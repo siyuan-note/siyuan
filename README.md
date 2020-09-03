@@ -9,12 +9,12 @@
 <a title="Hits" target="_blank" href="https://github.com/siyuan-note/siyuan"><img src="https://hits.b3log.org/siyuan-note/siyuan.svg"></a>
 </p>
 
-这里仅用于分发思源笔记发布包，反馈问题或者建议：
+这里仅用于分发思源笔记发布包，反馈问题或者建议请到：
 
 * [思源笔记讨论区](https://hacpai.com/tag/siyuan)
 * [思源笔记 QQ 群](https://jq.qq.com/?_wv=1027&k=brIyNm7y)
 
-开发计划和版本变更：
+开发计划和版本变更请参考：
 
 * [思源笔记开发计划和进度](https://github.com/siyuan-note/siyuan/projects/1)
 * [思源笔记版本变更记录](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)

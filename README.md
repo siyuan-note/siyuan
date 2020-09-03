@@ -28,7 +28,7 @@ This is only for distributing the release package of SiYuan. For feedback or sug
 * [SiYuan Forum](https://hacpai.com/tag/siyuan)
 * [SiYuan QQ Group](https://jq.qq.com/?_wv=1027&k=brIyNm7y)
 
-T roadmap and version changes, please go to:
+The roadmap and version changes of SiYuan, please go to:
 
 * [SiYuan development plan and progress](https://github.com/siyuan-note/siyuan/projects/1)
 * [SiYuan Change logs](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)

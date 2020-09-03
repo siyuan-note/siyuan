@@ -9,7 +9,7 @@
 <a title="Hits" target="_blank" href="https://github.com/siyuan-note/siyuan"><img src="https://hits.b3log.org/siyuan-note/siyuan.svg"></a>
 </p>
 
-这里仅用于分发思源笔记发布包，如需反馈问题或者建议请到：
+这里仅用于分发思源笔记发布包，反馈问题或者建议：
 
 * [思源笔记讨论区](https://hacpai.com/tag/siyuan)
 * [思源笔记 QQ 群](https://jq.qq.com/?_wv=1027&k=brIyNm7y)

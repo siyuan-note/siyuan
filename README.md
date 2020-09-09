@@ -12,7 +12,7 @@
 这里仅用于分发思源笔记发布包，反馈问题或者建议请到：
 
 * [思源笔记 Issues](https://github.com/siyuan-note/siyuan/issues)
-* [思源笔记讨论区](https://hacpai.com/tag/siyuan)
+* [思源笔记讨论区](https://ld246.com/tag/siyuan)
 * [思源笔记 QQ 群](https://jq.qq.com/?_wv=1027&k=brIyNm7y)
 
 开发计划和版本变更请参考：
@@ -25,7 +25,7 @@
 This is only for distributing the release package of SiYuan. For feedback or suggestions, please go to:
 
 * [SiYuan Issues](https://github.com/siyuan-note/siyuan/issues)
-* [SiYuan Forum](https://hacpai.com/tag/siyuan)
+* [SiYuan Forum](https://ld246.com/tag/siyuan)
 * [SiYuan QQ Group](https://jq.qq.com/?_wv=1027&k=brIyNm7y)
 
 The roadmap and version changes of SiYuan, please go to:

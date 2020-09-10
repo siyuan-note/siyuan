@@ -59,7 +59,7 @@
 
 ### 漫游
 
-![roam.gif](https://b3logfile.com/file/2020/09/roam-1134c3c5.gif)
+![roam.gif](https://b3logfile.com/file/2020/09/roam-2d991169.gif)
 
 ### 明亮主题
 

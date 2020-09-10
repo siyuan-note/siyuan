@@ -57,7 +57,7 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
 
 ### Roam
 
-![roam.gif](https://b3logfile.com/file/2020/09/roam-1134c3c5.gif)
+![roam.gif](https://b3logfile.com/file/2020/09/roam-2d991169.gif)
 
 ### Light theme
 

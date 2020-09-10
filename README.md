@@ -81,9 +81,7 @@
 
 ![block.png](https://b3logfile.com/file/2020/08/block-e920d265.png)
 
-## 🛠️ 安装
-
-### 安装包
+## 🛠️ 下载安装
 
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [码云](https://gitee.com/siyuan-note/siyuan/releases)

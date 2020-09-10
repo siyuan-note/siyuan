@@ -79,9 +79,7 @@ The roadmap and version changes of SiYuan, please go to:
 
 ![block.png](https://b3logfile.com/file/2020/08/block-e920d265.png)
 
-## 🛠️ Setup
-
-### Installation package
+## 🛠️ Download Setup
 
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [Gitee](https://gitee.com/siyuan-note/siyuan/releases)

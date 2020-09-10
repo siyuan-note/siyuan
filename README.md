@@ -9,26 +9,102 @@
 <a title="Hits" target="_blank" href="https://github.com/siyuan-note/siyuan"><img src="https://hits.b3log.org/siyuan-note/siyuan.svg"></a>
 </p>
 
-这里仅用于分发思源笔记发布包，反馈问题或者建议请到：
+<p align="center">
+<a href="https://github.com/siyuan-note/siyuan/blob/master/README_en_US.md">English</a>
+</p>
 
-* [思源笔记 Issues](https://github.com/siyuan-note/siyuan/issues)
-* [思源笔记讨论区](https://ld246.com/tag/siyuan)
-* [思源笔记 QQ 群](https://jq.qq.com/?_wv=1027&k=brIyNm7y)
+## 💡 简介
+
+思源笔记是一款 Markdown 块级引用和双向链接的网状笔记应用，支持 Windows、Mac 和 Linux。
+
+欢迎到[思源笔记官方讨论区](https://ld246.com/tag/siyuan)了解更多。同时也欢迎关注 B3log 开源社区微信公众号 `B3log开源`：
+
+![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
+
+## ✨  特性
+
+* **为 Markdown 而生**
+  * 支持即时渲染，对熟悉 Typora 的用户应该不会感到陌生，理论上这是最优雅的 Markdown 编辑方式
+  * 支持数学公式、图表、流程图、甘特图、时序图、五线谱等
+  * Markdown 文本格式化
+  * 粘贴 HTML 自动转换为 Markdown
+  * 配置 Markdown 解析渲染细节参数
+    * 是否启用脚注支持
+    * 是否启用 [ToC] 支持
+    * 是否启用 ==标记== 支持
+    * 是否需要中西文间自动插入空格
+    * 是否进行自动术语修正
+    * 中文后跟英文逗号句号等标点是否自动替换为中文对应标点
+    * 内联数学公式是否允许起始 $ 后紧跟数字
+    * 数学公式引擎切换 MathJax、KaTeX
+* 块模式
+  * 块级双向链接
+  * 关系图    
+* WebDAV 挂载远程目录
+* 全文搜索
+* 明亮、暗黑两套主题
 
 开发计划和版本变更请参考：
 
 * [思源笔记开发计划和进度](https://github.com/siyuan-note/siyuan/projects/1)
 * [思源笔记版本变更记录](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
 
----
+## 📸 截图
 
-This is only for distributing the release package of SiYuan. For feedback or suggestions, please go to:
+### 即时渲染
 
-* [SiYuan Issues](https://github.com/siyuan-note/siyuan/issues)
-* [SiYuan Forum](https://ld246.com/tag/siyuan)
-* [SiYuan QQ Group](https://jq.qq.com/?_wv=1027&k=brIyNm7y)
+*即时渲染*模式对熟悉 Typora 的用户应该不会感到陌生，理论上这是最优雅的 Markdown 编辑方式。
 
-The roadmap and version changes of SiYuan, please go to:
+![vditor-ir](https://b3logfile.com/file/2020/07/ir-67cd956c.gif)
 
-* [SiYuan development plan and progress](https://github.com/siyuan-note/siyuan/projects/1)
-* [SiYuan Change logs](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
+### 漫游
+
+![roam.gif](https://b3logfile.com/file/2020/08/roam-ee61e1c5.gif) 
+
+### 明亮主题
+
+![light.png](https://b3logfile.com/file/2020/08/light-75289939.png)
+
+### 暗黑主题
+
+![dark.png](https://b3logfile.com/file/2020/08/dark-eb8b11ba.png)
+
+### Markdown 配置
+
+![md.png](https://b3logfile.com/file/2020/08/md-070d5a94.png)
+
+### 全文搜索
+
+![search.png](https://b3logfile.com/file/2020/08/search-7ba4939e.png)
+
+### 块级引用
+
+![block.png](https://b3logfile.com/file/2020/08/block-e920d265.png)
+
+## 🛠️ 安装
+
+### 安装包
+
+* [GitHub](https://github.com/siyuan-note/siyuan/releases)
+* [码云](https://gitee.com/siyuan-note/siyuan/releases)
+
+## 📜 文档
+
+* [思源笔记 - 支持 Markdown 块级引用和双向链接的网状笔记应用](https://ld246.com/article/1598872180233)
+* [Markdown 实现块级引用双向链接的探索](https://ld246.com/article/1597226949061)
+
+## 🏘️ 社区
+
+* [思源笔记 Issues](https://github.com/siyuan-note/siyuan/issues)
+* [思源笔记讨论区](https://ld246.com/tag/siyuan)
+* [思源笔记 QQ 群](https://jq.qq.com/?_wv=1027&k=brIyNm7y)
+
+## 🙏 鸣谢
+
+* [浏览器端的编辑器 Vditor](https://github.com/Vanessa219/vditor)
+* [对中文语境优化的 Markdown 引擎 Lute](https://github.com/88250/lute)
+* [Go WebDAV 客户端库](https://github.com/88250/gowebdav)
+* [Go 常用工具库](https://github.com/88250/gulu)
+* [Go Web 框架 Gin](https://github.com/gin-gonic/gin)
+* [Go WebSocket 框架 melody](https://github.com/olahol/melody)
+* [跨平台桌面应用框架 Electron](https://github.com/electron/electron)

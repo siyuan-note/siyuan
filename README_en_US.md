@@ -57,27 +57,31 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
 
 ### Roam
 
-![roam.gif](https://b3logfile.com/file/2020/08/roam-ee61e1c5.gif) 
+![roam.gif](https://b3logfile.com/file/2020/09/roam-1134c3c5.gif)
 
 ### Light theme
 
-![light.png](https://b3logfile.com/file/2020/08/light-75289939.png)
+![light.png](https://b3logfile.com/file/2020/09/light-457b7791.png)
 
 ### Dark theme
 
-![dark.png](https://b3logfile.com/file/2020/08/dark-eb8b11ba.png)
+![dark.png](https://b3logfile.com/file/2020/09/dark-1a33cf13.png)
 
 ### Markdown Options
 
-![md.png](https://b3logfile.com/file/2020/08/md-070d5a94.png)
+![md.png](https://b3logfile.com/file/2020/09/md-cfd1e429.png)
 
-### Fulltext search
+### Search
 
-![search.png](https://b3logfile.com/file/2020/08/search-7ba4939e.png)
+![search.png](https://b3logfile.com/file/2020/09/search-8bab7453.png)
+
+### Block
+
+![block.png](https://b3logfile.com/file/2020/09/block-cdbc5038.png)
 
 ### Block Reference
 
-![block.png](https://b3logfile.com/file/2020/08/block-e920d265.png)
+![blockref.png](https://b3logfile.com/file/2020/09/blockref-975b32e4.png)
 
 ## 🛠️ Download Setup
 

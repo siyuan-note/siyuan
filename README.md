@@ -59,27 +59,31 @@
 
 ### 漫游
 
-![roam.gif](https://b3logfile.com/file/2020/08/roam-ee61e1c5.gif) 
+![roam.gif](https://b3logfile.com/file/2020/09/roam-1134c3c5.gif)
 
 ### 明亮主题
 
-![light.png](https://b3logfile.com/file/2020/08/light-75289939.png)
+![light.png](https://b3logfile.com/file/2020/09/light-457b7791.png)
 
 ### 暗黑主题
 
-![dark.png](https://b3logfile.com/file/2020/08/dark-eb8b11ba.png)
+![dark.png](https://b3logfile.com/file/2020/09/dark-1a33cf13.png)
 
 ### Markdown 配置
 
-![md.png](https://b3logfile.com/file/2020/08/md-070d5a94.png)
+![md.png](https://b3logfile.com/file/2020/09/md-cfd1e429.png)
 
-### 全文搜索
+### 搜索
 
-![search.png](https://b3logfile.com/file/2020/08/search-7ba4939e.png)
+![search.png](https://b3logfile.com/file/2020/09/search-8bab7453.png)
+
+### 内容块类型
+
+![block.png](https://b3logfile.com/file/2020/09/block-cdbc5038.png)
 
 ### 块级引用
 
-![block.png](https://b3logfile.com/file/2020/08/block-e920d265.png)
+![blockref.png](https://b3logfile.com/file/2020/09/blockref-975b32e4.png)
 
 ## 🛠️ 下载安装
 

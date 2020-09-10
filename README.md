@@ -44,7 +44,7 @@
 * 全文搜索
 * 明亮、暗黑两套主题
 
-开发计划和版本变更请参考：
+## 🗺️ 路线图
 
 * [思源笔记开发计划和进度](https://github.com/siyuan-note/siyuan/projects/1)
 * [思源笔记版本变更记录](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)

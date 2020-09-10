@@ -42,7 +42,7 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
 * Fulltext search
 * Light and dark themes
 
-The roadmap and version changes of SiYuan, please go to:
+## 🗺️ Roadmap
 
 * [SiYuan development plan and progress](https://github.com/siyuan-note/siyuan/projects/1)
 * [SiYuan Change logs](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)

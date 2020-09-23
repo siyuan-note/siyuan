@@ -45,7 +45,7 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
 * Themes and icons
    * Built-in bright and dark themes
    * Built-in two sets of icons, Material and Ant Design
-   * Support custom theme pictures
+   * Support custom themes and icons
 * Export
    * Standard Markdown export
    * Content block quote provides anchor text + embedded Blockquote option

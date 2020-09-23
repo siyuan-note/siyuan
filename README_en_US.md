@@ -35,12 +35,21 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
     * Punctuation such as Chinese followed by English comma period is automatically replaced with Chinese corresponding punctuation
     * Does inline math formula allow starting $ followed by numbers
     * Math formula engine switching MathJax, KaTeX
-* Block mode
-  * Block-level bidirectional link
-  * Link network graph    
+* Content block
+   * Block-level quotes and two-way links
+   * Document relationship diagram, global relationship diagram
+   * Bookmark collection
+* Level label
 * WebDAV mount remote directory
-* Fulltext search
-* Light and dark themes
+* research all
+* Themes and icons
+   * Built-in bright and dark themes
+   * Built-in two sets of icons, Material and Ant Design
+   * Support custom theme pictures
+* Export
+   * Standard Markdown export
+   * Content block quote provides anchor text + embedded Blockquote option
+   * Copy to WeChat public account, Zhihu
 
 ## 🗺️ Roadmap
 

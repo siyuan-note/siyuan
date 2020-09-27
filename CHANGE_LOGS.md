@@ -1,3 +1,26 @@
+## v0.2.3 / 2020-09-27
+
+### 引入特性
+
+* [标签页签，支持层级标签](https://github.com/siyuan-note/siyuan/issues/91)
+* [搜索条件持久化](https://github.com/siyuan-note/siyuan/issues/101)
+
+### 改进功能
+
+* [粘贴图片使用时间戳作为文件名](https://github.com/siyuan-note/siyuan/issues/84)
+* [笔记本打开仅支持文件夹](https://github.com/siyuan-note/siyuan/issues/90)
+* [==标记==语法自动折行优化](https://github.com/siyuan-note/siyuan/issues/102)
+
+### 修复缺陷
+
+* [任务列表起始位置使用 `<font>` 标签的预览问题](https://github.com/siyuan-note/siyuan/issues/33)
+* [子列表中粘贴代码块问题](https://github.com/siyuan-note/siyuan/issues/77)
+* [复制粘贴内容后搜索引用不到问题](https://github.com/siyuan-note/siyuan/issues/89)
+* [任务列表嵌套缩进问题](https://github.com/siyuan-note/siyuan/issues/93)
+* [网络图片引用失效](https://github.com/siyuan-note/siyuan/issues/94)
+* [修改内容块后书签丢失问题](https://github.com/siyuan-note/siyuan/issues/99)
+* [软删除重名问题](https://github.com/siyuan-note/siyuan/issues/100)
+
 ## v0.2.2 / 2020-09-25
 
 ### 引入特性

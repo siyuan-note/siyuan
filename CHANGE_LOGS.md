@@ -11,6 +11,7 @@
 * [笔记本打开仅支持文件夹](https://github.com/siyuan-note/siyuan/issues/90)
 * [==标记==语法自动折行优化](https://github.com/siyuan-note/siyuan/issues/102)
 * [移除中文分词，依靠输入时空格分词](https://github.com/siyuan-note/siyuan/issues/107)
+* [降低内存使用](https://github.com/siyuan-note/siyuan/issues/108)
 
 ### 修复缺陷
 

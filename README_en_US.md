@@ -39,9 +39,10 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
    * Block-level quotes and two-way links
    * Document relationship diagram, global relationship diagram
    * Bookmark collection
-* Level label
-* WebDAV mount remote directory
-* research all
+* Hierarchical tag
+* Multi-window, multi-tab, drag and drop to split screen
+* WebDAV
+* Fulltext search
 * Themes and icons
    * Built-in bright and dark themes
    * Built-in two sets of icons, Material and Ant Design

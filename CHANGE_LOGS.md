@@ -1,3 +1,25 @@
+## v0.2.4 / 2020-09-29
+
+### 引入特性
+
+* [assets 资源文件展现](https://github.com/siyuan-note/siyuan/issues/27)
+* [窗口布局持久化](https://github.com/siyuan-note/siyuan/issues/46)
+* [支持 asciinema 嵌入播放](https://github.com/siyuan-note/siyuan/issues/106)
+* [引入 git 本地仓库](https://github.com/siyuan-note/siyuan/issues/119)
+
+### 改进功能
+
+* [关系图上显示文档块标题块文本](https://github.com/siyuan-note/siyuan/issues/68)
+* [文档最大宽度设置](https://github.com/siyuan-note/siyuan/issues/105)
+* [修改应用标题](https://github.com/siyuan-note/siyuan/issues/112)
+* [重命名实时导出文档](https://github.com/siyuan-note/siyuan/issues/124)
+* [嵌入块编辑优化](https://github.com/siyuan-note/siyuan/issues/126)
+
+### 修复缺陷
+
+* [搜索关键词不能定位问题](https://github.com/siyuan-note/siyuan/issues/96)
+* [加粗渲染问题](https://github.com/siyuan-note/siyuan/issues/123)
+
 ## v0.2.3 / 2020-09-27
 
 ### 引入特性

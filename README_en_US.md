@@ -27,14 +27,6 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
   * Markdown text formatting
   * Paste HTML automatically converted to Markdown
   * Configure Markdown to analyze detailed rendering parameters
-    * Whether to enable footnote support
-    * Whether to enable [ToC] support
-    * Whether to enable ==Mark== support
-    * Do you need to insert spaces between Chinese and Western languages automatically
-    * Whether to perform automatic term correction
-    * Punctuation such as Chinese followed by English comma period is automatically replaced with Chinese corresponding punctuation
-    * Does inline math formula allow starting $ followed by numbers
-    * Math formula engine switching MathJax, KaTeX
 * Content block
    * Block-level quotes and two-way links
    * Document relationship diagram, global relationship diagram

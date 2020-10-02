@@ -42,7 +42,7 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
 * Hierarchical tag
 * Multi-window, multi-tab, drag and drop to split screen
 * WebDAV
-* Version mange
+* Version mange and Git repository sync
 * Fulltext search
 * Themes and icons
    * Built-in bright and dark themes

@@ -1,3 +1,30 @@
+## v0.2.5 / 2020-10-02
+
+### 引入特性
+
+* [支持版本管理，本地 Git 仓库](https://github.com/siyuan-note/siyuan/issues/86)
+* [快速搜索加入内容块预览](https://github.com/siyuan-note/siyuan/issues/103)
+
+### 改进功能
+
+* [修改主题 CSS 时即时呈现](https://github.com/siyuan-note/siyuan/issues/117)
+* [内容块联动大纲](https://github.com/siyuan-note/siyuan/issues/122)
+* [最大宽度设置优化](https://github.com/siyuan-note/siyuan/issues/129)
+* [打开帮助文档优化](https://github.com/siyuan-note/siyuan/issues/131)
+* [同时打开反链、关系图会报错](https://github.com/siyuan-note/siyuan/issues/135)
+* [设置 - 语言合并到外观中作为一个选项](https://github.com/siyuan-note/siyuan/issues/139)
+* [保存布局时，页签多语言失效](https://github.com/siyuan-note/siyuan/issues/140)
+* [嵌入内容块能够被选中复制](https://github.com/siyuan-note/siyuan/issues/141)
+* [废除软删除 .deleted 机制](https://github.com/siyuan-note/siyuan/issues/145)
+
+### 文档相关
+
+* [用户指南文档独立成库](https://github.com/siyuan-note/siyuan/issues/142)
+
+### 修复缺陷
+
+* [关闭笔记本时清理相关的页签](https://github.com/siyuan-note/siyuan/issues/130)
+
 ## v0.2.4 / 2020-09-29
 
 ### 引入特性

@@ -17,9 +17,7 @@
 
 思源笔记是一款 Markdown 块级引用和双向链接的网状笔记应用，支持 Windows、Mac 和 Linux。
 
-欢迎到[思源笔记官方讨论区](https://ld246.com/tag/siyuan)了解更多。同时也欢迎关注 B3log 开源社区微信公众号 `B3log开源`：
-
-![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
+欢迎到[思源笔记官方讨论区](https://ld246.com/tag/siyuan)了解更多。
 
 ## ✨  特性
 

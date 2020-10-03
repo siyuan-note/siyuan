@@ -24,13 +24,13 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
 * **Born for Markdown**
   * Support Instant Rendering, users familiar with Typora should not be unfamiliar, in theory this is the most elegant Markdown editing method
   * Support mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
-  * Markdown text formatting
   * Paste HTML automatically converted to Markdown
   * Configure Markdown to analyze detailed rendering parameters
 * Content block
    * Block-level quotes and two-way links
    * Document relationship diagram, global relationship diagram
    * Bookmark collection
+* Use directly on the browser, support mobile-end
 * Hierarchical tag
 * Multi-window, multi-tab, drag and drop to split screen
 * WebDAV
@@ -43,7 +43,7 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
 * Export
    * Standard Markdown export
    * Content block quote provides anchor text + embedded Blockquote option
-   * Copy to WeChat public account, Zhihu
+   * Copy to WeChat MP, Zhihu
 
 ## 🗺️ Roadmap
 

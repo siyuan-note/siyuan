@@ -15,7 +15,7 @@
 
 ## 💡 Introduction
 
-SiYuan is a desktop Markdown Block-Reference and Bidirectional-Link note-taking application, supports Windows, Mac and Linux.
+SiYuan is a desktop Markdown Block-Reference and Bidirectional-Link note-taking application, supports Windows, Mac and Linux, can be used directly on the browser, and supports mobile-end adaptation.
 
 Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to learn more.
 

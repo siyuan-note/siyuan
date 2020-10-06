@@ -19,9 +19,9 @@
 
 欢迎到[思源笔记官方讨论区](https://ld246.com/tag/siyuan)了解更多。
 
-![desktop.png](https://b3logfile.com/file/2020/10/index-e8965292.png)
+![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/desktop.png)
 
-![mobile.png](https://b3logfile.com/file/2020/10/mobile-2aad21a2.png)
+![mobile.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/mobile.png)
 
 ## ✨  特性
 
@@ -60,27 +60,27 @@
 
 *即时渲染*模式对熟悉 Typora 的用户应该不会感到陌生，理论上这是最优雅的 Markdown 编辑方式。
 
-![vditor-ir](https://b3logfile.com/file/2020/07/ir-67cd956c.gif)
+![vditor-ir](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/ir.gif)
 
 ### 漫游
 
-![roam.gif](https://b3logfile.com/file/2020/09/roam-2d991169.gif)
+![roam.gif](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/roam.gif)
 
 ### 设置
 
-![settings.png](https://b3logfile.com/file/2020/10/settings-7f5f574f.png)
+![settings.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/settings.png)
 
 ### 搜索
 
-![search.png](https://b3logfile.com/file/2020/10/search-219e44bf.png)
+![search.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/search.png)
 
 ### 内容块类型
 
-![block.png](https://b3logfile.com/file/2020/10/blocks-475e1e92.png)
+![blocks.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/blocks.png)
 
 ### 块级引用
 
-![blockref.png](https://b3logfile.com/file/2020/09/blockref-975b32e4.png)
+![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/block-ref.gif)
 
 ## 🛠️ 下载安装
 

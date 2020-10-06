@@ -19,9 +19,9 @@ SiYuan is a desktop Markdown Block-Reference and Bidirectional-Link note-taking 
 
 Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to learn more.
 
-![desktop.png](https://b3logfile.com/file/2020/10/index-e8965292.png)
+![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/desktop.png)
 
-![mobile.png](https://b3logfile.com/file/2020/10/mobile-2aad21a2.png)
+![mobile.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/mobile.png)
 
 ## ✨  Features
 
@@ -60,35 +60,27 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
 
 *Instant Rendering* mode should not be unfamiliar to users who are familiar with Typora. In theory, this is the most elegant Markdown editing method.
 
-![vditor-ir](https://b3logfile.com/file/2020/07/ir-67cd956c.gif)
+![vditor-ir](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/ir.gif)
 
 ### Roam
 
-![roam.gif](https://b3logfile.com/file/2020/09/roam-2d991169.gif)
-
-### Light theme
-
-![light.png](https://b3logfile.com/file/2020/09/light-457b7791.png)
-
-### Dark theme
-
-![dark.png](https://b3logfile.com/file/2020/09/dark-1a33cf13.png)
+![roam.gif](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/roam.gif)
 
 ### Settings
 
-![settings.png](https://b3logfile.com/file/2020/10/settings-7f5f574f.png)
+![settings.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/settings.png)
 
 ### Search
 
-![search.png](https://b3logfile.com/file/2020/10/search-219e44bf.png)
+![search.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/search.png)
 
-### Block
+### Block Types
 
-![block.png](https://b3logfile.com/file/2020/10/blocks-475e1e92.png)
+![blocks.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/blocks.png)
 
 ### Block Reference
 
-![blockref.png](https://b3logfile.com/file/2020/09/blockref-975b32e4.png)
+![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/block-ref.gif)
 
 ## 🛠️ Download Setup
 

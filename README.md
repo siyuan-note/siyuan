@@ -19,7 +19,7 @@
 
 欢迎到[思源笔记官方讨论区](https://ld246.com/tag/siyuan)了解更多。
 
-![desktop.png](https://b3logfile.com/file/2020/10/index-8f3c5c65.png)
+![desktop.png](https://b3logfile.com/file/2020/10/index-e8965292.png)
 
 ![mobile.png](https://b3logfile.com/file/2020/10/mobile-2aad21a2.png)
 
@@ -66,17 +66,17 @@
 
 ![roam.gif](https://b3logfile.com/file/2020/09/roam-2d991169.gif)
 
-### Markdown 配置
+### 设置
 
-![md.png](https://b3logfile.com/file/2020/09/md-cfd1e429.png)
+![settings.png](https://b3logfile.com/file/2020/10/settings-7f5f574f.png)
 
 ### 搜索
 
-![search.png](https://b3logfile.com/file/2020/09/search-8bab7453.png)
+![search.png](https://b3logfile.com/file/2020/10/search-219e44bf.png)
 
 ### 内容块类型
 
-![block.png](https://b3logfile.com/file/2020/09/block-cdbc5038.png)
+![block.png](https://b3logfile.com/file/2020/10/blocks-475e1e92.png)
 
 ### 块级引用
 

@@ -19,7 +19,7 @@ SiYuan is a desktop Markdown Block-Reference and Bidirectional-Link note-taking 
 
 Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to learn more.
 
-![desktop.png](https://b3logfile.com/file/2020/10/index-8f3c5c65.png)
+![desktop.png](https://b3logfile.com/file/2020/10/index-e8965292.png)
 
 ![mobile.png](https://b3logfile.com/file/2020/10/mobile-2aad21a2.png)
 
@@ -74,17 +74,17 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
 
 ![dark.png](https://b3logfile.com/file/2020/09/dark-1a33cf13.png)
 
-### Markdown Options
+### Settings
 
-![md.png](https://b3logfile.com/file/2020/09/md-cfd1e429.png)
+![settings.png](https://b3logfile.com/file/2020/10/settings-7f5f574f.png)
 
 ### Search
 
-![search.png](https://b3logfile.com/file/2020/09/search-8bab7453.png)
+![search.png](https://b3logfile.com/file/2020/10/search-219e44bf.png)
 
 ### Block
 
-![block.png](https://b3logfile.com/file/2020/09/block-cdbc5038.png)
+![block.png](https://b3logfile.com/file/2020/10/blocks-475e1e92.png)
 
 ### Block Reference
 

@@ -1,3 +1,23 @@
+## v0.2.6 / 2020-10-06
+
+### 引入特性
+
+* [支持 Windows 系统托盘](https://github.com/siyuan-note/siyuan/issues/37)
+* [浏览器上直接使用](https://github.com/siyuan-note/siyuan/issues/121)
+* [发布内核 Docker 镜像](https://github.com/siyuan-note/siyuan/issues/171)
+
+### 改进功能
+
+* [内容块引用自动完成列表条目优化](https://github.com/siyuan-note/siyuan/issues/149)
+* [Windows 版发布包改为安装程序](https://github.com/siyuan-note/siyuan/issues/157)
+
+### 修复缺陷
+
+* [MathJax 引擎 `\boldsymbol{}` 问题](https://github.com/siyuan-note/siyuan/issues/152)
+* [WebDAV 报错导致内核崩溃](https://github.com/siyuan-note/siyuan/issues/153)
+* [本地仓库初始化时获取 Git 用户报错](https://github.com/siyuan-note/siyuan/issues/154)
+* [快速搜索报错](https://github.com/siyuan-note/siyuan/issues/156)
+
 ## v0.2.5 / 2020-10-02
 
 ### 引入特性

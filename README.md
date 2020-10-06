@@ -19,6 +19,10 @@
 
 欢迎到[思源笔记官方讨论区](https://ld246.com/tag/siyuan)了解更多。
 
+![desktop.png](https://b3logfile.com/file/2020/10/index-8f3c5c65.png)
+
+![mobile.png](https://b3logfile.com/file/2020/10/mobile-2aad21a2.png)
+
 ## ✨  特性
 
 * **为 Markdown 而生**
@@ -61,14 +65,6 @@
 ### 漫游
 
 ![roam.gif](https://b3logfile.com/file/2020/09/roam-2d991169.gif)
-
-### 明亮主题
-
-![light.png](https://b3logfile.com/file/2020/09/light-457b7791.png)
-
-### 暗黑主题
-
-![dark.png](https://b3logfile.com/file/2020/09/dark-1a33cf13.png)
 
 ### Markdown 配置
 

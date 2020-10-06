@@ -19,6 +19,10 @@ SiYuan is a desktop Markdown Block-Reference and Bidirectional-Link note-taking 
 
 Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to learn more.
 
+![desktop.png](https://b3logfile.com/file/2020/10/index-8f3c5c65.png)
+
+![mobile.png](https://b3logfile.com/file/2020/10/mobile-2aad21a2.png)
+
 ## ✨  Features
 
 * **Born for Markdown**

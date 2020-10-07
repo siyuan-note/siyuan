@@ -74,10 +74,6 @@
 
 ![search.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/search.png)
 
-### 内容块类型
-
-![blocks.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/blocks.png)
-
 ### 块级引用
 
 ![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/block-ref.gif)

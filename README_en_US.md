@@ -74,10 +74,6 @@ Welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to l
 
 ![search.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/search.png)
 
-### Block Types
-
-![blocks.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/blocks.png)
-
 ### Block Reference
 
 ![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/block-ref.gif)

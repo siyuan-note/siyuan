@@ -1,3 +1,31 @@
+## v0.2.7 / 2020-10-08
+
+### 引入特性
+
+* [数据同步](https://github.com/siyuan-note/siyuan/issues/87)
+* [文件树支持分屏打开文档](https://github.com/siyuan-note/siyuan/issues/144)
+
+### 改进功能
+
+* [内容联动大纲改进](https://github.com/siyuan-note/siyuan/issues/148)
+* [快速搜索内容块预览关键词高亮](https://github.com/siyuan-note/siyuan/issues/155)
+* [标签页签与书签页签内容块预览](https://github.com/siyuan-note/siyuan/issues/159)
+* [解决知乎不支持引用嵌套](https://github.com/siyuan-note/siyuan/issues/162)
+* [表格复制到知乎问题](https://github.com/siyuan-note/siyuan/issues/163)
+* [细化编辑器标记符配色](https://github.com/siyuan-note/siyuan/issues/168)
+* [添加启动日志开头标识](https://github.com/siyuan-note/siyuan/issues/176)
+* [移动端浏览图片和块嵌入](https://github.com/siyuan-note/siyuan/issues/177)
+* [抽取关系图配色值](https://github.com/siyuan-note/siyuan/issues/180)
+* [降低内存占用](https://github.com/siyuan-note/siyuan/issues/182)
+
+### 修复缺陷
+
+* [打开空文件夹失败](https://github.com/siyuan-note/siyuan/issues/173)
+* [联动编辑跳转的问题](https://github.com/siyuan-note/siyuan/issues/179)
+* [全局关系图在某些情况下没有箭头的问题](https://github.com/siyuan-note/siyuan/issues/181)
+* [#标签# 中文空格问题](https://github.com/siyuan-note/siyuan/issues/184)
+* [页签拖拽无限复制和拖拽至编辑器问题](https://github.com/siyuan-note/siyuan/issues/185)
+
 ## v0.2.6 / 2020-10-06
 
 ### 引入特性

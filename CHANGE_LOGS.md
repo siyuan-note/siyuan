@@ -1,3 +1,31 @@
+## v0.2.8 / 2020-10-11
+
+### 引入特性
+
+* [移动端云服务](https://github.com/siyuan-note/siyuan/issues/187)
+* [移动端加入同步支持](https://github.com/siyuan-note/siyuan/issues/199)
+* [文件树空白可以新建，文件夹移上去添加更多和新建按钮](https://github.com/siyuan-note/siyuan/issues/210)
+
+### 改进功能
+
+* [启动时恢复上一次窗口大小和位置](https://github.com/siyuan-note/siyuan/issues/136)
+* [文件树交互改进](https://github.com/siyuan-note/siyuan/issues/189)
+* [更新账号信息需进行提示](https://github.com/siyuan-note/siyuan/issues/190)
+* [初始化树组件异常报错](https://github.com/siyuan-note/siyuan/issues/192)
+* [设置 - 同步](https://github.com/siyuan-note/siyuan/issues/193)
+* [为页签添加背景色配置](https://github.com/siyuan-note/siyuan/issues/195)
+* [为坚果云 WebDAV 做单独的优化](https://github.com/siyuan-note/siyuan/issues/201)
+
+### 修复缺陷
+
+* [WebDAV 缺陷修复](https://github.com/siyuan-note/siyuan/issues/198)
+* [文件查询失败](https://github.com/siyuan-note/siyuan/issues/200)
+* [YAML Front Matter 导入问题](https://github.com/siyuan-note/siyuan/issues/202)
+* [文档开头为空块时关系图连线不显示问题](https://github.com/siyuan-note/siyuan/issues/204)
+* [文件夹重命名为同名文件失败无提示](https://github.com/siyuan-note/siyuan/issues/206)
+* [粘贴带有 alt 属性的图片后无法显示](https://github.com/siyuan-note/siyuan/issues/207)
+* [批量插入图片问题](https://github.com/siyuan-note/siyuan/issues/208)
+
 ## v0.2.7 / 2020-10-08
 
 ### 引入特性

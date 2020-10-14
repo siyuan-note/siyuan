@@ -1,3 +1,24 @@
+## v0.2.9 / 2020-10-14
+
+### 引入特性
+
+* [从云端仓库克隆笔记本](https://github.com/siyuan-note/siyuan/issues/186)
+* [支持 flowchart.js 渲染](https://github.com/siyuan-note/siyuan/issues/215)
+* [快速搜索改进并支持正则表达式](https://github.com/siyuan-note/siyuan/issues/218)
+* [打开笔记本时新增导入流程](https://github.com/siyuan-note/siyuan/issues/221)
+
+### 改进功能
+
+* [同步后实时刷新文档](https://github.com/siyuan-note/siyuan/issues/212)
+* [#标签# 标记符隐藏](https://github.com/siyuan-note/siyuan/issues/232)
+
+### 修复缺陷
+
+* [重命名文件夹打不开问题](https://github.com/siyuan-note/siyuan/issues/203)
+* [assets 和新导入的 .md 版本控制问题](https://github.com/siyuan-note/siyuan/issues/214)
+* [编辑器复制块引用 `>` 问题](https://github.com/siyuan-note/siyuan/issues/216)
+* [修复云端仓库访问控制漏洞](https://github.com/siyuan-note/siyuan/issues/227)
+
 ## v0.2.8 / 2020-10-11
 
 ### 引入特性

@@ -1,3 +1,25 @@
+## v0.3.0 / 2020-10-17
+
+### 引入特性
+
+* [支持删除云端仓库](https://github.com/siyuan-note/siyuan/issues/243)
+
+### 改进功能
+
+* [导出选项 - 块引锚文本包裹符号](https://github.com/siyuan-note/siyuan/issues/172)
+* [启动加载界面](https://github.com/siyuan-note/siyuan/issues/229)
+* [块引用悬浮预览窗口加入跳转按钮](https://github.com/siyuan-note/siyuan/issues/233)
+* [搜索预览时支持复制内容块 ID](https://github.com/siyuan-note/siyuan/issues/242)
+
+### 修复缺陷
+
+* [联动关系图问题](https://github.com/siyuan-note/siyuan/issues/237)
+* [导入时选择原地存储路径导致无限嵌套问题](https://github.com/siyuan-note/siyuan/issues/245)
+* [在部分版本的 Windows 10 操作系统上界面样式异常问题](https://github.com/siyuan-note/siyuan/issues/247)
+* [快速搜索最近打开的块中包含关闭笔记本的块](https://github.com/siyuan-note/siyuan/issues/248)
+* [内容块中存在 `<font>` 时悬浮预览问题](https://github.com/siyuan-note/siyuan/issues/251)
+* [标题内容中存在 `<font>` 时大纲点击失效问题](https://github.com/siyuan-note/siyuan/issues/252)
+
 ## v0.2.9 / 2020-10-14
 
 ### 引入特性

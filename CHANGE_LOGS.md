@@ -1,3 +1,18 @@
+## v0.3.1 / 2020-10-18
+
+### 引入特性
+
+* [标签输入自动完成](https://github.com/siyuan-note/siyuan/issues/161)
+* [支持调整外观配色](https://github.com/siyuan-note/siyuan/issues/167)
+* [退出时清理未使用的块 ID，减少对笔记文本的”污染“](https://github.com/siyuan-note/siyuan/issues/261)
+
+### 改进功能
+
+* [复制块 ID 后，增加粘贴成嵌入块选项](https://github.com/siyuan-note/siyuan/issues/250)
+* [工具栏标题快捷键 Ctrl h 取消优化](https://github.com/siyuan-note/siyuan/issues/256)
+* [搜索预览窗复制块 ID 和编辑器内复制块 ID 锚文本不一致](https://github.com/siyuan-note/siyuan/issues/257)
+* [移动端文件树的滑动问题](https://github.com/siyuan-note/siyuan/issues/259)
+
 ## v0.3.0 / 2020-10-17
 
 ### 引入特性

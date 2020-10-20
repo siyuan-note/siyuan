@@ -1,3 +1,27 @@
+## v0.3.2 / 2020-10-20
+
+### 引入特性
+
+* [反链提及](https://github.com/siyuan-note/siyuan/issues/74)
+* [思源在线（Xanadu）移动端添加 PWA](https://github.com/siyuan-note/siyuan/issues/265)
+
+### 改进功能
+
+* [设置 - 外观中增加“点击关闭按钮时的行为”](https://github.com/siyuan-note/siyuan/issues/246)
+* [窗口 最大化/向下还原 切换时，分屏布局宽度高度自适应](https://github.com/siyuan-note/siyuan/issues/263)
+* [书签、文件树、标签扩大折叠展开箭头的点击范围](https://github.com/siyuan-note/siyuan/issues/275)
+* [内核进程增加常驻内存参数](https://github.com/siyuan-note/siyuan/issues/277)
+* [macOS 版使用 Windows 风格](https://github.com/siyuan-note/siyuan/issues/281)
+
+### 修复缺陷
+
+* [联动关系图页签关闭问题](https://github.com/siyuan-note/siyuan/issues/267)
+* [标签自动完成问题](https://github.com/siyuan-note/siyuan/issues/268)
+* [关闭程序后窗口布局持久化、清理 ID 失效问题](https://github.com/siyuan-note/siyuan/issues/271)
+* [包含行内代码块的标题无法在大纲中正常渲染](https://github.com/siyuan-note/siyuan/issues/272)
+* [编辑器内任务列表复制报错问题](https://github.com/siyuan-note/siyuan/issues/276)
+* [导入时处理某些行级 HTML 导致的崩溃问题](https://github.com/siyuan-note/siyuan/issues/280)
+
 ## v0.3.1 / 2020-10-18
 
 ### 引入特性

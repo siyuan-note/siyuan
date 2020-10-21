@@ -1,3 +1,23 @@
+## v0.3.3 / 2020-10-21
+
+### 引入特性
+
+* [编辑器右键添加复制、粘贴、剪切](https://github.com/siyuan-note/siyuan/issues/57)
+* [新建文档块自顶向下用法](https://github.com/siyuan-note/siyuan/issues/70)
+* [自动更新](https://github.com/siyuan-note/siyuan/issues/170)
+* [Windows 版发布包增加 Zip 绿色解压版](https://github.com/siyuan-note/siyuan/issues/175)
+* [在块的标识上增加单击后的功能【复制块内容】](https://github.com/siyuan-note/siyuan/issues/225)
+* [选择文本右键选项“创建以此为标题的新笔记”](https://github.com/siyuan-note/siyuan/issues/283)
+
+### 改进功能
+
+* [优化启动速度](https://github.com/siyuan-note/siyuan/issues/289)
+* [设置 - 关于中增加“打开配置文件夹”](https://github.com/siyuan-note/siyuan/issues/290)
+
+### 修复缺陷
+
+* [安装路径中有空格时启动异常](https://github.com/siyuan-note/siyuan/issues/284)
+
 ## v0.3.2 / 2020-10-20
 
 ### 引入特性

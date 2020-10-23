@@ -1,3 +1,23 @@
+## v0.3.4 / 2020-10-23
+
+### 引入特性
+
+* [清理 assets 文件夹未引用资源文件](https://github.com/siyuan-note/siyuan/issues/110)
+* [支持列表项块](https://github.com/siyuan-note/siyuan/issues/111)
+
+### 改进功能
+
+* [输入法符号自动补全时块引补全兼容](https://github.com/siyuan-note/siyuan/issues/228)
+* [数学公式预览开关](https://github.com/siyuan-note/siyuan/issues/270)
+* [反链提及中高亮锚文本](https://github.com/siyuan-note/siyuan/issues/285)
+
+### 修复缺陷
+
+* [自顶向下法新建文档后光标定位问题](https://github.com/siyuan-note/siyuan/issues/299)
+* [自动更新在 macOS 和 Linux 上不工作的问题](https://github.com/siyuan-note/siyuan/issues/301)
+* [资源文件删除失效问题](https://github.com/siyuan-note/siyuan/issues/307)
+* [列表编辑解析问题](https://github.com/siyuan-note/siyuan/issues/309)
+
 ## v0.3.3 / 2020-10-21
 
 ### 引入特性

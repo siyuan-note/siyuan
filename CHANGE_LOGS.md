@@ -1,3 +1,24 @@
+## v0.3.5 / 2020-10-26
+
+### 引入特性
+
+* [assets 资源预览页签](https://github.com/siyuan-note/siyuan/issues/120)
+* [移动文档](https://github.com/siyuan-note/siyuan/issues/244)
+
+### 改进功能
+
+* [清理未引用资源加上加载中示意](https://github.com/siyuan-note/siyuan/issues/317)
+* [增大文件重命名界面宽度](https://github.com/siyuan-note/siyuan/issues/329)
+
+### 修复缺陷
+
+* [Setext 风格标题编辑问题](https://github.com/siyuan-note/siyuan/issues/278)
+* [加粗、强调、标记等软换行失效问题](https://github.com/siyuan-note/siyuan/issues/311)
+* [块引用搜索展示不全](https://github.com/siyuan-note/siyuan/issues/316)
+* [提示窗口关闭回调错误](https://github.com/siyuan-note/siyuan/issues/318)
+* [列表项缩进问题](https://github.com/siyuan-note/siyuan/issues/319)
+* [清理未引用资源报错问题](https://github.com/siyuan-note/siyuan/issues/330)
+
 ## v0.3.4 / 2020-10-23
 
 ### 引入特性

@@ -1,3 +1,21 @@
+## v0.3.6 / 2020-10-27
+
+### 引入特性
+
+* [复制内容块快捷操作](https://github.com/siyuan-note/siyuan/issues/313)
+
+### 改进功能
+
+* [选中文本后进行内容块粘贴时锚文本的优化](https://github.com/siyuan-note/siyuan/issues/321)
+* [块 ID 复制粘贴改进](https://github.com/siyuan-note/siyuan/issues/338)
+
+### 修复缺陷
+
+* [多开时实例隔离问题](https://github.com/siyuan-note/siyuan/issues/274)
+* [标签页签排序不稳定的问题](https://github.com/siyuan-note/siyuan/issues/325)
+* [任务列表块编辑渲染问题](https://github.com/siyuan-note/siyuan/issues/334)
+* [文件夹拖拽移动问题](https://github.com/siyuan-note/siyuan/issues/336)
+
 ## v0.3.5 / 2020-10-26
 
 ### 引入特性

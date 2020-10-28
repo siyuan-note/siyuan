@@ -1,3 +1,23 @@
+## v0.3.7 / 2020-10-28
+
+### 引入特性
+
+* [支持文档导出为 TextBundle](https://github.com/siyuan-note/siyuan/issues/50)
+* [块引搜索类型过滤](https://github.com/siyuan-note/siyuan/issues/342)
+
+### 改进功能
+
+* [Mac 窗口按钮重做](https://github.com/siyuan-note/siyuan/issues/288)
+* [块引用候选列表内容块预览](https://github.com/siyuan-note/siyuan/issues/297)
+* [标签及书签中块列表增加路径信息](https://github.com/siyuan-note/siyuan/issues/322)
+* [Shift 单击时新窗口打开优化](https://github.com/siyuan-note/siyuan/issues/332)
+* [粘贴后需定位](https://github.com/siyuan-note/siyuan/issues/348)
+
+### 修复缺陷
+
+* [编辑器行级内容拖拽问题](https://github.com/siyuan-note/siyuan/issues/337)
+* [表格内容空格消失问题](https://github.com/siyuan-note/siyuan/issues/347)
+
 ## v0.3.6 / 2020-10-27
 
 ### 引入特性

@@ -1,3 +1,30 @@
+## v0.3.8 / 2020-10-30
+
+### 引入特性
+
+* [以预览模式打开文档](https://github.com/siyuan-note/siyuan/issues/115)
+
+### 改进功能
+
+* [清理未引用资源-图片预览](https://github.com/siyuan-note/siyuan/issues/324)
+* [标签及反向链接列表内容和路径分两行显示](https://github.com/siyuan-note/siyuan/issues/349)
+* [清理未引用 ID 仅在发生变动情况下才写盘](https://github.com/siyuan-note/siyuan/issues/353)
+* [链接/图片路径中存在中文时不进行编码处理](https://github.com/siyuan-note/siyuan/issues/357)
+* [代码块、数学公式间距过大](https://github.com/siyuan-note/siyuan/issues/358)
+
+### 开发重构
+
+* [重写右键菜单](https://github.com/siyuan-note/siyuan/issues/351)
+
+### 修复缺陷
+
+* [重命名文件夹后图片显示异常](https://github.com/siyuan-note/siyuan/issues/350)
+* [书签丢失问题](https://github.com/siyuan-note/siyuan/issues/355)
+* [任务列表暴露 ID 问题](https://github.com/siyuan-note/siyuan/issues/356)
+* [行级 HTML 解析问题](https://github.com/siyuan-note/siyuan/issues/360)
+* [列表项中嵌入内容块问题](https://github.com/siyuan-note/siyuan/issues/364)
+* [移动文档报错问题](https://github.com/siyuan-note/siyuan/issues/365)
+
 ## v0.3.7 / 2020-10-28
 
 ### 引入特性

@@ -1,3 +1,25 @@
+## v0.3.9 / 2020-10-31
+
+### 引入特性
+
+* [文件树排序](https://github.com/siyuan-note/siyuan/issues/335)
+* [自动识别桌面端/移动端浏览器并重定向到对应版本界面](https://github.com/siyuan-note/siyuan/issues/377)
+
+### 改进功能
+
+* [添加粗体、斜体、标签等行级元素文字颜色配置](https://github.com/siyuan-note/siyuan/issues/287)
+* [文件上右键新增新建文档/文件入口](https://github.com/siyuan-note/siyuan/issues/361)
+* [改进快捷键提示文案与本地系统一致](https://github.com/siyuan-note/siyuan/issues/369)
+* [文档关系图层级结构优化](https://github.com/siyuan-note/siyuan/issues/376)
+
+### 修复缺陷
+
+* [任务列表项中嵌入内容块问题](https://github.com/siyuan-note/siyuan/issues/346)
+* [内容块标识菜单分屏时无法弹出的问题](https://github.com/siyuan-note/siyuan/issues/366)
+* [软换行行级代码失效问题](https://github.com/siyuan-note/siyuan/issues/370)
+* [HTML `<scope>` 标签解析渲染问题](https://github.com/siyuan-note/siyuan/issues/374)
+* [列表项行级排版自动换行问题](https://github.com/siyuan-note/siyuan/issues/379)
+
 ## v0.3.8 / 2020-10-30
 
 ### 引入特性

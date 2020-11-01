@@ -17,7 +17,7 @@
 
 思源笔记是一款 Markdown 块级引用和双向链接的网状笔记应用，支持 Windows、Mac 和 Linux，可在浏览器上直接使用，支持移动端适配。
 
-欢迎到[思源笔记官方讨论区](https://ld246.com/tag/siyuan)了解更多。
+在线体验：[https://ld246.com/xanadu/](https://ld246.com/xanadu/)，欢迎到[思源笔记官方讨论区](https://ld246.com/tag/siyuan)了解更多。
 
 ![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/desktop.png)
 

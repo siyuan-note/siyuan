@@ -1,3 +1,24 @@
+## v0.4.0 / 2020-11-02
+
+### 引入特性
+
+* [桌面版浏览器支持](https://github.com/siyuan-note/siyuan/issues/188)
+* [当前编辑器页签文件树定位](https://github.com/siyuan-note/siyuan/issues/378)
+* [内核加入只读模式](https://github.com/siyuan-note/siyuan/issues/386)
+
+### 改进功能
+
+* [数学公式显示优化](https://github.com/siyuan-note/siyuan/issues/333)
+* [右键菜单中加入删除/剪切块](https://github.com/siyuan-note/siyuan/issues/368)
+* [思源在线工作空间会话鉴权](https://github.com/siyuan-note/siyuan/issues/381)
+* [块引用和嵌入加上路径信息](https://github.com/siyuan-note/siyuan/issues/384)
+
+### 修复缺陷
+
+* [粘贴块引用无效](https://github.com/siyuan-note/siyuan/issues/385)
+* [文件夹下可以新建空文档名的问题](https://github.com/siyuan-note/siyuan/issues/387)
+* [文本加行级代码软换行问题](https://github.com/siyuan-note/siyuan/issues/388)
+
 ## v0.3.9 / 2020-10-31
 
 ### 引入特性

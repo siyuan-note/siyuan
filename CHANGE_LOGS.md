@@ -1,3 +1,26 @@
+## v0.4.1 / 2020-11-04
+
+### 引入特性
+
+* [自定义书签标识](https://github.com/siyuan-note/siyuan/issues/67)
+* [支持设置块引时新建文档默认存储路径](https://github.com/siyuan-note/siyuan/issues/291)
+* [文件树排序加上自然序](https://github.com/siyuan-note/siyuan/issues/389)
+
+### 改进功能
+
+* [版本管理从自动保存时提交改为定时提交](https://github.com/siyuan-note/siyuan/issues/401)
+* [优化创建、移动文档/文件夹/资源文件的性能](https://github.com/siyuan-note/siyuan/issues/404)
+
+### 修复缺陷
+
+* [账号登录状态过期问题](https://github.com/siyuan-note/siyuan/issues/383)
+* [表格快捷键 Ctrl Shift + 失效](https://github.com/siyuan-note/siyuan/issues/396)
+* [嵌入块无法复制 ID](https://github.com/siyuan-note/siyuan/issues/397)
+* [自动保存时软换行失效问题](https://github.com/siyuan-note/siyuan/issues/400)
+* [云端使用图片不显示问题](https://github.com/siyuan-note/siyuan/issues/408)
+* [HTML 标签 `<ms>` 导致卡死的问题](https://github.com/siyuan-note/siyuan/issues/411)
+* [- 列表项和 Setext 解析冲突导致内核崩溃问题](https://github.com/siyuan-note/siyuan/issues/416)
+
 ## v0.4.0 / 2020-11-02
 
 ### 引入特性

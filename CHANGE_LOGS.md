@@ -1,3 +1,24 @@
+## v0.4.2 / 2020-11-06
+
+### 引入特性
+
+* [支持当前编辑器页签打开新文档](https://github.com/siyuan-note/siyuan/issues/183)
+* [在线发布](https://github.com/siyuan-note/siyuan/issues/305)
+
+### 改进功能
+
+* [预览模式点击 PDF 无法关闭](https://github.com/siyuan-note/siyuan/issues/414)
+* [改进更新检查提示](https://github.com/siyuan-note/siyuan/issues/421)
+* [脚注语法支持改进](https://github.com/siyuan-note/siyuan/issues/432)
+* [链接引用语法支持改进](https://github.com/siyuan-note/siyuan/issues/434)
+
+### 修复缺陷
+
+* [新建文件夹不显示问题](https://github.com/siyuan-note/siyuan/issues/420)
+* [导入时重复建立文件夹的问题](https://github.com/siyuan-note/siyuan/issues/426)
+* [HTML 标签 `<code>` 编辑解析问题](https://github.com/siyuan-note/siyuan/issues/427)
+* [任务列表暴露 ID 问题](https://github.com/siyuan-note/siyuan/issues/429)
+
 ## v0.4.1 / 2020-11-04
 
 ### 引入特性

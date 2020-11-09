@@ -1,3 +1,23 @@
+## v0.4.3 / 2020-11-09
+
+### 引入特性
+
+* [文档块 URL](https://github.com/siyuan-note/siyuan/issues/312)
+
+### 改进功能
+
+* [PDF 预览效果添加使用浏览器和本地 PDF 工具打开](https://github.com/siyuan-note/siyuan/issues/363)
+* [改进只读模式](https://github.com/siyuan-note/siyuan/issues/430)
+* [在关于页面加入伺服地址](https://github.com/siyuan-note/siyuan/issues/440)
+* [为右键菜单加上图标](https://github.com/siyuan-note/siyuan/issues/444)
+* [同步依赖官方 Git 安装](https://github.com/siyuan-note/siyuan/issues/445)
+* [URL 由 /assets/ 换为 /stage/](https://github.com/siyuan-note/siyuan/issues/450)
+
+### 修复缺陷
+
+* [偶发的启动白屏问题](https://github.com/siyuan-note/siyuan/issues/438)
+* [右键菜单遮挡内容问题](https://github.com/siyuan-note/siyuan/issues/446)
+
 ## v0.4.2 / 2020-11-06
 
 ### 引入特性

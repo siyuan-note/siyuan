@@ -1,3 +1,23 @@
+## v0.4.4 / 2020-11-11
+
+### 引入特性
+
+* [浏览器拖拽图文剪藏](https://github.com/siyuan-note/siyuan/issues/405)
+* [支持设置浏览器端访问鉴权](https://github.com/siyuan-note/siyuan/issues/458)
+
+### 改进功能
+
+* [脚注改进](https://github.com/siyuan-note/siyuan/issues/437)
+* [Windows 版本内置集成 Git ](https://github.com/siyuan-note/siyuan/issues/455)
+* [反链提及中默认纳入当前文档名作为锚文本进行搜索](https://github.com/siyuan-note/siyuan/issues/457)
+* [链接引用改进](https://github.com/siyuan-note/siyuan/issues/460)
+* [加入持久化块 ID 的配置选项](https://github.com/siyuan-note/siyuan/issues/468)
+
+### 修复缺陷
+
+* [修复启动白屏 404 问题](https://github.com/siyuan-note/siyuan/issues/454)
+* [预览/引用/嵌入内容重复问题](https://github.com/siyuan-note/siyuan/issues/456)
+
 ## v0.4.3 / 2020-11-09
 
 ### 引入特性

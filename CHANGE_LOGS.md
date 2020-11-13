@@ -1,3 +1,23 @@
+## v0.4.5 / 2020-11-13
+
+### 引入特性
+
+* [反向链接支持搜索过滤](https://github.com/siyuan-note/siyuan/issues/393)
+* [反向链接提及支持一键转为内部链接](https://github.com/siyuan-note/siyuan/issues/453)
+* [块引用的锚文本支持 Latex、加粗、强调等行级排版](https://github.com/siyuan-note/siyuan/issues/482)
+* [支持图片路径带空格的情况](https://github.com/siyuan-note/siyuan/issues/483)
+
+### 改进功能
+
+* [分享发布设置私有时即时生效](https://github.com/siyuan-note/siyuan/issues/441)
+* [从选中文字新建文档名称不全的问题](https://github.com/siyuan-note/siyuan/issues/477)
+
+### 修复缺陷
+
+* [块引标题自动完成问题](https://github.com/siyuan-note/siyuan/issues/466)
+* [任务列表编辑渲染问题](https://github.com/siyuan-note/siyuan/issues/470)
+* [文档块 URL 打开问题](https://github.com/siyuan-note/siyuan/issues/472)
+
 ## v0.4.4 / 2020-11-11
 
 ### 引入特性

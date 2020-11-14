@@ -1,3 +1,25 @@
+## v0.4.6 / 2020-11-15
+
+### 引入特性
+
+* [内容块嵌入编辑](https://github.com/siyuan-note/siyuan/issues/17)
+* [块引悬浮预览嵌套浏览](https://github.com/siyuan-note/siyuan/issues/51)
+* [搜索支持 SQL](https://github.com/siyuan-note/siyuan/issues/72)
+
+### 改进功能
+
+* [版本管理开关](https://github.com/siyuan-note/siyuan/issues/224)
+* [云端笔记本克隆到本地时增加提示](https://github.com/siyuan-note/siyuan/issues/413)
+* [粘贴时减少抖动优化](https://github.com/siyuan-note/siyuan/issues/447)
+* [支持标签搜索](https://github.com/siyuan-note/siyuan/issues/461)
+* [用“剪切，粘贴”移动被引用的块之后，引用丢失目标](https://github.com/siyuan-note/siyuan/issues/463)
+* [移动端支持上传](https://github.com/siyuan-note/siyuan/issues/499)
+* [同步库名支持空格、短横线等符号](https://github.com/siyuan-note/siyuan/issues/501)
+
+### 修复缺陷
+
+* [块引使用标题前缀 # 过滤时前面多了一个 (](https://github.com/siyuan-note/siyuan/issues/498)
+
 ## v0.4.5 / 2020-11-13
 
 ### 引入特性

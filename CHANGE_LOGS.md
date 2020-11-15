@@ -19,6 +19,7 @@
 ### 修复缺陷
 
 * [块引使用标题前缀 # 过滤时前面多了一个 (](https://github.com/siyuan-note/siyuan/issues/498)
+* [使用 assets 路径的 `<img>` 标签图片无法显示](https://github.com/siyuan-note/siyuan/issues/503)
 
 ## v0.4.5 / 2020-11-13
 

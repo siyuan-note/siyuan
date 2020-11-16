@@ -13,7 +13,7 @@ Please describe the functions and application scenarios you expect as clearly an
 请尝试描述最优的解决方案，也许已经有类似软件实现了该特性，也请列出给我们参考。
 Please try to describe the best solution. There may be similar software that implements this feature. Please also list it for our reference.
 
-### 描述你认为的候选方案 Describe the candidates you think
+### 描述候选方案 Describe the candidates solution
 
 请尽量清晰精准地描述你能接受的候选解决方案。
 Please describe the candidate solutions you can accept as clearly and accurately as possible.

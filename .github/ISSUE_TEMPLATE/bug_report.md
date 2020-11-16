@@ -26,7 +26,7 @@ If possible, please try to attach screenshots or videos to describe the problem 
 （Windows 下推荐使用 [Screen2Gif](https://www.screentogif.com/) 进行录屏。如果是编辑器输入相关问题，使用 Screen2Gif 录制结束后请打开`图像 - 按键`）
 (It is recommended to use [Screen2Gif](https://www.screentogif.com/) to record the screen under Windows. If it is related to the editor input, please open the `Image - Key Strokes` after recording with Screen2Gif)
 
-### Version environment
+### 版本环境 Version environment
 
 * 版本 Version：
 * 操作系统 Operating system：

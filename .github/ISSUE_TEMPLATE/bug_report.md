@@ -35,4 +35,3 @@ If possible, please try to attach screenshots or videos to describe the problem 
 
 请提供其他附加信息帮助我们诊断问题。
 Please provide other additional information to help us diagnose the problem.
-

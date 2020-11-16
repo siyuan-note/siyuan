@@ -10,6 +10,7 @@ Please describe your problem as clearly and accurately as possible.
 
 ````````markdown
 如果是解析渲染问题的话请在此处贴入 Markdown 原文
+If it is a problem of parsing and rendering, please post the original Markdown here
 ````````
 
 ### 期待的结果 Expected result

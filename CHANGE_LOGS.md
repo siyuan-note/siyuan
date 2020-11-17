@@ -1,3 +1,25 @@
+## v0.4.7 / 2020-11-17
+
+### 引入特性
+
+* [内容块动态查询嵌入](https://github.com/siyuan-note/siyuan/issues/48)
+* [内容块 URL](https://github.com/siyuan-note/siyuan/issues/476)
+
+### 改进功能
+
+* [编辑栏的高亮按钮和快捷键](https://github.com/siyuan-note/siyuan/issues/362)
+* [Latex 渲染大小自适应标题级别](https://github.com/siyuan-note/siyuan/issues/487)
+* [流程图自适应大小](https://github.com/siyuan-note/siyuan/issues/493)
+* [字数统计和大文档保存性能优化](https://github.com/siyuan-note/siyuan/issues/512)
+
+### 修复缺陷
+
+* [无序列表变成有序列表后块 ID 改变的问题](https://github.com/siyuan-note/siyuan/issues/249)
+* [长文档不能自动保存](https://github.com/siyuan-note/siyuan/issues/354)
+* [悬浮预览内容为空的内容块时闪烁问题](https://github.com/siyuan-note/siyuan/issues/513)
+* [Markdown 解析异常导致内核启动失败](https://github.com/siyuan-note/siyuan/issues/516)
+* [文件夹下文档反链提及搜索为空](https://github.com/siyuan-note/siyuan/issues/521)
+
 ## v0.4.6 / 2020-11-15
 
 ### 引入特性

@@ -34,6 +34,7 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
    * Block-level quotes and two-way links
    * Document relationship diagram, global relationship diagram
    * Bookmark collection
+   * Dynamic query embed
 * Use directly on the browser, support mobile-end
 * Hierarchical tag
 * Multi-window, multi-tab, drag and drop to split screen

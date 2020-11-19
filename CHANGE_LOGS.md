@@ -1,3 +1,27 @@
+## v0.4.8 / 2020-11-19
+
+### 引入特性
+
+* [支持表格编辑](https://github.com/siyuan-note/siyuan/issues/39)
+* [大纲折叠](https://github.com/siyuan-note/siyuan/issues/240)
+
+### 改进功能
+
+* [打开笔记本文件夹时提示文案](https://github.com/siyuan-note/siyuan/issues/236)
+* [Ctrk J 任务列表后再取消遗留空格](https://github.com/siyuan-note/siyuan/issues/478)
+* [大纲中渲染 Latex、行级代码、粗体斜体](https://github.com/siyuan-note/siyuan/issues/488)
+* [公式块中的 `\tag` 语法样式改进](https://github.com/siyuan-note/siyuan/issues/517)
+* [搜索忽略大小写](https://github.com/siyuan-note/siyuan/issues/524)
+
+### 修复缺陷
+
+* [笔记录音问题](https://github.com/siyuan-note/siyuan/issues/266)
+* [鼠标移动到滚动条上的样式问题](https://github.com/siyuan-note/siyuan/issues/518)
+* [路径带 `%20` 的图片清理和导出 TextBundle 问题](https://github.com/siyuan-note/siyuan/issues/519)
+* [行级数学公式无法正确渲染](https://github.com/siyuan-note/siyuan/issues/523)
+* [脑图, e-charts,mermaid 编辑后无法渲染](https://github.com/siyuan-note/siyuan/issues/527)
+* [松散任务列表块初始化渲染问题](https://github.com/siyuan-note/siyuan/issues/530)
+
 ## v0.4.7 / 2020-11-17
 
 ### 引入特性

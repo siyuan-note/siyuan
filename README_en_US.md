@@ -78,6 +78,10 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
 
 ![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/block-ref.gif)
 
+### Dynamic Query Embed
+
+![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/block-query-embed.png)
+
 ## 🛠️ Download Setup
 
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
@@ -100,6 +104,6 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
 * [Lute - A structured Markdown engine that supports Go and JavaScript](https://github.com/88250/lute)
 * [GoWebDAV - Go WebDAV client lib](https://github.com/88250/gowebdav)
 * [Gulu - Go commons utilities](https://github.com/88250/gulu)
+* [Melody - Go WebSocket framework](https://github.com/88250/melody)
 * [Gin - Go Web framework](https://github.com/gin-gonic/gin)
-* [Melody - Go WebSocket framework](https://github.com/olahol/melody)
 * [Electron - Build cross-platform desktop apps with JavaScript, HTML, and CSS](https://github.com/electron/electron)

@@ -78,6 +78,10 @@
 
 ![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/block-ref.gif)
 
+### 动态查询嵌入
+
+![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/block-query-embed.png)
+
 ## 🛠️ 下载安装
 
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
@@ -100,6 +104,6 @@
 * [对中文语境优化的 Markdown 引擎 Lute](https://github.com/88250/lute)
 * [Go WebDAV 客户端库](https://github.com/88250/gowebdav)
 * [Go 常用工具库](https://github.com/88250/gulu)
+* [Go WebSocket 框架 melody](https://github.com/88250/melody)
 * [Go Web 框架 Gin](https://github.com/gin-gonic/gin)
-* [Go WebSocket 框架 melody](https://github.com/olahol/melody)
 * [跨平台桌面应用框架 Electron](https://github.com/electron/electron)

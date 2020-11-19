@@ -31,15 +31,16 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
   * Paste HTML automatically converted to Markdown
   * Configure Markdown to analyze detailed rendering parameters
 * Content block
-   * Block-level quotes and two-way links
+   * Block-level reference and two-way links
    * Document relationship diagram, global relationship diagram
    * Bookmark collection
    * Dynamic query embed
+   * URL for browser visit or link with other software
 * Use directly on the browser, support mobile-end
 * Hierarchical tag
 * Multi-window, multi-tab, drag and drop to split screen
 * WebDAV
-* Version mange and Git repository sync
+* Versioning and Sync
 * Fulltext search
 * Themes and icons
    * Built-in bright and dark themes
@@ -49,6 +50,8 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
    * Standard Markdown export
    * Content block reference provides anchor text + embedded blockquote option
    * Copy to WeChat MP, Zhihu
+* Online Cloud workspace
+* Online Publishing and Share
 
 ## 🗺️ Roadmap
 

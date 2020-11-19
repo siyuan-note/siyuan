@@ -47,7 +47,7 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
    * Support custom themes and icons
 * Export
    * Standard Markdown export
-   * Content block quote provides anchor text + embedded Blockquote option
+   * Content block reference provides anchor text + embedded blockquote option
    * Copy to WeChat MP, Zhihu
 
 ## 🗺️ Roadmap

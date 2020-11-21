@@ -25,8 +25,8 @@
 
 ## ✨  特性
 
-* **为 Markdown 而生**
-  * 支持即时渲染，对熟悉 Typora 的用户应该不会感到陌生，理论上这是最优雅的 Markdown 编辑方式
+* 为 Markdown 而生
+  * 类似 Typora 的即时渲染编辑模式
   * 支持数学公式、图表、流程图、甘特图、时序图、五线谱等
   * 粘贴 HTML 自动转换为 Markdown
   * 配置 Markdown 解析渲染细节参数

@@ -25,8 +25,8 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
 
 ## ✨  Features
 
-* **Born for Markdown**
-  * Support Instant Rendering, users familiar with Typora should not be unfamiliar, in theory this is the most elegant Markdown editing method
+* Born for Markdown
+  * Instant Rendering editing mode similar to Typora
   * Support mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
   * Paste HTML automatically converted to Markdown
   * Configure Markdown to analyze detailed rendering parameters

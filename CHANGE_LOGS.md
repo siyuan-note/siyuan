@@ -1,3 +1,30 @@
+## v0.4.9 / 2020-11-23
+
+### 引入特性
+
+* [选中内容右键“作为内容新建文档”](https://github.com/siyuan-note/siyuan/issues/296)
+* [编辑器自定义字号](https://github.com/siyuan-note/siyuan/issues/504)
+* [支持图片标题渲染](https://github.com/siyuan-note/siyuan/issues/505)
+* [流程图、甘特图、时序图、图表、脑图、五线谱、添加暗黑模式](https://github.com/siyuan-note/siyuan/issues/560)
+
+### 改进功能
+
+* [粘贴链接优化](https://github.com/siyuan-note/siyuan/issues/38)
+* [列表项批量缩进和取消缩进](https://github.com/siyuan-note/siyuan/issues/56)
+* [数学公式块去除背景](https://github.com/siyuan-note/siyuan/issues/63)
+* [搜索结果一键复制](https://github.com/siyuan-note/siyuan/issues/506)
+* [嵌入编辑进入时不跳到第一行](https://github.com/siyuan-note/siyuan/issues/525)
+* [改进启动引导](https://github.com/siyuan-note/siyuan/issues/559)
+
+### 修复缺陷
+
+* [资源附件本地打开问题](https://github.com/siyuan-note/siyuan/issues/515)
+* [使用 MathJax 引擎编辑公式时白屏的问题](https://github.com/siyuan-note/siyuan/issues/537)
+* [大纲只能折叠根节点下第一层的问题](https://github.com/siyuan-note/siyuan/issues/542)
+* [输入 HTML 实体之后无法继续再输入其它字符](https://github.com/siyuan-note/siyuan/issues/548)
+* [标签无法显示](https://github.com/siyuan-note/siyuan/issues/550)
+* [引用计数的气泡被侧边栏遮住了](https://github.com/siyuan-note/siyuan/issues/553)
+
 ## v0.4.8 / 2020-11-19
 
 ### 引入特性

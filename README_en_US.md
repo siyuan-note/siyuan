@@ -101,6 +101,7 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
 * [SiYuan Issues](https://github.com/siyuan-note/siyuan/issues)
 * [SiYuan Forum](https://ld246.com/tag/siyuan)
 * [SiYuan QQ Group](https://jq.qq.com/?_wv=1027&k=brIyNm7y)
+* [SiYuan Customer Service Email](mailto:support@b3log.org)
 
 ## 🙏 Acknowledgement
 

@@ -102,7 +102,7 @@
 * [思源笔记讨论区](https://ld246.com/tag/siyuan)
 * [思源笔记 QQ 群](https://jq.qq.com/?_wv=1027&k=brIyNm7y)
 * [思源笔记客服邮箱](mailto:support@b3log.org)
-* 微信公众号：`B3log开源`
+* 微信公众号：`B3log开源`  
   ![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
 
 ## 🙏 鸣谢

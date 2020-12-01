@@ -1,3 +1,38 @@
+## v0.5.0 / 2020-12-01
+
+### 引入特性
+
+* [超级块 {{{ blocks }}}](https://github.com/siyuan-note/siyuan/issues/73)
+* [内容块 URL 定位](https://github.com/siyuan-note/siyuan/issues/568)
+
+### 改进功能
+
+* [改进 ToC 渲染，支持点击跳转](https://github.com/siyuan-note/siyuan/issues/49)
+* [Ctrl B 加粗文字后光标位置改进](https://github.com/siyuan-note/siyuan/issues/323)
+* [在新窗口打开块引](https://github.com/siyuan-note/siyuan/issues/500)
+* [预览模式下粘贴公式到公众号公式尺寸异常](https://github.com/siyuan-note/siyuan/issues/540)
+* [块嵌入内容直接选择复制](https://github.com/siyuan-note/siyuan/issues/543)
+* [表格内 `<br>` 编辑表现不一致](https://github.com/siyuan-note/siyuan/issues/547)
+* [行级公式作为西文对待加空格](https://github.com/siyuan-note/siyuan/issues/565)
+* [笔记本路径不能让用户选择在安装路径上](https://github.com/siyuan-note/siyuan/issues/569)
+* [`echarts` 代码区编辑体验问题](https://github.com/siyuan-note/siyuan/issues/570)
+* [macOS 窗体按钮改进](https://github.com/siyuan-note/siyuan/issues/579)
+* [编辑右键菜单“设为文档标题”](https://github.com/siyuan-note/siyuan/issues/580)
+* [文件树字母排序考虑拼音](https://github.com/siyuan-note/siyuan/issues/596)
+* [改进同步实现](https://github.com/siyuan-note/siyuan/issues/598)
+* [内核连接检查](https://github.com/siyuan-note/siyuan/issues/599)
+
+### 修复缺陷
+
+* [YAML Front Matter 中删除问题](https://github.com/siyuan-note/siyuan/issues/109)
+* [切换明亮暗黑模式后图表相关渲染没有切换](https://github.com/siyuan-note/siyuan/issues/561)
+* [块引用块内按 Ctrl+B 会自动换行](https://github.com/siyuan-note/siyuan/issues/562)
+* [大纲层级折叠问题](https://github.com/siyuan-note/siyuan/issues/563)
+* [代码块渲染问题](https://github.com/siyuan-note/siyuan/issues/567)
+* [预览时图片等附件资源链接错误](https://github.com/siyuan-note/siyuan/issues/588)
+* [第一次导入时不应该添加中西文自动空格](https://github.com/siyuan-note/siyuan/issues/589)
+* [软换行后粘贴的图片无法正确渲染](https://github.com/siyuan-note/siyuan/issues/603)
+
 ## v0.4.9 / 2020-11-23
 
 ### 引入特性

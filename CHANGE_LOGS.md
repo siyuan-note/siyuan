@@ -1,3 +1,27 @@
+## v0.5.1 / 2020-12-03
+
+### 引入特性
+
+* [最近的笔记本列表](https://github.com/siyuan-note/siyuan/issues/481)
+* [支持上标下标语法](https://github.com/siyuan-note/siyuan/issues/534)
+
+### 改进功能
+
+* [块引悬浮框大小支持拖动](https://github.com/siyuan-note/siyuan/issues/526)
+* [手机浏览器打开 assets 资源文件](https://github.com/siyuan-note/siyuan/issues/602)
+* [稳定表格的 Markdown 格式化](https://github.com/siyuan-note/siyuan/issues/610)
+* [代码块高亮支持语言由 45 种扩展为 51 种](https://github.com/siyuan-note/siyuan/issues/611)
+* [文件树中文档前加上图标](https://github.com/siyuan-note/siyuan/issues/613)
+* [文件树排序配置持久化](https://github.com/siyuan-note/siyuan/issues/614)
+* [`private.key` 使用临时随机文件](https://github.com/siyuan-note/siyuan/issues/623)
+* [代码块主题样式由 37 种扩展为 98 种](https://github.com/siyuan-note/siyuan/issues/626)
+* [同步检查本地笔记本大小时排除 .git 元数据](https://github.com/siyuan-note/siyuan/issues/627)
+
+### 修复缺陷
+
+* [删除空行后公式错位](https://github.com/siyuan-note/siyuan/issues/608)
+* [F11 全屏后窗口最大化状态不对的问题](https://github.com/siyuan-note/siyuan/issues/625)
+
 ## v0.5.0 / 2020-12-01
 
 ### 引入特性

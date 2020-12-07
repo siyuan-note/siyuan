@@ -1,3 +1,33 @@
+## v0.5.2 / 2020-12-07
+
+### 引入特性
+
+* [模板片段](https://github.com/siyuan-note/siyuan/issues/81)
+* [块引锚文本支持模板变量](https://github.com/siyuan-note/siyuan/issues/490)
+* [新建文档时文档名支持模板片段](https://github.com/siyuan-note/siyuan/issues/615)
+
+### 改进功能
+
+* [内核退出和监测机制改进](https://github.com/siyuan-note/siyuan/issues/624)
+* [支持导入 .markdown 后缀](https://github.com/siyuan-note/siyuan/issues/631)
+* [在编辑器内复制时不应该带块 ID](https://github.com/siyuan-note/siyuan/issues/637)
+
+### 开发重构
+
+* [重新实现最近使用的块](https://github.com/siyuan-note/siyuan/issues/636)
+
+### 修复缺陷
+
+* [下标渲染为上标问题](https://github.com/siyuan-note/siyuan/issues/628)
+* [内容块动态查询嵌入跳转问题](https://github.com/siyuan-note/siyuan/issues/629)
+* [音频资源文件插入问题](https://github.com/siyuan-note/siyuan/issues/630)
+* [大纲拖拽引起的窗口布局问题](https://github.com/siyuan-note/siyuan/issues/633)
+* [复制代码到代码块问题](https://github.com/siyuan-note/siyuan/issues/634)
+* [自动空格设置为关闭后还是会添加空格的问题](https://github.com/siyuan-note/siyuan/issues/643)
+* [WebDAV 图片显示问题](https://github.com/siyuan-note/siyuan/issues/648)
+* [加密配置文件中的 WebDAV 密码字段](https://github.com/siyuan-note/siyuan/issues/649)
+* [粘贴不了 Excel 内容的问题](https://github.com/siyuan-note/siyuan/issues/655)
+
 ## v0.5.1 / 2020-12-03
 
 ### 引入特性

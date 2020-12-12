@@ -99,8 +99,7 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
 ## 🏘️ Community
 
 * [SiYuan Issues](https://github.com/siyuan-note/siyuan/issues)
-* [SiYuan Forum](https://ld246.com/tag/siyuan)
-* [SiYuan QQ Group](https://jq.qq.com/?_wv=1027&k=brIyNm7y)
+  [SiYuan Discussions](https://github.com/siyuan-note/siyuan/discussions)
 * [SiYuan Customer Service Email](mailto:support@b3log.org)
 
 ## 🙏 Acknowledgement
@@ -112,3 +111,11 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
 * [Melody - Go WebSocket framework](https://github.com/88250/melody)
 * [Gin - Go Web framework](https://github.com/gin-gonic/gin)
 * [Electron - Build cross-platform desktop apps with JavaScript, HTML, and CSS](https://github.com/electron/electron)
+
+## 💌 Participate in contribution
+
+At present, some components of SiYuan are open source, and contributions are welcome.
+
+* [User Guide](https://github.com/siyuan-note/user-guide-en_US)
+* [Appearance and language](https://github.com/siyuan-note/appearance)
+* [Markdown Engine](https://github.com/88250/lute)

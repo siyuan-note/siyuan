@@ -114,3 +114,11 @@
 * [Go WebSocket 框架 melody](https://github.com/88250/melody)
 * [Go Web 框架 Gin](https://github.com/gin-gonic/gin)
 * [跨平台桌面应用框架 Electron](https://github.com/electron/electron)
+
+## 💌 参与贡献
+
+目前思源笔记的一些组件是开源的，欢迎参与贡献。
+
+* [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)
+* [外观和语言](https://github.com/siyuan-note/appearance)
+* [Markdown 引擎](https://github.com/88250/lute)

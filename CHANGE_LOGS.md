@@ -1,3 +1,29 @@
+## v0.5.3 / 2020-12-12
+
+### 引入特性
+
+* [打通正文与文件树的壁障](https://github.com/siyuan-note/siyuan/issues/556)
+
+### 改进功能
+
+* [图注支持加粗、斜体和公式等行级渲染](https://github.com/siyuan-note/siyuan/issues/566)
+* [修改标题块嵌入时提示不支持保存](https://github.com/siyuan-note/siyuan/issues/582)
+* [块引搜索不区分大小写，支持类型前缀转义](https://github.com/siyuan-note/siyuan/issues/618)
+* [支持分屏并移动](https://github.com/siyuan-note/siyuan/issues/677)
+* [文件树排序忽略 Emoji](https://github.com/siyuan-note/siyuan/issues/685)
+* [嵌入块的锚文本应当使用 .title](https://github.com/siyuan-note/siyuan/issues/690)
+* [右键复制块引用修改为模版变量](https://github.com/siyuan-note/siyuan/issues/695)
+
+### 修复缺陷
+
+* [页内搜索问题](https://github.com/siyuan-note/siyuan/issues/53)
+* [打开最近笔记本如果是 WebDAV 的话会报错](https://github.com/siyuan-note/siyuan/issues/650)
+* [通过远程 IP 访问时图片不显示的问题](https://github.com/siyuan-note/siyuan/issues/680)
+* [大纲渲染 `<foo>` 时的转义问题](https://github.com/siyuan-note/siyuan/issues/689)
+* [预览时段落开头空两格对齐](https://github.com/siyuan-note/siyuan/issues/698)
+* [清理未引用资源时需要将 HTML src 计入](https://github.com/siyuan-note/siyuan/issues/700)
+* [标题上使用模板的问题](https://github.com/siyuan-note/siyuan/issues/702)
+
 ## v0.5.2 / 2020-12-07
 
 ### 引入特性

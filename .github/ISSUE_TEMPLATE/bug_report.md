@@ -38,6 +38,20 @@ If possible, please try to attach screenshots or videos to describe the problem 
 * 操作系统 Operating system：
 * 浏览器（如果使用）Browser (if used)：
 
+### 日志文件 Log
+
+<!--
+程序日志文件位于：
+
+* 操作系统用户家目录 ~/.siyuan/siyuan.log，可在设置 - 关于 - 打开配置目录快速打开
+* Windows 上一般位于 C:\Users\YourName\siyuan\siyuan.log
+
+The program log file is located at:
+
+* The operating system user's home directory ~/.siyuan/siyuan.log, can be opened quickly in Settings - About-Open the configuration directory
+* Generally located at C:\Users\YourName\siyuan\siyuan.log on Windows
+-->
+
 ### 其他信息 Other information
 
 <!--

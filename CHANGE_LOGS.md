@@ -1,3 +1,38 @@
+## v0.5.4 / 2020-12-16
+
+### 引入特性
+
+* [PDF 导出](https://github.com/siyuan-note/siyuan/issues/79)
+* [点击查看大图功能](https://github.com/siyuan-note/siyuan/issues/609)
+* [在引用内右键新增删除引用操作](https://github.com/siyuan-note/siyuan/issues/730)
+
+### 改进功能
+
+* [表格编辑改进](https://github.com/siyuan-note/siyuan/issues/555)
+* [HTML 块预览开关](https://github.com/siyuan-note/siyuan/issues/607)
+* [assets 资源文件支持改进](https://github.com/siyuan-note/siyuan/issues/652)
+* [文件树上显示文档更新时间和大小](https://github.com/siyuan-note/siyuan/issues/661)
+* [冒号后 emoji 输入直接回车行为改进](https://github.com/siyuan-note/siyuan/issues/669)
+* [块引创建文档时支持指定路径](https://github.com/siyuan-note/siyuan/issues/673)
+* [优化多开启动](https://github.com/siyuan-note/siyuan/issues/709)
+* [动态查询嵌入默认隐藏 SQL](https://github.com/siyuan-note/siyuan/issues/721)
+* [文档名去掉 `_id.sy` 段](https://github.com/siyuan-note/siyuan/issues/723)
+* [独占一行的图片默认居中](https://github.com/siyuan-note/siyuan/issues/726)
+* [搜索面板中的更多修改为右键](https://github.com/siyuan-note/siyuan/issues/731)
+* [新增模板变量 `title`](https://github.com/siyuan-note/siyuan/issues/751)
+
+### 文档相关
+
+* [同步第三方远程仓库的操作文档](https://github.com/siyuan-note/siyuan/issues/718)
+
+### 修复缺陷
+
+* [{{.title}} 模板需要修正的几个地方](https://github.com/siyuan-note/siyuan/issues/692)
+* [jfif 后缀资源图片清理未引用资源问题](https://github.com/siyuan-note/siyuan/issues/714)
+* [剪切块内容时，无法进行撤销](https://github.com/siyuan-note/siyuan/issues/717)
+* [文档块标题块转换时需复制关联的资源文件](https://github.com/siyuan-note/siyuan/issues/741)
+* [鼠标悬停被任务栏遮挡](https://github.com/siyuan-note/siyuan/issues/748)
+
 ## v0.5.3 / 2020-12-12
 
 ### 引入特性

@@ -1,3 +1,25 @@
+## v0.5.41 / 2020-12-18
+
+### 引入特性
+
+* [支持文档块书签](https://github.com/siyuan-note/siyuan/issues/339)
+
+### 改进功能
+
+* [去掉代码块预览选项，代码块默认预览高亮](https://github.com/siyuan-note/siyuan/issues/739)
+* [去掉实时导出 Markdown 功能](https://github.com/siyuan-note/siyuan/issues/760)
+* [上线付费订阅](https://github.com/siyuan-note/siyuan/issues/764)
+* [从安装目录下读取配置文件夹](https://github.com/siyuan-note/siyuan/issues/766)
+* [废弃锚文本模板变量 `{{.title}}`](https://github.com/siyuan-note/siyuan/issues/771)
+
+### 修复缺陷
+
+* [列表项块反链包含逻辑问题和引用计数问题](https://github.com/siyuan-note/siyuan/issues/571)
+* [导出 PDF 有时图片、代码块和图表等渲染有问题](https://github.com/siyuan-note/siyuan/issues/761)
+* [笔记本文件夹根一层没有 .md 时的问题](https://github.com/siyuan-note/siyuan/issues/763)
+* [全局搜索卡顿问题](https://github.com/siyuan-note/siyuan/issues/768)
+* [从托盘处激活报错](https://github.com/siyuan-note/siyuan/issues/769)
+
 ## v0.5.4 / 2020-12-16
 
 ### 引入特性

@@ -1,3 +1,32 @@
+## v0.5.42 / 2020-12-21
+
+### 引入特性
+
+* [导出时支持配置标签的开闭标记符](https://github.com/siyuan-note/siyuan/issues/572)
+* [代码块预览加入行号](https://github.com/siyuan-note/siyuan/issues/774)
+
+### 改进功能
+
+* [文档关系图按逻辑层级呈现](https://github.com/siyuan-note/siyuan/issues/62)
+* [导出完成提示自动关闭](https://github.com/siyuan-note/siyuan/issues/780)
+* [改进网页上的代码块剪藏](https://github.com/siyuan-note/siyuan/issues/781)
+* [改进 `[[wikilink]]` 导入，识别 Obsidian 短路径格式](https://github.com/siyuan-note/siyuan/issues/786)
+* [在安装目录下写入应用日志 app.log](https://github.com/siyuan-note/siyuan/issues/787)
+* [全局关系图仅体现文档块之间的联系](https://github.com/siyuan-note/siyuan/issues/789)
+* [改进内核退出，让退出过程更快一些](https://github.com/siyuan-note/siyuan/issues/795)
+* [查看编辑历史性能优化](https://github.com/siyuan-note/siyuan/issues/796)
+
+### 修复缺陷
+
+* [网页内容复制后无法剪藏](https://github.com/siyuan-note/siyuan/issues/752)
+* [列表内粘贴插入位置错误](https://github.com/siyuan-note/siyuan/issues/775)
+* [配置在安装目录下时自定义外观问题](https://github.com/siyuan-note/siyuan/issues/777)
+* [内容块嵌入编辑时内容不保存](https://github.com/siyuan-note/siyuan/issues/778)
+* [自定义主题重启不生效以及代码重复生成问题](https://github.com/siyuan-note/siyuan/issues/782)
+* [打开空文件夹不应该走导入向导](https://github.com/siyuan-note/siyuan/issues/784)
+* [导入导出问题](https://github.com/siyuan-note/siyuan/issues/785)
+* [快速插入标签额外多插入了一对 “#”](https://github.com/siyuan-note/siyuan/issues/788)
+
 ## v0.5.41 / 2020-12-18
 
 ### 引入特性

@@ -1,3 +1,25 @@
+## v0.5.43 / 2020-12-25
+
+### 引入特性
+
+* [搜索支持表达式](https://github.com/siyuan-note/siyuan/issues/797)
+
+### 改进功能
+
+* [移除清理 ID 功能](https://github.com/siyuan-note/siyuan/issues/807)
+
+### 修复缺陷
+
+* [行级公式渲染大小自适应标题级别](https://github.com/siyuan-note/siyuan/issues/487)
+* [块嵌入的表格内换行符消失](https://github.com/siyuan-note/siyuan/issues/654)
+* [使用本地绝对路径引用资源时的问题](https://github.com/siyuan-note/siyuan/issues/729)
+* [块引用的锚文本行级渲染问题](https://github.com/siyuan-note/siyuan/issues/800)
+* [反链提及文档名未正常显示](https://github.com/siyuan-note/siyuan/issues/802)
+* [中西文添加空格等选项从编辑时改为预览/导出时](https://github.com/siyuan-note/siyuan/issues/814)
+* [移除中文后标点符号自动替换为中文标点](https://github.com/siyuan-note/siyuan/issues/815)
+* [不同文件夹下嵌入的图片预览时不显示](https://github.com/siyuan-note/siyuan/issues/825)
+* [B 站视频插入播放问题](https://github.com/siyuan-note/siyuan/issues/827)
+
 ## v0.5.42 / 2020-12-21
 
 ### 引入特性

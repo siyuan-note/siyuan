@@ -1,3 +1,28 @@
+## v0.5.44 / 2020-12-27
+
+### 引入特性
+
+* [主题集市](https://github.com/siyuan-note/siyuan/issues/706)
+
+### 改进功能
+
+* [加入启动参数 `--ssl`](https://github.com/siyuan-note/siyuan/issues/828)
+* [重命名时需要判断大小写](https://github.com/siyuan-note/siyuan/issues/829)
+* [支持年付订阅](https://github.com/siyuan-note/siyuan/issues/830)
+* [全局搜索改进](https://github.com/siyuan-note/siyuan/issues/835)
+* [换行时不要强制居中打字机](https://github.com/siyuan-note/siyuan/issues/840)
+* [`protocol://` 协议打开其他软件](https://github.com/siyuan-note/siyuan/issues/847)
+* [超级块导出去掉标记符](https://github.com/siyuan-note/siyuan/issues/849)
+
+### 修复缺陷
+
+* [火狐使用时无法复制](https://github.com/siyuan-note/siyuan/issues/531)
+* [图片块引用展示异常](https://github.com/siyuan-note/siyuan/issues/816)
+* [WebDAV 贴图问题](https://github.com/siyuan-note/siyuan/issues/837)
+* [引用块无法拷贝 ref id](https://github.com/siyuan-note/siyuan/issues/841)
+* [带 Emoji 的文件夹/文档排序不稳定问题](https://github.com/siyuan-note/siyuan/issues/842)
+* [列表项块引用修改提示找不到](https://github.com/siyuan-note/siyuan/issues/846)
+
 ## v0.5.43 / 2020-12-25
 
 ### 引入特性

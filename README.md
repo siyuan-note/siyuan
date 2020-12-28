@@ -6,6 +6,7 @@
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <a title="Release Date" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release-date/siyuan-note/siyuan.svg?style=flat-square&color=99CCFF"></a>
 <a title="Downloads" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/downloads/siyuan-note/siyuan/total.svg?style=flat-square&color=blueviolet"></a>
+<a title="Docker Pulls" target="_blank" href="https://hub.docker.com/r/b3log/siyuan"><img src="https://img.shields.io/docker/pulls/b3log/siyuan.svg?style=flat-square&color=FF96B4"></a>
 <a title="Hits" target="_blank" href="https://github.com/siyuan-note/siyuan"><img src="https://hits.b3log.org/siyuan-note/siyuan.svg"></a>
 </p>
 
@@ -90,9 +91,11 @@
 
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [码云](https://gitee.com/siyuan-note/siyuan/releases)
+* [Docker](https://hub.docker.com/r/b3log/siyuan)
 
 ## 📜 文档
 
+* [思源笔记用户指南](https://ld246.com/udanax/1602224134353)
 * [思源笔记 - 支持 Markdown 块级引用和双向链接的网状笔记应用](https://ld246.com/article/1598872180233)
 * [Markdown 实现块级引用双向链接的探索](https://ld246.com/article/1597226949061)
 

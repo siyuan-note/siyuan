@@ -1,3 +1,27 @@
+## v0.5.45 / 2020-12-28
+
+### 引入特性
+
+* [托盘快捷键](https://github.com/siyuan-note/siyuan/issues/704)
+* [文件树上加入刷新操作](https://github.com/siyuan-note/siyuan/issues/794)
+* [编辑器内资源右键添加删除功能](https://github.com/siyuan-note/siyuan/issues/852)
+
+### 改进功能
+
+* [双击后快捷键改进](https://github.com/siyuan-note/siyuan/issues/809)
+* [块引支持搜索表达式](https://github.com/siyuan-note/siyuan/issues/848)
+* [搜索支持锚文本模板](https://github.com/siyuan-note/siyuan/issues/854)
+
+### 文档相关
+
+* [完善 Docker 镜像搭建服务相关文档](https://github.com/siyuan-note/siyuan/issues/812)
+
+### 修复缺陷
+
+* [Windows 上 Alt F4 改为完全退出程序](https://github.com/siyuan-note/siyuan/issues/783)
+* [预览时大纲无法定位](https://github.com/siyuan-note/siyuan/issues/819)
+* [卸载主题问题](https://github.com/siyuan-note/siyuan/issues/850)
+
 ## v0.5.44 / 2020-12-27
 
 ### 引入特性

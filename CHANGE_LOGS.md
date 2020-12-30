@@ -1,3 +1,27 @@
+## v0.5.46 / 2020-12-30
+
+### 引入特性
+
+* [内容块标识区域显示层级结构和引用数](https://github.com/siyuan-note/siyuan/issues/76)
+* [邀请订阅奖励机制](https://github.com/siyuan-note/siyuan/issues/872)
+
+### 改进功能
+
+* [页签右键添加关闭左侧、右侧、未修改功能](https://github.com/siyuan-note/siyuan/issues/767)
+* [预览悬浮窗口默认可编辑，支持钉住（Pin）](https://github.com/siyuan-note/siyuan/issues/864)
+* [内容块加入创建时间显示](https://github.com/siyuan-note/siyuan/issues/867)
+* [v1.0.0 发布时间](https://github.com/siyuan-note/siyuan/issues/873)
+* [改进文件树上的文档拖拽转换标题时的交互](https://github.com/siyuan-note/siyuan/issues/876)
+* [简化全局和块引搜索结果](https://github.com/siyuan-note/siyuan/issues/883)
+
+### 修复缺陷
+
+* [上下标无法解析 `+` 和 `-` 问题](https://github.com/siyuan-note/siyuan/issues/853)
+* [模版插入未自动保存问题](https://github.com/siyuan-note/siyuan/issues/858)
+* [安装集市主题后自定义修改不回显的问题](https://github.com/siyuan-note/siyuan/issues/861)
+* [搜索忽略高亮 `==Mark==` 标记符和空格](https://github.com/siyuan-note/siyuan/issues/862)
+* [预览悬浮窗口大小计算问题](https://github.com/siyuan-note/siyuan/issues/877)
+
 ## v0.5.45 / 2020-12-28
 
 ### 引入特性

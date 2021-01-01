@@ -1,3 +1,28 @@
+## v0.5.5 / 2021-01-01
+
+### 引入特性
+
+* [内容块书签右侧标识](https://github.com/siyuan-note/siyuan/issues/75)
+* [支持内容块拖动排版](https://github.com/siyuan-note/siyuan/issues/226)
+* [鼠标移动到引用数上查看被引用的块](https://github.com/siyuan-note/siyuan/issues/529)
+* [连接 WebDAV 支持文件夹选择](https://github.com/siyuan-note/siyuan/issues/866)
+
+### 改进功能
+
+* [移动端浏览器兼容](https://github.com/siyuan-note/siyuan/issues/651)
+* [支持通过鼠标中键关闭页签](https://github.com/siyuan-note/siyuan/issues/686)
+* [搜索时包含文档块且文档块排最前面](https://github.com/siyuan-note/siyuan/issues/900)
+* [编辑器标题块标识和书签标识是否显示的配置](https://github.com/siyuan-note/siyuan/issues/901)
+
+### 开发重构
+
+* [重构标签、模版等底层实现](https://github.com/siyuan-note/siyuan/issues/897)
+
+### 修复缺陷
+
+* [QQ 拼音输入法自动补全时块引符号时末尾多出 `]]`](https://github.com/siyuan-note/siyuan/issues/320)
+* [有时启动会一直 loading 进不去](https://github.com/siyuan-note/siyuan/issues/895)
+
 ## v0.5.46 / 2020-12-30
 
 ### 引入特性

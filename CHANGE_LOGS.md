@@ -1,3 +1,29 @@
+## v0.5.6 / 2021-01-06
+
+### 引入特性
+
+* [支持加粗、强调、删除线和代码设置属性，实现自定义文字颜色等样式](https://github.com/siyuan-note/siyuan/issues/620)
+* [自定义快捷键](https://github.com/siyuan-note/siyuan/issues/621)
+
+### 改进功能
+
+* [代码块复制按钮改进](https://github.com/siyuan-note/siyuan/issues/665)
+* [简化容器块的反链提及结果](https://github.com/siyuan-note/siyuan/issues/874)
+* [引用数标识应显示多个定义块](https://github.com/siyuan-note/siyuan/issues/904)
+* [改进 HTML 转换 Markdown 时加粗、斜体等空格的处理](https://github.com/siyuan-note/siyuan/issues/931)
+
+### 开发重构
+
+* [重写底层，降低内存占用](https://github.com/siyuan-note/siyuan/issues/898)
+* [文档内容变更以后数据状态通知](https://github.com/siyuan-note/siyuan/issues/907)
+* [重构反向链接、书签底层实现](https://github.com/siyuan-note/siyuan/issues/908)
+
+### 修复缺陷
+
+* [反链提及快速链接问题](https://github.com/siyuan-note/siyuan/issues/881)
+* [配置搜索报错](https://github.com/siyuan-note/siyuan/issues/928)
+* [开启下标语法后删除线语法失效](https://github.com/siyuan-note/siyuan/issues/934)
+
 ## v0.5.5 / 2021-01-01
 
 ### 引入特性

@@ -11,6 +11,7 @@
 * [简化容器块的反链提及结果](https://github.com/siyuan-note/siyuan/issues/874)
 * [引用数标识应显示多个定义块](https://github.com/siyuan-note/siyuan/issues/904)
 * [改进 HTML 转换 Markdown 时加粗、斜体等空格的处理](https://github.com/siyuan-note/siyuan/issues/931)
+* [文件树上同一文件夹下最多显示 512 个文档](https://github.com/siyuan-note/siyuan/issues/948)
 
 ### 开发重构
 
@@ -23,6 +24,8 @@
 * [反链提及快速链接问题](https://github.com/siyuan-note/siyuan/issues/881)
 * [配置搜索报错](https://github.com/siyuan-note/siyuan/issues/928)
 * [开启下标语法后删除线语法失效](https://github.com/siyuan-note/siyuan/issues/934)
+* [嵌套引用锚文本模板渲染问题](https://github.com/siyuan-note/siyuan/issues/946)
+* [使用模板导致标题块图标在错误的位置](https://github.com/siyuan-note/siyuan/issues/949)
 
 ## v0.5.5 / 2021-01-01
 

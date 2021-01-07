@@ -1,3 +1,24 @@
+## v0.5.7 / 2021-01-07
+
+### 引入特性
+
+* [支持内容块折叠](https://github.com/siyuan-note/siyuan/issues/262)
+* [支持插入图片大小设置](https://github.com/siyuan-note/siyuan/issues/315)
+
+### 改进功能
+
+* [左侧图标和系统的最大化图标距离太近了](https://github.com/siyuan-note/siyuan/issues/738)
+* [优化文件树文件定位](https://github.com/siyuan-note/siyuan/issues/936)
+* [鼠标从右到左选择文字设置字体颜色优化](https://github.com/siyuan-note/siyuan/issues/954)
+* [行级属性不暴露在编辑器中](https://github.com/siyuan-note/siyuan/issues/957)
+
+### 修复缺陷
+
+* [快捷键重置问题](https://github.com/siyuan-note/siyuan/issues/951)
+* [字体彩色变糊问题](https://github.com/siyuan-note/siyuan/issues/952)
+* [循环引用导致内存泄漏进程崩溃问题](https://github.com/siyuan-note/siyuan/issues/959)
+* [移动文档时 assets 附件不跟随移动的问题](https://github.com/siyuan-note/siyuan/issues/960)
+
 ## v0.5.6 / 2021-01-06
 
 ### 引入特性

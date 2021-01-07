@@ -11,6 +11,7 @@
 * [优化文件树文件定位](https://github.com/siyuan-note/siyuan/issues/936)
 * [鼠标从右到左选择文字设置字体颜色优化](https://github.com/siyuan-note/siyuan/issues/954)
 * [行级属性不暴露在编辑器中](https://github.com/siyuan-note/siyuan/issues/957)
+* [标题块拖拽移动时包含下方内容块](https://github.com/siyuan-note/siyuan/issues/963)
 
 ### 修复缺陷
 

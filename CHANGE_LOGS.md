@@ -1,3 +1,24 @@
+## v0.5.8 / 2021-01-08
+
+### 引入特性
+
+* [批量导出标准 Markdown 文件](https://github.com/siyuan-note/siyuan/issues/577)
+* [内容块命名、备注和样式](https://github.com/siyuan-note/siyuan/issues/595)
+* [笔记本内笔记数量显示](https://github.com/siyuan-note/siyuan/issues/871)
+
+### 改进功能
+
+* [反链提及使用内容块名称进行搜索](https://github.com/siyuan-note/siyuan/issues/953)
+* [折叠块时报“查询内容块失败”](https://github.com/siyuan-note/siyuan/issues/970)
+* [超级块改进](https://github.com/siyuan-note/siyuan/issues/972)
+* [块图标交互修改](https://github.com/siyuan-note/siyuan/issues/974)
+* [编辑器右键菜单改进](https://github.com/siyuan-note/siyuan/issues/976)
+
+### 修复缺陷
+
+* [标题块折叠拖动问题](https://github.com/siyuan-note/siyuan/issues/971)
+* [引用链接超过 7 个显示异常](https://github.com/siyuan-note/siyuan/issues/975)
+
 ## v0.5.7 / 2021-01-07
 
 ### 引入特性

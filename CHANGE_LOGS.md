@@ -1,3 +1,23 @@
+## v0.5.9 / 2021-01-11
+
+### 引入特性
+
+* [日记](https://github.com/siyuan-note/siyuan/issues/399)
+
+### 改进功能
+
+* [缩放图片提供常用缩放百分比](https://github.com/siyuan-note/siyuan/issues/969)
+* [小优化：标签补全提示](https://github.com/siyuan-note/siyuan/issues/990)
+* [改进内核启动机制](https://github.com/siyuan-note/siyuan/issues/991)
+
+### 修复缺陷
+
+* [数学公式尾行按上键会跳出](https://github.com/siyuan-note/siyuan/issues/982)
+* [点击图片偶尔不会显示资源菜单](https://github.com/siyuan-note/siyuan/issues/984)
+* [超过 2520 个块的文档打不开问题](https://github.com/siyuan-note/siyuan/issues/988)
+* [搜索时搜不到行级排版元素的问题](https://github.com/siyuan-note/siyuan/issues/993)
+* [设置背景色后多层级块图标会重叠](https://github.com/siyuan-note/siyuan/issues/994)
+
 ## v0.5.8 / 2021-01-08
 
 ### 引入特性

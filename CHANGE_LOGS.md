@@ -7,7 +7,7 @@
 ### 改进功能
 
 * [缩放图片提供常用缩放百分比](https://github.com/siyuan-note/siyuan/issues/969)
-* [小优化：标签补全提示](https://github.com/siyuan-note/siyuan/issues/990)
+* [标签补全提示优化](https://github.com/siyuan-note/siyuan/issues/990)
 * [改进内核启动机制](https://github.com/siyuan-note/siyuan/issues/991)
 
 ### 修复缺陷

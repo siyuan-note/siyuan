@@ -18,7 +18,7 @@
 
 SiYuan is a desktop Markdown Block-Reference and Bidirectional-Link note-taking application, supports Windows, Mac and Linux, can be used directly on the browser, and supports mobile-end adaptation.
 
-Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to learn more.
+The online experience of share publishing: [https://ld246.com/udanax/1602224134353](https://ld246.com/udanax/1602224134353), welcome to [SiYuan Official Discussion Forum](https://github.com/siyuan-note/siyuan/discussions) to learn more.
 
 ![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/desktop.png)
 

@@ -98,6 +98,10 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
 
 ![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/block-query-embed.gif)
 
+### Community theme bazaar
+
+![theme-bazaar](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/theme-bazaar.png)
+
 ## 🛠️ Download Setup
 
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)

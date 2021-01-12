@@ -98,6 +98,10 @@
 
 ![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/block-query-embed.gif)
 
+### 社区主题集市
+
+![theme-bazaar](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/theme-bazaar.png)
+
 ## 🛠️ 下载安装
 
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)

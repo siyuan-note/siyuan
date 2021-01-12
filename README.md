@@ -65,7 +65,7 @@
 
 *即时渲染*模式对熟悉 Typora 的用户应该不会感到陌生，理论上这是最优雅的 Markdown 编辑方式。
 
-![ir](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/ir.gif)
+![ir-block](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/ir-block.gif)
 
 ### 块移动、折叠和样式
 

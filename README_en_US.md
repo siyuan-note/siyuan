@@ -20,9 +20,9 @@ SiYuan is a desktop Markdown Block-Reference and Bidirectional-Link note-taking 
 
 Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welcome to [SiYuan Official Discussion Forum](https://ld246.com/tag/siyuan) to learn more.
 
-![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@2a5378647a479d10f330daf59d3eb1649473a404/screenshots/desktop.png)
+![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/desktop.png)
 
-![mobile.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@2a5378647a479d10f330daf59d3eb1649473a404/screenshots/mobile.png)
+![mobile.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/mobile.png)
 
 ## ✨  Features
 
@@ -68,39 +68,39 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
 
 *Instant Rendering* mode should not be unfamiliar to users who are familiar with Typora. In theory, this is the most elegant Markdown editing method.
 
-![ir-block](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@2a5378647a479d10f330daf59d3eb1649473a404e/screenshots/ir-block.gif)
+![ir-block](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0e/screenshots/ir-block.gif)
 
 ### Block move, fold and style
 
-![move-fold-style](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@2a5378647a479d10f330daf59d3eb1649473a404/screenshots/move-fold-style.gif)
+![move-fold-style](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/move-fold-style.gif)
 
 ### MindMap mode
 
-![mindmap](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@2a5378647a479d10f330daf59d3eb1649473a404/screenshots/mindmap.png)
+![mindmap](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/mindmap.png)
 
 ### Roam
 
-![roam.gif](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@2a5378647a479d10f330daf59d3eb1649473a404/screenshots/roam.gif)
+![roam.gif](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/roam.gif)
 
 ### Settings
 
-![settings.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@2a5378647a479d10f330daf59d3eb1649473a404/screenshots/settings.png)
+![settings.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/settings.png)
 
 ### Search
 
-![search.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@2a5378647a479d10f330daf59d3eb1649473a404/screenshots/search.png)
+![search.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/search.png)
 
 ### Block Reference
 
-![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@2a5378647a479d10f330daf59d3eb1649473a404/screenshots/block-ref.gif)
+![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/block-ref.gif)
 
 ### Dynamic Query Embed
 
-![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@2a5378647a479d10f330daf59d3eb1649473a404/screenshots/block-query-embed.gif)
+![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/block-query-embed.gif)
 
 ### Community theme bazaar
 
-![theme-bazaar](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@2a5378647a479d10f330daf59d3eb1649473a404/screenshots/theme-bazaar.png)
+![theme-bazaar](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/theme-bazaar.png)
 
 ## 🛠️ Download Setup
 

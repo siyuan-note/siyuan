@@ -20,9 +20,9 @@
 
 在线体验：[https://ld246.com/xanadu/](https://ld246.com/xanadu/)，欢迎到[思源笔记官方讨论区](https://ld246.com/tag/siyuan)了解更多。
 
-![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/desktop.png)
+![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/desktop.png)
 
-![mobile.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/mobile.png)
+![mobile.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/mobile.png)
 
 ## ✨  特性
 
@@ -68,35 +68,35 @@
 
 *即时渲染*模式对熟悉 Typora 的用户应该不会感到陌生，理论上这是最优雅的 Markdown 编辑方式。
 
-![ir-block](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/ir-block.gif)
+![ir-block](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/ir-block.gif)
 
 ### 块移动、折叠和样式
 
-![move-fold-style](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/move-fold-style.gif)
+![move-fold-style](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/move-fold-style.gif)
 
 ### 脑图模式
 
-![mindmap](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/mindmap.png)
+![mindmap](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/mindmap.png)
 
 ### 漫游
 
-![roam.gif](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/roam.gif)
+![roam.gif](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/roam.gif)
 
 ### 设置
 
-![settings.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/settings.png)
+![settings.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/settings.png)
 
 ### 搜索
 
-![search.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/search.png)
+![search.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/search.png)
 
 ### 块级引用
 
-![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/block-ref.gif)
+![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/block-ref.gif)
 
 ### 动态查询嵌入
 
-![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/block-query-embed.png)
+![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/block-query-embed.png)
 
 ## 🛠️ 下载安装
 

@@ -37,7 +37,10 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
    * Bookmark collection
    * Dynamic query embed
    * URL for browser visit or link with other software
-* Use directly on the browser, support mobile-end
+* MinMap mode
+  * Support zoom, drag, layout and theme, etc.
+  * Keep editing and Markdown in sync
+* Use on the browser, support mobile-end
 * Hierarchical tag
 * Multi-window, multi-tab, drag and drop to split screen
 * WebDAV
@@ -48,7 +51,7 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
    * Built-in two sets of icons, Material and Ant Design
    * Support custom themes and icons
 * Export
-   * Standard Markdown export
+   * Standard Markdown and TextBundle export
    * Content block reference provides anchor text + embedded blockquote option
    * Copy to WeChat MP, Zhihu
 * Online Cloud workspace
@@ -65,7 +68,15 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
 
 *Instant Rendering* mode should not be unfamiliar to users who are familiar with Typora. In theory, this is the most elegant Markdown editing method.
 
-![vditor-ir](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/ir.gif)
+![ir-block](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/ir-block.gif)
+
+### Block move, fold and style
+
+![move-fold-style](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/move-fold-style.gif)
+
+### MindMap mode
+
+![mindmap](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/mindmap.png)
 
 ### Roam
 

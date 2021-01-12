@@ -51,7 +51,7 @@
   * 内置 Material、Ant Design 两套图标
   * 支持自定义主题和图标
 * 导出
-  * 标准 Markdown、TextBundle 导出
+  * 标准 Markdown 和 TextBundle 导出
   * 内容块引用提供锚文本 + 嵌入 Blockquote 选项
   * 复制到微信公众号、知乎
 * 在线工作空间

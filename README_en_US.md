@@ -96,7 +96,7 @@ Online experience: [https://ld246.com/xanadu/](https://ld246.com/xanadu/), welco
 
 ### Dynamic Query Embed
 
-![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/block-query-embed.png)
+![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@cd71a68a0824355620172df836ce0ebe608a55d/screenshots/block-query-embed.gif)
 
 ## 🛠️ Download Setup
 

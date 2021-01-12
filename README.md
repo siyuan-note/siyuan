@@ -36,8 +36,11 @@
   * 文档关系图、全局关系图
   * 书签收藏
   * 动态查询嵌入
-  * 提供 URL 浏览器访问或给其他软件链接 
-* 在浏览器上直接使用、支持移动端
+  * 提供 URL 浏览器访问或给其他软件链接
+* 脑图模式
+  * 支持缩放、拖拽、布局、主题等
+  * 编辑和 Markdown 保持同步
+* 支持浏览器使用、支持移动端
 * 层级标签
 * 多窗口多页签，拖拽分屏
 * WebDAV
@@ -48,7 +51,7 @@
   * 内置 Material、Ant Design 两套图标
   * 支持自定义主题和图标
 * 导出
-  * 标准 Markdown 导出
+  * 标准 Markdown、TextBundle 导出
   * 内容块引用提供锚文本 + 嵌入 Blockquote 选项
   * 复制到微信公众号、知乎
 * 在线工作空间
@@ -70,6 +73,10 @@
 ### 块移动、折叠和样式
 
 ![move-fold-style](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/move-fold-style.gif)
+
+### 脑图模式
+
+![mindmap](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/mindmap.gif)
 
 ### 漫游
 

@@ -76,7 +76,7 @@
 
 ### 脑图模式
 
-![mindmap](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/mindmap.gif)
+![mindmap](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@master/screenshots/mindmap.png)
 
 ### 漫游
 

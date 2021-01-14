@@ -1,3 +1,26 @@
+## v0.6.0 / 2021-01-14
+
+### 引入特性
+
+* [引入新的编辑模式 - 脑图模式](https://github.com/siyuan-note/siyuan/issues/735)
+* [内容块动态查询支持搜索表达式](https://github.com/siyuan-note/siyuan/issues/1011)
+
+### 改进功能
+
+* [支持 Stata 代码块高亮](https://github.com/siyuan-note/siyuan/issues/656)
+* [支持 PowerShell 代码块高亮](https://github.com/siyuan-note/siyuan/issues/1002)
+* [日记设置中的笔记本名称由输入改为下拉选择](https://github.com/siyuan-note/siyuan/issues/1003)
+* [支持在链接文本和代码内容中搜索](https://github.com/siyuan-note/siyuan/issues/1052)
+
+### 修复缺陷
+
+* [编辑器内搜索表格无法定位](https://github.com/siyuan-note/siyuan/issues/922)
+* [块嵌入时内部引用渲染问题](https://github.com/siyuan-note/siyuan/issues/1000)
+* [文档增删后父级文件夹计数不更新](https://github.com/siyuan-note/siyuan/issues/1004)
+* [缩放图片后不居中问题](https://github.com/siyuan-note/siyuan/issues/1010)
+* [模板中使用内容块动态查询报错问题](https://github.com/siyuan-note/siyuan/issues/1014)
+* [嵌入被错误识别成引用](https://github.com/siyuan-note/siyuan/issues/1046)
+
 ## v0.5.9 / 2021-01-11
 
 ### 引入特性

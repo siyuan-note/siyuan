@@ -1,3 +1,32 @@
+## v0.6.1 / 2021-01-16
+
+### 引入特性
+
+* [搜索页签](https://github.com/siyuan-note/siyuan/issues/104)
+* [编辑器 Ctrl 点击标签触发搜索页签](https://github.com/siyuan-note/siyuan/issues/945)
+* [编辑器划词触发搜索页签](https://github.com/siyuan-note/siyuan/issues/1072)
+
+### 改进功能
+
+* [代码块复制不带 ```lang](https://github.com/siyuan-note/siyuan/issues/995)
+* [清理未引用资源时包含文件夹引用情况](https://github.com/siyuan-note/siyuan/issues/1035)
+* [`#` 在代码块也会产生不必要的下拉菜单](https://github.com/siyuan-note/siyuan/issues/1091)
+
+### 开发重构
+
+* [包路径重构](https://github.com/siyuan-note/siyuan/issues/1075)
+
+### 修复缺陷
+
+* [内容块嵌入中的文本字体设置失效](https://github.com/siyuan-note/siyuan/issues/977)
+* [表格内 Tab 键切换单元格问题](https://github.com/siyuan-note/siyuan/issues/1040)
+* [去掉脑图中引用的 `{{.text}}`](https://github.com/siyuan-note/siyuan/issues/1060)
+* [图片缩放兼容 Firefox](https://github.com/siyuan-note/siyuan/issues/1066)
+* [嵌入块显示的时候空白过大问题](https://github.com/siyuan-note/siyuan/issues/1077)
+* [代码块清空内容后仍然保留的问题](https://github.com/siyuan-note/siyuan/issues/1084)
+* [复制引用时结尾去掉多余的锚文本](https://github.com/siyuan-note/siyuan/issues/1086)
+* [图片路径编辑问题](https://github.com/siyuan-note/siyuan/issues/1087)
+
 ## v0.6.0 / 2021-01-14
 
 ### 引入特性

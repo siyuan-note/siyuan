@@ -1,3 +1,28 @@
+## v0.6.2 / 2021-01-17
+
+### 引入特性
+
+* [编辑器内容右键划词搜索并链接](https://github.com/siyuan-note/siyuan/issues/747)
+* [模板集市](https://github.com/siyuan-note/siyuan/issues/1037)
+
+### 改进功能
+
+* [只读模式下禁用编辑功能](https://github.com/siyuan-note/siyuan/issues/1058)
+* [颜色取消后，粗体页需要取消](https://github.com/siyuan-note/siyuan/issues/1064)
+* [在引用块的中间部分按下Enter两次会直接跳出引用块](https://github.com/siyuan-note/siyuan/issues/1081)
+* [编辑器右键划词搜索支持新建搜索页签](https://github.com/siyuan-note/siyuan/issues/1110)
+* [调整悬浮窗口和搜索、反链等非主编辑区的字号行距](https://github.com/siyuan-note/siyuan/issues/1115)
+* [优化行级数学公式光标位置](https://github.com/siyuan-note/siyuan/issues/1121)
+* [保留空段落](https://github.com/siyuan-note/siyuan/issues/1125)
+
+### 修复缺陷
+
+* [含有行内公式的句子加粗问题](https://github.com/siyuan-note/siyuan/issues/1093)
+* [工具栏设置标题只能设置为一级标题问题](https://github.com/siyuan-note/siyuan/issues/1103)
+* [脑图渲染问题](https://github.com/siyuan-note/siyuan/issues/1114)
+* [悬浮框编辑时右键菜单重叠被覆盖](https://github.com/siyuan-note/siyuan/issues/1123)
+* [搜索页签子标签无法搜索到内容](https://github.com/siyuan-note/siyuan/issues/1124)
+
 ## v0.6.1 / 2021-01-16
 
 ### 引入特性

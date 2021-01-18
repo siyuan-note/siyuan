@@ -1,3 +1,29 @@
+## v0.6.3 / 2021-01-18
+
+### 引入特性
+
+* [大纲搜索过滤](https://github.com/siyuan-note/siyuan/issues/737)
+* [内容块别名](https://github.com/siyuan-note/siyuan/issues/1126)
+
+### 改进功能
+
+* [文档块引用计数展示](https://github.com/siyuan-note/siyuan/issues/1005)
+* [文档块支持备注](https://github.com/siyuan-note/siyuan/issues/1016)
+* [内容块命名的名称展示](https://github.com/siyuan-note/siyuan/issues/1028)
+* [带有链接的块折叠时没有视觉提示](https://github.com/siyuan-note/siyuan/issues/1106)
+* [方向键上键有时无法控制光标！](https://github.com/siyuan-note/siyuan/issues/1108)
+* [使用划选的内容作为搜索引用锚文本或者快速搜索关键字](https://github.com/siyuan-note/siyuan/issues/1134)
+* [初始化时设置随机的访问鉴权密码](https://github.com/siyuan-note/siyuan/issues/1146)
+
+### 修复缺陷
+
+* [更新内容块内容后属性丢失](https://github.com/siyuan-note/siyuan/issues/1132)
+* [快速搜索中最近使用的块源码暴露问题](https://github.com/siyuan-note/siyuan/issues/1135)
+* [多关键词检索时预览区没有高亮](https://github.com/siyuan-note/siyuan/issues/1136)
+* [调用模板时，动态内容块嵌入 未渲染问题](https://github.com/siyuan-note/siyuan/issues/1137)
+* [正则表达式搜索失效问题](https://github.com/siyuan-note/siyuan/issues/1141)
+* [调用模板后，字体颜色效果消失](https://github.com/siyuan-note/siyuan/issues/1142)
+
 ## v0.6.2 / 2021-01-17
 
 ### 引入特性

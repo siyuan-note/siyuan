@@ -1,3 +1,28 @@
+## v0.6.4 / 2021-01-19
+
+### 引入特性
+
+* [编辑器支持查找替换](https://github.com/siyuan-note/siyuan/issues/344)
+* [点击文档块引用计数显示引用出处](https://github.com/siyuan-note/siyuan/issues/1163)
+
+### 改进功能
+
+* [模式选择菜单显示当前选中模式](https://github.com/siyuan-note/siyuan/issues/1122)
+* [复制标准 Markdown 和复制 kramdown 分开](https://github.com/siyuan-note/siyuan/issues/1152)
+* [拖拽插入资源文件 128M 限制改为 1G](https://github.com/siyuan-note/siyuan/issues/1171)
+* [降低 conf.json 配置写入](https://github.com/siyuan-note/siyuan/issues/1183)
+
+### 修复缺陷
+
+* [导出 PDF 代码压缩问题](https://github.com/siyuan-note/siyuan/issues/1092)
+* [全屏模式下编辑器工具栏点击识别问题](https://github.com/siyuan-note/siyuan/issues/1143)
+* [blockquote 上下键及回车问题修复](https://github.com/siyuan-note/siyuan/issues/1167)
+* [IP 网址粘贴创建了空链接](https://github.com/siyuan-note/siyuan/issues/1168)
+* [正则搜索时转义符 `\` 处理问题](https://github.com/siyuan-note/siyuan/issues/1172)
+* [使用模板生成的日记内容格式混乱](https://github.com/siyuan-note/siyuan/issues/1175)
+* [blockquote 中多个代码块之间出现多余空行](https://github.com/siyuan-note/siyuan/issues/1178)
+* [块命名丢失及编码问题](https://github.com/siyuan-note/siyuan/issues/1179)
+
 ## v0.6.3 / 2021-01-18
 
 ### 引入特性

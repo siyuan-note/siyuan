@@ -1,3 +1,30 @@
+## v0.6.5 / 2021-01-20
+
+### 引入特性
+
+* [导入 Markdown 到已有笔记本文件夹下](https://github.com/siyuan-note/siyuan/issues/1105)
+
+### 改进功能
+
+* [文件树展开折叠状态保持](https://github.com/siyuan-note/siyuan/issues/668)
+* [字体样式设置应放在右键选项中](https://github.com/siyuan-note/siyuan/issues/958)
+* [反链里的容器块按子块简化展现](https://github.com/siyuan-note/siyuan/issues/1013)
+* [去掉文件夹下对非思源 .md 的导入支持](https://github.com/siyuan-note/siyuan/issues/1104)
+* [内容块折叠操作方式优化](https://github.com/siyuan-note/siyuan/issues/1154)
+
+### 修复缺陷
+
+* [清除选中内容中的所有字体格式](https://github.com/siyuan-note/siyuan/issues/1030)
+* [删除嵌入块前面的内容导致的解析渲染问题](https://github.com/siyuan-note/siyuan/issues/1047)
+* [URL 中的 `&not` 自动转换成字符 `¬`](https://github.com/siyuan-note/siyuan/issues/1160)
+* [反链提及重复问题](https://github.com/siyuan-note/siyuan/issues/1161)
+* [搜索结果带 HTML 标签时显示异常](https://github.com/siyuan-note/siyuan/issues/1170)
+* [主题自定义 (custom.css) 更新问题](https://github.com/siyuan-note/siyuan/issues/1174)
+* [内容块动态查询嵌入 SQL 模式问题](https://github.com/siyuan-note/siyuan/issues/1177)
+* [列表项的命名块无法使用 `!{{name:xxx}}` 查询](https://github.com/siyuan-note/siyuan/issues/1185)
+* [表格块下多次正向链接，在关系图中只显示一个节点的问题](https://github.com/siyuan-note/siyuan/issues/1187)
+* [导出 TextBundle/Markdown 时本地图片路径错误](https://github.com/siyuan-note/siyuan/issues/1192)
+
 ## v0.6.4 / 2021-01-19
 
 ### 引入特性

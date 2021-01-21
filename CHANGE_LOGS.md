@@ -1,3 +1,27 @@
+## v0.6.6 / 2021-01-21
+
+### 引入特性
+
+* [支持历史文件回滚](https://github.com/siyuan-note/siyuan/issues/880)
+* [编辑器支持 Git 冲突标记解析渲染](https://github.com/siyuan-note/siyuan/issues/1200)
+
+### 改进功能
+
+* [撤销操作页面没有跟踪光标处](https://github.com/siyuan-note/siyuan/issues/956)
+* [中文右双引号无法输入](https://github.com/siyuan-note/siyuan/issues/1021)
+* [导出 HTML 设置编码](https://github.com/siyuan-note/siyuan/issues/1195)
+* [导入 `[[wikilink]]` 时锚文本使用模板变量 `{{.text}}`](https://github.com/siyuan-note/siyuan/issues/1197)
+* [按下 Alt 时鼠标所在位置的块进行高亮](https://github.com/siyuan-note/siyuan/issues/1199)
+
+### 修复缺陷
+
+* [「Shift + 左箭头」从右向左多选文字时可能出现问题](https://github.com/siyuan-note/siyuan/issues/407)
+* [撤回时页面会向上滚动一大截](https://github.com/siyuan-note/siyuan/issues/712)
+* [网页复制粘贴自动空格问题](https://github.com/siyuan-note/siyuan/issues/1190)
+* [列表项中选中文本新建文档时缩进异常](https://github.com/siyuan-note/siyuan/issues/1191)
+* [撤销操作无法复制代码](https://github.com/siyuan-note/siyuan/issues/1194)
+* [块引锚文本内行级元素渲染问题](https://github.com/siyuan-note/siyuan/issues/1196)
+
 ## v0.6.5 / 2021-01-20
 
 ### 引入特性

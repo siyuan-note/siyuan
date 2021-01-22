@@ -171,3 +171,4 @@ SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) an
 * [https://github.com/mozilla/pdfjs-dist](https://github.com/mozilla/pdfjs-dist) `Apache-2.0 License`
 * [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`
 * [https://github.com/fex-team/kityminder-core](https://github.com/fex-team/kityminder-core) `BSD-3-Clause License`
+* [https://github.com/codemirror/CodeMirror](https://github.com/codemirror/CodeMirror) `MIT License`

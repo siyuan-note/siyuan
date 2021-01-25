@@ -1,3 +1,24 @@
+## v0.6.7 / 2021-01-25
+
+### 引入特性
+
+* [支持 SQL 查询数据库模板函数](https://github.com/siyuan-note/siyuan/issues/1026)
+* [初步引入专家模式](https://github.com/siyuan-note/siyuan/issues/1212)
+* [图片支持设置位置](https://github.com/siyuan-note/siyuan/issues/1220)
+* [初步引入 Dock 停靠栏](https://github.com/siyuan-note/siyuan/issues/1222)
+* [支持创建本地笔记本](https://github.com/siyuan-note/siyuan/issues/1253)
+
+### 改进功能
+
+* [按下 Alt 时鼠标所在位置需高亮](https://github.com/siyuan-note/siyuan/issues/1211)
+* [新增安装包下载渠道](https://github.com/siyuan-note/siyuan/issues/1216)
+* [链滴社区中为订阅用户赋予“订阅者”头衔](https://github.com/siyuan-note/siyuan/issues/1217)
+* [设置 - 帐号中可配置是否显示顶部工具栏中的头衔和 VIP 标识](https://github.com/siyuan-note/siyuan/issues/1237)
+
+### 修复缺陷
+
+* [编辑器内搜索偶尔失效的问题](https://github.com/siyuan-note/siyuan/issues/1228)
+
 ## v0.6.6 / 2021-01-21
 
 ### 引入特性

@@ -1,3 +1,32 @@
+## v0.6.8 / 2021-01-28
+
+### 引入特性
+
+* [反链页签上下文展现](https://github.com/siyuan-note/siyuan/issues/295)
+* [支持停靠栏显示/隐藏](https://github.com/siyuan-note/siyuan/issues/1270)
+* [支持 PDF 页码跳转](https://github.com/siyuan-note/siyuan/issues/1307)
+
+### 改进功能
+
+* [标签页签上下文展现](https://github.com/siyuan-note/siyuan/issues/1031)
+* [书签页签上下文展现](https://github.com/siyuan-note/siyuan/issues/1158)
+* [带样式导出 PDF 和 HTML](https://github.com/siyuan-note/siyuan/issues/1201)
+* [`((` 触发块引搜索默认选中优化](https://github.com/siyuan-note/siyuan/issues/1229)
+* [搜素页签默认展开第一个搜索结果](https://github.com/siyuan-note/siyuan/issues/1242)
+* [同一文件夹下资源文件过多不提示](https://github.com/siyuan-note/siyuan/issues/1278)
+* [移除 .sy.md 和 .sy.export.md 识别](https://github.com/siyuan-note/siyuan/issues/1299)
+* [搜索默认不仅在根一级上进行](https://github.com/siyuan-note/siyuan/issues/1310)
+
+### 修复缺陷
+
+* [Alt Tab 切换窗口后会触发折叠](https://github.com/siyuan-note/siyuan/issues/1219)
+* [文档重命名问题](https://github.com/siyuan-note/siyuan/issues/1271)
+* [设置中搜索无法匹配关键词](https://github.com/siyuan-note/siyuan/issues/1274)
+* [在本地浏览器打开失败](https://github.com/siyuan-note/siyuan/issues/1294)
+* [某些文件保存不了（或者提示没保存）的问题](https://github.com/siyuan-note/siyuan/issues/1295)
+* [设置中快捷键设置无效](https://github.com/siyuan-note/siyuan/issues/1297)
+* [粘贴不了 MS Office Excel 内容的问题](https://github.com/siyuan-note/siyuan/issues/1300)
+
 ## v0.6.7 / 2021-01-25
 
 ### 引入特性

@@ -1,3 +1,30 @@
+## v0.7.0 / 2021-01-29
+
+### 引入特性
+
+* [关系图搜索过滤和渲染参数配置](https://github.com/siyuan-note/siyuan/issues/793)
+* [展现标签所属块之间的关系](https://github.com/siyuan-note/siyuan/issues/838)
+
+### 改进功能
+
+* [已设置书签的文档需要在书签设置菜单中高亮](https://github.com/siyuan-note/siyuan/issues/1204)
+* [悬浮窗无法上下滑动](https://github.com/siyuan-note/siyuan/issues/1248)
+* [关系图节点信息优先显示块名或备注](https://github.com/siyuan-note/siyuan/issues/1262)
+* [关系图和全局关系图图标区分](https://github.com/siyuan-note/siyuan/issues/1265)
+* [双链浮窗 Esc 键关闭](https://github.com/siyuan-note/siyuan/issues/1308)
+* [标签面板内的结果排除模板](https://github.com/siyuan-note/siyuan/issues/1316)
+* [获取引用浮窗、计数等性能优化](https://github.com/siyuan-note/siyuan/issues/1320)
+* [粘贴后撤销行为异常](https://github.com/siyuan-note/siyuan/issues/1325)
+
+### 修复缺陷
+
+* [双链列表项渲染问题](https://github.com/siyuan-note/siyuan/issues/1257)
+* [文件树上的文档点击引用计数报错](https://github.com/siyuan-note/siyuan/issues/1259)
+* [模板函数无法嵌套文档名变量 `{{.title}}`](https://github.com/siyuan-note/siyuan/issues/1286)
+* [导出 PDF 时 Mermaid、YFM 没有渲染的问题](https://github.com/siyuan-note/siyuan/issues/1318)
+* [窗口激活时顶部单像素宽的白边](https://github.com/siyuan-note/siyuan/issues/1333)
+* [文件树拖拽覆盖重名文档问题](https://github.com/siyuan-note/siyuan/issues/1341)
+
 ## v0.6.8 / 2021-01-28
 
 ### 引入特性

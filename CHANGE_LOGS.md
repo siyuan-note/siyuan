@@ -1,3 +1,29 @@
+## v0.7.1 / 2021-01-31
+
+### 引入特性
+
+* [引入新的编辑模式 - 专家模式](https://github.com/siyuan-note/siyuan/issues/868)
+* [关系图节点支持编辑浮窗](https://github.com/siyuan-note/siyuan/issues/1343)
+
+### 改进功能
+
+* [列表回车跳出需添加当层列表一级](https://github.com/siyuan-note/siyuan/issues/810)
+* [多级列表的编辑逻辑优化](https://github.com/siyuan-note/siyuan/issues/961)
+* [粘贴代码时代入最近语言](https://github.com/siyuan-note/siyuan/issues/1317)
+* [新增百度云、蓝奏云下载渠道](https://github.com/siyuan-note/siyuan/issues/1353)
+* [文件树最大列出数量支持配置](https://github.com/siyuan-note/siyuan/issues/1370)
+
+### 修复缺陷
+
+* [脑图模式下列表项查询内容块失败](https://github.com/siyuan-note/siyuan/issues/1118)
+* [列表项缩进和反向缩进问题](https://github.com/siyuan-note/siyuan/issues/1240)
+* [列表项退格删除问题](https://github.com/siyuan-note/siyuan/issues/1254)
+* [列表项之间回车新建列表项问题](https://github.com/siyuan-note/siyuan/issues/1261)
+* [列表、列表项间隙不一致的问题](https://github.com/siyuan-note/siyuan/issues/1285)
+* [空的列表项回车反向缩进层级问题](https://github.com/siyuan-note/siyuan/issues/1314)
+* [标题块模板片段显示异常](https://github.com/siyuan-note/siyuan/issues/1357)
+* [使用表达式查询时标题块没有显示下方块的问题 ](https://github.com/siyuan-note/siyuan/issues/1371)
+
 ## v0.7.0 / 2021-01-29
 
 ### 引入特性

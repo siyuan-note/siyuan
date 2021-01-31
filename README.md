@@ -111,16 +111,14 @@
 
 ## 📜 文档
 
-* [思源笔记用户指南](https://ld246.com/udanax/1602224134353)
+* [用户指南](https://ld246.com/udanax/1602224134353)
 * [思源笔记 - 支持 Markdown 块级引用和双向链接的网状笔记应用](https://ld246.com/article/1598872180233)
 * [Markdown 实现块级引用双向链接的探索](https://ld246.com/article/1597226949061)
 
 ## 🏘️ 社区
 
-* [思源笔记 Issues](https://github.com/siyuan-note/siyuan/issues)
-* [思源笔记讨论区](https://ld246.com/tag/siyuan)
-* [思源笔记 QQ 群](https://jq.qq.com/?_wv=1027&k=brIyNm7y)
-* [思源笔记客服邮箱](mailto:support@b3log.org)
+* [GitHub Issues](https://github.com/siyuan-note/siyuan/issues)
+* [中文讨论区](https://ld246.com/tag/siyuan)
 * 微信公众号：`B3log开源`  
   ![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
 

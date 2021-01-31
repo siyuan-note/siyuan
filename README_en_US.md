@@ -111,15 +111,14 @@ The online experience of share publishing: [https://ld246.com/udanax/16022241343
 
 ## 📜 Documentation
 
-* [SiYuan User Guide](https://ld246.com/udanax/1602224134353)
+* [User Guide](https://ld246.com/udanax/1602224134353)
 * [SiYuan - A desktop Markdown Block-Reference and Bidirectional-Link note-taking application](https://ld246.com/article/1598872180233)
 * [Markdown implements the exploration of block-level reference bidirectional links](https://ld246.com/article/1597226949061)
 
 ## 🏘️ Community
 
-* [SiYuan Issues](https://github.com/siyuan-note/siyuan/issues)
-  [SiYuan Discussions](https://github.com/siyuan-note/siyuan/discussions)
-* [SiYuan Customer Service Email](mailto:support@b3log.org)
+* [GitHub Issues](https://github.com/siyuan-note/siyuan/issues)
+  [English Discussions](https://github.com/siyuan-note/siyuan/discussions)
 
 ## 💌 Participate in contribution
 

@@ -22,7 +22,7 @@
 * [列表、列表项间隙不一致的问题](https://github.com/siyuan-note/siyuan/issues/1285)
 * [空的列表项回车反向缩进层级问题](https://github.com/siyuan-note/siyuan/issues/1314)
 * [标题块模板片段显示异常](https://github.com/siyuan-note/siyuan/issues/1357)
-* [使用表达式查询时标题块没有显示下方块的问题 ](https://github.com/siyuan-note/siyuan/issues/1371)
+* [使用表达式查询时标题块没有显示下方块的问题](https://github.com/siyuan-note/siyuan/issues/1371)
 
 ## v0.7.0 / 2021-01-29
 

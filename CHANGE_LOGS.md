@@ -1,3 +1,21 @@
+## v0.7.5 / 2021-02-01
+
+### 引入特性
+
+* [界面支持 Dock 停靠栏](https://github.com/siyuan-note/siyuan/issues/635)
+
+### 改进功能
+
+* [自动拉取图片时 jpe 后缀改为 jpg](https://github.com/siyuan-note/siyuan/issues/1383)
+
+### 修复缺陷
+
+* [复制导致 ID 重复的问题](https://github.com/siyuan-note/siyuan/issues/1232)
+* [列表回车导致图片缩放失效的问题](https://github.com/siyuan-note/siyuan/issues/1348)
+* [访问授权码置空 `BEYOND` 不生效问题](https://github.com/siyuan-note/siyuan/issues/1376)
+* [有序列表回车返回父级 ID 暴露问题](https://github.com/siyuan-note/siyuan/issues/1380)
+* [大纲中无法显示 HTML 标签包裹文字](https://github.com/siyuan-note/siyuan/issues/1384)
+
 ## v0.7.1 / 2021-01-31
 
 ### 引入特性

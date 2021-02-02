@@ -1,3 +1,26 @@
+## v0.7.8 / 2021-02-02
+
+### 引入特性
+
+* [支持 PlantUML 在线渲染](https://github.com/siyuan-note/siyuan/issues/1054)
+
+### 改进功能
+
+* [列表项创建的编辑逻辑优化](https://github.com/siyuan-note/siyuan/issues/1153)
+* [统一列表渲染为松散模式](https://github.com/siyuan-note/siyuan/issues/1364)
+* [网页端 Favicon ](https://github.com/siyuan-note/siyuan/issues/1377)
+* [简化主体界面](https://github.com/siyuan-note/siyuan/issues/1396)
+* [列表 Tab 带子项层级缩进](https://github.com/siyuan-note/siyuan/issues/1397)
+* [增加图表悬浮提示](https://github.com/siyuan-note/siyuan/issues/1404)
+
+### 修复缺陷
+
+* [标签和列表全选剪切的问题](https://github.com/siyuan-note/siyuan/issues/1309)
+* [窗口图标对齐问题](https://github.com/siyuan-note/siyuan/issues/1334)
+* [列表缩进关联子项的问题](https://github.com/siyuan-note/siyuan/issues/1381)
+* [停靠栏上下方按钮消失问题](https://github.com/siyuan-note/siyuan/issues/1393)
+* [超链接和分隔线排版解析问题](https://github.com/siyuan-note/siyuan/issues/1394)
+
 ## v0.7.5 / 2021-02-01
 
 ### 引入特性

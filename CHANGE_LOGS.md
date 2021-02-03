@@ -1,3 +1,23 @@
+## v0.8.0 / 2021-02-03
+
+### 引入特性
+
+* [支持将文档渲染为幻灯片演示](https://github.com/siyuan-note/siyuan/issues/392)
+
+### 改进功能
+
+* [内容块备注展现](https://github.com/siyuan-note/siyuan/issues/1342)
+* [支持 CMake 代码高亮](https://github.com/siyuan-note/siyuan/issues/1358)
+* [停靠面板加入最小化操作按钮](https://github.com/siyuan-note/siyuan/issues/1420)
+
+### 修复缺陷
+
+* [SQL 动态查询空表名 `dual` 报错问题](https://github.com/siyuan-note/siyuan/issues/1390)
+* [列表 Tab 携带同级项问题](https://github.com/siyuan-note/siyuan/issues/1407)
+* [文档仅索引 128 个的问题](https://github.com/siyuan-note/siyuan/issues/1408)
+* [任务列表空段落问题](https://github.com/siyuan-note/siyuan/issues/1414)
+* [设置书签后没有在书签面板中实时刷新的问题](https://github.com/siyuan-note/siyuan/issues/1416)
+
 ## v0.7.8 / 2021-02-02
 
 ### 引入特性

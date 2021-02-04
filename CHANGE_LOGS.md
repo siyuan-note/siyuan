@@ -1,3 +1,22 @@
+## v0.8.5 / 2021-02-04
+
+### 引入特性
+
+* [支持跨文档拖拽移动块](https://github.com/siyuan-note/siyuan/issues/1025)
+* [Android 端支持打开 data 文件夹下的笔记本](https://github.com/siyuan-note/siyuan/issues/1085)
+
+### 改进功能
+
+* [优化导入性能](https://github.com/siyuan-note/siyuan/issues/1435)
+
+### 修复缺陷
+
+* [网页标题粘贴至表格的问题](https://github.com/siyuan-note/siyuan/issues/1252)
+* [MS Excel 粘贴带图表格问题](https://github.com/siyuan-note/siyuan/issues/1324)
+* [MS Word 表格粘贴问题](https://github.com/siyuan-note/siyuan/issues/1332)
+* [文件夹内的文档块不支持书签](https://github.com/siyuan-note/siyuan/issues/1427)
+* [WebDAV 连接报错](https://github.com/siyuan-note/siyuan/issues/1432)
+
 ## v0.8.0 / 2021-02-03
 
 ### 引入特性

@@ -1,8 +1,5 @@
-# Binaries for programs and plugins
+# Binaries
 *.exe
-*.dll
-*.so
-*.dylib
 
 # IDE
 .idea/

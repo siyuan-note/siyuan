@@ -18,7 +18,7 @@
 
 思源笔记是一款 Markdown 块级引用和双向链接的网状笔记应用，支持 Windows、Mac 和 Linux，可在浏览器上直接使用，支持移动端适配。
 
-分享发布空间在线体验：[https://ld246.com/udanax/1602224134353](https://ld246.com/udanax/1602224134353)，欢迎到[思源笔记官方讨论区](https://ld246.com/tag/siyuan)了解更多。
+分享发布空间在线体验：[https://ld246.com/udanax/1602224134353](https://ld246.com/udanax/1602224134353)，欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。
 
 ![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/desktop.png)
 
@@ -118,7 +118,7 @@
 ## 🏘️ 社区
 
 * [GitHub Issues](https://github.com/siyuan-note/siyuan/issues)
-* [中文讨论区](https://ld246.com/tag/siyuan)
+* [中文讨论区](https://ld246.com/domain/siyuan)
 * 微信公众号：`B3log开源`  
   ![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
 

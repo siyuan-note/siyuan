@@ -1,7 +1,7 @@
 <p align="center">
 <img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
 <br>
-<em>源于思考，饮水思源</em>
+<em>下一代的笔记系统，为未来而构建</em>
 <br><br>
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <a title="Release Date" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release-date/siyuan-note/siyuan.svg?style=flat-square&color=99CCFF"></a>

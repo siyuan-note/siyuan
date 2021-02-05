@@ -1,7 +1,7 @@
 <p align="center">
 <img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
 <br>
-<em>When one drinks water, one must not forget where it comes from</em>
+<em>The next generation of the note-taking system, built for the future</em>
 <br><br>
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <a title="Release Date" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release-date/siyuan-note/siyuan.svg?style=flat-square&color=99CCFF"></a>

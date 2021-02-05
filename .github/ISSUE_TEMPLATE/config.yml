@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 思源笔记官方讨论区
-    url: https://ld246.com/tag/siyuan
-    about: 欢迎到这里反馈问题和提出建议，国内访问的话会比 GitHub 更丝滑流畅一些
+  - name: 思源笔记中文讨论区
+    url: https://ld246.com/domain/siyuan
+    about: 中文用户请到这里反馈问题和提出建议
   - name: 思源笔记 QQ 群
     url: https://jq.qq.com/?_wv=1027&k=DQF67LUQ
-    about: QQ 群主要用于大家使用交流，反馈问题请尽量走 GitHub Issue 或者官方论坛
+    about: QQ 群主要用于大家使用交流，请勿用于问题反馈

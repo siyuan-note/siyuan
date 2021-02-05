@@ -1,7 +1,7 @@
 <p align="center">
 <img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
 <br>
-<em>When one drinks water, one must not forget where it comes from</em>
+<em>源于思考，饮水思源</em>
 <br><br>
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <a title="Release Date" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release-date/siyuan-note/siyuan.svg?style=flat-square&color=99CCFF"></a>
@@ -11,128 +11,130 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/siyuan-note/siyuan/blob/master/README_zh_CN.md">中文</a>
+<a href="https://github.com/siyuan-note/siyuan/blob/master/README.md">English</a>
 </p>
 
-## 💡 Introduction
+## 💡 简介
 
-SiYuan is a desktop Markdown Block-Reference and Bidirectional-Link note-taking application, supports Windows, Mac and Linux, can be used directly on the browser, and supports mobile-end adaptation.
+思源笔记是一款 Markdown 块级引用和双向链接的网状笔记应用，支持 Windows、Mac 和 Linux，可在浏览器上直接使用，支持移动端适配。
 
-The online experience of share publishing: [https://ld246.com/udanax/1602224134353](https://ld246.com/udanax/1602224134353), welcome to [SiYuan Official Discussion Forum](https://github.com/siyuan-note/siyuan/discussions) to learn more.
+分享发布空间在线体验：[https://ld246.com/udanax/1602224134353](https://ld246.com/udanax/1602224134353)，欢迎到[思源笔记官方讨论区](https://ld246.com/tag/siyuan)了解更多。
 
 ![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/desktop.png)
 
 ![mobile.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/mobile.png)
 
-## ✨  Features
+## ✨  特性
 
-* Born for Markdown
-  * Instant Rendering editing mode similar to Typora
-  * Support mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
-  * Paste HTML automatically converted to Markdown
-  * Configure Markdown to analyze detailed rendering parameters
-* Content block
-  * Block-level reference and two-way links
-  * Document relationship diagram, global relationship diagram
-  * Bookmark collection
-  * Dynamic query embed
-  * URL for browser visit or link with other software
-* MinMap mode
-  * Support zoom, drag, layout and theme, etc.
-  * Keep editing and Markdown in sync
-* Use on the browser, support mobile-end
-* Hierarchical tag
-* Multi-window, multi-tab, drag and drop to split screen
+* 为 Markdown 而生
+  * 类似 Typora 的即时渲染编辑模式
+  * 支持数学公式、图表、流程图、甘特图、时序图、五线谱等
+  * 粘贴 HTML 自动转换为 Markdown
+  * 配置 Markdown 解析渲染细节参数
+* 内容块
+  * 块级引用和双向链接
+  * 文档关系图、全局关系图
+  * 书签收藏
+  * 动态查询嵌入
+  * 提供 URL 浏览器访问或给其他软件链接
+* 脑图模式
+  * 支持缩放、拖拽、布局、主题等
+  * 编辑和 Markdown 保持同步
+* 支持浏览器使用、支持移动端
+* 层级标签
+* 多窗口多页签，拖拽分屏
 * WebDAV
-* Versioning and Sync
-* Fulltext search
-* Themes and icons
-  * Built-in bright and dark themes
-  * Built-in two sets of icons, Material and Ant Design
-  * Support custom themes and icons
-* Export
-  * Standard Markdown and TextBundle export
-  * Content block reference provides anchor text + embedded blockquote option
-  * Copy to WeChat MP, Zhihu
-* Online Cloud workspace
-* Online Publishing and Share
+* 版本管理和同步
+* 全文搜索
+* 主题和图标
+  * 内置明亮、暗黑两套主题
+  * 内置 Material、Ant Design 两套图标
+  * 支持自定义主题和图标
+* 导出
+  * 标准 Markdown 和 TextBundle 导出
+  * 内容块引用提供锚文本 + 嵌入 Blockquote 选项
+  * 复制到微信公众号、知乎
+* 在线工作空间
+* 在线分享发布
 
-## 🗺️ Roadmap
+## 🗺️ 路线图
 
-* [SiYuan development plan and progress](https://github.com/siyuan-note/siyuan/projects/1)
-* [SiYuan Change logs](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
+* [思源笔记开发计划和进度](https://github.com/siyuan-note/siyuan/projects/1)
+* [思源笔记版本变更记录](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
 
-## 📸 Screenshots
+## 📸 截图
 
-### Instant Rendering
+### 即时渲染
 
-*Instant Rendering* mode should not be unfamiliar to users who are familiar with Typora. In theory, this is the most elegant Markdown editing method.
+*即时渲染*模式对熟悉 Typora 的用户应该不会感到陌生，理论上这是最优雅的 Markdown 编辑方式。
 
-![ir-block](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0e/screenshots/ir-block.gif)
+![ir-block](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/ir-block.gif)
 
-### Block move, fold and style
+### 块移动、折叠和样式
 
 ![move-fold-style](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/move-fold-style.gif)
 
-### MindMap mode
+### 脑图模式
 
 ![mindmap](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/mindmap.png)
 
-### Roam
+### 漫游
 
 ![roam.gif](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/roam.gif)
 
-### Settings
+### 设置
 
 ![settings.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/settings.png)
 
-### Search
+### 搜索
 
 ![search.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/search.png)
 
-### Block Reference
+### 块级引用
 
 ![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/block-ref.gif)
 
-### Dynamic Query Embed
+### 动态查询嵌入
 
 ![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/block-query-embed.gif)
 
-### Community theme bazaar
+### 社区主题集市
 
 ![theme-bazaar](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/theme-bazaar.png)
 
-## 🛠️ Download Setup
+## 🛠️ 下载安装
 
 * [B3log](https://b3log.org/siyuan/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
-* [Gitee](https://gitee.com/siyuan-note/siyuan/releases)
+* [码云](https://gitee.com/siyuan-note/siyuan/releases)
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
 
-## 📜 Documentation
+## 📜 文档
 
-* [User Guide](https://ld246.com/udanax/1602224134353)
-* [SiYuan - A desktop Markdown Block-Reference and Bidirectional-Link note-taking application](https://ld246.com/article/1598872180233)
-* [Markdown implements the exploration of block-level reference bidirectional links](https://ld246.com/article/1597226949061)
+* [用户指南](https://ld246.com/udanax/1602224134353)
+* [思源笔记 - 支持 Markdown 块级引用和双向链接的网状笔记应用](https://ld246.com/article/1598872180233)
+* [Markdown 实现块级引用双向链接的探索](https://ld246.com/article/1597226949061)
 
-## 🏘️ Community
+## 🏘️ 社区
 
 * [GitHub Issues](https://github.com/siyuan-note/siyuan/issues)
-  [English Discussions](https://github.com/siyuan-note/siyuan/discussions)
+* [中文讨论区](https://ld246.com/tag/siyuan)
+* 微信公众号：`B3log开源`  
+  ![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
 
-## 💌 Participate in contribution
+## 💌 参与贡献
 
-At present, some components of SiYuan are open source, and contributions are welcome.
+目前思源笔记的一些组件是开源的，欢迎参与贡献。
 
-* [User Guide](https://github.com/siyuan-note/user-guide-en_US)
-* [Appearance and language](https://github.com/siyuan-note/appearance)
-* [Markdown Engine](https://github.com/88250/lute)
+* [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)
+* [外观和语言](https://github.com/siyuan-note/appearance)
+* [Markdown 引擎](https://github.com/88250/lute)
 
-## 🙏 Acknowledgement
+## 🙏 鸣谢
 
-SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) and [Lute](https://github.com/88250/lute) open source project and other open source software.
+思源笔记的诞生离不开 [Vditor](https://github.com/Vanessa219/vditor) 和 [Lute](https://github.com/88250/lute) 开源项目以及下列开源项目。
 
-### Kernel
+### 内核
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
@@ -161,7 +163,7 @@ SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) an
 * [https://github.com/go-gorm/sqlite](https://github.com/go-gorm/sqlite) `MIT License`
 * [https://github.com/go-gorm/gorm](https://github.com/go-gorm/gorm) `MIT License`
 
-### UI
+### 界面
 
 * [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`
 * [https://github.com/electron/electron](https://github.com/electron/electron) `MIT License`

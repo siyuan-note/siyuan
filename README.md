@@ -20,7 +20,9 @@ SiYuan is a desktop Markdown Block-Reference and Bidirectional-Link note-taking 
 
 The online experience of share publishing: [https://ld246.com/udanax/1602224134353](https://ld246.com/udanax/1602224134353), welcome to [SiYuan Official Discussion Forum](https://github.com/siyuan-note/siyuan/discussions) to learn more.
 
-![siyuan.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg1.png)
+![bg1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg1.png)
+
+![bg3.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg3.png)
 
 ## ✨  Features
 

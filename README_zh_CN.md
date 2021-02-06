@@ -20,7 +20,9 @@
 
 分享发布空间在线体验：[https://ld246.com/udanax/1602224134353](https://ld246.com/udanax/1602224134353)，欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。
 
-![siyuan.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg1.png)
+![bg1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg1.png)
+
+![bg3.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg3.png)
 
 ## ✨  特性
 

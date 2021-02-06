@@ -59,7 +59,7 @@
 
 ## 🗺️ 路线图
 
-* [思源笔记开发计划和进度](https://github.com/siyuan-note/siyuan/projects/1)
+* [思源笔记开发计划和进度](https://github.com/siyuan-note/siyuan/projects)
 * [思源笔记版本变更记录](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
 
 ## 📸 截图

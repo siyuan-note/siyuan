@@ -59,7 +59,7 @@ The online experience of share publishing: [https://ld246.com/udanax/16022241343
 
 ## 🗺️ Roadmap
 
-* [SiYuan development plan and progress](https://github.com/siyuan-note/siyuan/projects/1)
+* [SiYuan development plan and progress](https://github.com/siyuan-note/siyuan/projects)
 * [SiYuan Change logs](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
 
 ## 📸 Screenshots

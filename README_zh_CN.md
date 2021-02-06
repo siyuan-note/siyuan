@@ -94,7 +94,8 @@
 
 思源笔记的诞生离不开 [Vditor](https://github.com/Vanessa219/vditor) 和 [Lute](https://github.com/88250/lute) 开源项目以及下列开源项目。
 
-### 内核
+<details>
+<summary>内核</summary>
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
@@ -122,8 +123,10 @@
 * [https://github.com/golang/text](https://github.com/golang/text) `BSD-3-Clause License`
 * [https://github.com/go-gorm/sqlite](https://github.com/go-gorm/sqlite) `MIT License`
 * [https://github.com/go-gorm/gorm](https://github.com/go-gorm/gorm) `MIT License`
+</details>
 
-### 界面
+<details>
+<summary>界面</summary>
 
 * [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`
 * [https://github.com/electron/electron](https://github.com/electron/electron) `MIT License`
@@ -135,3 +138,4 @@
 * [https://github.com/fex-team/kityminder-core](https://github.com/fex-team/kityminder-core) `BSD-3-Clause License`
 * [https://github.com/codemirror/CodeMirror](https://github.com/codemirror/CodeMirror) `MIT License`
 * [https://github.com/hakimel/reveal.js](https://github.com/hakimel/reveal.js) `MIT License`
+</details>

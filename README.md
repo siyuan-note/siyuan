@@ -92,7 +92,8 @@ At present, some components of SiYuan are open source, and contributions are wel
 
 SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) and [Lute](https://github.com/88250/lute) open source project and other open source software.
 
-### Kernel
+<details>
+<summary>Kernel</summary>
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
@@ -120,8 +121,10 @@ SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) an
 * [https://github.com/golang/text](https://github.com/golang/text) `BSD-3-Clause License`
 * [https://github.com/go-gorm/sqlite](https://github.com/go-gorm/sqlite) `MIT License`
 * [https://github.com/go-gorm/gorm](https://github.com/go-gorm/gorm) `MIT License`
+</details>
 
-### UI
+<details>
+<summary>UI</summary>
 
 * [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`
 * [https://github.com/electron/electron](https://github.com/electron/electron) `MIT License`
@@ -133,3 +136,4 @@ SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) an
 * [https://github.com/fex-team/kityminder-core](https://github.com/fex-team/kityminder-core) `BSD-3-Clause License`
 * [https://github.com/codemirror/CodeMirror](https://github.com/codemirror/CodeMirror) `MIT License`
 * [https://github.com/hakimel/reveal.js](https://github.com/hakimel/reveal.js) `MIT License`
+</details>

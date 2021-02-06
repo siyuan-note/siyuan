@@ -20,9 +20,7 @@ SiYuan is a desktop Markdown Block-Reference and Bidirectional-Link note-taking 
 
 The online experience of share publishing: [https://ld246.com/udanax/1602224134353](https://ld246.com/udanax/1602224134353), welcome to [SiYuan Official Discussion Forum](https://github.com/siyuan-note/siyuan/discussions) to learn more.
 
-![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/desktop.png)
-
-![mobile.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/mobile.png)
+![siyuan.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg1.png)
 
 ## ✨  Features
 
@@ -61,46 +59,6 @@ The online experience of share publishing: [https://ld246.com/udanax/16022241343
 
 * [SiYuan development plan and progress](https://github.com/siyuan-note/siyuan/projects)
 * [SiYuan Change logs](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
-
-## 📸 Screenshots
-
-### Instant Rendering
-
-*Instant Rendering* mode should not be unfamiliar to users who are familiar with Typora. In theory, this is the most elegant Markdown editing method.
-
-![ir-block](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0e/screenshots/ir-block.gif)
-
-### Block move, fold and style
-
-![move-fold-style](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/move-fold-style.gif)
-
-### MindMap mode
-
-![mindmap](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/mindmap.png)
-
-### Roam
-
-![roam.gif](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/roam.gif)
-
-### Settings
-
-![settings.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/settings.png)
-
-### Search
-
-![search.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/search.png)
-
-### Block Reference
-
-![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/block-ref.gif)
-
-### Dynamic Query Embed
-
-![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/block-query-embed.gif)
-
-### Community theme bazaar
-
-![theme-bazaar](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/theme-bazaar.png)
 
 ## 🛠️ Download Setup
 

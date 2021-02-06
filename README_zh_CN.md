@@ -20,9 +20,7 @@
 
 分享发布空间在线体验：[https://ld246.com/udanax/1602224134353](https://ld246.com/udanax/1602224134353)，欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。
 
-![desktop.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/desktop.png)
-
-![mobile.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/mobile.png)
+![siyuan.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg1.png)
 
 ## ✨  特性
 
@@ -61,46 +59,6 @@
 
 * [思源笔记开发计划和进度](https://github.com/siyuan-note/siyuan/projects)
 * [思源笔记版本变更记录](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
-
-## 📸 截图
-
-### 即时渲染
-
-*即时渲染*模式对熟悉 Typora 的用户应该不会感到陌生，理论上这是最优雅的 Markdown 编辑方式。
-
-![ir-block](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/ir-block.gif)
-
-### 块移动、折叠和样式
-
-![move-fold-style](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/move-fold-style.gif)
-
-### 脑图模式
-
-![mindmap](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/mindmap.png)
-
-### 漫游
-
-![roam.gif](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/roam.gif)
-
-### 设置
-
-![settings.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/settings.png)
-
-### 搜索
-
-![search.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/search.png)
-
-### 块级引用
-
-![blockref.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/block-ref.gif)
-
-### 动态查询嵌入
-
-![block-query-embed.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/block-query-embed.gif)
-
-### 社区主题集市
-
-![theme-bazaar](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@76dd4e98f4ceac248666ffc248569d88aa1f5aa0/screenshots/theme-bazaar.png)
 
 ## 🛠️ 下载安装
 

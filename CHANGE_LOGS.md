@@ -1,3 +1,42 @@
+## v0.9.0 / 2021-02-07
+
+### Enhancements
+
+* Member subscription paid function prompt
+
+  If you do not have a paid subscription, you will be prompted when you use [Advanced Features](https://b3log.org/siyuan/en/advanced_features.html). After v1.0.0 is released on 2021-02-19, advanced features can only be used after paid subscription. **If you already have data stored in the cloud and do not plan to pay for subscription, please export it as soon as possible**.
+* Search and merge text mode and SQL mode
+
+  Removed the SQL mode button on the quick search box, if you need to use SQL search to write SQL statements directly.
+* Android mobile terminal has started public testing, which can be downloaded on GitHub or Baidu Netdisk
+* Support shortcut keys for picture setting position
+* Block aliases and notes support shortcut keys
+* Improvement of floating window interference of relationship graph node
+* Online workspace, sharing and publishing entrance adjustment
+
+  Make the entrance bigger and more visible and easier to click.
+* Block folding optimization, support <kbd>Alt+Click</kbd> click block icon to collapse
+
+### Development refactoring
+
+* Upgrade Electron framework on desktop
+
+### Fix defects
+
+* File tree location open file display defect
+* Modify the content in the floating box of the block quote
+* Fix the problem that the label auto-complete list prompts residual
+* Fix the problem that the list block cannot be expanded after being collapsed
+
+---
+
+In addition, we have divided the language of the community:
+
+* For Chinese feedback, please go to [Siyuan Notes-Domain-Link Drop](https://ld246.com/domain/siyuan)
+* For English feedback, please go to [Issues · siyuan-note/siyuan](https://github.com/siyuan-note/siyuan/issues)
+
+**The content of the wrong partition will be closed or deleted directly**, thank you for your support ❤️
+
 ## v0.8.5 / 2021-02-04
 
 ### 引入特性

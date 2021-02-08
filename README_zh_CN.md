@@ -77,10 +77,8 @@
 
 ## 🏘️ 社区
 
-* [GitHub Issues](https://github.com/siyuan-note/siyuan/issues)
 * [中文讨论区](https://ld246.com/domain/siyuan)
-* 微信公众号：`B3log开源`  
-  ![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
+* [Discord](https://discord.gg/bzfCBwMzdP)
 
 ## 💌 参与贡献
 

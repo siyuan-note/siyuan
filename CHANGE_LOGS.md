@@ -1,3 +1,28 @@
+## v0.9.2 / 2021-02-08
+
+### Enhancements
+
+* [PDF browsing interface optimization](https://github.com/siyuan-note/siyuan/issues/1336)
+* [List item ctrl+shift+x problem](https://github.com/siyuan-note/siyuan/issues/1425)
+* [Trim trailing newline when copying code block](https://github.com/siyuan-note/siyuan/issues/1458)
+* [Improve application exit mechanism](https://github.com/siyuan-note/siyuan/issues/1462)
+* [Improve the handling of bold content when copying content from web pages](https://github.com/siyuan-note/siyuan/issues/1466)
+
+### Fix bugs
+
+* [Blockquote in the super block will automatically add blank lines](https://github.com/siyuan-note/siyuan/issues/1243)
+* [Image centering does not work when exporting PDF](https://github.com/siyuan-note/siyuan/issues/1269)
+* [The cursor is lost when the super block is continuously entered](https://github.com/siyuan-note/siyuan/issues/1375)
+* [Inserting a picture into the table causes the problem of adding rows](https://github.com/siyuan-note/siyuan/issues/1382)
+* [LaTeX cannot be rendered when exporting to PDF](https://github.com/siyuan-note/siyuan/issues/1430)
+* [Docker container crash](https://github.com/siyuan-note/siyuan/issues/1457)
+* [After the ordered list exceeds 10, pressing tab will not indent correctly](https://github.com/siyuan-note/siyuan/issues/1459)
+* [List tab and then press ctrl+z, the behavior is abnormal](https://github.com/siyuan-note/siyuan/issues/1460)
+* [Issue of inserting a picture in the folder name containing '#'](https://github.com/siyuan-note/siyuan/issues/1461)
+* [Cannot fold the code block after shift enter](https://github.com/siyuan-note/siyuan/issues/1464)
+* [Click the asset file link in preview mode to report an error](https://github.com/siyuan-note/siyuan/issues/1465)
+* [Asset tab can not locate on the file tree](https://github.com/siyuan-note/siyuan/issues/1468)
+
 ## v0.9.0 / 2021-02-07
 
 ### Enhancements

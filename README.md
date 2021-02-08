@@ -77,7 +77,6 @@ The online experience of share publishing: [https://ld246.com/udanax/16022241343
 ## 🏘️ Community
 
 * [Discord](https://discord.gg/bzfCBwMzdP)
-* [Chinese Discussions](https://ld246.com/domain/siyuan)
 
 ## 💌 Participate in contribution
 

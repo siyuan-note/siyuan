@@ -66,7 +66,6 @@ The online experience of share publishing: [https://ld246.com/udanax/16022241343
 
 * [B3log](https://b3log.org/siyuan/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
-* [Gitee](https://gitee.com/siyuan-note/siyuan/releases)
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
 
 ## 📜 Documentation

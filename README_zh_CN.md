@@ -54,8 +54,9 @@
   * 标准 Markdown 和 TextBundle 导出
   * 内容块引用提供锚文本 + 嵌入 Blockquote 选项
   * 复制到微信公众号、知乎
-* 在线工作空间
-* 在线分享发布
+* 云端同步
+  * [在线工作空间](https://ld246.com/xanadu/)
+  * [在线分享发布](https://ld246.com/udanax/)
 
 ## 🗺️ 路线图
 

@@ -54,8 +54,9 @@ The online experience of share publishing: [https://ld246.com/udanax/16022241343
   * Standard Markdown and TextBundle export
   * Content block reference provides anchor text + embedded blockquote option
   * Copy to WeChat MP, Zhihu
-* Online Cloud workspace
-* Online Publishing and Share
+* Cloud Sync
+  * [Online Workspace](https://ld246.com/xanadu/)
+  * [Online Publishing](https://ld246.com/udanax/)
 
 ## 🗺️ Roadmap
 

@@ -1,3 +1,27 @@
+## v0.9.5 / 2021-02-10
+
+### Features
+
+* [Android APP](https://github.com/siyuan-note/siyuan/issues/1061)
+* [Android supports synchronizing cloud repositories](https://github.com/siyuan-note/siyuan/issues/1470)
+* [Android supports cloning cloud repositories](https://github.com/siyuan-note/siyuan/issues/1474)
+
+### Enhancements
+
+* [Blank lines are generated when using the arrow keys to move out of the code block](https://github.com/siyuan-note/siyuan/issues/372)
+* [Distinguish the type of task list block and normal list block](https://github.com/siyuan-note/siyuan/issues/1015)
+* [after drag/resize, keep then cursor in the editor](https://github.com/siyuan-note/siyuan/issues/1291)
+* [Subtype of blocks](https://github.com/siyuan-note/siyuan/issues/1481)
+* [Check existence of kernel binary before booting it](https://github.com/siyuan-note/siyuan/issues/1482)
+* [Add icon and name for kernel on Windows](https://github.com/siyuan-note/siyuan/issues/1484)
+
+### Fix bugs
+
+* [List collapsed picture problem](https://github.com/siyuan-note/siyuan/issues/1469)
+* [Open more instances of SiYuan on macOS problem](https://github.com/siyuan-note/siyuan/issues/1471)
+
+In addition to the above, the SiYuan static site generator [OceanPress](https://github.com/siyuan-note/oceanpress) developed by the community contributor [崮生](https://github.com/2234839) is officially migrated to the community organization, everyone is welcome to try and contribute ❤️
+
 ## v0.9.2 / 2021-02-08
 
 ### Enhancements

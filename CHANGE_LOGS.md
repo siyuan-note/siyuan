@@ -1,3 +1,22 @@
+## v0.9.6 / 2021-02-11
+
+Happy Chinese New Year 🎉
+
+### Features
+
+* [`/` can quickly prompt frequently used functions](https://github.com/siyuan-note/siyuan/issues/1477)
+* [Android add appearance setting](https://github.com/siyuan-note/siyuan/issues/1493)
+
+### Enhancements
+
+* [Improve update mechanism](https://github.com/siyuan-note/siyuan/issues/1486)
+* [Android add tag/slash/template hint](https://github.com/siyuan-note/siyuan/issues/1492)
+
+### Fix bugs
+
+* [Android Wrong time zone](https://github.com/siyuan-note/siyuan/issues/1483)
+* [Android query embed can not display](https://github.com/siyuan-note/siyuan/issues/1495)
+
 ## v0.9.5 / 2021-02-10
 
 ### Features

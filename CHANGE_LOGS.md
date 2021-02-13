@@ -1,3 +1,24 @@
+## v0.9.7 / 2021-02-13
+
+### Features
+
+* [Android open word, excel and hyperlink](https://github.com/siyuan-note/siyuan/issues/1497)
+
+### Enhancements
+
+* [Display tag and bookmark in flat](https://github.com/siyuan-note/siyuan/issues/1340)
+* [Ref block needs to be processed when copying as markdown](https://github.com/siyuan-note/siyuan/issues/1472)
+* [Android open account settings using the external browser](https://github.com/siyuan-note/siyuan/issues/1499)
+* [Remove auto space of inline math](https://github.com/siyuan-note/siyuan/issues/1500)
+* [Improve booting](https://github.com/siyuan-note/siyuan/issues/1501)
+* [Improve block ref, hyperlink and tag link jump](https://github.com/siyuan-note/siyuan/issues/1502)
+* [Right-click menu display is incomplete](https://github.com/siyuan-note/siyuan/issues/1505)
+
+### Fix bugs
+
+* [copy block ref in search panel is error](https://github.com/siyuan-note/siyuan/issues/1503)
+* [Remove block hotkey can not auto save](https://github.com/siyuan-note/siyuan/issues/1504)
+
 ## v0.9.6 / 2021-02-11
 
 Happy Chinese New Year 🎉

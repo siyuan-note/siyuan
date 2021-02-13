@@ -16,7 +16,7 @@
 
 ### Fix bugs
 
-* [copy block ref in search panel is error](https://github.com/siyuan-note/siyuan/issues/1503)
+* [Copy block ref in search panel is error](https://github.com/siyuan-note/siyuan/issues/1503)
 * [Remove block hotkey can not auto save](https://github.com/siyuan-note/siyuan/issues/1504)
 
 ## v0.9.6 / 2021-02-11

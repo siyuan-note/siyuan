@@ -65,7 +65,7 @@ The online experience of share publishing: [https://ld246.com/udanax/16022241343
 
 ## 🛠️ Download Setup
 
-* [B3log](https://b3log.org/siyuan/download.html)
+* [B3log](https://b3log.org/siyuan/en/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
 

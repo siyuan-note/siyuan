@@ -1,3 +1,29 @@
+## v0.9.8 / 2021-02-15
+
+### Features
+
+* [File tree custom sorting](https://github.com/siyuan-note/siyuan/issues/1513)
+* [Highlight panel by focus](https://github.com/siyuan-note/siyuan/issues/1518)
+
+### Enhancements
+
+* [The fold state of the parent block does not affect the child block](https://github.com/siyuan-note/siyuan/issues/1315)
+* [Stick toolbar in the backlink tab](https://github.com/siyuan-note/siyuan/issues/1487)
+* [Improve the ctrl+z behavior after cut/paste](https://github.com/siyuan-note/siyuan/issues/1509)
+* [Android create diary](https://github.com/siyuan-note/siyuan/issues/1510)
+* [Optimize performance](https://github.com/siyuan-note/siyuan/issues/1511)
+* [Change siyuan to private folder on Android](https://github.com/siyuan-note/siyuan/issues/1516)
+  Existing data needs to be manually migrated to the new in-app data directory.
+
+### Fix bugs
+
+* [Paste content in dynamic query embedding will be repeated](https://github.com/siyuan-note/siyuan/issues/1256)
+* [Frozen after pressing alt+m twice](https://github.com/siyuan-note/siyuan/issues/1491)
+* [Embed block can not use hint and code block](https://github.com/siyuan-note/siyuan/issues/1512)
+* [Failed to query content block when folding](https://github.com/siyuan-note/siyuan/issues/1514)
+* [Can't rename file when focus is not in editor](https://github.com/siyuan-note/siyuan/issues/1515)
+* [Android soft keyboard hide editable content at the bottom](https://github.com/siyuan-note/siyuan/issues/1517)
+
 ## v0.9.7 / 2021-02-13
 
 ### Features

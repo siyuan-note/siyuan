@@ -1,3 +1,24 @@
+## v0.9.9 / 2021-02-16
+
+### Enhancements
+
+* [Improve select multiple blocks for type conversion](https://github.com/siyuan-note/siyuan/issues/132)
+* [Improve Alt+M](https://github.com/siyuan-note/siyuan/issues/1494)
+* [Improve update](https://github.com/siyuan-note/siyuan/issues/1521)
+* [Change folder to private storage on Android](https://github.com/siyuan-note/siyuan/issues/1522)
+* [File tree hide `.md` on Android](https://github.com/siyuan-note/siyuan/issues/1523)
+* [Improve sync](https://github.com/siyuan-note/siyuan/issues/1526)
+* [Improve navigation bar on Android](https://github.com/siyuan-note/siyuan/issues/1528)
+* [When mouse move in dock panel, show its toolbar and tree arrow icon](https://github.com/siyuan-note/siyuan/issues/1531)
+
+### Fix bugs
+
+* [Android set font size can not work](https://github.com/siyuan-note/siyuan/issues/1519)
+* [Tag hotkey can not work](https://github.com/siyuan-note/siyuan/issues/1520)
+* [Template call is not responding](https://github.com/siyuan-note/siyuan/issues/1529)
+* [Empty list exposes ID problem](https://github.com/siyuan-note/siyuan/issues/1530)
+* [Error: A JavaScript error occurred in them main process](https://github.com/siyuan-note/siyuan/issues/1533)
+
 ## v0.9.8 / 2021-02-15
 
 ### Features

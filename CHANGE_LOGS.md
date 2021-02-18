@@ -1,3 +1,29 @@
+## v1.0.0 / 2021-02-18
+
+### Features
+
+* [Support copy to yuque.com](https://github.com/siyuan-note/siyuan/issues/1546)
+
+### Enhancements
+
+* [Support custom keymap for Alt+M](https://github.com/siyuan-note/siyuan/issues/899)
+* [End early bird discount subscription](https://github.com/siyuan-note/siyuan/issues/1536)
+* [Improve sync process on Android](https://github.com/siyuan-note/siyuan/issues/1538)
+* [Optimize the editing performance on the large document](https://github.com/siyuan-note/siyuan/issues/1547)
+* [Improve boot process](https://github.com/siyuan-note/siyuan/issues/1549)
+
+### Fix bugs
+
+* [Heading as list item problem](https://github.com/siyuan-note/siyuan/issues/733)
+* [Crash on Android 8.1](https://github.com/siyuan-note/siyuan/issues/1537)
+* [Show/hide super block mark, wrong position of gutter icon](https://github.com/siyuan-note/siyuan/issues/1540)
+* [Kernel interrupt](https://github.com/siyuan-note/siyuan/issues/1543)
+* [UI error when editor is fullscreen](https://github.com/siyuan-note/siyuan/issues/1544)
+* [Exception after renaming the same file twice](https://github.com/siyuan-note/siyuan/issues/1545)
+* [Sync issue on Android 8.1](https://github.com/siyuan-note/siyuan/issues/1548)
+* [After `:`, press `alt+z` error](https://github.com/siyuan-note/siyuan/issues/1550)
+* [Outline display error](https://github.com/siyuan-note/siyuan/issues/1551)
+
 ## v0.9.9 / 2021-02-16
 
 ### Enhancements

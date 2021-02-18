@@ -17,7 +17,7 @@
 
 ## 💡 Introduction
 
-SiYuan is a desktop Markdown Block-Reference and Bidirectional-Link note-taking application, supports Windows, Mac and Linux, can be used directly on the browser, and supports mobile-end adaptation.
+SiYuan is a local-first personal knowledge management system, support fine-grained block-level reference and Markdown instant-render editing.
 
 ![bg1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg1.png)
 

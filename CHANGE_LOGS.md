@@ -1,3 +1,25 @@
+## v1.0.1 / 2021-02-19
+
+### Enhancements
+
+* [If task list item checked, add class `vditor-task--done`](https://github.com/siyuan-note/siyuan/issues/1556)
+* [Add default value for the diary storage path](https://github.com/siyuan-note/siyuan/issues/1564)
+* [Improve update](https://github.com/siyuan-note/siyuan/issues/1569)
+* [Before clicking ref to open the document, close the pop-up window](https://github.com/siyuan-note/siyuan/issues/1572)
+* [Improve clone performance](https://github.com/siyuan-note/siyuan/issues/1577)
+* [Improve sync performance](https://github.com/siyuan-note/siyuan/issues/1578)
+
+### Development refactoring
+
+* [Kernel upgrade to Go 1.16](https://github.com/siyuan-note/siyuan/issues/1573)
+
+### Fix bugs
+
+* [Bookmark invalid](https://github.com/siyuan-note/siyuan/issues/1565)
+* [Heading cannot be converted into a doc](https://github.com/siyuan-note/siyuan/issues/1570)
+* [Gutter icon are not aligned](https://github.com/siyuan-note/siyuan/issues/1571)
+* [`((` type filter problem](https://github.com/siyuan-note/siyuan/issues/1574)
+
 ## v1.0.0 / 2021-02-18
 
 ### Features

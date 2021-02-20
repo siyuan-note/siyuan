@@ -1,3 +1,27 @@
+## v1.0.2 / 2021-02-20
+
+### Features
+
+* [Copy image into clipboard](https://github.com/siyuan-note/siyuan/issues/448)
+
+### Enhancements
+
+* [Support Android 11](https://github.com/siyuan-note/siyuan/issues/1576)
+* [In browser, can remove webdav](https://github.com/siyuan-note/siyuan/issues/1581)
+* [Use bellow method, can not save layout](https://github.com/siyuan-note/siyuan/issues/1583)
+* [Change installation method on Windows](https://github.com/siyuan-note/siyuan/issues/1584)
+* [End of support for auto-update on macOS and Linux](https://github.com/siyuan-note/siyuan/issues/1585)
+* [End of support for auto-update if using zip package on Windows](https://github.com/siyuan-note/siyuan/issues/1587)
+* [Support search/replace for inline math](https://github.com/siyuan-note/siyuan/issues/1590)
+* [Let the prompt box display completely](https://github.com/siyuan-note/siyuan/issues/1591)
+
+### Fix bugs
+
+* [Select marker * cannot set the font color](https://github.com/siyuan-note/siyuan/issues/1582)
+* [Task list can not input ref](https://github.com/siyuan-note/siyuan/issues/1588)
+* [The name of the list item will be transmitted to the next list item after the line break](https://github.com/siyuan-note/siyuan/issues/1589)
+* [Report an error after remove `alt+M` in setting -> hotkey](https://github.com/siyuan-note/siyuan/issues/1594)
+
 ## v1.0.1 / 2021-02-19
 
 ### Enhancements

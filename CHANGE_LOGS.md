@@ -1,3 +1,25 @@
+## v1.0.3 / 2021-02-21
+
+### Features
+
+* [Save update time of blocks](https://github.com/siyuan-note/siyuan/issues/1561)
+
+### Enhancements
+
+* [Showing tags on the graph](https://github.com/siyuan-note/siyuan/issues/1597)
+* [Add template var `{{.id}}` for doc](https://github.com/siyuan-note/siyuan/issues/1608)
+* [Improve def block render performance](https://github.com/siyuan-note/siyuan/issues/1611)
+* [(( After allowing input of `!`, `/` and `、` to filter](https://github.com/siyuan-note/siyuan/issues/1613)
+* [Database table blocks `time` field rename to `created`](https://github.com/siyuan-note/siyuan/issues/1622)
+
+### Bug Fixes
+
+* [Export pdf can not use custom.css](https://github.com/siyuan-note/siyuan/issues/1607)
+* [Copy the ref and then paste it incorrectly](https://github.com/siyuan-note/siyuan/issues/1609)
+* [The heading bar is dragged incorrectly from top to bottom](https://github.com/siyuan-note/siyuan/issues/1610)
+* [Order list Shift + Tab is incorrect](https://github.com/siyuan-note/siyuan/issues/1612)
+* [Some files in the file tree cannot be displayed](https://github.com/siyuan-note/siyuan/issues/1617)
+
 ## v1.0.2 / 2021-02-20
 
 ### Features

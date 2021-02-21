@@ -19,6 +19,7 @@
 * [The heading bar is dragged incorrectly from top to bottom](https://github.com/siyuan-note/siyuan/issues/1610)
 * [Order list Shift + Tab is incorrect](https://github.com/siyuan-note/siyuan/issues/1612)
 * [Some files in the file tree cannot be displayed](https://github.com/siyuan-note/siyuan/issues/1617)
+* [List item ID changed if set background color](https://github.com/siyuan-note/siyuan/issues/1623)
 
 ## v1.0.2 / 2021-02-20
 

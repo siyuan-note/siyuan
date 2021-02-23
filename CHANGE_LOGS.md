@@ -1,3 +1,26 @@
+## v1.0.4 / 2021-02-23
+
+### Features
+
+* [Open new tab by ctrl+click  when set `Open in the current tab`](https://github.com/siyuan-note/siyuan/issues/1624)
+
+### Enhancements
+
+* [Render result after the cursor leaves dynamic query](https://github.com/siyuan-note/siyuan/issues/1592)
+* [Add alt+click for `Open Below the Tab`](https://github.com/siyuan-note/siyuan/issues/1626)
+* [Add option `Close the kernel when exiting the interface`](https://github.com/siyuan-note/siyuan/issues/1628)
+* [Rendering error when the app opened for the first time contains math](https://github.com/siyuan-note/siyuan/issues/1641)
+* [Ignore .siyuan sync](https://github.com/siyuan-note/siyuan/issues/1642)
+* [Bazaar templates/themes sort by update time desc](https://github.com/siyuan-note/siyuan/issues/1643)
+
+### Bug fixes
+
+* [Folding of the embed block will cause the outer layer to be folded](https://github.com/siyuan-note/siyuan/issues/1593)
+* [UI process does not exit sometime](https://github.com/siyuan-note/siyuan/issues/1629)
+* [Can't use super block in templates](https://github.com/siyuan-note/siyuan/issues/1633)
+* [Cannot create diary after setting template](https://github.com/siyuan-note/siyuan/issues/1638)
+* [File Tree cannot be refreshed automatically](https://github.com/siyuan-note/siyuan/issues/1640)
+
 ## v1.0.3 / 2021-02-21
 
 ### Features

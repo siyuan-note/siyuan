@@ -1,3 +1,44 @@
+## v1.0.5 / 2021-02-24
+
+### Features
+
+* [Assets storage in the cloud](https://github.com/siyuan-note/siyuan/issues/1614)
+  
+  Starting from this version, cloud synchronization will be divided into Git synchronization and asset file synchronization, which can significantly improve performance and reduce space usage by about half.
+
+  * Git synchronization is only used to synchronize .md files, automatically ignore the assets folder synchronization through .gitignore
+  * The asset files referenced in the document under the assets folder will be synchronized through upload and download, and the asset files that are not referenced will not be synchronized
+
+  Note:
+
+  * Every time Siyuan synchronizes, it will automatically add the `assets` line in .gitignore, that is, ignore the assets folder submission
+  * Because assets are not included in Git management, there will be no version history support, please confirm clearly when deleting asset files
+  * If you use other Git warehouse services, please manually modify .gitignore and then use `git`
+
+  Upgrade suggestions:
+
+  * Please follow `Help Document - Versioning and Synchronization - FAQ - How to delete unnecessary history records to reduce space usage and improve performance`
+
+  In the future, we will continue to improve cloud asset file storage services, adding management functions such as uploading, viewing, and deleting to facilitate users to share documents across platforms and applications. In addition, we plan to complete the free expansion of cloud space for all paying users before the end of March. The basic space will be expanded from 4G to 8G. Thank you for your company and encouragement. We will continue to work hard.
+* [Add database table assets](https://github.com/siyuan-note/siyuan/issues/1651)
+
+### Enhancements
+
+* [Git sync ignore assets by default](https://github.com/siyuan-note/siyuan/issues/1625)
+* [Inline math and math block are not the same size](https://github.com/siyuan-note/siyuan/issues/1645)
+* [When link contains a image, can not jump to the corresponding link after clicking](https://github.com/siyuan-note/siyuan/issues/1646)
+* [In mind map, press space can edit it](https://github.com/siyuan-note/siyuan/issues/1649)
+* [No prompt after `#xxx` input `#`](https://github.com/siyuan-note/siyuan/issues/1655)
+* [Support MIUI 12.5](https://github.com/siyuan-note/siyuan/issues/1656)
+* [Assets name retain scores and underscores](https://github.com/siyuan-note/siyuan/issues/1661)
+
+### Bug fixes
+
+* [The Dynamic query does not work in template](https://github.com/siyuan-note/siyuan/issues/1648)
+* [Fold heading show `Failed to query content block`](https://github.com/siyuan-note/siyuan/issues/1653)
+* [Import list problem](https://github.com/siyuan-note/siyuan/issues/1657)
+* [Delete under the collapsed list item will delete its subitems](https://github.com/siyuan-note/siyuan/issues/1660)
+
 ## v1.0.4 / 2021-02-23
 
 ### Features

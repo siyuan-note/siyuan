@@ -1,3 +1,30 @@
+## v1.0.6 / 2021-02-26
+
+### Features
+
+* [Notebook settings](https://github.com/siyuan-note/siyuan/issues/1616)
+* [Copy standard Markdown, Zhihu, Yuque and WeChat MP using cloud asset path](https://github.com/siyuan-note/siyuan/issues/1658)
+* [Auto-sync at interval](https://github.com/siyuan-note/siyuan/issues/1673)
+
+### Enhancements
+
+* [Improve sync](https://github.com/siyuan-note/siyuan/issues/1663)
+* [Display the latest sync time](https://github.com/siyuan-note/siyuan/issues/1668)
+* [Improve assets download performance](https://github.com/siyuan-note/siyuan/issues/1669)
+* [Do not reload UI if there are no changes when syncing](https://github.com/siyuan-note/siyuan/issues/1671)
+* [Add template var `{{.alias}}` for doc](https://github.com/siyuan-note/siyuan/issues/1675)
+* [AppImage for Linux](https://github.com/siyuan-note/siyuan/issues/1678)
+* [Improve `Ctrl+Shift+A`](https://github.com/siyuan-note/siyuan/issues/1679)
+* [Improve drag list item to another list item](https://github.com/siyuan-note/siyuan/issues/1681)
+
+### Bug fixes
+
+* [Import folder, custom sort can not work](https://github.com/siyuan-note/siyuan/issues/1605)
+* [Create doc failed sometimes](https://github.com/siyuan-note/siyuan/issues/1654)
+* [Some formats of assets upload failed](https://github.com/siyuan-note/siyuan/issues/1670)
+* [The first child of the list item is the code block, and the collapsed list item shows an error](https://github.com/siyuan-note/siyuan/issues/1680)
+* [Parse error when `+`  in the middle of ref](https://github.com/siyuan-note/siyuan/issues/1682)
+
 ## v1.0.5 / 2021-02-24
 
 ### Features

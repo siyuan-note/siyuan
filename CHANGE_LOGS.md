@@ -1,3 +1,22 @@
+## v1.0.7 / 2021-02-26
+
+### Features
+
+* [Search settings](https://github.com/siyuan-note/siyuan/issues/1676)
+
+### Enhancements
+
+* [Support ARM architecture on macOS (Apple Silicon)](https://github.com/siyuan-note/siyuan/issues/713)
+* [Deleting a checkbox block will add several newlines below](https://github.com/siyuan-note/siyuan/issues/1601)
+* [Improve update](https://github.com/siyuan-note/siyuan/issues/1677)
+* [Support Windows 32-bit](https://github.com/siyuan-note/siyuan/issues/1687)
+* [Improve drag icon to the checkbox](https://github.com/siyuan-note/siyuan/issues/1689)
+
+### Bug fixes
+
+* [Failed to create daily note](https://github.com/siyuan-note/siyuan/issues/1685)
+* [WebDAV can not save the box config](https://github.com/siyuan-note/siyuan/issues/1686)
+
 ## v1.0.6 / 2021-02-26
 
 ### Features

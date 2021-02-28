@@ -6,7 +6,7 @@
 
 ### Enhancements
 
-* [Improve ref code block anchor text template ](https://github.com/siyuan-note/siyuan/issues/1260)
+* [Improve ref code block anchor text template](https://github.com/siyuan-note/siyuan/issues/1260)
 * [Improve asset file name link text](https://github.com/siyuan-note/siyuan/issues/1692)
 * [Improve daily note selection](https://github.com/siyuan-note/siyuan/issues/1696)
 * [Prevent repeated clicks when refreshing the file tree and sync](https://github.com/siyuan-note/siyuan/issues/1698)

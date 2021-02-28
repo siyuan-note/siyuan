@@ -1,3 +1,31 @@
+## v1.0.8 / 2021-02-28
+
+### Features
+
+* [Historical search conditions](https://github.com/siyuan-note/siyuan/issues/1255)
+
+### Enhancements
+
+* [Improve ref code block anchor text template ](https://github.com/siyuan-note/siyuan/issues/1260)
+* [Improve asset file name link text](https://github.com/siyuan-note/siyuan/issues/1692)
+* [Improve daily note selection](https://github.com/siyuan-note/siyuan/issues/1696)
+* [Prevent repeated clicks when refreshing the file tree and sync](https://github.com/siyuan-note/siyuan/issues/1698)
+* [Improve online workspace/publishing loading](https://github.com/siyuan-note/siyuan/issues/1699)
+* [Global graph show unrelated nodes](https://github.com/siyuan-note/siyuan/issues/1700)
+* [WebDAV connect URL must specify to folder](https://github.com/siyuan-note/siyuan/issues/1703)
+* [Improve list enter](https://github.com/siyuan-note/siyuan/issues/1705)
+* [Improve sync message notify](https://github.com/siyuan-note/siyuan/issues/1709)
+* [Improve memo on icon for fold](https://github.com/siyuan-note/siyuan/issues/1711)
+* [Add notebook settings for Android](https://github.com/siyuan-note/siyuan/issues/1714)
+
+### Bug fixes
+
+* [The tag in the doc have no lines in the graph](https://github.com/siyuan-note/siyuan/issues/1688)
+* [Apple Silicon version fails to open](https://github.com/siyuan-note/siyuan/issues/1691)
+* [Text mode `created between` syntax does not work](https://github.com/siyuan-note/siyuan/issues/1697)
+* [Kernel crash on saving doc sometimes if using WebDAV notebook](https://github.com/siyuan-note/siyuan/issues/1702)
+* [Can not sync after open User Guide](https://github.com/siyuan-note/siyuan/issues/1707)
+
 ## v1.0.7 / 2021-02-26
 
 ### Features

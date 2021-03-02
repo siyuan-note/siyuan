@@ -1,3 +1,29 @@
+## v1.0.9 / 2021-03-02
+
+### Features
+
+* [Support open/close/new/recent notebook for the online workspace and Docker](https://github.com/siyuan-note/siyuan/issues/1710)
+
+### Enhancements
+
+* [Code signing on Windows](https://github.com/siyuan-note/siyuan/issues/1485)
+* [Import template can not keep the empty block](https://github.com/siyuan-note/siyuan/issues/1715)
+* [Use built-in Git on Windows](https://github.com/siyuan-note/siyuan/issues/1718)
+* [Add copy block id to file tree](https://github.com/siyuan-note/siyuan/issues/1720)
+* [Android server supports copying to yuque](https://github.com/siyuan-note/siyuan/issues/1728)
+* [Only sync .md for Git](https://github.com/siyuan-note/siyuan/issues/1731)
+* [Improve order list outdent](https://github.com/siyuan-note/siyuan/issues/1736)
+
+### Bug fixes
+
+* [Ref in heading is error](https://github.com/siyuan-note/siyuan/issues/1712)
+* [Use the template, the anchor text is error](https://github.com/siyuan-note/siyuan/issues/1713)
+* [Empty task item render error when open again](https://github.com/siyuan-note/siyuan/issues/1717)
+* [Before saving the file on Android, go to other files will be overwritten](https://github.com/siyuan-note/siyuan/issues/1723)
+* [Ref create doc save location and Template path can not save `"`](https://github.com/siyuan-note/siyuan/issues/1725)
+* [Undo will overwrite the content of the current document with the content of the last opened document](https://github.com/siyuan-note/siyuan/issues/1726)
+* [`Alt+Ctrl+A` The handle is invalid](https://github.com/siyuan-note/siyuan/issues/1730)
+
 ## v1.0.8 / 2021-02-28
 
 ### Features

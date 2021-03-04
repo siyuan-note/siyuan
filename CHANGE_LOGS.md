@@ -1,3 +1,36 @@
+## v1.1.0 / 2021-03-04
+
+### Features
+
+* [Add "Move to" in the file tree and editor tabs](https://github.com/siyuan-note/siyuan/issues/449)
+
+### Enhancements
+
+* [Improve rename case sensitive](https://github.com/siyuan-note/siyuan/issues/1722)
+* [Android cannot keep the last opened document](https://github.com/siyuan-note/siyuan/issues/1737)
+* [Flatten backlinks](https://github.com/siyuan-note/siyuan/issues/1738)
+* [Heading in the list item, the gutter icon can not align](https://github.com/siyuan-note/siyuan/issues/1740)
+* [Remove .git in sub folders when syncing](https://github.com/siyuan-note/siyuan/issues/1742)
+* [Improve wiki link convert when importing](https://github.com/siyuan-note/siyuan/issues/1745)
+* [Reduce Android size](https://github.com/siyuan-note/siyuan/issues/1746)
+* [Improve fold list style](https://github.com/siyuan-note/siyuan/issues/1749)
+* [Ctrl+F performance optimization](https://github.com/siyuan-note/siyuan/issues/1750)
+* [Improve link text parse](https://github.com/siyuan-note/siyuan/issues/1751)
+* [Slash menu remove `、` hint](https://github.com/siyuan-note/siyuan/issues/1753)
+* [Improve performance for indexing](https://github.com/siyuan-note/siyuan/issues/1754)
+* [Change asset ID from prefix to suffix](https://github.com/siyuan-note/siyuan/issues/1759)
+* [Trim starting empty blocks when rendering templates](https://github.com/siyuan-note/siyuan/issues/1762)
+
+### Refactor
+
+* [Upgrade Electron](https://github.com/siyuan-note/siyuan/issues/1748)
+
+### Bug fixes
+
+* [Cannot synchronize using the sync button in the browser through android APP](https://github.com/siyuan-note/siyuan/issues/1644)
+* [The problem when creating daily note using template](https://github.com/siyuan-note/siyuan/issues/1744)
+* [After resizing in the dock panel, closing one will leave blank](https://github.com/siyuan-note/siyuan/issues/1764)
+
 ## v1.0.9 / 2021-03-02
 
 ### Features

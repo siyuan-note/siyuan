@@ -68,6 +68,8 @@
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
 
+获取最新内部预览版（Insider Preview），请<a href="https://jq.qq.com/?_wv=1027&k=brIyNm7y" target="_blank">加入 Q 群</a> 或者 将你的 GitHub 登录名发送邮件至 845764@qq.com，我们将邀请你加入 SiYuan 内部预览团队。
+
 ## 📜 文档
 
 * [用户指南](https://ld246.com/udanax/1602224134353)

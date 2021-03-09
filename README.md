@@ -66,7 +66,7 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
 
-To get the latest Insider Preview, please send an email with your GitHub login name to 845764@qq.com, and we will invite you to join the SiYuan Insider Preview team, thanks.
+To get the latest Insider Preview, please send an email with your GitHub login name to 845765@qq.com, and we will invite you to join the SiYuan Insider Preview team, thanks.
 
 ## 📜 Documentation
 

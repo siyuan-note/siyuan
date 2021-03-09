@@ -1,3 +1,41 @@
+## v1.1.1 / 2021-03-09
+
+### Features
+
+* [Filter daily note in the graph](https://github.com/siyuan-note/siyuan/issues/1652)
+* [Drag asset from the file tree to the doc](https://github.com/siyuan-note/siyuan/issues/1756)
+* [Block ref '((' support name, alias and memo](https://github.com/siyuan-note/siyuan/issues/1761)
+* [Global graph support type filtering](https://github.com/siyuan-note/siyuan/issues/1775)
+* [SQL query API](https://github.com/siyuan-note/siyuan/issues/1777)
+
+### Enhancements
+
+* [Copy or drag content with pictures to a different folder](https://github.com/siyuan-note/siyuan/issues/480)
+* [Divide assets icons into video, audio, image, pdf](https://github.com/siyuan-note/siyuan/issues/1757)
+* [Open or new file in the focus panel](https://github.com/siyuan-note/siyuan/issues/1758)
+* [Ctrl+F  code block](https://github.com/siyuan-note/siyuan/issues/1765)
+* [Anchor text is incomplete when pasting block ref](https://github.com/siyuan-note/siyuan/issues/1766)
+* [Add search settings name, alias and memo](https://github.com/siyuan-note/siyuan/issues/1769)
+* [Improve Ctrl+F/R performance](https://github.com/siyuan-note/siyuan/issues/1772)
+* [Display boot progress](https://github.com/siyuan-note/siyuan/issues/1774)
+* [Separate the settings of the global graph and the local graph](https://github.com/siyuan-note/siyuan/issues/1776)
+* [Improve focus in the file tree](https://github.com/siyuan-note/siyuan/issues/1778)
+* [Improve export for block ref](https://github.com/siyuan-note/siyuan/issues/1779)
+* [Real-time display of memo on gutter icon](https://github.com/siyuan-note/siyuan/issues/1780)
+* [After `shift + tab`, the first list item cannot be changed into paragraphs](https://github.com/siyuan-note/siyuan/issues/1782)
+* [Save the layout of the PC browser](https://github.com/siyuan-note/siyuan/issues/1786)
+* [Improve import performance](https://github.com/siyuan-note/siyuan/issues/1788)
+* [Improve graphviz style](https://github.com/siyuan-note/siyuan/issues/1793)
+* [Improve backmention to backlink](https://github.com/siyuan-note/siyuan/issues/1801)
+
+### Bug fixes
+
+* [Switch theme mode, the code theme is incorrect](https://github.com/siyuan-note/siyuan/issues/1770)
+* [Ctrl+F continuous search bug](https://github.com/siyuan-note/siyuan/issues/1771)
+* [Improve enter at the heading with fold](https://github.com/siyuan-note/siyuan/issues/1784)
+* [Failed to create a doc on WebDAV](https://github.com/siyuan-note/siyuan/issues/1785)
+* [Mind map will be lost data](https://github.com/siyuan-note/siyuan/issues/1794)
+
 ## v1.1.0 / 2021-03-04
 
 ### Features

@@ -1,3 +1,19 @@
+## v1.1.2 / 2021-03-10
+
+### Enhancements
+
+* [Improve graph performance](https://github.com/siyuan-note/siyuan/issues/1783)
+* [Preview and export has no class `vditor-task--done`](https://github.com/siyuan-note/siyuan/issues/1791)
+* [Set sync flag to true after clone](https://github.com/siyuan-note/siyuan/issues/1805)
+
+### Bug fixes
+
+* [Complex sql parsing problems](https://github.com/siyuan-note/siyuan/issues/1727)
+* [Failed to custom appearance on Android](https://github.com/siyuan-note/siyuan/issues/1796)
+* [Boot hangs sometimes](https://github.com/siyuan-note/siyuan/issues/1803)
+* [Cloud assets path issue](https://github.com/siyuan-note/siyuan/issues/1804)
+* [Not download assets after clone](https://github.com/siyuan-note/siyuan/issues/1806)
+
 ## v1.1.1 / 2021-03-09
 
 ### Features

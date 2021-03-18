@@ -1,3 +1,49 @@
+## v1.1.3 / 2021-03-18
+
+### Features
+
+* [Use Rsync instead of Git for sync](https://github.com/siyuan-note/siyuan/issues/1807)
+  * Since the cloud data has been emptied, it is necessary to upload the local data to the cloud through synchronization-upload first
+  * Removed the automatic synchronization function, if you need to synchronize, please operate manually
+  * The Git automatic commit interval will be reset to 0, that is, the Git version management function is disabled. If you need to open the version management function, please set the interval value to a value greater than 0. It is recommended to set it to 10, which means that the version will be submitted automatically every 10 minutes
+* The initial size of cloud space has been expanded from 4G to 8G
+* The graph has undergone a preliminary remake, please manually reset the graph parameters once
+
+### Enhancements
+
+* [File tree and recent document exchange location on Android](https://github.com/siyuan-note/siyuan/issues/1798)
+* [Double click gutter icon to update memo](https://github.com/siyuan-note/siyuan/issues/1809)
+* [Improve reload after sync error](https://github.com/siyuan-note/siyuan/issues/1821)
+* [`、` is only useful at the beginning](https://github.com/siyuan-note/siyuan/issues/1824)
+* [Input `》` can also be converted to blockquote](https://github.com/siyuan-note/siyuan/issues/1825)
+* [Improve name style in the table, code block and math block](https://github.com/siyuan-note/siyuan/issues/1827)
+* [Support ⌘ARROWDOWN/⌘ARROWUP for config hotkey](https://github.com/siyuan-note/siyuan/issues/1828)
+* [Backmention doc name is so short](https://github.com/siyuan-note/siyuan/issues/1830)
+* [Expand the default cloud storage space to 8G](https://github.com/siyuan-note/siyuan/issues/1832)
+* [Improve boot speed on Android](https://github.com/siyuan-note/siyuan/issues/1833)
+* [Improve search sort](https://github.com/siyuan-note/siyuan/issues/1836)
+* [Click the daily notes button to select notebook](https://github.com/siyuan-note/siyuan/issues/1844)
+* [When dragging a image to Siyuan, disable its cursor selection](https://github.com/siyuan-note/siyuan/issues/1846)
+* [Improve click and dblclick at the end of the block](https://github.com/siyuan-note/siyuan/issues/1848)
+* [You can use tabs for indentation anywhere in the list](https://github.com/siyuan-note/siyuan/issues/1850)
+* [Clicking on the outline cannot locate the collapsed heading](https://github.com/siyuan-note/siyuan/issues/1852)
+
+### Bug fixes
+
+* [After Ctrl+A can not remove embed ref](https://github.com/siyuan-note/siyuan/issues/1799)
+* [Only show one backlink](https://github.com/siyuan-note/siyuan/issues/1817)
+* [Copy document ref, paste as embed ref is error](https://github.com/siyuan-note/siyuan/issues/1819)
+* [No authentication is required when URL include /stage/](https://github.com/siyuan-note/siyuan/issues/1820)
+* [The same block ref show twice sometimes](https://github.com/siyuan-note/siyuan/issues/1822)
+* [Failed to parse `<table>` tag](https://github.com/siyuan-note/siyuan/issues/1823)
+* [The graph can not show if customized graph style](https://github.com/siyuan-note/siyuan/issues/1834)
+* [Cut and paste will cause duplicate id](https://github.com/siyuan-note/siyuan/issues/1838)
+* [The text before the ref cannot use alt+z](https://github.com/siyuan-note/siyuan/issues/1839)
+* [Export PDF can not load static resource](https://github.com/siyuan-note/siyuan/issues/1842)
+* [DeleteContentForward at the end of the paragraph, when there is a ref in the next paragraph, the ref is wrong](https://github.com/siyuan-note/siyuan/issues/1845)
+* [`*` after entering a space, the list disappears](https://github.com/siyuan-note/siyuan/issues/1849)
+* [Folders cannot be sorted before and after the document by dragging and dropping](https://github.com/siyuan-note/siyuan/issues/1851)
+
 ## v1.1.2 / 2021-03-10
 
 ### Enhancements

@@ -1,3 +1,25 @@
+## v1.1.4 / 2021-03-19
+
+### Features
+
+* [Use vis.js instead of D3.js for graph](https://github.com/siyuan-note/siyuan/issues/1854)
+* [Support custom font color and background color](https://github.com/siyuan-note/siyuan/issues/1863)
+
+### Enhancements
+
+* [Improve thematic break editing](https://github.com/siyuan-note/siyuan/issues/1636)
+* [Update font and background color](https://github.com/siyuan-note/siyuan/issues/1855)
+* [Tab indent without children, ctrl+shift+i indent with children](https://github.com/siyuan-note/siyuan/issues/1856)
+
+### Bug fixes
+
+* [Can not open graph if exists duplicated nodes](https://github.com/siyuan-note/siyuan/issues/1857)
+* [Can't not sync on macOS](https://github.com/siyuan-note/siyuan/issues/1858)
+* [Unrecognized local theme and reset css](https://github.com/siyuan-note/siyuan/issues/1859)
+* [After the heading is cut and then pasted, it becomes text](https://github.com/siyuan-note/siyuan/issues/1860)
+* [Local and cloud space display is inconsistent](https://github.com/siyuan-note/siyuan/issues/1861)
+* [After the table enter, the next block ID will change](https://github.com/siyuan-note/siyuan/issues/1862)
+
 ## v1.1.3 / 2021-03-18
 
 ### Features

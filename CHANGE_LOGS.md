@@ -1,3 +1,39 @@
+## v1.1.5 / 2021-03-23
+
+### Features
+
+* [Delete bookmarks directly in the bookmarks panel](https://github.com/siyuan-note/siyuan/issues/1619)
+* [Add copy function to assets files](https://github.com/siyuan-note/siyuan/issues/1889)
+
+### Enhancements
+
+* [Failed to fetch image when copy-pasting HTML](https://github.com/siyuan-note/siyuan/issues/1792)
+* [Support sync path containing non-ASCII characters on Windows](https://github.com/siyuan-note/siyuan/issues/1865)
+* [Graph's title and label display HTML entity](https://github.com/siyuan-note/siyuan/issues/1866)
+* [Support using CSS to set Graph font family](https://github.com/siyuan-note/siyuan/issues/1867)
+* [Variables missing in the theme are replaced by official theme variables](https://github.com/siyuan-note/siyuan/issues/1871)
+* [Support for querying the set fonts](https://github.com/siyuan-note/siyuan/issues/1874)
+* [Local graph show related tag only](https://github.com/siyuan-note/siyuan/issues/1878)
+* [Table `blocks` add field `length`](https://github.com/siyuan-note/siyuan/issues/1879)
+* [Improve HTML code block parse](https://github.com/siyuan-note/siyuan/issues/1880)
+* [Pin pdf toolbar](https://github.com/siyuan-note/siyuan/issues/1881)
+* [Keep the editable state of the embed block consistent with the editor](https://github.com/siyuan-note/siyuan/issues/1883)
+* [Add hotkey to open new tab for ref and embed block](https://github.com/siyuan-note/siyuan/issues/1884)
+* [`Ctrl+Shift+X` in the block ref, only remove ref](https://github.com/siyuan-note/siyuan/issues/1886)
+* [Improve file tree listing performance](https://github.com/siyuan-note/siyuan/issues/1887)
+* [After pressing enter before the heading, the previous element needs to become a paragraph](https://github.com/siyuan-note/siyuan/issues/1892)
+
+### Bug fixes
+
+* [A newline will be added after the heading of the super block](https://github.com/siyuan-note/siyuan/issues/1841)
+* [Gutter icon can not show updated time](https://github.com/siyuan-note/siyuan/issues/1868)
+* [Lost content when indenting list items with Tab](https://github.com/siyuan-note/siyuan/issues/1869)
+* [Custom theme styles are corrupted after the restart ](https://github.com/siyuan-note/siyuan/issues/1872)
+* [Lost properties after converting Doc-Heading](https://github.com/siyuan-note/siyuan/issues/1873)
+* [Invalid Git commit time on macOS](https://github.com/siyuan-note/siyuan/issues/1876)
+* [Improve list outdent](https://github.com/siyuan-note/siyuan/issues/1877)
+* [Cannot open embed block in Android](https://github.com/siyuan-note/siyuan/issues/1882)
+
 ## v1.1.4 / 2021-03-19
 
 ### Features

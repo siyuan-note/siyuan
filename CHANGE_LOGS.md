@@ -1,3 +1,41 @@
+## v1.1.6 / 2021-03-29
+
+### Features
+
+* [Support config Tab width in the code block](https://github.com/siyuan-note/siyuan/issues/705)
+* [Edit code block in place](https://github.com/siyuan-note/siyuan/issues/1374)
+* [Support backup for deleting files](https://github.com/siyuan-note/siyuan/issues/1893)
+* [Support auto sync mode](https://github.com/siyuan-note/siyuan/issues/1910)
+
+### Enhancements
+
+* [Code block line wrap configuration](https://github.com/siyuan-note/siyuan/issues/708)
+* [Improve Ctrl+Shift+B in the list item](https://github.com/siyuan-note/siyuan/issues/1790)
+* [Improve code block search](https://github.com/siyuan-note/siyuan/issues/1826)
+* [Optimize the drag and drop performance of block elements in the editor](https://github.com/siyuan-note/siyuan/issues/1894)
+* [Code block or math block ref anchor text template display all content](https://github.com/siyuan-note/siyuan/issues/1895)
+* [Add copy code function for Export HTML](https://github.com/siyuan-note/siyuan/issues/1899)
+* [Count the contents of code blocks and formula blocks into the character count](https://github.com/siyuan-note/siyuan/issues/1901)
+* [When copying a block reference, the anchor text is the name](https://github.com/siyuan-note/siyuan/issues/1903)
+* [Supports sync of notebooks that contain spaces in the path](https://github.com/siyuan-note/siyuan/issues/1904)
+* [In the editor, you can set whether to render mathematical formulas](https://github.com/siyuan-note/siyuan/issues/1905)
+* [Support mathematica, lisp, clojure, Fortran language in code block](https://github.com/siyuan-note/siyuan/issues/1906)
+* [Add copy block id](https://github.com/siyuan-note/siyuan/issues/1913)
+* [Outline search ignores case](https://github.com/siyuan-note/siyuan/issues/1914)
+* [Add a link to automatically recognize the file protocol](https://github.com/siyuan-note/siyuan/issues/1915)
+* [The attachment in the embed block cannot be opened by clicking](https://github.com/siyuan-note/siyuan/issues/1916)
+* [Improve init language detect on Android](https://github.com/siyuan-note/siyuan/issues/1917)
+
+### Bug fixes
+
+* [Do not change `[[wikilink]]` text if not found ref](https://github.com/siyuan-note/siyuan/issues/1843)
+* [Blockquote in the list, enter will change to list item](https://github.com/siyuan-note/siyuan/issues/1897)
+* [The database will be cleared when the UI is launched for the second time while the kernel is resident](https://github.com/siyuan-note/siyuan/issues/1898)
+* [Import templates should not be wrapped in paragraphs](https://github.com/siyuan-note/siyuan/issues/1900)
+* [Failed to parse name, alias or memo (IAL properties) including `}`](https://github.com/siyuan-note/siyuan/issues/1902)
+* [Invalid permission when sync download](https://github.com/siyuan-note/siyuan/issues/1908)
+* [Can't convert backmention to backlink for doc name ref](https://github.com/siyuan-note/siyuan/issues/1918)
+
 ## v1.1.5 / 2021-03-23
 
 ### Features

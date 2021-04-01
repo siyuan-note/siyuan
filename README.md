@@ -108,7 +108,6 @@ SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) an
 * [https://github.com/fsnotify/fsnotify](https://github.com/fsnotify/fsnotify) `BSD-3-Clause License`
 * [https://github.com/gin-contrib/cors](https://github.com/gin-contrib/cors) `MIT License`
 * [https://github.com/gin-gonic/gin](https://github.com/gin-gonic/gin) `MIT License`
-* [https://github.com/go-git/go-git](https://github.com/go-git/go-git) `Apache-2.0 License`
 * [https://github.com/jackpal/gateway](https://github.com/jackpal/gateway) `BSD-3-Clause License`
 * [https://github.com/mitchellh/go-ps](https://github.com/mitchellh/go-ps) `MIT License`
 * [https://github.com/mssola/user_agent](https://github.com/mssola/user_agent) `MIT License`

@@ -1,3 +1,36 @@
+## v1.1.7 / 2021-04-02
+
+### Features
+
+* [Open SiYuan via protocol `siyuan://`](https://github.com/siyuan-note/siyuan/issues/1896)
+* [Insert mp4/mov/webm convert to `<video>`](https://github.com/siyuan-note/siyuan/issues/1909)
+* [Support fold/unfold block on Android](https://github.com/siyuan-note/siyuan/issues/1919)
+* [When exporting html, the image can use the CDN address](https://github.com/siyuan-note/siyuan/issues/1930)
+
+### Enhancements
+
+* [Sometimes the arrow keys cannot control the cursor](https://github.com/siyuan-note/siyuan/issues/1108)
+* [Add a switch option for cloud assets storage](https://github.com/siyuan-note/siyuan/issues/1808)
+* [There is an empty paragraph before the heading, delete before the heading should keep the title and its id](https://github.com/siyuan-note/siyuan/issues/1890)
+* [Convert `<br>` to `\n` when copy as standard Markdown](https://github.com/siyuan-note/siyuan/issues/1920)
+* [Pasting two paragraphs into the table should not be merged](https://github.com/siyuan-note/siyuan/issues/1921)
+* [Built-in rsync on macOS](https://github.com/siyuan-note/siyuan/issues/1925)
+* [Display boot progress on Android](https://github.com/siyuan-note/siyuan/issues/1927)
+* [No longer provide Windows zip decompression version](https://github.com/siyuan-note/siyuan/issues/1933)
+* [No longer support open multiple instances](https://github.com/siyuan-note/siyuan/issues/1935)
+* [After clicking, hide the prompt panel](https://github.com/siyuan-note/siyuan/issues/1942)
+* [It is not allowed to close the tab during upload](https://github.com/siyuan-note/siyuan/issues/1943)
+
+### Bug fixes
+
+* [Copy the order list and paste it will become a list](https://github.com/siyuan-note/siyuan/issues/1789)
+* [The result of the query with level-3 tags is empty](https://github.com/siyuan-note/siyuan/issues/1911)
+* [Failed to parse when copy code block](https://github.com/siyuan-note/siyuan/issues/1922)
+* [Data is not overwritten according to the update time when multiple devices are synchronized](https://github.com/siyuan-note/siyuan/issues/1926)
+* [Block ref inline code issue](https://github.com/siyuan-note/siyuan/issues/1928)
+* [WebSocket connection auth](https://github.com/siyuan-note/siyuan/issues/1937)
+* [Changing the task to the list should remove the class vditor-task-complete](https://github.com/siyuan-note/siyuan/issues/1941)
+
 ## v1.1.6 / 2021-03-29
 
 ### Features

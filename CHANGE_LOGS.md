@@ -1,3 +1,26 @@
+## v1.1.8 / 2021-04-03
+
+### Features
+
+* [Use file copy instead of Git for versioning](https://github.com/siyuan-note/siyuan/issues/1940)
+
+### Enhancements
+
+* [Gutter icon add cut function](https://github.com/siyuan-note/siyuan/issues/1946)
+* [Add some shortcut keys](https://github.com/siyuan-note/siyuan/issues/1947)
+* [Improve conf file read/write](https://github.com/siyuan-note/siyuan/issues/1948)
+* [The spacing between pictures with description and pictures without description should be the same](https://github.com/siyuan-note/siyuan/issues/1951)
+* [Built-int rsync on macOS 10](https://github.com/siyuan-note/siyuan/issues/1955)
+* [Add local protocol recognition](https://github.com/siyuan-note/siyuan/issues/1956)
+
+### Bug fixes
+
+* [Uploading assets takes a lot of time](https://github.com/siyuan-note/siyuan/issues/1945)
+* [Boot param `--authCode` not work](https://github.com/siyuan-note/siyuan/issues/1949)
+* [Delete at the beginning of the block below will delete the end of the block above](https://github.com/siyuan-note/siyuan/issues/1950)
+* [Sometimes failed to parse standard Markdown when importing](https://github.com/siyuan-note/siyuan/issues/1954)
+* [Fix the display of markers in popover and embed blocks](https://github.com/siyuan-note/siyuan/issues/1958)
+
 ## v1.1.7 / 2021-04-02
 
 ### Features

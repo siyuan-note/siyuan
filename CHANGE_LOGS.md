@@ -1,3 +1,16 @@
+## v1.1.81 / 2021-04-04
+
+### Enhancements
+
+* [Add copy button for block code](https://github.com/siyuan-note/siyuan/issues/1959)
+* [Improve sync stability](https://github.com/siyuan-note/siyuan/issues/1960)
+* [When there is only one block in the list item, insert an empty block to become a list item](https://github.com/siyuan-note/siyuan/issues/1961)
+* [Add remove block for gutter icon](https://github.com/siyuan-note/siyuan/issues/1962)
+
+### Bug fixes
+
+* [When pasting code in code block it creates new lines](https://github.com/siyuan-note/siyuan/issues/1938)
+
 ## v1.1.8 / 2021-04-03
 
 ### Features

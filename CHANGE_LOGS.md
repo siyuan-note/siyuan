@@ -1,3 +1,24 @@
+## v1.1.82 / 2021-04-06
+
+### Enhancements
+
+* [Android edit even when there is no internet](https://github.com/siyuan-note/siyuan/issues/1615)
+* [Persist auth code on Android](https://github.com/siyuan-note/siyuan/issues/1831)
+* [Built-in rsync for macOS Apple Silicon](https://github.com/siyuan-note/siyuan/issues/1964)
+* [Optimize the network, reduce the delay of login and synchronization](https://github.com/siyuan-note/siyuan/issues/1965)
+* [Copy content should remove heading marker](https://github.com/siyuan-note/siyuan/issues/1966)
+* [Do not check requests from `127.0.0.1`](https://github.com/siyuan-note/siyuan/issues/1967)
+* [Export PDF remove iframe](https://github.com/siyuan-note/siyuan/issues/1969)
+* [Update the right-click menu of the file tree and tabs](https://github.com/siyuan-note/siyuan/issues/1971)
+
+### Bug fixes
+
+* [Can't show the image when export PDF with network images](https://github.com/siyuan-note/siyuan/issues/1968)
+* [Content loss caused by iframe not closing](https://github.com/siyuan-note/siyuan/issues/1970)
+* [`# 1. foo` ref as anchor text template will be rendered to `foo`](https://github.com/siyuan-note/siyuan/issues/1972)
+* [Enter the sublist under the task list](https://github.com/siyuan-note/siyuan/issues/1973)
+* [List in the blockquote can not move to up](https://github.com/siyuan-note/siyuan/issues/1974)
+
 ## v1.1.81 / 2021-04-04
 
 ### Enhancements

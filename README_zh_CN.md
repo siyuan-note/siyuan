@@ -60,7 +60,7 @@
 ## 🗺️ 路线图
 
 * [思源笔记开发计划和进度](https://github.com/siyuan-note/siyuan/projects)
-* [思源笔记版本变更记录](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
+* [思源笔记版本变更和公告](https://ld246.com/tag/siyuan-announcement)
 
 ## 🛠️ 下载安装
 
@@ -119,8 +119,6 @@
 * [https://github.com/golang/crypto](https://github.com/golang/crypto) `BSD-3-Clause License`
 * [https://github.com/golang/net](https://github.com/golang/net) `BSD-3-Clause License`
 * [https://github.com/golang/text](https://github.com/golang/text) `BSD-3-Clause License`
-* [https://github.com/go-gorm/sqlite](https://github.com/go-gorm/sqlite) `MIT License`
-* [https://github.com/go-gorm/gorm](https://github.com/go-gorm/gorm) `MIT License`
 </details>
 
 <details>

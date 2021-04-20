@@ -116,8 +116,6 @@ SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) an
 * [https://github.com/golang/crypto](https://github.com/golang/crypto) `BSD-3-Clause License`
 * [https://github.com/golang/net](https://github.com/golang/net) `BSD-3-Clause License`
 * [https://github.com/golang/text](https://github.com/golang/text) `BSD-3-Clause License`
-* [https://github.com/go-gorm/sqlite](https://github.com/go-gorm/sqlite) `MIT License`
-* [https://github.com/go-gorm/gorm](https://github.com/go-gorm/gorm) `MIT License`
 </details>
 
 <details>

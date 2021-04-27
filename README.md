@@ -41,7 +41,6 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
 * Use on the browser, support mobile-end
 * Hierarchical tag
 * Multi-window, multi-tab, drag and drop to split screen
-* WebDAV
 * Fulltext search
 * Themes and icons
   * Built-in bright and dark themes
@@ -95,7 +94,6 @@ SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) an
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
-* [https://github.com/studio-b12/gowebdav](https://github.com/studio-b12/gowebdav) `BSD-3-Clause License`
 * [https://github.com/88250/gulu](https://github.com/88250/gulu) `Mulan PSL v2`
 * [https://github.com/olahol/melody](https://github.com/olahol/melody) `BSD-2-Clause License`
 * [https://github.com/Masterminds/sprig](https://github.com/Masterminds/sprig) `MIT License`

@@ -43,7 +43,6 @@
 * 支持浏览器使用、支持移动端
 * 层级标签
 * 多窗口多页签，拖拽分屏
-* WebDAV
 * 全文搜索
 * 主题和图标
   * 内置明亮、暗黑两套主题
@@ -98,7 +97,6 @@
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
-* [https://github.com/studio-b12/gowebdav](https://github.com/studio-b12/gowebdav) `BSD-3-Clause License`
 * [https://github.com/88250/gulu](https://github.com/88250/gulu) `Mulan PSL v2`
 * [https://github.com/olahol/melody](https://github.com/olahol/melody) `BSD-2-Clause License`
 * [https://github.com/Masterminds/sprig](https://github.com/Masterminds/sprig) `MIT License`

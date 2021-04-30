@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <p align="center">
 <img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
 <br>
@@ -13,9 +14,13 @@
 <p align="center">
 <a href="https://github.com/siyuan-note/siyuan/blob/master/README_zh_CN.md">中文</a>
 </p>
+=======
+这里仅用于分发思源笔记发布包，如需反馈建议或者问题请到：
+>>>>>>> parent of b1874ba (:memo: 更新自述)
 
 ## 💡 Introduction
 
+<<<<<<< HEAD
 SiYuan is a local-first personal knowledge management system, support fine-grained block-level reference and Markdown instant-render editing.
 
 ![bg1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg1.png)
@@ -130,3 +135,6 @@ SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) an
 * [https://github.com/codemirror/CodeMirror](https://github.com/codemirror/CodeMirror) `MIT License`
 * [https://github.com/hakimel/reveal.js](https://github.com/hakimel/reveal.js) `MIT License`
 </details>
+=======
+感谢关注 :heart:
+>>>>>>> parent of b1874ba (:memo: 更新自述)

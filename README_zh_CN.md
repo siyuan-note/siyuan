@@ -107,12 +107,16 @@
 * [https://github.com/emirpasic/gods](https://github.com/emirpasic/gods) `BSD-2-Clause License`
 * [https://github.com/facette/natsort](https://github.com/facette/natsort) `BSD-3-Clause License`
 * [https://github.com/fsnotify/fsnotify](https://github.com/fsnotify/fsnotify) `BSD-3-Clause License`
+* [https://github.com/gin-contrib/cors](https://github.com/gin-contrib/cors) `MIT License`
 * [https://github.com/gin-gonic/gin](https://github.com/gin-gonic/gin) `MIT License`
 * [https://github.com/jackpal/gateway](https://github.com/jackpal/gateway) `BSD-3-Clause License`
 * [https://github.com/mitchellh/go-ps](https://github.com/mitchellh/go-ps) `MIT License`
 * [https://github.com/mssola/user_agent](https://github.com/mssola/user_agent) `MIT License`
 * [https://github.com/panjf2000/ants](https://github.com/panjf2000/ants) `MIT License`
 * [https://github.com/parnurzeal/gorequest](https://github.com/parnurzeal/gorequest) `MIT License`
+* [https://github.com/golang/crypto](https://github.com/golang/crypto) `BSD-3-Clause License`
+* [https://github.com/golang/net](https://github.com/golang/net) `BSD-3-Clause License`
+* [https://github.com/golang/text](https://github.com/golang/text) `BSD-3-Clause License`
 </details>
 
 <details>
@@ -120,11 +124,12 @@
 
 * [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`
 * [https://github.com/electron/electron](https://github.com/electron/electron) `MIT License`
-* [https://github.com/visjs/vis-network](https://github.com/visjs/vis-network) `Apache-2.0 License`
+* [https://github.com/d3/d3](https://github.com/d3/d3) `BSD-3-Clause License`
 * [https://github.com/google/diff-match-patch](https://github.com/google/diff-match-patch) `Apache-2.0 License`
 * [https://github.com/rtfpessoa/diff2html](https://github.com/rtfpessoa/diff2html) `MIT License`
 * [https://github.com/mozilla/pdfjs-dist](https://github.com/mozilla/pdfjs-dist) `Apache-2.0 License`
 * [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`
 * [https://github.com/fex-team/kityminder-core](https://github.com/fex-team/kityminder-core) `BSD-3-Clause License`
+* [https://github.com/codemirror/CodeMirror](https://github.com/codemirror/CodeMirror) `MIT License`
 * [https://github.com/hakimel/reveal.js](https://github.com/hakimel/reveal.js) `MIT License`
 </details>

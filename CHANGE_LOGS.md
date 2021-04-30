@@ -1,15 +1,4 @@
-## v1.1.83 / 2021-04-09
-
-### Enhancements
-
-* [Improve export block ref mode option](https://github.com/siyuan-note/siyuan/issues/1976)
-* [Template folder should NOT be included while rendering global graph](https://github.com/siyuan-note/siyuan/issues/1978)
-
-### Bug fixes
-
-* [The image is not displayed when other machines in the local area network access](https://github.com/siyuan-note/siyuan/issues/1975)
-* [Boot failed on macOS M1](https://github.com/siyuan-note/siyuan/issues/1982)
-
+<<<<<<< HEAD
 ## v1.1.82 / 2021-04-06
 
 ### Enhancements
@@ -609,6 +598,8 @@
 * [Empty list exposes ID problem](https://github.com/siyuan-note/siyuan/issues/1530)
 * [Error: A JavaScript error occurred in them main process](https://github.com/siyuan-note/siyuan/issues/1533)
 
+=======
+>>>>>>> parent of 1198659 (:bookmark: Release v0.9.9)
 ## v0.9.8 / 2021-02-15
 
 ### Features

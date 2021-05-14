@@ -16,7 +16,7 @@
 
 ## 💡 简介
 
-思源笔记是一款本地离线优先的个人知识管理系统， 支持细粒度块级引用和 Markdown 即时渲染编辑。
+思源笔记是一款本地离线优先的个人知识管理系统， 支持细粒度块级引用和 Markdown 所见即所得。
 
 [分享发布空间在线体验](https://ld246.com/udanax/1602224134353)，欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。
 
@@ -31,30 +31,28 @@
   * 文档关系图、全局关系图
   * 书签收藏
   * 动态查询嵌入
-  * 提供 URL 浏览器访问或给其他软件链接
-* 为 Markdown 而生
-  * 类似 Typora 的即时渲染编辑模式
+  * 协议 `siyuan://`
+* 格式排版
+  * 所见即所得
   * 支持数学公式、图表、流程图、甘特图、时序图、五线谱等
   * 粘贴 HTML 自动转换为 Markdown
-  * 配置 Markdown 解析渲染细节参数  
-* 脑图模式
-  * 支持缩放、拖拽、布局、主题等
-  * 编辑和 Markdown 保持同步
-* 支持浏览器使用、支持移动端
+  * 网页剪藏
 * 层级标签
-* 多窗口多页签，拖拽分屏
+* 多页签拖拽分屏
 * 全文搜索
 * 主题和图标
   * 内置明亮、暗黑两套主题
   * 内置 Material、Ant Design 两套图标
   * 支持自定义主题和图标
 * 导出
-  * 标准 Markdown 和 TextBundle 导出
+  * 带 assets 文件夹的标准 Markdown
   * 内容块引用提供锚文本 + 嵌入 Blockquote 选项
   * 复制到微信公众号、知乎和语雀
-* 版本管理和同步
-  * [在线工作空间](https://ld246.com/xanadu/)
-  * [在线分享发布](https://ld246.com/udanax/)
+* 数据同步
+* [在线工作空间](https://ld246.com/xanadu/)
+* [在线分享发布](https://ld246.com/udanax/)
+* Android APP
+* Docker 部署
 
 ## 🗺️ 路线图
 
@@ -67,7 +65,7 @@
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
 
-获取最新内部预览版（Insider Preview），请<a href="https://jq.qq.com/?_wv=1027&k=brIyNm7y" target="_blank">加入 Q 群</a>或者将你的 GitHub 登录名发送邮件至 845765@qq.com，我们将邀请你加入 SiYuan 内部预览团队。
+获取最新内部预览版（Insider Preview），请将你的 GitHub 登录名发送邮件至 845765@qq.com，我们将邀请你加入 SiYuan 内部预览团队。
 
 ## 📜 文档
 
@@ -87,13 +85,11 @@
 * [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)
 * [外观和语言](https://github.com/siyuan-note/appearance)
 * [Markdown 引擎](https://github.com/88250/lute)
+* [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
 
 ## 🙏 鸣谢
 
-思源笔记的诞生离不开 [Vditor](https://github.com/Vanessa219/vditor) 和 [Lute](https://github.com/88250/lute) 开源项目以及下列开源项目。
-
-<details>
-<summary>内核</summary>
+思源的诞生离不开 [Vditor](https://github.com/Vanessa219/vditor) 和 [Lute](https://github.com/88250/lute) 开源项目以及下列开源项目。
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
@@ -113,11 +109,6 @@
 * [https://github.com/mssola/user_agent](https://github.com/mssola/user_agent) `MIT License`
 * [https://github.com/panjf2000/ants](https://github.com/panjf2000/ants) `MIT License`
 * [https://github.com/parnurzeal/gorequest](https://github.com/parnurzeal/gorequest) `MIT License`
-</details>
-
-<details>
-<summary>界面</summary>
-
 * [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`
 * [https://github.com/electron/electron](https://github.com/electron/electron) `MIT License`
 * [https://github.com/visjs/vis-network](https://github.com/visjs/vis-network) `Apache-2.0 License`
@@ -127,4 +118,3 @@
 * [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`
 * [https://github.com/fex-team/kityminder-core](https://github.com/fex-team/kityminder-core) `BSD-3-Clause License`
 * [https://github.com/hakimel/reveal.js](https://github.com/hakimel/reveal.js) `MIT License`
-</details>

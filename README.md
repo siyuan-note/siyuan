@@ -16,7 +16,7 @@
 
 ## 💡 Introduction
 
-SiYuan is a local-first personal knowledge management system, support fine-grained block-level reference and Markdown instant-render editing.
+SiYuan is a local-first personal knowledge management system, support fine-grained block-level reference and Markdown WYSIWYG.
 
 ![bg1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg1.png)
 
@@ -29,30 +29,28 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
   * Document relationship diagram, global relationship diagram
   * Bookmark collection
   * Dynamic query embed
-  * URL for browser visit or link with other software
-* Markdown
-  * Instant Rendering editing mode similar to Typora
+  * Protocol `siyuan://`
+* Formatting
+  * WYSIWYG
   * Support mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
   * Paste HTML automatically converted to Markdown
-  * Configure Markdown to analyze detailed rendering parameters  
-* MinMap mode
-  * Support zoom, drag, layout and theme, etc.
-  * Keep editing and Markdown in sync
-* Use on the browser, support mobile-end
+  * Web clipping
 * Hierarchical tag
-* Multi-window, multi-tab, drag and drop to split screen
+* Multi-tab, drag and drop to split screen
 * Fulltext search
 * Themes and icons
   * Built-in bright and dark themes
   * Built-in two sets of icons, Material and Ant Design
   * Support custom themes and icons
 * Export
-  * Standard Markdown and TextBundle export
+  * Standard Markdown with assets
   * Content block reference provides anchor text + embedded blockquote option
   * Copy to WeChat MP, Zhihu and Yuque
-* Versioning and Sync
-  * [Online Workspace](https://ld246.com/xanadu/)
-  * [Online Publishing](https://ld246.com/udanax/)
+* Data sync
+* [Online Workspace](https://ld246.com/xanadu/)
+* [Online Publishing](https://ld246.com/udanax/)
+* Android APP
+* Docker deployment
 
 ## 🗺️ Roadmap
 
@@ -84,13 +82,11 @@ At present, some components of SiYuan are open source, and contributions are wel
 * [User Guide](https://github.com/siyuan-note/user-guide-en_US)
 * [Appearance and language](https://github.com/siyuan-note/appearance)
 * [Markdown Engine](https://github.com/88250/lute)
+* [Chrome web clipping extension](https://github.com/siyuan-note/siyuan-chrome)
 
 ## 🙏 Acknowledgement
 
 SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) and [Lute](https://github.com/88250/lute) open source project and other open source software.
-
-<details>
-<summary>Kernel</summary>
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
@@ -110,11 +106,6 @@ SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) an
 * [https://github.com/mssola/user_agent](https://github.com/mssola/user_agent) `MIT License`
 * [https://github.com/panjf2000/ants](https://github.com/panjf2000/ants) `MIT License`
 * [https://github.com/parnurzeal/gorequest](https://github.com/parnurzeal/gorequest) `MIT License`
-</details>
-
-<details>
-<summary>UI</summary>
-
 * [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`
 * [https://github.com/electron/electron](https://github.com/electron/electron) `MIT License`
 * [https://github.com/visjs/vis-network](https://github.com/visjs/vis-network) `Apache-2.0 License`
@@ -124,4 +115,3 @@ SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) an
 * [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`
 * [https://github.com/fex-team/kityminder-core](https://github.com/fex-team/kityminder-core) `BSD-3-Clause License`
 * [https://github.com/hakimel/reveal.js](https://github.com/hakimel/reveal.js) `MIT License`
-</details>

@@ -33,7 +33,8 @@
   * SQL 查询嵌入
   * 协议 `siyuan://`
 * 编辑器
-  * Markdown 所见即所得
+  * Block 风格
+  * Markdown 所见即所得  
   * 列表大纲
   * 块缩放聚焦  
   * 块横向排版

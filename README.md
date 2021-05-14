@@ -42,6 +42,8 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
 * Hierarchical tag
 * Multi-tab, drag and drop to split screen
 * Fulltext search
+* Template snippet
+* Keymap  
 * Themes and icons
   * Built-in bright and dark themes
   * Built-in two sets of icons, Material and Ant Design

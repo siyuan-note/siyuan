@@ -27,13 +27,16 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
 * Content block
   * Block-level reference and two-way links
   * Document relationship diagram, global relationship diagram
-  * Bookmark collection
-  * Dynamic query embed
+  * Properties
+  * SQL query embed
   * Protocol `siyuan://`
-* Formatting
+* Editor
   * WYSIWYG
-  * Support mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
-  * Paste HTML automatically converted to Markdown
+  * List outline
+  * Block zoom-in  
+  * Block horizontal layout
+  * Million-word large document editing
+  * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
   * Web clipping
 * Hierarchical tag
 * Multi-tab, drag and drop to split screen

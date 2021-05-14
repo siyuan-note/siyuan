@@ -39,19 +39,16 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
   * Million-word large document editing
   * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
   * Web clipping
+* Export
+  * Standard Markdown with assets
+  * Content block reference provides anchor text + embedded blockquote option
+  * Copy to WeChat MP, Zhihu and Yuque  
 * Hierarchical tag
 * Multi-tab, drag and drop to split screen
 * Fulltext search
 * Template snippet
 * Keymap  
 * Themes and icons
-  * Built-in bright and dark themes
-  * Built-in two sets of icons, Material and Ant Design
-  * Support custom themes and icons
-* Export
-  * Standard Markdown with assets
-  * Content block reference provides anchor text + embedded blockquote option
-  * Copy to WeChat MP, Zhihu and Yuque
 * Incremental data synchronization
 * [Online Workspace](https://ld246.com/xanadu/)
 * [Online Publishing](https://ld246.com/udanax/)

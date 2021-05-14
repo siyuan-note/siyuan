@@ -31,7 +31,7 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
   * SQL query embed
   * Protocol `siyuan://`
 * Editor
-  * WYSIWYG
+  * Markdown WYSIWYG
   * List outline
   * Block zoom-in  
   * Block horizontal layout

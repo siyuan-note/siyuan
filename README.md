@@ -49,7 +49,7 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
   * Standard Markdown with assets
   * Content block reference provides anchor text + embedded blockquote option
   * Copy to WeChat MP, Zhihu and Yuque
-* Data sync
+* Incremental data synchronization
 * [Online Workspace](https://ld246.com/xanadu/)
 * [Online Publishing](https://ld246.com/udanax/)
 * Android APP

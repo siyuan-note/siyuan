@@ -51,7 +51,7 @@
   * 带 assets 文件夹的标准 Markdown
   * 内容块引用提供锚文本 + 嵌入 Blockquote 选项
   * 复制到微信公众号、知乎和语雀
-* 数据同步
+* 增量数据同步
 * [在线工作空间](https://ld246.com/xanadu/)
 * [在线分享发布](https://ld246.com/udanax/)
 * Android APP

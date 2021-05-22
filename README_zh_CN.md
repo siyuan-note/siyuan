@@ -51,9 +51,7 @@
 * 模板片段
 * 快捷键
 * 主题和图标
-* 增量数据同步
-* [在线工作空间](https://ld246.com/xanadu/)
-* [在线分享发布](https://ld246.com/udanax/)
+* 数据云端备份
 * Android APP
 * Docker 部署
 

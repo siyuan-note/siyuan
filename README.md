@@ -49,9 +49,7 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
 * Template snippet
 * Keymap  
 * Themes and icons
-* Incremental data synchronization
-* [Online Workspace](https://ld246.com/xanadu/)
-* [Online Publishing](https://ld246.com/udanax/)
+* Data cloud backup
 * Android APP
 * Docker deployment
 

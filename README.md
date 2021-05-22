@@ -49,7 +49,7 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
 * Template snippet
 * Keymap  
 * Themes and icons
-* Data cloud backup
+* Data cloud backup, end-to-end encryption
 * Android APP
 * Docker deployment
 

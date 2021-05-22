@@ -18,7 +18,7 @@
 
 思源笔记是一款本地离线优先的个人知识管理系统， 支持细粒度块级引用和 Markdown 所见即所得。
 
-[分享发布空间在线体验](https://ld246.com/udanax/1602224134353)，欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。
+欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。
 
 ![bg1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg1.png)
 

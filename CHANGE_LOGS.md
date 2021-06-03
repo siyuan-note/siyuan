@@ -1,3 +1,80 @@
+## v1.2.0-beta1 / 2021-06-03
+
+### Features
+
+* [Outline expand collapse all](https://github.com/siyuan-note/siyuan/issues/564)
+* [Horizontal layout of content blocks](https://github.com/siyuan-note/siyuan/issues/790)
+* [Block zoom-in](https://github.com/siyuan-note/siyuan/issues/1231)
+* [Support underline](https://github.com/siyuan-note/siyuan/issues/1773)
+* [Support cross notebook block ref](https://github.com/siyuan-note/siyuan/issues/1853)
+* [Document dynamic loading](https://github.com/siyuan-note/siyuan/issues/1977)
+* [Block drag](https://github.com/siyuan-note/siyuan/issues/1980)
+* [Use Protyle instead of Vditor for the editor](https://github.com/siyuan-note/siyuan/issues/1981)
+* [List outline](https://github.com/siyuan-note/siyuan/issues/1983)
+* [WYSIWYG instead of IR](https://github.com/siyuan-note/siyuan/issues/1985)
+* [Local workspace dir](https://github.com/siyuan-note/siyuan/issues/2016)
+* [New assets serve](https://github.com/siyuan-note/siyuan/issues/2019)
+* [Chrome extension for content copy](https://github.com/siyuan-note/siyuan/issues/2035)
+* [Support upload assets of a single doc to cloud](https://github.com/siyuan-note/siyuan/issues/2041)
+* [Auto copy local attachments to assets when pasting from Word](https://github.com/siyuan-note/siyuan/issues/2043)
+* [Batch export standard Markdown with assets](https://github.com/siyuan-note/siyuan/issues/2047)
+* [Support export to `.docx`](https://github.com/siyuan-note/siyuan/issues/2054)
+* [End-to-end encryption backup](https://github.com/siyuan-note/siyuan/issues/2056)
+
+### Enhancements
+
+* [Editing freezes when rendering a large number of mathematical formulas](https://github.com/siyuan-note/siyuan/issues/845)
+* [Support the preview and export for query embed block](https://github.com/siyuan-note/siyuan/issues/1362)
+* [Improve function in image scale mode](https://github.com/siyuan-note/siyuan/issues/1739)
+* [Editor redo/undo](https://github.com/siyuan-note/siyuan/issues/1988)
+* [Rename editor options](https://github.com/siyuan-note/siyuan/issues/2000)
+* [Change the doc data file format to `.sy`](https://github.com/siyuan-note/siyuan/issues/2002)
+* [Optimize the writing performance of large document data](https://github.com/siyuan-note/siyuan/issues/2005)
+* [Change embed query block syntax from `!{{script}}` to `{{script}}`](https://github.com/siyuan-note/siyuan/issues/2020)
+* [Template use `.md`, save under workspace data dir `templates`](https://github.com/siyuan-note/siyuan/issues/2023)
+* [Conf dir move to $workspace/conf/](https://github.com/siyuan-note/siyuan/issues/2029)
+* [Boot parameter `--workspace` instead of `--conf` and `--data`](https://github.com/siyuan-note/siyuan/issues/2030)
+* [Table `blocks` add columns](https://github.com/siyuan-note/siyuan/issues/2044)
+* [Improve performance of boot indexing](https://github.com/siyuan-note/siyuan/issues/2046)
+
+### Docs
+
+* [Weaken Markdown related content in the user guide](https://github.com/siyuan-note/siyuan/issues/2001)
+
+### Abolishments
+
+* [Remove editor options](https://github.com/siyuan-note/siyuan/issues/1997)
+* [Remove export option `fixTermTypo`](https://github.com/siyuan-note/siyuan/issues/1998)
+* [Remove YAML Front Matter support](https://github.com/siyuan-note/siyuan/issues/2006)
+* [Remove HTML Block and Inline HTML rendering](https://github.com/siyuan-note/siyuan/issues/2007)
+* [Remove block ref anchor text template `{{.text}}`](https://github.com/siyuan-note/siyuan/issues/2008)
+* [Remove block ref anchor text inline parsing](https://github.com/siyuan-note/siyuan/issues/2009)
+* [Remove block embed `!((id))`](https://github.com/siyuan-note/siyuan/issues/2011)
+* [Remove Markdown footnotes support](https://github.com/siyuan-note/siyuan/issues/2012)
+* [Remove Markdown link ref support](https://github.com/siyuan-note/siyuan/issues/2013)
+* [Remove find in page and find replace](https://github.com/siyuan-note/siyuan/issues/2014)
+* [Remove filetree options](https://github.com/siyuan-note/siyuan/issues/2017)
+* [Remove WebDAV support](https://github.com/siyuan-note/siyuan/issues/2018)
+* [Remove template call syntax `{{`, use `/` as the entry](https://github.com/siyuan-note/siyuan/issues/2021)
+* [Remove expert mode](https://github.com/siyuan-note/siyuan/issues/2022)
+* [Remove sync option in notebook conf and global conf](https://github.com/siyuan-note/siyuan/issues/2025)
+* [Remove `[toc]`](https://github.com/siyuan-note/siyuan/issues/2026)
+* [Remove `siyuan://notebooks/{notebook_name}/blocks/{id}`](https://github.com/siyuan-note/siyuan/issues/2031)
+* [Remove Mindmap](https://github.com/siyuan-note/siyuan/issues/2032)
+* [Remove auto fetch remote image to local](https://github.com/siyuan-note/siyuan/issues/2033)
+* [Remove search text mode](https://github.com/siyuan-note/siyuan/issues/2034)
+* [Remove indent code block](https://github.com/siyuan-note/siyuan/issues/2037)
+* [Remove TextBundle export](https://github.com/siyuan-note/siyuan/issues/2048)
+* [Remove MathJax engine](https://github.com/siyuan-note/siyuan/issues/2051)
+* [Remove cloud online workspace and publishing](https://github.com/siyuan-note/siyuan/issues/2055)
+
+### Bug fixes
+
+* [Change account then sync: auth failed](https://github.com/siyuan-note/siyuan/issues/581)
+* [Edit heading after code block issue](https://github.com/siyuan-note/siyuan/issues/727)
+* [Emoji issue when using Microsoft PinYin](https://github.com/siyuan-note/siyuan/issues/1555)
+* [Doc tree custom sorting bug](https://github.com/siyuan-note/siyuan/issues/2049)
+
 ## v1.1.83 / 2021-04-09
 
 ### Enhancements

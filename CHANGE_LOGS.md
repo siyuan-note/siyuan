@@ -1,3 +1,20 @@
+## v1.2.0-beta4 / 2021-06-07
+
+### Features
+
+* [Mermaid click callback ](https://github.com/siyuan-note/siyuan/issues/2042)
+
+### Enhancements
+
+* [发布新的 Docker 镜像，请注意备份数据和修改启动参数](https://github.com/siyuan-note/siyuan/issues/2070)
+
+### Bug fixes
+
+* [`kbd` 和下划线的解析问题 ](https://github.com/siyuan-note/siyuan/issues/2068)
+* [资源文件 Assets 相关的一些列问题](https://github.com/siyuan-note/siyuan/issues/2072)
+* [添加的标签没有显示在标签栏](https://github.com/siyuan-note/siyuan/issues/2073)
+* [插入模板后会出现在页面的上方](https://github.com/siyuan-note/siyuan/issues/2074)
+
 ## v1.2.0-beta3 / 2021-06-07
 
 Bug fixes and improves details.

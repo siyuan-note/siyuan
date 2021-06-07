@@ -1,3 +1,11 @@
+## v1.2.0-beta3 / 2021-06-07
+
+Bug fixes and improves details.
+
+## v1.2.0-beta2 / 2021-06-05
+
+Bug fixes and improves details.
+
 ## v1.2.0-beta1 / 2021-06-03
 
 ### Features

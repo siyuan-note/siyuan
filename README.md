@@ -27,7 +27,7 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
 * Content block
   * Block-level reference and two-way links
   * Document relationship diagram, global relationship diagram
-  * Properties
+  * Custom attributes
   * SQL query embed
   * Protocol `siyuan://`
 * Editor

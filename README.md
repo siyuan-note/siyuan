@@ -81,9 +81,9 @@ To get the latest Insider Preview, please send an email with your GitHub login n
 At present, some components of SiYuan are open source, and contributions are welcome.
 
 * [User Guide](https://github.com/siyuan-note/user-guide-en_US)
-* [Appearance and language](https://github.com/siyuan-note/appearance)
+* [Appearance](https://github.com/siyuan-note/appearance)
 * [Markdown Engine](https://github.com/88250/lute)
-* [Chrome web clipping extension](https://github.com/siyuan-note/siyuan-chrome)
+* [Chrome extension](https://github.com/siyuan-note/siyuan-chrome)
 
 ## 🙏 Acknowledgement
 

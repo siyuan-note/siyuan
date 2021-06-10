@@ -14,6 +14,7 @@
 * [字体加粗后删除依旧为粗体](https://github.com/siyuan-note/siyuan/issues/2086)
 * [数据库结构变更后强制重建库](https://github.com/siyuan-note/siyuan/issues/2088)
 * [开源端到端加密代码](https://github.com/siyuan-note/siyuan/issues/2095)
+* [为代码块添加 144 种主题及对 verilog 的支持](https://github.com/siyuan-note/siyuan/issues/2103)
 
 ### Bug fixes
 

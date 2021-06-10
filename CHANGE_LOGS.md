@@ -1,3 +1,29 @@
+## v1.2.0-beta5 / 2021-06-10
+
+### 引入特性
+
+* [引入挂件块伺服](https://github.com/siyuan-note/siyuan/issues/2093)
+
+### 改进功能
+
+* [Support select, copy, cut and enter to edit ](https://github.com/siyuan-note/siyuan/issues/2069)
+* [文字选中进行操作处理时,能否自动跳过公式?](https://github.com/siyuan-note/siyuan/issues/2076)
+* [自定义加密备份存放路径](https://github.com/siyuan-note/siyuan/issues/2077)
+* [备注悬浮预览](https://github.com/siyuan-note/siyuan/issues/2080)
+* [上下键会跳过空段落](https://github.com/siyuan-note/siyuan/issues/2082)
+* [字体加粗后删除依旧为粗体](https://github.com/siyuan-note/siyuan/issues/2086)
+* [数据库结构变更后强制重建库](https://github.com/siyuan-note/siyuan/issues/2088)
+* [开源端到端加密代码](https://github.com/siyuan-note/siyuan/issues/2095)
+
+### 修复缺陷
+
+* [Blockquote data loss](https://github.com/siyuan-note/siyuan/issues/2075)
+* [不同笔记本下创建了同名笔记的问题](https://github.com/siyuan-note/siyuan/issues/2081)
+* [行内公式在一行之首时无法缩到上一行](https://github.com/siyuan-note/siyuan/issues/2083)
+* [块引单引号影响搜索](https://github.com/siyuan-note/siyuan/issues/2089)
+* [标题转换文档数据丢失](https://github.com/siyuan-note/siyuan/issues/2094)
+* [一些网站无法使用 IFrame 嵌入的问题](https://github.com/siyuan-note/siyuan/issues/2096)
+
 ## v1.2.0-beta4 / 2021-06-07
 
 ### Features

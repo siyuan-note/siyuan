@@ -34,7 +34,7 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
   * Block-style
   * Markdown WYSIWYG
   * List outline
-  * Block zoom-in  
+  * Block zoom-in
   * Block horizontal layout
   * Million-word large document editing
   * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
@@ -42,12 +42,12 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
 * Export
   * Standard Markdown with assets
   * Content block reference provides anchor text + embedded blockquote option
-  * Copy to WeChat MP, Zhihu and Yuque  
+  * Copy to WeChat MP, Zhihu and Yuque
 * Hierarchical tag
 * Multi-tab, drag and drop to split screen
 * Fulltext search
 * Template snippet
-* Keymap  
+* Keymap
 * Themes and icons
 * Data cloud backup, end-to-end encryption
 * Android APP

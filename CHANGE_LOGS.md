@@ -1,10 +1,10 @@
 ## v1.2.0-beta5 / 2021-06-10
 
-### 引入特性
+### Features
 
 * [引入挂件块伺服](https://github.com/siyuan-note/siyuan/issues/2093)
 
-### 改进功能
+### Enhancements
 
 * [Support select, copy, cut and enter to edit ](https://github.com/siyuan-note/siyuan/issues/2069)
 * [文字选中进行操作处理时,能否自动跳过公式?](https://github.com/siyuan-note/siyuan/issues/2076)
@@ -15,7 +15,7 @@
 * [数据库结构变更后强制重建库](https://github.com/siyuan-note/siyuan/issues/2088)
 * [开源端到端加密代码](https://github.com/siyuan-note/siyuan/issues/2095)
 
-### 修复缺陷
+### Bug fixes
 
 * [Blockquote data loss](https://github.com/siyuan-note/siyuan/issues/2075)
 * [不同笔记本下创建了同名笔记的问题](https://github.com/siyuan-note/siyuan/issues/2081)

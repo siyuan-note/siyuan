@@ -1,12 +1,12 @@
 ## v1.2.0-beta6 / 2021-06-13
 
-### 引入特性
+### Features
 
 * [Support custom block attributes](https://github.com/siyuan-note/siyuan/issues/1719)
 * [添加居中/左/右快捷键](https://github.com/siyuan-note/siyuan/issues/2091)
 * [横排分栏宽度调整](https://github.com/siyuan-note/siyuan/issues/2125)
 
-### 改进功能
+### Enhancements
 
 * [命名、别名、备注和书签合并到属性设置中](https://github.com/siyuan-note/siyuan/issues/1275)
 * [图片标题入库](https://github.com/siyuan-note/siyuan/issues/2100)
@@ -19,7 +19,7 @@
 * [不锁定日志文件](https://github.com/siyuan-note/siyuan/issues/2122)
 * [缩短备份文件名，避免一些系统上路径过长报错](https://github.com/siyuan-note/siyuan/issues/2124)
 
-### 修复缺陷
+### Bug fixes
 
 * [任务列表转换段落问题](https://github.com/siyuan-note/siyuan/issues/2102)
 * [Android 端横屏重启问题](https://github.com/siyuan-note/siyuan/issues/2107)

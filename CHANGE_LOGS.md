@@ -1,3 +1,36 @@
+## v1.2.0-beta6 / 2021-06-13
+
+### 引入特性
+
+* [Support custom block attributes](https://github.com/siyuan-note/siyuan/issues/1719)
+* [添加居中/左/右快捷键](https://github.com/siyuan-note/siyuan/issues/2091)
+* [横排分栏宽度调整](https://github.com/siyuan-note/siyuan/issues/2125)
+
+### 改进功能
+
+* [命名、别名、备注和书签合并到属性设置中](https://github.com/siyuan-note/siyuan/issues/1275)
+* [图片标题入库](https://github.com/siyuan-note/siyuan/issues/2100)
+* [Want to unify the folding style for list and list item](https://github.com/siyuan-note/siyuan/issues/2104)
+* [移动端代码块折行问题](https://github.com/siyuan-note/siyuan/issues/2106)
+* [从其他软件复制带图内容改进](https://github.com/siyuan-note/siyuan/issues/2110)
+* [行内公式的新问题](https://github.com/siyuan-note/siyuan/issues/2112)
+* [结合 shift↑ 为块添加展开/折叠快捷键 ⌘↑](https://github.com/siyuan-note/siyuan/issues/2114)
+* [图片居中以后，同一段落输入文本，图片的居中会被取消](https://github.com/siyuan-note/siyuan/issues/2117)
+* [不锁定日志文件](https://github.com/siyuan-note/siyuan/issues/2122)
+* [缩短备份文件名，避免一些系统上路径过长报错](https://github.com/siyuan-note/siyuan/issues/2124)
+
+### 修复缺陷
+
+* [任务列表转换段落问题](https://github.com/siyuan-note/siyuan/issues/2102)
+* [Android 端横屏重启问题](https://github.com/siyuan-note/siyuan/issues/2107)
+* [行级元素拖拽移动问题](https://github.com/siyuan-note/siyuan/issues/2108)
+* [备注预览显示默认 `memo` 文案问题](https://github.com/siyuan-note/siyuan/issues/2109)
+* [重启后访问授权码被随机重置问题](https://github.com/siyuan-note/siyuan/issues/2115)
+* [未引用资源预览样式不正确、最后一个资源无法删除](https://github.com/siyuan-note/siyuan/issues/2116)
+* [剪藏时如果包含长图片名路径时会报错](https://github.com/siyuan-note/siyuan/issues/2119)
+* [备份恢复报错 `open xxx/decrypt: is a directory`](https://github.com/siyuan-note/siyuan/issues/2120)
+* [剪切、粘贴引用块后，被剪切的块会留在原地](https://github.com/siyuan-note/siyuan/issues/2123)
+
 ## v1.2.0-beta5 / 2021-06-10
 
 ### Features

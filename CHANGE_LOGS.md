@@ -1,3 +1,35 @@
+## v1.2.0-beta7 / 2021-06-16
+
+### Features
+
+* [Docker rsync](https://github.com/siyuan-note/siyuan/issues/2040)
+* [笔记本 assets 资源文件伺服](https://github.com/siyuan-note/siyuan/issues/2113)
+* [支持剪藏 SVG](https://github.com/siyuan-note/siyuan/issues/2151)
+
+### Enhancements
+
+* [属性设置交互优化](https://github.com/siyuan-note/siyuan/issues/2129)
+* [resize heading with folding quoteblock](https://github.com/siyuan-note/siyuan/issues/2134)
+* [Cursor Position Wrong When Typing Math Formula](https://github.com/siyuan-note/siyuan/issues/2135)
+* [Enhancement of naming and memo functions](https://github.com/siyuan-note/siyuan/issues/2136)
+* [块引悬浮层加载上下文](https://github.com/siyuan-note/siyuan/issues/2139)
+* [折叠逻辑修改](https://github.com/siyuan-note/siyuan/issues/2142)
+* [改进导出 pdf 中的数学公式渲染](https://github.com/siyuan-note/siyuan/issues/2147)
+* [Add refresh button on the bookmark toolbar](https://github.com/siyuan-note/siyuan/issues/2149)
+* [优化粘贴大量数据时的性能](https://github.com/siyuan-note/siyuan/issues/2150)
+
+### Bug fixes
+
+* [设置 - 资源界面卡住问题](https://github.com/siyuan-note/siyuan/issues/2126)
+* [剪藏某些网页图片路径重复问题](https://github.com/siyuan-note/siyuan/issues/2130)
+* [PPT 渲染无法解析数学公式、代码块等](https://github.com/siyuan-note/siyuan/issues/2132)
+* [Resize image not work](https://github.com/siyuan-note/siyuan/issues/2133)
+* [带编号的公式显示不正常](https://github.com/siyuan-note/siyuan/issues/2140)
+* [反斜杠 `\` 转义后再打开文档会重复显示](https://github.com/siyuan-note/siyuan/issues/2141)
+* [模板空列表项解析问题](https://github.com/siyuan-note/siyuan/issues/2143)
+* [自定义排序移动文件夹后失效的问题](https://github.com/siyuan-note/siyuan/issues/2145)
+* [无法撤销第一个操作](https://github.com/siyuan-note/siyuan/issues/2148)
+
 ## v1.2.0-beta6 / 2021-06-13
 
 ### Features

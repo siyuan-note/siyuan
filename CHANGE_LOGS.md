@@ -1,3 +1,26 @@
+## v1.2.0-beta8 / 2021-06-18
+
+### Features
+
+* [标题块带下方块折叠和移动](https://github.com/siyuan-note/siyuan/issues/2097)
+* [为代码块单独提供换行、连字符和行号配置](https://github.com/siyuan-note/siyuan/issues/2144)
+
+### Enhancements
+
+* [切换 tab 不应该失去光标焦点](https://github.com/siyuan-note/siyuan/issues/2156)
+* [禁止在表格中多选单元格进行格式化排版](https://github.com/siyuan-note/siyuan/issues/2157)
+* [引用块面板全局滚动条无法使用鼠标进行拖动](https://github.com/siyuan-note/siyuan/issues/2158)
+* [Improve undo](https://github.com/siyuan-note/siyuan/issues/2159)
+* [属性面板支持回车确定](https://github.com/siyuan-note/siyuan/issues/2163)
+
+### Bug fixes
+
+* [命名及备注标识被遮挡](https://github.com/siyuan-note/siyuan/issues/2153)
+* [Cannot remove bookmark for doc](https://github.com/siyuan-note/siyuan/issues/2154)
+* [正文中出现滑块](https://github.com/siyuan-note/siyuan/issues/2155)
+* [列表项中包含子列表和段落，回车错误](https://github.com/siyuan-note/siyuan/issues/2161)
+* [脑图和图表上下动态加载后会消失](https://github.com/siyuan-note/siyuan/issues/2162)
+
 ## v1.2.0-beta7 / 2021-06-16
 
 ### Features

@@ -1,3 +1,36 @@
+## v1.2.0-beta9 / 2021-06-23
+
+### 引入特性
+
+* [Global search with path filter](https://github.com/siyuan-note/siyuan/issues/1995)
+
+### 改进功能
+
+* [中西文自动空格计入 `@` 符号](https://github.com/siyuan-note/siyuan/issues/2164)
+* [表格内容三击操作有问题](https://github.com/siyuan-note/siyuan/issues/2168)
+* [copy individual image locally](https://github.com/siyuan-note/siyuan/issues/2171)
+* [持久化保存备份密码，避免每次都需要输入](https://github.com/siyuan-note/siyuan/issues/2173)
+* [笔记本 backup 目录重命名为 history](https://github.com/siyuan-note/siyuan/issues/2175)
+* [数学公式改进](https://github.com/siyuan-note/siyuan/issues/2181)
+* [嵌入块手动刷新](https://github.com/siyuan-note/siyuan/issues/2184)
+* [行级公式编辑框不允许换行](https://github.com/siyuan-note/siyuan/issues/2187)
+* [脑图编辑支持 tab](https://github.com/siyuan-note/siyuan/issues/2192)
+* [表格内粘贴优化](https://github.com/siyuan-note/siyuan/issues/2193)
+
+### 修复缺陷
+
+* [整段文字加颜色着重,行内公式上移](https://github.com/siyuan-note/siyuan/issues/2170)
+* [大小写影响提及转换链接](https://github.com/siyuan-note/siyuan/issues/2172)
+* [标题折叠取消超级块时内容丢失](https://github.com/siyuan-note/siyuan/issues/2174)
+* [文档标题栏不应该显示其子块引用计数](https://github.com/siyuan-note/siyuan/issues/2183)
+* [任务列表转换有序列表序号不正确](https://github.com/siyuan-note/siyuan/issues/2185)
+* [导出 Markdown 时包含中文名的资源文件没有导出](https://github.com/siyuan-note/siyuan/issues/2186)
+* [删除折叠标题时恢复下方块为展开状态](https://github.com/siyuan-note/siyuan/issues/2188)
+* [同一个文档中移动折叠标题导致内容重复](https://github.com/siyuan-note/siyuan/issues/2189)
+* [块引时候选列表中点击块标插入位置问题](https://github.com/siyuan-note/siyuan/issues/2191)
+* [双栏操作下光标会出现跳回上次操作的位置](https://github.com/siyuan-note/siyuan/issues/2196)
+* [多选先“转换为引述”，再“转换为无序列表”内容丢失](https://github.com/siyuan-note/siyuan/issues/2197)
+
 ## v1.2.0-beta8 / 2021-06-18
 
 ### Features

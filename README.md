@@ -68,7 +68,6 @@ To get the latest Insider Preview, please send an email with your GitHub login n
 
 ## 📜 Documentation
 
-* [User Guide](https://ld246.com/udanax/1602224134353)
 * [SiYuan - A desktop Markdown Block-Reference and Bidirectional-Link note-taking application](https://ld246.com/article/1598872180233)
 * [Markdown implements the exploration of block-level reference bidirectional links](https://ld246.com/article/1597226949061)
 

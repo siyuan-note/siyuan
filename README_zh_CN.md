@@ -20,9 +20,9 @@
 
 欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。
 
-![bg1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg1.png)
+![bg1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@8489397401cf5025eab847dfb26a4f3896be5363/screenshots/feature0.png)
 
-![bg3.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@762fc276da1f713551b61799f04a3661ccd17369/screenshots/bg3.png)
+![bg3.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@8489397401cf5025eab847dfb26a4f3896be5363/screenshots/feature1-1.png)
 
 ## ✨  特性
 

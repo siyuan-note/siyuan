@@ -1,3 +1,40 @@
+## v1.2.0-beta10 / 2021-06-26
+
+### Features
+
+* [浏览器剪藏扩展支持设置内核接口地址](https://github.com/siyuan-note/siyuan/issues/2203)
+* [资源文件相对路径伺服](https://github.com/siyuan-note/siyuan/issues/2236)
+
+### Enhancements
+
+* [高亮排版时删除内部多余的空格](https://github.com/siyuan-note/siyuan/issues/2169)
+* [大纲折叠优化](https://github.com/siyuan-note/siyuan/issues/2199)
+* [菜单项过多时需进行滚动](https://github.com/siyuan-note/siyuan/issues/2201)
+* [行首为公式时无法使用 `Home` 键定位到行首](https://github.com/siyuan-note/siyuan/issues/2204)
+* [文档大纲缩进优化](https://github.com/siyuan-note/siyuan/issues/2205)
+* [PDF、HTML 导出需要付费订阅](https://github.com/siyuan-note/siyuan/issues/2206)
+* [任务列表块内容和方块标记不对齐](https://github.com/siyuan-note/siyuan/issues/2207)
+* [文章标题能够自动换行](https://github.com/siyuan-note/siyuan/issues/2213)
+* [汉字与假名的自动空格问题](https://github.com/siyuan-note/siyuan/issues/2214)
+* [文档编辑时如果没有权限写入数据需要及时在界面上提醒](https://github.com/siyuan-note/siyuan/issues/2220)
+* [斜杆菜单位置和大小优化](https://github.com/siyuan-note/siyuan/issues/2221)
+* [重命名后光标应再回到编辑器中](https://github.com/siyuan-note/siyuan/issues/2227)
+* [增加图片拖拽区域范围](https://github.com/siyuan-note/siyuan/issues/2228)
+
+### Bug fixes
+
+* [代码块在缩小字体字号时，左边有部分内容被隐藏，整体往左偏移了一些像素。](https://github.com/siyuan-note/siyuan/issues/2178)
+* [搜索面板搜索为空且关闭报错](https://github.com/siyuan-note/siyuan/issues/2202)
+* [后缀名为空的文件拖动到笔记时无法自动复制](https://github.com/siyuan-note/siyuan/issues/2208)
+* [含有视频网站链接的文章无法导出 pdf](https://github.com/siyuan-note/siyuan/issues/2209)
+* [SQL 全局搜索不应该转换小写](https://github.com/siyuan-note/siyuan/issues/2211)
+* [查看云端空间占用为零的问题](https://github.com/siyuan-note/siyuan/issues/2212)
+* [列表前一个块结尾 Delete 后删除逻辑问题](https://github.com/siyuan-note/siyuan/issues/2218)
+* [嵌入块中的图片图标遮挡住了嵌入块的操作按钮](https://github.com/siyuan-note/siyuan/issues/2225)
+* [调整历史生成间隔以后没有即时生效](https://github.com/siyuan-note/siyuan/issues/2226)
+* [链接后粘贴链接问题](https://github.com/siyuan-note/siyuan/issues/2232)
+* [粘贴 Excel 变成图片的问题](https://github.com/siyuan-note/siyuan/issues/2235)
+
 ## v1.2.0-beta9 / 2021-06-23
 
 ### 引入特性

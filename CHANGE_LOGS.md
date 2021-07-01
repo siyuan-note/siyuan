@@ -1,3 +1,47 @@
+## v1.2.0-beta11 / 2021-07-01
+
+### Features
+
+* [列表项多选缩进及反向缩进](https://github.com/siyuan-note/siyuan/issues/1392)
+* [重写文档数据写入机制，锁定文件提升稳定性](https://github.com/siyuan-note/siyuan/issues/2257)
+
+### Enhancements
+
+* [用 `Ctrl+/` 调出块标菜单后可支持方向键和回车键进行操作](https://github.com/siyuan-note/siyuan/issues/2078)
+* [点击文档，高亮大纲中对应的标题](https://github.com/siyuan-note/siyuan/issues/2195)
+* [表格细节改进](https://github.com/siyuan-note/siyuan/issues/2210)
+* [点击块右上角的属性后将光标定位到该属性的输入框中](https://github.com/siyuan-note/siyuan/issues/2224)
+* [剪切链接后粘贴问题](https://github.com/siyuan-note/siyuan/issues/2231)
+* [输入法中数字的句号无法转换为点](https://github.com/siyuan-note/siyuan/issues/2237)
+* [增加段落块转换类型支持](https://github.com/siyuan-note/siyuan/issues/2238)
+* [引用过多时，优化悬浮窗性能](https://github.com/siyuan-note/siyuan/issues/2246)
+* [搜索结果中存在命名别名的块排序优先](https://github.com/siyuan-note/siyuan/issues/2251)
+* [嵌入块搜索忽略类型过滤](https://github.com/siyuan-note/siyuan/issues/2252)
+* [搜索结果高亮](https://github.com/siyuan-note/siyuan/issues/2254)
+* [文档手动刷新按钮](https://github.com/siyuan-note/siyuan/issues/2256)
+* [优化移动端横向排版效果](https://github.com/siyuan-note/siyuan/issues/2259)
+* [顿号唤出菜单仅限于斜杆，反斜杠按钮打出的顿号不再唤出菜单](https://github.com/siyuan-note/siyuan/issues/2261)
+* [改进空块提示](https://github.com/siyuan-note/siyuan/issues/2263)
+* [调整编辑器大小时，块符号不跟随](https://github.com/siyuan-note/siyuan/issues/2266)
+* [切换/编辑文档时保持大纲折叠状态](https://github.com/siyuan-note/siyuan/issues/2268)
+* [从备份恢复后需要重新启动](https://github.com/siyuan-note/siyuan/issues/2273)
+* [Android 通过通知栏保活](https://github.com/siyuan-note/siyuan/issues/2274)
+* [简化块标、聚焦面包屑导航](https://github.com/siyuan-note/siyuan/issues/2278)
+
+### Bug fixes
+
+* [`<kbd>` 中反斜杠转义问题](https://github.com/siyuan-note/siyuan/issues/2242)
+* [首行是列表块时光标上移 bug](https://github.com/siyuan-note/siyuan/issues/2245)
+* [标题折叠展开相关问题](https://github.com/siyuan-note/siyuan/issues/2248)
+* [Do not allow to write data during boot](https://github.com/siyuan-note/siyuan/issues/2253)
+* [Docker 部署时下载云端数据备份异常](https://github.com/siyuan-note/siyuan/issues/2255)
+* [代码块粘贴文本以换行符结尾时, 最后一行无法删除](https://github.com/siyuan-note/siyuan/issues/2258)
+* [wrap code bug](https://github.com/siyuan-note/siyuan/issues/2264)
+* [登录账号需要输入验证码时没有显示验证码的问题](https://github.com/siyuan-note/siyuan/issues/2271)
+* [剪藏微信公众号全选报错问题](https://github.com/siyuan-note/siyuan/issues/2275)
+* [列表中嵌套超级块后无法点击左侧图标](https://github.com/siyuan-note/siyuan/issues/2277)
+* [表格内存在行级公式时编辑会产生换行](https://github.com/siyuan-note/siyuan/issues/2279)
+
 ## v1.2.0-beta10 / 2021-06-26
 
 ### Features

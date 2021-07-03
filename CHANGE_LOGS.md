@@ -1,3 +1,36 @@
+## v1.2.0-beta12 / 2021-07-03
+
+### Features
+
+* [支持插入音频、视频和图片后设置链接](https://github.com/siyuan-note/siyuan/issues/2302)
+* [为块元素添加字体、背景、镂空、阴影、发光效果](https://github.com/siyuan-note/siyuan/issues/2306)
+
+### Enhancements
+
+* [块引浮窗上下文加载按钮](https://github.com/siyuan-note/siyuan/issues/2262)
+* [折叠标题性能优化](https://github.com/siyuan-note/siyuan/issues/2281)
+* [导出时块引锚文本加上 siyuan:// 块链](https://github.com/siyuan-note/siyuan/issues/2282)
+* [拖拽时隐藏块前图标提示](https://github.com/siyuan-note/siyuan/issues/2283)
+* [固定面包屑导航](https://github.com/siyuan-note/siyuan/issues/2285)
+* [拖拽块前图标无法向上滚动](https://github.com/siyuan-note/siyuan/issues/2287)
+* [导出的多级列表样式和编辑器中不一致](https://github.com/siyuan-note/siyuan/issues/2288)
+* [优化全局搜索结果排序](https://github.com/siyuan-note/siyuan/issues/2289)
+* [支持行内代码连字](https://github.com/siyuan-note/siyuan/issues/2295)
+* [列表样式不随着字体大小改变而变化](https://github.com/siyuan-note/siyuan/issues/2296)
+* [兼容主题菜单样式错误](https://github.com/siyuan-note/siyuan/issues/2300)
+* [支持视频、音频、iframe 的居中、居左、居右配置](https://github.com/siyuan-note/siyuan/issues/2301)
+* [嵌入块 `{{` 后不弹出 SQL 代码框，而是类似 `((` 后自动搜索关键字](https://github.com/siyuan-note/siyuan/issues/2305)
+
+### Bug fixes
+
+* [子块折叠后位置错位](https://github.com/siyuan-note/siyuan/issues/2284)
+* [列表删除后仍然可被引用](https://github.com/siyuan-note/siyuan/issues/2293)
+* [输入中文双引号时，会出现文本显示错位，之后输入文本，光标会丢失](https://github.com/siyuan-note/siyuan/issues/2297)
+* [公式导出时大于号、小于号等错误地转换为了 HTML 实体](https://github.com/siyuan-note/siyuan/issues/2298)
+* [文件树拖拽间隔过短会失败](https://github.com/siyuan-note/siyuan/issues/2299)
+* [段落块意外的块属性修正](https://github.com/siyuan-note/siyuan/issues/2307)
+* [文档转换标题时层级计算溢出](https://github.com/siyuan-note/siyuan/issues/2308)
+
 ## v1.2.0-beta11 / 2021-07-01
 
 ### Features

@@ -1,3 +1,25 @@
+## v1.2.0-beta13 / 2021-07-05
+
+### Enhancements
+
+* [增加行宽度75](https://github.com/siyuan-note/siyuan/issues/2294)
+* [被其他软件占用文件时需要弹框锁定](https://github.com/siyuan-note/siyuan/issues/2309)
+* [块引浮窗取消动态加载，除非点击过上下文加载按钮才启用动态加载](https://github.com/siyuan-note/siyuan/issues/2311)
+* [改进重命名机制，避免使用同步盘时潜在的数据不一致](https://github.com/siyuan-note/siyuan/issues/2319)
+* [体验改进](https://github.com/siyuan-note/siyuan/issues/2322)
+* [浏览器中支持 Ctrl+K](https://github.com/siyuan-note/siyuan/issues/2324)
+* [文档树上文件夹和文档的视觉区分](https://github.com/siyuan-note/siyuan/issues/2327)
+
+### Bug fixes
+
+* [导出 Markdown 时没有导出笔记本级 assets](https://github.com/siyuan-note/siyuan/issues/2312)
+* [历史记录写入报错](https://github.com/siyuan-note/siyuan/issues/2313)
+* [移动端切换文档时面包屑不会刷新](https://github.com/siyuan-note/siyuan/issues/2316)
+* [引术块属性 bug](https://github.com/siyuan-note/siyuan/issues/2317)
+* [点击两行文字的中间光标消失](https://github.com/siyuan-note/siyuan/issues/2318)
+* [微软输入法中文状态下输入数字的问题](https://github.com/siyuan-note/siyuan/issues/2321)
+* [编辑标题块以后内容块查询失败的问题](https://github.com/siyuan-note/siyuan/issues/2326)
+
 ## v1.2.0-beta12 / 2021-07-03
 
 ### Features

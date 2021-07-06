@@ -1,3 +1,18 @@
+## v1.2.0-beta14 / 2021-07-06
+
+### Enhancements
+
+* [从右往左选中优化](https://github.com/siyuan-note/siyuan/issues/2328)
+* [新版启动时自动结束老版内核](https://github.com/siyuan-note/siyuan/issues/2330)
+* [全局缓存代码语言](https://github.com/siyuan-note/siyuan/issues/2331)
+* [代码块自定义默认配置需和全局保持一致](https://github.com/siyuan-note/siyuan/issues/2334)
+
+### Bug fixes
+
+* [List block data loss](https://github.com/siyuan-note/siyuan/issues/2329)
+* [图片末尾回车 bug](https://github.com/siyuan-note/siyuan/issues/2332)
+* [删除文件夹时报文件被占用锁定问题](https://github.com/siyuan-note/siyuan/issues/2333)
+
 ## v1.2.0-beta13 / 2021-07-05
 
 ### Enhancements

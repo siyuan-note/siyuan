@@ -1,3 +1,31 @@
+## v1.2.0-beta15 / 2021-07-08
+
+### Features
+
+* [双击未修改过的页签后不再进行替换](https://github.com/siyuan-note/siyuan/issues/2344)
+* [Shift+↑/↓ 延续选中上/下兄弟块](https://github.com/siyuan-note/siyuan/issues/2349)
+* [支持段落块段首空格或 Tab 缩进](https://github.com/siyuan-note/siyuan/issues/2356)
+
+### Enhancements
+
+* [有序列表拖拽第一项后应保持顺序不变](https://github.com/siyuan-note/siyuan/issues/2337)
+* [面包屑文档根节点导航点击改进](https://github.com/siyuan-note/siyuan/issues/2343)
+* [文字选中优化](https://github.com/siyuan-note/siyuan/issues/2345)
+* [空列表数据订正](https://github.com/siyuan-note/siyuan/issues/2350)
+* [缩放快捷键 `Alt+→/←`](https://github.com/siyuan-note/siyuan/issues/2351)
+* [缩放 `Ctrl+Click`/`Ctrl+RightClick` 支持在非块标上操作](https://github.com/siyuan-note/siyuan/issues/2352)
+* [图片右键应弹出图片菜单而非段落块菜单](https://github.com/siyuan-note/siyuan/issues/2355)
+
+### Bug fixes
+
+* [浏览历史为空的问题](https://github.com/siyuan-note/siyuan/issues/2338)
+* [帮助文档重复挂载问题](https://github.com/siyuan-note/siyuan/issues/2339)
+* [删除标题块以后编辑报错查询内容块失败](https://github.com/siyuan-note/siyuan/issues/2340)
+* [列表项拖拽合并到另一个列表第一项时的问题](https://github.com/siyuan-note/siyuan/issues/2341)
+* [Docker 镜像缺失 Pandoc ](https://github.com/siyuan-note/siyuan/issues/2346)
+* [粘贴行级代码时 HTML 转义问题](https://github.com/siyuan-note/siyuan/issues/2347)
+* [有序列表缩进到无序列表中的 bug](https://github.com/siyuan-note/siyuan/issues/2348)
+
 ## v1.2.0-beta14 / 2021-07-06
 
 ### Enhancements

@@ -15,6 +15,7 @@
 * [缩放快捷键 `Alt+→/←`](https://github.com/siyuan-note/siyuan/issues/2351)
 * [缩放 `Ctrl+Click`/`Ctrl+RightClick` 支持在非块标上操作](https://github.com/siyuan-note/siyuan/issues/2352)
 * [图片右键应弹出图片菜单而非段落块菜单](https://github.com/siyuan-note/siyuan/issues/2355)
+* [块引用时排除当前块](https://github.com/siyuan-note/siyuan/issues/2358)
 
 ### Bug fixes
 

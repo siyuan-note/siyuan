@@ -1,3 +1,22 @@
+## v1.2.0-beta16 / 2021-07-09
+
+### Enhancements
+
+* [列表项带子块聚焦](https://github.com/siyuan-note/siyuan/issues/2362)
+* [Windows 版允许设置安装位置](https://github.com/siyuan-note/siyuan/issues/2366)
+* [阻止长按 enter 回车](https://github.com/siyuan-note/siyuan/issues/2367)
+* [设置备份目录路径检查](https://github.com/siyuan-note/siyuan/issues/2368)
+* [图片预览由单击改为双击](https://github.com/siyuan-note/siyuan/issues/2373)
+* [大纲默认全部展开](https://github.com/siyuan-note/siyuan/issues/2374)
+* [优化属性设置的性能](https://github.com/siyuan-note/siyuan/issues/2375)
+
+### Bug fixes
+
+* [冷启动过慢的问题](https://github.com/siyuan-note/siyuan/issues/2363)
+* [回滚文档大小为 0K 的问题](https://github.com/siyuan-note/siyuan/issues/2364)
+* [图片上下空行问题](https://github.com/siyuan-note/siyuan/issues/2365)
+* [`<iframe ` 解析问题](https://github.com/siyuan-note/siyuan/issues/2369)
+
 ## v1.2.0-beta15 / 2021-07-08
 
 ### Features

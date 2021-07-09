@@ -1,5 +1,5 @@
 ## v1.2.0-beta16 / 2021-07-09
-
+ 
 ### Enhancements
 
 * [列表项带子块聚焦](https://github.com/siyuan-note/siyuan/issues/2362)

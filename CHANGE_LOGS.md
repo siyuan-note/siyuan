@@ -1,3 +1,28 @@
+## v1.2.0-rc1 / 2021-07-11
+
+### Bug fixes
+
+* [显示/隐藏窗口快捷键唤出时窗口不在最前](https://github.com/siyuan-note/siyuan/issues/2354)
+* [导出设置块引为锚文本模式时报错](https://github.com/siyuan-note/siyuan/issues/2376)
+* [托盘退出时关闭内核](https://github.com/siyuan-note/siyuan/issues/2377)
+* [重命名工作空间文件夹后重启会新建一个原有的工作空间文件夹](https://github.com/siyuan-note/siyuan/issues/2379)
+* [Docker 导出 Markdown 时下载地址不对](https://github.com/siyuan-note/siyuan/issues/2380)
+* [行级元素 Shift 跳出不连续问题](https://github.com/siyuan-note/siyuan/issues/2381)
+* [行级元素软换行后删除不了](https://github.com/siyuan-note/siyuan/issues/2382)
+* [页签/文档树等 UI 元素过窄时界面会失去焦点，交互操作无响应](https://github.com/siyuan-note/siyuan/issues/2383)
+* [空列表项粘贴嵌入块再撤销，就没法回车继续回车了](https://github.com/siyuan-note/siyuan/issues/2386)
+* [列表内有嵌入块，列表下方按删除键无反应](https://github.com/siyuan-note/siyuan/issues/2388)
+* [折叠组合移动 bug](https://github.com/siyuan-note/siyuan/issues/2389)
+* [导出时子列表内标记符重复](https://github.com/siyuan-note/siyuan/issues/2390)
+* [新建文档名对话框输入自适应宽度](https://github.com/siyuan-note/siyuan/issues/2391)
+* [空公式解析问题](https://github.com/siyuan-note/siyuan/issues/2392)
+* [中西文自动空格对上下标排版后失效](https://github.com/siyuan-note/siyuan/issues/2393)
+* [foo /math 后重新打开还存在](https://github.com/siyuan-note/siyuan/issues/2394)
+* [禁止行级公式派生块级公式](https://github.com/siyuan-note/siyuan/issues/2395)
+* [图片下间距太长，不美观](https://github.com/siyuan-note/siyuan/issues/2396)
+* [大纲、面包屑内容转义问题](https://github.com/siyuan-note/siyuan/issues/2397)
+* [软换行后数学公式不会弹出公式输入框](https://github.com/siyuan-note/siyuan/issues/2398)
+
 ## v1.2.0-beta16 / 2021-07-09
 
 ### Enhancements

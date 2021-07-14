@@ -1,6 +1,6 @@
 ## v1.2.0-rc3 / 2021-07-14
 
-### 修复缺陷
+### Bug fixes
 
 * [横排标题折叠后使用 Ctrl ↓ 展开失效](https://github.com/siyuan-note/siyuan/issues/2416)
 * [打开/关闭笔记本和刷新文档树并发问题](https://github.com/siyuan-note/siyuan/issues/2417)
@@ -12,11 +12,11 @@
 
 ## v1.2.0-rc2 / 2021-07-13
 
-### 文档相关
+### Documentation
 
 * [安装/升级后自动打开帮助文档](https://github.com/siyuan-note/siyuan/issues/2411)
 
-### 修复缺陷
+### Bug fixes
 
 * [代码高亮渲染不完整](https://github.com/siyuan-note/siyuan/issues/2399)
 * [横排标题折叠后使用 Ctrl ↓ 展开失效](https://github.com/siyuan-note/siyuan/issues/2400)

@@ -1,3 +1,35 @@
+## v1.2.0-rc3 / 2021-07-14
+
+### 修复缺陷
+
+* [横排标题折叠后使用 Ctrl ↓ 展开失效](https://github.com/siyuan-note/siyuan/issues/2416)
+* [打开/关闭笔记本和刷新文档树并发问题](https://github.com/siyuan-note/siyuan/issues/2417)
+* [云端备份 rsync 路径错误](https://github.com/siyuan-note/siyuan/issues/2418)
+* [Android 端文档树返回上一层失效](https://github.com/siyuan-note/siyuan/issues/2419)
+* [Windows 安装程序问题](https://github.com/siyuan-note/siyuan/issues/2420)
+* [复制图片后不应该转换 PNG 格式](https://github.com/siyuan-note/siyuan/issues/2421)
+* [插入资源文件时避免重复](https://github.com/siyuan-note/siyuan/issues/2422)
+
+## v1.2.0-rc2 / 2021-07-13
+
+### 文档相关
+
+* [安装/升级后自动打开帮助文档](https://github.com/siyuan-note/siyuan/issues/2411)
+
+### 修复缺陷
+
+* [代码高亮渲染不完整](https://github.com/siyuan-note/siyuan/issues/2399)
+* [横排标题折叠后使用 Ctrl ↓ 展开失效](https://github.com/siyuan-note/siyuan/issues/2400)
+* [Alt M 未恢复窗体状态](https://github.com/siyuan-note/siyuan/issues/2401)
+* [去掉 Ctrl Click 聚焦](https://github.com/siyuan-note/siyuan/issues/2403)
+* [重命名文档时 `\n`、`\t` 等没有处理](https://github.com/siyuan-note/siyuan/issues/2404)
+* [Windows 上 rsync 存在性修复](https://github.com/siyuan-note/siyuan/issues/2405)
+* [不允许将工作空间、备份目录设置到带空格的路径下](https://github.com/siyuan-note/siyuan/issues/2407)
+* [Android 端左滑、右滑、下滑触发失效问题](https://github.com/siyuan-note/siyuan/issues/2408)
+* [浏览器剪藏时没有将资源文件保存在手动建立的 assets 中](https://github.com/siyuan-note/siyuan/issues/2410)
+* [PDF 页签图标错误](https://github.com/siyuan-note/siyuan/issues/2412)
+* [行级公式 `&amp;` 数据订正](https://github.com/siyuan-note/siyuan/issues/2413)
+
 ## v1.2.0-rc1 / 2021-07-11
 
 ### Bug fixes

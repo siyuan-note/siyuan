@@ -1,3 +1,11 @@
+## v1.2.0 / 2021-07-15
+
+### Bug fixes
+
+* [`#标签` 自动完成性能不好](https://github.com/siyuan-note/siyuan/issues/2424)
+* [行级公式内容为空时应该自动移除标记符](https://github.com/siyuan-note/siyuan/issues/2425)
+* [当前光标所在位置块字数统计错误](https://github.com/siyuan-note/siyuan/issues/2426)
+
 ## v1.2.0-rc3 / 2021-07-14
 
 ### Bug fixes

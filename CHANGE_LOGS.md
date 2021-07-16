@@ -1,3 +1,27 @@
+## v1.2.1 / 2021-07-16
+
+### Features
+
+* [内容块聚焦关系图](https://github.com/siyuan-note/siyuan/issues/1388)
+* [关系图全屏](https://github.com/siyuan-note/siyuan/issues/2223)
+* [为图片提供更多设置](https://github.com/siyuan-note/siyuan/issues/2439)
+
+### Enhancements
+
+* [优化未引用资源文件加载性能](https://github.com/siyuan-note/siyuan/issues/2414)
+* [复制块级元素到表格中时转换为行级元素](https://github.com/siyuan-note/siyuan/issues/2436)
+* [设置备份目录路径改进](https://github.com/siyuan-note/siyuan/issues/2437)
+* [文档标题保存在属性中](https://github.com/siyuan-note/siyuan/issues/2438)
+* [导入 Markdown 文档时同时导入引用的资源文件](https://github.com/siyuan-note/siyuan/issues/2441)
+
+### Bug fixes
+
+* [打开帮助文档后引起的未找到内容块](https://github.com/siyuan-note/siyuan/issues/2432)
+* [资源文件打开报错](https://github.com/siyuan-note/siyuan/issues/2434)
+* [未引用资源文件统计错误](https://github.com/siyuan-note/siyuan/issues/2435)
+* [导入 Markdown 文件夹时 `\` 路径未处理](https://github.com/siyuan-note/siyuan/issues/2440)
+* [文档标题选中后粘贴应删除选中的内容](https://github.com/siyuan-note/siyuan/issues/2445)
+
 ## v1.2.0 / 2021-07-15
 
 ### Bug fixes

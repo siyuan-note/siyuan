@@ -1,3 +1,73 @@
+## v1.2.2 / 2021-07-27
+
+### 升级须知
+
+* 升级前请在老版本上将 <kbd>设置 - 关于 - 访问授权码</kbd> 设置为空或者设置为一个自己常用的授权码（设置为空时新版打开不需要鉴权，不为空时需要输入授权码解锁）
+* 数据同步功能已经开始公测，使用前请查看帮助文档，备份数据后再开启同步
+
+### 引入特性
+
+* [重制鉴权](https://github.com/siyuan-note/siyuan/issues/1139)
+* [文档树新增按文档被引用数排序](https://github.com/siyuan-note/siyuan/issues/1215)
+* [对接 Web Clipper](https://github.com/siyuan-note/siyuan/issues/1266)
+* [设置 - 搜索支持大小写敏感选项](https://github.com/siyuan-note/siyuan/issues/2461)
+* [光标所在块右键不弹块菜单，弹出复制/全选等菜单](https://github.com/siyuan-note/siyuan/issues/2469)
+* [选中块元素后， 可使用上下键选择附近的块](https://github.com/siyuan-note/siyuan/issues/2470)
+* [面包屑缩放中高亮当前块](https://github.com/siyuan-note/siyuan/issues/2474)
+* [Android 端支持后退](https://github.com/siyuan-note/siyuan/issues/2502)
+* [自动清理历史](https://github.com/siyuan-note/siyuan/issues/2507)
+
+### 改进功能
+
+* [反链提及搜索排除链接文本](https://github.com/siyuan-note/siyuan/issues/1542)
+* [优化备份/恢复性能](https://github.com/siyuan-note/siyuan/issues/2406)
+* [shift + 方向键和全选快捷键的操作建议](https://github.com/siyuan-note/siyuan/issues/2442)
+* [优化未引用资源文件加载性能](https://github.com/siyuan-note/siyuan/issues/2449)
+* [导出块引时支持仅锚文本模式](https://github.com/siyuan-note/siyuan/issues/2457)
+* [帮助文档仅在初次安装时打开](https://github.com/siyuan-note/siyuan/issues/2458)
+* [正常退出内核时等待数据全部写入后再退出](https://github.com/siyuan-note/siyuan/issues/2459)
+* [使用设置 - 搜索 - 搜索结果显示数来限制反链提及搜索结果条目](https://github.com/siyuan-note/siyuan/issues/2460)
+* [导入 Markdown 文档前进行重名检查](https://github.com/siyuan-note/siyuan/issues/2464)
+* [alt+x 需全局缓存记忆](https://github.com/siyuan-note/siyuan/issues/2465)
+* [所有本地功能完全免费](https://github.com/siyuan-note/siyuan/issues/2471)
+* [大纲中的全部展开改为保持全部展开](https://github.com/siyuan-note/siyuan/issues/2476)
+* [面包屑导航文本优先使用命名](https://github.com/siyuan-note/siyuan/issues/2479)
+* [ `shift+左/右` 选中行内公式后 `ctr+m` 可进行编辑](https://github.com/siyuan-note/siyuan/issues/2483)
+* [删除笔记本配置 .siyuan/conf.json 中的更新时间字段](https://github.com/siyuan-note/siyuan/issues/2490)
+* [复制/剪切空格时会应用到块上](https://github.com/siyuan-note/siyuan/issues/2491)
+* [不使用系统临时目录](https://github.com/siyuan-note/siyuan/issues/2493)
+* [/ 菜单交互改进](https://github.com/siyuan-note/siyuan/issues/2506)
+* [列表前的原点操作和块图标保持一致](https://github.com/siyuan-note/siyuan/issues/2509)
+
+### 开发重构
+
+* [重构块移动和删除](https://github.com/siyuan-note/siyuan/issues/2456)
+* [重构数据提交事务实现](https://github.com/siyuan-note/siyuan/issues/2462)
+* [重构容器块类型转换实现](https://github.com/siyuan-note/siyuan/issues/2467)
+
+### 修复缺陷
+
+* [别名、命名等属性未转义](https://github.com/siyuan-note/siyuan/issues/2447)
+* [文档内粘贴并换行后文档自动关闭](https://github.com/siyuan-note/siyuan/issues/2448)
+* [移动超级块内的折叠标题会丢失数据](https://github.com/siyuan-note/siyuan/issues/2450)
+* [删除空行导致文本块和代码块合并](https://github.com/siyuan-note/siyuan/issues/2452)
+* [导入 Markdown 时存在行级 HTML 解析报错](https://github.com/siyuan-note/siyuan/issues/2468)
+* [将软换行段落使用标题打断为多个块后乱序的问题](https://github.com/siyuan-note/siyuan/issues/2472)
+* [标签自动完成候选列表不全](https://github.com/siyuan-note/siyuan/issues/2473)
+* [推荐码使用过多，无法看到剩余天数](https://github.com/siyuan-note/siyuan/issues/2475)
+* [不期待的任务列表输入方式](https://github.com/siyuan-note/siyuan/issues/2477)
+* [块中有行内公式，输入 Emoji 会消失](https://github.com/siyuan-note/siyuan/issues/2478)
+* [粗体、颜色选中后再输入 bug](https://github.com/siyuan-note/siyuan/issues/2480)
+* [内容块弹窗无法折叠和展开](https://github.com/siyuan-note/siyuan/issues/2481)
+* [相对路径 assets 上传不了云端图床](https://github.com/siyuan-note/siyuan/issues/2482)
+* [代码块换行没有进行保存](https://github.com/siyuan-note/siyuan/issues/2486)
+* [日文片假名长音 `ー` 等 Unicode 字母修饰符自动空格问题](https://github.com/siyuan-note/siyuan/issues/2487)
+* [任务列表前有的有 id，有的没有](https://github.com/siyuan-note/siyuan/issues/2489)
+* [给行内公式加下划线样式错误](https://github.com/siyuan-note/siyuan/issues/2492)
+* [/api/lute/html2BlockDOM 接口转换错误](https://github.com/siyuan-note/siyuan/issues/2498)
+* [模板自定义属性问题](https://github.com/siyuan-note/siyuan/issues/2510)
+* [完善引用提示补全](https://github.com/siyuan-note/siyuan/issues/2511)
+
 ## v1.2.1 / 2021-07-16
 
 ### Features

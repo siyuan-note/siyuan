@@ -45,6 +45,7 @@
   * 网页剪藏
 * 导出
   * 带 assets 文件夹的标准 Markdown
+  * PDF、Word 和 HTML
   * 内容块引用提供锚文本 + 嵌入 Blockquote 选项
   * 复制到微信公众号、知乎和语雀
 * 层级标签

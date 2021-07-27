@@ -43,6 +43,7 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
   * Web clipping
 * Export
   * Standard Markdown with assets
+  * PDF, Word and HTML  
   * Content block reference provides anchor text + embedded blockquote option
   * Copy to WeChat MP, Zhihu and Yuque
 * Hierarchical tag

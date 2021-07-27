@@ -26,6 +26,8 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
 
 ### Free
 
+All local features are free.
+
 * Content block
   * Block-level reference and two-way links
   * Document relationship diagram, global relationship diagram
@@ -56,6 +58,8 @@ SiYuan is a local-first personal knowledge management system, support fine-grain
 * Docker deployment
 
 ### Paid subscription
+
+Cloud services require a paid subscription.
 
 * VIP identity
 * End-to-end encrypted data synchronization

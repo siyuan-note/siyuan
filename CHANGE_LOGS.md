@@ -6,7 +6,7 @@
 
 ### 改进功能
 
-* [更新文档名后，引用不会实时更新 ](https://github.com/siyuan-note/siyuan/issues/2512)
+* [更新文档名后，引用不会实时更新](https://github.com/siyuan-note/siyuan/issues/2512)
 * [数据写入遇到“关键错误”时强制退出内核进程](https://github.com/siyuan-note/siyuan/issues/2516)
 * [移除本地同步目录、本地备份目录设置](https://github.com/siyuan-note/siyuan/issues/2518)
 * [删除大纲标题后面包屑不会立即刷新](https://github.com/siyuan-note/siyuan/issues/2521)

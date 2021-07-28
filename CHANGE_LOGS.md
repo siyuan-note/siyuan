@@ -1,3 +1,34 @@
+## v1.2.3 / 2021-07-28
+
+### 引入特性
+
+* [文件排序加入“按创建时间排序”](https://github.com/siyuan-note/siyuan/issues/2519)
+
+### 改进功能
+
+* [更新文档名后，引用不会实时更新 ](https://github.com/siyuan-note/siyuan/issues/2512)
+* [数据写入遇到“关键错误”时强制退出内核进程](https://github.com/siyuan-note/siyuan/issues/2516)
+* [移除本地同步目录、本地备份目录设置](https://github.com/siyuan-note/siyuan/issues/2518)
+* [删除大纲标题后面包屑不会立即刷新](https://github.com/siyuan-note/siyuan/issues/2521)
+* [版本升级时强制结束老内核进程](https://github.com/siyuan-note/siyuan/issues/2525)
+* [更换授权码字段为 `accessAuthCode`](https://github.com/siyuan-note/siyuan/issues/2526)
+* [浏览器中点击附件改进](https://github.com/siyuan-note/siyuan/issues/2527)
+* [安卓端长公式的手势改进](https://github.com/siyuan-note/siyuan/issues/2530)
+* [支持鉴权页面拖拽](https://github.com/siyuan-note/siyuan/issues/2533)
+
+### 修复缺陷
+
+* [标签异常高亮](https://github.com/siyuan-note/siyuan/issues/2513)
+* [工作空间所在磁盘分区不存在时内核启动失败](https://github.com/siyuan-note/siyuan/issues/2514)
+* [表格 ctrl+z 撤销的问题](https://github.com/siyuan-note/siyuan/issues/2520)
+* [修改文件树或编辑器内的文件名，大纲顶部的文件名不会刷新](https://github.com/siyuan-note/siyuan/issues/2522)
+* [Markdown 语法 `<url>` 问题](https://github.com/siyuan-note/siyuan/issues/2523)
+* [手机端面包屑过长时的问题](https://github.com/siyuan-note/siyuan/issues/2529)
+* [更改鉴权密码后不能关闭软件](https://github.com/siyuan-note/siyuan/issues/2531)
+* [吞超链接](https://github.com/siyuan-note/siyuan/issues/2532)
+* [移动端选择后没有复制选项](https://github.com/siyuan-note/siyuan/issues/2534)
+* [转义符 `\[` 引起的关键错误](https://github.com/siyuan-note/siyuan/issues/2536)
+
 ## v1.2.2 / 2021-07-27
 
 ### 升级须知

@@ -1,3 +1,38 @@
+## v1.2.31 / 2021-08-01
+
+### 引入特性
+
+* [笔记本重命名](https://github.com/siyuan-note/siyuan/issues/2484)
+* [API token](https://github.com/siyuan-note/siyuan/issues/2537)
+* [笔记本删除](https://github.com/siyuan-note/siyuan/issues/2563)
+
+### 改进功能
+
+* [剪藏扩展加入 API token 配置](https://github.com/siyuan-note/siyuan/issues/2538)
+* [优化数据保存性能](https://github.com/siyuan-note/siyuan/issues/2539)
+* [鼠标单击行尾空白处时，光标有时会定位在行首而非行末](https://github.com/siyuan-note/siyuan/issues/2547)
+* [Docker 容器监听 `0.0.0.0`](https://github.com/siyuan-note/siyuan/issues/2549)
+* [面包屑导航列表使用第一个子块文本](https://github.com/siyuan-note/siyuan/issues/2553)
+* [不允许创建以 `.` 开头的文档](https://github.com/siyuan-note/siyuan/issues/2556)
+* [编辑时自动移除空标签](https://github.com/siyuan-note/siyuan/issues/2560)
+* [改进折叠块的块标显示](https://github.com/siyuan-note/siyuan/issues/2562)
+
+### 开发重构
+
+* [SQL 表 blocks 移除两列 `previous_id` 和 `next_id`](https://github.com/siyuan-note/siyuan/issues/2546)
+* [笔记本路径迁移](https://github.com/siyuan-note/siyuan/issues/2559)
+
+### 修复缺陷
+
+* [有序列表块选择移动问题](https://github.com/siyuan-note/siyuan/issues/2541)
+* [多行块属性导致内核崩溃](https://github.com/siyuan-note/siyuan/issues/2543)
+* [未引用资源在自建子文件夹的情况下计算错误](https://github.com/siyuan-note/siyuan/issues/2544)
+* [着色后，不在同一个块中继续输入，光标会乱跳](https://github.com/siyuan-note/siyuan/issues/2545)
+* [导出 Word 时中文段首缩进失效](https://github.com/siyuan-note/siyuan/issues/2550)
+* [链接无法保存](https://github.com/siyuan-note/siyuan/issues/2554)
+* [折叠标题修改数据丢失](https://github.com/siyuan-note/siyuan/issues/2555)
+* [数学公式前输入公式排版格式消失](https://github.com/siyuan-note/siyuan/issues/2561)
+
 ## v1.2.3 / 2021-07-28
 
 ### 引入特性

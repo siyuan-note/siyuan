@@ -1,3 +1,77 @@
+## v1.2.5 / 2021-08-20
+
+### 引入特性
+
+* [Back and forward for editor](https://github.com/siyuan-note/siyuan/issues/239)
+* [从文件夹结构迁移到子文档结构](https://github.com/siyuan-note/siyuan/issues/2304)
+* [支持鼠标中键关闭页签，侧键前进后退](https://github.com/siyuan-note/siyuan/issues/2598)
+* [文档图标](https://github.com/siyuan-note/siyuan/issues/2617)
+* [自动保存常用 Emoji](https://github.com/siyuan-note/siyuan/issues/2628)
+
+### 改进功能
+
+* [Add SiYuan emoji](https://github.com/siyuan-note/siyuan/issues/1496)
+* [文档数据文件名使用 ID](https://github.com/siyuan-note/siyuan/issues/2131)
+* [全局搜索预览编辑区支持行级文本内容高亮](https://github.com/siyuan-note/siyuan/issues/2551)
+* [End-to-End testing via Cypress](https://github.com/siyuan-note/siyuan/issues/2566)
+* [同步报错文案优化](https://github.com/siyuan-note/siyuan/issues/2569)
+* [从临时文件恢复](https://github.com/siyuan-note/siyuan/issues/2571)
+* [延长文档锁定时间为 5 分钟](https://github.com/siyuan-note/siyuan/issues/2572)
+* [不允许同时选中文本和块](https://github.com/siyuan-note/siyuan/issues/2588)
+* [稳定 shift+click 算法，选中后定位光标](https://github.com/siyuan-note/siyuan/issues/2590)
+* [剪藏扩展发布到 Edge 浏览器商店](https://github.com/siyuan-note/siyuan/issues/2592)
+* [macOS 和 Linux 上使用系统自带的 rsync 兜底](https://github.com/siyuan-note/siyuan/issues/2596)
+* [通过模版创建日记时支持 id 和 title 变量](https://github.com/siyuan-note/siyuan/issues/2599)
+* [没有配置授权码时锁屏需要提示](https://github.com/siyuan-note/siyuan/issues/2600)
+* [设置 - 云端相关加载改进](https://github.com/siyuan-note/siyuan/issues/2604)
+* [修改默认快捷不再需要进行重置](https://github.com/siyuan-note/siyuan/issues/2605)
+* [重写移动端文档树](https://github.com/siyuan-note/siyuan/issues/2607)
+* [同步时连续两次从云端下载则退出应用](https://github.com/siyuan-note/siyuan/issues/2609)
+* [代码块下的空段落块无法删除](https://github.com/siyuan-note/siyuan/issues/2618)
+* [创建文档流程改进](https://github.com/siyuan-note/siyuan/issues/2619)
+* [多选块以后右键需打开多选块菜单](https://github.com/siyuan-note/siyuan/issues/2624)
+* [全局搜索快捷调整大小写敏感](https://github.com/siyuan-note/siyuan/issues/2625)
+* [笔记本关闭后依旧保留在文档树上](https://github.com/siyuan-note/siyuan/issues/2636)
+* [文档树上的引用计数和文档引用计数区分](https://github.com/siyuan-note/siyuan/issues/2640)
+* [引述块折叠会显示一行半的文字](https://github.com/siyuan-note/siyuan/issues/2645)
+* [改进剪藏扩展拉取图片稳定性](https://github.com/siyuan-note/siyuan/issues/2651)
+
+### 开发重构
+
+* [WebSocket 重构为 HTTP API](https://github.com/siyuan-note/siyuan/issues/2603)
+* [重新实现文档树自定义排序](https://github.com/siyuan-note/siyuan/issues/2623)
+
+### 移除功能
+
+* [移除老版本到 v1.2.0 的迁移支持](https://github.com/siyuan-note/siyuan/issues/2578)
+
+### 修复缺陷
+
+* [重命名和使用别名后反向链接显示错误](https://github.com/siyuan-note/siyuan/issues/2567)
+* [引用超级块时没有渲染文本](https://github.com/siyuan-note/siyuan/issues/2568)
+* [重命名笔记本和笔记的问题](https://github.com/siyuan-note/siyuan/issues/2570)
+* [点击行内元素光标乱跳](https://github.com/siyuan-note/siyuan/issues/2573)
+* [mac 拼音输入法在大纲中的 bug](https://github.com/siyuan-note/siyuan/issues/2574)
+* [创建标题后对应子内容父亲字段未更新](https://github.com/siyuan-note/siyuan/issues/2581)
+* [嵌入超级块，图片拖拽导致界面异常](https://github.com/siyuan-note/siyuan/issues/2584)
+* [事务失败导致的内核连接中断](https://github.com/siyuan-note/siyuan/issues/2585)
+* [移动端滑动表格会出现菜单](https://github.com/siyuan-note/siyuan/issues/2593)
+* [表格选择需移除空元素](https://github.com/siyuan-note/siyuan/issues/2594)
+* [修改链接光标和标题转义问题](https://github.com/siyuan-note/siyuan/issues/2595)
+* [任务列表空项引起的解析报错](https://github.com/siyuan-note/siyuan/issues/2602)
+* [SQL `"` 转义处理问题](https://github.com/siyuan-note/siyuan/issues/2611)
+* [链接提示不会消失改进](https://github.com/siyuan-note/siyuan/issues/2614)
+* [改进搜索历史](https://github.com/siyuan-note/siyuan/issues/2615)
+* [重启思源导致列表背景色丢失](https://github.com/siyuan-note/siyuan/issues/2629)
+* [面包屑自动订正数据引起的内核中断问题](https://github.com/siyuan-note/siyuan/issues/2630)
+* [反向缩进内容丢失](https://github.com/siyuan-note/siyuan/issues/2631)
+* [代码块中的 kramdown 代码会被解析渲染](https://github.com/siyuan-note/siyuan/issues/2634)
+* [引用前后加 `**` 重启后引用消失](https://github.com/siyuan-note/siyuan/issues/2639)
+* [折叠标题更新和移动导致内容错乱的问题](https://github.com/siyuan-note/siyuan/issues/2641)
+* [表格内使用微软拼音的问题](https://github.com/siyuan-note/siyuan/issues/2644)
+* [从 Word 中复制多段落时自动添加空格问题](https://github.com/siyuan-note/siyuan/issues/2646)
+* [数学公式染色 bug](https://github.com/siyuan-note/siyuan/issues/2649)
+
 ## v1.2.31 / 2021-08-01
 
 ### 引入特性

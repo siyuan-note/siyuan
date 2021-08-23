@@ -29,18 +29,18 @@
 
 ## v1.2.6 / 2021-08-21
 
-## 引入特性
+### 引入特性
 
 * [虚拟引用 Virtual ref](https://github.com/siyuan-note/siyuan/issues/2249)
 
-## 改进功能
+### 改进功能
 
 * [导入时 assets 的放置改进](https://github.com/siyuan-note/siyuan/issues/2627)
 * [F5 刷新增加标题后的引用数更新](https://github.com/siyuan-note/siyuan/issues/2658)
 * [移动端支持切换主题](https://github.com/siyuan-note/siyuan/issues/2659)
 * [改进已关闭笔记本列表](https://github.com/siyuan-note/siyuan/issues/2662)
 
-## 修复缺陷
+### 修复缺陷
 
 * [有关闭的笔记本时文档树排序报查询笔记本失败](https://github.com/siyuan-note/siyuan/issues/2656)
 * [自定义排序失效问题](https://github.com/siyuan-note/siyuan/issues/2657)

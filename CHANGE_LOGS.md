@@ -1,3 +1,32 @@
+## v1.2.7 / 2021-08-23
+
+### 引入特性
+
+* [文档块支持标签](https://github.com/siyuan-note/siyuan/issues/2431)
+
+### 改进功能
+
+* [拖拽文件夹到编辑器内，错误信息为空](https://github.com/siyuan-note/siyuan/issues/2586)
+* [虚拟引用涵盖命名、别名、定义块文本](https://github.com/siyuan-note/siyuan/issues/2677)
+* [启动思源后，点击页签，光标不会聚焦到编辑器上](https://github.com/siyuan-note/siyuan/issues/2678)
+* [头图上传插入去重](https://github.com/siyuan-note/siyuan/issues/2681)
+* [虚拟引用支持关键字排除列表](https://github.com/siyuan-note/siyuan/issues/2686)
+* [笔记本名称、文档标题允许使用特殊符号](https://github.com/siyuan-note/siyuan/issues/2690)
+* [移动端使用系统自带 emoji](https://github.com/siyuan-note/siyuan/issues/2694)
+* [支持直接使用 ID 搜索块](https://github.com/siyuan-note/siyuan/issues/2696)
+
+### 修复缺陷
+
+* [后退后再操作，后退缺少一步](https://github.com/siyuan-note/siyuan/issues/2676)
+* [文档树点击已打开的文档、切换页签没有记录到后退中](https://github.com/siyuan-note/siyuan/issues/2679)
+* [设置属性以后没有同步到数据库](https://github.com/siyuan-note/siyuan/issues/2680)
+* [重名文档导出只导出一个文档问题](https://github.com/siyuan-note/siyuan/issues/2683)
+* [表格单元格内颜色文字后无法继续输入](https://github.com/siyuan-note/siyuan/issues/2687)
+* [打开文档不会更新大纲](https://github.com/siyuan-note/siyuan/issues/2691)
+* [无法消除的高亮](https://github.com/siyuan-note/siyuan/issues/2692)
+* [标题转换为段落时，大纲没有更新](https://github.com/siyuan-note/siyuan/issues/2693)
+* [列表大纲定位错误](https://github.com/siyuan-note/siyuan/issues/2695)
+
 ## v1.2.6 / 2021-08-21
 
 ## 引入特性

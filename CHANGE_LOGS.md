@@ -1,3 +1,33 @@
+## v1.2.8 / 2021-08-24
+
+### 引入特性
+
+* [网络图片提示角标](https://github.com/siyuan-note/siyuan/issues/2276)
+
+### 改进功能
+
+* [文档树 Alt 1 展开后获得焦点、上下键选择以及 Enter 打开](https://github.com/siyuan-note/siyuan/issues/2463)
+* [启动进入主界面加载优化](https://github.com/siyuan-note/siyuan/issues/2660)
+* [引用块时粘贴的文本无法显示新建](https://github.com/siyuan-note/siyuan/issues/2664)
+* [ PDF 链接 ctrl+click 使用本地默认工具打开](https://github.com/siyuan-note/siyuan/issues/2685)
+* [文档树支持 Del 键删除笔记](https://github.com/siyuan-note/siyuan/issues/2698)
+* [虚拟引用对英语使用空格分词](https://github.com/siyuan-note/siyuan/issues/2703)
+* [视频音频等文件插入去重](https://github.com/siyuan-note/siyuan/issues/2704)
+* [嵌入块为代码块的时候，右上角的功能会被覆盖](https://github.com/siyuan-note/siyuan/issues/2709)
+
+### 移除功能
+
+* [移除 v1.2.5 数据迁移支持](https://github.com/siyuan-note/siyuan/issues/2697)
+
+### 修复缺陷
+
+* [开启虚拟引用导致的内容乱码问题](https://github.com/siyuan-note/siyuan/issues/2699)
+* [文档标签搜索不出](https://github.com/siyuan-note/siyuan/issues/2700)
+* [文档标签区分大小写](https://github.com/siyuan-note/siyuan/issues/2701)
+* [虚拟引用搜索多个别名时的问题](https://github.com/siyuan-note/siyuan/issues/2705)
+* [文档题头工具栏遮挡问题](https://github.com/siyuan-note/siyuan/issues/2706)
+* [文档标签下拉菜单没有文档级标签](https://github.com/siyuan-note/siyuan/issues/2707)
+
 ## v1.2.7 / 2021-08-23
 
 ### 引入特性

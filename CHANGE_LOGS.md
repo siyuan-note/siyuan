@@ -9,7 +9,7 @@
 * [文档树 Alt 1 展开后获得焦点、上下键选择以及 Enter 打开](https://github.com/siyuan-note/siyuan/issues/2463)
 * [启动进入主界面加载优化](https://github.com/siyuan-note/siyuan/issues/2660)
 * [引用块时粘贴的文本无法显示新建](https://github.com/siyuan-note/siyuan/issues/2664)
-* [ PDF 链接 ctrl+click 使用本地默认工具打开](https://github.com/siyuan-note/siyuan/issues/2685)
+* [PDF 链接 ctrl+click 使用本地默认工具打开](https://github.com/siyuan-note/siyuan/issues/2685)
 * [文档树支持 Del 键删除笔记](https://github.com/siyuan-note/siyuan/issues/2698)
 * [虚拟引用对英语使用空格分词](https://github.com/siyuan-note/siyuan/issues/2703)
 * [视频音频等文件插入去重](https://github.com/siyuan-note/siyuan/issues/2704)

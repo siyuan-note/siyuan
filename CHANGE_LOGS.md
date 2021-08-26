@@ -1,3 +1,29 @@
+## v1.2.9 / 2021-08-26
+
+### 引入特性
+
+* [支持扩展 Emoji](https://github.com/siyuan-note/siyuan/issues/2654)
+
+### 改进功能
+
+* [调整图片外链标识位置](https://github.com/siyuan-note/siyuan/issues/2714)
+* [块引搜索候选列表排序优化](https://github.com/siyuan-note/siyuan/issues/2715)
+* [代码高亮渲染改进](https://github.com/siyuan-note/siyuan/issues/2726)
+
+### 移除功能
+
+* [移除涉及侵权的 Emoji](https://github.com/siyuan-note/siyuan/issues/2725)
+
+### 修复缺陷
+
+* [【【块引呼出问题](https://github.com/siyuan-note/siyuan/issues/2713)
+* [句末不能使用软换行](https://github.com/siyuan-note/siyuan/issues/2716)
+* [代码块回车抖动](https://github.com/siyuan-note/siyuan/issues/2717)
+* [文档图标搜索删除和文档标题重命名删除会触发删除文档](https://github.com/siyuan-note/siyuan/issues/2719)
+* [点击块引进去的文档不显示反链信息](https://github.com/siyuan-note/siyuan/issues/2720)
+* [悬浮窗列表项无法展开](https://github.com/siyuan-note/siyuan/issues/2721)
+* [列表内斜体后的最后一个字符无法选中](https://github.com/siyuan-note/siyuan/issues/2722)
+
 ## v1.2.8 / 2021-08-24
 
 ### 引入特性

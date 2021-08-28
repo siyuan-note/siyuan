@@ -1,3 +1,41 @@
+## v1.3.0 / 2021-08-28
+
+### 引入特性
+
+* [工作空间端到端加密数据同步](https://github.com/siyuan-note/siyuan/issues/2165)
+
+### 改进功能
+
+* [Code signing on macOS](https://github.com/siyuan-note/siyuan/issues/1768)
+* [Zoom-in while searching folded blocks](https://github.com/siyuan-note/siyuan/issues/2230)
+* [全局搜索排除容器块](https://github.com/siyuan-note/siyuan/issues/2612)
+* [自定义前进/后退/聚焦进入/聚焦返回快捷键](https://github.com/siyuan-note/siyuan/issues/2689)
+* [各功能面板在选中时需显示展开的箭头](https://github.com/siyuan-note/siyuan/issues/2712)
+* [``` 代码块输入改进](https://github.com/siyuan-note/siyuan/issues/2731)
+* [桌面端启动检查端口改进](https://github.com/siyuan-note/siyuan/issues/2734)
+* [调整链接打开规则](https://github.com/siyuan-note/siyuan/issues/2736)
+* [为“移动”功能添加可配置的快捷键](https://github.com/siyuan-note/siyuan/issues/2737)
+* [内核启动时自动优化数据库文件](https://github.com/siyuan-note/siyuan/issues/2743)
+* [优化集市加载速度](https://github.com/siyuan-note/siyuan/issues/2744)
+* [有序列表批量删除需更新序号](https://github.com/siyuan-note/siyuan/issues/2746)
+* [自动检查版本更新](https://github.com/siyuan-note/siyuan/issues/2749)
+* [文档树展开箭头和文档图标视觉优化](https://github.com/siyuan-note/siyuan/issues/2756)
+
+### 移除功能
+
+* [移除自动更新相关遗留代码](https://github.com/siyuan-note/siyuan/issues/2754)
+
+### 修复缺陷
+
+* [空表格里不能 Backspace 空行](https://github.com/siyuan-note/siyuan/issues/2732)
+* [文档树添加 Ctrl F 快捷键](https://github.com/siyuan-note/siyuan/issues/2733)
+* [页面按向下箭头丢失焦点](https://github.com/siyuan-note/siyuan/issues/2735)
+* [句首和句尾的英文不显示虚拟引用](https://github.com/siyuan-note/siyuan/issues/2741)
+* [反链面板布局状态保留问题](https://github.com/siyuan-note/siyuan/issues/2742)
+* [代码块光标乱跳](https://github.com/siyuan-note/siyuan/issues/2745)
+* [macOS 上删除所有 emoji 文件之后仍存在一个破损文件](https://github.com/siyuan-note/siyuan/issues/2751)
+* [Docker 部署帮助文档自动打开问题](https://github.com/siyuan-note/siyuan/issues/2755)
+
 ## v1.2.9 / 2021-08-26
 
 ### 引入特性

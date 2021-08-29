@@ -1,3 +1,38 @@
+## v1.3.1 / 2021-08-29
+
+### 引入特性
+
+* [支持浮窗移动块](https://github.com/siyuan-note/siyuan/issues/2766)
+
+### 改进功能
+
+* [添加  Vim Script 语言代码高亮，扩展 TOML、C#](https://github.com/siyuan-note/siyuan/issues/2753)
+* [标签跳转折叠块](https://github.com/siyuan-note/siyuan/issues/2764)
+* [自定义 emoji 支持子文件夹](https://github.com/siyuan-note/siyuan/issues/2769)
+* [改进主界面加载性能](https://github.com/siyuan-note/siyuan/issues/2770)
+* [折叠嵌入块 UI 改进](https://github.com/siyuan-note/siyuan/issues/2780)
+* [出现内核中断问题以后下次启动重建索引](https://github.com/siyuan-note/siyuan/issues/2782)
+* [文档树 icon 大小不一致](https://github.com/siyuan-note/siyuan/issues/2784)
+
+### 开发重构
+
+* [块 hash 字段减少长度](https://github.com/siyuan-note/siyuan/issues/2781)
+
+### 修复缺陷
+
+* [弹框编辑删除内核中断](https://github.com/siyuan-note/siyuan/issues/2748)
+* [全局搜索鼠标单击跳转问题](https://github.com/siyuan-note/siyuan/issues/2757)
+* [移动端登录账号问题](https://github.com/siyuan-note/siyuan/issues/2758)
+* [容器块 updated 字段未更新](https://github.com/siyuan-note/siyuan/issues/2765)
+* [段首不能软换行](https://github.com/siyuan-note/siyuan/issues/2767)
+* [第一个块的块首按左键或最后一个块块末按右键，光标丢失](https://github.com/siyuan-note/siyuan/issues/2768)
+* [有序列表下方多选块删除内核中断](https://github.com/siyuan-note/siyuan/issues/2773)
+* [从历史恢复时报错，查看历史入口统一到笔记本右键菜单](https://github.com/siyuan-note/siyuan/issues/2774)
+* [搜索类型过滤失效](https://github.com/siyuan-note/siyuan/issues/2775)
+* [账号鉴权自动续期问题](https://github.com/siyuan-note/siyuan/issues/2777)
+* [撤销导致的内核中断](https://github.com/siyuan-note/siyuan/issues/2778)
+* [反链面板中点击悬浮窗中的面包屑，反链面板不应更新](https://github.com/siyuan-note/siyuan/issues/2783)
+
 ## v1.3.0 / 2021-08-28
 
 ### 引入特性

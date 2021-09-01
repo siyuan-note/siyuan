@@ -1,7 +1,7 @@
 <p align="center">
 <img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
 <br>
-<em>The next generation PKM system, your digital garden</em>
+<em>下一代的个人知识管理系统，你的数字花园</em>
 <br><br>
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <a title="Downloads" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/downloads/siyuan-note/siyuan/total.svg?style=flat-square&color=blueviolet"></a>
@@ -11,95 +11,98 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/siyuan-note/siyuan/blob/master/README_zh_CN.md">中文</a>
+<a href="https://github.com/siyuan-note/siyuan/blob/master/README.md">English</a>
 </p>
 
-## 💡 Introduction
+## 💡 简介
 
-SiYuan is a local-first personal knowledge management system, support fine-grained block-level reference and Markdown WYSIWYG.
+思源笔记是一款本地优先的个人知识管理系统， 支持细粒度块级引用和 Markdown 所见即所得。
+
+欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。
 
 ![feature0.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@8489397401cf5025eab847dfb26a4f3896be5363/screenshots/feature0.png)
 
 ![feature1-1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@8489397401cf5025eab847dfb26a4f3896be5363/screenshots/feature1-1.png)
 
-## ✨  Features
+## ✨  特性
 
-### Free
+### 免费
 
-All local features are free.
+所有本地功能都是免费的。
 
-* Content block
-  * Block-level reference and two-way links
-  * Document relationship diagram, global relationship diagram
-  * Custom attributes
-  * SQL query embed
-  * Protocol `siyuan://`
-* Editor
-  * Block-style
-  * Markdown WYSIWYG
-  * List outline
-  * Block zoom-in
-  * Block horizontal layout
-  * Million-word large document editing
-  * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
-  * Web clipping
-* Export
-  * Standard Markdown with assets
-  * PDF, Word and HTML  
-  * Content block reference provides anchor text + embedded blockquote option
-  * Copy to WeChat MP, Zhihu and Yuque
-* Hierarchical tag
-* Multi-tab, drag and drop to split screen
-* Fulltext search
-* Template snippet
-* Keymap
-* Themes and icons
+* 内容块
+  * 块级引用和双向链接
+  * 文档关系图、全局关系图
+  * 自定义属性
+  * SQL 查询嵌入
+  * 协议 `siyuan://`
+* 编辑器
+  * Block 风格
+  * Markdown 所见即所得
+  * 列表大纲
+  * 块缩放聚焦
+  * 块横向排版
+  * 百万字大文档编辑
+  * 数学公式、图表、流程图、甘特图、时序图、五线谱等
+  * 网页剪藏
+* 导出
+  * 带 assets 文件夹的标准 Markdown
+  * PDF、Word 和 HTML
+  * 内容块引用提供锚文本 + 嵌入 Blockquote 选项
+  * 复制到微信公众号、知乎和语雀
+* 层级标签
+* 多页签拖拽分屏
+* 全文搜索
+* 模板片段
+* 快捷键
+* 主题和图标
 * Android APP
-* Docker deployment
+* Docker 部署
 
-### Paid subscription
+### 付费订阅
 
-Cloud services require a paid subscription.
+云端服务需要付费订阅。
 
-* VIP identity
-* End-to-end encrypted data synchronization
-* End-to-end encrypted data backup
-* Cloud assets serving
+* 尊贵身份标识
+* 端到端加密数据同步
+* 端到端加密数据备份
+* 云端图床服务
 
-## 🗺️ Roadmap
+## 🗺️ 路线图
 
-* [SiYuan development plan and progress](https://github.com/siyuan-note/siyuan/projects)
-* [SiYuan Change logs](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
+* [思源笔记开发计划和进度](https://github.com/siyuan-note/siyuan/projects)
+* [思源笔记版本变更和公告](https://ld246.com/tag/siyuan-announcement)
 
-## 🛠️ Download Setup
+## 🛠️ 下载安装
 
-* [B3log](https://b3log.org/siyuan/en/download.html)
+* [B3log](https://b3log.org/siyuan/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
 
-To get the latest Insider Preview, please send an email with your GitHub login name to 845765@qq.com, and we will invite you to join the SiYuan Insider Preview team, thanks.
+获取最新内部预览版（Insider Preview），请将你的 GitHub 登录名发送邮件至 845765@qq.com，我们将邀请你加入 SiYuan 内部预览团队。
 
-## 📜 Documentation
+## 📜 文档
 
-* [SiYuan - A desktop Markdown Block-Reference and Bidirectional-Link note-taking application](https://ld246.com/article/1598872180233)
-* [Markdown implements the exploration of block-level reference bidirectional links](https://ld246.com/article/1597226949061)
+* [思源笔记 - 支持 Markdown 块级引用和双向链接的网状笔记应用](https://ld246.com/article/1598872180233)
+* [Markdown 实现块级引用双向链接的探索](https://ld246.com/article/1597226949061)
 
-## 🏘️ Community
+## 🏘️ 社区
 
+* [中文讨论区](https://ld246.com/domain/siyuan)
 * [Discord](https://discord.gg/bzfCBwMzdP)
 
-## 💌 Participate in contribution
+## 💌 参与贡献
 
-At present, some components of SiYuan are open source, and contributions are welcome.
+目前思源笔记的一些组件是开源的，欢迎参与贡献。
 
-* [User Guide](https://github.com/siyuan-note/user-guide-en_US)
-* [Appearance](https://github.com/siyuan-note/appearance)
-* [Markdown Engine](https://github.com/88250/lute)
-* [Chrome Extension](https://github.com/siyuan-note/siyuan-chrome)
+* [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)
+* [外观](https://github.com/siyuan-note/appearance)
+* [Markdown 引擎](https://github.com/88250/lute)
+* [Chrome 扩展](https://github.com/siyuan-note/siyuan-chrome)
 
-## 🙏 Acknowledgement
+## 🙏 鸣谢
 
-SiYuan is made possible by the [Vditor](https://github.com/Vanessa219/vditor) and [Lute](https://github.com/88250/lute) open source project and other open source software.
+思源的诞生离不开 [Vditor](https://github.com/Vanessa219/vditor) 和 [Lute](https://github.com/88250/lute) 开源项目以及下列开源项目。
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`

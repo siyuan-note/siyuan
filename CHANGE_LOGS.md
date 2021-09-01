@@ -1,3 +1,38 @@
+## v1.3.2 / 2021-09-01
+
+### 引入特性
+
+* [支持跨笔记本移动块](https://github.com/siyuan-note/siyuan/issues/2488)
+
+### 改进功能
+
+* [列表项多选禁止转换](https://github.com/siyuan-note/siyuan/issues/2708)
+* [支持关闭网络图片角标](https://github.com/siyuan-note/siyuan/issues/2771)
+* [导出时嵌入块使用原始文本](https://github.com/siyuan-note/siyuan/issues/2772)
+* [点击左边空白，光标置于段首](https://github.com/siyuan-note/siyuan/issues/2779)
+* [同步/备份限制单个文件最大为 1G](https://github.com/siyuan-note/siyuan/issues/2785)
+* [嵌入多行块，第二行会显示一半](https://github.com/siyuan-note/siyuan/issues/2792)
+* [改进复制网页内容时的换行处理](https://github.com/siyuan-note/siyuan/issues/2793)
+* [文档的标签不能用顶级标签](https://github.com/siyuan-note/siyuan/issues/2801)
+* [改进锚文本修改后光标的位置](https://github.com/siyuan-note/siyuan/issues/2802)
+* [列表项下的标题和圆点对不齐](https://github.com/siyuan-note/siyuan/issues/2803)
+* [移除空链接](https://github.com/siyuan-note/siyuan/issues/2808)
+* [嵌入块内的引用无法点击打开](https://github.com/siyuan-note/siyuan/issues/2816)
+
+### 修复缺陷
+
+* [某些空行删除不了](https://github.com/siyuan-note/siyuan/issues/2787)
+* [Android 端无法打开 PDF 资源文件](https://github.com/siyuan-note/siyuan/issues/2788)
+* [云端报错 failed to connect cloud server](https://github.com/siyuan-note/siyuan/issues/2794)
+* [`\` 撤销问题](https://github.com/siyuan-note/siyuan/issues/2795)
+* [添加颜色后英文单词之间无法添加空格](https://github.com/siyuan-note/siyuan/issues/2797)
+* [浮窗中的列表项无法拖拽到文档中](https://github.com/siyuan-note/siyuan/issues/2798)
+* [移动带子文档的文档后子文档打不开](https://github.com/siyuan-note/siyuan/issues/2804)
+* [休眠后内核连接中断](https://github.com/siyuan-note/siyuan/issues/2806)
+* [悬浮窗内容显示不全](https://github.com/siyuan-note/siyuan/issues/2807)
+* [未使用过字体染色后，alt+x 报错](https://github.com/siyuan-note/siyuan/issues/2811)
+* [从 Word 粘贴时空列表项处理](https://github.com/siyuan-note/siyuan/issues/2812)
+
 ## v1.3.1 / 2021-08-29
 
 ### 引入特性

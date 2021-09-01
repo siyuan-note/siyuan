@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/siyuan-note/siyuan/blob/master/README_zh_CN.md">中文</a>
+<a href="https://github.com/siyuan-note/siyuan/blob/master/README.md">中文</a>
 </p>
 
 ## 💡 Introduction

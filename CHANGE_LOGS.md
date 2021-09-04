@@ -1,3 +1,35 @@
+## v1.3.3 / 2021-09-04
+
+### 引入特性
+
+* [文档另存为模板](https://github.com/siyuan-note/siyuan/issues/2517)
+* [嵌入块导出选项](https://github.com/siyuan-note/siyuan/issues/2810)
+* [为各面板添加全部折叠/展开的快捷键](https://github.com/siyuan-note/siyuan/issues/2823)
+
+### 改进功能
+
+* [文档动态加载优化](https://github.com/siyuan-note/siyuan/issues/2815)
+* [切换外观模式时卡顿](https://github.com/siyuan-note/siyuan/issues/2818)
+* [鼠标移动到命名，别名，备注上，对应的块需进行高亮](https://github.com/siyuan-note/siyuan/issues/2827)
+* [代码块编辑改进](https://github.com/siyuan-note/siyuan/issues/2834)
+
+### 开发重构
+
+* [重构运行环境容器判断](https://github.com/siyuan-note/siyuan/issues/2820)
+
+### 修复缺陷
+
+* [代码块 // 注释后粘贴, 光标错误](https://github.com/siyuan-note/siyuan/issues/2817)
+* [新建的笔记本查看历史报错](https://github.com/siyuan-note/siyuan/issues/2819)
+* [无法复制自定义 emoji](https://github.com/siyuan-note/siyuan/issues/2824)
+* [同一个块内有2个引用时产生的问题](https://github.com/siyuan-note/siyuan/issues/2825)
+* [导出嵌入块时未处理嵌套情况](https://github.com/siyuan-note/siyuan/issues/2826)
+* [锚文本不支持单个字符的问题](https://github.com/siyuan-note/siyuan/issues/2830)
+* [移动端浏览器使用时链接不能跳转的问题](https://github.com/siyuan-note/siyuan/issues/2832)
+* [反链提及排序不稳定](https://github.com/siyuan-note/siyuan/issues/2836)
+* [反链面板上下文按钮状态问题](https://github.com/siyuan-note/siyuan/issues/2837)
+* [悬浮窗改变宽度后滚动条消失](https://github.com/siyuan-note/siyuan/issues/2838)
+
 ## v1.3.2 / 2021-09-01
 
 ### 引入特性

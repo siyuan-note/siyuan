@@ -1,3 +1,29 @@
+## v1.3.4 / 2021-09-06
+
+### 引入特性
+
+* [导出时将块引用转换为脚注](https://github.com/siyuan-note/siyuan/issues/2833)
+
+### 改进功能
+
+* [同步鉴权失败后自动重试](https://github.com/siyuan-note/siyuan/issues/2831)
+* [文档导出为模板支持属性](https://github.com/siyuan-note/siyuan/issues/2841)
+* [编辑器文档块标菜单添加删除文档](https://github.com/siyuan-note/siyuan/issues/2844)
+* [添加超链接时如果不填链接地址则取消超链接](https://github.com/siyuan-note/siyuan/issues/2845)
+* [标签面板不再显示块，点击标签以后通过搜索页签展现](https://github.com/siyuan-note/siyuan/issues/2846)
+* [编辑标题时大纲闪烁](https://github.com/siyuan-note/siyuan/issues/2848)
+* [(( 新建文档 32 个字符限制改为 512个](https://github.com/siyuan-note/siyuan/issues/2853)
+* [使用非中文和英文外观时统一使用英文帮助文档](https://github.com/siyuan-note/siyuan/issues/2859)
+
+### 修复缺陷
+
+* [列表项内用ctrl+↑折叠，块标变成段落块](https://github.com/siyuan-note/siyuan/issues/2809)
+* [移动端右侧滑动卡](https://github.com/siyuan-note/siyuan/issues/2839)
+* [搜索预览区动态加载时丢失关键字高亮](https://github.com/siyuan-note/siyuan/issues/2843)
+* [移动端搜索跳转定位不对](https://github.com/siyuan-note/siyuan/issues/2852)
+* [移动端粘贴菜单无效](https://github.com/siyuan-note/siyuan/issues/2854)
+* [导出嵌入超级块重复](https://github.com/siyuan-note/siyuan/issues/2861)
+
 ## v1.3.3 / 2021-09-04
 
 ### 引入特性

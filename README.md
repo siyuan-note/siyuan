@@ -66,7 +66,7 @@
 * Android APP
 * iOS APP (开发中)
 * Docker 部署
-* [API](https://github.com/siyuan-note/siyuan/issues/213)
+* [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
 
 ### 付费订阅
 

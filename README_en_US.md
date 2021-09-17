@@ -65,7 +65,7 @@ All local features are free.
 * Android APP
 * iOS APP (in progress)
 * Docker deployment
-* [API](https://github.com/siyuan-note/siyuan/issues/213)
+* [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
 
 ### Paid subscription
 

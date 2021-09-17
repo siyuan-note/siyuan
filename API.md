@@ -298,12 +298,53 @@ https://ld246.com/article/1627956688432
 
 ### 重命名文档
 
-/api/filetree/renameDoc
+* `/api/filetree/renameDoc`
+* 参数
+
+  ```json
+  {
+    "notebook": "20210831090520-7dvbdv0",
+    "path": "/20210902210113-0avi12f.sy",
+    "title": "文档新标题"
+  }
+  ```
+
+  * `notebook`：笔记本 ID
+  * `path`：文档路径
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
 
 ### 删除文档
 
-/api/filetree/removeDoc
+* `/api/filetree/removeDoc`
+* 参数
 
+  ```json
+  {
+    "notebook": "20210831090520-7dvbdv0",
+    "path": "/20210902210113-0avi12f.sy"
+  }
+  ```
+
+  * `notebook`：笔记本 ID
+  * `path`：文档路径
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+  
 ## 资源文件
 
 ### 上传资源文件

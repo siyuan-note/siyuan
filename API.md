@@ -25,14 +25,15 @@
     * [搜索嵌入块](#搜索嵌入块)
     * [搜索块](#搜索块)
 * [SQL](#SQL)
-  * [SQL 查询](#sql-查询)
+    * [SQL 查询](#sql-查询)
 * [模板](#模板)
     * [渲染模板](#渲染模板)
 * [导出](#导出)
     * [导出 Markdown 文本](#导出-markdown-文本)
 * [系统](#系统)
-    * [获取系统版本](#获取系统版本)
     * [获取启动进度](#获取启动进度)
+    * [获取系统版本](#获取系统版本)
+    * [获取系统当前时间](#获取系统当前时间)
     * [判断是否正在写入数据](#判断是否正在写入数据)
 
 ---
@@ -122,7 +123,7 @@ https://ld246.com/article/1627956688432
   }
   ```
 
-  * `notebook`：笔记本 ID
+    * `notebook`：笔记本 ID
 * 返回值
 
   ```json
@@ -145,7 +146,7 @@ https://ld246.com/article/1627956688432
   }
   ```
 
-  * `notebook`：笔记本 ID
+    * `notebook`：笔记本 ID
 * 返回值
 
   ```json
@@ -175,7 +176,7 @@ https://ld246.com/article/1627956688432
     "data": null
   }
   ```
-  
+
 ### 删除笔记本
 
 * `/api/notebook/removeNotebook`
@@ -187,7 +188,7 @@ https://ld246.com/article/1627956688432
   }
   ```
 
-  * `notebook`：笔记本 ID
+    * `notebook`：笔记本 ID
 * 返回值
 
   ```json
@@ -209,7 +210,7 @@ https://ld246.com/article/1627956688432
   }
   ```
 
-  * `notebook`：笔记本 ID
+    * `notebook`：笔记本 ID
 * 返回值
 
   ```json
@@ -250,7 +251,7 @@ https://ld246.com/article/1627956688432
   }
   ```
 
-  * `notebook`：笔记本 ID
+    * `notebook`：笔记本 ID
 * 返回值
 
   ```json
@@ -311,8 +312,8 @@ https://ld246.com/article/1627956688432
   }
   ```
 
-  * `notebook`：笔记本 ID
-  * `path`：文档路径
+    * `notebook`：笔记本 ID
+    * `path`：文档路径
 * 返回值
 
   ```json
@@ -335,8 +336,8 @@ https://ld246.com/article/1627956688432
   }
   ```
 
-  * `notebook`：笔记本 ID
-  * `path`：文档路径
+    * `notebook`：笔记本 ID
+    * `path`：文档路径
 * 返回值
 
   ```json
@@ -346,7 +347,7 @@ https://ld246.com/article/1627956688432
     "data": null
   }
   ```
-  
+
 ## 资源文件
 
 ### 上传资源文件
@@ -471,7 +472,7 @@ https://ld246.com/article/1627956688432
   }
   ```
 
-  * `stmt`：SQL 脚本
+    * `stmt`：SQL 脚本
 * 返回值
 
   ```json
@@ -483,7 +484,7 @@ https://ld246.com/article/1627956688432
     ]
   }
   ```
-  
+
 ## 模板
 
 ### 渲染模板
@@ -538,7 +539,7 @@ https://ld246.com/article/1627956688432
     }
   }
   ```
-  
+
 ### 获取系统版本
 
 * `/api/system/version`
@@ -552,6 +553,22 @@ https://ld246.com/article/1627956688432
     "data": "1.3.5"
   }
   ```
+
+### 获取系统当前时间
+
+* `/api/system/currentTime`
+* 不带参
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": 1631850968131
+  }
+  ```
+
+    * `data`: 精度为毫秒
 
 ### 判断是否正在写入数据
 

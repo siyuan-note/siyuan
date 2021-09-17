@@ -17,13 +17,14 @@
 
 ## 💡 Introduction
 
-SiYuan is a local-first personal knowledge management system, support fine-grained block-level reference and Markdown WYSIWYG.
+SiYuan is a local-first personal knowledge management system, support fine-grained block-level reference and Markdown
+WYSIWYG.
 
 ![feature0.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@8489397401cf5025eab847dfb26a4f3896be5363/screenshots/feature0.png)
 
 ![feature1-1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@8489397401cf5025eab847dfb26a4f3896be5363/screenshots/feature1-1.png)
 
-## ✨  Features
+## ✨ Features
 
 ### Free
 
@@ -44,10 +45,11 @@ All local features are free.
     * Million-word large document editing
     * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
     * Web clipping
+    * PDF Annotation link
 * Export
+    * Block ref and embed 
     * Standard Markdown with assets
     * PDF, Word and HTML
-    * Content block reference provides anchor text + embedded blockquote option
     * Copy to WeChat MP, Zhihu and Yuque
 * Hierarchical tag
 * Multi-tab, drag and drop to split screen
@@ -78,7 +80,8 @@ Cloud services require a paid subscription.
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
 
-To get the latest Insider Preview, please send an email with your GitHub login name to 845765@qq.com, and we will invite you to join the SiYuan Insider Preview team, thanks.
+To get the latest Insider Preview, please send an email with your GitHub login name to 845765@qq.com, and we will invite
+you to join the SiYuan Insider Preview team, thanks.
 
 ## 📜 Documentation
 

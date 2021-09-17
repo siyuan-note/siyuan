@@ -14,6 +14,7 @@
     * [通过 Markdown 创建文档](#通过-markdown-创建文档)
     * [重命名文档](#重命名文档)
     * [删除文档](#删除文档)
+    * [移动文档](#移动文档)
 * [资源文件](#资源文件)
     * [上传资源文件](#上传资源文件)
 * [属性](#属性)
@@ -330,6 +331,34 @@
 
     * `notebook`：笔记本 ID
     * `path`：文档路径
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### 移动文档
+
+* `/api/filetree/moveDoc`
+* 参数
+
+  ```json
+  {
+    "fromNotebook": "20210831090520-7dvbdv0",
+    "fromPath": "/20210917220056-yxtyl7i.sy",
+    "toNotebook": "20210817205410-2kvfpfn",
+    "toPath": "/"
+  }
+  ```
+
+  * `fromNotebook`：源笔记本 ID
+  * `fromPath`：源路径
+  * `toNotebook`：目标笔记本 ID
+  * `toPath`：目标路径
 * 返回值
 
   ```json

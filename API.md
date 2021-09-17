@@ -32,6 +32,8 @@
     * [导出 Markdown 文本](#导出-markdown-文本)
 * [系统](#系统)
     * [获取系统版本](#获取系统版本)
+    * [获取启动进度](#获取启动进度)
+    * [判断是否正在写入数据](#判断是否正在写入数据)
 
 ---
 
@@ -520,7 +522,47 @@ https://ld246.com/article/1627956688432
 
 ## 系统
 
+### 获取启动进度
+
+* `/api/system/bootProgress`
+* 不带参
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+        "details": "Finishing boot...",
+        "progress": 100
+    }
+  }
+  ```
+  
 ### 获取系统版本
 
-/system/version
+* `/api/system/version`
+* 不带参
+* 返回值
 
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": "1.3.5"
+  }
+  ```
+
+### 判断是否正在写入数据
+
+* `/api/system/isDataWriting`
+* 不带参
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": false
+  }
+  ```

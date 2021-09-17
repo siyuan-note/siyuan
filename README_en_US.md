@@ -51,6 +51,11 @@ All local features are free.
     * Standard Markdown with assets
     * PDF, Word and HTML
     * Copy to WeChat MP, Zhihu and Yuque
+* Community bazaar
+  * Themes
+  * Icons
+  * Templates
+  * Widgets
 * Hierarchical tag
 * Multi-tab, drag and drop to split screen
 * Fulltext search
@@ -58,7 +63,9 @@ All local features are free.
 * Keymap
 * Themes and icons
 * Android APP
+* iOS APP (in progress)
 * Docker deployment
+* [API](https://github.com/siyuan-note/siyuan/issues/213)
 
 ### Paid subscription
 

@@ -52,6 +52,11 @@
   * 带 assets 文件夹的标准 Markdown
   * PDF、Word 和 HTML
   * 复制到微信公众号、知乎和语雀
+* 社区集市
+  * 主题
+  * 图标
+  * 模板
+  * 挂件
 * 层级标签
 * 多页签拖拽分屏
 * 全文搜索
@@ -59,7 +64,9 @@
 * 快捷键
 * 主题和图标
 * Android APP
+* iOS APP (开发中)
 * Docker 部署
+* [API](https://github.com/siyuan-note/siyuan/issues/213)
 
 ### 付费订阅
 

@@ -136,6 +136,7 @@ Source code dependencies:
 * [https://github.com/gin-contrib/gzip](https://github.com/gin-contrib/gzip) `MIT License`
 * [https://github.com/gin-contrib/sessions](https://github.com/gin-contrib/sessions) `MIT License`
 * [https://github.com/gin-gonic/gin](https://github.com/gin-gonic/gin) `MIT License`
+* [https://github.com/go-shiori/go-readability](https://github.com/go-shiori/go-readability) `MIT License`
 * [https://github.com/hexops/gotextdiff](https://github.com/hexops/gotextdiff) `BSD-3-Clause License`
 * [https://github.com/jackpal/gateway](https://github.com/jackpal/gateway) `BSD-3-Clause License`
 * [https://github.com/jinzhu/copier](https://github.com/jinzhu/copier) `MIT License`

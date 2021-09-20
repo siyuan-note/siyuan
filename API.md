@@ -74,7 +74,7 @@
     "code": 0,
     "msg": "",
     "data": {
-      "files": [
+      "notebooks": [
         {
           "closed": false,
           "id": "20210817205410-2kvfpfn",
@@ -89,8 +89,6 @@
     }
   }
   ```
-
-    * `files`：笔记本路径，截取最后一个 `/` 后面的字符串即笔记本名称
 
 ### 打开笔记本
 
@@ -364,10 +362,10 @@
   }
   ```
 
-  * `fromNotebook`：源笔记本 ID
-  * `fromPath`：源路径
-  * `toNotebook`：目标笔记本 ID
-  * `toPath`：目标路径
+    * `fromNotebook`：源笔记本 ID
+    * `fromPath`：源路径
+    * `toNotebook`：目标笔记本 ID
+    * `toPath`：目标路径
 * 返回值
 
   ```json
@@ -390,8 +388,8 @@
   }
   ```
 
-  * `notebook`：笔记本 ID
-  * `path`：路径
+    * `notebook`：笔记本 ID
+    * `path`：路径
 * 返回值
 
   ```json

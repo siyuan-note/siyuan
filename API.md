@@ -75,8 +75,16 @@
     "msg": "",
     "data": {
       "files": [
-        "F:\\SiYuan\\data/思源笔记用户指南",
-        "F:\\SiYuan\\data/测试笔记本"
+        {
+          "closed": false,
+          "id": "20210817205410-2kvfpfn",
+          "name": "测试笔记本"
+        },
+        {
+          "closed": true,
+          "id": "20210831090520-7dvbdv0",
+          "name": "测试笔记本2"
+        }
       ]
     }
   }

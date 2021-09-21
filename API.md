@@ -278,13 +278,13 @@
 
   ```json
   {
-    "notebook": "测试笔记本",
+    "notebook": "20210817205410-2kvfpfn",
     "path": "/foo/bar",
     "markdown": ""
   }
   ```
 
-    * `notebook`：笔记本名称
+    * `notebook`：笔记本 ID
     * `path`：文档路径，需要以 / 开头，中间使用 / 分隔层级
     * `markdown`：GFM Markdown 内容
 * 返回值

@@ -1,3 +1,72 @@
+## v1.3.5 / 2021-09-23
+
+### 引入特性
+
+* [HTTP API](https://github.com/siyuan-note/siyuan/issues/213)
+* [导出 PDF 书签大纲](https://github.com/siyuan-note/siyuan/issues/779)
+* [PDF 标注双链](https://github.com/siyuan-note/siyuan/issues/2828)
+* [预览 PDF 支持书签大纲跳转、搜索、缩放等常用功能](https://github.com/siyuan-note/siyuan/issues/2857)
+* [Linux 和 macOS 上支持选择字体](https://github.com/siyuan-note/siyuan/issues/2914)
+* [集市显示仓库星标数](https://github.com/siyuan-note/siyuan/issues/2935)
+* [浏览器剪藏扩展支持一键发送](https://github.com/siyuan-note/siyuan/issues/2944)
+
+### 改进功能
+
+* [导出增加文档标题选项](https://github.com/siyuan-note/siyuan/issues/2863)
+* [支持 VHDL、Scala 语法高亮](https://github.com/siyuan-note/siyuan/issues/2864)
+* [列表中的标题没有对齐](https://github.com/siyuan-note/siyuan/issues/2867)
+* [移除超级块内部边距](https://github.com/siyuan-note/siyuan/issues/2873)
+* [支持标签层级范围搜索](https://github.com/siyuan-note/siyuan/issues/2878)
+* [字体列表中仅支持常规字形的字体](https://github.com/siyuan-note/siyuan/issues/2879)
+* [自动同步支持设置时间间隔](https://github.com/siyuan-note/siyuan/issues/2885)
+* [超链接提示干扰](https://github.com/siyuan-note/siyuan/issues/2887)
+* [优化同步获取云端信息](https://github.com/siyuan-note/siyuan/issues/2893)
+* [get upload token failed: 401](https://github.com/siyuan-note/siyuan/issues/2897)
+* [上下移动导致大纲面板闪烁](https://github.com/siyuan-note/siyuan/issues/2898)
+* [点击停靠栏两次后面板才会收起](https://github.com/siyuan-note/siyuan/issues/2905)
+* [行内数学公式被遮挡](https://github.com/siyuan-note/siyuan/issues/2917)
+* [属性面板、代码编辑框等使用 Ctrl Enter 确认并关闭](https://github.com/siyuan-note/siyuan/issues/2933)
+* [引用过多时悬浮窗很难 resize](https://github.com/siyuan-note/siyuan/issues/2937)
+* [嵌入块中的超链接支持点击打开](https://github.com/siyuan-note/siyuan/issues/2940)
+* [嵌入块折叠后选项按钮消失](https://github.com/siyuan-note/siyuan/issues/2941)
+* [为二级菜单添加阴影效果](https://github.com/siyuan-note/siyuan/issues/2943)
+* [修改暗黑主题下错误、警告、信息、成功的背景色](https://github.com/siyuan-note/siyuan/issues/2945)
+* [打开用户指南时提示请勿写入重要数据](https://github.com/siyuan-note/siyuan/issues/2949)
+
+### 开发重构
+
+* [重新打包 Windows 版 Rsync](https://github.com/siyuan-note/siyuan/issues/2934)
+
+### 修复缺陷
+
+* [Android 11 以下无法正常进入](https://github.com/siyuan-note/siyuan/issues/2868)
+* [列表下嵌入块图标位置显示错误](https://github.com/siyuan-note/siyuan/issues/2870)
+* [搜索结果上下键切换问题](https://github.com/siyuan-note/siyuan/issues/2872)
+* [某些字体设置失效](https://github.com/siyuan-note/siyuan/issues/2876)
+* [标签带空格时搜索失效问题](https://github.com/siyuan-note/siyuan/issues/2881)
+* [引用跳转高亮消失](https://github.com/siyuan-note/siyuan/issues/2890)
+* [下划线合并问题](https://github.com/siyuan-note/siyuan/issues/2900)
+* [窗口位置超出屏幕之外](https://github.com/siyuan-note/siyuan/issues/2902)
+* [空白处粘贴超级块显示不出来](https://github.com/siyuan-note/siyuan/issues/2903)
+* [Markdown link parse failed](https://github.com/siyuan-note/siyuan/issues/2906)
+* [未鉴权的情况下可以访问 assets 下的图片](https://github.com/siyuan-note/siyuan/issues/2908)
+* [文档末尾表格内右键无效](https://github.com/siyuan-note/siyuan/issues/2910)
+* [打开刚关闭的文档不显示大纲](https://github.com/siyuan-note/siyuan/issues/2912)
+* [虚拟引用别名判断重复包含问题](https://github.com/siyuan-note/siyuan/issues/2915)
+* [剪藏扩展处理 SVG 公式时路径不正确](https://github.com/siyuan-note/siyuan/issues/2916)
+* [数学公式内容中包含 `\$` 时解析报错](https://github.com/siyuan-note/siyuan/issues/2918)
+* [选中整个块粘贴再撤销会导致选中的内容丢失](https://github.com/siyuan-note/siyuan/issues/2920)
+* [快捷键无法设置为 alt + 左右](https://github.com/siyuan-note/siyuan/issues/2922)
+* [无网络情况无法通过设置 - 云端关闭同步](https://github.com/siyuan-note/siyuan/issues/2925)
+* [文档块属性换行符转义](https://github.com/siyuan-note/siyuan/issues/2927)
+* [表格内的数学公式复制粘贴无效](https://github.com/siyuan-note/siyuan/issues/2929)
+* [五线谱导出 PDF 不全](https://github.com/siyuan-note/siyuan/issues/2930)
+* [内核只读模式下仍然可以移动块](https://github.com/siyuan-note/siyuan/issues/2931)
+* [视频框拖拽粘滞](https://github.com/siyuan-note/siyuan/issues/2942)
+* [XSS 漏洞修复](https://github.com/siyuan-note/siyuan/issues/2946)
+* [折叠标题转换为文档时需要自动展开下方块](https://github.com/siyuan-note/siyuan/issues/2947)
+* [列表中代码块回车后会回到顶部](https://github.com/siyuan-note/siyuan/issues/2948)
+
 ## v1.3.4 / 2021-09-06
 
 ### 引入特性

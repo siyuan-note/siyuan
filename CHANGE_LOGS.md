@@ -1,3 +1,42 @@
+## v1.3.6 / 2021-09-26
+
+### 引入特性
+
+* [一键清空所有历史](https://github.com/siyuan-note/siyuan/issues/2840)
+
+### 改进功能
+
+* [直接粘贴公式后无法撤销](https://github.com/siyuan-note/siyuan/issues/2198)
+* [反链面板层级、上下文和移动改进](https://github.com/siyuan-note/siyuan/issues/2762)
+* [嵌入块右键显示菜单](https://github.com/siyuan-note/siyuan/issues/2866)
+* [文档导出模板保留空行和任务列表](https://github.com/siyuan-note/siyuan/issues/2882)
+* [编辑器字体选择支持 TTC 和 OTF](https://github.com/siyuan-note/siyuan/issues/2956)
+* [嵌入块交互改进](https://github.com/siyuan-note/siyuan/issues/2957)
+* [PDF 划选背景改为边框](https://github.com/siyuan-note/siyuan/issues/2958)
+* [折叠标题改动层级时需要先展开](https://github.com/siyuan-note/siyuan/issues/2959)
+* [PDF 画框复制注解锚文本改进](https://github.com/siyuan-note/siyuan/issues/2962)
+* [被其他程序锁定的文件加入关闭按钮](https://github.com/siyuan-note/siyuan/issues/2963)
+* [汇编语法高亮](https://github.com/siyuan-note/siyuan/issues/2964)
+* [代码签名 rsync 相关 exe](https://github.com/siyuan-note/siyuan/issues/2965)
+* [数据库表 spans 不再存储纯文本元素](https://github.com/siyuan-note/siyuan/issues/2967)
+* [整理表格、标题、代码块、引述第一个字符前，前向删除逻辑](https://github.com/siyuan-note/siyuan/issues/2970)
+* [PDF 标注文本需要在大纲显示](https://github.com/siyuan-note/siyuan/issues/2974)
+* [隐藏 PDF 文件上使用其他编辑器做的标注](https://github.com/siyuan-note/siyuan/issues/2975)
+
+### 开发重构
+
+* [重构历史恢复机制](https://github.com/siyuan-note/siyuan/issues/2855)
+
+### 修复缺陷
+
+* [加粗邻接时标记符和属性暴露](https://github.com/siyuan-note/siyuan/issues/2160)
+* [文档导出模板包含自定义 emoji 问题](https://github.com/siyuan-note/siyuan/issues/2851)
+* [应用主题以后模式选择保留](https://github.com/siyuan-note/siyuan/issues/2862)
+* [软换行后输入 >> 内核中断](https://github.com/siyuan-note/siyuan/issues/2960)
+* [转义符导致的行级元素样式属性暴露](https://github.com/siyuan-note/siyuan/issues/2969)
+* [跨文档移动列表项时父 ID 指向不对](https://github.com/siyuan-note/siyuan/issues/2972)
+* [动态加载最后一个块可能出现的边界计算问题](https://github.com/siyuan-note/siyuan/issues/2976)
+
 ## v1.3.5 / 2021-09-23
 
 ### 引入特性

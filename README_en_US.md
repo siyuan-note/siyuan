@@ -115,6 +115,7 @@ SiYuan is made possible by the following open source projects.
 ### Source code dependencies
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
+* [https://github.com/atotto/clipboard](https://github.com/atotto/clipboard) `BSD-3-Clause License` 
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
 * [https://github.com/gofrs/flock](https://github.com/gofrs/flock) `BSD-3-Clause License`
 * [https://github.com/88250/gulu](https://github.com/88250/gulu) `Mulan PSL v2`

@@ -1,3 +1,30 @@
+## v1.3.7 / 2021-09-28
+
+### 引入特性
+
+* [同步排除文件列表](https://github.com/siyuan-note/siyuan/issues/2842)
+
+### 改进功能
+
+* [Alt+F4/Command+Q 和关闭按钮保持逻辑一致](https://github.com/siyuan-note/siyuan/issues/2575)
+* [编辑时 ESC 取消光标并选中当前块](https://github.com/siyuan-note/siyuan/issues/2875)
+* [锁屏界面多语言支持](https://github.com/siyuan-note/siyuan/issues/2899)
+* [浏览器剪藏扩展剪藏同名网页改进](https://github.com/siyuan-note/siyuan/issues/2991)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/2814)
+* [重构系统剪切板读取文件路径](https://github.com/siyuan-note/siyuan/issues/2984)
+
+### 修复缺陷
+
+* [macOS 关闭后无法保存布局状态](https://github.com/siyuan-note/siyuan/issues/2813)
+* [代码块无法对齐](https://github.com/siyuan-note/siyuan/issues/2971)
+* [悬浮窗点击更多，鼠标移动到菜单上时，悬浮窗消失](https://github.com/siyuan-note/siyuan/issues/2981)
+* [打不开使用 `file://` 链接的 PDF](https://github.com/siyuan-note/siyuan/issues/2983)
+* [列表项拖动内核中断](https://github.com/siyuan-note/siyuan/issues/2994)
+* [历史无法滚动](https://github.com/siyuan-note/siyuan/issues/2995)
+
 ## v1.3.6 / 2021-09-27
 
 ### 引入特性

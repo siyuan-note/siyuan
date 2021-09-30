@@ -1,3 +1,31 @@
+## v1.3.8 / 2021-09-30
+
+### 引入特性
+
+* [支持 SOCKS5 网络代理](https://github.com/siyuan-note/siyuan/issues/2928)
+* [PDF 标注支持背景和边框切换](https://github.com/siyuan-note/siyuan/issues/2961)
+
+### 改进功能
+
+* [嵌入块未保留折叠显示](https://github.com/siyuan-note/siyuan/issues/2889)
+* [PDF 需精准定位到注解](https://github.com/siyuan-note/siyuan/issues/2980)
+* [剪藏扩展点击发送到思源后关闭面板](https://github.com/siyuan-note/siyuan/issues/2993)
+* [插入资源文件时不替换标点符号和空格](https://github.com/siyuan-note/siyuan/issues/2999)
+* [云端同步的 4.1kB 应该显示为 0](https://github.com/siyuan-note/siyuan/issues/3001)
+* [变更同步忽略文件夹语法](https://github.com/siyuan-note/siyuan/issues/3002)
+* [剪藏扩展保留代码高亮语言](https://github.com/siyuan-note/siyuan/issues/3012)
+* [为待办列表添加 ctrl/shift/alt +click 事件](https://github.com/siyuan-note/siyuan/issues/3013)
+
+### 修复缺陷
+
+* [同步忽略列表删除源文件问题](https://github.com/siyuan-note/siyuan/issues/2998)
+* [查询嵌入块渲染导致的内核崩溃](https://github.com/siyuan-note/siyuan/issues/3000)
+* [列表下标题过长导致样式错位](https://github.com/siyuan-note/siyuan/issues/3003)
+* [Code is inline by mistake when copy-paste](https://github.com/siyuan-note/siyuan/issues/3008)
+* [需要登录的 iframe 无法登录](https://github.com/siyuan-note/siyuan/issues/3014)
+* [软换行后，数据没有保存](https://github.com/siyuan-note/siyuan/issues/3017)
+* [连续粘贴 PDF 标注不生效](https://github.com/siyuan-note/siyuan/issues/3018)
+
 ## v1.3.7 / 2021-09-28
 
 ### 引入特性

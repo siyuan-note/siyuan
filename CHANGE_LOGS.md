@@ -1,3 +1,32 @@
+## v1.3.9 / 2021-10-03
+
+### 引入特性
+
+* [插入已有资源文件](https://github.com/siyuan-note/siyuan/issues/1378)
+
+### 改进功能
+
+* [文档标题互转后，编辑区会跳转到开头](https://github.com/siyuan-note/siyuan/issues/2939)
+* [Windows 下图表弹框拖拽卡顿](https://github.com/siyuan-note/siyuan/issues/2950)
+* [PDF 搜索或更多，点击空白地方不会消失](https://github.com/siyuan-note/siyuan/issues/3006)
+* [不同步符号链接](https://github.com/siyuan-note/siyuan/issues/3020)
+* [大纲点击后文档标题定位到顶部](https://github.com/siyuan-note/siyuan/issues/3028)
+* [改进 PDF 标注渲染效果](https://github.com/siyuan-note/siyuan/issues/3033)
+* [英文句尾换行问题](https://github.com/siyuan-note/siyuan/issues/3035)
+* [列表项不应该允许合并超级块](https://github.com/siyuan-note/siyuan/issues/3039)
+
+### 修复缺陷
+
+* [在 data 下的子文件同步时没有删除](https://github.com/siyuan-note/siyuan/issues/3022)
+* [代码块换行，复制按钮消失](https://github.com/siyuan-note/siyuan/issues/3024)
+* [反链面板中，某一项突然颜色变淡](https://github.com/siyuan-note/siyuan/issues/3025)
+* [退出应用问题](https://github.com/siyuan-note/siyuan/issues/3029)
+* [大纲不显示转义内容](https://github.com/siyuan-note/siyuan/issues/3030)
+* [列表项横排后撤销内核中断](https://github.com/siyuan-note/siyuan/issues/3031)
+* [有的 PDF 无法划选](https://github.com/siyuan-note/siyuan/issues/3032)
+* [端到端密码报错](https://github.com/siyuan-note/siyuan/issues/3034)
+* [虚拟引用通过命名搜索遗漏问题](https://github.com/siyuan-note/siyuan/issues/3038)
+
 ## v1.3.8 / 2021-09-30
 
 ### 引入特性

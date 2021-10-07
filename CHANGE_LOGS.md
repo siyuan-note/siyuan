@@ -1,3 +1,38 @@
+## v1.4.0 / 2021-10-07
+
+### 引入特性
+
+* [工作空间列表切换](https://github.com/siyuan-note/siyuan/issues/2535)
+* [笔记本排序](https://github.com/siyuan-note/siyuan/issues/2786)
+* [笔记本图标](https://github.com/siyuan-note/siyuan/issues/3056)
+
+### 改进功能
+
+* [当光标没有定位到块时，文件无法拖到笔记中](https://github.com/siyuan-note/siyuan/issues/2665)
+* [改进输入法兼容性](https://github.com/siyuan-note/siyuan/issues/3027)
+* [资源文件搜索结果显示不完整](https://github.com/siyuan-note/siyuan/issues/3040)
+* [点击文档后，大纲同步滚动](https://github.com/siyuan-note/siyuan/issues/3043)
+* [虚拟引用不再排除自身定义块](https://github.com/siyuan-note/siyuan/issues/3046)
+* [资源文件搜索去重](https://github.com/siyuan-note/siyuan/issues/3047)
+* [标签筛选组合需按住 Ctrl](https://github.com/siyuan-note/siyuan/issues/3055)
+* [文档中的 PDF 标注无法通过 Backspace 删除](https://github.com/siyuan-note/siyuan/issues/3057)
+* [多个软换行后应形成新的块](https://github.com/siyuan-note/siyuan/issues/3058)
+* [剪藏扩展支持笔记本 assets](https://github.com/siyuan-note/siyuan/issues/3061)
+* [嵌入块面包屑滑动会弹出左右菜单](https://github.com/siyuan-note/siyuan/issues/3065)
+* [开启同步以后，如果同步失败可选择强制退出](https://github.com/siyuan-note/siyuan/issues/3071)
+
+### 修复缺陷
+
+* [在代码块输入 &copy; 自动转变字符](https://github.com/siyuan-note/siyuan/issues/3041)
+* [调整块宽度影响图片大小](https://github.com/siyuan-note/siyuan/issues/3044)
+* [开启最小化到托盘后 Quit 无效](https://github.com/siyuan-note/siyuan/issues/3045)
+* [部分站点的 iframe 加载问题](https://github.com/siyuan-note/siyuan/issues/3051)
+* [文档名包含 `"` 和 `>` 等符号的转义问题](https://github.com/siyuan-note/siyuan/issues/3052)
+* [网络角标显示问题](https://github.com/siyuan-note/siyuan/issues/3053)
+* [任务列表下的引用导致反链显示问题](https://github.com/siyuan-note/siyuan/issues/3054)
+* [某些移动端 Pad 设备上无法进入](https://github.com/siyuan-note/siyuan/issues/3060)
+* [查询嵌入块导出问题](https://github.com/siyuan-note/siyuan/issues/3069)
+
 ## v1.3.9 / 2021-10-03
 
 ### 引入特性

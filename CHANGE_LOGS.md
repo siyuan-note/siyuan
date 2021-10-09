@@ -1,3 +1,31 @@
+## v1.4.1 / 2021-10-09
+
+### 改进功能
+
+* [文档树双击为子文档的折叠或展开](https://github.com/siyuan-note/siyuan/issues/2888)
+* [PDF 打开位置为包含 PDF 的页签组中](https://github.com/siyuan-note/siyuan/issues/3072)
+* [列表侧边竖线改进](https://github.com/siyuan-note/siyuan/issues/3093)
+* [全局搜索加入选项 - 是否排除容器块](https://github.com/siyuan-note/siyuan/issues/3094)
+
+### 开发重构
+
+* [变更发版机制](https://github.com/siyuan-note/siyuan/issues/3087)
+
+### 修复缺陷
+
+* [块引新建时选择到的行级代码重复](https://github.com/siyuan-note/siyuan/issues/3075)
+* [不能修改文档图标](https://github.com/siyuan-note/siyuan/issues/3076)
+* [设置文档图标导致自动创建空的笔记本](https://github.com/siyuan-note/siyuan/issues/3078)
+* [子文档不能拖到笔记本下](https://github.com/siyuan-note/siyuan/issues/3080)
+* [PDF 标注复制引用后有时查询不到块](https://github.com/siyuan-note/siyuan/issues/3084)
+* [部分站点的 iframe 加载问题](https://github.com/siyuan-note/siyuan/issues/3085)
+* [macOS 中 Dock 右键退出无法退出](https://github.com/siyuan-note/siyuan/issues/3086)
+* [大纲中显示次级标题的数量不全](https://github.com/siyuan-note/siyuan/issues/3088)
+* [网络代理设置文案错误](https://github.com/siyuan-note/siyuan/issues/3092)
+* [解析文本 `<<` 时错误识别为文件标注语法](https://github.com/siyuan-note/siyuan/issues/3095)
+* [设置搜索失效](https://github.com/siyuan-note/siyuan/issues/3102)
+* [导出模板时任务列表问题](https://github.com/siyuan-note/siyuan/issues/3108)
+
 ## v1.4.0 / 2021-10-07
 
 ### 引入特性

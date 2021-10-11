@@ -1,3 +1,26 @@
+## v1.4.2 / 2021-10-11
+
+### 改进功能
+
+* [文档树拖拽文档层级时细化视觉](https://github.com/siyuan-note/siyuan/issues/3106)
+* [云端同步默认忽略帮助文档](https://github.com/siyuan-note/siyuan/issues/3107)
+* [跨笔记本移动时保持自定义排序](https://github.com/siyuan-note/siyuan/issues/3109)
+* [打包 Apple 芯片 arm64 版本](https://github.com/siyuan-note/siyuan/issues/3110)
+* [列表侧边竖线改进](https://github.com/siyuan-note/siyuan/issues/3111)
+* [改进 PDF 注解语法解析](https://github.com/siyuan-note/siyuan/issues/3112)
+* [13 后回车改进：由生成 1 同级列表修改为生成13下方的空块](https://github.com/siyuan-note/siyuan/issues/3118)
+* [开启同步时校验是否端到端密码为空](https://github.com/siyuan-note/siyuan/issues/3122)
+
+### 修复缺陷
+
+* [软换行后移动数学公式导致内核中断](https://github.com/siyuan-note/siyuan/issues/3113)
+* [连续空列表项无法 shift + click 选中](https://github.com/siyuan-note/siyuan/issues/3116)
+* [网络角标显示问题](https://github.com/siyuan-note/siyuan/issues/3119)
+* [超级块下的列表项中再包含超级块时，样式错位](https://github.com/siyuan-note/siyuan/issues/3120)
+* [`/无序` 唤出问题](https://github.com/siyuan-note/siyuan/issues/3121)
+* [Android 端无法通过其他应用打开资源文件](https://github.com/siyuan-note/siyuan/issues/3123)
+* [主题配置文件损坏时内核启动崩溃](https://github.com/siyuan-note/siyuan/issues/3127)
+
 ## v1.4.1 / 2021-10-09
 
 ### 改进功能

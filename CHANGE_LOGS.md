@@ -1,3 +1,14 @@
+## v1.4.4 / 2021-10-20
+
+### 改进功能
+
+* [Docker 镜像版本化](https://github.com/siyuan-note/siyuan/issues/3199)
+
+### 修复缺陷
+
+* [嵌入块查询异常导致重新索引](https://github.com/siyuan-note/siyuan/issues/3197)
+* [频繁报错状态异常](https://github.com/siyuan-note/siyuan/issues/3198)
+
 ## v1.4.3 / 2021-10-20
 
 ### 改进功能

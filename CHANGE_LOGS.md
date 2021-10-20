@@ -1,3 +1,59 @@
+## v1.4.3 / 2021-10-20
+
+### 改进功能
+
+* [优化暗黑模式下选择代码后的显式效果](https://github.com/siyuan-note/siyuan/issues/3070)
+* [行内公式与文字垂直居中排版](https://github.com/siyuan-note/siyuan/issues/3081)
+* [引用容器块时自动渲染锚文本改进](https://github.com/siyuan-note/siyuan/issues/3126)
+* [通过异步写入优化内核保存数据性能](https://github.com/siyuan-note/siyuan/issues/3128)
+* [改进输入实现](https://github.com/siyuan-note/siyuan/issues/3129)
+* [主题文件夹没有 theme.json 时不应该影响内核启动](https://github.com/siyuan-note/siyuan/issues/3130)
+* [剪藏某些网站代码块换行丢失](https://github.com/siyuan-note/siyuan/issues/3135)
+* [减少列表竖线间距](https://github.com/siyuan-note/siyuan/issues/3137)
+* [设置工作空间路径时校验不能放置在程序安装路径下](https://github.com/siyuan-note/siyuan/issues/3139)
+* [列表项折叠，除第一个子块外其余子块都隐藏](https://github.com/siyuan-note/siyuan/issues/3142)
+* [云端空间总大小在 .5G 时不显示](https://github.com/siyuan-note/siyuan/issues/3149)
+* [改进导出时嵌入和引用嵌套的处理](https://github.com/siyuan-note/siyuan/issues/3152)
+* [为搜索、块嵌入、块引用添加 loading](https://github.com/siyuan-note/siyuan/issues/3159)
+* [订阅推荐码改为付款后输入](https://github.com/siyuan-note/siyuan/issues/3161)
+* [嵌入块过长时，单击弹出的悬浮窗位置居下](https://github.com/siyuan-note/siyuan/issues/3165)
+* [删除笔记本时复制 assets 到全局 assets 下](https://github.com/siyuan-note/siyuan/issues/3166)
+* [表格内公式含有 `|` 符号导致表格异常分割](https://github.com/siyuan-note/siyuan/issues/3168)
+* [同步改进 - 引入基于 HTTPS 的同步方式](https://github.com/siyuan-note/siyuan/issues/3169)
+* [iOS 初版公测](https://github.com/siyuan-note/siyuan/issues/3172)
+* [移动端自定义图标对不齐](https://github.com/siyuan-note/siyuan/issues/3174)
+* [内核连接中断退出调整为重建索引](https://github.com/siyuan-note/siyuan/issues/3176)
+* [移动端文档树禁用修改图标](https://github.com/siyuan-note/siyuan/issues/3178)
+* [为每个面板添加属性，增加自定义样式的灵活性](https://github.com/siyuan-note/siyuan/issues/3179)
+* [文档树动画效果](https://github.com/siyuan-note/siyuan/issues/3182)
+* [虚拟引用排除命中自身块命名和别名的情况](https://github.com/siyuan-note/siyuan/issues/3185)
+* [改进嵌入块查询性能](https://github.com/siyuan-note/siyuan/issues/3195)
+* [改进导入 Markdown 相对路径资源文件处理](https://github.com/siyuan-note/siyuan/issues/3196)
+
+### 移除功能
+
+* [废弃导出选项引用块转换为原始块和引述块](https://github.com/siyuan-note/siyuan/issues/3155)
+* [去掉移动端设置按钮](https://github.com/siyuan-note/siyuan/issues/3184)
+
+### 修复缺陷
+
+* [列表中引述侧边线对不齐](https://github.com/siyuan-note/siyuan/issues/3131)
+* [新建日记存放路径仅填 `/` 时文档打不开](https://github.com/siyuan-note/siyuan/issues/3143)
+* [列表项引用块下有任务列表时反链面板无法显示任何反链](https://github.com/siyuan-note/siyuan/issues/3147)
+* [系统休眠唤醒后同步报错 Failed to exec bin/ssh.exe](https://github.com/siyuan-note/siyuan/issues/3148)
+* [快捷键创建日志后文档树没有被选中](https://github.com/siyuan-note/siyuan/issues/3153)
+* [引用后的文本删除，锚文本会被填充内容](https://github.com/siyuan-note/siyuan/issues/3154)
+* [代码块里无法复制空格](https://github.com/siyuan-note/siyuan/issues/3158)
+* [视频居左拖拽大小异常](https://github.com/siyuan-note/siyuan/issues/3162)
+* [右键视频、音频、IFrame 禁止弹出复制粘贴菜单](https://github.com/siyuan-note/siyuan/issues/3163)
+* [列表折叠后的第一个子块竖线过长](https://github.com/siyuan-note/siyuan/issues/3164)
+* [导出为 Markdown 时段落开头空两格不生效](https://github.com/siyuan-note/siyuan/issues/3167)
+* [幻灯片播放后无法退出](https://github.com/siyuan-note/siyuan/issues/3170)
+* [表格中的换行复制粘贴后会变为 `<br>`](https://github.com/siyuan-note/siyuan/issues/3173)
+* [预览/导出使用块引转脚注时报错](https://github.com/siyuan-note/siyuan/issues/3186)
+* [macOS 版全屏后无法关闭](https://github.com/siyuan-note/siyuan/issues/3188)
+* [同步排除的笔记本文档丢失](https://github.com/siyuan-note/siyuan/issues/3191)
+
 ## v1.4.2 / 2021-10-11
 
 ### 改进功能

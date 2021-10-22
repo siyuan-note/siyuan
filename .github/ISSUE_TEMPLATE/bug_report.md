@@ -1,5 +1,5 @@
 ---
-name: 缺陷报告 Bug Report
+name: 🐛 缺陷报告 Bug Report
 about: 报告缺陷以帮助我们进行改进 Report defects to help us improve
 ---
 

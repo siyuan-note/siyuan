@@ -1,5 +1,5 @@
 ---
-name: 特性提议 Request new features
+name: ✨ 特性提议 Request new features
 about: 欢迎提出你所期待的新特性 Come up with the features you expect
 ---
 

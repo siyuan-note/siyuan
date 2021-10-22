@@ -3,6 +3,9 @@ contact_links:
   - name: 思源笔记中文讨论区
     url: https://ld246.com/domain/siyuan
     about: 中文用户请到这里反馈问题和提出建议
-  - name: 思源笔记 QQ 群
-    url: https://jq.qq.com/?_wv=1027&k=DQF67LUQ
-    about: QQ 群主要用于大家使用交流，请勿用于问题反馈
+  - name: 思源笔记基础使用 Q 群
+    url: https://jq.qq.com/?_wv=1027&k=OmaV22we
+    about: 该群主要用于大家使用交流，请勿用于问题反馈
+  - name: 思源笔记技术代码 Q 群
+      url: https://jq.qq.com/?_wv=1027&k=p1WHLxyQ
+      about: 该群主要用于自定义主题、模板和挂件等开发交流

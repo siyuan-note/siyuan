@@ -1,3 +1,34 @@
+## v1.4.5 / 2021-10-22
+
+### 改进功能
+
+* [引用超大的单个块会导致无响应](https://github.com/siyuan-note/siyuan/issues/3140)
+* [改进反链面板列表项子级展现判断](https://github.com/siyuan-note/siyuan/issues/3151)
+* [移动端返回桌面时进行一次同步](https://github.com/siyuan-note/siyuan/issues/3187)
+* [选择文本插入超链接改进](https://github.com/siyuan-note/siyuan/issues/3192)
+* [工作空间中文路径校验](https://github.com/siyuan-note/siyuan/issues/3205)
+* [图片菜单样式改进](https://github.com/siyuan-note/siyuan/issues/3206)
+* [列表中连续代码块之间没有空隙](https://github.com/siyuan-note/siyuan/issues/3208)
+* [打包所有 highlight.js 支持的高亮](https://github.com/siyuan-note/siyuan/issues/3210)
+* [改进引述容器为空的处理](https://github.com/siyuan-note/siyuan/issues/3211)
+* [大纲和嵌入块慢半拍改进](https://github.com/siyuan-note/siyuan/issues/3212)
+* [块引自动渲染锚文本最大长度设置为 64](https://github.com/siyuan-note/siyuan/issues/3213)
+* [查询为空时默认的块引排序规则按最近使用优先](https://github.com/siyuan-note/siyuan/issues/3218)
+* [优化文档树展开性能](https://github.com/siyuan-note/siyuan/issues/3225)
+
+### 修复缺陷
+
+* [加粗和斜体等空格情况标记符暴露](https://github.com/siyuan-note/siyuan/issues/3134)
+* [设置账号无法登出](https://github.com/siyuan-note/siyuan/issues/3202)
+* [复制为嵌入块时重复](https://github.com/siyuan-note/siyuan/issues/3203)
+* [列表标记符暴露问题](https://github.com/siyuan-note/siyuan/issues/3204)
+* [导出软换行和有序列表序号问题](https://github.com/siyuan-note/siyuan/issues/3207)
+* [没有标签时输入 `#` 后转圈不停止](https://github.com/siyuan-note/siyuan/issues/3209)
+* [列表撤销导致状态异常](https://github.com/siyuan-note/siyuan/issues/3216)
+* [容器块自动渲染锚文本问题](https://github.com/siyuan-note/siyuan/issues/3220)
+* [最后一个代码块右键失效](https://github.com/siyuan-note/siyuan/issues/3221)
+* [自动空格导致输入法吞字](https://github.com/siyuan-note/siyuan/issues/3222)
+
 ## v1.4.4 / 2021-10-20
 
 ### 改进功能

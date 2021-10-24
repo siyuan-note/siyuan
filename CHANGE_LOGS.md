@@ -1,3 +1,28 @@
+## v1.4.6 / 2021-10-24
+
+### 改进功能
+
+* [Android 端支持上传文件](https://github.com/siyuan-note/siyuan/issues/1957)
+* [移动端点击空白处无法编辑](https://github.com/siyuan-note/siyuan/issues/2932)
+* [剪藏扩展插入原文链接、摘要和剪藏时间](https://github.com/siyuan-note/siyuan/issues/3146)
+* [移动端左右滑动改为前进后退](https://github.com/siyuan-note/siyuan/issues/3177)
+* [全局搜索路径缓存处理改进](https://github.com/siyuan-note/siyuan/issues/3193)
+* [粘贴文本中包含 `((` 时不应该出现块引提示](https://github.com/siyuan-note/siyuan/issues/3227)
+* [设置页面按钮宽度自适应](https://github.com/siyuan-note/siyuan/issues/3230)
+* [iOS 端公测同步](https://github.com/siyuan-note/siyuan/issues/3236)
+* [优化 HTTPS 同步性能](https://github.com/siyuan-note/siyuan/issues/3237)
+* [移动端取消滑动拉出侧栏和搜索](https://github.com/siyuan-note/siyuan/issues/3240)
+* [支持嵌入 B 站视频时去弹幕](https://github.com/siyuan-note/siyuan/issues/3242)
+
+### 修复缺陷
+
+* [数学公式导出 `&` 转义问题](https://github.com/siyuan-note/siyuan/issues/3234)
+* [反链面板容器块自动渲染锚文本问题](https://github.com/siyuan-note/siyuan/issues/3235)
+* [块引搜索转圈不停](https://github.com/siyuan-note/siyuan/issues/3238)
+* [移动端编辑器 `...` 菜单问题](https://github.com/siyuan-note/siyuan/issues/3241)
+* [剪藏时图片后标题解析问题](https://github.com/siyuan-note/siyuan/issues/3244)
+* [反链面板搜索关键字失效问题](https://github.com/siyuan-note/siyuan/issues/3246)
+
 ## v1.4.5 / 2021-10-22
 
 ### 改进功能

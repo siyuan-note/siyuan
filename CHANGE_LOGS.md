@@ -1,3 +1,57 @@
+## v1.4.7 / 2021-11-05
+
+### 改进功能
+
+* [移动面板支持跨笔记本](https://github.com/siyuan-note/siyuan/issues/2850)
+* [输入 `[]`，`【】` 时，转换为任务列表](https://github.com/siyuan-note/siyuan/issues/2936)
+* [优先使用系统 $PATH 下的 pandoc](https://github.com/siyuan-note/siyuan/issues/3124)
+* [同步配置向导](https://github.com/siyuan-note/siyuan/issues/3243)
+* [清理未引用资源时忽略挂件引用的数据文件](https://github.com/siyuan-note/siyuan/issues/3249)
+* [块引动态渲染的锚文本长度支持配置](https://github.com/siyuan-note/siyuan/issues/3251)
+* [移动端扩展可点击的空白区域](https://github.com/siyuan-note/siyuan/issues/3252)
+* [优化关系图渲染效果](https://github.com/siyuan-note/siyuan/issues/3255)
+* [优化块引搜索性能](https://github.com/siyuan-note/siyuan/issues/3263)
+* [iOS 端同步完整性改进](https://github.com/siyuan-note/siyuan/issues/3267)
+* [HTTPS 同步大文件性能改进](https://github.com/siyuan-note/siyuan/issues/3269)
+* [简化云端备份功能](https://github.com/siyuan-note/siyuan/issues/3275)
+* [超链接/块引设置对话框改进](https://github.com/siyuan-note/siyuan/issues/3276)
+* [推荐订阅送终身会员，512 个名额送完即止](https://github.com/siyuan-note/siyuan/issues/3278)
+* [双击悬浮层顶部栏进行 pin/unpin 操作](https://github.com/siyuan-note/siyuan/issues/3281)
+* [上传资源文件 API 支持覆盖已有资源文件](https://github.com/siyuan-note/siyuan/issues/3286)
+* [缩放聚焦容器块时计入反链](https://github.com/siyuan-note/siyuan/issues/3303)
+* [各面板中的树的箭头保持显示](https://github.com/siyuan-note/siyuan/issues/3307)
+* [日志文件存放到 temp 下](https://github.com/siyuan-note/siyuan/issues/3311)
+* [块引动态渲染的锚文本优先使用命名](https://github.com/siyuan-note/siyuan/issues/3315)
+* [没有块的时候对嵌入和引用进行搜索时应进行提示](https://github.com/siyuan-note/siyuan/issues/3316)
+* [在页签右/下侧打开文档，应保持在该页签紧邻的右/下侧](https://github.com/siyuan-note/siyuan/issues/3321)
+* [文件树上 alt/shift/ctrl 点击后不松开，依旧保持原有的打开方式](https://github.com/siyuan-note/siyuan/issues/3323)
+* [为引用打开悬浮窗/页签添加快捷键](https://github.com/siyuan-note/siyuan/issues/3325)
+* [SQL 不支持公共表表达式](https://github.com/siyuan-note/siyuan/issues/3328)
+* [搜索/搜索页签/引用块打开文档，没有光标](https://github.com/siyuan-note/siyuan/issues/3331)
+* [全局配置目录放置到 ~/.config/siyuan](https://github.com/siyuan-note/siyuan/issues/3332)
+* [桌面端 app.log 放置到 ~/.config/siyuan](https://github.com/siyuan-note/siyuan/issues/3333)
+* [属性面板中的备注输入框增加高度](https://github.com/siyuan-note/siyuan/issues/3336)
+
+### 修复缺陷
+
+* [修改密码后已登录账号的设备账号没有过期](https://github.com/siyuan-note/siyuan/issues/3247)
+* [工作空间路切换时的报错文案误导问题](https://github.com/siyuan-note/siyuan/issues/3248)
+* [数据库表 spans 未写入行级高亮元素](https://github.com/siyuan-note/siyuan/issues/3250)
+* [脑图不显示](https://github.com/siyuan-note/siyuan/issues/3253)
+* [引用提示请求覆盖](https://github.com/siyuan-note/siyuan/issues/3256)
+* [闭合行级代码后粘贴内容仍然在行级代码内](https://github.com/siyuan-note/siyuan/issues/3257)
+* [新建文档后位置错位及文档树定位错误](https://github.com/siyuan-note/siyuan/issues/3258)
+* [某些输入法下分隔线语法解析问题](https://github.com/siyuan-note/siyuan/issues/3259)
+* [列表项下挂代码块时竖线显示问题](https://github.com/siyuan-note/siyuan/issues/3260)
+* [大纲出现 `...` 问题](https://github.com/siyuan-note/siyuan/issues/3261)
+* [开启在当前页签中选项，关闭右侧页签错误](https://github.com/siyuan-note/siyuan/issues/3271)
+* [右键删除有序列表项后，序号不会改变](https://github.com/siyuan-note/siyuan/issues/3272)
+* [剪切板中为链接且无选中内容，ctrl+k 无效](https://github.com/siyuan-note/siyuan/issues/3288)
+* [转义符暴露搜索高亮代码问题](https://github.com/siyuan-note/siyuan/issues/3289)
+* [超链接、块引用、PDF 标注锚文本转义问题](https://github.com/siyuan-note/siyuan/issues/3320)
+* [任务列表完成状态改变时 updated 字段设值错误](https://github.com/siyuan-note/siyuan/issues/3327)
+* [Linux dolpin 文件管理器复制粘贴图片无效](https://github.com/siyuan-note/siyuan/issues/3329)
+
 ## v1.4.6 / 2021-10-24
 
 ### 改进功能

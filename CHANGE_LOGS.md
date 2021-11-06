@@ -1,3 +1,15 @@
+## v1.4.8 / 2021-11-06
+
+### 改进功能
+
+* [日志大于 2M 后清空重置](https://github.com/siyuan-note/siyuan/issues/3339)
+* [列表项大于一个时 【】不再将其转换为任务列表](https://github.com/siyuan-note/siyuan/issues/3343)
+* [链接聚焦优化](https://github.com/siyuan-note/siyuan/issues/3344)
+
+### 修复缺陷
+
+* [App does not boot](https://github.com/siyuan-note/siyuan/issues/3341)
+
 ## v1.4.7 / 2021-11-05
 
 ### 改进功能

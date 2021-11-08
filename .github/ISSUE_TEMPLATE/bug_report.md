@@ -35,8 +35,8 @@ Please try to attach screenshots or videos to describe the problem you are exper
 ### 日志文件 Log File
 
 <!--
-请提供内核日志：工作空间/conf/siyuan.log
-The program log file is located at: workspace/conf/siyuan.log
+请提供内核日志：工作空间/temp/siyuan.log
+The program log file is located at: workspace/temp/siyuan.log
 -->
 
 ### 更多信息 More information

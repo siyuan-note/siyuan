@@ -1,3 +1,34 @@
+## v1.5.0 / 2021-11-09
+
+### 引入特性
+
+* [列表项块转换为文档块](https://github.com/siyuan-note/siyuan/issues/2610)
+* [引述块转换为段落块](https://github.com/siyuan-note/siyuan/issues/2880)
+
+### 改进功能
+
+* [块引浮窗交互改进](https://github.com/siyuan-note/siyuan/issues/3183)
+* [开发者工具警告`无法加载来源映射`](https://github.com/siyuan-note/siyuan/issues/3348)
+* [`~/.config` 下 Electron 相关文件夹名称改为 `SiYuan-Electron`](https://github.com/siyuan-note/siyuan/issues/3349)
+* [HTTPS 同步复用客户端、回收空闲连接](https://github.com/siyuan-note/siyuan/issues/3351)
+* [能否加入\ket \bra等更全的 tex 符号支持](https://github.com/siyuan-note/siyuan/issues/3352)
+* [重建索引遮罩](https://github.com/siyuan-note/siyuan/issues/3354)
+* [浏览器环境下标题没有及时显示](https://github.com/siyuan-note/siyuan/issues/3360)
+* [文档标题支持复制引用快捷键](https://github.com/siyuan-note/siyuan/issues/3361)
+* [外观支持繁体中文语言](https://github.com/siyuan-note/siyuan/issues/3362)
+* [列表项中有多个块就允许折叠](https://github.com/siyuan-note/siyuan/issues/3369)
+
+### 修复缺陷
+
+* [挂起无响应问题](https://github.com/siyuan-note/siyuan/issues/3342)
+* [ctrl+k 在空块中无效](https://github.com/siyuan-note/siyuan/issues/3346)
+* [引用列表项时，引用块为文档时动态渲染锚文本为空](https://github.com/siyuan-note/siyuan/issues/3350)
+* [自定义快捷键bug——表格功能中左右方向键无法识别](https://github.com/siyuan-note/siyuan/issues/3353)
+* [空列表项上下无法选中](https://github.com/siyuan-note/siyuan/issues/3356)
+* [大纲跳转不正常](https://github.com/siyuan-note/siyuan/issues/3358)
+* [代码块输入块元数据后导致运行时异常](https://github.com/siyuan-note/siyuan/issues/3364)
+* [标题中如果正在拼写，使用下键会阻断继续的输入](https://github.com/siyuan-note/siyuan/issues/3366)
+
 ## v1.4.8 / 2021-11-06
 
 ### 改进功能

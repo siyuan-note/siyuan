@@ -1,3 +1,23 @@
+## v1.5.1 / 2021-11-11
+
+### 改进功能
+
+* [优化冒号后自动弹出 emoji 选择框的场景](https://github.com/siyuan-note/siyuan/issues/3223)
+* [Emoji 加入斜杆菜单](https://github.com/siyuan-note/siyuan/issues/3224)
+* [Docker 容器以 1000:1000 用户组执行](https://github.com/siyuan-note/siyuan/issues/3296)
+* [块引锚文本修改光标位置不正常](https://github.com/siyuan-note/siyuan/issues/3297)
+* [优化数据索引性能](https://github.com/siyuan-note/siyuan/issues/3375)
+* [为文档图标的 emoji 选择面板添加上下和回车键](https://github.com/siyuan-note/siyuan/issues/3378)
+* [编辑器内的 emoji 选择面板改为文档图标选择面板](https://github.com/siyuan-note/siyuan/issues/3379)
+* [端到端密码支持非数字和字母](https://github.com/siyuan-note/siyuan/issues/3383)
+
+### 修复缺陷
+
+* [列表项转换文档触发运行时异常](https://github.com/siyuan-note/siyuan/issues/3371)
+* [查询嵌入块和引用嵌套导致的挂起无响应问题](https://github.com/siyuan-note/siyuan/issues/3372)
+* [端到端密码无法设置](https://github.com/siyuan-note/siyuan/issues/3377)
+* [使用 `~` 输入围栏代码块时运行时异常](https://github.com/siyuan-note/siyuan/issues/3381)
+
 ## v1.5.0 / 2021-11-09
 
 ### 引入特性

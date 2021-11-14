@@ -1,3 +1,31 @@
+## v1.5.2 / 2021-11-14
+
+### 改进功能
+
+* [录音改进](https://github.com/siyuan-note/siyuan/issues/541)
+* [改进列表上下移动逻辑](https://github.com/siyuan-note/siyuan/issues/2466)
+* [同文档块引转脚注缩略定义](https://github.com/siyuan-note/siyuan/issues/3299)
+* [公式编辑输入框在窗口切换后失焦](https://github.com/siyuan-note/siyuan/issues/3357)
+* [修改面包屑部分样式会导致输入时卡死](https://github.com/siyuan-note/siyuan/issues/3384)
+* [普通提示和警告提示视觉优化](https://github.com/siyuan-note/siyuan/issues/3386)
+* [数据解析报错记录日志](https://github.com/siyuan-note/siyuan/issues/3391)
+* [导出时动态渲染锚文本最大长度按照配置处理](https://github.com/siyuan-note/siyuan/issues/3400)
+* [文档移动搜索时支持命名、别名和备注](https://github.com/siyuan-note/siyuan/issues/3401)
+* [文档移动支持移动到笔记本根路径](https://github.com/siyuan-note/siyuan/issues/3402)
+
+### 开发重构
+
+* [重构数据文件读写包 `filesys`](https://github.com/siyuan-note/siyuan/issues/3398)
+
+### 修复缺陷
+
+* [引用锚文本解析导致的挂起无响应问题](https://github.com/siyuan-note/siyuan/issues/3390)
+* [迁移 `~/.siyuan` 到 `~/.config/siyuan` 改进](https://github.com/siyuan-note/siyuan/issues/3393)
+* [输入 `//mermaid` 后回车报错](https://github.com/siyuan-note/siyuan/issues/3395)
+* [软换行后输入 ``` 报错](https://github.com/siyuan-note/siyuan/issues/3396)
+* [代码块不换行输入导致块元数据暴露并出现运行时异常](https://github.com/siyuan-note/siyuan/issues/3399)
+* [PDF 多次打开](https://github.com/siyuan-note/siyuan/issues/3403)
+
 ## v1.5.1 / 2021-11-11
 
 ### 改进功能

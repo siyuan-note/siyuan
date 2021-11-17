@@ -66,7 +66,7 @@
 * 快捷键
 * 主题和图标
 * Android APP
-* iOS APP (开发中)
+* iOS APP
 * Docker 部署
 * [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
 

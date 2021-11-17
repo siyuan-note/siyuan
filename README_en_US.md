@@ -63,7 +63,7 @@ All local features are free.
 * Keymap
 * Themes and icons
 * Android APP
-* iOS APP (in progress)
+* iOS APP
 * Docker deployment
 * [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
 

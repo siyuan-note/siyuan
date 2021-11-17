@@ -1,3 +1,35 @@
+## v1.5.3 / 2021-11-18
+
+### 改进功能
+
+* [支持多选块拖拽移动](https://github.com/siyuan-note/siyuan/issues/2087)
+* [优化列表编辑保存性能](https://github.com/siyuan-note/siyuan/issues/2548)
+* [使用同步时两次连续下载后不再退出内核](https://github.com/siyuan-note/siyuan/issues/3406)
+* [优化数据索引引用块性能](https://github.com/siyuan-note/siyuan/issues/3408)
+* [重命名包含大量子文档的文档时遮罩显示进度](https://github.com/siyuan-note/siyuan/issues/3410)
+* [优化数据索引解析 `.sy` 性能](https://github.com/siyuan-note/siyuan/issues/3412)
+* [优化属性设置保存性能](https://github.com/siyuan-note/siyuan/issues/3422)
+* [启动时优先使用已有数据库](https://github.com/siyuan-note/siyuan/issues/3424)
+* [使用 align 时，公式出现滚动条](https://github.com/siyuan-note/siyuan/issues/3426)
+* [支持对图片和链接的标题进行搜索](https://github.com/siyuan-note/siyuan/issues/3427)
+* [选择行内数学后点击公式按钮应取消公式](https://github.com/siyuan-note/siyuan/issues/3430)
+* [Android 长按菜单和双击菜单重叠](https://github.com/siyuan-note/siyuan/issues/3433)
+
+### 开发重构
+
+* [数据库锁模式切换为排它模式](https://github.com/siyuan-note/siyuan/issues/3405)
+
+### 修复缺陷
+
+* [`/code` 插入代码块问题](https://github.com/siyuan-note/siyuan/issues/3411)
+* [大量多层级文档时部分文档层级路径为空的问题](https://github.com/siyuan-note/siyuan/issues/3413)
+* [移动面板搜索不全问题](https://github.com/siyuan-note/siyuan/issues/3416)
+* [数据解析报错导致的启动闪退问题](https://github.com/siyuan-note/siyuan/issues/3418)
+* [PDF 标注中包含双引号 `"` 的解析问题](https://github.com/siyuan-note/siyuan/issues/3420)
+* [块引用锚文本编辑时光标丢失](https://github.com/siyuan-note/siyuan/issues/3425)
+* [粘贴块引用锚文本为空的块](https://github.com/siyuan-note/siyuan/issues/3429)
+* [XSS 导致客户端 RCE](https://github.com/siyuan-note/siyuan/issues/3431)
+
 ## v1.5.2 / 2021-11-14
 
 ### 改进功能

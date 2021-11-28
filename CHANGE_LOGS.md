@@ -1,3 +1,53 @@
+## v1.5.4 / 2021-11-28
+
+### 改进功能
+
+* [编辑器全屏后，其余编辑器也需要全屏](https://github.com/siyuan-note/siyuan/issues/2239)
+* [优化列表项粘贴到列表中](https://github.com/siyuan-note/siyuan/issues/2591)
+* [选中文本按 `Ctrl Alt A` 快速设置命名](https://github.com/siyuan-note/siyuan/issues/2702)
+* [增加插入代码块的快捷键](https://github.com/siyuan-note/siyuan/issues/3409)
+* [降低数据索引内存占用](https://github.com/siyuan-note/siyuan/issues/3439)
+* [窗口最小化时，思源协议无法唤起窗口](https://github.com/siyuan-note/siyuan/issues/3447)
+* [编辑器全屏后，为面包屑添加双击和拖拽](https://github.com/siyuan-note/siyuan/issues/3451)
+* [Shift+Enter 换行在导出为 Markdown 时使用硬换行](https://github.com/siyuan-note/siyuan/issues/3458)
+* [模板和挂件搜索跳过 `.` 开头的文件](https://github.com/siyuan-note/siyuan/issues/3461)
+* [PDF 支持 Ctrl + 鼠标滚轮进行缩放](https://github.com/siyuan-note/siyuan/issues/3462)
+* [:: 后不进行表情提示](https://github.com/siyuan-note/siyuan/issues/3464)
+* [减少表情提示数量，以减少卡顿](https://github.com/siyuan-note/siyuan/issues/3466)
+* [统一内核 booting 启动界面](https://github.com/siyuan-note/siyuan/issues/3467)
+* [前进后退和文本块引搜索快捷键修改](https://github.com/siyuan-note/siyuan/issues/3468)
+* [移动端图片宽度菜单显示不完全](https://github.com/siyuan-note/siyuan/issues/3469)
+* [每个 PDF 需单独记住阅读位置](https://github.com/siyuan-note/siyuan/issues/3472)
+* [渲染块大小调整，不进行语法错误识别](https://github.com/siyuan-note/siyuan/issues/3475)
+* [优化反链面板加载性能](https://github.com/siyuan-note/siyuan/issues/3476)
+* [集市下载包问题改进](https://github.com/siyuan-note/siyuan/issues/3479)
+* [调整块引搜索列表大小](https://github.com/siyuan-note/siyuan/issues/3483)
+* [文档树排序切换后不再展开笔记本](https://github.com/siyuan-note/siyuan/issues/3484)
+* [分屏打开改进](https://github.com/siyuan-note/siyuan/issues/3485)
+* [反向链接面板计入文档自身引用](https://github.com/siyuan-note/siyuan/issues/3486)
+* [插入资源文件时自动将后缀统一为小写](https://github.com/siyuan-note/siyuan/issues/3487)
+* [ 反链面板“上下文”文案调整为“显示更多”](https://github.com/siyuan-note/siyuan/issues/3489)
+* [嵌入块为长文档时浮窗无法移动位置](https://github.com/siyuan-note/siyuan/issues/3497)
+
+### 修复缺陷
+
+* [iOS 端数据索引阶段崩溃问题](https://github.com/siyuan-note/siyuan/issues/3440)
+* [如果多选拖拽的不是第一个块标，拖拽后顺序错误](https://github.com/siyuan-note/siyuan/issues/3441)
+* [悬浮窗不应该在属性面板之上](https://github.com/siyuan-note/siyuan/issues/3442)
+* [资源文件名中带有 `#` 时打不开](https://github.com/siyuan-note/siyuan/issues/3443)
+* [XSS 导致客户端 RCE 2](https://github.com/siyuan-note/siyuan/issues/3444)
+* [无法插入包含特殊符号文件名的文件](https://github.com/siyuan-note/siyuan/issues/3445)
+* [反链面板中的锚文本显示有误](https://github.com/siyuan-note/siyuan/issues/3446)
+* [PDF 中的超链接无法点击跳转](https://github.com/siyuan-note/siyuan/issues/3452)
+* [列表和反链块标无法进行拖拽](https://github.com/siyuan-note/siyuan/issues/3453)
+* [搜索页签某些情况下无法打开](https://github.com/siyuan-note/siyuan/issues/3455)
+* [查询嵌入块脚本为空导致的卡死问题](https://github.com/siyuan-note/siyuan/issues/3456)
+* [表格同一行无法输入两个 `$` ](https://github.com/siyuan-note/siyuan/issues/3460)
+* [反链面板移动块导致的运行时异常](https://github.com/siyuan-note/siyuan/issues/3463)
+* [仅对 PDF 进行标注时无法触发同步](https://github.com/siyuan-note/siyuan/issues/3465)
+* [不显示提及](https://github.com/siyuan-note/siyuan/issues/3481)
+* [文档树排序对笔记本级别无用](https://github.com/siyuan-note/siyuan/issues/3482)
+
 ## v1.5.3 / 2021-11-18
 
 ### 改进功能

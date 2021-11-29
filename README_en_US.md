@@ -93,6 +93,7 @@ you to join the SiYuan Insider Preview team, thanks.
 ## 🏘️ Community
 
 * [Discord](https://discord.gg/bzfCBwMzdP)
+* [Issues](https://github.com/siyuan-note/siyuan/issues)
 
 ## ❓ FAQs
 

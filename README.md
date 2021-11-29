@@ -96,6 +96,7 @@
 
 * [中文讨论区](https://ld246.com/domain/siyuan)
 * [Discord](https://discord.gg/bzfCBwMzdP)
+* [Issues](https://github.com/siyuan-note/siyuan/issues)
 
 ## ❓ 常见问题和解答
 

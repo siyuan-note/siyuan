@@ -110,7 +110,7 @@ The data is saved in the workspace folder (the default is in the user's home dir
 
 Currently, it is not completely open source, but in order to ensure the portability of data, [Data Parser](https://github.com/88250/protyle) and [Editor Engine](https://github.com/88250/ lute) is completely open source.
 
-### Is there any #Note# for deleting docs?
+### Is there any Note for deleting docs?
 
 After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate ((20210615213222-vs5tzbd "Edit history")).
 

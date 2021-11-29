@@ -90,14 +90,66 @@ Cloud services require a paid subscription.
 To get the latest Insider Preview, please send an email with your GitHub login name to 845765@qq.com, and we will invite
 you to join the SiYuan Insider Preview team, thanks.
 
-## 📜 Documentation
-
-* [SiYuan - A desktop Markdown Block-Reference and Bidirectional-Link note-taking application](https://ld246.com/article/1598872180233)
-* [Markdown implements the exploration of block-level reference bidirectional links](https://ld246.com/article/1597226949061)
-
 ## 🏘️ Community
 
 * [Discord](https://discord.gg/bzfCBwMzdP)
+
+## ❓ FAQs
+
+### How does SiYuan store data?
+
+The data is saved in the workspace folder (the default is in the user's home directory Documents/SiYuan, which can be modified in <kbd>Settings</kbd> - <kbd>About</kbd>), in the workspace data folder:
+
+* `assets` are used to save all inserted asset files
+* `templates` are used to save ((20201204184532-3qm9l8n "template snippets"))
+* `widgets` are used to save widgets
+* `emojis` are uaed to save emoji images
+* The rest of the folders are the notebook folders created by the user, files with the suffix of `.sy` in the notebook folder are used to save the document data, and the data format is JSON
+
+### Is SiYuan open source?
+
+Currently, it is not completely open source, but in order to ensure the portability of data, [Data Parser](https://github.com/88250/protyle) and [Editor Engine](https://github.com/88250/ lute) is completely open source.
+
+### Is there any #Note# for deleting docs?
+
+After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate ((20210615213222-vs5tzbd "Edit history")).
+
+### How can I just wrap and not start a new paragraph?
+
+Please use <kbd>Shift+Enter</kbd>.
+
+### How to indent at the beginning of a Chinese paragraph?
+
+Please use full-width spaces so that the content can be aligned after it is automatically wrapped.
+
+### How to move the heading and blocks below it?
+
+Fold the heading and move it later.
+
+### How to select multiple blocks across pages?
+
+Click at the beginning, hold down <kbd>Shift</kbd> and click at the end after scrolling the page.
+
+### How to adjust table rows and columns?
+
+There is an operation entry in the block icon menu of the table block.
+
+### How to use a third-party sync disk for data synchronization?
+
+* Please only synchronize the `workspace/data/`, do not synchronize the entire workspace
+* Please suspend third-party synchronization during the operation of SiYuan, otherwise data may be damaged. For details, please refer to [here](https://ld246.com/article/1626537583158)
+* The data folder path on the Android is `internal storage device/Android/data/org.b3log.siyuan/files/siyuan/data/`, which is a private path of the application and cannot be read by other programs and can only be copied manually
+* There is a conflict between third-party synchronization and SiYuan synchronization, please do not use at the same time
+
+### Do you plan to support plugins?
+
+SiYuan supports ((20201004194026-s8h2cog "Use on browser")),  which can be extended by browser plug-ins. We are looking forward to other developers writing browser plug-ins for SiYuan. With the gradual provision of ((20201227201751-gv0fpx2 "Kernel API")) , we will introduce a plug-in mechanism in the future.
+
+### Do I need to pay for it?
+
+Local functions are completely free to use, [Cloud services](https://b3log.org/siyuan/pricing.html) requires annual subscription, price is $64/year。
+
+Users in non-Mainland China regions should not pay for subscriptions, because SiYuan Cloud Server cannot guarantee availability in non-Mainland China regions.
 
 ## 💌 Participate in contribution
 

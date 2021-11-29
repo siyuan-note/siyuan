@@ -160,7 +160,7 @@
 
 * [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)
 * [外观](https://github.com/siyuan-note/appearance)
-* [Markdown 引擎](https://github.com/88250/lute)
+* [编辑器引擎](https://github.com/88250/lute)
 * [Chrome 扩展](https://github.com/siyuan-note/siyuan-chrome)
 
 ## 🙏 鸣谢

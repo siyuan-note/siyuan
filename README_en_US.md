@@ -157,7 +157,7 @@ At present, some components of SiYuan are open source, and contributions are wel
 
 * [User Guide](https://github.com/siyuan-note/user-guide-en_US)
 * [Appearance](https://github.com/siyuan-note/appearance)
-* [Markdown Engine](https://github.com/88250/lute)
+* [Editor Engine](https://github.com/88250/lute)
 * [Chrome Extension](https://github.com/siyuan-note/siyuan-chrome)
 
 ## 🙏 Acknowledgement

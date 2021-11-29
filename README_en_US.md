@@ -101,7 +101,7 @@ you to join the SiYuan Insider Preview team, thanks.
 The data is saved in the workspace folder (the default is in the user's home directory Documents/SiYuan, which can be modified in <kbd>Settings</kbd> - <kbd>About</kbd>), in the workspace data folder:
 
 * `assets` are used to save all inserted asset files
-* `templates` are used to save ((20201204184532-3qm9l8n "template snippets"))
+* `templates` are used to save template snippets
 * `widgets` are used to save widgets
 * `emojis` are uaed to save emoji images
 * The rest of the folders are the notebook folders created by the user, files with the suffix of `.sy` in the notebook folder are used to save the document data, and the data format is JSON
@@ -112,7 +112,7 @@ Currently, it is not completely open source, but in order to ensure the portabil
 
 ### Is there any Note for deleting docs?
 
-After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate ((20210615213222-vs5tzbd "Edit history")).
+After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate edit history.
 
 ### How can I just wrap and not start a new paragraph?
 
@@ -143,7 +143,7 @@ There is an operation entry in the block icon menu of the table block.
 
 ### Do you plan to support plugins?
 
-SiYuan supports ((20201004194026-s8h2cog "Use on browser")),  which can be extended by browser plug-ins. We are looking forward to other developers writing browser plug-ins for SiYuan. With the gradual provision of ((20201227201751-gv0fpx2 "Kernel API")) , we will introduce a plug-in mechanism in the future.
+SiYuan supports use on browser,  which can be extended by browser plug-ins. We are looking forward to other developers writing browser plug-ins for SiYuan. With the gradual provision of Kernel API , we will introduce a plug-in mechanism in the future.
 
 ### Do I need to pay for it?
 

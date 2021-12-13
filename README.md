@@ -183,6 +183,7 @@
 * [https://github.com/ConradIrwin/font](https://github.com/ConradIrwin/font) `MIT License`
 * [https://github.com/Masterminds/sprig](https://github.com/Masterminds/sprig) `MIT License`
 * [https://github.com/Xuanwo/go-locale](https://github.com/Xuanwo/go-locale) `Apache-2.0 License`
+* [https://github.com/araddon/dateparse](https://github.com/araddon/dateparse) `MIT License`
 * [https://github.com/common-nighthawk/go-figure](https://github.com/common-nighthawk/go-figure) `MIT License`
 * [https://github.com/dustin/go-humanize](https://github.com/dustin/go-humanize) `MIT License`
 * [https://github.com/emirpasic/gods](https://github.com/emirpasic/gods) `BSD-2-Clause License`

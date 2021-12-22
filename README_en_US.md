@@ -118,10 +118,6 @@ After deletion, the doc will not appear in the operating system's recycle bin, b
 
 Please use <kbd>Shift+Enter</kbd>.
 
-### How to indent at the beginning of a Chinese paragraph?
-
-Please use full-width spaces so that the content can be aligned after it is automatically wrapped.
-
 ### How to move the heading and blocks below it?
 
 Fold the heading and move it later.

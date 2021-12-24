@@ -91,10 +91,10 @@ To get the latest Insider Preview, please send an email with your GitHub login n
 
 ## 🏘️ Community
 
-* [Discord](https://discord.gg/bzfCBwMzdP)
 * [Issues](https://github.com/siyuan-note/siyuan/issues)
+* [Discord](https://discord.gg/bzfCBwMzdP)
 
-## ❓ FAQs
+## ❓ FAQ
 
 ### How does SiYuan store data?
 

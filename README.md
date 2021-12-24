@@ -95,8 +95,9 @@
 ## 🏘️ 社区
 
 * [中文讨论区](https://ld246.com/domain/siyuan)
-* [Discord](https://discord.gg/bzfCBwMzdP)
-* [Issues](https://github.com/siyuan-note/siyuan/issues)
+* [GitHub Issues](https://github.com/siyuan-note/siyuan/issues)
+* [QQ 频道](https://qun.qq.com/qqweb/qunpro/share?_wv=3&_wwv=128&inviteCode=EGKPc&from=246610&biz=ka)
+* [用户社群汇总](https://ld246.com/article/1640266171309)
 
 ## ❓ 常见问题和解答
 

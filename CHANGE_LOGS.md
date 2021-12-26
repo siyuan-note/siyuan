@@ -1,3 +1,90 @@
+## v1.5.5 / 2021-12-26
+
+### 改进功能
+
+* [多选块外观设置](https://github.com/siyuan-note/siyuan/issues/3037)
+* [增加区分默认图标和自定义图标样式类](https://github.com/siyuan-note/siyuan/issues/3270)
+* [Ctrl 点击多选块](https://github.com/siyuan-note/siyuan/issues/3300)
+* [SQL 不支持字符串拼接操作](https://github.com/siyuan-note/siyuan/issues/3312)
+* [iOS 端点击超链接跳转浏览器](https://github.com/siyuan-note/siyuan/issues/3388)
+* [优化层级较深的列表下保存数据的性能](https://github.com/siyuan-note/siyuan/issues/3495)
+* [自动切换同步方式，提升同步可用性](https://github.com/siyuan-note/siyuan/issues/3503)
+* [改进数据一致性](https://github.com/siyuan-note/siyuan/issues/3508)
+* [搜索界面反向链接浮窗被遮挡](https://github.com/siyuan-note/siyuan/issues/3515)
+* [降低编辑时的 CPU 占用](https://github.com/siyuan-note/siyuan/issues/3521)
+* [对自定义 emoji 搜索结果进行匹配优先排序](https://github.com/siyuan-note/siyuan/issues/3525)
+* [降低导入 Markdown 文件夹内存占用](https://github.com/siyuan-note/siyuan/issues/3531)
+* [插入资源文件时允许下划线](https://github.com/siyuan-note/siyuan/issues/3534)
+* [导出 Word 时支持通过属性设置 Pandoc 参数](https://github.com/siyuan-note/siyuan/issues/3535)
+* [剪藏扩展自动滚动页面加载图片](https://github.com/siyuan-note/siyuan/issues/3537)
+* [搜索页签改为上下布局](https://github.com/siyuan-note/siyuan/issues/3538)
+* [数学公式编号遮挡](https://github.com/siyuan-note/siyuan/issues/3541)
+* [Windows 上代码签名仅支持 SHA256 算法](https://github.com/siyuan-note/siyuan/issues/3543)
+* [iOS 端息屏后内核退出，再次进入时重新拉起内核](https://github.com/siyuan-note/siyuan/issues/3545)
+* [Android 端顶部适配打孔屏](https://github.com/siyuan-note/siyuan/issues/3548)
+* [工具栏和停靠栏调大](https://github.com/siyuan-note/siyuan/issues/3554)
+* [改进块引锚文本实现方式以提升稳定性和性能](https://github.com/siyuan-note/siyuan/issues/3561)
+* [固定优先使用数据库](https://github.com/siyuan-note/siyuan/issues/3568)
+* [集市中主题安装后不应该再显示下载按钮](https://github.com/siyuan-note/siyuan/issues/3570)
+* [为数学公式提供字体变量 `--b3-font-family-math`](https://github.com/siyuan-note/siyuan/issues/3571)
+* [反链面板用户调整过布局后将不再自动计算](https://github.com/siyuan-note/siyuan/issues/3584)
+* [shift+click 和 alt+click 调整](https://github.com/siyuan-note/siyuan/issues/3585)
+* [Rsync 传输设置 30m 超时](https://github.com/siyuan-note/siyuan/issues/3593)
+* [移动端提供退出应用按钮](https://github.com/siyuan-note/siyuan/issues/3594)
+* [启动时不再根据内置主题自动合并 custom.css ](https://github.com/siyuan-note/siyuan/issues/3597)
+* [新增模板函数 `parseTime`](https://github.com/siyuan-note/siyuan/issues/3605)
+* [页签样式修改](https://github.com/siyuan-note/siyuan/issues/3606)
+* [切换引用后链接光标丢失](https://github.com/siyuan-note/siyuan/issues/3609)
+* [启动时不再根据数据内容校验是否直接使用数据库](https://github.com/siyuan-note/siyuan/issues/3615)
+* [云端备份下载并恢复由手动重启改为自动重建索引](https://github.com/siyuan-note/siyuan/issues/3616)
+* [IPAD思源无法卸载主题，卸载APP后重装仍然有](https://github.com/siyuan-note/siyuan/issues/3619)
+* [iOS 支持打开 Excel 和 Word](https://github.com/siyuan-note/siyuan/issues/3625)
+* [集市更新包时进行数据覆盖提示](https://github.com/siyuan-note/siyuan/issues/3632)
+* [改进集市加载和下载速度](https://github.com/siyuan-note/siyuan/issues/3633)
+* [升级 mermaid，支持用户图、git 图、类图、实体关系图](https://github.com/siyuan-note/siyuan/issues/3636)
+* [表格出现滚动条时，在末尾输入数字后滚动条会向前移动](https://github.com/siyuan-note/siyuan/issues/3650)
+* [支持复制块 ID](https://github.com/siyuan-note/siyuan/issues/3656)
+* [反向链接、书签、标签和关系图刷新按钮动效](https://github.com/siyuan-note/siyuan/issues/3672)
+
+### 开发重构
+
+* [新增 blocks_fts 虚拟表用于全文检索](https://github.com/siyuan-note/siyuan/issues/3591)
+
+### 移除功能
+
+* [移除导入时对 `[[Wikilink]]` 和 `#Tag` 的转换处理](https://github.com/siyuan-note/siyuan/issues/3557)
+* [移除文档树笔记本级重建索引](https://github.com/siyuan-note/siyuan/issues/3611)
+
+### 修复缺陷
+
+* [Android 开关网络伺服后未自动退出](https://github.com/siyuan-note/siyuan/issues/3509)
+* [折叠展开导致的内核崩溃](https://github.com/siyuan-note/siyuan/issues/3510)
+* [自定义排序后新建的文档排序不一致](https://github.com/siyuan-note/siyuan/issues/3511)
+* [集市包版本更新但不出现更新按钮问题](https://github.com/siyuan-note/siyuan/issues/3513)
+* [分屏情况下，全屏后文章显示错误](https://github.com/siyuan-note/siyuan/issues/3514)
+* [云端空间大小显示问题](https://github.com/siyuan-note/siyuan/issues/3524)
+* [图片光标乱跳问题](https://github.com/siyuan-note/siyuan/issues/3527)
+* [引用嵌套导出问题](https://github.com/siyuan-note/siyuan/issues/3540)
+* [macOS 端打开时报错](https://github.com/siyuan-note/siyuan/issues/3546)
+* [在一些 Windows 系统上 SSH 同步报错](https://github.com/siyuan-note/siyuan/issues/3549)
+* [折叠标题后转换为段落丢失原标题下方块](https://github.com/siyuan-note/siyuan/issues/3551)
+* [反链面板搜索后 `显示更多` 无效](https://github.com/siyuan-note/siyuan/issues/3552)
+* [跨笔记本反向链接不全](https://github.com/siyuan-note/siyuan/issues/3555)
+* [导出为模板时空引述问题](https://github.com/siyuan-note/siyuan/issues/3577)
+* [iOS 搜索面板无法滚动](https://github.com/siyuan-note/siyuan/issues/3580)
+* [存在两处 XSS](https://github.com/siyuan-note/siyuan/issues/3587)
+* [图表导出转义问题](https://github.com/siyuan-note/siyuan/issues/3589)
+* [【【 输入锚文本后 shift+enter 无效](https://github.com/siyuan-note/siyuan/issues/3590)
+* [无法关闭自动更新检查](https://github.com/siyuan-note/siyuan/issues/3599)
+* [自动清理历史遗漏了 data/.siyuan/history](https://github.com/siyuan-note/siyuan/issues/3602)
+* [无法搜索到 iframe 块、视频块和音频块](https://github.com/siyuan-note/siyuan/issues/3604)
+* [iOS 端有时无法滚动进行动态加载](https://github.com/siyuan-note/siyuan/issues/3608)
+* [iPhone 上 PDF 无法滚动和退出](https://github.com/siyuan-note/siyuan/issues/3610)
+* [嵌入块中脚本换行时导出为模板后不能正确解析](https://github.com/siyuan-note/siyuan/issues/3629)
+* [代码块 mermaid 不显示](https://github.com/siyuan-note/siyuan/issues/3641)
+* [表格内复制、样式问题](https://github.com/siyuan-note/siyuan/issues/3649)
+* [macOS 鼠须管输入法在 `$x+y$` 后面无法输入内容](https://github.com/siyuan-note/siyuan/issues/3651)
+
 ## v1.5.4 / 2021-11-28
 
 ### 改进功能

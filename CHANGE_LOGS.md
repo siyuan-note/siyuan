@@ -1,3 +1,33 @@
+## v1.5.6 / 2021-12-29
+
+### 改进功能
+
+* [引用块和嵌入块搜索结果左侧缩略优化](https://github.com/siyuan-note/siyuan/issues/3492)
+* [`/` 菜单加入插入图片或文件](https://github.com/siyuan-note/siyuan/issues/3536)
+* [`/` 菜单加入创建子文档](https://github.com/siyuan-note/siyuan/issues/3542)
+* [编辑时不显示面包屑导航](https://github.com/siyuan-note/siyuan/issues/3622)
+* [支持设置反链提及搜索过滤](https://github.com/siyuan-note/siyuan/issues/3652)
+* [改进面包屑导航加载性能](https://github.com/siyuan-note/siyuan/issues/3684)
+* [Windows 端安装时默认为所有用户安装](https://github.com/siyuan-note/siyuan/issues/3686)
+* [自定义表情不随标题大小进行变化](https://github.com/siyuan-note/siyuan/issues/3691)
+
+### 文档相关
+
+* [繁体中文帮助文档](https://github.com/siyuan-note/siyuan/issues/3675)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/3682)
+
+### 修复缺陷
+
+* [复制公式块时的转义问题](https://github.com/siyuan-note/siyuan/issues/3626)
+* [导出 Markdown 时缺少带空格文件名的资源文件](https://github.com/siyuan-note/siyuan/issues/3679)
+* [预览中公式编号位置错误](https://github.com/siyuan-note/siyuan/issues/3681)
+* [云端同步时出现全量传输的问题](https://github.com/siyuan-note/siyuan/issues/3688)
+* [导出预览不显示自定义表情](https://github.com/siyuan-note/siyuan/issues/3692)
+* [Windows 端同步文件权限问题](https://github.com/siyuan-note/siyuan/issues/3693)
+
 ## v1.5.5 / 2021-12-26
 
 ### 改进功能

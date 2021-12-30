@@ -453,7 +453,7 @@
   ```
 
     * `dataType`：待插入数据类型，值可选择 `markdown` 或者 `dom`
-    * `data`：带插入的数据
+    * `data`：待插入的数据
     * `previousID`：前一个块的 ID，用于锚定插入位置
 * 返回值
 
@@ -496,7 +496,7 @@
   ```
 
     * `dataType`：待更新数据类型，值可选择 `markdown` 或者 `dom`
-    * `data`：带更新的数据
+    * `data`：待更新的数据
     * `id`：待更新块 ID
 * 返回值
 

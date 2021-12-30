@@ -480,6 +480,48 @@
     * `action.data`：新插入块生成的 DOM
     * `action.id`：新插入块的 ID
 
+### 更新块
+
+* `/api/block/updateBlock`
+* 参数
+
+  ```json
+  {
+    "dataType": "markdown",
+    "data": "foobarbaz",
+    "id": "20211230161520-querkps"
+  }
+  ```
+
+    * `dataType`：待更新数据类型，值可选择 `markdown` 或者 `dom`
+    * `data`：带更新的数据
+    * `id`：待更新块 ID
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+      {
+        "doOperations": [
+          {
+            "action": "update",
+              "data": "<div data-node-id=\"20211230161520-querkps\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\"><div contenteditable=\"true\" spellcheck=\"false\">foo<strong>bar</strong>baz</div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
+              "id": "20211230161520-querkps",
+              "parentID": "",
+              "previousID": "",
+              "retData": null
+              }
+            ],
+        "undoOperations": null
+      }
+    ]
+  }
+  ```
+
+    * `action.data`：更新块生成的 DOM
+
 ## 属性
 
 ### 设置块属性

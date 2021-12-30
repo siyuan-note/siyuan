@@ -18,6 +18,8 @@
     * [根据路径获取人类可读路径](#根据路径获取人类可读路径)
 * [资源文件](#资源文件)
     * [上传资源文件](#上传资源文件)
+* [块操作](#块操作)
+    * [插入块](#插入块)
 * [属性](#属性)
     * [设置块属性](#设置块属性)
     * [获取块属性](#获取块属性)
@@ -297,7 +299,7 @@
   ```
 
     * `data`：创建好的文档 ID
-    * 如果使用同一个 `path` 重复调用该接口，不会覆盖已有文档，而是新建随机数结尾的文档 
+    * 如果使用同一个 `path` 重复调用该接口，不会覆盖已有文档，而是新建随机数结尾的文档
 
 ### 重命名文档
 
@@ -432,6 +434,51 @@
 
     * `errFiles`：处理时遇到错误的文件名
     * `succMap`：处理成功的文件，key 为上传时的文件名，value 为 assets/foo-id.png，用于将已有 Markdown 内容中的资源文件链接地址替换为上传后的地址
+
+## 块操作
+
+### 插入块
+
+* `/api/block/insertBlock`
+* 参数
+
+  ```json
+  {
+    "dataType": "markdown",
+    "data": "foo**bar**{: style=\"color: var(--b3-font-color8);\"}baz",
+    "previousID": "20211229114650-vrek5x6"
+  }
+  ```
+
+    * `dataType`：待插入数据类型，值可选择 `markdown` 或者 `dom`
+    * `data`：带插入的数据
+    * `previousID`：前一个块的 ID，用于锚定待插入块的位置
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+      {
+        "doOperations": [
+          {
+            "action": "insert",
+              "data": "<div data-node-id=\"20211230115020-g02dfx0\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\"><div contenteditable=\"true\" spellcheck=\"false\">foo<strong style=\"color: var(--b3-font-color8);\">bar</strong>baz</div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
+              "id": "",
+              "parentID": "",
+              "previousID": "20211229114650-vrek5x6",
+              "retData": null
+            }
+        ],
+        "undoOperations": null
+      }
+    ]
+  }
+  ```
+
+    * `action.data`：新插入块生成的 DOM
+    * `action.id`：新插入块的 ID
 
 ## 属性
 

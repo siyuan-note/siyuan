@@ -522,6 +522,42 @@
 
     * `action.data`：更新块生成的 DOM
 
+### 删除块
+
+* `/api/block/deleteBlock`
+* 参数
+
+  ```json
+  {
+    "id": "20211230161520-querkps"
+  }
+  ```
+
+    * `id`：待删除块 ID
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+      {
+        "doOperations": [
+          {
+            "action": "delete",
+            "data": null,
+            "id": "20211230162439-vtm09qo",
+            "parentID": "",
+            "previousID": "",
+            "retData": null
+          }
+        ],
+       "undoOperations": null
+      }
+    ]
+  }
+  ```
+
 ## 属性
 
 ### 设置块属性

@@ -452,7 +452,7 @@
 
     * `dataType`：待插入数据类型，值可选择 `markdown` 或者 `dom`
     * `data`：带插入的数据
-    * `previousID`：前一个块的 ID，用于锚定待插入位置
+    * `previousID`：前一个块的 ID，用于锚定插入位置
 * 返回值
 
   ```json

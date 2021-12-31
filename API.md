@@ -288,7 +288,7 @@
   ```
 
     * `notebook`：笔记本 ID
-    * `path`：文档路径，需要以 / 开头，中间使用 / 分隔层级
+    * `path`：文档路径，需要以 / 开头，中间使用 / 分隔层级（这里的 path 对应数据库 hpath 字段）
     * `markdown`：GFM Markdown 内容
 * 返回值
 

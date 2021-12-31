@@ -620,7 +620,7 @@
 
 ### SQL 查询
 
-* `/api//query/sql`
+* `/api/query/sql`
 * 参数
 
   ```json

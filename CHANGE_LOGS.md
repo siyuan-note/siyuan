@@ -1,3 +1,36 @@
+## v1.6.0 / 2022-01-01
+
+### 引入特性
+
+* [移动端显示大纲](https://github.com/siyuan-note/siyuan/issues/2921)
+* [提供插入块、更新块和删除块的 API](https://github.com/siyuan-note/siyuan/issues/3334)
+* [微信提醒推送](https://github.com/siyuan-note/siyuan/issues/3457)
+* [移动端显示反向链接](https://github.com/siyuan-note/siyuan/issues/3683)
+
+### 改进功能
+
+* [支持设置虚拟引用搜索过滤](https://github.com/siyuan-note/siyuan/issues/3049)
+* [标签面板添加引用计数](https://github.com/siyuan-note/siyuan/issues/3330)
+* [发起互联网服务请求时进行标准化处理](https://github.com/siyuan-note/siyuan/issues/3685)
+* [托盘菜单添加显示主界面](https://github.com/siyuan-note/siyuan/issues/3687)
+* [cpp 代码高亮渲染错误](https://github.com/siyuan-note/siyuan/issues/3695)
+* [云端备份不再包括历史](https://github.com/siyuan-note/siyuan/issues/3698)
+* [Windows 端安装时可选择仅为当前用户安装](https://github.com/siyuan-note/siyuan/issues/3702)
+* [提及关键字搜索最大支持 512 个](https://github.com/siyuan-note/siyuan/issues/3715)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/3699)
+* [移除 blocks_fts 虚拟表](https://github.com/siyuan-note/siyuan/issues/3708)
+
+### 修复缺陷
+
+* [浮窗中面包屑消失后不会重显](https://github.com/siyuan-note/siyuan/issues/3694)
+* [``` 后粘贴回导致状态异常](https://github.com/siyuan-note/siyuan/issues/3701)
+* [macOS 端界面图标不显示](https://github.com/siyuan-note/siyuan/issues/3703)
+* [`/` 菜单点击插入图片链接无响应](https://github.com/siyuan-note/siyuan/issues/3710)
+* [搜索资源文件时显示错位的问题](https://github.com/siyuan-note/siyuan/issues/3711)
+
 ## v1.5.6 / 2021-12-29
 
 ### 改进功能

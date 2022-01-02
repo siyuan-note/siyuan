@@ -1,3 +1,17 @@
+## v1.6.1 / 2022-01-02
+
+### 改进功能
+
+* [为超链接输入框中加入标题输入框](https://github.com/siyuan-note/siyuan/issues/3586)
+* [文档属性的多行备注预览被遮挡](https://github.com/siyuan-note/siyuan/issues/3721)
+
+### 修复缺陷
+
+* [iframe、嵌入块标菜单失效](https://github.com/siyuan-note/siyuan/issues/3722)
+* [文档标签重复入库问题](https://github.com/siyuan-note/siyuan/issues/3723)
+* [图片和超链接标题 `"` 未转义问题](https://github.com/siyuan-note/siyuan/issues/3724)
+* [快速删除文字后再撤销错误](https://github.com/siyuan-note/siyuan/issues/3727)
+
 ## v1.6.0 / 2022-01-01
 
 ### 引入特性

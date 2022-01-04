@@ -1,3 +1,23 @@
+## v1.6.2 / 2022-01-04
+
+### 改进功能
+
+* [移动块时更新修改时间](https://github.com/siyuan-note/siyuan/issues/3567)
+* [块标菜单增加 `移动`](https://github.com/siyuan-note/siyuan/issues/3725)
+* [~/.config/ 权限不足需弹窗告诉用户](https://github.com/siyuan-note/siyuan/issues/3730)
+* [调整云端服务网络架构](https://github.com/siyuan-note/siyuan/issues/3737)
+* [大纲项显示对不齐](https://github.com/siyuan-note/siyuan/issues/3739)
+* [超链接悬浮显示链接+标题](https://github.com/siyuan-note/siyuan/issues/3740)
+* [移动端添加 API token 的显示和复制](https://github.com/siyuan-note/siyuan/issues/3742)
+
+### 修复缺陷
+
+* [笔记本名称为空时无法导出](https://github.com/siyuan-note/siyuan/issues/3729)
+* [PDF 搜索无结果时显示错误](https://github.com/siyuan-note/siyuan/issues/3733)
+* [同一文档分屏后拖拽问题](https://github.com/siyuan-note/siyuan/issues/3741)
+* [大纲未渲染行级元素](https://github.com/siyuan-note/siyuan/issues/3743)
+* [PDF 页签切换导致渲染异常](https://github.com/siyuan-note/siyuan/issues/3744)
+
 ## v1.6.1 / 2022-01-02
 
 ### 改进功能

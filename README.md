@@ -218,4 +218,3 @@
 ### 二进制依赖
 
 * [https://github.com/jgm/pandoc](https://github.com/jgm/pandoc) `GPL-3.0 License`
-* [https://github.com/WayneD/rsync](https://github.com/WayneD/rsync) `GPL-3.0 License`

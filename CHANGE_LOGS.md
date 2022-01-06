@@ -1,3 +1,22 @@
+## v1.6.3 / 2022-01-06
+
+### 改进功能
+
+* [面包屑缩略悬浮预览](https://github.com/siyuan-note/siyuan/issues/2858)
+* [同步/备份限制单个文件最大为 100MB](https://github.com/siyuan-note/siyuan/issues/3747)
+* [移除 Rsync 统一使用 HTTPS 实现同步](https://github.com/siyuan-note/siyuan/issues/3750)
+* [改进云端服务网络稳定性](https://github.com/siyuan-note/siyuan/issues/3752)
+* [工作空间路径支持中文和空格](https://github.com/siyuan-note/siyuan/issues/3754)
+* [云端同步目录最多支持 7 个](https://github.com/siyuan-note/siyuan/issues/3756)
+
+### 修复缺陷
+
+* [移动面板无法使用上下键](https://github.com/siyuan-note/siyuan/issues/3745)
+* [文档名的虚拟引用提示不存在符合条件的内容块](https://github.com/siyuan-note/siyuan/issues/3748)
+* [Cannot access `showCreateConfDirErrBox` ](https://github.com/siyuan-note/siyuan/issues/3749)
+* [macOS 上文档数量较多时索引失败](https://github.com/siyuan-note/siyuan/issues/3761)
+* [多设备同步时文件存在冗余的下载请求](https://github.com/siyuan-note/siyuan/issues/3762)
+
 ## v1.6.2 / 2022-01-04
 
 ### 改进功能

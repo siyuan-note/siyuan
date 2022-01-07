@@ -20,13 +20,15 @@
     * [上传资源文件](#上传资源文件)
 * [块操作](#块操作)
     * [插入块](#插入块)
+    * [插入前置子块](#插入前置子块)
+    * [插入后置子块](#插入后置子块)
     * [更新块](#更新块)
     * [删除块](#删除块)
 * [属性](#属性)
     * [设置块属性](#设置块属性)
     * [获取块属性](#获取块属性)
 * [SQL](#SQL)
-    * [SQL 查询](#sql-查询)
+    * [SQL 查询](#SQL-查询)
 * [模板](#模板)
     * [渲染模板](#渲染模板)
 * [导出](#导出)
@@ -467,11 +469,97 @@
           {
             "action": "insert",
               "data": "<div data-node-id=\"20211230115020-g02dfx0\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\"><div contenteditable=\"true\" spellcheck=\"false\">foo<strong style=\"color: var(--b3-font-color8);\">bar</strong>baz</div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
-              "id": "",
+              "id": "20211230115020-g02dfx0",
               "parentID": "",
               "previousID": "20211229114650-vrek5x6",
               "retData": null
             }
+        ],
+        "undoOperations": null
+      }
+    ]
+  }
+  ```
+
+    * `action.data`：新插入块生成的 DOM
+    * `action.id`：新插入块的 ID
+
+### 插入前置子块
+
+* `/api/block/prependBlock`
+* 参数
+
+  ```json
+  {
+    "data": "foo**bar**{: style=\"color: var(--b3-font-color8);\"}baz",
+    "dataType": "markdown",
+    "parentID": "20220107173950-7f9m1nb"
+  }
+  ```
+
+    * `dataType`：待插入数据类型，值可选择 `markdown` 或者 `dom`
+    * `data`：待插入的数据
+    * `parentID`：父块的 ID，用于锚定插入位置
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+      {
+        "doOperations": [
+          {
+            "action": "insert",
+            "data": "<div data-node-id=\"20220108003710-hm0x9sc\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\"><div contenteditable=\"true\" spellcheck=\"false\">foo<strong style=\"color: var(--b3-font-color8);\">bar</strong>baz</div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
+            "id": "20220108003710-hm0x9sc",
+            "parentID": "20220107173950-7f9m1nb",
+            "previousID": "",
+            "retData": null
+          }
+        ],
+        "undoOperations": null
+      }
+    ]
+  }
+  ```
+
+    * `action.data`：新插入块生成的 DOM
+    * `action.id`：新插入块的 ID
+
+### 插入后置子块
+
+* `/api/block/appendBlock`
+* 参数
+
+  ```json
+  {
+    "data": "foo**bar**{: style=\"color: var(--b3-font-color8);\"}baz",
+    "dataType": "markdown",
+    "parentID": "20220107173950-7f9m1nb"
+  }
+  ```
+
+    * `dataType`：待插入数据类型，值可选择 `markdown` 或者 `dom`
+    * `data`：待插入的数据
+    * `parentID`：父块的 ID，用于锚定插入位置
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+      {
+        "doOperations": [
+          {
+            "action": "insert",
+            "data": "<div data-node-id=\"20220108003642-y2wmpcv\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\"><div contenteditable=\"true\" spellcheck=\"false\">foo<strong style=\"color: var(--b3-font-color8);\">bar</strong>baz</div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
+            "id": "20220108003642-y2wmpcv",
+            "parentID": "20220107173950-7f9m1nb",
+            "previousID": "20220108003615-7rk41t1",
+            "retData": null
+          }
         ],
         "undoOperations": null
       }

@@ -1,3 +1,46 @@
+## v1.7.0 / 2022-01-11
+
+### 引入特性
+
+* [切换页签](https://github.com/siyuan-note/siyuan/issues/533)
+* [钉住页签](https://github.com/siyuan-note/siyuan/issues/640)
+* [支持网络链接题头图](https://github.com/siyuan-note/siyuan/issues/2951)
+* [移动端支持切换文档树排序模式](https://github.com/siyuan-note/siyuan/issues/3036)
+* [新增 `prependBlock` 和 `appendBlock` API](https://github.com/siyuan-note/siyuan/issues/3751)
+* [支持自动生成端到端加密密码](https://github.com/siyuan-note/siyuan/issues/3790)
+
+### 改进功能
+
+* [去除下拉列表中初始自带的书签](https://github.com/siyuan-note/siyuan/issues/3690)
+* [iOS 反链、大纲面板无法滚动](https://github.com/siyuan-note/siyuan/issues/3755)
+* [同步后进行增量索引](https://github.com/siyuan-note/siyuan/issues/3763)
+* [改进移动包含大量子文档层级的文档时的性能](https://github.com/siyuan-note/siyuan/issues/3767)
+* [来自 127.0.0.1 的本机资源文件请求不鉴权](https://github.com/siyuan-note/siyuan/issues/3771)
+* [移动端大纲点击后不应刷新界面](https://github.com/siyuan-note/siyuan/issues/3774)
+* [反链提及过滤中加入文档名](https://github.com/siyuan-note/siyuan/issues/3776)
+* [剪藏扩展时间格式改为 `yyyy-MM-dd HH:mm:ss`](https://github.com/siyuan-note/siyuan/issues/3779)
+* [延迟显示块标菜单提示](https://github.com/siyuan-note/siyuan/issues/3781)
+* [设置 - 账号加入个人主页背景图](https://github.com/siyuan-note/siyuan/issues/3785)
+* [`insertBlock` API 支持多块插入](https://github.com/siyuan-note/siyuan/issues/3786)
+* [启动应用时的云端同步过程动态显示](https://github.com/siyuan-note/siyuan/issues/3788)
+* [云端同步和备份下载数据时先使用索引文件验证解密](https://github.com/siyuan-note/siyuan/issues/3789)
+
+### 开发重构
+
+* [降级 Electron ](https://github.com/siyuan-note/siyuan/issues/3783)
+
+### 移除功能
+
+* [移除同步间隔设置](https://github.com/siyuan-note/siyuan/issues/3793)
+
+### 修复缺陷
+
+* [复制粘贴块后创建时间小于更新时间](https://github.com/siyuan-note/siyuan/issues/3624)
+* [开启访问授权以后导出 PDF/Word 时图片丢失](https://github.com/siyuan-note/siyuan/issues/3765)
+* [移动带子文档的文档时日志报错](https://github.com/siyuan-note/siyuan/issues/3766)
+* [反链面板请求响应顺序问题](https://github.com/siyuan-note/siyuan/issues/3770)
+* [一些系统上播放多媒体文件崩溃的问题](https://github.com/siyuan-note/siyuan/issues/3784)
+
 ## v1.6.3 / 2022-01-06
 
 ### 改进功能

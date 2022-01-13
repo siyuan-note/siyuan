@@ -160,8 +160,6 @@ At present, some components of SiYuan are open source, and contributions are wel
 
 SiYuan is made possible by the following open source projects.
 
-### Source code dependencies
-
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/atotto/clipboard](https://github.com/atotto/clipboard) `BSD-3-Clause License` 
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
@@ -209,7 +207,3 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/mozilla/pdf.js](https://github.com/mozilla/pdf.js) `Apache-2.0 License`
 * [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`
 * [https://github.com/hakimel/reveal.js](https://github.com/hakimel/reveal.js) `MIT License`
-
-### Binary dependencies
-
-* [https://github.com/jgm/pandoc](https://github.com/jgm/pandoc) `GPL-3.0 License`

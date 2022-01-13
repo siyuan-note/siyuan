@@ -165,8 +165,6 @@
 
 思源的诞生离不开下列开源项目。
 
-### 源码依赖
-
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/atotto/clipboard](https://github.com/atotto/clipboard) `BSD-3-Clause License`
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
@@ -214,7 +212,3 @@
 * [https://github.com/mozilla/pdf.js](https://github.com/mozilla/pdf.js) `Apache-2.0 License`
 * [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`
 * [https://github.com/hakimel/reveal.js](https://github.com/hakimel/reveal.js) `MIT License`
-
-### 二进制依赖
-
-* [https://github.com/jgm/pandoc](https://github.com/jgm/pandoc) `GPL-3.0 License`

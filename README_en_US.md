@@ -49,7 +49,7 @@ All local features are free.
 * Export
     * Block ref and embed 
     * Standard Markdown with assets
-    * PDF, Word and HTML
+    * PDF and HTML
     * Copy to WeChat MP, Zhihu and Yuque
 * Community bazaar
   * Themes

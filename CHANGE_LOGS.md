@@ -1,3 +1,34 @@
+## v1.7.1 / 2022-01-14
+
+### 改进功能
+
+* [PDF 标注导出锚文本选项](https://github.com/siyuan-note/siyuan/issues/3068)
+* [导出 PDF 支持设置一些参数](https://github.com/siyuan-note/siyuan/issues/3337)
+* [Linux 上无法导出 PDF](https://github.com/siyuan-note/siyuan/issues/3635)
+* [搜索页签添加历史](https://github.com/siyuan-note/siyuan/issues/3794)
+* [导出 HTML 时保留块属性](https://github.com/siyuan-note/siyuan/issues/3796)
+* [导出 HTML 时自包含 js/css 和 assets](https://github.com/siyuan-note/siyuan/issues/3797)
+* [导出 PDF 和 HTML 时支持超级块横排](https://github.com/siyuan-note/siyuan/issues/3798)
+* [导出 PDF 支持空格导出](https://github.com/siyuan-note/siyuan/issues/3799)
+* [云端备份上传去掉中间的确认框](https://github.com/siyuan-note/siyuan/issues/3802)
+* [Alt+5 创建日记后光标应保持在用户可见区域内](https://github.com/siyuan-note/siyuan/issues/3806)
+* [拖拽标题后大纲没有更新](https://github.com/siyuan-note/siyuan/issues/3807)
+* [切换页签/搜索打开页签后大纲没有高亮](https://github.com/siyuan-note/siyuan/issues/3808)
+* [微信提醒设置后进行消息提示](https://github.com/siyuan-note/siyuan/issues/3809)
+
+### 移除功能
+
+* [移除 Word .docx 导出](https://github.com/siyuan-note/siyuan/issues/3811)
+
+### 修复缺陷
+
+* [设置属性命名后复制为引用块不生效](https://github.com/siyuan-note/siyuan/issues/3795)
+* [钉住页签在开启 `在当前页签中打开` 功能时失效](https://github.com/siyuan-note/siyuan/issues/3800)
+* [菜单点击后不消失](https://github.com/siyuan-note/siyuan/issues/3801)
+* [某些版本的 Windows 系统上每次同步时都会上传很多文件](https://github.com/siyuan-note/siyuan/issues/3814)
+* [文档树鼠标悬浮文档时不显示命名备注](https://github.com/siyuan-note/siyuan/issues/3815)
+* [移动端冒号输入表情错误](https://github.com/siyuan-note/siyuan/issues/3816)
+
 ## v1.7.0 / 2022-01-11
 
 ### 引入特性

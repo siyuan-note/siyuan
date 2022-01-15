@@ -1,3 +1,31 @@
+## v1.7.2 / 2022-01-15
+
+### 改进功能
+
+* [改进页签滚动条](https://github.com/siyuan-note/siyuan/issues/3670)
+* [插入链接时的一个小问题](https://github.com/siyuan-note/siyuan/issues/3719)
+* [移动文档后不再自动展开目标文档](https://github.com/siyuan-note/siyuan/issues/3764)
+* [钉住的页签不显示斜体](https://github.com/siyuan-note/siyuan/issues/3819)
+* [Windows 端在缺失 robocopy 命令的情况下使用内置实现](https://github.com/siyuan-note/siyuan/issues/3822)
+* [主题和图标加载时带上版本号](https://github.com/siyuan-note/siyuan/issues/3827)
+* [HTML/PDF 导出标签样式](https://github.com/siyuan-note/siyuan/issues/3828)
+
+### 文档相关
+
+* [端到端加密具体内容说明](https://github.com/siyuan-note/siyuan/issues/3824)
+
+### 移除功能
+
+* [移除 `![foo](data:image)` 图片解析支持](https://github.com/siyuan-note/siyuan/issues/2750)
+* [移除幻灯片演示](https://github.com/siyuan-note/siyuan/issues/3817)
+* [移除发光和彩色字体效果](https://github.com/siyuan-note/siyuan/issues/3818)
+* [移除中西文间自动插入空格](https://github.com/siyuan-note/siyuan/issues/3826)
+
+### 修复缺陷
+
+* [文档树鼠标悬浮显示的文档备注未转义](https://github.com/siyuan-note/siyuan/issues/3820)
+* [使用非默认主题无法导出 HTML](https://github.com/siyuan-note/siyuan/issues/3823)
+
 ## v1.7.1 / 2022-01-14
 
 ### 改进功能

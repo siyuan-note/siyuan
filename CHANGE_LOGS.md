@@ -1,3 +1,26 @@
+## v1.7.3 / 2022-01-17
+
+### 改进功能
+
+* [标签重命名](https://github.com/siyuan-note/siyuan/issues/844)
+* [相同文档分屏后，大纲、引用块点击无法定位到当前激活的文档中](https://github.com/siyuan-note/siyuan/issues/3498)
+* [ctrl+shift+f 改为全局快捷键](https://github.com/siyuan-note/siyuan/issues/3833)
+* [文档树展开不丝滑](https://github.com/siyuan-note/siyuan/issues/3835)
+* [属性过长过多时仅显示一行](https://github.com/siyuan-note/siyuan/issues/3837)
+* [以下操作再次按快捷键时界面关闭](https://github.com/siyuan-note/siyuan/issues/3839)
+* [ctrl+w, ctrl+f, ctr+shiftl+f 使用时不需点击编辑器](https://github.com/siyuan-note/siyuan/issues/3840)
+* [Windows 端安装程序执行前弹出确认框](https://github.com/siyuan-note/siyuan/issues/3842)
+* [设置书签属性后编辑器内将书签渲染在命名左侧](https://github.com/siyuan-note/siyuan/issues/3843)
+* [emoji 搜索时移除分类](https://github.com/siyuan-note/siyuan/issues/3844)
+
+### 修复缺陷
+
+* [PDF 导出不了图片](https://github.com/siyuan-note/siyuan/issues/3829)
+* [加载图标和主题使用文件夹名称而不是 json 配置中的名称](https://github.com/siyuan-note/siyuan/issues/3830)
+* [编辑器内属性值未转义](https://github.com/siyuan-note/siyuan/issues/3836)
+* [包含子文档时无法转换为标题的判断不正确](https://github.com/siyuan-note/siyuan/issues/3841)
+* [数学公式后连续回车，列表不会进行反向缩进](https://github.com/siyuan-note/siyuan/issues/3846)
+
 ## v1.7.2 / 2022-01-15
 
 ### 改进功能

@@ -1,3 +1,21 @@
+## v1.7.4 / 2022-01-19
+
+### 改进功能
+
+* [全局搜索支持类型过滤](https://github.com/siyuan-note/siyuan/issues/2229)
+* [标签面板排序](https://github.com/siyuan-note/siyuan/issues/2877)
+* [调整桌面端顶部工具栏](https://github.com/siyuan-note/siyuan/issues/3849)
+* [空标签数据订正](https://github.com/siyuan-note/siyuan/issues/3858)
+* [标签重命名判空](https://github.com/siyuan-note/siyuan/issues/3859)
+* [:emoji 提示面板高度自适应](https://github.com/siyuan-note/siyuan/issues/3860)
+* [启动应用时转圈动画改为静态图片](https://github.com/siyuan-note/siyuan/issues/3861)
+* [拖拽分屏添加动效](https://github.com/siyuan-note/siyuan/issues/3865)
+
+### 修复缺陷
+
+* [数学公式回车光标错误](https://github.com/siyuan-note/siyuan/issues/3850)
+* [快捷键修改后无法保存](https://github.com/siyuan-note/siyuan/issues/3855)
+
 ## v1.7.3 / 2022-01-17
 
 ### 改进功能

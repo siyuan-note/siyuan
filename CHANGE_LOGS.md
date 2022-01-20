@@ -1,3 +1,24 @@
+## v1.7.5 / 2022-01-20
+
+### 改进功能
+
+* [支持题头图上下拖动调整位置](https://github.com/siyuan-note/siyuan/issues/2805)
+* [主题支持加载 theme.js](https://github.com/siyuan-note/siyuan/issues/3856)
+* [顶部工具栏标题居中](https://github.com/siyuan-note/siyuan/issues/3868)
+* [新增按 Markdown 导出 HTML](https://github.com/siyuan-note/siyuan/issues/3872)
+* [大纲面板中的块标视觉调整](https://github.com/siyuan-note/siyuan/issues/3876)
+
+### 文档相关
+
+* [新增微信提醒帮助文档](https://github.com/siyuan-note/siyuan/issues/3877)
+
+### 修复缺陷
+
+* [字体加颜色并添加块引用后无法插入字符](https://github.com/siyuan-note/siyuan/issues/3103)
+* [使用 `[]`  输入任务列表时会导致父级列表被清空](https://github.com/siyuan-note/siyuan/issues/3639)
+* [在某些版本的 Windows 上无法正常进入应用](https://github.com/siyuan-note/siyuan/issues/3813)
+* [导出 Markdown 不应该带超级块语法](https://github.com/siyuan-note/siyuan/issues/3867)
+
 ## v1.7.4 / 2022-01-19
 
 ### 改进功能

@@ -1,3 +1,21 @@
+## v1.7.6 / 2022-01-21
+
+### 改进功能
+
+* [优化编辑器光标移动](https://github.com/siyuan-note/siyuan/issues/3274)
+* [图片支持单击后 Delete/Backspace 删除](https://github.com/siyuan-note/siyuan/issues/3530)
+* [文档编辑器 `...` 菜单中新增 `中西文间插入空格` 格式化功能](https://github.com/siyuan-note/siyuan/issues/3873)
+* [桌面端支持设置 Pandoc 可执行文件路径](https://github.com/siyuan-note/siyuan/issues/3874)
+* [通过 Pandoc 导出 Word .docx 文件](https://github.com/siyuan-note/siyuan/issues/3875)
+* [改进安装包下载分发网络](https://github.com/siyuan-note/siyuan/issues/3883)
+
+### 修复缺陷
+
+* [导出 PDF 时行内加粗/行内斜体内的行内公式消失](https://github.com/siyuan-note/siyuan/issues/3866)
+* [题头图调整移动以后图片会被计入未引用资源](https://github.com/siyuan-note/siyuan/issues/3880)
+* [上下键无法选中数学公式和视频](https://github.com/siyuan-note/siyuan/issues/3881)
+* [资源文件上传 API 在未指定 `assetsDirPath` 时存放路径不正确](https://github.com/siyuan-note/siyuan/issues/3882)
+
 ## v1.7.5 / 2022-01-20
 
 ### 改进功能

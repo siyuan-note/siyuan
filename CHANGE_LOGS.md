@@ -1,3 +1,30 @@
+## v1.7.7 / 2022-01-23
+
+### 改进功能
+
+* [iOS 端短时间关闭屏幕会出现内核中断](https://github.com/siyuan-note/siyuan/issues/3775)
+* [Windows 端安装程序工作空间确认框弹出一次](https://github.com/siyuan-note/siyuan/issues/3888)
+* [iOS 端时区问题](https://github.com/siyuan-note/siyuan/issues/3892)
+* [设置搜索不到 `标签` 和 `Pandoc`](https://github.com/siyuan-note/siyuan/issues/3894)
+* [Android 端状态栏不隐藏](https://github.com/siyuan-note/siyuan/issues/3900)
+* [提升 Android 端启动速度](https://github.com/siyuan-note/siyuan/issues/3902)
+* [“在中英文间插入空格”功能对行内公式不生效](https://github.com/siyuan-note/siyuan/issues/3905)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/3886)
+
+### 修复缺陷
+
+* [打开文档并定位文档所在位置后打开日记，文档树会全部折叠](https://github.com/siyuan-note/siyuan/issues/3217)
+* [代码块后用中文输入法格式会乱](https://github.com/siyuan-note/siyuan/issues/3885)
+* [一些系统上播放多媒体文件崩溃的问题](https://github.com/siyuan-note/siyuan/issues/3887)
+* [引用文件夹被误计入未引用资源](https://github.com/siyuan-note/siyuan/issues/3889)
+* [三击列表项编辑时出现运行时异常](https://github.com/siyuan-note/siyuan/issues/3891)
+* [移动端只读模式光标插入符问题](https://github.com/siyuan-note/siyuan/issues/3893)
+* [导入 Markdown 后有时界面会卡死](https://github.com/siyuan-note/siyuan/issues/3895)
+* [移动端帮助文档有时无法打开](https://github.com/siyuan-note/siyuan/issues/3901)
+
 ## v1.7.6 / 2022-01-21
 
 ### 改进功能

@@ -1,3 +1,19 @@
+## v1.7.8 / 2022-01-25
+
+### 改进功能
+
+* [多个视频相邻时 Shift+Click 多选无效](https://github.com/siyuan-note/siyuan/issues/3026)
+* [支持配置 PlantUML 服务器地址](https://github.com/siyuan-note/siyuan/issues/3671)
+* [上传资源文件到云端如果失败需要提示](https://github.com/siyuan-note/siyuan/issues/3917)
+* [默认限制创建文档层级最大深度为 7 层](https://github.com/siyuan-note/siyuan/issues/3919)
+
+### 修复缺陷
+
+* [表格中难以在行内公式之前插入文字](https://github.com/siyuan-note/siyuan/issues/3908)
+* [按住 Shift 试图多选失败](https://github.com/siyuan-note/siyuan/issues/3916)
+* [XSS 安全漏洞](https://github.com/siyuan-note/siyuan/issues/3918)
+* [云端同步报错 500 问题](https://github.com/siyuan-note/siyuan/issues/3920)
+
 ## v1.7.7 / 2022-01-23
 
 ### 改进功能

@@ -81,14 +81,18 @@
     "data": {
       "notebooks": [
         {
-          "closed": false,
-          "id": "20210817205410-2kvfpfn",
-          "name": "测试笔记本"
+          "id": "20210817205410-2kvfpfn", 
+          "name": "测试笔记本",
+          "icon": "1f41b",
+          "sort": 0,
+          "closed": false
         },
         {
-          "closed": true,
-          "id": "20210831090520-7dvbdv0",
-          "name": "测试笔记本2"
+          "id": "20210808180117-czj9bvb",
+          "name": "思源笔记用户指南",
+          "icon": "1f4d4",
+          "sort": 1,
+          "closed": false
         }
       ]
     }

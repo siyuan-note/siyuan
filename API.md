@@ -185,7 +185,7 @@
     "data": {
       "notebook": {
         "id": "20220126215949-r1wvoch",
-        "name": "测试笔记本",
+        "name": "笔记本的名称",
         "icon": "",
         "sort": 0,
         "closed": false

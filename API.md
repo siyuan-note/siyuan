@@ -182,7 +182,15 @@
   {
     "code": 0,
     "msg": "",
-    "data": null
+    "data": {
+      "notebook": {
+        "id": "20220126215949-r1wvoch",
+        "name": "测试笔记本",
+        "icon": "",
+        "sort": 0,
+        "closed": false
+      }
+    }
   }
   ```
 

@@ -1,3 +1,25 @@
+## v1.7.9 / 2022-01-28
+
+### 改进功能
+
+* [iOS 端上架 App Store](https://github.com/siyuan-note/siyuan/issues/2800)
+* [改进集市](https://github.com/siyuan-note/siyuan/issues/3500)
+* [改进端到端加密密码设置后的提示文案](https://github.com/siyuan-note/siyuan/issues/3926)
+* [切换主题的时候通过 theme.js 增加的元素不会被清除](https://github.com/siyuan-note/siyuan/issues/3927)
+* [选中的文本为链接时 Ctrl+K 不使用剪切板中的链接](https://github.com/siyuan-note/siyuan/issues/3928)
+* [使用 API 创建笔记本时返回新建的笔记本的 ID](https://github.com/siyuan-note/siyuan/issues/3934)
+* [折叠后展开位置不对](https://github.com/siyuan-note/siyuan/issues/3935)
+* [被外部锁文件时提示 `未找到 ID 为 [xxx] 的内容块` 改进](https://github.com/siyuan-note/siyuan/issues/3936)
+
+### 修复缺陷
+
+* [文档树面板和编辑器焦点切换问题](https://github.com/siyuan-note/siyuan/issues/3929)
+* [Tooltip 拖拽后显示异常的问题](https://github.com/siyuan-note/siyuan/issues/3930)
+* [使用 API 插入空字符串出现错误](https://github.com/siyuan-note/siyuan/issues/3931)
+* [文档末尾粘贴时可能触发重复的动态加载](https://github.com/siyuan-note/siyuan/issues/3932)
+* [代码块三击复制问题](https://github.com/siyuan-note/siyuan/issues/3940)
+* [列表项行级公式结尾回车问题](https://github.com/siyuan-note/siyuan/issues/3942)
+
 ## v1.7.8 / 2022-01-25
 
 ### 改进功能

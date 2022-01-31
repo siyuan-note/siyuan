@@ -1,3 +1,23 @@
+## v1.7.10 / 2022-01-31
+
+### 改进功能
+
+* [创建文档副本](https://github.com/siyuan-note/siyuan/issues/2790)
+* [挂件块数据导出属性 `data-export-md`](https://github.com/siyuan-note/siyuan/issues/3834)
+* [云端同步自动检查间隔改为 5 分钟一次](https://github.com/siyuan-note/siyuan/issues/3948)
+* [内核退出时清理临时文件](https://github.com/siyuan-note/siyuan/issues/3955)
+* [将文档中的网络图片转换为本地资源文件](https://github.com/siyuan-note/siyuan/issues/3959)
+* [切换主题时如果该主题存在 theme.js 则直接刷新界面](https://github.com/siyuan-note/siyuan/issues/3963)
+* [集市包 README 渲染不启用软换行转换硬换行](https://github.com/siyuan-note/siyuan/issues/3966)
+
+### 修复缺陷
+
+* [大于 100MB 的文件不应该计入云端空间大小检查](https://github.com/siyuan-note/siyuan/issues/3945)
+* [点击集市包 README 中的一些链接导致白屏](https://github.com/siyuan-note/siyuan/issues/3951)
+* [部分集市包 README 乱码](https://github.com/siyuan-note/siyuan/issues/3954)
+* [键入 SQL 查询后焦点没有自动跳转到 SQL 编辑框内](https://github.com/siyuan-note/siyuan/issues/3956)
+* [分割线中也可以输入文字](https://github.com/siyuan-note/siyuan/issues/3958)
+
 ## v1.7.9 / 2022-01-28
 
 ### 改进功能

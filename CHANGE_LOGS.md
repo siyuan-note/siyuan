@@ -1,3 +1,19 @@
+## v1.7.11 / 2022-02-02
+
+### 改进功能
+
+* [iOS 主题和安全距离适配](https://github.com/siyuan-note/siyuan/issues/3642)
+* [改进同步开关交互](https://github.com/siyuan-note/siyuan/issues/3953)
+* [网络图片转换本地资源文件支持 http 协议](https://github.com/siyuan-note/siyuan/issues/3975)
+
+### 修复缺陷
+
+* [查询嵌入块刷新问题](https://github.com/siyuan-note/siyuan/issues/3967)
+* [点击集市包 README 中的一些链接导致白屏](https://github.com/siyuan-note/siyuan/issues/3968)
+* [Shift+Click 在同一块内无法选中](https://github.com/siyuan-note/siyuan/issues/3970)
+* [网络图片转换为本地资源文件丢失后缀问题](https://github.com/siyuan-note/siyuan/issues/3972)
+* [移动折叠标题后倒序问题](https://github.com/siyuan-note/siyuan/issues/3973)
+
 ## v1.7.10 / 2022-01-31
 
 ### 改进功能

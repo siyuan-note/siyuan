@@ -1,3 +1,27 @@
+## v1.8.0 / 2022-02-05
+
+### 引入特性
+
+* [挂件](https://github.com/siyuan-note/siyuan/issues/1488)
+* [挂件集市](https://github.com/siyuan-note/siyuan/issues/1489)
+* [支持查找替换](https://github.com/siyuan-note/siyuan/issues/3180)
+
+### 改进功能
+
+* [跨页滚动多选提示](https://github.com/siyuan-note/siyuan/issues/2066)
+* [移动功能加入快捷键](https://github.com/siyuan-note/siyuan/issues/3977)
+* [设置 - 搜索文案改进](https://github.com/siyuan-note/siyuan/issues/3980)
+* [改进一个块中 Shift + 上下光标跨行选中](https://github.com/siyuan-note/siyuan/issues/3981)
+* [块引搜索条件为空时去重](https://github.com/siyuan-note/siyuan/issues/3987)
+* [提供 32 位的 Android 端安装包](https://github.com/siyuan-note/siyuan/issues/3988)
+
+### 修复缺陷
+
+* [导出 PDF 文件时表格分页表头错位](https://github.com/siyuan-note/siyuan/issues/3374)
+* [iOS 中文输入法无法保存内容](https://github.com/siyuan-note/siyuan/issues/3978)
+* [合并、取消超级块时，嵌入块会复制多一份结果](https://github.com/siyuan-note/siyuan/issues/3984)
+* [列表块撤销状态异常](https://github.com/siyuan-note/siyuan/issues/3985)
+
 ## v1.7.11 / 2022-02-02
 
 ### 改进功能

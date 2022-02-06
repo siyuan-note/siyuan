@@ -108,7 +108,13 @@ The data is saved in the workspace folder (the default is in the user's home dir
 
 ### Is SiYuan open source?
 
-Currently, it is not completely open source, but in order to ensure the portability of data, [Data Parser](https://github.com/88250/protyle) and [Editor Engine](https://github.com/88250/ lute) is completely open source.
+It is not completely open source at present, but some components and applications have been open sourced:
+
+* [Data Parser](https://github.com/88250/protyle)
+* [Editor Engine](https://github.com/88250/lute)
+* [End-to-end encryption](https://github.com/siyuan-note/encryption)
+* [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
+* [Android](https://github.com/siyuan-note/siyuan-android)
 
 ### Is there any Note for deleting docs?
 

@@ -113,7 +113,13 @@
 
 ### 思源是开源的吗？
 
-目前并没有完全开源，但为了保证数据的可迁移性，[数据解析器](https://github.com/88250/protyle)和[编辑器引擎](https://github.com/88250/lute)是完全开源的。
+目前并没有完全开源，但已开源部分组件和应用端：
+
+* [数据解析器](https://github.com/88250/protyle)
+* [编辑器引擎](https://github.com/88250/lute)
+* [端到端加密](https://github.com/siyuan-note/encryption)
+* [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
+* [Android 端](https://github.com/siyuan-note/siyuan-android)
 
 ### 删除文档有什么注意事项吗？
 

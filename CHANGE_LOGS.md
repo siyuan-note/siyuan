@@ -1,3 +1,29 @@
+## v1.8.1 / 2022-02-08
+
+### 改进功能
+
+* [加回 Ctrl+P 并对其进行优化](https://github.com/siyuan-note/siyuan/issues/3991)
+* [查找替换支持代码、公式和超链接](https://github.com/siyuan-note/siyuan/issues/3992)
+* [升级五线谱 abcjs](https://github.com/siyuan-note/siyuan/issues/3993)
+* [Ctrl+Shift+F 通过上下键切换选择的搜索内容](https://github.com/siyuan-note/siyuan/issues/3997)
+* [Android 端状态栏和全屏状态调整](https://github.com/siyuan-note/siyuan/issues/3998)
+* [开源 Android 端](https://github.com/siyuan-note/siyuan/issues/4000)
+* [图片之前的空行无法删除](https://github.com/siyuan-note/siyuan/issues/4003)
+* [Android 端首次运行弹窗展示 `隐私条款` 和 `使用授权`](https://github.com/siyuan-note/siyuan/issues/4004)
+
+### 文档相关
+
+* [用户指南 - 快捷键文档内容重复](https://github.com/siyuan-note/siyuan/issues/3995)
+
+### 开发重构
+
+* [Android 端升级 SDK 到 12.0](https://github.com/siyuan-note/siyuan/issues/3996)
+* [Android 端最低版本要求从 5.1 改为 6.0](https://github.com/siyuan-note/siyuan/issues/3999)
+
+### 修复缺陷
+
+* [三次点击块内部不能选中一句话而是光标跳到了下一行](https://github.com/siyuan-note/siyuan/issues/4005)
+
 ## v1.8.0 / 2022-02-05
 
 ### 引入特性

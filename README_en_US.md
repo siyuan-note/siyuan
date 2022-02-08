@@ -108,13 +108,16 @@ The data is saved in the workspace folder (the default is in the user's home dir
 
 ### Is SiYuan open source?
 
-It is not completely open source at present, but some components and applications have been open sourced:
+It is not completely open source at present, but some components and applications have been open sourced, and contributions are welcome.
 
+* [User Guide](https://github.com/siyuan-note/user-guide-en_US)
+* [Appearance](https://github.com/siyuan-note/appearance)
 * [Data Parser](https://github.com/88250/protyle)
 * [Editor Engine](https://github.com/88250/lute)
 * [End-to-end encryption](https://github.com/siyuan-note/encryption)
 * [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
 * [Android](https://github.com/siyuan-note/siyuan-android)
+* [iOS](https://github.com/siyuan-note/siyuan-ios)
 
 ### Is there any Note for deleting docs?
 
@@ -159,8 +162,12 @@ At present, some components of SiYuan are open source, and contributions are wel
 
 * [User Guide](https://github.com/siyuan-note/user-guide-en_US)
 * [Appearance](https://github.com/siyuan-note/appearance)
+* [Data Parser](https://github.com/88250/protyle)
 * [Editor Engine](https://github.com/88250/lute)
-* [Chrome Extension](https://github.com/siyuan-note/siyuan-chrome)
+* [End-to-end encryption](https://github.com/siyuan-note/encryption)
+* [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
+* [Android](https://github.com/siyuan-note/siyuan-android)
+* [iOS](https://github.com/siyuan-note/siyuan-ios)
 
 ## 🙏 Acknowledgement
 

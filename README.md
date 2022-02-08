@@ -113,13 +113,16 @@
 
 ### 思源是开源的吗？
 
-目前并没有完全开源，但已开源部分组件和应用端：
+目前并没有完全开源，但已开源部分组件和应用端，欢迎参与贡献。
 
+* [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)
+* [外观](https://github.com/siyuan-note/appearance)
 * [数据解析器](https://github.com/88250/protyle)
 * [编辑器引擎](https://github.com/88250/lute)
 * [端到端加密](https://github.com/siyuan-note/encryption)
 * [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
 * [Android 端](https://github.com/siyuan-note/siyuan-android)
+* [iOS 端](https://github.com/siyuan-note/siyuan-ios)
 
 ### 删除文档有什么注意事项吗？
 
@@ -164,8 +167,12 @@
 
 * [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)
 * [外观](https://github.com/siyuan-note/appearance)
+* [数据解析器](https://github.com/88250/protyle)
 * [编辑器引擎](https://github.com/88250/lute)
-* [Chrome 扩展](https://github.com/siyuan-note/siyuan-chrome)
+* [端到端加密](https://github.com/siyuan-note/encryption)
+* [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
+* [Android 端](https://github.com/siyuan-note/siyuan-android)
+* [iOS 端](https://github.com/siyuan-note/siyuan-ios)
 
 ## 🙏 鸣谢
 

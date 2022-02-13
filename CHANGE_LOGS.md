@@ -1,3 +1,33 @@
+## v1.8.2 / 2022-02-13
+
+### 改进功能
+
+* [Android 端上架 Google Play](https://github.com/siyuan-note/siyuan/issues/4006)
+* [开源 iOS 端](https://github.com/siyuan-note/siyuan/issues/4007)
+* [移除编辑器光标置于空白行时的提示文案](https://github.com/siyuan-note/siyuan/issues/4015)
+* [点击图表交互时不应该触发代码编辑](https://github.com/siyuan-note/siyuan/issues/4016)
+* [表格支持调整列宽](https://github.com/siyuan-note/siyuan/issues/4018)
+* [`Tab 空格数` 文案修改，提示不会修改复制的内容](https://github.com/siyuan-note/siyuan/issues/4033)
+* [Android 端沉浸式状态栏](https://github.com/siyuan-note/siyuan/issues/4034)
+* [导出 PDF/Word 时 IFrame 块使用超链接](https://github.com/siyuan-note/siyuan/issues/4035)
+
+### 文档相关
+
+* [更新隐私政策](https://github.com/siyuan-note/siyuan/issues/4017)
+* [Android/iOS 开源协议使用 AGPLv3](https://github.com/siyuan-note/siyuan/issues/4036)
+
+### 开发重构
+
+* [重命名内核可执行文件](https://github.com/siyuan-note/siyuan/issues/4026)
+
+### 修复缺陷
+
+* [Android 7 无法打开程序](https://github.com/siyuan-note/siyuan/issues/4010)
+* [操作系统休眠重进后卡在加载界面的问题](https://github.com/siyuan-note/siyuan/issues/4024)
+* [网络图片转换为本地资源文件文件名不合法问题](https://github.com/siyuan-note/siyuan/issues/4027)
+* [/fgx 光标错误](https://github.com/siyuan-note/siyuan/issues/4032)
+* [分隔线复制会触发状态异常](https://github.com/siyuan-note/siyuan/issues/4037)
+
 ## v1.8.1 / 2022-02-08
 
 ### 改进功能

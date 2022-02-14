@@ -91,6 +91,8 @@
 * [B3log](https://b3log.org/siyuan/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
+* [App Store](https://apps.apple.com/cn/app/siyuan/id1583226508)
+* [Google Play](https://play.google.com/store/apps/details?id=org.b3log.siyuan)
 
 获取最新内部预览版（Insider Preview），请将你的 GitHub 登录名发送邮件至 845765@qq.com，我们将邀请你加入 SiYuan 内部预览团队。
 

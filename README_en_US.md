@@ -88,7 +88,7 @@ Cloud services require a paid subscription.
 * [B3log](https://b3log.org/siyuan/en/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
-* [App Store](https://apps.apple.com/cn/app/siyuan/id1583226508)
+* [App Store](https://apps.apple.com/us/app/siyuan/id1583226508)
 * [Google Play](https://play.google.com/store/apps/details?id=org.b3log.siyuan)
 
 To get the latest Insider Preview, please send an email with your GitHub login name to 845765@qq.com, and we will invite you to join the SiYuan Insider Preview team, thanks.

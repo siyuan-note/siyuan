@@ -1,186 +1,181 @@
 <p align="center">
 <img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
 <br>
-<em>下一代的个人知识管理系统，你的数字花园</em>
+<em>The next generation PKM system, your digital garden</em>
 <br><br>
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <a title="Downloads" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/downloads/siyuan-note/siyuan/total.svg?style=flat-square&color=blueviolet"></a>
 <a title="Docker Pulls" target="_blank" href="https://hub.docker.com/r/b3log/siyuan"><img src="https://img.shields.io/docker/pulls/b3log/siyuan.svg?style=flat-square&color=99CCFF"></a>
-<a title="QQ 群" target="_blank" href="https://jq.qq.com/?_wv=1027&k=OmaV22we"><img src="https://img.shields.io/static/v1?label=Q%20%E7%BE%A4&style=flat-square&message=155585856&color=D28EFF"></a>
+<a title="QQ Group" target="_blank" href="https://jq.qq.com/?_wv=1027&k=OmaV22we"><img src="https://img.shields.io/static/v1?label=Q%20Group&style=flat-square&message=155585856&color=D28EFF"></a>
 <a title="Discord" target="_blank" href="https://discord.gg/bzfCBwMzdP"><img src="https://img.shields.io/discord/808152298789666826?label=discord&style=flat-square&color=orange"></a>
 <a title="Hits" target="_blank" href="https://github.com/siyuan-note/siyuan"><img src="https://hits.b3log.org/siyuan-note/siyuan.svg"></a>
 </p>
 
 <p align="center">
-<a href="https://github.com/siyuan-note/siyuan/blob/master/README_en_US.md">English</a>
+<a href="https://github.com/siyuan-note/siyuan/blob/master/README_zh_CN.md">中文</a>
 </p>
 
-## 💡 简介
+## 💡 Introduction
 
-思源笔记是一款本地优先的个人知识管理系统， 支持细粒度块级引用和 Markdown 所见即所得。
+SiYuan is a local-first personal knowledge management system, support fine-grained block-level reference and Markdown
+WYSIWYG.
 
 ![feature0.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@aa842a59b28a873dcc999fb63eaeafb4158c02d3/screenshots/feature0.png)
 
 ![feature1-1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@aa842a59b28a873dcc999fb63eaeafb4158c02d3/screenshots/feature1-1.png)
 
-欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。同时也欢迎关注 B3log 开源社区微信公众号 `B3log开源`：
+## ✨ Features
 
-![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
+### Free
 
-## ✨  特性
+All local features are free.
 
-### 免费
-
-所有本地功能都是免费的。
-
-* 内容块
-  * 块级引用和双向链接
-  * 文档关系图、全局关系图
-  * 自定义属性
-  * SQL 查询嵌入
-  * 协议 `siyuan://`
-* 编辑器
-  * Block 风格
-  * Markdown 所见即所得
-  * 列表大纲
-  * 块缩放聚焦
-  * 块横向排版
-  * 百万字大文档编辑
-  * 数学公式、图表、流程图、甘特图、时序图、五线谱等
-  * 网页剪藏
-  * PDF 标注双链
-* 导出
-  * 引用块和嵌入块 
-  * 带 assets 文件夹的标准 Markdown
-  * PDF、Word 和 HTML
-  * 复制到微信公众号、知乎和语雀
-* 社区集市
-  * 主题
-  * 图标
-  * 模板
-  * 挂件
-* 层级标签
-* 多页签拖拽分屏
-* 全文搜索
-* 模板片段
-* 快捷键
-* 主题和图标
+* Content block
+  * Block-level reference and two-way links
+  * Document relationship diagram, global relationship diagram
+  * Custom attributes
+  * SQL query embed
+  * Protocol `siyuan://`
+* Editor
+  * Block-style
+  * Markdown WYSIWYG
+  * List outline
+  * Block zoom-in
+  * Block horizontal layout
+  * Million-word large document editing
+  * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
+  * Web clipping
+  * PDF Annotation link
+* Export
+  * Block ref and embed
+  * Standard Markdown with assets
+  * PDF, Word and HTML
+  * Copy to WeChat MP, Zhihu and Yuque
+* Community bazaar
+  * Themes
+  * Icons
+  * Templates
+  * Widgets
+* Hierarchical tag
+* Multi-tab, drag and drop to split screen
+* Fulltext search
+* Template snippet
+* Keymap
+* Themes and icons
 * Android APP
 * iOS APP
-* Docker 部署
+* Docker deployment
 * [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
 
-### 付费订阅
+### Paid subscription
 
-云端服务需要付费订阅。
+Cloud services require a paid subscription.
 
-* 尊贵身份标识
-* 端到端加密数据同步
-* 端到端加密数据备份
-* 云端图床服务
-* 定时微信提醒
-* 云端收集箱（计划中）
+* VIP identity
+* End-to-end encrypted data synchronization
+* End-to-end encrypted data backup
+* Cloud assets serving
+* WeChat notification
+* Cloud inbox (TBD)
 
-## 🗺️ 路线图
+## 🗺️ Roadmap
 
-* [思源笔记开发计划和进度](https://github.com/siyuan-note/siyuan/projects)
-* [思源笔记版本变更和公告](https://ld246.com/tag/siyuan-announcement)
+* [SiYuan development plan and progress](https://github.com/siyuan-note/siyuan/projects)
+* [SiYuan Change logs](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
 
-## 🛠️ 下载安装
+## 🛠️ Download Setup
 
-* [B3log](https://b3log.org/siyuan/download.html)
+* [B3log](https://b3log.org/siyuan/en/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
-* [App Store](https://apps.apple.com/cn/app/siyuan/id1583226508)
+* [App Store](https://apps.apple.com/us/app/siyuan/id1583226508)
 * [Google Play](https://play.google.com/store/apps/details?id=org.b3log.siyuan)
 
-获取最新内部预览版（Insider Preview），请将你的 GitHub 登录名发送邮件至 845765@qq.com，我们将邀请你加入 SiYuan 内部预览团队。
+To get the latest Insider Preview, please send an email with your GitHub login name to 845765@qq.com, and we will invite you to join the SiYuan Insider Preview team, thanks.
 
-## 🏘️ 社区
+## 🏘️ Community
 
-* [中文讨论区](https://ld246.com/domain/siyuan)
-* [GitHub Issues](https://github.com/siyuan-note/siyuan/issues)
-* [QQ 频道](https://qun.qq.com/qqweb/qunpro/share?_wv=3&_wwv=128&inviteCode=EGKPc&from=246610&biz=ka)
-* [用户社群汇总](https://ld246.com/article/1640266171309)
+* [Issues](https://github.com/siyuan-note/siyuan/issues)
+* [Discord](https://discord.gg/bzfCBwMzdP)
 
-## ❓ 常见问题和解答
+## ❓ FAQ
 
-### 思源是如何存储数据的？
+### How does SiYuan store data?
 
-数据保存在工作空间文件夹下（默认位于用户家目录 Documents/SiYuan，可在 <kbd>设置</kbd> - <kbd>关于</kbd> 中进行修改），在工作空间 data 文件夹下：
+The data is saved in the workspace folder (the default is in the user's home directory Documents/SiYuan, which can be modified in <kbd>Settings</kbd> - <kbd>About</kbd>), in the workspace data folder:
 
-* `assets` 用于保存所有插入的资源文件
-* `templates` 用于保存模板片段
-* `widgets` 用于保存挂件
-* `emojis` 用于保存 Emoji 图片
-* 其余文件夹就是用户自己创建的笔记本文件夹，笔记本文件夹下 `.sy` 后缀的文件用于保存文档数据，数据格式为 JSON
+* `assets` are used to save all inserted asset files
+* `templates` are used to save template snippets
+* `widgets` are used to save widgets
+* `emojis` are uaed to save emoji images
+* The rest of the folders are the notebook folders created by the user, files with the suffix of `.sy` in the notebook folder are used to save the document data, and the data format is JSON
 
-### 思源是开源的吗？
+### Is SiYuan open source?
 
-目前并没有完全开源，但已开源部分组件和应用端，欢迎参与贡献。
+It is not completely open source at present, but some components and applications have been open sourced, and contributions are welcome.
 
-* [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)
-* [外观](https://github.com/siyuan-note/appearance)
-* [数据解析器](https://github.com/88250/protyle)
-* [编辑器引擎](https://github.com/88250/lute)
-* [端到端加密](https://github.com/siyuan-note/encryption)
-* [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
-* [Android 端](https://github.com/siyuan-note/siyuan-android)
-* [iOS 端](https://github.com/siyuan-note/siyuan-ios)
+* [User Guide](https://github.com/siyuan-note/user-guide-en_US)
+* [Appearance](https://github.com/siyuan-note/appearance)
+* [Data Parser](https://github.com/88250/protyle)
+* [Editor Engine](https://github.com/88250/lute)
+* [End-to-end encryption](https://github.com/siyuan-note/encryption)
+* [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
+* [Android](https://github.com/siyuan-note/siyuan-android)
+* [iOS](https://github.com/siyuan-note/siyuan-ios)
 
-### 删除文档有什么注意事项吗？
+### Is there any Note for deleting docs?
 
-文档被删除后不会出现在操作系统回收站中，而是直接删除，删除时思源会生成编辑历史。
+After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate edit history.
 
-### 如何才能只换行不新起段落？
+### How can I just wrap and not start a new paragraph?
 
-请使用 <kbd>Shift+Enter</kbd>。
+Please use <kbd>Shift+Enter</kbd>.
 
-### 移动标题时如何带下方块一起移动？
+### How to move the heading and blocks below it?
 
-将标题折叠以后再移动。
+Fold the heading and move it later.
 
-### 如何跨页多选内容块？
+### How to select multiple blocks across pages?
 
-在开始的地方单击，滚动页面以后在结束的地方按住 <kbd>Shift</kbd> 单击。
+Click at the beginning, hold down <kbd>Shift</kbd> and click at the end after scrolling the page.
 
-### 如何调整表格行列？
+### How to adjust table rows and columns?
 
-表格块的块标菜单中有操作入口。
+There is an operation entry in the block icon menu of the table block.
 
-### 如何使用第三方同步盘进行数据同步？
+### How to use a third-party sync disk for data synchronization?
 
-* 请仅同步 `工作空间/data/`，切勿同步整个工作空间
-* 思源运行期间请暂停第三方同步，否则可能会出现数据损坏，细节请参考[这里](https://ld246.com/article/1626537583158)
-* Android 端数据文件夹路径为 `内部存储设备/Android/data/org.b3log.siyuan/files/siyuan/data/`，该路径是应用私有路径，其他程序无法读取，只能手动复制
-* 第三方同步和思源同步存在冲突，切勿同时使用
+* Please only synchronize the `workspace/data/`, do not synchronize the entire workspace
+* Please suspend third-party synchronization during the operation of SiYuan, otherwise data may be damaged. For details, please refer to [here](https://ld246.com/article/1626537583158)
+* The data folder path on the Android is `internal storage device/Android/data/org.b3log.siyuan/files/siyuan/data/`, which is a private path of the application and cannot be read by other programs and can only be copied manually
+* There is a conflict between third-party synchronization and SiYuan synchronization, please do not use at the same time
 
-### 计划支持插件吗？
+### Do you plan to support plugins?
 
-思源支持在浏览器上使用，可以通过浏览器插件来扩展功能。我们很期待其他开发者为思源编写浏览器插件。随着内核 API 的逐步提供，后续我们会引入插件机制。
+SiYuan supports use on browser,  which can be extended by browser plug-ins. We are looking forward to other developers writing browser plug-ins for SiYuan. With the gradual provision of Kernel API , we will introduce a plug-in mechanism in the future.
 
-### 使用需要付费吗？
+### Do I need to pay for it?
 
-本地功能完全免费使用，[云端服务](https://b3log.org/siyuan/pricing.html)需要年付订阅。
+Local functions are completely free to use, [Cloud services](https://b3log.org/siyuan/pricing.html) requires annual subscription, price is $64/year。
 
-非中国大陆地区的用户请勿付费订阅，因为思源云端服务器无法保证非中国大陆地区可用。
+Users in non-Mainland China regions should not pay for subscriptions, because SiYuan Cloud Server cannot guarantee availability in non-Mainland China regions.
 
-## 💌 参与贡献
+## 💌 Participate in contribution
 
-目前思源笔记的一些组件是开源的，欢迎参与贡献。
+At present, some components of SiYuan are open source, and contributions are welcome.
 
-* [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)
-* [外观](https://github.com/siyuan-note/appearance)
-* [数据解析器](https://github.com/88250/protyle)
-* [编辑器引擎](https://github.com/88250/lute)
-* [端到端加密](https://github.com/siyuan-note/encryption)
-* [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
-* [Android 端](https://github.com/siyuan-note/siyuan-android)
-* [iOS 端](https://github.com/siyuan-note/siyuan-ios)
+* [User Guide](https://github.com/siyuan-note/user-guide-en_US)
+* [Appearance](https://github.com/siyuan-note/appearance)
+* [Data Parser](https://github.com/88250/protyle)
+* [Editor Engine](https://github.com/88250/lute)
+* [End-to-end encryption](https://github.com/siyuan-note/encryption)
+* [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
+* [Android](https://github.com/siyuan-note/siyuan-android)
+* [iOS](https://github.com/siyuan-note/siyuan-ios)
 
-## 🙏 鸣谢
+## 🙏 Acknowledgement
 
-思源的诞生离不开下列开源项目。
+SiYuan is made possible by the following open source projects.
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/atotto/clipboard](https://github.com/atotto/clipboard) `BSD-3-Clause License`

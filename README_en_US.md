@@ -20,9 +20,9 @@
 SiYuan is a local-first personal knowledge management system, support fine-grained block-level reference and Markdown
 WYSIWYG.
 
-![feature0.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@8489397401cf5025eab847dfb26a4f3896be5363/screenshots/feature0.png)
+![feature0.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@aa842a59b28a873dcc999fb63eaeafb4158c02d3/screenshots/feature0.png)
 
-![feature1-1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@8489397401cf5025eab847dfb26a4f3896be5363/screenshots/feature1-1.png)
+![feature1-1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@aa842a59b28a873dcc999fb63eaeafb4158c02d3/screenshots/feature1-1.png)
 
 ## ✨ Features
 

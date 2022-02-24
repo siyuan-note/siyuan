@@ -1,3 +1,5 @@
+<a href="https://github.com/siyuan-note/siyuan/blob/master/API.md">English</a>
+
 * [规范](#规范)
     * [参数和返回值](#参数和返回值)
     * [鉴权](#鉴权)

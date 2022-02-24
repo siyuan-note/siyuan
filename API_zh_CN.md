@@ -1,5 +1,5 @@
-* [Specification](#Specification)
-    * [Parameters and return values](#Parameters-and-return-values)
+* [规范](#规范)
+    * [参数和返回值](#参数和返回值)
     * [鉴权](#鉴权)
 * [笔记本](#笔记本)
     * [列出笔记本](#列出笔记本)
@@ -41,38 +41,38 @@
 
 ---
 
-## Specification
+## 规范
 
-### Parameters and return values
+### 参数和返回值
 
-* Endpoint: `http://127.0.0.1:6806`
-* Both are POST methods
-* An interface with parameters is required, the parameter is a JSON string, placed in the body, and the header Content-Type is `application/json`
-* Return value
+* 端点：`http://127.0.0.1:6806`
+* 均是 POST 方法
+* 需要带参的接口，参数为 JSON 字符串，放置到 body 里，标头 Content-Type 为 `application/json`
+* 返回值
 
-   ````json
-   {
-     "code": 0,
-     "msg": "",
-     "data": {}
-   }
-   ````
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {}
+  }
+  ```
 
-  * `code`: non-zero for exceptions
-  * `msg`: an empty string under normal circumstances, an error text will be returned under abnormal conditions
-  * `data`: may be `{}`, `[]` or `NULL`, depending on the interface
+    * `code`：非 0 为异常情况
+    * `msg`：正常情况下是空字符串，异常情况下会返回错误文案
+    * `data`：可能为 `{}`、`[]` 或者 `NULL`，根据不同接口而不同
 
-### Authentication
+### 鉴权
 
-View API token in <kbd>Settings - About</kbd>, request header: `Authorization: Token xxx`
+在 <kbd>设置 - 关于</kbd> 里查看 API token，请求标头：`Authorization: Token xxx`
 
-## Notebooks
+## 笔记本
 
-### List notebooks
+### 列出笔记本
 
 * `/api/notebook/lsNotebooks`
-* No parameters
-* Return value
+* 不带参
+* 返回值
 
   ```json
   {
@@ -82,14 +82,14 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
       "notebooks": [
         {
           "id": "20210817205410-2kvfpfn", 
-          "name": "Test Notebook",
+          "name": "测试笔记本",
           "icon": "1f41b",
           "sort": 0,
           "closed": false
         },
         {
           "id": "20210808180117-czj9bvb",
-          "name": "SiYuan User Guide",
+          "name": "思源笔记用户指南",
           "icon": "1f4d4",
           "sort": 1,
           "closed": false
@@ -99,10 +99,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Open a notebook
+### 打开笔记本
 
 * `/api/notebook/openNotebook`
-* Parameters
+* 参数
 
   ```json
   {
@@ -110,8 +110,8 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `notebook`: Notebook ID
-* Return value
+    * `notebook`：笔记本 ID
+* 返回值
 
   ```json
   {
@@ -121,10 +121,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Close a notebook
+### 关闭笔记本
 
 * `/api/notebook/closeNotebook`
-* Parameters
+* 参数
 
   ```json
   {
@@ -132,8 +132,8 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `notebook`: Notebook ID
-* Return value
+    * `notebook`：笔记本 ID
+* 返回值
 
   ```json
   {
@@ -143,20 +143,20 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Rename a notebook
+### 重命名笔记本
 
 * `/api/notebook/renameNotebook`
-* Parameters
+* 参数
 
   ```json
   {
     "notebook": "20210831090520-7dvbdv0",
-    "name": "New name for notebook"
+    "name": "笔记本的新名称"
   }
   ```
 
-    * `notebook`: Notebook ID
-* Return value
+    * `notebook`：笔记本 ID
+* 返回值
 
   ```json
   {
@@ -166,17 +166,17 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Create a notebook
+### 创建笔记本
 
 * `/api/notebook/createNotebook`
-* Parameters
+* 参数
 
   ```json
   {
-    "name": "Notebook name"
+    "name": "笔记本的名称"
   }
   ```
-* Return value
+* 返回值
 
   ```json
   {
@@ -185,7 +185,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "data": {
       "notebook": {
         "id": "20220126215949-r1wvoch",
-        "name": "Notebook name",
+        "name": "笔记本的名称",
         "icon": "",
         "sort": 0,
         "closed": false
@@ -194,10 +194,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Remove a notebook
+### 删除笔记本
 
 * `/api/notebook/removeNotebook`
-* Parameters
+* 参数
 
   ```json
   {
@@ -205,8 +205,8 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `notebook`: Notebook ID
-* Return value
+    * `notebook`：笔记本 ID
+* 返回值
 
   ```json
   {
@@ -216,10 +216,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Get notebook configuration
+### 获取笔记本配置
 
 * `/api/notebook/getNotebookConf`
-* Parameters
+* 参数
 
   ```json
   {
@@ -227,8 +227,8 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `notebook`: Notebook ID
-* Return value
+    * `notebook`：笔记本 ID
+* 返回值
 
   ```json
   {
@@ -237,28 +237,28 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "data": {
       "box": "20210817205410-2kvfpfn",
       "conf": {
-        "name": "Test Notebook",
+        "name": "测试笔记本",
         "closed": false,
         "refCreateSavePath": "",
         "createDocNameTemplate": "",
         "dailyNoteSavePath": "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}",
         "dailyNoteTemplatePath": ""
       },
-      "name": "Test Notebook"
+      "name": "测试笔记本"
     }
   }
   ```
 
-### Save notebook configuration
+### 保存笔记本配置
 
 * `/api/notebook/setNotebookConf`
-* Parameters
+* 参数
 
   ```json
   {
     "notebook": "20210817205410-2kvfpfn",
     "conf": {
-        "name": "Test Notebook",
+        "name": "测试笔记本",
         "closed": false,
         "refCreateSavePath": "",
         "createDocNameTemplate": "",
@@ -268,15 +268,15 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `notebook`: Notebook ID
-* Return value
+    * `notebook`：笔记本 ID
+* 返回值
 
   ```json
   {
     "code": 0,
     "msg": "",
     "data": {
-      "name": "Test Notebook",
+      "name": "测试笔记本",
       "closed": false,
       "refCreateSavePath": "",
       "createDocNameTemplate": "",
@@ -286,12 +286,12 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-## Documents
+## 文档
 
-### Create a document with Markdown
+### 通过 Markdown 创建文档
 
 * `/api/filetree/createDocWithMd`
-* Parameters
+* 参数
 
   ```json
   {
@@ -301,10 +301,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `notebook`: Notebook ID
-    * `path`: Document path, which needs to start with / and separate levels with / (path here corresponds to the database hpath field)
-    * `markdown`: GFM Markdown content
-* Return value
+    * `notebook`：笔记本 ID
+    * `path`：文档路径，需要以 / 开头，中间使用 / 分隔层级（这里的 path 对应数据库 hpath 字段）
+    * `markdown`：GFM Markdown 内容
+* 返回值
 
   ```json
   {
@@ -314,25 +314,25 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `data`: Created document ID
-    * If you use the same `path` to call this interface repeatedly, the existing document will not be overwritten, but a new document ending with a random number will be created
+    * `data`：创建好的文档 ID
+    * 如果使用同一个 `path` 重复调用该接口，不会覆盖已有文档，而是新建随机数结尾的文档
 
-### Rename a document
+### 重命名文档
 
 * `/api/filetree/renameDoc`
-* Parameters
+* 参数
 
   ```json
   {
     "notebook": "20210831090520-7dvbdv0",
     "path": "/20210902210113-0avi12f.sy",
-    "title": "Document new title"
+    "title": "文档新标题"
   }
   ```
 
-    * `notebook`: Notebook ID
-    * `path`: Document path
-* Return value
+    * `notebook`：笔记本 ID
+    * `path`：文档路径
+* 返回值
 
   ```json
   {
@@ -342,10 +342,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Remove a document
+### 删除文档
 
 * `/api/filetree/removeDoc`
-* Parameters
+* 参数
 
   ```json
   {
@@ -354,9 +354,9 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `notebook`: Notebook ID
-    * `path`: Document path
-* Return value
+    * `notebook`：笔记本 ID
+    * `path`：文档路径
+* 返回值
 
   ```json
   {
@@ -366,10 +366,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Move a document
+### 移动文档
 
 * `/api/filetree/moveDoc`
-* Parameters
+* 参数
 
   ```json
   {
@@ -380,11 +380,11 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `fromNotebook`: Source notebook ID
-    * `fromPath`: Source path
-    * `toNotebook`: Target notebook ID
-    * `toPath`: Target path
-* Return value
+    * `fromNotebook`：源笔记本 ID
+    * `fromPath`：源路径
+    * `toNotebook`：目标笔记本 ID
+    * `toPath`：目标路径
+* 返回值
 
   ```json
   {
@@ -394,10 +394,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Get human-readable path based on path
+### 根据路径获取人类可读路径
 
 * `/api/filetree/getHPathByPath`
-* Parameters
+* 参数
 
   ```json
   {
@@ -406,9 +406,9 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `notebook`: Notebook ID
-    * `path`: Document path
-* Return value
+    * `notebook`：笔记本 ID
+    * `path`：路径
+* 返回值
 
   ```json
   {
@@ -418,22 +418,22 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-## Assets
+## 资源文件
 
-### Upload assets
+### 上传资源文件
 
 * `/api/asset/upload`
-* The parameter is an HTTP Multipart form
+* 参数为 HTTP Multipart 表单
 
-    * `assetsDirPath`: The folder path where the assets are stored. The arguments have the following three cases
+    * `assetsDirPath`：资源文件存放的文件夹路径，实参有以下三种情况
 
-        1. `"/assets/"`: Workspace/data/assets folder
-        2. `"/Test Notebook/assets/"`: Assets folder under `Test Notebook`
-        3. `"/Test Notebook/foo/assets/"`: Assets folder under foo folder under `Test notebook`
+        1. `"/assets/"`：工作空间/data/assets 文件夹
+        2. `"/测试笔记本/assets/"`：`测试笔记本`下的 assets 文件夹
+        3. `"/测试笔记本/foo/assets/"`：`测试笔记本`下 foo 文件夹下的 assets 文件夹
 
-      It is recommended to use the first one, which is stored in the workspace assets folder uniformly.
-    * `file[]`: Uploaded file list
-* Return value
+      建议用第一种，统一存放到工作空间资源文件夹下。
+    * `file[]`：上传的文件列表
+* 返回值
 
   ```json
   {
@@ -448,15 +448,15 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `errFiles`: List of filenames with errors in upload processing
-    * `succMap`: For successfully processed files, the key is the file name when uploading, and the value is assets/foo-id.png, which is used to replace the asset link address in the existing Markdown content with the uploaded address
+    * `errFiles`：处理时遇到错误的文件名
+    * `succMap`：处理成功的文件，key 为上传时的文件名，value 为 assets/foo-id.png，用于将已有 Markdown 内容中的资源文件链接地址替换为上传后的地址
 
-## Blocks
+## 块
 
-### Insert blocks
+### 插入块
 
 * `/api/block/insertBlock`
-* Parameters
+* 参数
 
   ```json
   {
@@ -466,10 +466,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `dataType`: The data type to be inserted, the value can be `markdown` or `dom`
-    * `data`: Data to be inserted
-    * `previousID`: The ID of the previous block, used to anchor the insertion position
-* Return value
+    * `dataType`：待插入数据类型，值可选择 `markdown` 或者 `dom`
+    * `data`：待插入的数据
+    * `previousID`：前一个块的 ID，用于锚定插入位置
+* 返回值
 
   ```json
   {
@@ -493,13 +493,13 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `action.data`: DOM generated by the newly inserted block
-    * `action.id`: ID of the newly inserted block
+    * `action.data`：新插入块生成的 DOM
+    * `action.id`：新插入块的 ID
 
-### Prepend blocks
+### 插入前置子块
 
 * `/api/block/prependBlock`
-* Parameters
+* 参数
 
   ```json
   {
@@ -509,10 +509,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `dataType`: The data type to be inserted, the value can be `markdown` or `dom`
-    * `data`: Data to be inserted
-    * `parentID`: The ID of the parent block, used to anchor the insertion position
-* Return value
+    * `dataType`：待插入数据类型，值可选择 `markdown` 或者 `dom`
+    * `data`：待插入的数据
+    * `parentID`：父块的 ID，用于锚定插入位置
+* 返回值
 
   ```json
   {
@@ -536,13 +536,13 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `action.data`: DOM generated by the newly inserted block
-    * `action.id`: ID of the newly inserted block
+    * `action.data`：新插入块生成的 DOM
+    * `action.id`：新插入块的 ID
 
-### Append blocks
+### 插入后置子块
 
 * `/api/block/appendBlock`
-* Parameters
+* 参数
 
   ```json
   {
@@ -552,10 +552,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `dataType`: The data type to be inserted, the value can be `markdown` or `dom`
-    * `data`: Data to be inserted
-    * `parentID`: The ID of the parent block, used to anchor the insertion position
-* Return value
+    * `dataType`：待插入数据类型，值可选择 `markdown` 或者 `dom`
+    * `data`：待插入的数据
+    * `parentID`：父块的 ID，用于锚定插入位置
+* 返回值
 
   ```json
   {
@@ -579,13 +579,13 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `action.data`: DOM generated by the newly inserted block
-    * `action.id`: ID of the newly inserted block
+    * `action.data`：新插入块生成的 DOM
+    * `action.id`：新插入块的 ID
 
-### Update a block
+### 更新块
 
 * `/api/block/updateBlock`
-* Parameters
+* 参数
 
   ```json
   {
@@ -595,10 +595,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `dataType`: The data type to be updated, the value can be `markdown` or `dom`
-    * `data`: Data to be updated
-    * `id`: ID of the block to be updated
-* Return value
+    * `dataType`：待更新数据类型，值可选择 `markdown` 或者 `dom`
+    * `data`：待更新的数据
+    * `id`：待更新块的 ID
+* 返回值
 
   ```json
   {
@@ -622,12 +622,12 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `action.data`: DOM generated by the updated block
+    * `action.data`：更新块生成的 DOM
 
-### Delete a block
+### 删除块
 
 * `/api/block/deleteBlock`
-* Parameters
+* 参数
 
   ```json
   {
@@ -635,8 +635,8 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `id`: ID of the block to be deleted
-* Return value
+    * `id`：待删除块的 ID
+* 返回值
 
   ```json
   {
@@ -660,12 +660,12 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-## Attributes
+## 属性
 
-### Set block properties
+### 设置块属性
 
 * `/api/attr/setBlockAttrs`
-* Parameters
+* 参数
 
   ```json
   {
@@ -676,9 +676,9 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `id`: Block ID
-    * `attrs`: Block attributes, custom attributes must be prefixed with `custom-`
-* Return value
+    * `id`：块 ID
+    * `attrs`：块属性，自定义属性必须以 `custom-` 作为前缀
+* 返回值
 
   ```json
   {
@@ -688,10 +688,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Get block attributes
+### 获取块属性
 
 * `/api/attr/getBlockAttrs`
-* Parameters
+* 参数
 
   ```json
   {
@@ -699,8 +699,8 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `id`: Block ID
-* Return value
+    * `id`：块 ID
+* 返回值
 
   ```json
   {
@@ -709,7 +709,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "data": {
       "custom-attr1": "line1\nline2",
       "id": "20210912214605-uhi5gco",
-      "title": "PDF Annotation Demo",
+      "title": "PDF 标注双链演示",
       "type": "doc",
       "updated": "20210916120715"
     }
@@ -718,10 +718,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
 ## SQL
 
-### Execute SQL query
+### 执行 SQL 查询
 
 * `/api/query/sql`
-* Parameters
+* 参数
 
   ```json
   {
@@ -729,31 +729,31 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `stmt`: SQL statement
-* Return value
+    * `stmt`：SQL 脚本
+* 返回值
 
   ```json
   {
     "code": 0,
     "msg": "",
     "data": [
-      { "col": "val" }
+      { "列": "值" }
     ]
   }
   ```
 
-## Templates
+## 模板
 
-### Render a template
+### 渲染模板
 
 /template/render
 
-## Export
+## 导出
 
-### Export Markdown
+### 导出 Markdown 文本
 
 * `/api/export/exportMdContent`
-* Parameters
+* 参数
 
   ```json
   {
@@ -761,30 +761,30 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `id`: ID of the doc block to export
-* Return value
+    * `id`：要导出的文档块 ID
+* 返回值
 
   ```json
   {
     "code": 0,
     "msg": "",
     "data": {
-        "hPath": "/Please Start Here",
-        "content": "## 🍫 Content Block\n\nIn SiYuan, the only important core concept is..."
+        "hPath": "/0 请从这里开始",
+        "content": "## 🍫 内容块\n\n在思源中，唯一重要的核心概念是..."
     }
   }
   ```
 
-    * `hPath`: human-readable path
-    * `content`: Markdown content
+    * `hPath`：人类可读的路径
+    * `content`：Markdown 内容
 
-## System
+## 系统
 
-### Get boot progress
+### 获取启动进度
 
 * `/api/system/bootProgress`
-* No parameters
-* Return value
+* 不带参
+* 返回值
 
   ```json
   {
@@ -797,11 +797,11 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Get system version
+### 获取系统版本
 
 * `/api/system/version`
-* No parameters
-* Return value
+* 不带参
+* 返回值
 
   ```json
   {
@@ -811,11 +811,11 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Get the current time of the system
+### 获取系统当前时间
 
 * `/api/system/currentTime`
-* No parameters
-* Return value
+* 不带参
+* 返回值
 
   ```json
   {
@@ -825,7 +825,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `data`: Precision in milliseconds
+    * `data`: 精度为毫秒
 
 ## Webhook
 

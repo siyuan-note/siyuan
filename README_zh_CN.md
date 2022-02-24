@@ -68,7 +68,7 @@
 * Android APP
 * iOS APP
 * Docker 部署
-* [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
+* [API](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)
 
 ### 付费订阅
 

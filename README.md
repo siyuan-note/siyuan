@@ -123,7 +123,7 @@ It is not completely open source at present, but some components and application
 * [Android](https://github.com/siyuan-note/siyuan-android)
 * [iOS](https://github.com/siyuan-note/siyuan-ios)
 
-### Is there any #Note# for deleting docs?
+### Is there any note for deleting docs?
 
 After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate edit history.
 
@@ -156,7 +156,7 @@ There is an operation entry in the block icon menu of the table block.
 * New workspace can reset password
 * The cloud uses the new cloud synchronization directory
 
-If it is a mobile-end, uninstall and reinstall it (#Note#: When the mobile-enduninstalls the application, the local workspace data will be deleted together).
+If it is a mobile-end, uninstall and reinstall it (note: When the mobile-enduninstalls the application, the local workspace data will be deleted together).
 
 ### Do I need to pay for it?
 

@@ -123,7 +123,7 @@ It is not completely open source at present, but some components and application
 * [Android](https://github.com/siyuan-note/siyuan-android)
 * [iOS](https://github.com/siyuan-note/siyuan-ios)
 
-### Is there any Note for deleting docs?
+### Is there any #Note# for deleting docs?
 
 After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate edit history.
 
@@ -150,9 +150,13 @@ There is an operation entry in the block icon menu of the table block.
 * The data folder path on the Android is `internal storage device/Android/data/org.b3log.siyuan/files/siyuan/data/`, which is a private path of the application and cannot be read by other programs and can only be copied manually
 * There is a conflict between third-party synchronization and SiYuan synchronization, please do not use at the same time
 
-### Do you plan to support plugins?
+### What should I do if I forget the end-to-end password?
 
-SiYuan supports use on browser,  which can be extended by browser plug-ins. We are looking forward to other developers writing browser plug-ins for SiYuan. With the gradual provision of Kernel API , we will introduce a plug-in mechanism in the future.
+* Use the new workspace on the main device, manually copy the old workspace data folder to the new workspace
+* New workspace can reset password
+* The cloud uses the new cloud synchronization directory
+
+If it is a mobile-end, uninstall and reinstall it (#Note#: When the mobile-enduninstalls the application, the local workspace data will be deleted together).
 
 ### Do I need to pay for it?
 

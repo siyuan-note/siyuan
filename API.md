@@ -1,4 +1,4 @@
-<a href="https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md">中文</a>
+[中文](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)
 
 * [Specification](#Specification)
     * [Parameters and return values](#Parameters-and-return-values)

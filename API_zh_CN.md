@@ -480,12 +480,12 @@
         "doOperations": [
           {
             "action": "insert",
-              "data": "<div data-node-id=\"20211230115020-g02dfx0\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\"><div contenteditable=\"true\" spellcheck=\"false\">foo<strong style=\"color: var(--b3-font-color8);\">bar</strong>baz</div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
-              "id": "20211230115020-g02dfx0",
-              "parentID": "",
-              "previousID": "20211229114650-vrek5x6",
-              "retData": null
-            }
+            "data": "<div data-node-id=\"20211230115020-g02dfx0\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\"><div contenteditable=\"true\" spellcheck=\"false\">foo<strong style=\"color: var(--b3-font-color8);\">bar</strong>baz</div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
+            "id": "20211230115020-g02dfx0",
+            "parentID": "",
+            "previousID": "20211229114650-vrek5x6",
+            "retData": null
+          }
         ],
         "undoOperations": null
       }
@@ -609,13 +609,13 @@
         "doOperations": [
           {
             "action": "update",
-              "data": "<div data-node-id=\"20211230161520-querkps\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\"><div contenteditable=\"true\" spellcheck=\"false\">foo<strong>bar</strong>baz</div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
-              "id": "20211230161520-querkps",
-              "parentID": "",
-              "previousID": "",
-              "retData": null
-              }
-            ],
+            "data": "<div data-node-id=\"20211230161520-querkps\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\"><div contenteditable=\"true\" spellcheck=\"false\">foo<strong>bar</strong>baz</div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
+            "id": "20211230161520-querkps",
+            "parentID": "",
+            "previousID": "",
+            "retData": null
+            }
+          ],
         "undoOperations": null
       }
     ]
@@ -671,7 +671,7 @@
   {
     "id": "20210912214605-uhi5gco",
     "attrs": {
-        "custom-attr1": "line1\nline2"
+      "custom-attr1": "line1\nline2"
     }
   }
   ```
@@ -769,8 +769,8 @@
     "code": 0,
     "msg": "",
     "data": {
-        "hPath": "/0 请从这里开始",
-        "content": "## 🍫 内容块\n\n在思源中，唯一重要的核心概念是..."
+      "hPath": "/0 请从这里开始",
+      "content": "## 🍫 内容块\n\n在思源中，唯一重要的核心概念是..."
     }
   }
   ```
@@ -791,8 +791,8 @@
     "code": 0,
     "msg": "",
     "data": {
-        "details": "Finishing boot...",
-        "progress": 100
+      "details": "Finishing boot...",
+      "progress": 100
     }
   }
   ```

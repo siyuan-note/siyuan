@@ -1,3 +1,50 @@
+## v1.8.4 / 2022-02-25
+
+### 改进功能
+
+* [ECharts 和 Mindmap 支持高度设定](https://github.com/siyuan-note/siyuan/issues/2896)
+* [Windows 端上架 Microsoft Store](https://github.com/siyuan-note/siyuan/issues/3950)
+* [iPad 端文档点导出 Markdown 没反应](https://github.com/siyuan-note/siyuan/issues/4013)
+* [表格支持合并拆分单元格](https://github.com/siyuan-note/siyuan/issues/4022)
+* [取消表格列自定义宽度](https://github.com/siyuan-note/siyuan/issues/4038)
+* [Android 端初次安装可选择拒绝隐私政策](https://github.com/siyuan-note/siyuan/issues/4046)
+* [设置 - 账号链滴社区服务协议与隐私条款改为勾选同意](https://github.com/siyuan-note/siyuan/issues/4048)
+* [支持长表格导出 PDF](https://github.com/siyuan-note/siyuan/issues/4050)
+* [导出 PDF 时代码块应保持折行](https://github.com/siyuan-note/siyuan/issues/4051)
+* [数学公式渲染改进](https://github.com/siyuan-note/siyuan/issues/4053)
+* [多选时禁止按键操作](https://github.com/siyuan-note/siyuan/issues/4061)
+* [折叠的块导出 HTML/PDF 时固定展开](https://github.com/siyuan-note/siyuan/issues/4064)
+* [关于中提供隐私政策和用户协议查看入口](https://github.com/siyuan-note/siyuan/issues/4066)
+* [移动端设置 - 账号中提供账号注销功能](https://github.com/siyuan-note/siyuan/issues/4067)
+* [custom.css 编辑或通过外观设置修改后自动刷新](https://github.com/siyuan-note/siyuan/issues/4069)
+* [改进特殊情况下大纲需点击两次的问题](https://github.com/siyuan-note/siyuan/issues/4070)
+* [折叠列表子内容，按回车不会新建列表项](https://github.com/siyuan-note/siyuan/issues/4074)
+* [Excel 粘贴时第一个单元格会出现换行](https://github.com/siyuan-note/siyuan/issues/4083)
+* [录音采样率调整为 44100](https://github.com/siyuan-note/siyuan/issues/4085)
+* [Android 端编辑状态下键盘上方遮挡](https://github.com/siyuan-note/siyuan/issues/4086)
+* [图表块标菜单中不应出现代码块](https://github.com/siyuan-note/siyuan/issues/4093)
+* [集市包下载超时调整为两分钟](https://github.com/siyuan-note/siyuan/issues/4096)
+
+### 文档相关
+
+* [API 英文文档](https://github.com/siyuan-note/siyuan/issues/4095)
+
+### 移除功能
+
+* [Android 端移除录音功能](https://github.com/siyuan-note/siyuan/issues/4065)
+
+### 修复缺陷
+
+* [桌面端更新版本时没有结束老内核进程](https://github.com/siyuan-note/siyuan/issues/4039)
+* [列表项下标题剪切问题](https://github.com/siyuan-note/siyuan/issues/4040)
+* [挂件编辑问题](https://github.com/siyuan-note/siyuan/issues/4072)
+* [Android 端长按扩选后复制内容不全](https://github.com/siyuan-note/siyuan/issues/4073)
+* [当标题有 `#` 的时候导出 Markdown 失败](https://github.com/siyuan-note/siyuan/issues/4075)
+* [不关闭思源几天后可能出现账号鉴权失败](https://github.com/siyuan-note/siyuan/issues/4080)
+* [代码块折叠后下方输入文字错误](https://github.com/siyuan-note/siyuan/issues/4087)
+* [有序列表项插入行再撤销后序号错误](https://github.com/siyuan-note/siyuan/issues/4088)
+* [有序列表项拖拽、撤销再删除后导致的状态异常](https://github.com/siyuan-note/siyuan/issues/4089)
+
 ## v1.8.2 / 2022-02-13
 
 ### 改进功能

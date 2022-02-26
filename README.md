@@ -108,7 +108,7 @@ The data is saved in the workspace folder (the default is in the user's home dir
 * `assets` are used to save all inserted asset files
 * `templates` are used to save template snippets
 * `widgets` are used to save widgets
-* `emojis` are uaed to save emoji images
+* `emojis` are used to save emoji images
 * The rest of the folders are the notebook folders created by the user, files with the suffix of `.sy` in the notebook folder are used to save the document data, and the data format is JSON
 
 ### Is SiYuan open source?
@@ -121,8 +121,8 @@ It is not completely open source at present, but some components and application
 * [Editor Engine](https://github.com/88250/lute)
 * [End-to-end encryption](https://github.com/siyuan-note/encryption)
 * [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
-* [Android](https://github.com/siyuan-note/siyuan-android)
-* [iOS](https://github.com/siyuan-note/siyuan-ios)
+* [Android App](https://github.com/siyuan-note/siyuan-android)
+* [iOS App](https://github.com/siyuan-note/siyuan-ios)
 
 ### Is there any note for deleting docs?
 

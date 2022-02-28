@@ -1,3 +1,32 @@
+## v1.8.5 / 2022-02-28
+
+### 改进功能
+
+* [Android 端上架华为应用市场](https://github.com/siyuan-note/siyuan/issues/4041)
+* [Android 端上架酷安](https://github.com/siyuan-note/siyuan/issues/4092)
+* [表格外部左右测禁止输入](https://github.com/siyuan-note/siyuan/issues/4105)
+* [禁止在分隔线、嵌入块、数学公式、iframe、音频、视频和图表渲染块内输入中文](https://github.com/siyuan-note/siyuan/issues/4114)
+* [改进某些情况下数据下载解密失败问题](https://github.com/siyuan-note/siyuan/issues/4115)
+* [浏览器剪藏扩展支持大尺寸数据网页](https://github.com/siyuan-note/siyuan/issues/4116)
+* [数学公式块上下对齐问题](https://github.com/siyuan-note/siyuan/issues/4119)
+* [导出 HTML/PDF 支持渲染表格合并单元格](https://github.com/siyuan-note/siyuan/issues/4121)
+* [浏览器剪藏扩展不申请剪切板读取权限](https://github.com/siyuan-note/siyuan/issues/4125)
+
+### 文档相关
+
+* [上线官网英文版](https://github.com/siyuan-note/siyuan/issues/4103)
+
+### 修复缺陷
+
+* [表格左右滚动时隐藏所选单元格](https://github.com/siyuan-note/siyuan/issues/4099)
+* [含标题行的拆分单元格错位](https://github.com/siyuan-note/siyuan/issues/4102)
+* [跨表头合并单元格错误](https://github.com/siyuan-note/siyuan/issues/4106)
+* [表格居中时选中效果渲染错位](https://github.com/siyuan-note/siyuan/issues/4107)
+* [表格居中时无法对单元格宽度进行拖拽](https://github.com/siyuan-note/siyuan/issues/4111)
+* [`/` 后输入 `引用块` 和 `引述` 没有候选结果](https://github.com/siyuan-note/siyuan/issues/4112)
+* [脑图、图表删除再撤销后无法显示](https://github.com/siyuan-note/siyuan/issues/4113)
+* [导出 PDF 数学公式没有居中](https://github.com/siyuan-note/siyuan/issues/4120)
+
 ## v1.8.4 / 2022-02-25
 
 ### 改进功能

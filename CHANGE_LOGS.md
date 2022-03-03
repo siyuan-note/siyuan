@@ -1,3 +1,22 @@
+## v1.8.6 / 2022-03-03
+
+### 改进功能
+
+* [Android 端上架小米应用商店](https://github.com/siyuan-note/siyuan/issues/3946)
+* [`Ctrl+End/Home` 调整为在整个文档范围生效](https://github.com/siyuan-note/siyuan/issues/4108)
+* [在文档块的 DOM 中添加文档块属性](https://github.com/siyuan-note/siyuan/issues/4117)
+* [设置与搜索栏中的类型过滤相互独立](https://github.com/siyuan-note/siyuan/issues/4129)
+* [代码块行号和数学公式导出 PDF 改进](https://github.com/siyuan-note/siyuan/issues/4133)
+* [`Alt+M` 隐藏窗口时不在任务栏上显示](https://github.com/siyuan-note/siyuan/issues/4138)
+
+### 修复缺陷
+
+* [通过 Markdown 语法插入超级块时属性设置错误问题](https://github.com/siyuan-note/siyuan/issues/4068)
+* [粘贴文本到行级元素时插入位置不正确](https://github.com/siyuan-note/siyuan/issues/4118)
+* [移动端通过伺服下载某些主题后无法打开](https://github.com/siyuan-note/siyuan/issues/4127)
+* [Markdwon 导入时 URL 编码后的图片地址导入失败](https://github.com/siyuan-note/siyuan/issues/4130)
+* [macOS 中`Shift+Home/End` 范围选择错误及相关文档修改](https://github.com/siyuan-note/siyuan/issues/4135)
+
 ## v1.8.5 / 2022-02-28
 
 ### 改进功能

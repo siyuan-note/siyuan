@@ -1,3 +1,20 @@
+## v1.8.7 / 2022-03-05
+
+### 改进功能
+
+* [列表项和标题折叠小三角](https://github.com/siyuan-note/siyuan/issues/3125)
+* [Windows 端 PDF 导出代码块行号对不齐](https://github.com/siyuan-note/siyuan/issues/4148)
+* [存储时剔除文档标题首尾空格](https://github.com/siyuan-note/siyuan/issues/4150)
+* [代码块代码中划选后隐藏其他块内容划选触发的浮动工具条](https://github.com/siyuan-note/siyuan/issues/4152)
+* [拖拽上下分屏会导致滚动条滚动](https://github.com/siyuan-note/siyuan/issues/4155)
+
+### 修复缺陷
+
+* [macOS 端全屏幕后切换主题模式会导致工具栏左侧出现空白](https://github.com/siyuan-note/siyuan/issues/4132)
+* [复制块到表格触发状态异常](https://github.com/siyuan-note/siyuan/issues/4141)
+* [拖入资源文件到表格里会记录到上一个块里](https://github.com/siyuan-note/siyuan/issues/4146)
+* [列表编辑时动态加载触发状态异常](https://github.com/siyuan-note/siyuan/issues/4151)
+
 ## v1.8.6 / 2022-03-03
 
 ### 改进功能

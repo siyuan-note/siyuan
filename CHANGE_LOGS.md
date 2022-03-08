@@ -1,3 +1,26 @@
+## v1.8.8 / 2022-03-08
+
+### 改进功能
+
+* [折叠按钮点击过快优化](https://github.com/siyuan-note/siyuan/issues/4163)
+* [改进云端数据同步服务稳定性](https://github.com/siyuan-note/siyuan/issues/4185)
+
+### 文档相关
+
+* [改进云端同步文档](https://github.com/siyuan-note/siyuan/issues/4176)
+
+### 修复缺陷
+
+* [图片居中后光标消失，无法通过 `Ctrl+Shift+↑/↓` 移动块](https://github.com/siyuan-note/siyuan/issues/3091)
+* [使用 API 插入空代码块后在其中粘贴时会粘贴至其外部](https://github.com/siyuan-note/siyuan/issues/4143)
+* [空的 `<kbd>` 无法删除](https://github.com/siyuan-note/siyuan/issues/4162)
+* [代码块编辑出现抖动](https://github.com/siyuan-note/siyuan/issues/4164)
+* [使用 API `/api/block/updateBlock` 无法更新文档块](https://github.com/siyuan-note/siyuan/issues/4165)
+* [表格中行内代码后换行问题](https://github.com/siyuan-note/siyuan/issues/4169)
+* [启动后大纲显示为空](https://github.com/siyuan-note/siyuan/issues/4178)
+* [中西文插入空格后代码块出现块 ID](https://github.com/siyuan-note/siyuan/issues/4184)
+* [Pagedown 无法加载](https://github.com/siyuan-note/siyuan/issues/4189)
+
 ## v1.8.7 / 2022-03-05
 
 ### 改进功能

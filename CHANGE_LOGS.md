@@ -1,3 +1,24 @@
+## v1.8.9 / 2022-03-09
+
+### 改进功能
+
+* [内容块支持两侧对齐方式](https://github.com/siyuan-note/siyuan/issues/3419)
+* [微软商店版任务栏图标问题](https://github.com/siyuan-note/siyuan/issues/4139)
+* [编辑器空标题光标无法进入](https://github.com/siyuan-note/siyuan/issues/4167)
+* [调整编辑器单个资源文件插入最大限制为 4G](https://github.com/siyuan-note/siyuan/issues/4198)
+* [优化数学公式、图表等渲染块编辑窗的弹出方式](https://github.com/siyuan-note/siyuan/issues/4199)
+
+### 修复缺陷
+
+* [切换笔记时如果光标在表格中大纲不会自动刷新](https://github.com/siyuan-note/siyuan/issues/4171)
+* [选中图片后输入下一行，图片依然是选中状态](https://github.com/siyuan-note/siyuan/issues/4173)
+* [块属性备注栏 Ctrl+Z 撤销不撤销备注栏内容而撤销文档内容](https://github.com/siyuan-note/siyuan/issues/4179)
+* [导出 `data-export-md` 时未解析代码块与行内代码内的转义字符](https://github.com/siyuan-note/siyuan/issues/4180)
+* [代码块编辑光标乱跳和一些历史遗留问题](https://github.com/siyuan-note/siyuan/issues/4190)
+* [引用文档时锚文本没有跟随文档重命名](https://github.com/siyuan-note/siyuan/issues/4193)
+* [某些版本的 Windows 无法同步](https://github.com/siyuan-note/siyuan/issues/4197)
+* [iPad 端启动偶尔白屏的问题](https://github.com/siyuan-note/siyuan/issues/4200)
+
 ## v1.8.8 / 2022-03-08
 
 ### 改进功能

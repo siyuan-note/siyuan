@@ -18,6 +18,7 @@
     * [Remove a document](#Remove-a-document)
     * [Move a document](#Move-a-document)
     * [Get human-readable path based on path](#Get-human-readable-path-based-on-path)
+    * [Get human-readable path based on ID](#Get-human-readable-path-based-on-ID)
 * [Assets](#Assets)
     * [Upload assets](#Upload-assets)
 * [Blocks](#Blocks)
@@ -396,7 +397,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Get human-readable path based on path
+### Get human readable path based on path
 
 * `/api/filetree/getHPathByPath`
 * Parameters
@@ -410,6 +411,28 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
     * `notebook`: Notebook ID
     * `path`: Document path
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": "/foo/bar"
+  }
+  ```
+
+### Get human readable path based on ID
+
+* `/api/filetree/getHPathByID`
+* Parameters
+
+  ```json
+  {
+    "id": "20210917220056-yxtyl7i"
+  }
+  ```
+
+  * `id`：Block ID
 * Return value
 
   ```json

@@ -1,3 +1,40 @@
+## v1.9.0 / 2022-03-14
+
+### 引入特性
+
+* [书签重命名](https://github.com/siyuan-note/siyuan/issues/3924)
+* [支持 HTML 块](https://github.com/siyuan-note/siyuan/issues/4023)
+
+### 改进功能
+
+* [思源超链接支持浮窗预览](https://github.com/siyuan-note/siyuan/issues/3302)
+* [编辑区宽度较小时块标弹出动画多次播放](https://github.com/siyuan-note/siyuan/issues/4166)
+* [将挂件的 `src` 与 `data-src` 属性由完整超链接更换为伺服根路径的绝对路径](https://github.com/siyuan-note/siyuan/issues/4206)
+* [公式输入框高度随编辑内容自动调整](https://github.com/siyuan-note/siyuan/issues/4215)
+* [思源协议块超链接加入 `focus` 参数](https://github.com/siyuan-note/siyuan/issues/4221)
+* [表格同时合并第一、二行时，可能会使第二行也成为表头](https://github.com/siyuan-note/siyuan/issues/4224)
+* [光标在块左侧时也需显示块标](https://github.com/siyuan-note/siyuan/issues/4225)
+* [增加快捷键获得当前文档的人类可读路径](https://github.com/siyuan-note/siyuan/issues/4226)
+* [降低文档重命名后文档树改变的延迟](https://github.com/siyuan-note/siyuan/issues/4228)
+* [增加根据 ID 获取人类可读路径 API](https://github.com/siyuan-note/siyuan/issues/4229)
+
+### 修复缺陷
+
+* [折叠标题后未触发动态加载](https://github.com/siyuan-note/siyuan/issues/4168)
+* [使用 iframe 块嵌入挂件时部分操作会触发选中块并导致运行时异常](https://github.com/siyuan-note/siyuan/issues/4172)
+* [代码块粘贴代码时会出现闪烁问题并且光标被移动到最后](https://github.com/siyuan-note/siyuan/issues/4202)
+* [如果在一个块的上方嵌入该块，会导致无法正常修改原块的样式](https://github.com/siyuan-note/siyuan/issues/4204)
+* [Windows 端下键无法触发滚动](https://github.com/siyuan-note/siyuan/issues/4208)
+* [标签面板中的条目内容未转义](https://github.com/siyuan-note/siyuan/issues/4209)
+* [粘贴块引时未转义锚文本](https://github.com/siyuan-note/siyuan/issues/4210)
+* [文档标题空格粘贴操作出现空格异常](https://github.com/siyuan-note/siyuan/issues/4214)
+* [标签比较长时自动补全不应该使用 `...` 省略](https://github.com/siyuan-note/siyuan/issues/4218)
+* [重建索引时卡住](https://github.com/siyuan-note/siyuan/issues/4222)
+* [折叠列表后回车没有创建新列表项](https://github.com/siyuan-note/siyuan/issues/4227)
+* [块聚焦时提及面板点击转换引用块没反应](https://github.com/siyuan-note/siyuan/issues/4230)
+* [列表中行级公式后进行退格会增加换行](https://github.com/siyuan-note/siyuan/issues/4233)
+* [端到端加密密码设置后提示不对](https://github.com/siyuan-note/siyuan/issues/4236)
+
 ## v1.8.9 / 2022-03-09
 
 ### 改进功能

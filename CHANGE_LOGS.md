@@ -1,3 +1,48 @@
+## v1.9.1 / 2022-03-17
+
+### 改进功能
+
+* [改进标题和列表折叠](https://github.com/siyuan-note/siyuan/issues/4213)
+* [移动端只读状态下折叠和展开操作提示](https://github.com/siyuan-note/siyuan/issues/4232)
+* [标签批量删除](https://github.com/siyuan-note/siyuan/issues/4239)
+* [仅含有行级 HTML 标签的 HTML 块导出为模板后再导入会渲染为段落块](https://github.com/siyuan-note/siyuan/issues/4244)
+* [书签面板和标签面板上的删除操作增加确认对话框](https://github.com/siyuan-note/siyuan/issues/4257)
+* [折叠后光标移到被折叠块上](https://github.com/siyuan-note/siyuan/issues/4265)
+* [折叠列表下删除改进](https://github.com/siyuan-note/siyuan/issues/4277)
+* [折叠的列表项无法通过鼠标多选](https://github.com/siyuan-note/siyuan/issues/4279)
+* [数据库 `spans` 表中超链接元素的 `markdown` 字段未保存为超链接 markdown 文本](https://github.com/siyuan-note/siyuan/issues/4280)
+* [表格超长时粘贴会自动调整至最左侧](https://github.com/siyuan-note/siyuan/issues/4281)
+
+### 开发重构
+
+* [CSS 类 `b3-text-filed` 系列重命名为 `b3-text-field`](https://github.com/siyuan-note/siyuan/issues/4247)
+* [重构锁机制](https://github.com/siyuan-note/siyuan/issues/4269)
+
+### 移除功能
+
+* [移除自动版本更新检查](https://github.com/siyuan-note/siyuan/issues/4252)
+
+### 修复缺陷
+
+* [代码块里面剪切时触发前文 `#` 号标签搜索以及剪切抖动](https://github.com/siyuan-note/siyuan/issues/4212)
+* [导入 Markdown 文件内核连接中断](https://github.com/siyuan-note/siyuan/issues/4241)
+* [文档重命名后有时文档树没有刷新](https://github.com/siyuan-note/siyuan/issues/4243)
+* [HTML 块复制/剪切后粘贴，块内容转义与解析错误](https://github.com/siyuan-note/siyuan/issues/4245)
+* [代码块中回车后滚动位置计算错误](https://github.com/siyuan-note/siyuan/issues/4254)
+* [创建文档时标题未转义 `"`](https://github.com/siyuan-note/siyuan/issues/4256)
+* [标签转义问题](https://github.com/siyuan-note/siyuan/issues/4258)
+* [代码块光标错误](https://github.com/siyuan-note/siyuan/issues/4261)
+* [列表项下代码块中按 `↓` 时光标移动问题](https://github.com/siyuan-note/siyuan/issues/4262)
+* [数学公式后无法显示光标](https://github.com/siyuan-note/siyuan/issues/4263)
+* [块引打开文档动态加载不全](https://github.com/siyuan-note/siyuan/issues/4264)
+* [右键弹出菜单错误](https://github.com/siyuan-note/siyuan/issues/4266)
+* [新开页签定位错误](https://github.com/siyuan-note/siyuan/issues/4267)
+* [嵌入块标题错误显示为 HTML 块](https://github.com/siyuan-note/siyuan/issues/4268)
+* [拖拽文档排序后位置不正确](https://github.com/siyuan-note/siyuan/issues/4270)
+* [创建列表项触发状态异常](https://github.com/siyuan-note/siyuan/issues/4271)
+* [移动端没有渲染 HTML 块](https://github.com/siyuan-note/siyuan/issues/4273)
+* [代码块中出现分隔线解析错误](https://github.com/siyuan-note/siyuan/issues/4275)
+
 ## v1.9.0 / 2022-03-14
 
 ### 引入特性

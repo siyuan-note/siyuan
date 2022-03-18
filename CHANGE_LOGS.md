@@ -1,3 +1,24 @@
+## v1.9.2 / 2022-03-18
+
+### 改进功能
+
+* [表格支持最后一个单元格使用 Tab 添加下一行](https://github.com/siyuan-note/siyuan/issues/4235)
+* [光标在文档树等面板中，按 Esc 回到编辑器中](https://github.com/siyuan-note/siyuan/issues/4289)
+* [支持订阅续订](https://github.com/siyuan-note/siyuan/issues/4290)
+* [图片顶部对齐](https://github.com/siyuan-note/siyuan/issues/4292)
+* [当块选中且折叠时，使用上下键不应选择其折叠块](https://github.com/siyuan-note/siyuan/issues/4294)
+
+### 文档相关
+
+* [改进导入导出帮助文档](https://github.com/siyuan-note/siyuan/issues/4287)
+
+### 修复缺陷
+
+* [动态渲染的长文档后退问题](https://github.com/siyuan-note/siyuan/issues/3528)
+* [标题折叠没有折叠下方最后一个块](https://github.com/siyuan-note/siyuan/issues/4288)
+* [导入 Markdown 文件夹时卡住](https://github.com/siyuan-note/siyuan/issues/4295)
+* [块引用后软换行异常](https://github.com/siyuan-note/siyuan/issues/4296)
+
 ## v1.9.1 / 2022-03-17
 
 ### 改进功能

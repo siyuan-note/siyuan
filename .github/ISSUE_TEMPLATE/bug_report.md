@@ -6,8 +6,8 @@ about: 报告缺陷以帮助我们进行改进 Report defects to help us improve
 ### 描述问题 Describe the problem
 
 <!--
-请尽量清晰地描述你遇到的问题。
-Please describe your problem as clearly and accurately as possible.
+请确认能够在默认主题下重新问题，并尽量清晰地描述你遇到的问题。
+Please make sure you can reproduce the issue under the default theme and try to describe the problem you are encountering as clearly as possible.
 -->
 
 ### 期待的结果 Expected result
@@ -32,7 +32,7 @@ Please try to attach screenshots or videos to describe the problem you are exper
 * Operating system: 
 * Browser (if used): 
 
-### 日志文件 Log File
+### 日志文件 Log file
 
 <!--
 请提供内核日志：工作空间/temp/siyuan.log

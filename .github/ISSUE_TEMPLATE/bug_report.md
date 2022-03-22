@@ -6,8 +6,8 @@ about: 报告缺陷以帮助我们进行改进 Report defects to help us improve
 ### 描述问题 Describe the problem
 
 <!--
-请确认能够在默认主题下重新问题，并尽量清晰地描述你遇到的问题。
-Please make sure you can reproduce the issue under the default theme and try to describe the problem you are encountering as clearly as possible.
+请尽量清晰地描述你遇到的问题，并确认能够在默认主题下重现该问题。
+Please describe the problem you are experiencing as clearly as possible and confirm that you can reproduce the problem with the default theme.
 -->
 
 ### 期待的结果 Expected result

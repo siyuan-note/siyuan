@@ -1,3 +1,36 @@
+## v1.9.3 / 2022-03-22
+
+### 改进功能
+
+* [移动端复制粘贴问题](https://github.com/siyuan-note/siyuan/issues/3282)
+* [划选文字引用搜索支持输入关键字](https://github.com/siyuan-note/siyuan/issues/3596)
+* [光标在文档树上时支持 Ctrl+/ 唤起右键菜单，并支持对应的上下左右及回车操作](https://github.com/siyuan-note/siyuan/issues/4304)
+* [调整云端获取集市哈希和版本检查接口](https://github.com/siyuan-note/siyuan/issues/4305)
+* [续订时间不再限制 180 天后](https://github.com/siyuan-note/siyuan/issues/4307)
+* [划选块引用时，禁止弹出浮窗](https://github.com/siyuan-note/siyuan/issues/4314)
+* [重建索引时不再清理已过时索引](https://github.com/siyuan-note/siyuan/issues/4326)
+* [桌面端点击大纲中的文档名可以定位至文档顶部](https://github.com/siyuan-note/siyuan/issues/4328)
+* [使用 Sentry 自动上传报错信息和诊断数据](https://github.com/siyuan-note/siyuan/issues/4338)
+
+### 修复缺陷
+
+* [使用 API  `/api/block/appendBlock` 往超级块中插入内容后渲染错误](https://github.com/siyuan-note/siyuan/issues/4283)
+* [使用 API `/api/block/prependBlock` 往任务列表项块中插入内容后解析异常](https://github.com/siyuan-note/siyuan/issues/4302)
+* [云端同步空间大小判断问题](https://github.com/siyuan-note/siyuan/issues/4303)
+* [选中块引用和文本时，剪切后有残余](https://github.com/siyuan-note/siyuan/issues/4313)
+* [段首连续换行时结果不一致](https://github.com/siyuan-note/siyuan/issues/4315)
+* [数据库 `spans` 表中上标元素 `type` 字段错误](https://github.com/siyuan-note/siyuan/issues/4316)
+* [iPad 端 Shift+Enter 输入无效](https://github.com/siyuan-note/siyuan/issues/4317)
+* [光标无法进入剪切之后剩下的空段落](https://github.com/siyuan-note/siyuan/issues/4321)
+* [复制 Markdown 任务列表第一项为标题时错位](https://github.com/siyuan-note/siyuan/issues/4325)
+* [移动端点击块引跳转后，无法后退到块引原文](https://github.com/siyuan-note/siyuan/issues/4327)
+* [修改过标题后再次选中标题中的所有内容进行剪切，无法剪切整个标题](https://github.com/siyuan-note/siyuan/issues/4329)
+* [锚文本提及无法转换为引用](https://github.com/siyuan-note/siyuan/issues/4336)
+* [文档重命名不生效问题](https://github.com/siyuan-note/siyuan/issues/4339)
+* [iPad 端切换页签大纲不会跟随切换](https://github.com/siyuan-note/siyuan/issues/4340)
+* [新打开的块中选中内容后使用搜狗输入法输入，再撤销会状态异常](https://github.com/siyuan-note/siyuan/issues/4341)
+* [容器块在顶层内容删除后撤销导致状态异常](https://github.com/siyuan-note/siyuan/issues/4342)
+
 ## v1.9.2 / 2022-03-18
 
 ### 改进功能

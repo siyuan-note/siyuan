@@ -774,7 +774,7 @@
 
 ### 渲染模板
 
-/template/render
+/api/template/render
 
 ## 文件
 
@@ -800,7 +800,7 @@
 
     * `path`：工作空间路径下的文件路径
     * `isDir`：是否为创建文件夹，为 `true` 时仅创建文件夹，忽略 `file` 
-    * `modTime`：最近访问时间，Unix time
+    * `modTime`：最近访问和修改时间，Unix time
     * `file`：上传的文件
 * 返回值
 

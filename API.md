@@ -771,7 +771,43 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
 ### Render a template
 
-/template/render
+/api/template/render
+
+## File
+
+### Get file
+
+* `/api/file/getFile`
+* Parameters
+
+   ``json
+   {
+     "path": "/data/20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+   }
+   ``
+  * `path`: the file path under the workspace path
+* Return value
+
+  File content
+
+### Put file
+
+* `/api/file/putFile`
+* The parameter is an HTTP Multipart form
+
+  * `path`: the file path under the workspace path
+  * `isDir`: whether to create a folder, when `true` only create a folder, ignore `file`
+  * `modTime`: last access and modification time, Unix time
+  * `file`: the uploaded file
+* return value
+
+   ```json
+   {
+     "code": 0,
+     "msg": "",
+     "data": null
+   }
+   ```
 
 ## Export
 

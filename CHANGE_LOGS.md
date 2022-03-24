@@ -12,7 +12,7 @@
 
 ### 修复缺陷
 
-* [动态加载时   data-doc-type 错误](https://github.com/siyuan-note/siyuan/issues/4352)
+* [动态加载时 data-doc-type 错误](https://github.com/siyuan-note/siyuan/issues/4352)
 * [划选引用搜索时触发状态异常](https://github.com/siyuan-note/siyuan/issues/4353)
 * [仅包含一个单元格表头剪切后解析报错导致内核崩溃](https://github.com/siyuan-note/siyuan/issues/4354)
 * [Adnroid 端无法插入大的资源文件](https://github.com/siyuan-note/siyuan/issues/4357)

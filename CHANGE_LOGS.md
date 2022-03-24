@@ -1,3 +1,24 @@
+## v1.9.4 / 2022-03-24
+
+### 改进功能
+
+* [提供读写文件 API](https://github.com/siyuan-note/siyuan/issues/4343)
+* [代码块中间换行，高亮错误](https://github.com/siyuan-note/siyuan/issues/4356)
+* [文档重命名不阻塞](https://github.com/siyuan-note/siyuan/issues/4358)
+
+### 开发重构
+
+* [升级 Go 1.18](https://github.com/siyuan-note/siyuan/issues/4360)
+
+### 修复缺陷
+
+* [动态加载时   data-doc-type 错误](https://github.com/siyuan-note/siyuan/issues/4352)
+* [划选引用搜索时触发状态异常](https://github.com/siyuan-note/siyuan/issues/4353)
+* [仅包含一个单元格表头剪切后解析报错导致内核崩溃](https://github.com/siyuan-note/siyuan/issues/4354)
+* [Adnroid 端无法插入大的资源文件](https://github.com/siyuan-note/siyuan/issues/4357)
+* [折叠/展开标题撤销后状态不对](https://github.com/siyuan-note/siyuan/issues/4359)
+* [标题更改层级时出现 HTML](https://github.com/siyuan-note/siyuan/issues/4365)
+
 ## v1.9.3 / 2022-03-22
 
 ### 改进功能

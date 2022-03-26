@@ -205,6 +205,7 @@
 * [https://github.com/Xuanwo/go-locale](https://github.com/Xuanwo/go-locale) `Apache-2.0 License`
 * [https://github.com/araddon/dateparse](https://github.com/araddon/dateparse) `MIT License`
 * [https://github.com/common-nighthawk/go-figure](https://github.com/common-nighthawk/go-figure) `MIT License`
+* [https://github.com/dgraph-io/ristretto](https://github.com/dgraph-io/ristretto) `Apache-2.0 License`
 * [https://github.com/dustin/go-humanize](https://github.com/dustin/go-humanize) `MIT License`
 * [https://github.com/emirpasic/gods](https://github.com/emirpasic/gods) `BSD-2-Clause License`
 * [https://github.com/facette/natsort](https://github.com/facette/natsort) `BSD-3-Clause License`

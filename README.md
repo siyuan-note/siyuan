@@ -185,13 +185,13 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
 * [https://github.com/atotto/clipboard](https://github.com/atotto/clipboard) `BSD-3-Clause License`
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
-* [https://github.com/gofrs/flock](https://github.com/gofrs/flock) `BSD-3-Clause License`
+* [https://github.com/88250/flock](https://github.com/gofrs/flock) `BSD-3-Clause License`
 * [https://github.com/88250/gulu](https://github.com/88250/gulu) `Mulan PSL v2`
 * [https://github.com/88250/lute](https://github.com/88250/lute) `Mulan PSL v2`
 * [https://github.com/olahol/melody](https://github.com/olahol/melody) `BSD-2-Clause License`
 * [https://github.com/pdfcpu/pdfcpu](https://github.com/pdfcpu/pdfcpu) `Apache-2.0 License`
 * [https://github.com/88250/protyle](https://github.com/88250/protyle) `Mulan PSL v2`
-* [https://github.com/blastrain/vitess-sqlparser](https://github.com/blastrain/vitess-sqlparser) `Apache-2.0 License`
+* [https://github.com/88250/vitess-sqlparser](https://github.com/blastrain/vitess-sqlparser) `Apache-2.0 License`
 * [https://github.com/ConradIrwin/font](https://github.com/ConradIrwin/font) `MIT License`
 * [https://github.com/Masterminds/sprig](https://github.com/Masterminds/sprig) `MIT License`
 * [https://github.com/Xuanwo/go-locale](https://github.com/Xuanwo/go-locale) `Apache-2.0 License`
@@ -214,11 +214,8 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/mitchellh/go-ps](https://github.com/mitchellh/go-ps) `MIT License`
 * [https://github.com/mssola/user_agent](https://github.com/mssola/user_agent) `MIT License`
 * [https://github.com/panjf2000/ants](https://github.com/panjf2000/ants) `MIT License`
-* [https://github.com/patrickmn/go-cache](https://github.com/patrickmn/go-cache) `MIT License`
-* [https://github.com/pkg/sftp](https://github.com/pkg/sftp) `BSD-2-Clause License`
 * [https://github.com/siyuan-note/encryption](https://github.com/siyuan-note/encryption) `Mulan PSL v2`
 * [https://github.com/xrash/smetrics](https://github.com/xrash/smetrics) `MIT License`
-* [https://github.com/golang/crypto](https://github.com/golang/crypto) `BSD-3-Clause License`
 * [https://github.com/golang/image](https://github.com/golang/image) `BSD-3-Clause License`
 * [https://github.com/golang/mobile](https://github.com/golang/mobile) `BSD-3-Clause License`
 * [https://github.com/golang/text](https://github.com/golang/text) `BSD-3-Clause License`

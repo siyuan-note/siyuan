@@ -1,3 +1,46 @@
+## v1.9.5 / 2022-03-28
+
+### 改进功能
+
+* [预览图片时支持缩放和拖动视觉焦点位置](https://github.com/siyuan-note/siyuan/issues/2415)
+* [预览图片支持切换上一张和下一张](https://github.com/siyuan-note/siyuan/issues/4223)
+* [左右侧栏面板最小宽度限制](https://github.com/siyuan-note/siyuan/issues/4373)
+* [订阅到期提醒](https://github.com/siyuan-note/siyuan/issues/4375)
+* [减少代码块行号渲染抖动问题](https://github.com/siyuan-note/siyuan/issues/4377)
+* [订阅到期后云端数据会被立即删除](https://github.com/siyuan-note/siyuan/issues/4379)
+* [改进集市稳定性](https://github.com/siyuan-note/siyuan/issues/4381)
+* [改进云端同步性能](https://github.com/siyuan-note/siyuan/issues/4383)
+* [不允许在段首的块引用前进行软换行](https://github.com/siyuan-note/siyuan/issues/4386)
+* [Android 端通过通知栏返回应用](https://github.com/siyuan-note/siyuan/issues/4392)
+* [微信公众号编辑器无法抓取云端图床图片](https://github.com/siyuan-note/siyuan/issues/4396)
+* [升级 PDF 库](https://github.com/siyuan-note/siyuan/issues/4398)
+* [表格中全选为选中当前单元格](https://github.com/siyuan-note/siyuan/issues/4400)
+* [桌面端禁用硬件加速](https://github.com/siyuan-note/siyuan/issues/4405)
+* [反链面板图标在拖拽过程中不弹出悬浮层](https://github.com/siyuan-note/siyuan/issues/4407)
+
+### 开发重构
+
+* [更换内核使用的 HTTP 客户端库](https://github.com/siyuan-note/siyuan/issues/4380)
+* [更换内核使用的缓存库](https://github.com/siyuan-note/siyuan/issues/4385)
+
+### 修复缺陷
+
+* [网络图片转本地图片失败](https://github.com/siyuan-note/siyuan/issues/4159)
+* [行内公式渲染换行问题](https://github.com/siyuan-note/siyuan/issues/4334)
+* [大纲面板条目中无法显示多个空格](https://github.com/siyuan-note/siyuan/issues/4370)
+* [任务列表粘贴到表格中触发状态异常](https://github.com/siyuan-note/siyuan/issues/4371)
+* [重启后通过引用打开的页签不应该进行聚焦](https://github.com/siyuan-note/siyuan/issues/4378)
+* [从 VS Code 粘贴 HTML 时解析错误](https://github.com/siyuan-note/siyuan/issues/4382)
+* [中西文插入空格导致内核崩溃](https://github.com/siyuan-note/siyuan/issues/4384)
+* [Windows 端行级元素通过快捷键排版后输入中文撤销触发状态异常](https://github.com/siyuan-note/siyuan/issues/4388)
+* [引用列表块时动态锚文本未跟随定义块内容变动](https://github.com/siyuan-note/siyuan/issues/4393)
+* [iPad 端不能新建笔记本](https://github.com/siyuan-note/siyuan/issues/4395)
+* [导出 Word .docx 失败](https://github.com/siyuan-note/siyuan/issues/4397)
+* [任务列表内的块拖拽到其他笔记后原始位置无法输入](https://github.com/siyuan-note/siyuan/issues/4399)
+* [Ant 停靠栏图标在 Windows 端下无法显示](https://github.com/siyuan-note/siyuan/issues/4401)
+* [通过命名进行块引用时文本显示不同](https://github.com/siyuan-note/siyuan/issues/4402)
+* [API `appendBlock` 插入多块时顺序不正确](https://github.com/siyuan-note/siyuan/issues/4409)
+
 ## v1.9.4 / 2022-03-24
 
 ### 改进功能

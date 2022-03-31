@@ -1,3 +1,36 @@
+## v1.9.6 / 2022-03-31
+
+### 改进功能
+
+* [HTML 块将编辑代码的功能放到菜单中](https://github.com/siyuan-note/siyuan/issues/4276)
+* [嵌入块支持隐藏标题下方的块](https://github.com/siyuan-note/siyuan/issues/4404)
+* [减小 Android/iOS 端安装包大小](https://github.com/siyuan-note/siyuan/issues/4416)
+* [桌面端启用硬件加速](https://github.com/siyuan-note/siyuan/issues/4417)
+* [改进标题折叠后的视觉](https://github.com/siyuan-note/siyuan/issues/4418)
+* [剪切折叠标题后撤销，加载界面没有消失](https://github.com/siyuan-note/siyuan/issues/4420)
+* [点击块标弹出菜单后，无法通过快捷键的方式操作块](https://github.com/siyuan-note/siyuan/issues/4421)
+* [Microsoft Store 版支持 `siyuan://` 协议拉起应用](https://github.com/siyuan-note/siyuan/issues/4428)
+* [悬浮窗光标在编辑器左侧无法显示图标](https://github.com/siyuan-note/siyuan/issues/4433)
+* [改进云端同步和备份稳定性](https://github.com/siyuan-note/siyuan/issues/4436)
+* [页签钉住后不显示取消钉住按钮](https://github.com/siyuan-note/siyuan/issues/4437)
+* [反链提及转换为引用时使用动态锚文本](https://github.com/siyuan-note/siyuan/issues/4443)
+* [反链提及转换为引用后自动刷新反链面板](https://github.com/siyuan-note/siyuan/issues/4444)
+* [编辑器分屏视觉区隔](https://github.com/siyuan-note/siyuan/issues/4445)
+* [为当前选中的编辑器页签添加高亮显示](https://github.com/siyuan-note/siyuan/issues/4447)
+
+### 修复缺陷
+
+* [PDF 页签 Ctrl+F 和全局搜索冲突](https://github.com/siyuan-note/siyuan/issues/4324)
+* [默认折叠的块中代码块展开后不渲染行号](https://github.com/siyuan-note/siyuan/issues/4411)
+* [手动安装挂件包后挂件集市无法打开的问题](https://github.com/siyuan-note/siyuan/issues/4415)
+* [嵌入超级块时不应该展开其中的标题块](https://github.com/siyuan-note/siyuan/issues/4419)
+* [全选删除包含折叠标题，删除后快速输入触发状态异常](https://github.com/siyuan-note/siyuan/issues/4422)
+* [折叠标题后打开属性设置不显示](https://github.com/siyuan-note/siyuan/issues/4432)
+* [iframe 块的资源不支持 `//` 开头的 URL](https://github.com/siyuan-note/siyuan/issues/4434)
+* [部分同步报错未记录到日志文件中](https://github.com/siyuan-note/siyuan/issues/4435)
+* [升级 PDF 库后的一些问题](https://github.com/siyuan-note/siyuan/issues/4439)
+* [锚文本反链提及搜索不到问题](https://github.com/siyuan-note/siyuan/issues/4442)
+
 ## v1.9.5 / 2022-03-28
 
 ### 改进功能

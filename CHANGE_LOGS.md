@@ -1,3 +1,62 @@
+## v1.9.7 / 2022-04-07
+
+### 改进功能
+
+* [统计云端数据同步和备份使用的上传和下载流量](https://github.com/siyuan-note/siyuan/issues/4182)
+* [Docker 端支持网络代理选项](https://github.com/siyuan-note/siyuan/issues/4453)
+* [改进鼠标悬浮提示文字的位置](https://github.com/siyuan-note/siyuan/issues/4460)
+* [Docker 部署时如果没有设置 `--servePath` 参数则终止启动](https://github.com/siyuan-note/siyuan/issues/4463)
+* [改进云端同步和备份稳定性](https://github.com/siyuan-note/siyuan/issues/4464)
+* [搜索时 Ctrl+Enter 可打开新页签](https://github.com/siyuan-note/siyuan/issues/4492)
+* [改进搜索排序](https://github.com/siyuan-note/siyuan/issues/4493)
+* [移动端点击嵌入块直接跳转到正文](https://github.com/siyuan-note/siyuan/issues/4495)
+* [挂件块支持内置属性 `命名`、`别名` 和 `备注` 搜索](https://github.com/siyuan-note/siyuan/issues/4497)
+* [支持 HTML 块中使用 JavaScript](https://github.com/siyuan-note/siyuan/issues/4499)
+* [同步统计信息支持多语言](https://github.com/siyuan-note/siyuan/issues/4502)
+* [为复制嵌入块添加快捷键 Ctrl+Shift+E](https://github.com/siyuan-note/siyuan/issues/4505)
+* [Linux 端支持 URL Scheme `siyuan://`](https://github.com/siyuan-note/siyuan/issues/4513)
+* [移动端支持导出完整 data 文件夹 zip 压缩包](https://github.com/siyuan-note/siyuan/issues/4520)
+* [支持播放 .webm 视频文件](https://github.com/siyuan-note/siyuan/issues/4522)
+* [改进新建文档后的光标位置](https://github.com/siyuan-note/siyuan/issues/4524)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/4504)
+
+### 修复缺陷
+
+* [Alt+7 反链面板切换文档时没有触发刷新](https://github.com/siyuan-note/siyuan/issues/4414)
+* [输入 6 个反引号 ` 后解析问题](https://github.com/siyuan-note/siyuan/issues/4426)
+* [复制并粘贴 5 个反引号 ` 后点击触发状态异常](https://github.com/siyuan-note/siyuan/issues/4427)
+* [生成的用户指南笔记本在文档树中排序异常](https://github.com/siyuan-note/siyuan/issues/4449)
+* [带有输入框的 HTML 块每次输入一个字符就失焦](https://github.com/siyuan-note/siyuan/issues/4450)
+* [XSS 安全漏洞](https://github.com/siyuan-note/siyuan/issues/4451)
+* [非嵌入块的输入框中的 `隐藏标题下方的块` 开关未隐藏](https://github.com/siyuan-note/siyuan/issues/4454)
+* [调整表格宽度时鼠标拖拽状态保留异常](https://github.com/siyuan-note/siyuan/issues/4455)
+* [iPad 端块滑条无效](https://github.com/siyuan-note/siyuan/issues/4458)
+* [空代码块中输入 `[]` 时变为任务列表](https://github.com/siyuan-note/siyuan/issues/4461)
+* [划选后输入触发状态异常](https://github.com/siyuan-note/siyuan/issues/4465)
+* [视频块点击进度无效](https://github.com/siyuan-note/siyuan/issues/4466)
+* [点击动态加载条跳转到最后一个块后无法继续动态加载](https://github.com/siyuan-note/siyuan/issues/4467)
+* [列表块删除后再撤销操作出现内容位置异常](https://github.com/siyuan-note/siyuan/issues/4468)
+* [符号转义后无法被搜出](https://github.com/siyuan-note/siyuan/issues/4469)
+* [划选多块撤销后没有充分还原](https://github.com/siyuan-note/siyuan/issues/4473)
+* [点击大纲后再点击动态滚动条后，反链显示错误](https://github.com/siyuan-note/siyuan/issues/4475)
+* [集市中同时支持浅色与深色模式的主题无法在过滤结果中同时显示](https://github.com/siyuan-note/siyuan/issues/4476)
+* [标题和文档互转后大纲未刷新](https://github.com/siyuan-note/siyuan/issues/4477)
+* [点击大纲后双击正文，面包屑高亮错误](https://github.com/siyuan-note/siyuan/issues/4482)
+* [设置完属性后引用数会消失](https://github.com/siyuan-note/siyuan/issues/4485)
+* [标题转换文档后文档标题状态错误](https://github.com/siyuan-note/siyuan/issues/4487)
+* [折叠标题导出为模板后使用会出现内容重复](https://github.com/siyuan-note/siyuan/issues/4488)
+* [API `appendBlock` 插入多块时顺序不正确](https://github.com/siyuan-note/siyuan/issues/4498)
+* [焦点在表格中未能在文档树自动定位](https://github.com/siyuan-note/siyuan/issues/4500)
+* [启动后同步按钮悬浮未显示统计信息](https://github.com/siyuan-note/siyuan/issues/4501)
+* [移动无法搜索到新建的空笔记本](https://github.com/siyuan-note/siyuan/issues/4506)
+* [iPad 无法设置字号](https://github.com/siyuan-note/siyuan/issues/4507)
+* [关闭左侧分屏后重启会重置窗口布局](https://github.com/siyuan-note/siyuan/issues/4510)
+* [云端同步服务宕机时不应该导致内核崩溃](https://github.com/siyuan-note/siyuan/issues/4518)
+* [缩放后 F5 刷新文档会导致面包屑高亮错误](https://github.com/siyuan-note/siyuan/issues/4523)
+
 ## v1.9.6 / 2022-03-31
 
 ### 改进功能

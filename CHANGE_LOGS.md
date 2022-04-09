@@ -1,3 +1,35 @@
+## v1.9.8 / 2022-04-09
+
+### 改进功能
+
+* [支持查看和删除云端图床资源文件](https://github.com/siyuan-note/siyuan/issues/1674)
+* [改进列表折叠](https://github.com/siyuan-note/siyuan/issues/4496)
+* [集市 `preview.png` 图片预览不完整](https://github.com/siyuan-note/siyuan/issues/4512)
+* [支持代码块高亮语言 `bat`, `graphql`；新增 felipec，intellij-light，tokyo-night-dark，tokyo-night-light 主题](https://github.com/siyuan-note/siyuan/issues/4525)
+* [播放图片时会闪屏一次](https://github.com/siyuan-note/siyuan/issues/4529)
+* [数据库表 `blocks` 中的 `length` 字段按 `content` 长度取值](https://github.com/siyuan-note/siyuan/issues/4530)
+* [部分 Windows 端上卡顿的问题](https://github.com/siyuan-note/siyuan/issues/4533)
+* [列表样式改进](https://github.com/siyuan-note/siyuan/issues/4535)
+* [虚拟引用排除当前文档名](https://github.com/siyuan-note/siyuan/issues/4537)
+* [`((` 引用候选中排除当前块的父块](https://github.com/siyuan-note/siyuan/issues/4538)
+* [改进集市包预览图加载](https://github.com/siyuan-note/siyuan/issues/4540)
+* [桌面端主窗体背景色设置为 `#FFF`](https://github.com/siyuan-note/siyuan/issues/4544)
+* [改进搜索排序规则](https://github.com/siyuan-note/siyuan/issues/4546)
+* [搜索框的类型开关优化](https://github.com/siyuan-note/siyuan/issues/4548)
+
+### 开发重构
+
+* [降级 Electron](https://github.com/siyuan-note/siyuan/issues/4532)
+
+### 修复缺陷
+
+* [集市包偶尔显示不完全](https://github.com/siyuan-note/siyuan/issues/4521)
+* [鼠标右键单击段落中插入的自定义 `emojis` 时控制台输出异常](https://github.com/siyuan-note/siyuan/issues/4528)
+* [`((` 引用列表项时使用第一个子块作为动态锚文本](https://github.com/siyuan-note/siyuan/issues/4536)
+* [Ctrl+End 最后一个块无法加载](https://github.com/siyuan-note/siyuan/issues/4539)
+* [输入内容无法保存](https://github.com/siyuan-note/siyuan/issues/4541)
+* [查询嵌入块未禁止划选编辑](https://github.com/siyuan-note/siyuan/issues/4547)
+
 ## v1.9.7 / 2022-04-07
 
 ### 改进功能

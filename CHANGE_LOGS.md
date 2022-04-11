@@ -1,3 +1,24 @@
+## v1.9.9 / 2022-04-11
+
+### 改进功能
+
+* [反链提及转换为引用时支持选择静态锚文本](https://github.com/siyuan-note/siyuan/issues/4484)
+* [`((` 引用时容器块显示子块内容](https://github.com/siyuan-note/siyuan/issues/4555)
+* [`blocks` 表新增字段 `fcontent`](https://github.com/siyuan-note/siyuan/issues/4556)
+* [改进列表折叠](https://github.com/siyuan-note/siyuan/issues/4557)
+* [改进搜索排序规则](https://github.com/siyuan-note/siyuan/issues/4558)
+* [自定义块属性名过长时无法完整显示](https://github.com/siyuan-note/siyuan/issues/4559)
+* [移动面板路径全显示](https://github.com/siyuan-note/siyuan/issues/4564)
+
+### 修复缺陷
+
+* [空的行级元素删除后撤销触发状态异常](https://github.com/siyuan-note/siyuan/issues/4551)
+* [云端图床部分内容删不掉](https://github.com/siyuan-note/siyuan/issues/4553)
+* [调用模板 SQL 查询报错](https://github.com/siyuan-note/siyuan/issues/4554)
+* [导出嵌入块时报错](https://github.com/siyuan-note/siyuan/issues/4561)
+* [超级块和标题展开折叠出现问题](https://github.com/siyuan-note/siyuan/issues/4565)
+* [拖拽如触发滚动后将无法进行移动](https://github.com/siyuan-note/siyuan/issues/4566)
+
 ## v1.9.8 / 2022-04-09
 
 ### 改进功能

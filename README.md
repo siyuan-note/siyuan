@@ -95,7 +95,6 @@ To get the latest Insider Preview, please send an email with your GitHub login n
 ## 🏘️ Community
 
 * [Issues](https://github.com/siyuan-note/siyuan/issues)
-* [Discord](https://discord.gg/bzfCBwMzdP)
 
 ## ❓ FAQ
 

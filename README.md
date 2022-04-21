@@ -74,7 +74,7 @@ Cloud services require a paid subscription.
 * End-to-end encrypted data backup
 * Cloud assets serving
 * WeChat notification
-* Cloud inbox (TBD)
+* Cloud inbox
 
 ## 🗺️ Roadmap
 

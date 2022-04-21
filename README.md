@@ -205,7 +205,6 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/gin-contrib/sessions](https://github.com/gin-contrib/sessions) `MIT License`
 * [https://github.com/gin-gonic/gin](https://github.com/gin-gonic/gin) `MIT License`
 * [https://github.com/imroc/req](https://github.com/imroc/req) `MIT License`
-* [https://github.com/jackpal/gateway](https://github.com/jackpal/gateway) `BSD-3-Clause License`
 * [https://github.com/jinzhu/copier](https://github.com/jinzhu/copier) `MIT License`
 * [https://github.com/mattn/go-sqlite3](https://github.com/mattn/go-sqlite3) `MIT License`
 * [https://github.com/mattn/go-zglob](https://github.com/mattn/go-zglob) `MIT License`

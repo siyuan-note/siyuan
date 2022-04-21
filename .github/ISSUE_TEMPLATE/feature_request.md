@@ -3,7 +3,7 @@ name: ✨ 特性提议 Request new features
 about: 欢迎提出你所期待的新特性 Come up with the features you expect
 ---
 
-### 在什么情况下你需要该特性？ In what scenarios do you need this function?
+### 在什么情况下你需要该特性？ In what scenarios do you need this feature?
 
 <!--
 请尽量清晰地描述该特性的应用场景。

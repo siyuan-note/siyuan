@@ -1,3 +1,63 @@
+## v2.0.0 / 2022-04-22
+
+### 引入特性
+
+* [云端收集箱](https://github.com/siyuan-note/siyuan/issues/3718)
+* [全局搜索支持查询语法](https://github.com/siyuan-note/siyuan/issues/4610)
+
+### 改进功能
+
+* [结束早鸟订阅优惠](https://github.com/siyuan-note/siyuan/issues/4286)
+* [定义块引用计数浮窗高亮引用处锚文本](https://github.com/siyuan-note/siyuan/issues/4446)
+* [启用伺服时显示本机所有网卡的 IP](https://github.com/siyuan-note/siyuan/issues/4526)
+* [改进块引搜索排序规则](https://github.com/siyuan-note/siyuan/issues/4569)
+* [公式块悬浮窗在输入时会跳回默认位置](https://github.com/siyuan-note/siyuan/issues/4572)
+* [在 `DOM` 树中区分不同弹出搜索菜单](https://github.com/siyuan-note/siyuan/issues/4575)
+* [表格改进](https://github.com/siyuan-note/siyuan/issues/4586)
+* [支持使用 `* [ ]` 和 `* [x]` 创建任务列表](https://github.com/siyuan-note/siyuan/issues/4587)
+* [为订阅续订操作提供更醒目的提示对话框](https://github.com/siyuan-note/siyuan/issues/4589)
+* [网络代理支持 HTTP 协议](https://github.com/siyuan-note/siyuan/issues/4591)
+* [emoji 面板中鼠标移动不会影响上下键对表情的选择](https://github.com/siyuan-note/siyuan/issues/4597)
+* [增加反馈按钮](https://github.com/siyuan-note/siyuan/issues/4598)
+* [为思源协议链接添加 Alt/Shift/Ctrl+Click 事件](https://github.com/siyuan-note/siyuan/issues/4602)
+* [升级 KaTex 并调整其行间距](https://github.com/siyuan-note/siyuan/issues/4606)
+* [浮窗改进](https://github.com/siyuan-note/siyuan/issues/4607)
+* [代码块语法高亮支持  `yul`、`solidity` 和 `abap`](https://github.com/siyuan-note/siyuan/issues/4615)
+* [推荐订阅送终身会员活动附加结束时间条件](https://github.com/siyuan-note/siyuan/issues/4616)
+* [题头图上下调整使用百分比](https://github.com/siyuan-note/siyuan/issues/4626)
+* [当存在链接时打开链接面板光标应该在锚文本上](https://github.com/siyuan-note/siyuan/issues/4627)
+* [改进导出 Markdown 的请求端点](https://github.com/siyuan-note/siyuan/issues/4643)
+* [改进自定义表情图片的请求端点](https://github.com/siyuan-note/siyuan/issues/4644)
+* [改进静态资源请求端点](https://github.com/siyuan-note/siyuan/issues/4645)
+* [废弃内核参数 `--servePath`](https://github.com/siyuan-note/siyuan/issues/4647)
+* [选中图片后回车，应取消图片的选中状态](https://github.com/siyuan-note/siyuan/issues/4648)
+* [改进代码块行号自适应](https://github.com/siyuan-note/siyuan/issues/4651)
+* [下载集市包时展示进度](https://github.com/siyuan-note/siyuan/issues/4655)
+
+### 开发重构
+
+* [重制全局搜索](https://github.com/siyuan-note/siyuan/issues/4573)
+* [降级 Electron](https://github.com/siyuan-note/siyuan/issues/4594)
+
+### 修复缺陷
+
+* [Windows 端窗口异常问题](https://github.com/siyuan-note/siyuan/issues/4545)
+* [块引搜索条件为空时选择候选结果后没有创建块引](https://github.com/siyuan-note/siyuan/issues/4571)
+* [不含有子项的列表项在折叠同级之后，不应带有折叠标记](https://github.com/siyuan-note/siyuan/issues/4576)
+* [行级排版元素后软换行无法保存](https://github.com/siyuan-note/siyuan/issues/4583)
+* [某些情况下缺失 `updated` 属性](https://github.com/siyuan-note/siyuan/issues/4584)
+* [导出文档时未移除不支持的文件名符号](https://github.com/siyuan-note/siyuan/issues/4590)
+* [选中文字后中文输入时删除字母后无法撤销](https://github.com/siyuan-note/siyuan/issues/4604)
+* [行级公式 `$foo$1` 解析失败问题](https://github.com/siyuan-note/siyuan/issues/4605)
+* [代码块使用 `Tab` 缩进后渲染异常](https://github.com/siyuan-note/siyuan/issues/4609)
+* [合并过的表格无法在上方插入一行](https://github.com/siyuan-note/siyuan/issues/4613)
+* [列表项和标题转换为文档后反链异常](https://github.com/siyuan-note/siyuan/issues/4625)
+* [列表项-引述-列表-列表项 图标位置错误](https://github.com/siyuan-note/siyuan/issues/4631)
+* [列表回车跳出后撤销光标位置不对](https://github.com/siyuan-note/siyuan/issues/4632)
+* [Shift+Click 无法从下往上选](https://github.com/siyuan-note/siyuan/issues/4633)
+* [从浮窗三击全选复制内容粘贴后触发状态异常](https://github.com/siyuan-note/siyuan/issues/4636)
+* [PDF 标注浮窗引用重复](https://github.com/siyuan-note/siyuan/issues/4654)
+
 ## v1.9.9 / 2022-04-11
 
 ### 改进功能

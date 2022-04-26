@@ -1,3 +1,37 @@
+## v2.0.1 / 2022-04-26
+
+### 改进功能
+
+* [导出时支持导出题头图](https://github.com/siyuan-note/siyuan/issues/4372)
+* [公式块悬浮窗增加固定键](https://github.com/siyuan-note/siyuan/issues/4570)
+* [绘图更新机制改进](https://github.com/siyuan-note/siyuan/issues/4580)
+* [导出 PDF 时可选择不导出资源文件](https://github.com/siyuan-note/siyuan/issues/4649)
+* [当光标不在表格区域中时表格无法被复制](https://github.com/siyuan-note/siyuan/issues/4661)
+* [改进搜索过滤](https://github.com/siyuan-note/siyuan/issues/4663)
+* [导出 Markdown 时去除公式内容中的首尾空格](https://github.com/siyuan-note/siyuan/issues/4666)
+* [改进 `Ctrl+K` 超链接粘贴识别](https://github.com/siyuan-note/siyuan/issues/4669)
+* [使用 API `getFile` 时自动解锁文件](https://github.com/siyuan-note/siyuan/issues/4674)
+* [导出 PDF 文案改进及记录上一次选择](https://github.com/siyuan-note/siyuan/issues/4682)
+* [新的数据同步实现](https://github.com/siyuan-note/siyuan/issues/4687)
+* [全选块时弹出排版工具栏](https://github.com/siyuan-note/siyuan/issues/4688)
+* [块引搜索默认使用双引号包裹](https://github.com/siyuan-note/siyuan/issues/4689)
+* [提及搜索时纳入超链接锚文本](https://github.com/siyuan-note/siyuan/issues/4699)
+
+### 移除功能
+
+* [云端同步目录不再支持重命名](https://github.com/siyuan-note/siyuan/issues/4686)
+
+### 修复缺陷
+
+* [粘贴文本到带有输入框的 HTML 块后该块消失](https://github.com/siyuan-note/siyuan/issues/4600)
+* [文档标题图标与文档第一个块图标重叠](https://github.com/siyuan-note/siyuan/issues/4659)
+* [导出 PDF 未加载样式](https://github.com/siyuan-note/siyuan/issues/4665)
+* [标题展开时进行动态加载导致重复内容](https://github.com/siyuan-note/siyuan/issues/4671)
+* [搜狗输入法划选输入中文再撤销触发状态异常](https://github.com/siyuan-note/siyuan/issues/4672)
+* [新工作空间初次同步下载或备份恢复时可能出现的报错](https://github.com/siyuan-note/siyuan/issues/4685)
+* [跨块多选转换导致顺序错误](https://github.com/siyuan-note/siyuan/issues/4690)
+* [三个空块合并的超级块导出模版后使用会变成两个块](https://github.com/siyuan-note/siyuan/issues/4692)
+
 ## v2.0.0 / 2022-04-22
 
 ### 引入特性

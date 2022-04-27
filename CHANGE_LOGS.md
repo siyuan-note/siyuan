@@ -1,3 +1,18 @@
+## v2.0.2 / 2022-04-27
+
+### 改进功能
+
+* [桌面端支持导出完整 data 文件夹 zip 压缩包 ](https://github.com/siyuan-note/siyuan/issues/4696)
+* [导出时题头图放在文档标题前](https://github.com/siyuan-note/siyuan/issues/4708)
+
+### 修复缺陷
+
+* [旧版同步下载报错问题](https://github.com/siyuan-note/siyuan/issues/4701)
+* [新版同步上传报错问题](https://github.com/siyuan-note/siyuan/issues/4702)
+* [部分文档不能导出](https://github.com/siyuan-note/siyuan/issues/4704)
+* [部分网页无法使用收集箱剪藏问题](https://github.com/siyuan-note/siyuan/issues/4705)
+* [Windows 端悬浮菜单和顶部标题栏重合时无法点击](https://github.com/siyuan-note/siyuan/issues/4709)
+
 ## v2.0.1 / 2022-04-26
 
 ### 改进功能

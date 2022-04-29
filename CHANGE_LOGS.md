@@ -1,3 +1,34 @@
+## v2.0.3 / 2022-04-29
+
+### 改进功能
+
+* [支持块引和块超链接的相互转化](https://github.com/siyuan-note/siyuan/issues/4628)
+* [文档名支持搜索替换](https://github.com/siyuan-note/siyuan/issues/4667)
+* [HTML 块若内容为空时无法在数据库中查询到](https://github.com/siyuan-note/siyuan/issues/4691)
+* [外部修改已有资源文件后纳入云端同步](https://github.com/siyuan-note/siyuan/issues/4694)
+* [改进桌面端新版同步算法](https://github.com/siyuan-note/siyuan/issues/4700)
+* [全局搜索支持搜索自定义属性](https://github.com/siyuan-note/siyuan/issues/4711)
+* [收集箱剪藏失败时保留链接](https://github.com/siyuan-note/siyuan/issues/4713)
+* [剪藏扩展容错改进](https://github.com/siyuan-note/siyuan/issues/4716)
+* [收集箱公众号输入按日期合并](https://github.com/siyuan-note/siyuan/issues/4718)
+* [上架 OPPO 软件商店](https://github.com/siyuan-note/siyuan/issues/4719)
+* [引用块为折叠块时，点击应缩放进入该块](https://github.com/siyuan-note/siyuan/issues/4727)
+* [为订阅会员提供更快的集市包下载加速](https://github.com/siyuan-note/siyuan/issues/4728)
+* [代码块语言样式改进 & 移除复制按钮](https://github.com/siyuan-note/siyuan/issues/4730)
+* [ECharts 图表块将编辑代码的功能放到菜单中](https://github.com/siyuan-note/siyuan/issues/4732)
+* [改进块引搜索时空格分隔多关键字处理](https://github.com/siyuan-note/siyuan/issues/4735)
+
+### 修复缺陷
+
+* [新版同步云端目录无法删除](https://github.com/siyuan-note/siyuan/issues/4712)
+* [表格单元格中使用代码和 `|` 的问题](https://github.com/siyuan-note/siyuan/issues/4717)
+* [新版同步下载报错 404 问题](https://github.com/siyuan-note/siyuan/issues/4721)
+* [搜索折叠内容时面包屑显示错误](https://github.com/siyuan-note/siyuan/issues/4723)
+* [在文档首插入代码块后三击后退格会删除下一个相邻块的内容](https://github.com/siyuan-note/siyuan/issues/4726)
+* [引用文档时锚文本没有跟随文档重命名](https://github.com/siyuan-note/siyuan/issues/4731)
+* [某些情况下缺失 `updated` 属性](https://github.com/siyuan-note/siyuan/issues/4733)
+* [模板函数 `queryBlocks` 返回数量问题](https://github.com/siyuan-note/siyuan/issues/4734)
+
 ## v2.0.2 / 2022-04-27
 
 ### 改进功能

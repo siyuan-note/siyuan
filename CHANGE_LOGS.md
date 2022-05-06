@@ -1,3 +1,44 @@
+## v2.0.4 / 2022-05-06
+
+### 改进功能
+
+* [支持查看和回滚资源文件历史](https://github.com/siyuan-note/siyuan/issues/3544)
+* [代码块改进](https://github.com/siyuan-note/siyuan/issues/4737)
+* [搜索过滤支持自定义属性开关](https://github.com/siyuan-note/siyuan/issues/4738)
+* [搜索页签使用全文搜索实现](https://github.com/siyuan-note/siyuan/issues/4739)
+* [数据库表 `blocks` 新增字段 `tag`](https://github.com/siyuan-note/siyuan/issues/4740)
+* [搜索加入 ID 支持](https://github.com/siyuan-note/siyuan/issues/4741)
+* [当光标移动到图表等块上时统一显示编辑和菜单按钮，取消其点击事件](https://github.com/siyuan-note/siyuan/issues/4742)
+* [导入 Markdown 时避免所有块的 `created` 和 `updated` 一致](https://github.com/siyuan-note/siyuan/issues/4743)
+* [反链提及搜索使用全文搜索实现](https://github.com/siyuan-note/siyuan/issues/4745)
+* [统一历史数据存放位置为 `工作空间/history/`](https://github.com/siyuan-note/siyuan/issues/4750)
+* [备份恢复时生成历史](https://github.com/siyuan-note/siyuan/issues/4752)
+* [API 请求鉴权提示优化](https://github.com/siyuan-note/siyuan/issues/4753)
+* [Alt+H 不在编辑器中时无效](https://github.com/siyuan-note/siyuan/issues/4756)
+* [数据历史查看界面独立打开](https://github.com/siyuan-note/siyuan/issues/4764)
+* [全局搜索加入单独的查询语法选项](https://github.com/siyuan-note/siyuan/issues/4767)
+* [改进数据同步接口安全性](https://github.com/siyuan-note/siyuan/issues/4769)
+* [使用备份恢复时自动暂停同步](https://github.com/siyuan-note/siyuan/issues/4773)
+* [支持查看和回滚被删除的笔记本](https://github.com/siyuan-note/siyuan/issues/4775)
+* [改进收集箱剪藏稳定性](https://github.com/siyuan-note/siyuan/issues/4777)
+* [数据库 `content` 字段块级之间增加空格](https://github.com/siyuan-note/siyuan/issues/4780)
+* [集市挂件名称过长遮挡星标](https://github.com/siyuan-note/siyuan/issues/4782)
+* [为字体设置添加最近一次使用](https://github.com/siyuan-note/siyuan/issues/4792)
+
+### 修复缺陷
+
+* [使用 API `api/block/updateBlock` 更新列表项时渲染错误](https://github.com/siyuan-note/siyuan/issues/4658)
+* [无法在下划线左侧粘贴](https://github.com/siyuan-note/siyuan/issues/4729)
+* [搜索替换不支持包含符号的关键字](https://github.com/siyuan-note/siyuan/issues/4755)
+* [嵌入块包含折叠标题时不应该显示其下方块](https://github.com/siyuan-note/siyuan/issues/4765)
+* [到达文档树最大列出限制以后排序不正确](https://github.com/siyuan-note/siyuan/issues/4768)
+* [在资源文件很多的情况下 macOS 端启动异常](https://github.com/siyuan-note/siyuan/issues/4770)
+* [在行首输入 `$$` 数学公式无法渲染](https://github.com/siyuan-note/siyuan/issues/4774)
+* [文档关系图不显示](https://github.com/siyuan-note/siyuan/issues/4776)
+* [表格中行内公式使用下标时再次编辑时光标位置不对](https://github.com/siyuan-note/siyuan/issues/4784)
+* [任务列表中无法使用鼠标选中文字](https://github.com/siyuan-note/siyuan/issues/4787)
+* [文档转换标题时 block not found](https://github.com/siyuan-note/siyuan/issues/4791)
+
 ## v2.0.3 / 2022-04-29
 
 ### 改进功能

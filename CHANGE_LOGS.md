@@ -3,7 +3,7 @@
 ### 改进功能
 
 * [改进反链面板标题下方块展现判断](https://github.com/siyuan-note/siyuan/issues/3438)
-* [块引锚文本设置改进](https://github.com/siyuan-note/siyuan/issues/4793)
+* [改进块引设置](https://github.com/siyuan-note/siyuan/issues/4793)
 * [优化账号头像和背景图加载速度](https://github.com/siyuan-note/siyuan/issues/4801)
 * [浏览器端支持导出完整 data 文件夹 zip 压缩包](https://github.com/siyuan-note/siyuan/issues/4803)
 * [`Ctrl+F` 指定路径搜索加入 `包含子文档` 选项](https://github.com/siyuan-note/siyuan/issues/4805)

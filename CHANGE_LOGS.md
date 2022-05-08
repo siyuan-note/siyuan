@@ -1,3 +1,24 @@
+## v2.0.5 / 2022-05-08
+
+### 改进功能
+
+* [改进反链面板标题下方块展现判断](https://github.com/siyuan-note/siyuan/issues/3438)
+* [块引锚文本设置改进](https://github.com/siyuan-note/siyuan/issues/4793)
+* [优化账号头像和背景图加载速度](https://github.com/siyuan-note/siyuan/issues/4801)
+* [浏览器端支持导出完整 data 文件夹 zip 压缩包](https://github.com/siyuan-note/siyuan/issues/4803)
+* [`Ctrl+F` 指定路径搜索加入 `包含子文档` 选项](https://github.com/siyuan-note/siyuan/issues/4805)
+* [提升内核关闭速度](https://github.com/siyuan-note/siyuan/issues/4812)
+
+### 修复缺陷
+
+* [浏览器端锁屏后无法使用](https://github.com/siyuan-note/siyuan/issues/4794)
+* [列表开头使用自定义 emojis 失效](https://github.com/siyuan-note/siyuan/issues/4795)
+* [全局搜索时通过 ID 搜索不应该需要开启查询语法](https://github.com/siyuan-note/siyuan/issues/4796)
+* [`Alt+1` 文档树焦点不对](https://github.com/siyuan-note/siyuan/issues/4797)
+* [字体设置最近一次使用快捷键不对](https://github.com/siyuan-note/siyuan/issues/4799)
+* [从搜索打开时文档树未自动定位](https://github.com/siyuan-note/siyuan/issues/4800)
+* [块引排序问题](https://github.com/siyuan-note/siyuan/issues/4802)
+
 ## v2.0.4 / 2022-05-06
 
 ### 改进功能

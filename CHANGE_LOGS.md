@@ -1,3 +1,26 @@
+## v2.0.6 / 2022-05-10
+
+### 改进功能
+
+* [钉住的页签使用 Emoji 或标题的第一个字](https://github.com/siyuan-note/siyuan/issues/4588)
+* [文档树增加随机图标按钮](https://github.com/siyuan-note/siyuan/issues/4807)
+* [改进移动端/Docker 端新版同步算法](https://github.com/siyuan-note/siyuan/issues/4818)
+* [数据历史未展示最新的条目](https://github.com/siyuan-note/siyuan/issues/4820)
+* [在设置外观中切换模式导致闪烁](https://github.com/siyuan-note/siyuan/issues/4824)
+* [自动同步下载失败次数过多则调整同步间隔为 1 小时](https://github.com/siyuan-note/siyuan/issues/4827)
+* [标签元素错误结构订正](https://github.com/siyuan-note/siyuan/issues/4829)
+* [文档页签鼠标悬浮提示全路径](https://github.com/siyuan-note/siyuan/issues/4832)
+* [数据变动后 30 秒进行一次同步](https://github.com/siyuan-note/siyuan/issues/4833)
+* [桌面端同步加入快捷键 `F9`](https://github.com/siyuan-note/siyuan/issues/4834)
+* [为合并超级块添加图标](https://github.com/siyuan-note/siyuan/issues/4835)
+* [字体颜色添加多个最近使用](https://github.com/siyuan-note/siyuan/issues/4836)
+
+### 修复缺陷
+
+* [块标高亮无法自动消除](https://github.com/siyuan-note/siyuan/issues/4811)
+* [删除文档以后数据库中的数据没有删除](https://github.com/siyuan-note/siyuan/issues/4819)
+* [SQL 不支持字符串拼接操作](https://github.com/siyuan-note/siyuan/issues/4825)
+
 ## v2.0.5 / 2022-05-08
 
 ### 改进功能

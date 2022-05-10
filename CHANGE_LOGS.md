@@ -1,3 +1,16 @@
+## v2.0.7 / 2022-05-10
+
+### 改进功能
+
+* [钉住页签改进](https://github.com/siyuan-note/siyuan/issues/4839)
+* [移动搜索带关键字时过滤笔记本](https://github.com/siyuan-note/siyuan/issues/4840)
+* [文档修改时间展示使用 `updated` 属性](https://github.com/siyuan-note/siyuan/issues/4842)
+
+### 修复缺陷
+
+* [启动闪退](https://github.com/siyuan-note/siyuan/issues/4838)
+* [全局搜索无法弹出](https://github.com/siyuan-note/siyuan/issues/4841)
+
 ## v2.0.6 / 2022-05-10
 
 ### 改进功能

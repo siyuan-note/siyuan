@@ -194,6 +194,7 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/Xuanwo/go-locale](https://github.com/Xuanwo/go-locale) `Apache-2.0 License`
 * [https://github.com/araddon/dateparse](https://github.com/araddon/dateparse) `MIT License`
 * [https://github.com/common-nighthawk/go-figure](https://github.com/common-nighthawk/go-figure) `MIT License`
+* [https://github.com/denisbrodbeck/machineid](https://github.com/denisbrodbeck/machineid) `MIT License`
 * [https://github.com/dgraph-io/ristretto](https://github.com/dgraph-io/ristretto) `Apache-2.0 License`
 * [https://github.com/dustin/go-humanize](https://github.com/dustin/go-humanize) `MIT License`
 * [https://github.com/emirpasic/gods](https://github.com/emirpasic/gods) `BSD-2-Clause License`
@@ -213,9 +214,6 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/panjf2000/ants](https://github.com/panjf2000/ants) `MIT License`
 * [https://github.com/siyuan-note/encryption](https://github.com/siyuan-note/encryption) `Mulan PSL v2`
 * [https://github.com/xrash/smetrics](https://github.com/xrash/smetrics) `MIT License`
-* [https://github.com/golang/image](https://github.com/golang/image) `BSD-3-Clause License`
-* [https://github.com/golang/mobile](https://github.com/golang/mobile) `BSD-3-Clause License`
-* [https://github.com/golang/text](https://github.com/golang/text) `BSD-3-Clause License`
 * [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`
 * [https://github.com/electron/electron](https://github.com/electron/electron) `MIT License`
 * [https://github.com/Vanessa219/vditor](https://github.com/Vanessa219/vditor) `MIT License`

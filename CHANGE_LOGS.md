@@ -1,3 +1,33 @@
+## v2.0.8 / 2022-05-12
+
+### 改进功能
+
+* [块图标竖项排列时进行倒序](https://github.com/siyuan-note/siyuan/issues/4374)
+* [下线旧版云端同步服务](https://github.com/siyuan-note/siyuan/issues/4749)
+* [外观菜单修改为横排](https://github.com/siyuan-note/siyuan/issues/4757)
+* [调整启动/退出时云端同步网络连接超时为 15s](https://github.com/siyuan-note/siyuan/issues/4847)
+* [修改用户协议](https://github.com/siyuan-note/siyuan/issues/4849)
+* [支持导入 Data 压缩包](https://github.com/siyuan-note/siyuan/issues/4850)
+* [改进桌面端获取系统 ID 方式](https://github.com/siyuan-note/siyuan/issues/4851)
+* [为超级块添加快捷键](https://github.com/siyuan-note/siyuan/issues/4853)
+* [取消提示浮层移除延时](https://github.com/siyuan-note/siyuan/issues/4854)
+* [云端同步接口使用 `443` 端口](https://github.com/siyuan-note/siyuan/issues/4862)
+* [默认主题微调](https://github.com/siyuan-note/siyuan/issues/4869)
+* [改进集市界面加载速度](https://github.com/siyuan-note/siyuan/issues/4873)
+* [聚焦返回后定位到当前块](https://github.com/siyuan-note/siyuan/issues/4874)
+
+### 开发重构
+
+* [缓存引用元素](https://github.com/siyuan-note/siyuan/issues/4861)
+
+### 修复缺陷
+
+* [macOS/iOS 端监听资源文件报错导致启动卡住的问题](https://github.com/siyuan-note/siyuan/issues/4855)
+* [Android 移动端导出 Data 未弹出下载](https://github.com/siyuan-note/siyuan/issues/4856)
+* [嵌入块 SQL `LIMIT` 失效](https://github.com/siyuan-note/siyuan/issues/4858)
+* [插入引用后立即修改定义块后引用锚文本未变化](https://github.com/siyuan-note/siyuan/issues/4859)
+* [跨文档拖动列表项块后源文档状态异常](https://github.com/siyuan-note/siyuan/issues/4863)
+
 ## v2.0.7 / 2022-05-10
 
 ### 改进功能

@@ -1,3 +1,38 @@
+## v2.0.9 / 2022-05-16
+
+### 改进功能
+
+* [订阅激活码](https://github.com/siyuan-note/siyuan/issues/3117)
+* [集市包增加下载数量统计](https://github.com/siyuan-note/siyuan/issues/4845)
+* [集市包支持按下载数量排序](https://github.com/siyuan-note/siyuan/issues/4846)
+* [块超链接光标定位](https://github.com/siyuan-note/siyuan/issues/4871)
+* [结束推荐订阅送终身会员活动](https://github.com/siyuan-note/siyuan/issues/4872)
+* [更换默认的笔记本图标](https://github.com/siyuan-note/siyuan/issues/4881)
+* [云端同步传输数据使用 HTTPS](https://github.com/siyuan-note/siyuan/issues/4887)
+* [回滚文档数据时保持原路径](https://github.com/siyuan-note/siyuan/issues/4890)
+* [改进数据历史文档页签选择笔记本入口](https://github.com/siyuan-note/siyuan/issues/4891)
+* [代码块横向滚动问题](https://github.com/siyuan-note/siyuan/issues/4903)
+* [优化开启同步时的启动速度](https://github.com/siyuan-note/siyuan/issues/4904)
+* [默认主题优化](https://github.com/siyuan-note/siyuan/issues/4910)
+* [列表项聚焦返回和面包屑保持一致](https://github.com/siyuan-note/siyuan/issues/4914)
+
+### 开发重构
+
+* [块树索引加入 `HPath` 字段](https://github.com/siyuan-note/siyuan/issues/4898)
+
+### 修复缺陷
+
+* [块标纵向排列以后折叠小三角失效](https://github.com/siyuan-note/siyuan/issues/4876)
+* [删除文档图标后默认图标不正确](https://github.com/siyuan-note/siyuan/issues/4879)
+* [聚焦返回问题](https://github.com/siyuan-note/siyuan/issues/4882)
+* [文档页签标题被 Emoji 覆盖](https://github.com/siyuan-note/siyuan/issues/4883)
+* [API  `/api/block/updateBlock` 更新文档块为空的问题](https://github.com/siyuan-note/siyuan/issues/4884)
+* [重命名文档动态锚文本未跟随](https://github.com/siyuan-note/siyuan/issues/4893)
+* [创建日记问题](https://github.com/siyuan-note/siyuan/issues/4896)
+* [移动端无法保存书签属性](https://github.com/siyuan-note/siyuan/issues/4899)
+* [下载恢复备份问题](https://github.com/siyuan-note/siyuan/issues/4908)
+* [同步过程中断导致的一致性问题](https://github.com/siyuan-note/siyuan/issues/4912)
+
 ## v2.0.8 / 2022-05-12
 
 ### 改进功能

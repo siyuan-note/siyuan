@@ -199,7 +199,6 @@
 * [https://github.com/88250/vitess-sqlparser](https://github.com/blastrain/vitess-sqlparser) `Apache-2.0 License`
 * [https://github.com/ConradIrwin/font](https://github.com/ConradIrwin/font) `MIT License`
 * [https://github.com/Masterminds/sprig](https://github.com/Masterminds/sprig) `MIT License`
-* [https://github.com/Xuanwo/go-locale](https://github.com/Xuanwo/go-locale) `Apache-2.0 License`
 * [https://github.com/araddon/dateparse](https://github.com/araddon/dateparse) `MIT License`
 * [https://github.com/common-nighthawk/go-figure](https://github.com/common-nighthawk/go-figure) `MIT License`
 * [https://github.com/denisbrodbeck/machineid](https://github.com/denisbrodbeck/machineid) `MIT License`

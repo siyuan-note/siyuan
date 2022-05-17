@@ -46,7 +46,7 @@ body:
         - Browser (if used):
       render: markdown
     validations:
-      required: false
+      required: true
   - type: textarea
     attributes:
       label: 日志文件 Log file

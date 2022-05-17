@@ -1,6 +1,6 @@
 name: 🐛 缺陷报告 Bug Report
 description: 报告缺陷以帮助我们进行改进 Report defects to help us improve
-title: "[BUG] <title>"
+title: "请输入问题报告标题 Please enter the title of the bug report"
 body:
   - type: checkboxes
     attributes:

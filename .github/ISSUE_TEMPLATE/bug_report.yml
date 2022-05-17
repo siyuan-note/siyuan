@@ -24,13 +24,17 @@ body:
   - type: textarea
     attributes:
       label: 期待的结果 Expected result
-      description: 请尽量清晰地描述你所期待的结果。\nPlease be as clear and accurate as possible to describe the results you are looking for.
+      description: |
+        请尽量清晰地描述你所期待的结果。
+        Please be as clear and accurate as possible to describe the results you are looking for.
     validations:
       required: true
   - type: textarea
     attributes:
       label: 截屏或者录屏演示 Screenshot or screen recording presentation
-      description: 请通过截屏或者录屏演示你碰到的问题。\nPlease try to attach screenshots or videos to describe the problem you are experiencing.
+      description: |
+        请通过截屏或者录屏演示你碰到的问题。
+        Please try to attach screenshots or videos to describe the problem you are experiencing.
     validations:
       required: false
   - type: textarea
@@ -46,12 +50,16 @@ body:
   - type: textarea
     attributes:
       label: 日志文件 Log file
-      description: 请提供内核日志 `工作空间/temp/siyuan.log`\nThe program log file is located at `workspace/temp/siyuan.log`
+      description: |
+        请提供内核日志 `工作空间/temp/siyuan.log`
+        The program log file is located at `workspace/temp/siyuan.log`
     validations:
       required: true
   - type: textarea
     attributes:
       label: 更多信息 More information
-      description: 请提供任何附加信息，以帮助我们更好地定位问题。\nPlease provide other additional information to help us diagnose the problem.
+      description: |
+        请提供任何附加信息，以帮助我们更好地定位问题。
+        Please provide other additional information to help us diagnose the problem.
     validations:
       required: false

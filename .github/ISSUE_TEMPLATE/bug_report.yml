@@ -5,14 +5,20 @@ body:
   - type: checkboxes
     attributes:
       label: 该问题是否已经被报告过了？ Is there an existing issue for this?
-      description: 请搜索以查看你遇到的问题是否已经被报告过。Please search to see if an issue already exists for the bug you encountered.
+      description: |
+        请搜索以查看你遇到的问题是否已经被报告过。
+        Please search to see if an issue already exists for the bug you encountered.
       options:
-        - label: 我已经搜索了 Issues，没有发现类似问题 I have searched the existing issues
+        - label: |
+            我已经搜索了 Issues，没有发现类似问题 
+            I have searched the existing issues
           required: true
   - type: textarea
     attributes:
       label: 描述问题 Describe the problem
-      description: 请尽量清晰地描述你遇到的问题，并确认能够在默认主题下重现该问题。\nPlease describe the problem you are experiencing as clearly as possible and confirm that you can reproduce the problem with the default theme.
+      description: |
+        请尽量清晰地描述你遇到的问题，并确认能够在默认主题下重现该问题。
+        Please describe the problem you are experiencing as clearly as possible and confirm that you can reproduce the problem with the default theme.
     validations:
       required: true
   - type: textarea

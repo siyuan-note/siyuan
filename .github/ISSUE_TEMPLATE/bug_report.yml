@@ -30,8 +30,7 @@ body:
   - type: textarea
     attributes:
       label: 版本环境 Version environment
-      description: |
-        examples:
+      placeholder: |
           - Version: 
           - Operating System: 
           - Browser (if used):

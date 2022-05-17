@@ -30,10 +30,10 @@ body:
   - type: textarea
     attributes:
       label: 版本环境 Version environment
-      placeholder: |
-          - Version: 
-          - Operating System: 
-          - Browser (if used):
+      value: |
+        - Version: 
+        - Operating System: 
+        - Browser (if used):
       render: markdown
     validations:
       required: false

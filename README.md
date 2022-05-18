@@ -188,7 +188,7 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/olahol/melody](https://github.com/olahol/melody) `BSD-2-Clause License`
 * [https://github.com/pdfcpu/pdfcpu](https://github.com/pdfcpu/pdfcpu) `Apache-2.0 License`
 * [https://github.com/88250/protyle](https://github.com/88250/protyle) `Mulan PSL v2`
-* [https://github.com/88250/vitess-sqlparser](https://github.com/blastrain/vitess-sqlparser) `Apache-2.0 License`
+* [https://github.com/blastrain/vitess-sqlparser](https://github.com/blastrain/vitess-sqlparser) `Apache-2.0 License`
 * [https://github.com/ConradIrwin/font](https://github.com/ConradIrwin/font) `MIT License`
 * [https://github.com/Masterminds/sprig](https://github.com/Masterminds/sprig) `MIT License`
 * [https://github.com/araddon/dateparse](https://github.com/araddon/dateparse) `MIT License`

@@ -1,3 +1,16 @@
+## v2.0.11 / 2022-05-19
+
+### 改进功能
+
+* [记住集市的排序状态](https://github.com/siyuan-note/siyuan/issues/4928)
+
+### 修复缺陷
+
+* [OPPO 移动端上超链接无法打开浏览器](https://github.com/siyuan-note/siyuan/issues/4751)
+* [桌面端初次安装向导选择工作空间报错](https://github.com/siyuan-note/siyuan/issues/4946)
+* [iOS 端导出 Data 无法下载](https://github.com/siyuan-note/siyuan/issues/4948)
+* [iOS 端关于页未显示 IP 地址](https://github.com/siyuan-note/siyuan/issues/4949)
+
 ## v2.0.10 / 2022-05-19
 
 ### 改进功能

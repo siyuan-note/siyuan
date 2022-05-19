@@ -1,3 +1,31 @@
+## v2.0.10 / 2022-05-19
+
+### 改进功能
+
+* [桌面端初次安装启动后向导](https://github.com/siyuan-note/siyuan/issues/4900)
+* [`---` 插入分隔线后如果下方已经存在块则不生成空白段落](https://github.com/siyuan-note/siyuan/issues/4906)
+* [通过链滴系统通知发放终身会员激活码](https://github.com/siyuan-note/siyuan/issues/4909)
+* [子块的宽度不够填满超级块时无法调整超级块的整体布局](https://github.com/siyuan-note/siyuan/issues/4915)
+* [大纲点击折叠标题跳转聚焦](https://github.com/siyuan-note/siyuan/issues/4920)
+* [文档第一个块为包含嵌入块的列表时下上键无法在文档标题和第一个块之间切换](https://github.com/siyuan-note/siyuan/issues/4923)
+* [优化新版主题头部及 Windows 端关闭按钮](https://github.com/siyuan-note/siyuan/issues/4924)
+* [改进集市包更新版本对比](https://github.com/siyuan-note/siyuan/issues/4925)
+* [内核启动参数加入 `lang`](https://github.com/siyuan-note/siyuan/issues/4929)
+* [使用快捷键调出颜色面板](https://github.com/siyuan-note/siyuan/issues/4935)
+* [改进云端同步 404 问题](https://github.com/siyuan-note/siyuan/issues/4940)
+* [云端同步初始化默认 `main` 目录](https://github.com/siyuan-note/siyuan/issues/4943)
+
+### 修复缺陷
+
+* [导出 `段落开头空两格` 失效](https://github.com/siyuan-note/siyuan/issues/4917)
+* [引述块下删除列表触发状态异常](https://github.com/siyuan-note/siyuan/issues/4918)
+* [头部为列表时上键光标会跳到标题位置](https://github.com/siyuan-note/siyuan/issues/4922)
+* [API `appendBlock` 插入渲染重复](https://github.com/siyuan-note/siyuan/issues/4926)
+* [大纲点击产生动态加载后 `data-doc-type` 错误](https://github.com/siyuan-note/siyuan/issues/4938)
+* [同步后文档树文档图标没有更新](https://github.com/siyuan-note/siyuan/issues/4939)
+* [编辑器和标题中 `Alt+5` 会留下字符](https://github.com/siyuan-note/siyuan/issues/4941)
+* [云端同步偶尔报错 `The system cannot find the path specified.`](https://github.com/siyuan-note/siyuan/issues/4942)
+
 ## v2.0.9 / 2022-05-16
 
 ### 改进功能

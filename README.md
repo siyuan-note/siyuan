@@ -18,9 +18,9 @@ Build Your Eternal Digital Garden
 SiYuan is a local-first personal knowledge management system, support fine-grained block-level reference and Markdown
 WYSIWYG.
 
-![feature0.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@aa842a59b28a873dcc999fb63eaeafb4158c02d3/screenshots/feature0.png)
+![feature0.png](https://b3logfile.com/file/2022/05/feature0-a82bdd3f.png)
 
-![feature1-1.png](https://cdn.jsdelivr.net/gh/siyuan-note/siyuan@aa842a59b28a873dcc999fb63eaeafb4158c02d3/screenshots/feature1-1.png)
+![feature1-1.png](https://b3logfile.com/file/2022/05/feature1-1-740d9a02.png)
 
 ## ✨ Features
 
@@ -127,7 +127,7 @@ To simplify, it is recommended to configure the workspace folder path to be cons
 
 #### User permissions
 
-In the image, the normal user `siyuan` (uid 1000/gid 1000) created by default is used to start the kernel process. Therefore, when the host creates a workspace folder, please pay attention to setting the user group of the folder:  `chown - R 1000:1000 /siyuan/workspace`. The parameter `-u 1000:1000` is required when starting the container.
+In the image, the normal user `siyuan` (uid 1000/gid 1000) created by default is used to start the kernel process. Therefore, when the host creates a workspace folder, please pay attention to setting the user group of the folder:  `chown -R 1000:1000 /siyuan/workspace`. The parameter `-u 1000:1000` is required when starting the container.
 
 #### Hidden port
 

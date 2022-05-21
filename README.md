@@ -87,7 +87,6 @@ It is recommended to give priority to installing through the application market 
 
 ### App Market
 
-* [Docker](https://hub.docker.com/r/b3log/siyuan)
 * [App Store](https://apps.apple.com/us/app/siyuan/id1583226508)
 * [Google Play](https://play.google.com/store/apps/details?id=org.b3log.siyuan)
 * [Microsoft Store](https://www.microsoft.com/store/apps/9P7HPMXP73K4)

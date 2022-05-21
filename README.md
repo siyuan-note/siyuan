@@ -125,11 +125,11 @@ More parameters can refer to `--help`. The following is an example of a startup 
 
 To simplify, it is recommended to configure the workspace folder path to be consistent on the host and container, such as: `workspace_dir_host` and `workspace_dir_container` are configured as `/siyuan/workspace`, the corresponding startup commands is: `docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/`.
 
-## User permissions
+#### User permissions
 
 In the image, the normal user `siyuan` (uid 1000/gid 1000) created by default is used to start the kernel process. Therefore, when the host creates a workspace folder, please pay attention to setting the user group of the folder:  `chown - R 1000:1000 /siyuan/workspace`. The parameter `-u 1000:1000` is required when starting the container.
 
-## Hidden port
+#### Hidden port
 
 Use NGINX reverse proxy to hide port 6806, please note:
 

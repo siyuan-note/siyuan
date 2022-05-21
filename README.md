@@ -83,12 +83,67 @@ Cloud services require a paid subscription.
 
 ## 🛠️ Download Setup
 
-* [B3log](https://b3log.org/siyuan/en/download.html)
-* [GitHub](https://github.com/siyuan-note/siyuan/releases)
+It is recommended to give priority to installing through the application market on the desktop and mobile, so that you can upgrade the version with one click in the future.
+
+### App Market
+
 * [Docker](https://hub.docker.com/r/b3log/siyuan)
 * [App Store](https://apps.apple.com/us/app/siyuan/id1583226508)
 * [Google Play](https://play.google.com/store/apps/details?id=org.b3log.siyuan)
 * [Microsoft Store](https://www.microsoft.com/store/apps/9P7HPMXP73K4)
+
+### Docker Hosting
+
+<details>
+<summary>Docker Deployment</summary>
+
+#### Overview
+
+The easiest way to serve SiYuan on a server is to deploy it through Docker.
+
+* Image name `b3log/siyuan`
+* [Image URL](https://hub.docker.com/r/b3log/siyuan)
+
+#### File structure
+
+The overall program is located under `/opt/siyuan/`, which is basically the structure under the resources folder of the Electron installation package:
+
+* appearance: icon, theme, languages
+* guide: user guide document
+* stage: interface and static resources
+* kernel: kernel program
+
+#### Entrypoint
+
+The entry point is set when building the Docker image: `ENTRYPOINT ["/opt/siyuan/kernel" ]`, use `docker run b3log/siyuan` with parameters to start:
+
+* `--workspace` specifies the workspace folder path, mounted to the container via `-v` on the host
+
+More parameters can refer to `--help`. The following is an example of a startup command: `docker run -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container`
+
+* `workspace_dir_host`: the workspace folder path on the host
+* `workspace_dir_container`: The path of the workspace folder in the container, which is the same as specified in `--workspace`
+
+To simplify, it is recommended to configure the workspace folder path to be consistent on the host and container, such as: `workspace_dir_host` and `workspace_dir_container` are configured as `/siyuan/workspace`, the corresponding startup commands is: `docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/`.
+
+## User permissions
+
+In the image, the normal user `siyuan` (uid 1000/gid 1000) created by default is used to start the kernel process. Therefore, when the host creates a workspace folder, please pay attention to setting the user group of the folder:  `chown - R 1000:1000 /siyuan/workspace`. The parameter `-u 1000:1000` is required when starting the container.
+
+## Hidden port
+
+Use NGINX reverse proxy to hide port 6806, please note:
+
+* Configure WebSocket reverse proxy `/ws`
+
+</details>
+
+### Installation Package
+
+* [B3log](https://b3log.org/siyuan/en/download.html)
+* [GitHub](https://github.com/siyuan-note/siyuan/releases)
+
+### Insider Preview
 
 To get the latest Insider Preview, please send an email with your GitHub login name to 845765@qq.com, and we will invite you to join the SiYuan Insider Preview team, thanks.
 

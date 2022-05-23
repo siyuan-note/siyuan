@@ -1,3 +1,41 @@
+## v2.0.12 / 2022-05-23
+
+### 改进功能
+
+* [面包屑改进：`Click` 为聚焦，聚焦返回文案修改](https://github.com/siyuan-note/siyuan/issues/4916)
+* [搜索页签和全局搜索支持 `Alt+Click` 打开分屏](https://github.com/siyuan-note/siyuan/issues/4953)
+* [改进启动报错窗口](https://github.com/siyuan-note/siyuan/issues/4957)
+* [支持导入文档数据包 `.sy.zip`](https://github.com/siyuan-note/siyuan/issues/4961)
+* [对选中的单元格支持清除内容](https://github.com/siyuan-note/siyuan/issues/4964)
+* [支持导出文档数据包 `.sy.zip`](https://github.com/siyuan-note/siyuan/issues/4965)
+* [选中图片后支持 `Ctrl+X` 和 `Ctrl+C`](https://github.com/siyuan-note/siyuan/issues/4974)
+* [大幅提升启动速度](https://github.com/siyuan-note/siyuan/issues/4975)
+* [iOS 端根据系统语言初始化外观语言](https://github.com/siyuan-note/siyuan/issues/4978)
+* [增强锚文本的键盘操作](https://github.com/siyuan-note/siyuan/issues/4979)
+* [在 PDF 标记和链接内可以使用 `Ctrl+/` 弹出对应的菜单](https://github.com/siyuan-note/siyuan/issues/4980)
+* [桌面端在系统睡眠和唤醒时进行一次数据同步](https://github.com/siyuan-note/siyuan/issues/4983)
+
+### 文档相关
+
+* [README 中增加 Docker 部署说明](https://github.com/siyuan-note/siyuan/issues/4972)
+
+### 移除功能
+
+* [移除 `退出界面时关闭内核` 选项](https://github.com/siyuan-note/siyuan/issues/4977)
+
+### 修复缺陷
+
+* [iOS 端图片保存到相册导致崩溃](https://github.com/siyuan-note/siyuan/issues/4930)
+* [`Alt+X` 选择状态问题](https://github.com/siyuan-note/siyuan/issues/4951)
+* [窗口拉窄后顶部工具栏消失](https://github.com/siyuan-note/siyuan/issues/4956)
+* [类型转换导致折叠标题下方块丢失](https://github.com/siyuan-note/siyuan/issues/4960)
+* [复制内容为空的块作为块引用时粘贴无效](https://github.com/siyuan-note/siyuan/issues/4962)
+* [列表项下图片删除后撤销触发状态异常](https://github.com/siyuan-note/siyuan/issues/4963)
+* [代码块未显示行号时切换语言界面错位](https://github.com/siyuan-note/siyuan/issues/4969)
+* [对已有颜色的文字添加不了背景](https://github.com/siyuan-note/siyuan/issues/4973)
+* [聚焦后折叠会触发重建索引](https://github.com/siyuan-note/siyuan/issues/4976)
+* [悬浮窗面包屑显示异常](https://github.com/siyuan-note/siyuan/issues/4982)
+
 ## v2.0.11 / 2022-05-19
 
 ### 改进功能

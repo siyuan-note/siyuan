@@ -1,3 +1,28 @@
+## v2.0.13 / 2022-05-25
+
+### 改进功能
+
+* [更新嵌入块内容不重新渲染嵌入块](https://github.com/siyuan-note/siyuan/issues/4958)
+* [更新主题后不需要对该主题进行切换](https://github.com/siyuan-note/siyuan/issues/4966)
+* [新开页签应置于当前激活页签的右侧](https://github.com/siyuan-note/siyuan/issues/4967)
+* [大纲面板移除顶层文档标题](https://github.com/siyuan-note/siyuan/issues/4988)
+* [面包屑鼠标悬浮文字显示不全](https://github.com/siyuan-note/siyuan/issues/4989)
+* [改进同步下载数据稳定性](https://github.com/siyuan-note/siyuan/issues/4994)
+* [笔记本配置文件丢失后重新生成名为 `Untitled` 的笔记本配置](https://github.com/siyuan-note/siyuan/issues/4995)
+* [局部关系图中添加文档链接关系](https://github.com/siyuan-note/siyuan/issues/4996)
+* [文档树引用计数不使用缓存](https://github.com/siyuan-note/siyuan/issues/5001)
+* [搜索页签和浮层路径长度最大调整](https://github.com/siyuan-note/siyuan/issues/5002)
+* [云端数据同步和备份时忽略隐藏文件](https://github.com/siyuan-note/siyuan/issues/5005)
+
+### 移除功能
+
+* [移除局部关系图 `层级` 参数](https://github.com/siyuan-note/siyuan/issues/5004)
+
+### 修复缺陷
+
+* [表格内粘贴 HTML 时异常](https://github.com/siyuan-note/siyuan/issues/4986)
+* [无法给整行文字设置样式，只能应用于行内部分文字](https://github.com/siyuan-note/siyuan/issues/4987)
+
 ## v2.0.12 / 2022-05-23
 
 ### 改进功能

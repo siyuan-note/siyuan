@@ -1,6 +1,4 @@
-<p align="center">
-<a href="https://github.com/siyuan-note/siyuan/blob/master/DEV.md">English</a>
-</p>
+[English](https://github.com/siyuan-note/siyuan/blob/master/DEV.md)
 
 ## 获取源码
 

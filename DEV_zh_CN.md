@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://github.com/siyuan-note/siyuan/blob/master/DEV_zh_CN.md">English</a>
+<a href="https://github.com/siyuan-note/siyuan/blob/master/DEV.md">English</a>
 </p>
 
 ## 获取源码

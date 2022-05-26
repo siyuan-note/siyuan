@@ -6,7 +6,7 @@
 		"id": "20200923234602-gy54e67",
 		"title": "Privacy Policy and User Agreement",
 		"type": "doc",
-		"updated": "20220526172141"
+		"updated": "20220526191417"
 	},
 	"Children": [
 		{
@@ -495,12 +495,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220526172045-j259gxu",
-				"updated": "20220526172048"
+				"updated": "20220526191417"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "For SiYuan cloud service, it is forbidden to share user accounts, otherwise the account may be deactivated."
+					"Data": "For SiYuan cloud service, it is forbidden to share user accounts, otherwise the account will be deactivated."
 				}
 			]
 		}

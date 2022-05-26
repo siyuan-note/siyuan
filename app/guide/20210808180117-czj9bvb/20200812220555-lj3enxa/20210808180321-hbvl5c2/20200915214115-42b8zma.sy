@@ -1,0 +1,606 @@
+{
+	"ID": "20200915214115-42b8zma",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200915214115-42b8zma",
+		"title": "资源文件",
+		"type": "doc",
+		"updated": "20220503121834"
+	},
+	"Children": [
+		{
+			"ID": "20210503095355-r83044o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210503095355-r83044o",
+				"updated": "20210503095726"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20210503095358-zr3uijl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210503095358-zr3uijl",
+				"updated": "20210615102655"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过编辑器插入的附件会被认为是资源文件，默认放置在工作空间 data/assets 文件夹下。"
+				}
+			]
+		},
+		{
+			"ID": "20201210194734-lr6v0s2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201210194734-lr6v0s2"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "插入图片"
+				}
+			]
+		},
+		{
+			"ID": "20210104091255-8s7avcx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091255-8s7avcx",
+				"updated": "20210503095618"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在编辑器中可以直接粘贴系统剪切板中复制好的图片，或者通过拖拽图片文件到编辑器中也可以实现图片插入。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091255-7fwvx7a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091255-7fwvx7a",
+				"updated": "20210615101500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果排版时指定了图片标题，则标题会被渲染在图片下方作为图注。"
+				}
+			]
+		},
+		{
+			"ID": "20210512171633-u3iy2xx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210512171633-u3iy2xx",
+				"updated": "20210604092212"
+			},
+			"Children": [
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Properties": {
+						"style": "display: block;"
+					},
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "siyuan-128.png"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/siyuan-128-20210604092205-djd749a.png"
+						},
+						{
+							"Type": "NodeLinkSpace"
+						},
+						{
+							"Type": "NodeLinkTitle",
+							"Data": "源于思考，饮水思源"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeKramdownSpanIAL",
+					"Data": "{: style=\"display: block;\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "\n"
+				}
+			]
+		},
+		{
+			"ID": "20210115222011-bzsftun",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210115222011-bzsftun"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "清理未引用资源"
+				}
+			]
+		},
+		{
+			"ID": "20210115222053-i62ppkz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210115222053-i62ppkz",
+				"updated": "20210503095856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "“引用”指的是通过超链接、插入图片或者 HTML 标签（例如 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "\u003cimg\u003e"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 、"
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "\u003ciframe\u003e"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）的属性 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "src"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 对资源文件进行链接。这里分为两种情况："
+				}
+			]
+		},
+		{
+			"ID": "20210115222514-tqfsawm",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46,
+				"Padding": 3,
+				"Marker": "MQ==",
+				"Num": 1
+			},
+			"Properties": {
+				"id": "20210115222514-tqfsawm"
+			},
+			"Children": [
+				{
+					"ID": "20210115222515-47r5lop",
+					"Type": "NodeListItem",
+					"Data": "1",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MQ==",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20210115222515-47r5lop"
+					},
+					"Children": [
+						{
+							"ID": "20210204172443-a8xpkb9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210204172443-a8xpkb9"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "引用具体的资源文件，比如图片或者文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210115222545-nilj84d",
+					"Type": "NodeListItem",
+					"Data": "2",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mg==",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20210115222545-nilj84d"
+					},
+					"Children": [
+						{
+							"ID": "20210204172443-zyll68d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210204172443-zyll68d"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "引用资源文件夹（在 assets 文件夹下的子文件夹），必须以 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"CodeMarkerLen": 1,
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker",
+											"Data": "`"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker",
+											"Data": "`"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 结尾，比如 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"CodeMarkerLen": 1,
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker",
+											"Data": "`"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "[foo](assets/bar/)"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker",
+											"Data": "`"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210115223119-4mzx5a8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210115223119-4mzx5a8"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "第二种情况比较特殊：一个资源文件夹如果被引用，则下面所有资源文件无论是否被单独引用，都会被算作已经引用。"
+				}
+			]
+		},
+		{
+			"ID": "20210115223610-ffnxstf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210115223610-ffnxstf",
+				"updated": "20210512160443"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "设置"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "资源"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可以一键清理未引用资源，如果需要找回被误删的文件，请通过"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20210104090742-hjfornp"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "回滚"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20210130103406-8jfbo6k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210130103406-8jfbo6k",
+				"updated": "20210512160659"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker",
+							"Data": "#"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker",
+							"Data": "#"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：使用绝对路径（本地路径或者是网络路径）不会纳入清理计算。"
+				}
+			]
+		},
+		{
+			"ID": "20210615102657-kampx8a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210615102657-kampx8a",
+				"updated": "20220503121605"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "笔记本级资源文件"
+				}
+			]
+		},
+		{
+			"ID": "20210615102703-7wghhgm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210615102703-7wghhgm",
+				"updated": "20210626153454"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要默认将插入的资源文件放置在文档同级 assets 文件夹下，则需要先手动创建名为 assets 的文件夹，这样思源会优先选择该 assets 文件夹来存放资源文件。"
+				}
+			]
+		},
+		{
+			"ID": "20220503120950-4e9vwxq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220503120950-4e9vwxq",
+				"updated": "20220503121613"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "建议尽量不要使用笔记本级资源文件，因为这会带来一些副作用："
+				}
+			]
+		},
+		{
+			"ID": "20220503121213-afjyt05",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220503121213-afjyt05",
+				"updated": "20220503121834"
+			},
+			"Children": [
+				{
+					"ID": "20220503121214-haxyvyt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220503121214-haxyvyt",
+						"updated": "20220503121401"
+					},
+					"Children": [
+						{
+							"ID": "20220503121214-cmqtvby",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220503121214-cmqtvby",
+								"updated": "20220503121401"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "删除该笔记本时，为保证跨笔记本资源文件引用正常工作，该笔记本下的资源文件会被批量复制到全局 assets 中"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220503121359-3hqko22",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220503121359-3hqko22",
+						"updated": "20220503121834"
+					},
+					"Children": [
+						{
+							"ID": "20220503121359-amc47nl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220503121359-amc47nl",
+								"updated": "20220503121834"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持在数据历史中查看笔记本级资源文件历史"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

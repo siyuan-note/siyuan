@@ -1,0 +1,875 @@
+{
+	"ID": "20200813125307-pxsjela",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200813125307-pxsjela",
+		"title": "导入和导出",
+		"type": "doc",
+		"updated": "20220511190018"
+	},
+	"Children": [
+		{
+			"ID": "20201229120428-dgzkno8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201229120428-dgzkno8",
+				"updated": "20201229120428"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "导入"
+				}
+			]
+		},
+		{
+			"ID": "20220511184321-um53ppo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220511184321-um53ppo",
+				"updated": "20220511184328"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown"
+				}
+			]
+		},
+		{
+			"ID": "20210120161018-1mdw4fy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210120161018-1mdw4fy",
+				"updated": "20220511190018"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源支持导入 Markdown 文件。所以如果你需要导入其他笔记软件的数据，请先将数据转换为 Markdown 文件。"
+				}
+			]
+		},
+		{
+			"ID": "20220317221825-c0ydyo2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220317221825-c0ydyo2",
+				"updated": "20220317223800"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "导入时如果遇到形如 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "![foo](images/bar.png)"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 的图片语法（本地相对路径），则思源会将 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "images/bar.png"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 转换为"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20200915214115-42b8zma"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "资源文件"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。但是如果是 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": ".images/bar.png"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 则不会转换，因为 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "."
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 开头的路径文件属于隐藏文件，思源不会进行处理。"
+				}
+			]
+		},
+		{
+			"ID": "20220511184340-6w8o7kg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220511184340-6w8o7kg",
+				"updated": "20220511184359"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data"
+				}
+			]
+		},
+		{
+			"ID": "20220511184359-mea18d0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220511184359-mea18d0",
+				"updated": "20220511184938"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "设置 "
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "- "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "导出"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、移动端右侧栏 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "关于"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可以进行数据导入和导出。这里的导出会将 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "工作空间/data/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文件夹完整复制并打包为 zip 压缩包。"
+				}
+			]
+		},
+		{
+			"ID": "20220511184941-kxdmrtc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220511184941-kxdmrtc",
+				"updated": "20220511185824"
+			},
+			"Children": [
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "导入 Data"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 功能仅支持处理以上步骤导出的 Data 压缩包。导入按压缩包中的文件路径复制到当前 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "工作空间/data/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文件夹："
+				}
+			]
+		},
+		{
+			"ID": "20220511185356-4tsyhu8",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220511185356-4tsyhu8",
+				"updated": "20220511185914"
+			},
+			"Children": [
+				{
+					"ID": "20220511185357-fw8xf5g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220511185357-fw8xf5g",
+						"updated": "20220511185459"
+					},
+					"Children": [
+						{
+							"ID": "20220511185357-gp14zkk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220511185357-gp14zkk",
+								"updated": "20220511185459"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "重复的文件进行覆盖"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220511185359-3ygpkgm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220511185359-3ygpkgm",
+						"updated": "20220511185502"
+					},
+					"Children": [
+						{
+							"ID": "20220511185359-26rtw7w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220511185359-26rtw7w",
+								"updated": "20220511185502"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不存在的文件进行新增"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220511185425-lrj9vu4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220511185425-lrj9vu4",
+						"updated": "20220511185914"
+					},
+					"Children": [
+						{
+							"ID": "20220511185425-zhhh2s5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220511185425-zhhh2s5",
+								"updated": "20220511185914"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "已有的文件不做任何处理"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220511185359-zc5av9q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220511185359-zc5av9q",
+				"updated": "20220511185406"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：使用前请务必留意，避免已有数据被覆盖无法恢复。"
+				}
+			]
+		},
+		{
+			"ID": "20201229120428-9k34lga",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201229120428-9k34lga"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "导出"
+				}
+			]
+		},
+		{
+			"ID": "20210120154937-u6g9q4l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210120154937-u6g9q4l"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "编辑内容复制"
+				}
+			]
+		},
+		{
+			"ID": "20201229120428-uk4lxtt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201229120428-uk4lxtt",
+				"updated": "20220317223050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选择内容后使用复制快捷键 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Ctrl+C"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 即可，剪切板中是标准 Markdown 文本。"
+				}
+			]
+		},
+		{
+			"ID": "20220317223052-qrqe13g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220317223052-qrqe13g",
+				"updated": "20220317224423"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果你需要复制 HTML 内容，请在编辑器页签右上角的 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "..."
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 菜单中的 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "模式切换"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 切换到 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "导出预览"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后再进行复制。"
+				}
+			]
+		},
+		{
+			"ID": "20210120154948-gl0hxz6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210120154948-gl0hxz6"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "全文导出"
+				}
+			]
+		},
+		{
+			"ID": "20201229120428-ysyvyt4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201229120428-ysyvyt4",
+				"updated": "20220317224436"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在文档树上选择文档后右键选择 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "导出"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或者编辑器页签右上角的 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "..."
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 菜单中选择 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "导出"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "："
+				}
+			]
+		},
+		{
+			"ID": "20201229120428-sokahme",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20201229120428-sokahme",
+				"updated": "20220317223356"
+			},
+			"Children": [
+				{
+					"ID": "20201229120428-3zal4fw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20201229120428-3zal4fw"
+					},
+					"Children": [
+						{
+							"ID": "20210302223614-aj1pupk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223614-aj1pupk",
+								"updated": "20211130233541"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Markdown"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201229120428-rbzugkm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20201229120428-rbzugkm"
+					},
+					"Children": [
+						{
+							"ID": "20210302223614-6mzkgcu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223614-6mzkgcu"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "PDF"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210120155702-mhp0c0s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210120155702-mhp0c0s"
+					},
+					"Children": [
+						{
+							"ID": "20210302223614-zc7v8ds",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223614-zc7v8ds"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "HTML"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220317223347-co3uufi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220317223347-co3uufi",
+						"updated": "20220317223356"
+					},
+					"Children": [
+						{
+							"ID": "20220317223347-842ufju",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220317223347-842ufju",
+								"updated": "20220317223356"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Word .docx"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220317224209-iw0imsf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220317224209-iw0imsf",
+				"updated": "20220317225002"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "设置"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "导出"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中有一些选项可以进行导出处理配置，细节请参考该界面上的提示信息。"
+				}
+			]
+		}
+	]
+}

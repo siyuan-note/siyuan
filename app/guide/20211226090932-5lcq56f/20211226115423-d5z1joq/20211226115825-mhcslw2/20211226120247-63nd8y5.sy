@@ -1,0 +1,399 @@
+{
+	"ID": "20211226120247-63nd8y5",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226120247-63nd8y5",
+		"title": "引用内容塊",
+		"updated": "20211228134803"
+	},
+	"Children": [
+		{
+			"ID": "20211226120337-x5qwass",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120337-x5qwass",
+				"updated": "20211225232221"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20211226120337-iozq7fp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120337-iozq7fp",
+				"updated": "20211225232238"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "輸入 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "(("
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後將觸發內容塊引用搜索，繼續輸入作為搜索關鍵字，在搜索結果中使用上下鍵選定後Enter就可以完成內容塊的引用了。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120337-o2cufj5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120337-o2cufj5",
+				"updated": "20211228134803"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "內容塊引用的完整語法是："
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": " ((id \"text\"))"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，其中 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "id"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 形如： "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "202008250000-a1b2c3d"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，由時間和 7 位隨機字符組成，內容塊 id 是在創建內容塊時就會自動生成的；後面的 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "text"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 是在引用處對該內容塊的自定義錨文本。建立好內容塊引用後，滑鼠懸浮在錨文本上後將彈出預覽浮層，展現被引用的內容塊。"
+				},
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "內容塊/引用"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226120337-nfx8mlg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120337-nfx8mlg",
+				"updated": "20211226153611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "連結方向"
+				}
+			]
+		},
+		{
+			"ID": "20211226120337-vc0412c",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226120337-vc0412c",
+				"updated": "20211226153324"
+			},
+			"Children": [
+				{
+					"ID": "20211226120337-y3gytco",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120337-y3gytco",
+						"updated": "20211226153322"
+					},
+					"Children": [
+						{
+							"ID": "20211226120337-97ez2pg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120337-97ez2pg",
+								"updated": "20211226153322"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "正向連結（Forwardlink），即當前內容塊使用了哪些其他內容塊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226120337-y5w0fua",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120337-y5w0fua",
+						"updated": "20211226153324"
+					},
+					"Children": [
+						{
+							"ID": "20211226120337-1ss1org",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120337-1ss1org",
+								"updated": "20211226153324"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "反向連結（Backlink），即當前內容塊被那些其他內容塊使用了"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226120337-toyoo9f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120337-toyoo9f",
+				"updated": "20211228131019"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "正向連結包含在當前塊的內容中，我們可以很直觀的看到。反向連結需要在其他文檔中搜索才能知道，而恰恰是這些訊息對我們比較有價值。我們可以通過以下兩種方式來幫助我們更好的掌握知識點或者發散思路："
+				}
+			]
+		},
+		{
+			"ID": "20211226120337-ugzfcwd",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226120337-ugzfcwd",
+				"updated": "20211227210423"
+			},
+			"Children": [
+				{
+					"ID": "20211226120337-063naya",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120337-063naya",
+						"updated": "20211227210417"
+					},
+					"Children": [
+						{
+							"ID": "20211226120337-eq78a5a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120337-eq78a5a",
+								"updated": "20211227210417"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockRef",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20211226120415-akhb2fd"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "關系圖"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：瀏覽內容塊之間的正向和反向連結關系"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226120337-5t8nuey",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120337-5t8nuey",
+						"updated": "20211227210423"
+					},
+					"Children": [
+						{
+							"ID": "20211226120337-ajml6vu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120337-ajml6vu",
+								"updated": "20211227210423"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockRef",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20211226120415-p3ajlx2"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "反向連結"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：以文本列表的方式展現當前內容塊的反向連結"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226125751-tez9k3q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226125751-tez9k3q",
+				"updated": "20211226125751"
+			}
+		}
+	]
+}

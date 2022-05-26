@@ -1,0 +1,56 @@
+{
+	"ID": "20201227201751-gv0fpx2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201227201751-gv0fpx2",
+		"title": "Kernel API",
+		"type": "doc",
+		"updated": "20210918114757"
+	},
+	"Children": [
+		{
+			"ID": "20210822164043-6gvv84p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210822164043-6gvv84p",
+				"updated": "20210918114757"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Please refer to "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "API Doc"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/blob/master/API.md"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		}
+	]
+}

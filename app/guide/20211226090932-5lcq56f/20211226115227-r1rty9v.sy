@@ -1,0 +1,1785 @@
+{
+	"ID": "20211226115227-r1rty9v",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "2753",
+		"id": "20211226115227-r1rty9v",
+		"title": "常見問題",
+		"updated": "20220526112913"
+	},
+	"Children": [
+		{
+			"ID": "20211226115356-hp36u1f",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115356-hp36u1f",
+				"updated": "20211228141247"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源是如何存儲資料的？"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-fcwiy36",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115356-fcwiy36",
+				"updated": "20211228141251"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "資料保存在工作空間文件夾下（預設位於用戶家目錄 Documents/SiYuan，可在 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "設置"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "關於"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中進行修改），在工作空間 data 文件夾下："
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-i1v42hf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226115356-i1v42hf",
+				"updated": "20220329160520"
+			},
+			"Children": [
+				{
+					"ID": "20211226115356-2dufb3s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115356-2dufb3s",
+						"updated": "20220329160516"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-ymtmyye",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-ymtmyye",
+								"updated": "20220329160516"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "assets"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 用於保存所有插入的"
+								},
+								{
+									"Type": "NodeBlockRef",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20211226123038-4umgpxy"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "資料文件"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115356-dmkm408",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115356-dmkm408",
+						"updated": "20211228104617"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-k4ju5n9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-k4ju5n9",
+								"updated": "20211228104617"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "templates"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 用於保存"
+								},
+								{
+									"Type": "NodeBlockRef",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20211226123004-dplpw0o"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "範本片段"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115356-nmsm4tw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115356-nmsm4tw",
+						"updated": "20220329160520"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-za90b90",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-za90b90",
+								"updated": "20220329160520"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "widgets"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 用於保存"
+								},
+								{
+									"Type": "NodeBlockRef",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20211226123101-qjw03ab"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "小工具"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115356-09xvo09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115356-09xvo09"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-1r4537c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-1r4537c"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "emojis"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 用於保存 Emoji 圖片"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115356-vfc2ba3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115356-vfc2ba3",
+						"updated": "20211228141258"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-jv0ssqa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-jv0ssqa",
+								"updated": "20211228141258"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "其余文件夾就是用戶自己創建的筆記本文件夾，筆記本文件夾下 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": ".sy"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 後綴的文件用於保存文檔資料，資料格式為 JSON"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-iecet3h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115356-iecet3h",
+				"updated": "20211226161246"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源是開原的嗎？"
+				}
+			]
+		},
+		{
+			"ID": "20220526112905-720doo3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220526112905-720doo3",
+				"updated": "20220526112913"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源筆記是完全開原的，歡迎參與貢獻："
+				}
+			]
+		},
+		{
+			"ID": "20220526112905-4lumsx2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220526112905-4lumsx2",
+				"updated": "20220526112905"
+			},
+			"Children": [
+				{
+					"ID": "20220526112905-mc93oj3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220526112905-mc93oj3",
+						"updated": "20220526112905"
+					},
+					"Children": [
+						{
+							"ID": "20220526112905-0xsljf4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220526112905-0xsljf4",
+								"updated": "20220526112905"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "界面和內核"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/siyuan-note/siyuan"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220526112905-0vhtidf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220526112905-0vhtidf",
+						"updated": "20220526112905"
+					},
+					"Children": [
+						{
+							"ID": "20220526112905-ofq01hk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220526112905-ofq01hk",
+								"updated": "20220526112905"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "用戶指南"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/siyuan-note/user-guide-zh_CN"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220526112905-rfll5uu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220526112905-rfll5uu",
+						"updated": "20220526112905"
+					},
+					"Children": [
+						{
+							"ID": "20220526112905-5m9urij",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220526112905-5m9urij",
+								"updated": "20220526112905"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "外觀"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/siyuan-note/appearance"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220526112905-25zib8i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220526112905-25zib8i",
+						"updated": "20220526112905"
+					},
+					"Children": [
+						{
+							"ID": "20220526112905-lg3tfv2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220526112905-lg3tfv2",
+								"updated": "20220526112905"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "數據解析器"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/88250/protyle"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220526112905-vjd528r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220526112905-vjd528r",
+						"updated": "20220526112905"
+					},
+					"Children": [
+						{
+							"ID": "20220526112905-lpkpu0e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220526112905-lpkpu0e",
+								"updated": "20220526112905"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "編輯器引擎"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/88250/lute"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220526112905-9nfa85r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220526112905-9nfa85r",
+						"updated": "20220526112905"
+					},
+					"Children": [
+						{
+							"ID": "20220526112905-idr2lmn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220526112905-idr2lmn",
+								"updated": "20220526112905"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "端到端加密"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/siyuan-note/encryption"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220526112905-q4sgprn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220526112905-q4sgprn",
+						"updated": "20220526112905"
+					},
+					"Children": [
+						{
+							"ID": "20220526112905-ewnoyot",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220526112905-ewnoyot",
+								"updated": "20220526112905"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "Chrome 剪藏擴展"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/siyuan-note/siyuan-chrome"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220526112905-myxxgda",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220526112905-myxxgda",
+						"updated": "20220526112905"
+					},
+					"Children": [
+						{
+							"ID": "20220526112905-9l7ydfc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220526112905-9l7ydfc",
+								"updated": "20220526112905"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "Android 端"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/siyuan-note/siyuan-android"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220526112905-wjwu4d0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220526112905-wjwu4d0",
+						"updated": "20220526112905"
+					},
+					"Children": [
+						{
+							"ID": "20220526112905-5vtl4ff",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220526112905-5vtl4ff",
+								"updated": "20220526112905"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "iOS 端"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/siyuan-note/siyuan-ios"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220526112905-yjamiap",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220526112905-yjamiap",
+				"updated": "20220526112905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "更多細節請參考"
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "開髮指南"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/blob/master/DEV_zh_CN.md"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-m9gd7qb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115356-m9gd7qb",
+				"updated": "20211225215145"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "刪除文檔有什麽"
+				},
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "事項嗎？"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-rn32tpl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115356-rn32tpl",
+				"updated": "20220502163402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文檔被刪除後不會出現在作業系統回收站中，而是直接刪除，刪除時思源會生成"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20211226122707-8cr09co"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "數據歷史"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-4hn8mip",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115356-4hn8mip",
+				"updated": "20211225214824"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如何才能只換行不新起段落？"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-nqz7h5e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115356-nqz7h5e",
+				"updated": "20211225214824"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "請使用 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Shift+Enter"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-uy14htm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115356-uy14htm",
+				"updated": "20211225214824"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "移動標題時如何帶下方塊一起移動？"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-2wnhnjm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115356-2wnhnjm",
+				"updated": "20220501230240"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將標題摺疊以後再移動。請注意是移動，不是剪切，折疊標題剪切不會帶下方塊。"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-2yx1vif",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115356-2yx1vif",
+				"updated": "20211225214824"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如何跨頁多選內容塊？"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-1m4sfr6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115356-1m4sfr6",
+				"updated": "20211225214824"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在開始的地方單擊，滾動頁面以後在結束的地方按住 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Shift"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 單擊。"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-f9knemj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115356-f9knemj",
+				"updated": "20211225214824"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如何調整表格行列？"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-9rj1muh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115356-9rj1muh",
+				"updated": "20211228130709"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表格塊的塊標菜單中有作業入口。"
+				}
+			]
+		},
+		{
+			"ID": "20220501231338-vlg2lgm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220501231338-vlg2lgm",
+				"updated": "20220501231338"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有的塊（比如在列表項中的段落塊）找不到塊標怎麼辦？"
+				}
+			]
+		},
+		{
+			"ID": "20220501231338-vs50rai",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501231338-vs50rai",
+				"updated": "20220501231338"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在列表項下的第一個子塊是省略塊標的。可以將光標移到這個塊中，然後通過 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Ctrl+/"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 觸發它的塊標菜單。"
+				}
+			]
+		},
+		{
+			"ID": "20220421192606-o093rti",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220421192606-o093rti",
+				"updated": "20220421192606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如何搜索包含符號的內容？"
+				}
+			]
+		},
+		{
+			"ID": "20220421192606-fmhxfvg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220421192606-fmhxfvg",
+				"updated": "20220421192629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要搜索包含符號（ "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "-"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "*"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 等）的內容，需要使用 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "\""
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 包裹關鍵字，比如 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "\"-siyuan\""
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。具體細節請參考"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20220415232129-shpzg6r"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "查詢語法"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-ha8z0ho",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115356-ha8z0ho",
+				"updated": "20211228141228"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如何使用第三方同步碟進行資料同步？"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-3in0o6m",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226115356-3in0o6m",
+				"updated": "20211228141236"
+			},
+			"Children": [
+				{
+					"ID": "20211226115356-6mz51rm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115356-6mz51rm"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-ceokwxz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-ceokwxz"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "請僅同步 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "工作空間/data/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，切勿同步整個工作空間"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115356-8js1cre",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115356-8js1cre",
+						"updated": "20211228141231"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-d8c1p84",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-d8c1p84",
+								"updated": "20211228141231"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "思源運行期間請暫停第三方同步，否則可能會出現資料損壞，細節請參考"
+								},
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "這裡"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://ld246.com/article/1626537583158"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115356-k2pkly3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115356-k2pkly3",
+						"updated": "20211228141236"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-74boopf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-74boopf",
+								"updated": "20211228141236"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Android 端資料文件夾路徑為 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "內部存儲設備/Android/data/org.b3log.siyuan/files/siyuan/data/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，該路徑是應用私有路徑，其他程式無法讀取，只能手動複製"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115356-cbazfe6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115356-cbazfe6"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-gv0e4sv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-gv0e4sv"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "第三方同步和思源同步存在沖突，切勿同時使用"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-hny5emi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115356-hny5emi",
+				"updated": "20211225214824"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "端到端密碼忘記了怎麽辦？"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-985lne8",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20211226115356-985lne8",
+				"updated": "20211226115356"
+			},
+			"Children": [
+				{
+					"ID": "20211226115356-o8rp4od",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20211226115356-o8rp4od"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-ssizaoe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-ssizaoe"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "主力設備上使用新的工作空間，將舊的工作空間 data 文件夾手動覆制到新的工作空間下"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115356-wdxpema",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20211226115356-wdxpema"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-m0gqvck",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-m0gqvck"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "新的工作空間可以重新設置密碼"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115356-5iftoc4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20211226115356-5iftoc4",
+						"updated": "20211225214824"
+					},
+					"Children": [
+						{
+							"ID": "20211226115356-v8sz97s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115356-v8sz97s",
+								"updated": "20211225214824"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "雲端使用新的雲端同步目錄"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-2tif6u0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115356-2tif6u0",
+				"updated": "20211228145251"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果是行動端的話解除重裝即可（"
+				},
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：行動端解除應用時，本地工作空間資料會被一併刪除）。"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-x0hmcor",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115356-x0hmcor",
+				"updated": "20211225214824"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用需要付費嗎？"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-flfljlv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115356-flfljlv",
+				"updated": "20211225214824"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地功能完全免費使用，"
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "雲端服務"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://b3log.org/siyuan/pricing.html"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "需要年付訂閱。"
+				}
+			]
+		},
+		{
+			"ID": "20211226115356-zk19o1w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115356-zk19o1w",
+				"updated": "20211228143236"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "非中國大陸地區的用戶請勿付費訂閱，因為思源雲端伺服器無法保證非中國大陸地區可用。"
+				}
+			]
+		}
+	]
+}

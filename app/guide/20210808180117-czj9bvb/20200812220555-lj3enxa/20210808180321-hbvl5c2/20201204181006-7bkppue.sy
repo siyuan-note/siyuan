@@ -1,0 +1,1449 @@
+{
+	"ID": "20201204181006-7bkppue",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201204181006-7bkppue",
+		"title": "模板片段",
+		"type": "doc",
+		"updated": "20210131162925"
+	},
+	"Children": [
+		{
+			"ID": "20210428214921-3rfhrt6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210428214921-3rfhrt6",
+				"updated": "20210428214924"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-h61sdjr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091309-h61sdjr",
+				"updated": "20210428230754"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模板片段"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "用于在光标插入符位置快速插入之前设置好的文本内容，支持变量。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "模板片段"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "使用 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": ".md"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后缀文件，存放在工作空间 data/templates 文件夹下。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-fhb549c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091309-fhb549c"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "编写模板"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-siekt4x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091309-siekt4x",
+				"updated": "20210502204926"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模板使用的是 "
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "Go 编程语言的文本模板"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://golang.org/pkg/text/template/"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "进行实现，如果你对此有了解的话，可以实现一些程序逻辑在里面，比如比较逻辑、迭代逻辑等。另外，为了避免语法冲突，模板语法使用 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": ".action{action}"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（而不是 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "{{action}}"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-mvyh081",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091309-mvyh081",
+				"updated": "20210502204943"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我们通过开源项目 "
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "Sprig"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/Masterminds/sprig"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 内置了一些变量和函数来丰富模板。比如可通过 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": ".action{now | date \"2006-01-02 15:04:05​\"}"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 来渲染当前时间，更多用法请参考 "
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "Sprig 帮助文档"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "http://masterminds.github.io/sprig/"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-vnxe81t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091309-vnxe81t",
+				"updated": "20210428223417"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "关于日期时间格式化有个细节需要"
+				},
+				{
+					"Type": "NodeTag",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker",
+							"Data": "#"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker",
+							"Data": "#"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：Go 编程语言的格式化比较特殊：不是使用 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "yyyy-MM-dd HH:mm:ss"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，而是使用 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "2006-01-02 15:04:05"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 这个固定时间格式（"
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "知乎讨论"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://www.zhihu.com/question/366830553"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-os47lco",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091309-os47lco"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了 Sprig 内置的变量和函数，还支持如下变量和函数："
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-gjkg3u5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210104091309-gjkg3u5",
+				"updated": "20211213121154"
+			},
+			"Children": [
+				{
+					"ID": "20210104091309-p88fqma",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210104091309-p88fqma"
+					},
+					"Children": [
+						{
+							"ID": "20210131155558-loq0tt3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131155558-loq0tt3",
+								"updated": "20210502204955"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "title"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：该变量用于插入当前文档名。比如模板内容为 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "# .action{.title}"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，则调用后会以一级标题语法插入到当前文档内容中"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210221131427-rfs2tcl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210221131427-rfs2tcl"
+					},
+					"Children": [
+						{
+							"ID": "20210221131427-mx22ukt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210221131427-mx22ukt",
+								"updated": "20210428223457"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "id"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：该变量用于插入当前文档 ID"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211213120720-ulwzg6f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211213120720-ulwzg6f"
+					},
+					"Children": [
+						{
+							"ID": "20211213120720-bm8xbwm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211213120720-bm8xbwm",
+								"updated": "20211213120746"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "name"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：该变量用于插入当前文档命名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211213120748-0uhzrha",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211213120748-0uhzrha"
+					},
+					"Children": [
+						{
+							"ID": "20211213120748-72e95wc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211213120748-72e95wc",
+								"updated": "20211213120801"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "alias"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：该变量用于插入但前文档别名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210121193601-uwo8s5h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210121193601-uwo8s5h"
+					},
+					"Children": [
+						{
+							"ID": "20210131155558-ghlchbx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131155558-ghlchbx",
+								"updated": "20210504092933"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "queryBlocks"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：该函数用于查询数据库，返回值为 blocks 列表，参数为 SQL 语句："
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": ".action{sql \"SELECT * FROM blocks LIMIT 7\"}"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210504093313-4aoyxd0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210504093313-4aoyxd0"
+					},
+					"Children": [
+						{
+							"ID": "20210504093313-ya53o58",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210504093313-ya53o58",
+								"updated": "20210504093332"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "querySpans"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：该函数用于查询数据库，返回值为 spans 列表，参数为 SQL 语句："
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": ".action{sql \"SELECT * FROM spans LIMIT 7\"}"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211213120813-ppm3j85",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211213120813-ppm3j85",
+						"updated": "20211213121154"
+					},
+					"Children": [
+						{
+							"ID": "20211213120813-9ynpjax",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211213120813-9ynpjax",
+								"updated": "20211213121154"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "parseTime"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：该函数用于将时间格式的字符串解析为 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "time.Time"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 类型，以便使用更多格式化方法渲染该时间"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210604111213-774ll6c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210604111213-774ll6c",
+				"updated": "20210604111557"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "queryBlocks"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "querySpans"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 支持类似 SQL 预编译语句的变参列表，方便传入参数："
+				}
+			]
+		},
+		{
+			"ID": "20210604111446-p6vadfc",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20210604111446-p6vadfc",
+				"updated": "20210604111632"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"ID": "20220307091943-diuexe8",
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks :=queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n",
+					"Properties": {
+						"id": "20220307091943-diuexe8"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-h71ogwf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091309-h71ogwf"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "调用模板"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-l9wcdtk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091309-l9wcdtk",
+				"updated": "20210428221604"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在光标插入符位置，通过 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 选择模板来触发模板搜索，找到需要插入的模板后回车即可。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-2p68yju",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091309-2p68yju"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "一个示例"
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-9ppkq6j",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "cGxhaW50ZXh0",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20210104091309-9ppkq6j"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "cGxhaW50ZXh0"
+				},
+				{
+					"ID": "20220307091943-k77h7sb",
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{$before := (div (now.Sub (toDate \"2006-01-02\" \"2020-02-19\")).Hours 24)}\n\n.action{$after := (div ((toDate \"2006-01-02\" \"2048-02-19\").Sub now).Hours 24)}\n今天是 `.action{now | date \"2006-01-02\"}`。\n\n* 距离 `2020-02-19` 已经过去 `.action{$before}` 天\n* 距离 `2048-02-19` 还剩 `.action{$after}` 天\n",
+					"Properties": {
+						"id": "20220307091943-k77h7sb"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20210104091309-06sv04x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091309-06sv04x"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "$before"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "$after"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 定义了两个变量，分别记录当前日期距离 2020 年和 2048 年的天数。"
+				}
+			]
+		},
+		{
+			"ID": "20210131162925-p51ey8q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210131162925-p51ey8q"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "上架模板集市"
+				}
+			]
+		},
+		{
+			"ID": "20210131162925-ececb6c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210131162925-ececb6c",
+				"updated": "20211222094858"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上架前请确认你的模板仓库根路径下至少包含以下文件（"
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "仓库示例"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/88250/November-Rain"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）："
+				}
+			]
+		},
+		{
+			"ID": "20210131162925-lyyl9sm",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210131162925-lyyl9sm",
+				"updated": "20211222094908"
+			},
+			"Children": [
+				{
+					"ID": "20210131162925-mzvnu0y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210131162925-mzvnu0y"
+					},
+					"Children": [
+						{
+							"ID": "20210131162925-owpf9yl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162925-owpf9yl"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "template.json（请确保 JSON 格式正确）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210131162925-kvgwgr7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210131162925-kvgwgr7"
+					},
+					"Children": [
+						{
+							"ID": "20210131162925-m5sxpc7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162925-m5sxpc7",
+								"updated": "20211222094852"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "preview.png（请压缩图片大小在 512 KB 以内）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211222094908-l3yznj7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211222094908-l3yznj7",
+						"updated": "20211222094908"
+					},
+					"Children": [
+						{
+							"ID": "20211222094908-xiw0ti2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211222094908-xiw0ti2",
+								"updated": "20211222094908"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "README.md（请注意大小写）"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210131162925-ld2wv38",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210131162925-ld2wv38"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "确认无误以后请通过对"
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "社区集市"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/bazaar"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "仓库"
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "发起 pull request"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://docs.github.com/cn/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，修改 templates.json 文件。该文件是所有社区模板仓库的索引，格式为："
+				}
+			]
+		},
+		{
+			"ID": "20210131162925-01ixzvb",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20210131162925-01ixzvb"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"ID": "20220307091943-dgkvjic",
+					"Type": "NodeCodeBlockCode",
+					"Data": "{\n  \"repos\": [\n    \"username/reponame@commithash\"\n  ]\n}\n",
+					"Properties": {
+						"id": "20220307091943-dgkvjic"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20210131162925-tos2g00",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210131162925-tos2g00"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "其中 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "commithash"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 请填写你的模板仓库上最近一次发布版本的 Git 提交哈希值，请使用完整哈希值，不要使用 7 位短值。"
+				}
+			]
+		},
+		{
+			"ID": "20210131162925-e2aq6sa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210131162925-e2aq6sa",
+				"updated": "20210131162925"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "更新"
+				}
+			]
+		},
+		{
+			"ID": "20210131162925-1q8zsu9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210131162925-1q8zsu9"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果你开发的模板更新了版本，请记得："
+				}
+			]
+		},
+		{
+			"ID": "20210131162925-z512z4z",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210131162925-z512z4z"
+			},
+			"Children": [
+				{
+					"ID": "20210131162925-kxy0t2r",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210131162925-kxy0t2r"
+					},
+					"Children": [
+						{
+							"ID": "20210131162925-vg6sggf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162925-vg6sggf"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "更新你的模板配置 template.json 中的 version 字段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210131162925-g7efau2",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210131162925-g7efau2"
+					},
+					"Children": [
+						{
+							"ID": "20210131162925-3qgjytc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162925-3qgjytc"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "再次对社区集市发起 Pull Request"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

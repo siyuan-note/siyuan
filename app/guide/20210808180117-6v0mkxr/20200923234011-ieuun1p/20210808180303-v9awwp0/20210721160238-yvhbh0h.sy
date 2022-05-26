@@ -1,0 +1,437 @@
+{
+	"ID": "20210721160238-yvhbh0h",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210721160238-yvhbh0h",
+		"title": "Assets Serving",
+		"updated": "20220408193053"
+	},
+	"Children": [
+		{
+			"ID": "20210721160254-thunmzr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721160254-thunmzr",
+				"updated": "20210721160328"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan provides cloud assets serving, which is mainly used to copy documents and asset files to platforms such as WeChat MP, Zhihu and Yuque. The editors of these platforms will automatically pull resource files to their platforms when pasting."
+				}
+			]
+		},
+		{
+			"ID": "20210721160254-4t8mham",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721160254-4t8mham",
+				"updated": "20210721160254"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20210721160254-2ssi3ws",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20210721160254-2ssi3ws",
+				"updated": "20220317224741"
+			},
+			"Children": [
+				{
+					"ID": "20210721160254-kqzcayi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20210721160254-kqzcayi",
+						"updated": "20220317224741"
+					},
+					"Children": [
+						{
+							"ID": "20210721160254-ynqg7sy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721160254-ynqg7sy",
+								"updated": "20220317224741"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "In the upper right corner of the document, select "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "..."
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in the More menu and select "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Upload asset files to cloud"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721160254-hrltn03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20210721160254-hrltn03",
+						"updated": "20210721160432"
+					},
+					"Children": [
+						{
+							"ID": "20210721160254-v4468pn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721160254-v4468pn",
+								"updated": "20210721160432"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Export Preview"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Toogle Mode"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721160254-p8h304m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20210721160254-p8h304m",
+						"updated": "20210721160517"
+					},
+					"Children": [
+						{
+							"ID": "20210721160254-5a7y91o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721160254-5a7y91o",
+								"updated": "20210721160517"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Copy to Wechat MP"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Copy to Zhihu"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Copy to Yuque"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721160254-uf874va",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20210721160254-uf874va"
+					},
+					"Children": [
+						{
+							"ID": "20210721160254-w1cr40w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721160254-w1cr40w"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Paste into the target platform editor"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220407085720-uruuriu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220407085720-uruuriu",
+				"updated": "20220408193053"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to delete the files in the cloud assets serving, please go to "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "LianDi - Settings - File - Note"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://ld246.com/settings/file?type=3"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to operate. After deletion, the cloud storage space occupied by the file will be released immediately, but the CDN cache cleaning may not take effect in time, which will cause the file URL to remain accessible until the CDN cache expires automatically after 30 days."
+				}
+			]
+		},
+		{
+			"ID": "20210721160254-s3pqp62",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721160254-s3pqp62",
+				"updated": "20211127233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Note"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211127232925-9w2c55m",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211127232925-9w2c55m",
+				"updated": "20211127233055"
+			},
+			"Children": [
+				{
+					"ID": "20211127232925-5wk0g8k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211127232925-5wk0g8k",
+						"updated": "20211127233016"
+					},
+					"Children": [
+						{
+							"ID": "20211127232925-v3v5uup",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211127232925-v3v5uup",
+								"updated": "20211127233016"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Please do not directly use the external link address provided by cloud assets on other platforms. This address is unstable and may affect the availability due to the domain name change"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211127232925-f6or56l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211127232925-f6or56l",
+						"updated": "20211127233055"
+					},
+					"Children": [
+						{
+							"ID": "20211127232925-smtbm06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211127232925-smtbm06",
+								"updated": "20211127233055"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Please do not upload illegal or sensitive files. The uploaded files will be reviewed through services provided by third parties (pornography, violent terrorism, sensitive people, etc.). If a user is found to upload illegal files, the user account will be permanently banned, and the corresponding legal responsibility will be assumed"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

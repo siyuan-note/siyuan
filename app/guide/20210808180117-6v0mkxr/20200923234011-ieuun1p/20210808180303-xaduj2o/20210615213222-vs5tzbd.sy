@@ -1,0 +1,949 @@
+{
+	"ID": "20210615213222-vs5tzbd",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210615213222-vs5tzbd",
+		"title": "Data history",
+		"updated": "20220503204314"
+	},
+	"Children": [
+		{
+			"ID": "20220501135308-u5qn6iz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220501135308-u5qn6iz",
+				"updated": "20220501135308"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20220501135308-99gc8dn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501135308-99gc8dn",
+				"updated": "20220502163315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data history is mainly used to ensure data security, and even if a misoperation occurs, data can be rolled back through the history. Historical data is uniformly stored in the "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "workspace/history/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " folder. History will be automatically generated in the following cases:"
+				}
+			]
+		},
+		{
+			"ID": "20220501135308-30uwxvd",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220501135308-30uwxvd",
+				"updated": "20220503122549"
+			},
+			"Children": [
+				{
+					"ID": "20220501135308-kwaramc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-kwaramc",
+						"updated": "20220501135549"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-yr7v67z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-yr7v67z",
+								"updated": "20220501135549"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Every 10 minutes, a history will be generated for the documents updated within these 10 minutes. The interval can be set by "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Settings"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Editor"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "History Generation Interval"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " make adjustments, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "-update"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501135308-1xc2m8l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-1xc2m8l",
+						"updated": "20220501135308"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-dmnsr7d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-dmnsr7d",
+								"updated": "20220501135308"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When synchronizing in the cloud, the local data covered by the cloud will generate a history, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "-sync"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501135308-z09e5tv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-z09e5tv",
+						"updated": "20220503122549"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-pqw5kwp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-pqw5kwp",
+								"updated": "20220503122549"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "History will be generated when manually deleting notebooks, documents and assets, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "-delete"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501135308-0iyl6a6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-0iyl6a6",
+						"updated": "20220501135628"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-9htfn1h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-9htfn1h",
+								"updated": "20220501135628"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When using "
+								},
+								{
+									"Type": "NodeBlockRef",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20210115224203-q8bj2gd"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "Cleanup unreferenced assets"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", a history will be generated, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "-delete"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501135308-wzazz01",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-wzazz01",
+						"updated": "20220501135536"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-xldpw4q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-xldpw4q",
+								"updated": "20220501135536"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When using the "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "Insert a space between Chinese and Western"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " function, a history will be generated, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "-format"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220501135308-2rn9rgb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220501135308-2rn9rgb",
+				"updated": "20220501135308"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Browsing History"
+				}
+			]
+		},
+		{
+			"ID": "20220501135308-3azjqzh",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220501135308-3azjqzh",
+				"updated": "20220503204314"
+			},
+			"Children": [
+				{
+					"ID": "20220501135308-itmzgsj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-itmzgsj",
+						"updated": "20220503204314"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-yvsiton",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-yvsiton",
+								"updated": "20220503204314"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "At the top "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "..."
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " menu or "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Alt+H"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to open the history, only supports browsing the latest 32 times of history"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501135308-9uu4udf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-9uu4udf",
+						"updated": "20220501135308"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-5yqjh8u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-5yqjh8u",
+								"updated": "20220501135308"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Browse under the filesystem "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "workspace/history/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " folder"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091559-kgrtuyh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091559-kgrtuyh",
+				"updated": "20210403161323"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rollback"
+				}
+			]
+		},
+		{
+			"ID": "20220501133808-qv8l0rm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501133808-qv8l0rm",
+				"updated": "20220501133808"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the time list column on the left side of the history interface, there is a rollback button behind each historical record. After clicking, a confirmation dialog box will pop up. If the rollback is confirmed, the existing data will be overwritten with the historical data."
+				}
+			]
+		},
+		{
+			"ID": "20220501133808-uopvhd4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501133808-uopvhd4",
+				"updated": "20220501133808"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If there are very many files that need to be rolled back, it is recommended to manually copy on the file system. The internal structure of the history folder is the same as the internal structure of data, for example:"
+				}
+			]
+		},
+		{
+			"ID": "20220501133808-aipi33o",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220501133808-aipi33o",
+				"updated": "20220501134021"
+			},
+			"Children": [
+				{
+					"ID": "20220501133808-wxongrk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501133808-wxongrk",
+						"updated": "20220501133808"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-tbbutzj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-tbbutzj",
+								"updated": "20220501133808"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Notebook delete: "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "2022-05-01-091021-delete/20210808180117-czj9bvb/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", i.e. "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "historical generation date-{operation}/{notebook ID}/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133808-44fj5ct",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501133808-44fj5ct",
+						"updated": "20220501134016"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-y3c9auz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-y3c9auz",
+								"updated": "20220501134016"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Document deletion: "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "2022-05-01-091209-delete/20210808180117-czj9bvb/20200812220555-lj3enxa.sy"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", which is "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "historical generation date-{operation}/{notebook ID}/{document path}"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133808-9qkl603",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501133808-9qkl603",
+						"updated": "20220501134021"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-caf9m4c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-caf9m4c",
+								"updated": "20220501134021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Asset file deletion: "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "2022-05-01-095621-delete/assets/image-20220501091157-qccp87e.png"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", which is "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "historical generation date-{operation}/assets/{asset file name}"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220501133808-qyb1i5y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501133808-qyb1i5y",
+				"updated": "20220501133808"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manual rollback steps:"
+				}
+			]
+		},
+		{
+			"ID": "20220501133808-vpkkff8",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220501133808-vpkkff8",
+				"updated": "20220501134108"
+			},
+			"Children": [
+				{
+					"ID": "20220501133808-u2jd9bs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220501133808-u2jd9bs",
+						"updated": "20220501134035"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-nuxcwdm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-nuxcwdm",
+								"updated": "20220501134035"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Exit SiYuan, and then make a full copy and backup of the entire workspace to avoid data loss caused by subsequent misoperations"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133808-5op6pre",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220501133808-5op6pre",
+						"updated": "20220501134101"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-wgm1itd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-wgm1itd",
+								"updated": "20220501134101"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Go to the "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "workspace/history/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " folder and copy the data in the "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "historical generation date-{operation}"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " folder directly to the data folder for overwriting"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133808-te5g9yq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220501133808-te5g9yq",
+						"updated": "20220501134108"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-8md1hk0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-8md1hk0",
+								"updated": "20220501134108"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Restart SiYuan"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

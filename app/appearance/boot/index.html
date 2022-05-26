@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <style>
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+            color: #000;
+            text-shadow: 0 0 2px #fff;
+            font-size: 12px;
+            font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+        }
+
+        #image {
+            position: fixed;
+            top: 32px;
+            left: 0;
+            width: 100%;
+            bottom: 32px;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: contain;
+        }
+    </style>
+</head>
+<body>
+<div id="bg"
+     style="opacity:0.68;background-image: linear-gradient(-225deg, #69EACB 0%, #EACCF8 48%, #6654F1 100%);height: 100%;position: fixed;width: 100%;box-sizing: border-box;"></div>
+<div id="image" style="background-image: url(images/boot1.svg)"></div>
+<div style="position: fixed;bottom: 34px;width: 100%;height: 2px;background-color: #3b3e43;">
+    <div id="progress"
+         style="position: absolute;height: 2px;background-color: #d23f31;transition: width 50ms cubic-bezier(0, 0, 0.2, 1);bottom: 0;"></div>
+    <div style="position: absolute;bottom: -26px;left: 16px;display: flex;align-items: center;right: 16px;">
+        <svg style="width: 16px;height: 16px;margin-right: 8px;flex-shrink: 0;" version="1.1"
+             xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+            <path fill="#d23e31"
+                  d="M26.99 22.989c-0.151 0.15-0.271 0.285-0.267 0.299s-0.003 0.021-0.015 0.014c-0.032-0.020-0.272 0.23-0.247 0.257 0.011 0.012 0.007 0.015-0.009 0.006-0.031-0.017-0.167 0.118-0.167 0.166 0 0.015-0.009 0.023-0.020 0.016-0.025-0.015-0.087 0.050-0.066 0.071 0.009 0.009 0.001 0.016-0.016 0.016-0.041 0-0.16 0.119-0.16 0.16 0 0.017-0.007 0.025-0.016 0.016-0.016-0.016-0.23 0.18-0.514 0.473-0.479 0.492-0.878 0.882-0.891 0.87-0.008-0.008-0.014 0.006-0.014 0.031s-0.012 0.038-0.026 0.029c-0.024-0.014-0.037 0.020-0.029 0.072 0.002 0.011-0.012 0.017-0.029 0.013s-0.029 0.009-0.025 0.028c0.004 0.019-0.004 0.028-0.017 0.020s-0.087 0.051-0.164 0.132c-0.216 0.227-0.492 0.502-0.7 0.695-0.104 0.097-0.181 0.176-0.171 0.176s-0.021 0.032-0.069 0.072c-0.17 0.14-0.471 0.463-0.498 0.535-0.010 0.025-0.035 0.046-0.058 0.046s-0.040 0.018-0.040 0.041-0.009 0.035-0.021 0.028c-0.027-0.016-0.504 0.442-0.483 0.463 0.009 0.009 0.001 0.016-0.016 0.016s-0.091 0.062-0.163 0.137c-0.343 0.358-0.548 0.568-0.556 0.568-0.005 0-0.11 0.1-0.233 0.223l-0.224 0.223-0 6.171c-0 4.22 0.008 6.187 0.027 6.222 0.039 0.074 0.081 0.061 0.169-0.052 0.043-0.055 0.087-0.095 0.098-0.088s0.020-0.009 0.020-0.034 0.006-0.039 0.014-0.031c0.014 0.014 1.981-1.926 3.371-3.325 0.118-0.119 0.544-0.544 0.945-0.944s0.723-0.739 0.713-0.754c-0.009-0.015-0.006-0.020 0.008-0.011 0.035 0.022 0.171-0.109 0.149-0.144-0.010-0.017-0.006-0.021 0.011-0.011 0.029 0.018 0.136-0.078 0.136-0.123 0-0.014 0.006-0.019 0.014-0.011 0.049 0.049 0.59-0.569 0.575-0.658-0.008-0.050-0.015-2.859-0.015-6.243s-0.009-6.15-0.020-6.149-0.143 0.125-0.293 0.275zM36.246 23.045c-0.183 0.183-0.333 0.349-0.333 0.369s-0.007 0.029-0.016 0.020c-0.013-0.013-0.84 0.796-1.889 1.847-0.057 0.058-0.527 0.529-1.043 1.047l-0.939 0.943v6.252c0 3.439 0.006 6.252 0.014 6.252 0.029 0 0.139-0.125 0.123-0.141-0.009-0.009 0.001-0.016 0.021-0.017s0.113-0.085 0.207-0.188c0.093-0.102 0.245-0.258 0.336-0.345s0.333-0.327 0.535-0.533c0.203-0.206 0.442-0.447 0.533-0.535 0.464-0.451 0.788-0.773 0.778-0.773-0.006 0 0.096-0.109 0.227-0.243s0.248-0.239 0.258-0.233 0.020-0.010 0.020-0.035 0.007-0.038 0.016-0.029c0.020 0.020 0.088-0.046 0.088-0.086 0-0.016 0.009-0.024 0.020-0.018 0.019 0.011 0.157-0.116 0.143-0.131-0.004-0.004 0.002-0.010 0.013-0.013 0.036-0.010 0.079-0.060 0.067-0.080-0.007-0.011 0.007-0.020 0.031-0.020s0.035-0.012 0.026-0.026c-0.009-0.014-0.006-0.026 0.008-0.026s0.278-0.252 0.589-0.56l0.565-0.56v-6.196c0-3.408-0.007-6.214-0.016-6.237-0.024-0.064-0.028-0.061-0.382 0.293z"></path>
+            <path fill="#3b3e43"
+                  d="M27.303 22.685c0 0.014 0.018 0.026 0.039 0.026s0.039-0.012 0.039-0.026c0-0.014-0.018-0.026-0.039-0.026s-0.039 0.012-0.039 0.026zM27.373 22.729c-0.010 0.010-0.017 2.825-0.016 6.256l0.001 6.238 1.111 1.096c0.929 0.916 2.33 2.3 2.885 2.849 0.075 0.074 0.237 0.241 0.359 0.37s0.236 0.236 0.254 0.236c0.026 0.001 0.032-1.265 0.032-6.248v-6.25l-0.12-0.11c-0.066-0.060-0.192-0.184-0.28-0.273-0.139-0.142-0.518-0.521-1.064-1.066-0.084-0.084-0.318-0.321-0.519-0.526s-0.365-0.366-0.365-0.358-0.079-0.068-0.176-0.17c-0.097-0.102-0.358-0.366-0.581-0.588-0.447-0.445-0.547-0.546-1.091-1.096-0.367-0.371-0.396-0.395-0.431-0.36zM36.687 22.77c-0.009 0.032-0.016 2.845-0.016 6.251l-0 6.193 3.066 3.063c2.43 2.428 3.079 3.063 3.131 3.063h0.065v-12.448l-3.092-3.091c-1.7-1.7-3.102-3.091-3.115-3.091s-0.030 0.027-0.039 0.059z"></path>
+            <path fill="#3b3e43"
+                  d="M36.644 22.705c-0.012 2.232-0.007 12.496 0.006 12.483 0.025-0.025 0.039-12.502 0.013-12.502-0.011 0-0.020 0.009-0.020 0.020zM27.306 28.889c0.001 3.397 0.012 6.207 0.023 6.243s0.025-2.744 0.030-6.178c0.007-4.981 0.003-6.243-0.023-6.243s-0.032 1.251-0.030 6.178zM32.013 33.526c0 3.444 0.003 4.849 0.007 3.123s0.004-4.545 0-6.262c-0.004-1.717-0.007-0.304-0.007 3.14zM35.861 35.96l-0.169 0.176 0.176-0.169c0.164-0.157 0.188-0.184 0.169-0.184-0.004 0-0.083 0.079-0.176 0.176z"></path>
+            <path fill="#3b3e43"
+                  d="M23.878 26.077c-0.025 0.029-0.036 0.052-0.025 0.052s0.040-0.024 0.065-0.052c0.025-0.029 0.036-0.052 0.025-0.052s-0.040 0.024-0.065 0.052zM22.829 27.119c-0.010 0.015-0.008 0.028 0.004 0.028s0.004 0.012-0.018 0.026c-0.027 0.018-0.029 0.025-0.006 0.026 0.018 0 0.040-0.018 0.049-0.040 0.018-0.048-0.004-0.079-0.029-0.040zM34.801 37.001c-0.132 0.134-0.231 0.248-0.222 0.252s0.125-0.1 0.258-0.234c0.132-0.133 0.232-0.247 0.222-0.252s-0.126 0.1-0.258 0.234zM23.662 38.869l-0.077 0.085 0.085-0.077c0.047-0.042 0.085-0.080 0.085-0.085 0-0.020-0.021-0.002-0.093 0.077zM21.237 41.263c-0.026 0.029-0.041 0.052-0.034 0.052s0.040-0.024 0.073-0.052 0.049-0.052 0.034-0.052c-0.014 0-0.047 0.024-0.073 0.052z"></path>
+            <circle cx="32" cy="32" fill="none"
+                    stroke-linecap="round" r="31" stroke-width="1" stroke="#3b3e43"
+                    stroke-dasharray="40 64">
+                <animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 32 32;360 32 32"
+                                  keyTimes="0;1" dur="1.5s" begin="0s" repeatCount="indefinite"></animateTransform>
+            </circle>
+            <circle cx="32" cy="32" fill="none" stroke-linecap="round" r="29"
+                    stroke-width="1" stroke="#d23f31" stroke-dasharray="40 64">
+                <animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 32 32;-360 32 32"
+                                  keyTimes="0;1" dur="1.5s" begin="0s" repeatCount="indefinite"></animateTransform>
+            </circle>
+        </svg>
+        <span id="details" style="text-overflow: ellipsis;white-space: nowrap;overflow: hidden;"></span>
+    </div>
+</div>
+<script>
+  const bgs = [
+    'linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%)',
+    'linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%)',
+    'linear-gradient(120deg, #a6c0fe 0%, #f68084 100%)',
+    'linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%)',
+    'linear-gradient(to right, #fa709a 0%, #fee140 100%)',
+    'linear-gradient(to top, #30cfd0 0%, #330867 100%)',
+    'linear-gradient(to top, #a8edea 0%, #fed6e3 100%)',
+    'linear-gradient(to top, #d299c2 0%, #fef9d7 100%)',
+    'linear-gradient(to top, #fddb92 0%, #d1fdff 100%)',
+    'linear-gradient(to top, #9890e3 0%, #b1f4cf 100%)',
+    'linear-gradient(to top, #96fbc4 0%, #f9f586 100%)',
+    'linear-gradient(to right, #eea2a2 0%, #bbc1bf 19%, #57c6e1 42%, #b49fda 79%, #7ac5d8 100%)',
+    'linear-gradient(to top, #9795f0 0%, #fbc8d4 100%)',
+    'linear-gradient(to top, #3f51b1 0%, #5a55ae 13%, #7b5fac 25%, #8f6aae 38%, #a86aa4 50%, #cc6b8e 62%, #f18271 75%, #f3a469 87%, #f7c978 100%)',
+    'linear-gradient(to top, #f43b47 0%, #453a94 100%)',
+    'linear-gradient(to top, #88d3ce 0%, #6e45e2 100%)',
+    'linear-gradient(to top, #d9afd9 0%, #97d9e1 100%)',
+    'linear-gradient(-20deg, #b721ff 0%, #21d4fd 100%)',
+    'linear-gradient(60deg, #abecd6 0%, #fbed96 100%)',
+    'linear-gradient(to top, #3b41c5 0%, #a981bb 49%, #ffc8a9 100%)',
+    'linear-gradient(to top, #0fd850 0%, #f9f047 100%)',
+    'linear-gradient(to top, #d5dee7 0%, #ffafbd 0%, #c9ffbf 100%)',
+    'linear-gradient(to top, #65bd60 0%, #5ac1a8 25%, #3ec6ed 50%, #b7ddb7 75%, #fef381 100%)',
+    'linear-gradient(to top, #50cc7f 0%, #f5d100 100%)',
+    'linear-gradient(to top, #df89b5 0%, #bfd9fe 100%)',
+    'linear-gradient(to top, #e14fad 0%, #f9d423 100%)',
+    'linear-gradient(to right, #ec77ab 0%, #7873f5 100%)',
+    'linear-gradient(-225deg, #2CD8D5 0%, #C5C1FF 56%, #FFBAC3 100%)',
+    'linear-gradient(-225deg, #5271C4 0%, #B19FFF 48%, #ECA1FE 100%)',
+    'linear-gradient(-225deg, #FF3CAC 0%, #562B7C 52%, #2B86C5 100%)',
+    'linear-gradient(-225deg, #69EACB 0%, #EACCF8 48%, #6654F1 100%)',
+    'linear-gradient(-225deg, #231557 0%, #44107A 29%, #FF1361 67%, #FFF800 100%)',
+  ]
+  const sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+  const redirect = () => {
+    const uri = 'http://127.0.0.1:6806'
+    if (navigator.userAgent.match(/Android/i))
+      document.location = uri
+    else
+      window.location.replace(uri)
+  }
+  (async () => {
+    document.getElementById('bg').style.backgroundImage = bgs[(new Date()).getDate()]
+    document.getElementById('image').style.backgroundImage = `url(images/boot${(new Date()).getDate()}.svg)`
+    document.getElementById('details').textContent = 'Booting...'
+    let progressing = false
+    while (!progressing) {
+      try {
+        const progressResult = await fetch('http://127.0.0.1:6806/api/system/bootProgress')
+        const progressData = await progressResult.json()
+        document.getElementById('progress').style.width = progressData.data.progress + '%'
+        document.getElementById('details').textContent = progressData.data.details
+        if (progressData.data.progress >= 100) {
+          progressing = true
+          if (navigator.userAgent.indexOf('Electron') === -1) {
+            redirect()
+          }
+        } else {
+          await sleep(100)
+        }
+      } catch (e) {
+        await sleep(100)
+      }
+    }
+  })()
+</script>
+</body>
+</html>

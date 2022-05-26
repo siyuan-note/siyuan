@@ -1,0 +1,598 @@
+{
+	"ID": "20200923234602-gy54e67",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f4c4",
+		"id": "20200923234602-gy54e67",
+		"title": "Privacy Policy and User Agreement",
+		"type": "doc",
+		"updated": "20220511114202"
+	},
+	"Children": [
+		{
+			"ID": "20210104091616-xrdqdy2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091616-xrdqdy2",
+				"updated": "20210302223930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Privacy Policy"
+				}
+			]
+		},
+		{
+			"ID": "20220209213811-rpuvjhk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220209213811-rpuvjhk",
+				"updated": "20220209213811"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan's privacy policy document to declare its commitment to user privacy protection. Last updated February 9, 2022."
+				}
+			]
+		},
+		{
+			"ID": "20220209213811-awxzl13",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220209213811-awxzl13",
+				"updated": "20220209213811"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Will personal information or data be collected?"
+				}
+			]
+		},
+		{
+			"ID": "20220209213811-l51sw6a",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220209213811-l51sw6a",
+				"updated": "20220209213835"
+			},
+			"Children": [
+				{
+					"ID": "20220209213811-ewxm84m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220209213811-ewxm84m",
+						"updated": "20220209213835"
+					},
+					"Children": [
+						{
+							"ID": "20220209213811-ky9opf0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220209213811-ky9opf0",
+								"updated": "20220209213835"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Does not collect user personal information and usage data (notes, asset files, operation records and program logs, etc.)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220209213811-is7xk7y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220209213811-is7xk7y"
+					},
+					"Children": [
+						{
+							"ID": "20220209213811-kbcjlc7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220209213811-kbcjlc7"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "All data is kept on the device under full control of the user"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220209213811-9gohtvm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220209213811-9gohtvm",
+				"updated": "20220209213811"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Developer Information and Contact"
+				}
+			]
+		},
+		{
+			"ID": "20220209213811-l3g0zol",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220209213811-l3g0zol",
+				"updated": "20220209213846"
+			},
+			"Children": [
+				{
+					"ID": "20220209213811-w811dqf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220209213811-w811dqf",
+						"updated": "20220209213846"
+					},
+					"Children": [
+						{
+							"ID": "20220209213811-n3n3bkg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220209213811-n3n3bkg",
+								"updated": "20220209213846"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SiYuan is designed and developed by Yunnan Liandi Technology Co., Ltd."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220209213811-m8hbjvz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220209213811-m8hbjvz"
+					},
+					"Children": [
+						{
+							"ID": "20220209213811-ya7l4pe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220209213811-ya7l4pe"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Contact via 845765@qq.com"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220209213811-o63lu5z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220209213811-o63lu5z",
+				"updated": "20220209213811"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "View Privacy Policy"
+				}
+			]
+		},
+		{
+			"ID": "20220209213811-vqbaqai",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220209213811-vqbaqai",
+				"updated": "20220226133935"
+			},
+			"Children": [
+				{
+					"ID": "20220209213811-kzz0gfr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220209213811-kzz0gfr",
+						"updated": "20220226133935"
+					},
+					"Children": [
+						{
+							"ID": "20220209213811-b7bccxi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220209213811-b7bccxi",
+								"updated": "20220226133935"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "By visiting the webpage "
+								},
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "https://b3log.org/siyuan/en/privacy.html"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://b3log.org/siyuan/en/privacy.html"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220209213811-jm73hi0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220209213811-jm73hi0",
+						"updated": "20220209213954"
+					},
+					"Children": [
+						{
+							"ID": "20220209213811-b4d3q89",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220209213811-b4d3q89",
+								"updated": "20220209213954"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click \"Help\" in the software, and open the \"Privacy Policy and License\" document in the opened \"SiYuan User Guide\""
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091616-of87fda",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091616-of87fda",
+				"updated": "20220219101126"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "User Agreement"
+				}
+			]
+		},
+		{
+			"ID": "20220219101351-0tucf6z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220219101351-0tucf6z",
+				"updated": "20220511114202"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This agreement applies and only applies to SiYuan (hereinafter referred to as \"the software\"), and Yunnan Liandi Technology Co., Ltd. has the final right to interpret this agreement."
+				}
+			]
+		},
+		{
+			"ID": "20220219101351-vq4zmoc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220219101351-vq4zmoc",
+				"updated": "20220219101351"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Once you confirm this agreement and start to use the software, you are deemed to fully understand and accept the terms of this agreement. An agreement in the form of electronic text has full and equivalent legal effect as an agreement signed by both parties in writing."
+				}
+			]
+		},
+		{
+			"ID": "20220219101351-k90bwhy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220219101351-k90bwhy",
+				"updated": "20220219101351"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "While enjoying the power conferred by the terms, it is subject to relevant constraints and restrictions. Behaviors outside the scope of the agreement will directly violate this agreement and constitute infringement. We have the right to terminate the authorization at any time, order to stop the damage, and reserve the right to pursue relevant responsibilities."
+				}
+			]
+		},
+		{
+			"ID": "20220219101351-4z646n1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220219101351-4z646n1",
+				"updated": "20220219101351"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Licensed Rights"
+				}
+			]
+		},
+		{
+			"ID": "20220219101351-wdm69r4",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220219101351-wdm69r4",
+				"updated": "20220219101351"
+			},
+			"Children": [
+				{
+					"ID": "20220219101351-uxailqh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220219101351-uxailqh"
+					},
+					"Children": [
+						{
+							"ID": "20220219101351-1hq20f9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220219101351-1hq20f9"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "You can use the software within the constraints and limitations stipulated in the agreement"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220219101351-wj1wwxg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220219101351-wj1wwxg"
+					},
+					"Children": [
+						{
+							"ID": "20220219101351-kdfxs0r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220219101351-kdfxs0r"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "You own the ownership of the content written by using this software, and independently assume the relevant legal obligations related to these content"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220219101351-zafgped",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220219101351-zafgped",
+				"updated": "20220219101351"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Constraints and Restrictions under the Agreement"
+				}
+			]
+		},
+		{
+			"ID": "20220219101351-33mzoxp",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220219101351-33mzoxp",
+				"updated": "20220511114148"
+			},
+			"Children": [
+				{
+					"ID": "20220219101351-6fxrijg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220219101351-6fxrijg",
+						"updated": "20220219101351"
+					},
+					"Children": [
+						{
+							"ID": "20220219101351-hahd4aj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220219101351-hahd4aj",
+								"updated": "20220219101351"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Development of derivative, modified or third-party versions of the software in whole or in part for redistribution without official permission is prohibited"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220511114148-mhyfpm4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220511114148-mhyfpm4",
+						"updated": "20220511114148"
+					},
+					"Children": [
+						{
+							"ID": "20220511114148-eri7s9w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220511114148-eri7s9w",
+								"updated": "20220511114148"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "It is forbidden to share the user account to use the software"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220219101351-wrfqyzo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220219101351-wrfqyzo",
+						"updated": "20220219101351"
+					},
+					"Children": [
+						{
+							"ID": "20220219101351-yggu31m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220219101351-yggu31m",
+								"updated": "20220219101351"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If you fail to comply with the terms of this agreement, your authorization will be terminated, the licensed rights will be withdrawn, and you will assume the corresponding legal responsibility"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220219101351-nfsf1sy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220219101351-nfsf1sy",
+				"updated": "20220219101351"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "LIMITED WARRANTY AND DISCLAIMER"
+				}
+			]
+		},
+		{
+			"ID": "20220219101351-jhqa4s1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220219101351-jhqa4s1",
+				"updated": "20220219101351"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "THIS SOFTWARE AND THE ACCOMPANYING DOCUMENTS ARE PROVIDED WITHOUT ANY EXPRESS OR IMPLIED INDEMNITY OR WARRANTY."
+				}
+			]
+		}
+	]
+}

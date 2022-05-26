@@ -1,0 +1,161 @@
+:root {
+    /* 主色 */
+    --b3-theme-primary: #1f6feb;
+    --b3-theme-primary-light: rgba(31, 111, 235, 0.54);
+    --b3-theme-primary-lighter: rgba(31, 111, 235, 0.38);
+    --b3-theme-primary-lightest: rgba(31, 111, 235, 0.12);
+    --b3-theme-secondary: #f3a92f;
+    --b3-theme-background: #212224;
+    --b3-theme-background-light: #353637;
+    --b3-theme-surface: #292a2d;
+    --b3-theme-surface-light: rgba(41, 42, 45, .86);
+    --b3-theme-error: #d23f31;
+
+    /* 文字颜色 */
+    --b3-theme-on-primary: #fff;
+    --b3-theme-on-secondary: #fff;
+    --b3-theme-on-background: #c9d1d9;
+    --b3-theme-on-surface: #9aa0a6;
+    --b3-theme-on-surface-light: rgba(154, 160, 166, .68);
+    --b3-theme-on-error: #fff;
+
+    /* 字体 */
+    --b3-font-family: "quote", "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+    --b3-font-family-code: "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+    --b3-font-family-graph: mononoki;
+    --b3-font-family-emoji: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji";
+    --b3-font-family-math: KaTeX_Math;
+
+    /* 线条 */
+    --b3-border-color: rgba(230, 230, 230, .06);
+
+    /* 滚动条 */
+    --b3-scroll-color: rgba(230, 230, 230, .2);
+
+    /* 列表 */
+    --b3-list-hover: #3f4041;
+
+    /* 菜单 */
+    --b3-menu-background: #27282a;
+
+    /* 提示 */
+    --b3-tooltips-color: rgba(70, 72, 76, .86);
+
+    /* 遮罩 */
+    --b3-mask-background: rgba(0, 0, 0, 0.78);
+
+    /* 卡片背景 */
+    --b3-card-error-color: rgb(250, 179, 174);
+    --b3-card-error-background: #280a08;
+    --b3-card-warning-color: rgb(255, 213, 153);
+    --b3-card-warning-background: #2d1b00;
+    --b3-card-info-color: rgb(166, 213, 250);
+    --b3-card-info-background: #051829;
+    --b3-card-success-color: rgb(183, 223, 185);
+    --b3-card-success-background: #0d1f0d;
+
+    /* 自定义文字 */
+    --b3-font-color1: var(--b3-card-error-color);
+    --b3-font-color2: var(--b3-card-warning-color);
+    --b3-font-color3: var(--b3-card-info-color);
+    --b3-font-color4: var(--b3-card-success-color);
+    --b3-font-color5: var(--b3-theme-on-surface);
+    --b3-font-color6: var(--b3-theme-primary);
+    --b3-font-color7: var(--b3-theme-secondary);
+    --b3-font-color8: var(--b3-theme-error);
+    --b3-font-color9: #f5539e;
+    --b3-font-color10: #944194;
+    --b3-font-color11: #65b84d;
+    --b3-font-color12: #f5822e;
+    --b3-font-color13: var(--b3-theme-background);
+    --b3-font-background1: var(--b3-card-error-background);
+    --b3-font-background2: var(--b3-card-warning-background);
+    --b3-font-background3: var(--b3-card-info-background);
+    --b3-font-background4: var(--b3-card-success-background);
+    --b3-font-background5: var(--b3-theme-surface);
+    --b3-font-background6: var(--b3-theme-primary-light);
+    --b3-font-background7: rgba(217, 211, 215, 0.5);
+    --b3-font-background8: rgba(255, 193, 153, 0.5);
+    --b3-font-background9: rgba(189, 201, 255, 0.5);
+    --b3-font-background10: rgba(239, 218, 251, 0.5);
+    --b3-font-background11: rgba(234, 202, 220, 0.5);
+    --b3-font-background12: rgba(253, 198, 200, 0.5);
+    --b3-font-background13: var(--b3-theme-on-background);
+
+    /* 动画效果 */
+    --b3-transition: all .15s cubic-bezier(0, 0, .2, 1) 0ms;
+    --b3-width-transition: width .15s cubic-bezier(0, 0, .2, 1) 0ms;
+
+    /* 阴影 */
+    --b3-point-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+    --b3-dialog-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
+
+    /* 图表颜色 */
+    --b3-graph-p-point: #076f7e;
+    --b3-graph-heading-point: #9876aa;
+    --b3-graph-math-point: #80FFA5;
+    --b3-graph-code-point: #00DDFF;
+    --b3-graph-table-point: #37A2FF;
+    --b3-graph-list-point: #FF0087;
+    --b3-graph-todo-point: #FFBF00;
+    --b3-graph-olist-point: #b3005f;
+    --b3-graph-listitem-point: #f65b00;
+    --b3-graph-bq-point: #8d48e3;
+    --b3-graph-super-point: #dd79ff;
+    --b3-graph-doc-point: #e8eaed;
+    --b3-graph-tag-point: #dbf32f;
+    --b3-graph-asset-point: #05c091;
+    --b3-graph-line: #9aa0a6;
+    --b3-graph-ref-line: #d23f31;
+    --b3-graph-tag-line: #5f6b06;
+    --b3-graph-tag-tag-line: #dbf32f;
+    --b3-graph-asset-line: #037457;
+    --b3-graph-hl-point: #f3a92f;
+    --b3-graph-hl-line: #4285f4;
+
+    /* 编辑器搜索颜色 */
+    --b3-protyle-search-background: #32593c;
+    --b3-protyle-search-border-color: #486a51;
+    --b3-protyle-search-current-background: #204282;
+
+    /* 代码片段背景 */
+    --b3-protyle-code-background: rgba(240, 246, 252, .15);
+    --b3-protyle-code-linenumber-hl: #26364a;
+
+    /* 所见即所得行内元素颜色 */
+    --b3-protyle-inline-strong-color: #e8eaed;
+    --b3-protyle-inline-em-color: #e8eaed;
+    --b3-protyle-inline-s-color: #e8eaed;
+    --b3-protyle-inline-link-color: #8ab4f8;
+    --b3-protyle-inline-mark-background: #32593c;
+    --b3-protyle-inline-mark-color: #e8eaed;
+    --b3-protyle-inline-tag-color: #9aa0a6;
+    --b3-protyle-inline-blockref-color: #9876aa;
+
+    /* PDF */
+    --b3-pdf-selection: #779170;
+    --b3-pdf-sidebar-width: 200px;
+    --b3-pdf-offset: 0;
+    --b3-pdf-background1: var(--b3-theme-error);
+    --b3-pdf-background2: #f5822e;
+    --b3-pdf-background3: var(--b3-theme-secondary);
+    --b3-pdf-background4: #65b84d;
+    --b3-pdf-background5: #f5539e;
+    --b3-pdf-background6: var(--b3-theme-primary);
+    --b3-pdf-background7: #944194;
+}
+
+/* PDF */
+.pdfViewer .page canvas,
+.thumbnailImage {
+    filter: grayscale(0%) invert(100%) contrast(100%) brightness(100%) hue-rotate(180deg);
+}
+
+.textLayer,
+.pdf__resize {
+    mix-blend-mode: screen;
+}
+
+.b3-text-field::-webkit-calendar-picker-indicator {
+    filter: invert(1)
+}

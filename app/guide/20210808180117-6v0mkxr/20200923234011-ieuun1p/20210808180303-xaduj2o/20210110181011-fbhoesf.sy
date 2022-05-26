@@ -1,0 +1,189 @@
+{
+	"ID": "20210110181011-fbhoesf",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210110181011-fbhoesf",
+		"title": "Daily notes",
+		"type": "doc"
+	},
+	"Children": [
+		{
+			"ID": "20210110181041-j47iwxx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110181041-j47iwxx",
+				"updated": "20210302223722"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "We can quickly create a document through the daily note. The entry of the daily note function in the top toolbar looks like a calendar button."
+				}
+			]
+		},
+		{
+			"ID": "20210110181041-dnap16f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110181041-dnap16f",
+				"updated": "20210303230545"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "But before using the daily note, you need to select settings in the right-click drop-down menu of the notebook, and configure in the new diary settings:"
+				}
+			]
+		},
+		{
+			"ID": "20210110181041-24ejxr4",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210110181041-24ejxr4"
+			},
+			"Children": [
+				{
+					"ID": "20210110181041-3dq1cg4",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210110181041-3dq1cg4"
+					},
+					"Children": [
+						{
+							"ID": "20210302223720-m8ekt02",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223720-m8ekt02"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Storage path: the path under the notebook, support "
+								},
+								{
+									"Type": "NodeBlockRef",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20210104091444-c7gg3ak"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "template variables"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210110181041-aqpiznl",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210110181041-aqpiznl"
+					},
+					"Children": [
+						{
+							"ID": "20210302223720-no5b8qx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223720-no5b8qx"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Template path (optional): use this template as the initial content when creating the daily note"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210110181041-vntbiya",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110181041-vntbiya",
+				"updated": "20210501173308"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tips: Use in the specified template "
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20201117112518-dott91x"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "Embed Content Block"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to summarize to-do items or content blocks that need to be viewed daily."
+				}
+			]
+		}
+	]
+}

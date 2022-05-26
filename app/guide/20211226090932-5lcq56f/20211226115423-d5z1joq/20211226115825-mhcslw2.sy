@@ -1,0 +1,34 @@
+{
+	"ID": "20211226115825-mhcslw2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f36b",
+		"id": "20211226115825-mhcslw2",
+		"title": "內容塊",
+		"updated": "20211226120052"
+	},
+	"Children": [
+		{
+			"ID": "20211226115825-cy05qlm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115825-cy05qlm",
+				"updated": "20211226115839"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "內容塊"
+				}
+			]
+		},
+		{
+			"ID": "20211226120011-dxhqbkd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120011-dxhqbkd",
+				"updated": "20211226120011"
+			}
+		}
+	]
+}

@@ -1,0 +1,140 @@
+{
+	"ID": "20211226121503-k3jma6m",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226121503-k3jma6m",
+		"title": "存儲空間",
+		"updated": "20211226121514"
+	},
+	"Children": [
+		{
+			"ID": "20211226121514-9r4k5e3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226121514-9r4k5e3",
+				"updated": "20211226005932"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "雲端存儲空間大小為 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "8G"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，分為三個部分："
+				}
+			]
+		},
+		{
+			"ID": "20211226121514-hmpy0lc",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226121514-hmpy0lc",
+				"updated": "20211228141330"
+			},
+			"Children": [
+				{
+					"ID": "20211226121514-pn19r60",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121514-pn19r60",
+						"updated": "20211228141328"
+					},
+					"Children": [
+						{
+							"ID": "20211226121514-t2bmmoj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121514-t2bmmoj",
+								"updated": "20211228141328"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同步資料：提供給同步功能使用，資料是加密的"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121514-oxrrbse",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121514-oxrrbse",
+						"updated": "20211228141330"
+					},
+					"Children": [
+						{
+							"ID": "20211226121514-s9iqfeb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121514-s9iqfeb",
+								"updated": "20211228141330"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "備份資料：提供給備份功能使用，資料是加密的"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121514-tq33ai6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121514-tq33ai6",
+						"updated": "20211228104804"
+					},
+					"Children": [
+						{
+							"ID": "20211226121514-0a8n57l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121514-0a8n57l",
+								"updated": "20211228104804"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "資料文件：提供給複製到公眾號、知乎和語雀等使用，HTTPS CDN"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

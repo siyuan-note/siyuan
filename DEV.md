@@ -2,7 +2,7 @@
 
 ## Get the source code
 
-* `git clone --recurse-submodules git@github.com:siyuan-note/siyuan.git`
+* `git clone --recurse-submodules git@github.com:siyuan-note/siyuan.git` For example saved in `D:/siyuan/`
 * switch to dev branch
 
 ## NPM dependencies
@@ -21,17 +21,20 @@ NPM mirror:
 
 ### Desktop
 
-* `go build --tags "fts5" -o "D:\\siyuan\\app\\kernel\\SiYuan-Kernel.exe"`
-* `SiYuan-Kernel.exe --wd=D:\\siyuan\\app`
+* `cd kernel`
+* `go build --tags "fts5" -o "../app/kernel/SiYuan-Kernel.exe"`
+* `SiYuan-Kernel.exe --wd=D:/siyuan/app`
 
 ### iOS
 
-* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./kernel/mobile/`
+* `cd kernel`
+* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./mobile/`
 * https://github.com/siyuan-note/siyuan-ios
 
 ### Android
 
-* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm,android/arm64' ./kernel/mobile/`
+* `cd kernel`
+* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm,android/arm64' ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 ## User Interface

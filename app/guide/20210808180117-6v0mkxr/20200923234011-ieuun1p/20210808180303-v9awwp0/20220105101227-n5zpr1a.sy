@@ -1,0 +1,146 @@
+{
+	"ID": "20220105101227-n5zpr1a",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20220105101227-n5zpr1a",
+		"title": "Limitations",
+		"updated": "20220325115446"
+	},
+	"Children": [
+		{
+			"ID": "20220105101254-dhwb8a1",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220105101254-dhwb8a1",
+				"updated": "20220325115446"
+			},
+			"Children": [
+				{
+					"ID": "20220105101254-jmyydpw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101254-jmyydpw",
+						"updated": "20220325115446"
+					},
+					"Children": [
+						{
+							"ID": "20220105101254-gm1ctyf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101254-gm1ctyf",
+								"updated": "20220325115446"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "During synchronization or backup, single file transfer larger than 100MB is not supported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101254-hqgvkpw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101254-hqgvkpw"
+					},
+					"Children": [
+						{
+							"ID": "20220105101254-9uc9ujk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101254-9uc9ujk"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Supports the creation of up to 7 cloud synchronization directories"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101254-7efd0tf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101254-7efd0tf"
+					},
+					"Children": [
+						{
+							"ID": "20220105101254-2pos3yt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101254-2pos3yt"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The initial total size of cloud storage space is "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "8G"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101254-fvel6pz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101254-fvel6pz",
+						"updated": "20220325115334"
+					},
+					"Children": [
+						{
+							"ID": "20220105101254-523epu0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101254-523epu0",
+								"updated": "20220325115334"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After the paid subscription expires, the cloud storage will be completely deleted"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

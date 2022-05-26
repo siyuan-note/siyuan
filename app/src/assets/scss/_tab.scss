@@ -1,0 +1,11 @@
+.b3-tab-container {
+    overflow: auto;
+    box-sizing: border-box;
+    flex: 1;
+    background-color: var(--b3-theme-background);
+
+  .b3-label {
+    padding: 16px 0;
+    margin: 0 24px;
+  }
+}

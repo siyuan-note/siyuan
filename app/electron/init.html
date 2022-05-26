@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SiYuan</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            background-color: #fff;
+            text-align: center;
+            color: #202124;
+            user-select: none;
+            font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+        }
+
+        .fn__flex-column {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin: 0 auto;
+            border: 1px solid rgba(0, 0, 0, .06);
+            min-height: 100vh;
+            box-sizing: border-box;
+            padding: 0 calc((100vw - 608px) / 2);
+        }
+
+        .fn__flex-1 {
+            flex: 1;
+            min-height: 16px;
+            flex-shrink: 0;
+        }
+
+        h2 {
+            margin: 0 0 4px 0;
+            line-height: 24px;
+        }
+
+        .b3-select {
+            border: 1px solid rgba(0, 0, 0, .06);
+            border-radius: 4px;
+            padding: 4px 8px;
+            line-height: 20px;
+            box-sizing: border-box;
+            color: #202124;
+            transition: box-shadow 120ms 0ms cubic-bezier(0, 0, 0.2, 1);
+            background-color: #fff;
+            height: 28px;
+            font-size: 14px;
+            width: 96px;
+        }
+
+        .b3-select:focus {
+            border: 1px solid #218bff;
+            outline: none;
+        }
+
+        .b3-button {
+            cursor: pointer;
+            color: #fff;
+            border-radius: 4px;
+            line-height: 20px;
+            padding: 4px 8px;
+            background-color: #218bff;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
+            border: 0;
+            box-sizing: border-box;
+            text-align: center;
+            width: 96px;
+        }
+
+        .b3-button:hover, .b3-button:focus {
+            text-decoration: none;
+            background-color: #0969da;
+            box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12)
+        }
+
+        .b3-button:active {
+            box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12)
+        }
+
+        .b3-label {
+            padding: 12px 24px;
+            line-height: 20px;
+            display: flex;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, .06);
+        }
+
+        .b3-label__text {
+            color: #5f6368;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .fn__space {
+            width: 8px;
+            flex-shrink: 0;
+        }
+
+        .fn__flex-center {
+            align-self: center;
+        }
+
+        .svg {
+            position: fixed;
+            right: 22px;
+            top: 0;
+            width: 12px;
+            fill: #5f6368;
+            padding: 5px;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .svg:hover {
+            background: #dfe0e1;
+            fill: #202124;
+        }
+
+        #close {
+            right: 0;
+            width: 8px;
+            padding: 7px 7px;
+        }
+
+        #close:hover {
+            background-color: #d23f31;
+            fill: #fff;
+        }
+
+        a {
+            text-decoration: none;
+            color: #218bff;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: #0969da;
+        }
+
+        .fn__none {
+            display: none !important;
+        }
+
+        .slogan {
+            color: #5f6368;
+            font-size: 15px;
+        }
+
+        .icon {
+            width: 88px;
+            margin: 0 auto
+        }
+
+        kbd {
+            padding: 2px 4px;
+            font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            line-height: 1;
+            color: #5f6368;
+            vertical-align: middle;
+            background-color: #f3f3f3;
+            border: solid 1px rgba(0, 0, 0, .06);
+            border-radius: 3px;
+            box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .06);
+        }
+
+        .feedback {
+            display: flex;
+            justify-content: space-around;
+            font-size: 14px
+        }
+
+        .drag {
+            -webkit-app-region: drag;
+            height: 22px;
+            cursor: pointer;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 44px;
+        }
+    </style>
+</head>
+<body>
+<div id="zhCN" class="fn__flex-column">
+    <div class="fn__flex-1"></div>
+    <img class="icon">
+    <h2>思源笔记</h2>
+    <div class="slogan">构建你永恒的数字花园</div>
+    <div class="fn__flex-1"></div>
+    <label class="b3-label">
+        <div>
+            🌐 外观语言
+            <div class="b3-label__text">用户界面语言，后续可在 <kbd>设置</kbd> - <kbd>外观</kbd> 中切换</div>
+        </div>
+        <div class="fn__space"></div>
+        <div class="fn__flex-1"></div>
+        <select class="b3-select lang">
+            <option value="en-US">English</option>
+            <option value="fr-FR">Français</option>
+            <option value="zh-CN">简体中文</option>
+            <option value="zh-CHT">繁體中文</option>
+        </select>
+    </label>
+    <label class="b3-label">
+        <div>
+            🗂️ 工作空间
+            <div class="b3-label__text"> 工作空间用于存放数据，后续可在 <kbd>设置</kbd> - <kbd>关于</kbd> 中切换</div>
+        </div>
+        <div class="fn__space"></div>
+        <div class="fn__flex-1"></div>
+        <button class="b3-button fn__flex-center choosePath">选择</button>
+    </label>
+    <div class="fn__flex-1"></div>
+    <div class="feedback">
+        <span>❤️ <a href="https://ld246.com/article/1649901726096" target="_blank">求助反馈建议</a></span>
+        <span>🏘️ <a href="https://ld246.com/article/1640266171309" target="_blank">用户社区汇总</a></span>
+        <span><a href="https://b3log.org/siyuan/download.html" target="_blank" class="version"></a></span>
+    </div>
+    <div class="fn__flex-1"></div>
+</div>
+<div class="fn__none fn__flex-column" id="enUS">
+    <div class="fn__flex-1"></div>
+    <img class="icon">
+    <h2>SiYuan</h2>
+    <div class="slogan">Build Your Eternal Digital Garden</div>
+    <div class="fn__flex-1"></div>
+    <label class="b3-label">
+        <div>
+            🌐 Language
+            <div class="b3-label__text">User interface language, which can be switched later in <br>
+                <kbd>Settings</kbd> - <kbd>Appearance</kbd>
+            </div>
+        </div>
+        <div class="fn__space"></div>
+        <div class="fn__flex-1"></div>
+        <select class="b3-select lang">
+            <option value="en-US">English</option>
+            <option value="fr-FR">Français</option>
+            <option value="zh-CN">简体中文</option>
+            <option value="zh-CHT">繁體中文</option>
+        </select>
+    </label>
+    <label class="b3-label">
+        <div>
+            🗂️ Workspace
+            <div class="b3-label__text">The workspace is used to store data, which can be switched later in <br>
+                <kbd>Settings</kbd> - <kbd>About</kbd>
+            </div>
+        </div>
+        <div class="fn__space"></div>
+        <div class="fn__flex-1"></div>
+        <button class="b3-button fn__flex-center choosePath">Select</button>
+    </label>
+    <div class="fn__flex-1"></div>
+    <div class="feedback">
+        <span>❤️ Feedback via <a href="https://github.com/siyuan-note/siyuan/issues"
+                                 target="_blank">GitHub Issues</a></span>
+        <span><a href="https://b3log.org/siyuan/en/download.html" target="_blank" class="version"></a></span>
+    </div>
+    <div class="fn__flex-1"></div>
+</div>
+<svg class="svg" id="min" viewBox="0 0 32 32">
+    <path d="M1.333 14.667h29.333q1.333 0 1.333 1.333v0q0 1.333-1.333 1.333h-29.333q-1.333 0-1.333-1.333v0q0-1.333 1.333-1.333z"></path>
+</svg>
+<svg class="svg" id="close" viewBox="0 0 32 32">
+    <path d="M32 3.221l-12.779 12.779 12.779 12.779-3.221 3.221-12.779-12.779-12.779 12.779-3.221-3.221 12.779-12.779-12.779-12.779 3.221-3.221 12.779 12.779 12.779-12.779z"></path>
+</svg>
+<div class="drag"></div>
+<script>
+  const getSearch = (key) => {
+    if (window.location.search.indexOf('?') === -1) {
+      return ''
+    }
+    let value = ''
+    const data = window.location.search.split('?')[1].split('&')
+    data.find(item => {
+      const keyValue = item.split('=')
+      if (keyValue[0] === key) {
+        value = keyValue[1]
+        return true
+      }
+    })
+    return value
+  }
+
+  const setLang = (lang) => {
+    if (lang === 'zh-CN') {
+      document.title = `思源笔记 v${getSearch('v')}`
+      document.getElementById('zhCN').classList.remove('fn__none')
+      document.getElementById('enUS').classList.add('fn__none')
+    } else {
+      document.title = `SiYuan v${getSearch('v')}`
+      document.getElementById('zhCN').classList.add('fn__none')
+      document.getElementById('enUS').classList.remove('fn__none')
+    }
+  }
+
+  setLang(navigator.language)
+
+  document.querySelectorAll('.version').forEach(item => {
+    item.textContent = `🔖 v${getSearch('v')}`
+  })
+
+  document.querySelectorAll('.icon').forEach(item => {
+    item.src = decodeURIComponent(`${getSearch('icon')}`)
+  })
+
+  document.querySelectorAll('.lang').forEach(item => {
+    item.value = navigator.language
+    item.addEventListener('change', () => {
+      document.querySelectorAll('.lang').forEach(item1 => {
+        item1.value = item.value
+      })
+      setLang(item.value)
+    })
+  })
+
+  document.getElementById('close').addEventListener('click', () => {
+    const {ipcRenderer} = require('electron')
+    ipcRenderer.send('siyuan-first-quit')
+  })
+  document.getElementById('min').addEventListener('click', () => {
+    const {getCurrentWindow} = require('@electron/remote')
+    getCurrentWindow().minimize()
+  })
+
+  document.querySelectorAll('.choosePath').forEach((item) => {
+    item.addEventListener('click', () => {
+      const {dialog} = require('@electron/remote')
+      const path = require('path')
+      dialog.showOpenDialog({
+        defaultPath: path.join(decodeURIComponent(getSearch('home')), 'Documents'),
+        properties: ['openDirectory', 'createDirectory'],
+      }).then((result) => {
+        if (!result.canceled) {
+          const {ipcRenderer} = require('electron')
+          const fs = require('fs')
+          const initPath = path.join(result.filePaths[0], 'SiYuan')
+          if (!fs.existsSync(initPath)) {
+            fs.mkdirSync(initPath, {mode: 0o755, recursive: true})
+          }
+          const lang = document.querySelector('.lang').value.replaceAll('-', '_')
+          ipcRenderer.send('siyuan-first-init', `${initPath}-${lang}`)
+        }
+      })
+    })
+  })
+</script>
+</body>
+</html>

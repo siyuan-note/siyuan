@@ -1,0 +1,63 @@
+{
+	"ID": "20211226121329-c5v3dto",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226121329-c5v3dto",
+		"title": "Kernel API",
+		"updated": "20211226122348"
+	},
+	"Children": [
+		{
+			"ID": "20211226121329-6wf1aig",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226121329-6wf1aig",
+				"updated": "20211226122348"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "請瀏覽 "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "API 文檔"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/blob/master/API.md"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20211226122348-5t303hg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122348-5t303hg",
+				"updated": "20211226122348"
+			}
+		}
+	]
+}

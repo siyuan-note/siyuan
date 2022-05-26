@@ -1,0 +1,291 @@
+{
+	"ID": "20200910201551-h4twhas",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200910201551-h4twhas",
+		"title": "书签和标签",
+		"type": "doc",
+		"updated": "20210702231322"
+	},
+	"Children": [
+		{
+			"ID": "20210104091316-ltmnzg9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091316-ltmnzg9"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "书签"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-lz5jshd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091316-lz5jshd",
+				"updated": "20210702231322"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果你需要“收藏”内容块，请通过块标菜单打开属性面板，然后就可以在属性面板中设置书签了。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-bv7y23w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091316-bv7y23w"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "内置的书签标识是 ✨💡️⏳，可以通过新建其他文本作为书签标识。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-5vwheuz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091316-5vwheuz"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "所有收藏过的内容块会在书签页签（ "
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Alt 3"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "⌘ 3"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）中列出。如果要取消收藏，在该内容块标识下拉菜单中选择删除即可。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-zxotarc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091316-zxotarc"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "标签"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-2w9o7q2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091316-2w9o7q2"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标签用于在内容块中对该块进行标记。语法是通过一前一后两个 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "#"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 将标签标识包裹起来，像这样 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "#标签#"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-nehznw8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091316-nehznw8"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标签支持层级，这样可以更方便地对内容块进行分类整理。不同层级之间使用 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 分隔，像这样 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "#A/B/C#"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-gt0utcz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091316-gt0utcz"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "所有打过标签的内容块会在标签页签（"
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Alt 4"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "⌘ 4"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）中列出。如果需要取消标签，在内容块中删掉该标签即可。"
+				}
+			]
+		}
+	]
+}

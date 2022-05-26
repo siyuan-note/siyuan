@@ -1,0 +1,509 @@
+{
+	"ID": "20210824201257-cy7icrc",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210824201257-cy7icrc",
+		"title": "挂件",
+		"updated": "20220108010915"
+	},
+	"Children": [
+		{
+			"ID": "20210824201352-apdkqps",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210824201352-apdkqps",
+				"updated": "20210824201352"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20210824201352-z3731rx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210824201352-z3731rx",
+				"updated": "20210824201939"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "挂件是思源内核伺服的静态网页，它通过 API 存取数据，通过 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "\u003ciframe\u003e"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 进行渲染展现。"
+				}
+			]
+		},
+		{
+			"ID": "20210824201352-9vey615",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210824201352-9vey615",
+				"updated": "20210824202222"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20210824201352-xhr1kmi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210824201352-xhr1kmi",
+				"updated": "20211230223933"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "挂件通过挂件集市安装，安装后挂件将被放置到工作空间/widgets 文件夹下。在编辑器中使用斜杆菜单触发调用搜索，选择需要的挂件后该挂件就会以挂件块的形式插入到文档中。"
+				}
+			]
+		},
+		{
+			"ID": "20211222095016-3jjm95h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211222095016-3jjm95h",
+				"updated": "20211222095023"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上架挂件集市"
+				}
+			]
+		},
+		{
+			"ID": "20211222095046-vswv2j2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211222095046-vswv2j2",
+				"updated": "20211222095120"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上架前请确认你的模板仓库根路径下至少包含以下文件（"
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "仓库示例"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/88250/Stairway-To-Heaven"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）："
+				}
+			]
+		},
+		{
+			"ID": "20211222095046-19gwg0x",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211222095046-19gwg0x",
+				"updated": "20211222095205"
+			},
+			"Children": [
+				{
+					"ID": "20211222095046-a31h24x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211222095046-a31h24x"
+					},
+					"Children": [
+						{
+							"ID": "20211222095046-6wrfvla",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211222095046-6wrfvla",
+								"updated": "20211222095132"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "widget.json（请确保 JSON 格式正确）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211222095203-n4rmbif",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211222095203-n4rmbif",
+						"updated": "20211222095205"
+					},
+					"Children": [
+						{
+							"ID": "20211222095203-e7ndcm9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211222095203-e7ndcm9",
+								"updated": "20211222095205"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "index.html"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211222095046-3ck7na5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211222095046-3ck7na5"
+					},
+					"Children": [
+						{
+							"ID": "20211222095046-ef1y073",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211222095046-ef1y073",
+								"updated": "20211222094852"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "preview.png（请压缩图片大小在 512 KB 以内）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211222095046-ossgnvf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211222095046-ossgnvf"
+					},
+					"Children": [
+						{
+							"ID": "20211222095046-40cakfz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211222095046-40cakfz",
+								"updated": "20211222094908"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "README.md（请注意大小写）"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211222095046-70nwjqi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211222095046-70nwjqi",
+				"updated": "20211222095304"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "确认无误以后请通过对"
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "社区集市"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/bazaar"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "仓库"
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "发起 pull request"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://docs.github.com/cn/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，修改 widgets.json 文件。该文件是所有社区模板仓库的索引，格式为："
+				}
+			]
+		},
+		{
+			"ID": "20211222095046-dfkdfb0",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20211222095046-dfkdfb0",
+				"updated": "20211222095046"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"ID": "20220307091943-711z3n0",
+					"Type": "NodeCodeBlockCode",
+					"Data": "{\n  \"repos\": [\n    \"username/reponame@commithash\"\n  ]\n}\n",
+					"Properties": {
+						"id": "20220307091943-711z3n0"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20211222095046-3s0n0up",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211222095046-3s0n0up",
+				"updated": "20211222095046"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "其中 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "commithash"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 请填写你的模板仓库上最近一次发布版本的 Git 提交哈希值，请使用完整哈希值，不要使用 7 位短值。"
+				}
+			]
+		},
+		{
+			"ID": "20220108010915-kwv5j0s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220108010915-kwv5j0s",
+				"updated": "20220108010915"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "更新"
+				}
+			]
+		},
+		{
+			"ID": "20220108010915-w8a3mib",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220108010915-w8a3mib",
+				"updated": "20220108010922"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果你开发的挂件更新了版本，请记得："
+				}
+			]
+		},
+		{
+			"ID": "20220108010915-rgdoeez",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220108010915-rgdoeez",
+				"updated": "20220108010931"
+			},
+			"Children": [
+				{
+					"ID": "20220108010915-m411fw5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220108010915-m411fw5",
+						"updated": "20220108010931"
+					},
+					"Children": [
+						{
+							"ID": "20220108010915-fx63gvv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220108010915-fx63gvv",
+								"updated": "20220108010931"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "更新你的挂件配置 widget.json 中的 version 字段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220108010915-8i3n4ed",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220108010915-8i3n4ed"
+					},
+					"Children": [
+						{
+							"ID": "20220108010915-0vgx9h4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220108010915-0vgx9h4"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "再次对"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "社区"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "集市发起 Pull Request"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

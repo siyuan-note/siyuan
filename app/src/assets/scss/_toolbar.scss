@@ -1,0 +1,71 @@
+.protyle {
+  &-toolbar {
+    background-color: var(--b3-theme-background);
+    z-index: 3;
+    position: fixed;
+    box-shadow: var(--b3-point-shadow);
+    border-radius: 4px;
+    display: flex;
+
+    &__item {
+      color: var(--b3-theme-on-surface);
+      border: 0;
+      background-color: transparent;
+      height: 29px;
+      box-sizing: border-box;
+      font-size: 0;
+      padding: 0 6px;
+
+      &:focus {
+        outline: none;
+      }
+
+      svg {
+        fill: currentColor;
+        display: inline-block;
+        stroke-width: 0;
+        stroke: currentColor;
+        width: 14px;
+        height: 14px;
+      }
+
+      &--current {
+        color: var(--b3-theme-primary);
+      }
+
+      &:hover {
+        background-color: var(--b3-border-color);
+      }
+    }
+
+    &__divider {
+      border-left: 1px solid var(--b3-border-color);
+      margin: 6px 4px;
+    }
+  }
+
+  &-util {
+    @extend .b3-menu;
+    z-index: 303;
+  }
+
+  &-font {
+    font-size: 12px;
+    padding: 4px 8px;
+
+    &__style {
+      background-color: transparent;
+      margin-right: 4px;
+      transition: var(--b3-transition);
+      padding: 0 4px;
+      border-radius: 2px;
+      border: 1px solid transparent;
+      color: var(--b3-theme-on-background);
+      white-space: nowrap;
+
+      &:hover {
+        border-color: var(--b3-border-color);
+      }
+    }
+  }
+}

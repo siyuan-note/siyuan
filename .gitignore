@@ -1,5 +1,26 @@
-# Binaries
+# Binaries for programs and plugins
 *.exe
+cloc.exe
+*.dll
+*.so
+*.dylib
+*.aar
+*.jar
+*.syso
+.DS_Store
+app/node_modules
+app/stage/build
+app/build
+app/kernel*
+ios
+pprof
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+electron/dist
 
 # IDE
 .idea/

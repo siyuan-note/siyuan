@@ -2,7 +2,7 @@
 
 ## 获取源码
 
-* `git clone --recurse-submodules git@github.com:siyuan-note/siyuan.git`
+* `git clone --recurse-submodules git@github.com:siyuan-note/siyuan.git` 例如保存在 `D:/siyuan/`
 * 切换到 dev 分支
 
 ## NPM 依赖
@@ -21,8 +21,9 @@ NPM 镜像：
 
 ### 桌面端
 
-* `go build --tags "fts5" -o "D:\\siyuan\\app\\kernel\\SiYuan-Kernel.exe"`
-* `SiYuan-Kernel.exe --wd=D:\\siyuan\\app`
+* `cd kernel`
+* `go build --tags "fts5" -o "../app/kernel/SiYuan-Kernel.exe"`
+* `SiYuan-Kernel.exe --wd=D:/siyuan/app`
 
 ### iOS
 

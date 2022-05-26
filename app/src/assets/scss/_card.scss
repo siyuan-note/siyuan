@@ -1,0 +1,58 @@
+.b3-card {
+  box-shadow: var(--b3-point-shadow);
+  background-color: var(--b3-theme-surface);
+  width: 218px;
+  border-radius: 4px;
+  margin: 8px;
+  overflow: hidden;
+  position: relative;
+  transition: var(--b3-transition);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--b3-border-color);
+    transform: translate(0px, -4px);
+    box-shadow: var(--b3-dialog-shadow);
+  }
+
+  &s {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 8px;
+  }
+
+  &__img {
+    height: 116px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img {
+      max-height: 100%;
+    }
+  }
+
+  &__info {
+    padding: 8px 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+
+    a {
+      color: var(--b3-theme-on-background);
+
+      &:hover {
+        color: var(--b3-theme-on-surface);
+      }
+    }
+  }
+
+  &__actions {
+    padding: 0 16px 8px 16px;
+    display: flex;
+    height: 36px;
+    box-sizing: border-box;
+  }
+}

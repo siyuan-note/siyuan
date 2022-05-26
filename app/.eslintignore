@@ -1,0 +1,6 @@
+build
+dist
+electron
+node_modules
+public
+*.js

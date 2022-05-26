@@ -1,0 +1,64 @@
+@import "mixin";
+@import "tooltips";
+@import "typography";
+@import "wysiwyg";
+
+// https://ld246.com/article/1645943925484 问题3
+.fn__flex-1 {
+  flex: 1
+}
+
+.fn__none {
+  display: none;
+}
+
+.protyle-wysiwyg a {
+  color: var(--b3-protyle-inline-link-color);
+  cursor: pointer;
+  transition: var(--b3-transition);
+}
+
+svg {
+  fill: currentColor;
+  display: inline-block;
+}
+
+.protyle-wysiwyg [data-node-id].iframe:hover .protyle-action__drag {
+  display: none;
+}
+
+.b3-typography table, .protyle-wysiwyg table {
+  display: table;
+}
+
+.protyle-attr {
+  position: absolute;
+  right: 0;
+  top: -9px;
+  display: flex;
+  opacity: 0;
+  font-size: 12px;
+
+  & > div {
+    margin: 0 4px;
+    display: flex;
+    align-items: center;
+    line-height: 16px;
+    color: var(--b3-theme-on-surface);
+
+    &:hover {
+      color: var(--b3-theme-on-background);
+    }
+
+    svg {
+      height: 12px;
+      width: 12px;
+      margin-right: 2px;
+      flex-shrink: 0;
+    }
+  }
+
+  &:empty {
+    display: none;
+  }
+}

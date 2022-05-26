@@ -1,0 +1,223 @@
+.b3-menu {
+  position: fixed;
+  border-radius: 4px;
+  box-shadow: var(--b3-dialog-shadow);
+  background-color: var(--b3-menu-background);
+  padding: 4px 0;
+  z-index: 304;
+
+  &__item {
+    padding: 0 16px 0 8px;
+    user-select: none;
+    display: flex;
+    line-height: 30px;
+    cursor: pointer;
+    white-space: nowrap;
+    border: 0;
+    text-align: left;
+    width: 100%;
+    background-color: var(--b3-menu-background);
+    color: var(--b3-theme-on-background);
+    position: relative;
+    box-sizing: border-box;
+
+    &[disabled="disabled"] {
+      cursor: not-allowed;
+      opacity: 0.38;
+    }
+
+    &--show {
+      background-color: var(--b3-list-hover);
+
+      .b3-menu__submenu {
+        display: block;
+        border: 1px solid var(--b3-border-color);
+        border-radius: 4px;
+        background-color: var(--b3-menu-background);
+        padding: 4px 0;
+        position: absolute;
+        left: 100%;
+        top: -5px;
+        box-shadow: var(--b3-dialog-shadow);
+        mix-blend-mode: difference;
+
+
+        &--row {
+          display: flex;
+          flex-wrap: wrap;
+          flex-direction: row;
+          width: 312px;
+          padding: 4px;
+
+          .b3-menu__icon {
+            display: none;
+          }
+
+          .b3-menu__item {
+            width: auto;
+            padding: 4px;
+          }
+
+          .b3-menu__label {
+            min-width: auto;
+          }
+
+          .b3-menu__separator {
+            background-color: transparent;
+            margin: 2px 0;
+          }
+        }
+      }
+    }
+
+    &--current {
+      background-color: var(--b3-list-hover);
+    }
+
+    &--readonly {
+      cursor: auto;
+      color: var(--b3-theme-on-surface);
+      max-width: 320px;
+      white-space: normal;
+      word-break: break-all;
+      line-height: 16px;
+      margin: 4px 0;
+      display: inline-flex;
+    }
+
+    &--disabled {
+      opacity: .54;
+      cursor: not-allowed;
+    }
+  }
+
+  &__label {
+    flex: 1;
+    min-width: 84px;
+  }
+
+  &__icon {
+    align-self: center;
+    height: 14px;
+    width: 14px;
+    margin-right: 8px;
+    color: var(--b3-theme-on-surface);
+
+    &--arrow {
+      margin: 0 0 0 8px;
+      height: 10px;
+    }
+  }
+
+  &__separator {
+    background-color: var(--b3-border-color);
+    height: 1px;
+    margin: 4px 0;
+    display: block;
+    border: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+  }
+
+  &__submenu {
+    overflow: auto;
+    display: none;
+  }
+
+  &__accelerator {
+    font-size: 0.75rem;
+    margin-left: 16px;
+    color: var(--b3-theme-on-surface);
+    font-family: Consolas, Monaco, monospace;
+  }
+
+  // for protyle hint
+  &__emoji {
+    font-size: 20px;
+    float: left;
+    margin-right: 8px;
+    font-family: var(--b3-font-family-emoji);
+
+    img, svg {
+      width: 20px;
+      height: 20px;
+      float: left;
+    }
+  }
+}
+
+.emojis {
+  word-break: break-all;
+  white-space: normal;
+  height: 50vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 394px;
+
+  &__item {
+    font-size: 24px;
+    line-height: 24px;
+    font-family: var(--b3-font-family-emoji);
+    text-align: center;
+    height: 28px;
+    padding: 2px 4px;
+    cursor: pointer;
+    display: inline-block;
+    transition: var(--b3-transition);
+    background-color: transparent;
+    border: 0;
+    margin: 0;
+    overflow: hidden;
+
+    img, svg {
+      height: 24px;
+      display: block;
+      width: 24px;
+    }
+
+    &--current,
+    &:hover {
+      background: var(--b3-list-hover);
+      border-radius: 4px;
+    }
+  }
+
+  &__title {
+    color: var(--b3-theme-on-surface);
+    padding: 8px 4px 4px 4px;
+  }
+
+  &__panel {
+    flex: 1;
+    overflow: auto;
+    padding: 0 8px;
+  }
+
+  &__content {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  &__type {
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    line-height: 28px;
+    transition: var(--b3-list-hover);
+    font-size: 16px;
+
+    &:hover {
+      background-color: var(--b3-border-color);
+    }
+
+    svg {
+      height: 16px;
+      width: 16px;
+    }
+  }
+}

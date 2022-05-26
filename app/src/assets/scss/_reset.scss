@@ -1,0 +1,197 @@
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  margin: 0;
+  font-family: var(--b3-font-family);
+  font-size: 14px;
+  color: var(--b3-theme-on-background);
+  background-color: var(--b3-theme-background);
+  -webkit-font-smoothing: antialiased;
+  -webkit-overflow-scrolling: touch;
+  height: 100%;
+  box-sizing: border-box;
+  max-height: 100%;
+  overflow: hidden;
+
+  &.body--win32 {
+    -webkit-font-smoothing: auto;
+    border: 1px solid var(--b3-border-color);
+
+    .toolbar {
+      padding-left: 0;
+
+      // https://github.com/siyuan-note/siyuan/issues/4460
+      .b3-tooltips__se,
+      .b3-tooltips__sw,
+      .b3-tooltips__s {
+        &:before {
+          bottom: -15px;
+        }
+
+        &:after {
+          top: calc(100% + 10px);
+        }
+      }
+    }
+
+    &.body--blur {
+      border-top-color: var(--b3-theme-surface);
+    }
+
+    .fullscreen {
+      & > .protyle-breadcrumb,
+      & > .block__icons {
+        padding-left: 8px;
+        padding-right: 98px;
+      }
+
+      .protyle-breadcrumb > .fn__flex-shrink {
+        -webkit-app-region: drag;
+      }
+    }
+  }
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+dl,
+dd,
+p {
+  margin: 0;
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+nav,
+section {
+  display: block;
+}
+
+audio,
+canvas,
+video {
+  display: inline-block;
+}
+
+audio:not([controls]) {
+  display: none;
+}
+
+a {
+  outline: 0;
+  text-decoration: none;
+  color: var(--b3-theme-primary);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+sub,
+sup {
+  position: relative;
+  font-size: 75%;
+  line-height: 0;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+img {
+  max-width: 100%;
+  vertical-align: middle;
+  border: 0;
+  height: auto;
+  -ms-interpolation-mode: bicubic;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+button,
+input,
+select,
+textarea {
+  margin: 0;
+  font-size: 100%;
+  vertical-align: middle;
+  font-family: var(--b3-font-family);
+  outline: none;
+}
+
+button,
+input {
+  line-height: normal;
+}
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  cursor: pointer;
+  -webkit-appearance: button;
+}
+
+input[type="search"] {
+  box-sizing: content-box;
+  -webkit-appearance: textfield;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+textarea {
+  overflow: auto;
+}
+
+svg {
+  fill: currentColor;
+  display: inline-block;
+}
+
+line, circle {
+  transition: fill .15s ease-in-out;
+}
+
+circle {
+  cursor: pointer;
+}
+
+blockquote {
+  margin: 0;
+}

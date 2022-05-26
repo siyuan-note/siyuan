@@ -1,0 +1,20 @@
+{
+	"ID": "20210808180303-6yi0dv5",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f36b",
+		"id": "20210808180303-6yi0dv5",
+		"title": "Content Block",
+		"updated": "20210808180303"
+	},
+	"Children": [
+		{
+			"ID": "20210808180303-q8oudv4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210808180303-q8oudv4",
+				"updated": "20210808180303"
+			}
+		}
+	]
+}

@@ -1,0 +1,75 @@
+import {hasClosestBlock, hasClosestByAttribute} from "../protyle/util/hasClosest";
+import {getEditorRange, getSelectionPosition} from "../protyle/util/selection";
+
+const bgFade = (element: HTMLElement) => {
+    element.classList.add("protyle-wysiwyg--hl");
+    setTimeout(function () {
+        element.classList.remove("protyle-wysiwyg--hl");
+    }, 1024);
+};
+
+export const highlightById = (protyle: IProtyle, id: string, top = false) => {
+    let nodeElement: HTMLElement;
+    const protyleElement = protyle.wysiwyg.element;
+    if (!protyle.preview.element.classList.contains("fn__none")) {
+        // 预览定位
+        nodeElement = document.getElementById(id);
+        if (nodeElement) {
+            protyle.preview.element.scrollTop = nodeElement.offsetTop;
+            bgFade(nodeElement);
+        }
+        return undefined;
+    }
+
+    Array.from(protyleElement.querySelectorAll(`[data-node-id="${id}"]`)).find((item: HTMLElement) => {
+        if (!hasClosestByAttribute(item, "data-type", "block-render", true)) {
+            nodeElement = item;
+            return true;
+        }
+    });
+    if (nodeElement) {
+        scrollCenter(protyle, nodeElement, top);
+        bgFade(nodeElement);
+        return nodeElement;// 仅配合前进后退使用
+    }
+    if (id === protyle.block.rootID && protyle.options.render.title) {
+        bgFade(protyle.title.editElement);
+        return protyle.title.editElement;
+    }
+};
+
+export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = false) => {
+    if (!top && getSelection().rangeCount > 0 && hasClosestBlock(getSelection().getRangeAt(0).startContainer)) {
+        const editorElement = protyle.contentElement;
+        const cursorTop = getSelectionPosition(editorElement).top - editorElement.getBoundingClientRect().top;
+        if (cursorTop < 0) {
+            editorElement.scrollTop = editorElement.scrollTop + cursorTop;
+        } else if (cursorTop > editorElement.clientHeight - 34) {
+            editorElement.scrollTop = editorElement.scrollTop + (cursorTop + 34 - editorElement.clientHeight);
+        }
+        return;
+    }
+
+    if (!nodeElement) {
+        nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer) as HTMLElement;
+    }
+    if (!nodeElement) {
+        return;
+    }
+
+    let offsetTop = 0;
+    let parentNodeElement = nodeElement;
+    while (!parentNodeElement.classList.contains("protyle-wysiwyg")) {
+        offsetTop += (parentNodeElement as HTMLElement).offsetTop;
+        parentNodeElement = parentNodeElement.parentElement;
+    }
+    if (top) {
+        protyle.contentElement.scrollTop = offsetTop - 32;
+        return;
+    }
+    if (protyle.contentElement.scrollTop > offsetTop - 32) {
+        protyle.contentElement.scrollTop = offsetTop - 32;
+    } else if (protyle.contentElement.scrollTop + protyle.contentElement.clientHeight < offsetTop + nodeElement.clientHeight - 32) {
+        protyle.contentElement.scrollTop = offsetTop + nodeElement.clientHeight - 32 - protyle.contentElement.clientHeight;
+    }
+};

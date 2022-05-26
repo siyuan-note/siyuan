@@ -1,0 +1,423 @@
+{
+	"ID": "20201004184819-nj8ibyg",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201004184819-nj8ibyg",
+		"title": "在浏览器上使用",
+		"type": "doc"
+	},
+	"Children": [
+		{
+			"ID": "20210104090909-6pyfjgx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104090909-6pyfjgx",
+				"updated": "20210501194730"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "浏览器用法"
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-3fkdb8b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090909-3fkdb8b",
+				"updated": "20210302223612"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源桌面端是基于 "
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "Electron"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://www.electronjs.org"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 打包的独立应用，但这并不唯一的使用方式。只要启动思源内核后，就能在浏览器上直接使用了，支持移动端浏览器。"
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-z9210o7",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104090909-z9210o7"
+			},
+			"Children": [
+				{
+					"ID": "20210104090909-5occty9",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090909-5occty9"
+					},
+					"Children": [
+						{
+							"ID": "20210302223610-ngnee0k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223610-ngnee0k"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端网页版：使用体验几乎和 Electron 独立应用一致"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104090909-ipt2k4r",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090909-ipt2k4r"
+					},
+					"Children": [
+						{
+							"ID": "20210302223610-hnshr1s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223610-hnshr1s"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "移动端网页版：为移动端使用体验设计"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-5ucwkfd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090909-5ucwkfd"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "访问 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "http://127.0.0.1:6806/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后会自动根据浏览器版本切换桌面端或移动端。"
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-z2r76p3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090909-z2r76p3"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在局域网内使用，将 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "127.0.0.1"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 换成局域网 IP 地址即可。除了本地局域网使用，这里提供两个自助方案实现公网使用："
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-dcl5tif",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104090909-dcl5tif"
+			},
+			"Children": [
+				{
+					"ID": "20210104090909-qoham0m",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090909-qoham0m"
+					},
+					"Children": [
+						{
+							"ID": "20210302223610-18yksf1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223610-18yksf1"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通过“内网穿透”技术将本地内核服务发布在公网上（较为麻烦且不稳定，不推荐）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104090909-mtbso6l",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090909-mtbso6l"
+					},
+					"Children": [
+						{
+							"ID": "20210302223610-l2uqi6m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223610-l2uqi6m"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自行搭建思源服务端（推荐）"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-9ldxx4v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090909-9ldxx4v",
+				"updated": "20210522214253"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在着手前，请从了解"
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "思源笔记技术架构"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://ld246.com/article/1619868273581#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "开始。"
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-9x9sqe8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104090909-9x9sqe8"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "访问鉴权"
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-20f2hvi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090909-20f2hvi",
+				"updated": "20210522214354"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "设置"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "关于"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可配置浏览器访问鉴权密码，留空表示不启用鉴权。这在开放网络（比如办公场所和公网）会比较有用，只有鉴权通过后才能进入工作空间。"
+				}
+			]
+		},
+		{
+			"ID": "20210117210851-87cdi7m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210117210851-87cdi7m"
+			}
+		}
+	]
+}

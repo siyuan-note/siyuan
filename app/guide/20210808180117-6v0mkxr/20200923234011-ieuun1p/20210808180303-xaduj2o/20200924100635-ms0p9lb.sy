@@ -1,0 +1,291 @@
+{
+	"ID": "20200924100635-ms0p9lb",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200924100635-ms0p9lb",
+		"title": "Bookmark and Tag",
+		"type": "doc",
+		"updated": "20210702231509"
+	},
+	"Children": [
+		{
+			"ID": "20210104091414-c8862yg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091414-c8862yg"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Bookmark"
+				}
+			]
+		},
+		{
+			"ID": "20210104091414-5n6da7j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091414-5n6da7j",
+				"updated": "20210702231509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to \"favorite\" content blocks, please open the attribute panel through the block icon menu, and then you can set bookmarks in the attribute panel."
+				}
+			]
+		},
+		{
+			"ID": "20210104091414-xr1dze2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091414-xr1dze2"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The built-in bookmark label are ✨💡️⏳, you can create other text as the bookmark label."
+				}
+			]
+		},
+		{
+			"ID": "20210104091414-b6lifws",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091414-b6lifws"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "All favorite content blocks will be listed in the bookmark tab ("
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Alt 3"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "⌘ 3"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "). If you want to cancel the collection, select Delete in the drop-down menu of the content block ID."
+				}
+			]
+		},
+		{
+			"ID": "20210104091414-qp10fn0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091414-qp10fn0"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Tag"
+				}
+			]
+		},
+		{
+			"ID": "20210104091414-x7yerg6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091414-x7yerg6"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The tag is used to mark the block in the content block. The syntax is to wrap the tag identifier with two "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "#"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the first and one after the other, like this "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "#Tag#"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20210104091414-4cl5j5v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091414-4cl5j5v"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tag support hierarchical levels, so that content blocks can be sorted more easily. Use "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to separate different levels, like this "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "#A/B/C#"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20210104091414-s3vdbdu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091414-s3vdbdu"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "All tagged content blocks will be listed in the tag tab ("
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Alt 4"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "⌘ 4"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "). If you need to cancel the tag, just delete the tag in the content block."
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,1280 @@
+{
+	"ID": "20211226121438-xaafdo8",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226121438-xaafdo8",
+		"title": "資料同步",
+		"updated": "20220510105029"
+	},
+	"Children": [
+		{
+			"ID": "20211226121454-8vr6fgn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226121454-8vr6fgn",
+				"updated": "20211226010158"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-2wnvrmj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226121454-2wnvrmj",
+				"updated": "20211228141310"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "資料同步指的是在多個設備上保持 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "工作空間/data/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文件夾資料一致，包括資料文件、範本、小工具以及筆記本資料。"
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-g3niy0i",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226121454-g3niy0i",
+				"updated": "20211226010158"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-eo49ng8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226121454-eo49ng8",
+				"updated": "20211228130421"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打開 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "設置 - 雲端 - 雲端同步"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ，通過同步設置向導進行作業。"
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-jhgfygm",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20211226121454-jhgfygm",
+				"updated": "20220110114127"
+			},
+			"Children": [
+				{
+					"ID": "20211226121454-uv2o9ya",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20211226121454-uv2o9ya",
+						"updated": "20220110114127"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-jht5wtu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-jht5wtu",
+								"updated": "20220110114127"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "設置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "端到端加密"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "密碼"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121454-q2nwzs4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20211226121454-q2nwzs4",
+						"updated": "20211228141154"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-7ui6tey",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-7ui6tey",
+								"updated": "20211228141154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "創建或選擇一個雲端同步目錄，選擇以後該雲端同步目錄將用於當前工作空間資料同步"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121454-ggm3tr1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20211226121454-ggm3tr1"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-upj6vzq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-upj6vzq"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "啟用同步開關"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-z4qs6jx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226121454-z4qs6jx",
+				"updated": "20211228130502"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "以上作業請先在"
+				},
+				{
+					"Type": "NodeEmphasis",
+					"Data": "em",
+					"Children": [
+						{
+							"Type": "NodeEmA6kOpenMarker",
+							"Data": "*"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "主力"
+						},
+						{
+							"Type": "NodeEmA6kCloseMarker",
+							"Data": "*"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "設備上進行，然後在其他設備上選擇相同的雲端同步目錄，並打開同步開關即可。如果要切換、重命名或者刪除雲端同步目錄，請先在所有設備上關閉同步開關後再作業。"
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-8ay5lbb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226121454-8ay5lbb",
+				"updated": "20211226010158"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略文件"
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-03u8yy2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226121454-03u8yy2",
+				"updated": "20211228135319"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在同步時忽略一些文件，請在文件系統上創建或編輯文本文件 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": " 工作空間/data/.siyuan/syncignore"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "， 其中每一行使用 data 文件夾的相對路徑進行配置，表示忽略文件或文件夾的路徑，支援通配符。例如："
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-yx47k6p",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226121454-yx47k6p",
+				"updated": "20211226010158"
+			},
+			"Children": [
+				{
+					"ID": "20211226121454-ptlrqog",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121454-ptlrqog"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-fhzab8c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-fhzab8c"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "20210808180117-6v0mkxr/**/*"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "： 忽略 data/20210808180117-6v0mkxr 筆記本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121454-73oeoyd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121454-73oeoyd"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-x4g40uq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-x4g40uq"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "assets/*.pdf"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：忽略 data/assets/ 下的 PDF 文件"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-i5h1wl1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226121454-i5h1wl1",
+				"updated": "20211226010158"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "工作原理"
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-qo8jhii",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226121454-qo8jhii",
+				"updated": "20220510104916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源通過對比雲端數據版本和本地數據版本進行相應作業："
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-v4rgxob",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226121454-v4rgxob",
+				"updated": "20211228141209"
+			},
+			"Children": [
+				{
+					"ID": "20211226121454-t7668m6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121454-t7668m6",
+						"updated": "20211226121454"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-lci1ctl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-lci1ctl",
+								"updated": "20211226121454"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果版本相等則略過"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121454-mk5pevf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121454-mk5pevf",
+						"updated": "20220510104240"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-s9uvmqy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-s9uvmqy",
+								"updated": "20220510104240"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果雲端版本大於本地版本，則將雲端資料下載到本地並解密到 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "工作空間/data/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 文件夾下，本地被覆蓋或者刪除的文件會移動到 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "工作空間/history/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 文件夾下"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121454-rmdap08",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121454-rmdap08",
+						"updated": "20211228141209"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-o5x53rx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-o5x53rx",
+								"updated": "20211228141209"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "雲端"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "版本小於本地，則掃描 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "/工作空間/data/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 變更，然後將變更加密複製到 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "工作空間/sync/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 文件夾下，最後進行上傳並覆蓋"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "雲端"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220510105029-rawx8il",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220510105029-rawx8il",
+				"updated": "20220510105029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "版本對比每隔一段時間自動進行，時間間隔算法描述如下："
+				}
+			]
+		},
+		{
+			"ID": "20220510105029-d1ufczf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220510105029-d1ufczf",
+				"updated": "20220510105029"
+			},
+			"Children": [
+				{
+					"ID": "20220510105029-4ri0ne0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220510105029-4ri0ne0",
+						"updated": "20220510105029"
+					},
+					"Children": [
+						{
+							"ID": "20220510105029-8rsvfuv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220510105029-8rsvfuv",
+								"updated": "20220510105029"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "數據變動後 30 秒如果不再發生變動則進行一次對比，如果繼續發生變動則順延 30 秒"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220510105029-rdxn16v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220510105029-rdxn16v",
+						"updated": "20220510105029"
+					},
+					"Children": [
+						{
+							"ID": "20220510105029-7q5kg5g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220510105029-7q5kg5g",
+								"updated": "20220510105029"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "沒有數據變動則按 5 分鐘、8 分鐘、16 分鐘、32 分鐘……遞增間隔"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220307095239-5sgxvyl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220307095239-5sgxvyl",
+				"updated": "20220307095239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "場景例舉"
+				}
+			]
+		},
+		{
+			"ID": "20220307095239-14zl03b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220307095239-14zl03b",
+				"updated": "20220307095239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "從上述工作原理我們可以得知，思源僅支持在多設備上交替同步數據：設備 A 上同步完成以後設備 B 上再進行同步。無法支持多設備同時同步，這樣會發生無法預期的數據覆蓋。"
+				}
+			]
+		},
+		{
+			"ID": "20220307095239-elclvy3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220307095239-elclvy3",
+				"updated": "20220307095239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "正常場景"
+				}
+			]
+		},
+		{
+			"ID": "20220307095239-8s5z7ki",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220307095239-8s5z7ki",
+				"updated": "20220307095239"
+			},
+			"Children": [
+				{
+					"ID": "20220307095239-bqfn42n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220307095239-bqfn42n"
+					},
+					"Children": [
+						{
+							"ID": "20220307095239-iz19nv1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095239-iz19nv1"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在設備 A 上編輯後執行同步（通過自動或者手動觸發同步），此時雲端數據會被設備 A 數據覆蓋，既云端和設備 A 保持數據一致"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095239-fz84088",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220307095239-fz84088"
+					},
+					"Children": [
+						{
+							"ID": "20220307095239-1yu2g8x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095239-1yu2g8x"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在設備 B 上執行同步，此時設備 B 數據會被雲端數據覆蓋，即云端和設備 A、B 保持數據一致"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095239-smkxi2z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220307095239-smkxi2z"
+					},
+					"Children": [
+						{
+							"ID": "20220307095239-ydutuxv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095239-ydutuxv"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "設備 B 上編輯後再次執行同步，此時雲端數據會被設備 B 數據覆蓋，既云端和設備 B 保持數據一致"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095239-zhwwj9o",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20220307095239-zhwwj9o"
+					},
+					"Children": [
+						{
+							"ID": "20220307095239-j9w5415",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095239-j9w5415"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在設備 A 上執行同步，此時設備 A 數據會被雲端數據覆蓋，即云端和設備 A、B 保持數據一致"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220307095239-xb7advy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220307095239-xb7advy",
+				"updated": "20220307095239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "該場景下，使用同步的過程是在設備 A、B 上交替進行的，這樣能夠保證數據同步符合預期正常完成。"
+				}
+			]
+		},
+		{
+			"ID": "20220307095239-tezgp0o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220307095239-tezgp0o",
+				"updated": "20220307095239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "覆蓋場景"
+				}
+			]
+		},
+		{
+			"ID": "20220307095239-7565ggv",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220307095239-7565ggv",
+				"updated": "20220307095239"
+			},
+			"Children": [
+				{
+					"ID": "20220307095239-7ea0sqd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220307095239-7ea0sqd"
+					},
+					"Children": [
+						{
+							"ID": "20220307095239-zx0xhv2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095239-zx0xhv2"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在設備 A 上編輯後不同步（比如沒有網絡處於離線狀態時）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095239-ab37rw8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220307095239-ab37rw8"
+					},
+					"Children": [
+						{
+							"ID": "20220307095239-ejo8dqf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095239-ejo8dqf"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在設備 B 上編輯後不同步"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095239-9bq1woa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220307095239-9bq1woa"
+					},
+					"Children": [
+						{
+							"ID": "20220307095239-2cm8wqx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095239-2cm8wqx"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "設備 A 上執行同步，此時雲端數據會被設備 A 數據覆蓋，既云端和設備 A 保持數據一致"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095239-yt5ulni",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20220307095239-yt5ulni"
+					},
+					"Children": [
+						{
+							"ID": "20220307095239-ee4xhp1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095239-ee4xhp1"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在設備 B 上執行同步，此時會出現三種可能的情況"
+								}
+							]
+						},
+						{
+							"ID": "20220307095239-df4h0fo",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20220307095239-df4h0fo"
+							},
+							"Children": [
+								{
+									"ID": "20220307095239-2yvb8si",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220307095239-2yvb8si"
+									},
+									"Children": [
+										{
+											"ID": "20220307095239-y7qy3tr",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220307095239-y7qy3tr"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "設備 B 數據因為版本和雲端相同進而略過同步"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220307095239-xy53q6n",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220307095239-xy53q6n"
+									},
+									"Children": [
+										{
+											"ID": "20220307095239-nehg0y8",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220307095239-nehg0y8"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "設備 B 數據覆蓋雲端"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220307095239-b4a1r7g",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220307095239-b4a1r7g"
+									},
+									"Children": [
+										{
+											"ID": "20220307095239-z38fy9q",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220307095239-z38fy9q"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "設備 B 數據被雲端覆蓋"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220307095239-3qnw1k7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220307095239-3qnw1k7",
+				"updated": "20220307095239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "該場景下，使用同步的過程是在兩個設備上都離線編輯，然後再執行同步，這樣無法得到正常的同步預期結果。儘管如此，數據也不會發生丟失，可通過歷史找回被覆蓋的數據。"
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-0nlneiq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226121454-0nlneiq",
+				"updated": "20211226010158"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-kv5itch",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226121454-kv5itch",
+				"updated": "20220420100403"
+			},
+			"Children": [
+				{
+					"ID": "20220420100402-490hslt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220420100402-490hslt",
+						"updated": "20220420100403"
+					},
+					"Children": [
+						{
+							"ID": "20220420100402-5hyxqsg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220420100402-5hyxqsg",
+								"updated": "20220420100403"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "睡眠或關機等突然斷網的情況下不會觸發同步，請手動點擊同步按鈕進行同步"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121454-4vhcu0v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121454-4vhcu0v"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-f8zn2s6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-f8zn2s6"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "重命名或刪除"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "雲端"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "目錄前，請在所有設備上關閉同步後再修改或刪除"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121454-150ti1m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121454-150ti1m",
+						"updated": "20211228141216"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-vtdl325",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-vtdl325",
+								"updated": "20211228141216"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "請勿同時使用第三方同步碟和思源同步，可能會導致資料損壞"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121454-99w8h02",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121454-99w8h02",
+						"updated": "20211226153152"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-4s0b9k4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-4s0b9k4",
+								"updated": "20211226153152"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "符號連結不會被同步"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

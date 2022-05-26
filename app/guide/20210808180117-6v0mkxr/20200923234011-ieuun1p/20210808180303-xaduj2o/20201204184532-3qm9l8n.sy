@@ -1,0 +1,1444 @@
+{
+	"ID": "20201204184532-3qm9l8n",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201204184532-3qm9l8n",
+		"title": "Template snippet",
+		"type": "doc",
+		"updated": "20210131162806"
+	},
+	"Children": [
+		{
+			"ID": "20210428223009-x6fyksm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210428223009-x6fyksm",
+				"updated": "20210428223012"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-bu1zdhb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091444-bu1zdhb",
+				"updated": "20210428232129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The template snippet is used to quickly insert the previously set text content at the cursor caret position, and it supports variables. Template snippets use "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": ".md"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " suffix files and are stored in the data/templates folder of the workspace."
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-jy56z0p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091444-jy56z0p"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Writing a template"
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-ycq0a40",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091444-ycq0a40",
+				"updated": "20210502205109"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The template is implemented using "
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "The Go Programming Language text template"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://golang.org/pkg/text/template/"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". If you have an understanding of this, you can implement some program logic in it, such as comparison logic , Iterative logic, etc. In addition, to avoid syntax conflicts, template syntax uses "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": ".action{action}"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (instead of "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "{{action}}"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ")."
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-c7gg3ak",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091444-c7gg3ak",
+				"updated": "20210502205118"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "We have built-in variables and functions to enrich the template through the open source project "
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "Sprig"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/Masterminds/sprig"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". For example, you can use "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": ".action{now | date \"2006-01-02 15:04:05\"}"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to render the current time. For more usage, please refer to "
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "Sprig Function Documentation"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "http://masterminds.github.io/sprig/"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-i618qd8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091444-i618qd8",
+				"updated": "20210428223421"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "There is a detail about the date and time formatting. "
+				},
+				{
+					"Type": "NodeTag",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker",
+							"Data": "#"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Note"
+						},
+						{
+							"Type": "NodeTagCloseMarker",
+							"Data": "#"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ": The formatting of the Go programming language is quite special: Instead of using "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "yyyy-MM-dd HH:mm:ss"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", use "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "2006-01-02 15:04: 05"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " This fixed time format ("
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "related discussions on Stack Overflow"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://stackoverflow.com/questions/20530327/origin-of-mon-jan-2-150405-mst-2006-in-golang"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ")."
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-2wbdokx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091444-2wbdokx"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition to the built-in variables and functions of Sprig, the following variables and functions are also supported:"
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-mwbvc9m",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210104091444-mwbvc9m",
+				"updated": "20211213121210"
+			},
+			"Children": [
+				{
+					"ID": "20210104091444-d5hpwdd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210104091444-d5hpwdd"
+					},
+					"Children": [
+						{
+							"ID": "20210131162138-93wovlc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162138-93wovlc",
+								"updated": "20210502205126"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "title"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Use this variable to insert the current document name. For example, if the template content is "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "# .action{.title}"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", it will be inserted into the current document content with the first-level heading syntax after invoking"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210221131637-9xmclwp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210221131637-9xmclwp"
+					},
+					"Children": [
+						{
+							"ID": "20210221131637-hnlhxny",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210221131637-hnlhxny",
+								"updated": "20210428223500"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "id"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：Use this variable to insert the current document id"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211213121001-86hu9ws",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211213121001-86hu9ws"
+					},
+					"Children": [
+						{
+							"ID": "20211213121001-qg2k19v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211213121001-qg2k19v",
+								"updated": "20211213121022"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "name"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Use this variable to insert the current document name"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211213121022-33ngo64",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211213121022-33ngo64"
+					},
+					"Children": [
+						{
+							"ID": "20211213121022-un8wzkv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211213121022-un8wzkv",
+								"updated": "20211213121038"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "alias"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：Use this variable to insert the current document alias"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210121193829-wfzsf6m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210121193829-wfzsf6m"
+					},
+					"Children": [
+						{
+							"ID": "20210131162138-7ufhbho",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162138-7ufhbho",
+								"updated": "20210504093006"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "queryBlocks"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": This function is used to query the database, and the return value is a list of blocks,  and the parameter is a SQL statement: "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": ".action{sql \"SELECT * FROM blocks LIMIT 7\"}"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210504093232-vukp34t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210504093232-vukp34t"
+					},
+					"Children": [
+						{
+							"ID": "20210504093232-6wxl589",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210504093232-6wxl589",
+								"updated": "20210504093302"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "querySpans"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": This function is used to query the database, and the return value is a list of spans,  and the parameter is a SQL statement: "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": ".action{sql \"SELECT * FROM spans LIMIT 7\"}"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211213121042-5n981ru",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211213121042-5n981ru",
+						"updated": "20211213121210"
+					},
+					"Children": [
+						{
+							"ID": "20211213121042-g7gd7p5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211213121042-g7gd7p5",
+								"updated": "20211213121210"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "parseTime"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": This function is used to parse a string in time format into a "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "time.Time"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " type so that more formatting methods can be used to render the time"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210604111714-yc1e5gj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210604111714-yc1e5gj",
+				"updated": "20210604111715"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "queryBlocks"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "querySpans"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " support variable parameter lists similar to SQL prepared statements to facilitate the input of parameters:"
+				}
+			]
+		},
+		{
+			"ID": "20210604111750-c3sm3jr",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20210604111750-c3sm3jr",
+				"updated": "20210604111632"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"ID": "20220307092214-3yza25q",
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks :=queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n",
+					"Properties": {
+						"id": "20220307092214-3yza25q"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-4re70bp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091444-4re70bp"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Invoke template"
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-gfccosk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091444-gfccosk",
+				"updated": "20210428223517"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "At the cursor caret position, select the template via "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to trigger the template search, find the template that needs to be inserted and press Enter."
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-xz57sof",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091444-xz57sof"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "An example"
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-cclnk66",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "cGxhaW50ZXh0",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20210104091444-cclnk66"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "cGxhaW50ZXh0"
+				},
+				{
+					"ID": "20220307092214-3y1eex2",
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{$before := (div (now.Sub (toDate \"2006-01-02\" \"2020-02-19\")).Hours 24)}\n\n.action{$after := (div ((toDate \"2006-01-02\" \"2048-02-19\").Sub now).Hours 24)}\nToday is `.action{now | date \"2006-01-02\"}`.\n\n* `.action{$before}` days have passed since `2020-02-19`\n* There are `.action{$after}` days left from `2048-02-19`\n",
+					"Properties": {
+						"id": "20220307092214-3y1eex2"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20210104091444-rku6ohp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091444-rku6ohp"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "$before"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "$after"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " define two variables to record the number of days from the current date to 2020 and 2048, respectively."
+				}
+			]
+		},
+		{
+			"ID": "20210131162806-sk9tg4q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210131162806-sk9tg4q"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Push to template bazaar"
+				}
+			]
+		},
+		{
+			"ID": "20210131162806-wuttf37",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210131162806-wuttf37",
+				"updated": "20211222095741"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Please make sure that the root path of your template repository contains at least the following files before listing ("
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "repo example"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/88250/November-Rain"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "):"
+				}
+			]
+		},
+		{
+			"ID": "20210131162806-vsk0d2y",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210131162806-vsk0d2y",
+				"updated": "20211222095707"
+			},
+			"Children": [
+				{
+					"ID": "20210131162806-v0untr5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210131162806-v0untr5"
+					},
+					"Children": [
+						{
+							"ID": "20210131162806-lyudtae",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162806-lyudtae"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "template.json (please make sure the JSON format is correct)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210131162806-vruviwi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210131162806-vruviwi"
+					},
+					"Children": [
+						{
+							"ID": "20210131162806-v86lig4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162806-v86lig4",
+								"updated": "20211222095705"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "preview.png (please compress the image size within 512 KB)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211222095706-yc21k1e",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211222095706-yc21k1e",
+						"updated": "20211222095707"
+					},
+					"Children": [
+						{
+							"ID": "20211222095706-kpo2rd5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211222095706-kpo2rd5",
+								"updated": "20211222095707"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "README.md (please note the case)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210131162806-j35q2kr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210131162806-j35q2kr"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After confirmation, please "
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "create a pull request"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to the "
+				},
+				{
+					"Type": "NodeLink",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket",
+							"Data": "["
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "Community Bazaar"
+						},
+						{
+							"Type": "NodeCloseBracket",
+							"Data": "]"
+						},
+						{
+							"Type": "NodeOpenParen",
+							"Data": "("
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/bazaar"
+						},
+						{
+							"Type": "NodeCloseParen",
+							"Data": ")"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " repository and modify the themes.json file in it. This file is the index file of all community template repositories, the format is:"
+				}
+			]
+		},
+		{
+			"ID": "20210131162806-bmhjqma",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20210131162806-bmhjqma"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"ID": "20220307092214-tpodbuh",
+					"Type": "NodeCodeBlockCode",
+					"Data": "{\n   \"repos\": [\n     \"username/reponame@commithash\"\n   ]\n}\n",
+					"Properties": {
+						"id": "20220307092214-tpodbuh"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20210131162806-0jwldvf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210131162806-0jwldvf"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Among them, "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "commithash"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", please fill in the Git commit hash of the latest released version on your template repository, please use the full hash value instead of the 7-digit short value."
+				}
+			]
+		},
+		{
+			"ID": "20210131162806-pccuk3l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210131162806-pccuk3l",
+				"updated": "20210131162806"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Update"
+				}
+			]
+		},
+		{
+			"ID": "20210131162806-0gkw7xr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210131162806-0gkw7xr"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the template you developed has an updated version, please remember:"
+				}
+			]
+		},
+		{
+			"ID": "20210131162806-aijnkan",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210131162806-aijnkan"
+			},
+			"Children": [
+				{
+					"ID": "20210131162806-h1928oc",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210131162806-h1928oc"
+					},
+					"Children": [
+						{
+							"ID": "20210131162806-eqoftxj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162806-eqoftxj"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Update the version field in your template.json"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210131162806-4ldtdqg",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210131162806-4ldtdqg"
+					},
+					"Children": [
+						{
+							"ID": "20210131162806-kix2koc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162806-kix2koc"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create a Pull Request to the community bazaar"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210131162142-6g1r08m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210131162142-6g1r08m"
+			}
+		}
+	]
+}

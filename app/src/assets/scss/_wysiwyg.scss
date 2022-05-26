@@ -1,0 +1,594 @@
+.protyle-wysiwyg {
+  padding: 34px 16px 16px 24px;
+  cursor: text;
+
+  &:focus {
+    outline: none;
+  }
+
+  [data-node-id] {
+    position: relative;
+
+    [spellcheck="false"] {
+      word-break: break-word;
+      white-space: pre-wrap;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &.hr {
+      cursor: pointer;
+
+      & > div {
+        border-bottom: 1px solid var(--b3-theme-background-light)
+      }
+    }
+
+    &.list {
+      padding-left: 0;
+    }
+
+    &.li {
+      padding: 0;
+      margin: 0;
+
+      &[fold="1"] {
+        & > [data-node-id]:before {
+          content: none;
+        }
+
+        & > .protyle-action:after {
+          background-color: var(--b3-border-color);
+        }
+
+        & > div:nth-child(3):not(.protyle-attr),
+        & > div:nth-child(3) ~ div:not(.protyle-attr) {
+          display: none;
+        }
+      }
+
+      & > .protyle-action {
+        left: 0;
+        position: absolute;
+        width: 34px;
+        top: 0;
+        transition: var(--b3-transition);
+        color: var(--b3-theme-on-surface);
+        justify-content: center;
+        display: flex;
+        align-items: center;
+
+        & ~ .h1,
+        & ~ .h2,
+        & ~ .h3,
+        & ~ .h4,
+        & ~ .h5,
+        & ~ .h6 {
+          padding-top: 0;
+          padding-bottom: 0;
+        }
+
+        &:after {
+          content: "";
+          position: absolute;
+          border-radius: 50%;
+          top: 50%;
+          transition: var(--b3-transition);
+          left: 50%;
+        }
+
+        svg {
+          width: 34px;
+          display: block;
+          z-index: 1;
+          position: relative;
+        }
+
+        &--order:after {
+          border-radius: 4px;
+        }
+      }
+
+      & > div:nth-child(2) {
+        margin-top: 0 !important;
+
+        &:before {
+          top: 34px !important;
+          height: calc(100% - 26px) !important; // https://ld246.com/article/1636540486193
+        }
+
+        &:nth-last-child(2):before {
+          content: none;
+        }
+      }
+
+      & > div:nth-last-child(2):before {
+        height: 100%;
+        top: 0;
+      }
+
+      & > [data-node-id] {
+        margin-left: 34px !important;
+        padding-right: 0;
+
+        &:before {
+          content: "";
+          position: absolute;
+          height: calc(100% + 4px);
+          border-left: 1px solid var(--b3-theme-background-light);
+          top: 4px;
+          left: -18px;
+        }
+
+        &[data-type="NodeBlockQueryEmbed"]:before {
+          left: -19px;
+        }
+
+        &.bq:before {
+          left: calc(-18px - 0.25em);
+        }
+
+        &.code-block {
+          margin-top: 4px;
+          margin-bottom: 4px;
+        }
+
+        &.list:before {
+          left: -2px;
+        }
+      }
+
+      & > .list {
+        margin-left: 18px !important;
+        padding-left: 16px;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+    }
+
+    &.sb {
+      padding: 0;
+
+      &[data-sb-layout="col"] {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+
+        & > div {
+          flex: 1;
+          box-sizing: border-box;
+        }
+
+        .sb {
+          margin: 0;
+        }
+      }
+    }
+
+    span[data-type="tag"] {
+      border-bottom: 1px solid var(--b3-protyle-inline-tag-color);
+      color: var(--b3-protyle-inline-tag-color);
+      transition: var(--b3-transition);
+    }
+
+    span[data-type="a"] {
+      color: var(--b3-protyle-inline-link-color);
+      cursor: pointer;
+      transition: var(--b3-transition);
+
+      &:hover {
+        border-bottom: 1px solid var(--b3-protyle-inline-link-color);
+      }
+    }
+
+    span[data-type="inline-math"] {
+      user-select: text;
+      display: inline;
+      // https://github.com/siyuan-note/siyuan/issues/3081 test $\begin{bmatrix}   a & b \\c & d \\   e & f\end{bmatrix}$ test
+      // https://ld246.com/article/1626937851892 <u>test $\mu_p$ test</u>
+      // https://ld246.com/article/1636204769623  test $\rightarrow$ test
+    }
+
+    span[data-type="search-mark"] {
+      background-color: var(--b3-protyle-inline-mark-background);
+      color: var(--b3-protyle-inline-mark-color);
+    }
+
+    span[data-type="virtual-block-ref"] {
+      border-bottom: 1px dashed var(--b3-theme-on-surface);
+      transition: var(--b3-transition);
+
+      &:hover {
+        border-color: var(--b3-theme-on-background);
+      }
+    }
+
+    .def--mark {
+      background-color: var(--b3-protyle-inline-mark-background);
+    }
+
+    span[data-type="block-ref"],
+    span[data-type="file-annotation-ref"] {
+      color: var(--b3-protyle-inline-blockref-color);
+      opacity: .86;
+      transition: var(--b3-transition);
+    }
+
+    span[data-type="file-annotation-ref"]:before {
+      content: "🔖 ";
+    }
+
+    &.render-node {
+      min-height: 32px;
+
+      &[data-type="NodeBlockQueryEmbed"] {
+        background-color: var(--b3-theme-surface);
+        border-left: 1px dashed var(--b3-border-color);
+
+        & > .protyle-wysiwyg__embed {
+          -webkit-user-modify: read-only;
+          border-top: 1px dashed var(--b3-border-color);
+          position: relative;
+
+          .code-block:hover .protyle-icon,
+          .render-node:hover .protyle-icons {
+            opacity: 0 !important;
+          }
+
+          & > .list {
+            margin-left: -4px;
+          }
+        }
+
+        & > .protyle-icons + .protyle-wysiwyg__embed {
+          border-top: 0;
+        }
+      }
+    }
+
+    code:not(.hljs):empty {
+      padding: 0;
+    }
+
+    &.table > [spellcheck="false"] {
+      overflow: auto;
+
+      & > table.select {
+        position: relative;
+        z-index: 1;
+
+        tr {
+          background-color: transparent !important;
+        }
+      }
+    }
+
+    .img {
+      &--select {
+        filter: brightness(0.68);
+      }
+
+      &--drag > span:after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      &:hover .protyle-action__drag {
+        display: inline-block;
+      }
+
+      .protyle-action__drag {
+        height: 30%;
+        width: 4px;
+        background: var(--b3-theme-surface);
+        display: none;
+        border-radius: 4px;
+        cursor: col-resize;
+        transition: var(--b3-transition);
+        position: absolute;
+        top: 45%;
+        right: 4px;
+        box-shadow: 0 0 1px 1px var(--b3-theme-on-surface);
+        box-sizing: border-box;
+        z-index: 1;
+
+        &:hover {
+          background-color: var(--b3-theme-background);
+          box-shadow: 0 0 1px 1px var(--b3-theme-on-background);
+        }
+
+        &:before,
+        &:after {
+          position: absolute;
+          width: 4px;
+          content: "";
+          height: 100%;
+          left: -4px;
+        }
+
+        &:after {
+          left: 4px;
+          width: 8px
+        }
+      }
+
+      &__net {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        color: var(--b3-theme-primary);
+        background-color: var(--b3-border-color);
+        padding: 4px;
+        border-radius: 4px;
+
+        svg {
+          height: 12px;
+          width: 12px;
+          float: left;
+        }
+      }
+    }
+
+    & > [contenteditable="false"] > .img:hover .protyle-action__drag {
+      display: none;
+    }
+
+    &.iframe {
+      // https://ld246.com/article/1644827326901
+      // https://github.com/siyuan-note/siyuan/issues/4172
+      &[data-type="NodeWidget"] .iframe-content,
+      &[data-type="NodeIFrame"] .iframe-content {
+        -webkit-user-modify: read-only;
+      }
+
+      .iframe-content {
+        display: inline-block;
+        position: relative;
+      }
+
+      &--drag {
+        .iframe-content:after {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      &:hover .protyle-action__drag {
+        display: inline-block;
+      }
+
+      .protyle-action__drag {
+        height: 32px;
+        width: 4px;
+        background-color: var(--b3-theme-surface);
+        display: none;
+        border-radius: 4px;
+        cursor: nwse-resize;
+        transition: var(--b3-transition);
+        position: absolute;
+        right: -4px;
+        bottom: 0;
+        box-shadow: 0 0 1px 1px var(--b3-theme-on-surface);
+        box-sizing: border-box;
+
+        &:after {
+          content: "";
+          background-color: var(--b3-theme-surface);
+          width: 32px;
+          height: 4px;
+          display: block;
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          border-radius: 4px;
+          box-shadow: 0 0 1px 1px var(--b3-theme-on-surface);
+          box-sizing: border-box;
+          cursor: nwse-resize;
+        }
+
+        &:hover,
+        &:hover:after {
+          background-color: var(--b3-theme-background);
+          box-shadow: 0 0 1px 1px var(--b3-theme-on-background);
+        }
+      }
+    }
+  }
+
+  &--select,
+  &--select .hljs {
+    background-color: var(--b3-theme-primary-lightest) !important;
+  }
+
+  &--hl,
+  &--hl .hljs {
+    transition: var(--b3-transition);
+    background-color: var(--b3-theme-primary-lightest) !important;
+  }
+
+  &--hl .protyle-linenumber__rows,
+  &--select .protyle-linenumber__rows {
+    background-color: var(--b3-protyle-code-linenumber-hl) !important;
+  }
+
+  .dragover {
+    &__top {
+      box-shadow: 0 -4px 0 var(--b3-theme-primary-lighter);
+    }
+
+    &__bottom {
+      box-shadow: 0 4px 0 var(--b3-theme-primary-lighter);
+    }
+
+    &__left {
+      box-shadow: -4px 0 0 var(--b3-theme-primary-lighter);
+    }
+
+    &__right {
+      box-shadow: 4px 0 0 var(--b3-theme-primary-lighter);
+    }
+  }
+
+  &--attr .protyle-attr {
+    opacity: 1;
+
+    & > div:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
+      cursor: pointer;
+      @include text-clamp(1);
+    }
+  }
+
+  [data-type="backslash"] span {
+    display: none;
+  }
+
+  div[data-type="NodeMathBlock"] {
+    margin-top: 0;
+    margin-bottom: 0;
+    min-height: 62px !important;
+  }
+
+  div[data-type="NodeHTMLBlock"] {
+    min-height: 26px !important;
+  }
+
+  div[fold="1"][data-type="NodeHeading"]:before {
+    content: "";
+    height: 16px !important;
+    width: 16px;
+    background: var(--b3-border-color);
+    display: block;
+    position: absolute;
+    left: -18px !important;
+    top: 50% !important;
+    border-radius: 10px;
+    margin-top: -8px;
+    border-left: 0 !important;
+  }
+
+  [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {
+    @include text-clamp(1);
+    opacity: 0.68;
+    font-size: 16px;
+    height: 26px;
+    line-height: 26px;
+
+    .protyle-attr {
+      opacity: 0;
+    }
+
+    &.list {
+      height: 34px;
+
+      .li:first-child {
+        overflow: hidden;
+        height: 34px;
+      }
+    }
+
+    &[data-type="NodeBlockQueryEmbed"] {
+      height: 42px;
+
+      .protyle-wysiwyg__embed {
+        height: 34px;
+        overflow: hidden;
+      }
+    }
+
+    &.sb,
+    &.table {
+      height: 36px;
+    }
+
+    &.hr {
+      height: auto;
+    }
+
+    &.bq {
+      height: 42px;
+
+      & > div:first-child {
+        font-size: 16px;
+        height: 26px;
+        line-height: 26px;
+        overflow: hidden;
+      }
+    }
+
+    &.code-block {
+      line-height: 1.625;
+      height: 25px;
+
+      .protyle-action__language {
+        opacity: .86;
+      }
+
+      .protyle-action__copy,
+      .protyle-action__menu {
+        margin-top: -2px;
+      }
+    }
+  }
+}
+
+// 导出 html 不需要编辑样式
+.protyle-wysiwyg[contenteditable="true"] {
+  span[data-type="inline-math"],
+  span[data-type="tag"],
+  span[data-type="block-ref"],
+  span[data-type="file-annotation-ref"],
+  .protyle-action__language,
+  .img > span:nth-child(2),
+  .li > .protyle-action,
+  .render-node {
+    cursor: pointer;
+  }
+
+  span[data-type="tag"]:hover {
+    background-color: var(--b3-border-color);
+  }
+
+  span[data-type="block-ref"]:hover,
+  span[data-type="file-annotation-ref"]:hover {
+    opacity: 1;
+  }
+
+  .li > .protyle-action:hover {
+    &:after {
+      background-color: var(--b3-theme-background-light) !important;
+      opacity: .68;
+    }
+
+    color: var(--b3-theme-on-background);
+  }
+
+  .code-block .protyle-action {
+    -webkit-user-modify: read-only;
+
+    .protyle-action__language {
+      &:hover {
+        color: var(--b3-theme-on-background);
+      }
+
+      &:empty::after {
+        content: "language";
+        opacity: 0.68;
+      }
+    }
+  }
+
+  .img:hover .protyle-icons,
+  .render-node:hover > .protyle-icons {
+    opacity: .86;
+  }
+}

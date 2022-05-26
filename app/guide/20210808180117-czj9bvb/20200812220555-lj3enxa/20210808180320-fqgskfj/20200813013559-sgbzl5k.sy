@@ -1,0 +1,429 @@
+{
+	"ID": "20200813013559-sgbzl5k",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200813013559-sgbzl5k",
+		"title": "引用内容块",
+		"type": "doc",
+		"updated": "20211223192442"
+	},
+	"Children": [
+		{
+			"ID": "20200817123136-in6y5m1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20200817123136-in6y5m1",
+				"updated": "20210512154105"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20210104090557-575kpbp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090557-575kpbp",
+				"updated": "20210512153428"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "输入 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "(("
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后将触发内容块引用搜索，继续输入作为搜索关键字，在搜索结果中使用上下键选定后回车就可以完成内容块的引用了。"
+				}
+			]
+		},
+		{
+			"ID": "20210104090557-s8jwrnu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090557-s8jwrnu"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "内容块引用的完整语法是："
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": " ((id \"text\"))"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，其中 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "id"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 形如： "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "202008250000-a1b2c3d"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，由时间和 7 位随机字符组成，内容块 id 是在创建内容块时就会自动生成的；后面的 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "text"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 是在引用处对该内容块的自定义锚文本。建立好内容块引用后，鼠标悬浮在锚文本上后将弹出预览浮层，展现被引用的内容块。"
+				},
+				{
+					"Type": "NodeTag",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker",
+							"Data": "#"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "内容块/引用"
+						},
+						{
+							"Type": "NodeTagCloseMarker",
+							"Data": "#"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104090557-841hf2w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104090557-841hf2w",
+				"updated": "20210512154248"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "链接方向"
+				}
+			]
+		},
+		{
+			"ID": "20210104090557-jjkb0dx",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104090557-jjkb0dx"
+			},
+			"Children": [
+				{
+					"ID": "20210104090557-b5ngr4n",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090557-b5ngr4n"
+					},
+					"Children": [
+						{
+							"ID": "20210302223302-qqrbyfr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223302-qqrbyfr"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "正向链接（Forwardlink），即当前内容块使用了哪些其他内容块"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104090557-v1h50ji",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090557-v1h50ji"
+					},
+					"Children": [
+						{
+							"ID": "20210302223302-0o8gbmc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223302-0o8gbmc"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "反向链接（Backlink），即当前内容块被那些其他内容块使用了"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104090557-gyj2den",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090557-gyj2den"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "正向链接包含在当前块的内容中，我们可以很直观的看到。反向链接需要在其他文档中搜索才能知道，而恰恰是这些信息对我们比较有价值。我们可以通过以下两种方式来帮助我们更好的掌握知识点或者发散思路："
+				}
+			]
+		},
+		{
+			"ID": "20210104090557-7zvf09v",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104090557-7zvf09v",
+				"updated": "20210908144621"
+			},
+			"Children": [
+				{
+					"ID": "20210104090557-oiry1d1",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090557-oiry1d1"
+					},
+					"Children": [
+						{
+							"ID": "20210302223302-njoyflf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223302-njoyflf"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockRef",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20210104090757-xwom8ia"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "关系图"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：浏览内容块之间的正向和反向链接关系"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104090557-2qggmq4",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090557-2qggmq4",
+						"updated": "20210908144621"
+					},
+					"Children": [
+						{
+							"ID": "20210302223302-ifcbul4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223302-ifcbul4",
+								"updated": "20210908144621"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockRef",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20200920194146-psjundj"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "反向链接"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：以文本列表的方式展现当前内容块的反向链接"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

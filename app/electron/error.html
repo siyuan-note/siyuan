@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error - SiYuan</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            background-color: #fff;
+            color: #202124;
+            font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+        }
+
+        .fn__flex-column {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin: 0 auto;
+            border: 1px solid rgba(0, 0, 0, .06);
+            min-height: 100vh;
+            box-sizing: border-box;
+            padding: 0 calc((100vw - 608px) / 2);
+        }
+
+        .fn__flex-1 {
+            flex: 1;
+            min-height: 16px;
+            flex-shrink: 0;
+        }
+
+        h2 {
+            margin: 0 0 4px 0;
+            line-height: 24px;
+            text-align: center;
+        }
+
+        .svg {
+            position: fixed;
+            right: 22px;
+            top: 0;
+            width: 12px;
+            fill: #5f6368;
+            padding: 5px;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .svg:hover {
+            background: #dfe0e1;
+            fill: #202124;
+        }
+
+        #close {
+            right: 0;
+            width: 8px;
+            padding: 7px 7px;
+        }
+
+        #close:hover {
+            background-color: #d23f31;
+            fill: #fff;
+        }
+
+        a {
+            text-decoration: none;
+            color: #218bff;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: #0969da;
+        }
+
+        kbd {
+            padding: 2px 4px;
+            font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            line-height: 1;
+            color: #5f6368;
+            vertical-align: middle;
+            background-color: #f3f3f3;
+            border: solid 1px rgba(0, 0, 0, .06);
+            border-radius: 3px;
+            box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .06);
+        }
+
+        .feedback {
+            display: flex;
+            justify-content: space-around;
+            font-size: 14px
+        }
+
+        .drag {
+            -webkit-app-region: drag;
+            height: 22px;
+            cursor: pointer;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 44px;
+        }
+
+        #content div {
+            line-height: 1.6;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        #content div:last-child {
+            margin-bottom: 0;
+        }
+
+        #icon {
+            height: 22px;
+            width: 22px;
+            position: fixed;
+            left: 5px;
+            top: 0;
+        }
+
+        pre code {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 85%;
+            font-family: mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+            color: #5f6368;
+            display: block;
+            margin-top: 8px;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+<div class="fn__flex-column">
+    <div class="fn__flex-1"></div>
+    <h2 id="title"></h2>
+    <div class="fn__flex-1"></div>
+    <div id="content"></div>
+    <div class="fn__flex-1"></div>
+    <div class="feedback">
+        <span>❤️ <a href="https://github.com/siyuan-note/siyuan/issues" target="_blank">GitHub Issues</a></span>
+        <span>🏘️ <a href="https://ld246.com/article/1640266171309" target="_blank">用户社区汇总</a></span>
+        <span><a href="https://b3log.org/siyuan/download.html" target="_blank" class="version"></a></span>
+    </div>
+    <div class="fn__flex-1"></div>
+</div>
+<svg class="svg" id="min" viewBox="0 0 32 32">
+    <path d="M1.333 14.667h29.333q1.333 0 1.333 1.333v0q0 1.333-1.333 1.333h-29.333q-1.333 0-1.333-1.333v0q0-1.333 1.333-1.333z"></path>
+</svg>
+<svg class="svg" id="close" viewBox="0 0 32 32">
+    <path d="M32 3.221l-12.779 12.779 12.779 12.779-3.221 3.221-12.779-12.779-12.779 12.779-3.221-3.221 12.779-12.779-12.779-12.779 3.221-3.221 12.779 12.779 12.779-12.779z"></path>
+</svg>
+<img id="icon">
+<div class="drag"></div>
+<script>
+  const getSearch = (key) => {
+    if (window.location.search.indexOf('?') === -1) {
+      return ''
+    }
+    let value = ''
+    const data = window.location.search.split('?')[1].split('&')
+    data.find(item => {
+      const keyValue = item.split('=')
+      if (keyValue[0] === key) {
+        value = keyValue[1]
+        return true
+      }
+    })
+    return value
+  }
+
+  document.querySelector('#icon').src = decodeURIComponent(`${getSearch('icon')}`)
+
+  document.getElementById('title').innerHTML = decodeURIComponent(getSearch('title'))
+  document.getElementById('content').innerHTML = decodeURIComponent(getSearch('content'))
+  document.querySelectorAll('.version').forEach(item => {
+    item.textContent = `🔖 v${getSearch('v')}`
+  })
+
+  document.getElementById('close').addEventListener('click', () => {
+    const {ipcRenderer} = require('electron')
+    ipcRenderer.send('siyuan-first-quit')
+  })
+  document.getElementById('min').addEventListener('click', () => {
+    const {getCurrentWindow} = require('@electron/remote')
+    getCurrentWindow().minimize()
+  })
+</script>
+</body>
+</html>

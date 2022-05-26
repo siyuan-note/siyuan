@@ -1,0 +1,146 @@
+{
+	"ID": "20220105101348-corstqc",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20220105101348-corstqc",
+		"title": "限制",
+		"updated": "20220325115500"
+	},
+	"Children": [
+		{
+			"ID": "20220105101409-es213ce",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220105101409-es213ce",
+				"updated": "20220325115500"
+			},
+			"Children": [
+				{
+					"ID": "20220105101409-r9z7pa7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101409-r9z7pa7",
+						"updated": "20220325115500"
+					},
+					"Children": [
+						{
+							"ID": "20220105101409-jfva42o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101409-jfva42o",
+								"updated": "20220325115500"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同步或備份時，不支持大於 100MB 的單個文件傳輸"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101409-0c3wlyv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101409-0c3wlyv"
+					},
+					"Children": [
+						{
+							"ID": "20220105101409-2awkety",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101409-2awkety"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最多支持創建 7 個雲端同步目錄"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101409-7pgt847",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101409-7pgt847"
+					},
+					"Children": [
+						{
+							"ID": "20220105101409-7009hm1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101409-7009hm1"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "雲端存儲空間初始化總大小為 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "8G"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101409-7he9vg5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101409-7he9vg5",
+						"updated": "20220325115431"
+					},
+					"Children": [
+						{
+							"ID": "20220105101409-xyalcc9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101409-xyalcc9",
+								"updated": "20220325115431"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "付費訂閱到期以後，雲端存儲會被徹底刪除"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

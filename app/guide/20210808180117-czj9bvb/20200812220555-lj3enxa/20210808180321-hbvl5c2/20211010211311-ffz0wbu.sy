@@ -1,0 +1,158 @@
+{
+	"ID": "20211010211311-ffz0wbu",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211010211311-ffz0wbu",
+		"title": "虚拟引用",
+		"updated": "20211010212520"
+	},
+	"Children": [
+		{
+			"ID": "20211010211311-p49lqrm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211010211311-p49lqrm",
+				"updated": "20211010211345"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20211010211345-ewlmf4o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211010211345-ewlmf4o",
+				"updated": "20211010212407"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "虚拟引用是一种根据已有块链的锚文本或者块命名等来自动探测的“块链”，但它并不会真实链接到块上，而是仅在编辑器内标记，并支持浮窗预览。"
+				}
+			]
+		},
+		{
+			"ID": "20211010211443-fekufvk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211010211443-fekufvk",
+				"updated": "20211010211450"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20211010211616-b5kzfqf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211010211616-b5kzfqf",
+				"updated": "20211010211707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打开 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "设置"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "编辑器"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "虚拟引用"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 开关即可。"
+				}
+			]
+		},
+		{
+			"ID": "20211010211708-0qn8cpl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211010211708-0qn8cpl",
+				"updated": "20211010211737"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "探测规则"
+				}
+			]
+		},
+		{
+			"ID": "20211010211712-g08nujc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211010211712-g08nujc",
+				"updated": "20211010212520"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "根据已有块引的锚文本/定义块文本、块的命名和别名作为关键字搜索，如果在当前内容块的纯文本元素上搜索到这些关键字，那么就会作为虚拟引用。"
+				}
+			]
+		}
+	]
+}

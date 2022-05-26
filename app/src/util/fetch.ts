@@ -1,0 +1,74 @@
+import {Constants} from "../constants";
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+/// #endif
+import {processMessage} from "./processMessage";
+import {kernelError} from "../dialog/processSystem";
+
+export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketData) => void, headers?: IObject) => {
+    const init: RequestInit = {
+        method: "POST",
+    };
+    if (data) {
+        if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph"].includes(url)) {
+            window.siyuan.reqIds[url] = new Date().getTime();
+            data.reqId = window.siyuan.reqIds[url];
+        }
+        if (data instanceof FormData) {
+            init.body = data;
+        } else {
+            init.body = JSON.stringify(data);
+        }
+    }
+    if (headers) {
+        init.headers = headers;
+    }
+    fetch(url, init).then((response) => {
+        return response.json();
+    }).then((response: IWebSocketData) => {
+        if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph"].includes(url)) {
+            if (response.data.reqId && window.siyuan.reqIds[url] && window.siyuan.reqIds[url] > response.data.reqId) {
+                return;
+            }
+        }
+        if (processMessage(response) && cb) {
+            cb(response);
+        }
+    }).catch((e) => {
+        console.warn("fetch post error", e);
+        if (url === "/api/transactions" && e.message === "Failed to fetch") {
+            kernelError();
+            return;
+        }
+        /// #if !BROWSER
+        if (url === "/api/system/exit" || url === "/api/system/setWorkspaceDir" || (
+            url === "/api/system/setUILayout" && data.exit // 内核中断，点关闭处理
+        )) {
+            ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);
+            ipcRenderer.send(Constants.SIYUAN_QUIT);
+        }
+        /// #endif
+    });
+};
+
+export const fetchSyncPost = async (url: string, data?: any) => {
+    const init: RequestInit = {
+        method: "POST",
+    };
+    if (data) {
+        init.body = JSON.stringify(data);
+    }
+    const res = await fetch(url, init);
+    const res2 = await res.json() as IWebSocketData;
+    processMessage(res2);
+    return res2;
+};
+
+export const fetchGet = (url: string, cb: (response: IWebSocketData | IEmoji[]) => void) => {
+    fetch(url).then((response) => {
+        return response.json();
+    }).then((response: IWebSocketData) => {
+        cb(response);
+    });
+};
+

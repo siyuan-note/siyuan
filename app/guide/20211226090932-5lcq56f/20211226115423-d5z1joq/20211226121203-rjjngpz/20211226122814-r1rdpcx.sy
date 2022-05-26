@@ -1,0 +1,158 @@
+{
+	"ID": "20211226122814-r1rdpcx",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226122814-r1rdpcx",
+		"title": "虛擬引用",
+		"updated": "20211228135304"
+	},
+	"Children": [
+		{
+			"ID": "20211226122825-b3dgpzv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122825-b3dgpzv",
+				"updated": "20211226013145"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20211226122825-l5wv8k9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122825-l5wv8k9",
+				"updated": "20211228135304"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "虛擬引用是一種根據已有塊連的錨文本或者塊命名等來自動探測的“塊連”，但它並不會真實連接到塊上，而是僅在編輯器內標記，並支援浮窗預覽。"
+				}
+			]
+		},
+		{
+			"ID": "20211226122825-sua3d6c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122825-sua3d6c",
+				"updated": "20211226013145"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20211226122825-xjba5oj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122825-xjba5oj",
+				"updated": "20211226013145"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打開 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "設置"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "編輯器"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "虛擬引用"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開關即可。"
+				}
+			]
+		},
+		{
+			"ID": "20211226122825-w6wxq0c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122825-w6wxq0c",
+				"updated": "20211226013145"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "探測規則"
+				}
+			]
+		},
+		{
+			"ID": "20211226122825-z7izmqi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122825-z7izmqi",
+				"updated": "20211226013145"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "根據已有塊引的錨文本/定義塊文本、塊的命名和別名作為關鍵字搜索，如果在當前內容塊的純文本元素上搜索到這些關鍵字，那麽就會作為虛擬引用。"
+				}
+			]
+		}
+	]
+}

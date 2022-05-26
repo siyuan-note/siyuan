@@ -1,0 +1,34 @@
+a.b3-chip:hover {
+  text-decoration: none;
+  background-color: #ea4aaa;
+}
+
+.b3-chip {
+  background-color: var(--b3-list-hover);
+  color: var(--b3-theme-on-background);
+  line-height: 32px;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 16px;
+  border-radius: 16px;
+  transition: var(--b3-transition);
+
+  &--secondary {
+    background-color: var(--b3-theme-secondary);
+    color: var(--b3-theme-on-secondary);
+  }
+
+  &--primary {
+    background-color: var(--b3-theme-primary);
+    color: var(--b3-theme-on-primary);
+  }
+
+  svg {
+    margin-right: 4px;
+    margin-left: -4px;
+    height: 14px;
+    width: 14px;
+  }
+}

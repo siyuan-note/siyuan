@@ -1,0 +1,154 @@
+.fn {
+
+  &__ellipsis {
+    @include text-clamp(1);
+    display: block; // 集市挂件名称过长遮挡星标 https://github.com/siyuan-note/siyuan/issues/4782
+  }
+
+  &__space {
+    width: 8px;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  &__hr {
+    height: 8px;
+    display: block;
+
+    &--b {
+      display: block;
+      height: 16px;
+    }
+
+    &--small {
+      height: 4px;
+    }
+  }
+
+  &__flex {
+    display: flex;
+
+    &-center {
+      align-self: center;
+    }
+
+    &-1 {
+      flex: 1;
+      min-width: 0.1px;
+      overflow: auto;
+      min-height: 0.1px;
+    }
+
+    &-column {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    &-shrink {
+      flex-shrink: 0;
+    }
+  }
+
+  &__pointer {
+    cursor: pointer;
+  }
+
+  &__none {
+    display: none !important;
+  }
+
+  &__hidden {
+    visibility: hidden;
+  }
+
+  &__a {
+    color: var(--b3-theme-on-surface);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--b3-theme-on-background);
+    }
+  }
+
+  &__block {
+    width: 100%;
+  }
+
+  &__size200 {
+    width: 200px;
+    flex-shrink: 0;
+  }
+
+  &__rotate {
+    animation: rotate 2s infinite linear;
+  }
+
+  &__loading {
+    position: absolute;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    bottom: 0;
+    align-content: center;
+    z-index: 1;
+    align-items: center;
+
+    &--top {
+      top: 48px;
+    }
+  }
+}
+
+.ft {
+  &__smaller {
+    font-size: 12px;
+  }
+
+  &__center {
+    text-align: center;
+  }
+
+  &__on-background {
+    color: var(--b3-theme-on-background);
+  }
+
+  &__on-surface {
+    color: var(--b3-theme-on-surface);
+  }
+
+  &__pink {
+    color: #ea4aaa;
+  }
+
+  &__error {
+    color: var(--b3-theme-error) !important;
+  }
+
+  &__primary {
+    color: var(--b3-theme-primary);
+  }
+
+  &__secondary {
+    color: var(--b3-theme-secondary);
+  }
+}
+
+.history {
+  &__text {
+    background-color: var(--b3-theme-background);
+    padding: 16px;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 0 0 4px 0;
+    resize: none;
+    color: var(--b3-theme-on-background);
+  }
+
+  &__asset {
+    background-color: var(--b3-theme-background);
+    padding: 16px;
+    border-radius: 0 0 4px 0;
+  }
+}

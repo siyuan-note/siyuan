@@ -1,0 +1,1258 @@
+{
+	"ID": "20210721112206-mhr9wxi",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210721112206-mhr9wxi",
+		"title": "Data Sync",
+		"updated": "20220510105000"
+	},
+	"Children": [
+		{
+			"ID": "20210721112403-8no39l4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721112403-8no39l4",
+				"updated": "20210721112403"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210721112403-0ft3r91",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721112403-0ft3r91",
+				"updated": "20210721113101"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data synchronization refers to keeping the "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "workspace/data/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " folder data consistent on multiple devices, including asset files, templates, widgets, and notebook data."
+				}
+			]
+		},
+		{
+			"ID": "20210721112403-77frbcy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721112403-77frbcy",
+				"updated": "20210721112403"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20211027220510-0egr1r9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211027220510-0egr1r9",
+				"updated": "20211106114232"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Settings - Cloud - Cloud sync"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and proceed through the synchronization setting wizard."
+				}
+			]
+		},
+		{
+			"ID": "20211027220510-4qkvcnz",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20211027220510-4qkvcnz",
+				"updated": "20220110113833"
+			},
+			"Children": [
+				{
+					"ID": "20211027220510-4qik87y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20211027220510-4qik87y",
+						"updated": "20220110113833"
+					},
+					"Children": [
+						{
+							"ID": "20211027220510-4acljz5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211027220510-4acljz5",
+								"updated": "20220110113833"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Set the "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "end-to-end encryption"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " password"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211027220510-arpjijt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20211027220510-arpjijt"
+					},
+					"Children": [
+						{
+							"ID": "20211027220510-wz0rbnw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211027220510-wz0rbnw"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create or select a cloud synchronization directory. After selecting, the cloud synchronization directory will be used for data synchronization in the current workspace"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211027220510-i02t3c4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20211027220510-i02t3c4"
+					},
+					"Children": [
+						{
+							"ID": "20211027220510-u8153il",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211027220510-u8153il"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Enable sync switch"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210727103226-gfx0f7l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210727103226-gfx0f7l",
+				"updated": "20210727103347"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Please perform the above operations on the "
+				},
+				{
+					"Type": "NodeEmphasis",
+					"Data": "em",
+					"Children": [
+						{
+							"Type": "NodeEmA6kOpenMarker",
+							"Data": "*"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "main"
+						},
+						{
+							"Type": "NodeEmA6kCloseMarker",
+							"Data": "*"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " device first, then select the same cloud sync directory on other devices and turn on the sync switch. If you want to switch, rename or remove the cloud sync directory, please turn off the sync switch on all devices before proceeding."
+				}
+			]
+		},
+		{
+			"ID": "20210928101257-l27t5uo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210928101257-l27t5uo",
+				"updated": "20210928101257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ignore files"
+				}
+			]
+		},
+		{
+			"ID": "20210928101257-3m7efdr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210928101257-3m7efdr",
+				"updated": "20210928220616"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to ignore some files during synchronization, please create or edit the text file "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "workspace/data/.siyuan/syncignore"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on the file system, each line is configured with the relative path of the data folder, which means that the path of the file or folder is ignored and wildcard characters are supported. E.g:"
+				}
+			]
+		},
+		{
+			"ID": "20210928101257-apwzr8j",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210928101257-apwzr8j",
+				"updated": "20211222190049"
+			},
+			"Children": [
+				{
+					"ID": "20210928101257-9rghi7d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210928101257-9rghi7d",
+						"updated": "20211222190049"
+					},
+					"Children": [
+						{
+							"ID": "20210928101257-tjmd13g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210928101257-tjmd13g",
+								"updated": "20211222190049"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "20210808180117-6v0mkxr/**/*"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Ignore the data/20210808180117-6v0mkxr notebook"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210928101257-egaymco",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210928101257-egaymco"
+					},
+					"Children": [
+						{
+							"ID": "20210928101257-jj2836a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210928101257-jj2836a"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "assets/*.pdf"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ignore PDF files under data/assets/"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210721112403-v7hwt54",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721112403-v7hwt54",
+				"updated": "20210721113330"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Working principle"
+				}
+			]
+		},
+		{
+			"ID": "20210721112403-k020foj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721112403-k020foj",
+				"updated": "20220510104937"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan performs corresponding operations by comparing the cloud data version and the local data version:"
+				}
+			]
+		},
+		{
+			"ID": "20210721112403-7z02hlf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210721112403-7z02hlf",
+				"updated": "20210901163505"
+			},
+			"Children": [
+				{
+					"ID": "20210721112403-6vsuax6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721112403-6vsuax6",
+						"updated": "20210901163400"
+					},
+					"Children": [
+						{
+							"ID": "20210721112403-vy0km58",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721112403-vy0km58",
+								"updated": "20210901163400"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Skip if the version is equal"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721112403-t742q8e",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721112403-t742q8e",
+						"updated": "20220510104256"
+					},
+					"Children": [
+						{
+							"ID": "20210721112403-ai2lz2c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721112403-ai2lz2c",
+								"updated": "20220510104256"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If the cloud version is greater than the local version, download the cloud data locally and decrypt it to the "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "workspace/data/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " folder, and the local overwritten or deleted files will be moved to the "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "workspace/history/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " folder"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721112403-5kg7vat",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721112403-5kg7vat",
+						"updated": "20210901163505"
+					},
+					"Children": [
+						{
+							"ID": "20210721112403-lyikpwu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721112403-lyikpwu",
+								"updated": "20210901163505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If the cloud version is less than the local version, scan for changes in "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "/workspace/data/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", then encrypt the changes and copy them to the folder "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "workspace/sync/"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", and finally upload and overwrite the cloud data"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220510105000-503cjse",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220510105000-503cjse",
+				"updated": "20220510105000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The version comparison is automatically performed at regular intervals. The time interval algorithm is described as follows:"
+				}
+			]
+		},
+		{
+			"ID": "20220510105000-03p25i0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220510105000-03p25i0",
+				"updated": "20220510105000"
+			},
+			"Children": [
+				{
+					"ID": "20220510105000-soqifkx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220510105000-soqifkx",
+						"updated": "20220510105000"
+					},
+					"Children": [
+						{
+							"ID": "20220510105000-p9xg0yf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220510105000-p9xg0yf",
+								"updated": "20220510105000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After 30 seconds of data change, if there is no further change, a comparison will be made, and if it continues to change, it will be delayed by 30 seconds"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220510105000-ouj6xo5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220510105000-ouj6xo5",
+						"updated": "20220510105000"
+					},
+					"Children": [
+						{
+							"ID": "20220510105000-eps1jp2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220510105000-eps1jp2",
+								"updated": "20220510105000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If there is no data change, it will be incremented by 5 minutes, 8 minutes, 16 minutes, 32 minutes..."
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220307095105-is2jz8h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220307095105-is2jz8h",
+				"updated": "20220307095105"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Scenario example"
+				}
+			]
+		},
+		{
+			"ID": "20220307095105-pdveh7f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220307095105-pdveh7f",
+				"updated": "20220307095118"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "From the above working principle, we can know that SiYuan only supports alternate synchronization of data on multiple devices: after synchronization is completed on device A, synchronization is performed on device B. Simultaneous synchronization of multiple devices cannot be supported, so unexpected data overwriting will occur."
+				}
+			]
+		},
+		{
+			"ID": "20220307095105-xr4ht8a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220307095105-xr4ht8a",
+				"updated": "20220307095105"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Normal scene"
+				}
+			]
+		},
+		{
+			"ID": "20220307095105-z02ucyo",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220307095105-z02ucyo",
+				"updated": "20220307095105"
+			},
+			"Children": [
+				{
+					"ID": "20220307095105-hbj4ovp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220307095105-hbj4ovp"
+					},
+					"Children": [
+						{
+							"ID": "20220307095105-i864hxu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095105-i864hxu"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Execute synchronization after editing on device A (by triggering synchronization automatically or manually), at this time, the cloud data will be overwritten by the data of device A, that is, the cloud and device A keep the same data"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095105-q12j7j7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220307095105-q12j7j7"
+					},
+					"Children": [
+						{
+							"ID": "20220307095105-l0xxcoe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095105-l0xxcoe"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Execute synchronization on device B. At this time, the data of device B will be overwritten by the cloud data, that is, the cloud and devices A and B keep the same data"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095105-3mv34vh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220307095105-3mv34vh"
+					},
+					"Children": [
+						{
+							"ID": "20220307095105-2adzw18",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095105-2adzw18"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After editing on device B, perform synchronization again. At this time, the cloud data will be overwritten by device B data, that is, the cloud and device B keep the same data."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095105-pwlmtr3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20220307095105-pwlmtr3"
+					},
+					"Children": [
+						{
+							"ID": "20220307095105-bivgvtw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095105-bivgvtw"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Execute synchronization on device A. At this time, the data of device A will be overwritten by the cloud data, that is, the cloud and devices A and B keep the same data"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220307095105-imseszh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220307095105-imseszh",
+				"updated": "20220307095105"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In this scenario, the process of using synchronization is performed alternately on devices A and B, which can ensure that data synchronization is completed normally as expected."
+				}
+			]
+		},
+		{
+			"ID": "20220307095105-fiqosxx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220307095105-fiqosxx",
+				"updated": "20220307095105"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Override scene"
+				}
+			]
+		},
+		{
+			"ID": "20220307095105-ep79t8e",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220307095105-ep79t8e",
+				"updated": "20220307095105"
+			},
+			"Children": [
+				{
+					"ID": "20220307095105-8826dy9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220307095105-8826dy9"
+					},
+					"Children": [
+						{
+							"ID": "20220307095105-x0he7bs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095105-x0he7bs"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Not syncing after editing on device A (for example, when there is no network and it is offline)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095105-izitvbz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220307095105-izitvbz"
+					},
+					"Children": [
+						{
+							"ID": "20220307095105-w9ngf5y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095105-w9ngf5y"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Not syncing after editing on device B"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095105-sd6qr1j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220307095105-sd6qr1j"
+					},
+					"Children": [
+						{
+							"ID": "20220307095105-3u4gbc3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095105-3u4gbc3"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Perform synchronization on device A. At this time, the cloud data will be overwritten by the data of device A, that is, the cloud and device A keep the same data."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220307095105-e5htllk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20220307095105-e5htllk"
+					},
+					"Children": [
+						{
+							"ID": "20220307095105-dhos0vm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220307095105-dhos0vm"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Perform a sync on device B, at which point there are three possible scenarios"
+								}
+							]
+						},
+						{
+							"ID": "20220307095105-278fg11",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20220307095105-278fg11"
+							},
+							"Children": [
+								{
+									"ID": "20220307095105-yq7mdka",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220307095105-yq7mdka"
+									},
+									"Children": [
+										{
+											"ID": "20220307095105-6dgsvev",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220307095105-6dgsvev"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Device B data skip synchronization because the version and cloud are the same"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220307095105-spgvmup",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220307095105-spgvmup"
+									},
+									"Children": [
+										{
+											"ID": "20220307095105-4etoiq4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220307095105-4etoiq4"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Device B data covers the cloud"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220307095105-w45og3n",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220307095105-w45og3n"
+									},
+									"Children": [
+										{
+											"ID": "20220307095105-9cvcbpq",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220307095105-9cvcbpq"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Device B data is overwritten by the cloud"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220307095105-gl7j2q4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220307095105-gl7j2q4",
+				"updated": "20220307095105"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In this scenario, the process of using synchronization is to edit offline on both devices, and then perform synchronization, so that the expected results of normal synchronization cannot be obtained. Even so, the data will not be lost, and the overwritten data can be retrieved through history."
+				}
+			]
+		},
+		{
+			"ID": "20210721112403-b62c3ph",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721112403-b62c3ph",
+				"updated": "20210901163529"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Note"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210721112403-th2r6zf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210721112403-th2r6zf",
+				"updated": "20220420100331"
+			},
+			"Children": [
+				{
+					"ID": "20220420100320-of55n1f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220420100320-of55n1f",
+						"updated": "20220420100331"
+					},
+					"Children": [
+						{
+							"ID": "20220420100320-uqsflw4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220420100320-uqsflw4",
+								"updated": "20220420100331"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Synchronization will not be triggered in the case of sudden disconnection such as sleep or shutdown, please manually click the synchronization button to synchronize"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721195846-if71i5z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721195846-if71i5z",
+						"updated": "20210721195846"
+					},
+					"Children": [
+						{
+							"ID": "20210721195846-wcikaav",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721195846-wcikaav",
+								"updated": "20210721195846"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Before renaming or deleting the cloud directory, please turn off synchronization on all devices before editing or deleting"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721160159-gc5tin2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721160159-gc5tin2",
+						"updated": "20210721160206"
+					},
+					"Children": [
+						{
+							"ID": "20210721160159-keim8rq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721160159-keim8rq",
+								"updated": "20210721160206"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Do not use a third-party sync disk and SiYuan sync at the same time, it may cause data damage"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210930212724-54kv4ez",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210930212724-54kv4ez",
+						"updated": "20210930212744"
+					},
+					"Children": [
+						{
+							"ID": "20210930212724-tzon0le",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210930212724-tzon0le",
+								"updated": "20210930212744"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Symbolic links will not be synchronized"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

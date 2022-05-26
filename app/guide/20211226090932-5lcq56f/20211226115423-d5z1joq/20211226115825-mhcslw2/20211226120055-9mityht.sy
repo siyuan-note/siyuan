@@ -1,0 +1,516 @@
+{
+	"ID": "20211226120055-9mityht",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226120055-9mityht",
+		"title": "什麼是內容塊",
+		"updated": "20211228134758"
+	},
+	"Children": [
+		{
+			"ID": "20211226120120-jm4t451",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120120-jm4t451",
+				"updated": "20211225224210"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "內容塊定義"
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-83k0bgj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120120-83k0bgj",
+				"updated": "20211228124624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "“"
+				},
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "內容塊"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "”指的是一塊內容，每塊這樣的內容通過一個全域唯一的 ID 進行標識。ID 是程式自動生成的，形如： "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "202008250000-a1b2c3d"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，由時間和 7 位隨機字符組成。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-es5r7jz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120120-es5r7jz",
+				"updated": "20211225224210"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "內容塊類型"
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-mabxgr7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120120-mabxgr7",
+				"updated": "20211228105035"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "最常見的內容塊就是我們所熟悉的段落（Paragraph）。在中文傳統排版中，段落通常是通過段首縮進（空兩格）來表示，網際網路的發展逐漸影響了段落的表示，現在使用較多的方式是增加段落之間的行距，或者使用空行來分隔段落。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-o6vc62t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120120-o6vc62t",
+				"updated": "20211225224210"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "實際使用時，僅僅靠段落排版是不夠的，往往還需要用到標題（Heading）、列表（List）、表格（Table）、塊引用（Blockquote）等來豐富我們的排版。這些排版樣式除了視覺上的不同，更重要的是它們在一定程度上表達了內容的語義。比如在看到無序列表時，我們可以知道每個列表項是不分先後的平級關系，而在看到有序列表時則相反。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-8gxppvd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120120-8gxppvd",
+				"updated": "20211226125227"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "所以，內容塊存在"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20211226120227-2s70boj"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "很多類型"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，不同的排版格式會形成不同的內容塊。"
+				},
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "內容塊/類型"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-dpno0zb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120120-dpno0zb",
+				"updated": "20211225224210"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "組合內容塊"
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-z442iy4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120120-z442iy4",
+				"updated": "20211225224448"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "一篇文檔是一些內容塊的組合，內容塊是基本單位。這就好比樂高積木，可以使用不同的基本模塊進行組合。"
+				},
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：文檔本身也是一種內容塊，更準確地說，文檔塊、列表塊、引述塊這三種內容塊是容器塊，他們可以包含其他任意類型的內容塊。"
+				},
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "內容塊/組合"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-l22275a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120120-l22275a",
+				"updated": "20211226152623"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "至此，我們已經能夠用內容塊來描述所有的內容了，這樣就能通過統一的用法來"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20211226120247-63nd8y5"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "連結內容塊"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "了。邏輯上沒有頁面（Page）概念，減少使用中不必要的負擔，讓用戶將註意力集中在內容塊上。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-a9g5s86",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120120-a9g5s86",
+				"updated": "20211225224210"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "命名和備註"
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-ez8kp2p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120120-ez8kp2p",
+				"memo": "備註通常是一句簡短的話",
+				"updated": "20211228130959"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我們可以為每個內容塊命名、新增別名和備註。命名和別名主要用於反連"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20211226120415-kqk522d"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "提及"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "搜索，備註用於記錄一些不便在內容區中出現的訊息。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-tk670g9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120120-tk670g9",
+				"updated": "20211228134758"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "設置"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "編輯器"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中打開顯示書簽、命名、別名標識選項後，被命名的內容塊在編輯器中會被加上外框顯示。如果對文檔塊進行命名和備註，則當滑鼠懸浮文檔樹文檔上時將浮出該文檔的相關命名和備註訊息。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120120-mik443d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120120-mik443d",
+				"updated": "20211226125508"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可使用"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20211226120508-yzh70eh"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "嵌入內容塊"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "對命名和備註進行搜索匯總，比如列出備註中包含 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "簡短"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 關鍵字的內容塊："
+				}
+			]
+		},
+		{
+			"ID": "20211226152553-bvudiv9",
+			"Type": "NodeBlockQueryEmbed",
+			"Properties": {
+				"id": "20211226152553-bvudiv9",
+				"updated": "20211226152553"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "select * from blocks where id='20211226120120-ez8kp2p'"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20211226152554-ac2iftz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226152554-ac2iftz",
+				"updated": "20211226152554"
+			}
+		}
+	]
+}

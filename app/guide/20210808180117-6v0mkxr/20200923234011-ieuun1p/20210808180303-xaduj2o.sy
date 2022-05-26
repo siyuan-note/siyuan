@@ -1,0 +1,20 @@
+{
+	"ID": "20210808180303-xaduj2o",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f68c",
+		"id": "20210808180303-xaduj2o",
+		"title": "General Operations",
+		"updated": "20210808180303"
+	},
+	"Children": [
+		{
+			"ID": "20210808180303-1931idj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210808180303-1931idj",
+				"updated": "20210808180303"
+			}
+		}
+	]
+}

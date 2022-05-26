@@ -1,0 +1,115 @@
+.search {
+  &__header {
+    display: flex;
+    background: var(--b3-theme-background);
+    position: relative;
+    border-bottom: 1px solid var(--b3-border-color);
+
+    .b3-text-field--text {
+      font-size: 18px;
+      height: 48px;
+      line-height: 32px;
+      border-radius: 0;
+      padding: 8px 8px 8px 48px !important;
+    }
+
+    .b3-form__icon-icon {
+      top: 16px;
+      left: 12px;
+    }
+
+    .b3-menu {
+      max-height: 50vh;
+      overflow: auto;
+      top: 48px;
+      position: absolute;
+    }
+  }
+
+  &__arrowdown {
+    position: absolute;
+    height: 10px;
+    width: 10px;
+    left: 30px;
+    top: 20px;
+  }
+
+  &__label {
+    cursor: pointer;
+    flex: 1;
+
+    &:hover {
+      color: var(--b3-theme-on-background);
+    }
+
+    .b3-form__icon-input {
+      width: 0;
+      transition: var(--b3-transition);
+      border-color: transparent;
+      box-sizing: border-box;
+      padding-right: 0;
+      border-radius: 2px;
+
+      &:focus {
+        width: 100%;
+        border-color: var(--b3-theme-primary);
+      }
+    }
+  }
+}
+
+
+.protyle-search {
+  display: flex;
+  background-color: var(--b3-theme-surface);
+  transition: var(--b3-transition);
+  height: 0;
+  overflow: hidden;
+  flex-direction: column;
+  box-sizing: border-box;
+
+  &__item {
+    margin: 8px 16px 0 16px;
+    display: flex;
+    align-items: center;
+  }
+
+  &--open {
+    height: 36px;
+  }
+
+  &__mark {
+    background-color: var(--b3-protyle-search-background);
+    box-shadow: 0 0 1px var(--b3-protyle-search-border-color);
+
+    &--current {
+      background-color: var(--b3-protyle-search-current-background);
+      box-shadow: 0 0 1px var(--b3-theme-on-background);
+    }
+  }
+
+  &__text {
+    color: var(--b3-theme-on-surface);
+    font-size: 12px;
+    line-height: 22px;
+    height: 22px;
+    padding: 0 8px 0 16px;
+  }
+
+  .b3-tooltips {
+    display: flex;
+    align-items: center;
+  }
+
+  svg {
+    cursor: pointer;
+    color: var(--b3-theme-on-background);
+    padding: 6px 8px;
+    height: 10px;
+    width: 10px;
+
+    &:hover {
+      color: var(--b3-theme-on-surface);
+    }
+  }
+}

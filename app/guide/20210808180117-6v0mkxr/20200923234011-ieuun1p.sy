@@ -1,0 +1,926 @@
+{
+	"ID": "20200923234011-ieuun1p",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f389",
+		"id": "20200923234011-ieuun1p",
+		"title": "Please Start Here",
+		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
+		"type": "doc",
+		"updated": "20211223213256"
+	},
+	"Children": [
+		{
+			"ID": "20210428222013-0afj8vn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"bookmark": "✨",
+				"id": "20210428222013-0afj8vn",
+				"updated": "20210714093108"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "🍫 Content block"
+				}
+			]
+		},
+		{
+			"ID": "20210428222033-bhbz6yg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210428222033-bhbz6yg",
+				"style": "color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);",
+				"updated": "20210512150301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, the only important core concept is "
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20200924101106-19z4kaa"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "Content block"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". The content block can be formed through the formatting format, so that we can organize our thoughts and knowledge at the block-level granularity, and it is also convenient for reading and outputting long content."
+				}
+			]
+		},
+		{
+			"ID": "20210528120135-bznvpp6",
+			"Type": "NodeSuperBlock",
+			"Properties": {
+				"id": "20210528120135-bznvpp6",
+				"updated": "20211223213241"
+			},
+			"Children": [
+				{
+					"Type": "NodeSuperBlockOpenMarker"
+				},
+				{
+					"Type": "NodeSuperBlockLayoutMarker",
+					"Data": "col"
+				},
+				{
+					"ID": "20210528120142-hprb4ja",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"id": "20210528120142-hprb4ja",
+						"style": "width: 62%; flex: 0 0 auto;",
+						"updated": "20210502233931"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20201225220954-keui8uy",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"id": "20201225220954-keui8uy",
+								"updated": "20210601233810"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "🍔 Start eating"
+								}
+							]
+						},
+						{
+							"ID": "20201225220954-dlgzk1o",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20201225220954-dlgzk1o",
+								"updated": "20210502233931"
+							},
+							"Children": [
+								{
+									"ID": "20201225220954-e913snx",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20201225220954-e913snx"
+									},
+									"Children": [
+										{
+											"ID": "20210131161940-kfs31q6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210131161940-kfs31q6"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Create a new notebook, create a new document under the notebook"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20201225220954-ygz217h",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20201225220954-ygz217h",
+										"updated": "20211205193627"
+									},
+									"Children": [
+										{
+											"ID": "20210131161940-eo0riwq",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210131161940-eo0riwq",
+												"updated": "20211205193627"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Enter "
+												},
+												{
+													"Type": "NodeKbd",
+													"Data": "kbd",
+													"Children": [
+														{
+															"Type": "NodeKbdOpenMarker"
+														},
+														{
+															"Type": "NodeText",
+															"Data": "/"
+														},
+														{
+															"Type": "NodeKbdCloseMarker"
+														}
+													]
+												},
+												{
+													"Type": "NodeText",
+													"Data": " in the editor to trigger the function menu"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20201225220954-875yybt",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20201225220954-875yybt",
+										"updated": "20210502233931"
+									},
+									"Children": [
+										{
+											"ID": "20210131161940-b5uow2h",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210131161940-b5uow2h",
+												"updated": "20210502233931"
+											},
+											"Children": [
+												{
+													"Type": "NodeBlockRef",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeBlockRefID",
+															"Data": "20200924101200-gss5vee"
+														},
+														{
+															"Type": "NodeBlockRefSpace"
+														},
+														{
+															"Type": "NodeBlockRefText",
+															"Data": "Navigate in the content block"
+														},
+														{
+															"Type": "NodeCloseParen"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												},
+												{
+													"Type": "NodeText",
+													"Data": " and "
+												},
+												{
+													"Type": "NodeBlockRef",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeBlockRefID",
+															"Data": "20200924100906-0u4zfq3"
+														},
+														{
+															"Type": "NodeBlockRefSpace"
+														},
+														{
+															"Type": "NodeBlockRefText",
+															"Data": "Window and tab"
+														},
+														{
+															"Type": "NodeCloseParen"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker"
+						}
+					]
+				},
+				{
+					"ID": "20210528120140-1cfmrhm",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"id": "20210528120140-1cfmrhm",
+						"updated": "20211223213241"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20201225220954-qtw7nfl",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"id": "20201225220954-qtw7nfl",
+								"updated": "20210622215847"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "🍹 Drink recommend"
+								}
+							]
+						},
+						{
+							"ID": "20201225220954-kjfoqak",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20201225220954-kjfoqak",
+								"updated": "20211223213241"
+							},
+							"Children": [
+								{
+									"ID": "20201225220954-bbrjxhx",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20201225220954-bbrjxhx",
+										"updated": "20211223213241"
+									},
+									"Children": [
+										{
+											"ID": "20210131161940-zu27zlo",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210131161940-zu27zlo",
+												"updated": "20211223213241"
+											},
+											"Children": [
+												{
+													"Type": "NodeBlockRef",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeBlockRefID",
+															"Data": "20200923234731-h3zkwm2"
+														},
+														{
+															"Type": "NodeBlockRefSpace"
+														},
+														{
+															"Type": "NodeBlockRefText",
+															"Data": "FAQ"
+														},
+														{
+															"Type": "NodeCloseParen"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20201225220954-bj7c15e",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20201225220954-bj7c15e"
+									},
+									"Children": [
+										{
+											"ID": "20210131161940-nksa82l",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210131161940-nksa82l",
+												"updated": "20210501192621"
+											},
+											"Children": [
+												{
+													"Type": "NodeLink",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenBracket"
+														},
+														{
+															"Type": "NodeLinkText",
+															"Data": "Origin"
+														},
+														{
+															"Type": "NodeCloseBracket"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeLinkDest",
+															"Data": "https://ld246.com/article/1619868273581"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20210528120207-5wey3qg",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20210528120207-5wey3qg",
+										"updated": "20210528120213"
+									},
+									"Children": [
+										{
+											"ID": "20210528120207-0u97bon",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210528120207-0u97bon",
+												"updated": "20210528120213"
+											},
+											"Children": [
+												{
+													"Type": "NodeLink",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenBracket"
+														},
+														{
+															"Type": "NodeLinkText",
+															"Data": "Roadmap"
+														},
+														{
+															"Type": "NodeCloseBracket"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeLinkDest",
+															"Data": "https://github.com/siyuan-note/siyuan/projects"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeSuperBlockCloseMarker"
+				}
+			]
+		},
+		{
+			"ID": "20210528120236-zyh2t7d",
+			"Type": "NodeSuperBlock",
+			"Properties": {
+				"id": "20210528120236-zyh2t7d",
+				"updated": "20211223213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeSuperBlockOpenMarker"
+				},
+				{
+					"Type": "NodeSuperBlockLayoutMarker",
+					"Data": "col"
+				},
+				{
+					"ID": "20210528120311-ys4nmlw",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"id": "20210528120311-ys4nmlw",
+						"style": "width: 62%; flex: 0 0 auto;",
+						"updated": "20211223213256"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20201225220954-s2g98gd",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"id": "20201225220954-s2g98gd",
+								"name": "Community",
+								"updated": "20210601233839"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "🏘️ Our home"
+								}
+							]
+						},
+						{
+							"ID": "20200923234102-ysbri6o",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20200923234102-ysbri6o",
+								"updated": "20211223213256"
+							},
+							"Children": [
+								{
+									"ID": "20201225220954-d10tcsj",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20201225220954-d10tcsj"
+									},
+									"Children": [
+										{
+											"ID": "20210131161940-ucgs2kw",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210131161940-ucgs2kw",
+												"updated": "20210428231747"
+											},
+											"Children": [
+												{
+													"Type": "NodeLink",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenBracket"
+														},
+														{
+															"Type": "NodeLinkText",
+															"Data": "GitHub Issues"
+														},
+														{
+															"Type": "NodeCloseBracket"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeLinkDest",
+															"Data": "https://github.com/siyuan-note/siyuan/issues"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20210428231748-qeszm45",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20210428231748-qeszm45",
+										"updated": "20211223213256"
+									},
+									"Children": [
+										{
+											"ID": "20210428231748-t6le710",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210428231748-t6le710",
+												"updated": "20211223213256"
+											},
+											"Children": [
+												{
+													"Type": "NodeLink",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenBracket"
+														},
+														{
+															"Type": "NodeLinkText",
+															"Data": "Discord"
+														},
+														{
+															"Type": "NodeCloseBracket"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeLinkDest",
+															"Data": "https://discord.gg/bzfCBwMzdP"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker"
+						}
+					]
+				},
+				{
+					"ID": "20210528120308-9wuiyyz",
+					"Type": "NodeSuperBlock",
+					"Properties": {
+						"id": "20210528120308-9wuiyyz",
+						"updated": "20211222095928"
+					},
+					"Children": [
+						{
+							"Type": "NodeSuperBlockOpenMarker"
+						},
+						{
+							"Type": "NodeSuperBlockLayoutMarker",
+							"Data": "row"
+						},
+						{
+							"ID": "20210131161629-mutbkca",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"id": "20210131161629-mutbkca",
+								"updated": "20210623001017"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "💌 Contribution"
+								}
+							]
+						},
+						{
+							"ID": "20210317214434-nx9mt0d",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20210317214434-nx9mt0d",
+								"updated": "20211222095928"
+							},
+							"Children": [
+								{
+									"ID": "20210528120300-nrqw356",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20210528120300-nrqw356",
+										"updated": "20210601234314"
+									},
+									"Children": [
+										{
+											"ID": "20210528120300-w3gljah",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210528120300-w3gljah",
+												"updated": "20210601234314"
+											},
+											"Children": [
+												{
+													"Type": "NodeBlockRef",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeBlockRefID",
+															"Data": "20201225222754-u4sica8"
+														},
+														{
+															"Type": "NodeBlockRefSpace"
+														},
+														{
+															"Type": "NodeBlockRefText",
+															"Data": "Push to theme bazaar"
+														},
+														{
+															"Type": "NodeCloseParen"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20210528120303-0aq6wfk",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20210528120303-0aq6wfk"
+									},
+									"Children": [
+										{
+											"ID": "20210528120303-etp1e4c",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210528120303-etp1e4c"
+											},
+											"Children": [
+												{
+													"Type": "NodeBlockRef",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeBlockRefID",
+															"Data": "20210131162806-sk9tg4q"
+														},
+														{
+															"Type": "NodeBlockRefSpace"
+														},
+														{
+															"Type": "NodeBlockRefText",
+															"Data": "Push to template bazaar"
+														},
+														{
+															"Type": "NodeCloseParen"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20210317214155-4se7gl4",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20210317214155-4se7gl4",
+										"updated": "20211010210416"
+									},
+									"Children": [
+										{
+											"ID": "20210317214155-02ljnx2",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210317214155-02ljnx2",
+												"updated": "20211010210416"
+											},
+											"Children": [
+												{
+													"Type": "NodeBlockRef",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeBlockRefID",
+															"Data": "20210601103837-057w6ot"
+														},
+														{
+															"Type": "NodeBlockRefSpace"
+														},
+														{
+															"Type": "NodeBlockRefText",
+															"Data": "Push to icon bazaar"
+														},
+														{
+															"Type": "NodeCloseParen"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20210317214158-92uea49",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20210317214158-92uea49",
+										"updated": "20211222095928"
+									},
+									"Children": [
+										{
+											"ID": "20210317214158-acl7oxj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210317214158-acl7oxj",
+												"updated": "20211222095928"
+											},
+											"Children": [
+												{
+													"Type": "NodeBlockRef",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeBlockRefID",
+															"Data": "20211222095842-700ar7j"
+														},
+														{
+															"Type": "NodeBlockRefSpace"
+														},
+														{
+															"Type": "NodeBlockRefText",
+															"Data": "Push to widget bazaar"
+														},
+														{
+															"Type": "NodeCloseParen"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeSuperBlockCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeSuperBlockCloseMarker"
+				}
+			]
+		}
+	]
+}

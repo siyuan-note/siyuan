@@ -1,0 +1,426 @@
+{
+	"ID": "20200924101256-f8b1sbi",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200924101256-f8b1sbi",
+		"title": "Ref Content Block",
+		"type": "doc",
+		"updated": "20211223192536"
+	},
+	"Children": [
+		{
+			"ID": "20200924101312-jj4e0v3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20200924101312-jj4e0v3",
+				"updated": "20210512154431"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210104091542-6dj8jvc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091542-6dj8jvc",
+				"updated": "20210512153449"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Entering "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "(("
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " will trigger the content block quotation search, continue to enter as the search keyword, use the up and down keys to select in the search results and press Enter to complete the content block quotation."
+				}
+			]
+		},
+		{
+			"ID": "20210104091542-ev4hpxo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091542-ev4hpxo"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The complete syntax of the content block quote is: "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "((id \"text\"))"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", where the "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "id"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is like: "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "202008250000-a1b2c3d"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", consisting of time and 7 random characters, the content block id is when the content block is created It will be automatically generated; the following "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "text"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is the custom anchor text for the content block in the quote. After the content block quote is established, hover the mouse over the anchor text and a preview floating layer will pop up to show the quoted content block. "
+				},
+				{
+					"Type": "NodeTag",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker",
+							"Data": "#"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Content block/Reference"
+						},
+						{
+							"Type": "NodeTagCloseMarker",
+							"Data": "#"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091542-v1yca4p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091542-v1yca4p",
+				"updated": "20210512154424"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Direction of the ref link"
+				}
+			]
+		},
+		{
+			"ID": "20210104091542-9h3i9dh",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104091542-9h3i9dh"
+			},
+			"Children": [
+				{
+					"ID": "20210104091542-ctguz9s",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091542-ctguz9s"
+					},
+					"Children": [
+						{
+							"ID": "20210302223856-grgney1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223856-grgney1"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Forwardlink, that is, which other content blocks are used in the current content block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091542-7fy85lw",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091542-7fy85lw"
+					},
+					"Children": [
+						{
+							"ID": "20210302223856-qk6hr9b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223856-qk6hr9b"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Backlink, that is, the current content block is used by those other content blocks"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091542-hbzfsn5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091542-hbzfsn5"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The forward link is included in the content of the current block, which we can see intuitively. Backlinks need to be searched in other documents to know, and it is precisely this information that is more valuable to us. We can use the following two ways to help us better grasp the knowledge points or diverge ideas:"
+				}
+			]
+		},
+		{
+			"ID": "20210104091542-rlv1299",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104091542-rlv1299"
+			},
+			"Children": [
+				{
+					"ID": "20210104091542-1ryw6y3",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091542-1ryw6y3"
+					},
+					"Children": [
+						{
+							"ID": "20210302223856-ngw7ijw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223856-ngw7ijw"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockRef",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20200924101210-zwf8ags"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "Graph"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": browse forward and backward link relationships between content blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091542-40sj7jl",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091542-40sj7jl"
+					},
+					"Children": [
+						{
+							"ID": "20210302223856-y92ousb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223856-y92ousb",
+								"updated": "20210512154524"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockRef",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20200924101210-3qfiiat"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "Backlinks"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Display the backlinks of the current content block as a text list"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

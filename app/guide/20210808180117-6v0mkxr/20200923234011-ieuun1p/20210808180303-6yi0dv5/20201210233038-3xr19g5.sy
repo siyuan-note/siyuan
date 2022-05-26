@@ -1,0 +1,603 @@
+{
+	"ID": "20201210233038-3xr19g5",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201210233038-3xr19g5",
+		"title": "Conversion of Document and Heading",
+		"type": "doc",
+		"updated": "20211223192545"
+	},
+	"Children": [
+		{
+			"ID": "20210104091550-oyzs64s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091550-oyzs64s"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Correspondence between Document and Heading"
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-stqtr5k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091550-stqtr5k"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The heading block and the document block have a natural correspondence, because:"
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-c9m7yo3",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104091550-c9m7yo3"
+			},
+			"Children": [
+				{
+					"ID": "20210104091550-kfphjkv",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091550-kfphjkv"
+					},
+					"Children": [
+						{
+							"ID": "20210302223904-ak8zul2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223904-ak8zul2",
+								"updated": "20210302223906"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Each document block has a name"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091550-cod7uyo",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091550-cod7uyo"
+					},
+					"Children": [
+						{
+							"ID": "20210302223904-3rbkt5r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223904-3rbkt5r"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Each heading block also has a name"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-0izuikh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091550-0izuikh"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "So we can convert between the document block and the heading block. In addition, because the content block is referenced based on id, the conversion process will not break the existing reference relationship."
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-5sh49go",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091550-5sh49go"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Convert Document block to Heading block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-rbetlgr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091550-rbetlgr"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the doc tree, select the document that needs to be converted into a heading block, and then drag it to the position to be inserted in the editor tab. There are two situations here:"
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-qfc4zlm",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46,
+				"Padding": 3,
+				"Marker": "MQ==",
+				"Num": 1
+			},
+			"Properties": {
+				"id": "20210104091550-qfc4zlm"
+			},
+			"Children": [
+				{
+					"ID": "20210104091550-12grx1a",
+					"Type": "NodeListItem",
+					"Data": "1",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MQ==",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20210104091550-12grx1a"
+					},
+					"Children": [
+						{
+							"ID": "20210302223904-ytpydxa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223904-ytpydxa"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Place the document block on the existing heading block, and the document block will be inserted below as the level node of the heading block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091550-a5hh8bg",
+					"Type": "NodeListItem",
+					"Data": "2",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mg==",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20210104091550-a5hh8bg"
+					},
+					"Children": [
+						{
+							"ID": "20210302223904-4rlhclw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223904-4rlhclw"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Place the document block on a non-heading block, and the document block will be inserted as a child node of the heading block to which the block belongs"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-9sy6z40",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091550-9sy6z40"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After the document block is converted to a heading block:"
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-zq0ph0f",
+			"Type": "NodeList",
+			"ListData": {
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104091550-zq0ph0f"
+			},
+			"Children": [
+				{
+					"ID": "20210104091550-7unpq37",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091550-7unpq37"
+					},
+					"Children": [
+						{
+							"ID": "20210302223904-bzkmex1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223904-bzkmex1"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The original document name will become the heading name"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091550-hi3ky7o",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091550-hi3ky7o"
+					},
+					"Children": [
+						{
+							"ID": "20210302223904-l78gsey",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223904-l78gsey"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Logically, the document block is a first-level title, and the relative level will be changed according to the insertion position"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091550-cumad9i",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091550-cumad9i"
+					},
+					"Children": [
+						{
+							"ID": "20210302223904-dsfeeh6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223904-dsfeeh6"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Each heading level in the original document will be adjusted according to the insertion position"
+								}
+							]
+						},
+						{
+							"ID": "20210104091550-rbvitpg",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 42,
+								"Padding": 2,
+								"Marker": "Kg==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20210104091550-rbvitpg"
+							},
+							"Children": [
+								{
+									"ID": "20210104091550-q8xxl8s",
+									"Type": "NodeListItem",
+									"Data": "*",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 42,
+										"Padding": 2,
+										"Marker": "Kg==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20210104091550-q8xxl8s"
+									},
+									"Children": [
+										{
+											"ID": "20210302223904-z5rbkfi",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210302223904-z5rbkfi"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "For the above situation 1: For example, if the original document contains the first, second, and third level headings, and the insertion position is a second-level heading, the heading block after the document block conversion will be a second-level heading. Level 3 headings will become Level 2, 3, and 4 headings"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20210104091550-ks1lqvh",
+									"Type": "NodeListItem",
+									"Data": "*",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 42,
+										"Padding": 2,
+										"Marker": "Kg==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20210104091550-ks1lqvh"
+									},
+									"Children": [
+										{
+											"ID": "20210302223904-hwh19uj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210302223904-hwh19uj"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "For the second case above: For example, the original document contains headings of level 1, 2, and 3, and the insertion position is a paragraph block under a level 2 heading. The heading block after the conversion of the document block will be a level 3 heading. Level 1, 2, and 3 headings will become Level 3, 4, and 5 headings"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-fualfrs",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091550-fualfrs"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Convert Heading block to Document block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-1pe70bg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091550-1pe70bg"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the editor tab, select the heading block to be converted, press and hold the heading block icon, and then drag it to the folder to be placed in the doc tree. If you need to place it on the notebook root folder, drag the heading block icon to the top notebook icon row."
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-atbf12t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091550-atbf12t"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After the heading block is converted to a document block:"
+				}
+			]
+		},
+		{
+			"ID": "20210104091550-nsd8w2j",
+			"Type": "NodeList",
+			"ListData": {
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104091550-nsd8w2j"
+			},
+			"Children": [
+				{
+					"ID": "20210104091550-85231ks",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091550-85231ks"
+					},
+					"Children": [
+						{
+							"ID": "20210302223904-brosops",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223904-brosops"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The heading name will become the document name"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091550-s2nrev0",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091550-s2nrev0"
+					},
+					"Children": [
+						{
+							"ID": "20210302223904-mleww72",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223904-mleww72"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If there are subtitles under the original heading block, the largest level of these subtitles will be used as the first level of the new document, and the remaining subtitles will be adjusted according to the relative level"
+								}
+							]
+						},
+						{
+							"ID": "20210104091550-c8bmph5",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 42,
+								"Padding": 2,
+								"Marker": "Kg==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20210104091550-c8bmph5"
+							},
+							"Children": [
+								{
+									"ID": "20210104091550-o45r6uw",
+									"Type": "NodeListItem",
+									"Data": "*",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 42,
+										"Padding": 2,
+										"Marker": "Kg==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20210104091550-o45r6uw"
+									},
+									"Children": [
+										{
+											"ID": "20210302223904-62szx4g",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20210302223904-62szx4g"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "For example, the original heading block contains three, four, and five levels of subtitles, and these subtitles will be converted into one, two, and three levels after being converted into a document block"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

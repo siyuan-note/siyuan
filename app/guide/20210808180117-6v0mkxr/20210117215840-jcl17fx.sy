@@ -1,0 +1,351 @@
+{
+	"ID": "20210117215840-jcl17fx",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f50f",
+		"id": "20210117215840-jcl17fx",
+		"title": "Data Security",
+		"type": "doc",
+		"updated": "20220111133319"
+	},
+	"Children": [
+		{
+			"ID": "20210721113914-ncefrsq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721113914-ncefrsq",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-myj5bf9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721113914-myj5bf9",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data security is mainly divided into two aspects:"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-eyp2qea",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210721113914-eyp2qea",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"ID": "20210721113914-l3m6qaz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-l3m6qaz"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-tv2xupw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-tv2xupw"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Availability: no data loss, no conflict, keep the data complete and consistent"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721113914-4n8h1s2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-4n8h1s2"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-rly8yqn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-rly8yqn"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Confidentiality: data will not be leaked or tampered with"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-rmgqqcr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721113914-rmgqqcr",
+				"updated": "20210721114140"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan supports both of these aspects. The following is an explanation about data security."
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-z3cmj85",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721113914-z3cmj85",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Plaintext storage"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-3zwi0oa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721113914-3zwi0oa",
+				"updated": "20210721114144"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan uses plaintext to store data on the local file system, which means:"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-cpc36qq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210721113914-cpc36qq",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"ID": "20210721113914-9g01tnu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-9g01tnu"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-bkvbciw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-bkvbciw"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Anyone or software who can use the operating system can read the data in it"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721113914-diinbpv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-diinbpv"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-s8qsqi2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-s8qsqi2"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The availability of data depends on the availability of hardware disks and operating systems"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-ccvr8nz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721113914-ccvr8nz",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "End-to-end encryption"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-knx9uy7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721113914-knx9uy7",
+				"updated": "20220111133319"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan cloud backup and synchronization use "
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20210721112229-fp97j3c"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "end-to-end encryption"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", the password is stored locally with a built-in key encryption, any third party other than the user cannot get the plaintext in the cloud data."
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-yk8x9s1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721113914-yk8x9s1",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Suggest"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-m1bcp7i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210721113914-m1bcp7i",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"ID": "20210721113914-fg1idfp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-fg1idfp"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-rmfboog",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-rmfboog"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Regularly back up data to the cloud and offline devices at the same time"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721113914-sszurje",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-sszurje"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-zzp6rxb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-zzp6rxb"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "It is recommended to use special software, equipment or offline storage for important passwords, keys or core secrets"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

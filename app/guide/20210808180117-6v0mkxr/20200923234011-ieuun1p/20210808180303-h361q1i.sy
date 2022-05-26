@@ -1,0 +1,187 @@
+{
+	"ID": "20210808180303-h361q1i",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f371",
+		"id": "20210808180303-h361q1i",
+		"title": "Editor",
+		"updated": "20210808180303"
+	},
+	"Children": [
+		{
+			"ID": "20210419175558-p7doxbn",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210419175558-p7doxbn"
+			},
+			"Children": [
+				{
+					"ID": "20210419175558-f0dh89l",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175558-f0dh89l"
+					},
+					"Children": [
+						{
+							"ID": "20210419175558-rr763ws",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175558-rr763ws"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Editing and typesetting based on content blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175558-931w9pb",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175558-931w9pb"
+					},
+					"Children": [
+						{
+							"ID": "20210419175558-1vwlm9o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175558-1vwlm9o"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "List outline, support with or without sub-level indentation"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175558-oorcy24",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175558-oorcy24"
+					},
+					"Children": [
+						{
+							"ID": "20210419175558-7s6a7wb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175558-7s6a7wb"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Content block zoom, that is, each content block can be zoomed into focus"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175558-zqid77i",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175558-zqid77i"
+					},
+					"Children": [
+						{
+							"ID": "20210419175558-b3vziix",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175558-b3vziix"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Dynamic loading, solving large document jams"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175558-i95hwiv",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175558-i95hwiv"
+					},
+					"Children": [
+						{
+							"ID": "20210419175558-ocap7p2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175558-ocap7p2",
+								"updated": "20210512153240"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Horizontal layout by dragging block icon"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210808180303-a0ht38y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210808180303-a0ht38y",
+				"updated": "20210808180303"
+			}
+		}
+	]
+}

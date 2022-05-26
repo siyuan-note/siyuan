@@ -1,0 +1,149 @@
+{
+	"ID": "20220105100506-auvmvcw",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20220105100506-auvmvcw",
+		"title": "限制",
+		"updated": "20220325115453"
+	},
+	"Children": [
+		{
+			"ID": "20220105100506-t539921",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220105100506-t539921",
+				"updated": "20220325115453"
+			},
+			"Children": [
+				{
+					"ID": "20220105100537-cv7d0lj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105100537-cv7d0lj",
+						"updated": "20220325115453"
+					},
+					"Children": [
+						{
+							"ID": "20220105100537-d94pnme",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105100537-d94pnme",
+								"updated": "20220325115453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同步或备份时，不支持大于 100MB 的单个文件传输"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105100920-t56zj22",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105100920-t56zj22"
+					},
+					"Children": [
+						{
+							"ID": "20220105100920-dryyskm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105100920-dryyskm",
+								"updated": "20220105101036"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最多支持创建 7 个云端同步目录"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101036-nzhrmjj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101036-nzhrmjj",
+						"updated": "20220105101103"
+					},
+					"Children": [
+						{
+							"ID": "20220105101036-s9k80fw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101036-s9k80fw",
+								"updated": "20220105101103"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "云端存储空间初始化总大小为 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "8G"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101055-3ruzllu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101055-3ruzllu",
+						"updated": "20220325115113"
+					},
+					"Children": [
+						{
+							"ID": "20220105101055-6fop8lv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101055-6fop8lv",
+								"updated": "20220325115113"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "付费订阅到期以后，云端存储会被彻底删除"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

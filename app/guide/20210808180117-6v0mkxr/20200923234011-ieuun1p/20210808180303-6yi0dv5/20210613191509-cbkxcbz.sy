@@ -1,0 +1,497 @@
+{
+	"ID": "20210613191509-cbkxcbz",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210613191509-cbkxcbz",
+		"title": "Content Block Attribute",
+		"updated": "20211223192555"
+	},
+	"Children": [
+		{
+			"ID": "20210613191548-b394bll",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210613191548-b394bll",
+				"updated": "20210613191548"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-o34mmas",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210613191548-o34mmas",
+				"updated": "20210613191548"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Attributes exist in the form of key-value pairs. We can enrich the connotation of the content block by setting attributes on the content block. Attributes are divided into built-in attributes and custom attributes."
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-ckua3q3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210613191548-ckua3q3",
+				"updated": "20210613191548"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Built-in attributes"
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-n6dt4hc",
+			"Type": "NodeTable",
+			"TableAligns": [
+				2,
+				0
+			],
+			"Properties": {
+				"id": "20210613191548-n6dt4hc",
+				"updated": "20210613191633"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"TableCellAlign": 2,
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Property name"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Description"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "name"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Name of the content block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "alias"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Alias of content block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "memo"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Memo of the content block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "bookmark"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Bookmark of content block"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-65gd8yo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210613191548-65gd8yo",
+				"updated": "20210613191548"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Custom attributes"
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-7p2bvoq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210613191548-7p2bvoq",
+				"updated": "20210613191746"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The user-defined attributes are set by the user through the "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "Block icon menu"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " -"
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "Attribute"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and only English letters and Arabic numerals are allowed in the attribute name (such as "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "doing"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "7days"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "). After setting, SiYuan will automatically prefix the attribute name with "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "custom-"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to distinguish built-in attributes from custom attributes."
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-5m1tlai",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210613191548-5m1tlai",
+				"updated": "20210613191548"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Using attributes"
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-r7r6xw4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210613191548-r7r6xw4",
+				"updated": "20210824200848"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "There are two main usage scenarios for attributes: querying content blocks based on attributes and storing widget data."
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-ihlwok9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210613191548-ihlwok9",
+				"updated": "20210613191548"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Query content blocks based on attributes"
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-h0zl261",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210613191548-h0zl261",
+				"updated": "20210613191548"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, when we set the properties of "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "progress=30"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "priority=2"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for the content block, we can query all content blocks with a progress of 30 and a priority of 2 through SQL:"
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-vaj5jsf",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20210613191548-vaj5jsf",
+				"updated": "20210613191548"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "c3Fs"
+				},
+				{
+					"ID": "20220307092214-mhz28us",
+					"Type": "NodeCodeBlockCode",
+					"Data": "SELECT *\nFROM blocks\nWHERE id IN (\n    SELECT block_id\n    FROM attributes AS a\n    WHERE (a.name ='custom-progress' AND a.value = '30')\n       OR (a.name ='custom-priority' AND a.value = '2')\n    GROUP BY block_id\n    HAVING count(block_id) = 2\n);\n",
+					"Properties": {
+						"id": "20220307092214-mhz28us"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-cc68rcy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210613191548-cc68rcy",
+				"updated": "20210824200759"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Store widget data"
+				}
+			]
+		},
+		{
+			"ID": "20210613191548-54xjeo6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210613191548-54xjeo6",
+				"updated": "20210824200805"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The widget can set the attributes through the interface, please refer to the development document for details."
+				}
+			]
+		}
+	]
+}

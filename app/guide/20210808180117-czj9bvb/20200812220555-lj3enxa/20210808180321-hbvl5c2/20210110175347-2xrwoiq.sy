@@ -1,0 +1,188 @@
+{
+	"ID": "20210110175347-2xrwoiq",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210110175347-2xrwoiq",
+		"title": "日记",
+		"type": "doc"
+	},
+	"Children": [
+		{
+			"ID": "20210110175347-jvtq2ap",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110175347-jvtq2ap"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我们可以通过日记来快速创建文档，日记功能入口在顶部工具栏形似日历的按钮。"
+				}
+			]
+		},
+		{
+			"ID": "20210110175631-umo8b4h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110175631-umo8b4h",
+				"updated": "20210303230529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "但在使用日记前，需要在笔记本右键下拉菜单中选择设置，在新建日记设置中配置："
+				}
+			]
+		},
+		{
+			"ID": "20210110175837-55w4xt5",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210110175837-55w4xt5"
+			},
+			"Children": [
+				{
+					"ID": "20210110175920-qtdl64h",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210110175920-qtdl64h"
+					},
+					"Children": [
+						{
+							"ID": "20210302223636-tqjhcf4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223636-tqjhcf4"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "存放路径：笔记本下的路径，支持"
+								},
+								{
+									"Type": "NodeBlockRef",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20210104091309-mvyh081"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "模板变量"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210110180130-mnk70fh",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210110180130-mnk70fh"
+					},
+					"Children": [
+						{
+							"ID": "20210302223636-w27ek0t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223636-w27ek0t"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "模板路径（可选）：创建日记时使用该模板作为初始内容"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210110180249-yz7jbt6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110180249-yz7jbt6",
+				"updated": "20210501172601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "小提示：在指定的模板使用"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20201117101902-2ewjjum"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "嵌入内容块"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可以汇总待办事项或者需要每日查看的内容块。"
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,473 @@
+{
+	"ID": "20210824202056-udkf7wg",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210824202056-udkf7wg",
+		"title": "Widgets",
+		"updated": "20211222095930"
+	},
+	"Children": [
+		{
+			"ID": "20210824202107-oi62h64",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210824202107-oi62h64",
+				"updated": "20210824202107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210824202107-faidvkw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210824202107-faidvkw",
+				"updated": "20211230224034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The widget is a static webpage served by SiYuan Kernel. It accesses data through API and renders it through "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "\u003ciframe\u003e"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20210824202107-3zt4469",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210824202107-3zt4469",
+				"updated": "20210824202323"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20210824202107-cmsetzk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210824202107-cmsetzk",
+				"updated": "20211230224119"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The widgets are installed through the widget bazaar. After installation, the widgets will be placed in the workspace/widgets folder. In the editor, use the slash menu to trigger the call search. After selecting the widget you need, the widget will be inserted into the document in the form of a widget block."
+				}
+			]
+		},
+		{
+			"ID": "20211222095842-700ar7j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211222095842-700ar7j",
+				"updated": "20211222095930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Push to widget bazaar"
+				}
+			]
+		},
+		{
+			"ID": "20211222095842-qz47tit",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211222095842-qz47tit",
+				"updated": "20211222095758"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Please make sure that the root path of your icon repository contains at least the following files before listing:"
+				}
+			]
+		},
+		{
+			"ID": "20211222095842-wpkm0ef",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211222095842-wpkm0ef",
+				"updated": "20211222100002"
+			},
+			"Children": [
+				{
+					"ID": "20211222095842-5f4seou",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211222095842-5f4seou",
+						"updated": "20210601103900"
+					},
+					"Children": [
+						{
+							"ID": "20211222095842-me2yuau",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211222095842-me2yuau",
+								"updated": "20210601103900"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "icon.json (please make sure the JSON format is correct)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211222100000-8k9r3gx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211222100000-8k9r3gx",
+						"updated": "20211222100002"
+					},
+					"Children": [
+						{
+							"ID": "20211222100000-e09ho47",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211222100000-e09ho47",
+								"updated": "20211222100002"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "index.html"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211222095842-s83wtfo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211222095842-s83wtfo"
+					},
+					"Children": [
+						{
+							"ID": "20211222095842-lq1uvzp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211222095842-lq1uvzp",
+								"updated": "20211222095801"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "preview.png (please compress the image size within 512 KB)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211222095842-m114ope",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211222095842-m114ope",
+						"updated": "20211222095802"
+					},
+					"Children": [
+						{
+							"ID": "20211222095842-321pjb5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211222095842-321pjb5",
+								"updated": "20211222095802"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "README.md (please note the case)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211222095842-747c9up",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211222095842-747c9up",
+				"updated": "20210601103918"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After confirmation, please "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "create a pull request"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to the "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "Community Bazaar"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/bazaar"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " repository and modify the consi.json file in it. This file is the index of all community icon repositories, the format is:"
+				}
+			]
+		},
+		{
+			"ID": "20211222095842-kw4pr7j",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20211222095842-kw4pr7j",
+				"updated": "20210601103837"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"ID": "20220307092214-k32951j",
+					"Type": "NodeCodeBlockCode",
+					"Data": "{\n   \"repos\": [\n     \"username/reponame@commithash\"\n   ]\n}\n",
+					"Properties": {
+						"id": "20220307092214-k32951j"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20211222095842-3zqsaaz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211222095842-3zqsaaz",
+				"updated": "20210601103923"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Among them, "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "commithash"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", please fill in the Git commit hash of the latest released version on your icon repository, please use the full hash value instead of the 7-digit short value."
+				}
+			]
+		},
+		{
+			"ID": "20220108011050-va209ro",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220108011050-va209ro",
+				"updated": "20220108011050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Update"
+				}
+			]
+		},
+		{
+			"ID": "20220108011050-7uurrky",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220108011050-7uurrky",
+				"updated": "20220108011056"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the widget you developed has an updated version, please remember:"
+				}
+			]
+		},
+		{
+			"ID": "20220108011050-xp7o42z",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220108011050-xp7o42z",
+				"updated": "20220108011102"
+			},
+			"Children": [
+				{
+					"ID": "20220108011050-21o237c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220108011050-21o237c",
+						"updated": "20220108011102"
+					},
+					"Children": [
+						{
+							"ID": "20220108011050-xnk2vhj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220108011050-xnk2vhj",
+								"updated": "20220108011102"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Update the version field in your widget.json"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220108011050-nw9xmu2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220108011050-nw9xmu2"
+					},
+					"Children": [
+						{
+							"ID": "20220108011050-92kivav",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220108011050-92kivav"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create a Pull Request to the community bazaar"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

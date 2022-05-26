@@ -1,0 +1,136 @@
+{
+	"ID": "20210721112159-9p645xm",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210721112159-9p645xm",
+		"title": "Storage",
+		"updated": "20210721112251"
+	},
+	"Children": [
+		{
+			"ID": "20210721112251-nlv1v47",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721112251-nlv1v47",
+				"updated": "20210721112251"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The cloud storage space is "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "8G"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", divided into three parts:"
+				}
+			]
+		},
+		{
+			"ID": "20210721112251-y58mwa8",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210721112251-y58mwa8",
+				"updated": "20210721112319"
+			},
+			"Children": [
+				{
+					"ID": "20210721112251-2g73fn6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721112251-2g73fn6"
+					},
+					"Children": [
+						{
+							"ID": "20210721112251-9zy3gnn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721112251-9zy3gnn"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Synchronized data: Provided to the synchronization function, the data is encrypted"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721112251-evmyz01",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721112251-evmyz01"
+					},
+					"Children": [
+						{
+							"ID": "20210721112251-mvo15y4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721112251-mvo15y4"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Backup data: Provided to the backup function, the data is encrypted"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721112251-mbp661h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721112251-mbp661h",
+						"updated": "20210721112319"
+					},
+					"Children": [
+						{
+							"ID": "20210721112251-fj4dru0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721112251-fj4dru0",
+								"updated": "20210721112319"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Asset file: Provided for copying to the Wechat MP, Zhihu and Yuque, etc., HTTPS CDN"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

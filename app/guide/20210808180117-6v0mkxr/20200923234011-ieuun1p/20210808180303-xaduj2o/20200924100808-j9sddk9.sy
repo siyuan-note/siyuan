@@ -1,0 +1,871 @@
+{
+	"ID": "20200924100808-j9sddk9",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200924100808-j9sddk9",
+		"title": "Import and Export",
+		"type": "doc",
+		"updated": "20220511190015"
+	},
+	"Children": [
+		{
+			"ID": "20220317223639-oaxmz7d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220317223639-oaxmz7d",
+				"updated": "20220317223642"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Import"
+				}
+			]
+		},
+		{
+			"ID": "20220511185728-as165rt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220511185728-as165rt",
+				"updated": "20220511185730"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown"
+				}
+			]
+		},
+		{
+			"ID": "20220317223639-vfe5e6w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220317223639-vfe5e6w",
+				"updated": "20220511190015"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan supports importing Markdown files. So if you need to import data from other note-taking software, please convert the data into Markdown files first."
+				}
+			]
+		},
+		{
+			"ID": "20220317223639-u3fan6w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220317223639-u3fan6w",
+				"updated": "20220317223836"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the image syntax (local relative path) like "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "![foo](images/bar.png)"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is encountered during import, SiYuan will convert "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "images/bar.png"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " into "
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20200924100744-br924ar"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "assets"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". But if it is "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": ".images/bar.png"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", it will not be converted, because the path files starting with "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "."
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " are hidden files, SiYuan will not process them."
+				}
+			]
+		},
+		{
+			"ID": "20220511185726-nlnhhsh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220511185726-nlnhhsh",
+				"updated": "20220511185726"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data"
+				}
+			]
+		},
+		{
+			"ID": "20220511185726-fsg9r0c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220511185726-fsg9r0c",
+				"updated": "20220511185757"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can import and export data in "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Settings"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Export"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on the desktop-end and "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "About"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on the right sidebar on the mobile-end. The export here will completely copy and pack the "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "workspace/data/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " folder into a zip archive."
+				}
+			]
+		},
+		{
+			"ID": "20220511185726-02j5ggo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220511185726-02j5ggo",
+				"updated": "20220511185841"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Import Data"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " function only supports processing the data archive exported in the above steps. The import is copied to the current "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "workspace/data/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " folder according to the file path in the archive:"
+				}
+			]
+		},
+		{
+			"ID": "20220511185726-sx3r3js",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220511185726-sx3r3js",
+				"updated": "20220511185920"
+			},
+			"Children": [
+				{
+					"ID": "20220511185726-i8g7pfi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220511185726-i8g7pfi",
+						"updated": "20220511185726"
+					},
+					"Children": [
+						{
+							"ID": "20220511185726-b90qzam",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220511185726-b90qzam",
+								"updated": "20220511185726"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Duplicate files are overwritten"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220511185726-i2corj3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220511185726-i2corj3",
+						"updated": "20220511185726"
+					},
+					"Children": [
+						{
+							"ID": "20220511185726-y1rygj1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220511185726-y1rygj1",
+								"updated": "20220511185726"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Add files that do not exist"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220511185726-8ujetzq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220511185726-8ujetzq",
+						"updated": "20220511185920"
+					},
+					"Children": [
+						{
+							"ID": "20220511185726-d1r8ez6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220511185726-d1r8ez6",
+								"updated": "20220511185920"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Do not do any processing for existing files"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220511185726-1r88nxx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220511185726-1r88nxx",
+				"updated": "20220511185726"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Note"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ": Please pay attention before use, to avoid existing data being overwritten and unrecoverable."
+				}
+			]
+		},
+		{
+			"ID": "20220317223639-0fnf9vp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220317223639-0fnf9vp",
+				"updated": "20220317223644"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Export"
+				}
+			]
+		},
+		{
+			"ID": "20220317223639-g5061h8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220317223639-g5061h8",
+				"updated": "20220317223647"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Edit content copy"
+				}
+			]
+		},
+		{
+			"ID": "20220317223639-hrd8l6o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220317223639-hrd8l6o",
+				"updated": "20220317223639"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After selecting the content, use the copy shortcut "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Ctrl+C"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and the clipboard is standard Markdown text."
+				}
+			]
+		},
+		{
+			"ID": "20220317223639-w6wj4mq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220317223639-w6wj4mq",
+				"updated": "20220317224518"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to copy HTML content, please switch to "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Export Preview"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " from "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Toogle Mode"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "..."
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " menu in the upper right corner of the editor tab before copying."
+				}
+			]
+		},
+		{
+			"ID": "20220317223639-8217o1r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220317223639-8217o1r",
+				"updated": "20220317223639"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Full text export"
+				}
+			]
+		},
+		{
+			"ID": "20220317223639-otxjla4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220317223639-otxjla4",
+				"updated": "20220317224527"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After selecting the document on the document tree, right-click and select "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Export"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or select "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Export"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " from the "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "..."
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " menu in the upper right corner of the editor tab:"
+				}
+			]
+		},
+		{
+			"ID": "20220317223639-vhdy88m",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220317223639-vhdy88m",
+				"updated": "20220317224017"
+			},
+			"Children": [
+				{
+					"ID": "20220317223639-du4a7d2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220317223639-du4a7d2"
+					},
+					"Children": [
+						{
+							"ID": "20220317223639-7k2yxwr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220317223639-7k2yxwr",
+								"updated": "20220317224009"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Markdown"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220317224009-wqfhw3y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220317224009-wqfhw3y"
+					},
+					"Children": [
+						{
+							"ID": "20220317224009-khgfqoe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220317224009-khgfqoe"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "PDF"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220317223639-kqjyqge",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220317223639-kqjyqge"
+					},
+					"Children": [
+						{
+							"ID": "20220317223639-nurkpus",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220317223639-nurkpus",
+								"updated": "20220317224015"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "HTML"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220317224015-1a3olya",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220317224015-1a3olya",
+						"updated": "20220317224017"
+					},
+					"Children": [
+						{
+							"ID": "20220317224015-kqwmx81",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220317224015-kqwmx81",
+								"updated": "20220317224017"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Word .docx"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220317225021-4jcnk35",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220317225021-4jcnk35",
+				"updated": "20220317225021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "There are some options in "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Settings"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Export"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to configure export processing, please refer to the prompt information on this interface for details."
+				}
+			]
+		}
+	]
+}

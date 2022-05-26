@@ -1,0 +1,527 @@
+{
+	"ID": "20200813004931-q4cu8na",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200813004931-q4cu8na",
+		"title": "什么是内容块",
+		"type": "doc",
+		"updated": "20211223192435"
+	},
+	"Children": [
+		{
+			"ID": "20210118100623-i00rgj0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210118100623-i00rgj0"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "内容块定义"
+				}
+			]
+		},
+		{
+			"ID": "20210118100631-nhy9fe2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210118100631-nhy9fe2",
+				"updated": "20210415202214"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "“"
+				},
+				{
+					"Type": "NodeTag",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker",
+							"Data": "#"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "内容块"
+						},
+						{
+							"Type": "NodeTagCloseMarker",
+							"Data": "#"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "”指的是一块内容，每块这样的内容通过一个全局唯一的 ID 进行标识。ID 是程序自动生成的，形如： "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "202008250000-a1b2c3d"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，由时间和 7 位随机字符组成。"
+				}
+			]
+		},
+		{
+			"ID": "20210104090752-2n7t087",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104090752-2n7t087",
+				"updated": "20210415202508"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "内容块类型"
+				}
+			]
+		},
+		{
+			"ID": "20210104090752-98ivtnt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090752-98ivtnt",
+				"updated": "20211110154030"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "最常见的内容块就是我们所熟悉的段落（Paragraph）。在中文传统排版中，段落通常是通过段首缩进（空两格）来表示，互联网的发展逐渐影响了段落的表示，现在使用较多的方式是增加段落之间的行距，或者使用空行来分隔段落。"
+				}
+			]
+		},
+		{
+			"ID": "20210104090752-7efgvis",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090752-7efgvis"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "实际使用时，仅仅靠段落排版是不够的，往往还需要用到标题（Heading）、列表（List）、表格（Table）、块引用（Blockquote）等来丰富我们的排版。这些排版样式除了视觉上的不同，更重要的是它们在一定程度上表达了内容的语义。比如在看到无序列表时，我们可以知道每个列表项是不分先后的平级关系，而在看到有序列表时则相反。"
+				}
+			]
+		},
+		{
+			"ID": "20210104090752-c49qfvi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090752-c49qfvi",
+				"updated": "20210415202309"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "所以，内容块存在"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20200905090211-2vixtlf"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "很多类型"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，不同的排版格式会形成不同的内容块。"
+				},
+				{
+					"Type": "NodeTag",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker",
+							"Data": "#"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "内容块/类型"
+						},
+						{
+							"Type": "NodeTagCloseMarker",
+							"Data": "#"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104090752-qxk7yz6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104090752-qxk7yz6"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "组合内容块"
+				}
+			]
+		},
+		{
+			"ID": "20210104090752-cg21nhc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090752-cg21nhc"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "一篇文档是一些内容块的组合，内容块是基本单位。这就好比乐高积木，可以使用不同的基本模块进行组合。"
+				},
+				{
+					"Type": "NodeTag",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker",
+							"Data": "#"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker",
+							"Data": "#"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：文档本身也是一种内容块，更准确地说，文档块、列表块、引述块这三种内容块是容器块，他们可以包含其他任意类型的内容块。"
+				},
+				{
+					"Type": "NodeTag",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker",
+							"Data": "#"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "内容块/组合"
+						},
+						{
+							"Type": "NodeTagCloseMarker",
+							"Data": "#"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104090752-hjcn822",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090752-hjcn822"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "至此，我们已经能够用内容块来描述所有的内容了，这样就能通过统一的用法来"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20200813013559-sgbzl5k"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "链接内容块"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "了。逻辑上没有页面（Page）概念，减少使用中不必要的负担，让用户将注意力集中在内容块上。"
+				}
+			]
+		},
+		{
+			"ID": "20210118101911-tbt6kkp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210118101911-tbt6kkp"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "命名和备注"
+				}
+			]
+		},
+		{
+			"ID": "20210118101917-4n4ygss",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210118101917-4n4ygss",
+				"memo": "备注通常是一句简短的话。"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我们可以为每个内容块命名、添加别名和备注。命名和别名主要用于反链"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20210106201736-oyu11fw"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "提及"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "搜索，备注用于记录一些不便在内容区中出现的信息。"
+				}
+			]
+		},
+		{
+			"ID": "20210118102327-mybetkv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210118102327-mybetkv",
+				"updated": "20210512160923"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "设置"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "编辑器"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中打开显示书签、命名、别名标识选项后，被命名的内容块在编辑器中会被加上外框显示。如果对文档块进行命名和备注，则当鼠标悬浮文档树文档上时将浮出该文档的相关命名和备注信息。"
+				}
+			]
+		},
+		{
+			"ID": "20210118103020-bjtu89u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210118103020-bjtu89u",
+				"updated": "20210512154754"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可使用"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20201117101902-2ewjjum"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "嵌入内容块"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "对命名和备注进行搜索汇总，比如列出备注中包含 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"CodeMarkerLen": 1,
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker",
+							"Data": "`"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "简短"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker",
+							"Data": "`"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 关键字的内容块："
+				}
+			]
+		},
+		{
+			"ID": "20210118103059-q92s3lt",
+			"Type": "NodeBlockQueryEmbed",
+			"Data": "{{SELECT * FROM blocks WHERE memo LIKE '%简短%'}}\n",
+			"Properties": {
+				"id": "20210118103059-q92s3lt"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks WHERE memo LIKE '%简短%'"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20210127204409-yjgww90",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210127204409-yjgww90"
+			}
+		}
+	]
+}

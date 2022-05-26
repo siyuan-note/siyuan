@@ -164,16 +164,19 @@ The data is saved in the workspace folder (the default is in the user's home dir
 
 ### Is SiYuan open source?
 
-It is not completely open source at present, but some components and applications have been open sourced, and contributions are welcome.
+SiYuan is completely open source, and contributions are welcome:
 
+* [User Interface and Kernel](https://github.com/siyuan-note/siyuan)
 * [User Guide](https://github.com/siyuan-note/user-guide-en_US)
 * [Appearance](https://github.com/siyuan-note/appearance)
 * [Data Parser](https://github.com/88250/protyle)
 * [Editor Engine](https://github.com/88250/lute)
 * [End-to-end encryption](https://github.com/siyuan-note/encryption)
 * [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
-* [Android App](https://github.com/siyuan-note/siyuan-android)
-* [iOS App](https://github.com/siyuan-note/siyuan-ios)
+* [Android](https://github.com/siyuan-note/siyuan-android)
+* [iOS](https://github.com/siyuan-note/siyuan-ios)
+
+For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/DEV.md).
 
 ### Is there any note for deleting docs?
 
@@ -218,8 +221,9 @@ Users in non-Mainland China regions should not pay for subscriptions, because Si
 
 ## 💌 Participate in contribution
 
-At present, some components of SiYuan are open source, and contributions are welcome.
+SiYuan is completely open source, and contributions are welcome:
 
+* [User Interface and Kernel](https://github.com/siyuan-note/siyuan)
 * [User Guide](https://github.com/siyuan-note/user-guide-en_US)
 * [Appearance](https://github.com/siyuan-note/appearance)
 * [Data Parser](https://github.com/88250/protyle)
@@ -228,6 +232,8 @@ At present, some components of SiYuan are open source, and contributions are wel
 * [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
 * [Android](https://github.com/siyuan-note/siyuan-android)
 * [iOS](https://github.com/siyuan-note/siyuan-ios)
+
+For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/DEV.md).
 
 ## 🙏 Acknowledgement
 

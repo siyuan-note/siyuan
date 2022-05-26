@@ -100,6 +100,9 @@ func NetImg2LocalAssets(rootID string) (err error) {
 				} else {
 					name = path.Base(u)
 				}
+				if strings.Contains(name, "#") {
+					name = name[:strings.Index(name, "#")]
+				}
 				name, _ = url.PathUnescape(name)
 				ext := path.Ext(name)
 				if "" == ext {

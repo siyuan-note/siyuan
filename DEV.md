@@ -1,3 +1,7 @@
+<p align="center">
+<a href="https://github.com/siyuan-note/siyuan/blob/master/DEV.md">English</a>
+</p>
+
 ## Get the source code
 
 * `git clone --recurse-submodules git@github.com:siyuan-note/siyuan.git`

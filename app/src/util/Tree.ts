@@ -71,7 +71,7 @@ data-type="${item.nodeType}"
 data-subtype="${item.subType}" 
 ${item.label ? "data-label='" + item.label + "'" : ""}>
     <span style="padding-left: ${item.depth * 16}px" class="b3-list-item__toggle">
-        <svg data-id="${(item.name + item.depth)}" class="b3-list-item__arrow ${((item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0)) ? "b3-list-item__arrow--open" : "fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
+        <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow ${((item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0)) ? "b3-list-item__arrow--open" : "fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
     <span class="b3-list-item__text">${item.name}</span>

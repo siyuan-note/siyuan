@@ -65,6 +65,11 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                     });
                 }
             });
+            inputElement.addEventListener("keydown", (event) => {
+                if (event.key === "Enter" && !event.isComposing) {
+                    window.siyuan.menus.menu.remove();
+                }
+            });
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({

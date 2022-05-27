@@ -17,9 +17,7 @@
 package model
 
 import (
-	"crypto/sha256"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path"
@@ -58,20 +56,22 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 			continue
 		}
 
-		var f *os.File
-		f, err = os.Open(p)
-		if nil != err {
+		fi, statErr := os.Stat(p)
+		if nil != statErr {
+			err = statErr
+			return
+		}
+		f, openErr := os.Open(p)
+		if nil != openErr {
+			err = openErr
+			return
+		}
+		hash, hashErr := util.GetEtagByHandle(f, fi.Size())
+		if nil != hashErr {
+			f.Close()
 			return
 		}
 
-		var data []byte
-		data, err = io.ReadAll(f)
-		f.Close()
-		if nil != err {
-			return
-		}
-
-		hash := fmt.Sprintf("%x", sha256.Sum256(data))
 		if existAsset := sql.QueryAssetByHash(hash); nil != existAsset {
 			// 已经存在同样数据的资源文件的话不重复保存
 			succMap[baseName] = existAsset.Path
@@ -80,9 +80,15 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 			fName = fName[0 : len(fName)-len(ext)]
 			fName = fName + "-" + ast.NewNodeID() + ext
 			writePath := filepath.Join(assets, fName)
-			if err = gulu.File.WriteFileSafer(writePath, data, 0644); nil != err {
+			if _, err = f.Seek(0, io.SeekStart); nil != err {
+				f.Close()
 				return
 			}
+			if err = gulu.File.WriteFileSaferByReader(writePath, f, 0644); nil != err {
+				f.Close()
+				return
+			}
+			f.Close()
 			succMap[baseName] = "assets/" + fName
 		}
 	}
@@ -134,22 +140,21 @@ func Upload(c *gin.Context) {
 		ext = strings.ToLower(ext)
 		fName += ext
 		baseName := fName
-		f, err := file.Open()
-		if nil != err {
+		f, openErr := file.Open()
+		if nil != openErr {
 			errFiles = append(errFiles, fName)
-			ret.Msg = err.Error()
+			ret.Msg = openErr.Error()
 			break
 		}
 
-		data, err := io.ReadAll(f)
-		if nil != err {
+		hash, hashErr := util.GetEtagByHandle(f, file.Size)
+		if nil != hashErr {
 			errFiles = append(errFiles, fName)
 			ret.Msg = err.Error()
+			f.Close()
 			break
 		}
-		f.Close()
 
-		hash := fmt.Sprintf("%x", sha256.Sum256(data))
 		if existAsset := sql.QueryAssetByHash(hash); nil != existAsset {
 			// 已经存在同样数据的资源文件的话不重复保存
 			succMap[baseName] = existAsset.Path
@@ -168,11 +173,19 @@ func Upload(c *gin.Context) {
 				}
 			}
 			writePath := filepath.Join(assetsDirPath, fName)
-			if err = gulu.File.WriteFileSafer(writePath, data, 0644); nil != err {
+			if _, err = f.Seek(0, io.SeekStart); nil != err {
 				errFiles = append(errFiles, fName)
 				ret.Msg = err.Error()
+				f.Close()
 				break
 			}
+			if err = gulu.File.WriteFileSaferByReader(writePath, f, 0644); nil != err {
+				errFiles = append(errFiles, fName)
+				ret.Msg = err.Error()
+				f.Close()
+				break
+			}
+			f.Close()
 			succMap[baseName] = "assets/" + fName
 		}
 	}

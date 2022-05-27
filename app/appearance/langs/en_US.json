@@ -740,7 +740,7 @@
     "12": "Query asset failed [%s]",
     "13": "Cannot create a file starting with .",
     "14": "Export failed: %s",
-    "15": "The content block with ID [%s] was not found, please rebuild the index and try again",
+    "15": "The content block with ID [%s] was not found, please try again later in the document tree panel menu [Rebuild Index]",
     "16": "Please enter the doc name",
     "17": "The initial synchronization failed at startup. Unpredictable data overwriting may occur if you continue to operate. Please perform a synchronization first",
     "18": "Get community user account failed",

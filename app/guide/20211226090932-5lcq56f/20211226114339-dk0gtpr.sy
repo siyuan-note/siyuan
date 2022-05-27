@@ -5,7 +5,7 @@
 		"icon": "1f4c4",
 		"id": "20211226114339-dk0gtpr",
 		"title": "隱私政策和用戶協議",
-		"updated": "20220511113836"
+		"updated": "20220526191434"
 	},
 	"Children": [
 		{
@@ -3323,7 +3323,7 @@
 			},
 			"Properties": {
 				"id": "20220212225553-ud2rl66",
-				"updated": "20220511113836"
+				"updated": "20220526171944"
 			},
 			"Children": [
 				{
@@ -4115,7 +4115,7 @@
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
-						"Marker": "Kg=="
+						"Marker": "NC4="
 					},
 					"Properties": {
 						"id": "20220511113836-twa99rf",
@@ -4139,177 +4139,148 @@
 					]
 				},
 				{
-					"ID": "20220219101327-c97vfrq",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20220219101327-c97vfrq",
-						"updated": "20220219101327"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "本協議適用且僅適用於思源筆記（以下簡稱為“本軟件”），雲南鏈滴科技有限公司對本協議擁有最終解釋權。"
-						}
-					]
-				},
-				{
-					"ID": "20220219101327-avt2nxg",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20220219101327-avt2nxg",
-						"updated": "20220219101327"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "你一旦確認本協議並開始使用本軟件，即被視為完全理解並接受本協議的各項條款。電子文本形式的協議如同雙方書面簽署的協議一樣，具有完全的和等同的法律效力。"
-						}
-					]
-				},
-				{
-					"ID": "20220219101327-mu3z2n3",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20220219101327-mu3z2n3",
-						"updated": "20220219101327"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "在享有條款授予的權力的同時，受到相關的約束和"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "限制"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "。協議許可範圍以外的行為，將直接違反本協議並構成侵權，我們有權隨時終止授權，責令停止損害，並保留追究相關責任的權力。"
-						}
-					]
-				},
-				{
-					"ID": "20220219101327-3fyi23b",
-					"Type": "NodeHeading",
-					"HeadingLevel": 3,
-					"Properties": {
-						"id": "20220219101327-3fyi23b",
-						"updated": "20220219101327"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "協議許可的權利"
-						}
-					]
-				},
-				{
-					"ID": "20220511113820-fwgcxhr",
+					"ID": "20220526171828-dsh8zoi",
 					"Type": "NodeListItem",
 					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "MS4=",
-						"Num": 1
+						"BulletChar": 42,
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220511113820-fwgcxhr",
-						"updated": "20220511113820"
+						"id": "20220526171828-dsh8zoi",
+						"updated": "20220526171944"
 					},
 					"Children": [
 						{
-							"ID": "20220511113820-14zy4is",
+							"ID": "20220526171828-7yiz1nj",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220511113820-14zy4is",
-								"updated": "20220511113820"
+								"id": "20220526171828-7yiz1nj",
+								"updated": "20220526171944"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "你可以在協議規定的約束和限制範圍內使用本軟件"
+									"Data": "最新日期：2022 年 5 月 26 日"
 								}
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20220526171900-uln5cce",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220526171900-uln5cce",
+				"updated": "20220526171901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源筆記使用 "
 				},
 				{
-					"ID": "20220219101327-64p7fiz",
-					"Type": "NodeHeading",
-					"HeadingLevel": 3,
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "AGPLv3 開源協議"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/blob/master/LICENSE"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，請務必遵循。"
+				}
+			]
+		},
+		{
+			"ID": "20220526171914-w0rh0tr",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20220526171914-w0rh0tr",
+				"updated": "20220526171914"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20220526171914-pf17jbe",
+					"Type": "NodeParagraph",
 					"Properties": {
-						"id": "20220219101327-64p7fiz",
-						"updated": "20220219101327"
+						"id": "20220526171914-pf17jbe",
+						"updated": "20220526171914"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "協議規定的約束和"
+							"Data": "// This program is free software: you can redistribute it and/or modify\n// it under the terms of the GNU Affero General Public License as published by\n// the Free Software Foundation, either version 3 of the License, or\n// (at your option) any later version.\n//\n// This program is distributed in the hope that it will be useful,\n// but WITHOUT ANY WARRANTY; without even the implied warranty of\n// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n// GNU Affero General Public License for more details.\n//\n// You should have received a copy of the GNU Affero General Public License\n// along with this program.  If not, see "
+						},
+						{
+							"Type": "NodeLink",
+							"Data": "span",
+							"Children": [
+								{
+									"Type": "NodeOpenBracket"
+								},
+								{
+									"Type": "NodeLinkText",
+									"Data": "https://www.gnu.org/licenses/"
+								},
+								{
+									"Type": "NodeCloseBracket"
+								},
+								{
+									"Type": "NodeOpenParen"
+								},
+								{
+									"Type": "NodeLinkDest",
+									"Data": "https://www.gnu.org/licenses/"
+								},
+								{
+									"Type": "NodeCloseParen"
+								}
+							]
 						},
 						{
 							"Type": "NodeText",
-							"Data": "限制"
+							"Data": "."
 						}
 					]
-				},
+				}
+			]
+		},
+		{
+			"ID": "20220526171930-a4yynx6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220526171930-a4yynx6",
+				"updated": "20220526191434"
+			},
+			"Children": [
 				{
-					"ID": "20220511113804-hd2wvlx",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "MS4=",
-						"Num": 1
-					},
-					"Properties": {
-						"id": "20220511113804-hd2wvlx",
-						"updated": "20220511113804"
-					},
-					"Children": [
-						{
-							"ID": "20220511113804-jvi5ugm",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220511113804-jvi5ugm",
-								"updated": "20220511113804"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "未經官方許可，禁止在本軟件的整體或任何部分基礎上發展派生版本、修改版本或第三方版本用於重新分發"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220219101327-kj36lkk",
-					"Type": "NodeHeading",
-					"HeadingLevel": 3,
-					"Properties": {
-						"id": "20220219101327-kj36lkk",
-						"updated": "20220219101327"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "有限擔保和免責聲明"
-						}
-					]
-				},
-				{
-					"ID": "20220219101327-07qxlkd",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20220219101327-07qxlkd",
-						"updated": "20220219101327"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "本軟件及所附帶的文件是作為不提供任何明確的或隱含的賠償或擔保的形式提供的。"
-						}
-					]
+					"Type": "NodeText",
+					"Data": "對於思源筆記云端服務，禁止共享用戶賬號，否則賬號會被停用。"
 				}
 			]
 		}

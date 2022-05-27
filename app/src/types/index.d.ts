@@ -386,7 +386,6 @@ declare interface IBlockTree {
     nodeType: string,
     subType: string,
     name: string,
-    full: string,
     type: string,
     depth: number,
     url?: string,

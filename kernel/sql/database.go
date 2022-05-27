@@ -18,10 +18,8 @@ package sql
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"database/sql"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -522,12 +520,12 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		}
 
 		var hash string
+		var hashErr error
 		if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
 			if !gulu.File.IsDir(lp) {
-				if data, err := os.ReadFile(lp); nil != err {
-					util.LogErrorf("read asset [%s] data failed: %s", lp, err)
-				} else {
-					hash = fmt.Sprintf("%x", sha256.Sum256(data))
+				hash, hashErr = util.GetEtag(lp)
+				if nil != hashErr {
+					util.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
 				}
 			}
 		}
@@ -597,11 +595,11 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 
 		dest := string(src)
 		var hash string
+		var hashErr error
 		if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
-			if data, err := os.ReadFile(lp); nil != err {
-				util.LogErrorf("read asset [%s] data failed: %s", lp, err)
-			} else {
-				hash = fmt.Sprintf("%x", sha256.Sum256(data))
+			hash, hashErr = util.GetEtag(lp)
+			if nil != hashErr {
+				util.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
 			}
 		}
 

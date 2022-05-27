@@ -1,4 +1,10 @@
+echo 'Building UI'
+cd app
+call npm install
+call npm run build
+cd ..
 
+echo 'Cleaning Builds'
 del /S /Q /F app\build 1>nul
 del /S /Q /F app\kernel 1>nul
 del /S /Q /F app\kernel32 1>nul

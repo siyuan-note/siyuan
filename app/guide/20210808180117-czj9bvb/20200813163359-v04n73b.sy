@@ -6,7 +6,7 @@
 		"id": "20200813163359-v04n73b",
 		"title": "隐私政策和用户协议",
 		"type": "doc",
-		"updated": "20220511113654"
+		"updated": "20220526191427"
 	},
 	"Children": [
 		{
@@ -4171,7 +4171,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220511113456-gcc1dea",
-				"updated": "20220511113501"
+				"updated": "20220526171235"
 			},
 			"Children": [
 				{
@@ -4211,7 +4211,7 @@
 					},
 					"Properties": {
 						"id": "20220511113456-u7wd33k",
-						"updated": "20220511113501"
+						"updated": "20220526171235"
 					},
 					"Children": [
 						{
@@ -4219,12 +4219,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220511113456-p9wsd8q",
-								"updated": "20220511113501"
+								"updated": "20220526171235"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最新日期：2022 年 5 月 11 日"
+									"Data": "最新日期：2022 年 5 月 26 日"
 								}
 							]
 						}
@@ -4233,294 +4233,118 @@
 			]
 		},
 		{
-			"ID": "20210104090915-a04zhlh",
+			"ID": "20220526171251-8nnjevr",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090915-a04zhlh",
-				"updated": "20210104090915"
+				"id": "20220526171251-8nnjevr",
+				"updated": "20220526171503"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "本协议适用且仅适用于思源笔记（以下简称为“本软件”），云南链滴科技有限公司对本协议拥有最终解释权。"
+					"Data": "思源笔记使用 "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "AGPLv3 开源协议"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/blob/master/LICENSE"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，请务必遵循。"
 				}
 			]
 		},
 		{
-			"ID": "20210104090915-hu6xcln",
+			"ID": "20220526171636-9q1pwf7",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20220526171636-9q1pwf7",
+				"updated": "20220526171646"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20220526171645-5blv3be",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20220526171645-5blv3be",
+						"updated": "20220526171646"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "// This program is free software: you can redistribute it and/or modify\n// it under the terms of the GNU Affero General Public License as published by\n// the Free Software Foundation, either version 3 of the License, or\n// (at your option) any later version.\n//\n// This program is distributed in the hope that it will be useful,\n// but WITHOUT ANY WARRANTY; without even the implied warranty of\n// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n// GNU Affero General Public License for more details.\n//\n// You should have received a copy of the GNU Affero General Public License\n// along with this program.  If not, see "
+						},
+						{
+							"Type": "NodeLink",
+							"Data": "span",
+							"Children": [
+								{
+									"Type": "NodeOpenBracket"
+								},
+								{
+									"Type": "NodeLinkText",
+									"Data": "https://www.gnu.org/licenses/"
+								},
+								{
+									"Type": "NodeCloseBracket"
+								},
+								{
+									"Type": "NodeOpenParen"
+								},
+								{
+									"Type": "NodeLinkDest",
+									"Data": "https://www.gnu.org/licenses/"
+								},
+								{
+									"Type": "NodeCloseParen"
+								}
+							]
+						},
+						{
+							"Type": "NodeText",
+							"Data": "."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220526171506-rurnhwq",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090915-hu6xcln"
+				"id": "20220526171506-rurnhwq",
+				"updated": "20220526191427"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "你一旦确认本协议并开始使用本软件，即被视为完全理解并接受本协议的各项条款。电子文本形式的协议如同双方书面签署的协议一样，具有完全的和等同的法律效力。"
-				}
-			]
-		},
-		{
-			"ID": "20210104090915-1k9kae7",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104090915-1k9kae7"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在享有条款授予的权力的同时，受到相关的约束和限制。协议许可范围以外的行为，将直接违反本协议并构成侵权，我们有权随时终止授权，责令停止损害，并保留追究相关责任的权力。"
-				}
-			]
-		},
-		{
-			"ID": "20210104090915-ak5egyi",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210104090915-ak5egyi"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
-				{
-					"Type": "NodeText",
-					"Data": "协议许可的权利"
-				}
-			]
-		},
-		{
-			"ID": "20210104090915-rczuc0z",
-			"Type": "NodeList",
-			"ListData": {
-				"Typ": 1,
-				"Tight": true,
-				"Start": 1,
-				"Delimiter": 46,
-				"Padding": 3,
-				"Marker": "MQ==",
-				"Num": 1
-			},
-			"Properties": {
-				"id": "20210104090915-rczuc0z"
-			},
-			"Children": [
-				{
-					"ID": "20210104090915-b9cczi3",
-					"Type": "NodeListItem",
-					"Data": "1",
-					"ListData": {
-						"Typ": 1,
-						"Tight": true,
-						"Start": 1,
-						"Delimiter": 46,
-						"Padding": 3,
-						"Marker": "MQ==",
-						"Num": 1
-					},
-					"Properties": {
-						"id": "20210104090915-b9cczi3"
-					},
-					"Children": [
-						{
-							"ID": "20210302223426-70l51cs",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210302223426-70l51cs"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "你可以在协议规定的约束和限制范围内使用本软件"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210104090915-d43yymc",
-					"Type": "NodeListItem",
-					"Data": "2",
-					"ListData": {
-						"Typ": 1,
-						"Tight": true,
-						"Start": 2,
-						"Delimiter": 46,
-						"Padding": 3,
-						"Marker": "Mg==",
-						"Num": 2
-					},
-					"Properties": {
-						"id": "20210104090915-d43yymc"
-					},
-					"Children": [
-						{
-							"ID": "20210302223426-6dffke4",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210302223426-6dffke4"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "你拥有使用本软件所撰写的内容的所有权，并独立承担与这些内容的相关法律义务"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20210104090915-x2wdz7e",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210104090915-x2wdz7e"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
-				{
-					"Type": "NodeText",
-					"Data": "协议规定的约束和限制"
-				}
-			]
-		},
-		{
-			"ID": "20210104090915-0ax0fha",
-			"Type": "NodeList",
-			"ListData": {
-				"Typ": 1
-			},
-			"Properties": {
-				"id": "20210104090915-0ax0fha",
-				"updated": "20220511113654"
-			},
-			"Children": [
-				{
-					"ID": "20210104090915-fsygbeb",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "MS4=",
-						"Num": 1
-					},
-					"Properties": {
-						"id": "20210104090915-fsygbeb",
-						"updated": "20210302223426"
-					},
-					"Children": [
-						{
-							"ID": "20210302223426-3q23bq2",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210302223426-3q23bq2",
-								"updated": "20210302223426"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "未经官方许可，禁止在本软件的整体或任何部分基础上发展派生版本、修改版本或第三方版本用于重新分发"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220511113528-mrrcm2w",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "Mi4=",
-						"Num": 2
-					},
-					"Properties": {
-						"id": "20220511113528-mrrcm2w",
-						"updated": "20220511113654"
-					},
-					"Children": [
-						{
-							"ID": "20220511113528-yf5id9c",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220511113528-yf5id9c",
-								"updated": "20220511113654"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "禁止共享用户账号使用本软件"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210104090915-q19dcjt",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "My4=",
-						"Num": 3
-					},
-					"Properties": {
-						"id": "20210104090915-q19dcjt",
-						"updated": "20210302223426"
-					},
-					"Children": [
-						{
-							"ID": "20210302223426-h2ew654",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210302223426-h2ew654",
-								"updated": "20210302223426"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "如果你未能遵守本协议的条款，你的授权将被终止，所被许可的权利将被收回，并承担相应法律责任"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20210104090915-n97gco7",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210104090915-n97gco7"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
-				{
-					"Type": "NodeText",
-					"Data": "有限担保和免责声明"
-				}
-			]
-		},
-		{
-			"ID": "20210104090915-p0f6gq3",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104090915-p0f6gq3"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "本软件及所附带的文件是作为不提供任何明确的或隐含的赔偿或担保的形式提供的。"
+					"Data": "对于思源笔记云端服务，禁止共享用户账号，否则账号会被停用。"
 				}
 			]
 		}

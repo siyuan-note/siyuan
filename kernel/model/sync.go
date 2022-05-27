@@ -571,7 +571,7 @@ func genCloudIndex(localDirPath string, excludes map[string]bool) (err error) {
 			return nil
 		}
 
-		hash, hashErr := GetEtag(path)
+		hash, hashErr := util.GetEtag(path)
 		if nil != hashErr {
 			util.LogErrorf("get file [%s] hash failed: %s", path, hashErr)
 			return hashErr

@@ -82,30 +82,22 @@ func Outline(rootID string) (ret []*Path, err error) {
 	}
 
 	ret = toFlatTree(blocks, 0, "outline")
-	if 0 < len(ret) {
-		children := ret[0].Blocks
-		ret = nil
-		for _, b := range children {
-			resetDepth(b, 0)
-			ret = append(ret, &Path{
-				ID:      b.ID,
-				Box:     b.Box,
-				Name:    b.Content,
-				Type:    b.Type,
-				SubType: b.SubType,
-				Blocks:  b.Children,
-				Depth:   0,
-				Count:   b.Count,
-			})
-		}
-	}
+	resetDepth(ret)
 	return
 }
 
-func resetDepth(b *Block, depth int) {
-	b.Depth = depth
+func resetDepth(paths []*Path) {
+	for _, p := range paths {
+		for _, b := range p.Blocks {
+			resetDepth0(b, p.Depth)
+		}
+	}
+}
+
+func resetDepth0(b *Block, depth int) {
+	b.Depth = depth + 1
 	b.Count = len(b.Children)
 	for _, c := range b.Children {
-		resetDepth(c, depth+1)
+		resetDepth0(c, depth+1)
 	}
 }

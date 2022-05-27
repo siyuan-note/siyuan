@@ -6,7 +6,7 @@
 		"id": "20200923234602-gy54e67",
 		"title": "Privacy Policy and User Agreement",
 		"type": "doc",
-		"updated": "20220511114202"
+		"updated": "20220526191417"
 	},
 	"Children": [
 		{
@@ -322,124 +322,65 @@
 			]
 		},
 		{
-			"ID": "20220219101351-0tucf6z",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220219101351-0tucf6z",
-				"updated": "20220511114202"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "This agreement applies and only applies to SiYuan (hereinafter referred to as \"the software\"), and Yunnan Liandi Technology Co., Ltd. has the final right to interpret this agreement."
-				}
-			]
-		},
-		{
-			"ID": "20220219101351-vq4zmoc",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220219101351-vq4zmoc",
-				"updated": "20220219101351"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Once you confirm this agreement and start to use the software, you are deemed to fully understand and accept the terms of this agreement. An agreement in the form of electronic text has full and equivalent legal effect as an agreement signed by both parties in writing."
-				}
-			]
-		},
-		{
-			"ID": "20220219101351-k90bwhy",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220219101351-k90bwhy",
-				"updated": "20220219101351"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "While enjoying the power conferred by the terms, it is subject to relevant constraints and restrictions. Behaviors outside the scope of the agreement will directly violate this agreement and constitute infringement. We have the right to terminate the authorization at any time, order to stop the damage, and reserve the right to pursue relevant responsibilities."
-				}
-			]
-		},
-		{
-			"ID": "20220219101351-4z646n1",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20220219101351-4z646n1",
-				"updated": "20220219101351"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Licensed Rights"
-				}
-			]
-		},
-		{
-			"ID": "20220219101351-wdm69r4",
+			"ID": "20220526172102-26zds8b",
 			"Type": "NodeList",
-			"ListData": {
-				"Typ": 1
-			},
+			"ListData": {},
 			"Properties": {
-				"id": "20220219101351-wdm69r4",
-				"updated": "20220219101351"
+				"id": "20220526172102-26zds8b",
+				"updated": "20220526172141"
 			},
 			"Children": [
 				{
-					"ID": "20220219101351-uxailqh",
+					"ID": "20220526172102-w718t2m",
 					"Type": "NodeListItem",
 					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "MS4=",
-						"Num": 1
+						"BulletChar": 42,
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220219101351-uxailqh"
+						"id": "20220526172102-w718t2m",
+						"updated": "20220526172102"
 					},
 					"Children": [
 						{
-							"ID": "20220219101351-1hq20f9",
+							"ID": "20220526172102-0850u1g",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220219101351-1hq20f9"
+								"id": "20220526172102-0850u1g",
+								"updated": "20220526172102"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "You can use the software within the constraints and limitations stipulated in the agreement"
+									"Data": "Release date: February 11, 2022"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220219101351-wj1wwxg",
+					"ID": "20220526172102-ud15cx9",
 					"Type": "NodeListItem",
 					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "Mi4=",
-						"Num": 2
+						"BulletChar": 42,
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220219101351-wj1wwxg"
+						"id": "20220526172102-ud15cx9",
+						"updated": "20220526172141"
 					},
 					"Children": [
 						{
-							"ID": "20220219101351-kdfxs0r",
+							"ID": "20220526172102-ltmv72n",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220219101351-kdfxs0r"
+								"id": "20220526172102-ltmv72n",
+								"updated": "20220526172141"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "You own the ownership of the content written by using this software, and independently assume the relevant legal obligations related to these content"
+									"Data": "Latest date: May 26, 2022"
 								}
 							]
 						}
@@ -448,149 +389,118 @@
 			]
 		},
 		{
-			"ID": "20220219101351-zafgped",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20220219101351-zafgped",
-				"updated": "20220219101351"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Constraints and Restrictions under the Agreement"
-				}
-			]
-		},
-		{
-			"ID": "20220219101351-33mzoxp",
-			"Type": "NodeList",
-			"ListData": {
-				"Typ": 1
-			},
-			"Properties": {
-				"id": "20220219101351-33mzoxp",
-				"updated": "20220511114148"
-			},
-			"Children": [
-				{
-					"ID": "20220219101351-6fxrijg",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "MS4=",
-						"Num": 1
-					},
-					"Properties": {
-						"id": "20220219101351-6fxrijg",
-						"updated": "20220219101351"
-					},
-					"Children": [
-						{
-							"ID": "20220219101351-hahd4aj",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220219101351-hahd4aj",
-								"updated": "20220219101351"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Development of derivative, modified or third-party versions of the software in whole or in part for redistribution without official permission is prohibited"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220511114148-mhyfpm4",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "Mi4=",
-						"Num": 2
-					},
-					"Properties": {
-						"id": "20220511114148-mhyfpm4",
-						"updated": "20220511114148"
-					},
-					"Children": [
-						{
-							"ID": "20220511114148-eri7s9w",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220511114148-eri7s9w",
-								"updated": "20220511114148"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "It is forbidden to share the user account to use the software"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220219101351-wrfqyzo",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "My4=",
-						"Num": 3
-					},
-					"Properties": {
-						"id": "20220219101351-wrfqyzo",
-						"updated": "20220219101351"
-					},
-					"Children": [
-						{
-							"ID": "20220219101351-yggu31m",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220219101351-yggu31m",
-								"updated": "20220219101351"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "If you fail to comply with the terms of this agreement, your authorization will be terminated, the licensed rights will be withdrawn, and you will assume the corresponding legal responsibility"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220219101351-nfsf1sy",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20220219101351-nfsf1sy",
-				"updated": "20220219101351"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "LIMITED WARRANTY AND DISCLAIMER"
-				}
-			]
-		},
-		{
-			"ID": "20220219101351-jhqa4s1",
+			"ID": "20220526172025-jc682zl",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220219101351-jhqa4s1",
-				"updated": "20220219101351"
+				"id": "20220526172025-jc682zl",
+				"updated": "20220526172030"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "THIS SOFTWARE AND THE ACCOMPANYING DOCUMENTS ARE PROVIDED WITHOUT ANY EXPRESS OR IMPLIED INDEMNITY OR WARRANTY."
+					"Data": "SiYuan uses the "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "AGPLv3 Open Source License"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/blob/master/LICENSE"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", please be sure to follow it."
+				}
+			]
+		},
+		{
+			"ID": "20220526172038-2fqf9le",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20220526172038-2fqf9le",
+				"updated": "20220526172038"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20220526172038-y5qjebj",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20220526172038-y5qjebj",
+						"updated": "20220526172038"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "// This program is free software: you can redistribute it and/or modify\n// it under the terms of the GNU Affero General Public License as published by\n// the Free Software Foundation, either version 3 of the License, or\n// (at your option) any later version.\n//\n// This program is distributed in the hope that it will be useful,\n// but WITHOUT ANY WARRANTY; without even the implied warranty of\n// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n// GNU Affero General Public License for more details.\n//\n// You should have received a copy of the GNU Affero General Public License\n// along with this program.  If not, see "
+						},
+						{
+							"Type": "NodeLink",
+							"Data": "span",
+							"Children": [
+								{
+									"Type": "NodeOpenBracket"
+								},
+								{
+									"Type": "NodeLinkText",
+									"Data": "https://www.gnu.org/licenses/"
+								},
+								{
+									"Type": "NodeCloseBracket"
+								},
+								{
+									"Type": "NodeOpenParen"
+								},
+								{
+									"Type": "NodeLinkDest",
+									"Data": "https://www.gnu.org/licenses/"
+								},
+								{
+									"Type": "NodeCloseParen"
+								}
+							]
+						},
+						{
+							"Type": "NodeText",
+							"Data": "."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220526172045-j259gxu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220526172045-j259gxu",
+				"updated": "20220526191417"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For SiYuan cloud service, it is forbidden to share user accounts, otherwise the account will be deactivated."
 				}
 			]
 		}

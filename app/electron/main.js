@@ -376,6 +376,12 @@ const boot = () => {
         },
       },
       {
+        label: 'Hide Window',
+        click: () => {
+          mainWindow.hide()
+        },
+      },
+      {
         label: 'Quit',
         click: () => {
           mainWindow.webContents.send('siyuan-save-close', true)

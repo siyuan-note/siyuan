@@ -64,7 +64,6 @@ type Path struct {
 	ID       string   `json:"id"`       // 块 ID
 	Box      string   `json:"box"`      // 块 Box
 	Name     string   `json:"name"`     // 当前路径
-	Full     string   `json:"full"`     // 全路径
 	Type     string   `json:"type"`     // "path"
 	NodeType string   `json:"nodeType"` // 节点类型
 	SubType  string   `json:"subType"`  // 节点子类型

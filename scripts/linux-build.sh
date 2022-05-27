@@ -1,7 +1,11 @@
 #!/bin/bash
 
-./build-ui.sh
+echo 'Building UI'
+cd app
+npm install && npm run build
+cd ..
 
+echo 'Cleaning Builds'
 rm -rf app/build
 rm -rf app/kernel-linux
 

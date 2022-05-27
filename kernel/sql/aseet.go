@@ -20,7 +20,6 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -71,12 +70,11 @@ func docTitleImgAsset(root *ast.Node) *Asset {
 		}
 
 		var hash string
+		var err error
 		absPath := filepath.Join(util.DataDir, p)
-		if data, err := os.ReadFile(absPath); nil != err {
+		if hash, err = util.GetEtag(absPath); nil != err {
 			util.LogErrorf("read asset [%s] data failed: %s", absPath, err)
 			hash = fmt.Sprintf("%x", sha256.Sum256([]byte(gulu.Rand.String(7))))
-		} else {
-			hash = fmt.Sprintf("%x", sha256.Sum256(data))
 		}
 		name, _ := util.LastID(p)
 		asset := &Asset{

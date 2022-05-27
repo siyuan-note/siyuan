@@ -44,7 +44,7 @@ var cookieStore = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
 func Serve(fastMode bool) {
 	gin.SetMode(gin.ReleaseMode)
 	ginServer := gin.New()
-	ginServer.MaxMultipartMemory = 1024 * 1024 * 1024 * 4
+	ginServer.MaxMultipartMemory = 1024 * 1024 * 32 // 32MB
 	ginServer.Use(gin.Recovery())
 	ginServer.Use(cors.Default())
 	ginServer.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm"})))

@@ -53,6 +53,8 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                     element.setAttribute("data-subtype", inputElement.value ? "s" : "d");
                     updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
                 }
+                protyle.toolbar.range.selectNodeContents(element);
+                protyle.toolbar.range.collapse(false);
                 focusByRange(protyle.toolbar.range);
                 event.stopPropagation();
             });

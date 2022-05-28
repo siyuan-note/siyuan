@@ -1,4 +1,10 @@
-import {focusBlock, focusByRange, getEditorRange} from "../util/selection";
+import {
+    focusBlock,
+    focusByOffset,
+    focusByRange,
+    getEditorRange,
+    getSelectionOffset,
+} from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {replaceFileName, validateName} from "../../editor/rename";
 import {MenuItem} from "../../menus/Menu";
@@ -116,6 +122,24 @@ export class Title {
                 });
                 event.preventDefault();
                 event.stopPropagation();
+            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {
+                event.preventDefault();
+                event.stopPropagation();
+                openBacklink(protyle);
+                return;
+            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.graphView.custom, event)) {
+                event.preventDefault();
+                event.stopPropagation();
+                openGraph(protyle);
+                return;
+            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.outline.custom, event)) {
+                event.preventDefault();
+                event.stopPropagation();
+                const offset = getSelectionOffset(this.editElement);
+                openOutline(protyle);
+                // switchWnd 后，range会被清空，需要重新设置
+                focusByOffset(this.editElement, offset.start, offset.end);
+                return;
             }
         });
         const iconElement = this.element.querySelector(".protyle-title__icon");
@@ -223,6 +247,7 @@ export class Title {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconAlignCenter",
                 label: window.siyuan.languages.outline,
+                accelerator: window.siyuan.config.keymap.editor.general.outline.custom,
                 click: () => {
                     openOutline(protyle);
                 }
@@ -230,6 +255,7 @@ export class Title {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconLink",
                 label: window.siyuan.languages.backlinks,
+                accelerator: window.siyuan.config.keymap.editor.general.backlinks.custom,
                 click: () => {
                     openBacklink(protyle);
                 }
@@ -237,6 +263,7 @@ export class Title {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconGraph",
                 label: window.siyuan.languages.graphView,
+                accelerator: window.siyuan.config.keymap.editor.general.graphView.custom,
                 click: () => {
                     openGraph(protyle);
                 }

@@ -39,6 +39,7 @@ export class Title {
             const range = getEditorRange(this.editElement);
             range.deleteContents();
             range.insertNode(document.createTextNode(replaceFileName(event.clipboardData.getData("text/plain"))));
+            range.collapse(false);
         });
         this.editElement.addEventListener("click", () => {
             if (protyle.model) {

@@ -45,7 +45,7 @@ export class MobileOutline {
             }
         });
         this.element.firstElementChild.querySelector('[data-type="collapse"]').addEventListener(getEventName(), () => {
-            this.tree.collapseAll(true);
+            this.tree.collapseAll();
         });
         const expandElement = this.element.firstElementChild.querySelector('[data-type="expand"]');
         expandElement.addEventListener(getEventName(), () => {

@@ -226,22 +226,14 @@ data-def-path="${item.defPath}">
         });
     }
 
-    public collapseAll(isFirst = false) {
+    public collapseAll() {
         this.element.querySelectorAll("ul").forEach(item => {
             if (!item.classList.contains("b3-list")) {
-                if (isFirst && item.parentElement.classList.contains("b3-list")) {
-                    // 第一层级不进行缩放
-                } else {
-                    item.classList.add("fn__none");
-                }
+                item.classList.add("fn__none");
             }
         });
         this.element.querySelectorAll(".b3-list-item__arrow").forEach(item => {
-            if (isFirst && item.parentElement.parentElement.parentElement.classList.contains("b3-list")) {
-                // 第一层级不进行缩放
-            } else {
-                item.classList.remove("b3-list-item__arrow--open");
-            }
+            item.classList.remove("b3-list-item__arrow--open");
         });
     }
 

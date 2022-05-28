@@ -439,6 +439,7 @@ const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
             fetchPost("/api/outline/getDocOutline", {
                 id: blockId,
             }, response => {
+                item.updateDocTitle(protyle.title.editElement.textContent);
                 item.update(response, blockId);
                 if (protyle && getSelection().rangeCount > 0) {
                     const startContainer = getSelection().getRangeAt(0).startContainer;

@@ -10,6 +10,7 @@ import {openFileById, updateBacklinkGraph} from "../../editor/util";
 import {Constants} from "../../constants";
 import {focusBlock} from "../../protyle/util/selection";
 import {pushBack} from "../../util/backForward";
+import {escapeHtml} from "../../util/escape";
 
 export class Outline extends Model {
     private tree: Tree;
@@ -45,11 +46,7 @@ export class Outline extends Model {
                             if (this.type === "local" && this.blockId === data.data.id) {
                                 this.parent.updateTitle(data.data.title);
                             } else {
-                                fetchPost("/api/outline/getDocOutline", {
-                                    id: this.blockId,
-                                }, response => {
-                                    this.update(response);
-                                });
+                                this.updateDocTitle(data.data.title);
                             }
                             break;
                         case "unmount":
@@ -84,6 +81,7 @@ export class Outline extends Model {
     <span class="${this.type === "local" ? "fn__none " : ""}fn__space"></span>
     <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
+<div class="fn__ellipsis outline__title"></div>
 <div class="fn__flex-1"></div>`;
         this.element = options.tab.panelElement.lastElementChild as HTMLElement;
         this.headerElement = options.tab.panelElement.firstElementChild as HTMLElement;
@@ -117,7 +115,7 @@ export class Outline extends Model {
         });
         // 为了快捷键的 dispatch
         options.tab.panelElement.querySelector('[data-type="collapse"]').addEventListener("click", () => {
-            this.tree.collapseAll(true);
+            this.tree.collapseAll();
         });
         options.tab.panelElement.querySelector('[data-type="expand"]').addEventListener("click", (event: MouseEvent & { target: Element }) => {
             const iconElement = hasClosestByClassName(event.target, "block__icon");
@@ -154,11 +152,19 @@ export class Outline extends Model {
         fetchPost("/api/outline/getDocOutline", {
             id: this.blockId,
         }, response => {
+            this.updateDocTitle();
             this.update(response);
         });
 
         if (this.type === "pin") {
             setPanelFocus(options.tab.panelElement.firstElementChild);
+        }
+    }
+
+    public updateDocTitle(title = "") {
+        if (this.type === "pin") {
+            this.headerElement.nextElementSibling.innerHTML = escapeHtml(title);
+            this.headerElement.nextElementSibling.setAttribute("title", title);
         }
     }
 

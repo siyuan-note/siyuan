@@ -62,6 +62,12 @@ progressLoading: 400 // 需大于 .b3-dialog
   }
 }
 
+.outline__title {
+  padding: 0 8px;
+  white-space: nowrap;
+  line-height: 30px;
+}
+
 .fullscreen {
   position: fixed;
   top: 0;

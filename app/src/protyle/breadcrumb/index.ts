@@ -48,10 +48,6 @@ export class Breadcrumb {
                             openFileById({id, action: [Constants.CB_GET_FOCUS]});
                         }
                     } else {
-                        // const activeElement = this.element.querySelector(".protyle-breadcrumb__item--active")
-                        // if (activeElement) {
-                        //     activeElement.classList.remove("protyle-breadcrumb__item--active");
-                        // }
                         zoomOut(protyle, id);
                     }
                     event.preventDefault();
@@ -401,7 +397,7 @@ export class Breadcrumb {
                 return;
             }
             let jump = false;
-            while (this.element.scrollHeight > 60 && !jump) {
+            while (this.element.scrollHeight > 30 && !jump) {
                 itemElements.find((item, index) => {
                     if (itemElements.length === 1) {
                         item.classList.add("protyle-breadcrumb__text--ellipsis");

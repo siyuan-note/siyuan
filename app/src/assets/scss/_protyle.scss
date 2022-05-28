@@ -111,14 +111,15 @@
   box-sizing: border-box;
 
   &__bar {
-    flex-wrap: wrap;
     align-items: center;
     display: flex;
     transition: var(--b3-transition);
     margin-right: 8px;
-    max-height: 60px;
-    min-height: 30px;
     overflow: auto;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
     &--hide {
       opacity: 0;
@@ -140,7 +141,7 @@
   }
 
   &__text--ellipsis {
-    width: 23px;
+    width: 112px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;

@@ -256,7 +256,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         }
         range.extractContents();
         const types = protyle.toolbar.getCurrentType(range);
-        if (types.length > 0 && range.startContainer.nodeType !== 3) {
+        if (types.includes("inline-code") && range.startContainer.nodeType !== 3) {
             // https://github.com/siyuan-note/siyuan/issues/4169
             const brElement = document.createElement("br");
             (range.startContainer as HTMLElement).after(brElement);

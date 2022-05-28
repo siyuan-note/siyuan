@@ -112,6 +112,7 @@
 
   &__bar {
     align-items: center;
+    flex-wrap: wrap;
     display: flex;
     transition: var(--b3-transition);
     margin-right: 8px;
@@ -124,6 +125,10 @@
     &--hide {
       opacity: 0;
       transition: 1s;
+    }
+
+    &--nowrap {
+      flex-wrap: nowrap;
     }
 
     .b3-tooltips {

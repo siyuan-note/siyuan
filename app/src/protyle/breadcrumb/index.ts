@@ -391,6 +391,7 @@ export class Breadcrumb {
                     html += '<svg class="protyle-breadcrumb__arrow"><use xlink:href="#iconRight"></use></svg>';
                 }
             });
+            this.element.classList.remove("protyle-breadcrumb__bar--nowrap");
             this.element.innerHTML = html;
             const itemElements = Array.from(this.element.querySelectorAll(".protyle-breadcrumb__text"));
             if (itemElements.length === 0) {
@@ -404,7 +405,7 @@ export class Breadcrumb {
                         jump = true;
                         return true;
                     }
-                    if (index !== 0 && !item.classList.contains("protyle-breadcrumb__text--ellipsis")) {
+                    if (!item.classList.contains("protyle-breadcrumb__text--ellipsis")) {
                         item.classList.add("protyle-breadcrumb__text--ellipsis");
                         return true;
                     }
@@ -413,6 +414,8 @@ export class Breadcrumb {
                     }
                 });
             }
+            this.element.classList.add("protyle-breadcrumb__bar--nowrap");
+            this.element.lastElementChild.previousElementSibling.scrollIntoView();
         });
     }
 

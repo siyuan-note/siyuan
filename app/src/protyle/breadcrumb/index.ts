@@ -106,6 +106,9 @@ export class Breadcrumb {
                 }
             }
         });
+        this.element.addEventListener("mousewheel", (event: WheelEvent) => {
+            this.element.scrollLeft = this.element.scrollLeft + event.deltaY;
+        }, {passive: true});
         /// #if !BROWSER
         if ("windows" !== window.siyuan.config.system.os && "linux" !== window.siyuan.config.system.os) {
             const currentWindow = getCurrentWindow();

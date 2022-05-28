@@ -146,7 +146,7 @@
   }
 
   &__text--ellipsis {
-    width: 112px;
+    max-width: 112px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;

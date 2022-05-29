@@ -13,5 +13,5 @@ jobs:
       - name: Build the Docker image
         run: |
           docker login --username=${{ secrets.DOCKER_HUB_USER }} --password=${{ secrets.DOCKER_HUB_PWD }}
-          docker build -t b3log/siyuan:latest -t b3log/siyuan:v2.0.13 .
+          docker build -t b3log/siyuan:latest -t b3log/siyuan:v2.0.14 .
           docker push b3log/siyuan -a

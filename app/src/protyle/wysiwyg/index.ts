@@ -197,7 +197,7 @@ export class WYSIWYG {
             if (!nodeElement) {
                 return;
             }
-            const selectImgElement = nodeElement.querySelector(".img--select")
+            const selectImgElement = nodeElement.querySelector(".img--select");
             let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
                 !selectImgElement) {
@@ -266,7 +266,7 @@ export class WYSIWYG {
             if (!nodeElement) {
                 return;
             }
-            const selectImgElement = nodeElement.querySelector(".img--select")
+            const selectImgElement = nodeElement.querySelector(".img--select");
             let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
                 !selectImgElement) {

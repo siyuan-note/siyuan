@@ -179,7 +179,7 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
     }
-}
+};
 
 export const promiseTransactions = () => {
     window.siyuan.transactionsTimeout = window.setInterval(() => {

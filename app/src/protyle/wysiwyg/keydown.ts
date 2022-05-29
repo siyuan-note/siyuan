@@ -465,7 +465,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey("⌘/", event)) {
             event.stopPropagation();
             event.preventDefault();
-            const inlineElement = hasClosestByAttribute(range.startContainer, "data-type", null)
+            const inlineElement = hasClosestByAttribute(range.startContainer, "data-type", null);
             if (inlineElement) {
                 const type = inlineElement.getAttribute("data-type");
                 if (type === "block-ref") {

@@ -381,7 +381,7 @@ export class Wnd {
                 event.preventDefault();
             });
         }
-        const containerElement = this.element.querySelector(".layout-tab-container")
+        const containerElement = this.element.querySelector(".layout-tab-container");
         if (!containerElement.querySelector(".fn__flex-1")) {
             // empty center
             containerElement.append(tab.panelElement);

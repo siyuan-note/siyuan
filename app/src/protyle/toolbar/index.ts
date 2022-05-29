@@ -1054,7 +1054,7 @@ export class Toolbar {
                 languageElement.textContent = this.subElement.querySelector(".b3-list-item--focus").textContent;
                 localStorage.setItem(Constants.LOCAL_CODELANG, languageElement.textContent);
                 const editElement = getContenteditableElement(nodeElement);
-                const lineNumber = nodeElement.getAttribute("linenumber")
+                const lineNumber = nodeElement.getAttribute("linenumber");
                 if (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum)) {
                     editElement.classList.add("protyle-linenumber");
                 } else {
@@ -1120,7 +1120,7 @@ export class Toolbar {
             const nodeElement = hasClosestBlock(languageElement);
             if (nodeElement) {
                 const editElement = getContenteditableElement(nodeElement);
-                const lineNumber = nodeElement.getAttribute("linenumber")
+                const lineNumber = nodeElement.getAttribute("linenumber");
                 if (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum)) {
                     editElement.classList.add("protyle-linenumber");
                 } else {

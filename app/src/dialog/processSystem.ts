@@ -213,11 +213,11 @@ export const setTitle = (title: string) => {
         const versionTitle = title + " v" + Constants.SIYUAN_VERSION;
         document.title = versionTitle;
         dragElement.textContent = versionTitle;
-        dragElement.setAttribute("title", versionTitle)
+        dragElement.setAttribute("title", versionTitle);
     } else {
         document.title = title + " - " + window.siyuan.languages.siyuanNote + " v" + Constants.SIYUAN_VERSION;
         dragElement.textContent = title;
-        dragElement.setAttribute("title", title)
+        dragElement.setAttribute("title", title);
     }
 };
 

@@ -2,7 +2,6 @@ import {hasClosestByAttribute} from "../util/hasClosest";
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
-import {mediaRender} from "./mediaRender";
 import {Constants} from "../../constants";
 
 export const blockRender = (protyle: IProtyle, element: Element) => {

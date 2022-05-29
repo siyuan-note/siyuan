@@ -384,7 +384,7 @@ export class Files extends Model {
                 return;
             }
             if (newElement.classList.contains("dragover")) {
-                fetchPost("/api/filetree/moveDoc", {
+                await fetchPost("/api/filetree/moveDoc", {
                     fromNotebook: fromURL,
                     toNotebook: toURL,
                     fromPath,

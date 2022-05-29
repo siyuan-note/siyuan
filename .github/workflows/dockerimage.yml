@@ -1,0 +1,17 @@
+name: Release Docker Image
+on:
+  release:
+    types: [published]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          #ref: '70e4c2c0cb2f1c2f3d1c76de99a3e7593e3d7cae'
+          submodules: true
+      - name: Build the Docker image
+        run: |
+          docker login --username=${{ secrets.DOCKER_HUB_USER }} --password=${{ secrets.DOCKER_HUB_PWD }}
+          docker build -t b3log/siyuan:latest -t b3log/siyuan:v2.0.13 .
+          docker push b3log/siyuan -a

@@ -1,3 +1,28 @@
+## v2.0.14 / 2022-05-29
+
+### 改进功能
+
+* [光标在文档标题位置时可使用快捷键唤出大纲、反链和关系图面板](https://github.com/siyuan-note/siyuan/issues/4999)
+* [大纲面板加入文档标题](https://github.com/siyuan-note/siyuan/issues/5011)
+* [完整开源界面和内核](https://github.com/siyuan-note/siyuan/issues/5013)
+* [面包屑继续改进 ](https://github.com/siyuan-note/siyuan/issues/5019)
+* [插入较大的资源文件时内存占用较大](https://github.com/siyuan-note/siyuan/issues/5023)
+* [桌面端托盘图标菜单加入 `Hide Window`](https://github.com/siyuan-note/siyuan/issues/5025)
+* [锚文本修改后 `Enter` 可退出修改层并跳转到锚文本末尾](https://github.com/siyuan-note/siyuan/issues/5036)
+
+### 文档相关
+
+* [公开内置密钥算法](https://github.com/siyuan-note/siyuan/issues/5012)
+* [修改用户协议](https://github.com/siyuan-note/siyuan/issues/5015)
+
+### 修复缺陷
+
+* [文档标题处粘贴内容会选中粘贴的内容](https://github.com/siyuan-note/siyuan/issues/5006)
+* [标题存在字体颜色时大纲面板异常](https://github.com/siyuan-note/siyuan/issues/5009)
+* [`网络图片转换为本地图片` 链接参数处理异常](https://github.com/siyuan-note/siyuan/issues/5014)
+* [表格内颜色字体不能换行](https://github.com/siyuan-note/siyuan/issues/5029)
+* [文档树拖拽子文档后排序不正确](https://github.com/siyuan-note/siyuan/issues/5034)
+
 ## v2.0.13 / 2022-05-25
 
 ### 改进功能

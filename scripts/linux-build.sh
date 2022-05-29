@@ -19,7 +19,7 @@ export CGO_ENABLED=1
 
 export GOOS=linux
 export GOARCH=amd64
-go build --tags fts5 -v -o "app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w" .
+go build --tags fts5 -v -o "../app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w" .
 cd ..
 
 echo 'Building Electron'

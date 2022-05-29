@@ -20,11 +20,11 @@ export CGO_ENABLED=1
 
 export GOOS=darwin
 export GOARCH=amd64
-go build --tags fts5 -v -o "app/kernel-darwin/SiYuan-Kernel" -ldflags "-s -w" .
+go build --tags fts5 -v -o "../app/kernel-darwin/SiYuan-Kernel" -ldflags "-s -w" .
 
 export GOOS=darwin
 export GOARCH=arm64
-go build --tags fts5 -v -o "app/kernel-darwin-arm64/SiYuan-Kernel" -ldflags "-s -w" .
+go build --tags fts5 -v -o "../app/kernel-darwin-arm64/SiYuan-Kernel" -ldflags "-s -w" .
 cd ..
 
 echo 'Building Electron'

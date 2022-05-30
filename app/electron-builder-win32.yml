@@ -19,7 +19,7 @@ win:
     - from: "kernel32"
       to: "kernel"
   requestedExecutionLevel: "asInvoker"
-  certificateSubjectName: "Yunnan Liandi Technology Co., Ltd."
+  # certificateSubjectName: "Yunnan Liandi Technology Co., Ltd."
   signingHashAlgorithms: [ 'sha256' ]
   #rfc3161TimeStampServer: "http://sha256timestamp.ws.symantec.com/sha256/timestamp"
   #rfc3161TimeStampServer: "http://time.certum.pl"

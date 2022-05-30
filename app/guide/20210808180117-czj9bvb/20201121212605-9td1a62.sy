@@ -6,7 +6,7 @@
 		"id": "20201121212605-9td1a62",
 		"title": "致谢",
 		"type": "doc",
-		"updated": "20220522101224"
+		"updated": "20220530180055"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220522101224-ctmcj3d",
-				"updated": "20220522101224"
+				"updated": "20220530180055"
 			},
 			"Children": [
 				{
@@ -1511,7 +1511,7 @@
 					},
 					"Properties": {
 						"id": "20220522101224-gbd2na7",
-						"updated": "20220522101224"
+						"updated": "20220530180049"
 					},
 					"Children": [
 						{
@@ -1519,7 +1519,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220522101224-mwz2rxp",
-								"updated": "20220522101224"
+								"updated": "20220530180049"
 							},
 							"Children": [
 								{
@@ -1562,6 +1562,76 @@
 										{
 											"Type": "NodeCodeSpanContent",
 											"Data": "BSD-3-Clause License"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220530180049-796wwcg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220530180049-796wwcg",
+						"updated": "20220530180055"
+					},
+					"Children": [
+						{
+							"ID": "20220530180049-qvs3gi0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220530180049-qvs3gi0",
+								"updated": "20220530180055"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "https://github.com/gabriel-vasile/mimetype"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/gabriel-vasile/mimetype"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "MIT License"
 										},
 										{
 											"Type": "NodeCodeSpanCloseMarker"

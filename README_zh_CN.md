@@ -269,6 +269,7 @@
 * [https://github.com/facette/natsort](https://github.com/facette/natsort) `BSD-3-Clause License`
 * [https://github.com/flopp/go-findfont](https://github.com/flopp/go-findfont) `MIT License`
 * [https://github.com/fsnotify/fsnotify](https://github.com/fsnotify/fsnotify) `BSD-3-Clause License`
+* [https://github.com/gabriel-vasile/mimetype](https://github.com/gabriel-vasile/mimetype) `MIT License`
 * [https://github.com/gin-contrib/cors](https://github.com/gin-contrib/cors) `MIT License`
 * [https://github.com/gin-contrib/gzip](https://github.com/gin-contrib/gzip) `MIT License`
 * [https://github.com/gin-contrib/sessions](https://github.com/gin-contrib/sessions) `MIT License`

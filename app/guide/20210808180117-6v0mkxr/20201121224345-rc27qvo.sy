@@ -6,7 +6,7 @@
 		"id": "20201121224345-rc27qvo",
 		"title": "Acknowledgements",
 		"type": "doc",
-		"updated": "20220522101213"
+		"updated": "20220530180108"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220522101213-z3hokh2",
-				"updated": "20220522101213"
+				"updated": "20220530180108"
 			},
 			"Children": [
 				{
@@ -1562,6 +1562,76 @@
 										{
 											"Type": "NodeCodeSpanContent",
 											"Data": "BSD-3-Clause License"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220530180107-u2pjucg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220530180107-u2pjucg",
+						"updated": "20220530180108"
+					},
+					"Children": [
+						{
+							"ID": "20220530180107-zbx81j2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220530180107-zbx81j2",
+								"updated": "20220530180108"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "https://github.com/gabriel-vasile/mimetype"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/gabriel-vasile/mimetype"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "MIT License"
 										},
 										{
 											"Type": "NodeCodeSpanCloseMarker"

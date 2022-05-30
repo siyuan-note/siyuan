@@ -24,6 +24,7 @@ require (
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
 	github.com/flopp/go-findfont v0.1.0
 	github.com/fsnotify/fsnotify v1.5.4
+	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/getsentry/sentry-go v0.13.0
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-contrib/gzip v0.0.5
@@ -32,6 +33,7 @@ require (
 	github.com/imroc/req/v3 v3.11.3
 	github.com/jinzhu/copier v0.3.5
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/mattn/go-zglob v0.0.3
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/user_agent v0.5.3
 	github.com/panjf2000/ants/v2 v2.5.0
@@ -78,7 +80,6 @@ require (
 	github.com/juju/errors v0.0.0-20220331221717-b38fca44723b // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/mattn/go-zglob v0.0.3 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

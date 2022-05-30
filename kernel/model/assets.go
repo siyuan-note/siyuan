@@ -34,6 +34,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -116,6 +117,11 @@ func NetImg2LocalAssets(rootID string) (err error) {
 				}
 				name, _ = url.PathUnescape(name)
 				ext := path.Ext(name)
+				if "" == ext {
+					if mtype := mimetype.Detect(data); nil != mtype {
+						ext = mtype.Extension()
+					}
+				}
 				if "" == ext {
 					contentType := resp.Header.Get("Content-Type")
 					exts, _ := mime.ExtensionsByType(contentType)

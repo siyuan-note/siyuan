@@ -117,6 +117,14 @@
       flex-shrink: 0;
       height: 14px;
       width: 12px;
+      line-height: 14px;
+      font-size: 12px;
+
+      // doc icon in the bookmark panel
+      svg {
+        width: 12px;
+        height: 14px;
+      }
     }
 
     &__arrow {

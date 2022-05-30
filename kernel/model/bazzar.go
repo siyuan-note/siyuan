@@ -50,8 +50,8 @@ func BazaarWidgets() (widgets []*bazaar.Widget) {
 }
 
 func InstallBazaarWidget(repoURL, repoHash, widgetName string) error {
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.DataDir, "widgets", widgetName)
 	err := bazaar.InstallWidget(repoURL, repoHash, installPath, Conf.System.NetworkProxy.String(), IsSubscriber(), Conf.System.ID)
@@ -62,8 +62,8 @@ func InstallBazaarWidget(repoURL, repoHash, widgetName string) error {
 }
 
 func UninstallBazaarWidget(widgetName string) error {
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.DataDir, "widgets", widgetName)
 	err := bazaar.UninstallWidget(installPath)
@@ -92,8 +92,8 @@ func BazaarIcons() (icons []*bazaar.Icon) {
 }
 
 func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.IconsPath, iconName)
 	err := bazaar.InstallIcon(repoURL, repoHash, installPath, Conf.System.NetworkProxy.String(), IsSubscriber(), Conf.System.ID)
@@ -107,8 +107,8 @@ func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
 }
 
 func UninstallBazaarIcon(iconName string) error {
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.IconsPath, iconName)
 	err := bazaar.UninstallIcon(installPath)
@@ -139,8 +139,8 @@ func BazaarThemes() (ret []*bazaar.Theme) {
 }
 
 func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bool) error {
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	closeThemeWatchers()
 
@@ -167,8 +167,8 @@ func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bo
 }
 
 func UninstallBazaarTheme(themeName string) error {
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	closeThemeWatchers()
 
@@ -198,8 +198,8 @@ func BazaarTemplates() (templates []*bazaar.Template) {
 }
 
 func InstallBazaarTemplate(repoURL, repoHash, templateName string) error {
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.DataDir, "templates", templateName)
 	err := bazaar.InstallTemplate(repoURL, repoHash, installPath, Conf.System.NetworkProxy.String(), IsSubscriber(), Conf.System.ID)
@@ -210,8 +210,8 @@ func InstallBazaarTemplate(repoURL, repoHash, templateName string) error {
 }
 
 func UninstallBazaarTemplate(templateName string) error {
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.DataDir, "templates", templateName)
 	err := bazaar.UninstallTemplate(installPath)

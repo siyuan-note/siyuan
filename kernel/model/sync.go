@@ -73,9 +73,6 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	if boot {
 		util.IncBootProgress(3, "Syncing data from the cloud...")
 		BootSyncSucc = 0
@@ -127,8 +124,11 @@ func SyncData(boot, exit, byHand bool) {
 		util.BroadcastByType("main", "syncing", 1, msg, nil)
 	}()
 
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
 	WaitForWritingFiles()
-	writingTreeLock.Lock()
+	writingDataLock.Lock()
 	var err error
 	// 将 data 变更同步到 sync
 	if err = workspaceData2SyncDir(); nil != err {
@@ -141,7 +141,7 @@ func SyncData(boot, exit, byHand bool) {
 		if exit {
 			ExitSyncSucc = 1
 		}
-		writingTreeLock.Unlock()
+		writingDataLock.Unlock()
 		return
 	}
 
@@ -156,10 +156,10 @@ func SyncData(boot, exit, byHand bool) {
 		if exit {
 			ExitSyncSucc = 1
 		}
-		writingTreeLock.Unlock()
+		writingDataLock.Unlock()
 		return
 	}
-	writingTreeLock.Unlock()
+	writingDataLock.Unlock()
 
 	cloudSyncVer, err := getCloudSyncVer(Conf.Sync.CloudName)
 	if nil != err {

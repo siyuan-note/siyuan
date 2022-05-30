@@ -474,12 +474,7 @@ func parseKTree(kramdown []byte) (ret *parse.Tree) {
 
 func RefreshFileTree() {
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
-	refreshFileTree()
-}
 
-func refreshFileTree() {
 	if err := sql.InitDatabase(true); nil != err {
 		util.PushErrMsg(Conf.Language(85), 5000)
 		return

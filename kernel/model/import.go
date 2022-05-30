@@ -250,8 +250,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 	}
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	filesys.ReleaseAllFileLocks()
 
@@ -279,7 +279,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	IncWorkspaceDataVer()
-	refreshFileTree()
+	RefreshFileTree()
 	return
 }
 
@@ -327,8 +327,8 @@ func ImportData(zipPath string) (err error) {
 		return errors.New("write conf.json failed")
 	}
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	filesys.ReleaseAllFileLocks()
 	tmpDataPath := filepath.Dir(filepath.Dir(confPath))
@@ -339,7 +339,7 @@ func ImportData(zipPath string) (err error) {
 	}
 
 	IncWorkspaceDataVer()
-	refreshFileTree()
+	RefreshFileTree()
 	return
 }
 
@@ -347,8 +347,8 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	box := Conf.Box(boxID)
 	var baseHPath, baseTargetPath, boxLocalPath string
@@ -510,7 +510,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		}
 
 		IncWorkspaceDataVer()
-		refreshFileTree()
+		RefreshFileTree()
 	} else { // 导入单个文件
 		fileName := filepath.Base(localPath)
 		if !strings.HasSuffix(fileName, ".md") && !strings.HasSuffix(fileName, ".markdown") {

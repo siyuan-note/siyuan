@@ -2,8 +2,6 @@ name: CI/CD For SiYuan
 
 on:
   push:
-    branches:
-      - dev
     tags:
       - v.*
   workflow_dispatch:

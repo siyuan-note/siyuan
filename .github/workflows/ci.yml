@@ -1,8 +1,11 @@
 name: CI/CD For SiYuan
 
 on:
-  schedule:
-    - cron:  '30 4 * * *'
+  push:
+    branches:
+      - dev
+    tags:
+      - v.*
   workflow_dispatch:
   
 
@@ -45,7 +48,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          release_name: v${{ steps.version.outputs.value }}-${{ steps.release_info.outputs.release_title }}
+          release_name: v${{ steps.version.outputs.value }}
           tag_name: ${{ github.ref }}
           body: ${{ steps.release_info.outputs.release_body }}
           draft: true

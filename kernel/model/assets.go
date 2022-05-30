@@ -77,6 +77,17 @@ func NetImg2LocalAssets(rootID string) (err error) {
 			dest := linkDest.Tokens
 			if !sql.IsAssetLinkDest(dest) && (bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://"))) {
 				u := string(dest)
+				if strings.Contains(u, "qpic.cn") {
+					// 微信图片拉取改进 https://github.com/siyuan-note/siyuan/issues/5052
+					if strings.Contains(u, "http://") {
+						u = strings.Replace(u, "http://", "https://", 1)
+					}
+					if strings.HasSuffix(u, "/0") {
+						u = strings.Replace(u, "/0", "/640", 1)
+					} else if strings.Contains(u, "/0?") {
+						u = strings.Replace(u, "/0?", "/640?", 1)
+					}
+				}
 				util.PushMsg(fmt.Sprintf(Conf.Language(119), u), 15000)
 				request := util.NewBrowserRequest(Conf.System.NetworkProxy.String())
 				resp, reqErr := request.Get(u)

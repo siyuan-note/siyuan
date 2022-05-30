@@ -362,7 +362,7 @@
   "copyID": "Copy ID",
   "newBookmark": "Create a bookmark label",
   "generateHistory": "History Generation Interval (minutes, set to 0 to disable)",
-  "generateHistoryInterval": "The history is automatically generated when editing or deleting, and the history and recovery can be viewed in the right-click menu of the notebook",
+  "generateHistoryInterval": "History is automatically generated when editing or deleting, which can be viewed and rolled back in the data history",
   "historyRetentionDays": "History Retention Days",
   "historyRetentionDaysTip": "Historical data exceeding the retention days will be automatically and completely deleted",
   "clearHistory": "Clear all history",

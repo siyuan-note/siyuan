@@ -362,7 +362,7 @@
   "copyID": "複製 ID",
   "newBookmark": "新建書簽標識",
   "generateHistory": "歷史生成間隔（分鐘，設置為 0 則禁用）",
-  "generateHistoryInterval": "編輯或刪除時會自動生成歷史，在筆記本右鍵功能表中可查看歷史和恢復",
+  "generateHistoryInterval": "編輯或刪除時會自動生成歷史，可在數據歷史中可查看和回滾",
   "historyRetentionDays": "歷史保留天數",
   "historyRetentionDaysTip": "超過保留天數的歷史資料會被自動徹底刪除",
   "clearHistory": "清空所有歷史",

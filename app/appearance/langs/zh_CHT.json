@@ -466,7 +466,7 @@
   "account10": "年付訂閱",
   "account11": "早鳥優惠活動結束還剩",
   "account12": "相伴一生",
-  "account13": "使用推薦碼後將不再支援退款，是否使用推薦碼？",
+  "clickMeToRenew": "<a href=\"https://ld246.com/subscribe/siyuan\" target=\"_blank\">前往續訂</a>",
   "priceAnnual": "￥148",
   "year": "年",
   "dataHistory": "數據歷史",

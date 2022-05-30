@@ -50,9 +50,6 @@ func generateDocHistory() {
 	}
 
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	for _, box := range Conf.GetOpenedBoxes() {
 		box.generateDocHistory0()
 	}
@@ -158,7 +155,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	syncLock.Lock()
+	writingDataLock.Lock()
 
 	srcPath := historyPath
 	var destPath string
@@ -169,22 +166,22 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	workingDoc := treenode.GetBlockTree(id)
 	if nil != workingDoc {
 		if err = os.RemoveAll(filepath.Join(util.DataDir, boxID, workingDoc.Path)); nil != err {
-			syncLock.Unlock()
+			writingDataLock.Unlock()
 			return
 		}
 	}
 
 	destPath, err = getRollbackDockPath(boxID, historyPath)
 	if nil != err {
-		syncLock.Unlock()
+		writingDataLock.Unlock()
 		return
 	}
 
 	if err = gulu.File.Copy(srcPath, destPath); nil != err {
-		syncLock.Unlock()
+		writingDataLock.Unlock()
 		return
 	}
-	syncLock.Unlock()
+	writingDataLock.Unlock()
 
 	RefreshFileTree()
 	IncWorkspaceDataVer()

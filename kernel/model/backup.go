@@ -145,8 +145,6 @@ func RecoverLocalBackup() (err error) {
 	data, _ = hex.DecodeString(string(data))
 	passwd := string(data)
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
 	CloseWatchAssets()
 	defer WatchAssets()
 
@@ -233,7 +231,7 @@ func RecoverLocalBackup() (err error) {
 
 	util.PushEndlessProgress(Conf.Language(62))
 	time.Sleep(2 * time.Second)
-	refreshFileTree()
+	RefreshFileTree()
 	if syncEnabled {
 		func() {
 			time.Sleep(5 * time.Second)
@@ -252,8 +250,6 @@ func CreateLocalBackup() (err error) {
 	util.PushEndlessProgress(Conf.Language(22))
 
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
 
 	filesys.ReleaseAllFileLocks()
 
@@ -326,9 +322,6 @@ func CreateLocalBackup() (err error) {
 }
 
 func DownloadBackup() (err error) {
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	// 使用索引文件进行解密验证 https://github.com/siyuan-note/siyuan/issues/3789
 	var tmpFetchedFiles int
 	var tmpTransferSize uint64
@@ -366,9 +359,6 @@ func UploadBackup() (err error) {
 	if err = checkUploadBackup(); nil != err {
 		return
 	}
-
-	syncLock.Lock()
-	defer syncLock.Unlock()
 
 	localDirPath := Conf.Backup.GetSaveDir()
 	util.PushEndlessProgress(Conf.Language(61))

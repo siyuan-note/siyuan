@@ -466,7 +466,7 @@
   "account10": "Annual subscription",
   "account11": "Until the end of the early bird discount",
   "account12": "Life companion",
-  "account13": "Après avoir utilisé le code de parrainage, les remboursements ne seront plus pris en charge. Faut-il utiliser le code d'abonnement ?",
+  "clickMeToRenew": "<a href=\"https://ld246.com/subscribe/siyuan\" target=\"_blank\">Go to Renew</a>",
   "priceAnnual": "$72",
   "year": "year",
   "dataHistory": "Data History",

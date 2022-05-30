@@ -43,7 +43,7 @@ var (
 	ErrNotFullyBoot = errors.New("the kernel has not been fully booted, please try again later")
 )
 
-var writingTreeLock = sync.Mutex{}
+var writingDataLock = sync.Mutex{}
 
 func IsFoldHeading(transactions *[]*Transaction) bool {
 	if 1 == len(*transactions) && 1 == len((*transactions)[0].DoOperations) {
@@ -114,8 +114,8 @@ func AutoFlushTx() {
 }
 
 func flushTx() {
-	writingTreeLock.Lock()
-	defer writingTreeLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 	defer util.Recover()
 
 	currentTx = mergeTx()

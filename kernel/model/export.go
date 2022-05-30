@@ -74,8 +74,9 @@ func ExportDataInFolder(exportFolder string) (err error) {
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	WaitForWritingFiles()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	exportFolder = filepath.Join(exportFolder, util.CurrentTimeSecondsStr())
 	err = exportData(exportFolder)
@@ -89,8 +90,9 @@ func ExportData() (zipPath string) {
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	WaitForWritingFiles()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	baseFolderName := "data-" + util.CurrentTimeSecondsStr()
 	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName)

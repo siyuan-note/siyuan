@@ -841,9 +841,6 @@ func DuplicateDoc(rootID string) (err error) {
 	defer util.PushClearMsg()
 
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	tree, err := loadTreeByBlockID(rootID)
 	if nil != err {
 		return
@@ -890,8 +887,6 @@ func DuplicateDoc(rootID string) (err error) {
 
 func CreateDocByMd(boxID, p, title, md string) (err error) {
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
 
 	box := Conf.Box(boxID)
 	if nil == box {
@@ -911,9 +906,6 @@ func CreateWithMarkdown(boxID, hPath, md string) (id string, err error) {
 	}
 
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	luteEngine := NewLute()
 	dom := luteEngine.Md2BlockDOM(md)
 	id, err = createDocsByHPath(box.ID, hPath, dom)
@@ -981,8 +973,8 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 	}
 
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	tree, err := LoadTree(fromBoxID, fromPath)
 	if nil != err {
@@ -1109,8 +1101,8 @@ func RemoveDoc(boxID, p string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	tree, err := LoadTree(boxID, p)
 	if nil != err {
@@ -1241,8 +1233,6 @@ func CreateDailyNote(boxID string) (p string, err error) {
 	}
 
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
 
 	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
 	if nil != existRoot {
@@ -1453,8 +1443,8 @@ func rootChildIDs(rootID string) (ret []string) {
 
 func ChangeFileTreeSort(boxID string, paths []string) {
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	box := Conf.Box(boxID)
 	sortIDs := map[string]int{}
@@ -1609,8 +1599,6 @@ func (box *Box) removeSort(rootID, path string) {
 
 func ServeFile(c *gin.Context, filePath string) (err error) {
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
 
 	if filesys.IsLocked(filePath) {
 		if err = filesys.UnlockFile(filePath); nil == err {

@@ -2,6 +2,8 @@ import {getIconByType} from "../editor/getIcon";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {isMobile} from "./functions";
 import {mathRender} from "../protyle/markdown/mathRender";
+import {unicode2Emoji} from "../emoji";
+import {Constants} from "../constants";
 
 export class Tree {
     public element: HTMLElement;
@@ -92,10 +94,19 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
         data.forEach((item: IBlock & {
             subType: string;
             count: string;
+            ial?: {
+                icon: string
+            }
         }) => {
             let countHTML = "";
             if (item.count) {
                 countHTML = `<span class="counter">${item.count}</span>`;
+            }
+            let iconHTML;
+            if (item.type === "NodeDocument") {
+                iconHTML = `<span data-defids='["${item.defID}"]' class="b3-list-item__icon popover__block" data-id="${item.id}">${unicode2Emoji(item.ial.icon || Constants.SIYUAN_IMAGE_FILE)}</span>`
+            } else {
+                iconHTML = `<svg data-defids='["${item.defID}"]' class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`
             }
             html += `<li ${type === "backlink" ? 'draggable="true"' : ""} 
 class="b3-list-item ${isMobile() ? "" : "b3-list-item--hide-action"}"  
@@ -109,7 +120,7 @@ data-def-path="${item.defPath}">
     <span style="padding-left: ${item.depth * 16}px" class="b3-list-item__toggle">
         <svg data-id="${item.id}" class="b3-list-item__arrow${item.children ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <svg data-defids='["${item.defID}"]' class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>
+    ${iconHTML}
     <span class="b3-list-item__text">${item.content}</span>
     ${countHTML}
     ${this.blockExtHTML || ""}

@@ -439,23 +439,27 @@ const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
             fetchPost("/api/outline/getDocOutline", {
                 id: blockId,
             }, response => {
-                item.updateDocTitle(protyle.title.editElement.textContent);
                 item.update(response, blockId);
-                if (protyle && getSelection().rangeCount > 0) {
-                    const startContainer = getSelection().getRangeAt(0).startContainer;
-                    if (protyle.wysiwyg.element.contains(startContainer)) {
-                        const currentElement = hasClosestByAttribute(startContainer, "data-node-id", null);
-                        if (currentElement) {
-                            if (currentElement.getAttribute("data-type") === "NodeHeading") {
-                                item.setCurrent(currentElement.getAttribute("data-node-id"));
-                            } else {
-                                const headingElement = getPreviousHeading(currentElement);
-                                if (headingElement) {
-                                    item.setCurrent(headingElement.getAttribute("data-node-id"));
+                if (protyle) {
+                    item.updateDocTitle(protyle.title.editElement.textContent);
+                    if (getSelection().rangeCount > 0) {
+                        const startContainer = getSelection().getRangeAt(0).startContainer;
+                        if (protyle.wysiwyg.element.contains(startContainer)) {
+                            const currentElement = hasClosestByAttribute(startContainer, "data-node-id", null);
+                            if (currentElement) {
+                                if (currentElement.getAttribute("data-type") === "NodeHeading") {
+                                    item.setCurrent(currentElement.getAttribute("data-node-id"));
+                                } else {
+                                    const headingElement = getPreviousHeading(currentElement);
+                                    if (headingElement) {
+                                        item.setCurrent(headingElement.getAttribute("data-node-id"));
+                                    }
                                 }
                             }
                         }
                     }
+                } else {
+                    item.updateDocTitle();
                 }
             });
             return;

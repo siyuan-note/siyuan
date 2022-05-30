@@ -352,8 +352,13 @@ export class Wnd {
         }
         let oldFocusIndex = 0;
         this.children.forEach((item, index) => {
-            if (item.headElement?.classList.contains("item--focus")) {
+            if (item.headElement && item.headElement.classList.contains("item--focus")) {
                 oldFocusIndex = index;
+                let nextElement = item.headElement.nextElementSibling;
+                while (nextElement && nextElement.classList.contains("item--pin")) {
+                    oldFocusIndex++;
+                    nextElement = nextElement.nextElementSibling;
+                }
             }
             if (!keepCursor) {
                 item.headElement?.classList.remove("item--focus");

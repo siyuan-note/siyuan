@@ -30,7 +30,7 @@ export class Breadcrumb {
         const element = document.createElement("div");
         element.className = "protyle-breadcrumb";
         let html = `<div class="protyle-breadcrumb__bar"></div>
-<span class="fn__flex-1 fn__space fn__flex-shrink"></span>
+<span class="fn__space fn__flex-shrink"></span>
 <button class="b3-tooltips b3-tooltips__w block__icon fn__flex-center" style="opacity: 1;" data-menu="true" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>`;
         if (protyle.options.render.breadcrumbContext) {
             html += `<span class="fn__space"></span>

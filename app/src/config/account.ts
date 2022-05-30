@@ -52,7 +52,7 @@ export const account = {
                 subscriptionHTML = `<div class="b3-chip b3-chip--secondary">${Constants.SIYUAN_IMAGE_VIP}${window.siyuan.languages.account12}</div>`;
             } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
                 subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div><div class="fn__hr"></div>
-<div class="ft__on-surface ft__smaller">${window.siyuan.languages.account6} ${Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24)} ${window.siyuan.languages.day}</div>`;
+<div class="ft__on-surface ft__smaller">${window.siyuan.languages.account6} ${Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24)} ${window.siyuan.languages.day} ${window.siyuan.languages.clickMeToRenew}</div>`;
             }
             return `<div class="fn__flex config-account">
 <div class="config-account__center">

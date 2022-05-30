@@ -77,10 +77,13 @@ export class Bookmark extends Model {
             element: this.element.lastElementChild as HTMLElement,
             data: null,
             click(element: HTMLElement) {
-                openFileById({
-                    id: element.getAttribute("data-node-id"),
-                    hasContext: true,
-                    action: [Constants.CB_GET_FOCUS]
+                const id =  element.getAttribute("data-node-id")
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openFileById({
+                        id,
+                        hasContext: !foldResponse.data,
+                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                    });
                 });
             },
             rightClick: (element: HTMLElement, event: MouseEvent) => {

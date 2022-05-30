@@ -382,6 +382,18 @@ const boot = () => {
         },
       },
       {
+        label: 'Official Website',
+        click: () => {
+          shell.openExternal('https://b3log.org/siyuan/')
+        }
+      },
+      {
+        label: 'Open Source',
+        click: () => {
+          shell.openExternal('https://github.com/siyuan-note/siyuan')
+        }
+      },
+      {
         label: 'Quit',
         click: () => {
           mainWindow.webContents.send('siyuan-save-close', true)

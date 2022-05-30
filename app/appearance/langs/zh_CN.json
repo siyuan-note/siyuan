@@ -362,7 +362,7 @@
   "copyID": "复制 ID",
   "newBookmark": "新建书签标识",
   "generateHistory": "历史生成间隔（分钟，设置为 0 则禁用）",
-  "generateHistoryInterval": "编辑或删除时会自动生成历史，在笔记本右键菜单中可查看历史和恢复",
+  "generateHistoryInterval": "编辑或删除时会自动生成历史，可在数据历史中可查看和回滚",
   "historyRetentionDays": "历史保留天数",
   "historyRetentionDaysTip": "超过保留天数的历史数据会被自动彻底删除",
   "clearHistory": "清空所有历史",

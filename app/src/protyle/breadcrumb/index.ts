@@ -329,11 +329,8 @@ export class Breadcrumb {
                 type: "submenu",
                 submenu: editSubmenu
             }).element);
-            /// #if !BROWSER
             window.siyuan.menus.menu.append(exportMd(protyle.block.parentID));
-            /// #endif
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-
             window.siyuan.menus.menu.append(new MenuItem({
                 type: "readonly",
                 label: `<div class="fn__flex">${window.siyuan.languages.docRuneCount}<span class="fn__space fn__flex-1"></span>${response.data.rootBlockRuneCount}</div>

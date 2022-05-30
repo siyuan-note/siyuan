@@ -236,10 +236,8 @@ export const initFileMenu = (notebookId: string, pathString: string, id: string,
             label: window.siyuan.languages.openBy,
             submenu: openSubmenus,
         }).element);
-        if (!window.siyuan.config.readonly) {
-            window.siyuan.menus.menu.append(exportMd(id));
-        }
     }
+    window.siyuan.menus.menu.append(exportMd(id));
     return window.siyuan.menus.menu;
 };
 

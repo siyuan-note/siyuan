@@ -257,8 +257,8 @@ export class Toolbar {
             return;
         }
         // 对已有字体样式的文字再次添加字体样式
-        if (focusAdd && action === "add" && types.includes("bold") &&
-            this.range.toString() === this.range.commonAncestorContainer.textContent) {
+        if (focusAdd && action === "add" && types.includes("bold") && this.range.startContainer.nodeType === 3 &&
+            this.range.startContainer.parentNode.isSameNode(this.range.endContainer.parentNode)) {
             return;
         }
         let startElement = this.range.startContainer as Element;

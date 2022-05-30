@@ -886,7 +886,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             type: "separator"
         });
     }
-    if (!hasNone || (hasNone && !hasRowSpan && hasColSpan)) {
+    if ((!hasNone && !hasRowSpan) || (hasNone && !hasRowSpan && hasColSpan)) {
         menus.push({
             icon: "iconDeleteRow",
             label: window.siyuan.languages["delete-row"],

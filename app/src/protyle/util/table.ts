@@ -576,7 +576,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
 
     // 删除当前行
     if (matchHotKey(window.siyuan.config.keymap.editor.table["delete-row"].custom, event)) {
-        if (!hasNone || (hasNone && !hasRowSpan && hasColSpan)) {
+        if ((!hasNone && !hasRowSpan) || (hasNone && !hasRowSpan && hasColSpan)) {
             deleteRow(protyle, range, cellElement, nodeElement);
         }
         event.preventDefault();

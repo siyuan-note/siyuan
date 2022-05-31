@@ -112,7 +112,7 @@ const focusStack = async (stack: IBackStack) => {
         }
         if (blockElement && !stack.protyle.block.showAll) {
             focusByOffset(blockElement, stack.position.start, stack.position.end);
-            scrollCenter(stack.protyle, blockElement);
+            scrollCenter(stack.protyle, blockElement, true);
             return true;
         }
         // 缩放不一致

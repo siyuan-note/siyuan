@@ -2,7 +2,7 @@
 
 echo 'Building UI'
 cd app
-npm run build
+pnpm install && pnpm run build
 cd ..
 
 echo 'Cleaning Builds'
@@ -29,7 +29,7 @@ cd ..
 
 echo 'Building Electron'
 cd app
-npm run dist-darwin
+pnpm run dist-darwin
 echo 'Building Electron arm64'
-npm run dist-darwin-arm64
+pnpm run dist-darwin-arm64
 cd ..

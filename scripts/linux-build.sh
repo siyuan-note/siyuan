@@ -2,7 +2,7 @@
 
 echo 'Building UI'
 cd app
-npm install && npm run build
+pnpm install && pnpm run build
 cd ..
 
 echo 'Cleaning Builds'
@@ -24,5 +24,5 @@ cd ..
 
 echo 'Building Electron'
 cd app
-npm run dist-linux
+pnpm run dist-linux
 cd ..

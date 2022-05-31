@@ -1,7 +1,7 @@
 echo 'Building UI'
 cd app
-call npm install
-call npm run build
+call pnpm install
+call pnpm run build
 cd ..
 
 echo 'Cleaning Builds'
@@ -29,9 +29,9 @@ cd ..
 
 echo 'Building Electron'
 cd app
-call npm run dist
+call pnpm run dist
 echo 'Building Electron win32'
-call npm run dist-win32
+call pnpm run dist-win32
 cd ..
 
 echo 'Building Appx'

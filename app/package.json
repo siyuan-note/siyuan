@@ -11,7 +11,7 @@
     "dev:mobile": "webpack --mode development --config webpack.mobile.js",
     "dev:desktop": "webpack --mode development --config webpack.desktop.js",
     "dev:export": "webpack --mode development --config webpack.export.js",
-    "build": "webpack --mode production && npm run build:mobile && npm run build:desktop && npm run build:export",
+    "build": "webpack --mode production && pnpm run build:mobile && pnpm run build:desktop && pnpm run build:export",
     "build:mobile": "webpack --mode production --config webpack.mobile.js",
     "build:desktop": "webpack --mode production --config webpack.desktop.js",
     "build:export": "webpack --mode production --config webpack.export.js",

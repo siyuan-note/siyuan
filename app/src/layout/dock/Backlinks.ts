@@ -176,7 +176,7 @@ export class Backlinks extends Model {
                     }
                     window.siyuan.menus.menu.remove();
                     window.siyuan.menus.menu.append(new MenuItem({
-                        label:  window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToStaticRef,
+                        label: window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToStaticRef,
                         click: () => {
                             this.turnToRef(element, false);
                         }
@@ -356,10 +356,21 @@ export class Backlinks extends Model {
     }
 
     public render(data: { box: string, backlinks: IBlockTree[], backmentions: IBlockTree[], linkRefsCount: number, mentionsCount: number, k: string, mk: string }) {
+        if (!data) {
+            data = {
+                box: "",
+                backlinks: [],
+                backmentions: [],
+                linkRefsCount: 0,
+                mentionsCount: 0,
+                k: "",
+                mk: ""
+            };
+        }
         this.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
         this.notebookId = data.box;
-        this.inputsElement[0].value = data.k || "";
-        this.inputsElement[1].value = data.mk || "";
+        this.inputsElement[0].value = data.k;
+        this.inputsElement[1].value = data.mk;
 
         this.tree.updateData(data.backlinks);
         this.mTree.updateData(data.backmentions);

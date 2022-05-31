@@ -154,6 +154,12 @@ func searchRefBlock(c *gin.Context) {
 		return
 	}
 
+	reqId := arg["reqId"]
+	ret.Data = map[string]interface{}{"reqId": reqId}
+	if nil == arg["id"] {
+		return
+	}
+
 	rootID := arg["rootID"].(string)
 	id := arg["id"].(string)
 	keyword := arg["k"].(string)

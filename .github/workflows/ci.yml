@@ -207,11 +207,6 @@ jobs:
       run: pnpm run ${{ matrix.config.electron_args }}
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
 
-    # - name: Build Appx
-    #   run: pnpm install -g electron-windows-store && electron-windows-store --input-directory app\build\win-unpacked --output-directory app\build\ --package-version 1.0.0.0 --package-name SiYuan --manifest app\appx\AppxManifest.xml --assets app\appx\assets\ --make-pri true
-    #   if: "contains( matrix.config.goos, 'windows')"
-    #   working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan
-
     - name: Upload Release
       uses: actions/upload-release-asset@v1
       env:

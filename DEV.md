@@ -7,15 +7,19 @@
 
 ## NPM dependencies
 
+Install pnpm
+
+`npm install -g pnpm`
+
 In China, it may be necessary to set the Electron mirror environment variable:
 
-* macOS/Linux: ELECTRON_MIRROR="https://cnpmjs.org/mirrors/electron/" npm install electron@14.2.5 -D
+* macOS/Linux: ELECTRON_MIRROR="https://cnpmjs.org/mirrors/electron/" pnpm install electron@14.2.5 -D
 * Windows: `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
 
 NPM mirror:
 
-* May need to use mirror repository in China `npm --registry https://r.cnpmjs.org/ i -D --sass_binary_site=https://cnpmjs.org/mirrors/node-sass/`
-* Revert to using official repository `npm --registry https://registry.npmjs.org i -D`
+* May need to use mirror repository in China `pnpm --registry https://r.cnpmjs.org/ i -D --sass_binary_site=https://cnpmjs.org/mirrors/node-sass/`
+* Revert to using official repository `pnpm --registry https://registry.npmjs.org i`
 
 ## Kernel
 

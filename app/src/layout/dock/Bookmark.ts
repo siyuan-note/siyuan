@@ -77,7 +77,7 @@ export class Bookmark extends Model {
             element: this.element.lastElementChild as HTMLElement,
             data: null,
             click(element: HTMLElement) {
-                const id =  element.getAttribute("data-node-id")
+                const id =  element.getAttribute("data-node-id");
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
                         id,

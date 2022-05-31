@@ -7,15 +7,19 @@
 
 ## NPM 依赖
 
+安装 pnpm
+
+`npm install -g pnpm`
+
 在中国可能需要设置 Electron 镜像环境变量：
 
-* macOS/Linux：ELECTRON_MIRROR="https://cnpmjs.org/mirrors/electron/" npm install electron@14.2.5 -D
+* macOS/Linux：ELECTRON_MIRROR="https://cnpmjs.org/mirrors/electron/" pnpm install electron@14.2.5 -D
 * Windows: `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
 
 NPM 镜像：
 
-* 在中国可能需要使用镜像仓库 `npm --registry https://r.cnpmjs.org/ i -D --sass_binary_site=https://cnpmjs.org/mirrors/node-sass/`
-* 恢复使用官方仓库 `npm --registry https://registry.npmjs.org i -D`
+* 在中国可能需要使用镜像仓库 `pnpm --registry https://r.cnpmjs.org/ i -D --sass_binary_site=https://cnpmjs.org/mirrors/node-sass/`
+* 恢复使用官方仓库 `pnpm --registry https://registry.npmjs.org i`
 
 ## 内核
 

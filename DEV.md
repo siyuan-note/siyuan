@@ -18,7 +18,7 @@ In China, it may be necessary to set the Electron mirror environment variable:
 
 NPM mirror:
 
-* May need to use mirror repository in China `pnpm --registry https://r.cnpmjs.org/ i -D --sass_binary_site=https://cnpmjs.org/mirrors/node-sass/`
+* May need to use mirror repository in China `pnpm --registry https://r.cnpmjs.org/ i`
 * Revert to using official repository `pnpm --registry https://registry.npmjs.org i`
 
 ## Kernel

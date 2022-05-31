@@ -18,7 +18,7 @@
 
 NPM 镜像：
 
-* 在中国可能需要使用镜像仓库 `pnpm --registry https://r.cnpmjs.org/ i -D --sass_binary_site=https://cnpmjs.org/mirrors/node-sass/`
+* 在中国可能需要使用镜像仓库 `pnpm --registry https://r.cnpmjs.org/ i`
 * 恢复使用官方仓库 `pnpm --registry https://registry.npmjs.org i`
 
 ## 内核

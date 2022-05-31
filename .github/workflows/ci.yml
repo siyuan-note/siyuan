@@ -145,12 +145,16 @@ jobs:
       with:
         node-version: 16
 
+    - name: Install Node pnpm
+      run: npm install -g pnpm
+      working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
+
     - name: Install Node Dependencies
-      run: npm install
+      run: pnpm install
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
       
     - name: Building UI
-      run: npm run build
+      run: pnpm run build
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
 
     - name: Remove Build Directory
@@ -200,11 +204,11 @@ jobs:
         GOARCH: ${{ matrix.config.goarch }}
       
     - name: Building Electron
-      run: npm run ${{ matrix.config.electron_args }}
+      run: pnpm run ${{ matrix.config.electron_args }}
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
 
     # - name: Build Appx
-    #   run: npm install -g electron-windows-store && electron-windows-store --input-directory app\build\win-unpacked --output-directory app\build\ --package-version 1.0.0.0 --package-name SiYuan --manifest app\appx\AppxManifest.xml --assets app\appx\assets\ --make-pri true
+    #   run: pnpm install -g electron-windows-store && electron-windows-store --input-directory app\build\win-unpacked --output-directory app\build\ --package-version 1.0.0.0 --package-name SiYuan --manifest app\appx\AppxManifest.xml --assets app\appx\assets\ --make-pri true
     #   if: "contains( matrix.config.goos, 'windows')"
     #   working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan
 

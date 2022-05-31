@@ -62,35 +62,35 @@ jobs:
         config:
           - os: ubuntu-20.04
             kernel_path: "../app/kernel-linux/SiYuan-Kernel"
-            build_args: "-s -w"
+            build_args: "-s -w -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod"
             electron_args: "dist-linux"
             goos: "linux"
             goarch: "amd64"
             suffix: "linux.AppImage"
           - os: ubuntu-20.04
             kernel_path: "../app/kernel-linux/SiYuan-Kernel"
-            build_args: "-s -w"
+            build_args: "-s -w -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod"
             electron_args: "dist-linux"
             goos: "linux"
             goarch: "amd64"
             suffix: "linux.tar.gz"
           - os: macos-latest
             kernel_path: "../app/kernel-darwin/SiYuan-Kernel"
-            build_args: "-s -w"
+            build_args: "-s -w -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod"
             electron_args: "dist-darwin"
             goos: "darwin"
             goarch: "amd64"
             suffix: "mac.dmg"
           - os: macos-latest
             kernel_path: "../app/kernel-darwin-arm64/SiYuan-Kernel"
-            build_args: "-s -w"
+            build_args: "-s -w -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod"
             electron_args: "dist-darwin-arm64"
             goos: "darwin"
             goarch: "arm64"
             suffix: "mac-arm64.dmg"
           - os: windows-2019
             kernel_path: "../app/kernel/SiYuan-Kernel.exe"
-            build_args: "-s -w -H=windowsgui"
+            build_args: "-s -w -H=windowsgui -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod"
             electron_args: "dist"
             goos: "windows"
             gobin: "bin"
@@ -99,7 +99,7 @@ jobs:
             suffix: "win.exe"
           - os: windows-2019
             kernel_path: "../app/kernel32/SiYuan-Kernel.exe"
-            build_args: "-s -w -H=windowsgui"
+            build_args: "-s -w -H=windowsgui -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod"
             electron_args: "dist-win32"
             goos: "windows"
             mingwsys: "MINGW32"
@@ -145,12 +145,16 @@ jobs:
       with:
         node-version: 16
 
+    - name: Install Node pnpm
+      run: npm install -g pnpm
+      working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
+
     - name: Install Node Dependencies
-      run: npm install
+      run: pnpm install
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
       
     - name: Building UI
-      run: npm run build
+      run: pnpm run build
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
 
     - name: Remove Build Directory
@@ -200,13 +204,8 @@ jobs:
         GOARCH: ${{ matrix.config.goarch }}
       
     - name: Building Electron
-      run: npm run ${{ matrix.config.electron_args }}
+      run: pnpm run ${{ matrix.config.electron_args }}
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
-
-    # - name: Build Appx
-    #   run: npm install -g electron-windows-store && electron-windows-store --input-directory app\build\win-unpacked --output-directory app\build\ --package-version 1.0.0.0 --package-name SiYuan --manifest app\appx\AppxManifest.xml --assets app\appx\assets\ --make-pri true
-    #   if: "contains( matrix.config.goos, 'windows')"
-    #   working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan
 
     - name: Upload Release
       uses: actions/upload-release-asset@v1

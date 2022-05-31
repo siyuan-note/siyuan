@@ -322,6 +322,8 @@ func SyncData(boot, exit, byHand bool) {
 		syncDownloadErrCount++
 		return
 	}
+
+	// 解密验证成功后将其移动到 sync/ 文件夹下
 	if err = os.Rename(tmpPathJSON, filepath.Join(localSyncDirPath, pathJSON)); nil != err {
 		util.PushClearMsg()
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))

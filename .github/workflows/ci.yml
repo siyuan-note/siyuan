@@ -3,7 +3,7 @@ name: CI/CD For SiYuan
 on:
   push:
     tags:
-      - v.*
+      - 'v*'
   workflow_dispatch:
   
 
@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
+      release_version: ${{ steps.release_info.outputs.release_version }}
       version: ${{ steps.version.outputs.value }}
     steps:
       - name: Checkout code
@@ -28,6 +29,7 @@ jobs:
         id: release_info
         run: |
           echo "::set-output name=release_title::$(git show --format=%s --no-patch | head -1)"
+          echo "::set-output name=release_version::$(TZ=Asia/Shanghai date +'v%Y%m%d%H%M')"
           changelog=$(python scripts/parse-changelog.py CHANGE_LOGS.md)
           changelog="${changelog//'%'/'%25'}"
           changelog="${changelog//$'\n'/'%0A'}"
@@ -46,10 +48,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          release_name: v${{ steps.version.outputs.value }}
+          release_name: ${{ steps.release_info.outputs.release_version }}
           tag_name: ${{ github.ref }}
-          body: ${{ steps.release_info.outputs.release_body }}
-          draft: true
+          body: ${{ github.ref }}
+          draft: false
           prerelease: true
 
   build:
@@ -212,6 +214,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_name: siyuan-${{ needs.create_release.outputs.version }}-${{ matrix.config.suffix }}
+        asset_name: siyuan-${{ needs.create_release.outputs.release_version }}-${{ matrix.config.suffix }}
         asset_path: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app/build/siyuan-${{ needs.create_release.outputs.version }}-${{ matrix.config.suffix }}
         asset_content_type: application/octet-stream

@@ -161,7 +161,7 @@ func listCloudSyncDirOSS() (dirs []map[string]interface{}, size int64, err error
 	return
 }
 
-func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFiles int, transferSize uint64, err error) {
+func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFilesCount int, transferSize uint64, downloadedFiles []string, err error) {
 	if !gulu.File.IsExist(localDirPath) {
 		return
 	}
@@ -187,24 +187,29 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 	waitGroup := &sync.WaitGroup{}
 	var downloadErr error
 	poolSize := 4
-	if poolSize > len(cloudFetches) {
+	if poolSize > len(cloudFetches)-1 /* 不计入 /.siyuan/conf.json，配置文件最后单独下载 */ {
 		poolSize = len(cloudFetches)
 	}
 	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
 		defer waitGroup.Done()
+		if nil != downloadErr {
+			return // 快速失败
+		}
 
 		fetch := arg.(string)
-		err = ossDownload0(localDirPath, cloudDirPath, fetch, &fetchedFiles, &transferSize, bootOrExit)
+		err = ossDownload0(localDirPath, cloudDirPath, fetch, &fetchedFilesCount, &transferSize, bootOrExit)
 		if nil != err {
 			downloadErr = err // 仅记录最后一次错误
 			return
 		}
+		downloadedFiles = append(downloadedFiles, fetch)
+
 		if needPushProgress {
-			msg := fmt.Sprintf(Conf.Language(103), fetchedFiles, len(cloudFetches)-fetchedFiles)
-			util.PushProgress(util.PushProgressCodeProgressed, fetchedFiles, len(cloudFetches), msg)
+			msg := fmt.Sprintf(Conf.Language(103), fetchedFilesCount, len(cloudFetches)-fetchedFilesCount)
+			util.PushProgress(util.PushProgressCodeProgressed, fetchedFilesCount, len(cloudFetches), msg)
 		}
 		if bootOrExit {
-			msg := fmt.Sprintf("Downloading data from the cloud %d/%d", fetchedFiles, len(cloudFetches))
+			msg := fmt.Sprintf("Downloading data from the cloud %d/%d", fetchedFilesCount, len(cloudFetches))
 			util.IncBootProgress(0, msg)
 		}
 	})
@@ -224,7 +229,7 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 		return
 	}
 
-	err = ossDownload0(localDirPath, cloudDirPath, "/.siyuan/conf.json", &fetchedFiles, &transferSize, bootOrExit)
+	err = ossDownload0(localDirPath, cloudDirPath, "/.siyuan/conf.json", &fetchedFilesCount, &transferSize, bootOrExit)
 	if nil != err {
 		return
 	}

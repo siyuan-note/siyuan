@@ -344,10 +344,10 @@ func DownloadBackup() (err error) {
 	localDirPath := Conf.Backup.GetSaveDir()
 	util.PushEndlessProgress(Conf.Language(68))
 	start := time.Now()
-	fetchedFiles, transferSize, err := ossDownload(localDirPath, "backup", false)
+	fetchedFilesCount, transferSize, _, err := ossDownload(localDirPath, "backup", false)
 	if nil == err {
 		elapsed := time.Now().Sub(start).Seconds()
-		util.LogInfof("downloaded backup [fetchedFiles=%d, transferSize=%s] in [%.2fs]", fetchedFiles, humanize.Bytes(transferSize), elapsed)
+		util.LogInfof("downloaded backup [fetchedFiles=%d, transferSize=%s] in [%.2fs]", fetchedFilesCount, humanize.Bytes(transferSize), elapsed)
 		util.PushEndlessProgress(Conf.Language(69))
 	}
 	return

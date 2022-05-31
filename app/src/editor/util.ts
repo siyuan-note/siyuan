@@ -441,7 +441,7 @@ const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
             }, response => {
                 item.update(response, blockId);
                 if (protyle) {
-                    item.updateDocTitle(protyle.title.editElement.textContent);
+                    item.updateDocTitle(protyle.background.ial);
                     if (getSelection().rangeCount > 0) {
                         const startContainer = getSelection().getRangeAt(0).startContainer;
                         if (protyle.wysiwyg.element.contains(startContainer)) {

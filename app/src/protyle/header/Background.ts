@@ -4,7 +4,7 @@ import {hideElements} from "../ui/hideElements";
 import {uploadFiles} from "../upload";
 import {hideMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
-import {getRandomEmoji, openEmojiPanel, unicode2Emoji, updateFileTreeEmoji} from "../../emoji";
+import {getRandomEmoji, openEmojiPanel, unicode2Emoji, updateFileTreeEmoji, updateOutlineEmoji} from "../../emoji";
 import {upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
 import {openGlobalSearch} from "../../search/util";
@@ -232,6 +232,7 @@ export class Background {
                         this.ial.icon = emoji;
                         this.render(this.ial, protyle.block.rootID);
                         updateFileTreeEmoji(emoji, protyle.block.rootID);
+                        updateOutlineEmoji(emoji);
                         fetchPost("/api/attr/setBlockAttrs", {
                             id: protyle.block.rootID,
                             attrs: {"icon": emoji}

@@ -266,6 +266,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
                     addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id);
                     updateFileEmoji(unicode, id);
+                    updateOutlineEmoji(unicode);
                 });
             }
             return;
@@ -344,6 +345,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     window.siyuan.menus.menu.remove();
                     updateFileTreeEmoji("", id);
                     updateFileEmoji("", id);
+                    updateOutlineEmoji("");
                 });
             }
             return;
@@ -373,12 +375,19 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id);
                     updateFileEmoji(unicode, id);
+                    updateOutlineEmoji(unicode);
                 });
             }
             return;
         }
     });
 };
+
+export const updateOutlineEmoji = (unicode: string) => {
+    getAllModels().outline.forEach(model => {
+        model.headerElement.nextElementSibling.firstElementChild.innerHTML = unicode2Emoji(unicode || Constants.SIYUAN_IMAGE_FILE);
+    });
+}
 
 export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFile") => {
     let emojiElement;

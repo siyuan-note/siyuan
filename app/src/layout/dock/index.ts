@@ -168,7 +168,7 @@ export class Dock {
                                     blockId: editor?.protyle?.block?.rootID,
                                 });
                                 if (editor?.protyle?.title?.editElement) {
-                                    outline.updateDocTitle(editor.protyle.title.editElement.textContent);
+                                    outline.updateDocTitle(editor.protyle?.background?.ial);
                                 }
                                 tab.addModel(outline);
                             }

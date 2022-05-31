@@ -11,11 +11,12 @@ import {Constants} from "../../constants";
 import {focusBlock} from "../../protyle/util/selection";
 import {pushBack} from "../../util/backForward";
 import {escapeHtml} from "../../util/escape";
+import {unicode2Emoji} from "../../emoji";
 
 export class Outline extends Model {
     private tree: Tree;
     public element: HTMLElement;
-    private headerElement: HTMLElement;
+    public headerElement: HTMLElement;
     public type: "pin" | "local";
     public blockId: string;
     private openNodes: { [key: string]: string[] } = {};
@@ -46,7 +47,9 @@ export class Outline extends Model {
                             if (this.type === "local" && this.blockId === data.data.id) {
                                 this.parent.updateTitle(data.data.title);
                             } else {
-                                this.updateDocTitle(data.data.title);
+                                this.updateDocTitle({
+                                    title: data.data.title
+                                });
                             }
                             break;
                         case "unmount":
@@ -81,7 +84,7 @@ export class Outline extends Model {
     <span class="${this.type === "local" ? "fn__none " : ""}fn__space"></span>
     <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
-<div class="fn__ellipsis outline__title"></div>
+<div class="b3-list-item"></div>
 <div class="fn__flex-1"></div>`;
         this.element = options.tab.panelElement.lastElementChild as HTMLElement;
         this.headerElement = options.tab.panelElement.firstElementChild as HTMLElement;
@@ -160,10 +163,20 @@ export class Outline extends Model {
         }
     }
 
-    public updateDocTitle(title = "") {
+    public updateDocTitle(ial?:IObject) {
         if (this.type === "pin") {
-            this.headerElement.nextElementSibling.innerHTML = escapeHtml(title);
-            this.headerElement.nextElementSibling.setAttribute("title", title);
+            if (ial) {
+                let iconHTML = `<span class="b3-list-item__graphic">${unicode2Emoji(ial.icon || Constants.SIYUAN_IMAGE_FILE)}</span>`
+                if (typeof ial.icon === "undefined" && this.headerElement.nextElementSibling.firstElementChild) {
+                    iconHTML = this.headerElement.nextElementSibling.firstElementChild.outerHTML;
+                }
+                this.headerElement.nextElementSibling.innerHTML = `${iconHTML}
+<span class="b3-list-item__text">${escapeHtml(ial.title)}</span>`;
+                this.headerElement.nextElementSibling.setAttribute("title", ial.title);
+            } else {
+                this.headerElement.nextElementSibling.innerHTML = "";
+                this.headerElement.nextElementSibling.removeAttribute("title");
+            }
         }
     }
 

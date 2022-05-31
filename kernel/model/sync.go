@@ -321,12 +321,18 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
-	fetchedFiles, transferSize, err := ossDownload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, boot || exit)
+	fetchedFilesCount, transferSize, downloadedFiles, err := ossDownload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, boot || exit)
 	if nil != err {
 		util.PushClearMsg()
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		Conf.Sync.Stat = msg
 		util.PushErrMsg(msg, 7000)
+
+		err = syncDirUpsertWorkspaceData(downloadedFiles)
+		if nil != err {
+			util.LogErrorf("upsert partially downloaded files to workspace data failed: %s", err)
+		}
+
 		if boot {
 			BootSyncSucc = 1
 		}
@@ -360,8 +366,8 @@ func SyncData(boot, exit, byHand bool) {
 	clearEmptyDirs(util.DataDir)
 
 	elapsed := time.Now().Sub(start).Seconds()
-	stat := fmt.Sprintf(Conf.Language(129), fetchedFiles, humanize.Bytes(transferSize)) + fmt.Sprintf(Conf.Language(131), elapsed)
-	util.LogInfof("sync [cloud=%d, local=%d, fetchedFiles=%d, transferSize=%s] downloaded in [%.2fs]", cloudSyncVer, syncConf.SyncVer, fetchedFiles, humanize.Bytes(transferSize), elapsed)
+	stat := fmt.Sprintf(Conf.Language(129), fetchedFilesCount, humanize.Bytes(transferSize)) + fmt.Sprintf(Conf.Language(131), elapsed)
+	util.LogInfof("sync [cloud=%d, local=%d, fetchedFiles=%d, transferSize=%s] downloaded in [%.2fs]", cloudSyncVer, syncConf.SyncVer, fetchedFilesCount, humanize.Bytes(transferSize), elapsed)
 
 	Conf.Sync.Downloaded = now
 	Conf.Sync.Stat = stat
@@ -489,6 +495,33 @@ func SetSyncEnable(b bool) (err error) {
 }
 
 var syncLock = sync.Mutex{}
+
+func syncDirUpsertWorkspaceData(downloadedFiles []string) (err error) {
+	start := time.Now()
+
+	modified := map[string]bool{}
+	syncDir := Conf.Sync.GetSaveDir()
+	for _, file := range downloadedFiles {
+		file = filepath.Join(syncDir, file)
+		modified[file] = true
+	}
+
+	decryptedDataDir, _, err := recoverSyncData(modified)
+	if nil != err {
+		util.LogErrorf("decrypt data dir failed: %s", err)
+		return
+	}
+
+	dataDir := util.DataDir
+	if err = stableCopy(decryptedDataDir, dataDir); nil != err {
+		util.LogErrorf("copy decrypted data dir from [%s] to data dir [%s] failed: %s", decryptedDataDir, dataDir, err)
+		return
+	}
+	if elapsed := time.Since(start).Milliseconds(); 5000 < elapsed {
+		util.LogInfof("sync data to workspace data elapsed [%dms]", elapsed)
+	}
+	return
+}
 
 // syncDir2WorkspaceData 将 sync 的数据更新到 data 中。
 //   1. 删除 data 中冗余的文件

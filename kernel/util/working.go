@@ -34,12 +34,12 @@ import (
 	goPS "github.com/mitchellh/go-ps"
 )
 
-var Mode = "dev"
-
-//var Mode = "prod"
+//var Mode = "dev"
+//
+var Mode = "prod"
 
 const (
-	Ver       = "2.0.14"
+	Ver       = "2.0.15"
 	IsInsider = false
 )
 

@@ -192,13 +192,11 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 	}
 	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
 		defer waitGroup.Done()
-		if nil != downloadErr {
-			return // 快速失败
-		}
+
 		fetch := arg.(string)
 		err = ossDownload0(localDirPath, cloudDirPath, fetch, &fetchedFiles, &transferSize, bootOrExit)
 		if nil != err {
-			downloadErr = err
+			downloadErr = err // 仅记录最后一次错误
 			return
 		}
 		if needPushProgress {
@@ -211,6 +209,11 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 		}
 	})
 	for _, fetch := range cloudFetches {
+		if "/.siyuan/conf.json" == fetch {
+			// 同步下载可能会报错，为了确保本地数据版本号不变所以不能更新配置文件，配置文件最后单独下载
+			continue
+		}
+
 		waitGroup.Add(1)
 		p.Invoke(fetch)
 	}
@@ -220,6 +223,12 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 		err = downloadErr
 		return
 	}
+
+	err = ossDownload0(localDirPath, cloudDirPath, "/.siyuan/conf.json", &fetchedFiles, &transferSize, bootOrExit)
+	if nil != err {
+		return
+	}
+
 	if needPushProgress {
 		util.ClearPushProgress(len(cloudFetches))
 		util.PushMsg(Conf.Language(106), 1000*60*10)

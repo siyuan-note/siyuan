@@ -152,7 +152,6 @@ export class Outline extends Model {
         fetchPost("/api/outline/getDocOutline", {
             id: this.blockId,
         }, response => {
-            this.updateDocTitle();
             this.update(response);
         });
 

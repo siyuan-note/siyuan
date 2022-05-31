@@ -12,6 +12,7 @@ import {Backlinks} from "./Backlinks";
 import {Model} from "../Model";
 import {getDockByType, resizeTabs, setPanelFocus} from "../util";
 import {Inbox} from "./Inbox";
+import Protyle from "../../protyle";
 
 export class Dock {
     public element: HTMLElement;
@@ -127,11 +128,11 @@ export class Dock {
             });
             target.classList.add("dock__item--active");
             if (!target.getAttribute("data-id")) {
-                let editId = "";
+                let editor: Protyle;
                 const models = getAllModels();
                 models.editor.find((item) => {
                     if (item.parent.headElement.classList.contains("item--focus") && item.editor?.protyle?.path) {
-                        editId = item.editor.protyle.block.rootID;
+                        editor = item.editor;
                         return true;
                     }
                 });
@@ -161,11 +162,15 @@ export class Dock {
                     case "outline":
                         tab = new Tab({
                             callback(tab: Tab) {
-                                tab.addModel(new Outline({
+                                const outline = new Outline({
                                     type: "pin",
                                     tab,
-                                    blockId: editId,
-                                }));
+                                    blockId: editor?.protyle?.block?.rootID,
+                                });
+                                if (editor?.protyle?.title?.editElement) {
+                                    outline.updateDocTitle(editor.protyle.title.editElement.textContent);
+                                }
+                                tab.addModel(outline);
                             }
                         });
                         break;
@@ -174,7 +179,7 @@ export class Dock {
                             callback(tab: Tab) {
                                 tab.addModel(new Graph({
                                     tab,
-                                    blockId: editId,
+                                    blockId: editor?.protyle?.block?.rootID,
                                     type: "pin"
                                 }));
                             }
@@ -196,7 +201,7 @@ export class Dock {
                                 tab.addModel(new Backlinks({
                                     type: "pin",
                                     tab,
-                                    blockId: editId,
+                                    blockId: editor?.protyle?.block?.rootID,
                                 }));
                             }
                         });

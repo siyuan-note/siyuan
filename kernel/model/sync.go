@@ -300,7 +300,9 @@ func SyncData(boot, exit, byHand bool) {
 		syncDownloadErrCount++
 		return
 	}
-	data, err := os.ReadFile(filepath.Join(util.TempDir, "/sync/"+pathJSON))
+
+	tmpPathJSON := filepath.Join(util.TempDir, "/sync/"+pathJSON)
+	data, err := os.ReadFile(tmpPathJSON)
 	if nil != err {
 		return
 	}
@@ -317,6 +319,20 @@ func SyncData(boot, exit, byHand bool) {
 			ExitSyncSucc = 1
 		}
 		Conf.Sync.Stat = msg
+		syncDownloadErrCount++
+		return
+	}
+	if err = os.Rename(tmpPathJSON, filepath.Join(localSyncDirPath, pathJSON)); nil != err {
+		util.PushClearMsg()
+		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+		Conf.Sync.Stat = msg
+		util.PushErrMsg(msg, 7000)
+		if boot {
+			BootSyncSucc = 1
+		}
+		if exit {
+			ExitSyncSucc = 1
+		}
 		syncDownloadErrCount++
 		return
 	}

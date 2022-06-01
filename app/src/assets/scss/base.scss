@@ -29,15 +29,22 @@
 @import "viewer";
 
 /*
-z-index:
-ctrl+p 搜索: 199 // 需小于 .block__popover https://github.com/siyuan-note/siyuan/issues/3515
-.hint & .protyle-util: 200 // 需小于 .b3-dialog
-.block__popover: 201 // 需小于 .b3-dialog https://ld246.com/article/1637204682648
-.b3-dialog: 203 // 需小于 #windowControls
-#windowControls: 302
-.protyle-util: 303 // 需大于 .block__popover https://github.com/siyuan-note/siyuan/issues/3276
-.b3-menu: 304 // 需大于 .block__popover
-progressLoading: 400 // 需大于 .b3-dialog
+// 需小于 .block__popover https://github.com/siyuan-note/siyuan/issues/3515
+ctrl+p 搜索: 199
+// 需小于 .b3-dialog
+.hint & .protyle-util: 200
+// 需小于 .b3-dialog https://ld246.com/article/1637204682648
+.block__popover: 201
+// 需大于 .block__popover https://github.com/siyuan-note/siyuan/issues/3276
+.protyle-util: 303
+// 需大于 .block__popover
+.b3-menu: 304
+// 需小于 #windowControls
+// 需大于 .protyle-util https://github.com/siyuan-note/siyuan/issues/5069
+.b3-dialog: 305
+// 需大于 .b3-dialog
+progressLoading: 400
+#windowControls: 502
 */
 
 .inbox {

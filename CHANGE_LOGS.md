@@ -1,3 +1,38 @@
+## v2.0.15 / 2022-06-01
+
+### 改进功能
+
+* [Docker 和移动端支持导出模版、Markdown 压缩包和 `.sy.zip` 数据包](https://github.com/siyuan-note/siyuan/issues/4947)
+* [云端数据同步时降低交互阻塞时间](https://github.com/siyuan-note/siyuan/issues/4984)
+* [书签面板 Emoji 和折叠问题](https://github.com/siyuan-note/siyuan/issues/5017)
+* [通过 GitHub Actions 实现每日构建](https://github.com/siyuan-note/siyuan/issues/5033)
+* [桌面端托盘图标菜单加入菜单项](https://github.com/siyuan-note/siyuan/issues/5046)
+* [桌面端 `设置` - `账号` 中增加订阅续订入口](https://github.com/siyuan-note/siyuan/issues/5050)
+* [改进 `网络图片转换为本地图片` 微信图片拉取](https://github.com/siyuan-note/siyuan/issues/5052)
+* [改进 `网络图片转换为本地图片` 文件名后缀](https://github.com/siyuan-note/siyuan/issues/5053)
+* [同步下载支持断点续传](https://github.com/siyuan-note/siyuan/issues/5056)
+* [每次打开帮助文档时自动检查版本更新并提醒](https://github.com/siyuan-note/siyuan/issues/5057)
+* [开放 insider 内部预览版本仓库](https://github.com/siyuan-note/siyuan/issues/5060)
+* [新增内核启动参数 `mode`](https://github.com/siyuan-note/siyuan/issues/5064)
+* [改进移动端打开引用缩放逻辑和桌面端一致](https://github.com/siyuan-note/siyuan/issues/5065)
+
+### 文档相关
+
+* [修改隐私政策](https://github.com/siyuan-note/siyuan/issues/5043)
+* [使用 GitHub Projects 描绘路线图](https://github.com/siyuan-note/siyuan/issues/5061)
+
+### 开发重构
+
+* [前端使用 `pnpm` 管理构建](https://github.com/siyuan-note/siyuan/issues/5059)
+
+### 修复缺陷
+
+* [一级标题被面包屑强制省略两个汉字](https://github.com/siyuan-note/siyuan/issues/5044)
+* [单元格所在行有跨行的单元格时禁止删除行](https://github.com/siyuan-note/siyuan/issues/5045)
+* [标题中设置字体颜色问题](https://github.com/siyuan-note/siyuan/issues/5047)
+* [打开页签时应跳过钉住的页签](https://github.com/siyuan-note/siyuan/issues/5048)
+* [关闭页签后大纲没有刷新](https://github.com/siyuan-note/siyuan/issues/5051)
+
 ## v2.0.14 / 2022-05-29
 
 ### 改进功能

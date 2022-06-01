@@ -27,7 +27,7 @@ NPM 镜像：
 
 * `cd kernel`
 * `go build --tags "fts5" -o "../app/kernel/SiYuan-Kernel.exe"`
-* `SiYuan-Kernel.exe --wd=D:/siyuan/app`
+* `SiYuan-Kernel.exe --wd=D:/siyuan/app --mode=dev`
 
 ### iOS
 

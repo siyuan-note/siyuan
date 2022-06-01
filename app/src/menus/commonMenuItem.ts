@@ -708,20 +708,23 @@ export const openMenu = (src: string, onlyMenu = false) => {
     const submenu = [];
     if (isLocalPath(src)) {
         submenu.push({
-            label: window.siyuan.languages.openInNewTab,
+            label: window.siyuan.languages.insertRight,
+            accelerator: "Click",
             click() {
-                openAsset(src.trim(), parseInt(getSearch("page", src)));
+                openAsset(src.trim(), parseInt(getSearch("page", src)), "right");
             }
         });
         /// #if !BROWSER
         submenu.push({
             label: window.siyuan.languages.useDefault,
+            accelerator: "⇧Click",
             click() {
                 openBy(src, "app");
             }
         });
         submenu.push({
             label: window.siyuan.languages.showInFolder,
+            accelerator: "⌘Click",
             click: () => {
                 openBy(src, "folder");
             }
@@ -730,13 +733,18 @@ export const openMenu = (src: string, onlyMenu = false) => {
     } else {
         submenu.push({
             label: window.siyuan.languages.useBrowserView,
+            accelerator: "Click",
             click: () => {
                 /// #if !BROWSER
                 shell.openExternal(src).catch((e) => {
                     console.log("openExternal error:" + e);
                 });
                 /// #else
-                window.open(src);
+                if (window.siyuan.config.system.container === "ios") {
+                    window.location.href = src;
+                } else {
+                    window.open(src);
+                }
                 /// #endif
             }
         });

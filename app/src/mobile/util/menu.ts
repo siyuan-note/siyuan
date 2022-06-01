@@ -150,7 +150,7 @@ ${accountHTML}
     <svg class="b3-list-item__graphic"><use xlink:href="#iconInfo"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.about}</span>
 </div>
 <div class="b3-list-item b3-list-item--big" id="menuSafeQuit">
-    <svg class="b3-list-item__graphic"></svg><span class="b3-list-item__text">${window.siyuan.languages.safeQuit}</span>
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconQuit"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.safeQuit}</span>
 </div>`;
 
         document.getElementById("menuSearch").addEventListener(getEventName(), () => {

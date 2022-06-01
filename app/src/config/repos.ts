@@ -118,7 +118,6 @@ const renderCloudBackup = () => {
 </div>`;
         }
         repos.element.querySelector("#reposBackup").innerHTML = actionHTML;
-        repos.element.querySelector("#reposLoading").classList.add("fn__none");
     });
 };
 
@@ -302,10 +301,17 @@ export const repos = {
     <div class="b3-label__text ft__error">${0 === window.siyuan.config.e2eePasswdMode ? window.siyuan.languages.builtinE2EEPasswdTip : window.siyuan.languages.changeE2EEPasswdTip}</div>
 </div>`;
         }
-        return `<div><div style="position: fixed;width: 800px;height: 434px;box-sizing: border-box;text-align: center;display: flex;align-items: center;justify-content: center;z-index: 1;" id="reposLoading">
-    <img src="/stage/loading-pure.svg">
+        return `<div>
+<div id="reposData" class="b3-label">
+    <div class="fn__flex">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.cloudStorage}
+        </div>
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.trafficStat}
+        </div>
+    </div>
 </div>
-<div id="reposData" class="b3-label"></div>
 ${passwordHTML}
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -325,7 +331,8 @@ ${passwordHTML}
     </div>
     <div id="reposCloudSyncList" class="fn__none config-repos__sync"><img style="margin: 0 auto;display: block;" src="/stage/loading-pure.svg"></div>
 </div>
-<div id="reposBackup" class="b3-label"></div></div>`;
+<div id="reposBackup" class="b3-label">${window.siyuan.languages.cloudBackup}</div>
+</div>`;
     },
     bindEvent: () => {
         if (needSubscribe("")) {
@@ -351,9 +358,6 @@ ${passwordHTML}
                 }
             });
         });
-        const loadingElement = repos.element.querySelector("#reposLoading") as HTMLElement;
-        loadingElement.style.width = repos.element.clientWidth + "px";
-        loadingElement.style.height = repos.element.clientHeight + "px";
         repos.element.firstElementChild.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             const syncConfigElement = repos.element.querySelector("#reposCloudSyncList");

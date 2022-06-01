@@ -11,7 +11,6 @@ docmap = {
     "Refactor": "开发重构",
     "Bug": "修复缺陷",
     "Features": "引入特性",
-    "Widget": "",
     "Abolishments": "移除功能"
 }
 

@@ -63,7 +63,7 @@ func Boot() {
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
 	lang := flag.String("lang", "en_US", "zh_CN/zh_CHT/en_US/fr_FR")
-
+	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
 
 	if "" != *wdPath {
@@ -72,6 +72,7 @@ func Boot() {
 	if "" != *lang {
 		Lang = *lang
 	}
+	Mode = *mode
 	Resident = *resident
 	ReadOnly = *readOnly
 	AccessAuthCode = *accessAuthCode

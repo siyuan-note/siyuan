@@ -164,7 +164,7 @@ const initBar = () => {
 </div>
 <div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__s${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDock : window.siyuan.languages.hideDock}">
     <svg>
-        <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconRestore" : "iconMax"}"></use>
+        <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>
 </div>
 <div id="barThemeMode" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.appearance.mode === 1 ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.languages.darkMode}">
@@ -246,12 +246,12 @@ const initBar = () => {
     const barDockElement = document.getElementById("barDock");
     const useElement = document.querySelector("#barDock use");
     barDockElement.addEventListener("click", () => {
-        const dockIsShow = useElement.getAttribute("xlink:href") === "#iconMax";
+        const dockIsShow = useElement.getAttribute("xlink:href") === "#iconHideDock";
         if (dockIsShow) {
-            useElement.setAttribute("xlink:href", "#iconRestore");
+            useElement.setAttribute("xlink:href", "#iconDock");
             barDockElement.setAttribute("aria-label", window.siyuan.languages.showDock);
         } else {
-            useElement.setAttribute("xlink:href", "#iconMax");
+            useElement.setAttribute("xlink:href", "#iconHideDock");
             barDockElement.setAttribute("aria-label", window.siyuan.languages.hideDock);
         }
         document.querySelectorAll(".dock").forEach(item => {

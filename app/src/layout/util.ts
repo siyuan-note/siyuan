@@ -131,7 +131,7 @@ export const exportLayout = (reload: boolean, cb?: () => void) => {
         return;
     }
     const layoutJSON: any = {
-        hideDock: useElement.getAttribute("xlink:href") !== "#iconMax",
+        hideDock: useElement.getAttribute("xlink:href") === "#iconDock",
         layout: {},
         top: dockToJSON(window.siyuan.layout.topDock),
         bottom: dockToJSON(window.siyuan.layout.bottomDock),

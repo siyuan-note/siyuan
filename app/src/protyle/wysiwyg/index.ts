@@ -1251,10 +1251,11 @@ export class WYSIWYG {
                 } else if (aElement) {
                     refBlockId = aElement.getAttribute("data-href").substring(16, 38);
                 }
-                if (isMobile()) {
-                    openMobileFileById(refBlockId, false, [Constants.CB_GET_ALL]);
-                } else {
-                    fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
+
+                fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
+                    if (isMobile()) {
+                        openMobileFileById(refBlockId, !foldResponse.data, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL]);
+                    } else {
                         if (window.siyuan.shiftIsPressed) {
                             openFileById({
                                 id: refBlockId,
@@ -1287,8 +1288,8 @@ export class WYSIWYG {
                                 zoomIn: foldResponse.data
                             });
                         }
-                    });
-                }
+                    }
+                });
                 if (protyle.model) {
                     // 打开双链需记录到后退中 https://github.com/siyuan-note/insider/issues/801
                     let blockElement: HTMLElement | false;
@@ -1397,7 +1398,7 @@ export class WYSIWYG {
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
             if (embedItemElement) {
                 if (isMobile()) {
-                    openMobileFileById(embedItemElement.getAttribute("data-id"), false, [Constants.CB_GET_ALL], true);
+                    openMobileFileById(embedItemElement.getAttribute("data-id"), false, [Constants.CB_GET_ALL]);
                 } else if (!protyle.disabled) {
                     window.siyuan.blockPanels.push(new BlockPanel({
                         targetElement: embedItemElement,

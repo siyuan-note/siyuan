@@ -12,6 +12,7 @@ import {lockFile} from "../dialog/processSystem";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 
 export const openMobileFileById = (id: string, hasContext?: boolean, action = [Constants.CB_GET_HL], pushStack = true) => {
+    window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({id, hasContext, action}));
     if (window.siyuan.mobileEditor) {
         let blockElement;
         Array.from(window.siyuan.mobileEditor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
@@ -83,7 +84,6 @@ export const openMobileFileById = (id: string, hasContext?: boolean, action = [C
         (document.getElementById("toolbarName") as HTMLInputElement).value = data.data.rootTitle;
         setEditor();
         closePanel();
-        window.localStorage.setItem(Constants.LOCAL_DOC, id);
         if (pushStack) {
             window.siyuan.backStack.push({
                 id,

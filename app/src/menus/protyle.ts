@@ -329,6 +329,11 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
         }
     }
     if (window.siyuan.mobileEditor) {
+        window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({
+            id,
+            hasContext: id === protyle.block.rootID,
+            action: id === protyle.block.rootID ? [Constants.CB_GET_HL] : [Constants.CB_GET_ALL]
+        }));
         window.siyuan.backStack.push({
             id: protyle.block.id,
             scrollTop: protyle.contentElement.scrollTop,

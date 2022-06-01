@@ -250,6 +250,14 @@ func initWorkspaceDir(workspaceArg string) {
 	ConfDir = filepath.Join(WorkspaceDir, "conf")
 	DataDir = filepath.Join(WorkspaceDir, "data")
 	TempDir = filepath.Join(WorkspaceDir, "temp")
+	osTmpDir := filepath.Join(TempDir, "os")
+	os.RemoveAll(osTmpDir)
+	if err := os.MkdirAll(osTmpDir, 0755); nil != err {
+		log.Fatalf("create os tmp dir [%s] failed: %s", osTmpDir, err)
+	}
+	os.Setenv("TMPDIR", osTmpDir)
+	os.Setenv("TEMP", osTmpDir)
+	os.Setenv("TMP", osTmpDir)
 	DBPath = filepath.Join(TempDir, DBName)
 	BlockTreePath = filepath.Join(TempDir, "blocktree.msgpack")
 }

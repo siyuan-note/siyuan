@@ -275,6 +275,7 @@
     overflow: auto;
     font-family: var(--b3-font-family-code);
     min-height: 22px !important;
+    overflow-x: overlay;
   }
 
   [data-subtype="echarts"] > div,

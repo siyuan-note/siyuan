@@ -10,7 +10,7 @@ Build Your Eternal Digital Garden
 </p>
 
 <p align="center">
-<a href="https://github.com/siyuan-note/siyuan/blob/master/README_zh_CN.md">中文</a>
+<a href="README_zh_CN.md">中文</a>
 </p>
 
 ## 💡 Introduction
@@ -79,7 +79,7 @@ Cloud services require a paid subscription.
 ## 🗺️ Roadmap
 
 * [SiYuan development plan and progress](https://github.com/siyuan-note/siyuan/projects)
-* [SiYuan Change logs](https://github.com/siyuan-note/siyuan/blob/master/CHANGE_LOGS.md)
+* [SiYuan Change logs](CHANGELOG.md)
 
 ## 🛠️ Download Setup
 
@@ -176,7 +176,7 @@ SiYuan is completely open source, and contributions are welcome:
 * [Android](https://github.com/siyuan-note/siyuan-android)
 * [iOS](https://github.com/siyuan-note/siyuan-ios)
 
-For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/DEV.md).
+For more details, please refer to [Development Guide](.github/CONTRIBUTING.md).
 
 ### Is there any note for deleting docs?
 
@@ -233,7 +233,7 @@ SiYuan is completely open source, and contributions are welcome:
 * [Android](https://github.com/siyuan-note/siyuan-android)
 * [iOS](https://github.com/siyuan-note/siyuan-ios)
 
-For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/DEV.md).
+For more details, please refer to [Development Guide](.github/CONTRIBUTING.md).
 
 ## 🙏 Acknowledgement
 

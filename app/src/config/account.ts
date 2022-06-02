@@ -160,7 +160,7 @@ ${window.siyuan.languages.account2}
         const trialSubElement = account.element.querySelector("#trialSub");
         if (trialSubElement) {
             trialSubElement.addEventListener("click", () => {
-                fetchPost("/api/account/startFreeTrial", () => {
+                fetchPost("/api/account/startFreeTrial", {}, () => {
                     account.element.querySelector("#refresh").dispatchEvent(new Event("click"));
                 });
             });

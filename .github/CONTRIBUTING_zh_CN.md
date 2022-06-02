@@ -7,9 +7,7 @@
 
 ## NPM 依赖
 
-安装 pnpm
-
-`npm install -g pnpm`
+安装 pnpm：`npm install -g pnpm`
 
 <details>
 <summary>适用于中国大陆</summary>
@@ -28,6 +26,7 @@ NPM 镜像：
 
 * `pnpm run dev`
 * `pnpm run start`
+
 ## 内核
 
 ### 桌面端

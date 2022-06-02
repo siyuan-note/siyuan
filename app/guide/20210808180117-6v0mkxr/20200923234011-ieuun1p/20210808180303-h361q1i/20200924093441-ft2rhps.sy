@@ -6,7 +6,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20220521234603"
+		"updated": "20220602101151"
 	},
 	"Children": [
 		{
@@ -3464,7 +3464,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20211221131201-600dcnw",
-				"updated": "20211221130624"
+				"updated": "20220602101151"
 			},
 			"Children": [
 				{
@@ -3476,12 +3476,8 @@
 					"CodeBlockInfo": "bWVybWFpZA=="
 				},
 				{
-					"ID": "20220307092214-ajekwh5",
 					"Type": "NodeCodeBlockCode",
-					"Data": "gitGraph:\noptions\n{\n    \u0026quot;nodeSpacing\u0026quot;: 150,\n    \u0026quot;nodeRadius\u0026quot;: 10\n}\nend\ncommit\nbranch newbranch\ncheckout newbranch\ncommit\ncommit\ncheckout master\ncommit\ncommit\nmerge newbranch",
-					"Properties": {
-						"id": "20220307092214-ajekwh5"
-					}
+					"Data": "    gitGraph\n       commit\n       commit\n       branch develop\n       commit\n       commit\n       commit\n       checkout main\n       commit\n       commit"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

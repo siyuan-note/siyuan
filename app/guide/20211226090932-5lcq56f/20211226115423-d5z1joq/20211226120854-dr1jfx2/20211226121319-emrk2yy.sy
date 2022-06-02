@@ -5,7 +5,7 @@
 		"id": "20211226121319-emrk2yy",
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
-		"updated": "20220521234434"
+		"updated": "20220602101300"
 	},
 	"Children": [
 		{
@@ -3419,7 +3419,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20211226122008-4u0uxuf",
-				"updated": "20211221130624"
+				"updated": "20220602101300"
 			},
 			"Children": [
 				{
@@ -3431,12 +3431,8 @@
 					"CodeBlockInfo": "bWVybWFpZA=="
 				},
 				{
-					"ID": "20220307092237-7c49s02",
 					"Type": "NodeCodeBlockCode",
-					"Data": "gitGraph:\noptions\n{\n    \u0026quot;nodeSpacing\u0026quot;: 150,\n    \u0026quot;nodeRadius\u0026quot;: 10\n}\nend\ncommit\nbranch newbranch\ncheckout newbranch\ncommit\ncommit\ncheckout master\ncommit\ncommit\nmerge newbranch",
-					"Properties": {
-						"id": "20220307092237-7c49s02"
-					}
+					"Data": "gitGraph\n       commit\n       commit\n       branch develop\n       commit\n       commit\n       commit\n       checkout main\n       commit\n       commit"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

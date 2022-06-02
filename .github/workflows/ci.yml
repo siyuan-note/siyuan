@@ -3,7 +3,7 @@ name: CI/CD For SiYuan
 on:
   push:
     tags:
-      - 'v*'
+      - 'dev*'
   workflow_dispatch:
   
 

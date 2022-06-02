@@ -20,10 +20,7 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
     }
     addScript(`${cdn}/js/mermaid/mermaid.min.js?v=0.0.0`, "protyleMermaidScript").then(() => {
         const config: any = {
-            // https://github.com/siyuan-note/siyuan/issues/3587
-            // graph LR
-            // id1["<iframe src=javascript:alert('xss')></iframe>"]
-            // securityLevel: "loose", 如上会 xss
+            securityLevel: "loose", // 升级后无 https://github.com/siyuan-note/siyuan/issues/3587，可使用该选项
             altFontFamily: "sans-serif",
             fontFamily: "sans-serif",
             startOnLoad: false,

@@ -26,10 +26,13 @@ export const account = {
     </span>
 </a>
 <div class="fn__hr--b"></div>
-<div>${window.siyuan.languages.account2}</div>
-<div>${window.siyuan.languages.account8}</div>
-<div>${window.siyuan.languages.account5}</div>
+${window.siyuan.languages.account2}
 <div><a href="https://b3log.org/siyuan/pricing.html" target="_blank">${window.siyuan.languages.account7}</a></div>
+<div class="fn__hr--b"></div>
+<a href="https://ld246.com/sponsor" target="_blank" class="b3-chip b3-chip--primary">
+    <svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>
+    ${window.siyuan.languages.sponsor}
+</a>
 <div class="fn__hr--b"></div>`;
         if (window.siyuan.user) {
             let userTitlesHTML = "";

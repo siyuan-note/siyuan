@@ -1,4 +1,5 @@
 {
+  "freeSub": "Free Trial Subscription",
   "sortByUpdateTimeDesc": "Descending by update time",
   "sortByUpdateTimeAsc": "Ascending by update time",
   "sortByDownloadsDesc": "Descending by downloads",
@@ -458,11 +459,10 @@
   "account3Tip": "Local backup will overwrite cloud backup. Do you want to upload?",
   "account1": "Click to pay",
   "account3": "Upload",
+  "account2": "<div>End-to-end encrypted data synchronization</div><div>End-to-end encrypted data backup</div><div>Cloud assets serving</div>",
   "account4": "Renewal price remains unchanged for life",
-  "account5": "Cloud Assets serving",
   "account6": "Remaining before subscription expires",
   "account7": "More advanced features",
-  "account8": "End-to-End encryption sync",
   "account10": "Annual subscription",
   "account11": "Until the end of the early bird discount",
   "account12": "Life companion",

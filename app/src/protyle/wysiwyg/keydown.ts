@@ -34,7 +34,7 @@ import {isLocalPath} from "../../util/pathName";
 import {clipboard} from "electron";
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
-import {refMenu, setFold, zoomOut} from "../../menus/protyle";
+import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import {setPosition} from "../../util/setPosition";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
@@ -477,7 +477,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     protyle.toolbar.showFileAnnotationRef(protyle, inlineElement);
                     return;
                 } else if (type === "a") {
-                    protyle.toolbar.showLink(protyle, inlineElement);
+                    linkMenu(protyle, inlineElement);
+                    const rect = inlineElement.getBoundingClientRect();
+                    setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
                     return;
                 }
             }

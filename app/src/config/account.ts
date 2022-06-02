@@ -15,21 +15,24 @@ export const account = {
 <div class="fn__hr--b"></div>
 <a class="b3-button b3-button--outline" style="min-width: 214px" href="https://ld246.com/subscribe/siyuan" target="_blank">
     <span>
-        <span class="fn__hr"></span>
+        <div class="fn__hr"></div>
         <span class="ft__smaller">${window.siyuan.languages.account4}</span>
-        <span class="fn__hr"></span>
+        <div class="fn__hr--small"></div>
         <big class="ft__secondary">${window.siyuan.languages.priceAnnual}</big>
         <span class="ft__on-background">/${window.siyuan.languages.year}</span>
-        <span class="fn__hr"></span>
+        <div class="fn__hr--small"></div>
         <span class="ft__smaller ft__on-surface">${window.siyuan.languages.account1}</span>
-        <span class="fn__hr"></span>
+        <div class="fn__hr"></div>
     </span>
 </a>
 <div class="fn__hr--b"></div>
-<div>${window.siyuan.languages.account2}</div>
-<div>${window.siyuan.languages.account8}</div>
-<div>${window.siyuan.languages.account5}</div>
+${window.siyuan.languages.account2}
 <div><a href="https://b3log.org/siyuan/pricing.html" target="_blank">${window.siyuan.languages.account7}</a></div>
+<div class="fn__hr--b"></div>
+<span class="b3-chip b3-chip--primary fn__pointer" id="trialSub">
+    <svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>
+    ${window.siyuan.languages.freeSub}
+</>
 <div class="fn__hr--b"></div>`;
         if (window.siyuan.user) {
             let userTitlesHTML = "";
@@ -154,6 +157,14 @@ export const account = {
 </div>`;
     },
     bindEvent: () => {
+        const trialSubElement = account.element.querySelector("#trialSub");
+        if (trialSubElement) {
+            trialSubElement.addEventListener("click", () => {
+                fetchPost("/api/account/startFreeTrial", {}, () => {
+                    account.element.querySelector("#refresh").dispatchEvent(new Event("click"));
+                });
+            });
+        }
         const agreeLoginElement = account.element.querySelector("#agreeLogin") as HTMLInputElement;
         const userNameElement = account.element.querySelector("#userName") as HTMLInputElement;
         if (!userNameElement) {

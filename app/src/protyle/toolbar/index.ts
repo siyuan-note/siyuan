@@ -39,6 +39,7 @@ import {matchHotKey} from "../util/hotKey";
 import {unicode2Emoji} from "../../emoji";
 import {escapeHtml} from "../../util/escape";
 import {hideElements} from "../ui/hideElements";
+import {linkMenu} from "../../menus/protyle";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -252,7 +253,10 @@ export class Toolbar {
         const types = this.getCurrentType();
         if (action === "add" && types.length > 0 && types.includes(type) && !focusAdd) {
             if (type === "link") {
-                this.showLink(protyle, this.range.startContainer.parentElement);
+                this.element.classList.add("fn__none");
+                linkMenu(protyle, this.range.startContainer.parentElement);
+                const rect = this.range.startContainer.parentElement.getBoundingClientRect();
+                setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
             }
             return;
         }
@@ -312,7 +316,9 @@ export class Toolbar {
         }
         if (types.length > 0 && types.includes("link") && action === "range") {
             // 链接快捷键不应取消，应该显示链接信息
-            this.showLink(protyle, this.range.startContainer.parentElement);
+            linkMenu(protyle, this.range.startContainer.parentElement);
+            const rect = this.range.startContainer.parentElement.getBoundingClientRect();
+            setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
             return;
         }
         const wbrElement = document.createElement("wbr");
@@ -491,7 +497,9 @@ export class Toolbar {
                         console.log(e);
                     }
                     if (needShowLink) {
-                        this.showLink(protyle, newElement as HTMLElement, focusText);
+                        linkMenu(protyle, newElement as HTMLElement, focusText);
+                        const rect = newElement.getBoundingClientRect();
+                        setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
                     }
                 }
             }
@@ -505,161 +513,6 @@ export class Toolbar {
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
         wbrElement.remove();
-    }
-
-    public showLink(protyle: IProtyle, linkElement: HTMLElement, focusText = false) {
-        const nodeElement = hasClosestBlock(linkElement);
-        if (!nodeElement) {
-            return;
-        }
-        const id = nodeElement.getAttribute("data-node-id");
-        this.subElement.style.width = isMobile() ? "80vw" : Math.min(480, window.innerWidth) + "px";
-        this.subElement.style.padding = "";
-        this.subElement.innerHTML = `<div class="b3-form__space--small">
-<label class="fn__flex">
-    <span class="ft__on-surface fn__flex-center" style="width: 72px">${window.siyuan.languages.link}</span>
-    <div class="fn__space"></div>
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.link}" />
-</label>
-<div class="fn__hr"></div>
-<label class="fn__flex">
-    <span class="ft__on-surface fn__flex-center" style="width: 72px">${window.siyuan.languages.anchor}</span>
-    <div class="fn__space"></div>
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.anchor}" />
-</label>
-<div class="fn__hr"></div>
-<label class="fn__flex">
-    <span class="ft__on-surface fn__flex-center" style="width: 72px">${window.siyuan.languages.title}</span>
-    <div class="fn__space"></div>
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}" />
-</label>
-<div class="fn__hr"></div>
-<div class="fn__hr"></div>
-<div class="fn__flex"><span class="fn__flex-1"></span>
-    <button class="b3-button b3-button--outline${linkElement.getAttribute("data-href")?.startsWith("siyuan://blocks/") ? "" : " fn__none"}">${window.siyuan.languages.turnInto} ${window.siyuan.languages.blockRef}</button>
-    <span class="fn__space"></span>
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.remove}</button>
-</div></div>`;
-        let preventChange = false;
-        let oldHTML = nodeElement.outerHTML;
-        this.subElement.querySelector(".b3-button--outline").addEventListener(getEventName(), (event) => {
-            preventChange = true;
-            linkElement.setAttribute("data-subtype", "s");
-            linkElement.setAttribute("data-type", "block-ref");
-            linkElement.setAttribute("data-id", linkElement.getAttribute("data-href")?.replace("siyuan://blocks/", ""));
-            linkElement.removeAttribute("data-href");
-            linkElement.removeAttribute("data-title");
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-            protyle.toolbar.range.selectNode(linkElement);
-            protyle.toolbar.range.collapse(false);
-            focusByRange(protyle.toolbar.range);
-            this.subElement.classList.add("fn__none");
-            event.stopPropagation();
-        });
-        this.subElement.querySelector(".b3-button--cancel").addEventListener(getEventName(), (event) => {
-            preventChange = true;
-            this.setInlineMark(protyle, "link", "remove");
-            this.subElement.classList.add("fn__none");
-            event.stopPropagation();
-        });
-        const titleElements = this.subElement.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
-        titleElements[0].value = linkElement.getAttribute("data-href") || "";
-        titleElements[1].value = linkElement.textContent.replace(Constants.ZWSP, "");
-        titleElements[2].value = Lute.UnEscapeHTMLStr(linkElement.getAttribute("data-title") || "");
-        const updateChange = (event: KeyboardEvent) => {
-            this.isNewEmptyInline = false;
-            event.stopPropagation();
-            if (event.isComposing) {
-                return;
-            }
-            window.setTimeout(() => {
-                if (preventChange) {
-                    return;
-                }
-                if (titleElements[1].value === "" || titleElements[0].value === "") {
-                    if (this.subElement.classList.contains("fn__none")) {
-                        this.setInlineMark(protyle, "link", "remove");
-                    }
-                    return;
-                }
-                linkElement.innerHTML = Lute.EscapeHTMLStr(titleElements[1].value);
-                if (titleElements[2].value) {
-                    linkElement.setAttribute("data-title", Lute.EscapeHTMLStr(titleElements[2].value));
-                } else {
-                    linkElement.removeAttribute("data-title");
-                }
-                linkElement.setAttribute("data-href", titleElements[0].value);
-                if (nodeElement.outerHTML !== oldHTML) {
-                    nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                    updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-                    oldHTML = nodeElement.outerHTML;
-                }
-                if (this.subElement.classList.contains("fn__none")) {
-                    this.range.setEnd(linkElement.lastChild, linkElement.lastChild.textContent.length);
-                    this.range.collapse(false);
-                    focusByRange(this.range);
-                }
-            }, Constants.TIMEOUT_SEARCH);
-        };
-        const hideSubElement = (event: KeyboardEvent) => {
-            if ((event.key === "Enter" || event.key === "Escape") && !event.isComposing) {
-                event.stopPropagation();
-                event.preventDefault();
-                this.subElement.classList.add("fn__none");
-            }
-        };
-        titleElements[0].addEventListener("keydown", (event: KeyboardEvent) => {
-            hideSubElement(event);
-        });
-        titleElements[1].addEventListener("keydown", (event: KeyboardEvent) => {
-            hideSubElement(event);
-        });
-        titleElements[2].addEventListener("keydown", (event: KeyboardEvent) => {
-            hideSubElement(event);
-        });
-        titleElements[0].addEventListener("blur", (event: KeyboardEvent) => {
-            updateChange(event);
-        });
-        titleElements[1].addEventListener("blur", (event: KeyboardEvent) => {
-            updateChange(event);
-        });
-        titleElements[1].addEventListener("compositionend", () => {
-            linkElement.innerHTML = Lute.EscapeHTMLStr(titleElements[1].value) || "";
-        });
-        titleElements[1].addEventListener("input", (event: KeyboardEvent) => {
-            if (!event.isComposing) {
-                linkElement.innerHTML = Lute.EscapeHTMLStr(titleElements[1].value) || "";
-            }
-        });
-        titleElements[2].addEventListener("blur", (event: KeyboardEvent) => {
-            updateChange(event);
-        });
-        titleElements[2].addEventListener("compositionend", () => {
-            if (titleElements[2].value) {
-                linkElement.setAttribute("data-title", Lute.EscapeHTMLStr(titleElements[2].value) || "");
-            } else {
-                linkElement.removeAttribute("data-title");
-            }
-        });
-        titleElements[2].addEventListener("input", (event: KeyboardEvent) => {
-            if (!event.isComposing) {
-                if (titleElements[2].value) {
-                    linkElement.setAttribute("data-title", Lute.EscapeHTMLStr(titleElements[2].value) || "");
-                } else {
-                    linkElement.removeAttribute("data-title");
-                }
-            }
-        });
-        this.subElement.classList.remove("fn__none");
-        const nodeRect = linkElement.getBoundingClientRect();
-        setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height + 4);
-        this.element.classList.add("fn__none");
-        if (focusText || protyle.lute.IsValidLinkDest(titleElements[0].value)) {
-            titleElements[1].select();
-        } else {
-            titleElements[0].select();
-        }
     }
 
     public showFileAnnotationRef(protyle: IProtyle, refElement: HTMLElement) {

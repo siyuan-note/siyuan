@@ -69,7 +69,7 @@
     "iconv-lite": "^0.6.3",
     "ifdef-loader": "^2.3.0",
     "mini-css-extract-plugin": "2.3.0",
-    "node-sass": "^7.0.1",
+    "sass": "^1.52.1",
     "path-browserify": "^1.0.1",
     "safer-buffer": "^2.1.2",
     "sass-loader": "^12.1.0",

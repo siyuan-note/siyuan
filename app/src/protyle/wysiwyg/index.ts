@@ -20,7 +20,7 @@ import {isLocalPath, pathPosix} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
 import {previewImage} from "../preview/image";
 import {openGlobalSearch} from "../../search/util";
-import {contentMenu, imgMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
+import {contentMenu, imgMenu, linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import * as dayjs from "dayjs";
 import {dropEvent} from "../util/editorCommonEvent";
 import {input} from "./input";
@@ -428,7 +428,8 @@ export class WYSIWYG {
             const type = target.getAttribute("data-type");
             if (type === "block-ref") {
                 refMenu(protyle, target);
-                setPosition(window.siyuan.menus.menu.element, event.clientX, event.clientY + 13, 26);
+                const rect =target.getBoundingClientRect();
+                setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
                 // 阻止 popover
                 target.removeAttribute("data-type");
                 setTimeout(() => {
@@ -441,8 +442,10 @@ export class WYSIWYG {
                 return false;
             }
             if (type === "a") {
-                protyle.toolbar.showLink(protyle, target);
-                if (target.getAttribute("data-href").startsWith("siyuan://blocks")) {
+                linkMenu(protyle, target);
+                const rect =target.getBoundingClientRect();
+                setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
+                if (target.getAttribute("data-href")?.startsWith("siyuan://blocks")) {
                     // 阻止 popover
                     target.setAttribute("prevent-popover", "true");
                     setTimeout(() => {

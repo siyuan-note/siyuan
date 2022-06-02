@@ -29,6 +29,9 @@ export const getDisplayName = (filePath: string, basename = true, removeSY = fal
 };
 
 export const isLocalPath = (link: string) => {
+    if (!link) {
+        return false;
+    }
     return link.startsWith("assets/") || link.startsWith("file://");
 };
 
@@ -93,7 +96,7 @@ export const movePathTo = async (notebookId: string, path: string, focus = true)
             k: inputElement.value
         }, (data) => {
             let fileHTML = "";
-            data.data.forEach((item: { boxIcon:string, box: string, hPath: string, path: string }) => {
+            data.data.forEach((item: { boxIcon: string, box: string, hPath: string, path: string }) => {
                 if (item.path === pathPosix().dirname(path) + "/" || item.path === path) {
                     return;
                 }

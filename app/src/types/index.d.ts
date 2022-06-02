@@ -97,6 +97,8 @@ interface ISiyuan {
         userNickname: string
         userPaymentSum: string
         userSiYuanProExpireTime: number // -1 终身会员；0 普通用户；> 0 过期时间
+        userSiYuanSubscriptionPlan: number // 0 年付订阅/终生；1 教育优惠；2 订阅试用
+        userSiYuanSubscriptionType: number // 0 年付；1 终生；2 月付
         userToken: string
         userTitles: { name: string, icon: string, desc: string }[]
     },

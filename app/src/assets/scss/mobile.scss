@@ -198,19 +198,29 @@
   }
 
   .config-account {
+    &__bg {
+      position: relative;
+      margin-bottom: 82px;
+      width: 100%;
+      flex: 1;
+    }
+
     &__cover {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
       background-size: cover;
       background-position: center center;
-      height: 70vh;
     }
 
     &__avatar {
       position: absolute;
-      top: 50vh;
+      bottom: 24px;
       width: 128px;
       height: 128px;
       left: 50%;
-      margin: -64px 0 0 -64px;
+      margin-left: -64px;
       background-repeat: no-repeat;
       background-position: 50%;
       background-size: cover;
@@ -219,7 +229,16 @@
       box-shadow: var(--b3-point-shadow);
     }
 
+    &__info {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 16px;
+    }
+
     &__name {
+      bottom: -58px;
+      position: absolute;
+      width: 100%;
       text-align: center;
     }
   }

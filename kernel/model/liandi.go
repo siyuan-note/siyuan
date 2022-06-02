@@ -31,6 +31,23 @@ import (
 
 var ErrFailedToConnectCloudServer = errors.New("failed to connect cloud server")
 
+func StartFreeTrial() (err error) {
+	requestResult := gulu.Ret.NewResult()
+	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	_, err = request.
+		SetResult(requestResult).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		Post(util.AliyunServer + "/apis/siyuan/user/startFreeTrial")
+	if nil != err {
+		util.LogErrorf("start free trial failed: %s", err)
+		return ErrFailedToConnectCloudServer
+	}
+	if 0 != requestResult.Code {
+		return errors.New(requestResult.Msg)
+	}
+	return
+}
+
 func DeactivateUser() (err error) {
 	requestResult := gulu.Ret.NewResult()
 	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())

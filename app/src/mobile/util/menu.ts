@@ -27,35 +27,27 @@ const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) =
     modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconAccount"></use>';
     modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.accountManage;
     modelMainElement.innerHTML = `<div class="fn__flex-column">
-<div style="position: relative">
+<div class="config-account__bg">
     <div class="config-account__cover" style="background-image: url(${window.siyuan.user.userHomeBImgURL})"></div>
-    <a target="_blank" href="https://ld246.com/settings/avatar" class="config-account__avatar" style="background-image: url(${window.siyuan.user.userAvatarURL})" target="_blank"></a>
-</div>
-<div class="fn__hr"></div>
-<div class="fn__flex-1">
+    <a href="https://ld246.com/settings/avatar" class="config-account__avatar" style="background-image: url(${window.siyuan.user.userAvatarURL})" target="_blank"></a>
     <h1 class="config-account__name">
         <a target="_blank" class="fn__a" href="https://ld246.com/member/${window.siyuan.user.userName}">${window.siyuan.user.userName}</a>
     </h1>
     ${userTitlesHTML}
 </div>
-<div class="fn__hr"></div>
-<div class="fn__flex">
-    <span class="fn__space"></span>
-    <a class="b3-button b3-button--text" href="https://ld246.com/settings" target="_blank">${window.siyuan.languages.accountManage}</a>
-    <span class="fn__space"></span>
-    <button class="b3-button b3-button--cancel" id="logout">
-        ${window.siyuan.languages.logout}
-    </button>
-    <span class="fn__space"></span>
-    <button class="b3-button b3-button--cancel" id="deactivateUser">
-        ${window.siyuan.languages.deactivateUser}
-    </button>
-    <span class="fn__flex-1"></span>
-    <button class="b3-button b3-button--cancel" id="refresh">
-        <svg><use xlink:href="#iconRefresh"></use></svg>
-    </button>
-    <span class="fn__space"></span>
-</div>`;
+<div class="config-account__info">
+    <div class="fn__flex">
+        <a class="b3-button b3-button--text" href="https://ld246.com/settings" target="_blank">${window.siyuan.languages.accountManage}</a>
+        <span class="fn__space"></span>
+        <button class="b3-button b3-button--cancel" id="logout">
+            ${window.siyuan.languages.logout}
+        </button>
+        <span class="fn__flex-1"></span>
+        <button class="b3-button b3-button--cancel" id="refresh">
+            <svg><use xlink:href="#iconRefresh"></use></svg>
+        </button>
+    </div>
+</div></div>`;
 
     modelMainElement.querySelector("#logout").addEventListener(getEventName(), () => {
         fetchPost("/api/setting/logoutCloudUser", {}, () => {

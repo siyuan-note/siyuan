@@ -59,7 +59,7 @@ export const initConfigSearch = (element: HTMLElement) => {
 
         // 账号
         getLang(["accountTip", "accountName", "password", "captcha", "forgetPassword", "login", "register", "twoFactorCaptcha",
-            "account1", "account2", "account5", "account7", "networkProxy"]),
+            "account1", "account2", "account5", "networkProxy"]),
 
         // 关于
         getLang(["about", "about1", "about2", "about3", "about4", "about5", "about6", "about7", "about8",

@@ -29,7 +29,7 @@ export const account = {
 ${window.siyuan.languages.account2}
 <div><a href="https://b3log.org/siyuan/pricing.html" target="_blank">${window.siyuan.languages.account7}</a></div>
 <div class="fn__hr--b"></div>
-<span class="b3-chip b3-chip--primary" id="trialSub">
+<span class="b3-chip b3-chip--primary fn__pointer" id="trialSub">
     <svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>
     ${window.siyuan.languages.freeSub}
 </>

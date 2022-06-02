@@ -1,3 +1,32 @@
+## v2.0.16 / 2022-06-02
+
+### 改进功能
+
+* [免费提供一个月的订阅试用](https://github.com/siyuan-note/siyuan/issues/4186)
+* [代码块横向滚动条改进](https://github.com/siyuan-note/siyuan/issues/4985)
+* [`Echarts` 图表块无法渲染 3D 图表](https://github.com/siyuan-note/siyuan/issues/4992)
+* [桌面端资源文件链接支持菜单操作](https://github.com/siyuan-note/siyuan/issues/4998)
+* [断网时能够暂停云端同步](https://github.com/siyuan-note/siyuan/issues/5035)
+* [更换隐藏/显示停靠栏图标](https://github.com/siyuan-note/siyuan/issues/5037)
+* [为 Mermaid 添加支持 HTML 标签功能](https://github.com/siyuan-note/siyuan/issues/5074)
+* [升级 Mermaid](https://github.com/siyuan-note/siyuan/issues/5077)
+
+### 开发重构
+
+* [chore: update eslint deps](https://github.com/siyuan-note/siyuan/pull/5072)
+* [chore: deprecate `node-sass`](https://github.com/siyuan-note/siyuan/pull/5075)
+
+### 移除功能
+
+* [付费订阅不再支持退款](https://github.com/siyuan-note/siyuan/issues/5031)
+
+### 修复缺陷
+
+* [移动端导入大于 32M 的 Data 包失败](https://github.com/siyuan-note/siyuan/issues/5067)
+* [代码块语言选择列表覆盖在设置页面上](https://github.com/siyuan-note/siyuan/issues/5069)
+* [Android 端状态栏在明亮模式下不正确](https://github.com/siyuan-note/siyuan/issues/5070)
+* [过早提示订阅即将过期](https://github.com/siyuan-note/siyuan/issues/5081)
+
 ## v2.0.15 / 2022-06-01
 
 ### 改进功能

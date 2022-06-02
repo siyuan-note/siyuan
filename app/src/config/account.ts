@@ -29,10 +29,10 @@ export const account = {
 ${window.siyuan.languages.account2}
 <div><a href="https://b3log.org/siyuan/pricing.html" target="_blank">${window.siyuan.languages.account7}</a></div>
 <div class="fn__hr--b"></div>
-<a href="https://ld246.com/sponsor" target="_blank" class="b3-chip b3-chip--primary">
+<span class="b3-chip b3-chip--primary" id="trialSub">
     <svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>
-    ${window.siyuan.languages.sponsor}
-</a>
+    ${window.siyuan.languages.freeSub}
+</>
 <div class="fn__hr--b"></div>`;
         if (window.siyuan.user) {
             let userTitlesHTML = "";
@@ -157,6 +157,14 @@ ${window.siyuan.languages.account2}
 </div>`;
     },
     bindEvent: () => {
+        const trialSubElement = account.element.querySelector("#trialSub");
+        if (trialSubElement) {
+            trialSubElement.addEventListener("click", () => {
+                fetchPost("/api/account/startFreeTrial", () => {
+                    account.element.querySelector("#refresh").dispatchEvent(new Event("click"));
+                });
+            });
+        }
         const agreeLoginElement = account.element.querySelector("#agreeLogin") as HTMLInputElement;
         const userNameElement = account.element.querySelector("#userName") as HTMLInputElement;
         if (!userNameElement) {

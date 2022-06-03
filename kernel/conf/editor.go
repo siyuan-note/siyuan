@@ -42,7 +42,7 @@ func NewEditor() *Editor {
 		CodeLineWrap:                    false,
 		CodeLigatures:                   false,
 		DisplayBookmarkIcon:             true,
-		DisplayNetImgMark:               false,
+		DisplayNetImgMark:               true,
 		GenerateHistoryInterval:         10,
 		HistoryRetentionDays:            30,
 		Emoji:                           []string{},

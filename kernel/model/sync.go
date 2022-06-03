@@ -595,10 +595,11 @@ func workspaceData2SyncDir() (err error) {
 	filesys.ReleaseAllFileLocks()
 
 	passwd := Conf.E2EEPasswd
-	unchanged, err := unchangedDataList(passwd)
+	unchanged, removed, err := unchangedDataList(passwd)
 	if nil != err {
 		return
 	}
+	_ = removed // TODO: 支持多设备操作不同文档后云端同步合并 https://github.com/siyuan-note/siyuan/issues/5092
 
 	encryptedDataDir, err := prepareSyncData(passwd, unchanged)
 	if nil != err {
@@ -992,7 +993,7 @@ func unchangedSyncList() (ret map[string]bool, removes []string, err error) {
 }
 
 // unchangedDataList 获取 sync 和 data 一致（没有修改过）的文件列表，并删除 sync 中不存在于 data 中的多余文件。
-func unchangedDataList(passwd string) (ret map[string]bool, err error) {
+func unchangedDataList(passwd string) (unchangedList map[string]bool, removeList map[string]bool, err error) {
 	syncDir := Conf.Sync.GetSaveDir()
 	meta := filepath.Join(syncDir, pathJSON)
 	if !gulu.File.IsExist(meta) {
@@ -1004,7 +1005,8 @@ func unchangedDataList(passwd string) (ret map[string]bool, err error) {
 	}
 	data, err = encryption.AESGCMDecryptBinBytes(data, passwd)
 	if nil != err {
-		return ret, errors.New(Conf.Language(40))
+		err = errors.New(Conf.Language(40))
+		return
 	}
 
 	metaJSON := map[string]string{}
@@ -1012,8 +1014,8 @@ func unchangedDataList(passwd string) (ret map[string]bool, err error) {
 		return
 	}
 
-	ret = map[string]bool{}
-	var removeList []string
+	unchangedList = map[string]bool{}
+	removeList = map[string]bool{}
 	filepath.Walk(syncDir, func(path string, info fs.FileInfo, _ error) error {
 		if syncDir == path || pathJSON == info.Name() {
 			return nil
@@ -1022,8 +1024,8 @@ func unchangedDataList(passwd string) (ret map[string]bool, err error) {
 		encryptedP := strings.TrimPrefix(path, syncDir+string(os.PathSeparator))
 		encryptedP = filepath.ToSlash(encryptedP)
 		decryptedP := metaJSON[encryptedP]
-		if "" == decryptedP {
-			removeList = append(removeList, path)
+		if "" == decryptedP { // 理论上不会发生
+			removeList[path] = true
 			if gulu.File.IsDir(path) {
 				return filepath.SkipDir
 			}
@@ -1032,7 +1034,7 @@ func unchangedDataList(passwd string) (ret map[string]bool, err error) {
 		dataP := filepath.Join(util.DataDir, decryptedP)
 		dataP = filepath.FromSlash(dataP)
 		if !gulu.File.IsExist(dataP) { // data 已经删除的文件
-			removeList = append(removeList, path)
+			removeList[path] = true
 			if gulu.File.IsDir(path) {
 				return filepath.SkipDir
 			}
@@ -1042,14 +1044,14 @@ func unchangedDataList(passwd string) (ret map[string]bool, err error) {
 		stat, _ := os.Stat(dataP)
 		dataModTime := stat.ModTime()
 		if info.ModTime() == dataModTime {
-			ret[dataP] = true
+			unchangedList[dataP] = true
 			return nil
 		}
 		return nil
 	})
 
 	// 在 sync 中删除 data 中已经删除的文件
-	for _, remove := range removeList {
+	for remove, _ := range removeList {
 		if strings.HasSuffix(remove, "index.json") {
 			continue
 		}

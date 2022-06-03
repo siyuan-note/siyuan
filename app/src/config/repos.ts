@@ -325,6 +325,17 @@ ${passwordHTML}
     <span class="fn__space"></span>
     <input type="checkbox" id="reposCloudSyncSwitch"${window.siyuan.config.sync.enabled ? " checked='checked'" : ""} class="b3-switch fn__flex-center">
 </label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.syncMode}
+        <div class="b3-label__text">${window.siyuan.languages.syncModeTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <select id="syncMode" class="b3-select fn__flex-center fn__size200">
+        <option value="1" ${window.siyuan.config.sync.mode === 1 ? "selected" : ""}>${window.siyuan.languages.syncMode1}</option>
+        <option value="2" ${window.siyuan.config.sync.mode === 2 ? "selected" : ""}>${window.siyuan.languages.syncMode2}</option>
+    </select>
+</label>
 <div class="b3-label">
     <div class="fn__flex">
         <div class="fn__flex-center">${window.siyuan.languages.cloudSync}</div>
@@ -359,6 +370,17 @@ ${passwordHTML}
                     switchElement.checked = false;
                 } else {
                     window.siyuan.config.sync.enabled = switchElement.checked;
+                }
+            });
+        });
+        const syncModeElement = repos.element.querySelector("#syncMode") as HTMLSelectElement;
+        syncModeElement.addEventListener("change", () => {
+            fetchPost("/api/sync/setSyncMode", {mode: parseInt(syncModeElement.value, 10)}, (response) => {
+                if (response.code === 1) {
+                    showMessage(response.msg);
+                    syncModeElement.value = "1";
+                } else {
+                    window.siyuan.config.sync.mode = parseInt(syncModeElement.value, 10);
                 }
             });
         });

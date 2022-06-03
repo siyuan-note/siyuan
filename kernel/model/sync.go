@@ -513,6 +513,15 @@ func SetSyncEnable(b bool) (err error) {
 	return
 }
 
+func SetSyncMode(mode int) (err error) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	Conf.Sync.Mode = mode
+	Conf.Save()
+	return
+}
+
 var syncLock = sync.Mutex{}
 
 func syncDirUpsertWorkspaceData(downloadedFiles []string) (err error) {

@@ -214,6 +214,9 @@ func InitConf() {
 			util.LogErrorf("create sync dir [%s] failed: %s", Conf.Sync.GetSaveDir(), err)
 		}
 	}
+	if 0 == Conf.Sync.Mode {
+		Conf.Sync.Mode = 1
+	}
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()

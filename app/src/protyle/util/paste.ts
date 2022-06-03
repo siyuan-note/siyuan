@@ -103,7 +103,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
 
     const nodeElement = hasClosestBlock(event.target);
     if (!nodeElement) {
-        if (files.length > 0) {
+        if (files && files.length > 0) {
             uploadFiles(protyle, files);
         }
         return;
@@ -165,7 +165,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         } else if (textHTML.replace("<!--StartFragment--><!--EndFragment-->", "").trim() !== "") {
             textHTML = textHTML.replace("<!--StartFragment-->", "").replace("<!--EndFragment-->", "").trim();
             // 浏览器上复制当个图片应拷贝到本地，excel 中的复制需粘贴
-            if (files.length === 1 && textHTML.indexOf("<img") > -1) {
+            if (files && files.length === 1 && textHTML.indexOf("<img") > -1) {
                 isHTML = false;
             } else {
                 isHTML = true;
@@ -239,9 +239,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 });
                 return;
             }
-        } else if (files.length > 0) {
+        } else if (files && files.length > 0) {
             uploadFiles(protyle, files);
-        } else if (textPlain.trim() !== "" && files.length === 0) {
+        } else if (textPlain.trim() !== "" && files && files.length === 0) {
             if (range.toString() !== "") {
                 if (isDynamicRef(textPlain)) {
                     textPlain = textPlain.replace(/'.*'\)\)$/, ` "${Lute.EscapeHTMLStr(range.toString())}"))`);

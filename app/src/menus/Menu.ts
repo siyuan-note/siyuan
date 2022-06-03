@@ -77,7 +77,7 @@ export class MenuItem {
         }
         this.element.classList.add("b3-menu__item");
         if (options.current) {
-            this.element.classList.add("b3-menu__item--current");
+            this.element.classList.add("b3-menu__item--selected");
         }
         if (options.click) {
             this.element.addEventListener(getEventName(), (event) => {

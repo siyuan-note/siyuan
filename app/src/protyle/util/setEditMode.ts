@@ -10,6 +10,7 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         protyle.contentElement.classList.add("fn__none");
         protyle.scroll?.element.classList.add("fn__none");
         protyle.breadcrumb.element.classList.add("fn__none");
+        protyle.breadcrumb.element.nextElementSibling.classList.add("fn__flex-1");
 
         protyle.preview.render(protyle);
     } else if (type === "wysiwyg") {
@@ -22,6 +23,7 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         protyle.contentElement.classList.remove("fn__none");
         protyle.scroll?.element.classList.remove("fn__none");
         protyle.breadcrumb.element.classList.remove("fn__none");
+        protyle.breadcrumb.element.nextElementSibling.classList.remove("fn__flex-1");
 
     }
     hideElements( ["gutter", "toolbar", "select", "hint", "util"], protyle);

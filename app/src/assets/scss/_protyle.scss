@@ -109,6 +109,7 @@
   background-color: var(--b3-theme-background);
   flex-shrink: 0;
   box-sizing: border-box;
+  min-height: 30px;
 
   &__bar {
     align-items: center;

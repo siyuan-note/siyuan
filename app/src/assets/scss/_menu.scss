@@ -70,6 +70,10 @@
       }
     }
 
+    &--selected {
+      color: var(--b3-theme-primary);
+    }
+
     &--current {
       background-color: var(--b3-list-hover);
     }

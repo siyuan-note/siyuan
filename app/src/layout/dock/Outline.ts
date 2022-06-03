@@ -147,6 +147,15 @@ export class Outline extends Model {
                             getDockByType("outline").toggleModel("outline");
                             break;
                     }
+                    break;
+                } else if (target.isSameNode(this.headerElement.nextElementSibling) || target.classList.contains("block__icons")) {
+                    getAllModels().editor.find(item => {
+                        if (this.blockId === item.editor.protyle.block.rootID) {
+                            item.editor.protyle.contentElement.scrollTop = 0;
+                            return true;
+                        }
+                    });
+                    break;
                 }
                 target = target.parentElement;
             }
@@ -163,7 +172,7 @@ export class Outline extends Model {
         }
     }
 
-    public updateDocTitle(ial?:IObject) {
+    public updateDocTitle(ial?: IObject) {
         if (this.type === "pin") {
             if (ial) {
                 let iconHTML = `<span class="b3-list-item__graphic">${unicode2Emoji(ial.icon || Constants.SIYUAN_IMAGE_FILE)}</span>`;

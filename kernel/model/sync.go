@@ -1213,10 +1213,6 @@ func formatErrorMsg(err error) string {
 }
 
 func IsValidCloudDirName(cloudDirName string) bool {
-	if "backup" == cloudDirName {
-		return false
-	}
-
 	if 16 < utf8.RuneCountInString(cloudDirName) {
 		return false
 	}

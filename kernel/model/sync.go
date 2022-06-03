@@ -625,6 +625,7 @@ type CloudIndex struct {
 
 func genCloudIndex(localDirPath string, excludes map[string]bool) (err error) {
 	cloudIndex := map[string]*CloudIndex{}
+	// TODO: 优化云端同步资源占用 https://github.com/siyuan-note/siyuan/issues/5093
 	err = filepath.Walk(localDirPath, func(path string, info fs.FileInfo, err error) error {
 		if nil != err {
 			return err

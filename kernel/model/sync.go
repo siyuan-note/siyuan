@@ -30,6 +30,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
@@ -1112,6 +1113,8 @@ func CreateCloudSyncDir(name string) (err error) {
 	syncLock.Lock()
 	defer syncLock.Unlock()
 
+	name = strings.TrimSpace(name)
+	name = util.RemoveInvisible(name)
 	if !IsValidCloudDirName(name) {
 		return errors.New(Conf.Language(37))
 	}
@@ -1197,7 +1200,11 @@ func formatErrorMsg(err error) string {
 }
 
 func IsValidCloudDirName(cloudDirName string) bool {
-	if 64 < len(cloudDirName) {
+	if "backup" == cloudDirName {
+		return false
+	}
+
+	if 16 < utf8.RuneCountInString(cloudDirName) {
 		return false
 	}
 
@@ -1211,9 +1218,7 @@ func IsValidCloudDirName(cloudDirName string) bool {
 	if strings.ContainsAny(cloudDirName, charsStr) {
 		return false
 	}
-
-	tmp := util.RemoveInvisible(cloudDirName)
-	return tmp == cloudDirName
+	return true
 }
 
 func getSyncIgnoreList() (ret *hashset.Set) {

@@ -30,6 +30,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
@@ -1202,7 +1203,8 @@ func IsValidCloudDirName(cloudDirName string) bool {
 	if "backup" == cloudDirName {
 		return false
 	}
-	if 16 < len(cloudDirName) {
+
+	if 16 < utf8.RuneCountInString(cloudDirName) {
 		return false
 	}
 
@@ -1216,9 +1218,7 @@ func IsValidCloudDirName(cloudDirName string) bool {
 	if strings.ContainsAny(cloudDirName, charsStr) {
 		return false
 	}
-
-	tmp := util.RemoveInvisible(cloudDirName)
-	return tmp == cloudDirName
+	return true
 }
 
 func getSyncIgnoreList() (ret *hashset.Set) {

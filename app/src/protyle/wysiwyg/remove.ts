@@ -10,9 +10,10 @@ import {
 import {transaction, updateTransaction} from "./transaction";
 import {genEmptyElement} from "../../block/util";
 import {listOutdent, updateListOrder} from "./list";
-import {setFold} from "../../menus/protyle";
+import {setFold, zoomOut} from "../../menus/protyle";
 import {preventScroll} from "../scroll/preventScroll";
 import {hideElements} from "../ui/hideElements";
+import {Constants} from "../../constants";
 
 const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
@@ -183,10 +184,6 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             item.classList.remove("protyle-wysiwyg--select");
             const topElement = getTopAloneElement(item);
             topElementId = topElement.getAttribute("data-node-id");
-            if (topElement.parentElement.classList.contains("protyle-wysiwyg") && topElement.getAttribute("data-type") === "NodeListItem") {
-                // 缩放后列表项不能全选删除
-                return true;
-            }
             const id = topElement.getAttribute("data-node-id");
             deletes.push({
                 action: "delete",
@@ -236,37 +233,43 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             }
         });
         if (sideElement) {
-            if ((sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0) ||
-                ((sideElement.classList.contains("bq") || sideElement.classList.contains("sb")) && sideElement.childElementCount === 1)) {
-                const emptyElement = genEmptyElement(false, true, topElementId);
-                sideElement.insertAdjacentElement("afterbegin", emptyElement);
-                deletes.push({
-                    action: "insert",
-                    data: emptyElement.outerHTML,
-                    id: topElementId,
-                    parentID: sideElement.getAttribute("data-node-id") || protyle.block.parentID
-                });
-                inserts.push({
-                    action: "delete",
-                    id: topElementId,
-                });
-                sideElement = undefined;
-                focusByWbr(emptyElement, range);
-            }
+            if (protyle.block.showAll && sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0) {
+                setTimeout(() => {
+                    zoomOut(protyle, protyle.block.parent2ID, protyle.block.parent2ID);
+                }, Constants.TIMEOUT_INPUT * 2 + 100);
+            } else {
+                if ((sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0) ||
+                    ((sideElement.classList.contains("bq") || sideElement.classList.contains("sb")) && sideElement.childElementCount === 1)) {
+                    const emptyElement = genEmptyElement(false, true, topElementId);
+                    sideElement.insertAdjacentElement("afterbegin", emptyElement);
+                    deletes.push({
+                        action: "insert",
+                        data: emptyElement.outerHTML,
+                        id: topElementId,
+                        parentID: sideElement.getAttribute("data-node-id") || protyle.block.parentID
+                    });
+                    inserts.push({
+                        action: "delete",
+                        id: topElementId,
+                    });
+                    sideElement = undefined;
+                    focusByWbr(emptyElement, range);
+                }
 
-            focusBlock(sideElement, undefined, false);
-            if (listElement) {
-                inserts.push({
-                    action: "update",
-                    id: listElement.getAttribute("data-node-id"),
-                    data: listElement.outerHTML
-                });
-                updateListOrder(listElement, 1);
-                deletes.push({
-                    action: "update",
-                    id: listElement.getAttribute("data-node-id"),
-                    data: listElement.outerHTML
-                });
+                focusBlock(sideElement, undefined, false);
+                if (listElement) {
+                    inserts.push({
+                        action: "update",
+                        id: listElement.getAttribute("data-node-id"),
+                        data: listElement.outerHTML
+                    });
+                    updateListOrder(listElement, 1);
+                    deletes.push({
+                        action: "update",
+                        id: listElement.getAttribute("data-node-id"),
+                        data: listElement.outerHTML
+                    });
+                }
             }
         }
         if (deletes.length > 0) {

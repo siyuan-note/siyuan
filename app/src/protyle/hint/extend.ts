@@ -15,6 +15,7 @@ import {getDisplayName} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
 import {updateListOrder} from "../wysiwyg/list";
 import {escapeHtml} from "../../util/escape";
+import {zoomOut} from "../../menus/protyle";
 
 export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
@@ -480,6 +481,10 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
                 data: item.outerHTML
             });
         });
+    } else if (protyle.block.showAll && parentElement.classList.contains("protyle-wysiwyg") && parentElement.childElementCount === 0) {
+        setTimeout(() => {
+            zoomOut(protyle, protyle.block.parent2ID, protyle.block.parent2ID);
+        }, Constants.TIMEOUT_INPUT * 2 + 100);
     } else if (parentElement.classList.contains("protyle-wysiwyg") && parentElement.innerHTML === "" &&
         !hasClosestByClassName(parentElement, "block__edit", true) &&
         protyle.block.id === protyle.block.rootID) {

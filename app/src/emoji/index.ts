@@ -88,13 +88,13 @@ export const filterEmoji = (key = "", max?: number, assic = false) => {
         category.items.forEach(emoji => {
             if (key) {
                 if (window.siyuan.config.editor.emoji.includes(emoji.unicode) &&
-                    (unicode2Emoji(emoji.unicode) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
+                    (unicode2Emoji(emoji.unicode, true) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
                     recentEmojis.push(emoji);
                 }
                 if (max && maxCount > max) {
                     return;
                 }
-                if (unicode2Emoji(emoji.unicode) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1) {
+                if (unicode2Emoji(emoji.unicode, true) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1) {
                     if (category.id === "custom") {
                         customStore.push(emoji);
                     } else {
@@ -141,8 +141,8 @@ ${unicode2Emoji(item.unicode, assic)}</button>`;
     let recentHTML = "";
     if (recentEmojis.length > 0) {
         recentHTML = `<div class="emojis__title" data-type="0">${window.siyuan.languages.recentEmoji}</div><div class="emojis__content">`;
-        window.siyuan.config.editor.emoji.forEach(key => {
-            const emoji = recentEmojis.filter((item) => item.unicode === key);
+        window.siyuan.config.editor.emoji.forEach(emojiUnicode => {
+            const emoji = recentEmojis.filter((item) => item.unicode === emojiUnicode);
             if (emoji[0]) {
                 recentHTML += `<button data-unicode="${emoji[0].unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji[0].description_zh_cn : emoji[0].description}">
 ${unicode2Emoji(emoji[0].unicode, assic)}
@@ -240,8 +240,6 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
         if (event.key.indexOf("Arrow") === -1 && event.key !== "Enter") {
             return;
         }
-        event.preventDefault();
-        event.stopPropagation();
         const currentElement = window.siyuan.menus.menu.element.firstElementChild.querySelector(".emojis__item--current");
         if (!currentElement) {
             return;
@@ -269,6 +267,8 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
                     updateOutlineEmoji(unicode);
                 });
             }
+            event.preventDefault();
+            event.stopPropagation();
             return;
         }
         let newCurrentElement: HTMLElement;
@@ -276,17 +276,25 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
             if (currentElement.previousElementSibling) {
                 currentElement.classList.remove("emojis__item--current");
                 newCurrentElement = currentElement.previousElementSibling as HTMLElement;
+                event.preventDefault();
+                event.stopPropagation();
             } else if (currentElement.parentElement.previousElementSibling?.previousElementSibling) {
                 currentElement.classList.remove("emojis__item--current");
                 newCurrentElement = currentElement.parentElement.previousElementSibling.previousElementSibling.lastElementChild as HTMLElement;
+                event.preventDefault();
+                event.stopPropagation();
             }
         } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
             if (currentElement.nextElementSibling) {
                 currentElement.classList.remove("emojis__item--current");
                 newCurrentElement = currentElement.nextElementSibling as HTMLElement;
+                event.preventDefault();
+                event.stopPropagation();
             } else if (currentElement.parentElement.nextElementSibling?.nextElementSibling) {
                 currentElement.classList.remove("emojis__item--current");
                 newCurrentElement = currentElement.parentElement.nextElementSibling.nextElementSibling.firstElementChild as HTMLElement;
+                event.preventDefault();
+                event.stopPropagation();
             }
         }
         if (newCurrentElement) {

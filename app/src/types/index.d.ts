@@ -242,6 +242,7 @@ declare interface IConfig {
     e2eePasswdMode: number
     sync: {
         enabled: boolean
+        mode: number
         synced: number
         stat: string
         interval: number

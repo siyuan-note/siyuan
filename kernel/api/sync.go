@@ -140,6 +140,25 @@ func setSyncEnable(c *gin.Context) {
 	}
 }
 
+func setSyncMode(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	mode := int(arg["mode"].(float64))
+	err := model.SetSyncMode(mode)
+	if nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+}
+
 func setCloudSyncDir(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

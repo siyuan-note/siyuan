@@ -68,6 +68,10 @@ func AutoSync() {
 func SyncData(boot, exit, byHand bool) {
 	defer util.Recover()
 
+	if !boot && !exit && 2 == Conf.Sync.Mode && !byHand {
+		return
+	}
+
 	if util.IsMutexLocked(&syncLock) {
 		util.LogWarnf("sync has been locked")
 		syncInterval = 30 * time.Second
@@ -509,6 +513,15 @@ func SetSyncEnable(b bool) (err error) {
 	defer syncLock.Unlock()
 
 	Conf.Sync.Enabled = b
+	Conf.Save()
+	return
+}
+
+func SetSyncMode(mode int) (err error) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	Conf.Sync.Mode = mode
 	Conf.Save()
 	return
 }

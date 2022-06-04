@@ -2,7 +2,6 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {getRandom, isMobile} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {uploadFiles} from "../upload";
-import {hideMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
 import {getRandomEmoji, openEmojiPanel, unicode2Emoji, updateFileTreeEmoji, updateOutlineEmoji} from "../../emoji";
 import {upDownHint} from "../../util/upDownHint";

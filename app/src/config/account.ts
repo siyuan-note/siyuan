@@ -299,7 +299,7 @@ ${window.siyuan.languages.account8}`;
                 userPassword: md5(userPasswordElement.value),
                 captcha: captchaElement.value.replace(/(^\s*)|(\s*$)/g, ""),
             }, (data) => {
-                let messageId
+                let messageId;
                 if (data.code === 1) {
                     messageId = showMessage(data.msg);
                     if (data.data.needCaptcha) {

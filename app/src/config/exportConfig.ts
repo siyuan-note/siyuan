@@ -166,7 +166,7 @@ export const exportConfig = {
                     fetchPost("/api/export/exportDataInFolder", {
                         folder: result.filePath
                     }, () => {
-                        hideMessage(id)
+                        hideMessage(id);
                         afterExport(result.filePath);
                     });
                 }

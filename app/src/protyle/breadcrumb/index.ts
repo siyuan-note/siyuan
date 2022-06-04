@@ -166,7 +166,7 @@ export class Breadcrumb {
                         icon: "iconRecord",
                         label: this.mediaRecorder?.isRecording ? window.siyuan.languages.endRecord : window.siyuan.languages.startRecord,
                         click: () => {
-                            let messageId = ''
+                            let messageId = "";
                             if (!this.mediaRecorder) {
                                 navigator.mediaDevices.getUserMedia({audio: true}).then((mediaStream: MediaStream) => {
                                     this.mediaRecorder = new RecordMedia(mediaStream);

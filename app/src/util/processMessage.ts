@@ -1,4 +1,4 @@
-import {hideMessage, showMessage} from "../dialog/message";
+import {showMessage} from "../dialog/message";
 import {exportLayout} from "../layout/util";
 import {isMobile} from "./functions";
 

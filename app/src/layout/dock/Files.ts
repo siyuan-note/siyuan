@@ -8,7 +8,7 @@ import {newFile} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
 import {MenuItem} from "../../menus/Menu";
 import {Editor} from "../../editor";
-import {hideMessage, showMessage} from "../../dialog/message";
+import {showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {newNotebook} from "../../util/mount";

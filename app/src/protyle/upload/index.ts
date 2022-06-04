@@ -1,5 +1,5 @@
 import {insertHTML} from "../util/insertHTML";
-import {hideMessage, showMessage} from "../../dialog/message";
+import {showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 import {destroy} from "../util/destroy";
 import {fetchPost} from "../../util/fetch";

@@ -229,9 +229,11 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 		return
 	}
 
-	err = ossDownload0(localDirPath, cloudDirPath, "/.siyuan/conf.json", &fetchedFilesCount, &transferSize, bootOrExit)
-	if nil != err {
-		return
+	if "backup" != cloudDirPath {
+		err = ossDownload0(localDirPath, cloudDirPath, "/.siyuan/conf.json", &fetchedFilesCount, &transferSize, bootOrExit)
+		if nil != err {
+			return
+		}
 	}
 
 	if needPushProgress {

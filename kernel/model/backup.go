@@ -235,7 +235,7 @@ func RecoverLocalBackup() (err error) {
 	if syncEnabled {
 		func() {
 			time.Sleep(5 * time.Second)
-			util.PushMsg(Conf.Language(134), 7000)
+			util.PushMsg(Conf.Language(134), 0)
 		}()
 	}
 	return

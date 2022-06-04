@@ -665,8 +665,8 @@ func genFullCloudIndex(localDirPath string, excludes map[string]bool) (err error
 	return
 }
 
-// genCloudIndex 增量生成云端索引文件。
-func genIncCloudIndex(localDirPath string, localFileList *map[string]*CloudIndex, removes, upserts, excludes map[string]bool) (err error) {
+// incCloudIndex 增量生成云端索引文件。
+func incCloudIndex(localDirPath string, localFileList *map[string]*CloudIndex, removes, upserts, excludes map[string]bool) (err error) {
 	for remove, _ := range removes {
 		delete(*localFileList, remove)
 	}
@@ -691,16 +691,6 @@ func genIncCloudIndex(localDirPath string, localFileList *map[string]*CloudIndex
 			return hashErr
 		}
 		(*localFileList)[upsert] = &CloudIndex{Hash: hash, Size: info.Size()}
-	}
-
-	data, err := gulu.JSON.MarshalJSON(localFileList)
-	if nil != err {
-		util.LogErrorf("marshal sync cloud index failed: %s", err)
-		return
-	}
-	if err = os.WriteFile(filepath.Join(localDirPath, "index.json"), data, 0644); nil != err {
-		util.LogErrorf("write sync cloud index failed: %s", err)
-		return
 	}
 	return
 }

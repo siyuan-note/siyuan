@@ -728,7 +728,7 @@ func localUpsertRemoveListOSS(localDirPath string, cloudFileList map[string]*Clo
 func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList map[string]*CloudIndex, removedSyncList, upsertedSyncList, excludes map[string]bool) (localUpserts, cloudRemoves []string, err error) {
 	localUpserts, cloudRemoves = []string{}, []string{}
 
-	if err = genIncCloudIndex(localDirPath, &localFileList, removedSyncList, upsertedSyncList, excludes); nil != err {
+	if err = incCloudIndex(localDirPath, &localFileList, removedSyncList, upsertedSyncList, excludes); nil != err {
 		return
 	}
 
@@ -763,6 +763,32 @@ func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList 
 		}
 		return nil
 	})
+
+	// syncignore 变更以后 cloud 和 local index 不一致，需要重新补全 local index
+	for _, upsert := range localUpserts {
+		info, statErr := os.Stat(upsert)
+		if nil != statErr {
+			util.LogErrorf("stat file [%s] failed: %s", upsert, statErr)
+			err = statErr
+			return
+		}
+		hash, hashErr := util.GetEtag(upsert)
+		if nil != hashErr {
+			util.LogErrorf("get file [%s] hash failed: %s", upsert, hashErr)
+			err = hashErr
+			return
+		}
+		localFileList[filepath.ToSlash(strings.TrimPrefix(upsert, localDirPath))] = &CloudIndex{Hash: hash, Size: info.Size()}
+	}
+	data, err := gulu.JSON.MarshalJSON(localFileList)
+	if nil != err {
+		util.LogErrorf("marshal sync cloud index failed: %s", err)
+		return
+	}
+	if err = os.WriteFile(filepath.Join(localDirPath, "index.json"), data, 0644); nil != err {
+		util.LogErrorf("write sync cloud index failed: %s", err)
+		return
+	}
 	return
 }
 

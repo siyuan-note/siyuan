@@ -278,7 +278,7 @@ func CreateLocalBackup() (err error) {
 		return
 	}
 
-	err = genCloudIndex(newBackupDir, map[string]bool{})
+	err = genFullCloudIndex(newBackupDir, map[string]bool{})
 	if nil != err {
 		return
 	}
@@ -364,7 +364,7 @@ func UploadBackup() (err error) {
 	util.PushEndlessProgress(Conf.Language(61))
 	util.LogInfof("uploading backup...")
 	start := time.Now()
-	wroteFiles, transferSize, err := ossUpload(localDirPath, "backup", "", false)
+	wroteFiles, transferSize, err := ossUpload(localDirPath, "backup", "not exist", false, map[string]bool{}, map[string]bool{})
 	if nil == err {
 		elapsed := time.Now().Sub(start).Seconds()
 		util.LogInfof("uploaded backup [wroteFiles=%d, transferSize=%s] in [%.2fs]", wroteFiles, humanize.Bytes(transferSize), elapsed)

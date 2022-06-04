@@ -135,8 +135,9 @@ func SyncData(boot, exit, byHand bool) {
 	WaitForWritingFiles()
 	writingDataLock.Lock()
 	var err error
+	var removedSyncList, upsertedSyncList map[string]bool
 	// 将 data 变更同步到 sync
-	if err = workspaceData2SyncDir(); nil != err {
+	if removedSyncList, upsertedSyncList, err = workspaceData2SyncDir(); nil != err {
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		Conf.Sync.Stat = msg
 		util.PushErrMsg(msg, 7000)
@@ -245,7 +246,7 @@ func SyncData(boot, exit, byHand bool) {
 			return
 		}
 
-		wroteFiles, transferSize, err := ossUpload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, device, boot)
+		wroteFiles, transferSize, err := ossUpload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, device, boot, removedSyncList, upsertedSyncList)
 		if nil != err {
 			util.PushClearMsg()
 			IncWorkspaceDataVer() // 上传失败的话提升本地版本，以备下次上传
@@ -560,7 +561,7 @@ func syncDirUpsertWorkspaceData(downloadedFiles []string) (err error) {
 //   2. 将 sync 中新增/修改的文件解密后拷贝到 data 中
 func syncDir2WorkspaceData(boot bool) (upsertFiles, removeFiles []string, err error) {
 	start := time.Now()
-	unchanged, removeFiles, err := unchangedSyncList()
+	unchanged, removeFiles, err := calcUnchangedSyncList()
 	if nil != err {
 		return
 	}
@@ -590,7 +591,7 @@ func syncDir2WorkspaceData(boot bool) (upsertFiles, removeFiles []string, err er
 // workspaceData2SyncDir 将 data 的数据更新到 sync 中。
 //   1. 删除 sync 中多余的文件
 //   2. 将 data 中新增/修改的文件加密后拷贝到 sync 中
-func workspaceData2SyncDir() (err error) {
+func workspaceData2SyncDir() (removedSyncList, upsertedSyncList map[string]bool, err error) {
 	start := time.Now()
 	filesys.ReleaseAllFileLocks()
 
@@ -599,9 +600,8 @@ func workspaceData2SyncDir() (err error) {
 	if nil != err {
 		return
 	}
-	_ = removedSyncList // TODO: 支持多设备操作不同文档后云端同步合并 https://github.com/siyuan-note/siyuan/issues/5092
 
-	encryptedDataDir, err := prepareSyncData(passwd, unchangedDataList)
+	encryptedDataDir, upsertedSyncList, err := prepareSyncData(passwd, unchangedDataList)
 	if nil != err {
 		util.LogErrorf("encrypt data dir failed: %s", err)
 		return
@@ -623,9 +623,9 @@ type CloudIndex struct {
 	Size int64  `json:"size"`
 }
 
-func genCloudIndex(localDirPath string, excludes map[string]bool) (err error) {
+// genCloudIndex 全量生成云端索引文件。
+func genFullCloudIndex(localDirPath string, excludes map[string]bool) (err error) {
 	cloudIndex := map[string]*CloudIndex{}
-	// TODO: 优化云端同步资源占用 https://github.com/siyuan-note/siyuan/issues/5093
 	err = filepath.Walk(localDirPath, func(path string, info fs.FileInfo, err error) error {
 		if nil != err {
 			return err
@@ -654,6 +654,46 @@ func genCloudIndex(localDirPath string, excludes map[string]bool) (err error) {
 		return
 	}
 	data, err := gulu.JSON.MarshalJSON(cloudIndex)
+	if nil != err {
+		util.LogErrorf("marshal sync cloud index failed: %s", err)
+		return
+	}
+	if err = os.WriteFile(filepath.Join(localDirPath, "index.json"), data, 0644); nil != err {
+		util.LogErrorf("write sync cloud index failed: %s", err)
+		return
+	}
+	return
+}
+
+// genCloudIndex 增量生成云端索引文件。
+func genIncCloudIndex(localDirPath string, localFileList *map[string]*CloudIndex, removes, upserts, excludes map[string]bool) (err error) {
+	for remove, _ := range removes {
+		delete(*localFileList, remove)
+	}
+	for exclude, _ := range excludes {
+		delete(*localFileList, filepath.ToSlash(strings.TrimPrefix(exclude, localDirPath)))
+	}
+
+	for upsert, _ := range upserts {
+		path := filepath.Join(localDirPath, upsert)
+		if excludes[path] {
+			continue
+		}
+
+		info, statErr := os.Stat(path)
+		if nil != statErr {
+			util.LogErrorf("stat file [%s] failed: %s", path, statErr)
+			return statErr
+		}
+		hash, hashErr := util.GetEtag(path)
+		if nil != hashErr {
+			util.LogErrorf("get file [%s] hash failed: %s", path, hashErr)
+			return hashErr
+		}
+		(*localFileList)[upsert] = &CloudIndex{Hash: hash, Size: info.Size()}
+	}
+
+	data, err := gulu.JSON.MarshalJSON(localFileList)
 	if nil != err {
 		util.LogErrorf("marshal sync cloud index failed: %s", err)
 		return
@@ -764,7 +804,7 @@ func recoverSyncData(modified map[string]bool) (decryptedDataDir string, upsertF
 	return
 }
 
-func prepareSyncData(passwd string, unchangedList map[string]bool) (encryptedDataDir string, err error) {
+func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encryptedDataDir string, upsertedSyncList map[string]bool, err error) {
 	encryptedDataDir = filepath.Join(util.WorkspaceDir, "incremental", "sync-encrypt")
 	if err = os.RemoveAll(encryptedDataDir); nil != err {
 		return
@@ -797,7 +837,7 @@ func prepareSyncData(passwd string, unchangedList map[string]bool) (encryptedDat
 		metaJSON[filepath.ToSlash(p)] = filepath.ToSlash(plainP)
 
 		// 如果不是新增或者修改则跳过
-		if unchangedList[path] {
+		if unchangedDataList[path] {
 			return nil
 		}
 
@@ -857,6 +897,7 @@ func prepareSyncData(passwd string, unchangedList map[string]bool) (encryptedDat
 		}
 	}
 
+	upsertedSyncList = map[string]bool{}
 	// 检查文件是否全部已经编入索引
 	err = filepath.Walk(encryptedDataDir, func(path string, info fs.FileInfo, _ error) error {
 		if encryptedDataDir == path {
@@ -868,6 +909,10 @@ func prepareSyncData(passwd string, unchangedList map[string]bool) (encryptedDat
 		if _, ok := metaJSON[path]; !ok {
 			util.LogErrorf("not found sync path in meta [%s]", path)
 			return errors.New(Conf.Language(27))
+		}
+
+		if !info.IsDir() {
+			upsertedSyncList["/"+path] = true
 		}
 		return nil
 	})
@@ -881,7 +926,8 @@ func prepareSyncData(passwd string, unchangedList map[string]bool) (encryptedDat
 	}
 	data, err = encryption.AESGCMEncryptBinBytes(data, passwd)
 	if nil != err {
-		return "", errors.New("encrypt file failed")
+		util.LogErrorf("encrypt file failed: %s", err)
+		return
 	}
 	meta := filepath.Join(encryptedDataDir, pathJSON)
 	if err = os.WriteFile(meta, data, 0644); nil != err {
@@ -907,8 +953,8 @@ func modifiedSyncList(unchangedList map[string]bool) (ret map[string]bool) {
 	return
 }
 
-// unchangedSyncList 获取 data 和 sync 一致（没有修改过）的文件列表，并删除 data 中不存在于 sync 中的多余文件。
-func unchangedSyncList() (ret map[string]bool, removes []string, err error) {
+// calcUnchangedSyncList 获取 data 和 sync 一致（没有修改过）的文件列表，并删除 data 中不存在于 sync 中的多余文件。
+func calcUnchangedSyncList() (ret map[string]bool, removes []string, err error) {
 	syncDir := Conf.Sync.GetSaveDir()
 	meta := filepath.Join(syncDir, pathJSON)
 	if !gulu.File.IsExist(meta) {
@@ -1051,16 +1097,22 @@ func calcUnchangedDataList(passwd string) (unchangedDataList map[string]bool, re
 		return nil
 	})
 
+	tmp := map[string]bool{}
 	// 在 sync 中删除 data 中已经删除的文件
 	for remove, _ := range removedSyncList {
 		if strings.HasSuffix(remove, "index.json") {
 			continue
 		}
 
+		p := strings.TrimPrefix(remove, syncDir)
+		p = filepath.ToSlash(p)
+		tmp[p] = true
+
 		if err = os.RemoveAll(remove); nil != err {
 			util.LogErrorf("remove [%s] failed: %s", remove, err)
 		}
 	}
+	removedSyncList = tmp
 	return
 }
 

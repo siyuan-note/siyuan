@@ -26,6 +26,8 @@ export const account = {
     </span>
 </a>
 <div class="fn__hr--b"></div>
+${window.siyuan.languages.account8}
+<div class="fn__hr"></div>
 ${window.siyuan.languages.account2}
 <div><a href="https://b3log.org/siyuan/pricing.html" target="_blank">${window.siyuan.languages.account7}</a></div>
 <div class="fn__hr--b"></div>
@@ -55,8 +57,11 @@ ${window.siyuan.languages.account2}
                 subscriptionHTML = `<div class="b3-chip b3-chip--secondary">${Constants.SIYUAN_IMAGE_VIP}${window.siyuan.languages.account12}</div>`;
             } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
                 if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
-                    subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div><div class="fn__hr"></div>
-<div class="ft__on-surface ft__smaller">${window.siyuan.languages.account6} ${Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24)} ${window.siyuan.languages.day} ${window.siyuan.languages.clickMeToRenew}</div>`;
+                    subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
+<div class="fn__hr"></div>
+<div class="ft__on-surface ft__smaller">${window.siyuan.languages.account6} ${Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24)} ${window.siyuan.languages.day} ${window.siyuan.languages.clickMeToRenew}</div>
+<div class="fn__hr"></div>
+${window.siyuan.languages.account8}`;
                 } else {
                     subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div><div class="fn__hr"></div>
 <div class="ft__on-surface ft__smaller">${window.siyuan.languages.account6} ${Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24)} ${window.siyuan.languages.day} ${window.siyuan.languages.clickMeToRenew}</div>`;

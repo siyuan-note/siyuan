@@ -13,6 +13,7 @@ import {repos} from "./config/repos";
 import {openFileById} from "./editor/util";
 import {bootSync, downloadProgress, progressLoading, setTitle, transactionError} from "./dialog/processSystem";
 import {promiseTransactions} from "./protyle/wysiwyg/transaction";
+import {initMessage, showMessage} from "./dialog/message";
 
 class App {
     constructor() {
@@ -87,6 +88,7 @@ class App {
                         dragElement.style.paddingRight = (dragElement.getBoundingClientRect().left - document.querySelector("#windowControls").clientWidth) + "px";
                     }
                     setTitle(window.siyuan.languages.siyuanNote);
+                    initMessage();
                 });
             });
         });

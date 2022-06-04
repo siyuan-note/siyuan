@@ -8,7 +8,6 @@ export const processMessage = (response: IWebSocketData) => {
         return false;
     }
     if ("cmsg" === response.cmd) {
-        hideMessage();
         const progressElement = document.getElementById("progress");
         if (progressElement) {
             progressElement.remove();

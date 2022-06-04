@@ -602,7 +602,6 @@ export class Files extends Model {
     }
 
     private onMount(data: { data: { box: INotebook, existed?: boolean }, callback?: string }) {
-        hideMessage();
         if (data.data.existed) {
             return;
         }

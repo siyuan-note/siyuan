@@ -1,4 +1,4 @@
-import {showMessage} from "../../dialog/message";
+import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {PrintToPDFOptions, SaveDialogReturnValue} from "electron";
@@ -126,7 +126,7 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
             properties: ["showOverwriteConfirmation"],
         }).then((result: SaveDialogReturnValue) => {
             if (!result.canceled) {
-                showMessage(window.siyuan.languages.exporting, -1);
+                const id = showMessage(window.siyuan.languages.exporting, -1);
                 let url = "/api/export/exportHTML";
                 if (option.type === "htmlmd") {
                     url = "/api/export/exportMdHTML";
@@ -138,6 +138,7 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
                     pdf: option.type === "pdf",
                     savePath: result.filePath
                 }, exportResponse => {
+                    hideMessage(id);
                     if (option.type === "word") {
                         afterExport(result.filePath);
                     } else {

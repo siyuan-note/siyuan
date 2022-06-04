@@ -1,22 +1,29 @@
 .b3-snackbar {
-  position: fixed;
-  top: 0;
-  z-index: 502;
-  transform: translate3d(0, -100px, 0);
-  opacity: 0;
-  transition: opacity 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms, transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  height: 0;
-  display: flex;
+  //transform: translate3d(0, -100px, 0);
+  //transition: opacity 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms, transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
 
-  &--show {
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
+  margin-bottom: 16px;
+  position: relative;
 
-    .b3-snackbar__content {
-      transform: none;
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &s {
+    position: fixed;
+    right: -2px;
+    top: 16px;
+    z-index: 502;
+    max-height: calc(100vh - 32px);
+    display: flex;
+    flex-direction: column;
+
+    & > .fn__flex-1 {
+      padding: 0 18px;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
     }
   }
 
@@ -33,13 +40,11 @@
     font-size: inherit;
     background-color: var(--b3-theme-primary);
     box-sizing: border-box;
-    box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%), 0 6px 10px 0 rgb(0 0 0 / 14%), 0 1px 18px 0 rgb(0 0 0 / 12%);
     transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
-    transform: scale(0.8);
-    top: 16px;
-    position: absolute;
     word-break: break-word;
-    max-width: 80vw;
+    width: 20vw;
+    min-width: 240px;
 
     a {
       color: var(--b3-theme-on-primary);
@@ -54,9 +59,18 @@
   &__close {
     position: absolute;
     cursor: pointer;
-    top: 8px;
-    right: -30px;
-    height: 14px;
-    width: 14px;
+    top: 10px;
+    right: 4px;
+    height: 8px;
+    width: 8px;
+    padding: 4px;
+    border-radius: 10px;
+    color: var(--b3-theme-background-light);
+    transition: var(--b3-transition);
+
+    &:hover {
+      color: var(--b3-theme-on-background);
+      background-color: var(--b3-theme-background-light);
+    }
   }
 }

@@ -160,7 +160,6 @@ export const keymap = {
             item.addEventListener("keydown", function (event) {
                 event.stopPropagation();
                 event.preventDefault();
-                hideMessage();
                 let keymapStr = "";
                 if (event.ctrlKey && !event.metaKey && isMac()) {
                     keymapStr += "⌃";

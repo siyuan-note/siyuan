@@ -14,6 +14,7 @@ import {initAssets, loadAssets} from "../util/assets";
 import {openMobileFileById} from "./editor";
 import {promiseTransactions} from "../protyle/wysiwyg/transaction";
 import {bootSync} from "../dialog/processSystem";
+import {initMessage} from "../dialog/message";
 
 class App {
     constructor() {
@@ -58,6 +59,7 @@ class App {
                     } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
                         window.JSAndroid.changeStatusBarColor(getComputedStyle(document.body).getPropertyValue("--b3-theme-background"), window.siyuan.config.appearance.mode);
                     }
+                    initMessage();
                 });
             });
             if (navigator.userAgent.indexOf("iPhone") > -1) {

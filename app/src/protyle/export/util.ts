@@ -5,7 +5,7 @@ import {shell} from "electron";
 import * as path from "path";
 
 export const afterExport = (exportPath: string) => {
-    showMessage(`<div class="fn__flex">
+    const id = showMessage(`<div class="fn__flex">
     <div class="fn__flex-center">${window.siyuan.languages.exported}${escapeHtml(exportPath)}</div> 
     <div class="fn__space"></div>
     <div class="fn__space"></div>
@@ -13,7 +13,7 @@ export const afterExport = (exportPath: string) => {
 </div>`, 6000);
     document.querySelector("#message button").addEventListener("click", () => {
         shell.showItemInFolder(path.join(exportPath));
-        hideMessage();
+        hideMessage(id);
     });
 };
 /// #endif

@@ -17,7 +17,6 @@ export class Upload {
 }
 
 const validateFile = (protyle: IProtyle, files: File[]) => {
-    hideMessage();
     const uploadFileList = [];
     let errorTip = "";
     let uploadingStr = "";
@@ -94,8 +93,6 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
 
     if (errorTip) {
         showMessage(errorTip);
-    } else {
-        hideMessage();
     }
 
     let succFileText = "";

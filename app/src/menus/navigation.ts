@@ -108,12 +108,12 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
         label: window.siyuan.languages.export,
         icon: "iconUpload",
         click: () => {
-            showMessage(window.siyuan.languages.exporting, -1);
+            const id = showMessage(window.siyuan.languages.exporting, -1);
             fetchPost("/api/export/batchExportMd", {
                 notebook: notebookId,
                 path: "/"
             }, response => {
-                hideMessage();
+                hideMessage(id);
                 window.open(response.data.zip);
             });
         }

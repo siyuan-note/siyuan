@@ -1,4 +1,4 @@
-import {hideMessage, showMessage} from "../dialog/message";
+import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {focusByRange} from "../protyle/util/selection";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
@@ -11,7 +11,6 @@ import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 
 export const validateName = (name: string) => {
-    hideMessage();
     if (/\r\n|\r|\n|\u2028|\u2029|\t|\//.test(name)) {
         showMessage(window.siyuan.languages.fileNameRule);
         return false;

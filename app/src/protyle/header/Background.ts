@@ -81,7 +81,6 @@ export class Background {
             uploadFiles(protyle, event.target.files, event.target, (responseText) => {
                 const response = JSON.parse(responseText);
                 const style = `background-image:url(${response.data.succMap[Object.keys(response.data.succMap)[0]]})`;
-                hideMessage();
                 this.ial["title-img"] = Lute.EscapeHTMLStr(style);
                 this.render(this.ial, protyle.block.rootID);
                 fetchPost("/api/attr/setBlockAttrs", {

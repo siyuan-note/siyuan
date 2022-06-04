@@ -5,7 +5,7 @@ import {SaveDialogReturnValue, shell} from "electron";
 import {afterExport} from "../protyle/export/util";
 /// #endif
 import {isBrowser} from "../util/functions";
-import {showMessage} from "../dialog/message";
+import {hideMessage, showMessage} from "../dialog/message";
 
 export const exportConfig = {
     element: undefined as Element,
@@ -162,10 +162,11 @@ export const exportConfig = {
                 properties: ["showOverwriteConfirmation"],
             }).then((result: SaveDialogReturnValue) => {
                 if (!result.canceled) {
-                    showMessage(window.siyuan.languages.exporting, -1);
+                    const id = showMessage(window.siyuan.languages.exporting, -1);
                     fetchPost("/api/export/exportDataInFolder", {
                         folder: result.filePath
                     }, () => {
+                        hideMessage(id)
                         afterExport(result.filePath);
                     });
                 }

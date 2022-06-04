@@ -299,8 +299,9 @@ ${window.siyuan.languages.account8}`;
                 userPassword: md5(userPasswordElement.value),
                 captcha: captchaElement.value.replace(/(^\s*)|(\s*$)/g, ""),
             }, (data) => {
+                let messageId
                 if (data.code === 1) {
-                    showMessage(data.msg);
+                    messageId = showMessage(data.msg);
                     if (data.data.needCaptcha) {
                         // 验证码
                         needCaptcha = data.data.needCaptcha;
@@ -320,7 +321,7 @@ ${window.siyuan.languages.account8}`;
                     token = data.data.token;
                     return;
                 }
-                hideMessage();
+                hideMessage(messageId);
                 fetchPost("/api/setting/getCloudUser", {
                     token: data.data.token,
                 }, response => {

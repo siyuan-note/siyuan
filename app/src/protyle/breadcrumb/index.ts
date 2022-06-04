@@ -166,6 +166,7 @@ export class Breadcrumb {
                         icon: "iconRecord",
                         label: this.mediaRecorder?.isRecording ? window.siyuan.languages.endRecord : window.siyuan.languages.startRecord,
                         click: () => {
+                            let messageId = ''
                             if (!this.mediaRecorder) {
                                 navigator.mediaDevices.getUserMedia({audio: true}).then((mediaStream: MediaStream) => {
                                     this.mediaRecorder = new RecordMedia(mediaStream);
@@ -180,7 +181,7 @@ export class Breadcrumb {
                                         this.mediaRecorder.cloneChannelData(left, right);
                                     };
                                     this.mediaRecorder.startRecordingNewWavFile();
-                                    showMessage(window.siyuan.languages.recording, 86400000);
+                                    id = showMessage(window.siyuan.languages.recording, -1);
                                 }).catch(() => {
                                     showMessage(window.siyuan.languages["record-tip"]);
                                 });
@@ -189,12 +190,13 @@ export class Breadcrumb {
 
                             if (this.mediaRecorder.isRecording) {
                                 this.mediaRecorder.stopRecording();
-                                hideMessage();
+                                hideMessage(messageId);
                                 const file: File = new File([this.mediaRecorder.buildWavFileBlob()],
                                     `record${(new Date()).getTime()}.wav`, {type: "video/webm"});
                                 uploadFiles(protyle, [file]);
                             } else {
-                                showMessage(window.siyuan.languages.recording, 86400000);
+                                hideMessage(messageId);
+                                messageId = showMessage(window.siyuan.languages.recording, -1);
                                 this.mediaRecorder.startRecordingNewWavFile();
                             }
                         }

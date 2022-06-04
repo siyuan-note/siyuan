@@ -723,7 +723,7 @@ func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList map[string]*Clo
 	ignores := syncIgnoreList.Values()
 	for _, p := range ignores {
 		relPath := p.(string)
-		relPath = pathSha246(relPath, "/")
+		relPath = pathSha256Short(relPath, "/")
 		relPath = filepath.Join(localDirPath, relPath)
 		excludes[relPath] = true
 	}

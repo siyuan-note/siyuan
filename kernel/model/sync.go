@@ -792,7 +792,7 @@ func prepareSyncData(passwd string, unchangedList map[string]bool) (encryptedDat
 		p := plainP
 
 		if !strings.HasPrefix(plainP, ".siyuan") { // 配置目录下都用明文，其他文件需要映射文件名
-			p = pathSha246(p, string(os.PathSeparator))
+			p = pathSha256Short(p, string(os.PathSeparator))
 		}
 		metaJSON[filepath.ToSlash(p)] = filepath.ToSlash(plainP)
 
@@ -935,7 +935,7 @@ func unchangedSyncList() (ret map[string]bool, removes []string, err error) {
 	ignores := syncIgnoreList.Values()
 	for _, p := range ignores {
 		relPath := p.(string)
-		relPath = pathSha246(relPath, "/")
+		relPath = pathSha256Short(relPath, "/")
 		relPath = filepath.Join(syncDir, relPath)
 		excludes[relPath] = true
 	}
@@ -956,7 +956,7 @@ func unchangedSyncList() (ret map[string]bool, removes []string, err error) {
 
 		plainP := strings.TrimPrefix(path, util.DataDir+sep)
 		dataP := plainP
-		dataP = pathSha246(dataP, sep)
+		dataP = pathSha256Short(dataP, sep)
 		syncP := filepath.Join(syncDir, dataP)
 
 		if excludes[syncP] {
@@ -1291,7 +1291,7 @@ func getSyncIgnoreList() (ret *hashset.Set) {
 	return
 }
 
-func pathSha246(p, sep string) string {
+func pathSha256Short(p, sep string) string {
 	buf := bytes.Buffer{}
 	parts := strings.Split(p, sep)
 	for i, part := range parts {

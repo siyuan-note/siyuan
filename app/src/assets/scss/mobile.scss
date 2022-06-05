@@ -283,6 +283,17 @@
   display: none;
 }
 
+#historyContainer {
+  & > div {
+    flex-direction: column;
+
+    & > ul {
+      width: auto !important;
+      flex: 1;
+    }
+  }
+}
+
 @media (max-width: 620px) {
   .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"] {
     flex-direction: column;

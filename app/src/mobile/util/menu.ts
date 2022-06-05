@@ -12,6 +12,7 @@ import * as md5 from "blueimp-md5";
 import {showMessage} from "../../dialog/message";
 import {exitSiYuan} from "../../dialog/processSystem";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {openHistory} from "../../util/history";
 
 const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) => {
     closePanel();
@@ -123,6 +124,9 @@ export const popMenu = () => {
 </div>
 <div class="b3-list-item b3-list-item--big" id="menuSyncNow">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconRefresh"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.syncNow}</span>
+</div>
+<div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHistory">
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconVideo"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.dataHistory}</span>
 </div>
 <div slot="border-bottom: 1px solid var(--b3-border-color);"></div>
 <div class="b3-list-item b3-list-item--big" id="menuAppearance">
@@ -312,6 +316,13 @@ ${accountHTML}
             }
             fetchPost("/api/sync/performSync", {});
         });
+        if (!window.siyuan.config.readonly) {
+            document.getElementById("menuHistory").addEventListener(getEventName(), (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                openHistory();
+            });
+        }
         document.getElementById("menuAccount").addEventListener(getEventName(), (event) => {
             event.stopPropagation();
             event.preventDefault();

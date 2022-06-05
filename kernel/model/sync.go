@@ -329,22 +329,6 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
-	// 解密验证成功后将其移动到 sync/ 文件夹下
-	if err = os.Rename(tmpPathJSON, filepath.Join(localSyncDirPath, pathJSON)); nil != err {
-		util.PushClearProgress()
-		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
-		Conf.Sync.Stat = msg
-		util.PushErrMsg(msg, 7000)
-		if boot {
-			BootSyncSucc = 1
-		}
-		if exit {
-			ExitSyncSucc = 1
-		}
-		syncDownloadErrCount++
-		return
-	}
-
 	fetchedFilesCount, transferSize, downloadedFiles, err := ossDownload(false, localSyncDirPath, "sync/"+Conf.Sync.CloudName, boot || exit, removeList, upsertList)
 	if nil != err {
 		util.PushClearProgress()
@@ -569,7 +553,7 @@ func syncDir2WorkspaceData(boot bool) (upsertFiles, removeFiles []string, err er
 	}
 
 	modified := modifiedSyncList(unchanged)
-	metaPath := filepath.Join(Conf.Sync.GetSaveDir(), pathJSON)
+	metaPath := filepath.Join(util.TempDir, "sync", pathJSON) // 使用前面解密验证时下载的临时文件
 	indexPath := filepath.Join(Conf.Sync.GetSaveDir(), "index.json")
 	decryptedDataDir, upsertFiles, err := recoverSyncData(metaPath, indexPath, modified)
 	if nil != err {

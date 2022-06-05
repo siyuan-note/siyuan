@@ -291,6 +291,10 @@ func ossDownload(isBackup bool, localDirPath, cloudDirPath string, bootOrExit bo
 			// 同步下载可能会报错，为了确保本地数据版本号不变所以不能更新配置文件，配置文件最后单独下载
 			continue
 		}
+		if "/"+pathJSON == fetch {
+			// 已经在前面验证解密的步骤中下载过了，目前位于 temp/sync/pathJSON
+			continue
+		}
 
 		waitGroup.Add(1)
 		p.Invoke(fetch)

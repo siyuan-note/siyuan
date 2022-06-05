@@ -511,11 +511,11 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 		}
 	})
 	index := filepath.Join(localDirPath, "index.json")
+	meta := filepath.Join(localDirPath, pathJSON)
 	for _, localUpsert := range localUpserts {
-		if index == localUpsert {
+		if index == localUpsert || meta == localUpsert {
 			// 同步过程中断导致的一致性问题 https://github.com/siyuan-note/siyuan/issues/4912
-			// index 最后单独上传
-			index = localUpsert
+			// index 和路径映射文件最后单独上传
 			continue
 		}
 
@@ -529,8 +529,12 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 		return
 	}
 
-	// 单独上传 index
+	// 单独上传 index 和路径映射
 	if uploadErr = ossUpload0(localDirPath, cloudDirPath, index, &wroteFiles, &transferSize); nil != uploadErr {
+		err = uploadErr
+		return
+	}
+	if uploadErr = ossUpload0(localDirPath, cloudDirPath, meta, &wroteFiles, &transferSize); nil != uploadErr {
 		err = uploadErr
 		return
 	}

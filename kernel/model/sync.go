@@ -1006,7 +1006,7 @@ func calcUnchangedDataList(passwd string) (unchangedDataList map[string]bool, re
 	unchangedDataList = map[string]bool{}
 	removeList = map[string]bool{}
 	filepath.Walk(syncDir, func(path string, info fs.FileInfo, _ error) error {
-		if syncDir == path || pathJSON == info.Name() {
+		if syncDir == path || pathJSON == info.Name() || "index.json" == info.Name() || info.IsDir() {
 			return nil
 		}
 

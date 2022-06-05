@@ -62,7 +62,7 @@ func clearWorkspaceHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	util.PushMsg(model.Conf.Language(100), 1000*60*15)
+	msgId := util.PushMsg(model.Conf.Language(100), 1000*60*15)
 	time.Sleep(3 * time.Second)
 	err := model.ClearWorkspaceHistory()
 	if nil != err {
@@ -70,6 +70,7 @@ func clearWorkspaceHistory(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	util.PushClearMsg(msgId)
 	util.PushMsg(model.Conf.Language(99), 1000*5)
 }
 

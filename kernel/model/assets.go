@@ -370,8 +370,11 @@ func saveWorkspaceAssets(assets []string) {
 }
 
 func RemoveUnusedAssets() (ret []string) {
-	util.PushMsg(Conf.Language(100), 30*1000)
-	defer util.PushMsg(Conf.Language(99), 3000)
+	msgId := util.PushMsg(Conf.Language(100), 30*1000)
+	defer func() {
+		util.PushClearMsg(msgId)
+		util.PushMsg(Conf.Language(99), 3000)
+	}()
 
 	ret = []string{}
 	unusedAssets := UnusedAssets()

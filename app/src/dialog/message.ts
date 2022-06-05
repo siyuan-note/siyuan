@@ -3,8 +3,7 @@ import {genUUID} from "../util/genID";
 export const initMessage = () => {
     const messageElement = document.getElementById("message");
     messageElement.innerHTML = `<div class="fn__flex-1"></div>
-<div class="fn__hr fn__flex-shrink"></div>
-<button class="fn__flex-center b3-button b3-button--outline">
+<button class="b3-button b3-button--outline">
     <svg><use xlink:href="#iconTrashcan"></use></svg> ${window.siyuan.languages.clearMessage}
 </button>`;
     messageElement.addEventListener("click", (event) => {
@@ -15,7 +14,7 @@ export const initMessage = () => {
                 event.preventDefault();
                 break;
             } else if (target.isSameNode(messageElement.lastElementChild)) {
-                target.parentElement.classList.add("fn__none");
+                target.parentElement.classList.remove("b3-snackbars--show");
                 target.parentElement.firstElementChild.innerHTML = "";
                 event.preventDefault();
                 break;
@@ -37,14 +36,17 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
     }
     const messagesElement = document.getElementById("message").firstElementChild;
     if (messagesElement.childElementCount === 0) {
-        messagesElement.parentElement.classList.remove("fn__none");
+        messagesElement.parentElement.classList.add("b3-snackbars--show");
     }
     messagesElement.insertAdjacentHTML("afterbegin", messageHTML + "</div>");
     if (messagesElement.firstElementChild.nextElementSibling &&
         messagesElement.firstElementChild.nextElementSibling.innerHTML === messagesElement.firstElementChild.innerHTML) {
         messagesElement.firstElementChild.nextElementSibling.remove();
     }
-    messagesElement.scrollTop = 0;
+    messagesElement.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
     return id;
 };
 
@@ -52,9 +54,12 @@ export const hideMessage = (id: string) => {
     const messagesElement = document.getElementById("message").firstElementChild;
     const messageElement = messagesElement.querySelector(`[data-id="${id}"]`);
     if (messageElement) {
-        messageElement.remove();
-    }
-    if (messagesElement.childElementCount === 0) {
-        messagesElement.parentElement.classList.add("fn__none");
+        messageElement.classList.add("b3-snackbar--hide");
+        setTimeout(() => {
+            messageElement.remove();
+        }, 520);
+        if (messagesElement.childElementCount < 2) {
+            messagesElement.parentElement.classList.remove("b3-snackbars--show");
+        }
     }
 };

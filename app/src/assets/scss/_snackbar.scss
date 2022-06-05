@@ -1,25 +1,37 @@
 .b3-snackbar {
-  //transform: translate3d(0, -100px, 0);
-  //transition: opacity 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms, transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
-
   margin-bottom: 16px;
   position: relative;
 
-  &:last-child {
-    margin-bottom: 0;
+  &--hide {
+    transform: translate3d(50vw, 0, 0);
+    transition: transform 0.52s cubic-bezier(0, 0, 0.2, 1) 0ms;
   }
 
   &s {
     position: fixed;
-    right: -2px;
-    top: 16px;
+    right: 12px;
+    top: 22px;
     z-index: 502;
     max-height: calc(100vh - 32px);
     display: flex;
     flex-direction: column;
+    transform: translate3d(50vw, 0, 0);
+    transition: opacity 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms, transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
+    opacity: 0;
+
+    &--show {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+
+    & > .b3-button {
+      align-self: flex-end;
+      margin-right: 18px;
+
+    }
 
     & > .fn__flex-1 {
-      padding: 0 18px;
+      padding: 0 18px 0 18px;
 
       &::-webkit-scrollbar {
         display: none;

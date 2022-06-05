@@ -163,7 +163,7 @@ func listCloudSyncDirOSS() (dirs []map[string]interface{}, size int64, err error
 	return
 }
 
-func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFilesCount int, transferSize uint64, downloadedFiles map[string]bool, err error) {
+func ossDownload(isBackup bool, localDirPath, cloudDirPath string, bootOrExit bool, removeList, upsertList map[string]bool) (fetchedFilesCount int, transferSize uint64, downloadedFiles map[string]bool, err error) {
 	if !gulu.File.IsExist(localDirPath) {
 		return
 	}
@@ -171,6 +171,62 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 	cloudFileList, err := getCloudFileListOSS(cloudDirPath)
 	if nil != err {
 		return
+	}
+
+	if !isBackup && (0 < len(removeList) || 0 < len(upsertList)) {
+		var removed, upserted bool
+		var removes []string
+		for remove, _ := range removeList {
+			removes = append(removes, remove)
+		}
+		removeErr := ossRemove0(cloudDirPath, removes)
+		if nil != removeErr {
+			util.LogErrorf("remove merge cloud file failed: %s", removeErr)
+		} else {
+			for remove, _ := range removeList {
+				delete(cloudFileList, remove)
+			}
+			removed = 0 < len(removeList)
+		}
+
+		var tmpWroteFiles int
+		var tmpTransferSize uint64
+		for upsert, _ := range upsertList {
+			localUpsert := filepath.Join(localDirPath, upsert)
+			info, statErr := os.Stat(localUpsert)
+			if nil != statErr {
+				util.LogErrorf("stat file [%s] failed: %s", localUpsert, statErr)
+				upserted = false
+				break
+			}
+
+			if uploadErr := ossUpload0(localDirPath, cloudDirPath, localUpsert, &tmpWroteFiles, &tmpTransferSize); nil != uploadErr {
+				util.LogErrorf("upload merge cloud file [%s] failed: %s", upsert, uploadErr)
+				upserted = false
+				break
+			}
+			cloudFileList[upsert] = &CloudIndex{
+				Size:    info.Size(),
+				Updated: info.ModTime().Unix(),
+			}
+			upserted = true
+		}
+
+		if removed || upserted {
+			data, marshalErr := gulu.JSON.MarshalJSON(cloudFileList)
+			if nil != marshalErr {
+				util.LogErrorf("marshal cloud file list failed: %s", marshalErr)
+			} else {
+				tmpIndex := filepath.Join(util.TempDir, "sync", "cloud.json")
+				if writeErr := os.WriteFile(tmpIndex, data, 0644); nil != writeErr {
+					util.LogErrorf("write cloud file list failed: %s", writeErr)
+				} else {
+					if uploadErr := ossUpload0(localDirPath, cloudDirPath, tmpIndex, &tmpWroteFiles, &tmpTransferSize); nil != uploadErr {
+						util.LogErrorf("upload merge cloud file [%s] failed: %s", tmpIndex, uploadErr)
+					}
+				}
+			}
+		}
 	}
 
 	localRemoves, cloudFetches, err := localUpsertRemoveListOSS(localDirPath, cloudFileList)
@@ -326,7 +382,7 @@ func ossDownload0(localDirPath, cloudDirPath, fetch string, fetchedFiles *int, t
 	return
 }
 
-func ossUpload(localDirPath, cloudDirPath, cloudDevice string, boot bool, removeList, upsertList map[string]bool) (wroteFiles int, transferSize uint64, err error) {
+func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, boot bool, removeList, upsertList map[string]bool) (wroteFiles int, transferSize uint64, err error) {
 	if !gulu.File.IsExist(localDirPath) {
 		return
 	}
@@ -342,7 +398,7 @@ func ossUpload(localDirPath, cloudDirPath, cloudDevice string, boot bool, remove
 	var localUpserts, cloudRemoves []string
 	var cloudFileList map[string]*CloudIndex
 	var downloadList map[string]bool
-	if "" != localDevice && localDevice == cloudDevice {
+	if "" != localDevice && localDevice == cloudDevice && !isBackup {
 		//util.LogInfof("cloud device is the same as local device, get index from local")
 		localUpserts, cloudRemoves, err = cloudUpsertRemoveLocalListOSS(localDirPath, removeList, upsertList, excludes)
 	} else {
@@ -357,7 +413,7 @@ func ossUpload(localDirPath, cloudDirPath, cloudDevice string, boot bool, remove
 		if nil != err {
 			return
 		}
-		if 0 < len(downloadList) {
+		if 0 < len(downloadList) && !isBackup {
 			// 下载合并云端变更
 			var tmpFetchedFiles int
 			var tmpTransferSize uint64

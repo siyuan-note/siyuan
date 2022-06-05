@@ -246,7 +246,7 @@ func SyncData(boot, exit, byHand bool) {
 			return
 		}
 
-		wroteFiles, transferSize, err := ossUpload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, device, boot, removeList, upsertList)
+		wroteFiles, transferSize, err := ossUpload(false, localSyncDirPath, "sync/"+Conf.Sync.CloudName, device, boot, removeList, upsertList)
 		if nil != err {
 			util.PushClearProgress()
 			IncWorkspaceDataVer() // 上传失败的话提升本地版本，以备下次上传
@@ -345,7 +345,7 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
-	fetchedFilesCount, transferSize, downloadedFiles, err := ossDownload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, boot || exit)
+	fetchedFilesCount, transferSize, downloadedFiles, err := ossDownload(false, localSyncDirPath, "sync/"+Conf.Sync.CloudName, boot || exit, removeList, upsertList)
 	if nil != err {
 		util.PushClearProgress()
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))

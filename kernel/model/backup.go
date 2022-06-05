@@ -344,7 +344,7 @@ func DownloadBackup() (err error) {
 	localDirPath := Conf.Backup.GetSaveDir()
 	util.PushEndlessProgress(Conf.Language(68))
 	start := time.Now()
-	fetchedFilesCount, transferSize, _, err := ossDownload(localDirPath, "backup", false)
+	fetchedFilesCount, transferSize, _, err := ossDownload(true, localDirPath, "backup", false, map[string]bool{}, map[string]bool{})
 	if nil == err {
 		elapsed := time.Now().Sub(start).Seconds()
 		util.LogInfof("downloaded backup [fetchedFiles=%d, transferSize=%s] in [%.2fs]", fetchedFilesCount, humanize.Bytes(transferSize), elapsed)
@@ -364,7 +364,7 @@ func UploadBackup() (err error) {
 	util.PushEndlessProgress(Conf.Language(61))
 	util.LogInfof("uploading backup...")
 	start := time.Now()
-	wroteFiles, transferSize, err := ossUpload(localDirPath, "backup", "not exist", false, map[string]bool{}, map[string]bool{})
+	wroteFiles, transferSize, err := ossUpload(true, localDirPath, "backup", "not exist", false, map[string]bool{}, map[string]bool{})
 	if nil == err {
 		elapsed := time.Now().Sub(start).Seconds()
 		util.LogInfof("uploaded backup [wroteFiles=%d, transferSize=%s] in [%.2fs]", wroteFiles, humanize.Bytes(transferSize), elapsed)

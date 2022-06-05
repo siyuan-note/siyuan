@@ -34,7 +34,10 @@ func pushMsg(c *gin.Context) {
 	}
 
 	msg := arg["msg"].(string)
-	timeout := int(arg["timeout"].(float64))
+	timeout := 7000
+	if nil != arg["timeout"] {
+		timeout = int(arg["timeout"].(float64))
+	}
 	msgId := util.PushMsg(msg, timeout)
 
 	ret.Data = map[string]interface{}{
@@ -52,7 +55,10 @@ func pushErrMsg(c *gin.Context) {
 	}
 
 	msg := arg["msg"].(string)
-	timeout := int(arg["timeout"].(float64))
+	timeout := 7000
+	if nil != arg["timeout"] {
+		timeout = int(arg["timeout"].(float64))
+	}
 	msgId := util.PushErrMsg(msg, timeout)
 
 	ret.Data = map[string]interface{}{

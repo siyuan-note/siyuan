@@ -33,6 +33,8 @@ import (
 	"github.com/88250/gulu"
 	"github.com/panjf2000/ants/v2"
 	"github.com/qiniu/go-sdk/v7/storage"
+	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -161,7 +163,7 @@ func listCloudSyncDirOSS() (dirs []map[string]interface{}, size int64, err error
 	return
 }
 
-func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFilesCount int, transferSize uint64, downloadedFiles []string, err error) {
+func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFilesCount int, transferSize uint64, downloadedFiles map[string]bool, err error) {
 	if !gulu.File.IsExist(localDirPath) {
 		return
 	}
@@ -186,6 +188,7 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 	needPushProgress := 32 < len(cloudFetches)
 	waitGroup := &sync.WaitGroup{}
 	var downloadErr error
+	downloadedFiles = map[string]bool{}
 	poolSize := 4
 	if poolSize > len(cloudFetches)-1 /* 不计入 /.siyuan/conf.json，配置文件最后单独下载 */ {
 		poolSize = len(cloudFetches)
@@ -202,7 +205,7 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 			downloadErr = err // 仅记录最后一次错误
 			return
 		}
-		downloadedFiles = append(downloadedFiles, fetch)
+		downloadedFiles[fetch] = true // FIXME: 并发修改 map
 
 		if needPushProgress {
 			msg := fmt.Sprintf(Conf.Language(103), fetchedFilesCount, len(cloudFetches)-fetchedFilesCount)
@@ -335,6 +338,7 @@ func ossUpload(localDirPath, cloudDirPath, cloudDevice string, boot bool, remove
 
 	var localUpserts, cloudRemoves []string
 	var cloudFileList map[string]*CloudIndex
+	var downloadList map[string]bool
 	if "" != localDevice && localDevice == cloudDevice {
 		//util.LogInfof("cloud device is the same as local device, get index from local")
 		localUpserts, cloudRemoves, err = cloudUpsertRemoveLocalListOSS(localDirPath, removeList, upsertList, excludes)
@@ -346,9 +350,46 @@ func ossUpload(localDirPath, cloudDirPath, cloudDevice string, boot bool, remove
 	}
 
 	if 0 < len(cloudFileList) {
-		localUpserts, cloudRemoves, err = cloudUpsertRemoveListOSS(localDirPath, cloudFileList, localFileList, excludes)
+		localUpserts, cloudRemoves, downloadList, err = cloudUpsertRemoveListOSS(localDirPath, cloudFileList, localFileList, removeList, upsertList, excludes)
 		if nil != err {
 			return
+		}
+		if 0 < len(downloadList) {
+			// 下载合并云端变更
+			var tmpFetchedFiles int
+			var tmpTransferSize uint64
+			err = ossDownload0(util.TempDir+"/sync", "sync/"+Conf.Sync.CloudName, "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, false)
+			if nil != err {
+				util.LogErrorf("download merge cloud file failed: %s", err)
+			}
+
+			metaPath := filepath.Join(util.TempDir, "/sync/"+pathJSON)
+			mergeErr := syncDirUpsertWorkspaceData(metaPath, downloadList)
+			if nil != mergeErr {
+				util.LogErrorf("download merge cloud file failed: %s", mergeErr)
+			} else {
+				// 增量索引
+				for upsertFile, _ := range downloadList {
+					if !strings.HasSuffix(upsertFile, ".sy") {
+						continue
+					}
+
+					upsertFile = filepath.ToSlash(upsertFile)
+					box := upsertFile[:strings.Index(upsertFile, "/")]
+					p := strings.TrimPrefix(upsertFile, box)
+					tree, err0 := LoadTree(box, p)
+					if nil != err0 {
+						continue
+					}
+					treenode.ReindexBlockTree(tree)
+					sql.UpsertTreeQueue(tree)
+				}
+			}
+
+			// 重新生成云端索引
+			if _, idxErr := genCloudIndex(localDirPath, excludes); nil != idxErr {
+				return
+			}
 		}
 	}
 
@@ -713,9 +754,10 @@ func cloudUpsertRemoveLocalListOSS(localDirPath string, removedSyncList, upserte
 	return
 }
 
-func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList map[string]*CloudIndex, excludes map[string]bool) (localUpserts, cloudRemoves []string, err error) {
+func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList map[string]*CloudIndex, removeList, upsertList, excludes map[string]bool) (localUpserts, cloudRemoves []string, downloadList map[string]bool, err error) {
 	localUpserts, cloudRemoves = []string{}, []string{}
 
+	cloudChangedList := map[string]bool{}
 	unchanged := map[string]bool{}
 	for cloudFile, cloudIdx := range cloudFileList {
 		localIdx := localFileList[cloudFile]
@@ -725,7 +767,10 @@ func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList 
 		}
 		if localIdx.Updated == cloudIdx.Updated {
 			unchanged[filepath.Join(localDirPath, cloudFile)] = true
+			continue
 		}
+
+		cloudChangedList[cloudFile] = true
 	}
 
 	delete(unchanged, filepath.Join(localDirPath, "index.json")) // 同步偶尔报错 `The system cannot find the path specified.` https://github.com/siyuan-note/siyuan/issues/4942
@@ -747,6 +792,14 @@ func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList 
 		}
 		return nil
 	})
+
+	downloadList = map[string]bool{}
+	for cloudChanged, _ := range cloudChangedList {
+		if upsertList[cloudChanged] || removeList[cloudChanged] || excludes[cloudChanged] {
+			continue
+		}
+		downloadList[cloudChanged] = true
+	}
 	return
 }
 

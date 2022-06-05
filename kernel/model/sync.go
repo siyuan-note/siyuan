@@ -352,7 +352,8 @@ func SyncData(boot, exit, byHand bool) {
 		Conf.Sync.Stat = msg
 		util.PushErrMsg(msg, 7000)
 
-		err = syncDirUpsertWorkspaceData(downloadedFiles)
+		metaPath := filepath.Join(Conf.Sync.GetSaveDir(), pathJSON)
+		err = syncDirUpsertWorkspaceData(metaPath, downloadedFiles)
 		if nil != err {
 			util.LogErrorf("upsert partially downloaded files to workspace data failed: %s", err)
 		}
@@ -529,17 +530,17 @@ func SetSyncMode(mode int) (err error) {
 
 var syncLock = sync.Mutex{}
 
-func syncDirUpsertWorkspaceData(downloadedFiles []string) (err error) {
+func syncDirUpsertWorkspaceData(metaPath string, downloadedFiles map[string]bool) (err error) {
 	start := time.Now()
 
 	modified := map[string]bool{}
 	syncDir := Conf.Sync.GetSaveDir()
-	for _, file := range downloadedFiles {
+	for file, _ := range downloadedFiles {
 		file = filepath.Join(syncDir, file)
 		modified[file] = true
 	}
 
-	decryptedDataDir, _, err := recoverSyncData(modified)
+	decryptedDataDir, _, err := recoverSyncData(metaPath, modified)
 	if nil != err {
 		util.LogErrorf("decrypt data dir failed: %s", err)
 		return
@@ -567,7 +568,8 @@ func syncDir2WorkspaceData(boot bool) (upsertFiles, removeFiles []string, err er
 	}
 
 	modified := modifiedSyncList(unchanged)
-	decryptedDataDir, upsertFiles, err := recoverSyncData(modified)
+	metaPath := filepath.Join(Conf.Sync.GetSaveDir(), pathJSON)
+	decryptedDataDir, upsertFiles, err := recoverSyncData(metaPath, modified)
 	if nil != err {
 		util.LogErrorf("decrypt data dir failed: %s", err)
 		return
@@ -659,7 +661,7 @@ func genCloudIndex(localDirPath string, excludes map[string]bool) (cloudIndex ma
 	return
 }
 
-func recoverSyncData(modified map[string]bool) (decryptedDataDir string, upsertFiles []string, err error) {
+func recoverSyncData(metaPath string, modified map[string]bool) (decryptedDataDir string, upsertFiles []string, err error) {
 	passwd := Conf.E2EEPasswd
 	decryptedDataDir = filepath.Join(util.WorkspaceDir, "incremental", "sync-decrypt")
 	if err = os.RemoveAll(decryptedDataDir); nil != err {
@@ -670,8 +672,7 @@ func recoverSyncData(modified map[string]bool) (decryptedDataDir string, upsertF
 	}
 
 	syncDir := Conf.Sync.GetSaveDir()
-	meta := filepath.Join(syncDir, pathJSON)
-	data, err := os.ReadFile(meta)
+	data, err := os.ReadFile(metaPath)
 	if nil != err {
 		return
 	}

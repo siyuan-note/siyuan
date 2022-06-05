@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210721112211-fwc1x43",
 		"title": "Data Backup",
-		"updated": "20220114235532"
+		"updated": "20220605010124"
 	},
 	"Children": [
 		{
@@ -586,7 +586,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721113518-flygugq",
-				"updated": "20210721113518"
+				"updated": "20220605010124"
 			},
 			"Children": [
 				{
@@ -597,117 +597,21 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210721113518-t2bu4ls"
+						"id": "20210721113518-t2bu4ls",
+						"updated": "20220605010124"
 					},
 					"Children": [
 						{
 							"ID": "20210721113518-vu6mx99",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210721113518-vu6mx99"
+								"id": "20210721113518-vu6mx99",
+								"updated": "20220605010124"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "The backup data is stored in the "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "workspace/backup/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": " folder by default, and the location can be modified"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210721113518-z0rcq4e",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210721113518-z0rcq4e"
-					},
-					"Children": [
-						{
-							"ID": "20210721113518-3l5b6ep",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210721113518-3l5b6ep"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Do not use a third-party synchronization disk to synchronize the folder, otherwise it may cause data damage"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210721113518-0gpgg0n",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210721113518-0gpgg0n"
-					},
-					"Children": [
-						{
-							"ID": "20210721113518-kt4w5p5",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210721113518-kt4w5p5"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Without changing the password, the data is transferred incrementally"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210721113518-d6loa4f",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210721113518-d6loa4f"
-					},
-					"Children": [
-						{
-							"ID": "20210721113518-e0qk31c",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210721113518-e0qk31c"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "The password must be kept in mind, the data cannot be recovered without a password, and the password cannot be cleared or retrieved"
+									"Data": "Do not use a third-party sync disk and SiYuan backup at the same time, it may cause data damage"
 								}
 							]
 						}

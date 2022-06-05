@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226121413-nznc7x0",
 		"title": "資料備份",
-		"updated": "20220114235521"
+		"updated": "20220605010033"
 	},
 	"Children": [
 		{
@@ -588,57 +588,9 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121432-vk1p2ti",
-				"updated": "20211228141446"
+				"updated": "20220605010033"
 			},
 			"Children": [
-				{
-					"ID": "20211226121432-ybod3bl",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226121432-ybod3bl",
-						"updated": "20211228141434"
-					},
-					"Children": [
-						{
-							"ID": "20211226121432-enyxopn",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121432-enyxopn",
-								"updated": "20211228141434"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "備份資料預設存放在 "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "工作空間/backup/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 文件夾下，該位置可修改"
-								}
-							]
-						}
-					]
-				},
 				{
 					"ID": "20211226121432-0mjndvh",
 					"Type": "NodeListItem",
@@ -648,7 +600,7 @@
 					},
 					"Properties": {
 						"id": "20211226121432-0mjndvh",
-						"updated": "20211228141437"
+						"updated": "20220605010033"
 					},
 					"Children": [
 						{
@@ -656,68 +608,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226121432-8v0c4ao",
-								"updated": "20211228141437"
+								"updated": "20220605010033"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "請勿使用第三方同步碟同步該文件夾，否則可能會造成資料損壞"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226121432-c653lc8",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226121432-c653lc8",
-						"updated": "20211228141440"
-					},
-					"Children": [
-						{
-							"ID": "20211226121432-zdxfc6j",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121432-zdxfc6j",
-								"updated": "20211228141440"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "在不改變密碼的情況下，資料是進行增量傳輸的"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226121432-nhe3knq",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226121432-nhe3knq",
-						"updated": "20211228141443"
-					},
-					"Children": [
-						{
-							"ID": "20211226121432-r67mbqo",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121432-r67mbqo",
-								"updated": "20211228141443"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "密碼務必牢記，沒有密碼無法恢復資料，且密碼無法清空或找回"
+									"Data": "請勿同時使用第三方同步盤和思源備份，可能會導致資料損壞"
 								}
 							]
 						}

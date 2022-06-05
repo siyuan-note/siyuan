@@ -5,7 +5,7 @@
 		"id": "20201002090451-hb9j8ai",
 		"title": "数据备份",
 		"type": "doc",
-		"updated": "20220114235451"
+		"updated": "20210525213840"
 	},
 	"Children": [
 		{
@@ -589,57 +589,9 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210524213716-ohh5os5",
-				"updated": "20210721110355"
+				"updated": "20210525213840"
 			},
 			"Children": [
-				{
-					"ID": "20210524213941-e2e360h",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210524213941-e2e360h",
-						"updated": "20210721110141"
-					},
-					"Children": [
-						{
-							"ID": "20210524213941-cam1ja6",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210524213941-cam1ja6",
-								"updated": "20210721110141"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "备份数据默认存放在 "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "工作空间/backup/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 文件夹下，该位置可修改"
-								}
-							]
-						}
-					]
-				},
 				{
 					"ID": "20210721110005-0zh6q73",
 					"Type": "NodeListItem",
@@ -649,7 +601,7 @@
 					},
 					"Properties": {
 						"id": "20210721110005-0zh6q73",
-						"updated": "20210721110315"
+						"updated": "20220605005935"
 					},
 					"Children": [
 						{
@@ -657,68 +609,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210721110005-34zreuo",
-								"updated": "20210721110315"
+								"updated": "20220605005935"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "请勿使用第三方同步盘同步该文件夹，否则可能会造成数据损坏"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210524214140-o24jy91",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210524214140-o24jy91",
-						"updated": "20210721110355"
-					},
-					"Children": [
-						{
-							"ID": "20210524214140-7obgo1d",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210524214140-7obgo1d",
-								"updated": "20210721110355"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "在不改变密码的情况下，数据是进行增量传输的"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210721102719-yhk2dq5",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210721102719-yhk2dq5",
-						"updated": "20210721102811"
-					},
-					"Children": [
-						{
-							"ID": "20210721102719-fq9diiz",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210721102719-fq9diiz",
-								"updated": "20210721102811"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "密码务必牢记，没有密码无法恢复数据，且密码无法清空或找回"
+									"Data": "请勿同时使用第三方同步盘和思源备份，可能会导致数据损坏"
 								}
 							]
 						}
@@ -732,7 +628,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210525213740-3z17tp0"
+						"id": "20210525213740-3z17tp0",
+						"updated": "20210525213840"
 					},
 					"Children": [
 						{

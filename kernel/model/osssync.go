@@ -188,6 +188,7 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 	needPushProgress := 32 < len(cloudFetches)
 	waitGroup := &sync.WaitGroup{}
 	var downloadErr error
+	downloadedFilesLock := sync.Mutex{}
 	downloadedFiles = map[string]bool{}
 	poolSize := 4
 	if poolSize > len(cloudFetches)-1 /* 不计入 /.siyuan/conf.json，配置文件最后单独下载 */ {
@@ -205,7 +206,9 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 			downloadErr = err // 仅记录最后一次错误
 			return
 		}
-		downloadedFiles[fetch] = true // FIXME: 并发修改 map
+		downloadedFilesLock.Lock()
+		downloadedFiles[fetch] = true
+		downloadedFilesLock.Unlock()
 
 		if needPushProgress {
 			msg := fmt.Sprintf(Conf.Language(103), fetchedFilesCount, len(cloudFetches)-fetchedFilesCount)

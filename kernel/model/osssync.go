@@ -33,8 +33,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/panjf2000/ants/v2"
 	"github.com/qiniu/go-sdk/v7/storage"
-	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -186,60 +184,60 @@ func ossDownload(isBackup bool, localDirPath, cloudDirPath string, bootOrExit bo
 	if !isBackup && (0 < len(removeList) || 0 < len(upsertList)) {
 		// 上传合并本地变更
 
-		var removed, upserted bool
-		var removes []string
-		for remove, _ := range removeList {
-			removes = append(removes, remove)
-		}
-		removeErr := ossRemove0(cloudDirPath, removes)
-		if nil != removeErr {
-			util.LogErrorf("remove merge cloud file failed: %s", removeErr)
-		} else {
-			for remove, _ := range removeList {
-				delete(cloudFileList, remove)
-			}
-			removed = 0 < len(removeList)
-		}
-
-		var tmpWroteFiles int
-		var tmpTransferSize uint64
-		for upsert, _ := range upsertList {
-			localUpsert := filepath.Join(localDirPath, upsert)
-			info, statErr := os.Stat(localUpsert)
-			if nil != statErr {
-				util.LogErrorf("stat file [%s] failed: %s", localUpsert, statErr)
-				upserted = false
-				break
-			}
-
-			if uploadErr := ossUpload0(localDirPath, cloudDirPath, localUpsert, &tmpWroteFiles, &tmpTransferSize); nil != uploadErr {
-				util.LogErrorf("upload merge cloud file [%s] failed: %s", upsert, uploadErr)
-				upserted = false
-				break
-			}
-			cloudFileList[upsert] = &CloudIndex{
-				Size:    info.Size(),
-				Updated: info.ModTime().Unix(),
-			}
-			upserted = true
-		}
-
-		if removed || upserted {
-			data, marshalErr := gulu.JSON.MarshalJSON(cloudFileList)
-			if nil != marshalErr {
-				util.LogErrorf("marshal cloud file list failed: %s", marshalErr)
-			} else {
-				tmpMergeDir := filepath.Join(util.TempDir, "sync")
-				tmpIndex := filepath.Join(tmpMergeDir, "index.json")
-				if writeErr := os.WriteFile(tmpIndex, data, 0644); nil != writeErr {
-					util.LogErrorf("write cloud file list failed: %s", writeErr)
-				} else {
-					if uploadErr := ossUpload0(tmpMergeDir, cloudDirPath, tmpIndex, &tmpWroteFiles, &tmpTransferSize); nil != uploadErr {
-						util.LogErrorf("upload merge cloud file [%s] failed: %s", tmpIndex, uploadErr)
-					}
-				}
-			}
-		}
+		//var removed, upserted bool
+		//var removes []string
+		//for remove, _ := range removeList {
+		//	removes = append(removes, remove)
+		//}
+		//removeErr := ossRemove0(cloudDirPath, removes)
+		//if nil != removeErr {
+		//	util.LogErrorf("remove merge cloud file failed: %s", removeErr)
+		//} else {
+		//	for remove, _ := range removeList {
+		//		delete(cloudFileList, remove)
+		//	}
+		//	removed = 0 < len(removeList)
+		//}
+		//
+		//var tmpWroteFiles int
+		//var tmpTransferSize uint64
+		//for upsert, _ := range upsertList {
+		//	localUpsert := filepath.Join(localDirPath, upsert)
+		//	info, statErr := os.Stat(localUpsert)
+		//	if nil != statErr {
+		//		util.LogErrorf("stat file [%s] failed: %s", localUpsert, statErr)
+		//		upserted = false
+		//		break
+		//	}
+		//
+		//	if uploadErr := ossUpload0(localDirPath, cloudDirPath, localUpsert, &tmpWroteFiles, &tmpTransferSize); nil != uploadErr {
+		//		util.LogErrorf("upload merge cloud file [%s] failed: %s", upsert, uploadErr)
+		//		upserted = false
+		//		break
+		//	}
+		//	cloudFileList[upsert] = &CloudIndex{
+		//		Size:    info.Size(),
+		//		Updated: info.ModTime().Unix(),
+		//	}
+		//	upserted = true
+		//}
+		//
+		//if removed || upserted {
+		//	data, marshalErr := gulu.JSON.MarshalJSON(cloudFileList)
+		//	if nil != marshalErr {
+		//		util.LogErrorf("marshal cloud file list failed: %s", marshalErr)
+		//	} else {
+		//		tmpMergeDir := filepath.Join(util.TempDir, "sync")
+		//		tmpIndex := filepath.Join(tmpMergeDir, "index.json")
+		//		if writeErr := os.WriteFile(tmpIndex, data, 0644); nil != writeErr {
+		//			util.LogErrorf("write cloud file list failed: %s", writeErr)
+		//		} else {
+		//			if uploadErr := ossUpload0(tmpMergeDir, cloudDirPath, tmpIndex, &tmpWroteFiles, &tmpTransferSize); nil != uploadErr {
+		//				util.LogErrorf("upload merge cloud file [%s] failed: %s", tmpIndex, uploadErr)
+		//			}
+		//		}
+		//	}
+		//}
 	}
 
 	localRemoves, cloudFetches, err := localUpsertRemoveListOSS(localDirPath, cloudFileList)
@@ -429,50 +427,50 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 		if 0 < len(downloadList) && !isBackup {
 			// 下载合并云端变更
 
-			var data []byte
-			data, err = gulu.JSON.MarshalJSON(cloudFileList)
-			if nil != err {
-				return
-			}
-			indexPath := filepath.Join(util.TempDir, "sync", "index.json")
-			if err = os.WriteFile(indexPath, data, 0644); nil != err {
-				return
-			}
-
-			var tmpFetchedFiles int
-			var tmpTransferSize uint64
-			err = ossDownload0(util.TempDir+"/sync", "sync/"+Conf.Sync.CloudName, "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, false)
-			if nil != err {
-				util.LogErrorf("download merge cloud file failed: %s", err)
-			}
-
-			metaPath := filepath.Join(util.TempDir, "/sync/"+pathJSON)
-			mergeErr := syncDirUpsertWorkspaceData(metaPath, indexPath, downloadList)
-			if nil != mergeErr {
-				util.LogErrorf("download merge cloud file failed: %s", mergeErr)
-			} else {
-				// 增量索引
-				for upsertFile, _ := range downloadList {
-					if !strings.HasSuffix(upsertFile, ".sy") {
-						continue
-					}
-
-					upsertFile = filepath.ToSlash(upsertFile)
-					box := upsertFile[:strings.Index(upsertFile, "/")]
-					p := strings.TrimPrefix(upsertFile, box)
-					tree, err0 := LoadTree(box, p)
-					if nil != err0 {
-						continue
-					}
-					treenode.ReindexBlockTree(tree)
-					sql.UpsertTreeQueue(tree)
-				}
-			}
-
-			// 重新生成云端索引
-			if _, idxErr := genCloudIndex(localDirPath, excludes); nil != idxErr {
-				return
-			}
+			//var data []byte
+			//data, err = gulu.JSON.MarshalJSON(cloudFileList)
+			//if nil != err {
+			//	return
+			//}
+			//indexPath := filepath.Join(util.TempDir, "sync", "index.json")
+			//if err = os.WriteFile(indexPath, data, 0644); nil != err {
+			//	return
+			//}
+			//
+			//var tmpFetchedFiles int
+			//var tmpTransferSize uint64
+			//err = ossDownload0(util.TempDir+"/sync", "sync/"+Conf.Sync.CloudName, "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, false)
+			//if nil != err {
+			//	util.LogErrorf("download merge cloud file failed: %s", err)
+			//}
+			//
+			//metaPath := filepath.Join(util.TempDir, "/sync/"+pathJSON)
+			//mergeErr := syncDirUpsertWorkspaceData(metaPath, indexPath, downloadList)
+			//if nil != mergeErr {
+			//	util.LogErrorf("download merge cloud file failed: %s", mergeErr)
+			//} else {
+			//	// 增量索引
+			//	for upsertFile, _ := range downloadList {
+			//		if !strings.HasSuffix(upsertFile, ".sy") {
+			//			continue
+			//		}
+			//
+			//		upsertFile = filepath.ToSlash(upsertFile)
+			//		box := upsertFile[:strings.Index(upsertFile, "/")]
+			//		p := strings.TrimPrefix(upsertFile, box)
+			//		tree, err0 := LoadTree(box, p)
+			//		if nil != err0 {
+			//			continue
+			//		}
+			//		treenode.ReindexBlockTree(tree)
+			//		sql.UpsertTreeQueue(tree)
+			//	}
+			//}
+			//
+			//// 重新生成云端索引
+			//if _, idxErr := genCloudIndex(localDirPath, excludes); nil != idxErr {
+			//	return
+			//}
 		}
 	}
 

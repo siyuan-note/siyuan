@@ -526,13 +526,20 @@ func decryptDataDir(passwd string) (decryptedDataDir string, err error) {
 	if nil != err {
 		return "", errors.New(Conf.Language(40))
 	}
-
 	metaJSON := map[string]string{}
 	if err = gulu.JSON.UnmarshalJSON(data, &metaJSON); nil != err {
 		return
 	}
 
-	modTimes := map[string]time.Time{}
+	index := map[string]*CloudIndex{}
+	data, err = os.ReadFile(filepath.Join(backupDir, "index.json"))
+	if nil != err {
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &index); nil != err {
+		return
+	}
+
 	err = filepath.Walk(backupDir, func(path string, info fs.FileInfo, _ error) error {
 		if backupDir == path || pathJSON == info.Name() || strings.HasSuffix(info.Name(), ".json") {
 			return nil
@@ -577,22 +584,20 @@ func decryptDataDir(passwd string) (decryptedDataDir string, err error) {
 				err = err0
 				return io.EOF
 			}
-		}
 
-		fi, err0 := os.Stat(path)
-		if nil != err0 {
-			util.LogErrorf("stat file [%s] failed: %s", path, err0)
-			err = err0
-			return io.EOF
+			var modTime int64
+			idx := index["/"+encryptedP]
+			if nil == idx {
+				util.LogErrorf("index file [%s] not found", encryptedP)
+				modTime = info.ModTime().Unix()
+			} else {
+				modTime = idx.Updated
+			}
+			if err0 = os.Chtimes(plainP, time.Unix(modTime, 0), time.Unix(modTime, 0)); nil != err0 {
+				util.LogErrorf("change file [%s] time failed: %s", plainP, err0)
+			}
 		}
-		modTimes[plainP] = fi.ModTime()
 		return nil
 	})
-
-	for plainP, modTime := range modTimes {
-		if err = os.Chtimes(plainP, modTime, modTime); nil != err {
-			return
-		}
-	}
 	return
 }

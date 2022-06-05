@@ -19,6 +19,7 @@ package util
 import (
 	"sync"
 
+	"github.com/88250/gulu"
 	"github.com/88250/melody"
 )
 
@@ -126,19 +127,16 @@ func PushTxErr(msg string, code int, data interface{}) {
 	BroadcastByType("main", "txerr", code, msg, data)
 }
 
-func PushMsg(msg string, timeout int) {
-	evt := NewCmdResult("msg", 0, PushModeBroadcast, 0)
-	evt.Msg = msg
-	evt.Data = map[string]interface{}{"closeTimeout": timeout}
-	PushEvent(evt)
+func PushMsg(msg string, timeout int) (msgId string) {
+	msgId = gulu.Rand.String(7)
+	BroadcastByType("main", "msg", 0, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
+	return
 }
 
-func PushErrMsg(msg string, timeout int) {
-	evt := NewCmdResult("msg", 0, PushModeBroadcast, 0)
-	evt.Code = -1
-	evt.Msg = msg
-	evt.Data = map[string]interface{}{"closeTimeout": timeout}
-	PushEvent(evt)
+func PushErrMsg(msg string, timeout int) (msgId string) {
+	msgId = gulu.Rand.String(7)
+	BroadcastByType("main", "msg", -1, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
+	return
 }
 
 const (
@@ -156,20 +154,20 @@ func PushEndlessProgress(msg string) {
 }
 
 func PushProgress(code, current, total int, msg string) {
-	evt := NewCmdResult("progress", 0, PushModeBroadcast, 0)
-	evt.Msg = msg
-	evt.Code = code
-	evt.Data = map[string]interface{}{
+	BroadcastByType("main", "progress", code, msg, map[string]interface{}{
 		"current": current,
 		"total":   total,
-	}
-	PushEvent(evt)
+	})
 }
 
-// PushClearMsg 会清空消息提示以及进度遮罩。
-func PushClearMsg() {
-	evt := NewCmdResult("cmsg", 0, PushModeBroadcast, 0)
-	PushEvent(evt)
+// PushClearMsg 会清空指定消息。
+func PushClearMsg(msgId string) {
+	BroadcastByType("main", "cmsg", 0, "", map[string]interface{}{"id": msgId})
+}
+
+// PushClearProgress 取消进度遮罩。
+func PushClearProgress() {
+	BroadcastByType("main", "cprogress", 0, "", nil)
 }
 
 func PushDownloadProgress(id string, percent float32) {

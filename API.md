@@ -35,10 +35,13 @@
 * [Templates](#Templates)
     * [Render a template](#Render-a-template)
 * [File](#File)
-    * [Get File](#Get-file)
-    * [Put File](#Put-file)
+    * [Get file](#Get-file)
+    * [Put file](#Put-file)
 * [Export](#Export)
     * [Export Markdown](#Export-Markdown)
+* [Notification](#Notification)
+    * [Push message](#Push-message)
+    * [Push error message](#Push-error-message)
 * [System](#System)
     * [Get boot progress](#Get-boot-progress)
     * [Get system version](#Get-system-version)
@@ -845,6 +848,60 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
     * `hPath`: human-readable path
     * `content`: Markdown content
+
+## Notification
+
+### Push message
+
+* `/api/notification/pushMsg`
+* Parameters
+
+  ```json
+  {
+    "msg": "test",
+    "timeout": 7000
+  }
+  ```
+    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000
+      milliseconds
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+        "id": "62jtmqi"
+    }
+  }
+  ```
+    * `id`: Message ID
+
+### Push error message
+
+* `/api/notification/pushErrMsg`
+* Parameters
+
+  ```json
+  {
+    "msg": "test",
+    "timeout": 7000
+  }
+  ```
+    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000
+      milliseconds
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+        "id": "qc9znut"
+    }
+  }
+  ```
+    * `id`：Message ID
 
 ## System
 

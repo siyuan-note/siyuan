@@ -248,7 +248,7 @@ func SyncData(boot, exit, byHand bool) {
 
 		wroteFiles, transferSize, err := ossUpload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, device, boot, removedSyncList, upsertedSyncList)
 		if nil != err {
-			util.PushClearMsg()
+			util.PushClearProgress()
 			IncWorkspaceDataVer() // 上传失败的话提升本地版本，以备下次上传
 
 			msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
@@ -263,7 +263,7 @@ func SyncData(boot, exit, byHand bool) {
 			return
 		}
 
-		util.PushClearMsg()
+		util.PushClearProgress()
 		elapsed := time.Now().Sub(start).Seconds()
 		stat := fmt.Sprintf(Conf.Language(130), wroteFiles, humanize.Bytes(transferSize)) + fmt.Sprintf(Conf.Language(132), elapsed)
 		util.LogInfof("sync [cloud=%d, local=%d, wroteFiles=%d, transferSize=%s] uploaded in [%.2fs]", cloudSyncVer, syncConf.SyncVer, wroteFiles, humanize.Bytes(transferSize), elapsed)
@@ -293,7 +293,7 @@ func SyncData(boot, exit, byHand bool) {
 	var tmpTransferSize uint64
 	err = ossDownload0(util.TempDir+"/sync", "sync/"+Conf.Sync.CloudName, "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, boot || exit)
 	if nil != err {
-		util.PushClearMsg()
+		util.PushClearProgress()
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		Conf.Sync.Stat = msg
 		util.PushErrMsg(msg, 7000)
@@ -314,7 +314,7 @@ func SyncData(boot, exit, byHand bool) {
 	}
 	data, err = encryption.AESGCMDecryptBinBytes(data, Conf.E2EEPasswd)
 	if nil != err {
-		util.PushClearMsg()
+		util.PushClearProgress()
 		msg := Conf.Language(28)
 		Conf.Sync.Stat = msg
 		util.PushErrMsg(fmt.Sprintf(Conf.Language(80), msg), 7000)
@@ -331,7 +331,7 @@ func SyncData(boot, exit, byHand bool) {
 
 	// 解密验证成功后将其移动到 sync/ 文件夹下
 	if err = os.Rename(tmpPathJSON, filepath.Join(localSyncDirPath, pathJSON)); nil != err {
-		util.PushClearMsg()
+		util.PushClearProgress()
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		Conf.Sync.Stat = msg
 		util.PushErrMsg(msg, 7000)
@@ -347,7 +347,7 @@ func SyncData(boot, exit, byHand bool) {
 
 	fetchedFilesCount, transferSize, downloadedFiles, err := ossDownload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, boot || exit)
 	if nil != err {
-		util.PushClearMsg()
+		util.PushClearProgress()
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		Conf.Sync.Stat = msg
 		util.PushErrMsg(msg, 7000)
@@ -366,7 +366,7 @@ func SyncData(boot, exit, byHand bool) {
 		syncDownloadErrCount++
 		return
 	}
-	util.PushClearMsg()
+	util.PushClearProgress()
 
 	// 恢复
 	var upsertFiles, removeFiles []string

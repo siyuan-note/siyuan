@@ -173,7 +173,19 @@ func ossDownload(isBackup bool, localDirPath, cloudDirPath string, bootOrExit bo
 		return
 	}
 
+	// 将云端索引文件临时保存一下，后面下载数据时如果部分成功，需要用索引文件恢复部分成功的文件 syncDirUpsertWorkspaceData()
+	data, err := gulu.JSON.MarshalJSON(cloudFileList)
+	if nil != err {
+		return
+	}
+	tmpIndex := filepath.Join(util.TempDir, "sync", "index.json")
+	if err = os.WriteFile(tmpIndex, data, 0644); nil != err {
+		return
+	}
+
 	if !isBackup && (0 < len(removeList) || 0 < len(upsertList)) {
+		// 上传合并本地变更
+
 		var removed, upserted bool
 		var removes []string
 		for remove, _ := range removeList {
@@ -217,11 +229,12 @@ func ossDownload(isBackup bool, localDirPath, cloudDirPath string, bootOrExit bo
 			if nil != marshalErr {
 				util.LogErrorf("marshal cloud file list failed: %s", marshalErr)
 			} else {
-				tmpIndex := filepath.Join(util.TempDir, "sync", "cloud.json")
+				tmpMergeDir := filepath.Join(util.TempDir, "sync")
+				tmpIndex := filepath.Join(tmpMergeDir, "index.json")
 				if writeErr := os.WriteFile(tmpIndex, data, 0644); nil != writeErr {
 					util.LogErrorf("write cloud file list failed: %s", writeErr)
 				} else {
-					if uploadErr := ossUpload0(localDirPath, cloudDirPath, tmpIndex, &tmpWroteFiles, &tmpTransferSize); nil != uploadErr {
+					if uploadErr := ossUpload0(tmpMergeDir, cloudDirPath, tmpIndex, &tmpWroteFiles, &tmpTransferSize); nil != uploadErr {
 						util.LogErrorf("upload merge cloud file [%s] failed: %s", tmpIndex, uploadErr)
 					}
 				}
@@ -415,6 +428,17 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 		}
 		if 0 < len(downloadList) && !isBackup {
 			// 下载合并云端变更
+
+			var data []byte
+			data, err = gulu.JSON.MarshalJSON(cloudFileList)
+			if nil != err {
+				return
+			}
+			indexPath := filepath.Join(util.TempDir, "sync", "index.json")
+			if err = os.WriteFile(indexPath, data, 0644); nil != err {
+				return
+			}
+
 			var tmpFetchedFiles int
 			var tmpTransferSize uint64
 			err = ossDownload0(util.TempDir+"/sync", "sync/"+Conf.Sync.CloudName, "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, false)
@@ -423,7 +447,7 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 			}
 
 			metaPath := filepath.Join(util.TempDir, "/sync/"+pathJSON)
-			mergeErr := syncDirUpsertWorkspaceData(metaPath, downloadList)
+			mergeErr := syncDirUpsertWorkspaceData(metaPath, indexPath, downloadList)
 			if nil != mergeErr {
 				util.LogErrorf("download merge cloud file failed: %s", mergeErr)
 			} else {

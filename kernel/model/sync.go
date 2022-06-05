@@ -353,7 +353,8 @@ func SyncData(boot, exit, byHand bool) {
 		util.PushErrMsg(msg, 7000)
 
 		metaPath := filepath.Join(Conf.Sync.GetSaveDir(), pathJSON)
-		err = syncDirUpsertWorkspaceData(metaPath, downloadedFiles)
+		indexPath := filepath.Join(util.TempDir, "sync", "index.json")
+		err = syncDirUpsertWorkspaceData(metaPath, indexPath, downloadedFiles)
 		if nil != err {
 			util.LogErrorf("upsert partially downloaded files to workspace data failed: %s", err)
 		}
@@ -530,7 +531,7 @@ func SetSyncMode(mode int) (err error) {
 
 var syncLock = sync.Mutex{}
 
-func syncDirUpsertWorkspaceData(metaPath string, downloadedFiles map[string]bool) (err error) {
+func syncDirUpsertWorkspaceData(metaPath, indexPath string, downloadedFiles map[string]bool) (err error) {
 	start := time.Now()
 
 	modified := map[string]bool{}
@@ -540,7 +541,7 @@ func syncDirUpsertWorkspaceData(metaPath string, downloadedFiles map[string]bool
 		modified[file] = true
 	}
 
-	decryptedDataDir, _, err := recoverSyncData(metaPath, modified)
+	decryptedDataDir, _, err := recoverSyncData(metaPath, indexPath, modified)
 	if nil != err {
 		util.LogErrorf("decrypt data dir failed: %s", err)
 		return
@@ -569,7 +570,8 @@ func syncDir2WorkspaceData(boot bool) (upsertFiles, removeFiles []string, err er
 
 	modified := modifiedSyncList(unchanged)
 	metaPath := filepath.Join(Conf.Sync.GetSaveDir(), pathJSON)
-	decryptedDataDir, upsertFiles, err := recoverSyncData(metaPath, modified)
+	indexPath := filepath.Join(Conf.Sync.GetSaveDir(), "index.json")
+	decryptedDataDir, upsertFiles, err := recoverSyncData(metaPath, indexPath, modified)
 	if nil != err {
 		util.LogErrorf("decrypt data dir failed: %s", err)
 		return
@@ -661,7 +663,7 @@ func genCloudIndex(localDirPath string, excludes map[string]bool) (cloudIndex ma
 	return
 }
 
-func recoverSyncData(metaPath string, modified map[string]bool) (decryptedDataDir string, upsertFiles []string, err error) {
+func recoverSyncData(metaPath, indexPath string, modified map[string]bool) (decryptedDataDir string, upsertFiles []string, err error) {
 	passwd := Conf.E2EEPasswd
 	decryptedDataDir = filepath.Join(util.WorkspaceDir, "incremental", "sync-decrypt")
 	if err = os.RemoveAll(decryptedDataDir); nil != err {
@@ -687,7 +689,15 @@ func recoverSyncData(metaPath string, modified map[string]bool) (decryptedDataDi
 		return
 	}
 
-	modTimes := map[string]time.Time{}
+	index := map[string]*CloudIndex{}
+	data, err = os.ReadFile(indexPath)
+	if nil != err {
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &index); nil != err {
+		return
+	}
+
 	now := time.Now().Format("2006-01-02-150405")
 	filepath.Walk(syncDir, func(path string, info fs.FileInfo, _ error) error {
 		if syncDir == path || pathJSON == info.Name() {
@@ -745,15 +755,19 @@ func recoverSyncData(metaPath string, modified map[string]bool) (decryptedDataDi
 				err = err0
 				return io.EOF
 			}
-		}
 
-		fi, err0 := os.Stat(path)
-		if nil != err0 {
-			util.LogErrorf("stat file [%s] failed: %s", path, err0)
-			err = err0
-			return io.EOF
+			var modTime int64
+			idx := index["/"+encryptedP]
+			if nil == idx {
+				util.LogErrorf("index file [%s] not found", encryptedP)
+				modTime = info.ModTime().Unix()
+			} else {
+				modTime = idx.Updated
+			}
+			if err0 = os.Chtimes(plainP, time.Unix(modTime, 0), time.Unix(modTime, 0)); nil != err0 {
+				util.LogErrorf("change file [%s] time failed: %s", plainP, err0)
+			}
 		}
-		modTimes[plainP] = fi.ModTime()
 		return nil
 	})
 	return

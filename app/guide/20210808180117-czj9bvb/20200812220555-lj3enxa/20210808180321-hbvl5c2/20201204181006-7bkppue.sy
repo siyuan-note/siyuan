@@ -5,7 +5,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20210131162925"
+		"updated": "20220605170311"
 	},
 	"Children": [
 		{
@@ -415,7 +415,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091309-gjkg3u5",
-				"updated": "20211213121154"
+				"updated": "20220605170311"
 			},
 			"Children": [
 				{
@@ -575,7 +575,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211213120748-0uhzrha"
+						"id": "20211213120748-0uhzrha",
+						"updated": "20220605170311"
 					},
 					"Children": [
 						{
@@ -583,7 +584,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211213120748-72e95wc",
-								"updated": "20211213120801"
+								"updated": "20220605170311"
 							},
 							"Children": [
 								{
@@ -604,7 +605,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：该变量用于插入但前文档别名"
+									"Data": "：该变量用于插入当前文档别名"
 								}
 							]
 						}

@@ -619,13 +619,13 @@ func workspaceData2SyncDir() (removedSyncList, upsertedSyncList map[string]bool,
 }
 
 type CloudIndex struct {
-	Hash string `json:"hash"`
-	Size int64  `json:"size"`
+	Size    int64 `json:"size"`
+	Updated int64 `json:"updated"` // Unix timestamp 秒
 }
 
-// genCloudIndex 全量生成云端索引文件。
-func genFullCloudIndex(localDirPath string, excludes map[string]bool) (err error) {
-	cloudIndex := map[string]*CloudIndex{}
+// genCloudIndex 生成云端索引文件。
+func genCloudIndex(localDirPath string, excludes map[string]bool) (cloudIndex map[string]*CloudIndex, err error) {
+	cloudIndex = map[string]*CloudIndex{}
 	err = filepath.Walk(localDirPath, func(path string, info fs.FileInfo, err error) error {
 		if nil != err {
 			return err
@@ -638,15 +638,9 @@ func genFullCloudIndex(localDirPath string, excludes map[string]bool) (err error
 			return nil
 		}
 
-		hash, hashErr := util.GetEtag(path)
-		if nil != hashErr {
-			util.LogErrorf("get file [%s] hash failed: %s", path, hashErr)
-			return hashErr
-		}
-
 		p := strings.TrimPrefix(path, localDirPath)
 		p = filepath.ToSlash(p)
-		cloudIndex[p] = &CloudIndex{Hash: hash, Size: info.Size()}
+		cloudIndex[p] = &CloudIndex{Size: info.Size(), Updated: info.ModTime().Unix()}
 		return nil
 	})
 	if nil != err {
@@ -661,36 +655,6 @@ func genFullCloudIndex(localDirPath string, excludes map[string]bool) (err error
 	if err = os.WriteFile(filepath.Join(localDirPath, "index.json"), data, 0644); nil != err {
 		util.LogErrorf("write sync cloud index failed: %s", err)
 		return
-	}
-	return
-}
-
-// incCloudIndex 增量生成云端索引文件。
-func incCloudIndex(localDirPath string, localFileList *map[string]*CloudIndex, removes, upserts, excludes map[string]bool) (err error) {
-	for remove, _ := range removes {
-		delete(*localFileList, remove)
-	}
-	for exclude, _ := range excludes {
-		delete(*localFileList, filepath.ToSlash(strings.TrimPrefix(exclude, localDirPath)))
-	}
-
-	for upsert, _ := range upserts {
-		path := filepath.Join(localDirPath, upsert)
-		if excludes[path] {
-			continue
-		}
-
-		info, statErr := os.Stat(path)
-		if nil != statErr {
-			util.LogErrorf("stat file [%s] failed: %s", path, statErr)
-			return statErr
-		}
-		hash, hashErr := util.GetEtag(path)
-		if nil != hashErr {
-			util.LogErrorf("get file [%s] hash failed: %s", path, hashErr)
-			return hashErr
-		}
-		(*localFileList)[upsert] = &CloudIndex{Hash: hash, Size: info.Size()}
 	}
 	return
 }
@@ -966,16 +930,7 @@ func calcUnchangedSyncList() (ret map[string]bool, removes []string, err error) 
 		return
 	}
 
-	syncIgnoreList := getSyncIgnoreList()
-	excludes := map[string]bool{}
-	ignores := syncIgnoreList.Values()
-	for _, p := range ignores {
-		relPath := p.(string)
-		relPath = pathSha256Short(relPath, "/")
-		relPath = filepath.Join(syncDir, relPath)
-		excludes[relPath] = true
-	}
-
+	excludes := getSyncExcludedList(syncDir)
 	ret = map[string]bool{}
 	sep := string(os.PathSeparator)
 	filepath.Walk(util.DataDir, func(path string, info fs.FileInfo, _ error) error {
@@ -1273,6 +1228,19 @@ func IsValidCloudDirName(cloudDirName string) bool {
 		return false
 	}
 	return true
+}
+
+func getSyncExcludedList(localDirPath string) (ret map[string]bool) {
+	syncIgnoreList := getSyncIgnoreList()
+	ret = map[string]bool{}
+	ignores := syncIgnoreList.Values()
+	for _, p := range ignores {
+		relPath := p.(string)
+		relPath = pathSha256Short(relPath, "/")
+		relPath = filepath.Join(localDirPath, relPath)
+		ret[relPath] = true
+	}
+	return
 }
 
 func getSyncIgnoreList() (ret *hashset.Set) {

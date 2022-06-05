@@ -278,7 +278,7 @@ func CreateLocalBackup() (err error) {
 		return
 	}
 
-	err = genFullCloudIndex(newBackupDir, map[string]bool{})
+	_, err = genCloudIndex(newBackupDir, map[string]bool{})
 	if nil != err {
 		return
 	}

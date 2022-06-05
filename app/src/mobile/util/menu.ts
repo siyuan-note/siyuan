@@ -149,30 +149,34 @@ ${accountHTML}
     <svg class="b3-list-item__graphic"><use xlink:href="#iconQuit"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.safeQuit}</span>
 </div>`;
 
-        document.getElementById("menuSearch").addEventListener(getEventName(), () => {
-            popSearch(modelElement, modelMainElement);
-        });
-
-        document.getElementById("menuAppearance").addEventListener(getEventName(), () => {
-            initAppearance(modelElement, modelMainElement);
-        });
-
-        document.getElementById("menuSafeQuit").addEventListener(getEventName(), () => {
-            exitSiYuan();
-        });
-
-        document.getElementById("menuAbout").addEventListener(getEventName(), (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            closePanel();
-            if (!window.siyuan.config.localIPs || window.siyuan.config.localIPs.length === 0 ||
-                (window.siyuan.config.localIPs.length === 1 && window.siyuan.config.localIPs[0] === "")) {
-                window.siyuan.config.localIPs = ["127.0.0.1"];
-            }
-            modelElement.style.top = "0";
-            modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconInfo"></use>';
-            modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.about;
-            modelMainElement.innerHTML = `<div class="b3-label fn__flex">
+        menuElement.addEventListener(getEventName(), (event) => {
+            let target = event.target as HTMLElement;
+            while (target && !target.isEqualNode(menuElement)) {
+                if (target.id === "menuSearch") {
+                    popSearch(modelElement, modelMainElement);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuAppearance") {
+                    initAppearance(modelElement, modelMainElement);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuSafeQuit") {
+                    exitSiYuan();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuAbout") {
+                    closePanel();
+                    if (!window.siyuan.config.localIPs || window.siyuan.config.localIPs.length === 0 ||
+                        (window.siyuan.config.localIPs.length === 1 && window.siyuan.config.localIPs[0] === "")) {
+                        window.siyuan.config.localIPs = ["127.0.0.1"];
+                    }
+                    modelElement.style.top = "0";
+                    modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconInfo"></use>';
+                    modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.about;
+                    modelMainElement.innerHTML = `<div class="b3-label fn__flex">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about11}
         <div class="b3-label__text">${window.siyuan.languages.about12}</div>
@@ -249,92 +253,100 @@ ${accountHTML}
     <div style="color:var(--b3-theme-surface);font-family: cursive;">会泽百家&nbsp;至公天下</div>
     ${window.siyuan.languages.about1}
 </div>`;
-            const authCodeElement = modelMainElement.querySelector("#authCode") as HTMLInputElement;
-            authCodeElement.addEventListener("click", () => {
-                setAccessAuthCode();
-            });
-            modelMainElement.querySelector("#token").addEventListener("click", () => {
-                writeText(window.siyuan.config.api.token);
-            });
-            modelMainElement.querySelector("#exportData").addEventListener("click", () => {
-                fetchPost("/api/export/exportData", {}, response => {
-                    if (window.JSAndroid) {
-                        window.JSAndroid.openExternal(response.data.zip);
+                    const authCodeElement = modelMainElement.querySelector("#authCode") as HTMLInputElement;
+                    authCodeElement.addEventListener("click", () => {
+                        setAccessAuthCode();
+                    });
+                    modelMainElement.querySelector("#token").addEventListener("click", () => {
+                        writeText(window.siyuan.config.api.token);
+                    });
+                    modelMainElement.querySelector("#exportData").addEventListener("click", () => {
+                        fetchPost("/api/export/exportData", {}, response => {
+                            if (window.JSAndroid) {
+                                window.JSAndroid.openExternal(response.data.zip);
+                                return;
+                            }
+                            window.location.href = response.data.zip;
+                        });
+                    });
+                    modelMainElement.querySelector("#importData").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
+                        const formData = new FormData();
+                        formData.append("file", event.target.files[0]);
+                        fetchPost("/api/import/importData", formData);
+                    });
+                    const networkServeElement = modelMainElement.querySelector("#networkServe") as HTMLInputElement;
+                    networkServeElement.addEventListener("change", () => {
+                        fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
+                            exitSiYuan();
+                        });
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuNewDaily") {
+                    newDailyNote();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuNewNotebook") {
+                    newNotebook();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuHelp") {
+                    mountHelp();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuLock") {
+                    fetchPost("/api/system/logoutAuth", {}, () => {
+                        window.location.href = "/";
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuSync") {
+                    if (!needSubscribe()) {
+                        closePanel();
+                        modelElement.style.top = "0";
+                        modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconCloud"></use>';
+                        modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.cloud;
+                        modelMainElement.innerHTML = repos.genHTML();
+                        repos.element = modelMainElement;
+                        repos.bindEvent();
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuSyncNow") {
+                    if (needSubscribe()) {
                         return;
                     }
-                    window.location.href = response.data.zip;
-                });
-            });
-            modelMainElement.querySelector("#importData").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
-                const formData = new FormData();
-                formData.append("file", event.target.files[0]);
-                fetchPost("/api/import/importData", formData);
-            });
-            const networkServeElement = modelMainElement.querySelector("#networkServe") as HTMLInputElement;
-            networkServeElement.addEventListener("change", () => {
-                fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
-                    exitSiYuan();
-                });
-            });
-        });
-        document.getElementById("menuNewDaily").addEventListener(getEventName(), () => {
-            newDailyNote();
-        });
-        document.getElementById("menuNewNotebook").addEventListener(getEventName(), () => {
-            newNotebook();
-        });
-        document.getElementById("menuHelp").addEventListener(getEventName(), () => {
-            mountHelp();
-        });
-        document.getElementById("menuLock").addEventListener(getEventName(), () => {
-            fetchPost("/api/system/logoutAuth", {}, () => {
-                window.location.href = "/";
-            });
-        });
-        document.getElementById("menuSync").addEventListener(getEventName(), (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            if (!needSubscribe()) {
-                closePanel();
-                modelElement.style.top = "0";
-                modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconCloud"></use>';
-                modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.cloud;
-                modelMainElement.innerHTML = repos.genHTML();
-                repos.element = modelMainElement;
-                repos.bindEvent();
-            }
-        });
-        document.getElementById("menuSyncNow").addEventListener(getEventName(), (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            if (needSubscribe()) {
-                return;
-            }
-            if (!window.siyuan.config.sync.enabled) {
-                showMessage(window.siyuan.languages._kernel[124]);
-                return;
-            }
-            fetchPost("/api/sync/performSync", {});
-        });
-        if (!window.siyuan.config.readonly) {
-            document.getElementById("menuHistory").addEventListener(getEventName(), (event) => {
-                event.stopPropagation();
-                event.preventDefault();
-                openHistory();
-            });
-        }
-        document.getElementById("menuAccount").addEventListener(getEventName(), (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            closePanel();
-            if (document.querySelector("#menuAccount img")) {
-                showAccountInfo(modelElement, modelMainElement);
-                return;
-            }
-            modelElement.style.top = "0";
-            modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconAccount"></use>';
-            modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.login;
-            modelMainElement.innerHTML = `<div class="b3-form__space" id="form1">
+                    if (!window.siyuan.config.sync.enabled) {
+                        showMessage(window.siyuan.languages._kernel[124]);
+                        return;
+                    }
+                    fetchPost("/api/sync/performSync", {});
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuHistory" && !window.siyuan.config.readonly) {
+                    openHistory();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuAccount") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    closePanel();
+                    if (document.querySelector("#menuAccount img")) {
+                        showAccountInfo(modelElement, modelMainElement);
+                        return;
+                    }
+                    modelElement.style.top = "0";
+                    modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconAccount"></use>';
+                    modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.login;
+                    modelMainElement.innerHTML = `<div class="b3-form__space" id="form1">
     <div class="b3-form__icon">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconAccount"></use></svg>
         <input id="userName" class="b3-text-field fn__block b3-form__icon-input" placeholder="${window.siyuan.languages.accountName}">
@@ -373,82 +385,85 @@ ${accountHTML}
     <div class="fn__hr--b"></div>
     <button id="login2" class="b3-button fn__block">${window.siyuan.languages.login}</button>
 </div>`;
-            const agreeLoginElement = modelMainElement.querySelector("#agreeLogin") as HTMLInputElement;
-            const userNameElement = modelMainElement.querySelector("#userName") as HTMLInputElement;
-            const userPasswordElement = modelMainElement.querySelector("#userPassword") as HTMLInputElement;
-            const captchaImgElement = modelMainElement.querySelector("#captchaImg") as HTMLInputElement;
-            const captchaElement = modelMainElement.querySelector("#captcha") as HTMLInputElement;
-            const twofactorAuthCodeElement = modelMainElement.querySelector("#twofactorAuthCode") as HTMLInputElement;
-            const loginBtnElement = modelMainElement.querySelector("#login") as HTMLButtonElement;
-            const login2BtnElement = modelMainElement.querySelector("#login2") as HTMLButtonElement;
-            userNameElement.focus();
-            let token: string;
-            let needCaptcha: string;
-            agreeLoginElement.addEventListener("click", () => {
-                if (agreeLoginElement.checked) {
-                    loginBtnElement.removeAttribute("disabled");
-                } else {
-                    loginBtnElement.setAttribute("disabled", "disabled");
-                }
-            });
-            captchaImgElement.addEventListener("click", () => {
-                captchaImgElement.setAttribute("src", `https://ld246.com/captcha/login?needCaptcha=${needCaptcha}&t=${new Date().getTime()}`);
-            });
-            loginBtnElement.addEventListener("click", () => {
-                fetchPost("/api/account/login", {
-                    userName: userNameElement.value.replace(/(^\s*)|(\s*$)/g, ""),
-                    userPassword: md5(userPasswordElement.value),
-                    captcha: captchaElement.value.replace(/(^\s*)|(\s*$)/g, ""),
-                }, (data) => {
-                    if (data.code === 1) {
-                        showMessage(data.msg);
-                        if (data.data.needCaptcha) {
-                            // 验证码
-                            needCaptcha = data.data.needCaptcha;
-                            captchaElement.parentElement.classList.remove("fn__none");
-                            captchaElement.previousElementSibling.setAttribute("src",
-                                `https://ld246.com/captcha/login?needCaptcha=${data.data.needCaptcha}`);
-                            captchaElement.value = "";
-                            return;
+                    const agreeLoginElement = modelMainElement.querySelector("#agreeLogin") as HTMLInputElement;
+                    const userNameElement = modelMainElement.querySelector("#userName") as HTMLInputElement;
+                    const userPasswordElement = modelMainElement.querySelector("#userPassword") as HTMLInputElement;
+                    const captchaImgElement = modelMainElement.querySelector("#captchaImg") as HTMLInputElement;
+                    const captchaElement = modelMainElement.querySelector("#captcha") as HTMLInputElement;
+                    const twofactorAuthCodeElement = modelMainElement.querySelector("#twofactorAuthCode") as HTMLInputElement;
+                    const loginBtnElement = modelMainElement.querySelector("#login") as HTMLButtonElement;
+                    const login2BtnElement = modelMainElement.querySelector("#login2") as HTMLButtonElement;
+                    userNameElement.focus();
+                    let token: string;
+                    let needCaptcha: string;
+                    agreeLoginElement.addEventListener("click", () => {
+                        if (agreeLoginElement.checked) {
+                            loginBtnElement.removeAttribute("disabled");
+                        } else {
+                            loginBtnElement.setAttribute("disabled", "disabled");
                         }
-                        return;
-                    }
-                    if (data.code === 10) {
-                        // 两步验证
-                        modelMainElement.querySelector("#form1").classList.add("fn__none");
-                        modelMainElement.querySelector("#form2").classList.remove("fn__none");
-                        twofactorAuthCodeElement.focus();
-                        token = data.data.token;
-                        return;
-                    }
-                    fetchPost("/api/setting/getCloudUser", {
-                        token: data.data.token,
-                    }, response => {
-                        window.siyuan.user = response.data;
-                        closePanel();
-                        document.getElementById("menuAccount").innerHTML = `<img class="b3-list-item__graphic" src="${window.siyuan.user.userAvatarURL}"/>
-<span class="b3-list-item__text">${window.siyuan.user.userName}</span>`;
                     });
-                });
-            });
+                    captchaImgElement.addEventListener("click", () => {
+                        captchaImgElement.setAttribute("src", `https://ld246.com/captcha/login?needCaptcha=${needCaptcha}&t=${new Date().getTime()}`);
+                    });
+                    loginBtnElement.addEventListener("click", () => {
+                        fetchPost("/api/account/login", {
+                            userName: userNameElement.value.replace(/(^\s*)|(\s*$)/g, ""),
+                            userPassword: md5(userPasswordElement.value),
+                            captcha: captchaElement.value.replace(/(^\s*)|(\s*$)/g, ""),
+                        }, (data) => {
+                            if (data.code === 1) {
+                                showMessage(data.msg);
+                                if (data.data.needCaptcha) {
+                                    // 验证码
+                                    needCaptcha = data.data.needCaptcha;
+                                    captchaElement.parentElement.classList.remove("fn__none");
+                                    captchaElement.previousElementSibling.setAttribute("src",
+                                        `https://ld246.com/captcha/login?needCaptcha=${data.data.needCaptcha}`);
+                                    captchaElement.value = "";
+                                    return;
+                                }
+                                return;
+                            }
+                            if (data.code === 10) {
+                                // 两步验证
+                                modelMainElement.querySelector("#form1").classList.add("fn__none");
+                                modelMainElement.querySelector("#form2").classList.remove("fn__none");
+                                twofactorAuthCodeElement.focus();
+                                token = data.data.token;
+                                return;
+                            }
+                            fetchPost("/api/setting/getCloudUser", {
+                                token: data.data.token,
+                            }, response => {
+                                window.siyuan.user = response.data;
+                                closePanel();
+                                document.getElementById("menuAccount").innerHTML = `<img class="b3-list-item__graphic" src="${window.siyuan.user.userAvatarURL}"/>
+<span class="b3-list-item__text">${window.siyuan.user.userName}</span>`;
+                            });
+                        });
+                    });
 
-            login2BtnElement.addEventListener("click", () => {
-                fetchPost("/api/setting/login2faCloudUser", {
-                    code: twofactorAuthCodeElement.value,
-                    token,
-                }, faResponse => {
-                    fetchPost("/api/setting/getCloudUser", {
-                        token: faResponse.data.token,
-                    }, response => {
-                        window.siyuan.user = response.data;
-                        closePanel();
-                        document.getElementById("menuAccount").innerHTML = `<img class="b3-list-item__graphic" src="${window.siyuan.user.userAvatarURL}"/>
+                    login2BtnElement.addEventListener("click", () => {
+                        fetchPost("/api/setting/login2faCloudUser", {
+                            code: twofactorAuthCodeElement.value,
+                            token,
+                        }, faResponse => {
+                            fetchPost("/api/setting/getCloudUser", {
+                                token: faResponse.data.token,
+                            }, response => {
+                                window.siyuan.user = response.data;
+                                closePanel();
+                                document.getElementById("menuAccount").innerHTML = `<img class="b3-list-item__graphic" src="${window.siyuan.user.userAvatarURL}"/>
 <span class="b3-list-item__text">${window.siyuan.user.userName}</span>`;
+                            });
+                        });
                     });
-                });
-            });
+                    break;
+                }
+                target = target.parentElement;
+            }
         });
-
         menuElement.style.right = "0";
         scrimElement.classList.remove("fn__none");
     });

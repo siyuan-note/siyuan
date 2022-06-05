@@ -288,7 +288,7 @@ func SyncData(boot, exit, byHand bool) {
 	start := time.Now()
 	//util.LogInfof("sync [cloud=%d, local=%d] downloading...", cloudSyncVer, syncConf.SyncVer)
 
-	// 使用索引文件进行解密验证 https://github.com/siyuan-note/siyuan/issues/3789
+	// 使用路径映射文件进行解密验证 https://github.com/siyuan-note/siyuan/issues/3789
 	var tmpFetchedFiles int
 	var tmpTransferSize uint64
 	err = ossDownload0(util.TempDir+"/sync", "sync/"+Conf.Sync.CloudName, "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, boot || exit)
@@ -783,7 +783,7 @@ func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encrypte
 	}
 
 	ctime := map[string]time.Time{}
-	metaJSON := map[string]string{}
+	meta := map[string]string{}
 	filepath.Walk(util.DataDir, func(path string, info fs.FileInfo, _ error) error {
 		if util.DataDir == path || nil == info {
 			return nil
@@ -803,7 +803,9 @@ func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encrypte
 		if !strings.HasPrefix(plainP, ".siyuan") { // 配置目录下都用明文，其他文件需要映射文件名
 			p = pathSha256Short(p, string(os.PathSeparator))
 		}
-		metaJSON[filepath.ToSlash(p)] = filepath.ToSlash(plainP)
+		if !isDir {
+			meta[filepath.ToSlash(p)] = filepath.ToSlash(plainP)
+		}
 
 		// 如果不是新增或者修改则跳过
 		if unchangedDataList[path] {
@@ -815,9 +817,6 @@ func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encrypte
 		if isDir {
 			if err = os.MkdirAll(p, 0755); nil != err {
 				return io.EOF
-			}
-			if fi, err0 := os.Stat(path); nil == err0 {
-				ctime[p] = fi.ModTime()
 			}
 		} else {
 			if err = os.MkdirAll(filepath.Dir(p), 0755); nil != err {
@@ -873,14 +872,14 @@ func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encrypte
 			return nil
 		}
 
-		path = strings.TrimPrefix(path, encryptedDataDir+string(os.PathSeparator))
-		path = filepath.ToSlash(path)
-		if _, ok := metaJSON[path]; !ok {
-			util.LogErrorf("not found sync path in meta [%s]", path)
-			return errors.New(Conf.Language(27))
-		}
-
 		if !info.IsDir() {
+			path = strings.TrimPrefix(path, encryptedDataDir+string(os.PathSeparator))
+			path = filepath.ToSlash(path)
+			if _, ok := meta[path]; !ok {
+				util.LogErrorf("not found sync path in meta [%s]", path)
+				return errors.New(Conf.Language(27))
+			}
+
 			upsertList["/"+path] = true
 		}
 		return nil
@@ -889,7 +888,7 @@ func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encrypte
 		return
 	}
 
-	data, err := gulu.JSON.MarshalJSON(metaJSON)
+	data, err := gulu.JSON.MarshalJSON(meta)
 	if nil != err {
 		return
 	}
@@ -898,8 +897,7 @@ func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encrypte
 		util.LogErrorf("encrypt file failed: %s", err)
 		return
 	}
-	meta := filepath.Join(encryptedDataDir, pathJSON)
-	if err = os.WriteFile(meta, data, 0644); nil != err {
+	if err = os.WriteFile(filepath.Join(encryptedDataDir, pathJSON), data, 0644); nil != err {
 		return
 	}
 	return

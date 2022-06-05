@@ -1,10 +1,10 @@
 .b3-snackbar {
   margin-bottom: 16px;
   position: relative;
+  transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
 
   &--hide {
-    transform: translate3d(50vw, 0, 0);
-    transition: transform 0.52s cubic-bezier(0, 0, 0.2, 1) 0ms;
+    transform: translate3d(300px, 0, 0);
   }
 
   &s {
@@ -15,12 +15,10 @@
     max-height: calc(100vh - 32px);
     display: flex;
     flex-direction: column;
-    transform: translate3d(50vw, 0, 0);
-    transition: opacity 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms, transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
-    opacity: 0;
+    transform: translate3d(300px, 0, 0);
+    transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
 
     &--show {
-      opacity: 1;
       transform: translate3d(0, 0, 0);
     }
 
@@ -53,10 +51,8 @@
     background-color: var(--b3-theme-primary);
     box-sizing: border-box;
     box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%), 0 6px 10px 0 rgb(0 0 0 / 14%), 0 1px 18px 0 rgb(0 0 0 / 12%);
-    transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
     word-break: break-word;
-    width: 20vw;
-    min-width: 240px;
+    width: 240px;
 
     a {
       color: var(--b3-theme-on-primary);

@@ -1,4 +1,5 @@
 import {genUUID} from "../util/genID";
+import {Constants} from "../constants";
 
 export const initMessage = () => {
     const messageElement = document.getElementById("message");
@@ -15,7 +16,9 @@ export const initMessage = () => {
                 break;
             } else if (target.isSameNode(messageElement.lastElementChild)) {
                 target.parentElement.classList.remove("b3-snackbars--show");
-                target.parentElement.firstElementChild.innerHTML = "";
+                setTimeout(() => {
+                    target.parentElement.firstElementChild.innerHTML = "";
+                }, Constants.TIMEOUT_INPUT);
                 event.preventDefault();
                 break;
             }
@@ -26,7 +29,7 @@ export const initMessage = () => {
 
 export const showMessage = (message: string, timeout = 6000, type = "info", messageId?: string) => {
     const id = messageId || genUUID();
-    let messageHTML = `<div data-id="${id}" class="b3-snackbar${type === "error" ? " b3-snackbar--error" : ""}"><div class="b3-snackbar__content">${message}</div>`;
+    let messageHTML = `<div data-id="${id}" class="b3-snackbar--hide b3-snackbar${type === "error" ? " b3-snackbar--error" : ""}"><div class="b3-snackbar__content">${message}</div>`;
     if (timeout === 0) {
         messageHTML += '<svg class="b3-snackbar__close"><use xlink:href="#iconClose"></use></svg>';
     } else if (timeout !== -1) { // -1 时需等待请求完成后手动关闭
@@ -39,6 +42,11 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
         messagesElement.parentElement.classList.add("b3-snackbars--show");
     }
     messagesElement.insertAdjacentHTML("afterbegin", messageHTML + "</div>");
+    setTimeout(() => {
+        messagesElement.querySelectorAll(".b3-snackbar--hide").forEach(item => {
+            item.classList.remove("b3-snackbar--hide");
+        });
+    });
     if (messagesElement.firstElementChild.nextElementSibling &&
         messagesElement.firstElementChild.nextElementSibling.innerHTML === messagesElement.firstElementChild.innerHTML) {
         messagesElement.firstElementChild.nextElementSibling.remove();
@@ -57,7 +65,7 @@ export const hideMessage = (id: string) => {
         messageElement.classList.add("b3-snackbar--hide");
         setTimeout(() => {
             messageElement.remove();
-        }, 520);
+        }, Constants.TIMEOUT_INPUT);
         if (messagesElement.childElementCount < 2) {
             messagesElement.parentElement.classList.remove("b3-snackbars--show");
         }

@@ -1013,7 +1013,7 @@ func calcUnchangedDataList(passwd string) (unchangedDataList map[string]bool, re
 		encryptedP := strings.TrimPrefix(path, syncDir+string(os.PathSeparator))
 		encryptedP = filepath.ToSlash(encryptedP)
 		decryptedP := metaJSON[encryptedP]
-		if "" == decryptedP { // 理论上不会发生
+		if "" == decryptedP {
 			removeList[path] = true
 			if gulu.File.IsDir(path) {
 				return filepath.SkipDir

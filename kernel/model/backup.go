@@ -322,7 +322,7 @@ func CreateLocalBackup() (err error) {
 }
 
 func DownloadBackup() (err error) {
-	// 使用索引文件进行解密验证 https://github.com/siyuan-note/siyuan/issues/3789
+	// 使用路径映射文件进行解密验证 https://github.com/siyuan-note/siyuan/issues/3789
 	var tmpFetchedFiles int
 	var tmpTransferSize uint64
 	err = ossDownload0(util.TempDir+"/backup", "backup", "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, false)
@@ -517,7 +517,7 @@ func decryptDataDir(passwd string) (decryptedDataDir string, err error) {
 	}
 
 	backupDir := Conf.Backup.GetSaveDir()
-	meta := filepath.Join(backupDir, pathJSON)
+	meta := filepath.Join(util.TempDir, "backup", pathJSON)
 	data, err := os.ReadFile(meta)
 	if nil != err {
 		return
@@ -540,7 +540,14 @@ func decryptDataDir(passwd string) (decryptedDataDir string, err error) {
 
 		encryptedP := strings.TrimPrefix(path, backupDir+string(os.PathSeparator))
 		encryptedP = filepath.ToSlash(encryptedP)
-		plainP := filepath.Join(decryptedDataDir, metaJSON[encryptedP])
+		decryptedP := metaJSON[encryptedP]
+		if "" == decryptedP {
+			if gulu.File.IsDir(path) {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		plainP := filepath.Join(decryptedDataDir, decryptedP)
 		plainP = filepath.FromSlash(plainP)
 
 		if info.IsDir() {

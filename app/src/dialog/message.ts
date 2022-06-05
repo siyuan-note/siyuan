@@ -4,8 +4,8 @@ export const initMessage = () => {
     const messageElement = document.getElementById("message");
     messageElement.innerHTML = `<div class="fn__flex-1"></div>
 <div class="fn__hr fn__flex-shrink"></div>
-<button class="fn__flex-center b3-button b3-button--cancel">
-    ${window.siyuan.languages.close}
+<button class="fn__flex-center b3-button b3-button--outline">
+    <svg><use xlink:href="#iconTrashcan"></use></svg> ${window.siyuan.languages.clearMessage}
 </button>`;
     messageElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
@@ -16,7 +16,7 @@ export const initMessage = () => {
                 break;
             } else if (target.isSameNode(messageElement.lastElementChild)) {
                 target.parentElement.classList.add("fn__none");
-                target.parentElement.innerHTML = "";
+                target.parentElement.firstElementChild.innerHTML = "";
                 event.preventDefault();
                 break;
             }
@@ -25,8 +25,8 @@ export const initMessage = () => {
     });
 };
 
-export const showMessage = (message: string, timeout = 6000, type = "info") => {
-    const id = genUUID();
+export const showMessage = (message: string, timeout = 6000, type = "info", messageId?: string) => {
+    const id = messageId || genUUID();
     let messageHTML = `<div data-id="${id}" class="b3-snackbar${type === "error" ? " b3-snackbar--error" : ""}"><div class="b3-snackbar__content">${message}</div>`;
     if (timeout === 0) {
         messageHTML += '<svg class="b3-snackbar__close"><use xlink:href="#iconClose"></use></svg>';
@@ -40,6 +40,10 @@ export const showMessage = (message: string, timeout = 6000, type = "info") => {
         messagesElement.parentElement.classList.remove("fn__none");
     }
     messagesElement.insertAdjacentHTML("afterbegin", messageHTML + "</div>");
+    if (messagesElement.firstElementChild.nextElementSibling &&
+        messagesElement.firstElementChild.nextElementSibling.innerHTML === messagesElement.firstElementChild.innerHTML) {
+        messagesElement.firstElementChild.nextElementSibling.remove();
+    }
     messagesElement.scrollTop = 0;
     return id;
 };

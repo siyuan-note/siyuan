@@ -1,13 +1,17 @@
-import {showMessage} from "../dialog/message";
+import {hideMessage, showMessage} from "../dialog/message";
 import {exportLayout} from "../layout/util";
 import {isMobile} from "./functions";
 
 export const processMessage = (response: IWebSocketData) => {
     if ("msg" === response.cmd) {
-        showMessage(response.msg, response.data.closeTimeout, response.code === 0 ? "info" : "error");
+        showMessage(response.msg, response.data.closeTimeout, response.code === 0 ? "info" : "error", response.data.id);
         return false;
     }
     if ("cmsg" === response.cmd) {
+        hideMessage(response.data.id);
+        return false;
+    }
+    if ("cprogress" === response.cmd) {
         const progressElement = document.getElementById("progress");
         if (progressElement) {
             progressElement.remove();

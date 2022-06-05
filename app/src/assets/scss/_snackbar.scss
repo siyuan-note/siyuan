@@ -4,7 +4,7 @@
   transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
 
   &--hide {
-    transform: translate3d(300px, 0, 0);
+    transform: translate3d(calc(20vw + 48px), 0, 0);
   }
 
   &s {
@@ -15,7 +15,7 @@
     max-height: calc(100vh - 32px);
     display: flex;
     flex-direction: column;
-    transform: translate3d(300px, 0, 0);
+    transform: translate3d(calc(20vw + 48px), 0, 0);
     transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
 
     &--show {
@@ -52,7 +52,7 @@
     box-sizing: border-box;
     box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%), 0 6px 10px 0 rgb(0 0 0 / 14%), 0 1px 18px 0 rgb(0 0 0 / 12%);
     word-break: break-word;
-    width: 240px;
+    width: 20vw;
 
     a {
       color: var(--b3-theme-on-primary);
@@ -68,7 +68,7 @@
     position: absolute;
     cursor: pointer;
     top: 10px;
-    right: 4px;
+    right: 1px;
     height: 8px;
     width: 8px;
     padding: 4px;

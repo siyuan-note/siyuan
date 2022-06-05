@@ -320,7 +320,7 @@ func ossDownload0(localDirPath, cloudDirPath, fetch string, fetchedFiles *int, t
 	return
 }
 
-func ossUpload(localDirPath, cloudDirPath, cloudDevice string, boot bool, removedSyncList, upsertedSyncList map[string]bool) (wroteFiles int, transferSize uint64, err error) {
+func ossUpload(localDirPath, cloudDirPath, cloudDevice string, boot bool, removeList, upsertList map[string]bool) (wroteFiles int, transferSize uint64, err error) {
 	if !gulu.File.IsExist(localDirPath) {
 		return
 	}
@@ -328,16 +328,16 @@ func ossUpload(localDirPath, cloudDirPath, cloudDevice string, boot bool, remove
 	localDevice := Conf.System.ID
 	excludes := getSyncExcludedList(localDirPath)
 	localFileList, genIndexErr := genCloudIndex(localDirPath, excludes)
+	if nil != genIndexErr {
+		err = genIndexErr
+		return
+	}
+
 	var localUpserts, cloudRemoves []string
 	var cloudFileList map[string]*CloudIndex
 	if "" != localDevice && localDevice == cloudDevice {
 		//util.LogInfof("cloud device is the same as local device, get index from local")
-		if nil == genIndexErr {
-			localUpserts, cloudRemoves, err = cloudUpsertRemoveLocalListOSS(localDirPath, removedSyncList, upsertedSyncList, excludes)
-		} else {
-			util.LogInfof("get local index failed [%s], get index from cloud", err)
-			cloudFileList, err = getCloudFileListOSS(cloudDirPath)
-		}
+		localUpserts, cloudRemoves, err = cloudUpsertRemoveLocalListOSS(localDirPath, removeList, upsertList, excludes)
 	} else {
 		cloudFileList, err = getCloudFileListOSS(cloudDirPath)
 	}

@@ -135,9 +135,9 @@ func SyncData(boot, exit, byHand bool) {
 	WaitForWritingFiles()
 	writingDataLock.Lock()
 	var err error
-	var removedSyncList, upsertedSyncList map[string]bool
+	var removeList, upsertList map[string]bool
 	// 将 data 变更同步到 sync
-	if removedSyncList, upsertedSyncList, err = workspaceData2SyncDir(); nil != err {
+	if removeList, upsertList, err = workspaceData2SyncDir(); nil != err {
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		Conf.Sync.Stat = msg
 		util.PushErrMsg(msg, 7000)
@@ -246,7 +246,7 @@ func SyncData(boot, exit, byHand bool) {
 			return
 		}
 
-		wroteFiles, transferSize, err := ossUpload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, device, boot, removedSyncList, upsertedSyncList)
+		wroteFiles, transferSize, err := ossUpload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, device, boot, removeList, upsertList)
 		if nil != err {
 			util.PushClearProgress()
 			IncWorkspaceDataVer() // 上传失败的话提升本地版本，以备下次上传
@@ -591,17 +591,17 @@ func syncDir2WorkspaceData(boot bool) (upsertFiles, removeFiles []string, err er
 // workspaceData2SyncDir 将 data 的数据更新到 sync 中。
 //   1. 删除 sync 中多余的文件
 //   2. 将 data 中新增/修改的文件加密后拷贝到 sync 中
-func workspaceData2SyncDir() (removedSyncList, upsertedSyncList map[string]bool, err error) {
+func workspaceData2SyncDir() (removeList, upsertList map[string]bool, err error) {
 	start := time.Now()
 	filesys.ReleaseAllFileLocks()
 
 	passwd := Conf.E2EEPasswd
-	unchangedDataList, removedSyncList, err := calcUnchangedDataList(passwd)
+	unchangedDataList, removeList, err := calcUnchangedDataList(passwd)
 	if nil != err {
 		return
 	}
 
-	encryptedDataDir, upsertedSyncList, err := prepareSyncData(passwd, unchangedDataList)
+	encryptedDataDir, upsertList, err := prepareSyncData(passwd, unchangedDataList)
 	if nil != err {
 		util.LogErrorf("encrypt data dir failed: %s", err)
 		return
@@ -758,7 +758,7 @@ func recoverSyncData(modified map[string]bool) (decryptedDataDir string, upsertF
 	return
 }
 
-func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encryptedDataDir string, upsertedSyncList map[string]bool, err error) {
+func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encryptedDataDir string, upsertList map[string]bool, err error) {
 	encryptedDataDir = filepath.Join(util.WorkspaceDir, "incremental", "sync-encrypt")
 	if err = os.RemoveAll(encryptedDataDir); nil != err {
 		return
@@ -851,7 +851,7 @@ func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encrypte
 		}
 	}
 
-	upsertedSyncList = map[string]bool{}
+	upsertList = map[string]bool{}
 	// 检查文件是否全部已经编入索引
 	err = filepath.Walk(encryptedDataDir, func(path string, info fs.FileInfo, _ error) error {
 		if encryptedDataDir == path {
@@ -866,7 +866,7 @@ func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encrypte
 		}
 
 		if !info.IsDir() {
-			upsertedSyncList["/"+path] = true
+			upsertList["/"+path] = true
 		}
 		return nil
 	})
@@ -984,8 +984,8 @@ func calcUnchangedSyncList() (ret map[string]bool, removes []string, err error) 
 	return
 }
 
-// calcUnchangedDataList 计算 sync 和 data 一致（没有修改过）的文件列表 unchangedDataList，并删除 sync 中不存在于 data 中的多余文件 removedSyncList。
-func calcUnchangedDataList(passwd string) (unchangedDataList map[string]bool, removedSyncList map[string]bool, err error) {
+// calcUnchangedDataList 计算 sync 和 data 一致（没有修改过）的文件列表 unchangedDataList，并删除 sync 中不存在于 data 中的多余文件 removeList。
+func calcUnchangedDataList(passwd string) (unchangedDataList map[string]bool, removeList map[string]bool, err error) {
 	syncDir := Conf.Sync.GetSaveDir()
 	meta := filepath.Join(syncDir, pathJSON)
 	if !gulu.File.IsExist(meta) {
@@ -1007,7 +1007,7 @@ func calcUnchangedDataList(passwd string) (unchangedDataList map[string]bool, re
 	}
 
 	unchangedDataList = map[string]bool{}
-	removedSyncList = map[string]bool{}
+	removeList = map[string]bool{}
 	filepath.Walk(syncDir, func(path string, info fs.FileInfo, _ error) error {
 		if syncDir == path || pathJSON == info.Name() {
 			return nil
@@ -1017,7 +1017,7 @@ func calcUnchangedDataList(passwd string) (unchangedDataList map[string]bool, re
 		encryptedP = filepath.ToSlash(encryptedP)
 		decryptedP := metaJSON[encryptedP]
 		if "" == decryptedP { // 理论上不会发生
-			removedSyncList[path] = true
+			removeList[path] = true
 			if gulu.File.IsDir(path) {
 				return filepath.SkipDir
 			}
@@ -1026,7 +1026,7 @@ func calcUnchangedDataList(passwd string) (unchangedDataList map[string]bool, re
 		dataP := filepath.Join(util.DataDir, decryptedP)
 		dataP = filepath.FromSlash(dataP)
 		if !gulu.File.IsExist(dataP) { // data 已经删除的文件
-			removedSyncList[path] = true
+			removeList[path] = true
 			if gulu.File.IsDir(path) {
 				return filepath.SkipDir
 			}
@@ -1044,7 +1044,7 @@ func calcUnchangedDataList(passwd string) (unchangedDataList map[string]bool, re
 
 	tmp := map[string]bool{}
 	// 在 sync 中删除 data 中已经删除的文件
-	for remove, _ := range removedSyncList {
+	for remove, _ := range removeList {
 		if strings.HasSuffix(remove, "index.json") {
 			continue
 		}
@@ -1057,7 +1057,7 @@ func calcUnchangedDataList(passwd string) (unchangedDataList map[string]bool, re
 			util.LogErrorf("remove [%s] failed: %s", remove, err)
 		}
 	}
-	removedSyncList = tmp
+	removeList = tmp
 	return
 }
 

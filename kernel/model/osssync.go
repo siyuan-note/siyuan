@@ -33,6 +33,8 @@ import (
 	"github.com/88250/gulu"
 	"github.com/panjf2000/ants/v2"
 	"github.com/qiniu/go-sdk/v7/storage"
+	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -431,50 +433,50 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 		if 0 < len(downloadList) && !isBackup {
 			// 下载合并云端变更
 
-			//var data []byte
-			//data, err = gulu.JSON.MarshalJSON(cloudFileList)
-			//if nil != err {
-			//	return
-			//}
-			//indexPath := filepath.Join(util.TempDir, "sync", "index.json")
-			//if err = os.WriteFile(indexPath, data, 0644); nil != err {
-			//	return
-			//}
-			//
-			//var tmpFetchedFiles int
-			//var tmpTransferSize uint64
-			//err = ossDownload0(util.TempDir+"/sync", "sync/"+Conf.Sync.CloudName, "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, false)
-			//if nil != err {
-			//	util.LogErrorf("download merge cloud file failed: %s", err)
-			//}
-			//
-			//metaPath := filepath.Join(util.TempDir, "/sync/"+pathJSON)
-			//mergeErr := syncDirUpsertWorkspaceData(metaPath, indexPath, downloadList)
-			//if nil != mergeErr {
-			//	util.LogErrorf("download merge cloud file failed: %s", mergeErr)
-			//} else {
-			//	// 增量索引
-			//	for upsertFile, _ := range downloadList {
-			//		if !strings.HasSuffix(upsertFile, ".sy") {
-			//			continue
-			//		}
-			//
-			//		upsertFile = filepath.ToSlash(upsertFile)
-			//		box := upsertFile[:strings.Index(upsertFile, "/")]
-			//		p := strings.TrimPrefix(upsertFile, box)
-			//		tree, err0 := LoadTree(box, p)
-			//		if nil != err0 {
-			//			continue
-			//		}
-			//		treenode.ReindexBlockTree(tree)
-			//		sql.UpsertTreeQueue(tree)
-			//	}
-			//}
-			//
-			//// 重新生成云端索引
-			//if _, idxErr := genCloudIndex(localDirPath, excludes); nil != idxErr {
-			//	return
-			//}
+			var data []byte
+			data, err = gulu.JSON.MarshalJSON(cloudFileList)
+			if nil != err {
+				return
+			}
+			indexPath := filepath.Join(util.TempDir, "sync", "index.json")
+			if err = os.WriteFile(indexPath, data, 0644); nil != err {
+				return
+			}
+
+			var tmpFetchedFiles int
+			var tmpTransferSize uint64
+			err = ossDownload0(util.TempDir+"/sync", "sync/"+Conf.Sync.CloudName, "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, false)
+			if nil != err {
+				util.LogErrorf("download merge cloud file failed: %s", err)
+			}
+
+			metaPath := filepath.Join(util.TempDir, "/sync/"+pathJSON)
+			mergeErr := syncDirUpsertWorkspaceData(metaPath, indexPath, downloadList)
+			if nil != mergeErr {
+				util.LogErrorf("download merge cloud file failed: %s", mergeErr)
+			} else {
+				// 增量索引
+				for upsertFile, _ := range downloadList {
+					if !strings.HasSuffix(upsertFile, ".sy") {
+						continue
+					}
+
+					upsertFile = filepath.ToSlash(upsertFile)
+					box := upsertFile[:strings.Index(upsertFile, "/")]
+					p := strings.TrimPrefix(upsertFile, box)
+					tree, err0 := LoadTree(box, p)
+					if nil != err0 {
+						continue
+					}
+					treenode.ReindexBlockTree(tree)
+					sql.UpsertTreeQueue(tree)
+				}
+			}
+
+			// 重新生成云端索引
+			if _, idxErr := genCloudIndex(localDirPath, excludes); nil != idxErr {
+				return
+			}
 		}
 	}
 

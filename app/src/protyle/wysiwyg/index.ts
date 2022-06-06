@@ -331,6 +331,7 @@ export class WYSIWYG {
                         headElement.before(emptyElement);
                     }
                     transaction(protyle, doOperations, undoOperations);
+                    focusSideBlock(headElement);
                     tempElement.append(headElement);
                 } else if (range.toString() !== "" && startContainer.isSameNode(range.endContainer) && range.startContainer.nodeType === 3
                     && range.endOffset === range.endContainer.textContent.length && range.startOffset === 0 &&

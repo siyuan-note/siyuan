@@ -329,7 +329,7 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
-	fetchedFilesCount, transferSize, downloadedFiles, err := ossDownload(false, localSyncDirPath, "sync/"+Conf.Sync.CloudName, boot || exit, removeList, upsertList)
+	fetchedFilesCount, transferSize, downloadedFiles, err := ossDownload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, boot || exit, removeList, upsertList)
 	if nil != err {
 		util.PushClearProgress()
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
@@ -613,7 +613,7 @@ type CloudIndex struct {
 }
 
 // genCloudIndex 生成云端索引文件。
-func genCloudIndex(localDirPath string, excludes map[string]bool) (cloudIndex map[string]*CloudIndex, err error) {
+func genCloudIndex(localDirPath string, excludes map[string]bool, calcHash bool) (cloudIndex map[string]*CloudIndex, err error) {
 	cloudIndex = map[string]*CloudIndex{}
 	err = filepath.Walk(localDirPath, func(path string, info fs.FileInfo, err error) error {
 		if nil != err {
@@ -629,11 +629,14 @@ func genCloudIndex(localDirPath string, excludes map[string]bool) (cloudIndex ma
 
 		p := strings.TrimPrefix(path, localDirPath)
 		p = filepath.ToSlash(p)
-		// TODO: 优化云端同步上传资源占用和耗时 https://github.com/siyuan-note/siyuan/issues/5093
-		hash, hashErr := util.GetEtag(path)
-		if nil != hashErr {
-			err = hashErr
-			return io.EOF
+		hash := ""
+		if calcHash {
+			var hashErr error
+			hash, hashErr = util.GetEtag(path)
+			if nil != hashErr {
+				err = hashErr
+				return io.EOF
+			}
 		}
 		cloudIndex[p] = &CloudIndex{Hash: hash, Size: info.Size(), Updated: info.ModTime().Unix()}
 		return nil

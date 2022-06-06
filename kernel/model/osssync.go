@@ -162,7 +162,7 @@ func listCloudSyncDirOSS() (dirs []map[string]interface{}, size int64, err error
 	return
 }
 
-func ossDownload(isBackup bool, localDirPath, cloudDirPath string, bootOrExit bool, removeList, upsertList map[string]bool) (fetchedFilesCount int, transferSize uint64, downloadedFiles map[string]bool, err error) {
+func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool, removeList, upsertList map[string]bool) (fetchedFilesCount int, transferSize uint64, downloadedFiles map[string]bool, err error) {
 	if !gulu.File.IsExist(localDirPath) {
 		return
 	}
@@ -181,66 +181,6 @@ func ossDownload(isBackup bool, localDirPath, cloudDirPath string, bootOrExit bo
 	tmpIndex := filepath.Join(tmpSyncDir, "index.json")
 	if err = os.WriteFile(tmpIndex, data, 0644); nil != err {
 		return
-	}
-
-	if !isBackup && (0 < len(removeList) || 0 < len(upsertList)) {
-		// 上传合并本地变更
-
-		//var removed, upserted bool
-		//var removes []string
-		//for remove, _ := range removeList {
-		//	removes = append(removes, remove)
-		//}
-		//err = ossRemove0(cloudDirPath, removes)
-		//if nil != err {
-		//	util.LogErrorf("remove merge cloud file failed: %s", err)
-		//	return
-		//}
-		//for remove, _ := range removeList {
-		//	delete(cloudFileList, remove)
-		//}
-		//removed = 0 < len(removeList)
-		//
-		//var tmpWroteFiles int
-		//var tmpTransferSize uint64
-		//for upsert, _ := range upsertList {
-		//	if "/.siyuan/conf.json" == upsert { // 版本号不覆盖云端
-		//		continue
-		//	}
-		//	localUpsert := filepath.Join(localDirPath, upsert)
-		//	var info os.FileInfo
-		//	info, err = os.Stat(localUpsert)
-		//	if nil != err {
-		//		util.LogErrorf("stat file [%s] failed: %s", localUpsert, err)
-		//		return
-		//	}
-		//
-		//	if err = ossUpload0(localDirPath, cloudDirPath, localUpsert, &tmpWroteFiles, &tmpTransferSize); nil != err {
-		//		util.LogErrorf("upload merge cloud file [%s] failed: %s", upsert, err)
-		//		return
-		//	}
-		//	cloudFileList[upsert] = &CloudIndex{
-		//		Size:    info.Size(),
-		//		Updated: info.ModTime().Unix(),
-		//	}
-		//	upserted = true
-		//}
-		//
-		//if removed || upserted {
-		//	data, err = gulu.JSON.MarshalJSON(cloudFileList)
-		//	if nil != err {
-		//		util.LogErrorf("marshal cloud file list failed: %s", err)
-		//		return
-		//	}
-		//	if err = os.WriteFile(tmpIndex, data, 0644); nil != err {
-		//		util.LogErrorf("write cloud file list failed: %s", err)
-		//		return
-		//	}
-		//	if err = ossUpload0(tmpSyncDir, cloudDirPath, tmpIndex, &tmpWroteFiles, &tmpTransferSize); nil != err {
-		//		util.LogErrorf("upload merge cloud file [%s] failed: %s", tmpIndex, err)
-		//		return
-		//	}
-		//}
 	}
 
 	localRemoves, cloudFetches, err := localUpsertRemoveListOSS(localDirPath, cloudFileList)
@@ -406,19 +346,10 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 	}
 
 	localDevice := Conf.System.ID
-	excludes := getSyncExcludedList(localDirPath)
-	localFileList, genIndexErr := genCloudIndex(localDirPath, excludes)
-	if nil != genIndexErr {
-		err = genIndexErr
-		return
-	}
-
-	var localUpserts, cloudRemoves []string
-	var cloudFileList map[string]*CloudIndex
-	var downloadList map[string]bool
+	var localFileList, cloudFileList map[string]*CloudIndex
 	if "" != localDevice && localDevice == cloudDevice && !isBackup {
-		//util.LogInfof("cloud device is the same as local device, get index from local")
-		localUpserts, cloudRemoves, err = cloudUpsertRemoveLocalListOSS(localDirPath, removeList, upsertList, excludes)
+		// 同一台设备连续上传，使用上一次的本地索引作为云端索引
+		cloudFileList, err = getLocalFileListOSS(isBackup)
 	} else {
 		cloudFileList, err = getCloudFileListOSS(cloudDirPath)
 	}
@@ -426,62 +357,23 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 		return
 	}
 
+	calcHash := false
 	if 0 < len(cloudFileList) {
-		localUpserts, cloudRemoves, downloadList, err = cloudUpsertRemoveListOSS(localDirPath, cloudFileList, localFileList, removeList, upsertList, excludes)
-		if nil != err {
-			return
+		if idx := cloudFileList["/index.json"]; nil != idx {
+			calcHash = 0 == idx.Updated
 		}
-		if 0 < len(downloadList) && !isBackup {
-			// 下载合并云端变更
+	}
 
-			//var data []byte
-			//data, err = gulu.JSON.MarshalJSON(cloudFileList)
-			//if nil != err {
-			//	return
-			//}
-			//tmpSyncDir := filepath.Join(util.TempDir, "sync")
-			//indexPath := filepath.Join(tmpSyncDir, "index.json")
-			//if err = os.WriteFile(indexPath, data, 0644); nil != err {
-			//	return
-			//}
-			//
-			//var tmpFetchedFiles int
-			//var tmpTransferSize uint64
-			//err = ossDownload0(tmpSyncDir, "sync/"+Conf.Sync.CloudName, "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, false)
-			//if nil != err {
-			//	util.LogErrorf("download merge cloud file failed: %s", err)
-			//	return
-			//}
-			//
-			//metaPath := filepath.Join(tmpSyncDir, pathJSON)
-			//var upsertFiles []string
-			//upsertFiles, err = syncDirUpsertWorkspaceData(metaPath, indexPath, downloadList)
-			//if nil != err {
-			//	util.LogErrorf("download merge cloud file failed: %s", err)
-			//	return
-			//}
-			//// 增量索引
-			//for _, upsertFile := range upsertFiles {
-			//	if !strings.HasSuffix(upsertFile, ".sy") {
-			//		continue
-			//	}
-			//
-			//	upsertFile = filepath.ToSlash(upsertFile)
-			//	box := upsertFile[:strings.Index(upsertFile, "/")]
-			//	p := strings.TrimPrefix(upsertFile, box)
-			//	tree, err0 := LoadTree(box, p)
-			//	if nil != err0 {
-			//		continue
-			//	}
-			//	treenode.ReindexBlockTree(tree)
-			//	sql.UpsertTreeQueue(tree)
-			//}
-			//
-			//// 重新生成云端索引
-			//if _, err = genCloudIndex(localDirPath, excludes); nil != err {
-			//	return
-			//}
-		}
+	excludes := getSyncExcludedList(localDirPath)
+	localFileList, err = genCloudIndex(localDirPath, excludes, calcHash)
+	if nil != err {
+		return
+	}
+
+	var localUpserts, cloudRemoves []string
+	localUpserts, cloudRemoves, err = cloudUpsertRemoveListOSS(localDirPath, cloudFileList, localFileList, excludes)
+	if nil != err {
+		return
 	}
 
 	err = ossRemove0(cloudDirPath, cloudRemoves)
@@ -731,6 +623,28 @@ func getCloudSync(cloudDir string) (assetSize, backupSize int64, device string, 
 	return
 }
 
+func getLocalFileListOSS(isBackup bool) (ret map[string]*CloudIndex, err error) {
+	ret = map[string]*CloudIndex{}
+	dir := "sync"
+	if isBackup {
+		dir = "backup"
+	}
+
+	localDirPath := filepath.Join(util.WorkspaceDir, dir)
+	indexPath := filepath.Join(localDirPath, "index.json")
+	if !gulu.File.IsExist(indexPath) {
+		return
+	}
+
+	data, err := os.ReadFile(indexPath)
+	if nil != err {
+		return
+	}
+
+	err = gulu.JSON.UnmarshalJSON(data, &ret)
+	return
+}
+
 func getCloudFileListOSS(cloudDirPath string) (ret map[string]*CloudIndex, err error) {
 	result := map[string]interface{}{}
 	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
@@ -806,8 +720,8 @@ func localUpsertRemoveListOSS(localDirPath string, cloudFileList map[string]*Clo
 			// 优先使用时间戳校验
 			if localModTime := info.ModTime().Unix(); cloudIdx.Updated == localModTime {
 				unchanged[relPath] = true
-				return nil
 			}
+			return nil
 		}
 
 		localHash, hashErr := util.GetEtag(path)
@@ -834,37 +748,9 @@ func localUpsertRemoveListOSS(localDirPath string, cloudFileList map[string]*Clo
 	return
 }
 
-func cloudUpsertRemoveLocalListOSS(localDirPath string, removedSyncList, upsertedSyncList, excludes map[string]bool) (localUpserts, cloudRemoves []string, err error) {
+func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList map[string]*CloudIndex, excludes map[string]bool) (localUpserts, cloudRemoves []string, err error) {
 	localUpserts, cloudRemoves = []string{}, []string{}
 
-	for removed, _ := range removedSyncList {
-		cloudRemoves = append(cloudRemoves, removed)
-	}
-
-	for upsert, _ := range upsertedSyncList {
-		p := filepath.Join(localDirPath, upsert)
-		if excludes[p] {
-			continue
-		}
-		info, statErr := os.Stat(p)
-		if nil != statErr {
-			util.LogErrorf("stat file [%s] failed: %s", p, statErr)
-			err = statErr
-			return
-		}
-		if util.CloudSingleFileMaxSizeLimit < info.Size() {
-			util.LogWarnf("file [%s] larger than 100MB, ignore uploading it", p)
-			continue
-		}
-		localUpserts = append(localUpserts, p)
-	}
-	return
-}
-
-func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList map[string]*CloudIndex, removeList, upsertList, excludes map[string]bool) (localUpserts, cloudRemoves []string, downloadList map[string]bool, err error) {
-	localUpserts, cloudRemoves = []string{}, []string{}
-
-	cloudChangedList := map[string]bool{}
 	unchanged := map[string]bool{}
 	for cloudFile, cloudIdx := range cloudFileList {
 		localIdx := localFileList[cloudFile]
@@ -872,16 +758,18 @@ func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList 
 			cloudRemoves = append(cloudRemoves, cloudFile)
 			continue
 		}
+		if 0 < cloudIdx.Updated {
+			// 优先使用时间戳校验
+			if localIdx.Updated == cloudIdx.Updated {
+				unchanged[filepath.Join(localDirPath, cloudFile)] = true
+			}
+			continue
+		}
+
 		if localIdx.Hash == cloudIdx.Hash {
 			unchanged[filepath.Join(localDirPath, cloudFile)] = true
 			continue
 		}
-		//if localIdx.Updated == cloudIdx.Updated {
-		//	unchanged[filepath.Join(localDirPath, cloudFile)] = true
-		//	continue
-		//}
-
-		cloudChangedList[cloudFile] = true
 	}
 
 	filepath.Walk(localDirPath, func(path string, info fs.FileInfo, err error) error {
@@ -902,14 +790,6 @@ func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList 
 		}
 		return nil
 	})
-
-	downloadList = map[string]bool{}
-	for cloudChanged, _ := range cloudChangedList {
-		if upsertList[cloudChanged] || removeList[cloudChanged] || excludes[cloudChanged] || "/"+pathJSON == cloudChanged || "/index.json" == cloudChanged {
-			continue
-		}
-		downloadList[cloudChanged] = true
-	}
 	return
 }
 

@@ -278,7 +278,7 @@ func CreateLocalBackup() (err error) {
 		return
 	}
 
-	_, err = genCloudIndex(newBackupDir, map[string]bool{})
+	_, err = genCloudIndex(newBackupDir, map[string]bool{}, true)
 	if nil != err {
 		return
 	}
@@ -344,7 +344,7 @@ func DownloadBackup() (err error) {
 	localDirPath := Conf.Backup.GetSaveDir()
 	util.PushEndlessProgress(Conf.Language(68))
 	start := time.Now()
-	fetchedFilesCount, transferSize, _, err := ossDownload(true, localDirPath, "backup", false, map[string]bool{}, map[string]bool{})
+	fetchedFilesCount, transferSize, _, err := ossDownload(localDirPath, "backup", false, map[string]bool{}, map[string]bool{})
 	if nil == err {
 		elapsed := time.Now().Sub(start).Seconds()
 		util.LogInfof("downloaded backup [fetchedFiles=%d, transferSize=%s] in [%.2fs]", fetchedFilesCount, humanize.Bytes(transferSize), elapsed)

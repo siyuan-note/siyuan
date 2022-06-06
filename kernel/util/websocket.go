@@ -127,6 +127,11 @@ func PushTxErr(msg string, code int, data interface{}) {
 	BroadcastByType("main", "txerr", code, msg, data)
 }
 
+func PushUpdateMsg(msgId string, msg string, timeout int) {
+	BroadcastByType("main", "msg", 0, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
+	return
+}
+
 func PushMsg(msg string, timeout int) (msgId string) {
 	msgId = gulu.Rand.String(7)
 	BroadcastByType("main", "msg", 0, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})

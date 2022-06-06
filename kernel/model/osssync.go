@@ -388,6 +388,7 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 	if poolSize > len(localUpserts) {
 		poolSize = len(localUpserts)
 	}
+	msgId := gulu.Rand.String(7)
 	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
 		defer waitGroup.Done()
 		if nil != uploadErr {
@@ -400,7 +401,7 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 			return
 		}
 		if needPushProgress {
-			util.PushMsg(fmt.Sprintf(Conf.Language(104), wroteFiles, len(localUpserts)-wroteFiles), 1000*60*10)
+			util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(104), wroteFiles, len(localUpserts)-wroteFiles), 1000*60*10)
 		}
 		if boot {
 			msg := fmt.Sprintf("Uploading data to the cloud %d/%d", wroteFiles, len(localUpserts))

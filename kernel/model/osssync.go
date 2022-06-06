@@ -236,6 +236,7 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 		}
 		if "/"+pathJSON == fetch {
 			// 已经在前面验证解密的步骤中下载过了，目前位于 temp/sync/pathJSON
+			fetchedFilesCount++
 			continue
 		}
 
@@ -255,7 +256,6 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 			return
 		}
 	}
-
 	if needPushProgress {
 		util.ClearPushProgress(len(cloudFetches))
 		util.PushMsg(Conf.Language(106), 1000*60*10)

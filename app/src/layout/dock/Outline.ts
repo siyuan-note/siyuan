@@ -48,7 +48,8 @@ export class Outline extends Model {
                                 this.parent.updateTitle(data.data.title);
                             } else {
                                 this.updateDocTitle({
-                                    title: data.data.title
+                                    title: data.data.title,
+                                    icon: Constants.ZWSP
                                 });
                             }
                             break;
@@ -176,7 +177,7 @@ export class Outline extends Model {
         if (this.type === "pin") {
             if (ial) {
                 let iconHTML = `<span class="b3-list-item__graphic">${unicode2Emoji(ial.icon || Constants.SIYUAN_IMAGE_FILE)}</span>`;
-                if (typeof ial.icon === "undefined" && this.headerElement.nextElementSibling.firstElementChild) {
+                if (ial.icon === Constants.ZWSP && this.headerElement.nextElementSibling.firstElementChild) {
                     iconHTML = this.headerElement.nextElementSibling.firstElementChild.outerHTML;
                 }
                 this.headerElement.nextElementSibling.innerHTML = `${iconHTML}

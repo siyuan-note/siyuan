@@ -32,6 +32,10 @@ import (
 var ErrFailedToConnectCloudServer = errors.New("failed to connect cloud server")
 
 func StartFreeTrial() (err error) {
+	if nil == Conf.User {
+		return errors.New(Conf.Language(31))
+	}
+
 	requestResult := gulu.Ret.NewResult()
 	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
 	_, err = request.

@@ -13,7 +13,7 @@ import {repos} from "./config/repos";
 import {openFileById} from "./editor/util";
 import {bootSync, downloadProgress, progressLoading, setTitle, transactionError} from "./dialog/processSystem";
 import {promiseTransactions} from "./protyle/wysiwyg/transaction";
-import {initMessage} from "./dialog/message";
+import {initMessage, showMessage} from "./dialog/message";
 
 class App {
     constructor() {
@@ -89,6 +89,9 @@ class App {
                     }
                     setTitle(window.siyuan.languages.siyuanNote);
                     initMessage();
+                    showMessage("ddd", 0)
+                    showMessage("123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123", 0)
+                    showMessage("ddd", 0)
                 });
             });
         });

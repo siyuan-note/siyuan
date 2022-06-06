@@ -2,6 +2,7 @@
   margin-bottom: 16px;
   position: relative;
   transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
+  text-align: right;
 
   &--hide {
     transform: translate3d(calc(20vw + 48px), 0, 0);
@@ -52,7 +53,9 @@
     box-sizing: border-box;
     box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%), 0 6px 10px 0 rgb(0 0 0 / 14%), 0 1px 18px 0 rgb(0 0 0 / 12%);
     word-break: break-word;
-    width: 20vw;
+    max-width: 20vw;
+    text-align: left;
+    display: inline-block;
 
     a {
       color: var(--b3-theme-on-primary);

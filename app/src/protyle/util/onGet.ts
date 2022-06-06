@@ -175,6 +175,10 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
         });
         protyle.options.defId = undefined;
     }
+    // https://ld246.com/article/1653639418266
+    if (protyle.element.classList.contains("block__edit") && (protyle.element.nextElementSibling || protyle.element.previousElementSibling)) {
+        protyle.element.style.minHeight = Math.min(30 + protyle.wysiwyg.element.clientHeight - 16, window.innerHeight / 3) + "px";
+    }
     if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE)) {
         return;
     }

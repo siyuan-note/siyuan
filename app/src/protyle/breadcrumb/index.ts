@@ -417,7 +417,9 @@ export class Breadcrumb {
                 });
             }
             this.element.classList.add("protyle-breadcrumb__bar--nowrap");
-            this.element.lastElementChild.previousElementSibling.scrollIntoView();
+            if (this.element.lastElementChild) {
+                this.element.scrollLeft = (this.element.lastElementChild as HTMLElement).offsetLeft - this.element.clientWidth - 8;
+            }
         });
     }
 

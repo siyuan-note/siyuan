@@ -329,6 +329,11 @@ func SyncData(boot, exit, byHand bool) {
 	}
 
 	fetchedFilesCount, transferSize, downloadedFiles, err := ossDownload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, boot || exit)
+
+	// 加上前面的路径映射文件统计
+	fetchedFilesCount += tmpFetchedFiles
+	transferSize += tmpTransferSize
+
 	if nil != err {
 		util.PushClearProgress()
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))

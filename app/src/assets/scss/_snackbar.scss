@@ -20,7 +20,7 @@
     transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
 
     &--show {
-      transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0) !important;
     }
 
     & > .b3-button {
@@ -83,5 +83,20 @@
       color: var(--b3-theme-on-background);
       background-color: var(--b3-theme-background-light);
     }
+  }
+}
+
+@media screen and (max-width: 520px) {
+  .b3-snackbars {
+    top: 35px;
+    right: calc(10vw - 18px);
+  }
+
+  .b3-snackbar__content {
+    max-width: 80vw
+  }
+
+  .b3-snackbars {
+    transform: translate3d(100vw, 0, 0);
   }
 }

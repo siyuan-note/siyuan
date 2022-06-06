@@ -439,6 +439,7 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 
 	if needPushProgress {
 		util.PushMsg(Conf.Language(105), 3000)
+		util.PushClearMsg(msgId)
 	}
 	return
 }

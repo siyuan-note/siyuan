@@ -141,8 +141,10 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
             if (!options.action.includes(Constants.CB_GET_UNUNDO)) {
                 pushBack(protyle, undefined, focusElement);
             }
+            focusElement.scrollIntoView();
+            // 减少抖动 https://ld246.com/article/1654263598088
             setTimeout(() => {
-                scrollCenter(protyle, focusElement, true);
+                focusElement.scrollIntoView();
             }, Constants.TIMEOUT_BLOCKLOAD);
         } else {
             focusBlock(protyle.wysiwyg.element.firstElementChild);

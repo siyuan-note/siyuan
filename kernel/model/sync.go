@@ -607,8 +607,9 @@ func workspaceData2SyncDir() (removeList, upsertList map[string]bool, err error)
 }
 
 type CloudIndex struct {
-	Size    int64 `json:"size"`
-	Updated int64 `json:"updated"` // Unix timestamp 秒
+	Hash    string `json:"hash"`
+	Size    int64  `json:"size"`
+	Updated int64  `json:"updated"` // Unix timestamp 秒
 }
 
 // genCloudIndex 生成云端索引文件。
@@ -628,7 +629,13 @@ func genCloudIndex(localDirPath string, excludes map[string]bool) (cloudIndex ma
 
 		p := strings.TrimPrefix(path, localDirPath)
 		p = filepath.ToSlash(p)
-		cloudIndex[p] = &CloudIndex{Size: info.Size(), Updated: info.ModTime().Unix()}
+		// TODO: 优化云端同步上传资源占用和耗时 https://github.com/siyuan-note/siyuan/issues/5093
+		hash, hashErr := util.GetEtag(path)
+		if nil != hashErr {
+			err = hashErr
+			return io.EOF
+		}
+		cloudIndex[p] = &CloudIndex{Hash: hash, Size: info.Size(), Updated: info.ModTime().Unix()}
 		return nil
 	})
 	if nil != err {

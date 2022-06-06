@@ -1,3 +1,30 @@
+## v2.0.17 / 2022-06-06
+
+### 改进功能
+
+* [消息提示支持显示多条](https://github.com/siyuan-note/siyuan/issues/4875)
+* [移动端支持数据历史](https://github.com/siyuan-note/siyuan/issues/4993)
+* [删除、剪切和移动聚焦的列表项后返回上一层](https://github.com/siyuan-note/siyuan/issues/5016)
+* [优化浮窗加载个数](https://github.com/siyuan-note/siyuan/issues/5024)
+* [不使用原生 Emoji 的情况下文档内表情提示和最终输入结果保持一致](https://github.com/siyuan-note/siyuan/issues/5039)
+* [支持学生优惠订阅](https://github.com/siyuan-note/siyuan/issues/5071)
+* [大纲面板和大纲页签改进](https://github.com/siyuan-note/siyuan/issues/5087)
+* [为桌面端添加 `同步模式` 选择](https://github.com/siyuan-note/siyuan/issues/5089)
+* [改进云端同步目录名称校验](https://github.com/siyuan-note/siyuan/issues/5090)
+* [优化云端同步上传资源占用和耗时](https://github.com/siyuan-note/siyuan/issues/5093)
+* [大纲点击跳转时会先跳转到文档开始](https://github.com/siyuan-note/siyuan/issues/5094)
+* [提供消息提示推送 API 接口](https://github.com/siyuan-note/siyuan/issues/5102)
+
+### 修复缺陷
+
+* [浏览器网页图片和文字直接拖入编辑器报错](https://github.com/siyuan-note/siyuan/issues/5084)
+* [导出预览模式更多菜单按钮位置异常](https://github.com/siyuan-note/siyuan/issues/5088)
+* [云端备份下载恢复报错](https://github.com/siyuan-note/siyuan/issues/5101)
+* [嵌入块中禁止拖拽列表圆点](https://github.com/siyuan-note/siyuan/issues/5104)
+* [历史数据无法切换笔记本](https://github.com/siyuan-note/siyuan/issues/5107)
+* [大纲文档图标不跟随文档切换而切换](https://github.com/siyuan-note/siyuan/issues/5108)
+* [标题下有代码块时剪切标题后撤掉导致状态异常](https://github.com/siyuan-note/siyuan/issues/5110)
+
 ## v2.0.16 / 2022-06-02
 
 ### 改进功能

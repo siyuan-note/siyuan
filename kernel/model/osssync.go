@@ -401,7 +401,7 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 			return
 		}
 		if needPushProgress {
-			util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(104), wroteFiles, len(localUpserts)-wroteFiles), 1000*60*10)
+			util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(104), wroteFiles, len(localUpserts)-wroteFiles), 1000*60)
 		}
 		if boot {
 			msg := fmt.Sprintf("Uploading data to the cloud %d/%d", wroteFiles, len(localUpserts))

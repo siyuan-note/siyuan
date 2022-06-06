@@ -122,7 +122,7 @@ func SyncData(boot, exit, byHand bool) {
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	defer func() {
-		synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02-15:04:05") + "\n\n" + Conf.Sync.Stat
+		synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n" + Conf.Sync.Stat
 		msg := fmt.Sprintf(Conf.Language(82), synced)
 		Conf.Sync.Stat = msg
 		Conf.Save()

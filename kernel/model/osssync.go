@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path"
@@ -801,10 +802,21 @@ func localUpsertRemoveListOSS(localDirPath string, cloudFileList map[string]*Clo
 			return nil
 		}
 
-		localModTime := info.ModTime().Unix()
-		if cloudIdx.Updated == localModTime {
+		// TODO: 优化云端同步上传资源占用和耗时 https://github.com/siyuan-note/siyuan/issues/5093
+		localHash, hashErr := util.GetEtag(path)
+		if nil != hashErr {
+			err = hashErr
+			return io.EOF
+		}
+
+		if cloudIdx.Hash == localHash {
 			unchanged[relPath] = true
 		}
+
+		//localModTime := info.ModTime().Unix()
+		//if cloudIdx.Updated == localModTime {
+		//	unchanged[relPath] = true
+		//}
 		return nil
 	})
 
@@ -859,10 +871,14 @@ func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList 
 			cloudRemoves = append(cloudRemoves, cloudFile)
 			continue
 		}
-		if localIdx.Updated == cloudIdx.Updated {
+		if localIdx.Hash == cloudIdx.Hash {
 			unchanged[filepath.Join(localDirPath, cloudFile)] = true
 			continue
 		}
+		//if localIdx.Updated == cloudIdx.Updated {
+		//	unchanged[filepath.Join(localDirPath, cloudFile)] = true
+		//	continue
+		//}
 
 		cloudChangedList[cloudFile] = true
 	}

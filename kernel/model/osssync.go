@@ -802,21 +802,22 @@ func localUpsertRemoveListOSS(localDirPath string, cloudFileList map[string]*Clo
 			return nil
 		}
 
-		// TODO: 优化云端同步上传资源占用和耗时 https://github.com/siyuan-note/siyuan/issues/5093
+		if 0 < cloudIdx.Updated {
+			// 优先使用时间戳校验
+			if localModTime := info.ModTime().Unix(); cloudIdx.Updated == localModTime {
+				unchanged[relPath] = true
+				return nil
+			}
+		}
+
 		localHash, hashErr := util.GetEtag(path)
 		if nil != hashErr {
 			err = hashErr
 			return io.EOF
 		}
-
 		if cloudIdx.Hash == localHash {
 			unchanged[relPath] = true
 		}
-
-		//localModTime := info.ModTime().Unix()
-		//if cloudIdx.Updated == localModTime {
-		//	unchanged[relPath] = true
-		//}
 		return nil
 	})
 

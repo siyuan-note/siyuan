@@ -1,6 +1,6 @@
 {
   "name": "SiYuan",
-  "version": "2.0.16",
+  "version": "2.0.17",
   "description": "A local-first personal knowledge management system, supports fine-grained block-level reference, and Markdown WYSIWYG.",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",

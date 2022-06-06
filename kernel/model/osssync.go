@@ -437,27 +437,29 @@ func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, bo
 			if nil != err {
 				return
 			}
-			indexPath := filepath.Join(util.TempDir, "sync", "index.json")
+			tmpSyncDir := filepath.Join(util.TempDir, "sync")
+			indexPath := filepath.Join(tmpSyncDir, "index.json")
 			if err = os.WriteFile(indexPath, data, 0644); nil != err {
 				return
 			}
 
 			var tmpFetchedFiles int
 			var tmpTransferSize uint64
-			err = ossDownload0(util.TempDir+"/sync", "sync/"+Conf.Sync.CloudName, "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, false)
+			err = ossDownload0(tmpSyncDir, "sync/"+Conf.Sync.CloudName, "/"+pathJSON, &tmpFetchedFiles, &tmpTransferSize, false)
 			if nil != err {
 				util.LogErrorf("download merge cloud file failed: %s", err)
 				return
 			}
 
-			metaPath := filepath.Join(util.TempDir, "/sync/"+pathJSON)
-			err = syncDirUpsertWorkspaceData(metaPath, indexPath, downloadList)
+			metaPath := filepath.Join(tmpSyncDir, pathJSON)
+			var upsertFiles []string
+			upsertFiles, err = syncDirUpsertWorkspaceData(metaPath, indexPath, downloadList)
 			if nil != err {
 				util.LogErrorf("download merge cloud file failed: %s", err)
 				return
 			}
 			// 增量索引
-			for upsertFile, _ := range downloadList {
+			for _, upsertFile := range upsertFiles {
 				if !strings.HasSuffix(upsertFile, ".sy") {
 					continue
 				}
@@ -864,7 +866,6 @@ func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList 
 		cloudChangedList[cloudFile] = true
 	}
 
-	delete(unchanged, filepath.Join(localDirPath, "index.json")) // 同步偶尔报错 `The system cannot find the path specified.` https://github.com/siyuan-note/siyuan/issues/4942
 	filepath.Walk(localDirPath, func(path string, info fs.FileInfo, err error) error {
 		if localDirPath == path || info.IsDir() {
 			return nil
@@ -886,7 +887,7 @@ func cloudUpsertRemoveListOSS(localDirPath string, cloudFileList, localFileList 
 
 	downloadList = map[string]bool{}
 	for cloudChanged, _ := range cloudChangedList {
-		if upsertList[cloudChanged] || removeList[cloudChanged] || excludes[cloudChanged] {
+		if upsertList[cloudChanged] || removeList[cloudChanged] || excludes[cloudChanged] || "/"+pathJSON == cloudChanged || "/index.json" == cloudChanged {
 			continue
 		}
 		downloadList[cloudChanged] = true

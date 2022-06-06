@@ -205,6 +205,9 @@ func ossDownload(isBackup bool, localDirPath, cloudDirPath string, bootOrExit bo
 		var tmpWroteFiles int
 		var tmpTransferSize uint64
 		for upsert, _ := range upsertList {
+			if "/.siyuan/conf.json" == upsert { // 版本号不覆盖云端
+				continue
+			}
 			localUpsert := filepath.Join(localDirPath, upsert)
 			var info os.FileInfo
 			info, err = os.Stat(localUpsert)

@@ -29,6 +29,12 @@ export const initMessage = () => {
 
 export const showMessage = (message: string, timeout = 6000, type = "info", messageId?: string) => {
     const id = messageId || genUUID();
+    const messagesElement = document.getElementById("message").firstElementChild;
+    const existElement = messagesElement.querySelector(`.b3-snackbar[data-id="${id}"]`)
+    if (existElement) {
+        existElement.firstElementChild.innerHTML = message;
+        return;
+    }
     let messageHTML = `<div data-id="${id}" class="b3-snackbar--hide b3-snackbar${type === "error" ? " b3-snackbar--error" : ""}"><div class="b3-snackbar__content">${message}</div>`;
     if (timeout === 0) {
         messageHTML += '<svg class="b3-snackbar__close"><use xlink:href="#iconClose"></use></svg>';
@@ -37,7 +43,6 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
             hideMessage(id);
         }, timeout);
     }
-    const messagesElement = document.getElementById("message").firstElementChild;
     if (messagesElement.childElementCount === 0) {
         messagesElement.parentElement.classList.add("b3-snackbars--show");
     }

@@ -560,7 +560,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         if (target.classList && target.classList.contains("protyle-action")) {
-            window.siyuan.dragElement = target.parentElement;
+            if (hasClosestByClassName(target, "protyle-wysiwyg__embed")) {
+                window.siyuan.dragElement = undefined;
+                event.preventDefault();
+            } else {
+                window.siyuan.dragElement = target.parentElement;
+            }
             return;
         }
         // 选中编辑器中的文字进行拖拽

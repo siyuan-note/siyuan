@@ -135,9 +135,8 @@ func SyncData(boot, exit, byHand bool) {
 	WaitForWritingFiles()
 	writingDataLock.Lock()
 	var err error
-	var removeList, upsertList map[string]bool
 	// 将 data 变更同步到 sync
-	if removeList, upsertList, err = workspaceData2SyncDir(); nil != err {
+	if _, _, err = workspaceData2SyncDir(); nil != err {
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		Conf.Sync.Stat = msg
 		util.PushErrMsg(msg, 7000)
@@ -246,7 +245,7 @@ func SyncData(boot, exit, byHand bool) {
 			return
 		}
 
-		wroteFiles, transferSize, err := ossUpload(false, localSyncDirPath, "sync/"+Conf.Sync.CloudName, device, boot, removeList, upsertList)
+		wroteFiles, transferSize, err := ossUpload(false, localSyncDirPath, "sync/"+Conf.Sync.CloudName, device, boot)
 		if nil != err {
 			util.PushClearProgress()
 			IncWorkspaceDataVer() // 上传失败的话提升本地版本，以备下次上传
@@ -329,7 +328,7 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
-	fetchedFilesCount, transferSize, downloadedFiles, err := ossDownload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, boot || exit, removeList, upsertList)
+	fetchedFilesCount, transferSize, downloadedFiles, err := ossDownload(localSyncDirPath, "sync/"+Conf.Sync.CloudName, boot || exit)
 	if nil != err {
 		util.PushClearProgress()
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))

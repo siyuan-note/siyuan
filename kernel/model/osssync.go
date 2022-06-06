@@ -162,7 +162,7 @@ func listCloudSyncDirOSS() (dirs []map[string]interface{}, size int64, err error
 	return
 }
 
-func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool, removeList, upsertList map[string]bool) (fetchedFilesCount int, transferSize uint64, downloadedFiles map[string]bool, err error) {
+func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFilesCount int, transferSize uint64, downloadedFiles map[string]bool, err error) {
 	if !gulu.File.IsExist(localDirPath) {
 		return
 	}
@@ -340,7 +340,7 @@ func ossDownload0(localDirPath, cloudDirPath, fetch string, fetchedFiles *int, t
 	return
 }
 
-func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, boot bool, removeList, upsertList map[string]bool) (wroteFiles int, transferSize uint64, err error) {
+func ossUpload(isBackup bool, localDirPath, cloudDirPath, cloudDevice string, boot bool) (wroteFiles int, transferSize uint64, err error) {
 	if !gulu.File.IsExist(localDirPath) {
 		return
 	}

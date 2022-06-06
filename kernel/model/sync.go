@@ -338,7 +338,7 @@ func SyncData(boot, exit, byHand bool) {
 
 		metaPath := filepath.Join(Conf.Sync.GetSaveDir(), pathJSON)
 		indexPath := filepath.Join(util.TempDir, "sync", "index.json")
-		err = syncDirUpsertWorkspaceData(metaPath, indexPath, downloadedFiles)
+		_, err = syncDirUpsertWorkspaceData(metaPath, indexPath, downloadedFiles)
 		if nil != err {
 			util.LogErrorf("upsert partially downloaded files to workspace data failed: %s", err)
 		}
@@ -515,7 +515,7 @@ func SetSyncMode(mode int) (err error) {
 
 var syncLock = sync.Mutex{}
 
-func syncDirUpsertWorkspaceData(metaPath, indexPath string, downloadedFiles map[string]bool) (err error) {
+func syncDirUpsertWorkspaceData(metaPath, indexPath string, downloadedFiles map[string]bool) (upsertFiles []string, err error) {
 	start := time.Now()
 
 	modified := map[string]bool{}
@@ -525,7 +525,7 @@ func syncDirUpsertWorkspaceData(metaPath, indexPath string, downloadedFiles map[
 		modified[file] = true
 	}
 
-	decryptedDataDir, _, err := recoverSyncData(metaPath, indexPath, modified)
+	decryptedDataDir, upsertFiles, err := recoverSyncData(metaPath, indexPath, modified)
 	if nil != err {
 		util.LogErrorf("decrypt data dir failed: %s", err)
 		return

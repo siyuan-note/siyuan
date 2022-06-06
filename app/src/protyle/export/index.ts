@@ -138,11 +138,10 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
                     pdf: option.type === "pdf",
                     savePath: result.filePath
                 }, exportResponse => {
-                    hideMessage(id);
                     if (option.type === "word") {
-                        afterExport(result.filePath);
+                        afterExport(result.filePath, id);
                     } else {
-                        onExport(exportResponse, result.filePath, option.type, pdfOption, removeAssets);
+                        onExport(exportResponse, result.filePath, option.type, pdfOption, removeAssets, id);
                     }
                 });
             }
@@ -150,7 +149,7 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
     });
 };
 
-const onExport = (data: IWebSocketData, filePath: string, type: string, pdfOptions?: PrintToPDFOptions, removeAssets?: boolean) => {
+const onExport = (data: IWebSocketData, filePath: string, type: string, pdfOptions?: PrintToPDFOptions, removeAssets?: boolean, msgId?:string) => {
     let themeName = window.siyuan.config.appearance.themeLight;
     let mode = 0;
     if (["html", "htmlmd"].includes(type) && window.siyuan.config.appearance.mode === 1) {
@@ -319,7 +318,7 @@ pre code {
                             id: data.data.id,
                             path: pdfFilePath
                         }, () => {
-                            afterExport(pdfFilePath);
+                            afterExport(pdfFilePath, msgId);
                             if (removeAssets) {
                                 const removePromise = (dir: string) => {
                                     return new Promise(function (resolve) {
@@ -354,7 +353,7 @@ pre code {
     } else {
         const htmlPath = path.join(filePath, "index.html");
         fs.writeFileSync(htmlPath, html);
-        afterExport(htmlPath);
+        afterExport(htmlPath, msgId);
     }
 };
 /// #endif

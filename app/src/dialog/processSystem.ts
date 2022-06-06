@@ -84,8 +84,8 @@ export const kernelError = () => {
 export const exitSiYuan = () => {
     fetchPost("/api/system/exit", {force: false}, (response) => {
         if (response.code === 1) {
-            showMessage(response.msg, response.data.closeTimeout, "error");
-            const buttonElement = document.querySelector("#message button");
+            const msgId = showMessage(response.msg, response.data.closeTimeout, "error");
+            const buttonElement = document.querySelector(`#message [data-id="${msgId}"] button`);
             if (buttonElement) {
                 buttonElement.addEventListener("click", () => {
                     fetchPost("/api/system/exit", {force: true}, () => {

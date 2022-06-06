@@ -33,15 +33,23 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
     const existElement = messagesElement.querySelector(`.b3-snackbar[data-id="${id}"]`)
     if (existElement) {
         existElement.firstElementChild.innerHTML = message;
+        window.clearTimeout(parseInt(existElement.getAttribute("data-timeoutid")));
+        if (timeout > 0) {
+            const timeoutId = window.setTimeout(() => {
+                hideMessage(id);
+            }, timeout);
+            existElement.setAttribute("data-timeoutid", timeoutId.toString());
+        }
         return;
     }
     let messageHTML = `<div data-id="${id}" class="b3-snackbar--hide b3-snackbar${type === "error" ? " b3-snackbar--error" : ""}"><div class="b3-snackbar__content">${message}</div>`;
     if (timeout === 0) {
         messageHTML += '<svg class="b3-snackbar__close"><use xlink:href="#iconClose"></use></svg>';
     } else if (timeout !== -1) { // -1 时需等待请求完成后手动关闭
-        window.setTimeout(() => {
+        const timeoutId = window.setTimeout(() => {
             hideMessage(id);
         }, timeout);
+        messageHTML.replace("<div data-id", `<div data-timeoutid="${timeoutId}" data-id`);
     }
     if (messagesElement.childElementCount === 0) {
         messagesElement.parentElement.classList.add("b3-snackbars--show");

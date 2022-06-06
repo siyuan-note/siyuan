@@ -37,14 +37,16 @@ ctrl+p 搜索: 199
 .block__popover: 201
 // 需大于 .block__popover https://github.com/siyuan-note/siyuan/issues/3276
 .protyle-util: 303
-// 需大于 .block__popover
-.b3-menu: 304
 // 需小于 #windowControls
 // 需大于 .protyle-util https://github.com/siyuan-note/siyuan/issues/5069
 .b3-dialog: 305
+// 需大于 .block__popover
+// 需大于 .b3-dialog https://github.com/siyuan-note/siyuan/issues/5107
+.b3-menu: 306
 // 需大于 .b3-dialog
 progressLoading: 400
 #windowControls: 502
+.b3-snackbar: 503
 */
 
 .inbox {

@@ -498,7 +498,11 @@ export const globalShortcut = () => {
 
     window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
         if (!window.siyuan.menus.menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {
-            window.siyuan.menus.menu.remove();
+            if (getSelection().rangeCount > 0 && window.siyuan.menus.menu.element.contains(getSelection().getRangeAt(0).startContainer)) {
+                // https://ld246.com/article/1654567749834/comment/1654589171218#comments
+            } else {
+                window.siyuan.menus.menu.remove();
+            }
         }
         if (!hasClosestByClassName(event.target, "pdf__outer")) {
             document.querySelectorAll(".pdf__util").forEach(item => {

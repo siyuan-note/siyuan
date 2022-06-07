@@ -117,7 +117,6 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
     if (protyle.options.render.scroll) {
         protyle.scroll.update(protyle.block.blockCount, protyle);
     }
-
     if (options.action.includes(Constants.CB_GET_HL)) {
         preventScroll(protyle); // 搜索页签滚动会导致再次请求
         const hlElement = highlightById(protyle, protyle.block.id, true);
@@ -178,6 +177,19 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
     // https://ld246.com/article/1653639418266
     if (protyle.element.classList.contains("block__edit") && (protyle.element.nextElementSibling || protyle.element.previousElementSibling)) {
         protyle.element.style.minHeight = Math.min(30 + protyle.wysiwyg.element.clientHeight - 16, window.innerHeight / 3) + "px";
+    }
+    // https://github.com/siyuan-note/siyuan/issues/5018
+    if (!protyle.scroll.element.classList.contains("fn__none") &&
+        protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true" &&
+        protyle.wysiwyg.element.clientHeight < protyle.contentElement.clientHeight) {
+        fetchPost("/api/filetree/getDoc", {
+            id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+            mode: 2,
+            k: protyle.options.key || "",
+            size: Constants.SIZE_GET,
+        }, getResponse => {
+            onGet(getResponse, protyle, [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]);
+        });
     }
     if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE)) {
         return;

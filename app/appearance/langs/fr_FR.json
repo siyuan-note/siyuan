@@ -526,7 +526,7 @@
   "md35": "Liste d'exclusion des mots-clés de la référence virtuelle",
   "md36": "Utiliser la virgule anglaise <code>,</code> pour séparer, la virgule elle-même peut être échappée par  <code>\\,</code>",
   "md37": "La longueur maximale du texte d'ancrage dynamique de référence de bloc",
-  "md38": "La longueur maximale du texte d'ancrage qui est automatiquement rendu lorsque le texte d'ancrage de la référence de bloc n'est pas personnalisé, la valeur par défaut est de <code>64</code> caractères",
+  "md38": "La longueur maximale du texte d'ancrage qui est automatiquement rendu lorsque le texte d'ancrage de la référence de bloc n'est pas personnalisé, la valeur par défaut est de <code>96</code> caractères",
   "md39": "Adresse Servo PlantUML",
   "md40": "Laissez vide pour restaurer <code>https://www.plantuml.com/plantuml/svg/~1/code> par défaut",
   "fileTree2": "L'arbre des Docs sélectionne automatiquement le document en cours lorsque l'on change d'onglet d'édition",

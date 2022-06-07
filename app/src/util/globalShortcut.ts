@@ -713,7 +713,30 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if (event.key === "ArrowDown") {
+    if ((event.key === "ArrowRight" && !liElement.querySelector(".b3-list-item__arrow--open") && !liElement.querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||
+        (event.key === "ArrowLeft" && liElement.querySelector(".b3-list-item__arrow--open"))) {
+        files.getLeaf(liElement, notebookId);
+        event.preventDefault();
+        return true;
+    }
+    const fileRect = files.element.getBoundingClientRect();
+    if (event.key === "ArrowLeft") {
+        let parentElement = liElement.parentElement.previousElementSibling;
+        if (parentElement) {
+            if (parentElement.tagName !== "LI") {
+                parentElement = files.element.querySelector(".b3-list-item");
+            }
+            liElement.classList.remove("b3-list-item--focus");
+            parentElement.classList.add("b3-list-item--focus");
+            const parentRect = parentElement.getBoundingClientRect();
+            if (parentRect.top < fileRect.top || parentRect.bottom > fileRect.bottom) {
+                parentElement.scrollIntoView(parentRect.top < fileRect.top);
+            }
+        }
+        event.preventDefault();
+        return true;
+    }
+    if (event.key === "ArrowDown" || event.key === "ArrowRight") {
         let nextElement = liElement;
         while (nextElement) {
             if (nextElement.nextElementSibling) {
@@ -734,6 +757,10 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         if (nextElement.classList.contains("b3-list-item")) {
             liElement.classList.remove("b3-list-item--focus");
             nextElement.classList.add("b3-list-item--focus");
+            const nextRect = nextElement.getBoundingClientRect();
+            if (nextRect.top < fileRect.top || nextRect.bottom > fileRect.bottom) {
+                nextElement.scrollIntoView(nextRect.top < fileRect.top);
+            }
         }
         event.preventDefault();
         return true;
@@ -760,12 +787,11 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         if (previousElement.classList.contains("b3-list-item")) {
             liElement.classList.remove("b3-list-item--focus");
             previousElement.classList.add("b3-list-item--focus");
+            const previousRect = previousElement.getBoundingClientRect();
+            if (previousRect.top < fileRect.top || previousRect.bottom > fileRect.bottom) {
+                previousElement.scrollIntoView(previousRect.top < fileRect.top);
+            }
         }
-        event.preventDefault();
-        return true;
-    }
-    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-        files.getLeaf(liElement, notebookId);
         event.preventDefault();
         return true;
     }

@@ -76,7 +76,7 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
         <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow ${((item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0)) ? "b3-list-item__arrow--open" : "fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
-    <span class="b3-list-item__text"${item.type === "outline" ? ' title="' + item.name + '"' : ""}>${item.name}</span>
+    <span class="b3-list-item__text"${item.type === "outline" ? ' title="' + Lute.EscapeHTMLStr(item.name) + '"' : ""}>${item.name}</span>
     ${countHTML}
 </li>`;
             if (item.children && item.children.length > 0) {
@@ -121,7 +121,7 @@ data-def-path="${item.defPath}">
         <svg data-id="${item.id}" class="b3-list-item__arrow${item.children ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
-    <span class="b3-list-item__text" ${type === "outline" ? ' title="' + item.content + '"' : ""}>${item.content}</span>
+    <span class="b3-list-item__text" ${type === "outline" ? ' title="' + Lute.EscapeHTMLStr(item.content) + '"' : ""}>${item.content}</span>
     ${countHTML}
     ${this.blockExtHTML || ""}
 </li>`;

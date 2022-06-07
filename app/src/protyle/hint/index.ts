@@ -8,7 +8,7 @@ import {
     getSelectionOffset,
     getSelectionPosition
 } from "../util/selection";
-import {hintEmbed, hintRef} from "./extend";
+import {hintEmbed, hintRef, hintSlash} from "./extend";
 import {getSavePath} from "../../util/newFile";
 import {upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
@@ -145,17 +145,20 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             }
             return;
         }
+        // https://github.com/siyuan-note/siyuan/issues/5083
+        if (this.splitChar === "/" || this.splitChar === "、") {
+            clearTimeout(this.timeId);
+            if (this.enableSlash) {
+                this.genHTML(hintSlash(key, protyle), protyle);
+            }
+            return;
+        }
+
         protyle.options.hint.extend.forEach((item) => {
             if (item.key === this.splitChar) {
                 clearTimeout(this.timeId);
                 this.timeId = window.setTimeout(() => {
-                    if (this.splitChar === "/" || this.splitChar === "、") {
-                        if (this.enableSlash) {
-                            this.genHTML(item.hint(key, protyle), protyle);
-                        }
-                    } else {
-                        this.genHTML(item.hint(key, protyle), protyle);
-                    }
+                    this.genHTML(item.hint(key, protyle), protyle);
                 }, protyle.options.hint.delay);
             }
         });

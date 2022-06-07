@@ -109,6 +109,7 @@ export abstract class Constants {
             toggleWin: {default: "⌥M", custom: "⌥M"},
             lockScreen: {default: "⌥N", custom: "⌥N"},
             move: {default: "", custom: ""},
+            selectOpen1: {default: "", custom: ""},
         },
         editor: {
             general: {

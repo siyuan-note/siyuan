@@ -67,7 +67,7 @@ export class Files extends Model {
         ${window.siyuan.languages.fileTree}
     </div>
     <span class="fn__flex-1 fn__space"></span>
-    <span data-type="focus" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.selectOpen1}"><svg><use xlink:href='#iconFocus'></use></svg></span>
+    <span data-type="focus" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.selectOpen1} ${updateHotkeyTip(window.siyuan.config.keymap.general.selectOpen1.custom)}"><svg><use xlink:href='#iconFocus'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapseAll} ${updateHotkeyTip("⌘↑")}">
         <svg><use xlink:href="#iconContract"></use></svg>

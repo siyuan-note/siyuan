@@ -646,6 +646,18 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         return false;
     }
     const files = dockFile.data.file as Files;
+    if (matchHotKey(window.siyuan.config.keymap.general.selectOpen1.custom, event)) {
+        event.preventDefault();
+        const element = document.querySelector(".layout__wnd--active > .layout-tab-bar > .item--focus") ||
+            document.querySelector(".layout-tab-bar > .item--focus");
+        if (element) {
+            const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
+            if (tab && tab.model instanceof Editor) {
+                files.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
+            }
+        }
+        return;
+    }
     if (!files.element.previousElementSibling.classList.contains("block__icons--active")) {
         return false;
     }

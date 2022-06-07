@@ -43,6 +43,10 @@ const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) =
         <button class="b3-button b3-button--cancel" id="logout">
             ${window.siyuan.languages.logout}
         </button>
+        <span class="fn__space"></span>
+        <button class="b3-button b3-button--cancel" id="deactivateUser">
+            ${window.siyuan.languages.deactivateUser}
+        </button>
         <span class="fn__flex-1"></span>
         <button class="b3-button b3-button--cancel" id="refresh">
             <svg><use xlink:href="#iconRefresh"></use></svg>

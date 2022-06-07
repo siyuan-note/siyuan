@@ -44,17 +44,16 @@ export class Tab {
             this.headElement.addEventListener("mouseenter", (event) => {
                 event.stopPropagation();
                 event.preventDefault();
-                if (!(this.model as Editor).editor) {
-                    return;
+                if (this.model instanceof Editor && this.model.editor?.protyle?.block?.rootID) {
+                    fetchPost("/api/filetree/getFullHPathByID", {
+                        id: (this.model as Editor).editor.protyle.block.rootID
+                    }, (response) => {
+                        if (!this.headElement.getAttribute("aria-label")) {
+                            showTooltip(escapeHtml(response.data), this.headElement);
+                        }
+                        this.headElement.setAttribute("aria-label", escapeHtml(response.data));
+                    });
                 }
-                fetchPost("/api/filetree/getFullHPathByID", {
-                    id: (this.model as Editor).editor.protyle.block.rootID
-                }, (response) => {
-                    if (!this.headElement.getAttribute("aria-label")) {
-                        showTooltip(escapeHtml(response.data), this.headElement);
-                    }
-                    this.headElement.setAttribute("aria-label", escapeHtml(response.data));
-                });
             });
             this.headElement.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
                 window.getSelection().removeAllRanges();

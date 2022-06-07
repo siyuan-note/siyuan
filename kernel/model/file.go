@@ -694,8 +694,9 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		} else if isHeading {
 			level := node.HeadingLevel
 			for n := node.Next; nil != n; n = n.Next {
-				if "1" == n.IALAttr("heading-fold") && ("1" == node.IALAttr("fold") && 0 == mode) {
-					// 从大纲跳转折叠标题的下方标题时需要判断跳转的标题是否是折叠 https://github.com/siyuan-note/siyuan/issues/4920
+				if "1" == n.IALAttr("heading-fold") {
+					// 大纲点击折叠标题跳转聚焦 https://github.com/siyuan-note/siyuan/issues/4920
+					// 多级标题折叠后上级块引浮窗中未折叠 https://github.com/siyuan-note/siyuan/issues/4997
 					continue
 				}
 				if ast.NodeHeading == n.Type {

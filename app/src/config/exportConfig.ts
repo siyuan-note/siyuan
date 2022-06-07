@@ -162,11 +162,11 @@ export const exportConfig = {
                 properties: ["showOverwriteConfirmation"],
             }).then((result: SaveDialogReturnValue) => {
                 if (!result.canceled) {
-                    const id = showMessage(window.siyuan.languages.exporting, -1);
+                    const msgId = showMessage(window.siyuan.languages.exporting, -1);
                     fetchPost("/api/export/exportDataInFolder", {
                         folder: result.filePath
                     }, () => {
-                        afterExport(result.filePath, id);
+                        afterExport(result.filePath, msgId);
                     });
                 }
             });

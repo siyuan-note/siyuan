@@ -639,11 +639,11 @@ export const exportMd = (id: string) => {
                 label: "Markdown",
                 icon: "iconMarkdown",
                 click: () => {
-                    const id = showMessage(window.siyuan.languages.exporting, -1);
+                    const msgId = showMessage(window.siyuan.languages.exporting, -1);
                     fetchPost("/api/export/exportMd", {
                         id,
                     }, response => {
-                        hideMessage(id);
+                        hideMessage(msgId);
                         if (window.siyuan.config.system.container === "ios") {
                             window.location.href = response.data.zip;
                         } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
@@ -658,11 +658,11 @@ export const exportMd = (id: string) => {
                 label: "SiYuan .sy.zip",
                 icon: "iconSiYuan",
                 click: () => {
-                    const id = showMessage(window.siyuan.languages.exporting, -1);
+                    const msgId = showMessage(window.siyuan.languages.exporting, -1);
                     fetchPost("/api/export/exportSY", {
                         id,
                     }, response => {
-                        hideMessage(id);
+                        hideMessage(msgId);
                         if (window.siyuan.config.system.container === "ios") {
                             window.location.href = response.data.zip;
                         } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {

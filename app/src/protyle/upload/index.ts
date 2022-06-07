@@ -130,12 +130,12 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
 };
 
 export const uploadLocalFiles = (files: string[], protyle: IProtyle) => {
-    const id = showMessage(window.siyuan.languages.uploading, 0);
+    const msgId = showMessage(window.siyuan.languages.uploading, 0);
     fetchPost("/api/asset/insertLocalAssets", {
         assetPaths: files,
         id: protyle.block.rootID
     }, (response) => {
-        hideMessage(id);
+        hideMessage(msgId);
         genUploadedLabel(JSON.stringify(response), protyle);
     });
 };

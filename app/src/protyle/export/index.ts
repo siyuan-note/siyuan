@@ -126,7 +126,7 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
             properties: ["showOverwriteConfirmation"],
         }).then((result: SaveDialogReturnValue) => {
             if (!result.canceled) {
-                const id = showMessage(window.siyuan.languages.exporting, -1);
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
                 let url = "/api/export/exportHTML";
                 if (option.type === "htmlmd") {
                     url = "/api/export/exportMdHTML";
@@ -139,9 +139,9 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
                     savePath: result.filePath
                 }, exportResponse => {
                     if (option.type === "word") {
-                        afterExport(result.filePath, id);
+                        afterExport(result.filePath, msgId);
                     } else {
-                        onExport(exportResponse, result.filePath, option.type, pdfOption, removeAssets, id);
+                        onExport(exportResponse, result.filePath, option.type, pdfOption, removeAssets, msgId);
                     }
                 });
             }

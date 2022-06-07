@@ -1,4 +1,4 @@
-import {hideMessage, showMessage} from "../../dialog/message";
+import {showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {PrintToPDFOptions, SaveDialogReturnValue} from "electron";

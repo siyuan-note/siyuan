@@ -4,9 +4,7 @@ import {Constants} from "../constants";
 export const initMessage = () => {
     const messageElement = document.getElementById("message");
     messageElement.innerHTML = `<div class="fn__flex-1"></div>
-<button class="b3-button b3-button--outline">
-    <svg><use xlink:href="#iconTrashcan"></use></svg> ${window.siyuan.languages.clearMessage}
-</button>`;
+<button class="b3-button b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.clearMessage}"><svg style="margin-right: 0"><use xlink:href="#iconTrashcan"></use></svg></button>`;
     messageElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(messageElement)) {
@@ -27,17 +25,18 @@ export const initMessage = () => {
     });
 };
 
+// type: info/error; timeout: 0 手动关闭；-1 用不关闭
 export const showMessage = (message: string, timeout = 6000, type = "info", messageId?: string) => {
     const id = messageId || genUUID();
     const messagesElement = document.getElementById("message").firstElementChild;
-    const existElement = messagesElement.querySelector(`.b3-snackbar[data-id="${id}"]`)
+    const existElement = messagesElement.querySelector(`.b3-snackbar[data-id="${id}"]`);
     if (existElement) {
         window.clearTimeout(parseInt(existElement.getAttribute("data-timeoutid")));
-        existElement.innerHTML = `<div class="b3-snackbar__content">${message}</div>${timeout === 0 ? '<svg class="b3-snackbar__close"><use xlink:href="#iconClose"></use></svg>' : ''}`;
+        existElement.innerHTML = `<div class="b3-snackbar__content">${message}</div>${timeout === 0 ? '<svg class="b3-snackbar__close"><use xlink:href="#iconClose"></use></svg>' : ""}`;
         if (type === "error") {
-            existElement.classList.add("b3-snackbar--error")
+            existElement.classList.add("b3-snackbar--error");
         } else {
-            existElement.classList.remove("b3-snackbar--error")
+            existElement.classList.remove("b3-snackbar--error");
         }
         if (timeout > 0) {
             const timeoutId = window.setTimeout(() => {

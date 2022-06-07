@@ -7,7 +7,7 @@ import {fetchPost} from "../../util/fetch";
 import {processRender} from "./processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {blockRender} from "../markdown/blockRender";
-import {highlightById, scrollCenter} from "../../util/highlightById";
+import {highlightById} from "../../util/highlightById";
 import {pushBack} from "../../util/backForward";
 import {focusBlock} from "./selection";
 import {hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";

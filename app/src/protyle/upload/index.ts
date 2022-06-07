@@ -65,7 +65,7 @@ const validateFile = (protyle: IProtyle, files: File[]) => {
             uploadingStr += `<li>${filename} ${window.siyuan.languages.uploading}</li>`;
         }
     }
-    let msgId
+    let msgId;
     if (errorTip !== "" || uploadingStr !== "") {
         msgId = showMessage(`<ul>${errorTip}${uploadingStr}</ul>`);
     }
@@ -135,7 +135,7 @@ export const uploadLocalFiles = (files: string[], protyle: IProtyle) => {
         assetPaths: files,
         id: protyle.block.rootID
     }, (response) => {
-        hideMessage(id)
+        hideMessage(id);
         genUploadedLabel(JSON.stringify(response), protyle);
     });
 };

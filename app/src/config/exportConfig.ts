@@ -5,7 +5,7 @@ import {SaveDialogReturnValue, shell} from "electron";
 import {afterExport} from "../protyle/export/util";
 /// #endif
 import {isBrowser} from "../util/functions";
-import {hideMessage, showMessage} from "../dialog/message";
+import {showMessage} from "../dialog/message";
 
 export const exportConfig = {
     element: undefined as Element,

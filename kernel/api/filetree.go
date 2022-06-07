@@ -200,6 +200,9 @@ func getFullHPathByID(c *gin.Context) {
 	if !ok {
 		return
 	}
+	if nil == arg["id"] {
+		return
+	}
 
 	id := arg["id"].(string)
 	hPath, err := model.GetFullHPathByID(id)

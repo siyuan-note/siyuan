@@ -181,7 +181,7 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
     // https://github.com/siyuan-note/siyuan/issues/5018
     if (!protyle.scroll.element.classList.contains("fn__none") &&
         protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true" &&
-        protyle.wysiwyg.element.clientHeight < protyle.contentElement.clientHeight) {
+        protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
         fetchPost("/api/filetree/getDoc", {
             id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
             mode: 2,

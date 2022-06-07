@@ -33,7 +33,7 @@ func GetRhyResult(force bool, proxyURL string) (map[string]interface{}, error) {
 	defer rhyResultLock.Unlock()
 
 	now := time.Now().Unix()
-	if 3600 >= now-rhyResultCacheTime && !force {
+	if 3600 >= now-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
 		return cachedRhyResult, nil
 	}
 

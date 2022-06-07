@@ -32,8 +32,13 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
     const messagesElement = document.getElementById("message").firstElementChild;
     const existElement = messagesElement.querySelector(`.b3-snackbar[data-id="${id}"]`)
     if (existElement) {
-        existElement.firstElementChild.innerHTML = message;
         window.clearTimeout(parseInt(existElement.getAttribute("data-timeoutid")));
+        existElement.innerHTML = `<div class="b3-snackbar__content">${message}</div>${timeout === 0 ? '<svg class="b3-snackbar__close"><use xlink:href="#iconClose"></use></svg>' : ''}`;
+        if (type === "error") {
+            existElement.classList.add("b3-snackbar--error")
+        } else {
+            existElement.classList.remove("b3-snackbar--error")
+        }
         if (timeout > 0) {
             const timeoutId = window.setTimeout(() => {
                 hideMessage(id);
@@ -49,7 +54,7 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
         const timeoutId = window.setTimeout(() => {
             hideMessage(id);
         }, timeout);
-        messageHTML.replace("<div data-id", `<div data-timeoutid="${timeoutId}" data-id`);
+        messageHTML = messageHTML.replace("<div data-id", `<div data-timeoutid="${timeoutId}" data-id`);
     }
     if (messagesElement.childElementCount === 0) {
         messagesElement.parentElement.classList.add("b3-snackbars--show");

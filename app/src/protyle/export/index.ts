@@ -149,7 +149,7 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
     });
 };
 
-const onExport = (data: IWebSocketData, filePath: string, type: string, pdfOptions?: PrintToPDFOptions, removeAssets?: boolean, msgId?:string) => {
+const onExport = (data: IWebSocketData, filePath: string, type: string, pdfOptions?: PrintToPDFOptions, removeAssets?: boolean, msgId?: string) => {
     let themeName = window.siyuan.config.appearance.themeLight;
     let mode = 0;
     if (["html", "htmlmd"].includes(type) && window.siyuan.config.appearance.mode === 1) {
@@ -342,11 +342,11 @@ pre code {
                         });
                         win.destroy();
                     }).catch((error: string) => {
-                        showMessage("Export PDF error:" + error, 0);
+                        showMessage("Export PDF error:" + error, 0, "error", msgId);
                         win.destroy();
                     });
                 } catch (e) {
-                    showMessage("Export PDF error:" + e + ". Export HTML and use Chrome's printing function to convert to PDF", 0);
+                    showMessage("Export PDF error:" + e + ". Export HTML and use Chrome's printing function to convert to PDF", 0, "error", msgId);
                 }
             }, Math.min(timeout, 10000));
         });

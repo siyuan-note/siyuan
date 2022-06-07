@@ -347,12 +347,12 @@ func setE2EEPasswd(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	if err := os.RemoveAll(filepath.Join(util.WorkspaceDir, "incremental")); nil != err {
+	if err := os.RemoveAll(filepath.Join(util.TempDir, "incremental")); nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
-	if err := os.MkdirAll(filepath.Join(util.WorkspaceDir, "incremental"), 0755); nil != err {
+	if err := os.MkdirAll(filepath.Join(util.TempDir, "incremental"), 0755); nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

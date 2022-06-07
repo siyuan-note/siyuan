@@ -379,7 +379,7 @@ func UploadBackup() (err error) {
 var pathJSON = fmt.Sprintf("%x", md5.Sum([]byte("paths.json"))) // 6952277a5a37c17aa6a7c6d86cd507b1
 
 func encryptDataDir(passwd string) (encryptedDataDir string, err error) {
-	encryptedDataDir = filepath.Join(util.WorkspaceDir, "incremental", "backup-encrypt")
+	encryptedDataDir = filepath.Join(util.TempDir, "incremental", "backup-encrypt")
 	if err = os.RemoveAll(encryptedDataDir); nil != err {
 		return
 	}
@@ -511,7 +511,7 @@ func encryptDataDir(passwd string) (encryptedDataDir string, err error) {
 }
 
 func decryptDataDir(passwd string) (decryptedDataDir string, err error) {
-	decryptedDataDir = filepath.Join(util.WorkspaceDir, "incremental", "backup-decrypt")
+	decryptedDataDir = filepath.Join(util.TempDir, "incremental", "backup-decrypt")
 	if err = os.RemoveAll(decryptedDataDir); nil != err {
 		return
 	}

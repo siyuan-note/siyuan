@@ -663,7 +663,7 @@ func genCloudIndex(localDirPath string, excludes map[string]bool, calcHash bool)
 
 func recoverSyncData(metaPath, indexPath string, modified map[string]bool) (decryptedDataDir string, upsertFiles []string, err error) {
 	passwd := Conf.E2EEPasswd
-	decryptedDataDir = filepath.Join(util.WorkspaceDir, "incremental", "sync-decrypt")
+	decryptedDataDir = filepath.Join(util.TempDir, "incremental", "sync-decrypt")
 	if err = os.RemoveAll(decryptedDataDir); nil != err {
 		return
 	}
@@ -772,7 +772,7 @@ func recoverSyncData(metaPath, indexPath string, modified map[string]bool) (decr
 }
 
 func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encryptedDataDir string, upsertList map[string]bool, err error) {
-	encryptedDataDir = filepath.Join(util.WorkspaceDir, "incremental", "sync-encrypt")
+	encryptedDataDir = filepath.Join(util.TempDir, "incremental", "sync-encrypt")
 	if err = os.RemoveAll(encryptedDataDir); nil != err {
 		return
 	}

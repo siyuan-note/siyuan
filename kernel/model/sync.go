@@ -340,9 +340,8 @@ func SyncData(boot, exit, byHand bool) {
 		Conf.Sync.Stat = msg
 		util.PushErrMsg(msg, 7000)
 
-		metaPath := filepath.Join(Conf.Sync.GetSaveDir(), pathJSON)
 		indexPath := filepath.Join(util.TempDir, "sync", "index.json")
-		_, err = syncDirUpsertWorkspaceData(metaPath, indexPath, downloadedFiles)
+		_, err = syncDirUpsertWorkspaceData(tmpPathJSON, indexPath, downloadedFiles)
 		if nil != err {
 			util.LogErrorf("upsert partially downloaded files to workspace data failed: %s", err)
 		}

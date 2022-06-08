@@ -93,7 +93,6 @@ func recoverFrom(confPath string) (data []byte, err error) {
 	// 尝试从临时文件恢复
 	tmp := util.LatestTmpFile(confPath)
 	if "" == tmp {
-		util.LogErrorf("read data conf [%s] failed: %s", confPath, err)
 		return
 	}
 

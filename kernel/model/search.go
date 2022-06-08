@@ -26,7 +26,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -183,10 +182,10 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 func FullTextSearchBlock(query, box, path string, types map[string]bool, querySyntax bool) (ret []*Block) {
 	query = strings.TrimSpace(query)
 	if queryStrLower := strings.ToLower(query); strings.Contains(queryStrLower, "select ") && strings.Contains(queryStrLower, " * ") && strings.Contains(queryStrLower, " from ") {
-		ret = searchBySQL(query, 12)
+		ret = searchBySQL(query, 36)
 	} else {
 		filter := searchFilter(types)
-		ret = fullTextSearch(query, box, path, filter, 12, querySyntax)
+		ret = fullTextSearch(query, box, path, filter, 36, querySyntax)
 	}
 	return
 }
@@ -238,7 +237,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
 	keyword = util.RemoveInvisible(keyword)
 
 	if util.IsIDPattern(keyword) {
-		ret = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 12)
+		ret = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 36)
 		return
 	}
 
@@ -249,12 +248,12 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
 	}
 
 	projections := "id, parent_id, root_id, hash, box, path, " +
-		"highlight(" + table + ", 6, '__@mark__', '__mark@__') AS hpath, " +
-		"highlight(" + table + ", 7, '__@mark__', '__mark@__') AS name, " +
-		"highlight(" + table + ", 8, '__@mark__', '__mark@__') AS alias, " +
-		"highlight(" + table + ", 9, '__@mark__', '__mark@__') AS memo, " +
+		"snippet(" + table + ", 6, '<mark>__r', '</mark>', '...', 64) AS hpath, " +
+		"snippet(" + table + ", 7, '<mark>__r', '</mark>', '...', 64) AS name, " +
+		"snippet(" + table + ", 8, '<mark>__r', '</mark>', '...', 64) AS alias, " +
+		"snippet(" + table + ", 9, '<mark>__r', '</mark>', '...', 64) AS memo, " +
 		"tag, " +
-		"highlight(" + table + ", 11, '__@mark__', '__mark@__') AS content, " +
+		"snippet(" + table + ", 11, '<mark>__r', '</mark>', '...', 64) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(" + quotedKeyword + ")' AND type IN " + Conf.Search.TypeFilter()
 	orderBy := ` order by case
@@ -383,19 +382,28 @@ func query2Stmt(queryStr string) (ret string) {
 	return
 }
 
-func markSearch(text string, keyword string, beforeLen int) (pos int, marked string, score float64) {
+func markSearch(text string, keyword string, beforeLen int) (marked string, score float64) {
 	if 0 == len(keyword) {
 		marked = text
 		if maxLen := 5120; maxLen < utf8.RuneCountInString(marked) {
 			marked = gulu.Str.SubStr(marked, maxLen) + "..."
 		}
-		marked = html.EscapeString(marked)
-		marked = strings.ReplaceAll(marked, "__@mark__", "<mark>")
-		marked = strings.ReplaceAll(marked, "__mark@__", "</mark>")
+
+		if strings.Contains(marked, "<mark>__r") { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
+			marked = strings.ReplaceAll(marked, "<mark>__r", "<mark>")
+			return
+		}
+
+		keywords := util.SubstringsBetween(marked, "__@mark__", "__mark@__")
+		keywords = util.RemoveDuplicatedElem(keywords)
+		keyword = strings.Join(keywords, search.TermSep)
+		marked = strings.ReplaceAll(marked, "__@mark__", "")
+		marked = strings.ReplaceAll(marked, "__mark@__", "")
+		_, marked = search.MarkText(marked, keyword, beforeLen, Conf.Search.CaseSensitive)
 		return
 	}
 
-	pos, marked = search.MarkText(text, keyword, beforeLen, Conf.Search.CaseSensitive)
+	pos, marked := search.MarkText(text, keyword, beforeLen, Conf.Search.CaseSensitive)
 	if -1 < pos {
 		if 0 == pos {
 			score = 1
@@ -424,7 +432,7 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 	content := sqlBlock.Content
 	p := sqlBlock.Path
 
-	_, content, _ = markSearch(content, terms, beforeLen)
+	content, _ = markSearch(content, terms, beforeLen)
 	markdown := maxContent(sqlBlock.Markdown, 5120)
 	content = maxContent(content, 5120)
 
@@ -454,20 +462,20 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 		}
 	}
 
-	_, hPath, _ := markSearch(sqlBlock.HPath, terms, 18)
+	hPath, _ := markSearch(sqlBlock.HPath, terms, 18)
 	if !strings.HasPrefix(hPath, "/") {
 		hPath = "/" + hPath
 	}
 	block.HPath = hPath
 
 	if "" != block.Name {
-		_, block.Name, _ = markSearch(block.Name, terms, 256)
+		block.Name, _ = markSearch(block.Name, terms, 256)
 	}
 	if "" != block.Alias {
-		_, block.Alias, _ = markSearch(block.Alias, terms, 256)
+		block.Alias, _ = markSearch(block.Alias, terms, 256)
 	}
 	if "" != block.Memo {
-		_, block.Memo, _ = markSearch(block.Memo, terms, 256)
+		block.Memo, _ = markSearch(block.Memo, terms, 256)
 	}
 	return
 }
@@ -500,6 +508,7 @@ func columnFilter() string {
 
 func stringQuery(query string) string {
 	query = strings.ReplaceAll(query, "\"", "\"\"")
+	query = strings.ReplaceAll(query, "'", "''")
 
 	buf := bytes.Buffer{}
 	parts := strings.Split(query, " ")

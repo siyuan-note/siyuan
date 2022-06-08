@@ -1,3 +1,32 @@
+## v2.0.18 / 2022-06-08
+
+### 改进功能
+
+* [`定位打开的文档` 增加快捷键](https://github.com/siyuan-note/siyuan/issues/4844)
+* [文档树面板左右键优化](https://github.com/siyuan-note/siyuan/issues/4852)
+* [屏幕太长导致无法动态加载且无动态滚动条](https://github.com/siyuan-note/siyuan/issues/5018)
+* [快速连击使用模板时是在斜线的下一行出现](https://github.com/siyuan-note/siyuan/issues/5083)
+* [云端同步上传大量文件时不新增通知](https://github.com/siyuan-note/siyuan/issues/5112)
+* [菜单中划选输入框超出菜单范围会导致菜单消失](https://github.com/siyuan-note/siyuan/issues/5122)
+* [改进全局搜索多个关键字命中时高亮片段](https://github.com/siyuan-note/siyuan/issues/5124)
+* [块引搜索结果高亮片段改进](https://github.com/siyuan-note/siyuan/issues/5125)
+
+### 开发重构
+
+* [`工作空间/incremental/` 文件夹移动到 `工作空间/temp/incremental/`](https://github.com/siyuan-note/siyuan/issues/5119)
+
+### 修复缺陷
+
+* [多级标题折叠后上级块引浮窗中未折叠](https://github.com/siyuan-note/siyuan/issues/4997)
+* [移动端没有通知消息时消息清除按钮未隐藏](https://github.com/siyuan-note/siyuan/issues/5111)
+* [全局关系图不显示](https://github.com/siyuan-note/siyuan/issues/5114)
+* [大纲行级元素渲染问题](https://github.com/siyuan-note/siyuan/issues/5115)
+* [移动端点击账号刷新失效](https://github.com/siyuan-note/siyuan/issues/5118)
+* [无法导出 `.sy.zip` 和 Markdown](https://github.com/siyuan-note/siyuan/issues/5120)
+* [云端同步下载文件时断点续传失效](https://github.com/siyuan-note/siyuan/issues/5123)
+* [英文单引号无法搜索](https://github.com/siyuan-note/siyuan/issues/5126)
+* [同一文档分屏后大纲定位问题](https://github.com/siyuan-note/siyuan/issues/5127)
+
 ## v2.0.17 / 2022-06-06
 
 ### 改进功能

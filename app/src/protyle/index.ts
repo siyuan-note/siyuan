@@ -147,7 +147,7 @@ class Protyle {
         }, getResponse => {
             onGet(getResponse, this.protyle, options.action);
             if (this.protyle.model) {
-                if (options.action.includes(Constants.CB_GET_FOCUS)) {
+                if (options.action?.includes(Constants.CB_GET_FOCUS)) {
                     setPanelFocus(this.protyle.model.element.parentElement.parentElement);
                 }
                 updatePanelByEditor(this.protyle, false);

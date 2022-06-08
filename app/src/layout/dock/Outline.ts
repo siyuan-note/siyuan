@@ -226,11 +226,12 @@ export class Outline extends Model {
         }
         if (currentElement) {
             currentElement.classList.add("b3-list-item--focus");
-            const titleHeight = this.headerElement.clientHeight;
-            if (currentElement.offsetTop - titleHeight < this.element.scrollTop) {
-                this.element.scrollTop = currentElement.offsetTop - titleHeight;
-            } else if (currentElement.offsetTop - this.element.clientHeight - titleHeight + currentElement.clientHeight > this.element.scrollTop) {
-                this.element.scrollTop = currentElement.offsetTop - this.element.clientHeight - titleHeight + currentElement.clientHeight;
+            const currentRect = currentElement.getBoundingClientRect()
+            const scrollRect = this.element.getBoundingClientRect()
+            if (currentRect.top < scrollRect.top) {
+                currentElement.scrollIntoView();
+            } else if (currentRect.bottom > scrollRect.bottom) {
+                currentElement.scrollIntoView(false);
             }
         }
     }

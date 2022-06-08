@@ -508,6 +508,7 @@ func columnFilter() string {
 
 func stringQuery(query string) string {
 	query = strings.ReplaceAll(query, "\"", "\"\"")
+	query = strings.ReplaceAll(query, "'", "''")
 
 	buf := bytes.Buffer{}
 	parts := strings.Split(query, " ")

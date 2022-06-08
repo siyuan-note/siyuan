@@ -95,7 +95,7 @@ export class Outline extends Model {
             click: (element: HTMLElement) => {
                 const models = getAllModels();
                 models.editor.find(item => {
-                    if (this.blockId === item.editor.protyle.block.rootID) {
+                    if (this.blockId === item.editor.protyle.block.rootID && !item.element.classList.contains("fn__none")) {
                         const id = element.getAttribute("data-node-id");
                         const targetElement = item.editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
                         if (targetElement) {

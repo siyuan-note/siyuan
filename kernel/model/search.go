@@ -182,10 +182,10 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 func FullTextSearchBlock(query, box, path string, types map[string]bool, querySyntax bool) (ret []*Block) {
 	query = strings.TrimSpace(query)
 	if queryStrLower := strings.ToLower(query); strings.Contains(queryStrLower, "select ") && strings.Contains(queryStrLower, " * ") && strings.Contains(queryStrLower, " from ") {
-		ret = searchBySQL(query, 12)
+		ret = searchBySQL(query, 36)
 	} else {
 		filter := searchFilter(types)
-		ret = fullTextSearch(query, box, path, filter, 12, querySyntax)
+		ret = fullTextSearch(query, box, path, filter, 36, querySyntax)
 	}
 	return
 }
@@ -237,7 +237,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
 	keyword = util.RemoveInvisible(keyword)
 
 	if util.IsIDPattern(keyword) {
-		ret = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 12)
+		ret = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 36)
 		return
 	}
 

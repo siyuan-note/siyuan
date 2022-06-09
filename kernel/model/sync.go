@@ -557,7 +557,7 @@ func syncDir2WorkspaceData(boot bool) (upsertFiles, removeFiles []string, err er
 
 	modified := modifiedSyncList(unchanged)
 	metaPath := filepath.Join(util.TempDir, "sync", pathJSON) // 使用前面解密验证时下载的临时文件
-	indexPath := filepath.Join(Conf.Sync.GetSaveDir(), "index.json")
+	indexPath := filepath.Join(util.TempDir, "sync", "index.json")
 	decryptedDataDir, upsertFiles, err := recoverSyncData(metaPath, indexPath, modified)
 	if nil != err {
 		util.LogErrorf("decrypt data dir failed: %s", err)

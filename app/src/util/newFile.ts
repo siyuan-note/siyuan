@@ -58,12 +58,8 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
             title: data.data.name || window.siyuan.languages.untitled,
             md: "",
         }, () => {
-            if (open) {
-                if (isMobile()) {
-                    openMobileFileById(id, true);
-                } else {
-                    openFileById({id, hasContext: true, action: [Constants.CB_GET_HL]});
-                }
+            if (open && !isMobile()) {
+                openFileById({id, hasContext: true, action: [Constants.CB_GET_HL]});
             }
         });
     });

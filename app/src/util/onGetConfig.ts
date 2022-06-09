@@ -167,7 +167,7 @@ const initBar = () => {
         <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>
 </div>
-<div id="barThemeMode" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.appearance.mode === 1 ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.languages.darkMode}">
+<div id="barThemeMode" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.appearance.mode === 1 ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.config.appearance.mode === 1 ? window.siyuan.languages.themeLight : window.siyuan.languages.themeDark}">
     <svg>
         <use xlink:href="#iconMoon"></use>
     </svg>
@@ -224,8 +224,10 @@ const initBar = () => {
         }
         if (barThemeModeElement.classList.contains("toolbar__item--active")) {
             barThemeModeElement.classList.remove("toolbar__item--active");
+            barThemeModeElement.setAttribute("aria-label", window.siyuan.languages.themeDark)
         } else {
             barThemeModeElement.classList.add("toolbar__item--active");
+            barThemeModeElement.setAttribute("aria-label", window.siyuan.languages.themeLight)
         }
         barThemeModeElement.setAttribute("disabled", "disabled");
         fetchPost("/api/system/setAppearanceMode", {

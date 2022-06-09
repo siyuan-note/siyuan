@@ -208,7 +208,6 @@
   "default": "Default",
   "titleBg": "Cover",
   "random": "Random",
-  "darkMode": "Dark mode",
   "downloadRecover1": "Download the cloud backup and overwrite the local backup, and then recover from the local backup",
   "deleteCloudBackup": "Delete cloud backup completely",
   "backupUpload1": "Generate an encrypted local backup and upload the backup to the cloud",

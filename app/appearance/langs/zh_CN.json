@@ -208,7 +208,6 @@
   "default": "默认",
   "titleBg": "题头图",
   "random": "随机",
-  "darkMode": "暗黑模式",
   "downloadRecover1": "将云端备份下载并覆盖本地备份，然后从本地备份进行恢复",
   "deleteCloudBackup": "彻底删除云端备份",
   "backupUpload1": "生成加密过的本地备份，然后将该备份上传到云端",

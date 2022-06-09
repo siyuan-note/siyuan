@@ -344,10 +344,15 @@ export const appearance = {
         ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, data.closeButtonBehavior);
         /// #endif
         loadAssets(data);
-        if (data.mode === 1) {
-            document.getElementById("barThemeMode")?.classList.add("toolbar__item--active");
-        } else {
-            document.getElementById("barThemeMode")?.classList.remove("toolbar__item--active");
+        const modeElement =  document.getElementById("barThemeMode")
+        if (modeElement) {
+            if (data.mode === 1) {
+                modeElement.classList.add("toolbar__item--active");
+                modeElement.setAttribute("aria-label", window.siyuan.languages.themeLight)
+            } else {
+                modeElement.classList.remove("toolbar__item--active");
+                modeElement.setAttribute("aria-label", window.siyuan.languages.themeDark)
+            }
         }
     }
 };

@@ -457,7 +457,7 @@ export class WYSIWYG {
             }
             if (target.tagName === "IMG" && hasClosestByClassName(target, "img")) {
                 imgMenu(protyle, protyle.toolbar.range, target.parentElement.parentElement, {
-                    clientX: event.clientX,
+                    clientX: event.clientX + 4,
                     clientY: event.clientY
                 });
                 return false;
@@ -1494,7 +1494,7 @@ export class WYSIWYG {
                 const type = actionElement.parentElement.parentElement.getAttribute("data-type");
                 if (type === "img" && !protyle.disabled) {
                     imgMenu(protyle, range, actionElement.parentElement.parentElement, {
-                        clientX: event.clientX,
+                        clientX: event.clientX + 4,
                         clientY: event.clientY
                     });
                 } else if (!protyle.disabled && actionElement.parentElement.classList.contains("li")) {

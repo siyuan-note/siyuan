@@ -83,8 +83,8 @@ export const hideMessage = (id: string) => {
         setTimeout(() => {
             messageElement.remove();
         }, Constants.TIMEOUT_INPUT);
-        if (messagesElement.childElementCount < 2) {
-            messagesElement.parentElement.classList.remove("b3-snackbars--show");
-        }
+    }
+    if (messagesElement.childElementCount < 2) {
+        messagesElement.parentElement.classList.remove("b3-snackbars--show");
     }
 };

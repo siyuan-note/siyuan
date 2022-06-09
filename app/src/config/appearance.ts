@@ -344,14 +344,14 @@ export const appearance = {
         ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, data.closeButtonBehavior);
         /// #endif
         loadAssets(data);
-        const modeElement =  document.getElementById("barThemeMode")
+        const modeElement =  document.getElementById("barThemeMode");
         if (modeElement) {
             if (data.mode === 1) {
                 modeElement.classList.add("toolbar__item--active");
-                modeElement.setAttribute("aria-label", window.siyuan.languages.themeLight)
+                modeElement.setAttribute("aria-label", window.siyuan.languages.themeLight);
             } else {
                 modeElement.classList.remove("toolbar__item--active");
-                modeElement.setAttribute("aria-label", window.siyuan.languages.themeDark)
+                modeElement.setAttribute("aria-label", window.siyuan.languages.themeDark);
             }
         }
     }

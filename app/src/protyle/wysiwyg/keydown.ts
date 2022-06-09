@@ -21,7 +21,6 @@ import {
     isNotEditBlock,
 } from "./getBlock";
 import {matchHotKey} from "../util/hotKey";
-import {fullscreen} from "../breadcrumb/action";
 import {enter} from "./enter";
 import {fixTable} from "../util/table";
 import {phTransaction, transaction, turnsIntoTransaction, updateTransaction} from "./transaction";
@@ -39,7 +38,6 @@ import {setPosition} from "../../util/setPosition";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
-import {addLoading, setPadding} from "../ui/initUI";
 import {preventScroll} from "../scroll/preventScroll";
 import {bindMenuKeydown} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";

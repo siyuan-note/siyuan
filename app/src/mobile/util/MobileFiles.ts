@@ -438,7 +438,7 @@ export class MobileFiles extends Model {
             targetElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
             const emojiElement = targetElement.querySelector(".b3-list-item__icon");
             if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FILE)) {
-                emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)
+                emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER);
             }
             if (targetElement.nextElementSibling && targetElement.nextElementSibling.tagName === "UL") {
                 targetElement.nextElementSibling.remove();

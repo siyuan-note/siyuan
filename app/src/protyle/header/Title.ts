@@ -1,9 +1,7 @@
 import {
     focusBlock,
-    focusByOffset,
     focusByRange,
     getEditorRange,
-    getSelectionOffset,
 } from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {replaceFileName, validateName} from "../../editor/rename";

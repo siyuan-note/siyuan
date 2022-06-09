@@ -9,7 +9,7 @@ import {Constants} from "../../constants";
 import {onGet} from "../util/onGet";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
-    const target = event.target as HTMLElement
+    const target = event.target as HTMLElement;
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
         fetchPost("/api/filetree/getHPathByID", {
             id: protyle.block.rootID
@@ -65,4 +65,4 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
             return true;
         }
     }
-}
+};

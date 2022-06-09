@@ -8,7 +8,6 @@ import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
 import {openFileById} from "../editor/util";
 import {Constants} from "../constants";
 import {isMobile} from "./functions";
-import {openMobileFileById} from "../mobile/editor";
 
 export const newFile = (notebookId?: string, currentPath?: string, open?: boolean) => {
     if (getOpenNotebookCount() === 0) {

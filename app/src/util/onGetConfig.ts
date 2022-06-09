@@ -224,10 +224,10 @@ const initBar = () => {
         }
         if (barThemeModeElement.classList.contains("toolbar__item--active")) {
             barThemeModeElement.classList.remove("toolbar__item--active");
-            barThemeModeElement.setAttribute("aria-label", window.siyuan.languages.themeDark)
+            barThemeModeElement.setAttribute("aria-label", window.siyuan.languages.themeDark);
         } else {
             barThemeModeElement.classList.add("toolbar__item--active");
-            barThemeModeElement.setAttribute("aria-label", window.siyuan.languages.themeLight)
+            barThemeModeElement.setAttribute("aria-label", window.siyuan.languages.themeLight);
         }
         barThemeModeElement.setAttribute("disabled", "disabled");
         fetchPost("/api/system/setAppearanceMode", {

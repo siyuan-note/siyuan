@@ -499,6 +499,10 @@ export class MobileFiles extends Model {
             } else {
                 targetElement.remove();
             }
+
+            if (window.siyuan.mobileEditor && window.siyuan.mobileEditor.protyle.path === data.data.path) {
+                setEmpty();
+            }
         }
     }
 

@@ -7,6 +7,8 @@ import {fetchPost} from "./fetch";
 import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
 import {openFileById} from "../editor/util";
 import {Constants} from "../constants";
+import {isMobile} from "./functions";
+import {openMobileFileById} from "../mobile/editor";
 
 export const newFile = (notebookId?: string, currentPath?: string, open?: boolean) => {
     if (getOpenNotebookCount() === 0) {
@@ -57,7 +59,11 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
             md: "",
         }, () => {
             if (open) {
-                openFileById({id, hasContext: true, action: [Constants.CB_GET_HL]});
+                if (isMobile()) {
+                    openMobileFileById(id, true);
+                } else {
+                    openFileById({id, hasContext: true, action: [Constants.CB_GET_HL]});
+                }
             }
         });
     });

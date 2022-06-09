@@ -194,7 +194,7 @@ export class Files extends Model {
                         event.preventDefault();
                         event.stopPropagation();
                         if (target.parentElement.getAttribute("data-type") === "navigation-file") {
-                            openEmojiPanel(target.parentElement.getAttribute("data-node-id"), target, false);
+                            openEmojiPanel(target.parentElement.getAttribute("data-node-id"), target);
                         } else {
                             openEmojiPanel(target.parentElement.parentElement.getAttribute("data-url"), target, true);
                         }

@@ -392,6 +392,9 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
 };
 
 export const updateOutlineEmoji = (unicode: string) => {
+    if (isMobile()) {
+        return;
+    }
     getAllModels().outline.forEach(model => {
         model.headerElement.nextElementSibling.firstElementChild.innerHTML = unicode2Emoji(unicode || Constants.SIYUAN_IMAGE_FILE);
     });
@@ -400,11 +403,7 @@ export const updateOutlineEmoji = (unicode: string) => {
 export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFile") => {
     let emojiElement;
     if (isMobile()) {
-        if (icon === "iconFile") {
-            emojiElement = document.querySelector(`#fileTree [data-node-id="${id}"] .b3-list-item__icon`);
-        } else {
-            emojiElement = document.querySelector(`#fileTree [data-node-id="${id}"] .b3-list-item__icon`) || document.querySelector(`#fileTree [data-url="${id}"] .b3-list-item__icon`);
-        }
+        emojiElement = document.querySelector(`#sidebar [data-type="sidebar-file"] [data-node-id="${id}"] .b3-list-item__icon`);
     } else {
         const files = getDockByType("file").data.file as Files;
         if (icon === "iconFile") {

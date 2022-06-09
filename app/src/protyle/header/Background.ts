@@ -235,7 +235,9 @@ export class Background {
                             id: protyle.block.rootID,
                             attrs: {"icon": emoji}
                         });
-                        protyle.model.parent.setDocIcon(emoji);
+                        if (protyle.model) {
+                            protyle.model.parent.setDocIcon(emoji);
+                        }
                     }
                     event.preventDefault();
                     event.stopPropagation();

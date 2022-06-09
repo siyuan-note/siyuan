@@ -1057,27 +1057,19 @@ func refreshUpdated(n *ast.Node) {
 	}
 }
 
-func createdUpdated(n *ast.Node) {
-	ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || "" == n.ID {
-			return ast.WalkContinue
-		}
-
-		created := util.TimeFromID(n.ID)
-		updated := n.IALAttr("updated")
-		if "" == updated {
-			updated = created
-		}
-		if updated < created {
-			updated = created // 复制粘贴块后创建时间小于更新时间 https://github.com/siyuan-note/siyuan/issues/3624
-		}
-		n.SetIALAttr("updated", updated)
-		parents := treenode.ParentNodes(n)
-		for _, parent := range parents { // 更新所有父节点的更新时间字段
-			parent.SetIALAttr("updated", updated)
-		}
-		return ast.WalkContinue
-	})
+func createdUpdated(node *ast.Node) {
+	created := util.TimeFromID(node.ID)
+	updated := node.IALAttr("updated")
+	if "" == updated {
+		updated = created
+	}
+	if updated < created {
+		updated = created // 复制粘贴块后创建时间小于更新时间 https://github.com/siyuan-note/siyuan/issues/3624
+	}
+	parents := treenode.ParentNodes(node)
+	for _, parent := range parents { // 更新所有父节点的更新时间字段
+		parent.SetIALAttr("updated", updated)
+	}
 }
 
 type Operation struct {

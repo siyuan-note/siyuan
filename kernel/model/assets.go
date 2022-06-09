@@ -69,6 +69,7 @@ func NetImg2LocalAssets(rootID string) (err error) {
 	}
 
 	var files int
+	util.PushMsg(Conf.Language(119), 7000)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -89,7 +90,6 @@ func NetImg2LocalAssets(rootID string) (err error) {
 						u = strings.Replace(u, "/0?", "/640?", 1)
 					}
 				}
-				util.PushMsg(fmt.Sprintf(Conf.Language(119), u), 15000)
 				request := util.NewBrowserRequest(Conf.System.NetworkProxy.String())
 				resp, reqErr := request.Get(u)
 				if nil != reqErr {
@@ -146,9 +146,8 @@ func NetImg2LocalAssets(rootID string) (err error) {
 		}
 		return ast.WalkContinue
 	})
-
 	if 0 < files {
-		util.PushMsg(Conf.Language(113), 5000)
+		util.PushMsg(Conf.Language(113), 7000)
 		if err = writeJSONQueue(tree); nil != err {
 			return
 		}

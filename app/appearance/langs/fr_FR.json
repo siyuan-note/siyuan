@@ -850,7 +850,7 @@
     "116": "Traitement en cours, veuillez patienter...",
     "117": "[%s] n'est pas un exécutable Pandoc valide",
     "118": "Les paramètres actuels ne permettent pas la création de sous-documents sous un document de 7 niveaux de profondeur",
-    "119": "Téléchargement de l'image Web [%s]",
+    "119": "Téléchargement de l'image Web...",
     "120": "Téléchargement terminé, [%d] fichiers au total",
     "121": "Il n'y a pas d'image réseau dans ce document",
     "122": "Cette fonction doit être configurée sur le bureau SiYuan",

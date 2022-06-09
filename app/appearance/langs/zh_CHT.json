@@ -208,6 +208,7 @@
   "default": "預設",
   "titleBg": "封面圖",
   "random": "隨機",
+  "lightMode": "淺色模式",
   "darkMode": "深色模式",
   "downloadRecover1": "將雲端備份下載並覆蓋本地備份，然後從本地備份進行恢復",
   "deleteCloudBackup": "徹底刪除雲端備份",

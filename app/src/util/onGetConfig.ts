@@ -167,7 +167,7 @@ const initBar = () => {
         <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>
 </div>
-<div id="barThemeMode" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.appearance.mode === 1 ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.languages.darkMode}">
+<div id="barThemeMode" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.appearance.mode === 1 ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.config.appearance.mode === 1 ? window.siyuan.languages.lightMode : window.siyuan.languages.darkMode }">
     <svg>
         <use xlink:href="#iconMoon"></use>
     </svg>
@@ -231,6 +231,7 @@ const initBar = () => {
         fetchPost("/api/system/setAppearanceMode", {
             mode: barThemeModeElement.classList.contains("toolbar__item--active") ? 1 : 0
         }, response => {
+            barThemeModeElement.setAttribute("aria-label", window.siyuan.config.appearance.mode === 1 ? window.siyuan.languages.darkMode : window.siyuan.languages.lightMode);
             if (window.siyuan.config.appearance.themeJS) {
                 exportLayout(true);
                 return;

@@ -208,6 +208,7 @@
   "default": "Default",
   "titleBg": "Couverture",
   "random": "Random",
+  "lightMode": "mode Clair",
   "darkMode": "mode Sombre",
   "downloadRecover1": "Téléchargez la sauvegarde sur le nuage et remplacez la sauvegarde locale, puis restaurez à partir de la sauvegarde locale.",
   "deleteCloudBackup": "Supprimer complètement la sauvegarde dans le cloud",

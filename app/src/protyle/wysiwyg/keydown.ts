@@ -45,10 +45,11 @@ import {bindMenuKeydown} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {scrollCenter} from "../../util/highlightById";
-import {openBacklink, openBy, openFileById, openGraph, openOutline} from "../../editor/util";
+import {openBy, openFileById} from "../../editor/util";
 import {BlockPanel} from "../../block/Panel";
 import * as dayjs from "dayjs";
 import {highlightRender} from "../markdown/highlightRender";
+import {commonHotkey} from "./commonHotkey";
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
@@ -449,19 +450,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.refresh.custom, event)) {
-            protyle.title.render(protyle, true);
-            addLoading(protyle);
-            fetchPost("/api/filetree/getDoc", {
-                id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
-                mode: 0,
-                size: protyle.block.showAll ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
-            }, getResponse => {
-                onGet(getResponse, protyle, protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]);
-            });
-            event.preventDefault();
-            return;
-        }
         if (matchHotKey("⌘/", event)) {
             event.stopPropagation();
             event.preventDefault();
@@ -724,13 +712,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.fullscreen.custom, event)) {
-            fullscreen(protyle.element);
-            setPadding(protyle);
-            event.preventDefault();
-            return true;
-        }
-
         if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {
             protyle.undo.undo(protyle);
             event.preventDefault();
@@ -758,13 +739,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
-            fetchPost("/api/filetree/getHPathByID", {
-                id: protyle.block.rootID
-            }, (response) => {
-                writeText(response.data);
-            });
-            event.preventDefault();
+        if (commonHotkey(protyle, event)) {
             return true;
         }
 
@@ -1394,26 +1369,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.preventDefault();
                 event.stopPropagation();
                 return true;
-            }
-        }
-
-        if (protyle.model) {
-            if (matchHotKey(window.siyuan.config.keymap.editor.general.outline.custom, event)) {
-                event.preventDefault();
-                openOutline(protyle);
-                return;
-            }
-
-            if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {
-                event.preventDefault();
-                openBacklink(protyle);
-                return;
-            }
-
-            if (matchHotKey(window.siyuan.config.keymap.editor.general.graphView.custom, event)) {
-                event.preventDefault();
-                openGraph(protyle);
-                return;
             }
         }
 

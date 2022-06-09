@@ -25,6 +25,7 @@ import {openBacklink, openGraph, openOutline, updatePanelByEditor} from "../../e
 import * as dayjs from "dayjs";
 import {setTitle} from "../../dialog/processSystem";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
+import {commonHotkey} from "../wysiwyg/commonHotkey";
 
 export class Title {
     public element: HTMLElement;
@@ -82,6 +83,11 @@ export class Title {
             if (event.isComposing) {
                 return;
             }
+
+            if (commonHotkey(protyle, event)) {
+                return true;
+            }
+
             if (event.key === "ArrowDown" || event.key === "Enter") {
                 const noContainerElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild);
                 // https://github.com/siyuan-note/siyuan/issues/4923
@@ -114,32 +120,6 @@ export class Title {
                 writeText(`siyuan://blocks/${protyle.block.rootID}`);
                 event.preventDefault();
                 event.stopPropagation();
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
-                fetchPost("/api/filetree/getHPathByID", {
-                    id: protyle.block.rootID
-                }, (response) => {
-                    writeText(response.data);
-                });
-                event.preventDefault();
-                event.stopPropagation();
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {
-                event.preventDefault();
-                event.stopPropagation();
-                openBacklink(protyle);
-                return;
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.graphView.custom, event)) {
-                event.preventDefault();
-                event.stopPropagation();
-                openGraph(protyle);
-                return;
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.outline.custom, event)) {
-                event.preventDefault();
-                event.stopPropagation();
-                const offset = getSelectionOffset(this.editElement);
-                openOutline(protyle);
-                // switchWnd 后，range会被清空，需要重新设置
-                focusByOffset(this.editElement, offset.start, offset.end);
-                return;
             }
         });
         const iconElement = this.element.querySelector(".protyle-title__icon");

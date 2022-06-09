@@ -414,7 +414,7 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
         }
     }
     if (emojiElement) {
-        emojiElement.innerHTML = unicode2Emoji(unicode || (icon === "iconFile" ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_NOTE));
+        emojiElement.innerHTML = unicode2Emoji(unicode || (icon === "iconFile" ? (emojiElement.previousElementSibling.classList.contains("fn__hidden") ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER) : Constants.SIYUAN_IMAGE_NOTE));
     }
     if (icon !== "iconFile") {
         setNoteBook();

@@ -383,6 +383,10 @@ export class MobileFiles extends Model {
                 if (sourceElement.parentElement.previousElementSibling) {
                     sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__toggle").classList.add("fn__hidden");
                     sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
+                    const emojiElement = sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__icon");
+                    if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
+                        emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);
+                    }
                 }
                 sourceElement.parentElement.remove();
             } else {
@@ -392,6 +396,10 @@ export class MobileFiles extends Model {
         const newElement = this.element.querySelector(`[data-url="${data.toNotebook}"] li[data-path="${data.toPath}"]`) as HTMLElement;
         // 重新展开移动到的新文件夹
         if (newElement) {
+            const emojiElement = newElement.querySelector(".b3-list-item__icon");
+            if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FILE)) {
+                emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER);
+            }
             newElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
             newElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
             if (newElement.nextElementSibling && newElement.nextElementSibling.tagName === "UL") {
@@ -428,6 +436,10 @@ export class MobileFiles extends Model {
         if (targetElement) {
             targetElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
             targetElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
+            const emojiElement = targetElement.querySelector(".b3-list-item__icon");
+            if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FILE)) {
+                emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)
+            }
             if (targetElement.nextElementSibling && targetElement.nextElementSibling.tagName === "UL") {
                 targetElement.nextElementSibling.remove();
             }
@@ -478,6 +490,10 @@ export class MobileFiles extends Model {
                     const iconElement = parentElement.querySelector("svg");
                     iconElement.classList.remove("b3-list-item__arrow--open");
                     iconElement.parentElement.classList.add("fn__hidden");
+                    const emojiElement = iconElement.parentElement.nextElementSibling;
+                    if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
+                        emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);
+                    }
                 }
                 targetElement.parentElement.remove();
             } else {
@@ -677,7 +693,7 @@ class="b3-list-item" data-path="${item.path}">
     <span style="padding-left: ${(item.path.split("/").length - 1) * 16}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <span class="b3-list-item__icon">${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE)}</span>
+    <span class="b3-list-item__icon">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER))}</span>
     <span class="b3-list-item__text">${getDisplayName(item.name, true, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>

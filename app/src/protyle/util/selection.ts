@@ -32,8 +32,41 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
         } else {
             position = getSelectionOffset(editElement, nodeElement, range);
             if (position.start !== 0 || position.end !== editElement.textContent.length) {
-                range.setStart(editElement.firstChild, 0);
-                range.setEndAfter(editElement.lastChild);
+                // 全选后 rang 不对 https://ld246.com/article/1654848722251
+                let firstChild = editElement.firstChild;
+                while (firstChild) {
+                    if (firstChild.nodeType === 3) {
+                        if (firstChild.textContent !== "") {
+                            range.setStart(firstChild, 0);
+                            break;
+                        }
+                        firstChild = firstChild.nextSibling
+                    } else {
+                        if ((firstChild as HTMLElement).classList.contains("render-node") ||
+                            (firstChild as HTMLElement).classList.contains("img")) {
+                            range.setStartBefore(firstChild);
+                            break;
+                        }
+                        firstChild = firstChild.firstChild
+                    }
+                }
+                let lastChild = editElement.lastChild
+                while (lastChild) {
+                    if (lastChild.nodeType === 3) {
+                        if (lastChild.textContent !== "") {
+                            range.setEnd(lastChild, lastChild.textContent.length);
+                            break;
+                        }
+                        lastChild = lastChild.previousSibling
+                    } else {
+                        if ((lastChild as HTMLElement).classList.contains("render-node") ||
+                            (lastChild as HTMLElement).classList.contains("img")) {
+                            range.setEndAfter(lastChild);
+                            break;
+                        }
+                        lastChild = lastChild.lastChild
+                    }
+                }
                 protyle.toolbar.render(protyle, range);
                 return true;
             }

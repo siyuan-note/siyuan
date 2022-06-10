@@ -78,14 +78,14 @@ export class Toolbar {
         Array.from(range.cloneContents().childNodes).find(item => {
             if (item.nodeType !== 1) {
                 if (item.textContent.length > 0) {
-                    noText = false
-                    return true
+                    noText = false;
+                    return true;
                 }
             } else if (!(item as HTMLElement).classList.contains("img")) {
-                hasImg = false
-                return true
+                hasImg = false;
+                return true;
             }
-        })
+        });
         if (hasImg && noText) {
             this.element.classList.add("fn__none");
             return;

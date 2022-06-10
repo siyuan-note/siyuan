@@ -40,31 +40,31 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                             range.setStart(firstChild, 0);
                             break;
                         }
-                        firstChild = firstChild.nextSibling
+                        firstChild = firstChild.nextSibling;
                     } else {
                         if ((firstChild as HTMLElement).classList.contains("render-node") ||
                             (firstChild as HTMLElement).classList.contains("img")) {
                             range.setStartBefore(firstChild);
                             break;
                         }
-                        firstChild = firstChild.firstChild
+                        firstChild = firstChild.firstChild;
                     }
                 }
-                let lastChild = editElement.lastChild
+                let lastChild = editElement.lastChild;
                 while (lastChild) {
                     if (lastChild.nodeType === 3) {
                         if (lastChild.textContent !== "") {
                             range.setEnd(lastChild, lastChild.textContent.length);
                             break;
                         }
-                        lastChild = lastChild.previousSibling
+                        lastChild = lastChild.previousSibling;
                     } else {
                         if ((lastChild as HTMLElement).classList.contains("render-node") ||
                             (lastChild as HTMLElement).classList.contains("img")) {
                             range.setEndAfter(lastChild);
                             break;
                         }
-                        lastChild = lastChild.lastChild
+                        lastChild = lastChild.lastChild;
                     }
                 }
                 protyle.toolbar.render(protyle, range);

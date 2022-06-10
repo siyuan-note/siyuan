@@ -250,7 +250,7 @@ export const globalShortcut = () => {
             fetchPost("/api/system/logoutAuth", {}, () => {
                 exportLayout(false, () => {
                     window.location.href = "/";
-                })
+                });
             });
             event.preventDefault();
             return;

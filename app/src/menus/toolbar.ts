@@ -56,7 +56,7 @@ export const initToolbarMore = () => {
             fetchPost("/api/system/logoutAuth", {}, () => {
                 exportLayout(false, () => {
                     window.location.href = "/";
-                })
+                });
             });
         }
     }).element);

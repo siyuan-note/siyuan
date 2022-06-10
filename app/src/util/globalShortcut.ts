@@ -11,7 +11,7 @@ import {
 import {newFile} from "./newFile";
 import {Constants} from "../constants";
 import {openSetting} from "../config";
-import {getDockByType, getInstanceById, setPanelFocus} from "../layout/util";
+import {exportLayout, getDockByType, getInstanceById, setPanelFocus} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {Editor} from "../editor";
 import {setEditMode} from "../protyle/util/setEditMode";
@@ -248,7 +248,9 @@ export const globalShortcut = () => {
         }
         if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {
             fetchPost("/api/system/logoutAuth", {}, () => {
-                window.location.href = "/";
+                exportLayout(false, () => {
+                    window.location.href = "/";
+                })
             });
             event.preventDefault();
             return;

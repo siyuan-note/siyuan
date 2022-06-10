@@ -350,6 +350,12 @@ ${window.siyuan.languages.account8}`;
         });
     },
     onSetaccount() {
+        if (repos.element) {
+            repos.element.innerHTML = "";
+        }
+        if (window.siyuan.config.system.container === "ios") {
+            return;
+        }
         let html = "";
         if (window.siyuan.config.account.displayVIP && window.siyuan.user) {
             if (window.siyuan.user.userSiYuanProExpireTime === -1) {
@@ -368,8 +374,5 @@ ${window.siyuan.languages.account8}`;
             });
         }
         document.getElementById("toolbarVIP").innerHTML = html;
-        if (repos.element) {
-            repos.element.innerHTML = "";
-        }
     }
 };

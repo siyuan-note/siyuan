@@ -21,7 +21,9 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
 
         protyle.preview.element.classList.add("fn__none");
         protyle.contentElement.classList.remove("fn__none");
-        protyle.scroll?.element.classList.remove("fn__none");
+        if (protyle.options.render.scroll) {
+            protyle.scroll?.element.classList.remove("fn__none");
+        }
         protyle.breadcrumb.element.classList.remove("fn__none");
         protyle.breadcrumb.element.nextElementSibling.classList.remove("fn__flex-1");
 

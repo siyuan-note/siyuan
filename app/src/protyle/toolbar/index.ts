@@ -72,6 +72,24 @@ export class Toolbar {
             this.element.classList.add("fn__none");
             return;
         }
+        // https://github.com/siyuan-note/siyuan/issues/5157
+        let hasImg = true;
+        let noText = true;
+        Array.from(range.cloneContents().childNodes).find(item => {
+            if (item.nodeType !== 1) {
+                if (item.textContent.length > 0) {
+                    noText = false
+                    return true
+                }
+            } else if (!(item as HTMLElement).classList.contains("img")) {
+                hasImg = false
+                return true
+            }
+        })
+        if (hasImg && noText) {
+            this.element.classList.add("fn__none");
+            return;
+        }
         // shift+方向键或三击选中，不同的块 https://github.com/siyuan-note/siyuan/issues/3891
         const startElement = hasClosestBlock(range.startContainer);
         const endElement = hasClosestBlock(range.endContainer);

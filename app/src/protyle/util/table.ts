@@ -148,7 +148,7 @@ export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElemen
 };
 
 export const deleteRow = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
-    if (cellElement.tagName === "TD") {
+    if (cellElement.parentElement.parentElement.tagName !== "THEAD") {
         range.insertNode(document.createElement("wbr"));
         const html = nodeElement.outerHTML;
 

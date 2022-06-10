@@ -1033,12 +1033,14 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             }
         });
     }
-    if (!hasNone || (hasNone && !hasRowSpan && hasColSpan) || colIsPure) {
+    if ((cellElement.parentElement.parentElement.tagName !== "THEAD" &&
+        ((!hasNone && !hasRowSpan) || (hasNone && !hasRowSpan && hasColSpan))) || colIsPure) {
         menus.push({
             type: "separator"
         });
     }
-    if ((!hasNone && !hasRowSpan) || (hasNone && !hasRowSpan && hasColSpan)) {
+    if (cellElement.parentElement.parentElement.tagName !== "THEAD" &&
+        ((!hasNone && !hasRowSpan) || (hasNone && !hasRowSpan && hasColSpan))) {
         menus.push({
             icon: "iconDeleteRow",
             label: window.siyuan.languages["delete-row"],

@@ -407,9 +407,12 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			}
 
 			var tree *parse.Tree
-
-			ext := path.Ext(info.Name())
-			title := strings.TrimSuffix(info.Name(), ext)
+			var ext string
+			title := info.Name()
+			if !info.IsDir() {
+				ext = path.Ext(info.Name())
+				title = strings.TrimSuffix(info.Name(), ext)
+			}
 			id := ast.NewNodeID()
 
 			curRelPath := filepath.ToSlash(strings.TrimPrefix(currentPath, localPath))

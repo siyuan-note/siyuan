@@ -350,7 +350,6 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
 
-	box := Conf.Box(boxID)
 	var baseHPath, baseTargetPath, boxLocalPath string
 	if "/" == toPath {
 		baseHPath = "/"
@@ -367,12 +366,6 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	boxLocalPath = filepath.Join(util.DataDir, boxID)
 
 	if gulu.File.IsDir(localPath) {
-		folderName := filepath.Base(localPath)
-		p := path.Join(toPath, folderName)
-		if box.Exist(p) {
-			return errors.New(Conf.Language(1))
-		}
-
 		// 收集所有资源文件
 		assets := map[string]string{}
 		filepath.Walk(localPath, func(currentPath string, info os.FileInfo, walkErr error) error {

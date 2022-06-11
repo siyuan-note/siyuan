@@ -384,6 +384,9 @@
     <div class="b3-snackbar__content"></div>
 </div>
 <script>
+  if (location.hostname !== "127.0.0.1") {
+    document.querySelector(".b3-button--white").remove();
+  }
   const exitApp = () => {
     try {
       const {ipcRenderer} = require('electron')

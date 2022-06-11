@@ -384,9 +384,19 @@
     <div class="b3-snackbar__content"></div>
 </div>
 <script>
-  if (location.hostname !== "127.0.0.1") {
-    document.querySelector(".b3-button--white").remove();
+  if (location.hostname !== '127.0.0.1') {
+    document.querySelector('.b3-button--white').remove()
   }
+
+  try {
+    const {ipcRenderer} = require('electron')
+    ipcRenderer.on('siyuan-save-close', (event, close) => {
+      exitSiYuan()
+    })
+  } catch (e) {
+    console.log(e)
+  }
+
   const exitApp = () => {
     try {
       const {ipcRenderer} = require('electron')

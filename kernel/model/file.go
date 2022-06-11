@@ -540,7 +540,7 @@ func GetDoc(id string, index int, keyword string, mode int, size int) (blockCoun
 			var tmp []string
 			for _, k := range virtualBlockRefKeywords {
 				repl := "<span data-type=\"virtual-block-ref\">" + k + "</span>"
-				if util.IsASCII(k) {
+				if gulu.Str.IsASCII(k) {
 					tmp = append(tmp, " "+k, " "+repl)
 					tmp = append(tmp, " "+k+" ", " "+repl+" ")
 					tmp = append(tmp, k+" ", repl+" ")
@@ -617,7 +617,7 @@ func GetDoc(id string, index int, keyword string, mode int, size int) (blockCoun
 								blockKeys = append(blockKeys, alias)
 							}
 							if 0 < len(blockKeys) {
-								keys := util.SubstringsBetween(newContent, "<span data-type=\"virtual-block-ref\">", "</span>")
+								keys := gulu.Str.SubstringsBetween(newContent, "<span data-type=\"virtual-block-ref\">", "</span>")
 								for _, k := range keys {
 									if gulu.Str.Contains(k, blockKeys) {
 										return ast.WalkContinue
@@ -1173,7 +1173,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 		return
 	}
 
-	title = util.RemoveInvisible(title)
+	title = gulu.Str.RemoveInvisible(title)
 	oldTitle := tree.Root.IALAttr("title")
 	if oldTitle == title {
 		return
@@ -1287,7 +1287,7 @@ func CreateDailyNote(boxID string) (p string, err error) {
 }
 
 func createDoc(boxID, p, title, dom string) (err error) {
-	title = util.RemoveInvisible(title)
+	title = gulu.Str.RemoveInvisible(title)
 
 	baseName := strings.TrimSpace(path.Base(p))
 	if "" == strings.TrimSuffix(baseName, ".sy") {

@@ -224,7 +224,7 @@ func searchFilter(types map[string]bool) string {
 }
 
 func searchBySQL(stmt string, beforeLen int) (ret []*Block) {
-	stmt = util.RemoveInvisible(stmt)
+	stmt = gulu.Str.RemoveInvisible(stmt)
 	blocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
@@ -234,7 +234,7 @@ func searchBySQL(stmt string, beforeLen int) (ret []*Block) {
 }
 
 func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
-	keyword = util.RemoveInvisible(keyword)
+	keyword = gulu.Str.RemoveInvisible(keyword)
 
 	if util.IsIDPattern(keyword) {
 		ret = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 36)
@@ -282,7 +282,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
 }
 
 func fullTextSearch(query, box, path, filter string, beforeLen int, querySyntax bool) (ret []*Block) {
-	query = util.RemoveInvisible(query)
+	query = gulu.Str.RemoveInvisible(query)
 	if util.IsIDPattern(query) {
 		ret = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen)
 		return
@@ -394,7 +394,7 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 			return
 		}
 
-		keywords := util.SubstringsBetween(marked, "__@mark__", "__mark@__")
+		keywords := gulu.Str.SubstringsBetween(marked, "__@mark__", "__mark@__")
 		keywords = util.RemoveDuplicatedElem(keywords)
 		keyword = strings.Join(keywords, search.TermSep)
 		marked = strings.ReplaceAll(marked, "__@mark__", "")

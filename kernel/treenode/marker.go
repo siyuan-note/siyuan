@@ -17,12 +17,12 @@
 package treenode
 
 import (
+	"github.com/88250/gulu"
 	"github.com/88250/lute/lex"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func ContainsMarker(str string) bool {
-	if !util.IsASCII(str) {
+	if !gulu.Str.IsASCII(str) {
 		return false
 	}
 

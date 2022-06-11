@@ -236,7 +236,7 @@ func WriteCustomCSS(themeName string, cssMap map[string]interface{}) (err error)
 		return
 	}
 
-	cssData := util.RemoveInvisible(string(data))
+	cssData := gulu.Str.RemoveInvisible(string(data))
 	customStyleSheet := css.Parse(cssData)
 
 	buf := &bytes.Buffer{}

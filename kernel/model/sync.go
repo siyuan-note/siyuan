@@ -1137,7 +1137,7 @@ func CreateCloudSyncDir(name string) (err error) {
 	defer syncLock.Unlock()
 
 	name = strings.TrimSpace(name)
-	name = util.RemoveInvisible(name)
+	name = gulu.Str.RemoveInvisible(name)
 	if !IsValidCloudDirName(name) {
 		return errors.New(Conf.Language(37))
 	}

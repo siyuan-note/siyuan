@@ -128,10 +128,10 @@ export const keymap = {
     _search(value: string) {
         keymap.element.querySelectorAll("#keymapList .b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
             if (item.textContent.indexOf(value) > -1 || value === "") {
-                item.parentElement.classList.remove("fn__none")
-                item.parentElement.parentElement.classList.remove("fn__none")
+                item.parentElement.classList.remove("fn__none");
+                item.parentElement.parentElement.classList.remove("fn__none");
             } else {
-                item.parentElement.classList.add("fn__none")
+                item.parentElement.classList.add("fn__none");
             }
         });
     },
@@ -139,15 +139,15 @@ export const keymap = {
         keymap.element.querySelector("#keymapRefreshBtn").addEventListener("click", () => {
             exportLayout(true);
         });
-        const searchElement = keymap.element.querySelector("#keymapInput") as HTMLInputElement
+        const searchElement = keymap.element.querySelector("#keymapInput") as HTMLInputElement;
         this.element.addEventListener("compositionend", () => {
-            keymap._search(searchElement.value)
+            keymap._search(searchElement.value);
         });
         searchElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {
                 return;
             }
-            keymap._search(searchElement.value)
+            keymap._search(searchElement.value);
         });
         keymap.element.querySelector("#keymapResetBtn").addEventListener("click", () => {
             window.siyuan.config.keymap = Constants.SIYUAN_KEYMAP;

@@ -184,7 +184,7 @@
 * [Android 端](https://github.com/siyuan-note/siyuan-android)
 * [iOS 端](https://github.com/siyuan-note/siyuan-ios)
 
-更多细节请参考[开发指南](.github/CONTRIBUTING_zh_CN.md)。
+更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
 
 ### 删除文档有什么注意事项吗？
 

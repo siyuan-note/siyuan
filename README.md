@@ -233,7 +233,7 @@ SiYuan is completely open source, and contributions are welcome:
 * [Android](https://github.com/siyuan-note/siyuan-android)
 * [iOS](https://github.com/siyuan-note/siyuan-ios)
 
-For more details, please refer to [Development Guide](.github/CONTRIBUTING.md).
+For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
 
 ## 🙏 Acknowledgement
 

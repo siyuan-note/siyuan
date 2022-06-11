@@ -98,11 +98,16 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
-	// 放过来自本机的资源文件请求
-	if strings.HasPrefix(c.Request.RemoteAddr, "127.0.0.1") &&
-		(strings.HasPrefix(c.Request.RequestURI, "/assets/") || strings.HasPrefix(c.Request.RequestURI, "/history/assets/")) {
-		c.Next()
-		return
+	// 放过来自本机的某些请求
+	if strings.HasPrefix(c.Request.RemoteAddr, "127.0.0.1") {
+		if strings.HasPrefix(c.Request.RequestURI, "/assets/") || strings.HasPrefix(c.Request.RequestURI, "/history/assets/") {
+			c.Next()
+			return
+		}
+		if strings.HasPrefix(c.Request.RequestURI, "/api/system/exit") {
+			c.Next()
+			return
+		}
 	}
 
 	// 通过 Cookie

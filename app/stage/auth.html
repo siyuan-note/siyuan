@@ -411,32 +411,38 @@
     }
   }
   const exitSiYuan = () => {
-    fetch('/api/system/exit', {
-      method: 'POST',
-      body: JSON.stringify({force: false}),
-    }).then((response) => {
-      return response.json()
-    }).then((response) => {
-      if (response.code === 1) {
-        document.querySelector('#message').classList.add('b3-snackbar--show')
-        document.querySelector('#message').firstElementChild.textContent = response.msg
-        const buttonElement = document.querySelector(`#message button`)
-        if (buttonElement) {
-          buttonElement.addEventListener('click', () => {
-            fetch('/api/system/exit', {
-              method: 'POST',
-              body: JSON.stringify({force: true}),
-            }).then((response) => {
-              return response.json()
-            }).then(() => {
-              exitApp()
+    try {
+      fetch('/api/system/exit', {
+        method: 'POST',
+        body: JSON.stringify({force: false}),
+      }).then((response) => {
+        return response.json()
+      }).then((response) => {
+        if (response.code === 1) {
+          document.querySelector('#message').classList.add('b3-snackbar--show')
+          document.querySelector('#message').firstElementChild.textContent = response.msg
+          const buttonElement = document.querySelector(`#message button`)
+          if (buttonElement) {
+            buttonElement.addEventListener('click', () => {
+              fetch('/api/system/exit', {
+                method: 'POST',
+                body: JSON.stringify({force: true}),
+              }).then((response) => {
+                return response.json()
+              }).then(() => {
+                exitApp()
+              })
             })
-          })
+          }
+        } else {
+          exitApp()
         }
-      } else {
+      }).catch(() =>{
         exitApp()
-      }
-    })
+      })
+    } catch (e) {
+      exitApp()
+    }
   }
 
   const inputElement = document.getElementById('authCode')

@@ -154,9 +154,9 @@
 
 ## 🏘️ 社区
 
-* [中文讨论区](https://ld246.com/domain/siyuan)
-* [GitHub Issues](https://github.com/siyuan-note/siyuan/issues)
-* [用户社群汇总](https://ld246.com/article/1640266171309)
+* [中文讨论区](https://ld246.com/domain/siyuan) 官方支持渠道
+* [用户社区汇总](https://ld246.com/article/1640266171309) 由热心用户建立的社区
+* [Awesome SiYuan](https://github.com/siyuan-note/awesome) 由热心用户整理的资源
 
 ## ❓ 常见问题和解答
 
@@ -241,7 +241,7 @@
 * [Android 端](https://github.com/siyuan-note/siyuan-android)
 * [iOS 端](https://github.com/siyuan-note/siyuan-ios)
 
-更多细节请参考[开发指南](.github/CONTRIBUTING_zh_CN.md)。
+更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
 
 ## 🙏 鸣谢
 

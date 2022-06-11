@@ -148,7 +148,9 @@ To get the latest Insider Preview, please send an email with your GitHub login n
 
 ## 🏘️ Community
 
-* [Issues](https://github.com/siyuan-note/siyuan/issues)
+* [Issues](https://github.com/siyuan-note/siyuan/issues) Official support channels
+* [Discord](https://discord.com/invite/bzfCBwMzdP) A community built by enthusiastic users
+* [Awesome SiYuan](https://github.com/siyuan-note/awesome) Resources organized by enthusiastic users
 
 ## ❓ FAQ
 
@@ -176,7 +178,7 @@ SiYuan is completely open source, and contributions are welcome:
 * [Android](https://github.com/siyuan-note/siyuan-android)
 * [iOS](https://github.com/siyuan-note/siyuan-ios)
 
-For more details, please refer to [Development Guide](.github/CONTRIBUTING.md).
+For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
 
 ### Is there any note for deleting docs?
 

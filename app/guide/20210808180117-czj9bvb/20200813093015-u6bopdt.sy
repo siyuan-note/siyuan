@@ -6,7 +6,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20220526112824"
+		"updated": "20220611225257"
 	},
 	"Children": [
 		{
@@ -922,7 +922,7 @@
 						},
 						{
 							"Type": "NodeLinkDest",
-							"Data": "https://github.com/siyuan-note/siyuan/blob/master/DEV_zh_CN.md"
+							"Data": "https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md"
 						},
 						{
 							"Type": "NodeCloseParen"
@@ -1148,34 +1148,51 @@
 			]
 		},
 		{
-			"ID": "20201224120447-j29fd5f",
+			"ID": "20220611225209-n74y51b",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201224120447-j29fd5f"
+				"id": "20220611225209-n74y51b",
+				"updated": "20220611225218"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "如何调整表格行列？"
+					"Data": "如何进行查找替换？"
 				}
 			]
 		},
 		{
-			"ID": "20210512152759-k9i5m4t",
+			"ID": "20220611225219-h4hz16v",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210512152759-k9i5m4t",
-				"updated": "20210605222411"
+				"id": "20220611225219-h4hz16v",
+				"updated": "20220611225257"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "表格块的块标菜单中有操作入口。"
+					"Data": "编辑器中选择关键字后按下 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Ctrl+R"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},
@@ -1225,148 +1242,6 @@
 				{
 					"Type": "NodeText",
 					"Data": " 触发它的块标菜单。"
-				}
-			]
-		},
-		{
-			"ID": "20220421192119-8yqvcpc",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20220421192119-8yqvcpc",
-				"updated": "20220421192442"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如何搜索包含符号的内容？"
-				}
-			]
-		},
-		{
-			"ID": "20220421192133-zpcg7vt",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220421192133-zpcg7vt",
-				"updated": "20220421192331"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果需要搜索包含符号（ "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "-"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "、"
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "*"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 等）的内容，需要使用 "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "\""
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 包裹关键字，比如 "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "\"-siyuan\""
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。具体细节请参考"
-				},
-				{
-					"Type": "NodeBlockRef",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20220415190432-r3xqn3r"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "查询语法"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
 				}
 			]
 		},

@@ -247,8 +247,8 @@ export const globalShortcut = () => {
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {
-            fetchPost("/api/system/logoutAuth", {}, () => {
-                exportLayout(false, () => {
+            exportLayout(false, () => {
+                fetchPost("/api/system/logoutAuth", {}, () => {
                     window.location.href = "/";
                 });
             });

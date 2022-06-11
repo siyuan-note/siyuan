@@ -53,8 +53,8 @@ export const initToolbarMore = () => {
         accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
         label: window.siyuan.languages.lockScreen,
         click: () => {
-            fetchPost("/api/system/logoutAuth", {}, () => {
-                exportLayout(false, () => {
+            exportLayout(false, () => {
+                fetchPost("/api/system/logoutAuth", {}, () => {
                     window.location.href = "/";
                 });
             });

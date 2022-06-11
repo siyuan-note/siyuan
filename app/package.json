@@ -4,7 +4,7 @@
   "description": "A local-first personal knowledge management system, supports fine-grained block-level reference, and Markdown WYSIWYG.",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
-  "packageManager": "pnpm@7.1.7",
+  "packageManager": "pnpm@7.2.1",
   "scripts": {
     "lint": "eslint . --fix --ext .ts",
     "dev": "webpack --mode development",

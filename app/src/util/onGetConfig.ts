@@ -383,7 +383,7 @@ const initWindow = () => {
     </svg>
 </div>
 <div aria-label="${window.siyuan.languages.max}" class="b3-tooltips b3-tooltips__sw toolbar__item toolbar__item--win" id="maxWindow">
-    <svg>
+    <svg style="height: 11px">
         <use xlink:href="#iconMax"></use>
     </svg>
 </div>

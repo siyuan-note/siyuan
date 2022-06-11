@@ -166,6 +166,9 @@ export class Gutter {
                 window.siyuan.menus.menu.element.classList.remove("fn__none");
                 setPosition(window.siyuan.menus.menu.element, event.clientX - window.siyuan.menus.menu.element.clientWidth - 16, event.clientY - 16);
                 // https://ld246.com/article/1648433751993
+                if (!protyle.toolbar.range) {
+                    protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element.firstElementChild);
+                }
                 focusByRange(protyle.toolbar.range);
             }
         });

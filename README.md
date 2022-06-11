@@ -194,9 +194,9 @@ Fold the heading and move it later.
 
 Click at the beginning, hold down <kbd>Shift</kbd> and click at the end after scrolling the page.
 
-### How to adjust table rows and columns?
+## How to do find and replace?
 
-There is an operation entry in the block icon menu of the table block.
+Press <kbd>Ctrl+R</kbd> after selecting the keyword in the editor.
 
 ### How to use a third-party sync disk for data synchronization?
 
@@ -215,7 +215,7 @@ If it is a mobile-end, uninstall and reinstall it (note: When the mobile-endunin
 
 ### Do I need to pay for it?
 
-Local functions are completely free to use, [Cloud services](https://b3log.org/siyuan/pricing.html) requires annual subscription, price is $72/year。
+Local functions are completely free to use, [Cloud services](https://b3log.org/siyuan/en/pricing.html) requires annual subscription, price is $72/year。
 
 Users in non-Mainland China regions should not pay for subscriptions, because SiYuan Cloud Server cannot guarantee availability in non-Mainland China regions.
 

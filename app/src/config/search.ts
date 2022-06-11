@@ -45,7 +45,7 @@ export const initConfigSearch = (element: HTMLElement) => {
             "doc", "headings", "list1", "listItem", "code", "math", "table", "quote", "superBlock", "paragraph"]),
 
         // 快捷键
-        getLang(["keymap"].concat(Object.keys(Constants.SIYUAN_KEYMAP.general))
+        getLang(["keymap", "keymapTip2"].concat(Object.keys(Constants.SIYUAN_KEYMAP.general))
             .concat(Object.keys(Constants.SIYUAN_KEYMAP.editor.general))
             .concat(Object.keys(Constants.SIYUAN_KEYMAP.editor.heading))
             .concat(Object.keys(Constants.SIYUAN_KEYMAP.editor.insert))

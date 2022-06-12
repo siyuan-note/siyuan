@@ -43,7 +43,7 @@ func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, e
 	resp, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"token": Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/data/getSiYuanWorkspace")
+		Post(util.AliyunServer + "/apis/siyuan/data/getSiYuanWorkspace?uid=" + Conf.User.UserId)
 	if nil != err {
 		util.LogErrorf("get cloud space failed: %s", err)
 		return nil, nil, 0, ErrFailedToConnectCloudServer
@@ -73,7 +73,7 @@ func removeCloudDirPath(dirPath string) (err error) {
 	resp, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"dirPath": dirPath, "token": Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/data/removeSiYuanDirPath")
+		Post(util.AliyunServer + "/apis/siyuan/data/removeSiYuanDirPath?uid=" + Conf.User.UserId)
 	if nil != err {
 		util.LogErrorf("create cloud sync dir failed: %s", err)
 		return ErrFailedToConnectCloudServer

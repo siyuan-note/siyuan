@@ -81,7 +81,7 @@
 
 ## 🗺️ 路线图
 
-* [思源笔记开发计划和进度](https://github.com/siyuan-note/siyuan/projects)
+* [思源笔记开发计划和进度](https://github.com/orgs/siyuan-note/projects/1)
 * [思源笔记版本变更和公告](https://ld246.com/tag/siyuan-announcement)
 
 ## 🛠️ 下载安装

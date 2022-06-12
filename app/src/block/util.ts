@@ -54,7 +54,8 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
     const parentOldHTML = blockElement.parentElement.outerHTML;
     const newId = newElement.getAttribute("data-node-id");
     blockElement.insertAdjacentElement(position, newElement);
-    if (blockElement.getAttribute("data-type") === "NodeListItem" && blockElement.getAttribute("data-subtype") === "o") {
+    if (blockElement.getAttribute("data-type") === "NodeListItem" && blockElement.getAttribute("data-subtype") === "o" &&
+        !newElement.parentElement.classList.contains("protyle-wysiwyg")) {
         updateListOrder(newElement.parentElement, orderIndex);
         updateTransaction(protyle, newElement.parentElement.getAttribute("data-node-id"), newElement.parentElement.outerHTML, parentOldHTML);
     } else {

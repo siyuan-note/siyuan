@@ -176,7 +176,7 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
     }
     // https://ld246.com/article/1653639418266
     if (protyle.element.classList.contains("block__edit") && (protyle.element.nextElementSibling || protyle.element.previousElementSibling)) {
-        protyle.element.style.minHeight = Math.min(30 + protyle.wysiwyg.element.clientHeight - 16, window.innerHeight / 3) + "px";
+        protyle.element.style.minHeight = Math.min(30 + protyle.wysiwyg.element.clientHeight, window.innerHeight / 3) + "px";
     }
     // https://github.com/siyuan-note/siyuan/issues/5018
     if (!protyle.scroll.element.classList.contains("fn__none") &&

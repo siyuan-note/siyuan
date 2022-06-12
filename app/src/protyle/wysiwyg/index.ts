@@ -53,6 +53,7 @@ import {isCtrl} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
+import {setTableAlign} from "../util/table";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -429,7 +430,7 @@ export class WYSIWYG {
             const type = target.getAttribute("data-type");
             if (type === "block-ref") {
                 refMenu(protyle, target);
-                const rect =target.getBoundingClientRect();
+                const rect = target.getBoundingClientRect();
                 setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
                 // 阻止 popover
                 target.removeAttribute("data-type");
@@ -444,7 +445,7 @@ export class WYSIWYG {
             }
             if (type === "a") {
                 linkMenu(protyle, target);
-                const rect =target.getBoundingClientRect();
+                const rect = target.getBoundingClientRect();
                 setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
                 if (target.getAttribute("data-href")?.startsWith("siyuan://blocks")) {
                     // 阻止 popover
@@ -1041,6 +1042,72 @@ export class WYSIWYG {
                                         item.innerHTML = "";
                                     });
                                     updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
+                                }
+                            }
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            icon: "iconAlignLeft",
+                            accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
+                            label: window.siyuan.languages.alignLeft,
+                            click: () => {
+                                if (tableBlockElement) {
+                                    const selectCellElements: HTMLTableCellElement[] = [];
+                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                        if (!item.classList.contains("fn__none") &&
+                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
+                                            (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
+                                            selectCellElements.push(item);
+                                        }
+                                    });
+                                    tableBlockElement.querySelector("table").classList.remove("select");
+                                    tableSelectElement.removeAttribute("style");
+                                    setTableAlign(protyle, selectCellElements, tableBlockElement, "left", getEditorRange(tableBlockElement));
+                                }
+                            }
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            icon: "iconAlignCenter",
+                            accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
+                            label: window.siyuan.languages.alignCenter,
+                            click: () => {
+                                if (tableBlockElement) {
+                                    const selectCellElements: HTMLTableCellElement[] = [];
+                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                        if (!item.classList.contains("fn__none") &&
+                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
+                                            (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
+                                            selectCellElements.push(item);
+                                        }
+                                    });
+                                    tableBlockElement.querySelector("table").classList.remove("select");
+                                    tableSelectElement.removeAttribute("style");
+                                    setTableAlign(protyle, selectCellElements, tableBlockElement, "center", getEditorRange(tableBlockElement));
+                                }
+                            }
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            icon: "iconAlignRight",
+                            accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
+                            label: window.siyuan.languages.alignRight,
+                            click: () => {
+                                if (tableBlockElement) {
+                                    const selectCellElements: HTMLTableCellElement[] = [];
+                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                        if (!item.classList.contains("fn__none") &&
+                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
+                                            (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
+                                            selectCellElements.push(item);
+                                        }
+                                    });
+                                    tableBlockElement.querySelector("table").classList.remove("select");
+                                    tableSelectElement.removeAttribute("style");
+                                    setTableAlign(protyle, selectCellElements, tableBlockElement, "right", getEditorRange(tableBlockElement));
                                 }
                             }
                         }).element);

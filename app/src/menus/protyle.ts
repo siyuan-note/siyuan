@@ -847,7 +847,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
         label: window.siyuan.languages.alignLeft,
         click: () => {
-            setTableAlign(protyle, cellElement, nodeElement, "left", range);
+            setTableAlign(protyle, [cellElement], nodeElement, "left", range);
         }
     });
     menus.push({
@@ -855,7 +855,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         label: window.siyuan.languages.alignCenter,
         accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
         click: () => {
-            setTableAlign(protyle, cellElement, nodeElement, "center", range);
+            setTableAlign(protyle, [cellElement], nodeElement, "center", range);
         }
     });
     menus.push({
@@ -863,7 +863,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         label: window.siyuan.languages.alignRight,
         accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
         click: () => {
-            setTableAlign(protyle, cellElement, nodeElement, "right", range);
+            setTableAlign(protyle, [cellElement], nodeElement, "right", range);
         }
     });
     menus.push({

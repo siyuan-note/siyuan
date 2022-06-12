@@ -39,25 +39,29 @@ const goPreviousCell = (cellElement: HTMLElement, range: Range, isSelected = tru
     return previousElement;
 };
 
-export const setTableAlign = (protyle: IProtyle, cellElement: HTMLElement, nodeElement: Element, type: string, range: Range) => {
+export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], nodeElement: Element, type: string, range: Range) => {
     range.insertNode(document.createElement("wbr"));
     const html = nodeElement.outerHTML;
 
     const tableElement = nodeElement.querySelector("table");
     const columnCnt = tableElement.rows[0].cells.length;
     const rowCnt = tableElement.rows.length;
-    let currentColumn = 0;
+    const currentColumns:number[] = [];
 
     for (let i = 0; i < rowCnt; i++) {
         for (let j = 0; j < columnCnt; j++) {
-            if (tableElement.rows[i].cells[j].isSameNode(cellElement)) {
-                currentColumn = j;
-                break;
+            if (tableElement.rows[i].cells[j].isSameNode(cellElements[currentColumns.length])) {
+                currentColumns.push(j);
             }
+        }
+        if (currentColumns.length > 0) {
+            break;
         }
     }
     for (let k = 0; k < rowCnt; k++) {
-        tableElement.rows[k].cells[currentColumn].setAttribute("align", type);
+        currentColumns.forEach(item => {
+            tableElement.rows[k].cells[item].setAttribute("align", type);
+        })
     }
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
     nodeElement.querySelector("wbr").remove();
@@ -414,21 +418,21 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return true;
     }
 
-    // 剧左
+    // 居左
     if (matchHotKey(window.siyuan.config.keymap.editor.general.alignLeft.custom, event)) {
-        setTableAlign(protyle, cellElement, nodeElement, "left", range);
+        setTableAlign(protyle, [cellElement], nodeElement, "left", range);
         event.preventDefault();
         return true;
     }
-    // 剧中
+    // 居中
     if (matchHotKey(window.siyuan.config.keymap.editor.general.alignCenter.custom, event)) {
-        setTableAlign(protyle, cellElement, nodeElement, "center", range);
+        setTableAlign(protyle, [cellElement], nodeElement, "center", range);
         event.preventDefault();
         return true;
     }
-    // 剧右
+    // 居右
     if (matchHotKey(window.siyuan.config.keymap.editor.general.alignRight.custom, event)) {
-        setTableAlign(protyle, cellElement, nodeElement, "right", range);
+        setTableAlign(protyle, [cellElement], nodeElement, "right", range);
         event.preventDefault();
         return true;
     }

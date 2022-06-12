@@ -1,3 +1,30 @@
+## v2.0.19 / 2022-06-12
+
+### 改进功能
+
+* [快捷键设置支持搜索](https://github.com/siyuan-note/siyuan/issues/4808)
+* [改进网络图片转换本地图片消息提示](https://github.com/siyuan-note/siyuan/issues/5131)
+* [为图片右键菜单添加剪切功能](https://github.com/siyuan-note/siyuan/issues/5132)
+* [文档图标区分是否存在子文档](https://github.com/siyuan-note/siyuan/issues/5135)
+* [更新节点 `updated` 时不再更新子节点 `updated`](https://github.com/siyuan-note/siyuan/issues/5138)
+* [补全光标在标题位置时缺失的快捷键](https://github.com/siyuan-note/siyuan/issues/5145)
+* [表头右键隐藏删除行菜单](https://github.com/siyuan-note/siyuan/issues/5153)
+* [右上角最大化/最小化/关闭这一组图标大小不协调](https://github.com/siyuan-note/siyuan/issues/5158)
+
+### 修复缺陷
+
+* [第一次同步数据时报错 `index.json` 找不到](https://github.com/siyuan-note/siyuan/issues/5133)
+* [任务列表项完成状态改变以后 `updated` 字段没有更新](https://github.com/siyuan-note/siyuan/issues/5136)
+* [顶部工具栏切换明暗模式的提示语有误](https://github.com/siyuan-note/siyuan/issues/5139)
+* [移动端更换 Emoji 后文档树没有更新](https://github.com/siyuan-note/siyuan/issues/5143)
+* [移动端删除打开的文档应关闭编辑器](https://github.com/siyuan-note/siyuan/issues/5144)
+* [导入包含 `.` 的 Markdown 文件夹问题](https://github.com/siyuan-note/siyuan/issues/5148)
+* [鉴权页关闭窗口失效](https://github.com/siyuan-note/siyuan/issues/5149)
+* [移动端预览页面新建文档失败](https://github.com/siyuan-note/siyuan/issues/5150)
+* [使用 Ctrl+A 选中块时菜单栏状态没有体现](https://github.com/siyuan-note/siyuan/issues/5154)
+* [划选图片后不应出现文本工具栏](https://github.com/siyuan-note/siyuan/issues/5157)
+* [悬浮窗中点击菜单后 Ctrl+X 无效](https://github.com/siyuan-note/siyuan/issues/5162)
+
 ## v2.0.18 / 2022-06-08
 
 ### 改进功能

@@ -85,8 +85,9 @@ export const about = {
 </div>
 <div class="b3-label fn__flex">
     <div class="fn__flex-1 fn__flex-center">
-        ${window.siyuan.languages.snapshotPassword}
-        <div class="b3-label__text">${window.siyuan.languages.snapshotPasswordTip}</div>
+        ${window.siyuan.languages.dataRepoKey}
+        <div class="b3-label__text">${window.siyuan.languages.dataRepoKeyTip1}</div>
+        <div class="b3-label__text ft__error">${window.siyuan.languages.dataRepoKeyTip2}</div>
     </div>
     <div class="fn__space"></div>
     <div class="fn__size200 fn__flex-center">

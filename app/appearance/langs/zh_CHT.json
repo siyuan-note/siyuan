@@ -1,5 +1,7 @@
 {
-  "snapshotPassword": "快照密碼",
+  "dataRepoKeyTip1": "數據倉庫用於加密保存數據快照，可在數據歷史中可創建快照和回滾快照",
+  "dataRepoKeyTip2": "主力設備上初始化密鑰以後，其他設備需要導入該密鑰。如果設備密鑰不一致，則無法雲端同步數據快照，所以請務必在所有設備上使用相同的密鑰",
+  "dataRepoKey": "數據倉庫密鑰",
   "plsChoose": "請先進行選擇",
   "clearMessage": "已讀",
   "freeSub": "免費試用訂閱",

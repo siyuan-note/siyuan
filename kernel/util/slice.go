@@ -38,13 +38,12 @@ func ExcludeElem(slice, excludes []string) (ret []string) {
 }
 
 func RemoveDuplicatedElem(slice []string) (ret []string) {
-	m := map[string]bool{}
-	for _, str := range slice {
-		m[str] = true
-	}
-	ret = []string{}
-	for str, _ := range m {
-		ret = append(ret, str)
+	allKeys := make(map[string]bool)
+	for _, item := range slice {
+		if _, value := allKeys[item]; !value {
+			allKeys[item] = true
+			ret = append(ret, item)
+		}
 	}
 	return
 }

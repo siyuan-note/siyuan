@@ -354,6 +354,7 @@ export const openHistory = () => {
                     fetchPost("/api/repo/indexRepo", {message: textAreaElement.value}, () => {
                         renderRepo(dialog.element.querySelector('#historyContainer [data-type="repo"]'))
                     })
+                    genRepoDialog.destroy();
                 });
             }
             target = target.parentElement;

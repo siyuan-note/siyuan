@@ -23,7 +23,9 @@ import (
 	"os"
 
 	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -96,10 +98,10 @@ var indexCallbacks = map[string]dejavu.Callback{
 		context.(func(msg string))(arg.(string))
 	},
 	"getLatestFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(string))
+		context.(func(msg string))(arg.(*entity.File).Path)
 	},
 	"upsertFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(string))
+		context.(func(msg string))(arg.(*entity.File).Path)
 	},
 }
 
@@ -114,6 +116,10 @@ func IndexRepo(message string) (err error) {
 		return
 	}
 
+	WaitForWritingFiles()
+	syncLock.Lock()
+	defer syncLock.Unlock()
+	filesys.ReleaseAllFileLocks()
 	_, err = repo.Index(message, util.PushEndlessProgress, indexCallbacks)
 	util.PushClearProgress()
 	return

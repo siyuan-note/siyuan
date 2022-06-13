@@ -5,6 +5,7 @@ import {Constants} from "../constants";
 import {MenuItem} from "../menus/Menu";
 import {unicode2Emoji} from "../emoji";
 import {escapeHtml} from "./escape";
+import {isMobile} from "./functions";
 
 const renderDoc = (notebook: INotebook, element: HTMLElement) => {
     if (!notebook || !notebook.id) {
@@ -27,7 +28,7 @@ const renderDoc = (notebook: INotebook, element: HTMLElement) => {
         }
         let logsHTML = switchHTML;
         response.data.histories.forEach((item: { items: { path: string, title: string }[], time: string }, index: number) => {
-            logsHTML += `<li class="b3-list-item" style="padding-left: 0">
+            logsHTML += `<li class="b3-list-item" data-type="toggle" style="padding-left: 0">
     <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
     <span class="b3-list-item__text">${item.time}</span>
 </li>`;
@@ -67,7 +68,7 @@ const renderAssets = (element: HTMLElement) => {
         }
         let logsHTML = "";
         response.data.histories.forEach((item: { items: { path: string, title: string }[], time: string }, index: number) => {
-            logsHTML += `<li class="b3-list-item" style="padding-left: 0">
+            logsHTML += `<li class="b3-list-item" data-type="toggle" style="padding-left: 0">
     <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
     <span class="b3-list-item__text">${item.time}</span>
 </li>`;
@@ -101,6 +102,36 @@ const renderAssets = (element: HTMLElement) => {
         element.firstElementChild.innerHTML = logsHTML;
     });
 };
+const renderRepo = (element: HTMLElement) => {
+    element.setAttribute("data-init", "true");
+    fetchPost("/api/repo/getRepoIndexLogs", {page: 1}, (response) => {
+        if (response.data.histories.length === 0) {
+            element.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+            return;
+        }
+        let logsHTML = "";
+        response.data.histories.forEach((item: { items: { path: string, title: string }[], time: string }, index: number) => {
+            logsHTML += `<li class="b3-list-item" style="padding-left: 0" data-type="toggle">
+    <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
+    <span class="b3-list-item__text">${item.time}</span>
+</li>`;
+            if (item.items.length > 0) {
+                logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
+                item.items.forEach((docItem) => {
+                    logsHTML += `<li data-type="notebook" data-path="${docItem.path}" class="b3-list-item" style="padding-left: 32px">
+    <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
+    <span class="fn__space"></span>
+    <span class="b3-list-item__action">
+        <svg><use xlink:href="#iconUndo"></use></svg><span class="fn__space"></span>${window.siyuan.languages.rollback}
+    </span>
+</li>`;
+                });
+                logsHTML += "</ul>";
+            }
+        });
+        element.innerHTML = logsHTML;
+    });
+};
 
 const renderRmNotebook = (element: HTMLElement) => {
     element.setAttribute("data-init", "true");
@@ -111,7 +142,7 @@ const renderRmNotebook = (element: HTMLElement) => {
         }
         let logsHTML = "";
         response.data.histories.forEach((item: { items: { path: string, title: string }[], time: string }, index: number) => {
-            logsHTML += `<li class="b3-list-item" style="padding-left: 0">
+            logsHTML += `<li class="b3-list-item" style="padding-left: 0" data-type="toggle">
     <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
     <span class="b3-list-item__text">${item.time}</span>
 </li>`;
@@ -150,6 +181,7 @@ export const openHistory = () => {
         <div data-type="doc" class="item item--focus"><span class="item__text">${window.siyuan.languages.doc}</span></div>
         <div data-type="assets" class="item"><span class="item__text">${window.siyuan.languages.assets}</span></div>
         <div data-type="notebook" class="item"><span class="item__text">${window.siyuan.languages.removedNotebook}</span></div>
+        <div data-type="repo" class="item"><span class="item__text">${window.siyuan.languages.xxx}</span></div>
     </div>
     <div class="fn__flex-1 fn__flex" id="historyContainer">
         <div data-type="doc" class="fn__flex fn__block" data-init="true">
@@ -167,6 +199,9 @@ export const openHistory = () => {
         <ul data-type="notebook" style="background-color: var(--b3-theme-background);border-radius: 0 0 4px 4px" class="fn__none b3-list b3-list--background">
             <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
         </ul>
+        <div data-type="repo" class="fn__none">
+            <button class="b3-button b3-button--outline" data-type="genRepo">xxx</button>        
+        </div>
     </div>
 </div>`,
         width: "80vw",
@@ -202,19 +237,21 @@ export const openHistory = () => {
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(dialog.element)) {
+            const type = target.getAttribute("data-type")
             if (target.classList.contains("item")) {
-                const currentType = target.getAttribute("data-type");
                 target.parentElement.querySelector(".item--focus").classList.remove("item--focus");
                 Array.from(dialog.element.querySelector("#historyContainer").children).forEach((item: HTMLElement) => {
-                    if (item.getAttribute("data-type") === currentType) {
+                    if (item.getAttribute("data-type") === type) {
                         item.classList.remove("fn__none");
                         item.classList.add("fn__block");
                         target.classList.add("item--focus");
                         if (item.getAttribute("data-init") !== "true") {
-                            if (currentType === "assets") {
+                            if (type === "assets") {
                                 renderAssets(item);
-                            } else if (currentType === "notebook") {
+                            } else if (type === "notebook") {
                                 renderRmNotebook(item);
+                            } else if (type === "repo") {
+                                renderRepo(item);
                             }
                         }
                     } else {
@@ -223,7 +260,7 @@ export const openHistory = () => {
                     }
                 });
                 break;
-            } else if (target.getAttribute("data-type") === "switchNotebook") {
+            } else if (type === "switchNotebook") {
                 window.siyuan.menus.menu.remove();
                 window.siyuan.notebooks.forEach(item => {
                     if (!item.closed) {
@@ -260,20 +297,15 @@ export const openHistory = () => {
                     }
                 });
                 break;
-            } else if (target.classList.contains("b3-list-item")) {
-                if (!target.classList.contains("b3-list-item--hide-action")) {
-                    if (target.getAttribute("data-type") === "notebook") {
-                        break;
-                    }
-                    target.nextElementSibling.classList.toggle("fn__none");
-                    target.firstElementChild.firstElementChild.classList.toggle("b3-list-item__arrow--open");
-                    break;
-                }
+            } else if (type === "toggle") {
+                target.nextElementSibling.classList.toggle("fn__none");
+                target.firstElementChild.firstElementChild.classList.toggle("b3-list-item__arrow--open");
+                break;
+            } else if (target.classList.contains("b3-list-item") && type !== "notebook") {
                 const dataPath = target.getAttribute("data-path");
-                const dataType = target.getAttribute("data-type");
-                if (dataPath && dataType !== "notebook") {
+                if (dataPath) {
                     let currentItem;
-                    if (dataType === "assets") {
+                    if (type === "assets") {
                         const type = dataPath.substr(dataPath.lastIndexOf(".")).toLowerCase();
                         if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
                             firstPanelElement.nextElementSibling.lastElementChild.innerHTML = `<img src="${dataPath}">`;
@@ -285,7 +317,7 @@ export const openHistory = () => {
                             firstPanelElement.nextElementSibling.lastElementChild.innerHTML = dataPath;
                         }
                         currentItem = firstPanelElement.nextElementSibling.querySelector(".b3-list-item--focus");
-                    } else if (dataType === "doc") {
+                    } else if (type === "doc") {
                         fetchPost("/api/history/getDocHistoryContent", {
                             historyPath: dataPath
                         }, (response) => {
@@ -299,6 +331,29 @@ export const openHistory = () => {
                     target.classList.add("b3-list-item--focus");
                 }
                 break;
+            } else if (type === "genRepo") {
+                const genRepoDialog = new Dialog({
+                    title: window.siyuan.languages.memo,
+                    content: `<div class="b3-dialog__content">
+    <textarea class="b3-text-field fn__block"></textarea>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                    width: isMobile() ? "80vw" : "520px",
+                });
+                const textAreaElement = genRepoDialog.element.querySelector("textarea");
+                textAreaElement.focus();
+                const btnsElement = genRepoDialog.element.querySelectorAll(".b3-button");
+                btnsElement[0].addEventListener("click", () => {
+                    genRepoDialog.destroy();
+                });
+                btnsElement[1].addEventListener("click", () => {
+                    fetchPost("/api/repo/indexRepo", {message: textAreaElement.value}, () => {
+                        renderRepo(dialog.element.querySelector('#historyContainer [data-type="repo"]'))
+                    })
+                });
             }
             target = target.parentElement;
         }

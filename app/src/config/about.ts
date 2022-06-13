@@ -227,6 +227,7 @@ export const about = {
                     importKeyElement.classList.add("fn__none");
                     importKeyElement.previousElementSibling.classList.add("fn__none");
                     importKeyElement.nextElementSibling.classList.remove("fn__none");
+                    passwordDialog.destroy();
                 })
             });
         });

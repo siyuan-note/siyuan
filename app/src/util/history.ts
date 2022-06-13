@@ -107,16 +107,16 @@ const renderAssets = (element: HTMLElement) => {
 const renderRepo = (element: Element, currentPage: number) => {
     element.setAttribute("data-init", "true");
     element.setAttribute("data-page", currentPage.toString());
-    const previousElement = element.querySelector('[data-type="previous"]')
-    const nextElement = element.querySelector('[data-type="next"]')
+    const previousElement = element.querySelector('[data-type="previous"]');
+    const nextElement = element.querySelector('[data-type="next"]');
     if (currentPage > 1) {
-        previousElement.removeAttribute("disabled")
+        previousElement.removeAttribute("disabled");
     } else {
         previousElement.setAttribute("disabled", "disabled");
     }
     fetchPost("/api/repo/getRepoIndexLogs", {page: currentPage}, (response) => {
         if (currentPage < response.data.pageCount) {
-            nextElement.removeAttribute("disabled")
+            nextElement.removeAttribute("disabled");
         } else {
             nextElement.setAttribute("disabled", "disabled");
         }
@@ -254,11 +254,11 @@ export const openHistory = () => {
 
     const firstPanelElement = dialog.element.querySelector("#historyContainer [data-type=doc]") as HTMLElement;
     renderDoc(currentNotebook, firstPanelElement);
-    const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]')
+    const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(dialog.element)) {
-            const type = target.getAttribute("data-type")
+            const type = target.getAttribute("data-type");
             if (target.classList.contains("item")) {
                 target.parentElement.querySelector(".item--focus").classList.remove("item--focus");
                 Array.from(dialog.element.querySelector("#historyContainer").children).forEach((item: HTMLElement) => {
@@ -302,7 +302,7 @@ export const openHistory = () => {
                 break;
             } else if (target.classList.contains("b3-list-item__action")) {
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback, `${window.siyuan.languages.rollbackConfirm.replace("${date}", target.parentElement.textContent.trim())}`, () => {
-                    const dataType = target.parentElement.getAttribute("data-type")
+                    const dataType = target.parentElement.getAttribute("data-type");
                     if (dataType === "assets") {
                         fetchPost("/api/history/rollbackAssetsHistory", {
                             historyPath: target.parentElement.getAttribute("data-path")
@@ -349,9 +349,9 @@ export const openHistory = () => {
                 } else if (type === "repo") {
                     target.parentElement.nextElementSibling.innerHTML = target.getAttribute("data-memo");
                 }
-                let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement
+                let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement;
                 if (currentItem) {
-                    currentItem = currentItem.querySelector(".b3-list-item--focus")
+                    currentItem = currentItem.querySelector(".b3-list-item--focus");
                     if (currentItem) {
                         currentItem.classList.remove("b3-list-item--focus");
                     }
@@ -378,13 +378,13 @@ export const openHistory = () => {
                 });
                 btnsElement[1].addEventListener("click", () => {
                     fetchPost("/api/repo/indexRepo", {message: textAreaElement.value}, () => {
-                        renderRepo(repoElement, 1)
-                    })
+                        renderRepo(repoElement, 1);
+                    });
                     genRepoDialog.destroy();
                 });
                 break;
             } else if ((type === "previous" || type === "next") && target.getAttribute("disabled") !== "disabled") {
-                const currentPage = parseInt(repoElement.getAttribute("data-page"))
+                const currentPage = parseInt(repoElement.getAttribute("data-page"));
                 renderRepo(repoElement, type === "previous" ? currentPage - 1 : currentPage + 1);
                 break;
             }

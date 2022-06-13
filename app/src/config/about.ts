@@ -203,7 +203,7 @@ export const about = {
         about.element.querySelector("#authCode").addEventListener("click", () => {
             setAccessAuthCode();
         });
-        const importKeyElement = about.element.querySelector("#importKey")
+        const importKeyElement = about.element.querySelector("#importKey");
         importKeyElement.addEventListener("click", () => {
             const passwordDialog = new Dialog({
                 title: window.siyuan.languages.key,
@@ -224,25 +224,25 @@ export const about = {
             });
             btnsElement[1].addEventListener("click", () => {
                 fetchPost("/api/repo/importRepoKey", {key: textAreaElement.value}, () => {
-                    window.siyuan.config.repo.key = textAreaElement.value
+                    window.siyuan.config.repo.key = textAreaElement.value;
                     importKeyElement.classList.add("fn__none");
                     importKeyElement.previousElementSibling.classList.add("fn__none");
                     importKeyElement.nextElementSibling.classList.remove("fn__none");
                     passwordDialog.destroy();
-                })
+                });
             });
         });
         about.element.querySelector("#initKey").addEventListener("click", () => {
             fetchPost("/api/repo/initRepoKey", {}, (response) => {
-                window.siyuan.config.repo.key = response.data.key
+                window.siyuan.config.repo.key = response.data.key;
                 importKeyElement.classList.add("fn__none");
                 importKeyElement.previousElementSibling.classList.add("fn__none");
                 importKeyElement.nextElementSibling.classList.remove("fn__none");
-            })
+            });
         });
         about.element.querySelector("#copyKey").addEventListener("click", () => {
-            showMessage(window.siyuan.languages.copied)
-            writeText(window.siyuan.config.repo.key)
+            showMessage(window.siyuan.languages.copied);
+            writeText(window.siyuan.config.repo.key);
         });
         const networkServeElement = about.element.querySelector("#networkServe") as HTMLInputElement;
         networkServeElement.addEventListener("change", () => {

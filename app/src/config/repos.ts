@@ -192,24 +192,24 @@ const setE2eePassword = () => {
         width: isMobile() ? "80vw" : "520px",
     });
     dialog.element.querySelector(".b3-dialog__content").addEventListener("click", (event) => {
-        let target = event.target as HTMLElement
+        let target = event.target as HTMLElement;
         while (target && !target.classList.contains("b3-dialog__content")) {
             if (target.classList.contains("b3-list-item")) {
                 target.parentElement.classList.add("fn__none");
                 if (target.getAttribute("data-type") === "default") {
-                    target.parentElement.nextElementSibling.classList.remove("fn__none")
+                    target.parentElement.nextElementSibling.classList.remove("fn__none");
                 } else {
-                    target.parentElement.nextElementSibling.nextElementSibling.classList.remove("fn__none")
+                    target.parentElement.nextElementSibling.nextElementSibling.classList.remove("fn__none");
                 }
                 break;
             } else if (target.classList.contains("b3-button--outline")) {
-                target.parentElement.classList.add("fn__none")
-                dialog.element.querySelector(".b3-list").classList.remove("fn__none")
+                target.parentElement.classList.add("fn__none");
+                dialog.element.querySelector(".b3-list").classList.remove("fn__none");
                 break;
             }
-            target = target.parentElement
+            target = target.parentElement;
         }
-    })
+    });
     const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
     inputElement.addEventListener("keydown", (event) => {
@@ -231,11 +231,11 @@ const setE2eePassword = () => {
         dialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
-        if (!dialog.element.querySelector('.b3-list').classList.contains("fn__none")) {
+        if (!dialog.element.querySelector(".b3-list").classList.contains("fn__none")) {
             showMessage(window.siyuan.languages.plsChoose);
             return;
         }
-        const mode = dialog.element.querySelector('div[data-type="default"]').classList.contains("fn__none") ? 1 : 0
+        const mode = dialog.element.querySelector('div[data-type="default"]').classList.contains("fn__none") ? 1 : 0;
         fetchPost("/api/system/setE2EEPasswd", {
             e2eePasswd: inputElement.value,
             mode    //0：内置密码; 1：自定义密码

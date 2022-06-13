@@ -61,7 +61,7 @@ export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], no
     for (let k = 0; k < rowCnt; k++) {
         currentColumns.forEach(item => {
             tableElement.rows[k].cells[item].setAttribute("align", type);
-        })
+        });
     }
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
     nodeElement.querySelector("wbr").remove();

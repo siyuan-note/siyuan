@@ -112,29 +112,10 @@ const renderRepo = (element: HTMLElement) => {
             return;
         }
         let repoHTML = "";
-        response.data.logs.forEach((item: { files: { path: string, id: string }[], id: string, hCreated: string }, index: number) => {
-            repoHTML += `<li class="b3-list-item" style="padding-left: 0" data-type="toggle">
-    <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.files.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
+        response.data.logs.forEach((item: { files: { path: string, id: string }[], id: string, hCreated: string }) => {
+            repoHTML += `<li class="b3-list-item" style="padding-left: 0">
     <span class="b3-list-item__text">${item.hCreated}</span>
 </li>`;
-            if (item.files.length > 0) {
-                repoHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
-                item.files.forEach((docItem) => {
-                    repoHTML += `<li data-type="notebook" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 32px">
-    <span class="b3-list-item__text">${getDisplayName(docItem.path)}</span>
-    <span class="fn__space"></span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>
-</li>`;
-                });
-                repoHTML += "</ul>";
-            }
-            if (index === 0) {
-                // fetchPost("/api/history/getDocHistoryContent", {
-                //     historyPath: item.items[0].path
-                // }, (response) => {
-                //     element.lastElementChild.innerHTML = response.data.content;
-                // });
-            }
         });
         element.lastElementChild.firstElementChild.innerHTML = `${repoHTML}`;
     });

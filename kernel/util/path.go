@@ -84,12 +84,15 @@ func IsIDPattern(str string) bool {
 var LocalIPs []string
 
 func GetLocalIPs() (ret []string) {
-	if 0 < len(LocalIPs) {
+	if "android" == Container {
+		// Android 上用不了 net.InterfaceAddrs() https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
+		LocalIPs = append(LocalIPs, "127.0.0.1")
+		LocalIPs = RemoveDuplicatedElem(LocalIPs)
 		return LocalIPs
 	}
 
 	ret = []string{}
-	addrs, err := net.InterfaceAddrs() // Android 上用不了 https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
+	addrs, err := net.InterfaceAddrs()
 	if nil != err {
 		LogWarnf("get interface addresses failed: %s", err)
 		return
@@ -100,6 +103,8 @@ func GetLocalIPs() (ret []string) {
 			ret = append(ret, networkIp.IP.String())
 		}
 	}
+	ret = append(ret, "127.0.0.1")
+	ret = RemoveDuplicatedElem(ret)
 	return
 }
 

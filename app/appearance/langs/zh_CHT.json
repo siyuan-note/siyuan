@@ -1,4 +1,6 @@
 {
+  "createSnapshot": "創建快照",
+  "dataSnapshot": "數據快照",
   "copyKey": "複製密鑰字符串",
   "importKey": "導入密鑰",
   "keyPlaceholder": "請在此處粘貼密鑰字符串",

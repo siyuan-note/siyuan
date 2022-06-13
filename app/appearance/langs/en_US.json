@@ -1,4 +1,6 @@
 {
+  "createSnapshot": "Create snapshot",
+  "dataSnapshot": "Data snapshot",
   "copyKey": "Copy key string",
   "importKey": "Import key",
   "keyPlaceholder": "Please paste the key string here",

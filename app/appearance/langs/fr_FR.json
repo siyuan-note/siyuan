@@ -1,4 +1,6 @@
 {
+  "createSnapshot": "Créer un instantané",
+  "dataSnapshot": "Instantané de données",
   "copyKey": "Copier la chaîne de clé",
   "importKey": "Importer la clé",
   "keyPlaceholder": "Veuillez coller la chaîne de clé ici",

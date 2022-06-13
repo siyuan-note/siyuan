@@ -28,10 +28,10 @@ const renderDoc = (notebook: INotebook, element: HTMLElement) => {
             return;
         }
         let logsHTML = switchHTML;
-        response.data.histories.forEach((item: { items: { path: string, title: string }[], time: string }, index: number) => {
+        response.data.histories.forEach((item: { items: { path: string, title: string }[], hCreated: string }, index: number) => {
             logsHTML += `<li class="b3-list-item" data-type="toggle" style="padding-left: 0">
     <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
-    <span class="b3-list-item__text">${item.time}</span>
+    <span class="b3-list-item__text">${item.hCreated}</span>
 </li>`;
             if (item.items.length > 0) {
                 logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
@@ -188,7 +188,7 @@ export const openHistory = () => {
         <div data-type="doc" class="item item--focus"><span class="item__text">${window.siyuan.languages.doc}</span></div>
         <div data-type="assets" class="item"><span class="item__text">${window.siyuan.languages.assets}</span></div>
         <div data-type="notebook" class="item"><span class="item__text">${window.siyuan.languages.removedNotebook}</span></div>
-        <div data-type="repo" class="item"><span class="item__text">${window.siyuan.languages.xxx}</span></div>
+        <div data-type="repo" class="item"><span class="item__text">${window.siyuan.languages.dataSnapshot}</span></div>
     </div>
     <div class="fn__flex-1 fn__flex" id="historyContainer">
         <div data-type="doc" class="fn__flex fn__block" data-init="true">
@@ -213,7 +213,7 @@ export const openHistory = () => {
                 <span class="fn__space"></span>
                 <span data-type="next" class="block__icon b3-tooltips b3-tooltips__sw" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                 <span class="fn__space"></span>
-                <button class="b3-button b3-button--outline" data-type="genRepo">xxx</button>
+                <button class="b3-button b3-button--outline" data-type="genRepo">${window.siyuan.languages.createSnapshot}</button>
             </div>    
             <div class="fn__flex fn__flex-1">
                 <ul style="width:200px;overflow: auto;background: var(--b3-theme-surface);" class="b3-list b3-list--background">

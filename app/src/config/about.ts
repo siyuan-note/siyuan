@@ -80,6 +80,16 @@ export const about = {
         <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
     </button>
 </div>
+<div class="b3-label fn__flex">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.snapshotPassword}
+        <div class="b3-label__text">${window.siyuan.languages.snapshotPasswordTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button class="fn__flex-center b3-button b3-button--outline fn__size200" id="snapshotPassword">
+        <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
+    </button>
+</div>
 <div class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}

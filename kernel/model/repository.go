@@ -22,6 +22,7 @@ import (
 	"errors"
 	"os"
 
+	"github.com/88250/gulu"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
@@ -148,9 +149,15 @@ var indexCallbacks = map[string]dejavu.Callback{
 	},
 }
 
-func IndexRepo(message string) (err error) {
+func IndexRepo(memo string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New("repo key is nil")
+		return
+	}
+
+	memo = gulu.Str.RemoveInvisible(memo)
+	if "" == memo {
+		err = errors.New(Conf.Language(142))
 		return
 	}
 
@@ -164,7 +171,7 @@ func IndexRepo(message string) (err error) {
 	syncLock.Lock()
 	defer syncLock.Unlock()
 	filesys.ReleaseAllFileLocks()
-	_, err = repo.Index(message, util.PushEndlessProgress, indexCallbacks)
+	_, err = repo.Index(memo, util.PushEndlessProgress, indexCallbacks)
 	util.PushClearProgress()
 	return
 }

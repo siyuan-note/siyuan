@@ -108,7 +108,7 @@ export const keymap = {
     },
     _setkeymap() {
         const data: IKeymap = Object.assign({}, Constants.SIYUAN_KEYMAP);
-        keymap.element.querySelectorAll("input").forEach((item) => {
+        keymap.element.querySelectorAll("ul input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
             if (keys[0] === "general") {
                 data[keys[0]][keys[1]].custom = item.getAttribute("data-value");
@@ -268,7 +268,7 @@ export const keymap = {
                         showMessage(tip + "] " + window.siyuan.languages.invalid);
                         return;
                     }
-                    const hasConflict = Array.from(keymap.element.querySelectorAll("input")).find(inputItem => {
+                    const hasConflict = Array.from(keymap.element.querySelectorAll("ul input")).find(inputItem => {
                         if (!inputItem.isSameNode(this) && inputItem.getAttribute("data-value") === keymapStr) {
                             const inputValueList = inputItem.getAttribute("data-key").split(Constants.ZWSP);
                             if (inputValueList[1] === "list") {

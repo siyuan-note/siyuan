@@ -238,6 +238,9 @@ declare interface IAccount {
 }
 
 declare interface IConfig {
+    repo: {
+        key: string
+    },
     e2eePasswd: string
     e2eePasswdMode: number
     sync: {

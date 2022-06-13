@@ -3,11 +3,14 @@ import {Constants} from "../constants";
 import {shell} from "electron";
 import {dialog} from "@electron/remote";
 /// #endif
-import {isBrowser} from "../util/functions";
+import {isBrowser, isMobile} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode} from "./util";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan} from "../dialog/processSystem";
+import {writeText} from "../protyle/util/compatibility";
+import {showMessage} from "../dialog/message";
+import {Dialog} from "../dialog";
 
 export const about = {
     element: undefined as Element,
@@ -81,14 +84,22 @@ export const about = {
     </button>
 </div>
 <div class="b3-label fn__flex">
-    <div class="fn__flex-1">
+    <div class="fn__flex-1 fn__flex-center">
         ${window.siyuan.languages.snapshotPassword}
         <div class="b3-label__text">${window.siyuan.languages.snapshotPasswordTip}</div>
     </div>
     <div class="fn__space"></div>
-    <button class="fn__flex-center b3-button b3-button--outline fn__size200" id="snapshotPassword">
-        <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
-    </button>
+    <div class="fn__size200 fn__flex-center">
+        <button style="margin-bottom: 8px" class="b3-button b3-button--outline fn__size200${window.siyuan.config.repo.key ? " fn__none" : ""}" id="initKey">
+            <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.defaultPassword}
+        </button>
+        <button class="b3-button b3-button--outline fn__size200${window.siyuan.config.repo.key ? " fn__none" : ""}" id="importKey">
+            <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
+        </button>
+        <button class="b3-button b3-button--outline fn__size200${window.siyuan.config.repo.key ? "" : " fn__none"}" id="copyKey">
+            <svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copy}
+        </button>
+    </div>
 </div>
 <div class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -188,9 +199,48 @@ export const about = {
             workspaceDirElement.value = window.siyuan.config.system.workspaceDir;
         });
         /// #endif
-        const authCodeElement = about.element.querySelector("#authCode") as HTMLInputElement;
-        authCodeElement.addEventListener("click", () => {
+        about.element.querySelector("#authCode").addEventListener("click", () => {
             setAccessAuthCode();
+        });
+        const importKeyElement = about.element.querySelector("#importKey")
+        importKeyElement.addEventListener("click", () => {
+            const passwordDialog = new Dialog({
+                title: window.siyuan.languages.password,
+                content: `<div class="b3-dialog__content">
+    <textarea class="b3-text-field fn__block"></textarea>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                width: isMobile() ? "80vw" : "520px",
+            });
+            const textAreaElement = passwordDialog.element.querySelector("textarea");
+            textAreaElement.focus();
+            const btnsElement = passwordDialog.element.querySelectorAll(".b3-button");
+            btnsElement[0].addEventListener("click", () => {
+                passwordDialog.destroy();
+            });
+            btnsElement[1].addEventListener("click", () => {
+                fetchPost("/api/repo/importRepoKey", {key: textAreaElement.value}, () => {
+                    window.siyuan.config.repo.key = textAreaElement.value
+                    importKeyElement.classList.add("fn__none");
+                    importKeyElement.previousElementSibling.classList.add("fn__none");
+                    importKeyElement.nextElementSibling.classList.remove("fn__none");
+                })
+            });
+        });
+        about.element.querySelector("#initKey").addEventListener("click", () => {
+            fetchPost("/api/repo/initRepoKey", {}, (response) => {
+                window.siyuan.config.repo.key = response.data.key
+                importKeyElement.classList.add("fn__none");
+                importKeyElement.previousElementSibling.classList.add("fn__none");
+                importKeyElement.nextElementSibling.classList.remove("fn__none");
+            })
+        });
+        about.element.querySelector("#copyKey").addEventListener("click", () => {
+            showMessage(window.siyuan.languages.copied)
+            writeText(window.siyuan.config.repo.key)
         });
         const networkServeElement = about.element.querySelector("#networkServe") as HTMLInputElement;
         networkServeElement.addEventListener("change", () => {

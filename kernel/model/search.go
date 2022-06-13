@@ -133,6 +133,8 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 	}
 
 	ids = util.RemoveDuplicatedElem(ids)
+	var renameRoots []*ast.Node
+	renameRootTitles := map[string]string{}
 	for _, id := range ids {
 		var tree *parse.Tree
 		tree, err = loadTreeByBlockID(id)
@@ -154,7 +156,8 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 			case ast.NodeDocument:
 				title := n.IALAttr("title")
 				if strings.Contains(title, keyword) {
-					n.SetIALAttr("title", strings.ReplaceAll(title, keyword, replacement))
+					renameRootTitles[n.ID] = strings.ReplaceAll(title, keyword, replacement)
+					renameRoots = append(renameRoots, n)
 				}
 			case ast.NodeText, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeCodeSpanContent, ast.NodeCodeBlockCode, ast.NodeInlineMathContent, ast.NodeMathBlockContent:
 				if bytes.Contains(n.Tokens, []byte(keyword)) {
@@ -167,6 +170,11 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 		if err = writeJSONQueue(tree); nil != err {
 			return
 		}
+	}
+
+	for _, renameRoot := range renameRoots {
+		newTitle := renameRootTitles[renameRoot.ID]
+		RenameDoc(renameRoot.Box, renameRoot.Path, newTitle)
 	}
 
 	WaitForWritingFiles()

@@ -45,6 +45,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setAppearanceMode", model.CheckAuth, setAppearanceMode)
 	ginServer.Handle("POST", "/api/system/getSysFonts", model.CheckAuth, getSysFonts)
 	ginServer.Handle("POST", "/api/system/setE2EEPasswd", model.CheckAuth, setE2EEPasswd)
+	ginServer.Handle("POST", "/api/system/initRepoKey", model.CheckAuth, initRepoKey)
 	ginServer.Handle("POST", "/api/system/exit", model.CheckAuth, exit)
 	ginServer.Handle("POST", "/api/system/setUILayout", model.CheckAuth, setUILayout)
 	ginServer.Handle("POST", "/api/system/getConf", model.CheckAuth, getConf)

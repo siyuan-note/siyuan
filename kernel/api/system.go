@@ -364,7 +364,31 @@ func setE2EEPasswd(c *gin.Context) {
 	util.PushMsg(model.Conf.Language(92), 3000)
 	time.Sleep(1 * time.Second)
 	model.SyncData(false, false, true)
+}
 
+func initRepoKey(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	util.PushMsg(model.Conf.Language(136), 1000*7)
+	if err := os.RemoveAll(model.Conf.Repo.GetSaveDir()); nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err := os.MkdirAll(model.Conf.Repo.GetSaveDir(), 0755); nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err := model.InitRepoKey(); nil != err {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(137)
+		return
+	}
+
+	time.Sleep(1 * time.Second)
+	util.PushMsg(model.Conf.Language(138), 3000)
 }
 
 func addUIProcess(c *gin.Context) {

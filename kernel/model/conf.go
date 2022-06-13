@@ -70,6 +70,7 @@ type AppConf struct {
 	Search         *conf.Search     `json:"search"`         // 搜索配置
 	Stat           *conf.Stat       `json:"stat"`           // 统计
 	Api            *conf.API        `json:"api"`            // API
+	Repo           *conf.Repo       `json:"repo"`           // 数据仓库
 	Newbie         bool             `json:"newbie"`         // 是否是安装后第一次启动
 }
 
@@ -220,6 +221,10 @@ func InitConf() {
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()
+	}
+
+	if nil == Conf.Repo {
+		Conf.Repo = conf.NewRepo()
 	}
 
 	if 1440 < Conf.Editor.GenerateHistoryInterval {

@@ -326,7 +326,7 @@ func setE2EEPasswd(c *gin.Context) {
 		return
 	}
 
-	util.PushMsg(model.Conf.Language(102), 60*1000)
+	msgId := util.PushMsg(model.Conf.Language(102), 1000*7)
 	if err := os.RemoveAll(model.Conf.Backup.GetSaveDir()); nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -361,7 +361,7 @@ func setE2EEPasswd(c *gin.Context) {
 	model.Conf.E2EEPasswd = newPasswd
 	model.Conf.E2EEPasswdMode = mode
 	model.Conf.Save()
-	util.PushMsg(model.Conf.Language(92), 3000)
+	util.PushUpdateMsg(msgId, model.Conf.Language(92), 3000)
 	time.Sleep(1 * time.Second)
 	model.SyncData(false, false, true)
 }

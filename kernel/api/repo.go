@@ -74,7 +74,7 @@ func importRepoKey(c *gin.Context) {
 		return
 	}
 
-	util.PushMsg(model.Conf.Language(136), 1000*7)
+	msgId := util.PushMsg(model.Conf.Language(136), 1000*7)
 	hexKey := arg["key"].(string)
 	if err := model.ImportRepoKey(hexKey); nil != err {
 		ret.Code = -1
@@ -82,14 +82,14 @@ func importRepoKey(c *gin.Context) {
 		return
 	}
 	time.Sleep(1 * time.Second)
-	util.PushMsg(model.Conf.Language(138), 3000)
+	util.PushUpdateMsg(msgId, model.Conf.Language(138), 3000)
 }
 
 func initRepoKey(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	util.PushMsg(model.Conf.Language(136), 1000*7)
+	msgId := util.PushMsg(model.Conf.Language(136), 1000*7)
 	if err := model.InitRepoKey(); nil != err {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(137)
@@ -97,7 +97,7 @@ func initRepoKey(c *gin.Context) {
 	}
 
 	time.Sleep(1 * time.Second)
-	util.PushMsg(model.Conf.Language(138), 3000)
+	util.PushUpdateMsg(msgId, model.Conf.Language(138), 3000)
 
 	ret.Data = map[string]interface{}{
 		"key": hex.EncodeToString(model.Conf.Repo.Key),

@@ -45,7 +45,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setAppearanceMode", model.CheckAuth, setAppearanceMode)
 	ginServer.Handle("POST", "/api/system/getSysFonts", model.CheckAuth, getSysFonts)
 	ginServer.Handle("POST", "/api/system/setE2EEPasswd", model.CheckAuth, setE2EEPasswd)
-	ginServer.Handle("POST", "/api/system/initRepoKey", model.CheckAuth, initRepoKey)
 	ginServer.Handle("POST", "/api/system/exit", model.CheckAuth, exit)
 	ginServer.Handle("POST", "/api/system/setUILayout", model.CheckAuth, setUILayout)
 	ginServer.Handle("POST", "/api/system/getConf", model.CheckAuth, getConf)
@@ -246,6 +245,9 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/bazaar/installBazaarTheme", model.CheckAuth, installBazaarTheme)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarTheme", model.CheckAuth, uninstallBazaarTheme)
 	ginServer.Handle("POST", "/api/bazaar/getBazaarPackageREAME", model.CheckAuth, getBazaarPackageREAME)
+
+	ginServer.Handle("POST", "/api/repo/initRepoKey", model.CheckAuth, initRepoKey)
+	ginServer.Handle("POST", "/api/repo/indexRepo", model.CheckAuth, indexRepo)
 
 	ginServer.Handle("POST", "/api/notification/pushMsg", model.CheckAuth, pushMsg)
 	ginServer.Handle("POST", "/api/notification/pushErrMsg", model.CheckAuth, pushErrMsg)

@@ -866,6 +866,10 @@
     "132": "Uploaded in %.2fs",
     "133": "No changes to local data",
     "134": "In order to prevent the newly restored data from being overwritten by synchronization, the data synchronization function has been automatically suspended",
-    "135": "Please make sure that all devices have been updated to the latest version, and then trigger synchronization after randomly changing a document on the main device, and finally trigger synchronization on other devices"
+    "135": "Please make sure that all devices have been updated to the latest version, and then trigger synchronization after randomly changing a document on the main device, and finally trigger synchronization on other devices",
+    "136": "Initializing data repository key...",
+    "137": "Failed to initialize data repository key",
+    "138": "Data repository key is set",
+    "139": "Data snapshot is being generated, [%s] data files have been processed, [%s] remaining..."
   }
 }

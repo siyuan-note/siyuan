@@ -162,6 +162,7 @@ var (
 	WorkspaceDir   string        // 工作空间目录路径
 	ConfDir        string        // 配置目录路径
 	DataDir        string        // 数据目录路径
+	RepoDir        string        // 仓库目录路径
 	TempDir        string        // 临时目录路径
 	LogPath        string        // 配置目录下的日志文件 siyuan.log 路径
 	DBName         = "siyuan.db" // SQLite 数据库文件名
@@ -249,6 +250,7 @@ func initWorkspaceDir(workspaceArg string) {
 
 	ConfDir = filepath.Join(WorkspaceDir, "conf")
 	DataDir = filepath.Join(WorkspaceDir, "data")
+	RepoDir = filepath.Join(WorkspaceDir, "repo")
 	TempDir = filepath.Join(WorkspaceDir, "temp")
 	osTmpDir := filepath.Join(TempDir, "os")
 	os.RemoveAll(osTmpDir)

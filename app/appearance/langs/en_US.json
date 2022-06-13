@@ -1,4 +1,9 @@
 {
+  "copyKey": "Copy key string",
+  "importKey": "Import key",
+  "keyPlaceholder": "Please paste the key string here",
+  "key": "Key",
+  "genKey": "Generate key",
   "dataRepoKeyTip": "The data repo is used to encrypt and save data snapshots. Snapshots can be created and rolled back in the data history",
   "dataRepoKeyTip2": "After the key is initialized on the main device, other devices need to import the key. If the device keys are inconsistent, data snapshots cannot be synced to the cloud, so be sure to use the same key on all devices",
   "dataRepoKey": "Data repo key",

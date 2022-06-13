@@ -92,13 +92,13 @@ export const about = {
     <div class="fn__space"></div>
     <div class="fn__size200 fn__flex-center">
         <button style="margin-bottom: 8px" class="b3-button b3-button--outline fn__size200${window.siyuan.config.repo.key ? " fn__none" : ""}" id="initKey">
-            <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.defaultPassword}
+            <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.genKey}
         </button>
         <button class="b3-button b3-button--outline fn__size200${window.siyuan.config.repo.key ? " fn__none" : ""}" id="importKey">
-            <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
+            <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.importKey}
         </button>
         <button class="b3-button b3-button--outline fn__size200${window.siyuan.config.repo.key ? "" : " fn__none"}" id="copyKey">
-            <svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copy}
+            <svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copyKey}
         </button>
     </div>
 </div>
@@ -206,9 +206,9 @@ export const about = {
         const importKeyElement = about.element.querySelector("#importKey")
         importKeyElement.addEventListener("click", () => {
             const passwordDialog = new Dialog({
-                title: window.siyuan.languages.password,
+                title: window.siyuan.languages.key,
                 content: `<div class="b3-dialog__content">
-    <textarea class="b3-text-field fn__block"></textarea>
+    <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}"></textarea>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>

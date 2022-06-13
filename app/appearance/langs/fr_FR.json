@@ -1,4 +1,9 @@
 {
+  "copyKey": "Copier la chaîne de clé",
+  "importKey": "Importer la clé",
+  "keyPlaceholder": "Veuillez coller la chaîne de clé ici",
+  "clé": "Clé",
+  "genKey": "Générer la clé",
   "dataRepoKeyTip1": "Le référentiel de données est utilisé pour chiffrer et enregistrer des instantanés de données. Des instantanés peuvent être créés et restaurés dans l'historique des données",
   "dataRepoKeyTip2": "Une fois la clé initialisée sur l'appareil principal, d'autres appareils doivent importer la clé. Si les clés de l'appareil sont incohérentes, les instantanés de données ne peuvent pas être synchronisés avec le cloud, alors assurez-vous d'utiliser la même clé sur tous les appareils",
   "dataRepoKey": "Clé de référentiel de données",

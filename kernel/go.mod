@@ -89,7 +89,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
-	github.com/siyuan-note/dejavu v0.0.0-20220612144647-aab04039e33b // indirect
+	github.com/siyuan-note/dejavu v0.0.0-20220613081907-2b6372ecfa83 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect

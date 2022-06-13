@@ -50,6 +50,18 @@ func InitRepoKey() (err error) {
 	return
 }
 
+var indexCallbacks = map[string]dejavu.Callback{
+	"walkData": func(context, arg interface{}, err error) {
+		context.(func(msg string))(arg.(string))
+	},
+	"getLatestFile": func(context, arg interface{}, err error) {
+		context.(func(msg string))(arg.(string))
+	},
+	"upsertFile": func(context, arg interface{}, err error) {
+		context.(func(msg string))(arg.(string))
+	},
+}
+
 func IndexRepo(message string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New("repo key is nil")
@@ -61,6 +73,7 @@ func IndexRepo(message string) (err error) {
 		return
 	}
 
-	_, err = repo.Index(message)
+	_, err = repo.Index(message, util.PushEndlessProgress, indexCallbacks)
+	util.PushClearProgress()
 	return
 }

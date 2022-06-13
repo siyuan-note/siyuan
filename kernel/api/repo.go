@@ -17,8 +17,8 @@
 package api
 
 import (
+	"encoding/hex"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/88250/gulu"
@@ -44,21 +44,31 @@ func indexRepo(c *gin.Context) {
 	}
 }
 
+func importRepoKey(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	util.PushMsg(model.Conf.Language(136), 1000*7)
+	hexKey := arg["key"].(string)
+	if err := model.IndexRepo(hexKey); nil != err {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(137)
+		return
+	}
+	time.Sleep(1 * time.Second)
+	util.PushMsg(model.Conf.Language(138), 3000)
+}
+
 func initRepoKey(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
 	util.PushMsg(model.Conf.Language(136), 1000*7)
-	if err := os.RemoveAll(model.Conf.Repo.GetSaveDir()); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	if err := os.MkdirAll(model.Conf.Repo.GetSaveDir(), 0755); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
 	if err := model.InitRepoKey(); nil != err {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(137)
@@ -67,4 +77,8 @@ func initRepoKey(c *gin.Context) {
 
 	time.Sleep(1 * time.Second)
 	util.PushMsg(model.Conf.Language(138), 3000)
+
+	ret.Data = map[string]interface{}{
+		"key": hex.EncodeToString(model.Conf.Repo.Key),
+	}
 }

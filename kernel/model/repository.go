@@ -18,14 +18,40 @@ package model
 
 import (
 	"crypto/rand"
+	"encoding/hex"
 	"errors"
+	"os"
 
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func ImportRepoKey(hexKey string) (err error) {
+	key, err := hex.DecodeString(hexKey)
+	if nil != err {
+		return
+	}
+	Conf.Repo.Key = key
+	Conf.Save()
+
+	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); nil != err {
+		return
+	}
+	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); nil != err {
+		return
+	}
+	return
+}
+
 func InitRepoKey() (err error) {
+	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); nil != err {
+		return
+	}
+	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); nil != err {
+		return
+	}
+
 	randomBytes := make([]byte, 16)
 	_, err = rand.Read(randomBytes)
 	if nil != err {

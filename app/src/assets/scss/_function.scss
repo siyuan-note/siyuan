@@ -151,4 +151,16 @@
     padding: 16px;
     border-radius: 0 0 4px 0;
   }
+
+  &__repo {
+    background-color: var(--b3-theme-background);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box
+  }
+
+  &__repoheader {
+    padding: 8px 16px;
+  }
 }

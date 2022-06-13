@@ -6,6 +6,7 @@ import {MenuItem} from "../menus/Menu";
 import {unicode2Emoji} from "../emoji";
 import {escapeHtml} from "./escape";
 import {isMobile} from "./functions";
+import {getDisplayName} from "./pathName";
 
 const renderDoc = (notebook: INotebook, element: HTMLElement) => {
     if (!notebook || !notebook.id) {
@@ -102,34 +103,40 @@ const renderAssets = (element: HTMLElement) => {
         element.firstElementChild.innerHTML = logsHTML;
     });
 };
+
 const renderRepo = (element: HTMLElement) => {
     element.setAttribute("data-init", "true");
     fetchPost("/api/repo/getRepoIndexLogs", {page: 1}, (response) => {
-        if (response.data.histories.length === 0) {
-            element.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+        if (response.data.logs.length === 0) {
+            element.lastElementChild.firstElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             return;
         }
-        let logsHTML = "";
-        response.data.histories.forEach((item: { items: { path: string, title: string }[], time: string }, index: number) => {
-            logsHTML += `<li class="b3-list-item" style="padding-left: 0" data-type="toggle">
-    <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
+        let repoHTML = "";
+        response.data.logs.forEach((item: { files: { path: string, id: string }[], id: string, time: string }, index: number) => {
+            repoHTML += `<li class="b3-list-item" style="padding-left: 0" data-type="toggle">
+    <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.files.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
     <span class="b3-list-item__text">${item.time}</span>
 </li>`;
-            if (item.items.length > 0) {
-                logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
-                item.items.forEach((docItem) => {
-                    logsHTML += `<li data-type="notebook" data-path="${docItem.path}" class="b3-list-item" style="padding-left: 32px">
-    <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
+            if (item.files.length > 0) {
+                repoHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
+                item.files.forEach((docItem) => {
+                    repoHTML += `<li data-type="notebook" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 32px">
+    <span class="b3-list-item__text">${getDisplayName(docItem.path)}</span>
     <span class="fn__space"></span>
-    <span class="b3-list-item__action">
-        <svg><use xlink:href="#iconUndo"></use></svg><span class="fn__space"></span>${window.siyuan.languages.rollback}
-    </span>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>
 </li>`;
                 });
-                logsHTML += "</ul>";
+                repoHTML += "</ul>";
+            }
+            if (index === 0) {
+                // fetchPost("/api/history/getDocHistoryContent", {
+                //     historyPath: item.items[0].path
+                // }, (response) => {
+                //     element.lastElementChild.innerHTML = response.data.content;
+                // });
             }
         });
-        element.innerHTML = logsHTML;
+        element.lastElementChild.firstElementChild.innerHTML = `${repoHTML}`;
     });
 };
 
@@ -199,8 +206,21 @@ export const openHistory = () => {
         <ul data-type="notebook" style="background-color: var(--b3-theme-background);border-radius: 0 0 4px 4px" class="fn__none b3-list b3-list--background">
             <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
         </ul>
-        <div data-type="repo" class="fn__none">
-            <button class="b3-button b3-button--outline" data-type="genRepo">xxx</button>        
+        <div data-type="repo" class="fn__none history__repo">
+            <div class="fn__flex history__repoheader">
+                <div class="fn__flex-1"></div>
+                <span data-type="previous" class="block__icon b3-tooltips b3-tooltips__sw" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
+                <span class="fn__space"></span>
+                <span data-type="next" class="block__icon b3-tooltips b3-tooltips__sw" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+                <span class="fn__space"></span>
+                <button class="b3-button b3-button--outline" data-type="genRepo">xxx</button>
+            </div>    
+            <div class="fn__flex fn__flex-1">
+                <ul style="width:200px;overflow: auto;background: var(--b3-theme-surface);" class="b3-list b3-list--background">
+                    <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
+                </ul>
+                <div class="fn__flex-1"></div>   
+            </div>
         </div>
     </div>
 </div>`,

@@ -243,8 +243,8 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 }
 
 type History struct {
-	Time  string         `json:"time"`
-	Items []*HistoryItem `json:"items"`
+	HCreated string         `json:"hCreated"`
+	Items    []*HistoryItem `json:"items"`
 }
 
 type HistoryItem struct {
@@ -323,8 +323,8 @@ func GetDocHistory(boxID string) (ret []*History, err error) {
 		}
 
 		ret = append(ret, &History{
-			Time:  t,
-			Items: docs,
+			HCreated: t,
+			Items:    docs,
 		})
 
 		count++
@@ -334,7 +334,7 @@ func GetDocHistory(boxID string) (ret []*History, err error) {
 	}
 
 	sort.Slice(ret, func(i, j int) bool {
-		return ret[i].Time > ret[j].Time
+		return ret[i].HCreated > ret[j].HCreated
 	})
 	return
 }
@@ -378,7 +378,7 @@ func GetNotebookHistory() (ret []*History, err error) {
 		}
 
 		ret = append(ret, &History{
-			Time: t,
+			HCreated: t,
 			Items: []*HistoryItem{
 				{
 					Title: c.Name,
@@ -394,7 +394,7 @@ func GetNotebookHistory() (ret []*History, err error) {
 	}
 
 	sort.Slice(ret, func(i, j int) bool {
-		return ret[i].Time > ret[j].Time
+		return ret[i].HCreated > ret[j].HCreated
 	})
 	return
 }
@@ -453,8 +453,8 @@ func GetAssetsHistory() (ret []*History, err error) {
 		}
 
 		ret = append(ret, &History{
-			Time:  t,
-			Items: assets,
+			HCreated: t,
+			Items:    assets,
 		})
 
 		historyCount++
@@ -464,7 +464,7 @@ func GetAssetsHistory() (ret []*History, err error) {
 	}
 
 	sort.Slice(ret, func(i, j int) bool {
-		return ret[i].Time > ret[j].Time
+		return ret[i].HCreated > ret[j].HCreated
 	})
 	return
 }

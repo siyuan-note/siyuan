@@ -68,10 +68,10 @@ const renderAssets = (element: HTMLElement) => {
             return;
         }
         let logsHTML = "";
-        response.data.histories.forEach((item: { items: { path: string, title: string }[], time: string }, index: number) => {
+        response.data.histories.forEach((item: { items: { path: string, title: string }[], hCreated: string }, index: number) => {
             logsHTML += `<li class="b3-list-item" data-type="toggle" style="padding-left: 0">
     <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
-    <span class="b3-list-item__text">${item.time}</span>
+    <span class="b3-list-item__text">${item.hCreated}</span>
 </li>`;
             if (item.items.length > 0) {
                 logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
@@ -112,10 +112,10 @@ const renderRepo = (element: HTMLElement) => {
             return;
         }
         let repoHTML = "";
-        response.data.logs.forEach((item: { files: { path: string, id: string }[], id: string, time: string }, index: number) => {
+        response.data.logs.forEach((item: { files: { path: string, id: string }[], id: string, hCreated: string }, index: number) => {
             repoHTML += `<li class="b3-list-item" style="padding-left: 0" data-type="toggle">
     <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.files.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
-    <span class="b3-list-item__text">${item.time}</span>
+    <span class="b3-list-item__text">${item.hCreated}</span>
 </li>`;
             if (item.files.length > 0) {
                 repoHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
@@ -148,10 +148,10 @@ const renderRmNotebook = (element: HTMLElement) => {
             return;
         }
         let logsHTML = "";
-        response.data.histories.forEach((item: { items: { path: string, title: string }[], time: string }, index: number) => {
+        response.data.histories.forEach((item: { items: { path: string, title: string }[], hCreated: string }, index: number) => {
             logsHTML += `<li class="b3-list-item" style="padding-left: 0" data-type="toggle">
     <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
-    <span class="b3-list-item__text">${item.time}</span>
+    <span class="b3-list-item__text">${item.hCreated}</span>
 </li>`;
             if (item.items.length > 0) {
                 logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;

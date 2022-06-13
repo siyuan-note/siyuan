@@ -18,6 +18,7 @@ package api
 
 import (
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -77,7 +78,8 @@ func indexRepo(c *gin.Context) {
 	message := arg["message"].(string)
 	if err := model.IndexRepo(message); nil != err {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(140)
+		ret.Msg = fmt.Sprintf(model.Conf.Language(140), err)
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
 	}
 }

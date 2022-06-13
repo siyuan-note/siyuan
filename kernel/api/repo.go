@@ -27,6 +27,27 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getRepoFile(c *gin.Context) {
+
+}
+
+func checkoutRepo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if err := model.CheckoutRepo(id); nil != err {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(141)
+		return
+	}
+}
+
 func getRepoIndexLogs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -60,7 +81,7 @@ func indexRepo(c *gin.Context) {
 	message := arg["message"].(string)
 	if err := model.IndexRepo(message); nil != err {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(137)
+		ret.Msg = model.Conf.Language(140)
 		return
 	}
 }

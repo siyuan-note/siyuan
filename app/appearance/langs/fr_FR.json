@@ -872,6 +872,8 @@
     "136": "Initialisation de la clé du référentiel de données...",
     "137": "Échec de l'initialisation de la clé du référentiel de données",
     "138": "La clé du référentiel de données est définie",
-    "139": "L'instantané des données est en cours de génération, [%s] fichiers de données ont été traités, [%s] restants..."
+    "139": "L'instantané des données est en cours de génération, [%s] fichiers de données ont été traités, [%s] restants...",
+    "140": "Échec de la création de l'instantané des données",
+    "141": "Échec de la restauration de l'instantané des données"
   }
 }

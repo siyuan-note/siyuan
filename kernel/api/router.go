@@ -249,7 +249,9 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/repo/initRepoKey", model.CheckAuth, initRepoKey)
 	ginServer.Handle("POST", "/api/repo/importRepoKey", model.CheckAuth, importRepoKey)
 	ginServer.Handle("POST", "/api/repo/indexRepo", model.CheckAuth, indexRepo)
+	ginServer.Handle("POST", "/api/repo/checkoutRepo", model.CheckAuth, checkoutRepo)
 	ginServer.Handle("POST", "/api/repo/getRepoIndexLogs", model.CheckAuth, getRepoIndexLogs)
+	ginServer.Handle("POST", "/api/repo/getRepoFile", model.CheckAuth, getRepoFile)
 
 	ginServer.Handle("POST", "/api/notification/pushMsg", model.CheckAuth, pushMsg)
 	ginServer.Handle("POST", "/api/notification/pushErrMsg", model.CheckAuth, pushErrMsg)

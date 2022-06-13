@@ -29,10 +29,20 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetRepoFile(id string) (ret []byte, err error) {
+	//repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	//if nil != err {
+	//	util.LogErrorf("init repo failed: %s", err)
+	//	return
+	//}
+
+	return
+}
+
 func GetRepoIndexLogs(page int) (logs []*dejavu.Log, err error) {
 	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
 	if nil != err {
-		util.LogErrorf("new repo failed: %s", err)
+		util.LogErrorf("init repo failed: %s", err)
 		return
 	}
 
@@ -93,6 +103,38 @@ func InitRepoKey() (err error) {
 	return
 }
 
+var checkoutCallbacks = map[string]dejavu.Callback{
+	"walkData": func(context, arg interface{}, err error) {
+		context.(func(msg string))(arg.(string))
+	},
+	"upsertFile": func(context, arg interface{}, err error) {
+		context.(func(msg string))(arg.(*entity.File).Path)
+	},
+	"removeFile": func(context, arg interface{}, err error) {
+		context.(func(msg string))(arg.(*entity.File).Path)
+	},
+}
+
+func CheckoutRepo(id string) (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New("repo key is nil")
+		return
+	}
+
+	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	if nil != err {
+		util.LogErrorf("init repo failed: %s", err)
+		return
+	}
+
+	syncLock.Lock()
+	defer syncLock.Unlock()
+	filesys.ReleaseAllFileLocks()
+	err = repo.Checkout(id, util.PushEndlessProgress, checkoutCallbacks)
+	util.PushClearProgress()
+	return
+}
+
 var indexCallbacks = map[string]dejavu.Callback{
 	"walkData": func(context, arg interface{}, err error) {
 		context.(func(msg string))(arg.(string))
@@ -113,6 +155,7 @@ func IndexRepo(message string) (err error) {
 
 	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
 	if nil != err {
+		util.LogErrorf("init repo failed: %s", err)
 		return
 	}
 

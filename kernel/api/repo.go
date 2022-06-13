@@ -27,6 +27,27 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getRepoIndexLogs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	page := arg["page"].(float64)
+	logs, err := model.GetRepoIndexLogs(int(page))
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]interface{}{
+		"logs": logs,
+	}
+}
+
 func indexRepo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -55,7 +76,7 @@ func importRepoKey(c *gin.Context) {
 
 	util.PushMsg(model.Conf.Language(136), 1000*7)
 	hexKey := arg["key"].(string)
-	if err := model.IndexRepo(hexKey); nil != err {
+	if err := model.ImportRepoKey(hexKey); nil != err {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(137)
 		return

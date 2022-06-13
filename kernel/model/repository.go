@@ -27,6 +27,21 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetRepoIndexLogs(page int) (logs []*dejavu.Log, err error) {
+	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	if nil != err {
+		util.LogErrorf("new repo failed: %s", err)
+		return
+	}
+
+	logs, err = repo.GetIndexLogs(page, 32)
+	if nil != err {
+		util.LogErrorf("get repo index logs failed: %s", err)
+		return
+	}
+	return
+}
+
 func ImportRepoKey(hexKey string) (err error) {
 	key, err := hex.DecodeString(hexKey)
 	if nil != err {

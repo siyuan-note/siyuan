@@ -27,10 +27,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getRepoFile(c *gin.Context) {
-
-}
-
 func checkoutRepo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -46,6 +46,7 @@ func GetRepoIndexLogs(page int) (logs []*dejavu.Log, err error) {
 		return
 	}
 
+	page-- // 从 0 开始
 	logs, err = repo.GetIndexLogs(page, 32)
 	if nil != err {
 		util.LogErrorf("get repo index logs failed: %s", err)

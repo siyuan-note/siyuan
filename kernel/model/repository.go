@@ -135,10 +135,9 @@ func CheckoutRepo(id string) (err error) {
 	util.PushEndlessProgress(Conf.Language(63))
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
-
-	filesys.ReleaseAllFileLocks()
+	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
-
+	filesys.ReleaseAllFileLocks()
 	CloseWatchAssets()
 	defer WatchAssets()
 
@@ -193,10 +192,15 @@ func IndexRepo(memo string) (err error) {
 		return
 	}
 
-	WaitForWritingFiles()
-	filesys.ReleaseAllFileLocks()
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
+	util.PushEndlessProgress(Conf.Language(143))
+	WaitForWritingFiles()
+	sql.WaitForWritingDatabase()
+	filesys.ReleaseAllFileLocks()
+	CloseWatchAssets()
+	defer WatchAssets()
+
 	_, err = repo.Index(memo, util.PushEndlessProgress, indexCallbacks)
 	util.PushClearProgress()
 	return

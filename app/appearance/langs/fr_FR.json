@@ -884,6 +884,7 @@
     "139": "L'instantané des données est en cours de génération, [%s] fichiers de données ont été traités, [%s] restants...",
     "140": "Échec de la création de l'instantané des données: %s",
     "141": "Échec de la restauration de l'instantané des données",
-    "142": "Le mémo d'instantané ne peut pas être vide"
+    "142": "Le mémo d'instantané ne peut pas être vide",
+    "143": "Création d'un instantané de données..."
   }
 }

@@ -550,7 +550,11 @@ func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 			ret = append(ret, dest)
 		} else {
 			if ast.NodeWidget == n.Type {
-				dataAssets := n.IALAttr("data-assets")
+				dataAssets := n.IALAttr("custom-data-assets")
+				if "" == dataAssets {
+					// 兼容两种属性名 custom-data-assets 和 data-assets https://github.com/siyuan-note/siyuan/issues/4122#issuecomment-1154796568
+					dataAssets = n.IALAttr("data-assets")
+				}
 				if "" == dataAssets || !isRelativePath([]byte(dataAssets)) {
 					return ast.WalkContinue
 				}

@@ -183,6 +183,30 @@ export class Title {
                 submenu: copySubMenu(protyle.block.rootID, "")
             }).element);
             if (!window.siyuan.config.readonly) {
+                window.siyuan.menus.menu.append(movePathToMenu(protyle.notebookId, protyle.path));
+                window.siyuan.menus.menu.append(new MenuItem({
+                    icon: "iconTrashcan",
+                    label: window.siyuan.languages.delete,
+                    click: () => {
+                        fetchPost("/api/block/getDocInfo", {
+                            id: protyle.block.rootID
+                        }, (response) => {
+                            let tip = `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(this.editElement.textContent)}</b>?`;
+                            if (response.data.subFileCount > 0) {
+                                tip = `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(this.editElement.textContent)}</b> ${window.siyuan.languages.andSubFile.replace("x", response.data.subFileCount)}?`;
+                            }
+                            confirmDialog(window.siyuan.languages.delete, tip, () => {
+                                fetchPost("/api/filetree/removeDoc", {
+                                    notebook: protyle.notebookId,
+                                    path: protyle.path
+                                });
+                            });
+                        });
+                    }
+                }).element);
+            }
+            if (!window.siyuan.config.readonly) {
+                window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.attr,
                     accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧Click"),
@@ -190,37 +214,7 @@ export class Title {
                         openFileAttr(response.data.ial, protyle.block.rootID);
                     }
                 }).element);
-                window.siyuan.menus.menu.append(movePathToMenu(protyle.notebookId, protyle.path));
             }
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.wechatReminder,
-                icon: "iconMp",
-                click() {
-                    openFileWechatNotify(protyle);
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconTrashcan",
-                label: window.siyuan.languages.delete,
-                click: () => {
-                    fetchPost("/api/block/getDocInfo", {
-                        id: protyle.block.rootID
-                    }, (response) => {
-                        let tip = `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(this.editElement.textContent)}</b>?`;
-                        if (response.data.subFileCount > 0) {
-                            tip = `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(this.editElement.textContent)}</b> ${window.siyuan.languages.andSubFile.replace("x", response.data.subFileCount)}?`;
-                        }
-                        confirmDialog(window.siyuan.languages.delete, tip, () => {
-                            fetchPost("/api/filetree/removeDoc", {
-                                notebook: protyle.notebookId,
-                                path: protyle.path
-                            });
-                        });
-                    });
-                }
-            }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconAlignCenter",
@@ -244,6 +238,14 @@ export class Title {
                 accelerator: window.siyuan.config.keymap.editor.general.graphView.custom,
                 click: () => {
                     openGraph(protyle);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.wechatReminder,
+                icon: "iconMp",
+                click() {
+                    openFileWechatNotify(protyle);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

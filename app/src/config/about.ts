@@ -3,7 +3,7 @@ import {Constants} from "../constants";
 import {shell} from "electron";
 import {dialog} from "@electron/remote";
 /// #endif
-import {isBrowser, isMobile} from "../util/functions";
+import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode} from "./util";
 import {exportLayout} from "../layout/util";
@@ -214,7 +214,7 @@ export const about = {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-                width: isMobile() ? "80vw" : "520px",
+                width: "520px",
             });
             const textAreaElement = passwordDialog.element.querySelector("textarea");
             textAreaElement.focus();

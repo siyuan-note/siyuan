@@ -396,13 +396,13 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
 
 export const resizeDrag = () => {
     const dragElement = document.getElementById("drag");
-    const right = dragElement.getBoundingClientRect().left - document.querySelector("#windowControls").clientWidth
+    const right = dragElement.getBoundingClientRect().left - document.querySelector("#windowControls").clientWidth;
     if (right < dragElement.clientWidth) {
         dragElement.style.paddingRight = right + "px";
     } else {
         dragElement.style.paddingRight = "";
     }
-}
+};
 
 export const resizeTabs = () => {
     const models = getAllModels();

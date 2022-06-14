@@ -103,7 +103,7 @@ var checkoutCallbacks = map[string]dejavu.Callback{
 		context.(func(msg string))(arg.(*entity.File).Path)
 	},
 	"removeFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(*entity.File).Path)
+		context.(func(msg string))(arg.(string))
 	},
 }
 

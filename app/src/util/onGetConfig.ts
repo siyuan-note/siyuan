@@ -1,5 +1,5 @@
 import {openSearch} from "../search/spread";
-import {exportLayout, JSONToLayout, resizeTabs} from "../layout/util";
+import {exportLayout, JSONToLayout, resizeDrag, resizeTabs} from "../layout/util";
 import {hotKey2Electron, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -142,6 +142,7 @@ export const onGetConfig = () => {
         window.clearTimeout(resizeTimeout);
         resizeTimeout = window.setTimeout(() => {
             resizeTabs();
+            resizeDrag();
         }, 200);
     });
 

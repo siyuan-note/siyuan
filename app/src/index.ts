@@ -14,6 +14,7 @@ import {openFileById} from "./editor/util";
 import {bootSync, downloadProgress, progressLoading, setTitle, transactionError} from "./dialog/processSystem";
 import {promiseTransactions} from "./protyle/wysiwyg/transaction";
 import {initMessage} from "./dialog/message";
+import {resizeDrag} from "./layout/util";
 
 class App {
     constructor() {
@@ -81,12 +82,7 @@ class App {
                     window.siyuan.user = userResponse.data;
                     onGetConfig();
                     account.onSetaccount();
-                    const dragElement = document.getElementById("drag");
-                    if ("windows" !== window.siyuan.config.system.os && "linux" !== window.siyuan.config.system.os) {
-                        dragElement.style.paddingRight = dragElement.getBoundingClientRect().left + "px";
-                    } else {
-                        dragElement.style.paddingRight = (dragElement.getBoundingClientRect().left - document.querySelector("#windowControls").clientWidth) + "px";
-                    }
+                    resizeDrag();
                     setTitle(window.siyuan.languages.siyuanNote);
                     initMessage();
                 });

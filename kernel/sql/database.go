@@ -70,6 +70,7 @@ func InitDatabase(forceRebuild bool) (err error) {
 	if gulu.File.IsExist(util.DBPath) {
 		if err = removeDatabaseFile(); nil != err {
 			util.LogErrorf("remove database file [%s] failed: %s", util.DBPath, err)
+			util.PushClearProgress()
 			return
 		}
 	}

@@ -28,6 +28,7 @@ import (
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -131,9 +132,12 @@ func CheckoutRepo(id string) (err error) {
 		return
 	}
 
-	filesys.ReleaseAllFileLocks()
+	util.PushEndlessProgress(Conf.Language(63))
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
+
+	filesys.ReleaseAllFileLocks()
+	sql.WaitForWritingDatabase()
 
 	CloseWatchAssets()
 	defer WatchAssets()

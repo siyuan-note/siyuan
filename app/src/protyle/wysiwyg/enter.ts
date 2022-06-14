@@ -8,7 +8,7 @@ import {
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
-import {genListItemElement, listOutdent, updateListOrder} from "./list";
+import {breakList, genListItemElement, listOutdent, updateListOrder} from "./list";
 import {hasClosestByMatchTag} from "../util/hasClosest";
 import {highlightRender} from "../markdown/highlightRender";
 import {setPosition} from "../../util/setPosition";
@@ -21,12 +21,17 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
     const editableElement = getContenteditableElement(blockElement);
     if (// \n 是因为 https://github.com/siyuan-note/siyuan/issues/3846
         ["", "\n"].includes(editableElement.textContent) &&
-        listItemElement.nextElementSibling?.classList.contains("protyle-attr") &&
         blockElement.previousElementSibling.classList.contains("protyle-action") &&
         !blockElement.querySelector("img") // https://ld246.com/article/1651820644238
     ) {
-        listOutdent(protyle, [blockElement.parentElement], range);
-        return true;
+        if (listItemElement.nextElementSibling?.classList.contains("protyle-attr")) {
+            listOutdent(protyle, [blockElement.parentElement], range);
+            return true;
+        } else if (!listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
+            // 打断列表
+            breakList(protyle, blockElement, range);
+            return true;
+        }
     }
 
     const position = getSelectionOffset(editableElement, protyle.wysiwyg.element, range);

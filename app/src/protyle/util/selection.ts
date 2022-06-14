@@ -374,7 +374,7 @@ export const focusByWbr = (element: Element, range: Range) => {
             } else if (wbrPreviousSibling.nodeType !== 3 && (wbrPreviousSibling as HTMLElement).classList.contains("img")) {
                 // <img><wbr>, 删除图片后的唯一的一个字符
                 range.setStartAfter(wbrPreviousSibling);
-            }  else {
+            } else {
                 // <span class="hljs-function"><span class="hljs-keyword">fun</span></span>
                 range.setStartBefore(wbrElement);
             }

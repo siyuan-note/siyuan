@@ -126,7 +126,7 @@ interface ISiyuan {
 }
 
 interface IOperation {
-    action: TOperation,
+    action: TOperation, // move， delete 不需要传 data
     id: string,
     data?: string,
     parentID?: string

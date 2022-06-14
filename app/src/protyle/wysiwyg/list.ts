@@ -1,6 +1,8 @@
 import {focusByWbr} from "../util/selection";
 import {transaction, updateTransaction} from "./transaction";
 import {genEmptyBlock} from "../../block/util";
+import * as dayjs from "dayjs";
+import {Constants} from "../../constants";
 
 export const updateListOrder = (listElement: Element, sIndex?: number) => {
     if (listElement.getAttribute("data-subtype") !== "o") {
@@ -172,6 +174,88 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
     }
     focusByWbr(previousElement, range);
 };
+
+export const breakList = (protyle: IProtyle, blockElement: Element, range: Range) => {
+    const listItemElement = blockElement.parentElement
+    const listItemId = listItemElement.getAttribute("data-node-id")
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+
+    range.insertNode(document.createElement("wbr"))
+    const newListId = Lute.NewNodeID()
+    let newListHTML = ''
+    let hasFind = 0
+    Array.from(listItemElement.parentElement.children).forEach(item => {
+        if (!hasFind && item.isSameNode(listItemElement)) {
+            hasFind = 1
+        } else if (hasFind && !item.classList.contains("protyle-attr")) {
+            undoOperations.push({
+                id: item.getAttribute("data-node-id"),
+                action: "move",
+                previousID: listItemId,
+            })
+            doOperations.push({
+                id: item.getAttribute("data-node-id"),
+                action: "delete",
+            })
+            if (item.getAttribute("data-subtype") === "o") {
+                undoOperations.push({
+                    id: item.getAttribute("data-node-id"),
+                    action: "update",
+                    data: item.outerHTML,
+                })
+                item.setAttribute("data-marker", hasFind + ".")
+                item.firstElementChild.innerHTML = hasFind + "."
+            }
+            newListHTML += item.outerHTML
+            item.remove();
+            hasFind++;
+        }
+    })
+    undoOperations.reverse();
+    newListHTML = `<div data-subtype="${listItemElement.getAttribute("data-subtype")}" data-node-id="${newListId}" data-type="NodeList" class="list" updated="${dayjs().format("YYYYMMDDHHmmss")}">${newListHTML}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`
+    listItemElement.parentElement.insertAdjacentHTML("afterend", newListHTML);
+    doOperations.push({
+        id: newListId,
+        action: "insert",
+        previousID: listItemElement.parentElement.getAttribute("data-node-id"),
+        data: newListHTML
+    })
+    undoOperations.push({
+        id: newListId,
+        action: "delete"
+    })
+
+    Array.from(listItemElement.children).reverse().forEach((item) => {
+        if (!item.classList.contains("protyle-action") && !item.classList.contains("protyle-attr")) {
+            doOperations.push({
+                id: item.getAttribute("data-node-id"),
+                action: "move",
+                previousID: listItemElement.parentElement.getAttribute("data-node-id")
+            })
+            undoOperations.push({
+                id: item.getAttribute("data-node-id"),
+                action: "move",
+                parentID: listItemId
+            })
+            listItemElement.parentElement.after(item);
+        }
+    })
+    undoOperations.splice(0, 0, {
+        id: listItemId,
+        action: "insert",
+        data: listItemElement.outerHTML,
+        previousID: listItemElement.previousElementSibling.getAttribute("data-node-id"),
+        parentID: listItemElement.parentElement.getAttribute("data-node-id")
+    })
+    listItemElement.remove()
+    doOperations.push({
+        id: listItemId,
+        action: "delete",
+    })
+    transaction(protyle, doOperations, undoOperations);
+    focusByWbr(protyle.wysiwyg.element, range);
+}
 
 export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range: Range) => {
     const liElement = liItemElements[0].parentElement;

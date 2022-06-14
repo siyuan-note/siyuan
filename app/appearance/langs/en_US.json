@@ -768,7 +768,7 @@
     "23": "Backup failed: %s",
     "24": "Failed to obtain cloud sync info: %s",
     "25": "The attribute name only supports English letters and digits",
-    "26": "Generate auth key failed",
+    "26": "Please initialize the data repo key first in [Settings - About - Data repo key]",
     "27": "Data integrity check failed",
     "28": "Incorrect end-to-end encryption password, unable to decrypt data",
     "29": "This feature requires <a target='_blank' href='https://ld246.com/subscribe/siyuan'>paid subscription</a> (If you have subscribed, please refresh or log in again in settings - account)",

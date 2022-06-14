@@ -31,6 +31,11 @@ import (
 )
 
 func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
 	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
 	if nil != err {
 		util.LogErrorf("init repo failed: %s", err)
@@ -109,7 +114,7 @@ var checkoutCallbacks = map[string]dejavu.Callback{
 
 func CheckoutRepo(id string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
-		err = errors.New("repo key is nil")
+		err = errors.New(Conf.Language(26))
 		return
 	}
 
@@ -141,7 +146,7 @@ var indexCallbacks = map[string]dejavu.Callback{
 
 func IndexRepo(memo string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
-		err = errors.New("repo key is nil")
+		err = errors.New(Conf.Language(26))
 		return
 	}
 

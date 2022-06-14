@@ -768,7 +768,7 @@
     "23": "La sauvegarde a échoué : %s",
     "24": "Impossible d'obtenir les informations de synchronisation du Cloud : %s",
     "25": "Le nom de l'attribut ne supporte que les lettres et les chiffres anglais.",
-    "26": "La génération de la clé d'authentification a échoué",
+    "26": "Veuillez d'abord initialiser la clé du référentiel de données dans [Paramètres - À propos - Clé du référentiel de données]",
     "27": "La vérification de l'intégrité des données a échoué",
     "28": "Mot de passe de cryptage de bout en bout incorrect, impossible de décrypter les données",
     "29": "Cette fonctionnalité nécessite <a target='_blank' href='https://ld246.com/subscribe/siyuan'>un abonnement payant</a> (Si vous êtes déjà abonné, Rafraîchissez ou connectez - vous à nouveau dans Paramètres - compte)",

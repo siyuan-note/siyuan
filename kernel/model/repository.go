@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"os"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/dejavu"
@@ -30,17 +31,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func GetRepoFile(id string) (ret []byte, err error) {
-	//repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
-	//if nil != err {
-	//	util.LogErrorf("init repo failed: %s", err)
-	//	return
-	//}
+func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
 
-	return
-}
-
-func GetRepoIndexLogs(page int) (logs []*dejavu.Log, err error) {
 	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
 	if nil != err {
 		util.LogErrorf("init repo failed: %s", err)
@@ -48,8 +44,14 @@ func GetRepoIndexLogs(page int) (logs []*dejavu.Log, err error) {
 	}
 
 	page-- // 从 0 开始
-	logs, err = repo.GetIndexLogs(page, 32)
+	logs, pageCount, totalCount, err = repo.GetIndexLogs(page, 32)
 	if nil != err {
+		if dejavu.ErrNotFoundIndex == err {
+			logs = []*dejavu.Log{}
+			err = nil
+			return
+		}
+
 		util.LogErrorf("get repo index logs failed: %s", err)
 		return
 	}
@@ -113,13 +115,13 @@ var checkoutCallbacks = map[string]dejavu.Callback{
 		context.(func(msg string))(arg.(*entity.File).Path)
 	},
 	"removeFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(*entity.File).Path)
+		context.(func(msg string))(arg.(string))
 	},
 }
 
 func CheckoutRepo(id string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
-		err = errors.New("repo key is nil")
+		err = errors.New(Conf.Language(26))
 		return
 	}
 
@@ -129,11 +131,31 @@ func CheckoutRepo(id string) (err error) {
 		return
 	}
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
 	filesys.ReleaseAllFileLocks()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
+
+	CloseWatchAssets()
+	defer WatchAssets()
+
+	// 恢复快照时自动暂停同步，避免刚刚恢复后的数据又被同步覆盖
+	syncEnabled := Conf.Sync.Enabled
+	Conf.Sync.Enabled = false
+	Conf.Save()
+
 	err = repo.Checkout(id, util.PushEndlessProgress, checkoutCallbacks)
-	util.PushClearProgress()
+	if nil != err {
+		util.PushClearProgress()
+		return
+	}
+
+	RefreshFileTree()
+	if syncEnabled {
+		func() {
+			time.Sleep(5 * time.Second)
+			util.PushMsg(Conf.Language(134), 0)
+		}()
+	}
 	return
 }
 
@@ -151,7 +173,7 @@ var indexCallbacks = map[string]dejavu.Callback{
 
 func IndexRepo(memo string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
-		err = errors.New("repo key is nil")
+		err = errors.New(Conf.Language(26))
 		return
 	}
 
@@ -168,9 +190,9 @@ func IndexRepo(memo string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
 	filesys.ReleaseAllFileLocks()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 	_, err = repo.Index(memo, util.PushEndlessProgress, indexCallbacks)
 	util.PushClearProgress()
 	return

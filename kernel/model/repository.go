@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"os"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/dejavu"
@@ -45,6 +46,12 @@ func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 	page-- // 从 0 开始
 	logs, pageCount, totalCount, err = repo.GetIndexLogs(page, 32)
 	if nil != err {
+		if dejavu.ErrNotFoundIndex == err {
+			logs = []*dejavu.Log{}
+			err = nil
+			return
+		}
+
 		util.LogErrorf("get repo index logs failed: %s", err)
 		return
 	}
@@ -124,11 +131,31 @@ func CheckoutRepo(id string) (err error) {
 		return
 	}
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
 	filesys.ReleaseAllFileLocks()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
+
+	CloseWatchAssets()
+	defer WatchAssets()
+
+	// 恢复快照时自动暂停同步，避免刚刚恢复后的数据又被同步覆盖
+	syncEnabled := Conf.Sync.Enabled
+	Conf.Sync.Enabled = false
+	Conf.Save()
+
 	err = repo.Checkout(id, util.PushEndlessProgress, checkoutCallbacks)
-	util.PushClearProgress()
+	if nil != err {
+		util.PushClearProgress()
+		return
+	}
+
+	RefreshFileTree()
+	if syncEnabled {
+		func() {
+			time.Sleep(5 * time.Second)
+			util.PushMsg(Conf.Language(134), 0)
+		}()
+	}
 	return
 }
 
@@ -163,9 +190,9 @@ func IndexRepo(memo string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
 	filesys.ReleaseAllFileLocks()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 	_, err = repo.Index(memo, util.PushEndlessProgress, indexCallbacks)
 	util.PushClearProgress()
 	return

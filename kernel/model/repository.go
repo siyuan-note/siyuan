@@ -30,17 +30,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func GetRepoFile(id string) (ret []byte, err error) {
-	//repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
-	//if nil != err {
-	//	util.LogErrorf("init repo failed: %s", err)
-	//	return
-	//}
-
-	return
-}
-
-func GetRepoIndexLogs(page int) (logs []*dejavu.Log, err error) {
+func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, err error) {
 	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
 	if nil != err {
 		util.LogErrorf("init repo failed: %s", err)
@@ -48,7 +38,7 @@ func GetRepoIndexLogs(page int) (logs []*dejavu.Log, err error) {
 	}
 
 	page-- // 从 0 开始
-	logs, err = repo.GetIndexLogs(page, 32)
+	logs, pageCount, totalCount, err = repo.GetIndexLogs(page, 32)
 	if nil != err {
 		util.LogErrorf("get repo index logs failed: %s", err)
 		return

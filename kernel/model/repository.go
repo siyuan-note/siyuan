@@ -197,7 +197,6 @@ func IndexRepo(memo string) (err error) {
 	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
 	filelock.ReleaseAllFileLocks()
-
 	_, err = repo.Index(memo, util.PushEndlessProgress, indexCallbacks)
 	util.PushClearProgress()
 	return

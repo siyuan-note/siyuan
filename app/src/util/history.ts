@@ -125,8 +125,8 @@ const renderRepo = (element: Element, currentPage: number) => {
             return;
         }
         let repoHTML = "";
-        response.data.logs.forEach((item: { memo: string, id: string, hCreated: string }, index: number) => {
-            repoHTML += `<li class="b3-list-item  b3-list-item--hide-action${index === 0 ? " b3-list-item--focus" : ""}" data-memo="${item.memo}" data-id="${item.id}" data-type="repo">
+        response.data.logs.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string }, index: number) => {
+            repoHTML += `<li class="b3-list-item  b3-list-item--hide-action${index === 0 ? " b3-list-item--focus" : ""}" data-hsize="${item.hSize}" data-count="${item.count}" data-memo="${encodeURIComponent(item.memo)}" data-id="${item.id}" data-type="repo">
     <span class="b3-list-item__text">${item.hCreated}</span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.rollback}">
@@ -134,7 +134,16 @@ const renderRepo = (element: Element, currentPage: number) => {
     </span>
 </li>`;
             if (index === 0) {
-                element.lastElementChild.lastElementChild.innerHTML = `${item.memo}`;
+                element.lastElementChild.lastElementChild.innerHTML = `<div class="fn__flex-center">
+    ${window.siyuan.languages.size}<span class="fn__space"></span>
+    <span class="ft__on-surface">${item.hSize}</span>
+    <span class="fn__space"></span>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.count}<span class="fn__space"></span>
+    <span class="ft__on-surface">${item.count}</span>
+</div>
+<div class="fn__hr"></div>
+<h3>${escapeHtml(item.memo)}</h3>`;
             }
         });
         element.lastElementChild.firstElementChild.innerHTML = `${repoHTML}`;
@@ -347,7 +356,16 @@ export const openHistory = () => {
                         firstPanelElement.lastElementChild.innerHTML = response.data.content;
                     });
                 } else if (type === "repo") {
-                    target.parentElement.nextElementSibling.innerHTML = target.getAttribute("data-memo");
+                    target.parentElement.nextElementSibling.innerHTML = `<div class="fn__flex-center">
+    ${window.siyuan.languages.size}<span class="fn__space"></span>
+    <span class="ft__on-surface">${target.getAttribute("data-hsize")}</span>
+    <span class="fn__space"></span>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.count}<span class="fn__space"></span>
+    <span class="ft__on-surface">${target.getAttribute("data-count")}</span>
+</div>
+<div class="fn__hr"></div>
+<h3>${escapeHtml(decodeURIComponent(target.getAttribute("data-memo")))}</h3>`;
                 }
                 let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement;
                 if (currentItem) {

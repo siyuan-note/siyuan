@@ -1,4 +1,6 @@
 {
+  "size": "Size",
+  "count": "Count",
   "createSnapshot": "Create snapshot",
   "dataSnapshot": "Data snapshot",
   "copyKey": "Copy key string",

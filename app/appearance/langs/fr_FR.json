@@ -1,4 +1,6 @@
 {
+  "size": "Taille",
+  "count": "Compter",
   "createSnapshot": "Créer un instantané",
   "dataSnapshot": "Instantané de données",
   "copyKey": "Copier la chaîne de clé",

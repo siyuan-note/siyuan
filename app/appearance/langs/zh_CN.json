@@ -1,4 +1,6 @@
 {
+  "size": "大小",
+  "count": "数量",
   "createSnapshot": "创建快照",
   "dataSnapshot": "数据快照",
   "copyKey": "复制密钥字符串",

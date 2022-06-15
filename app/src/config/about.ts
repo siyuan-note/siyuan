@@ -15,8 +15,7 @@ import {Dialog} from "../dialog";
 export const about = {
     element: undefined as Element,
     genHTML: () => {
-        return `
-<div class="b3-label fn__flex">
+        return `<div class="b3-label fn__flex">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about11}
         <div class="b3-label__text">${window.siyuan.languages.about12}</div>

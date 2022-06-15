@@ -24,6 +24,7 @@ import * as dayjs from "dayjs";
 import {setTitle} from "../../dialog/processSystem";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
+import {setPosition} from "../../util/setPosition";
 
 export class Title {
     public element: HTMLElement;
@@ -51,25 +52,16 @@ export class Title {
                 setPanelFocus(protyle.model.element.parentElement.parentElement);
                 updatePanelByEditor(protyle, false);
             }
+            protyle.toolbar?.element.classList.add("fn__none");
         });
-        this.editElement.addEventListener("blur", () => {
-            if (!validateName(this.editElement.textContent)) {
-                this.editElement.textContent = replaceFileName(this.editElement.textContent);
-                return false;
+        this.editElement.addEventListener("input", (event: InputEvent) => {
+            if (event.isComposing) {
+                return;
             }
-            if (this.editElement.textContent.trim() === "" || this.editElement.textContent.trim() === window.siyuan.languages.untitled) {
-                this.editElement.textContent = window.siyuan.languages.untitled;
-                this.editElement.classList.add("protyle-title__input--untitled");
-            } else {
-                this.editElement.classList.remove("protyle-title__input--untitled");
-            }
-            const fileName = replaceFileName(this.editElement.textContent);
-            fetchPost("/api/filetree/renameDoc", {
-                notebook: protyle.notebookId,
-                path: protyle.path,
-                title: fileName,
-            });
-            this.editElement.textContent = fileName;
+            this.rename(protyle);
+        });
+        this.editElement.addEventListener("compositionend", (event: InputEvent) => {
+            this.rename(protyle);
         });
         this.editElement.addEventListener("drop", (event: DragEvent) => {
             if (event.dataTransfer.getData(Constants.SIYUAN_DROP_EDITOR)) {
@@ -134,7 +126,70 @@ export class Title {
             }
         });
         this.element.addEventListener("contextmenu", (event) => {
-            this.renderMenu(protyle, iconElement, {x: event.clientX, y: event.clientY});
+            if (getSelection().rangeCount === 0) {
+                this.renderMenu(protyle, iconElement, {x: event.clientX, y: event.clientY});
+                return;
+            }
+            protyle.toolbar?.element.classList.add("fn__none");
+            window.siyuan.menus.menu.remove();
+            const range = getEditorRange(this.editElement)
+            if (range.toString() !== "") {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    icon: "iconCopy",
+                    accelerator: "⌘C",
+                    label: window.siyuan.languages.copy,
+                    click: () => {
+                        focusByRange(getEditorRange(this.editElement));
+                        document.execCommand("copy");
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    icon: "iconCut",
+                    accelerator: "⌘X",
+                    label: window.siyuan.languages.cut,
+                    click: () => {
+                        focusByRange(getEditorRange(this.editElement));
+                        document.execCommand("cut");
+                        setTimeout(() => {
+                            this.rename(protyle);
+                        }, Constants.TIMEOUT_INPUT)
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    icon: "iconTrashcan",
+                    accelerator: "⌫",
+                    label: window.siyuan.languages.delete,
+                    click: () => {
+                        const range = getEditorRange(this.editElement)
+                        range.extractContents();
+                        focusByRange(range)
+                        setTimeout(() => {
+                            this.rename(protyle);
+                        }, Constants.TIMEOUT_INPUT)
+                    }
+                }).element);
+            }
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.paste,
+                accelerator: "⌘V",
+                click: () => {
+                    focusByRange(getEditorRange(this.editElement));
+                    document.execCommand("paste");
+                    setTimeout(() => {
+                        this.rename(protyle);
+                    }, Constants.TIMEOUT_INPUT)
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.selectAll,
+                accelerator: "⌘A",
+                click: () => {
+                    range.selectNodeContents(this.editElement);
+                    focusByRange(range);
+                }
+            }).element);
+            window.siyuan.menus.menu.element.classList.remove("fn__none");
+            setPosition(window.siyuan.menus.menu.element, event.clientX, event.clientY);
         });
         this.element.querySelector(".protyle-attr").addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             fetchPost("/api/block/getDocInfo", {
@@ -169,6 +224,26 @@ export class Title {
                 }
             });
         });
+    }
+
+    private rename(protyle: IProtyle) {
+        if (!validateName(this.editElement.textContent)) {
+            this.editElement.textContent = replaceFileName(this.editElement.textContent);
+            return false;
+        }
+        if (this.editElement.textContent.trim() === "" || this.editElement.textContent.trim() === window.siyuan.languages.untitled) {
+            this.editElement.textContent = window.siyuan.languages.untitled;
+            this.editElement.classList.add("protyle-title__input--untitled");
+        } else {
+            this.editElement.classList.remove("protyle-title__input--untitled");
+        }
+        const fileName = replaceFileName(this.editElement.textContent);
+        fetchPost("/api/filetree/renameDoc", {
+            notebook: protyle.notebookId,
+            path: protyle.path,
+            title: fileName,
+        });
+        this.editElement.textContent = fileName;
     }
 
     private renderMenu(protyle: IProtyle, iconElement: Element, position: { x: number, y: number }) {

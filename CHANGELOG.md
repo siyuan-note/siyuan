@@ -1,3 +1,26 @@
+## v2.0.20 / 2022-06-15
+
+### 改进功能
+
+* [支持空列表项回车断开](https://github.com/siyuan-note/siyuan/issues/3804)
+* [数据快照](https://github.com/siyuan-note/siyuan/issues/5159)
+* [数据快照回滚](https://github.com/siyuan-note/siyuan/issues/5160)
+* [支持表格内容全部居中](https://github.com/siyuan-note/siyuan/issues/5163)
+* [悬浮窗最小高度调整](https://github.com/siyuan-note/siyuan/issues/5167)
+* [数据快照密钥初始化](https://github.com/siyuan-note/siyuan/issues/5173)
+* [改进端到端密码设置交互](https://github.com/siyuan-note/siyuan/issues/5176)
+* [列出 `在浏览器上使用` 的 IP 中默认加入 `127.0.0.1`](https://github.com/siyuan-note/siyuan/issues/5177)
+* [文档标题右键菜单修改为文本复制、粘贴、删除、全选和剪切](https://github.com/siyuan-note/siyuan/issues/5188)
+
+### 修复缺陷
+
+* [清理未引用资源时未忽略 `custom-data-assets` 属性定义的资源文件](https://github.com/siyuan-note/siyuan/issues/4122)
+* [有序列表项缩放后，在末尾插入行会状态异常](https://github.com/siyuan-note/siyuan/issues/5168)
+* [快捷键无法更改](https://github.com/siyuan-note/siyuan/issues/5172)
+* [查找替换文档名以后动态引用锚文本未跟随改变](https://github.com/siyuan-note/siyuan/issues/5175)
+* [Windows 端右上角的按钮会因为窗口压缩而消失](https://github.com/siyuan-note/siyuan/issues/5180)
+* [云端收集箱 SSRF（服务端请求伪造）漏洞](https://github.com/siyuan-note/siyuan/issues/5183)
+
 ## v2.0.19 / 2022-06-12
 
 ### 改进功能

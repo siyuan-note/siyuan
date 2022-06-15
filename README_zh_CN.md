@@ -175,14 +175,11 @@
 思源笔记是完全开源的，欢迎参与贡献：
 
 * [界面和内核](https://github.com/siyuan-note/siyuan)
-* [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)
-* [外观](https://github.com/siyuan-note/appearance)
-* [数据解析器](https://github.com/88250/protyle)
-* [编辑器引擎](https://github.com/88250/lute)
-* [端到端加密](https://github.com/siyuan-note/encryption)
+* [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)和[外观](https://github.com/siyuan-note/appearance)
+* [数据解析器](https://github.com/88250/protyle)和[编辑器引擎](https://github.com/88250/lute)
+* [端到端加密](https://github.com/siyuan-note/encryption)和[数据仓库](https://github.com/siyuan-note/dejavu)
 * [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
-* [Android 端](https://github.com/siyuan-note/siyuan-android)
-* [iOS 端](https://github.com/siyuan-note/siyuan-ios)
+* [Android 端](https://github.com/siyuan-note/siyuan-android)和 [iOS 端](https://github.com/siyuan-note/siyuan-ios)
 
 更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
 

@@ -5,7 +5,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20220611225324"
+		"updated": "20220615153430"
 	},
 	"Children": [
 		{
@@ -432,7 +432,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220526112905-4lumsx2",
-				"updated": "20220526112905"
+				"updated": "20220615152136"
 			},
 			"Children": [
 				{
@@ -502,7 +502,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220526112905-ofq01hk",
-								"updated": "20220526112905"
+								"updated": "20220615152032"
 							},
 							"Children": [
 								{
@@ -530,31 +530,11 @@
 											"Type": "NodeCloseParen"
 										}
 									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112905-rfll5uu",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112905-rfll5uu",
-						"updated": "20220526112905"
-					},
-					"Children": [
-						{
-							"ID": "20220526112905-5m9urij",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112905-5m9urij",
-								"updated": "20220526112905"
-							},
-							"Children": [
+								},
+								{
+									"Type": "NodeText",
+									"Data": "和"
+								},
 								{
 									"Type": "NodeLink",
 									"Data": "span",
@@ -602,7 +582,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220526112905-lg3tfv2",
-								"updated": "20220526112905"
+								"updated": "20220615152035"
 							},
 							"Children": [
 								{
@@ -630,31 +610,11 @@
 											"Type": "NodeCloseParen"
 										}
 									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112905-vjd528r",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112905-vjd528r",
-						"updated": "20220526112905"
-					},
-					"Children": [
-						{
-							"ID": "20220526112905-lpkpu0e",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112905-lpkpu0e",
-								"updated": "20220526112905"
-							},
-							"Children": [
+								},
+								{
+									"Type": "NodeText",
+									"Data": "和"
+								},
 								{
 									"Type": "NodeLink",
 									"Data": "span",
@@ -702,7 +662,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220526112905-idr2lmn",
-								"updated": "20220526112905"
+								"updated": "20220615152127"
 							},
 							"Children": [
 								{
@@ -725,6 +685,36 @@
 										{
 											"Type": "NodeLinkDest",
 											"Data": "https://github.com/siyuan-note/encryption"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "和"
+								},
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "數據倉庫"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/siyuan-note/dejavu"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -794,7 +784,7 @@
 					},
 					"Properties": {
 						"id": "20220526112905-myxxgda",
-						"updated": "20220526112905"
+						"updated": "20220615152136"
 					},
 					"Children": [
 						{
@@ -802,7 +792,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220526112905-9l7ydfc",
-								"updated": "20220526112905"
+								"updated": "20220615152136"
 							},
 							"Children": [
 								{
@@ -830,31 +820,11 @@
 											"Type": "NodeCloseParen"
 										}
 									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112905-wjwu4d0",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112905-wjwu4d0",
-						"updated": "20220526112905"
-					},
-					"Children": [
-						{
-							"ID": "20220526112905-5vtl4ff",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112905-5vtl4ff",
-								"updated": "20220526112905"
-							},
-							"Children": [
+								},
+								{
+									"Type": "NodeText",
+									"Data": "和 "
+								},
 								{
 									"Type": "NodeLink",
 									"Data": "span",
@@ -1235,6 +1205,194 @@
 				{
 					"Type": "NodeText",
 					"Data": " 觸發它的塊標菜單。"
+				}
+			]
+		},
+		{
+			"ID": "20220615153430-zg69bjz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220615153430-zg69bjz",
+				"updated": "20220615153430"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如何分享筆記？"
+				}
+			]
+		},
+		{
+			"ID": "20220615153430-3fw6dhu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220615153430-3fw6dhu",
+				"updated": "20220615153430"
+			},
+			"Children": [
+				{
+					"ID": "20220615153430-jw52uvw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615153430-jw52uvw",
+						"updated": "20220615153430"
+					},
+					"Children": [
+						{
+							"ID": "20220615153430-samxogn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615153430-samxogn",
+								"updated": "20220615153430"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "導出導入 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": ".sy.zip"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 數據包"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615153430-ossmtlg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615153430-ossmtlg",
+						"updated": "20220615153430"
+					},
+					"Children": [
+						{
+							"ID": "20220615153430-lpurhd3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615153430-lpurhd3",
+								"updated": "20220615153430"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通過網絡伺服"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615153430-ia2p1ra",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615153430-ia2p1ra",
+						"updated": "20220615153430"
+					},
+					"Children": [
+						{
+							"ID": "20220615153430-d6ghger",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615153430-d6ghger",
+								"updated": "20220615153430"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "導出導入 Markdown"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615153430-f4ehaey",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615153430-f4ehaey",
+						"updated": "20220615153430"
+					},
+					"Children": [
+						{
+							"ID": "20220615153430-fhmqpyu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615153430-fhmqpyu",
+								"updated": "20220615153430"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "導出預覽"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中復製到第三方在線服務"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220615153430-15kn96y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615153430-15kn96y",
+				"updated": "20220615153430"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "前兩種方式可以保證數據原始語義。"
 				}
 			]
 		},

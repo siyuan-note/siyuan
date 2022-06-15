@@ -42,6 +42,7 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/siyuan-note/dejavu v0.0.0-20220615074544-177b5b3df8bb
 	github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676
+	github.com/siyuan-note/filelock v0.0.0-20220615153616-77ca4edd93f5
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
@@ -93,11 +94,13 @@ require (
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+	go.uber.org/atomic v1.9.0 // indirect
+	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/net v0.0.0-20220607020251-c690dde0001d // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
-	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect
+	golang.org/x/sys v0.0.0-20220614162138-6c1b26c55098 // indirect
 	golang.org/x/tools v0.1.8 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect

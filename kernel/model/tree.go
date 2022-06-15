@@ -24,6 +24,7 @@ import (
 
 	"github.com/88250/lute/parse"
 	"github.com/88250/protyle"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -40,7 +41,7 @@ func loadTrees(localPath string) (ret []*parse.Tree) {
 			return nil
 		}
 
-		data, err := filesys.NoLockFileRead(path)
+		data, err := filelock.NoLockFileRead(path)
 		if nil != err {
 			util.LogErrorf("get data [path=%s] failed: %s", path, err)
 			return nil

@@ -33,7 +33,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/encryption"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -145,7 +145,10 @@ func RecoverLocalBackup() (err error) {
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
 
-	filesys.ReleaseAllFileLocks()
+	err = filelock.ReleaseAllFileLocks()
+	if nil != err {
+		return
+	}
 	sql.WaitForWritingDatabase()
 
 	CloseWatchAssets()
@@ -256,7 +259,10 @@ func CreateLocalBackup() (err error) {
 	defer writingDataLock.Unlock()
 	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
-	filesys.ReleaseAllFileLocks()
+	err = filelock.ReleaseAllFileLocks()
+	if nil != err {
+		return
+	}
 
 	util.LogInfof("creating backup...")
 	start := time.Now()

@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -47,7 +48,7 @@ func IncWorkspaceDataVer(inc bool, systemID string) {
 	conf := &DataConf{Updated: now, Device: systemID}
 	if !gulu.File.IsExist(confPath) {
 		data, _ = gulu.JSON.MarshalIndentJSON(conf, "", "  ")
-		if err = LockFileWrite(confPath, data); nil != err {
+		if err = filelock.LockFileWrite(confPath, data); nil != err {
 			util.LogErrorf("save data conf [%s] failed: %s", confPath, err)
 		}
 
@@ -58,7 +59,7 @@ func IncWorkspaceDataVer(inc bool, systemID string) {
 		return
 	}
 
-	data, err = LockFileRead(confPath)
+	data, err = filelock.LockFileRead(confPath)
 	if nil != err {
 		data, err = recoverFrom(confPath)
 		if nil != err {
@@ -83,7 +84,7 @@ func IncWorkspaceDataVer(inc bool, systemID string) {
 	}
 
 	data, _ = gulu.JSON.MarshalIndentJSON(conf, "", "  ")
-	if err = LockFileWrite(confPath, data); nil != err {
+	if err = filelock.LockFileWrite(confPath, data); nil != err {
 		util.LogErrorf("save data conf [%s] failed: %s", confPath, err)
 		return
 	}
@@ -96,7 +97,7 @@ func recoverFrom(confPath string) (data []byte, err error) {
 		return
 	}
 
-	data, err = NoLockFileRead(tmp)
+	data, err = filelock.NoLockFileRead(tmp)
 	if nil != err {
 		util.LogErrorf("read temp data conf [%s] failed: %s", tmp, err)
 		return

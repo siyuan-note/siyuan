@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/parse"
 	"github.com/88250/protyle"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -36,7 +37,7 @@ import (
 
 func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	filePath := filepath.Join(util.DataDir, boxID, p)
-	data, err := LockFileRead(filePath)
+	data, err := filelock.LockFileRead(filePath)
 	if nil != err {
 		return
 	}
@@ -70,7 +71,7 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 		}
 		parentPath += ".sy"
 		parentPath = filepath.Join(util.DataDir, boxID, parentPath)
-		data, err := LockFileRead(parentPath)
+		data, err := filelock.LockFileRead(parentPath)
 		if nil != err {
 			hPathBuilder.WriteString("Untitled/")
 			continue
@@ -113,7 +114,7 @@ func WriteTree(tree *parse.Tree) (err error) {
 	if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
 		return
 	}
-	if err = LockFileWrite(filePath, output); nil != err {
+	if err = filelock.LockFileWrite(filePath, output); nil != err {
 		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 		util.LogErrorf(msg)
 		return errors.New(msg)
@@ -144,12 +145,12 @@ func recoverParseJSON2Tree(boxID, p, filePath string, luteEngine *lute.Lute) (re
 		return
 	}
 
-	data, err := NoLockFileRead(tmp)
+	data, err := filelock.NoLockFileRead(tmp)
 	if nil != err {
 		util.LogErrorf("recover tree read from tmp [%s] failed: %s", tmp, err)
 		return
 	}
-	if err = NoLockFileWrite(filePath, data); nil != err {
+	if err = filelock.NoLockFileWrite(filePath, data); nil != err {
 		util.LogErrorf("recover tree write [%s] from tmp [%s] failed: %s", filePath, tmp, err)
 		return
 	}
@@ -191,7 +192,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
 			return
 		}
-		if err = LockFileWrite(filePath, output); nil != err {
+		if err = filelock.LockFileWrite(filePath, output); nil != err {
 			msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 			util.LogErrorf(msg)
 		}

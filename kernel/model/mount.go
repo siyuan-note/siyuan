@@ -27,7 +27,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -87,7 +87,7 @@ func RemoveBox(boxID string) (err error) {
 		return errors.New(fmt.Sprintf("can not remove [%s] caused by it is not a dir", boxID))
 	}
 
-	filesys.ReleaseFileLocks(localPath)
+	filelock.ReleaseFileLocks(localPath)
 	if !isUserGuide(boxID) {
 		var historyDir string
 		historyDir, err = util.GetHistoryDir("delete")

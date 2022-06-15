@@ -27,7 +27,7 @@ import (
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -136,7 +136,7 @@ func CheckoutRepo(id string) (err error) {
 	defer writingDataLock.Unlock()
 	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
-	filesys.ReleaseAllFileLocks()
+	filelock.ReleaseAllFileLocks()
 	CloseWatchAssets()
 	defer WatchAssets()
 
@@ -196,7 +196,7 @@ func IndexRepo(memo string) (err error) {
 	defer writingDataLock.Unlock()
 	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
-	filesys.ReleaseAllFileLocks()
+	filelock.ReleaseAllFileLocks()
 
 	_, err = repo.Index(memo, util.PushEndlessProgress, indexCallbacks)
 	util.PushClearProgress()

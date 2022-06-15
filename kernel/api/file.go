@@ -28,7 +28,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -92,7 +92,7 @@ func putFile(c *gin.Context) {
 		if err = os.MkdirAll(dir, 0755); nil != err {
 			util.LogErrorf("put a file [%s] make dir [%s] failed: %s", filePath, dir, err)
 		} else {
-			if filesys.IsLocked(filePath) {
+			if filelock.IsLocked(filePath) {
 				msg := fmt.Sprintf("file [%s] is locked", filePath)
 				util.LogErrorf(msg)
 				err = errors.New(msg)

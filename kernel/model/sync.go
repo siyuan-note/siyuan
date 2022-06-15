@@ -37,6 +37,7 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/mattn/go-zglob"
 	"github.com/siyuan-note/encryption"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -584,7 +585,7 @@ func syncDir2WorkspaceData(boot bool) (upsertFiles, removeFiles []string, err er
 //   2. 将 data 中新增/修改的文件加密后拷贝到 sync 中
 func workspaceData2SyncDir() (removeList, upsertList map[string]bool, err error) {
 	start := time.Now()
-	filesys.ReleaseAllFileLocks()
+	filelock.ReleaseAllFileLocks()
 
 	passwd := Conf.E2EEPasswd
 	unchangedDataList, removeList, err := calcUnchangedDataList(passwd)
@@ -820,7 +821,7 @@ func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encrypte
 				return io.EOF
 			}
 
-			data, err0 := filesys.NoLockFileRead(path)
+			data, err0 := filelock.NoLockFileRead(path)
 			if nil != err0 {
 				util.LogErrorf("read file [%s] failed: %s", path, err0)
 				err = err0
@@ -1204,7 +1205,7 @@ func genSyncHistory(now, p string) {
 
 	relativePath := strings.TrimPrefix(p, util.DataDir)
 	historyPath := filepath.Join(historyDir, relativePath)
-	filesys.ReleaseFileLocks(p)
+	filelock.ReleaseFileLocks(p)
 	if err = gulu.File.Copy(p, historyPath); nil != err {
 		util.LogErrorf("gen sync history failed: %s", err)
 		return

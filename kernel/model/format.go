@@ -25,7 +25,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -102,7 +102,7 @@ func generateFormatHistory(tree *parse.Tree) {
 	}
 
 	var data []byte
-	if data, err = filesys.NoLockFileRead(filepath.Join(util.DataDir, tree.Box, tree.Path)); err != nil {
+	if data, err = filelock.NoLockFileRead(filepath.Join(util.DataDir, tree.Box, tree.Path)); err != nil {
 		util.LogErrorf("generate history failed: %s", err)
 		return
 	}

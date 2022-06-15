@@ -32,8 +32,8 @@ import (
 	"github.com/88250/lute/parse"
 	util2 "github.com/88250/lute/util"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -434,7 +434,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	tree, err := tx.loadTree(block.ID)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
@@ -522,7 +522,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	tree, err := tx.loadTree(block.ID)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
@@ -723,7 +723,7 @@ func (tx *Transaction) doLargeInsert() (ret *TxErr) {
 	}
 	id := parentBlock.ID
 	tree, err := tx.loadTree(id)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: id}
 	}
 	if nil != err {
@@ -784,7 +784,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	var err error
 	id := operation.ID
 	tree, err := tx.loadTree(id)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: id}
 	}
 	if ErrBlockNotFound == err {
@@ -835,7 +835,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 	}
 	tree, err := tx.loadTree(block.ID)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
@@ -969,7 +969,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 
 	tree, err := tx.loadTree(id)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: id}
 	}
 	if nil != err {

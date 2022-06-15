@@ -32,8 +32,8 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/facette/natsort"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -85,14 +85,14 @@ func ListNotebooks() (ret []*Box, err error) {
 		boxConfPath := filepath.Join(util.DataDir, dir.Name(), ".siyuan", "conf.json")
 		if !gulu.File.IsExist(boxConfPath) {
 			if isUserGuide(dir.Name()) {
-				filesys.ReleaseAllFileLocks()
+				filelock.ReleaseAllFileLocks()
 				os.RemoveAll(filepath.Join(util.DataDir, dir.Name()))
 				util.LogWarnf("not found user guid box conf [%s], removed it", boxConfPath)
 				continue
 			}
 			util.LogWarnf("not found box conf [%s], recreate it", boxConfPath)
 		} else {
-			data, readErr := filesys.NoLockFileRead(boxConfPath)
+			data, readErr := filelock.NoLockFileRead(boxConfPath)
 			if nil != readErr {
 				util.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
 				continue
@@ -152,7 +152,7 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 		return
 	}
 
-	data, err := filesys.LockFileRead(confPath)
+	data, err := filelock.LockFileRead(confPath)
 	if nil != err {
 		util.LogErrorf("read box conf [%s] failed: %s", confPath, err)
 		return
@@ -173,7 +173,7 @@ func (box *Box) SaveConf(conf *conf.BoxConf) {
 		return
 	}
 
-	oldData, err := filesys.NoLockFileRead(confPath)
+	oldData, err := filelock.NoLockFileRead(confPath)
 	if nil != err {
 		box.saveConf0(newData)
 		return
@@ -191,7 +191,7 @@ func (box *Box) saveConf0(data []byte) {
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); nil != err {
 		util.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
-	if err := filesys.LockFileWrite(confPath, data); nil != err {
+	if err := filelock.LockFileWrite(confPath, data); nil != err {
 		util.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
 }
@@ -279,7 +279,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	fromPath := filepath.Join(boxLocalPath, oldPath)
 	toPath := filepath.Join(boxLocalPath, newPath)
-	filesys.ReleaseFileLocks(fromPath)
+	filelock.ReleaseFileLocks(fromPath)
 	if err := os.Rename(fromPath, toPath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(5), box.Name, fromPath, err)
 		util.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, box.Name, err)
@@ -299,7 +299,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 func (box *Box) Remove(path string) error {
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	filePath := filepath.Join(boxLocalPath, path)
-	filesys.ReleaseFileLocks(filePath)
+	filelock.ReleaseFileLocks(filePath)
 	if err := os.RemoveAll(filePath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(7), box.Name, path, err)
 		util.LogErrorf("remove [path=%s] in box [%s] failed: %s", path, box.ID, err)
@@ -317,7 +317,7 @@ func (box *Box) Unindex() {
 	sql.RemoveBoxHash(tx, box.ID)
 	sql.DeleteByBoxTx(tx, box.ID)
 	sql.CommitTx(tx)
-	filesys.ReleaseFileLocks(filepath.Join(util.DataDir, box.ID))
+	filelock.ReleaseFileLocks(filepath.Join(util.DataDir, box.ID))
 	treenode.RemoveBlockTreesByBoxID(box.ID)
 }
 
@@ -528,5 +528,5 @@ func LockFileByBlockID(id string) (locked bool, filePath string) {
 	if !gulu.File.IsExist(p) {
 		return true, ""
 	}
-	return nil == filesys.LockFile(p), p
+	return nil == filelock.LockFile(p), p
 }

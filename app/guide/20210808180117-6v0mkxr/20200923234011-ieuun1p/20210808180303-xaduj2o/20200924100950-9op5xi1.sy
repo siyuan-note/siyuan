@@ -6,7 +6,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20220518104905"
+		"updated": "20220615181617"
 	},
 	"Children": [
 		{
@@ -36,8 +36,9 @@
 				0
 			],
 			"Properties": {
+				"colgroup": "||",
 				"id": "20210106154101-qrojg1b",
-				"updated": "20220208113646"
+				"updated": "20220615181200"
 			},
 			"Children": [
 				{
@@ -1535,6 +1536,42 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Locate open documents"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Go to Settings -\u003e Shortcuts to configure"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -2050,7 +2087,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-yozlufs",
-				"updated": "20220405215021"
+				"updated": "20220615181617"
 			},
 			"Children": [
 				{
@@ -5755,7 +5792,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Call up the block menu"
+									"Data": "Call up the menu"
 								}
 							]
 						},
@@ -5806,8 +5843,84 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "The cursor evokes the corresponding function menu in the inline element, otherwise it evokes the block menu"
+								},
+								{
 									"Type": "NodeBr",
 									"Data": "br"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Horizontal layout"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Go to Settings -\u003e Shortcuts to configure"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Vertical layout"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Go to Settings -\u003e Shortcuts to configure"
 								}
 							]
 						}

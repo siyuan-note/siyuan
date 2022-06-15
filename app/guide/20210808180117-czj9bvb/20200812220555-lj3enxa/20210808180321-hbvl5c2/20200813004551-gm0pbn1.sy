@@ -6,7 +6,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20220518104535"
+		"updated": "20220615180819"
 	},
 	"Children": [
 		{
@@ -36,8 +36,9 @@
 				0
 			],
 			"Properties": {
+				"colgroup": "||",
 				"id": "20201227133317-ovwnk1y",
-				"updated": "20220208113522"
+				"updated": "20220615155525"
 			},
 			"Children": [
 				{
@@ -1541,6 +1542,42 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "定位打开的文档"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可前往 设置-\u003e快捷键 中配置"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -2056,7 +2093,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20220405214803"
+				"updated": "20220615180819"
 			},
 			"Children": [
 				{
@@ -5861,7 +5898,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "唤起块级菜单"
+									"Data": "唤起菜单"
 								}
 							]
 						},
@@ -5912,8 +5949,80 @@
 							"Data": "td",
 							"Children": [
 								{
-									"Type": "NodeBr",
-									"Data": "br"
+									"Type": "NodeText",
+									"Data": "光标在行内元素中唤起对应的功能菜单，否则唤起块菜单"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "水平布局"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可前往 设置-\u003e快捷键 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "垂直布局"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可前往 设置-\u003e快捷键 中配置"
 								}
 							]
 						}

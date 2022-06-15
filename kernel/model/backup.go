@@ -34,6 +34,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -141,9 +142,11 @@ func RecoverLocalBackup() (err error) {
 		return errors.New(Conf.Language(11))
 	}
 
-	data := util.AESDecrypt(Conf.E2EEPasswd)
-	data, _ = hex.DecodeString(string(data))
-	passwd := string(data)
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
+
+	filesys.ReleaseAllFileLocks()
+	sql.WaitForWritingDatabase()
 
 	CloseWatchAssets()
 	defer WatchAssets()
@@ -153,17 +156,17 @@ func RecoverLocalBackup() (err error) {
 	Conf.Sync.Enabled = false
 	Conf.Save()
 
-	filesys.ReleaseAllFileLocks()
-
 	util.PushEndlessProgress(Conf.Language(63))
 	util.LogInfof("starting recovery...")
 	start := time.Now()
-
+	data := util.AESDecrypt(Conf.E2EEPasswd)
+	data, _ = hex.DecodeString(string(data))
+	passwd := string(data)
 	decryptedDataDir, err := decryptDataDir(passwd)
 	if nil != err {
+		util.ClearPushProgress(100)
 		return
 	}
-
 	newDataDir := filepath.Join(util.WorkspaceDir, "data.new")
 	os.RemoveAll(newDataDir)
 	if err = os.MkdirAll(newDataDir, 0755); nil != err {
@@ -249,8 +252,10 @@ func CreateLocalBackup() (err error) {
 	defer util.ClearPushProgress(100)
 	util.PushEndlessProgress(Conf.Language(22))
 
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 	WaitForWritingFiles()
-
+	sql.WaitForWritingDatabase()
 	filesys.ReleaseAllFileLocks()
 
 	util.LogInfof("creating backup...")

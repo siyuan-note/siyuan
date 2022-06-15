@@ -28,6 +28,7 @@ import (
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -43,8 +44,7 @@ func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 		return
 	}
 
-	page-- // 从 0 开始
-	logs, pageCount, totalCount, err = repo.GetIndexLogs(page, 32)
+	logs, pageCount, totalCount, err = repo.GetIndexLogs(page, 16)
 	if nil != err {
 		if dejavu.ErrNotFoundIndex == err {
 			logs = []*dejavu.Log{}
@@ -131,10 +131,12 @@ func CheckoutRepo(id string) (err error) {
 		return
 	}
 
-	filesys.ReleaseAllFileLocks()
+	util.PushEndlessProgress(Conf.Language(63))
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
-
+	WaitForWritingFiles()
+	sql.WaitForWritingDatabase()
+	filesys.ReleaseAllFileLocks()
 	CloseWatchAssets()
 	defer WatchAssets()
 
@@ -189,10 +191,13 @@ func IndexRepo(memo string) (err error) {
 		return
 	}
 
-	WaitForWritingFiles()
-	filesys.ReleaseAllFileLocks()
+	util.PushEndlessProgress(Conf.Language(143))
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
+	WaitForWritingFiles()
+	sql.WaitForWritingDatabase()
+	filesys.ReleaseAllFileLocks()
+
 	_, err = repo.Index(memo, util.PushEndlessProgress, indexCallbacks)
 	util.PushClearProgress()
 	return

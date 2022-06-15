@@ -252,8 +252,10 @@ func CreateLocalBackup() (err error) {
 	defer util.ClearPushProgress(100)
 	util.PushEndlessProgress(Conf.Language(22))
 
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 	WaitForWritingFiles()
-
+	sql.WaitForWritingDatabase()
 	filesys.ReleaseAllFileLocks()
 
 	util.LogInfof("creating backup...")

@@ -192,14 +192,12 @@ func IndexRepo(memo string) (err error) {
 		return
 	}
 
+	util.PushEndlessProgress(Conf.Language(143))
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
-	util.PushEndlessProgress(Conf.Language(143))
 	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
 	filesys.ReleaseAllFileLocks()
-	CloseWatchAssets()
-	defer WatchAssets()
 
 	_, err = repo.Index(memo, util.PushEndlessProgress, indexCallbacks)
 	util.PushClearProgress()

@@ -5,7 +5,7 @@
 		"icon": "1f64f",
 		"id": "20211226114929-08ap1r0",
 		"title": "致謝",
-		"updated": "20220530180118"
+		"updated": "20220615154945"
 	},
 	"Children": [
 		{
@@ -28,7 +28,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220326092650-r61gazd",
-				"updated": "20220530180118"
+				"updated": "20220615154945"
 			},
 			"Children": [
 				{
@@ -2541,6 +2541,76 @@
 										{
 											"Type": "NodeCodeSpanContent",
 											"Data": "BSD-3-Clause License"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615154944-8ye5ub9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615154944-8ye5ub9",
+						"updated": "20220615154945"
+					},
+					"Children": [
+						{
+							"ID": "20220615154944-q5uqaxo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615154944-q5uqaxo",
+								"updated": "20220615154945"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "https://github.com/siyuan-note/dejavu"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/siyuan-note/dejavu"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "Mulan PSL v2"
 										},
 										{
 											"Type": "NodeCodeSpanCloseMarker"

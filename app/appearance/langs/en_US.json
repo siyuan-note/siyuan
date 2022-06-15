@@ -1,6 +1,4 @@
 {
-  "size": "Size",
-  "count": "Count",
   "createSnapshot": "Create snapshot",
   "dataSnapshot": "Data snapshot",
   "copyKey": "Copy key string",
@@ -92,6 +90,7 @@
   "rectAnnotation": "Rectangular Annotation",
   "fileName": "File name:",
   "fileSize": "File size:",
+  "fileCount": "File count:",
   "title1": "Title:",
   "author": "Author:",
   "subject": "Subject:",

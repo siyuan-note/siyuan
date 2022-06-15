@@ -1,6 +1,4 @@
 {
-  "size": "Taille",
-  "count": "Compter",
   "createSnapshot": "Créer un instantané",
   "dataSnapshot": "Instantané de données",
   "copyKey": "Copier la chaîne de clé",
@@ -92,6 +90,7 @@
   "rectAnnotation": "Annotation rectangulaire",
   "fileName": "Nom du fichier :",
   "fileSize": "Taille du fichier :",
+  "fileCount": "Nombre de fichiers :",
   "title1": "Titre :",
   "author": "Auteur :",
   "subject": "Sujet :",

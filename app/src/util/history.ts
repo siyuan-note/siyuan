@@ -135,11 +135,11 @@ const renderRepo = (element: Element, currentPage: number) => {
 </li>`;
             if (index === 0) {
                 element.lastElementChild.lastElementChild.innerHTML = `<div class="fn__flex-center">
-    ${window.siyuan.languages.size}<span class="fn__space"></span>
+    ${window.siyuan.languages.fileSize}</span>
     <span class="ft__on-surface">${item.hSize}</span>
     <span class="fn__space"></span>
     <span class="fn__space"></span>
-    ${window.siyuan.languages.count}<span class="fn__space"></span>
+    ${window.siyuan.languages.fileCount}</span>
     <span class="ft__on-surface">${item.count}</span>
 </div>
 <div class="fn__hr"></div>
@@ -357,11 +357,11 @@ export const openHistory = () => {
                     });
                 } else if (type === "repo") {
                     target.parentElement.nextElementSibling.innerHTML = `<div class="fn__flex-center">
-    ${window.siyuan.languages.size}<span class="fn__space"></span>
+    ${window.siyuan.languages.fileSize}
     <span class="ft__on-surface">${target.getAttribute("data-hsize")}</span>
     <span class="fn__space"></span>
     <span class="fn__space"></span>
-    ${window.siyuan.languages.count}<span class="fn__space"></span>
+    ${window.siyuan.languages.fileCount}
     <span class="ft__on-surface">${target.getAttribute("data-count")}</span>
 </div>
 <div class="fn__hr"></div>

@@ -1,6 +1,4 @@
 {
-  "size": "尺寸",
-  "count": "計數",
   "createSnapshot": "創建快照",
   "dataSnapshot": "數據快照",
   "copyKey": "複製密鑰字符串",
@@ -92,6 +90,7 @@
   "rectAnnotation": "矩形標注",
   "fileName": "檔案名：",
   "fileSize": "文件大小：",
+  "fileCount": "文件數量：",
   "title1": "標題：",
   "author": "作者：",
   "subject": "主題：",

@@ -2,7 +2,7 @@ import {focusBlock, focusByWbr, focusByRange} from "./selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {Constants} from "../../constants";
 import {paste} from "./paste";
-import {genEmptyElement, genSBElement} from "../../block/util";
+import {cancelSB, genEmptyElement, genSBElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {getTopAloneElement} from "../wysiwyg/getBlock";
 import {updateListOrder} from "../wysiwyg/list";
@@ -205,29 +205,11 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
         oldSourceParentElement = topSourceElement.parentElement;
         topSourceElement.remove();
     }
-    if (oldSourceParentElement && (oldSourceParentElement.classList.contains("bq") || oldSourceParentElement.classList.contains("sb")) && oldSourceParentElement.childElementCount === 1) {
-        // 拖拽后，bq 为空
-        const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
-        if (protyleElement) {
-            const editor = getInstanceById(protyleElement.getAttribute("data-id")) as Tab;
-            if (editor && editor.model instanceof Editor) {
-                const newId = Lute.NewNodeID();
-                const newElement = genEmptyElement(false, false, newId);
-                doOperations.splice(0, 0, {
-                    action: "insert",
-                    id: newId,
-                    data: newElement.outerHTML,
-                    parentID: oldSourceParentElement.getAttribute("data-node-id")
-                });
-                undoOperations.splice(0, 0, {
-                    action: "delete",
-                    id: newId,
-                });
-                if (isSameDoc) {
-                    oldSourceParentElement.insertAdjacentElement("afterbegin", newElement);
-                }
-            }
-        }
+    if (oldSourceParentElement && oldSourceParentElement.classList.contains("sb") && oldSourceParentElement.childElementCount === 2) {
+        // 拖拽后，sb 只剩下一个元素
+        const sbData = cancelSB(protyle, oldSourceParentElement);
+        doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
+        undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
     } else if (oldSourceParentElement && oldSourceParentElement.classList.contains("protyle-wysiwyg") && oldSourceParentElement.innerHTML === "") {
         // 拖拽后，根文档原内容为空，且不为悬浮窗
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
@@ -499,29 +481,11 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
             }
         }
     }
-    if (oldSourceParentElement && (oldSourceParentElement.classList.contains("bq") || oldSourceParentElement.classList.contains("sb")) && oldSourceParentElement.childElementCount === 1) {
-        // 拖拽后，bq 为空
-        const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
-        if (protyleElement) {
-            const editor = getInstanceById(protyleElement.getAttribute("data-id")) as Tab;
-            if (editor && editor.model instanceof Editor) {
-                const newId = Lute.NewNodeID();
-                const newElement = genEmptyElement(false, false, newId);
-                doOperations.splice(0, 0, {
-                    action: "insert",
-                    id: newId,
-                    data: newElement.outerHTML,
-                    parentID: oldSourceParentElement.getAttribute("data-node-id")
-                });
-                undoOperations.splice(0, 0, {
-                    action: "delete",
-                    id: newId,
-                });
-                if (isSameDoc) {
-                    oldSourceParentElement.insertAdjacentElement("afterbegin", newElement);
-                }
-            }
-        }
+    if (oldSourceParentElement && oldSourceParentElement.classList.contains("sb") && oldSourceParentElement.childElementCount === 2) {
+        // 拖拽后，sb 只剩下一个元素
+        const sbData = cancelSB(protyle, oldSourceParentElement);
+        doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
+        undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
     } else if (oldSourceParentElement && oldSourceParentElement.classList.contains("protyle-wysiwyg") && oldSourceParentElement.childElementCount === 0) {
         // 拖拽后，根文档原内容为空，且不为悬浮窗
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);

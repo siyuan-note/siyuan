@@ -16,7 +16,7 @@ import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost} from "../../util/fetch";
-import {genSBElement, insertEmptyBlock} from "../../block/util";
+import {cancelSB, insertEmptyBlock} from "../../block/util";
 import {scrollCenter} from "../../util/highlightById";
 import {isMobile} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
@@ -883,44 +883,9 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.cancel + " " + window.siyuan.languages.superBlock,
                 click() {
-                    const doOperations: IOperation[] = [];
-                    const undoOperations: IOperation[] = [];
-                    let previousId = nodeElement.previousElementSibling ? nodeElement.previousElementSibling.getAttribute("data-node-id") : undefined;
-                    nodeElement.classList.remove("protyle-wysiwyg--select");
-                    const sbElement = genSBElement(nodeElement.getAttribute("data-sb-layout"), id, nodeElement.lastElementChild.outerHTML);
-                    undoOperations.push({
-                        action: "insert",
-                        id,
-                        data: sbElement.outerHTML,
-                        previousID: nodeElement.previousElementSibling ? nodeElement.previousElementSibling.getAttribute("data-node-id") : undefined,
-                        parentID: nodeElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
-                    });
-                    Array.from(nodeElement.children).forEach((item, index) => {
-                        if (index === nodeElement.childElementCount - 1) {
-                            doOperations.push({
-                                action: "delete",
-                                id,
-                            });
-                            nodeElement.lastElementChild.remove();
-                            nodeElement.outerHTML = nodeElement.innerHTML;
-                            return;
-                        }
-                        doOperations.push({
-                            action: "move",
-                            id: item.getAttribute("data-node-id"),
-                            previousID: previousId,
-                            parentID: nodeElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
-                        });
-                        undoOperations.push({
-                            action: "move",
-                            id: item.getAttribute("data-node-id"),
-                            previousID: item.previousElementSibling ? item.previousElementSibling.getAttribute("data-node-id") : undefined,
-                            parentID: id
-                        });
-                        previousId = item.getAttribute("data-node-id");
-                    });
-                    transaction(protyle, doOperations, undoOperations);
-                    focusBlock(protyle.wysiwyg.element.querySelector(`[data-node-id="${previousId}"]`));
+                    const sbData = cancelSB(protyle, nodeElement);
+                    transaction(protyle, sbData.doOperations, sbData.undoOperations);
+                    focusBlock(protyle.wysiwyg.element.querySelector(`[data-node-id="${sbData.previousId}"]`));
                     hideElements(["gutter"], protyle);
                 }
             }).element);

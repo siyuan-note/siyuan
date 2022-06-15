@@ -139,6 +139,7 @@ export const getTopAloneElement = (topSourceElement: Element) => {
             } else if (topSourceElement.parentElement.getAttribute("data-type") === "NodeListItem" && topSourceElement.parentElement.childElementCount === 3) {
                 topSourceElement = topSourceElement.parentElement;
             } else {
+                topSourceElement = getTopAloneElement(topSourceElement);
                 break;
             }
         }

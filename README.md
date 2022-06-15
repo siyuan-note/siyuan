@@ -193,9 +193,22 @@ Fold the heading and move it later.
 
 Click at the beginning, hold down <kbd>Shift</kbd> and click at the end after scrolling the page.
 
-## How to do find and replace?
+### How to do find and replace?
 
 Press <kbd>Ctrl+R</kbd> after selecting the keyword in the editor.
+
+## What if some blocks (such as paragraph blocks in list items) cannot find the block icon?
+
+The first sub-block under the list item is the block icon omitted. You can move the cursor into this block and trigger its block menu with <kbd>Ctrl+/</kbd> .
+
+## How to share notes?
+
+* Export and import `.sy.zip` package
+* Via network hosting
+* Export and import Markdown
+* <kbd>Export Preview</kbd> to copy to third-party online services
+
+The first two methods can guarantee the original semantics of the data.
 
 ### How to use a third-party sync disk for data synchronization?
 

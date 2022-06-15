@@ -6,7 +6,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "Frequently Asked Questions",
 		"type": "doc",
-		"updated": "20220611225313"
+		"updated": "20220615153525"
 	},
 	"Children": [
 		{
@@ -436,7 +436,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220526112843-xbvl2ni",
-				"updated": "20220526112843"
+				"updated": "20220615152228"
 			},
 			"Children": [
 				{
@@ -506,7 +506,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220526112843-q3ckr5q",
-								"updated": "20220526112843"
+								"updated": "20220615152158"
 							},
 							"Children": [
 								{
@@ -534,31 +534,11 @@
 											"Type": "NodeCloseParen"
 										}
 									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112843-ledvs09",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112843-ledvs09",
-						"updated": "20220526112843"
-					},
-					"Children": [
-						{
-							"ID": "20220526112843-jhlhthq",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112843-jhlhthq",
-								"updated": "20220526112843"
-							},
-							"Children": [
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and "
+								},
 								{
 									"Type": "NodeLink",
 									"Data": "span",
@@ -606,7 +586,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220526112843-mj4iy0b",
-								"updated": "20220526112843"
+								"updated": "20220615152201"
 							},
 							"Children": [
 								{
@@ -634,31 +614,11 @@
 											"Type": "NodeCloseParen"
 										}
 									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112843-4ht8dz5",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112843-4ht8dz5",
-						"updated": "20220526112843"
-					},
-					"Children": [
-						{
-							"ID": "20220526112843-j6ysxgc",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112843-j6ysxgc",
-								"updated": "20220526112843"
-							},
-							"Children": [
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and "
+								},
 								{
 									"Type": "NodeLink",
 									"Data": "span",
@@ -706,7 +666,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220526112843-p1pn0w7",
-								"updated": "20220526112843"
+								"updated": "20220615152221"
 							},
 							"Children": [
 								{
@@ -729,6 +689,36 @@
 										{
 											"Type": "NodeLinkDest",
 											"Data": "https://github.com/siyuan-note/encryption"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and "
+								},
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "Data repo"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/siyuan-note/dejavu"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -798,7 +788,7 @@
 					},
 					"Properties": {
 						"id": "20220526112843-qwi3jan",
-						"updated": "20220526112843"
+						"updated": "20220615152228"
 					},
 					"Children": [
 						{
@@ -806,7 +796,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220526112843-lvjzpyf",
-								"updated": "20220526112843"
+								"updated": "20220615152228"
 							},
 							"Children": [
 								{
@@ -834,31 +824,11 @@
 											"Type": "NodeCloseParen"
 										}
 									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112843-qsecrjg",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112843-qsecrjg",
-						"updated": "20220526112843"
-					},
-					"Children": [
-						{
-							"ID": "20220526112843-5dd7c2e",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112843-5dd7c2e",
-								"updated": "20220526112843"
-							},
-							"Children": [
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and "
+								},
 								{
 									"Type": "NodeLink",
 									"Data": "span",
@@ -1242,6 +1212,198 @@
 				{
 					"Type": "NodeText",
 					"Data": " ."
+				}
+			]
+		},
+		{
+			"ID": "20220615153446-i8gpnt2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220615153446-i8gpnt2",
+				"updated": "20220615153446"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to share notes?"
+				}
+			]
+		},
+		{
+			"ID": "20220615153446-zufy5mm",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220615153446-zufy5mm",
+				"updated": "20220615153525"
+			},
+			"Children": [
+				{
+					"ID": "20220615153446-j8izdpx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615153446-j8izdpx",
+						"updated": "20220615153525"
+					},
+					"Children": [
+						{
+							"ID": "20220615153446-mm04qjn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615153446-mm04qjn",
+								"updated": "20220615153525"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Export and import "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": ".sy.zip"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " package"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615153446-xatayy7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615153446-xatayy7",
+						"updated": "20220615153512"
+					},
+					"Children": [
+						{
+							"ID": "20220615153446-2f54afd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615153446-2f54afd",
+								"updated": "20220615153512"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Via network hosting"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615153446-dlcpq8t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615153446-dlcpq8t",
+						"updated": "20220615153515"
+					},
+					"Children": [
+						{
+							"ID": "20220615153446-vp4d7u6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615153446-vp4d7u6",
+								"updated": "20220615153515"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Export and i"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "mport Markdown"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615153446-gnwpvme",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615153446-gnwpvme",
+						"updated": "20220615153446"
+					},
+					"Children": [
+						{
+							"ID": "20220615153446-p54g6hl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615153446-p54g6hl",
+								"updated": "20220615153446"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Export Preview"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to copy to third-party online services"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220615153446-qqqtcoj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615153446-qqqtcoj",
+				"updated": "20220615153446"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The first two methods can guarantee the original semantics of the data."
 				}
 			]
 		},

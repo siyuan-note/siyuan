@@ -1078,13 +1078,13 @@ func getWorkspaceDataConf() (conf *filesys.DataConf, err error) {
 	if !gulu.File.IsExist(confPath) {
 		os.MkdirAll(filepath.Dir(confPath), 0755)
 		data, _ := gulu.JSON.MarshalIndentJSON(conf, "", "  ")
-		if err = os.WriteFile(confPath, data, 0644); nil != err {
+		if err = filelock.NoLockFileWrite(confPath, data); nil != err {
 			util.LogErrorf("save sync conf [%s] failed: %s", confPath, err)
 		}
 		return
 	}
 
-	data, err := os.ReadFile(confPath)
+	data, err := filelock.NoLockFileRead(confPath)
 	if nil != err {
 		util.LogErrorf("read sync conf [%s] failed: %s", confPath, err)
 		return

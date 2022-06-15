@@ -60,7 +60,7 @@ export class Title {
             }
             this.rename(protyle);
         });
-        this.editElement.addEventListener("compositionend", (event: InputEvent) => {
+        this.editElement.addEventListener("compositionend", () => {
             this.rename(protyle);
         });
         this.editElement.addEventListener("drop", (event: DragEvent) => {
@@ -132,7 +132,7 @@ export class Title {
             }
             protyle.toolbar?.element.classList.add("fn__none");
             window.siyuan.menus.menu.remove();
-            const range = getEditorRange(this.editElement)
+            const range = getEditorRange(this.editElement);
             if (range.toString() !== "") {
                 window.siyuan.menus.menu.append(new MenuItem({
                     icon: "iconCopy",
@@ -152,7 +152,7 @@ export class Title {
                         document.execCommand("cut");
                         setTimeout(() => {
                             this.rename(protyle);
-                        }, Constants.TIMEOUT_INPUT)
+                        }, Constants.TIMEOUT_INPUT);
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
@@ -160,12 +160,12 @@ export class Title {
                     accelerator: "⌫",
                     label: window.siyuan.languages.delete,
                     click: () => {
-                        const range = getEditorRange(this.editElement)
+                        const range = getEditorRange(this.editElement);
                         range.extractContents();
-                        focusByRange(range)
+                        focusByRange(range);
                         setTimeout(() => {
                             this.rename(protyle);
-                        }, Constants.TIMEOUT_INPUT)
+                        }, Constants.TIMEOUT_INPUT);
                     }
                 }).element);
             }
@@ -177,7 +177,7 @@ export class Title {
                     document.execCommand("paste");
                     setTimeout(() => {
                         this.rename(protyle);
-                    }, Constants.TIMEOUT_INPUT)
+                    }, Constants.TIMEOUT_INPUT);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

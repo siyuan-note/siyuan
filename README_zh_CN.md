@@ -237,22 +237,6 @@
 
 非中国大陆地区的用户请勿付费订阅，因为思源云端服务器无法保证非中国大陆地区可用。
 
-## 💌 参与贡献
-
-思源笔记是完全开源的，欢迎参与贡献：
-
-* [界面和内核](https://github.com/siyuan-note/siyuan)
-* [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)
-* [外观](https://github.com/siyuan-note/appearance)
-* [数据解析器](https://github.com/88250/protyle)
-* [编辑器引擎](https://github.com/88250/lute)
-* [端到端加密](https://github.com/siyuan-note/encryption)
-* [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
-* [Android 端](https://github.com/siyuan-note/siyuan-android)
-* [iOS 端](https://github.com/siyuan-note/siyuan-ios)
-
-更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
-
 ## 🙏 鸣谢
 
 思源的诞生离不开下列开源项目。

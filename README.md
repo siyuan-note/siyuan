@@ -231,22 +231,6 @@ Local functions are completely free to use, [Cloud services](https://b3log.org/s
 
 Users in non-Mainland China regions should not pay for subscriptions, because SiYuan Cloud Server cannot guarantee availability in non-Mainland China regions.
 
-## 💌 Participate in contribution
-
-SiYuan is completely open source, and contributions are welcome:
-
-* [User Interface and Kernel](https://github.com/siyuan-note/siyuan)
-* [User Guide](https://github.com/siyuan-note/user-guide-en_US)
-* [Appearance](https://github.com/siyuan-note/appearance)
-* [Data Parser](https://github.com/88250/protyle)
-* [Editor Engine](https://github.com/88250/lute)
-* [End-to-end encryption](https://github.com/siyuan-note/encryption)
-* [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
-* [Android](https://github.com/siyuan-note/siyuan-android)
-* [iOS](https://github.com/siyuan-note/siyuan-ios)
-
-For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
-
 ## 🙏 Acknowledgement
 
 SiYuan is made possible by the following open source projects.

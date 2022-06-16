@@ -22,6 +22,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -56,6 +58,7 @@ func RemoveBookmark(bookmark string) (err error) {
 
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == bookmark {
 				node.RemoveIALAttr("bookmark")
+				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 			}
 		}
 
@@ -115,6 +118,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == oldBookmark {
 				node.SetIALAttr("bookmark", newBookmark)
+				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 			}
 		}
 

@@ -172,15 +172,23 @@ func ossDownload(localDirPath, cloudDirPath string, bootOrExit bool) (fetchedFil
 		return
 	}
 
-	// 将云端索引文件临时保存一下，后面下载数据时如果部分成功，需要用索引文件恢复部分成功的文件 syncDirUpsertWorkspaceData()
-	data, err := gulu.JSON.MarshalJSON(cloudFileList)
-	if nil != err {
-		return
-	}
-	tmpSyncDir := filepath.Join(util.TempDir, "sync")
-	tmpIndex := filepath.Join(tmpSyncDir, "index.json")
-	if err = os.WriteFile(tmpIndex, data, 0644); nil != err {
-		return
+	if "backup" != cloudDirPath {
+		// 将云端索引文件临时保存一下，后面下载数据时如果部分成功，需要用索引文件恢复部分成功的文件 syncDirUpsertWorkspaceData()
+
+		var data []byte
+		data, err = gulu.JSON.MarshalJSON(cloudFileList)
+		if nil != err {
+			return
+		}
+		tmpSyncDir := filepath.Join(util.TempDir, "sync")
+		err = os.MkdirAll(tmpSyncDir, 0755)
+		if nil != err {
+			return
+		}
+		tmpIndex := filepath.Join(tmpSyncDir, "index.json")
+		if err = os.WriteFile(tmpIndex, data, 0644); nil != err {
+			return
+		}
 	}
 
 	localRemoves, cloudFetches, err := localUpsertRemoveListOSS(localDirPath, cloudFileList)

@@ -37,3 +37,9 @@ lerna-debug.log*
 # package
 package-lock.json
 yarn.lock
+
+# container
+Documents/
+.bash_history
+.config/
+.pnpm-store/

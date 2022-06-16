@@ -17,7 +17,6 @@
 package util
 
 import (
-	"flag"
 	"log"
 	"math/rand"
 	"mime"
@@ -29,6 +28,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jnovack/flag"
 	"github.com/88250/gulu"
 	figure "github.com/common-nighthawk/go-figure"
 	goPS "github.com/mitchellh/go-ps"
@@ -50,40 +50,51 @@ var (
 )
 
 func Boot() {
+    var (
+        workspacePath string
+        wdPath string
+        servePath string
+        resident bool
+        readOnly bool
+        accessAuthCode string
+        ssl bool
+        lang string
+        mode string
+    )
 	IncBootProgress(3, "Booting...")
 	rand.Seed(time.Now().UTC().UnixNano())
 	initMime()
 
-	workspacePath := flag.String("workspace", "", "dir path of the workspace, default to ~/Documents/SiYuan/")
-	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
-	servePath := flag.String("servePath", "", "obsoleted https://github.com/siyuan-note/siyuan/issues/4647")
+	flag.StringVar(&workspacePath, "workspace", "", "dir path of the workspace, default to ~/Documents/SiYuan/")
+	flag.StringVar(&wdPath, "wd", WorkingDir, "working directory of SiYuan")
+	flag.StringVar(&servePath, "servePath", "", "obsoleted https://github.com/siyuan-note/siyuan/issues/4647")
 	_ = servePath
-	resident := flag.Bool("resident", true, "resident memory even if no active session")
-	readOnly := flag.Bool("readonly", false, "read-only mode")
-	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
-	ssl := flag.Bool("ssl", false, "for https and wss")
-	lang := flag.String("lang", "en_US", "zh_CN/zh_CHT/en_US/fr_FR")
-	mode := flag.String("mode", "prod", "dev/prod")
+	flag.BoolVar(&resident, "resident", true, "resident memory even if no active session")
+	flag.BoolVar(&readOnly, "readonly", false, "read-only mode")
+	flag.StringVar(&accessAuthCode, "accessAuthCode", "", "access auth code")
+	flag.BoolVar(&ssl, "ssl", false, "for https and wss")
+	flag.StringVar(&lang, "lang", "en_US", "zh_CN/zh_CHT/en_US/fr_FR")
+	flag.StringVar(&mode, "mode", "prod", "dev/prod")
 	flag.Parse()
 
-	if "" != *wdPath {
-		WorkingDir = *wdPath
+	if "" != wdPath {
+		WorkingDir = wdPath
 	}
-	if "" != *lang {
-		Lang = *lang
+	if "" != lang {
+		Lang = lang
 	}
-	Mode = *mode
-	Resident = *resident
-	ReadOnly = *readOnly
-	AccessAuthCode = *accessAuthCode
+	Mode = mode
+	Resident = resident
+	ReadOnly = readOnly
+	AccessAuthCode = accessAuthCode
 	Container = "std"
 	if isRunningInDockerContainer() {
 		Container = "docker"
 	}
 
-	initWorkspaceDir(*workspacePath)
+	initWorkspaceDir(workspacePath)
 
-	SSL = *ssl
+	SSL = ssl
 	LogPath = filepath.Join(TempDir, "siyuan.log")
 	AppearancePath = filepath.Join(ConfDir, "appearance")
 	if "dev" == Mode {

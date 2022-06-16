@@ -319,6 +319,7 @@ ${accountHTML}
                         writeText(window.siyuan.config.repo.key);
                     });
                     modelMainElement.querySelector("#token").addEventListener("click", () => {
+                        showMessage(window.siyuan.languages.copied);
                         writeText(window.siyuan.config.api.token);
                     });
                     modelMainElement.querySelector("#exportData").addEventListener("click", () => {

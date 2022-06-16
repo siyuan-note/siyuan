@@ -45,7 +45,7 @@ func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 		return
 	}
 
-	logs, pageCount, totalCount, err = repo.GetIndexLogs(page, 16)
+	logs, pageCount, totalCount, err = repo.GetIndexLogs(page, 32)
 	if nil != err {
 		if dejavu.ErrNotFoundIndex == err {
 			logs = []*dejavu.Log{}

@@ -28,8 +28,8 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/protyle"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -133,7 +133,7 @@ func GetDocHistoryContent(historyPath string) (content string, err error) {
 		return
 	}
 
-	data, err := filesys.NoLockFileRead(historyPath)
+	data, err := filelock.NoLockFileRead(historyPath)
 	if nil != err {
 		util.LogErrorf("read file [%s] failed: %s", historyPath, err)
 		return
@@ -162,7 +162,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	baseName := filepath.Base(historyPath)
 	id := strings.TrimSuffix(baseName, ".sy")
 
-	filesys.ReleaseFileLocks(filepath.Join(util.DataDir, boxID))
+	filelock.ReleaseFileLocks(filepath.Join(util.DataDir, boxID))
 	workingDoc := treenode.GetBlockTree(id)
 	if nil != workingDoc {
 		if err = os.RemoveAll(filepath.Join(util.DataDir, boxID, workingDoc.Path)); nil != err {
@@ -285,7 +285,7 @@ func GetDocHistory(boxID string) (ret []*History, err error) {
 				return nil
 			}
 
-			data, err := filesys.NoLockFileRead(path)
+			data, err := filelock.NoLockFileRead(path)
 			if nil != err {
 				util.LogErrorf("read file [%s] failed: %s", path, err)
 				return nil
@@ -489,7 +489,7 @@ func (box *Box) generateDocHistory0() {
 		}
 
 		var data []byte
-		if data, err = filesys.NoLockFileRead(file); err != nil {
+		if data, err = filelock.NoLockFileRead(file); err != nil {
 			util.LogErrorf("generate history failed: %s", err)
 			return
 		}

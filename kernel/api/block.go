@@ -17,13 +17,14 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/html"
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -73,7 +74,7 @@ func checkBlockExist(c *gin.Context) {
 
 	id := arg["id"].(string)
 	b, err := model.GetBlock(id)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 2
 		ret.Data = id
 		return
@@ -221,7 +222,7 @@ func getBlockInfo(c *gin.Context) {
 
 	id := arg["id"].(string)
 	block, err := model.GetBlock(id)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 2
 		ret.Data = id
 		return
@@ -247,7 +248,7 @@ func getBlockInfo(c *gin.Context) {
 	}
 
 	root, err := model.GetBlock(block.RootID)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 2
 		ret.Data = id
 		return

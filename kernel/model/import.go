@@ -39,6 +39,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/protyle"
 	"github.com/mattn/go-zglob"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -253,7 +254,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
 
-	filesys.ReleaseAllFileLocks()
+	filelock.ReleaseAllFileLocks()
 
 	var baseTargetPath string
 	if "/" == toPath {
@@ -330,7 +331,7 @@ func ImportData(zipPath string) (err error) {
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
 
-	filesys.ReleaseAllFileLocks()
+	filelock.ReleaseAllFileLocks()
 	tmpDataPath := filepath.Dir(filepath.Dir(confPath))
 	if err = stableCopy(tmpDataPath, util.DataDir); nil != err {
 		util.LogErrorf("copy data dir from [%s] to [%s] failed: %s", tmpDataPath, util.DataDir, err)

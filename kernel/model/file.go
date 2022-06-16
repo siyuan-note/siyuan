@@ -39,6 +39,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/facette/natsort"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
@@ -133,9 +134,9 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 
 	filePath := filepath.Join(util.DataDir, box.ID, p)
 
-	data, err := filesys.NoLockFileRead(filePath)
+	data, err := filelock.NoLockFileRead(filePath)
 	if util.IsCorruptedSYData(data) {
-		filesys.UnlockFile(filePath)
+		filelock.UnlockFile(filePath)
 		if removeErr := os.RemoveAll(filePath); nil == removeErr {
 			util.LogInfof("removed corrupted data file [path=%s, length=%d]", filePath, len(data))
 		} else {
@@ -1043,9 +1044,9 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 		} else {
 			absFromPath := filepath.Join(util.DataDir, fromBoxID, fromFolder)
 			absToPath := filepath.Join(util.DataDir, toBoxID, newFolder)
-			filesys.ReleaseFileLocks(absFromPath)
+			filelock.ReleaseFileLocks(absFromPath)
 			if gulu.File.IsExist(absToPath) {
-				filesys.ReleaseFileLocks(absToPath)
+				filelock.ReleaseFileLocks(absToPath)
 				os.RemoveAll(absToPath)
 			}
 			if err = os.Rename(absFromPath, absToPath); nil != err {
@@ -1073,7 +1074,7 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 	} else {
 		absFromPath := filepath.Join(util.DataDir, fromBoxID, fromPath)
 		absToPath := filepath.Join(util.DataDir, toBoxID, newPath)
-		filesys.ReleaseFileLocks(absFromPath)
+		filelock.ReleaseFileLocks(absFromPath)
 		if err = os.Rename(absFromPath, absToPath); nil != err {
 			msg := fmt.Sprintf(Conf.Language(5), fromBox.Name, fromPath, err)
 			util.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBoxID, err)
@@ -1118,7 +1119,7 @@ func RemoveDoc(boxID, p string) (err error) {
 
 	historyPath := filepath.Join(historyDir, boxID, p)
 	absPath := filepath.Join(util.DataDir, boxID, p)
-	filesys.ReleaseFileLocks(absPath)
+	filelock.ReleaseFileLocks(absPath)
 	if err = gulu.File.Copy(absPath, historyPath); nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(70), box.Name, absPath, err))
 	}
@@ -1375,7 +1376,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 	fromConfPath := filepath.Join(util.DataDir, fromBox, ".siyuan", "sort.json")
 	fromFullSortIDs := map[string]int{}
 	if gulu.File.IsExist(fromConfPath) {
-		data, err := filesys.LockFileRead(fromConfPath)
+		data, err := filelock.LockFileRead(fromConfPath)
 		if nil != err {
 			util.LogErrorf("read sort conf failed: %s", err)
 			return
@@ -1392,7 +1393,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 	toConfPath := filepath.Join(util.DataDir, toBox, ".siyuan", "sort.json")
 	toFullSortIDs := map[string]int{}
 	if gulu.File.IsExist(toConfPath) {
-		data, err := filesys.LockFileRead(toConfPath)
+		data, err := filelock.LockFileRead(toConfPath)
 		if nil != err {
 			util.LogErrorf("read sort conf failed: %s", err)
 			return
@@ -1413,7 +1414,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 		util.LogErrorf("marshal sort conf failed: %s", err)
 		return
 	}
-	if err = filesys.LockFileWrite(toConfPath, data); nil != err {
+	if err = filelock.LockFileWrite(toConfPath, data); nil != err {
 		util.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
@@ -1490,7 +1491,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	fullSortIDs := map[string]int{}
 	var data []byte
 	if gulu.File.IsExist(confPath) {
-		data, err = filesys.LockFileRead(confPath)
+		data, err = filelock.LockFileRead(confPath)
 		if nil != err {
 			util.LogErrorf("read sort conf failed: %s", err)
 			return
@@ -1510,7 +1511,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 		util.LogErrorf("marshal sort conf failed: %s", err)
 		return
 	}
-	if err = filesys.LockFileWrite(confPath, data); nil != err {
+	if err = filelock.LockFileWrite(confPath, data); nil != err {
 		util.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
@@ -1524,7 +1525,7 @@ func (box *Box) fillSort(files *[]*File) {
 		return
 	}
 
-	data, err := filesys.LockFileRead(confPath)
+	data, err := filelock.LockFileRead(confPath)
 	if nil != err {
 		util.LogErrorf("read sort conf failed: %s", err)
 		return
@@ -1571,7 +1572,7 @@ func (box *Box) removeSort(rootID, path string) {
 		return
 	}
 
-	data, err := filesys.LockFileRead(confPath)
+	data, err := filelock.LockFileRead(confPath)
 	if nil != err {
 		util.LogErrorf("read sort conf failed: %s", err)
 		return
@@ -1592,7 +1593,7 @@ func (box *Box) removeSort(rootID, path string) {
 		util.LogErrorf("marshal sort conf failed: %s", err)
 		return
 	}
-	if err = filesys.LockFileWrite(confPath, data); nil != err {
+	if err = filelock.LockFileWrite(confPath, data); nil != err {
 		util.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
@@ -1601,8 +1602,8 @@ func (box *Box) removeSort(rootID, path string) {
 func ServeFile(c *gin.Context, filePath string) (err error) {
 	WaitForWritingFiles()
 
-	if filesys.IsLocked(filePath) {
-		if err = filesys.UnlockFile(filePath); nil == err {
+	if filelock.IsLocked(filePath) {
+		if err = filelock.UnlockFile(filePath); nil == err {
 			util.LogInfof("unlocked file [%s]", filePath)
 		} else {
 			msg := fmt.Sprintf("unlock file [%s] failed: %s", filePath, err)

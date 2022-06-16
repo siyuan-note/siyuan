@@ -17,13 +17,14 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -64,7 +65,7 @@ func performTransactions(c *gin.Context) {
 		err = model.PerformTransactions(&transactions)
 	}
 
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 1
 		return
 	}

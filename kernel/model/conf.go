@@ -34,8 +34,8 @@ import (
 	"github.com/88250/lute"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/getsentry/sentry-go"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -386,7 +386,7 @@ func (conf *AppConf) Save() {
 
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")
-	oldData, err := filesys.NoLockFileRead(confPath)
+	oldData, err := filelock.NoLockFileRead(confPath)
 	if nil != err {
 		conf.save0(newData)
 		return
@@ -401,7 +401,7 @@ func (conf *AppConf) Save() {
 
 func (conf *AppConf) save0(data []byte) {
 	confPath := filepath.Join(util.ConfDir, "conf.json")
-	if err := filesys.LockFileWrite(confPath, data); nil != err {
+	if err := filelock.LockFileWrite(confPath, data); nil != err {
 		util.LogFatalf("write conf [%s] failed: %s", confPath, err)
 	}
 }

@@ -33,7 +33,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/encryption"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -145,7 +145,10 @@ func RecoverLocalBackup() (err error) {
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
 
-	filesys.ReleaseAllFileLocks()
+	err = filelock.ReleaseAllFileLocks()
+	if nil != err {
+		return
+	}
 	sql.WaitForWritingDatabase()
 
 	CloseWatchAssets()
@@ -256,7 +259,10 @@ func CreateLocalBackup() (err error) {
 	defer writingDataLock.Unlock()
 	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
-	filesys.ReleaseAllFileLocks()
+	err = filelock.ReleaseAllFileLocks()
+	if nil != err {
+		return
+	}
 
 	util.LogInfof("creating backup...")
 	start := time.Now()
@@ -294,7 +300,7 @@ func CreateLocalBackup() (err error) {
 		util.LogErrorf("marshal backup conf.json failed: %s", err)
 	} else {
 		confPath := filepath.Join(newBackupDir, "conf.json")
-		if err = os.WriteFile(confPath, data, 0644); nil != err {
+		if err = gulu.File.WriteFileSafer(confPath, data, 0644); nil != err {
 			util.LogErrorf("write backup conf.json [%s] failed: %s", confPath, err)
 		}
 	}
@@ -432,13 +438,7 @@ func encryptDataDir(passwd string) (encryptedDataDir string, err error) {
 				return io.EOF
 			}
 
-			f, err0 := os.Create(p)
-			if nil != err0 {
-				util.LogErrorf("create file [%s] failed: %s", p, err0)
-				err = err0
-				return io.EOF
-			}
-			data, err0 := os.ReadFile(path)
+			data, err0 := filelock.NoLockFileRead(path)
 			if nil != err0 {
 				util.LogErrorf("read file [%s] failed: %s", path, err0)
 				err = err0
@@ -450,13 +450,9 @@ func encryptDataDir(passwd string) (encryptedDataDir string, err error) {
 				err = errors.New("encrypt file failed")
 				return io.EOF
 			}
-			if _, err0 = f.Write(data); nil != err0 {
+
+			if err0 = gulu.File.WriteFileSafer(p, data, 0644); nil != err0 {
 				util.LogErrorf("write file [%s] failed: %s", p, err0)
-				err = err0
-				return io.EOF
-			}
-			if err0 = f.Close(); nil != err0 {
-				util.LogErrorf("close file [%s] failed: %s", p, err0)
 				err = err0
 				return io.EOF
 			}
@@ -584,7 +580,7 @@ func decryptDataDir(passwd string) (decryptedDataDir string, err error) {
 				err = errors.New(Conf.Language(40))
 				return io.EOF
 			}
-			if err0 = os.WriteFile(plainP, data, 0644); nil != err0 {
+			if err0 = gulu.File.WriteFileSafer(plainP, data, 0644); nil != err0 {
 				util.LogErrorf("write file [%s] failed: %s", plainP, err0)
 				err = err0
 				return io.EOF

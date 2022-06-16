@@ -31,6 +31,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -69,7 +70,7 @@ func (box *Box) BootIndex() {
 		// 缓存块树
 		treenode.IndexBlockTree(tree)
 		if 1 < i && 0 == i%64 {
-			filesys.ReleaseAllFileLocks()
+			filelock.ReleaseAllFileLocks()
 		}
 		i++
 	}
@@ -130,7 +131,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 		idHashMap[tree.ID] = tree.Hash
 		if 1 < i && 0 == i%64 {
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(88), i, len(files)-i))
-			filesys.ReleaseAllFileLocks()
+			filelock.ReleaseAllFileLocks()
 		}
 		i++
 	}
@@ -210,7 +211,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 		}
 		if 1 < i && 0 == i%64 {
 			util.PushEndlessProgress(fmt.Sprintf("["+box.Name+"] "+Conf.Language(53), i, treeCount-i))
-			filesys.ReleaseAllFileLocks()
+			filelock.ReleaseAllFileLocks()
 		}
 		i++
 	}
@@ -348,7 +349,7 @@ func IndexRefs() {
 				}
 				if 1 < i && 0 == i%64 {
 					util.PushEndlessProgress(fmt.Sprintf(Conf.Language(55), i))
-					filesys.ReleaseAllFileLocks()
+					filelock.ReleaseAllFileLocks()
 				}
 				i++
 			}

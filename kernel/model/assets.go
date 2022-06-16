@@ -35,7 +35,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/gabriel-vasile/mimetype"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -671,7 +671,7 @@ func copyDocAssetsToDataAssets(boxID, parentDocPath string) {
 }
 
 func copyAssetsToDataAssets(rootPath string) {
-	filesys.ReleaseFileLocks(rootPath)
+	filelock.ReleaseFileLocks(rootPath)
 
 	var assetsDirPaths []string
 	filepath.Walk(rootPath, func(path string, info fs.FileInfo, err error) error {

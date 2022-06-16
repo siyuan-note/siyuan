@@ -446,21 +446,32 @@ func UnusedAssets() (ret []string) {
 	if nil != err {
 		return
 	}
+	luteEngine := NewLute()
 	for _, notebook := range notebooks {
 		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)
-		trees := loadTrees(notebookAbsPath)
 		dests := map[string]bool{}
-		for _, tree := range trees {
-			for _, d := range assetsLinkDestsInTree(tree) {
-				dests[d] = true
-			}
-
-			if titleImgPath := treenode.GetDocTitleImgPath(tree.Root); "" != titleImgPath {
-				// 题头图计入
-				if !sql.IsAssetLinkDest([]byte(titleImgPath)) {
+		pages := pagedPaths(notebookAbsPath, 20)
+		for _, paths := range pages {
+			var trees []*parse.Tree
+			for _, localPath := range paths {
+				tree, loadTreeErr := loadTree(localPath, luteEngine)
+				if nil != loadTreeErr {
 					continue
 				}
-				dests[titleImgPath] = true
+				trees = append(trees, tree)
+			}
+			for _, tree := range trees {
+				for _, d := range assetsLinkDestsInTree(tree) {
+					dests[d] = true
+				}
+
+				if titleImgPath := treenode.GetDocTitleImgPath(tree.Root); "" != titleImgPath {
+					// 题头图计入
+					if !sql.IsAssetLinkDest([]byte(titleImgPath)) {
+						continue
+					}
+					dests[titleImgPath] = true
+				}
 			}
 		}
 

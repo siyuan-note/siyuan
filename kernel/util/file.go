@@ -38,24 +38,6 @@ func IsEmptyDir(p string) bool {
 	return 1 > len(files)
 }
 
-func IsValidJSON(p string) bool {
-	if !gulu.File.IsExist(p) {
-		return false
-	}
-	data, err := os.ReadFile(p)
-	if nil != err {
-		LogErrorf("read json file [%s] failed: %s", p, err)
-		return false
-	}
-
-	json := map[string]interface{}{}
-	if err = gulu.JSON.UnmarshalJSON(data, &json); nil != err {
-		LogErrorf("parse json file [%s] failed: %s", p, err)
-		return false
-	}
-	return true
-}
-
 func RemoveID(name string) string {
 	ext := path.Ext(name)
 	name = strings.TrimSuffix(name, ext)

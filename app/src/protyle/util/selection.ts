@@ -481,20 +481,7 @@ export const focusSideBlock = (updateElement: Element) => {
         if (!sideBlockElement) {
             sideBlockElement = updateElement;
         }
-        const cursorElement = getContenteditableElement(sideBlockElement);
-        if (cursorElement) {
-            const range = getEditorRange(cursorElement);
-            range.selectNodeContents(cursorElement);
-            range.collapse(collapse);
-            focusByRange(range);
-        } else {
-            const mathElement = updateElement.querySelector(".katex-display");
-            if (mathElement) {
-                const range = mathElement.nextElementSibling.ownerDocument.createRange();
-                range.setStart(mathElement.nextElementSibling.firstChild, 0);
-                focusByRange(range);
-            }
-        }
+        focusBlock(sideBlockElement);
         return;
     }
     const range = getEditorRange(updateElement);

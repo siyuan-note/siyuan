@@ -9,7 +9,12 @@ import {
     setFirstNodeRange,
     setLastNodeRange
 } from "../util/selection";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByMatchTag} from "../util/hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByMatchTag,
+    hasTopClosestByAttribute
+} from "../util/hasClosest";
 import {removeBlock} from "./remove";
 import {
     getContenteditableElement,
@@ -125,7 +130,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (nextElement) {
                         if (nextElement.getBoundingClientRect().width === 0) {
                             // https://github.com/siyuan-note/siyuan/issues/4294
-                            const foldElement = hasClosestByAttribute(nextElement, "fold", "1");
+                            const foldElement = hasTopClosestByAttribute(nextElement, "fold", "1");
                             if (foldElement) {
                                 nextElement = getNextBlock(foldElement) as HTMLElement;
                                 if (nextElement) {
@@ -156,19 +161,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 } else if (event.key === "ArrowUp") {
                     let previousElement: HTMLElement = getPreviousBlock(selectElements[0]) as HTMLElement;
                     if (previousElement) {
-                        if (previousElement.getAttribute("fold") === "1"
-                            && (previousElement.classList.contains("sb") || previousElement.classList.contains("bq"))) {
+                        previousElement = getLastBlock(previousElement) as HTMLElement;
+                        if (previousElement.getBoundingClientRect().width === 0) {
+                            // https://github.com/siyuan-note/siyuan/issues/4294
+                            const foldElement = hasTopClosestByAttribute(previousElement, "fold", "1");
+                            if (foldElement) {
+                                previousElement = getFirstBlock(foldElement) as HTMLElement;
+                            } else {
+                                previousElement = selectElements[0] as HTMLElement;
+                            }
+                        } else if (previousElement) {
                             // https://github.com/siyuan-note/siyuan/issues/3913
-                        } else {
-                            previousElement = getLastBlock(previousElement) as HTMLElement;
-                            if (previousElement.getBoundingClientRect().width === 0) {
-                                // https://github.com/siyuan-note/siyuan/issues/4294
-                                const foldElement = hasClosestByAttribute(previousElement, "fold", "1");
-                                if (foldElement) {
-                                    previousElement = getFirstBlock(foldElement) as HTMLElement;
-                                } else {
-                                    previousElement = selectElements[0] as HTMLElement;
-                                }
+                            const foldElement = hasTopClosestByAttribute(previousElement, "fold", "1")
+                            if (foldElement && (foldElement.classList.contains("sb") || foldElement.classList.contains("bq"))) {
+                                previousElement = foldElement
                             }
                         }
                     } else if (protyle.title && (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||
@@ -539,6 +545,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             protyle.scroll.lastScrollTop = 8;
                         }
                     }
+                } else {
+                    let previousElement: HTMLElement = getPreviousBlock(nodeElement) as HTMLElement;
+                    if (previousElement) {
+                        previousElement = getLastBlock(previousElement) as HTMLElement;
+                        if (previousElement) {
+                            previousElement = hasClosestByAttribute(previousElement, "fold", "1") as HTMLElement
+                            if (previousElement && previousElement.getAttribute("data-type") !== "NodeListItem") {
+                                // 遇到折叠块
+                                focusBlock(previousElement, undefined, true);
+                                event.stopPropagation();
+                                event.preventDefault();
+                            }
+                        }
+                    }
                 }
             } else if (range.toString() === "" && (event.key === "ArrowDown" || event.key === "ArrowRight") && nodeElement.isSameNode(getLastBlock(protyle.wysiwyg.element.lastElementChild)) &&
                 // 表格无法右移动 https://ld246.com/article/1631434502215
@@ -558,6 +578,23 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     event.stopPropagation();
                     event.preventDefault();
                     focusByRange(range);
+                }
+            }
+            if (event.key === "ArrowDown") {
+                const foldElement = hasClosestByAttribute(range.startContainer, "fold", "1")
+                if (foldElement) {
+                    let nextElement = getNextBlock(foldElement) as HTMLElement;
+                    if (nextElement) {
+                        if (nextElement.getAttribute("fold") === "1"
+                            && (nextElement.classList.contains("sb") || nextElement.classList.contains("bq"))) {
+                            // https://github.com/siyuan-note/siyuan/issues/3913
+                        } else {
+                            nextElement = getFirstBlock(nextElement) as HTMLElement;
+                        }
+                        focusBlock(nextElement);
+                        event.stopPropagation();
+                        event.preventDefault();
+                    }
                 }
             }
             return;

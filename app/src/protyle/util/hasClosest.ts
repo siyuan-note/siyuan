@@ -47,6 +47,21 @@ export const hasTopClosestByTag = (element: Node, nodeName: string) => {
     return closest || false;
 };
 
+export const hasTopClosestByAttribute = (element: Node, attr: string, value: string | null, top = false) => {
+    let closest = hasClosestByAttribute(element, attr, value, top);
+    let parentClosest: boolean | HTMLElement = false;
+    let findTop = false;
+    while (closest && !closest.classList.contains("protyle-wysiwyg") && !findTop) {
+        parentClosest = hasClosestByAttribute(closest.parentElement, attr, value, top);
+        if (parentClosest) {
+            closest = parentClosest;
+        } else {
+            findTop = true;
+        }
+    }
+    return closest || false;
+};
+
 export const hasClosestByAttribute = (element: Node, attr: string, value: string | null, top = false) => {
     if (!element) {
         return false;

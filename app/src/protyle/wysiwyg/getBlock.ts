@@ -170,15 +170,3 @@ export const hasPreviousSibling = (element: Node) => {
     }
     return false;
 };
-
-export const hasPrevious = (element: Node) => {
-    let previousSibling = element.previousSibling;
-    while (previousSibling) {
-        if (previousSibling.textContent === "") {
-            previousSibling = previousSibling.previousSibling;
-        } else {
-            return previousSibling;
-        }
-    }
-    return false;
-};

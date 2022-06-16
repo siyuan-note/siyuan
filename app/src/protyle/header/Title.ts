@@ -30,6 +30,7 @@ import {code160to32} from "../util/code160to32";
 export class Title {
     public element: HTMLElement;
     public editElement: HTMLElement;
+    private timeout: number
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -228,16 +229,19 @@ export class Title {
     }
 
     private rename(protyle: IProtyle) {
+        clearTimeout(this.timeout)
         if (!validateName(this.editElement.textContent)) {
             return false;
         }
-        const fileName = replaceFileName(this.editElement.textContent);
-        fetchPost("/api/filetree/renameDoc", {
-            notebook: protyle.notebookId,
-            path: protyle.path,
-            title: fileName,
-        });
-        this.setTitle(fileName)
+        this.timeout = window.setTimeout(() => {
+            const fileName = replaceFileName(this.editElement.textContent);
+            fetchPost("/api/filetree/renameDoc", {
+                notebook: protyle.notebookId,
+                path: protyle.path,
+                title: fileName,
+            });
+            this.setTitle(fileName)
+        }, Constants.TIMEOUT_INPUT)
     }
 
     private renderMenu(protyle: IProtyle, iconElement: Element, position: { x: number, y: number }) {

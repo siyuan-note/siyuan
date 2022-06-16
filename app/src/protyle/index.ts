@@ -108,7 +108,11 @@ class Protyle {
                             this.protyle.model.parent.updateTitle(data.data.title);
                         }
                         if (this.protyle.options.render.title && this.protyle.block.parentID === data.data.id) {
-                            this.protyle.title.setTitle(data.data.title);
+                            if (getSelection().rangeCount > 0 && this.protyle.element.contains(getSelection().getRangeAt(0).startContainer)) {
+                                // 编辑中的不用更新
+                            } else {
+                                this.protyle.title.setTitle(data.data.title);
+                            }
                         }
                         // update ref
                         this.protyle.wysiwyg.element.querySelectorAll(`[data-type="block-ref"][data-id="${data.data.id}"]`).forEach(item => {

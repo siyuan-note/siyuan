@@ -385,6 +385,7 @@
     font-weight: bold;
     line-height: 1.625;
     padding: 0 4px;
+    white-space: break-spaces;
 
     &:empty:after {
       content: attr(data-tip);

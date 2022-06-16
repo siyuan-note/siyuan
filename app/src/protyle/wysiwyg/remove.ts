@@ -180,11 +180,11 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         let sideElement = selectElements[0].previousElementSibling || selectElements[selectElements.length - 1].nextElementSibling;
         let listElement: Element;
         let topElementId: string;
-        let topParentElement: Element
+        let topParentElement: Element;
         selectElements.find((item: HTMLElement) => {
             item.classList.remove("protyle-wysiwyg--select");
             const topElement = getTopAloneElement(item);
-            topParentElement = topElement.parentElement
+            topParentElement = topElement.parentElement;
             topElementId = topElement.getAttribute("data-node-id");
             const id = topElement.getAttribute("data-node-id");
             deletes.push({
@@ -378,26 +378,26 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         return;
     }
 
-    const parentElement = blockElement.parentElement
+    const parentElement = blockElement.parentElement;
     const editableElement = getContenteditableElement(blockElement);
     const previousLastElement = getLastBlock(previousElement) as HTMLElement;
     const isSelectNode = previousLastElement && (previousLastElement.classList.contains("table") || previousLastElement.classList.contains("render-node") || previousLastElement.classList.contains("iframe") || previousLastElement.classList.contains("hr") || previousLastElement.classList.contains("code-block"));
     if (isSelectNode) {
         if (previousLastElement.classList.contains("code-block")) {
             if (editableElement.textContent.trim() === "") {
-                const previousId = previousLastElement.getAttribute("data-node-id")
+                const previousId = previousLastElement.getAttribute("data-node-id");
                 const id = blockElement.getAttribute("data-node-id");
                 const doOperations: IOperation[] = [{
                     action: "delete",
                     id,
-                }]
+                }];
                 const undoOperations: IOperation[] = [{
                     action: "insert",
                     data: blockElement.outerHTML,
                     id: id,
                     previousID: blockElement.previousElementSibling?.getAttribute("data-node-id"),
                     parentID: blockElement.parentElement.getAttribute("data-node-id")
-                }]
+                }];
                 blockElement.remove();
                 // 取消超级块
                 if (parentElement.getAttribute("data-type") === "NodeSuperBlock" && parentElement.childElementCount === 2) {
@@ -470,7 +470,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             action: "update",
             data: previousLastElement.outerHTML,
             id: newId,
-        })
+        });
     }
     if (parentElement.getAttribute("data-type") === "NodeSuperBlock" && parentElement.childElementCount === 2) {
         const sbData = cancelSB(protyle, parentElement);

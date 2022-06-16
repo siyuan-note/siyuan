@@ -11,7 +11,7 @@ export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
     const undoOperations: IOperation[] = [];
     let previousId = nodeElement.previousElementSibling ? nodeElement.previousElementSibling.getAttribute("data-node-id") : undefined;
     nodeElement.classList.remove("protyle-wysiwyg--select");
-    const id = nodeElement.getAttribute("data-node-id")
+    const id = nodeElement.getAttribute("data-node-id");
     const sbElement = genSBElement(nodeElement.getAttribute("data-sb-layout"), id, nodeElement.lastElementChild.outerHTML);
     undoOperations.push({
         action: "insert",
@@ -47,8 +47,8 @@ export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
 
     return {
         doOperations, undoOperations, previousId
-    }
-}
+    };
+};
 
 export const genSBElement = (layout: string, id?: string, attrHTML?: string) => {
     const sbElement = document.createElement("div");

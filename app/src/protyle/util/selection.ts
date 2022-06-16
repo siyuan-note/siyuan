@@ -481,7 +481,7 @@ export const focusSideBlock = (updateElement: Element) => {
         if (!sideBlockElement) {
             sideBlockElement = updateElement;
         }
-        focusBlock(sideBlockElement);
+        focusBlock(sideBlockElement, undefined, collapse);
         return;
     }
     const range = getEditorRange(updateElement);

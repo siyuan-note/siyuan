@@ -19,7 +19,7 @@ export const validateName = (name: string) => {
 };
 
 export const replaceFileName = (name: string) => {
-    return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|\//g, "").trim();
+    return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|\//g, "");
 };
 
 export const rename = (options: {
@@ -130,7 +130,7 @@ export const newFileBySelect = (fileName: string, protyle: IProtyle) => {
     const id = Lute.NewNodeID();
     fetchPost("/api/filetree/createDoc", {
         notebook: protyle.notebookId,
-        path: pathPosix().join(getDisplayName(protyle.path, false, true), id+ ".sy"),
+        path: pathPosix().join(getDisplayName(protyle.path, false, true), id + ".sy"),
         title: fileName,
         md: ""
     }, () => {

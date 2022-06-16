@@ -54,7 +54,7 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
         fetchPost("/api/filetree/createDoc", {
             notebook: notebookId,
             path: pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy"),
-            title: data.data.name || window.siyuan.languages.untitled,
+            title: data.data.name || "Untitled",
             md: "",
         }, () => {
             if (open && !isMobile()) {

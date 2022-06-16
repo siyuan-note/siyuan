@@ -493,10 +493,10 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 fetchPost("/api/filetree/createDoc", {
                     notebook: protyle.notebookId,
                     path: pathPosix().join(getDisplayName(protyle.path, false, true), newSubDocId + ".sy"),
-                    title: window.siyuan.languages.untitled,
+                    title: "Untitled",
                     md: ""
                 }, () => {
-                    insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">${escapeHtml(window.siyuan.languages.untitled)}</span>`), protyle);
+                    insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">Untitled</span>`), protyle);
                     if (isMobile()) {
                         openMobileFileById(newSubDocId, true);
                     } else {

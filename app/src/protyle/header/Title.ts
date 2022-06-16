@@ -25,6 +25,7 @@ import {setTitle} from "../../dialog/processSystem";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
 import {setPosition} from "../../util/setPosition";
+import {code160to32} from "../util/code160to32";
 
 export class Title {
     public element: HTMLElement;
@@ -228,14 +229,7 @@ export class Title {
 
     private rename(protyle: IProtyle) {
         if (!validateName(this.editElement.textContent)) {
-            this.editElement.textContent = replaceFileName(this.editElement.textContent);
             return false;
-        }
-        if (this.editElement.textContent.trim() === "" || this.editElement.textContent.trim() === window.siyuan.languages.untitled) {
-            this.editElement.textContent = window.siyuan.languages.untitled;
-            this.editElement.classList.add("protyle-title__input--untitled");
-        } else {
-            this.editElement.classList.remove("protyle-title__input--untitled");
         }
         const fileName = replaceFileName(this.editElement.textContent);
         fetchPost("/api/filetree/renameDoc", {
@@ -243,7 +237,7 @@ export class Title {
             path: protyle.path,
             title: fileName,
         });
-        this.editElement.textContent = fileName;
+        this.setTitle(fileName)
     }
 
     private renderMenu(protyle: IProtyle, iconElement: Element, position: { x: number, y: number }) {
@@ -333,6 +327,12 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
         });
     }
 
+    public setTitle(title: string) {
+        if (code160to32(title) !== code160to32(this.editElement.textContent)) {
+            this.editElement.textContent = title === "Untitled" ? "" : title;
+        }
+    }
+
     public render(protyle: IProtyle, refresh = false) {
         if (this.editElement.getAttribute("data-render") === "true" && !refresh) {
             return;
@@ -344,12 +344,7 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
             protyle.background.render(response.data.ial, protyle.block.rootID);
             protyle.wysiwyg.renderCustom(response.data.ial);
             this.editElement.setAttribute("data-render", "true");
-            this.editElement.textContent = response.data.ial.title;
-            if (response.data.ial.title === window.siyuan.languages.untitled) {
-                this.editElement.classList.add("protyle-title__input--untitled");
-            } else {
-                this.editElement.classList.remove("protyle-title__input--untitled");
-            }
+            this.setTitle(response.data.ial.title);
             let nodeAttrHTML = "";
             if (response.data.ial.bookmark) {
                 nodeAttrHTML += `<div class="protyle-attr--bookmark">${Lute.EscapeHTMLStr(response.data.ial.bookmark)}</div>`;
@@ -367,7 +362,7 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
             if (response.data.refCount !== 0) {
                 this.element.querySelector(".protyle-attr").insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids='${JSON.stringify([protyle.block.rootID])}' data-id='${JSON.stringify(response.data.refIDs)}'>${response.data.refCount}</div>`);
             }
-            // 存在设置新建文档名模板，不能使用 window.siyuan.languages.untitled 进行判断，https://ld246.com/article/1649301009888
+            // 存在设置新建文档名模板，不能使用 Untitled 进行判断，https://ld246.com/article/1649301009888
             if (new Date().getTime() - dayjs(response.data.id.split("-")[0]).toDate().getTime() < 2000) {
                 const range = this.editElement.ownerDocument.createRange();
                 range.selectNodeContents(this.editElement);

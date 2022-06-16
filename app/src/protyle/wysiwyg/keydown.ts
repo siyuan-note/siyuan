@@ -136,6 +136,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             } else {
                                 nextElement = currentSelectElement;
                             }
+                        } else if (nextElement.getAttribute("fold") === "1"
+                            && (nextElement.classList.contains("sb") || nextElement.classList.contains("bq"))) {
+                            // https://github.com/siyuan-note/siyuan/issues/3913
                         } else {
                             nextElement = getFirstBlock(nextElement) as HTMLElement;
                         }
@@ -153,14 +156,19 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 } else if (event.key === "ArrowUp") {
                     let previousElement: HTMLElement = getPreviousBlock(selectElements[0]) as HTMLElement;
                     if (previousElement) {
-                        previousElement = getLastBlock(previousElement) as HTMLElement;
-                        if (previousElement.getBoundingClientRect().width === 0) {
-                            // https://github.com/siyuan-note/siyuan/issues/4294
-                            const foldElement = hasClosestByAttribute(previousElement, "fold", "1");
-                            if (foldElement) {
-                                previousElement = getFirstBlock(foldElement) as HTMLElement;
-                            } else {
-                                previousElement = selectElements[0] as HTMLElement;
+                        if (previousElement.getAttribute("fold") === "1"
+                            && (previousElement.classList.contains("sb") || previousElement.classList.contains("bq"))) {
+                            // https://github.com/siyuan-note/siyuan/issues/3913
+                        } else {
+                            previousElement = getLastBlock(previousElement) as HTMLElement;
+                            if (previousElement.getBoundingClientRect().width === 0) {
+                                // https://github.com/siyuan-note/siyuan/issues/4294
+                                const foldElement = hasClosestByAttribute(previousElement, "fold", "1");
+                                if (foldElement) {
+                                    previousElement = getFirstBlock(foldElement) as HTMLElement;
+                                } else {
+                                    previousElement = selectElements[0] as HTMLElement;
+                                }
                             }
                         }
                     } else if (protyle.title && (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||

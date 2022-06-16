@@ -249,7 +249,7 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
             action: "insert",
             data: listItemElement.parentElement.outerHTML,
             previousID: listItemElement.parentElement.previousElementSibling?.getAttribute("data-node-id"),
-            parentID: listItemElement.parentElement.parentElement.getAttribute("data-node-id")
+            parentID: listItemElement.parentElement.parentElement.getAttribute("data-node-id") || protyle.block.rootID
         });
         listItemElement.parentElement.remove();
         doOperations.push({

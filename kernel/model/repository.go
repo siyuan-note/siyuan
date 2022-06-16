@@ -20,6 +20,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"os"
 	"time"
 
@@ -214,13 +215,23 @@ func indexRepoBeforeCloudSync() {
 	}
 
 	start := time.Now()
-	_, err = repo.Index("[Auto] Cloud sync", nil, nil)
+	latest, err := repo.Latest()
+	index, err := repo.Index("[Auto] Cloud sync", nil, nil)
 	if nil != err {
 		util.LogErrorf("index repo before cloud sync failed: %s", err)
 		return
 	}
-	elapsed := time.Since(start).Milliseconds()
-	if 7000 < elapsed {
-		util.LogWarnf("index repo before cloud sync elapsed [%dms]", elapsed)
+	elapsed := time.Since(start)
+	if nil != latest && latest.ID != index.ID {
+		// 对新创建的快照需要更新备注，加入耗时统计
+		index.Memo = fmt.Sprintf("[Auto] Cloud sync, completed in [%.2fs]", elapsed.Seconds())
+		err = repo.PutIndex(index)
+		if nil != err {
+			util.LogErrorf("put index into repo before cloud sync failed: %s", err)
+			return
+		}
+	}
+	if 7000 < elapsed.Milliseconds() {
+		util.LogWarnf("index repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
 	}
 }

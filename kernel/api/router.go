@@ -103,6 +103,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/outline/getDocOutline", model.CheckAuth, getDocOutline)
 	ginServer.Handle("POST", "/api/bookmark/getBookmark", model.CheckAuth, getBookmark)
 	ginServer.Handle("POST", "/api/bookmark/renameBookmark", model.CheckAuth, renameBookmark)
+	ginServer.Handle("POST", "/api/bookmark/removeBookmark", model.CheckAuth, removeBookmark)
 	ginServer.Handle("POST", "/api/tag/getTag", model.CheckAuth, getTag)
 	ginServer.Handle("POST", "/api/tag/renameTag", model.CheckAuth, renameTag)
 	ginServer.Handle("POST", "/api/tag/removeTag", model.CheckAuth, removeTag)

@@ -27,6 +27,52 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func RemoveBookmark(bookmark string) (err error) {
+	util.PushEndlessProgress(Conf.Language(116))
+
+	bookmarks := sql.QueryBookmarkBlocksByKeyword(bookmark)
+	treeBlocks := map[string][]string{}
+	for _, tag := range bookmarks {
+		if blocks, ok := treeBlocks[tag.RootID]; !ok {
+			treeBlocks[tag.RootID] = []string{tag.ID}
+		} else {
+			treeBlocks[tag.RootID] = append(blocks, tag.ID)
+		}
+	}
+
+	for treeID, blocks := range treeBlocks {
+		util.PushEndlessProgress("[" + treeID + "]")
+		tree, e := loadTreeByBlockID(treeID)
+		if nil != e {
+			util.PushClearProgress()
+			return e
+		}
+
+		for _, blockID := range blocks {
+			node := treenode.GetNodeInTree(tree, blockID)
+			if nil == node {
+				continue
+			}
+
+			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == bookmark {
+				node.RemoveIALAttr("bookmark")
+			}
+		}
+
+		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), tree.Root.IALAttr("title")))
+		if err = writeJSONQueue(tree); nil != err {
+			util.ClearPushProgress(100)
+			return
+		}
+		util.RandomSleep(50, 150)
+	}
+
+	util.PushEndlessProgress(Conf.Language(113))
+	sql.WaitForWritingDatabase()
+	util.ReloadUI()
+	return
+}
+
 func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 	if treenode.ContainsMarker(newBookmark) {
 		return errors.New(Conf.Language(112))

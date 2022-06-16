@@ -448,9 +448,10 @@ func UnusedAssets() (ret []string) {
 	}
 	luteEngine := NewLute()
 	for _, notebook := range notebooks {
-		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)
 		dests := map[string]bool{}
-		pages := pagedPaths(notebookAbsPath, 20)
+
+		// 分页加载，优化清理未引用资源内存占用 https://github.com/siyuan-note/siyuan/issues/5200
+		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 20)
 		for _, paths := range pages {
 			var trees []*parse.Tree
 			for _, localPath := range paths {

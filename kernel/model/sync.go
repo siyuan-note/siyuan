@@ -151,7 +151,11 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
-	syncConf, err := getWorkspaceDataConf()
+	// 创建数据快照 https://github.com/siyuan-note/siyuan/issues/5161
+	indexRepoBeforeCloudSync()
+
+	// 获取工作空间数据配置（数据版本）
+	dataConf, err := getWorkspaceDataConf()
 	if nil != err {
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		Conf.Sync.Stat = msg
@@ -181,8 +185,8 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
-	//util.LogInfof("sync [cloud=%d, local=%d]", cloudSyncVer, syncConf.SyncVer)
-	if cloudSyncVer == syncConf.SyncVer {
+	//util.LogInfof("sync [cloud=%d, local=%d]", cloudSyncVer, dataConf.SyncVer)
+	if cloudSyncVer == dataConf.SyncVer {
 		BootSyncSucc = 0
 		ExitSyncSucc = 0
 		syncSameCount++
@@ -217,7 +221,7 @@ func SyncData(boot, exit, byHand bool) {
 
 	localSyncDirPath := Conf.Sync.GetSaveDir()
 	syncSameCount = 0
-	if cloudSyncVer < syncConf.SyncVer {
+	if cloudSyncVer < dataConf.SyncVer {
 		// 上传
 
 		if -1 == cloudSyncVer {
@@ -227,7 +231,7 @@ func SyncData(boot, exit, byHand bool) {
 		}
 
 		start := time.Now()
-		//util.LogInfof("sync [cloud=%d, local=%d] uploading...", cloudSyncVer, syncConf.SyncVer)
+		//util.LogInfof("sync [cloud=%d, local=%d] uploading...", cloudSyncVer, dataConf.SyncVer)
 		syncSize, err := util.SizeOfDirectory(localSyncDirPath, false)
 		if nil != err {
 			util.PushErrMsg(fmt.Sprintf(Conf.Language(80), formatErrorMsg(err)), 7000)
@@ -266,7 +270,7 @@ func SyncData(boot, exit, byHand bool) {
 		util.PushClearProgress()
 		elapsed := time.Now().Sub(start).Seconds()
 		stat := fmt.Sprintf(Conf.Language(130), wroteFiles, humanize.Bytes(transferSize)) + fmt.Sprintf(Conf.Language(132), elapsed)
-		util.LogInfof("sync [cloud=%d, local=%d, wroteFiles=%d, transferSize=%s] uploaded in [%.2fs]", cloudSyncVer, syncConf.SyncVer, wroteFiles, humanize.Bytes(transferSize), elapsed)
+		util.LogInfof("sync [cloud=%d, local=%d, wroteFiles=%d, transferSize=%s] uploaded in [%.2fs]", cloudSyncVer, dataConf.SyncVer, wroteFiles, humanize.Bytes(transferSize), elapsed)
 
 		Conf.Sync.Uploaded = now
 		Conf.Sync.Stat = stat
@@ -286,7 +290,7 @@ func SyncData(boot, exit, byHand bool) {
 	}
 
 	start := time.Now()
-	//util.LogInfof("sync [cloud=%d, local=%d] downloading...", cloudSyncVer, syncConf.SyncVer)
+	//util.LogInfof("sync [cloud=%d, local=%d] downloading...", cloudSyncVer, dataConf.SyncVer)
 
 	// 使用路径映射文件进行解密验证 https://github.com/siyuan-note/siyuan/issues/3789
 	var tmpFetchedFiles int
@@ -381,7 +385,7 @@ func SyncData(boot, exit, byHand bool) {
 
 	elapsed := time.Now().Sub(start).Seconds()
 	stat := fmt.Sprintf(Conf.Language(129), fetchedFilesCount, humanize.Bytes(transferSize)) + fmt.Sprintf(Conf.Language(131), elapsed)
-	util.LogInfof("sync [cloud=%d, local=%d, fetchedFiles=%d, transferSize=%s] downloaded in [%.2fs]", cloudSyncVer, syncConf.SyncVer, fetchedFilesCount, humanize.Bytes(transferSize), elapsed)
+	util.LogInfof("sync [cloud=%d, local=%d, fetchedFiles=%d, transferSize=%s] downloaded in [%.2fs]", cloudSyncVer, dataConf.SyncVer, fetchedFilesCount, humanize.Bytes(transferSize), elapsed)
 
 	Conf.Sync.Downloaded = now
 	Conf.Sync.Stat = stat

@@ -469,6 +469,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return;
                 }
             }
+            // https://github.com/siyuan-note/siyuan/issues/5185
+            if (range.startOffset === 0 && range.startContainer.nodeType === 3) {
+                const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement
+                if (previousSibling && previousSibling.nodeType !== 3 && previousSibling.getAttribute("data-type") === "inline-math") {
+                    protyle.toolbar.showRender(protyle, previousSibling);
+                    return;
+                } else if (!previousSibling && range.startContainer.parentElement.previousSibling.isSameNode(range.startContainer.parentElement.previousElementSibling) &&
+                    range.startContainer.parentElement.previousElementSibling.getAttribute("data-type") === "inline-math") {
+                    protyle.toolbar.showRender(protyle, range.startContainer.parentElement.previousElementSibling);
+                    return;
+                }
+            }
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             let actionElement = nodeElement;
             if (selectElements.length > 0) {

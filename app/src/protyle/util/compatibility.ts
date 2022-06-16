@@ -6,7 +6,7 @@ export const writeText = async (text: string) => {
             window.JSAndroid.writeClipboard(text);
             return;
         }
-        if (window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) {
+        if ("ios" === window.siyuan.config.system.container && window.webkit?.messageHandlers) {
             window.webkit.messageHandlers.setClipboard.postMessage(text);
             return;
         }

@@ -201,3 +201,26 @@ func IndexRepo(memo string) (err error) {
 	util.PushClearProgress()
 	return
 }
+
+func indexRepoBeforeCloudSync() {
+	if 1 > len(Conf.Repo.Key) {
+		return
+	}
+
+	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	if nil != err {
+		util.LogErrorf("init repo failed: %s", err)
+		return
+	}
+
+	start := time.Now()
+	_, err = repo.Index("[Auto] Cloud sync", nil, nil)
+	if nil != err {
+		util.LogErrorf("index repo before cloud sync failed: %s", err)
+		return
+	}
+	elapsed := time.Since(start).Milliseconds()
+	if 7000 < elapsed {
+		util.LogWarnf("index repo before cloud sync elapsed [%dms]", elapsed)
+	}
+}

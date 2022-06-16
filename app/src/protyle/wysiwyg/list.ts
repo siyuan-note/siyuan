@@ -241,18 +241,36 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
             listItemElement.parentElement.after(item);
         }
     });
-    undoOperations.splice(0, 0, {
-        id: listItemId,
-        action: "insert",
-        data: listItemElement.outerHTML,
-        previousID: listItemElement.previousElementSibling?.getAttribute("data-node-id"),
-        parentID: listItemElement.parentElement.getAttribute("data-node-id")
-    });
-    listItemElement.remove();
-    doOperations.push({
-        id: listItemId,
-        action: "delete",
-    });
+
+    const parentId = listItemElement.parentElement.getAttribute("data-node-id")
+    if (listItemElement.parentElement.childElementCount === 2) {
+        undoOperations.splice(0, 0, {
+            id: parentId,
+            action: "insert",
+            data: listItemElement.parentElement.outerHTML,
+            previousID: listItemElement.parentElement.previousElementSibling?.getAttribute("data-node-id"),
+            parentID: listItemElement.parentElement.parentElement.getAttribute("data-node-id")
+        });
+        listItemElement.parentElement.remove();
+        doOperations.push({
+            id: parentId,
+            action: "delete",
+        });
+    } else {
+        undoOperations.splice(0, 0, {
+            id: listItemId,
+            action: "insert",
+            data: listItemElement.outerHTML,
+            previousID: listItemElement.previousElementSibling?.getAttribute("data-node-id"),
+            parentID: parentId
+        });
+        listItemElement.remove();
+        doOperations.push({
+            id: listItemId,
+            action: "delete",
+        });
+    }
+
     transaction(protyle, doOperations, undoOperations);
     focusByWbr(protyle.wysiwyg.element, range);
 };

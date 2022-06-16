@@ -40,9 +40,9 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20220616050739-e25262132c10
+	github.com/siyuan-note/dejavu v0.0.0-20220616063348-51925ac64e13
 	github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676
-	github.com/siyuan-note/filelock v0.0.0-20220615164210-064676f342aa
+	github.com/siyuan-note/filelock v0.0.0-20220616063212-74cfba0754ee
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd

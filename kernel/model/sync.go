@@ -654,7 +654,7 @@ func genCloudIndex(localDirPath string, excludes map[string]bool, calcHash bool)
 		util.LogErrorf("marshal sync cloud index failed: %s", err)
 		return
 	}
-	if err = os.WriteFile(filepath.Join(localDirPath, "index.json"), data, 0644); nil != err {
+	if err = gulu.File.WriteFileSafer(filepath.Join(localDirPath, "index.json"), data, 0644); nil != err {
 		util.LogErrorf("write sync cloud index failed: %s", err)
 		return
 	}
@@ -748,7 +748,7 @@ func recoverSyncData(metaPath, indexPath string, modified map[string]bool) (decr
 				}
 			}
 
-			if err0 = os.WriteFile(plainP, data, 0644); nil != err0 {
+			if err0 = gulu.File.WriteFileSafer(plainP, data, 0644); nil != err0 {
 				util.LogErrorf("write file [%s] failed: %s", plainP, err0)
 				err = err0
 				return io.EOF
@@ -836,7 +836,7 @@ func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encrypte
 				}
 			}
 
-			err0 = os.WriteFile(p, data, 0644)
+			err0 = gulu.File.WriteFileSafer(p, data, 0644)
 			if nil != err0 {
 				util.LogErrorf("write file [%s] failed: %s", p, err0)
 				err = err0
@@ -895,7 +895,7 @@ func prepareSyncData(passwd string, unchangedDataList map[string]bool) (encrypte
 		util.LogErrorf("encrypt file failed: %s", err)
 		return
 	}
-	if err = os.WriteFile(filepath.Join(encryptedDataDir, pathJSON), data, 0644); nil != err {
+	if err = gulu.File.WriteFileSafer(filepath.Join(encryptedDataDir, pathJSON), data, 0644); nil != err {
 		return
 	}
 	return
@@ -1107,7 +1107,7 @@ func incLocalSyncVer() {
 	conf.SyncVer++
 	data, _ := gulu.JSON.MarshalIndentJSON(conf, "", "  ")
 	confPath := filepath.Join(Conf.Sync.GetSaveDir(), ".siyuan", "conf.json")
-	if err = os.WriteFile(confPath, data, 0644); nil != err {
+	if err = gulu.File.WriteFileSafer(confPath, data, 0644); nil != err {
 		util.LogErrorf("save sync conf [%s] failed: %s", confPath, err)
 	}
 	return
@@ -1259,7 +1259,7 @@ func getSyncIgnoreList() (ret *hashset.Set) {
 	ignore := filepath.Join(util.DataDir, ".siyuan", "syncignore")
 	os.MkdirAll(filepath.Dir(ignore), 0755)
 	if !gulu.File.IsExist(ignore) {
-		if err := os.WriteFile(ignore, nil, 0644); nil != err {
+		if err := gulu.File.WriteFileSafer(ignore, nil, 0644); nil != err {
 			util.LogErrorf("create syncignore [%s] failed: %s", ignore, err)
 			return
 		}

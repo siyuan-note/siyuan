@@ -451,7 +451,7 @@ func UnusedAssets() (ret []string) {
 		dests := map[string]bool{}
 
 		// 分页加载，优化清理未引用资源内存占用 https://github.com/siyuan-note/siyuan/issues/5200
-		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 20)
+		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
 		for _, paths := range pages {
 			var trees []*parse.Tree
 			for _, localPath := range paths {

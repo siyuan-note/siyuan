@@ -34,5 +34,4 @@ jobs:
 
       - name: Build the Docker image
         run: |
-          docker login --username=${{ secrets.DOCKER_HUB_USER }} --password=${{ secrets.DOCKER_HUB_PWD }}
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7 -t b3log/siyuan:latest -t b3log/siyuan:v2.0.20 .
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7 -t ${{ secrets.DOCKERHUB_USERNAME }}/siyuan:latest -t ${{ secrets.DOCKERHUB_USERNAME }}/siyuan:v2.0.20 .

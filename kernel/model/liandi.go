@@ -170,7 +170,9 @@ func AutoRefreshUser() {
 
 		if nil != Conf.User {
 			time.Sleep(3 * time.Minute)
-			RefreshUser(Conf.User.UserToken)
+			if nil != Conf.User {
+				RefreshUser(Conf.User.UserToken)
+			}
 			subscriptionExpirationReminded = false
 		}
 		<-refreshUserTicker.C

@@ -60,6 +60,8 @@ func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 }
 
 func ImportRepoKey(hexKey string) (err error) {
+	msgId := util.PushMsg(Conf.Language(136), 1000*7)
+
 	key, err := hex.DecodeString(hexKey)
 	if nil != err {
 		return
@@ -73,10 +75,19 @@ func ImportRepoKey(hexKey string) (err error) {
 	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); nil != err {
 		return
 	}
+
+	time.Sleep(1 * time.Second)
+	util.PushUpdateMsg(msgId, Conf.Language(138), 3000)
+	time.Sleep(1 * time.Second)
+	if initErr := IndexRepo("Init data repo"); nil != initErr {
+		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(140), initErr), 7000)
+	}
 	return
 }
 
 func InitRepoKey() (err error) {
+	msgId := util.PushMsg(Conf.Language(136), 1000*7)
+
 	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); nil != err {
 		return
 	}
@@ -94,6 +105,7 @@ func InitRepoKey() (err error) {
 	_, err = rand.Read(randomBytes)
 	if nil != err {
 		util.LogErrorf("init repo key failed: %s", err)
+		util.PushUpdateMsg(msgId, Conf.Language(137), 5000)
 		return
 	}
 	salt := string(randomBytes)
@@ -101,10 +113,18 @@ func InitRepoKey() (err error) {
 	key, err := encryption.KDF(password, salt)
 	if nil != err {
 		util.LogErrorf("init repo key failed: %s", err)
+		util.PushUpdateMsg(msgId, Conf.Language(137), 5000)
 		return
 	}
 	Conf.Repo.Key = key
 	Conf.Save()
+
+	time.Sleep(1 * time.Second)
+	util.PushUpdateMsg(msgId, Conf.Language(138), 3000)
+	time.Sleep(1 * time.Second)
+	if initErr := IndexRepo("Init data repo"); nil != initErr {
+		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(140), initErr), 7000)
+	}
 	return
 }
 

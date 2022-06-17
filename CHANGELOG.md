@@ -1,3 +1,27 @@
+## v2.0.21 / 2022-06-17
+
+### 改进功能
+
+* [改进上下键遇到折叠的超级块和引述块时的交互](https://github.com/siyuan-note/siyuan/issues/3913)
+* [拖拽/删除后形成超级块下仅有一个块时取消该超级块](https://github.com/siyuan-note/siyuan/issues/4653)
+* [书签面板添加 `删除` 按钮用于删除书签组](https://github.com/siyuan-note/siyuan/issues/5155)
+* [云端同步时自动创建数据快照](https://github.com/siyuan-note/siyuan/issues/5161)
+* [希望修改公式时可以做到无鼠标操作](https://github.com/siyuan-note/siyuan/issues/5185)
+* [潜在的文件锁问题](https://github.com/siyuan-note/siyuan/issues/5191)
+* [改进云端同步和备份文件读写健壮性](https://github.com/siyuan-note/siyuan/issues/5196)
+* [优化清理未引用资源内存占用](https://github.com/siyuan-note/siyuan/issues/5200)
+* [代码块末尾向后删除改进](https://github.com/siyuan-note/siyuan/issues/5215)
+* [Added multi-arch support for Docker image](https://github.com/siyuan-note/siyuan/pull/5221)
+* [桌面端顶栏加入订阅试用图标](https://github.com/siyuan-note/siyuan/issues/5222)
+
+### 修复缺陷
+
+* [Android 端无法复制数据仓库密钥](https://github.com/siyuan-note/siyuan/issues/5198)
+* [下载云端备份报错](https://github.com/siyuan-note/siyuan/issues/5201)
+* [编辑文档标题时空格和置空问题](https://github.com/siyuan-note/siyuan/issues/5202)
+* [重命名书签后属性面板中的书签属性没有更改](https://github.com/siyuan-note/siyuan/issues/5207)
+* [列表项回车断开触发状态异常](https://github.com/siyuan-note/siyuan/issues/5208)
+
 ## v2.0.20 / 2022-06-15
 
 ### 改进功能

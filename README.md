@@ -154,6 +154,19 @@ To get the latest Insider Preview, please send an email with your GitHub login n
 
 ## ❓ FAQ
 
+### Is SiYuan right for me? Or how should I choose note-taking software?
+
+This question varies from person to person and is difficult to answer uniformly. But technically we have the following recommendations:
+
+* If you need to frequently share notes or edit collaboratively with others, and need the data table function, it is recommended to use:
+
+  * [Notion - One workspace. Every team.](https://www.notion.so/)
+* If you like to use plain text Markdown files to store your notes, it is recommended to use:
+
+  * [Obsidian - A second brain, for you, forever.](https://obsidian.md/)
+  * [Logseq - A privacy-first, open-source knowledge base](https://logseq.com/)
+* After all the above recommendations have been tried, try SiYuan again
+
 ### How does SiYuan store data?
 
 The data is saved in the workspace folder (the default is in the user's home directory Documents/SiYuan, which can be modified in <kbd>Settings</kbd> - <kbd>About</kbd>), in the workspace data folder:

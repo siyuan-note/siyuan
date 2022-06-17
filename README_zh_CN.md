@@ -160,6 +160,21 @@
 
 ## ❓ 常见问题和解答
 
+### 思源适合我吗？或者说我应该如何选择笔记软件？
+
+这个问题因人而异，很难统一回答。但从技术上而言我们有如下建议：
+
+* 如果你需要经常分享笔记或者与别人协作编辑，并且需要数据表格功能，推荐使用：
+
+  * [Notion - One workspace. Every team.](https://www.notion.so/)
+  * [我来 wolai - 不仅仅是未来的云端协作平台与个人笔记](https://www.wolai.com/)
+  * [FlowUs 息流 - 新一代知识管理与协作平台](https://flowus.cn/)
+* 如果你喜欢使用纯文本 Markdown 文件存储笔记，推荐使用：
+
+  * [Obsidian - A second brain, for you, forever.](https://obsidian.md/)
+  * [Logseq - A privacy-first, open-source knowledge base](https://logseq.com/)
+* 以上推荐都试过以后再试试思源
+
 ### 思源是如何存储数据的？
 
 数据保存在工作空间文件夹下（默认位于用户家目录 Documents/SiYuan，可在 <kbd>设置</kbd> - <kbd>关于</kbd> 中进行修改），在工作空间 data 文件夹下：

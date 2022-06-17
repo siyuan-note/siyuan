@@ -6,9 +6,399 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20220615153332"
+		"updated": "20220617163107"
 	},
 	"Children": [
+		{
+			"ID": "20220617160928-fw4ixa3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220617160928-fw4ixa3",
+				"updated": "20220617161057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源适合我吗？或者说我应该如何选择笔记软件？"
+				}
+			]
+		},
+		{
+			"ID": "20220617161051-9hnwzuw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220617161051-9hnwzuw",
+				"updated": "20220617161314"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "这个问题因人而异，很难统一回答。但从技术上而言我们有如下建议："
+				}
+			]
+		},
+		{
+			"ID": "20220617161301-eouqj46",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220617161301-eouqj46",
+				"updated": "20220617163107"
+			},
+			"Children": [
+				{
+					"ID": "20220617161333-cfjjt9f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220617161333-cfjjt9f"
+					},
+					"Children": [
+						{
+							"ID": "20220617161333-ljoc9yt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220617161333-ljoc9yt",
+								"updated": "20220617161636"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果你需要经常分享笔记或者与别人协作编辑，并且需要数据表格功能，推荐使用："
+								}
+							]
+						},
+						{
+							"ID": "20220617161455-izhl04n",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20220617161455-izhl04n"
+							},
+							"Children": [
+								{
+									"ID": "20220617161455-z1nqmw7",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220617161455-z1nqmw7"
+									},
+									"Children": [
+										{
+											"ID": "20220617161455-9v5752p",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220617161455-9v5752p",
+												"updated": "20220617161704"
+											},
+											"Children": [
+												{
+													"Type": "NodeLink",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenBracket"
+														},
+														{
+															"Type": "NodeLinkText",
+															"Data": "Notion - One workspace. Every team."
+														},
+														{
+															"Type": "NodeCloseBracket"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeLinkDest",
+															"Data": "https://www.notion.so/"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220617161706-38jhxke",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220617161706-38jhxke"
+									},
+									"Children": [
+										{
+											"ID": "20220617161706-9s8ze7c",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220617161706-9s8ze7c",
+												"updated": "20220617161813"
+											},
+											"Children": [
+												{
+													"Type": "NodeLink",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenBracket"
+														},
+														{
+															"Type": "NodeLinkText",
+															"Data": "我来 wolai - 不仅仅是未来的云端协作平台与个人笔记"
+														},
+														{
+															"Type": "NodeCloseBracket"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeLinkDest",
+															"Data": "https://www.wolai.com/"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220617161815-8fe1szc",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220617161815-8fe1szc"
+									},
+									"Children": [
+										{
+											"ID": "20220617161815-tvymjq4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220617161815-tvymjq4",
+												"updated": "20220617161852"
+											},
+											"Children": [
+												{
+													"Type": "NodeLink",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenBracket"
+														},
+														{
+															"Type": "NodeLinkText",
+															"Data": "FlowUs 息流 - 新一代知识管理与协作平台"
+														},
+														{
+															"Type": "NodeCloseBracket"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeLinkDest",
+															"Data": "https://flowus.cn/"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220617161302-0qg3px1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220617161302-0qg3px1",
+						"updated": "20220617162305"
+					},
+					"Children": [
+						{
+							"ID": "20220617161302-whpf579",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220617161302-whpf579",
+								"updated": "20220617162114"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果你喜欢使用纯文本 Markdown 文件存储笔记，推荐使用："
+								}
+							]
+						},
+						{
+							"ID": "20220617162114-l07zexd",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20220617162114-l07zexd",
+								"updated": "20220617162305"
+							},
+							"Children": [
+								{
+									"ID": "20220617162114-2a65c82",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220617162114-2a65c82"
+									},
+									"Children": [
+										{
+											"ID": "20220617162114-j1xuvda",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220617162114-j1xuvda",
+												"updated": "20220617162141"
+											},
+											"Children": [
+												{
+													"Type": "NodeLink",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenBracket"
+														},
+														{
+															"Type": "NodeLinkText",
+															"Data": "Obsidian - A second brain, for you, forever."
+														},
+														{
+															"Type": "NodeCloseBracket"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeLinkDest",
+															"Data": "https://obsidian.md/"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220617162143-bxv2p97",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220617162143-bxv2p97",
+										"updated": "20220617162305"
+									},
+									"Children": [
+										{
+											"ID": "20220617162143-3h56sfi",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220617162143-3h56sfi",
+												"updated": "20220617162305"
+											},
+											"Children": [
+												{
+													"Type": "NodeLink",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeOpenBracket"
+														},
+														{
+															"Type": "NodeLinkText",
+															"Data": "Logseq - A privacy-first, open-source knowledge base"
+														},
+														{
+															"Type": "NodeCloseBracket"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeLinkDest",
+															"Data": "https://logseq.com/"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220617163102-0uy0r79",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220617163102-0uy0r79",
+						"updated": "20220617163107"
+					},
+					"Children": [
+						{
+							"ID": "20220617163102-6c4hxf9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220617163102-6c4hxf9",
+								"updated": "20220617163107"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "以上推荐都试过以后再试试思源"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
 		{
 			"ID": "20210428213311-2hv9zwx",
 			"Type": "NodeHeading",

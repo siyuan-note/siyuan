@@ -88,7 +88,7 @@ export class Bookmark extends Model {
             },
             rightClick: (element: HTMLElement, event: MouseEvent) => {
                 window.siyuan.menus.menu.remove();
-                const id = element.getAttribute("data-node-id")
+                const id = element.getAttribute("data-node-id");
                 if (!id) {
                     window.siyuan.menus.menu.append(new MenuItem({
                         label: window.siyuan.languages.rename,
@@ -129,7 +129,7 @@ export class Bookmark extends Model {
                     icon: "iconTrashcan",
                     label: window.siyuan.languages.remove,
                     click: () => {
-                        const bookmark = (id ? element.parentElement.previousElementSibling : element).querySelector(".b3-list-item__text").textContent
+                        const bookmark = (id ? element.parentElement.previousElementSibling : element).querySelector(".b3-list-item__text").textContent;
                         confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(bookmark)}</b>?`, () => {
                             if (id) {
                                 fetchPost("/api/attr/setBlockAttrs", {id, attrs: {bookmark: ""}}, () => {

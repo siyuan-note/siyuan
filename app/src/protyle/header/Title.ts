@@ -30,7 +30,7 @@ import {code160to32} from "../util/code160to32";
 export class Title {
     public element: HTMLElement;
     public editElement: HTMLElement;
-    private timeout: number
+    private timeout: number;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -229,7 +229,7 @@ export class Title {
     }
 
     private rename(protyle: IProtyle) {
-        clearTimeout(this.timeout)
+        clearTimeout(this.timeout);
         if (!validateName(this.editElement.textContent)) {
             return false;
         }
@@ -240,8 +240,8 @@ export class Title {
                 path: protyle.path,
                 title: fileName,
             });
-            this.setTitle(fileName)
-        }, Constants.TIMEOUT_INPUT)
+            this.setTitle(fileName);
+        }, Constants.TIMEOUT_INPUT);
     }
 
     private renderMenu(protyle: IProtyle, iconElement: Element, position: { x: number, y: number }) {

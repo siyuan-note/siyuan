@@ -242,7 +242,7 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
         }
     });
 
-    const parentId = listItemElement.parentElement.getAttribute("data-node-id")
+    const parentId = listItemElement.parentElement.getAttribute("data-node-id");
     if (listItemElement.parentElement.childElementCount === 2) {
         undoOperations.splice(0, 0, {
             id: parentId,

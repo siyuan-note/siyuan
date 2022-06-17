@@ -172,9 +172,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             }
                         } else if (previousElement) {
                             // https://github.com/siyuan-note/siyuan/issues/3913
-                            const foldElement = hasTopClosestByAttribute(previousElement, "fold", "1")
+                            const foldElement = hasTopClosestByAttribute(previousElement, "fold", "1");
                             if (foldElement && (foldElement.classList.contains("sb") || foldElement.classList.contains("bq"))) {
-                                previousElement = foldElement
+                                previousElement = foldElement;
                             }
                         }
                     } else if (protyle.title && (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||
@@ -485,7 +485,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             // https://github.com/siyuan-note/siyuan/issues/5185
             if (range.startOffset === 0 && range.startContainer.nodeType === 3) {
-                const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement
+                const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
                 if (previousSibling && previousSibling.nodeType !== 3 && previousSibling.getAttribute("data-type") === "inline-math") {
                     protyle.toolbar.showRender(protyle, previousSibling);
                     return;
@@ -550,7 +550,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (previousElement) {
                         previousElement = getLastBlock(previousElement) as HTMLElement;
                         if (previousElement) {
-                            previousElement = hasClosestByAttribute(previousElement, "fold", "1") as HTMLElement
+                            previousElement = hasClosestByAttribute(previousElement, "fold", "1") as HTMLElement;
                             if (previousElement && previousElement.getAttribute("data-type") !== "NodeListItem") {
                                 // 遇到折叠块
                                 focusBlock(previousElement, undefined, true);
@@ -581,7 +581,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
             if (event.key === "ArrowDown") {
-                const foldElement = hasClosestByAttribute(range.startContainer, "fold", "1")
+                const foldElement = hasClosestByAttribute(range.startContainer, "fold", "1");
                 if (foldElement) {
                     let nextElement = getNextBlock(foldElement) as HTMLElement;
                     if (nextElement) {
@@ -645,6 +645,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             event.preventDefault();
                             return;
                         }
+                    } else if (position.end === editElement.textContent.length - 1 && nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
                     }
                 } else {
                     const currentNode = range.startContainer.childNodes[range.startOffset - 1] as HTMLElement;

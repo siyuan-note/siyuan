@@ -34,7 +34,7 @@ ${window.siyuan.languages.account2}
 <span class="b3-chip b3-chip--primary fn__pointer" id="trialSub">
     <svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>
     ${window.siyuan.languages.freeSub}
-</>
+</span>
 <div class="fn__hr--b"></div>`;
         if (window.siyuan.user) {
             let userTitlesHTML = "";
@@ -367,6 +367,9 @@ ${window.siyuan.languages.account8}`;
                     html = `<div class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.account10}"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg></div>`;
                 }
             }
+        }
+        if (!window.siyuan.user || (window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === -1)){
+            html = `<div class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.freeSub}"><svg class="ft__error"><use xlink:href="#iconVIP"></use></svg></div>`;
         }
         if (window.siyuan.config.account.displayTitle && window.siyuan.user) {
             window.siyuan.user.userTitles.forEach(item => {

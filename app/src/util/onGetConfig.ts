@@ -20,6 +20,7 @@ import {getOpenNotebookCount} from "./pathName";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
+import {openSetting} from "../config";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -269,6 +270,10 @@ const initBar = () => {
             }
         });
         resizeTabs();
+    });
+    document.getElementById("toolbarVIP").addEventListener("click", (event) => {
+        const dialogSetting = openSetting();
+        dialogSetting.element.querySelector('.b3-tab-bar [data-name="account"]').dispatchEvent(new CustomEvent("click"));
     });
     document.getElementById("barDailyNote").addEventListener("click", (event) => {
         if (getOpenNotebookCount() < 2) {

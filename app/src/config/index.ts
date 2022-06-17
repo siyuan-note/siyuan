@@ -20,7 +20,7 @@ export const openSetting = () => {
         }
     });
     if (exitDialog) {
-        return;
+        return exitDialog;
     }
     const height = Math.min(window.innerHeight * .9, Math.max(window.innerHeight * .7, 52 * 11));
     const dialog = new Dialog({
@@ -128,4 +128,5 @@ export const openSetting = () => {
     });
     editor.element = dialog.element.querySelector('.b3-tab-container[data-name="editor"]');
     editor.bindEvent();
+    return dialog;
 };

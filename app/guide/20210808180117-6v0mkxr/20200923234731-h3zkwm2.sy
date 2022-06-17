@@ -6,7 +6,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "Frequently Asked Questions",
 		"type": "doc",
-		"updated": "20220617163255"
+		"updated": "20220617163213"
 	},
 	"Children": [
 		{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220617163213-bjhtwoj",
-				"updated": "20220617163213"
+				"updated": "20220617192556"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "This question varies from person to person and is difficult to answer uniformly. But technically we have the following recommendations:"
+					"Data": "This question varies from person to person and is difficult to answer uniformly. If you're not sure if SiYuan is right for you, here are some suggestions:"
 				}
 			]
 		},
@@ -44,7 +44,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220617163213-8m8nof9",
-				"updated": "20220617163255"
+				"updated": "20220617163213"
 			},
 			"Children": [
 				{
@@ -270,34 +270,6 @@
 											]
 										}
 									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220617163213-neq5l79",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220617163213-neq5l79",
-						"updated": "20220617163255"
-					},
-					"Children": [
-						{
-							"ID": "20220617163213-31491bu",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220617163213-31491bu",
-								"updated": "20220617163255"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "After all the above recommendations have been tried, try SiYuan again"
 								}
 							]
 						}

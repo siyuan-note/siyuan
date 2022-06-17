@@ -162,7 +162,7 @@
 
 ### 思源适合我吗？或者说我应该如何选择笔记软件？
 
-这个问题因人而异，很难统一回答。但从技术上而言我们有如下建议：
+这个问题因人而异，很难统一回答。如果你不太确定思源是否适合你，请看如下建议：
 
 * 如果你需要经常分享笔记或者与别人协作编辑，并且需要数据表格功能，推荐使用：
 
@@ -173,7 +173,6 @@
 
   * [Obsidian - A second brain, for you, forever.](https://obsidian.md/)
   * [Logseq - A privacy-first, open-source knowledge base](https://logseq.com/)
-* 以上推荐都试过以后再试试思源
 
 ### 思源是如何存储数据的？
 

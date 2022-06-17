@@ -28,12 +28,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220617163143-zbzzz1r",
-				"updated": "20220617163143"
+				"updated": "20220617192529"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "這個問題因人而異，很難統一回答。但從技術上而言我們有如下建議："
+					"Data": "這個問題因人而異，很難統一回答。如果你不太確定思源是否適合你，請看如下建議："
 				}
 			]
 		},
@@ -269,34 +269,6 @@
 											]
 										}
 									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220617163143-o0g03nv",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220617163143-o0g03nv",
-						"updated": "20220617163143"
-					},
-					"Children": [
-						{
-							"ID": "20220617163143-o0gzk7l",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220617163143-o0gzk7l",
-								"updated": "20220617163143"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "以上推薦都試過以後再試試思源"
 								}
 							]
 						}

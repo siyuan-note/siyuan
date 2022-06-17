@@ -156,7 +156,7 @@ To get the latest Insider Preview, please send an email with your GitHub login n
 
 ### Is SiYuan right for me? Or how should I choose note-taking software?
 
-This question varies from person to person and is difficult to answer uniformly. But technically we have the following recommendations:
+This question varies from person to person and is difficult to answer uniformly. If you're not sure if Siyuan is right for you, here are some suggestions:
 
 * If you need to frequently share notes or edit collaboratively with others, and need the data table function, it is recommended to use:
 
@@ -165,7 +165,6 @@ This question varies from person to person and is difficult to answer uniformly.
 
   * [Obsidian - A second brain, for you, forever.](https://obsidian.md/)
   * [Logseq - A privacy-first, open-source knowledge base](https://logseq.com/)
-* After all the above recommendations have been tried, try SiYuan again
 
 ### How does SiYuan store data?
 

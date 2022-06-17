@@ -6,7 +6,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20220617163107"
+		"updated": "20220617192447"
 	},
 	"Children": [
 		{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220617161051-9hnwzuw",
-				"updated": "20220617161314"
+				"updated": "20220617192447"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "这个问题因人而异，很难统一回答。但从技术上而言我们有如下建议："
+					"Data": "这个问题因人而异，很难统一回答。如果你不太确定思源是否适合你，请看如下建议："
 				}
 			]
 		},
@@ -44,7 +44,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220617161301-eouqj46",
-				"updated": "20220617163107"
+				"updated": "20220617162305"
 			},
 			"Children": [
 				{
@@ -364,34 +364,6 @@
 											]
 										}
 									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220617163102-0uy0r79",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220617163102-0uy0r79",
-						"updated": "20220617163107"
-					},
-					"Children": [
-						{
-							"ID": "20220617163102-6c4hxf9",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220617163102-6c4hxf9",
-								"updated": "20220617163107"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "以上推荐都试过以后再试试思源"
 								}
 							]
 						}

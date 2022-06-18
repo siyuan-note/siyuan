@@ -1468,12 +1468,37 @@ export class WYSIWYG {
 
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
             if (embedItemElement) {
+                const embedId = embedItemElement.getAttribute("data-id")
                 if (isMobile()) {
-                    openMobileFileById(embedItemElement.getAttribute("data-id"), false, [Constants.CB_GET_ALL]);
+                    openMobileFileById(embedId, false, [Constants.CB_GET_ALL]);
+                } else if (window.siyuan.shiftIsPressed) {
+                    openFileById({
+                        id: embedId,
+                        position: "bottom",
+                        hasContext: false,
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL],
+                        zoomIn: true
+                    });
+                } else if (window.siyuan.altIsPressed) {
+                    openFileById({
+                        id: embedId,
+                        position: "right",
+                        hasContext: false,
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL],
+                        zoomIn: true
+                    });
+                } else if (window.siyuan.ctrlIsPressed) {
+                    openFileById({
+                        id: embedId,
+                        hasContext: false,
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL],
+                        keepCursor: true,
+                        zoomIn: true
+                    });
                 } else if (!protyle.disabled) {
                     window.siyuan.blockPanels.push(new BlockPanel({
                         targetElement: embedItemElement,
-                        nodeIds: [embedItemElement.getAttribute("data-id")],
+                        nodeIds: [embedId],
                     }));
                 }
                 event.stopPropagation();

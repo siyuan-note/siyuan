@@ -879,7 +879,7 @@ export class Toolbar {
             }
             /// #endif
 
-            if (event.key === "Escape" || matchHotKey("⌘Enter", event)) {
+            if (event.key === "Escape" || matchHotKey("⌘↩", event)) {
                 this.subElement.classList.add("fn__none");
                 this.subElement.querySelector('[data-type="pin"]').classList.remove("ft__primary");
                 if (renderElement.tagName === "SPAN") {

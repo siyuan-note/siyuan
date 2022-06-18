@@ -177,7 +177,7 @@ export abstract class Constants {
             list: {
                 indent: {default: "⇥", custom: "⇥"},
                 outdent: {default: "⇧⇥", custom: "⇧⇥"},
-                checkToggle: {default: "⌘Enter", custom: "⌘Enter"},
+                checkToggle: {default: "⌘↩", custom: "⌘↩"},
             },
             table: {
                 insertRowAbove: {default: "⇧⌘T", custom: "⇧⌘T"},

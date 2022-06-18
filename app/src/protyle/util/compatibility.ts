@@ -75,7 +75,8 @@ export const updateHotkeyTip = (hotkey: string) => {
     }
     hotkey = hotkey.replace("⌘", "Ctrl").replace("⇧", "Shift")
         .replace("⌥", "Alt").replace("⇥", "Tab")
-        .replace("⌫", "Backspace").replace("⌦", "Delete");
+        .replace("⌫", "Backspace").replace("⌦", "Delete")
+        .replace("↩", "Enter");
     if (hotkey.indexOf("Shift") > -1) {
         hotkey = hotkey.replace(";", ":").replace("=", "+").replace("-", "_").replace(".", ">");
     }

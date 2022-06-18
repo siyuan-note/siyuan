@@ -29,7 +29,7 @@ const bindAttrInput = (inputElement: HTMLInputElement, confirmElement: Element) 
         if (event.isComposing) {
             return;
         }
-        if (matchHotKey("⌘Enter", event)) {
+        if (matchHotKey("⌘↩", event)) {
             confirmElement.dispatchEvent(new CustomEvent("click"));
             event.stopPropagation();
             event.preventDefault();

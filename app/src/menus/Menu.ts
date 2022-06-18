@@ -48,6 +48,7 @@ export class Menu {
     public remove() {
         this.element.innerHTML = "";
         this.element.classList.add("fn__none");
+        this.element.style.zIndex = "";
     }
 
     public append(element?: HTMLElement) {

@@ -308,6 +308,7 @@ export const openHistory = () => {
                     }
                 });
                 window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                window.siyuan.menus.menu.element.style.zIndex = "310";
                 break;
             } else if (target.classList.contains("b3-list-item__action")) {
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback, `${window.siyuan.languages.rollbackConfirm.replace("${date}", target.parentElement.textContent.trim())}`, () => {

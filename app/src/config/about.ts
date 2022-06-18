@@ -11,6 +11,7 @@ import {exitSiYuan} from "../dialog/processSystem";
 import {writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 
 export const about = {
     element: undefined as Element,
@@ -89,15 +90,22 @@ export const about = {
         <div class="b3-label__text ft__error">${window.siyuan.languages.dataRepoKeyTip2}</div>
     </div>
     <div class="fn__space"></div>
-    <div class="fn__size200 fn__flex-center">
-        <button style="margin-bottom: 8px" class="b3-button b3-button--outline fn__size200${window.siyuan.config.repo.key ? " fn__none" : ""}" id="initKey">
+    <div class="fn__size200 fn__flex-center${window.siyuan.config.repo.key ? " fn__none" : ""}">
+        <button class="b3-button b3-button--outline fn__size200" id="initKey">
             <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.genKey}
         </button>
-        <button class="b3-button b3-button--outline fn__size200${window.siyuan.config.repo.key ? " fn__none" : ""}" id="importKey">
+        <div class="fn__hr"></div>
+        <button class="b3-button b3-button--outline fn__size200" id="importKey">
             <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.importKey}
         </button>
-        <button class="b3-button b3-button--outline fn__size200${window.siyuan.config.repo.key ? "" : " fn__none"}" id="copyKey">
+    </div>
+    <div class="fn__size200 fn__flex-center${window.siyuan.config.repo.key ? "" : " fn__none"}">
+        <button class="b3-button b3-button--outline fn__size200" id="copyKey">
             <svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copyKey}
+        </button>
+        <div class="fn__hr"></div>
+        <button class="b3-button b3-button--outline fn__size200" id="removeKey">
+            <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.remove}
         </button>
     </div>
 </div>
@@ -224,9 +232,8 @@ export const about = {
             btnsElement[1].addEventListener("click", () => {
                 fetchPost("/api/repo/importRepoKey", {key: textAreaElement.value}, () => {
                     window.siyuan.config.repo.key = textAreaElement.value;
-                    importKeyElement.classList.add("fn__none");
-                    importKeyElement.previousElementSibling.classList.add("fn__none");
-                    importKeyElement.nextElementSibling.classList.remove("fn__none");
+                    importKeyElement.parentElement.classList.add("fn__none");
+                    importKeyElement.parentElement.nextElementSibling.classList.remove("fn__none");
                     passwordDialog.destroy();
                 });
             });
@@ -234,14 +241,22 @@ export const about = {
         about.element.querySelector("#initKey").addEventListener("click", () => {
             fetchPost("/api/repo/initRepoKey", {}, (response) => {
                 window.siyuan.config.repo.key = response.data.key;
-                importKeyElement.classList.add("fn__none");
-                importKeyElement.previousElementSibling.classList.add("fn__none");
-                importKeyElement.nextElementSibling.classList.remove("fn__none");
+                importKeyElement.parentElement.classList.add("fn__none");
+                importKeyElement.parentElement.nextElementSibling.classList.remove("fn__none");
             });
         });
         about.element.querySelector("#copyKey").addEventListener("click", () => {
             showMessage(window.siyuan.languages.copied);
             writeText(window.siyuan.config.repo.key);
+        });
+        about.element.querySelector("#removeKey").addEventListener("click", () => {
+            confirmDialog(window.siyuan.languages.remove, "", () => {
+                fetchPost("/api/repo/resetRepo", {}, () => {
+                    window.siyuan.config.repo.key = "";
+                    importKeyElement.parentElement.classList.remove("fn__none");
+                    importKeyElement.parentElement.nextElementSibling.classList.add("fn__none");
+                });
+            });
         });
         const networkServeElement = about.element.querySelector("#networkServe") as HTMLInputElement;
         networkServeElement.addEventListener("change", () => {

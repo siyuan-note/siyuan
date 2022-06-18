@@ -48,6 +48,7 @@ export class Title {
             range.deleteContents();
             range.insertNode(document.createTextNode(replaceFileName(event.clipboardData.getData("text/plain"))));
             range.collapse(false);
+            this.rename(protyle);
         });
         this.editElement.addEventListener("click", () => {
             if (protyle.model) {

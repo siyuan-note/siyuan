@@ -27,6 +27,7 @@ type FileTree struct {
 	CreateDocNameTemplate  string `json:"createDocNameTemplate"`  // 新建文档名模板
 	MaxListCount           int    `json:"maxListCount"`           // 最大列出数量
 	AllowCreateDeeper      bool   `json:"allowCreateDeeper"`      // 允许创建超过 7 层深度的子文档
+	RemoveDocConfirm       int    `json:"removeDocConfirm"`       // 删除文档时是否需要确认，0：需要确认，1：不需要确认
 
 	Sort int `json:"sort"` // 排序方式
 }

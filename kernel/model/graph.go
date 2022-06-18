@@ -191,9 +191,10 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 		return
 	}
 
-	nodeSize := Conf.Graph.Local.NodeSize
-	if "" != p {
-		nodeSize = Conf.Graph.Global.NodeSize
+	isGlobal := "" == p
+	nodeSize := Conf.Graph.Global.NodeSize
+	if !isGlobal {
+		nodeSize = Conf.Graph.Local.NodeSize
 	}
 
 	// 构造标签节点
@@ -215,12 +216,22 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 	// 连接标签和块
 	for _, block := range *blocks {
 		for _, tagSpan := range tagSpans {
-			if block.ID == tagSpan.BlockID {
-				*links = append(*links, &GraphLink{
-					From:  tagSpan.Content,
-					To:    block.ID,
-					Color: &GraphLinkColor{Color: style["--b3-graph-tag-line"]},
-				})
+			if isGlobal { // 全局关系图将标签链接到文档块上
+				if block.RootID == tagSpan.RootID { // 局部关系图将标签链接到子块上
+					*links = append(*links, &GraphLink{
+						From:  tagSpan.Content,
+						To:    block.RootID,
+						Color: &GraphLinkColor{Color: style["--b3-graph-tag-line"]},
+					})
+				}
+			} else {
+				if block.ID == tagSpan.BlockID { // 局部关系图将标签链接到子块上
+					*links = append(*links, &GraphLink{
+						From:  tagSpan.Content,
+						To:    block.ID,
+						Color: &GraphLinkColor{Color: style["--b3-graph-tag-line"]},
+					})
+				}
 			}
 		}
 	}

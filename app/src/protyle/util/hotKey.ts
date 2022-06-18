@@ -18,8 +18,9 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
         return false;
     }
 
-    const hotKeys = hotKey.replace("Enter", Constants.ZWSP).split("");
-    if (hotKey.endsWith("↑") || hotKey.endsWith("↓") || hotKey.endsWith("→") || hotKey.endsWith("←") || hotKey.endsWith("Enter") || hotKey.endsWith("⇥")) {
+    const hotKeys = hotKey.split("");
+    if (hotKey.endsWith("↑") || hotKey.endsWith("↓") || hotKey.endsWith("→") || hotKey.endsWith("←") ||
+        hotKey.endsWith("↩") || hotKey.endsWith("⇥") || hotKey.indexOf("F") > -1) {
         hotKeys.forEach((item, index) => {
             if (item === "↑") {
                 hotKeys[index] = "ArrowUp";
@@ -31,8 +32,14 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
                 hotKeys[index] = "ArrowRight";
             } else if (item === "⇥") {
                 hotKeys[index] = "Tab";
-            } else if (item === Constants.ZWSP) {
+            } else if (item === "↩") {
                 hotKeys[index] = "Enter";
+            } else if (item === "F") {
+                // F1-F12
+                hotKeys[index] = "F" + hotKeys.splice(index + 1, 1);
+                if (hotKeys[index + 1]) {
+                    hotKeys[index + 1] += hotKeys.splice(index + 1, 1);
+                }
             }
         });
     }

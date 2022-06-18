@@ -19,7 +19,7 @@ import {setPosition} from "../util/setPosition";
 import {updateTransaction} from "../protyle/wysiwyg/transaction";
 import {Bookmark} from "../layout/dock/Bookmark";
 import {rename} from "../editor/rename";
-import {openAsset, openBy} from "../editor/util";
+import {deleteFile, openAsset, openBy} from "../editor/util";
 import {matchHotKey} from "../protyle/util/hotKey";
 import * as dayjs from "dayjs";
 import {Constants} from "../constants";
@@ -774,20 +774,7 @@ export const deleteMenu = (notebookId: string, name: string, pathString: string)
         label: window.siyuan.languages.delete,
         accelerator: "⌦",
         click: () => {
-            fetchPost("/api/block/getDocInfo", {
-                id: getDisplayName(pathString, true, true)
-            }, (response) => {
-                let tip = `${window.siyuan.languages.confirmDelete} <b>${name}</b>?`;
-                if (response.data.subFileCount > 0) {
-                    tip = `${window.siyuan.languages.confirmDelete} <b>${name}</b> ${window.siyuan.languages.andSubFile.replace("x", response.data.subFileCount)}?`;
-                }
-                confirmDialog(window.siyuan.languages.delete, tip, () => {
-                    fetchPost("/api/filetree/removeDoc", {
-                        notebook: notebookId,
-                        path: pathString
-                    });
-                });
-            });
+            deleteFile(notebookId, pathString, name);
         }
     }).element;
 };

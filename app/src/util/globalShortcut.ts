@@ -24,7 +24,7 @@ import {goBack, goForward} from "./backForward";
 import {onGet} from "../protyle/util/onGet";
 import {getDisplayName, getNotebookName, movePathTo} from "./pathName";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {openFileById} from "../editor/util";
+import {deleteFile, openFileById} from "../editor/util";
 import {getAllDocks, getAllModels, getAllTabs} from "../layout/getAll";
 import {openGlobalSearch} from "../search/util";
 import {getColIndex} from "../protyle/util/table";
@@ -815,21 +815,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     }
     if (event.key === "Delete" || (event.key === "Backspace" && isMac())) {
         if (isFile) {
-            fetchPost("/api/block/getDocInfo", {
-                id: getDisplayName(pathString, true, true)
-            }, (response) => {
-                const name = getDisplayName(liElement.getAttribute("data-name"), false, true);
-                let tip = `${window.siyuan.languages.confirmDelete} <b>${name}</b>?`;
-                if (response.data.subFileCount > 0) {
-                    tip = `${window.siyuan.languages.confirmDelete} <b>${name}</b> ${window.siyuan.languages.andSubFile.replace("x", response.data.subFileCount)}?`;
-                }
-                confirmDialog(window.siyuan.languages.delete, tip, () => {
-                    fetchPost("/api/filetree/removeDoc", {
-                        notebook: notebookId,
-                        path: pathString
-                    });
-                });
-            });
+            deleteFile(notebookId, pathString, getDisplayName(liElement.getAttribute("data-name"), false, true));
         } else {
             confirmDialog(window.siyuan.languages.delete,
                 `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(getNotebookName(notebookId))}</b>?`, () => {

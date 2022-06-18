@@ -18,7 +18,7 @@ export const initConfigSearch = (element: HTMLElement) => {
         ]),
 
         // 文档树
-        getLang(["selectOpen", "fileTree", "fileTree2",
+        getLang(["selectOpen", "fileTree", "fileTree2", "fileTree3", "fileTree4",
             "fileTree5", "fileTree6", "fileTree7", "fileTree8", "fileTree12", "fileTree13", "fileTree15", "fileTree16", "fileTree17"]),
 
         // 图片

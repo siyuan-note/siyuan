@@ -17,9 +17,8 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {matchHotKey} from "../util/hotKey";
 import {updateHotkeyTip, writeText} from "../util/compatibility";
 import {setPanelFocus} from "../../layout/util";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
-import {openBacklink, openGraph, openOutline, updatePanelByEditor} from "../../editor/util";
+import {deleteFile, openBacklink, openGraph, openOutline, updatePanelByEditor} from "../../editor/util";
 import * as dayjs from "dayjs";
 import {setTitle} from "../../dialog/processSystem";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
@@ -262,20 +261,7 @@ export class Title {
                     icon: "iconTrashcan",
                     label: window.siyuan.languages.delete,
                     click: () => {
-                        fetchPost("/api/block/getDocInfo", {
-                            id: protyle.block.rootID
-                        }, (response) => {
-                            let tip = `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(this.editElement.textContent)}</b>?`;
-                            if (response.data.subFileCount > 0) {
-                                tip = `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(this.editElement.textContent)}</b> ${window.siyuan.languages.andSubFile.replace("x", response.data.subFileCount)}?`;
-                            }
-                            confirmDialog(window.siyuan.languages.delete, tip, () => {
-                                fetchPost("/api/filetree/removeDoc", {
-                                    notebook: protyle.notebookId,
-                                    path: protyle.path
-                                });
-                            });
-                        });
+                        deleteFile(protyle.notebookId, protyle.path, escapeHtml(this.editElement.textContent))
                     }
                 }).element);
             }

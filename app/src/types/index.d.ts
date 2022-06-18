@@ -226,6 +226,7 @@ declare interface IAppearance {
 declare interface IFileTree {
     alwaysSelectOpenedFile: boolean
     openFilesUseCurrentTab: boolean
+    removeDocWithoutConfirm: boolean
     allowCreateDeeper: boolean
     refCreateSavePath: string
     createDocNameTemplate: string

@@ -85,6 +85,23 @@ func ImportRepoKey(hexKey string) (err error) {
 	return
 }
 
+func ResetRepo() (err error) {
+	msgId := util.PushMsg(Conf.Language(144), 1000*60)
+
+	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); nil != err {
+		return
+	}
+	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); nil != err {
+		return
+	}
+
+	Conf.Repo.Key = nil
+	Conf.Save()
+
+	util.PushUpdateMsg(msgId, Conf.Language(145), 3000)
+	return
+}
+
 func InitRepoKey() (err error) {
 	msgId := util.PushMsg(Conf.Language(136), 1000*7)
 

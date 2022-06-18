@@ -116,3 +116,18 @@ func initRepoKey(c *gin.Context) {
 		"key": hex.EncodeToString(model.Conf.Repo.Key),
 	}
 }
+
+func resetRepo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	if err := model.ResetRepo(); nil != err {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(146), err.Error())
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"key": hex.EncodeToString(model.Conf.Repo.Key),
+	}
+}

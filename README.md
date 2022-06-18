@@ -209,11 +209,11 @@ Click at the beginning, hold down <kbd>Shift</kbd> and click at the end after sc
 
 Press <kbd>Ctrl+R</kbd> after selecting the keyword in the editor.
 
-## What if some blocks (such as paragraph blocks in list items) cannot find the block icon?
+### What if some blocks (such as paragraph blocks in list items) cannot find the block icon?
 
 The first sub-block under the list item is the block icon omitted. You can move the cursor into this block and trigger its block menu with <kbd>Ctrl+/</kbd> .
 
-## How to share notes?
+### How to share notes?
 
 * Export and import `.sy.zip` package
 * Via network hosting

@@ -166,9 +166,9 @@
 
 * 如果你需要经常分享笔记或者与别人协作编辑，并且需要数据表格功能，推荐使用：
 
-  * [Notion - One workspace. Every team.](https://www.notion.so/)
-  * [我来 wolai - 不仅仅是未来的云端协作平台与个人笔记](https://www.wolai.com/)
   * [FlowUs 息流 - 新一代知识管理与协作平台](https://flowus.cn/)
+  * [我来 wolai - 不仅仅是未来的云端协作平台与个人笔记](https://www.wolai.com/)
+  * [Notion - One workspace. Every team.](https://www.notion.so/)
 * 如果你喜欢使用纯文本 Markdown 文件存储笔记，推荐使用：
 
   * [Obsidian - A second brain, for you, forever.](https://obsidian.md/)
@@ -217,11 +217,11 @@
 
 编辑器中选择关键字后按下 <kbd>Ctrl+R</kbd>。
 
-## 有的块（比如在列表项中的段落块）找不到块标怎么办？
+### 有的块（比如在列表项中的段落块）找不到块标怎么办？
 
 在列表项下的第一个子块是省略块标的。可以将光标移到这个块中，然后通过 <kbd>Ctrl+/</kbd> 触发它的块标菜单。
 
-## 如何分享笔记？
+### 如何分享笔记？
 
 * 导出导入 `.sy.zip` 数据包
 * 通过网络伺服

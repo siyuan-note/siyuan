@@ -806,6 +806,7 @@ export class Toolbar {
             });
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-content") || "");
         }
+
         textElement.addEventListener("input", (event) => {
             if (!renderElement.parentElement) {
                 return;
@@ -865,6 +866,19 @@ export class Toolbar {
             if (event.isComposing) {
                 return;
             }
+            /// #if !BROWSER
+            if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {
+                getCurrentWindow().webContents.undo();
+                event.preventDefault();
+                return;
+            }
+            if (matchHotKey(window.siyuan.config.keymap.editor.general.redo.custom, event)) {
+                getCurrentWindow().webContents.redo();
+                event.preventDefault();
+                return;
+            }
+            /// #endif
+
             if (event.key === "Escape" || matchHotKey("⌘Enter", event)) {
                 this.subElement.classList.add("fn__none");
                 this.subElement.querySelector('[data-type="pin"]').classList.remove("ft__primary");

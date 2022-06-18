@@ -126,8 +126,4 @@ func resetRepo(c *gin.Context) {
 		ret.Msg = fmt.Sprintf(model.Conf.Language(146), err.Error())
 		return
 	}
-
-	ret.Data = map[string]interface{}{
-		"key": hex.EncodeToString(model.Conf.Repo.Key),
-	}
 }

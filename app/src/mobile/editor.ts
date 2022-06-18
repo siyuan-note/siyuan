@@ -85,7 +85,7 @@ export const openMobileFileById = (id: string, hasContext?: boolean, action = [C
                 }
             });
         }
-        (document.getElementById("toolbarName") as HTMLInputElement).value = data.data.rootTitle;
+        (document.getElementById("toolbarName") as HTMLInputElement).value = data.data.rootTitle === "Untitled" ? "" : data.data.rootTitle;
         setEditor();
         closePanel();
         if (pushStack) {

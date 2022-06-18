@@ -104,8 +104,8 @@ export const about = {
             <svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copyKey}
         </button>
         <div class="fn__hr"></div>
-        <button class="b3-button b3-button--outline fn__size200" id="removeKey">
-            <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.remove}
+        <button class="b3-button b3-button--outline fn__size200" id="resetRepo">
+            <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.resetRepo}
         </button>
     </div>
 </div>
@@ -249,8 +249,8 @@ export const about = {
             showMessage(window.siyuan.languages.copied);
             writeText(window.siyuan.config.repo.key);
         });
-        about.element.querySelector("#removeKey").addEventListener("click", () => {
-            confirmDialog(window.siyuan.languages.remove, "", () => {
+        about.element.querySelector("#resetRepo").addEventListener("click", () => {
+            confirmDialog("⚠️ " + window.siyuan.languages.resetRepo, window.siyuan.languages.resetRepoTip, () => {
                 fetchPost("/api/repo/resetRepo", {}, () => {
                     window.siyuan.config.repo.key = "";
                     importKeyElement.parentElement.classList.remove("fn__none");

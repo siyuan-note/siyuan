@@ -93,8 +93,8 @@ func importRepoKey(c *gin.Context) {
 		return
 	}
 
-	hexKey := arg["key"].(string)
-	if err := model.ImportRepoKey(hexKey); nil != err {
+	base64Key := arg["key"].(string)
+	if err := model.ImportRepoKey(base64Key); nil != err {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(137)
 		return

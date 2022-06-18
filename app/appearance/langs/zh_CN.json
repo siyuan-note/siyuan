@@ -1,4 +1,6 @@
 {
+  "resetRepoTip": "重置数据仓库会彻底删除密钥和所有快照，确定进行重置吗？",
+  "resetRepo": "重置数据仓库",
   "createSnapshot": "创建快照",
   "dataSnapshot": "数据快照",
   "copyKey": "复制密钥字符串",

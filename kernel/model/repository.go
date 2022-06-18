@@ -18,7 +18,7 @@ package model
 
 import (
 	"crypto/rand"
-	"encoding/hex"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -59,10 +59,10 @@ func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 	return
 }
 
-func ImportRepoKey(hexKey string) (err error) {
+func ImportRepoKey(base64Key string) (err error) {
 	msgId := util.PushMsg(Conf.Language(136), 1000*7)
 
-	key, err := hex.DecodeString(hexKey)
+	key, err := base64.StdEncoding.DecodeString(base64Key)
 	if nil != err {
 		return
 	}

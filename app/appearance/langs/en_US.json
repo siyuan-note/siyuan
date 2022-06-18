@@ -1,4 +1,6 @@
 {
+  "resetRepoTip": "Resetting the data repository will completely delete the key and all snapshots, are you sure you want to reset?",
+  "resetRepo": "Reset data repo",
   "createSnapshot": "Create snapshot",
   "dataSnapshot": "Data snapshot",
   "copyKey": "Copy key string",

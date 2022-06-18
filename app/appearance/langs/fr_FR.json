@@ -1,4 +1,6 @@
 {
+  "resetRepoTip": "La réinitialisation du référentiel de données supprimera complètement la clé et tous les instantanés, êtes-vous sûr de vouloir réinitialiser ?",
+  "resetRepo": "Réinitialiser le référentiel de données",
   "createSnapshot": "Créer un instantané",
   "dataSnapshot": "Instantané de données",
   "copyKey": "Copier la chaîne de clé",

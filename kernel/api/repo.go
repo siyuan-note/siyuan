@@ -17,7 +17,6 @@
 package api
 
 import (
-	"encoding/hex"
 	"fmt"
 	"net/http"
 
@@ -113,7 +112,7 @@ func initRepoKey(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"key": hex.EncodeToString(model.Conf.Repo.Key),
+		"key": model.Conf.Repo.Key,
 	}
 }
 
@@ -125,9 +124,5 @@ func resetRepo(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(146), err.Error())
 		return
-	}
-
-	ret.Data = map[string]interface{}{
-		"key": hex.EncodeToString(model.Conf.Repo.Key),
 	}
 }

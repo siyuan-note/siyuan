@@ -544,6 +544,8 @@
   "md39": "Adresse Servo PlantUML",
   "md40": "Laissez vide pour restaurer <code>https://www.plantuml.com/plantuml/svg/~1/code> par défaut",
   "fileTree2": "L'arbre des Docs sélectionne automatiquement le document en cours lorsque l'on change d'onglet d'édition",
+  "fileTree3": "Aucune confirmation requise lors de la suppression de documents",
+  "fileTree4": "Si non activé, une boîte de confirmation apparaîtra à chaque fois que vous supprimerez un document",
   "fileTree5": "Référence créer doc enregistrer emplacement",
   "fileTree6": "Lors de l'utilisation de <code>((</code>, le chemin d'enregistrement du nouveau document (par exemple, /dossier1/ dossier2/, le chemin relatif du doc actuel est utilisé s'il ne commence pas par /).",
   "fileTree7": "Ouvrir dans l'Onglet actuel",

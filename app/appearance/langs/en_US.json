@@ -544,6 +544,8 @@
   "md39": "PlantUML Serve Address",
   "md40": "Leave blank to restore default <code>https://www.plantuml.com/plantuml/svg/~1</code>",
   "fileTree2": "The doc tree will automatically select the current document when the editor tab is switched",
+  "fileTree3": "No confirmation required when deleting documents",
+  "fileTree4": "If not enabled, a confirmation box will pop up every time you delete a document",
   "fileTree5": "Ref create doc save location",
   "fileTree6": "When using <code>((</code>, the save path of the new document (for example, /folder1/folder2/, the relative path of the current doc is used if it does not start with /)",
   "fileTree7": "Open in the current tab",

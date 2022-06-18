@@ -545,6 +545,8 @@
   "md39": "PlantUML 伺服地址",
   "md40": "留空将恢复默认值 <code>https://www.plantuml.com/plantuml/svg/~1</code>",
   "fileTree2": "在编辑器页签切换时文档树会自动选中当前的文档",
+  "fileTree3": "删除文档时不需要确认",
+  "fileTree4": "不启用时每次删除文档都会弹出确认框",
   "fileTree5": "块引新建文档存放位置",
   "fileTree6": "使用 <code>((</code> 时新建文档的存放路径（例如 /folder1/folder2/，不以 / 开头则使用当前文档相对路径）",
   "fileTree7": "在当前页签中打开",

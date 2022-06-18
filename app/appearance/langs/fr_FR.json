@@ -886,6 +886,9 @@
     "140": "Échec de la création de l'instantané des données: %s",
     "141": "Échec de la restauration de l'instantané des données",
     "142": "Le mémo d'instantané ne peut pas être vide",
-    "143": "Création d'un instantané de données..."
+    "143": "Création d'un instantané de données...",
+    "144": "Réinitialisation du référentiel de données...",
+    "145": "Réinitialisation du référentiel de données terminée",
+    "146": "Échec de la réinitialisation du référentiel de données : %s"
   }
 }

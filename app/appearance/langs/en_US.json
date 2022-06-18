@@ -886,6 +886,9 @@
     "140": "Failed to create data snapshot: %s",
     "141": "Failed to rollback data snapshot",
     "142": "Snapshot memo cannot be empty",
-    "143": "Creating data snapshot..."
+    "143": "Creating data snapshot...",
+    "144": "Resetting data repository...",
+    "145": "Data repository reset completed",
+    "146": "Failed to reset data repository: %s"
   }
 }

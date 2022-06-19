@@ -226,8 +226,13 @@ The first two methods can guarantee the original semantics of the data.
 
 * Please only synchronize the `workspace/data/`, do not synchronize the entire workspace
 * Please suspend third-party synchronization during the operation of SiYuan, otherwise data may be damaged. For details, please refer to [here](https://ld246.com/article/1626537583158)
-* The data folder path on the Android is `internal storage device/Android/data/org.b3log.siyuan/files/siyuan/data/`, which is a private path of the application and cannot be read by other programs and can only be copied manually
+* The data folder path on the Android is `Internal storage device/Android/data/org.b3log.siyuan/files/siyuan/data/`, which is a private path of the application and cannot be read by other programs and can only be copied manually
 * There is a conflict between third-party synchronization and SiYuan synchronization, please do not use at the same time
+
+In addition, you can consider manually exporting and importing Data to achieve data synchronization:
+
+* Desktop: <kbd>Settings</kbd> - <kbd>Export</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
+* Mobile: <kbd>Right column</kbd> - <kbd>About</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
 
 ### What should I do if I forget the end-to-end password?
 

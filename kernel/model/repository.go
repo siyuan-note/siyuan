@@ -33,6 +33,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func UploadSnapshot(id string) (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	if nil != err {
+		util.LogErrorf("init repo failed: %s", err)
+		return
+	}
+
+	_ = repo
+	return
+}
+
 func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))

@@ -662,7 +662,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		if ast.NodeHeading == node.Type {
 			// 标题展开时进行动态加载导致重复内容 https://github.com/siyuan-note/siyuan/issues/4671
 			// 这里要考虑折叠标题是最后一个块的情况
-			if children := treenode.FoldedHeadingChildren(node); 0 < len(children) {
+			if children := treenode.HeadingChildren(node); 0 < len(children) {
 				next = children[len(children)-1].Next
 			}
 		}
@@ -679,7 +679,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		nodes = append(nodes, node)
 		if isDoc {
 			for n := node.Next; nil != n; n = n.Next {
-				if "1" == n.IALAttr("heading-fold") {
+				if treenode.IsInFoldedHeading(n, nil) {
 					continue
 				}
 				nodes = append(nodes, n)
@@ -695,7 +695,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		} else if isHeading {
 			level := node.HeadingLevel
 			for n := node.Next; nil != n; n = n.Next {
-				if "1" == n.IALAttr("heading-fold") {
+				if treenode.IsInFoldedHeading(n, node) {
 					// 大纲点击折叠标题跳转聚焦 https://github.com/siyuan-note/siyuan/issues/4920
 					// 多级标题折叠后上级块引浮窗中未折叠 https://github.com/siyuan-note/siyuan/issues/4997
 					continue
@@ -720,7 +720,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		}
 	case 4: // Ctrl+End 跳转到末尾后向上加载
 		for n := node; nil != n; n = n.Previous {
-			if "1" == n.IALAttr("heading-fold") {
+			if treenode.IsInFoldedHeading(n, nil) {
 				continue
 			}
 			nodes = append([]*ast.Node{n}, nodes...)
@@ -736,7 +736,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		eof = true
 	case 1: // 向上加载
 		for n := node.Previous; /* 从上一个节点开始加载 */ nil != n; n = n.Previous {
-			if "1" == n.IALAttr("heading-fold") {
+			if treenode.IsInFoldedHeading(n, nil) {
 				continue
 			}
 			nodes = append([]*ast.Node{n}, nodes...)
@@ -752,7 +752,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		eof = nil == node.Previous
 	case 2: // 向下加载
 		for n := node.Next; /* 从下一个节点开始加载 */ nil != n; n = n.Next {
-			if "1" == n.IALAttr("heading-fold") {
+			if treenode.IsInFoldedHeading(n, node) {
 				continue
 			}
 			nodes = append(nodes, n)
@@ -767,7 +767,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		}
 	case 3: // 上下都加载
 		for n := node; nil != n; n = n.Previous {
-			if "1" == n.IALAttr("heading-fold") {
+			if treenode.IsInFoldedHeading(n, nil) {
 				continue
 			}
 			nodes = append([]*ast.Node{n}, nodes...)
@@ -793,7 +793,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		}
 		count = 0
 		for n := node.Next; nil != n; n = n.Next {
-			if "1" == n.IALAttr("heading-fold") {
+			if treenode.IsInFoldedHeading(n, nil) {
 				continue
 			}
 			nodes = append(nodes, n)

@@ -291,7 +291,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 	var headingChildren []*ast.Node
 	if isMovingFoldHeading := ast.NodeHeading == srcNode.Type && "1" == srcNode.IALAttr("fold"); isMovingFoldHeading {
-		headingChildren = treenode.FoldedHeadingChildren(srcNode)
+		headingChildren = treenode.HeadingChildren(srcNode)
 	}
 	var srcEmptyList *ast.Node
 	if ast.NodeListItem == srcNode.Type && srcNode.Parent.FirstChild == srcNode && srcNode.Parent.LastChild == srcNode {
@@ -324,7 +324,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		}
 
 		if ast.NodeHeading == targetNode.Type && "1" == targetNode.IALAttr("fold") {
-			targetChildren := treenode.FoldedHeadingChildren(targetNode)
+			targetChildren := treenode.HeadingChildren(targetNode)
 			if l := len(targetChildren); 0 < l {
 				targetNode = targetChildren[l-1]
 			}
@@ -611,7 +611,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 
 	var headingChildren []*ast.Node
 	if isMovingFoldHeading := ast.NodeHeading == srcNode.Type && "1" == srcNode.IALAttr("fold"); isMovingFoldHeading {
-		headingChildren = treenode.FoldedHeadingChildren(srcNode)
+		headingChildren = treenode.HeadingChildren(srcNode)
 	}
 	var srcEmptyList, targetNewList *ast.Node
 	if ast.NodeListItem == srcNode.Type {
@@ -910,7 +910,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 
 		if ast.NodeHeading == node.Type && "1" == node.IALAttr("fold") {
-			children := treenode.FoldedHeadingChildren(node)
+			children := treenode.HeadingChildren(node)
 			if l := len(children); 0 < l {
 				node = children[l-1]
 			}

@@ -30,7 +30,7 @@ func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 		}
 
 		if ast.NodeHeading == n.Type && "1" == n.IALAttr("fold") {
-			children := FoldedHeadingChildren(n)
+			children := HeadingChildren(n)
 			foldHeadings[n.ID] = children
 		}
 		return ast.WalkContinue
@@ -57,20 +57,19 @@ func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 	return
 }
 
-func FoldedHeadingChildren(heading *ast.Node) (ret []*ast.Node) {
-	children := HeadingChildren(heading)
-	if 1 > len(children) {
-		return
+func IsInFoldedHeading(node, currentHeading *ast.Node) bool {
+	heading := HeadingParent(node)
+	if nil == heading {
+		return false
 	}
-
-	for _, c := range children {
-		if "1" == c.IALAttr("heading-fold") {
-			ret = append(ret, c)
-		} else {
-			break
-		}
+	if "1" == heading.IALAttr("heading-fold") || "1" == heading.IALAttr("fold") {
+		return true
 	}
-	return
+	if heading == currentHeading {
+		// node 就在当前标题层级下的话不递归继续查询，直接返回不折叠
+		return false
+	}
+	return IsInFoldedHeading(heading, currentHeading)
 }
 
 func HeadingChildren(heading *ast.Node) (ret []*ast.Node) {

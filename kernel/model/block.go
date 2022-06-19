@@ -142,7 +142,7 @@ func getBlockRendered(id string, headingMode int) (ret *Block) {
 
 		if ast.NodeHeading == n.Type {
 			if "1" == n.IALAttr("fold") {
-				children := treenode.FoldedHeadingChildren(n)
+				children := treenode.HeadingChildren(n)
 				for _, c := range children {
 					unlinks = append(unlinks, c)
 				}

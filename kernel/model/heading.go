@@ -48,7 +48,7 @@ func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 	children := treenode.HeadingChildren(heading)
 	for _, child := range children {
 		childrenIDs = append(childrenIDs, child.ID)
-		child.RemoveIALAttr("fold")
+		child.SetIALAttr("fold", "1")
 		child.SetIALAttr("heading-fold", "1")
 	}
 	heading.SetIALAttr("fold", "1")
@@ -79,12 +79,13 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
 
-	children := treenode.FoldedHeadingChildren(heading)
+	children := treenode.HeadingChildren(heading)
 	for _, child := range children {
 		child.RemoveIALAttr("heading-fold")
 		child.RemoveIALAttr("fold")
 	}
 	heading.RemoveIALAttr("fold")
+	heading.RemoveIALAttr("heading-fold")
 	if err = tx.writeTree(tree); nil != err {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: headingID}
 	}
@@ -263,7 +264,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	}
 
 	// 折叠标题转换为文档时需要自动展开下方块 https://github.com/siyuan-note/siyuan/issues/2947
-	children := treenode.FoldedHeadingChildren(headingNode)
+	children := treenode.HeadingChildren(headingNode)
 	for _, child := range children {
 		child.RemoveIALAttr("heading-fold")
 		child.RemoveIALAttr("fold")

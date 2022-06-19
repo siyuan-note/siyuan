@@ -22,6 +22,7 @@ import {Search} from "../search";
 import {showMessage} from "../dialog/message";
 import {openFileById, updatePanelByEditor} from "../editor/util";
 import {scrollCenter} from "../util/highlightById";
+import {getAllModels} from "./getAll";
 
 export class Wnd {
     public id: string;
@@ -433,11 +434,6 @@ export class Wnd {
         this.children.find((item, index) => {
             if (item.id === id) {
                 if (this.children.length === 1) {
-                    if (this.children[0].model && this.children[0].model instanceof Editor) {
-                        // 关闭窗口中的最后一个 tab
-                        setPanelFocus(this.headersElement.parentElement);
-                        updatePanelByEditor();
-                    }
                     this.destroyModel(this.children[0].model);
                     this.children = [];
                     if (["top", "bottom", "left", "right"].includes(this.parent.type)) {
@@ -445,6 +441,13 @@ export class Wnd {
                     } else {
                         this.remove();
                     }
+                    getAllModels().editor.forEach(item => {
+                        if (!item.element.classList.contains("fn__none")) {
+                            setPanelFocus(item.parent.parent.headersElement.parentElement);
+                            updatePanelByEditor(item.editor.protyle, true, true);
+                            return;
+                        }
+                    });
                     return;
                 }
                 if (item.headElement) {

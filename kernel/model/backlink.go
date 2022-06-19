@@ -358,19 +358,23 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 			buf.WriteString(" OR ")
 		}
 	}
-	buf.WriteString(")'")
+	buf.WriteString(")")
 	if "" != keyword {
-		buf.WriteString(" AND MATCH '{content}:'")
-		buf.WriteString("\"" + keyword + "\"")
 		keyword = strings.ReplaceAll(keyword, "\"", "\"\"")
+		buf.WriteString(" AND (\"" + keyword + "\")")
 	}
+	buf.WriteString("'")
 	buf.WriteString(" AND root_id != '" + rootID + "'") // 不在定义块所在文档中搜索
 	buf.WriteString(" AND type IN ('d', 'h', 'p', 't')")
 	buf.WriteString(" ORDER BY id DESC LIMIT " + strconv.Itoa(Conf.Search.Limit))
 	query := buf.String()
 
 	sqlBlocks := sql.SelectBlocksRawStmt(query, Conf.Search.Limit)
-	blocks := fromSQLBlocks(&sqlBlocks, strings.Join(mentionKeywords, search.TermSep), beforeLen)
+	terms := mentionKeywords
+	if "" != keyword {
+		terms = append(terms, keyword)
+	}
+	blocks := fromSQLBlocks(&sqlBlocks, strings.Join(terms, search.TermSep), beforeLen)
 
 	// 排除链接文本 https://github.com/siyuan-note/siyuan/issues/1542
 	luteEngine := NewLute()

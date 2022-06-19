@@ -1,3 +1,29 @@
+## v2.0.22 / 2022-06-19
+
+### 改进功能
+
+* [弹出的编辑框（如公式/Mindmap 等）支持撤销和重做](https://github.com/siyuan-note/siyuan/issues/5203)
+* [重置数据仓库](https://github.com/siyuan-note/siyuan/issues/5212)
+* [嵌入块添加 Alt/Shift/Ctrl 点击](https://github.com/siyuan-note/siyuan/issues/5216)
+* [全局关系图中将标签链接到文档块上](https://github.com/siyuan-note/siyuan/issues/5218)
+* [添加文档树 `删除文档时不需要确认` 选项 ](https://github.com/siyuan-note/siyuan/issues/5225)
+* [移动端超级块中表格改进](https://github.com/siyuan-note/siyuan/issues/5227)
+* [快捷键支持 Alt+F1-F12](https://github.com/siyuan-note/siyuan/issues/5230)
+* [快捷键提示中 Enter 修改为 ↩](https://github.com/siyuan-note/siyuan/issues/5231)
+* [关闭分屏页签后光标消失](https://github.com/siyuan-note/siyuan/issues/5237)
+
+### 开发重构
+
+* [数据仓库索引 `Index` 不再加密](https://github.com/siyuan-note/siyuan/issues/5229)
+
+### 修复缺陷
+
+* [移动端菜单遮住左右侧栏](https://github.com/siyuan-note/siyuan/issues/5217)
+* [复制数据仓库密钥错误](https://github.com/siyuan-note/siyuan/issues/5226)
+* [折叠标题跨层级展开问题](https://github.com/siyuan-note/siyuan/issues/5232)
+* [文档标题编辑粘贴内容后不会进行修改](https://github.com/siyuan-note/siyuan/issues/5233)
+* [在提及中搜索不到结果问题](https://github.com/siyuan-note/siyuan/issues/5236)
+
 ## v2.0.21 / 2022-06-17
 
 ### 改进功能

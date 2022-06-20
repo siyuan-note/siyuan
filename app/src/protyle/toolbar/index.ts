@@ -656,7 +656,7 @@ export class Toolbar {
         if (type === "NodeBlockQueryEmbed") {
             title = window.siyuan.languages.blockEmbed;
         }
-        const isPin = this.subElement.querySelector('[data-type="pin"]')?.classList.contains("ft__primary");
+        const isPin = this.subElement.querySelector('[data-type="pin"]')?.classList.contains("block__icon--active");
         const pinData: IObject = {};
         if (isPin) {
             const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
@@ -673,7 +673,7 @@ export class Toolbar {
         <input type="checkbox" class="b3-switch">
         <span class="fn__space"></span>
     </label>
-    <button data-type="refresh" class="block__icon b3-tooltips b3-tooltips__nw${(isPin && !this.subElement.querySelector('[data-type="refresh"]').classList.contains("ft__primary")) ? "" : " ft__primary"}${type === "NodeBlockQueryEmbed" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
+    <button data-type="refresh" class="block__icon b3-tooltips b3-tooltips__nw${(isPin && !this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) ? "" : " block__icon--active"}${type === "NodeBlockQueryEmbed" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="before" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages["insert-before"]}"><svg><use xlink:href="#iconBefore"></use></svg></button>
     <span class="fn__space"></span>
@@ -681,7 +681,7 @@ export class Toolbar {
     <span class="fn__space"></span>
     <button data-type="copy" class="block__icon b3-tooltips b3-tooltips__nw${isBrowser() ? " fn__none" : ""}" aria-label="${window.siyuan.languages.copy} PNG"><svg><use xlink:href="#iconCopy"></use></svg></button>
     <span class="fn__space"></span>
-    <button data-type="pin" class="block__icon b3-tooltips b3-tooltips__nw${isPin ? " ft__primary" : ""}" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
+    <button data-type="pin" class="block__icon b3-tooltips b3-tooltips__nw${isPin ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="close" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.close}"><svg style="width: 10px"><use xlink:href="#iconClose"></use></svg></button>
 </div>
@@ -714,13 +714,13 @@ export class Toolbar {
             switch (btnElement.getAttribute("data-type")) {
                 case "close":
                     this.subElement.classList.add("fn__none");
-                    this.subElement.querySelector('[data-type="pin"]').classList.remove("ft__primary");
+                    this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");
                     break;
                 case "pin":
-                    btnElement.classList.toggle("ft__primary");
+                    btnElement.classList.toggle("block__icon--active");
                     break;
                 case "refresh":
-                    btnElement.classList.toggle("ft__primary");
+                    btnElement.classList.toggle("block__icon--active");
                     break;
                 case "before":
                     insertEmptyBlock(protyle, "beforebegin", id);
@@ -814,7 +814,7 @@ export class Toolbar {
             if (textElement.clientHeight !== textElement.scrollHeight) {
                 autoHeight();
             }
-            if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("ft__primary")) {
+            if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) {
                 return;
             }
             const target = event.target as HTMLTextAreaElement;
@@ -834,7 +834,7 @@ export class Toolbar {
             if (!renderElement.parentElement) {
                 return;
             }
-            if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("ft__primary")) {
+            if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) {
                 const target = event.target as HTMLTextAreaElement;
                 if (type === "NodeHTMLBlock") {
                     renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
@@ -881,7 +881,7 @@ export class Toolbar {
 
             if (event.key === "Escape" || matchHotKey("⌘↩", event)) {
                 this.subElement.classList.add("fn__none");
-                this.subElement.querySelector('[data-type="pin"]').classList.remove("ft__primary");
+                this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");
                 if (renderElement.tagName === "SPAN") {
                     const range = getEditorRange(renderElement);
                     range.setStartAfter(renderElement);

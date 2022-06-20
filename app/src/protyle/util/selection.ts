@@ -412,8 +412,13 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
         } else if (type === "NodeBlockQueryEmbed" && element.lastElementChild.previousElementSibling) {
             range.selectNodeContents(element.lastElementChild.previousElementSibling);
             setRange = true;
-        } else if (["NodeMathBlock", "NodeHTMLBlock"].includes(type) && element.lastElementChild.previousElementSibling?.lastElementChild) {
-            range.selectNodeContents(element.lastElementChild.previousElementSibling.lastElementChild);
+        } else if (["NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
+            // https://ld246.com/article/1655714737572
+            if (element.lastElementChild.previousElementSibling?.lastElementChild) {
+                range.selectNodeContents(element.lastElementChild.previousElementSibling.lastElementChild);
+            } else if (element.lastElementChild.previousElementSibling) {
+                range.selectNodeContents(element.lastElementChild.previousElementSibling);
+            }
             setRange = true;
         } else if (type === "NodeIFrame" || type === "NodeWidget") {
             range.setStart(element, 0);

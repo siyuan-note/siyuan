@@ -178,6 +178,7 @@ export class MobileFiles extends Model {
                                 newFile(notebookId, pathString, true);
                             } else if (type === "more-root") {
                                 initNavigationMenu(target.parentElement).popup({x, y});
+                                window.siyuan.menus.menu.element.style.zIndex = "310";
                             }
                         }
                         if (type === "more-file") {
@@ -185,6 +186,7 @@ export class MobileFiles extends Model {
                                 x,
                                 y
                             });
+                            window.siyuan.menus.menu.element.style.zIndex = "310";
                         }
                     }
                     event.preventDefault();
@@ -310,6 +312,7 @@ export class MobileFiles extends Model {
                 clickEvent(6);
             }
         }).element);
+        window.siyuan.menus.menu.element.style.zIndex = "310";
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
     }
 

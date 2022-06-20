@@ -127,7 +127,7 @@ export const keymap = {
     },
     _search(value: string) {
         keymap.element.querySelectorAll("#keymapList .b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
-            if (item.textContent.indexOf(value) > -1 || value === "") {
+            if (item.textContent.toLowerCase().indexOf(value.toLowerCase()) > -1 || value === "") {
                 item.parentElement.classList.remove("fn__none");
                 item.parentElement.parentElement.classList.remove("fn__none");
             } else {

@@ -328,7 +328,7 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<div class="b3-list-item__meta">${item.hPath}</div>`,
+<div class="b3-list-item__meta">${escapeHtml(item.hPath)}</div>`,
             });
         });
         if (isQuick) {

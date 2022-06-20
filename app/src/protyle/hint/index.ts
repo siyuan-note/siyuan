@@ -310,7 +310,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<div class="b3-list-item__meta">${item.hPath}</div></button>`;
+<div class="b3-list-item__meta">${escapeHtml(item.hPath)}</div></button>`;
             });
             if (searchHTML === "") {
                 searchHTML = `<button class="b3-list-item b3-list-item--two fn__block" data-value="">${window.siyuan.languages.emptyContent}</button>`;

@@ -51,8 +51,8 @@ github.com/88250/gulu v1.2.0/go.mod h1:ZhEJ98UjR2y7j2toGj4/b+1rRELcZFQAPq/Yjyin2
 github.com/88250/gulu v1.2.2 h1:LsuDSXI4GjqAD2XasG/DJEHuboKXU2lhZ9w0mnfJj3Y=
 github.com/88250/gulu v1.2.2/go.mod h1:I1qBzsksFL2ciGSuqDE7R3XW4BUMrfDgOvSXEk7FsAI=
 github.com/88250/lute v1.7.4-0.20220426011157-34c9bfa2e148/go.mod h1:Bdu9LRNjQhtL3TftbtpjIWTwDVAXoS7AD8QsZQPk7zo=
-github.com/88250/lute v1.7.4-0.20220525011519-3148f42c174b h1:UwGrvVWNkXpyv8FkazWeV0brdmhM7FpWE3qMfqF1K+4=
-github.com/88250/lute v1.7.4-0.20220525011519-3148f42c174b/go.mod h1:Bdu9LRNjQhtL3TftbtpjIWTwDVAXoS7AD8QsZQPk7zo=
+github.com/88250/lute v1.7.4-0.20220620143842-09dc863cb251 h1:uv39zdD2OksspZ86XYglQK6znW0MHqUey08eqjkGp0A=
+github.com/88250/lute v1.7.4-0.20220620143842-09dc863cb251/go.mod h1:Bdu9LRNjQhtL3TftbtpjIWTwDVAXoS7AD8QsZQPk7zo=
 github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1 h1:9Cb+iN639vUI2OcIBc+4oGwml9/0J6bL6dWNb8Al+1s=
 github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1/go.mod h1:jH6MMPr8G7AMzaVmWHXZQiB1DKO3giWbcWZ7UoJ1teI=
 github.com/88250/pdfcpu v0.3.13 h1:touMWMZkCGalMIbEg9bxYp7rETM+zwb9hXjwhqi4I7Q=
@@ -419,8 +419,8 @@ github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749/go.mod h1:ZY1cvUeJ
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/shurcooL/vfsgen v0.0.0-20200824052919-0d455de96546/go.mod h1:TrYk7fJVaAttu97ZZKrO9UbRa8izdowaMIZcxYMbVaw=
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
-github.com/siyuan-note/dejavu v0.0.0-20220618124953-c714755a1685 h1:8DgrXnXk1HPAj2G4DNI1wcDLdCnmddYAUfW/j3dkFVg=
-github.com/siyuan-note/dejavu v0.0.0-20220618124953-c714755a1685/go.mod h1:nCckhUVoaofwwlBOglCui+Mr7Hhyd059vMXzs7jdne0=
+github.com/siyuan-note/dejavu v0.0.0-20220620134708-bcbbf7f6478e h1:AOxGL9q3HYivlj5dP6y2zG+JA0ZN4H1oiTVjcbW8dOQ=
+github.com/siyuan-note/dejavu v0.0.0-20220620134708-bcbbf7f6478e/go.mod h1:nCckhUVoaofwwlBOglCui+Mr7Hhyd059vMXzs7jdne0=
 github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676 h1:QB9TjJQFhXhZ6dAtPpY02DlzHAQm1C+WqZq6OadG8mI=
 github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/filelock v0.0.0-20220616063212-74cfba0754ee h1:8nBBJKHbXuMF2dWKUKsrnnFblgeNBfPjLgVm0aDas/s=

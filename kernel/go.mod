@@ -7,7 +7,7 @@ require (
 	github.com/88250/css v0.1.2
 	github.com/88250/flock v0.8.2
 	github.com/88250/gulu v1.2.2
-	github.com/88250/lute v1.7.4-0.20220525011519-3148f42c174b
+	github.com/88250/lute v1.7.4-0.20220620143842-09dc863cb251
 	github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1
 	github.com/88250/pdfcpu v0.3.13
 	github.com/88250/protyle v0.0.0-20220519012506-0a2c8dc24397
@@ -40,7 +40,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20220618124953-c714755a1685
+	github.com/siyuan-note/dejavu v0.0.0-20220620134708-bcbbf7f6478e
 	github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676
 	github.com/siyuan-note/filelock v0.0.0-20220616063212-74cfba0754ee
 	github.com/vmihailenco/msgpack/v5 v5.3.5

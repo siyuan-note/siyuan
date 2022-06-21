@@ -132,6 +132,8 @@ declare class Lute {
 
     public static GetHeadingID(node: ILuteNode): string;
 
+    public static BlockDOM2Content(html: string): string;
+
     private constructor();
 
     public SetHeadingID(enable: boolean): void;

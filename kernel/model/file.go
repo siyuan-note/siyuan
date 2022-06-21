@@ -659,7 +659,7 @@ func GetDoc(id string, index int, keyword string, mode int, size int) (blockCoun
 func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeading bool) (nodes []*ast.Node, eof bool) {
 	if 2 == mode { // 向下
 		next := node.Next
-		if ast.NodeHeading == node.Type {
+		if ast.NodeHeading == node.Type && "1" == node.IALAttr("fold") {
 			// 标题展开时进行动态加载导致重复内容 https://github.com/siyuan-note/siyuan/issues/4671
 			// 这里要考虑折叠标题是最后一个块的情况
 			if children := treenode.HeadingChildren(node); 0 < len(children) {

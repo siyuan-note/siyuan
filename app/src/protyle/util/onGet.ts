@@ -178,9 +178,10 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
     if (protyle.element.classList.contains("block__edit") && (protyle.element.nextElementSibling || protyle.element.previousElementSibling)) {
         protyle.element.style.minHeight = Math.min(30 + protyle.wysiwyg.element.clientHeight, window.innerHeight / 3) + "px";
     }
-    // https://github.com/siyuan-note/siyuan/issues/5018
+    // 屏幕太高的页签 https://github.com/siyuan-note/siyuan/issues/5018
     if (!protyle.scroll.element.classList.contains("fn__none") &&
         protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true" &&
+        protyle.contentElement.scrollHeight > 0 && // 没有激活的页签 https://github.com/siyuan-note/siyuan/issues/5255
         protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
         fetchPost("/api/filetree/getDoc", {
             id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),

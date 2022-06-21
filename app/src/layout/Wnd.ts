@@ -23,6 +23,8 @@ import {showMessage} from "../dialog/message";
 import {openFileById, updatePanelByEditor} from "../editor/util";
 import {scrollCenter} from "../util/highlightById";
 import {getAllModels} from "./getAll";
+import {fetchPost} from "../util/fetch";
+import {onGet} from "../protyle/util/onGet";
 
 export class Wnd {
     public id: string;
@@ -336,6 +338,22 @@ export class Wnd {
             // focusin 触发前，layout__wnd--active 和 tab 已设置，需在调用里面更新
             if (update) {
                 updatePanelByEditor(currentTab.model.editor.protyle, true, pushBack);
+            }
+
+            // 切换到屏幕太高的页签 https://github.com/siyuan-note/siyuan/issues/5018
+            const protyle = currentTab.model.editor.protyle;
+            if (!protyle.scroll.element.classList.contains("fn__none") &&
+                protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true" &&
+                protyle.contentElement.scrollHeight > 0 &&
+                protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
+                fetchPost("/api/filetree/getDoc", {
+                    id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+                    mode: 2,
+                    k: protyle.options.key || "",
+                    size: Constants.SIZE_GET,
+                }, getResponse => {
+                    onGet(getResponse, protyle, [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]);
+                });
             }
         } else {
             updatePanelByEditor(undefined, false);

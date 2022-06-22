@@ -229,9 +229,13 @@ export const keymap = {
                         keymapStr += "⌫";
                     } else if (event.key === "Delete") {
                         keymapStr += "⌦";
+                    } else if (event.key === "Enter") {
+                        keymapStr += "↩";
                     } else if (event.altKey) {
                         const codeKey = event.code.substr(event.code.length - 1, 1).toUpperCase();
-                        if (event.key === "Enter" || (event.key.startsWith("F") && event.key.length > 1)) {
+                        if (event.key === "Enter") {
+                            keymapStr += "↩";
+                        } else if (event.key.startsWith("F") && event.key.length > 1) {
                             keymapStr += event.key;
                         } else if (event.code === "Period") {
                             keymapStr += ".";

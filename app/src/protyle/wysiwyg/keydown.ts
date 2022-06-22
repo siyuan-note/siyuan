@@ -230,7 +230,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 setFold(protyle, selectElements[0]);
             } else {
                 if (nodeElement.parentElement.getAttribute("data-type") === "NodeListItem") {
-                    if (nodeElement.parentElement.querySelector(".list")) {
+                    if (nodeElement.parentElement.childElementCount > 3) {
                         setFold(protyle, nodeElement.parentElement);
                     } else {
                         setFold(protyle, nodeElement);
@@ -251,7 +251,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 setFold(protyle, selectElements[0], true);
             } else {
                 if (nodeElement.parentElement.getAttribute("data-type") === "NodeListItem") {
-                    if (nodeElement.parentElement.querySelector(".list")) {
+                    if (nodeElement.parentElement.childElementCount > 3) {
                         setFold(protyle, nodeElement.parentElement, true);
                     } else {
                         setFold(protyle, nodeElement, true);

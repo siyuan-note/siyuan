@@ -1,4 +1,5 @@
 {
+  "pasteEscaped": "粘貼轉義文本",
   "resetRepoTip": "重置數據倉庫會徹底刪除密鑰和所有快照，確定進行重置嗎？",
   "resetRepo": "重置數據倉庫",
   "createSnapshot": "創建快照",

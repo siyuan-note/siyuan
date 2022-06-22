@@ -297,6 +297,20 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     }).element);
     /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.pasteEscaped,
+        async click() {
+            try {
+                // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
+                let clipText = await navigator.clipboard.readText();
+                clipText = clipText.replace(/\*/g, "\\*").replace(/\_/g, "\\_").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\!/g, "\\!").replace(/\\/g, "\\").replace(/\`/g, "\\`").replace(/\</g, "\\<").replace(/\>/g, "\\>").
+                replace(/\&/g, "\\&").replace(/\~/g, "\\~").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\=/g, "\\=").replace(/\#/g, "\\#").replace(/\$/g, "\\$").replace(/\^/g, "\\^").replace(/\|/g, "\\|")
+                pasteText(protyle, clipText, nodeElement);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.selectAll,
         accelerator: "⌘A",
         click() {

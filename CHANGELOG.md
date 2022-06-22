@@ -1,3 +1,25 @@
+## v2.0.23 / 2022-06-22
+
+### 改进功能
+
+* [支持粘贴转义文本](https://github.com/siyuan-note/siyuan/issues/5073)
+* [改进英文快捷键搜索为大小写不敏感](https://github.com/siyuan-note/siyuan/issues/5224)
+* [复制 Edge 浏览器 URL 粘贴特殊符号额外转义](https://github.com/siyuan-note/siyuan/issues/5251)
+* [行级代码和键盘元素为空格时应该保留](https://github.com/siyuan-note/siyuan/issues/5256)
+
+### 开发重构
+
+* [数据仓库索引文件存放在 `indexes` 文件夹下](https://github.com/siyuan-note/siyuan/issues/5253)
+
+### 修复缺陷
+
+* [粘贴公式触发状态异常](https://github.com/siyuan-note/siyuan/issues/5248)
+* [大纲悬浮提示转义问题](https://github.com/siyuan-note/siyuan/issues/5249)
+* [悬浮窗点击后会置于引用提示下](https://github.com/siyuan-note/siyuan/issues/5252)
+* [移动端文档树菜单层级错位](https://github.com/siyuan-note/siyuan/issues/5254)
+* [重启后已经存在的页签动态加载失效](https://github.com/siyuan-note/siyuan/issues/5255)
+* [书签面板层级显示错位](https://github.com/siyuan-note/siyuan/issues/5262)
+
 ## v2.0.22 / 2022-06-19
 
 ### 改进功能

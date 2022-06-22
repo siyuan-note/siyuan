@@ -290,6 +290,8 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/radovskyb/watcher](https://github.com/radovskyb/watcher) `BSD-3-Clause License`
 * [https://github.com/siyuan-note/dejavu](https://github.com/siyuan-note/dejavu) `Mulan PSL v2`
 * [https://github.com/siyuan-note/encryption](https://github.com/siyuan-note/encryption) `Mulan PSL v2`
+* [https://github.com/siyuan-note/filelock](https://github.com/siyuan-note/filelock) `Mulan PSL v2`
+* [https://github.com/siyuan-note/httpclient](https://github.com/siyuan-note/httpclient) `Mulan PSL v2`
 * [https://github.com/vmihailenco/msgpack](https://github.com/vmihailenco/msgpack) `BSD-2-Clause License`
 * [https://github.com/xrash/smetrics](https://github.com/xrash/smetrics) `MIT License`
 * [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`

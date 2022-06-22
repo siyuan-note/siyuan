@@ -383,7 +383,19 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
         return;
     }
     const endIndex = parseInt(endPageElement.getAttribute("data-page-number")) - 1;
-    const content = Lute.EscapeHTMLStr(range.toString());
+    // https://github.com/siyuan-note/siyuan/issues/5213
+    const rangeContents = range.cloneContents()
+    Array.from(rangeContents.children).forEach(item => {
+        if (item.tagName === "BR") {
+            const previousText = item.previousElementSibling.textContent
+            if (previousText.endsWith("-")) {
+                item.previousElementSibling.textContent = previousText.substring(0, previousText.length - 1)
+            } else {
+                item.insertAdjacentText("afterend", " ");
+            }
+        }
+    });
+    const content = Lute.EscapeHTMLStr(rangeContents.textContent);
 
     const startPage = pdf.pdfViewer.getPageView(startIndex);
     const startPageRect = startPage.canvas.getClientRects()[0];

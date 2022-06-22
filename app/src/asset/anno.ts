@@ -388,7 +388,9 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
     Array.from(rangeContents.children).forEach(item => {
         if (item.tagName === "BR") {
             const previousText = item.previousElementSibling.textContent;
-            if (previousText.endsWith("-")) {
+            const nextText = item.nextElementSibling.textContent;
+            if (previousText.endsWith("-") && /^[A-Za-z]$/.test(previousText.substring(previousText.length - 2, previousText.length - 1)) &&
+                /^[A-Za-z]$/.test(nextText.substring(0, 1))) {
                 item.previousElementSibling.textContent = previousText.substring(0, previousText.length - 1);
             } else {
                 item.insertAdjacentText("afterend", " ");

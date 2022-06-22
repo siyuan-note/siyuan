@@ -25,6 +25,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
+	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -63,7 +64,7 @@ func Widgets(proxyURL string) (widgets []*Widget) {
 	bazaarIndex := getBazaarIndex(proxyURL)
 	bazaarHash := result["bazaar"].(string)
 	result = map[string]interface{}{}
-	request := util.NewBrowserRequest(proxyURL)
+	request := httpclient.NewBrowserRequest(proxyURL)
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/widgets.json"
 	resp, err := request.SetResult(&result).Get(u)
 	if nil != err {
@@ -86,7 +87,7 @@ func Widgets(proxyURL string) (widgets []*Widget) {
 
 		widget := &Widget{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/widget.json"
-		innerResp, innerErr := util.NewBrowserRequest(proxyURL).SetResult(widget).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest(proxyURL).SetResult(widget).Get(innerU)
 		if nil != innerErr {
 			util.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
 			return

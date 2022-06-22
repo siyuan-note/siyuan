@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -37,7 +38,7 @@ func StartFreeTrial() (err error) {
 	}
 
 	requestResult := gulu.Ret.NewResult()
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	_, err = request.
 		SetResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
@@ -54,7 +55,7 @@ func StartFreeTrial() (err error) {
 
 func DeactivateUser() (err error) {
 	requestResult := gulu.Ret.NewResult()
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
@@ -79,7 +80,7 @@ func DeactivateUser() (err error) {
 func SetCloudBlockReminder(id, data string, timed int64) (err error) {
 	requestResult := gulu.Ret.NewResult()
 	payload := map[string]interface{}{"dataId": id, "data": data, "timed": timed}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetResult(requestResult).
 		SetBody(payload).
@@ -112,7 +113,7 @@ func LoadUploadToken() (err error) {
 	}
 
 	requestResult := gulu.Ret.NewResult()
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
@@ -251,7 +252,7 @@ func loadUserFromConf() *conf.User {
 
 func RemoveCloudShorthands(ids []string) (err error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	body := map[string]interface{}{
 		"ids": ids,
 	}
@@ -282,7 +283,7 @@ func RemoveCloudShorthands(ids []string) (err error) {
 
 func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 	result = map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetResult(&result).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
@@ -319,7 +320,7 @@ var errInvalidUser = errors.New("invalid user")
 
 func getUser(token string) (*conf.User, error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	_, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"token": token}).
@@ -350,7 +351,7 @@ func getUser(token string) (*conf.User, error) {
 
 func UseActivationcode(code string) (err error) {
 	requestResult := gulu.Ret.NewResult()
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	_, err = request.
 		SetResult(requestResult).
 		SetBody(map[string]string{"data": code}).
@@ -369,7 +370,7 @@ func UseActivationcode(code string) (err error) {
 func CheckActivationcode(code string) (retCode int, msg string) {
 	retCode = 1
 	requestResult := gulu.Ret.NewResult()
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	_, err := request.
 		SetResult(requestResult).
 		SetBody(map[string]string{"data": code}).
@@ -389,7 +390,7 @@ func CheckActivationcode(code string) (retCode int, msg string) {
 
 func Login(userName, password, captcha string) (ret *gulu.Result, err error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	_, err = request.
 		SetResult(&result).
 		SetBody(map[string]string{"userName": userName, "userPassword": password, "captcha": captcha}).
@@ -415,7 +416,7 @@ func Login(userName, password, captcha string) (ret *gulu.Result, err error) {
 
 func Login2fa(token, code string) (map[string]interface{}, error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	_, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"twofactorAuthCode": code}).

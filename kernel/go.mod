@@ -43,6 +43,7 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20220620134708-bcbbf7f6478e
 	github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676
 	github.com/siyuan-note/filelock v0.0.0-20220616063212-74cfba0754ee
+	github.com/siyuan-note/httpclient v0.0.0-20220622170705-004622a8138d
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
@@ -98,7 +99,7 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/mod v0.5.1 // indirect
-	golang.org/x/net v0.0.0-20220607020251-c690dde0001d // indirect
+	golang.org/x/net v0.0.0-20220621193019-9d032be2e588 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c // indirect
 	golang.org/x/tools v0.1.8 // indirect

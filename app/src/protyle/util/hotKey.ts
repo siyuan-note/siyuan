@@ -1,5 +1,4 @@
 import {isCtrl} from "./compatibility";
-import {Constants} from "../../constants";
 
 // 是否匹配 ⇧⌘[] / ⌘[] / ⌥[] / ⌥⌘[] / ⇧Tab / []
 export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {

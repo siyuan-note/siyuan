@@ -563,4 +563,4 @@ export const deleteFile = (notebookId: string, pathString: string, name: string)
             });
         });
     });
-}
+};

@@ -5,7 +5,7 @@ import {newFile} from "../util/newFile";
 import {getDockByType} from "../layout/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile} from "../util/functions";
-import {getDisplayName, isLocalPath, movePathTo} from "../util/pathName";
+import {isLocalPath, movePathTo} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {saveExport} from "../protyle/export";

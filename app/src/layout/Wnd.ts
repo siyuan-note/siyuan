@@ -427,17 +427,17 @@ export class Wnd {
             this.removeTab(this.children[0].id);
         } else if (this.children.length > 5) { // TODO: 需从后台设置中获取
             let removeId: string;
-            let openTime: string
+            let openTime: string;
             this.children.forEach((item, index) => {
                 if (item.headElement.classList.contains("item--pin") || item.headElement.classList.contains("item--focus") || index === oldFocusIndex) {
                     return;
                 }
                 if (!openTime) {
-                    openTime = item.headElement.getAttribute("data-opentime")
-                    removeId = this.children[index].id
+                    openTime = item.headElement.getAttribute("data-opentime");
+                    removeId = this.children[index].id;
                 } else if (item.headElement.getAttribute("data-opentime") < openTime) {
-                    openTime = item.headElement.getAttribute("data-opentime")
-                    removeId = this.children[index].id
+                    openTime = item.headElement.getAttribute("data-opentime");
+                    removeId = this.children[index].id;
                 }
             });
             if (removeId) {

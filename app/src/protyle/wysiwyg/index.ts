@@ -1468,7 +1468,7 @@ export class WYSIWYG {
 
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
             if (embedItemElement) {
-                const embedId = embedItemElement.getAttribute("data-id")
+                const embedId = embedItemElement.getAttribute("data-id");
                 if (isMobile()) {
                     openMobileFileById(embedId, false, [Constants.CB_GET_ALL]);
                 } else if (window.siyuan.shiftIsPressed) {

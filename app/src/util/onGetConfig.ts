@@ -271,7 +271,7 @@ const initBar = () => {
         });
         resizeTabs();
     });
-    document.getElementById("toolbarVIP").addEventListener("click", (event) => {
+    document.getElementById("toolbarVIP").addEventListener("click", () => {
         const dialogSetting = openSetting();
         dialogSetting.element.querySelector('.b3-tab-bar [data-name="account"]').dispatchEvent(new CustomEvent("click"));
     });

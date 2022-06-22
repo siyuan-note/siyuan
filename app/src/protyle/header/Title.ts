@@ -261,7 +261,7 @@ export class Title {
                     icon: "iconTrashcan",
                     label: window.siyuan.languages.delete,
                     click: () => {
-                        deleteFile(protyle.notebookId, protyle.path, escapeHtml(this.editElement.textContent))
+                        deleteFile(protyle.notebookId, protyle.path, escapeHtml(this.editElement.textContent));
                     }
                 }).element);
             }

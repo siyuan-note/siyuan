@@ -384,12 +384,12 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
     }
     const endIndex = parseInt(endPageElement.getAttribute("data-page-number")) - 1;
     // https://github.com/siyuan-note/siyuan/issues/5213
-    const rangeContents = range.cloneContents()
+    const rangeContents = range.cloneContents();
     Array.from(rangeContents.children).forEach(item => {
         if (item.tagName === "BR") {
-            const previousText = item.previousElementSibling.textContent
+            const previousText = item.previousElementSibling.textContent;
             if (previousText.endsWith("-")) {
-                item.previousElementSibling.textContent = previousText.substring(0, previousText.length - 1)
+                item.previousElementSibling.textContent = previousText.substring(0, previousText.length - 1);
             } else {
                 item.insertAdjacentText("afterend", " ");
             }

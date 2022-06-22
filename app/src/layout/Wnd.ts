@@ -404,6 +404,8 @@ export class Wnd {
                 event.stopPropagation();
                 event.preventDefault();
             });
+
+            tab.headElement.setAttribute("data-opentime", (new Date()).getTime().toString());
         }
         const containerElement = this.element.querySelector(".layout-tab-container");
         if (!containerElement.querySelector(".fn__flex-1")) {
@@ -423,6 +425,24 @@ export class Wnd {
         // 移除 centerLayout 中的 empty
         if (this.parent.type === "center" && this.children.length === 2 && !this.children[0].headElement) {
             this.removeTab(this.children[0].id);
+        } else if (this.children.length > 5) { // TODO: 需从后台设置中获取
+            let removeId: string;
+            let openTime: string
+            this.children.forEach((item, index) => {
+                if (item.headElement.classList.contains("item--pin") || item.headElement.classList.contains("item--focus") || index === oldFocusIndex) {
+                    return;
+                }
+                if (!openTime) {
+                    openTime = item.headElement.getAttribute("data-opentime")
+                    removeId = this.children[index].id
+                } else if (item.headElement.getAttribute("data-opentime") < openTime) {
+                    openTime = item.headElement.getAttribute("data-opentime")
+                    removeId = this.children[index].id
+                }
+            });
+            if (removeId) {
+                this.removeTab(removeId);
+            }
         }
     }
 

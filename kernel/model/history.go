@@ -527,7 +527,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 	}
 	for _, dir := range removes {
 		if err = os.RemoveAll(dir); nil != err {
-			util.LogErrorf("remove history dir [%s] failed: %s", err)
+			util.LogErrorf("remove history dir [%s] failed: %s", dir, err)
 			continue
 		}
 		//util.LogInfof("auto removed history dir [%s]", dir)

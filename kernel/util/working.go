@@ -32,6 +32,7 @@ import (
 	"github.com/88250/gulu"
 	figure "github.com/common-nighthawk/go-figure"
 	goPS "github.com/mitchellh/go-ps"
+	"github.com/siyuan-note/httpclient"
 )
 
 //var Mode = "dev"
@@ -53,6 +54,7 @@ func Boot() {
 	IncBootProgress(3, "Booting...")
 	rand.Seed(time.Now().UTC().UnixNano())
 	initMime()
+	httpclient.SetUserAgent(UserAgent)
 
 	workspacePath := flag.String("workspace", "", "dir path of the workspace, default to ~/Documents/SiYuan/")
 	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
@@ -323,7 +325,7 @@ func checkPort() {
 
 	LogInfof("port [%s] is opened, try to check version of running kernel", ServerPort)
 	result := NewResult()
-	_, err := NewBrowserRequest("").
+	_, err := httpclient.NewBrowserRequest("").
 		SetResult(result).
 		SetHeader("User-Agent", UserAgent).
 		Get("http://127.0.0.1:" + ServerPort + "/api/system/version")

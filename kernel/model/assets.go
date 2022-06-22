@@ -36,6 +36,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -91,7 +92,7 @@ func NetImg2LocalAssets(rootID string) (err error) {
 					}
 				}
 				util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(119), u), 15000)
-				request := util.NewBrowserRequest(Conf.System.NetworkProxy.String())
+				request := httpclient.NewBrowserRequest(Conf.System.NetworkProxy.String())
 				resp, reqErr := request.Get(u)
 				if nil != reqErr {
 					util.LogErrorf("download net img [%s] failed: %s", u, reqErr)
@@ -285,7 +286,7 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 		}
 
 		requestResult := gulu.Ret.NewResult()
-		request := util.NewCloudFileRequest2m(Conf.System.NetworkProxy.String())
+		request := httpclient.NewCloudFileRequest2m(Conf.System.NetworkProxy.String())
 		resp, reqErr := request.
 			SetResult(requestResult).
 			SetFile("file[]", absAsset).

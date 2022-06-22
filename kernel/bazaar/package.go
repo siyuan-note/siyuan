@@ -30,6 +30,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/araddon/dateparse"
 	"github.com/imroc/req/v3"
+	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	textUnicode "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
@@ -82,14 +83,14 @@ func downloadPackage(repoURLHash, proxyURL string, chinaCDN, pushProgress bool, 
 		u = util.BazaarOSSServer + "/package/" + repoURLHash
 	}
 	buf := &bytes.Buffer{}
-	resp, err := util.NewBrowserDownloadRequest(proxyURL).SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+	resp, err := httpclient.NewBrowserDownloadRequest(proxyURL).SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 		if pushProgress {
 			util.PushDownloadProgress(pushID, float32(info.DownloadedSize)/float32(info.Response.ContentLength))
 		}
 	}).Get(u)
 	if nil != err {
 		u = util.BazaarOSSServer + "/package/" + repoURLHash
-		resp, err = util.NewBrowserDownloadRequest(proxyURL).SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+		resp, err = httpclient.NewBrowserDownloadRequest(proxyURL).SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 			if pushProgress {
 				util.PushDownloadProgress(pushID, float32(info.DownloadedSize)/float32(info.Response.ContentLength))
 			}
@@ -116,7 +117,7 @@ func incPackageDownloads(repoURLHash, proxyURL, systemID string) {
 
 	repo := strings.Split(repoURLHash, "@")[0]
 	u := util.AliyunServer + "/apis/siyuan/bazaar/addBazaarPackageDownloadCount"
-	util.NewCloudRequest(proxyURL).SetBody(
+	httpclient.NewCloudRequest(proxyURL).SetBody(
 		map[string]interface{}{
 			"systemID": systemID,
 			"repo":     repo,
@@ -190,7 +191,7 @@ func getBazaarIndex(proxyURL string) map[string]*bazaarPackage {
 		return cachedBazaarIndex
 	}
 
-	request := util.NewBrowserRequest(proxyURL)
+	request := httpclient.NewBrowserRequest(proxyURL)
 	u := util.BazaarStatServer + "/bazaar/index.json"
 	resp, reqErr := request.SetResult(&cachedBazaarIndex).Get(u)
 	if nil != reqErr {

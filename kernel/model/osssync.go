@@ -34,12 +34,13 @@ import (
 	"github.com/88250/gulu"
 	"github.com/panjf2000/ants/v2"
 	"github.com/qiniu/go-sdk/v7/storage"
+	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, err error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"token": Conf.User.UserToken}).
@@ -69,7 +70,7 @@ func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, e
 
 func removeCloudDirPath(dirPath string) (err error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"dirPath": dirPath, "token": Conf.User.UserToken}).
@@ -94,7 +95,7 @@ func removeCloudDirPath(dirPath string) (err error) {
 
 func createCloudSyncDirOSS(name string) (err error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"name": name, "token": Conf.User.UserToken}).
@@ -125,7 +126,7 @@ func createCloudSyncDirOSS(name string) (err error) {
 
 func listCloudSyncDirOSS() (dirs []map[string]interface{}, size int64, err error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetBody(map[string]interface{}{"token": Conf.User.UserToken}).
 		SetResult(&result).
@@ -277,7 +278,7 @@ func ossDownload0(localDirPath, cloudDirPath, fetch string, fetchedFiles *int, t
 	localFilePath := filepath.Join(localDirPath, fetch)
 	remoteFileURL := path.Join(cloudDirPath, fetch)
 	var result map[string]interface{}
-	resp, err := util.NewCloudRequest(Conf.System.NetworkProxy.String()).
+	resp, err := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String()).
 		SetResult(&result).
 		SetBody(map[string]interface{}{"token": Conf.User.UserToken, "path": remoteFileURL}).
 		Post(util.AliyunServer + "/apis/siyuan/data/getSiYuanFile?uid=" + Conf.User.UserId)
@@ -312,9 +313,9 @@ func ossDownload0(localDirPath, cloudDirPath, fetch string, fetchedFiles *int, t
 	os.Remove(localFilePath)
 
 	if bootORExit {
-		resp, err = util.NewCloudFileRequest15s(Conf.System.NetworkProxy.String()).Get(downloadURL)
+		resp, err = httpclient.NewCloudFileRequest15s(Conf.System.NetworkProxy.String()).Get(downloadURL)
 	} else {
-		resp, err = util.NewCloudFileRequest2m(Conf.System.NetworkProxy.String()).Get(downloadURL)
+		resp, err = httpclient.NewCloudFileRequest2m(Conf.System.NetworkProxy.String()).Get(downloadURL)
 	}
 	if nil != err {
 		util.LogErrorf("download request [%s] failed: %s", downloadURL, err)
@@ -457,7 +458,7 @@ func ossRemove0(cloudDirPath string, removes []string) (err error) {
 		return
 	}
 
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetBody(map[string]interface{}{"token": Conf.User.UserToken, "dirPath": cloudDirPath, "paths": removes}).
 		Post(util.AliyunServer + "/apis/siyuan/data/removeSiYuanFile?uid=" + Conf.User.UserId)
@@ -511,7 +512,7 @@ func getOssUploadToken(filename, cloudDirPath string, length int64) (ret string,
 	// 因为需要指定 key，所以每次上传文件都必须在云端生成 Token，否则有安全隐患
 
 	var result map[string]interface{}
-	req := util.NewCloudRequest(Conf.System.NetworkProxy.String()).
+	req := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String()).
 		SetResult(&result)
 	req.SetBody(map[string]interface{}{
 		"token":   Conf.User.UserToken,
@@ -551,7 +552,7 @@ func getOssUploadToken(filename, cloudDirPath string, length int64) (ret string,
 func getCloudSyncVer(cloudDir string) (cloudSyncVer int64, err error) {
 	start := time.Now()
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"syncDir": cloudDir, "token": Conf.User.UserToken}).
@@ -591,7 +592,7 @@ func getCloudSyncVer(cloudDir string) (cloudSyncVer int64, err error) {
 func getCloudSync(cloudDir string) (assetSize, backupSize int64, device string, err error) {
 	start := time.Now()
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"syncDir": cloudDir, "token": Conf.User.UserToken}).
@@ -656,7 +657,7 @@ func getLocalFileListOSS(isBackup bool) (ret map[string]*CloudIndex, err error) 
 
 func getCloudFileListOSS(cloudDirPath string) (ret map[string]*CloudIndex, err error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"dirPath": cloudDirPath, "token": Conf.User.UserToken}).
@@ -681,7 +682,7 @@ func getCloudFileListOSS(cloudDirPath string) (ret map[string]*CloudIndex, err e
 
 	retData := result["data"].(map[string]interface{})
 	downloadURL := retData["url"].(string)
-	resp, err = util.NewCloudFileRequest15s(Conf.System.NetworkProxy.String()).Get(downloadURL)
+	resp, err = httpclient.NewCloudFileRequest15s(Conf.System.NetworkProxy.String()).Get(downloadURL)
 	if nil != err {
 		util.LogErrorf("download request [%s] failed: %s", downloadURL, err)
 		return

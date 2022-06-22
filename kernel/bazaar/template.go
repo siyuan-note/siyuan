@@ -26,6 +26,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
+	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -63,7 +64,7 @@ func Templates(proxyURL string) (templates []*Template) {
 	bazaarIndex := getBazaarIndex(proxyURL)
 	bazaarHash := result["bazaar"].(string)
 	result = map[string]interface{}{}
-	request := util.NewBrowserRequest(proxyURL)
+	request := httpclient.NewBrowserRequest(proxyURL)
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/templates.json"
 	resp, reqErr := request.SetResult(&result).Get(u)
 	if nil != reqErr {
@@ -86,7 +87,7 @@ func Templates(proxyURL string) (templates []*Template) {
 
 		template := &Template{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/template.json"
-		innerResp, innerErr := util.NewBrowserRequest(proxyURL).SetResult(template).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest(proxyURL).SetResult(template).Get(innerU)
 		if nil != innerErr {
 			util.LogErrorf("get community template [%s] failed: %s", repoURL, innerErr)
 			return

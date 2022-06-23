@@ -116,6 +116,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         }
         html = protyle.lute.SpinBlockDOM(html);
     }
+    // 在数学公式输入框中撤销到最后一步，再继续撤销会撤销编辑器正文内容，从而出发 input 事件
+    protyle.toolbar.subElement.classList.add("fn__none");
+
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
     if (needRender && (
@@ -181,8 +184,6 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         protyle.hint.render(protyle);
     }
     hideElements(["gutter"], protyle);
-    // 在数学公式输入框中撤销到最后一步，再继续撤销会撤销编辑器正文内容，从而出发 input 事件
-    protyle.toolbar.subElement.classList.add("fn__none");
     updateInput(html, protyle, id, type, todoOldHTML);
 };
 

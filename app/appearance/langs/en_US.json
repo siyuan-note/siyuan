@@ -1,4 +1,6 @@
 {
+  "tabLimit": "Tab Limit",
+  "tabLimit1": "Sort by opening time, close the earliest opened tab",
   "pasteEscaped": "Paste escaped text",
   "resetRepoTip": "Resetting the data repository will completely delete the key and all snapshots, are you sure you want to reset?",
   "resetRepo": "Reset data repo",

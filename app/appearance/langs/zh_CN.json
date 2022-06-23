@@ -1,4 +1,6 @@
 {
+  "tabLimit": "页签打开最大数量",
+  "tabLimit1": "按照打开时间排序，关闭最早打开的页签",
   "pasteEscaped": "粘贴转义文本",
   "resetRepoTip": "重置数据仓库会彻底删除密钥和所有快照，确定进行重置吗？",
   "resetRepo": "重置数据仓库",

@@ -1,4 +1,6 @@
 {
+  "tabLimit": "Nombre maximum d'onglets ouverts",
+  "tabLimit1": "Trier par heure d'ouverture, fermer le premier onglet ouvert",
   "pasteEscaped": "Coller le texte échappé",
   "resetRepoTip": "La réinitialisation du référentiel de données supprimera complètement la clé et tous les instantanés, êtes-vous sûr de vouloir réinitialiser ?",
   "resetRepo": "Réinitialiser le référentiel de données",

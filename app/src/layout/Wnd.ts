@@ -425,7 +425,7 @@ export class Wnd {
         // 移除 centerLayout 中的 empty
         if (this.parent.type === "center" && this.children.length === 2 && !this.children[0].headElement) {
             this.removeTab(this.children[0].id);
-        } else if (this.children.length > 5) { // TODO: 需从后台设置中获取
+        } else if (this.children.length > window.siyuan.config.fileTree.maxOpenTabCount) {
             let removeId: string;
             let openTime: string;
             this.children.forEach((item, index) => {

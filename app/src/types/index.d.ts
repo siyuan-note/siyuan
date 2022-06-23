@@ -231,6 +231,7 @@ declare interface IFileTree {
     refCreateSavePath: string
     createDocNameTemplate: string
     sort: number
+    maxOpenTabCount: number
     maxListCount: number
 }
 

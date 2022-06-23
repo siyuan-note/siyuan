@@ -1,4 +1,6 @@
 {
+  "tabLimit": "頁簽打開最大數量",
+  "tabLimit1": "按照打開時間排序，關閉最早打開的頁簽",
   "pasteEscaped": "粘貼轉義文本",
   "resetRepoTip": "重置數據倉庫會徹底刪除密鑰和所有快照，確定進行重置嗎？",
   "resetRepo": "重置數據倉庫",

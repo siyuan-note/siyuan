@@ -58,6 +58,14 @@ export const fileTree = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="maxListCount" type="number" min="1" max="10240" value="${window.siyuan.config.fileTree.maxListCount}">
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.tabLimit}
+        <div class="b3-label__text">${window.siyuan.languages.tabLimit1}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" id="maxOpenTabCount" type="number" min="1" max="32" value="${window.siyuan.config.fileTree.maxOpenTabCount}">
 </label>`;
     },
     _send() {
@@ -70,6 +78,7 @@ export const fileTree = {
             allowCreateDeeper: (fileTree.element.querySelector("#allowCreateDeeper") as HTMLInputElement).checked,
             removeDocWithoutConfirm: (fileTree.element.querySelector("#removeDocWithoutConfirm") as HTMLInputElement).checked,
             maxListCount: parseInt((fileTree.element.querySelector("#maxListCount") as HTMLInputElement).value),
+            maxOpenTabCount: parseInt((fileTree.element.querySelector("#maxOpenTabCount") as HTMLInputElement).value),
         }, response => {
             fileTree.onSetfiletree(response.data);
         });

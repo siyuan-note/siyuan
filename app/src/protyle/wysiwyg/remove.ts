@@ -179,13 +179,11 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         const inserts: IOperation[] = [];
         let sideElement = selectElements[0].previousElementSibling || selectElements[selectElements.length - 1].nextElementSibling;
         let listElement: Element;
-        let topElementId: string;
         let topParentElement: Element;
         selectElements.find((item: HTMLElement) => {
             item.classList.remove("protyle-wysiwyg--select");
             const topElement = getTopAloneElement(item);
             topParentElement = topElement.parentElement;
-            topElementId = topElement.getAttribute("data-node-id");
             const id = topElement.getAttribute("data-node-id");
             deletes.push({
                 action: "delete",
@@ -241,17 +239,18 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                 }, Constants.TIMEOUT_INPUT * 2 + 100);
             } else {
                 if ((sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0)) {
-                    const emptyElement = genEmptyElement(false, true, topElementId);
+                    const newID = Lute.NewNodeID();
+                    const emptyElement = genEmptyElement(false, true, newID);
                     sideElement.insertAdjacentElement("afterbegin", emptyElement);
                     deletes.push({
                         action: "insert",
                         data: emptyElement.outerHTML,
-                        id: topElementId,
+                        id: newID,
                         parentID: sideElement.getAttribute("data-node-id") || protyle.block.parentID
                     });
                     inserts.push({
                         action: "delete",
-                        id: topElementId,
+                        id: newID,
                     });
                     sideElement = undefined;
                     focusByWbr(emptyElement, range);

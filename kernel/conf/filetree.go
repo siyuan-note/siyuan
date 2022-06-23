@@ -40,7 +40,7 @@ func NewFileTree() *FileTree {
 		Sort:                   util.SortModeCustom,
 		CreateDocNameTemplate:  "",
 		MaxListCount:           512,
-		MaxOpenTabCount:        12,
+		MaxOpenTabCount:        8,
 		AllowCreateDeeper:      false,
 	}
 }

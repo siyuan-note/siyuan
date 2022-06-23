@@ -131,7 +131,7 @@ func InitConf() {
 		Conf.FileTree.MaxListCount = 512
 	}
 	if 1 > Conf.FileTree.MaxOpenTabCount {
-		Conf.FileTree.MaxOpenTabCount = 12
+		Conf.FileTree.MaxOpenTabCount = 8
 	}
 	if 32 < Conf.FileTree.MaxOpenTabCount {
 		Conf.FileTree.MaxOpenTabCount = 32

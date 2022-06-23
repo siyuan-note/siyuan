@@ -479,13 +479,19 @@ export class Wnd {
                     } else {
                         this.remove();
                     }
-                    getAllModels().editor.forEach(item => {
-                        if (!item.element.classList.contains("fn__none")) {
-                            setPanelFocus(item.parent.parent.headersElement.parentElement);
-                            updatePanelByEditor(item.editor.protyle, true, true);
-                            return;
-                        }
-                    });
+                    // 关闭分屏页签后光标消失
+                    const editors = getAllModels().editor;
+                    if (editors.length === 0) {
+                        updatePanelByEditor();
+                    } else {
+                        editors.forEach(item => {
+                            if (!item.element.classList.contains("fn__none")) {
+                                setPanelFocus(item.parent.parent.headersElement.parentElement);
+                                updatePanelByEditor(item.editor.protyle, true, true);
+                                return;
+                            }
+                        });
+                    }
                     return;
                 }
                 if (item.headElement) {

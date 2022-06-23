@@ -167,7 +167,7 @@ func setFiletree(c *gin.Context) {
 	}
 
 	if 1 > fileTree.MaxOpenTabCount {
-		fileTree.MaxOpenTabCount = 12
+		fileTree.MaxOpenTabCount = 8
 	}
 	if 32 < fileTree.MaxOpenTabCount {
 		fileTree.MaxOpenTabCount = 32

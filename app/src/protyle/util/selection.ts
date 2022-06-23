@@ -409,12 +409,17 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
         if (type === "NodeThematicBreak") {
             range.selectNodeContents(element.firstElementChild);
             setRange = true;
-        } else if (type === "NodeBlockQueryEmbed" && element.lastElementChild.previousElementSibling) {
-            range.selectNodeContents(element.lastElementChild.previousElementSibling);
+        } else if (type === "NodeBlockQueryEmbed") {
+            if (element.lastElementChild.previousElementSibling) {
+                range.selectNodeContents(element.lastElementChild.previousElementSibling);
+            } else {
+                // https://github.com/siyuan-note/siyuan/issues/5267
+                range.selectNodeContents(element);
+            }
             setRange = true;
         } else if (["NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
-            // https://ld246.com/article/1655714737572
             if (element.lastElementChild.previousElementSibling?.lastElementChild) {
+                // https://ld246.com/article/1655714737572
                 range.selectNodeContents(element.lastElementChild.previousElementSibling.lastElementChild);
             } else if (element.lastElementChild.previousElementSibling) {
                 range.selectNodeContents(element.lastElementChild.previousElementSibling);

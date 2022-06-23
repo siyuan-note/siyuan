@@ -5,7 +5,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20220429115804"
+		"updated": "20220623201527"
 	},
 	"Children": [
 		{
@@ -970,7 +970,8 @@
 			"ID": "20210104091538-a61xzjz",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091538-a61xzjz"
+				"id": "20210104091538-a61xzjz",
+				"updated": "20220623201527"
 			},
 			"Children": [
 				{
@@ -979,18 +980,17 @@
 				},
 				{
 					"Type": "NodeTag",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeTagOpenMarker",
-							"Data": "#"
+							"Type": "NodeTagOpenMarker"
 						},
 						{
 							"Type": "NodeText",
-							"Data": "Content block/Type"
+							"Data": "Content Block/Type"
 						},
 						{
-							"Type": "NodeTagCloseMarker",
-							"Data": "#"
+							"Type": "NodeTagCloseMarker"
 						}
 					]
 				}

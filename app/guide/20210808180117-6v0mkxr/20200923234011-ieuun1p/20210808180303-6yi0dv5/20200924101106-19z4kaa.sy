@@ -5,7 +5,7 @@
 		"id": "20200924101106-19z4kaa",
 		"title": "What is a Content Block",
 		"type": "doc",
-		"updated": "20211223192527"
+		"updated": "20220623201559"
 	},
 	"Children": [
 		{
@@ -31,7 +31,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118101709-9lqij9d",
-				"updated": "20210415203201"
+				"updated": "20220623201341"
 			},
 			"Children": [
 				{
@@ -40,18 +40,17 @@
 				},
 				{
 					"Type": "NodeTag",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeTagOpenMarker",
-							"Data": "#"
+							"Type": "NodeTagOpenMarker"
 						},
 						{
 							"Type": "NodeText",
-							"Data": "Content block"
+							"Data": "Content Block"
 						},
 						{
-							"Type": "NodeTagCloseMarker",
-							"Data": "#"
+							"Type": "NodeTagCloseMarker"
 						}
 					]
 				},
@@ -61,19 +60,17 @@
 				},
 				{
 					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
+					"Data": "code",
 					"Children": [
 						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
+							"Type": "NodeCodeSpanOpenMarker"
 						},
 						{
 							"Type": "NodeCodeSpanContent",
 							"Data": "202008250000-a1b2c3d"
 						},
 						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
+							"Type": "NodeCodeSpanCloseMarker"
 						}
 					]
 				},
@@ -133,7 +130,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091535-pnp9cmo",
-				"updated": "20210415203224"
+				"updated": "20220623201559"
 			},
 			"Children": [
 				{
@@ -142,6 +139,7 @@
 				},
 				{
 					"Type": "NodeBlockRef",
+					"Data": "span",
 					"Children": [
 						{
 							"Type": "NodeOpenParen"
@@ -174,18 +172,17 @@
 				},
 				{
 					"Type": "NodeTag",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeTagOpenMarker",
-							"Data": "#"
+							"Type": "NodeTagOpenMarker"
 						},
 						{
 							"Type": "NodeText",
-							"Data": "Content block/Type"
+							"Data": "Content Block/Type"
 						},
 						{
-							"Type": "NodeTagCloseMarker",
-							"Data": "#"
+							"Type": "NodeTagCloseMarker"
 						}
 					]
 				}
@@ -213,7 +210,8 @@
 			"ID": "20210104091535-2ybzqz1",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091535-2ybzqz1"
+				"id": "20210104091535-2ybzqz1",
+				"updated": "20220623201418"
 			},
 			"Children": [
 				{
@@ -222,18 +220,17 @@
 				},
 				{
 					"Type": "NodeTag",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeTagOpenMarker",
-							"Data": "#"
+							"Type": "NodeTagOpenMarker"
 						},
 						{
 							"Type": "NodeText",
 							"Data": "Note"
 						},
 						{
-							"Type": "NodeTagCloseMarker",
-							"Data": "#"
+							"Type": "NodeTagCloseMarker"
 						}
 					]
 				},
@@ -243,18 +240,17 @@
 				},
 				{
 					"Type": "NodeTag",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeTagOpenMarker",
-							"Data": "#"
+							"Type": "NodeTagOpenMarker"
 						},
 						{
 							"Type": "NodeText",
-							"Data": "Content block/Combine"
+							"Data": "Content Block/Combine"
 						},
 						{
-							"Type": "NodeTagCloseMarker",
-							"Data": "#"
+							"Type": "NodeTagCloseMarker"
 						}
 					]
 				}

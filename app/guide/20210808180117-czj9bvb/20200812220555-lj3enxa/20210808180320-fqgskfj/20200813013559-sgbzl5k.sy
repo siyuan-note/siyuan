@@ -5,7 +5,7 @@
 		"id": "20200813013559-sgbzl5k",
 		"title": "引用内容块",
 		"type": "doc",
-		"updated": "20211223192442"
+		"updated": "20220623200842"
 	},
 	"Children": [
 		{
@@ -32,7 +32,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090557-575kpbp",
-				"updated": "20210512153428"
+				"updated": "20220623200602"
 			},
 			"Children": [
 				{
@@ -41,141 +41,37 @@
 				},
 				{
 					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
+					"Data": "code",
 					"Children": [
 						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
+							"Type": "NodeCodeSpanOpenMarker"
 						},
 						{
 							"Type": "NodeCodeSpanContent",
 							"Data": "(("
 						},
 						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
+							"Type": "NodeCodeSpanCloseMarker"
 						}
 					]
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 后将触发内容块引用搜索，继续输入作为搜索关键字，在搜索结果中使用上下键选定后回车就可以完成内容块的引用了。"
-				}
-			]
-		},
-		{
-			"ID": "20210104090557-s8jwrnu",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104090557-s8jwrnu"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "内容块引用的完整语法是："
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": " ((id \"text\"))"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，其中 "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "id"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 形如： "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "202008250000-a1b2c3d"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，由时间和 7 位随机字符组成，内容块 id 是在创建内容块时就会自动生成的；后面的 "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "text"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 是在引用处对该内容块的自定义锚文本。建立好内容块引用后，鼠标悬浮在锚文本上后将弹出预览浮层，展现被引用的内容块。"
+					"Data": " 后将触发内容块引用搜索，继续输入作为搜索关键字，在搜索结果中使用上下键选定后回车就可以完成内容块的引用了。建立好内容块引用后，鼠标悬浮在锚文本上后将弹出预览浮层，展现被引用的内容块（定义块）。"
 				},
 				{
 					"Type": "NodeTag",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeTagOpenMarker",
-							"Data": "#"
+							"Type": "NodeTagOpenMarker"
 						},
 						{
 							"Type": "NodeText",
 							"Data": "内容块/引用"
 						},
 						{
-							"Type": "NodeTagCloseMarker",
-							"Data": "#"
+							"Type": "NodeTagCloseMarker"
 						}
 					]
 				}
@@ -292,28 +188,18 @@
 		{
 			"ID": "20210104090557-7zvf09v",
 			"Type": "NodeList",
-			"ListData": {
-				"Tight": true,
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
+			"ListData": {},
 			"Properties": {
 				"id": "20210104090557-7zvf09v",
-				"updated": "20210908144621"
+				"updated": "20220623195720"
 			},
 			"Children": [
 				{
 					"ID": "20210104090557-oiry1d1",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
 						"id": "20210104090557-oiry1d1"
@@ -328,6 +214,7 @@
 							"Children": [
 								{
 									"Type": "NodeBlockRef",
+									"Data": "span",
 									"Children": [
 										{
 											"Type": "NodeOpenParen"
@@ -356,7 +243,23 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：浏览内容块之间的正向和反向链接关系"
+									"Data": "：浏览"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "内容块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "之间的正向和"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "反向链接"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "关系"
 								}
 							]
 						}
@@ -365,17 +268,13 @@
 				{
 					"ID": "20210104090557-2qggmq4",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
 						"id": "20210104090557-2qggmq4",
-						"updated": "20210908144621"
+						"updated": "20220623195720"
 					},
 					"Children": [
 						{
@@ -383,7 +282,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210302223302-ifcbul4",
-								"updated": "20210908144621"
+								"updated": "20220623195720"
 							},
 							"Children": [
 								{
@@ -417,11 +316,516 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：以文本列表的方式展现当前内容块的反向链接"
+									"Data": "：以文本列表的方式展现当前"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "内容块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "的"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "反向链接"
 								}
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20220623194755-30vtsr7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220623194755-30vtsr7",
+				"updated": "20220623194758"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "锚文本"
+				}
+			]
+		},
+		{
+			"ID": "20220623194759-un63o8s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623194759-un63o8s",
+				"updated": "20220623195050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "锚文本即渲染引用时看到的文本，分为静态锚文本和动态锚文本："
+				}
+			]
+		},
+		{
+			"ID": "20220623195050-mpcd3br",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623195050-mpcd3br",
+				"updated": "20220623195233"
+			},
+			"Children": [
+				{
+					"ID": "20220623195051-q6iegdm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623195051-q6iegdm",
+						"updated": "20220623195135"
+					},
+					"Children": [
+						{
+							"ID": "20220623195051-ijrhvi2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623195051-ijrhvi2",
+								"updated": "20220623195417"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "静态锚文本：不会跟随定义块内容变化，即固定展现指定的内容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623195125-kapn1my",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623195125-kapn1my",
+						"updated": "20220623195233"
+					},
+					"Children": [
+						{
+							"ID": "20220623195125-51yt5os",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623195125-51yt5os",
+								"updated": "20220623195328"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "动态锚文本：跟随定义块内容变化，最大长度可在 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "设置"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "编辑器"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "块引动态锚文本最大长度"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中设置，最长支持 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "5120"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 个字符"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623195419-mc5y2rl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623195419-mc5y2rl",
+				"updated": "20220623195748"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "修改锚文本的方式如下："
+				}
+			]
+		},
+		{
+			"ID": "20220623195559-r0greck",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623195559-r0greck",
+				"updated": "20220623195906"
+			},
+			"Children": [
+				{
+					"ID": "20220623195600-uawu5gj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623195600-uawu5gj",
+						"updated": "20220623195600"
+					},
+					"Children": [
+						{
+							"ID": "20220623195600-7hw6t6b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623195600-7hw6t6b",
+								"updated": "20220623195659"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "将光标插入符移入引用元素，直接修改内容，这样会将该引用的锚文本设置为静态锚文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623195701-obv1sdb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623195701-obv1sdb"
+					},
+					"Children": [
+						{
+							"ID": "20220623195701-akeq453",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623195701-akeq453",
+								"updated": "20220623195737"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "右键单击引用元素后在弹出的菜单中修改锚文本，这样得到的锚文本也是静态锚文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623195738-5zwao6z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623195738-5zwao6z",
+						"updated": "20220623195906"
+					},
+					"Children": [
+						{
+							"ID": "20220623195738-7bxe56c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623195738-7bxe56c",
+								"updated": "20220623195906"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "右键单击引用元素后在弹出的菜单中清空锚文本，这样将使用动态锚文本"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623194610-9i15h8j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220623194610-9i15h8j",
+				"updated": "20220623194926"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "语法"
+				}
+			]
+		},
+		{
+			"ID": "20220623194617-93ho3r1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623194617-93ho3r1",
+				"updated": "20220623200842"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了使用 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "(("
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 触发引用搜索外，也可以直接使用语法 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "((id \"锚文本\"))"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20220623200042-wi0fnoq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623200042-wi0fnoq",
+				"updated": "20220623200048"
+			},
+			"Children": [
+				{
+					"ID": "20220623200048-ksp1pha",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623200048-ksp1pha",
+						"updated": "20220623200048"
+					},
+					"Children": [
+						{
+							"ID": "20220623200048-khk1tas",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623200048-khk1tas",
+								"updated": "20220623200105"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "\""
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 包裹锚文为静态锚文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623200105-p2p4qu7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623200105-p2p4qu7"
+					},
+					"Children": [
+						{
+							"ID": "20220623200105-fpr7anp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623200105-fpr7anp",
+								"updated": "20220623200138"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "'"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 包裹锚文本为动态锚文本，会在重建索引是自动重写"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623200140-527rg7n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623200140-527rg7n",
+				"updated": "20220623200426"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "直接使用语法的主要场景是通过外部工具或者 API 建立引用，大部分情况下我们主要还是直接使用 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "(("
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 触发引用搜索来建立引用。"
 				}
 			]
 		}

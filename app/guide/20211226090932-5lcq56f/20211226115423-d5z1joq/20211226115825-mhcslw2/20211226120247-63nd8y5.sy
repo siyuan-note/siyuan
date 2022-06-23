@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容塊",
-		"updated": "20211228134803"
+		"updated": "20220623200859"
 	},
 	"Children": [
 		{
@@ -23,11 +23,11 @@
 			]
 		},
 		{
-			"ID": "20211226120337-iozq7fp",
+			"ID": "20220623200737-sx458du",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226120337-iozq7fp",
-				"updated": "20211225232238"
+				"id": "20220623200737-sx458du",
+				"updated": "20220623200738"
 			},
 			"Children": [
 				{
@@ -52,101 +52,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 後將觸發內容塊引用搜索，繼續輸入作為搜索關鍵字，在搜索結果中使用上下鍵選定後Enter就可以完成內容塊的引用了。"
-				}
-			]
-		},
-		{
-			"ID": "20211226120337-o2cufj5",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226120337-o2cufj5",
-				"updated": "20211228134803"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "內容塊引用的完整語法是："
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": " ((id \"text\"))"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，其中 "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "id"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 形如： "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "202008250000-a1b2c3d"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，由時間和 7 位隨機字符組成，內容塊 id 是在創建內容塊時就會自動生成的；後面的 "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "text"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 是在引用處對該內容塊的自定義錨文本。建立好內容塊引用後，滑鼠懸浮在錨文本上後將彈出預覽浮層，展現被引用的內容塊。"
+					"Data": " 後將觸發內容塊引用搜索，繼續輸入作為搜索關鍵字，在搜索結果中使用上下鍵選定後回車就可以完成內容塊的引用了。建立好內容塊引用後，鼠標懸浮在錨文本上後將彈出預覽浮層，展現被引用的內容塊（定義塊）。"
 				},
 				{
 					"Type": "NodeTag",
@@ -388,12 +294,499 @@
 			]
 		},
 		{
-			"ID": "20211226125751-tez9k3q",
+			"ID": "20220623200754-u00gfsg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220623200754-u00gfsg",
+				"updated": "20220623200754"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "錨文本"
+				}
+			]
+		},
+		{
+			"ID": "20220623200754-gwc1rym",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226125751-tez9k3q",
-				"updated": "20211226125751"
-			}
+				"id": "20220623200754-gwc1rym",
+				"updated": "20220623200754"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "錨文本即渲染引用時看到的文本，分為靜態錨文本和動態錨文本："
+				}
+			]
+		},
+		{
+			"ID": "20220623200754-doe075z",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623200754-doe075z",
+				"updated": "20220623200754"
+			},
+			"Children": [
+				{
+					"ID": "20220623200754-sd1ge5a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623200754-sd1ge5a",
+						"updated": "20220623200754"
+					},
+					"Children": [
+						{
+							"ID": "20220623200754-c8pnbo0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623200754-c8pnbo0",
+								"updated": "20220623200754"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "靜態錨文本：不會跟隨定義塊內容變化，即固定展現指定的內容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623200754-aiiq7z3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623200754-aiiq7z3",
+						"updated": "20220623200754"
+					},
+					"Children": [
+						{
+							"ID": "20220623200754-4srcm5t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623200754-4srcm5t",
+								"updated": "20220623200754"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "動態錨文本：跟隨定義塊內容變化，最大長度可在 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "設置"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "編輯器"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "塊引動態錨文本最大長度"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中設置，最長支持 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "5120"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 個字符"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623200754-epcli9r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623200754-epcli9r",
+				"updated": "20220623200754"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "修改錨文本的方式如下："
+				}
+			]
+		},
+		{
+			"ID": "20220623200754-0dmv2ty",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623200754-0dmv2ty",
+				"updated": "20220623200754"
+			},
+			"Children": [
+				{
+					"ID": "20220623200754-vqf7x49",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623200754-vqf7x49",
+						"updated": "20220623200754"
+					},
+					"Children": [
+						{
+							"ID": "20220623200754-43rmvek",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623200754-43rmvek",
+								"updated": "20220623200754"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "將光標插入符移入引用元素，直接修改內容，這樣會將該引用的錨文本設置為靜態錨文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623200754-w895rvz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623200754-w895rvz",
+						"updated": "20220623200754"
+					},
+					"Children": [
+						{
+							"ID": "20220623200754-3muj6kg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623200754-3muj6kg",
+								"updated": "20220623200754"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "右鍵單擊引用元素後在彈出的菜單中修改錨文本，這樣得到的錨文本也是靜態錨文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623200754-hv4k525",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623200754-hv4k525",
+						"updated": "20220623200754"
+					},
+					"Children": [
+						{
+							"ID": "20220623200754-3prcu11",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623200754-3prcu11",
+								"updated": "20220623200754"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "右鍵單擊引用元素後在彈出的菜單中清空錨文本，這樣將使用動態錨文本"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623200754-kdtvxt1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220623200754-kdtvxt1",
+				"updated": "20220623200754"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "語法"
+				}
+			]
+		},
+		{
+			"ID": "20220623200859-8ba6jm6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623200859-8ba6jm6",
+				"updated": "20220623200859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了使用 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "(("
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 觸發引用搜索外，也可以直接使用語法 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "((id \"錨文本\"))"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20220623200859-xhkfk38",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623200859-xhkfk38",
+				"updated": "20220623200859"
+			},
+			"Children": [
+				{
+					"ID": "20220623200859-grgsuoo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623200859-grgsuoo",
+						"updated": "20220623200859"
+					},
+					"Children": [
+						{
+							"ID": "20220623200859-pma9zfx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623200859-pma9zfx",
+								"updated": "20220623200859"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "\""
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 包裹錨文為靜態錨文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623200859-p2du2ng",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623200859-p2du2ng",
+						"updated": "20220623200859"
+					},
+					"Children": [
+						{
+							"ID": "20220623200859-xdls0yl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623200859-xdls0yl",
+								"updated": "20220623200859"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "'"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 包裹錨文本為動態錨文本，會在重建索引是自動重寫"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623200859-x32n6yn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623200859-x32n6yn",
+				"updated": "20220623200859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "直接使用語法的主要場景是通過外部工具或者 API 建立引用，大部分情況下我們主要還是直接使用 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "(("
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 觸發引用搜索來建立引用。"
+				}
+			]
 		}
 	]
 }

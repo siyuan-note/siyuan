@@ -5,7 +5,7 @@
 		"id": "20200924101256-f8b1sbi",
 		"title": "Ref Content Block",
 		"type": "doc",
-		"updated": "20211223192536"
+		"updated": "20220623201408"
 	},
 	"Children": [
 		{
@@ -28,154 +28,50 @@
 			]
 		},
 		{
-			"ID": "20210104091542-6dj8jvc",
+			"ID": "20220623200920-67ob14v",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091542-6dj8jvc",
-				"updated": "20210512153449"
+				"id": "20220623200920-67ob14v",
+				"updated": "20220623201408"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Entering "
+					"Data": "After entering "
 				},
 				{
 					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
+					"Data": "code",
 					"Children": [
 						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
+							"Type": "NodeCodeSpanOpenMarker"
 						},
 						{
 							"Type": "NodeCodeSpanContent",
 							"Data": "(("
 						},
 						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
+							"Type": "NodeCodeSpanCloseMarker"
 						}
 					]
 				},
 				{
 					"Type": "NodeText",
-					"Data": " will trigger the content block quotation search, continue to enter as the search keyword, use the up and down keys to select in the search results and press Enter to complete the content block quotation."
-				}
-			]
-		},
-		{
-			"ID": "20210104091542-ev4hpxo",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104091542-ev4hpxo"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The complete syntax of the content block quote is: "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "((id \"text\"))"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": ", where the "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "id"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " is like: "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "202008250000-a1b2c3d"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": ", consisting of time and 7 random characters, the content block id is when the content block is created It will be automatically generated; the following "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "text"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " is the custom anchor text for the content block in the quote. After the content block quote is established, hover the mouse over the anchor text and a preview floating layer will pop up to show the quoted content block. "
+					"Data": ", the content block reference search will be triggered. Continue to input as the search keyword. In the search results, use the up and down keys to select and press Enter to complete the content block reference. After the content block reference is established, hover the mouse. After the anchor text is placed, the preview layer will pop up, showing the referenced content block (definition block). "
 				},
 				{
 					"Type": "NodeTag",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeTagOpenMarker",
-							"Data": "#"
+							"Type": "NodeTagOpenMarker"
 						},
 						{
 							"Type": "NodeText",
-							"Data": "Content block/Reference"
+							"Data": "Content Block/Reference"
 						},
 						{
-							"Type": "NodeTagCloseMarker",
-							"Data": "#"
+							"Type": "NodeTagCloseMarker"
 						}
 					]
 				}
@@ -419,6 +315,501 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-is3nn7u",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220623201008-is3nn7u",
+				"updated": "20220623201019"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Anchor text"
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-piboygr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623201008-piboygr",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Anchor text is the text you see when rendering a reference. It is divided into static anchor text and dynamic anchor text:"
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-h2pdjtl",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623201008-h2pdjtl",
+				"updated": "20220623201147"
+			},
+			"Children": [
+				{
+					"ID": "20220623201008-ay77217",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-ay77217",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-1oosx3r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-1oosx3r",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Static anchor text: It will not change with the content of the definition block, that is, the specified content will be displayed fixedly"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623201008-zy2xzyl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-zy2xzyl",
+						"updated": "20220623201147"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-l0p1dr3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-l0p1dr3",
+								"updated": "20220623201147"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Dynamic anchor text: follow the content of the defined block, the maximum length can be set in "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Settings"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Editor"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "The maximum length of block ref dynamic anchor text"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " , supports up to "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "5120"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " characters"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-xeb8r8l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623201008-xeb8r8l",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Here's how to modify anchor text:"
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-i8gh5d4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623201008-i8gh5d4",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"ID": "20220623201008-lgp3it0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-lgp3it0",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-0o5ttfn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-0o5ttfn",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Move the cursor caret into the reference element and modify the content directly, which will set the reference's anchor text to static anchor text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623201008-ni0hyaa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-ni0hyaa",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-6h4smq5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-6h4smq5",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Right-click the reference element and modify the anchor text in the pop-up menu, so that the anchor text obtained is also static anchor text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623201008-taaeskp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-taaeskp",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-gkk2l3p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-gkk2l3p",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Clear the anchor text in the pop-up menu after right-clicking the reference element, this will use dynamic anchor text"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-0h3iwvb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220623201008-0h3iwvb",
+				"updated": "20220623201232"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Syntax"
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-5f0sylr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623201008-5f0sylr",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition to using "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "(("
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to trigger a reference search, you can also use the syntax "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "((id \"anchor text\"))"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " directly."
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-7waqp1i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623201008-7waqp1i",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"ID": "20220623201008-u8tx1ot",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-u8tx1ot",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-w28mhoy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-w28mhoy",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "\""
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to wrap anchor text as static anchor text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623201008-ua4wzzm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-ua4wzzm",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-sh8z9bb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-sh8z9bb",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "'"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to wrap anchor text as dynamic anchor text, it will be automatically rewritten when the index is rebuilt"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-zjpwqy3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623201008-zjpwqy3",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The main scenario of using the syntax directly is to create a reference through an external tool or API. In most cases, we mainly use "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "(("
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to trigger a reference search to create a reference."
 				}
 			]
 		}

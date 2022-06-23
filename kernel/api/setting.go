@@ -152,7 +152,7 @@ func setFiletree(c *gin.Context) {
 		return
 	}
 
-	fileTree := &conf.FileTree{}
+	fileTree := conf.NewFileTree()
 	if err = gulu.JSON.UnmarshalJSON(param, fileTree); nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -166,6 +166,12 @@ func setFiletree(c *gin.Context) {
 		}
 	}
 
+	if 1 > fileTree.MaxOpenTabCount {
+		fileTree.MaxOpenTabCount = 12
+	}
+	if 32 < fileTree.MaxOpenTabCount {
+		fileTree.MaxOpenTabCount = 32
+	}
 	model.Conf.FileTree = fileTree
 	model.Conf.Save()
 

@@ -891,9 +891,8 @@ export class Toolbar {
                     focusSideBlock(renderElement);
                 }
             } else if (event.key === "Tab") {
-                const start = textElement.selectionStart;
-                textElement.value = textElement.value.substring(0, start) + "\t" + textElement.value.substring(textElement.selectionEnd);
-                textElement.selectionStart = textElement.selectionEnd = start + 1;
+                // https://github.com/siyuan-note/siyuan/issues/5270
+                document.execCommand("insertText", false, "\t");
                 event.preventDefault();
             }
         });

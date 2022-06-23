@@ -539,7 +539,7 @@ func getOssUploadToken(filename, cloudDirPath string, length int64) (ret string,
 	code := result["code"].(float64)
 	if 0 != code {
 		msg := result["msg"].(string)
-		util.LogErrorf("download cloud file failed: %s", msg)
+		util.LogErrorf("get file [%s] upload token failed: %s", filename, msg)
 		err = errors.New(fmt.Sprintf(Conf.Language(93), msg))
 		return
 	}

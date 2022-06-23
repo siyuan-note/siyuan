@@ -152,7 +152,7 @@ func setFiletree(c *gin.Context) {
 		return
 	}
 
-	fileTree := &conf.FileTree{}
+	fileTree := conf.NewFileTree()
 	if err = gulu.JSON.UnmarshalJSON(param, fileTree); nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

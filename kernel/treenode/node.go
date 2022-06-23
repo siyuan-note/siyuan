@@ -75,7 +75,15 @@ func NodeStaticContent(node *ast.Node) string {
 			buf.WriteString(GetDynamicBlockRefText(n))
 			lastSpace = false
 			return ast.WalkSkipChildren
-		case ast.NodeText, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
+		case ast.NodeLinkText:
+			buf.Write(n.Tokens)
+			buf.WriteByte(' ')
+		case ast.NodeLinkDest:
+			buf.Write(n.Tokens)
+			buf.WriteByte(' ')
+		case ast.NodeLinkTitle:
+			buf.Write(n.Tokens)
+		case ast.NodeText, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
 			buf.Write(n.Tokens)
 		case ast.NodeBackslash:
@@ -204,6 +212,7 @@ var typeAbbrMap = map[string]string{
 	// 行级元素
 	"NodeText":          "text",
 	"NodeLinkText":      "link_text",
+	"NodeLinkDest":      "link_dest",
 	"NodeTag":           "tag",
 	"NodeCodeSpan":      "code_span",
 	"NodeInlineMath":    "inline_math",

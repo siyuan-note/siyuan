@@ -506,6 +506,22 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		walkStatus = ast.WalkSkipChildren
 		return
 	case ast.NodeLinkDest:
+		text := n.TokensStr()
+		markdown := treenode.FormatNode(n.Parent, luteEngine)
+		parentBlock := treenode.ParentBlock(n)
+		span := &Span{
+			ID:       ast.NewNodeID(),
+			BlockID:  parentBlock.ID,
+			RootID:   rootID,
+			Box:      boxID,
+			Path:     p,
+			Content:  text,
+			Markdown: markdown,
+			Type:     treenode.TypeAbbr(n.Type.String()),
+			IAL:      treenode.IALStr(n),
+		}
+		spans = append(spans, span)
+
 		// assetsLinkDestsInTree
 
 		if !IsAssetLinkDest(n.Tokens) {
@@ -514,7 +530,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		}
 
 		dest := gulu.Str.FromBytes(n.Tokens)
-		parentBlock := treenode.ParentBlock(n)
+		parentBlock = treenode.ParentBlock(n)
 		var title string
 		if titleNode := n.Parent.ChildByType(ast.NodeLinkTitle); nil != titleNode {
 			title = gulu.Str.FromBytes(titleNode.Tokens)

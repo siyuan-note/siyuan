@@ -133,6 +133,9 @@ func InitConf() {
 	if 1 > Conf.FileTree.MaxOpenTabCount {
 		Conf.FileTree.MaxOpenTabCount = 12
 	}
+	if 32 < Conf.FileTree.MaxOpenTabCount {
+		Conf.FileTree.MaxOpenTabCount = 32
+	}
 	if nil == Conf.Tag {
 		Conf.Tag = conf.NewTag()
 	}

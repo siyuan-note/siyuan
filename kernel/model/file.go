@@ -531,11 +531,11 @@ func GetDoc(id string, index int, keyword string, mode int, size int) (blockCoun
 				tmp = append(tmp, e)
 			}
 			excludes = tmp
-			virtualBlockRefKeywords = util.ExcludeElem(virtualBlockRefKeywords, excludes)
+			virtualBlockRefKeywords = gulu.Str.ExcludeElem(virtualBlockRefKeywords, excludes)
 		}
 
 		// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
-		virtualBlockRefKeywords = util.ExcludeElem(virtualBlockRefKeywords, []string{tree.Root.IALAttr("title")})
+		virtualBlockRefKeywords = gulu.Str.ExcludeElem(virtualBlockRefKeywords, []string{tree.Root.IALAttr("title")})
 
 		if 0 < len(virtualBlockRefKeywords) {
 			var tmp []string

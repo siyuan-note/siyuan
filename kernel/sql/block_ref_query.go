@@ -21,6 +21,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -44,7 +45,7 @@ func QueryVirtualRefKeywords(name, alias, anchor, doc bool) (ret []string) {
 	if doc {
 		ret = append(ret, queryDocTitles()...)
 	}
-	ret = util.RemoveDuplicatedElem(ret)
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	sort.SliceStable(ret, func(i, j int) bool {
 		return len(ret[i]) >= len(ret[j])
 	})
@@ -187,7 +188,7 @@ func QueryBlockDefIDsByRefText(refText string, excludeIDs []string) (ret []strin
 	ret = queryDefIDsByDefText(refText, excludeIDs)
 	ret = append(ret, queryDefIDsByNameAlias(refText, excludeIDs)...)
 	ret = append(ret, queryDocIDsByTitle(refText, excludeIDs)...)
-	ret = util.RemoveDuplicatedElem(ret)
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
 }
 

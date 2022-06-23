@@ -267,7 +267,7 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 		return
 	}
 
-	uploadAbsAssets = util.RemoveDuplicatedElem(uploadAbsAssets)
+	uploadAbsAssets = gulu.Str.RemoveDuplicatedElem(uploadAbsAssets)
 
 	util.LogInfof("uploading [%d] assets", len(uploadAbsAssets))
 	if loadErr := LoadUploadToken(); nil != loadErr {
@@ -357,7 +357,7 @@ func saveWorkspaceAssets(assets []string) {
 	}
 	confPath := filepath.Join(confDir, "assets.json")
 
-	assets = util.RemoveDuplicatedElem(assets)
+	assets = gulu.Str.RemoveDuplicatedElem(assets)
 	sort.Strings(assets)
 	data, err := gulu.JSON.MarshalIndentJSON(assets, "", "  ")
 	if nil != err {

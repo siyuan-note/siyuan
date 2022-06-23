@@ -84,8 +84,8 @@ func setWorkspaceDir(c *gin.Context) {
 	}
 
 	workspacePaths = append(workspacePaths, path)
-	workspacePaths = util.RemoveDuplicatedElem(workspacePaths)
-	workspacePaths = util.RemoveElem(workspacePaths, path)
+	workspacePaths = gulu.Str.RemoveDuplicatedElem(workspacePaths)
+	workspacePaths = gulu.Str.RemoveElem(workspacePaths, path)
 	workspacePaths = append(workspacePaths, path) // 切换的工作空间固定放在最后一个
 
 	if data, err = gulu.JSON.MarshalJSON(workspacePaths); nil != err {

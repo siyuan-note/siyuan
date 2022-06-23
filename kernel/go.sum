@@ -48,8 +48,8 @@ github.com/88250/flock v0.8.2/go.mod h1:k+PZxETAUe4vLZx3R39ykvQCIlwHhc7AI2P2NUQV
 github.com/88250/go-sqlite3 v1.14.13-0.20220412041952-88c3aaa8595e h1:uXi4QLKI/mswcXuzD+wBjJMkj1C3hK5Tgl3hF6MJpbo=
 github.com/88250/go-sqlite3 v1.14.13-0.20220412041952-88c3aaa8595e/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/88250/gulu v1.2.0/go.mod h1:ZhEJ98UjR2y7j2toGj4/b+1rRELcZFQAPq/Yjyin2yY=
-github.com/88250/gulu v1.2.2 h1:LsuDSXI4GjqAD2XasG/DJEHuboKXU2lhZ9w0mnfJj3Y=
-github.com/88250/gulu v1.2.2/go.mod h1:I1qBzsksFL2ciGSuqDE7R3XW4BUMrfDgOvSXEk7FsAI=
+github.com/88250/gulu v1.2.3-0.20220623112232-c502d9016360 h1:afQ0cjIA/tzwvIDFy9Jf0jFCb1FvWwKuG1QidEMMi4M=
+github.com/88250/gulu v1.2.3-0.20220623112232-c502d9016360/go.mod h1:I1qBzsksFL2ciGSuqDE7R3XW4BUMrfDgOvSXEk7FsAI=
 github.com/88250/lute v1.7.4-0.20220426011157-34c9bfa2e148/go.mod h1:Bdu9LRNjQhtL3TftbtpjIWTwDVAXoS7AD8QsZQPk7zo=
 github.com/88250/lute v1.7.4-0.20220621025353-a289c6a2323b h1:oEfMdET2TVOH/X3R3tWJWf25oPsnh3drPAwPWoFc1so=
 github.com/88250/lute v1.7.4-0.20220621025353-a289c6a2323b/go.mod h1:Bdu9LRNjQhtL3TftbtpjIWTwDVAXoS7AD8QsZQPk7zo=

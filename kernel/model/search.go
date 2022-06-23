@@ -132,7 +132,7 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 		return
 	}
 
-	ids = util.RemoveDuplicatedElem(ids)
+	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	var renameRoots []*ast.Node
 	renameRootTitles := map[string]string{}
 	for _, id := range ids {
@@ -403,7 +403,7 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 		}
 
 		keywords := gulu.Str.SubstringsBetween(marked, "__@mark__", "__mark@__")
-		keywords = util.RemoveDuplicatedElem(keywords)
+		keywords = gulu.Str.RemoveDuplicatedElem(keywords)
 		keyword = strings.Join(keywords, search.TermSep)
 		marked = strings.ReplaceAll(marked, "__@mark__", "")
 		marked = strings.ReplaceAll(marked, "__mark@__", "")

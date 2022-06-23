@@ -21,6 +21,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/ConradIrwin/font/sfnt"
 	"github.com/flopp/go-findfont"
 	ttc "golang.org/x/image/font/sfnt"
@@ -30,7 +31,7 @@ import (
 
 func GetSysFonts(currentLanguage string) (ret []string) {
 	fonts := loadFonts(currentLanguage)
-	ret = RemoveDuplicatedElem(fonts)
+	ret = gulu.Str.RemoveDuplicatedElem(fonts)
 	ret = removeUnusedFonts(ret)
 	sort.Strings(ret)
 	return

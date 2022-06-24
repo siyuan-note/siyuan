@@ -180,10 +180,10 @@ class Protyle {
                     });
                 }
             });
+            if (mergedOptions.after) {
+                mergedOptions.after(this);
+            }
         });
-        if (mergedOptions.after) {
-            mergedOptions.after(this);
-        }
     }
 
     public reload() {

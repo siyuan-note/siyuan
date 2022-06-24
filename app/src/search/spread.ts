@@ -663,6 +663,9 @@ const getArticle = (options: {
                 gutter: true,
                 breadcrumbDocName: true
             },
+            after: (protyle) => {
+                protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`).scrollIntoView();
+            }
         });
     } else {
         protyle.protyle.scroll.lastScrollTop = 0;
@@ -674,6 +677,7 @@ const getArticle = (options: {
             size: options.folded ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
         }, getResponse => {
             onGet(getResponse, protyle.protyle, options.folded ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL]);
+            protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`).scrollIntoView();
         });
     }
 };

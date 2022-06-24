@@ -63,7 +63,6 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                 if (!hljs.getLanguage(language)) {
                     language = "plaintext";
                 }
-                block.classList.add("hljs");
                 block.innerHTML = hljs.highlight(
                     block.textContent + (block.textContent.endsWith("\n") ? "" : "\n"), // https://github.com/siyuan-note/siyuan/issues/4609
                     {

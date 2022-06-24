@@ -129,7 +129,7 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
         protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (lastElement.getBoundingClientRect().top - lastTop);
         // 动态加载移除
         while (protyle.wysiwyg.element.childElementCount > 2 && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT &&
-        protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom > window.innerHeight) {
+        protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().top > window.innerHeight) {
             protyle.wysiwyg.element.lastElementChild.remove();
         }
     } else {

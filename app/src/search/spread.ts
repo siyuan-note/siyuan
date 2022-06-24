@@ -433,14 +433,10 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
                 searchPanelElement.scrollTop > currentList.offsetTop) {
                 searchPanelElement.scrollTop = currentList.offsetTop - searchPanelElement.clientHeight + lineHeight;
             }
-            const id = currentList.getAttribute("data-node-id");
-            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                getArticle({
-                    dialog,
-                    folded: foldResponse.data,
-                    id,
-                    k: searchInputElement.value,
-                });
+            getArticle({
+                dialog,
+                id: currentList.getAttribute("data-node-id"),
+                k: searchInputElement.value,
             });
             event.preventDefault();
         } else if (event.key === "ArrowUp") {
@@ -456,14 +452,10 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
                 searchPanelElement.scrollTop > currentList.offsetTop - lineHeight * 2) {
                 searchPanelElement.scrollTop = currentList.offsetTop - lineHeight * 2;
             }
-            const id = currentList.getAttribute("data-node-id");
-            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                getArticle({
-                    dialog,
-                    folded: foldResponse.data,
-                    id,
-                    k: searchInputElement.value,
-                });
+            getArticle({
+                dialog,
+                id: currentList.getAttribute("data-node-id"),
+                k: searchInputElement.value,
             });
             event.preventDefault();
         } else if (event.key === "Enter") {
@@ -559,14 +551,10 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
                 searchPanelElement.scrollTop > currentList.offsetTop) {
                 searchPanelElement.scrollTop = currentList.offsetTop - searchPanelElement.clientHeight + lineHeight;
             }
-            const id = currentList.getAttribute("data-node-id");
-            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                getArticle({
-                    dialog,
-                    folded: foldResponse.data,
-                    id,
-                    k: searchInputElement.value,
-                });
+            getArticle({
+                dialog,
+                id: currentList.getAttribute("data-node-id"),
+                k: searchInputElement.value,
             });
         });
     };
@@ -609,14 +597,10 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
                         } else {
                             searchPanelElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                             target.classList.add("b3-list-item--focus");
-                            const id = target.getAttribute("data-node-id");
-                            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                                getArticle({
-                                    dialog,
-                                    folded: foldResponse.data,
-                                    id,
-                                    k: searchInputElement.value,
-                                });
+                            getArticle({
+                                dialog,
+                                id: target.getAttribute("data-node-id"),
+                                k: searchInputElement.value,
                             });
                             searchInputElement.focus();
                         }
@@ -650,36 +634,37 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
 
 const getArticle = (options: {
     id: string,
-    folded: boolean,
     k: string,
     dialog: Dialog
 }) => {
-    if (!protyle) {
-        protyle = new Protyle(options.dialog.element.querySelector("#searchPreview") as HTMLElement, {
-            blockId: options.id,
-            hasContext: !options.folded,
-            key: options.k,
-            render: {
-                gutter: true,
-                breadcrumbDocName: true
-            },
-            after: (protyle) => {
+    fetchPost("/api/block/checkBlockFold", {id:options.id}, (foldResponse) => {
+        if (!protyle) {
+            protyle = new Protyle(options.dialog.element.querySelector("#searchPreview") as HTMLElement, {
+                blockId: options.id,
+                hasContext: !foldResponse.data,
+                key: options.k,
+                render: {
+                    gutter: true,
+                    breadcrumbDocName: true
+                },
+                after: () => {
+                    protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`).scrollIntoView();
+                }
+            });
+        } else {
+            protyle.protyle.scroll.lastScrollTop = 0;
+            addLoading(protyle.protyle);
+            fetchPost("/api/filetree/getDoc", {
+                id: options.id,
+                k: options.k,
+                mode: foldResponse.data ? 0 : 3,
+                size: foldResponse.data ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
+            }, getResponse => {
+                onGet(getResponse, protyle.protyle, foldResponse.data ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL]);
                 protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`).scrollIntoView();
-            }
-        });
-    } else {
-        protyle.protyle.scroll.lastScrollTop = 0;
-        addLoading(protyle.protyle);
-        fetchPost("/api/filetree/getDoc", {
-            id: options.id,
-            k: options.k,
-            mode: options.folded ? 0 : 3,
-            size: options.folded ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
-        }, getResponse => {
-            onGet(getResponse, protyle.protyle, options.folded ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL]);
-            protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`).scrollIntoView();
-        });
-    }
+            });
+        }
+    });
 };
 
 const onSearch = (data: IBlock[], dialog: Dialog) => {
@@ -699,13 +684,10 @@ const onSearch = (data: IBlock[], dialog: Dialog) => {
         } else {
             dialog.element.querySelector("#searchPreview").classList.remove("fn__none");
         }
-        fetchPost("/api/block/checkBlockFold", {id: data[0].id}, (foldResponse) => {
-            getArticle({
-                dialog,
-                folded: foldResponse.data,
-                id: data[0].id,
-                k: (dialog.element.querySelector("input") as HTMLInputElement).value,
-            });
+        getArticle({
+            dialog,
+            id: data[0].id,
+            k: (dialog.element.querySelector("input") as HTMLInputElement).value,
         });
     } else {
         if (protyle) {

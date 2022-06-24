@@ -77,18 +77,7 @@ export class Search extends Model {
                     searchPanelElement.scrollTop > currentList.offsetTop) {
                     searchPanelElement.scrollTop = currentList.offsetTop - searchPanelElement.clientHeight + lineHeight;
                 }
-                const id = currentList.getAttribute("data-node-id");
-                addLoading(this.protyle.protyle);
-                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                    fetchPost("/api/filetree/getDoc", {
-                        id,
-                        k: inputElement.value,
-                        mode: foldResponse.data ? 0 : 3,
-                        size: foldResponse.data ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
-                    }, getResponse => {
-                        onGet(getResponse, this.protyle.protyle, foldResponse.data ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL]);
-                    });
-                });
+                this.getArticle(currentList.getAttribute("data-node-id"), inputElement.value)
                 event.preventDefault();
             } else if (event.key === "ArrowUp") {
                 currentList.classList.remove("b3-list-item--focus");
@@ -103,18 +92,7 @@ export class Search extends Model {
                     searchPanelElement.scrollTop > currentList.offsetTop - lineHeight * 2) {
                     searchPanelElement.scrollTop = currentList.offsetTop - lineHeight * 2;
                 }
-                addLoading(this.protyle.protyle);
-                const id = currentList.getAttribute("data-node-id");
-                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                    fetchPost("/api/filetree/getDoc", {
-                        id,
-                        k: inputElement.value,
-                        mode: foldResponse.data ? 0 : 3,
-                        size: foldResponse.data ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
-                    }, getResponse => {
-                        onGet(getResponse, this.protyle.protyle, foldResponse.data ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL]);
-                    });
-                });
+                this.getArticle(currentList.getAttribute("data-node-id"), inputElement.value);
                 event.preventDefault();
             }
         });
@@ -148,19 +126,7 @@ export class Search extends Model {
                                         item.classList.remove("b3-list-item--focus");
                                     });
                                     target.classList.add("b3-list-item--focus");
-                                    this.protyle.protyle.scroll.lastScrollTop = 0;
-                                    const id = target.getAttribute("data-node-id");
-                                    addLoading(this.protyle.protyle);
-                                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                                        fetchPost("/api/filetree/getDoc", {
-                                            id,
-                                            k: inputElement.value,
-                                            mode: foldResponse.data ? 0 : 3,
-                                            size: foldResponse.data ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
-                                        }, getResponse => {
-                                            onGet(getResponse, this.protyle.protyle, foldResponse.data ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL]);
-                                        });
-                                    });
+                                    this.getArticle(target.getAttribute("data-node-id"), inputElement.value);
                                 }
                             }, Constants.TIMEOUT_DBLCLICK);
                         } else if (event.detail === 2) {
@@ -207,6 +173,39 @@ export class Search extends Model {
                 historyElement.classList.add("fn__none");
             }
         }, false);
+    }
+
+    private getArticle(id: string, value: string) {
+        fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+            if (this.protyle) {
+                this.protyle.protyle.element.classList.remove("fn__none");
+                this.protyle.protyle.scroll.lastScrollTop = 0;
+                addLoading(this.protyle.protyle);
+
+                fetchPost("/api/filetree/getDoc", {
+                    id,
+                    k: value,
+                    mode: foldResponse.data ? 0 : 3,
+                    size: foldResponse.data ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
+                }, getResponse => {
+                    onGet(getResponse, this.protyle.protyle, foldResponse.data ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL]);
+                    this.protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${id}"] span[data-type="search-mark"]`).scrollIntoView();
+                });
+            } else {
+                this.protyle = new Protyle(this.element.querySelector("#searchPreview") as HTMLElement, {
+                    blockId: id,
+                    hasContext: !foldResponse.data,
+                    key: value,
+                    render: {
+                        gutter: true,
+                        breadcrumbDocName: true,
+                    },
+                    after: () => {
+                        this.protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${id}"] span[data-type="search-mark"]`).scrollIntoView();
+                    }
+                });
+            }
+        });
     }
 
     private setLocalStorage(value: string) {
@@ -281,30 +280,6 @@ export class Search extends Model {
             }
             return;
         }
-        fetchPost("/api/block/checkBlockFold", {id: data[0].id}, (foldResponse) => {
-            if (this.protyle) {
-                this.protyle.protyle.element.classList.remove("fn__none");
-                this.protyle.protyle.scroll.lastScrollTop = 0;
-                addLoading(this.protyle.protyle);
-                fetchPost("/api/filetree/getDoc", {
-                    id: data[0].id,
-                    k: (this.element.querySelector(".b3-text-field") as HTMLInputElement).value,
-                    mode: foldResponse.data ? 0 : 3,
-                    size: foldResponse.data ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
-                }, getResponse => {
-                    onGet(getResponse, this.protyle.protyle, foldResponse.data ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL]);
-                });
-            } else {
-                this.protyle = new Protyle(this.element.querySelector("#searchPreview") as HTMLElement, {
-                    blockId: data[0].id,
-                    hasContext: !foldResponse.data,
-                    key: (this.element.querySelector(".b3-text-field") as HTMLInputElement).value,
-                    render: {
-                        gutter: true,
-                        breadcrumbDocName: true,
-                    },
-                });
-            }
-        });
+        this.getArticle(data[0].id, (this.element.querySelector(".b3-text-field") as HTMLInputElement).value);
     }
 }

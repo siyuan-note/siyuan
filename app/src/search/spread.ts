@@ -110,7 +110,10 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         <div id="searchHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
     </div>
     <div class="b3-form__icon search__header${hotkey === window.siyuan.config.keymap.general.replace.custom ? "" : " fn__none"}">
-        <svg id="replaceHistoryBtn" data-menu="true" class="b3-form__icon-icon fn__a"><use xlink:href="#iconSearch"></use></svg>
+        <span class="fn__a" id="replaceHistoryBtn">
+            <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+            <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
+        </span>
         <input id="replaceInput" class="b3-text-field b3-text-field--text fn__block b3-form__icon-input">
         <svg class="fn__rotate fn__none svg" style="padding: 0 8px;align-self: center;"><use xlink:href="#iconRefresh"></use></svg>
         <button id="replaceAllBtn" class="b3-button b3-button--outline fn__flex-center">${window.siyuan.languages.replaceAll}</button>
@@ -325,7 +328,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         let html = "";
         (localData.list || []).forEach((s: string) => {
             if (s !== searchInputElement.value) {
-                html += `<div class="b3-list-item">${s}</div>`;
+                html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
             }
         });
         historyElement.classList.remove("fn__none");
@@ -343,7 +346,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         let html = "";
         (localData.replaceList || []).forEach((s: string) => {
             if (s !== replaceInputElement.value) {
-                html += `<div class="b3-list-item">${s}</div>`;
+                html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
             }
         });
         replaceHistoryElement.classList.remove("fn__none");

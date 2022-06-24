@@ -192,7 +192,7 @@ export class Search extends Model {
                     const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHETABDATA) || "[]");
                     data.forEach((s: string) => {
                         if (s !== inputElement.value) {
-                            html += `<div class="b3-list-item">${s}</div>`;
+                            html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
                         }
                     });
                     historyElement.classList.remove("fn__none");

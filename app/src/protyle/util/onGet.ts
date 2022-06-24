@@ -99,15 +99,39 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
         return;
     }
     protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
+    const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8
     if (options.action.includes(Constants.CB_GET_APPEND)) {
+        // 动态加载移除
+        if (protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
+            preventScroll(protyle);
+            let removeElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
+            const removeElements = [];
+            while (protyle.wysiwyg.element.childElementCount > 2) {
+                if (protyle.contentElement.scrollHeight - removeElement.offsetTop > REMOVED_OVER_HEIGHT) {
+                    removeElements.push(removeElement);
+                } else {
+                    break;
+                }
+                removeElement = removeElement.nextElementSibling as HTMLElement;
+            }
+            const lastRemoveTop = removeElement.getBoundingClientRect().top;
+            removeElements.forEach(item => {
+                item.remove();
+            });
+            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop);
+        }
         protyle.wysiwyg.element.insertAdjacentHTML("beforeend", options.content);
     } else if (options.action.includes(Constants.CB_GET_BEFORE)) {
+        preventScroll(protyle);
         const lastElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
-        const lastTop = lastElement.getBoundingClientRect().top - protyle.element.getBoundingClientRect().top;
+        const lastTop = lastElement.getBoundingClientRect().top;
         protyle.wysiwyg.element.insertAdjacentHTML("afterbegin", options.content);
-        const appendHeight = lastElement.offsetTop - lastTop;
-        protyle.contentElement.scrollTop = appendHeight;
-        protyle.scroll.lastScrollTop = appendHeight;
+        protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (lastElement.getBoundingClientRect().top - lastTop);
+        // 动态加载移除
+        while (protyle.wysiwyg.element.childElementCount > 2 && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT &&
+        protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom > window.innerHeight) {
+            protyle.wysiwyg.element.lastElementChild.remove();
+        }
     } else {
         protyle.wysiwyg.element.innerHTML = options.content;
     }

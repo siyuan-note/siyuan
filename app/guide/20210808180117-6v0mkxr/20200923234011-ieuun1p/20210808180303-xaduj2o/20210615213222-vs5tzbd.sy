@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
-		"updated": "20220615120852"
+		"updated": "20220625231856"
 	},
 	"Children": [
 		{
@@ -552,7 +552,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135308-3azjqzh",
-				"updated": "20220615120419"
+				"updated": "20220625231844"
 			},
 			"Children": [
 				{
@@ -564,7 +564,7 @@
 					},
 					"Properties": {
 						"id": "20220501135308-itmzgsj",
-						"updated": "20220615120419"
+						"updated": "20220625231844"
 					},
 					"Children": [
 						{
@@ -572,12 +572,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135308-yvsiton",
-								"updated": "20220615120419"
+								"updated": "20220625231844"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "At the top "
+									"Data": "Click the "
 								},
 								{
 									"Type": "NodeKbd",
@@ -588,7 +588,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "..."
+											"Data": "Data History"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -597,7 +597,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " menu or "
+									"Data": " button on the top toolbar or "
 								},
 								{
 									"Type": "NodeKbd",
@@ -1400,7 +1400,7 @@
 			},
 			"Properties": {
 				"id": "20220615120602-5r3nl34",
-				"updated": "20220615120840"
+				"updated": "20220625231856"
 			},
 			"Children": [
 				{
@@ -1414,7 +1414,7 @@
 					},
 					"Properties": {
 						"id": "20220615120602-a20qin2",
-						"updated": "20220615120602"
+						"updated": "20220625231856"
 					},
 					"Children": [
 						{
@@ -1422,12 +1422,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220615120602-k0xs8n5",
-								"updated": "20220615120602"
+								"updated": "20220625231856"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "On the top "
+									"Data": "Click the "
 								},
 								{
 									"Type": "NodeKbd",
@@ -1438,7 +1438,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "..."
+											"Data": "Data History"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -1447,7 +1447,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " menu or "
+									"Data": " button on the top toolbar or "
 								},
 								{
 									"Type": "NodeKbd",

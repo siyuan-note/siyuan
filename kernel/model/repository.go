@@ -35,7 +35,7 @@ import (
 
 func init() {
 	eventbus.Subscribe(dejavu.EvtIndexWalkData, func(context map[string]interface{}, path string) {
-		msg := "Indexing repo [walk data " + path + "]"
+		msg := "Indexing data repository [walk data " + path + "]"
 		util.SetBootDetails(msg)
 
 		switch context[CtxPushMsg].(int) {
@@ -49,7 +49,7 @@ func init() {
 		}
 	})
 	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(context map[string]interface{}, path string) {
-		msg := "Indexing repo [get latest file " + path + "]"
+		msg := "Indexing data repository [get latest file " + path + "]"
 		util.SetBootDetails(msg)
 
 		switch context[CtxPushMsg].(int) {
@@ -63,7 +63,7 @@ func init() {
 		}
 	})
 	eventbus.Subscribe(dejavu.EvtIndexUpsertFile, func(context map[string]interface{}, path string) {
-		msg := "Indexing repo [upsert file " + path + "]"
+		msg := "Indexing data repository [upsert file " + path + "]"
 		util.SetBootDetails(msg)
 
 		switch context[CtxPushMsg].(int) {
@@ -78,7 +78,7 @@ func init() {
 	})
 
 	eventbus.Subscribe(dejavu.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
-		msg := "Checkout repo [walk data " + path + "]"
+		msg := "Checkout data repository [walk data " + path + "]"
 		util.SetBootDetails(msg)
 
 		switch context[CtxPushMsg].(int) {
@@ -92,7 +92,7 @@ func init() {
 		}
 	})
 	eventbus.Subscribe(dejavu.EvtCheckoutUpsertFile, func(context map[string]interface{}, path string) {
-		msg := "Checkout repo [upsert file " + path + "]"
+		msg := "Checkout data repository [upsert file " + path + "]"
 		util.SetBootDetails(msg)
 
 		switch context[CtxPushMsg].(int) {
@@ -106,7 +106,7 @@ func init() {
 		}
 	})
 	eventbus.Subscribe(dejavu.EvtCheckoutRemoveFile, func(context map[string]interface{}, path string) {
-		msg := "Checkout repo [remove file " + path + "]"
+		msg := "Checkout data repository [remove file " + path + "]"
 		util.SetBootDetails(msg)
 
 		switch context[CtxPushMsg].(int) {
@@ -121,7 +121,7 @@ func init() {
 	})
 
 	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudIndexes, func(context map[string]interface{}, latestSync string) {
-		msg := "Downloading repo indexes..."
+		msg := "Downloading data repository indexes..."
 		util.SetBootDetails(msg)
 
 		switch context[CtxPushMsg].(int) {
@@ -136,7 +136,7 @@ func init() {
 	})
 
 	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudFile, func(context map[string]interface{}, id string) {
-		msg := "Downloading repo object [" + id + "]"
+		msg := "Downloading data repository object [" + id + "]"
 		util.SetBootDetails(msg)
 
 		switch context[CtxPushMsg].(int) {
@@ -151,7 +151,7 @@ func init() {
 	})
 
 	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudChunk, func(context map[string]interface{}, id string) {
-		msg := "Downloading repo object [" + id + "]"
+		msg := "Downloading data repository object [" + id + "]"
 		util.SetBootDetails(msg)
 
 		switch context[CtxPushMsg].(int) {
@@ -166,7 +166,7 @@ func init() {
 	})
 
 	eventbus.Subscribe(dejavu.EvtSyncBeforeUploadObject, func(context map[string]interface{}, id string) {
-		msg := "Uploading repo object [" + id + "]"
+		msg := "Uploading data repository object [" + id + "]"
 		util.SetBootDetails(msg)
 
 		switch context[CtxPushMsg].(int) {
@@ -189,7 +189,7 @@ func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 
 	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
 	if nil != err {
-		util.LogErrorf("init repo failed: %s", err)
+		util.LogErrorf("init data repository failed: %s", err)
 		return
 	}
 
@@ -201,7 +201,7 @@ func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 			return
 		}
 
-		util.LogErrorf("get repo index logs failed: %s", err)
+		util.LogErrorf("get data repo index logs failed: %s", err)
 		return
 	}
 	return
@@ -269,7 +269,7 @@ func InitRepoKey() (err error) {
 	randomBytes = make([]byte, 16)
 	_, err = rand.Read(randomBytes)
 	if nil != err {
-		util.LogErrorf("init repo key failed: %s", err)
+		util.LogErrorf("init data repo key failed: %s", err)
 		util.PushUpdateMsg(msgId, Conf.Language(137), 5000)
 		return
 	}
@@ -277,7 +277,7 @@ func InitRepoKey() (err error) {
 
 	key, err := encryption.KDF(password, salt)
 	if nil != err {
-		util.LogErrorf("init repo key failed: %s", err)
+		util.LogErrorf("init data repo key failed: %s", err)
 		util.PushUpdateMsg(msgId, Conf.Language(137), 5000)
 		return
 	}
@@ -301,7 +301,7 @@ func CheckoutRepo(id string) (err error) {
 
 	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
 	if nil != err {
-		util.LogErrorf("init repo failed: %s", err)
+		util.LogErrorf("init data repo failed: %s", err)
 		return
 	}
 
@@ -351,7 +351,7 @@ func IndexRepo(memo string) (err error) {
 
 	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
 	if nil != err {
-		util.LogErrorf("init repo failed: %s", err)
+		util.LogErrorf("init data repo failed: %s", err)
 		return
 	}
 
@@ -383,7 +383,7 @@ func indexRepoBeforeCloudSync() {
 
 	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
 	if nil != err {
-		util.LogErrorf("init repo failed: %s", err)
+		util.LogErrorf("init data repo failed: %s", err)
 		return
 	}
 
@@ -393,7 +393,7 @@ func indexRepoBeforeCloudSync() {
 		CtxPushMsg: CtxPushMsgToStatusBar,
 	})
 	if nil != err {
-		util.LogErrorf("index repo before cloud sync failed: %s", err)
+		util.LogErrorf("index data repo before cloud sync failed: %s", err)
 		return
 	}
 	elapsed := time.Since(start)
@@ -402,12 +402,12 @@ func indexRepoBeforeCloudSync() {
 		index.Memo = fmt.Sprintf("[Auto] Cloud sync, completed in [%.2fs]", elapsed.Seconds())
 		err = repo.PutIndex(index)
 		if nil != err {
-			util.LogErrorf("put index into repo before cloud sync failed: %s", err)
+			util.LogErrorf("put index into data repo before cloud sync failed: %s", err)
 			return
 		}
 	}
 	if 7000 < elapsed.Milliseconds() {
-		util.LogWarnf("index repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
+		util.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
 	}
 }
 
@@ -418,7 +418,7 @@ func syncRepo() (err error) {
 
 	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
 	if nil != err {
-		util.LogErrorf("init repo failed: %s", err)
+		util.LogErrorf("init data repo failed: %s", err)
 		return
 	}
 
@@ -427,6 +427,7 @@ func syncRepo() (err error) {
 		CtxPushMsg: CtxPushMsgToStatusBar,
 	})
 	elapsed := time.Since(start)
-	util.LogInfof("sync repo elapsed [%.2fs]", elapsed.Seconds())
+	util.LogInfof("sync data repo elapsed [%.2fs]", elapsed.Seconds())
+	util.PushStatusBar(fmt.Sprintf("Sync data data repo elapsed [%.2fs]", elapsed.Seconds()))
 	return
 }

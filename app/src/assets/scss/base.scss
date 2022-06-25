@@ -245,16 +245,8 @@ progressLoading: 400
   }
 
   #barDock {
-    &:hover .b3-menu {
-      display: block;
-    }
-
-    .b3-menu {
-      display: none;
-
-      &__item:hover {
-        background-color: var(--b3-list-hover);
-      }
+    .b3-menu__item:hover {
+      background-color: var(--b3-list-hover);
     }
   }
 }

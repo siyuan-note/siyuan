@@ -166,7 +166,7 @@ const initStatus = () => {
     <svg>
         <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>
-    <div class="b3-menu" style="bottom: 21px;left: 4px">
+    <div class="b3-menu fn__none" style="bottom: 21px;left: 4px">
         ${menuHTML}
     </div>
 </div>
@@ -184,6 +184,13 @@ const initStatus = () => {
 <div id="barHelp" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
 </div>`;
+    const dockElement = document.getElementById("barDock");
+    dockElement.addEventListener("mouseenter", () => {
+        dockElement.querySelector(".b3-menu").classList.remove("fn__none");
+    });
+    dockElement.addEventListener("mouseleave", () => {
+        dockElement.querySelector(".b3-menu").classList.add("fn__none");
+    });
     document.querySelector("#status").addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target.id !== "status") {
@@ -209,6 +216,7 @@ const initStatus = () => {
                     }
                 });
                 resizeTabs();
+                target.querySelector(".b3-menu").classList.add("fn__none")
                 event.stopPropagation();
                 break;
             } else if (target.id === "barSync") {
@@ -235,10 +243,7 @@ const initStatus = () => {
                         wysiwygElement.blur();
                     }
                 }
-                target.parentElement.style.display = "none";
-                setTimeout(() => {
-                    target.parentElement.style.display = "";
-                }, Constants.TIMEOUT_BLOCKLOAD);
+                target.parentElement.classList.add("fn__none");
                 event.stopPropagation();
                 break;
             } else if (target.id === "barLock") {

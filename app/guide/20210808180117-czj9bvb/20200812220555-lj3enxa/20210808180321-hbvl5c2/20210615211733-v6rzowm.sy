@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
-		"updated": "20220615120214"
+		"updated": "20220625231706"
 	},
 	"Children": [
 		{
@@ -572,7 +572,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104090742-8rmcz3i",
-				"updated": "20220615112450"
+				"updated": "20220625231706"
 			},
 			"Children": [
 				{
@@ -584,7 +584,7 @@
 					},
 					"Properties": {
 						"id": "20220501135052-k47n4ms",
-						"updated": "20220615112450"
+						"updated": "20220625231706"
 					},
 					"Children": [
 						{
@@ -592,12 +592,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135052-o3r30jj",
-								"updated": "20220615112450"
+								"updated": "20220625231706"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在顶部 "
+									"Data": "点击顶部工具栏 "
 								},
 								{
 									"Type": "NodeKbd",
@@ -608,7 +608,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "..."
+											"Data": "数据历史"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -617,7 +617,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 菜单或者 "
+									"Data": " 按钮或者 "
 								},
 								{
 									"Type": "NodeKbd",
@@ -1420,7 +1420,7 @@
 			},
 			"Properties": {
 				"id": "20220615112933-zoh8iyg",
-				"updated": "20220615120214"
+				"updated": "20220625231649"
 			},
 			"Children": [
 				{
@@ -1434,7 +1434,7 @@
 					},
 					"Properties": {
 						"id": "20220615114246-9or7h68",
-						"updated": "20220615114246"
+						"updated": "20220625231649"
 					},
 					"Children": [
 						{
@@ -1442,12 +1442,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220615114246-lr3ydl0",
-								"updated": "20220615114250"
+								"updated": "20220625231649"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在顶部 "
+									"Data": "点击顶部工具栏 "
 								},
 								{
 									"Type": "NodeKbd",
@@ -1458,7 +1458,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "..."
+											"Data": "数据历史"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -1467,7 +1467,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 菜单或者 "
+									"Data": " 按钮或者 "
 								},
 								{
 									"Type": "NodeKbd",

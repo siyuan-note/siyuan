@@ -26,7 +26,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/dejavu"
-	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
@@ -35,20 +34,60 @@ import (
 )
 
 func init() {
+	eventbus.Subscribe(dejavu.EvtIndexWalkData, func(path string) {
+		msg := "Indexing repo walk data [" + path + "]"
+		util.SetBootDetails(msg)
+		util.PushEndlessProgress(msg)
+	})
+	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(path string) {
+		msg := "Indexing repo get latest file [" + path + "]"
+		util.SetBootDetails(msg)
+		util.PushEndlessProgress(msg)
+	})
+	eventbus.Subscribe(dejavu.EvtIndexUpsertFile, func(path string) {
+		msg := "Indexing repo upsert file [" + path + "]"
+		util.SetBootDetails(msg)
+		util.PushEndlessProgress(msg)
+	})
+
+	eventbus.Subscribe(dejavu.EvtCheckoutWalkData, func(path string) {
+		msg := "Checkout repo walk data [" + path + "]"
+		util.SetBootDetails(msg)
+		util.PushEndlessProgress(msg)
+	})
+	eventbus.Subscribe(dejavu.EvtCheckoutUpsertFile, func(path string) {
+		msg := "Checkout repo upsert file [" + path + "]"
+		util.SetBootDetails(msg)
+		util.PushEndlessProgress(msg)
+	})
+	eventbus.Subscribe(dejavu.EvtCheckoutRemoveFile, func(path string) {
+		msg := "Checkout repo remove file [" + path + "]"
+		util.SetBootDetails(msg)
+		util.PushEndlessProgress(msg)
+	})
+
 	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudIndexes, func(latestSync string) {
-		util.SetBootDetails("Downloading repo indexes...")
+		msg := "Downloading repo indexes..."
+		util.SetBootDetails(msg)
+		util.PushEndlessProgress(msg)
 	})
 
 	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudFile, func(id string) {
-		util.SetBootDetails("Downloading repo object [" + id + "]")
+		msg := "Downloading repo object [" + id + "]"
+		util.SetBootDetails(msg)
+		util.PushEndlessProgress(msg)
 	})
 
 	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudChunk, func(id string) {
-		util.SetBootDetails("Downloading repo object [" + id + "]")
+		msg := "Downloading repo object [" + id + "]"
+		util.SetBootDetails(msg)
+		util.PushEndlessProgress(msg)
 	})
 
 	eventbus.Subscribe(dejavu.EvtSyncBeforeUploadObject, func(id string) {
-		util.SetBootDetails("Uploading repo object [" + id + "]")
+		msg := "Uploading repo object [" + id + "]"
+		util.SetBootDetails(msg)
+		util.PushEndlessProgress(msg)
 	})
 }
 
@@ -164,18 +203,6 @@ func InitRepoKey() (err error) {
 	return
 }
 
-var checkoutCallbacks = map[string]dejavu.Callback{
-	"walkData": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(string))
-	},
-	"upsertFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(*entity.File).Path)
-	},
-	"removeFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(string))
-	},
-}
-
 func CheckoutRepo(id string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
@@ -202,7 +229,7 @@ func CheckoutRepo(id string) (err error) {
 	Conf.Sync.Enabled = false
 	Conf.Save()
 
-	err = repo.Checkout(id, util.PushEndlessProgress, checkoutCallbacks)
+	err = repo.Checkout(id)
 	if nil != err {
 		util.PushClearProgress()
 		return
@@ -216,18 +243,6 @@ func CheckoutRepo(id string) (err error) {
 		}()
 	}
 	return
-}
-
-var indexCallbacks = map[string]dejavu.Callback{
-	"walkData": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(string))
-	},
-	"getLatestFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(*entity.File).Path)
-	},
-	"upsertFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(*entity.File).Path)
-	},
 }
 
 func IndexRepo(memo string) (err error) {
@@ -254,7 +269,7 @@ func IndexRepo(memo string) (err error) {
 	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
 	filelock.ReleaseAllFileLocks()
-	_, err = repo.Index(memo, util.PushEndlessProgress, indexCallbacks)
+	_, err = repo.Index(memo)
 	util.PushClearProgress()
 	return
 }
@@ -272,7 +287,7 @@ func indexRepoBeforeCloudSync() {
 
 	start := time.Now()
 	latest, err := repo.Latest()
-	index, err := repo.Index("[Auto] Cloud sync", nil, nil)
+	index, err := repo.Index("[Auto] Cloud sync")
 	if nil != err {
 		util.LogErrorf("index repo before cloud sync failed: %s", err)
 		return

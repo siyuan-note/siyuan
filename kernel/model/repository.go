@@ -26,27 +26,159 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/dejavu"
-	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
+	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func UploadSnapshot(id string) (err error) {
-	if 1 > len(Conf.Repo.Key) {
-		err = errors.New(Conf.Language(26))
-		return
-	}
+func init() {
+	eventbus.Subscribe(dejavu.EvtIndexWalkData, func(context map[string]interface{}, path string) {
+		msg := "Indexing repo [walk data " + path + "]"
+		util.SetBootDetails(msg)
 
-	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
-	if nil != err {
-		util.LogErrorf("init repo failed: %s", err)
-		return
-	}
+		switch context[CtxPushMsg].(int) {
+		case CtxPushMsgToProgress:
+			util.PushEndlessProgress(msg)
+		case CtxPushMsgToStatusBar:
+			util.PushStatusBar(msg)
+		case CtxPushMsgToStatusBarAndProgress:
+			util.PushStatusBar(msg)
+			util.PushEndlessProgress(msg)
+		}
+	})
+	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(context map[string]interface{}, path string) {
+		msg := "Indexing repo [get latest file " + path + "]"
+		util.SetBootDetails(msg)
 
-	_ = repo
-	return
+		switch context[CtxPushMsg].(int) {
+		case CtxPushMsgToProgress:
+			util.PushEndlessProgress(msg)
+		case CtxPushMsgToStatusBar:
+			util.PushStatusBar(msg)
+		case CtxPushMsgToStatusBarAndProgress:
+			util.PushStatusBar(msg)
+			util.PushEndlessProgress(msg)
+		}
+	})
+	eventbus.Subscribe(dejavu.EvtIndexUpsertFile, func(context map[string]interface{}, path string) {
+		msg := "Indexing repo [upsert file " + path + "]"
+		util.SetBootDetails(msg)
+
+		switch context[CtxPushMsg].(int) {
+		case CtxPushMsgToProgress:
+			util.PushEndlessProgress(msg)
+		case CtxPushMsgToStatusBar:
+			util.PushStatusBar(msg)
+		case CtxPushMsgToStatusBarAndProgress:
+			util.PushStatusBar(msg)
+			util.PushEndlessProgress(msg)
+		}
+	})
+
+	eventbus.Subscribe(dejavu.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
+		msg := "Checkout repo [walk data " + path + "]"
+		util.SetBootDetails(msg)
+
+		switch context[CtxPushMsg].(int) {
+		case CtxPushMsgToProgress:
+			util.PushEndlessProgress(msg)
+		case CtxPushMsgToStatusBar:
+			util.PushStatusBar(msg)
+		case CtxPushMsgToStatusBarAndProgress:
+			util.PushStatusBar(msg)
+			util.PushEndlessProgress(msg)
+		}
+	})
+	eventbus.Subscribe(dejavu.EvtCheckoutUpsertFile, func(context map[string]interface{}, path string) {
+		msg := "Checkout repo [upsert file " + path + "]"
+		util.SetBootDetails(msg)
+
+		switch context[CtxPushMsg].(int) {
+		case CtxPushMsgToProgress:
+			util.PushEndlessProgress(msg)
+		case CtxPushMsgToStatusBar:
+			util.PushStatusBar(msg)
+		case CtxPushMsgToStatusBarAndProgress:
+			util.PushStatusBar(msg)
+			util.PushEndlessProgress(msg)
+		}
+	})
+	eventbus.Subscribe(dejavu.EvtCheckoutRemoveFile, func(context map[string]interface{}, path string) {
+		msg := "Checkout repo [remove file " + path + "]"
+		util.SetBootDetails(msg)
+
+		switch context[CtxPushMsg].(int) {
+		case CtxPushMsgToProgress:
+			util.PushEndlessProgress(msg)
+		case CtxPushMsgToStatusBar:
+			util.PushStatusBar(msg)
+		case CtxPushMsgToStatusBarAndProgress:
+			util.PushStatusBar(msg)
+			util.PushEndlessProgress(msg)
+		}
+	})
+
+	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudIndexes, func(context map[string]interface{}, latestSync string) {
+		msg := "Downloading repo indexes..."
+		util.SetBootDetails(msg)
+
+		switch context[CtxPushMsg].(int) {
+		case CtxPushMsgToProgress:
+			util.PushEndlessProgress(msg)
+		case CtxPushMsgToStatusBar:
+			util.PushStatusBar(msg)
+		case CtxPushMsgToStatusBarAndProgress:
+			util.PushStatusBar(msg)
+			util.PushEndlessProgress(msg)
+		}
+	})
+
+	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudFile, func(context map[string]interface{}, id string) {
+		msg := "Downloading repo object [" + id + "]"
+		util.SetBootDetails(msg)
+
+		switch context[CtxPushMsg].(int) {
+		case CtxPushMsgToProgress:
+			util.PushEndlessProgress(msg)
+		case CtxPushMsgToStatusBar:
+			util.PushStatusBar(msg)
+		case CtxPushMsgToStatusBarAndProgress:
+			util.PushStatusBar(msg)
+			util.PushEndlessProgress(msg)
+		}
+	})
+
+	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudChunk, func(context map[string]interface{}, id string) {
+		msg := "Downloading repo object [" + id + "]"
+		util.SetBootDetails(msg)
+
+		switch context[CtxPushMsg].(int) {
+		case CtxPushMsgToProgress:
+			util.PushEndlessProgress(msg)
+		case CtxPushMsgToStatusBar:
+			util.PushStatusBar(msg)
+		case CtxPushMsgToStatusBarAndProgress:
+			util.PushStatusBar(msg)
+			util.PushEndlessProgress(msg)
+		}
+	})
+
+	eventbus.Subscribe(dejavu.EvtSyncBeforeUploadObject, func(context map[string]interface{}, id string) {
+		msg := "Uploading repo object [" + id + "]"
+		util.SetBootDetails(msg)
+
+		switch context[CtxPushMsg].(int) {
+		case CtxPushMsgToProgress:
+			util.PushEndlessProgress(msg)
+		case CtxPushMsgToStatusBar:
+			util.PushStatusBar(msg)
+		case CtxPushMsgToStatusBarAndProgress:
+			util.PushStatusBar(msg)
+			util.PushEndlessProgress(msg)
+		}
+	})
 }
 
 func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, err error) {
@@ -161,18 +293,6 @@ func InitRepoKey() (err error) {
 	return
 }
 
-var checkoutCallbacks = map[string]dejavu.Callback{
-	"walkData": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(string))
-	},
-	"upsertFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(*entity.File).Path)
-	},
-	"removeFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(string))
-	},
-}
-
 func CheckoutRepo(id string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
@@ -199,7 +319,9 @@ func CheckoutRepo(id string) (err error) {
 	Conf.Sync.Enabled = false
 	Conf.Save()
 
-	err = repo.Checkout(id, util.PushEndlessProgress, checkoutCallbacks)
+	err = repo.Checkout(id, map[string]interface{}{
+		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
+	})
 	if nil != err {
 		util.PushClearProgress()
 		return
@@ -213,18 +335,6 @@ func CheckoutRepo(id string) (err error) {
 		}()
 	}
 	return
-}
-
-var indexCallbacks = map[string]dejavu.Callback{
-	"walkData": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(string))
-	},
-	"getLatestFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(*entity.File).Path)
-	},
-	"upsertFile": func(context, arg interface{}, err error) {
-		context.(func(msg string))(arg.(*entity.File).Path)
-	},
 }
 
 func IndexRepo(memo string) (err error) {
@@ -251,10 +361,20 @@ func IndexRepo(memo string) (err error) {
 	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
 	filelock.ReleaseAllFileLocks()
-	_, err = repo.Index(memo, util.PushEndlessProgress, indexCallbacks)
+	_, err = repo.Index(memo, map[string]interface{}{
+		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
+	})
 	util.PushClearProgress()
 	return
 }
+
+const (
+	CtxPushMsg = "pushMsg"
+
+	CtxPushMsgToProgress = iota
+	CtxPushMsgToStatusBar
+	CtxPushMsgToStatusBarAndProgress
+)
 
 func indexRepoBeforeCloudSync() {
 	if 1 > len(Conf.Repo.Key) {
@@ -269,7 +389,9 @@ func indexRepoBeforeCloudSync() {
 
 	start := time.Now()
 	latest, err := repo.Latest()
-	index, err := repo.Index("[Auto] Cloud sync", nil, nil)
+	index, err := repo.Index("[Auto] Cloud sync", map[string]interface{}{
+		CtxPushMsg: CtxPushMsgToStatusBar,
+	})
 	if nil != err {
 		util.LogErrorf("index repo before cloud sync failed: %s", err)
 		return
@@ -287,4 +409,22 @@ func indexRepoBeforeCloudSync() {
 	if 7000 < elapsed.Milliseconds() {
 		util.LogWarnf("index repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
 	}
+}
+
+func syncRepo() (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		return
+	}
+
+	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	if nil != err {
+		util.LogErrorf("init repo failed: %s", err)
+		return
+	}
+
+	start := time.Now()
+	err = repo.Sync(Conf.Sync.CloudName, Conf.User.UserId, Conf.User.UserToken, Conf.System.NetworkProxy.String(), util.AliyunServer)
+	elapsed := time.Since(start)
+	util.LogInfof("sync repo elapsed [%.2fs]", elapsed.Seconds())
+	return
 }

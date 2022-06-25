@@ -144,6 +144,10 @@ func PushErrMsg(msg string, timeout int) (msgId string) {
 	return
 }
 
+func PushStatusBar(msg string) {
+	BroadcastByType("main", "statusbar", 0, msg, nil)
+}
+
 const (
 	PushProgressCodeProgressed = 0 // 有进度
 	PushProgressCodeEndless    = 1 // 无进度

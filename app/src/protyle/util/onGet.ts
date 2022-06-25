@@ -99,7 +99,7 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
         return;
     }
     protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
-    const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8
+    const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
     if (options.action.includes(Constants.CB_GET_APPEND)) {
         // 动态加载移除
         if (protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {

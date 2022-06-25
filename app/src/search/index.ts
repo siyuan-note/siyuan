@@ -77,7 +77,7 @@ export class Search extends Model {
                     searchPanelElement.scrollTop > currentList.offsetTop) {
                     searchPanelElement.scrollTop = currentList.offsetTop - searchPanelElement.clientHeight + lineHeight;
                 }
-                this.getArticle(currentList.getAttribute("data-node-id"), inputElement.value)
+                this.getArticle(currentList.getAttribute("data-node-id"), inputElement.value);
                 event.preventDefault();
             } else if (event.key === "ArrowUp") {
                 currentList.classList.remove("b3-list-item--focus");

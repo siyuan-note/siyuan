@@ -158,9 +158,9 @@ export const onGetConfig = () => {
 
 const initStatus = () => {
     const allDocks = getAllDocks();
-    let menuHTML = ''
+    let menuHTML = "";
     allDocks.forEach(item => {
-        menuHTML += `<button class="b3-menu__item" data-type="${item.type}"><svg class="b3-menu__icon""><use xlink:href="#${item.icon}"></use></svg><span class="b3-menu__label">${window.siyuan.languages[item.hotkeyLangId]}</span><span class="b3-menu__accelerator">${window.siyuan.config.keymap.general[item.hotkeyLangId].custom}</span></button>`
+        menuHTML += `<button class="b3-menu__item" data-type="${item.type}"><svg class="b3-menu__icon""><use xlink:href="#${item.icon}"></use></svg><span class="b3-menu__label">${window.siyuan.languages[item.hotkeyLangId]}</span><span class="b3-menu__accelerator">${window.siyuan.config.keymap.general[item.hotkeyLangId].custom}</span></button>`;
     });
     document.getElementById("status").innerHTML = `<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__e${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDock : window.siyuan.languages.hideDock}">
     <svg>
@@ -183,12 +183,12 @@ const initStatus = () => {
 </div>
 <div id="barHelp" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
-</div>`
+</div>`;
     document.querySelector("#status").addEventListener("click", (event) => {
-        let target = event.target as HTMLElement
+        let target = event.target as HTMLElement;
         while (target.id !== "status") {
-            if (target.id === 'barDock') {
-                const useElement = target.firstElementChild.firstElementChild
+            if (target.id === "barDock") {
+                const useElement = target.firstElementChild.firstElementChild;
                 const dockIsShow = useElement.getAttribute("xlink:href") === "#iconHideDock";
                 if (dockIsShow) {
                     useElement.setAttribute("xlink:href", "#iconDock");
@@ -226,7 +226,7 @@ const initStatus = () => {
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("b3-menu__item")) {
-                const type = target.getAttribute("data-type") as TDockType
+                const type = target.getAttribute("data-type") as TDockType;
                 getDockByType(type).toggleModel(type);
                 if (type === "file" && getSelection().rangeCount > 0) {
                     const range = getSelection().getRangeAt(0);
@@ -262,10 +262,10 @@ const initStatus = () => {
                 event.stopPropagation();
                 break;
             }
-            target = target.parentElement
+            target = target.parentElement;
         }
-    })
-}
+    });
+};
 
 const initBar = () => {
     document.querySelector(".toolbar").innerHTML = `<div id="toolbarVIP" class="fn__flex"></div>

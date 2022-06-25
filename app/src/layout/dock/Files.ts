@@ -307,12 +307,15 @@ export class Files extends Model {
             }
             liElement.classList.remove("dragover__top", "dragover__bottom", "dragover");
             const sourceType = window.siyuan.dragElement.getAttribute("data-type");
-            if (["NodeListItem", "NodeHeading"].includes(sourceType)) {
-                // 编辑器情景菜单拖拽
-                liElement.classList.add("dragover");
+            if (window.siyuan.dragElement.parentElement?.classList.contains("protyle-gutters")) {
+                if (["NodeListItem", "NodeHeading"].includes(sourceType)) {
+                    // 编辑器情景菜单拖拽
+                    liElement.classList.add("dragover");
+                }
                 event.preventDefault();
                 return;
             }
+
             const targetType = liElement.getAttribute("data-type");
             if (sourceType === "navigation-root" && targetType !== "navigation-root") {
                 event.preventDefault();

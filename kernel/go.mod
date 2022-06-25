@@ -40,8 +40,9 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20220620134708-bcbbf7f6478e
+	github.com/siyuan-note/dejavu v0.0.0-20220625090001-05561417a463
 	github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676
+	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
 	github.com/siyuan-note/filelock v0.0.0-20220616063212-74cfba0754ee
 	github.com/siyuan-note/httpclient v0.0.0-20220622170705-004622a8138d
 	github.com/vmihailenco/msgpack/v5 v5.3.5
@@ -57,6 +58,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
+	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
@@ -97,11 +99,11 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
+	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/mod v0.5.1 // indirect
-	golang.org/x/net v0.0.0-20220621193019-9d032be2e588 // indirect
+	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
-	golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c // indirect
+	golang.org/x/sys v0.0.0-20220624220833-87e55d714810 // indirect
 	golang.org/x/tools v0.1.8 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect

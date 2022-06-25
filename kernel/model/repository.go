@@ -28,25 +28,28 @@ import (
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
+	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func UploadSnapshot(id string) (err error) {
-	if 1 > len(Conf.Repo.Key) {
-		err = errors.New(Conf.Language(26))
-		return
-	}
+func init() {
+	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudIndexes, func(latestSync string) {
+		util.SetBootDetails("Downloading repo indexes...")
+	})
 
-	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
-	if nil != err {
-		util.LogErrorf("init repo failed: %s", err)
-		return
-	}
+	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudFile, func(id string) {
+		util.SetBootDetails("Downloading repo object [" + id + "]")
+	})
 
-	_ = repo
-	return
+	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudChunk, func(id string) {
+		util.SetBootDetails("Downloading repo object [" + id + "]")
+	})
+
+	eventbus.Subscribe(dejavu.EvtSyncBeforeUploadObject, func(id string) {
+		util.SetBootDetails("Uploading repo object [" + id + "]")
+	})
 }
 
 func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, err error) {
@@ -287,4 +290,22 @@ func indexRepoBeforeCloudSync() {
 	if 7000 < elapsed.Milliseconds() {
 		util.LogWarnf("index repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
 	}
+}
+
+func syncRepo() (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		return
+	}
+
+	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	if nil != err {
+		util.LogErrorf("init repo failed: %s", err)
+		return
+	}
+
+	start := time.Now()
+	err = repo.Sync(Conf.Sync.CloudName, Conf.User.UserId, Conf.User.UserToken, Conf.System.NetworkProxy.String(), util.AliyunServer)
+	elapsed := time.Since(start)
+	util.LogInfof("sync repo elapsed [%.2fs]", elapsed.Seconds())
+	return
 }

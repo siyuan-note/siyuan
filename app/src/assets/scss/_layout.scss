@@ -237,12 +237,10 @@
     border-left: 1px solid var(--b3-border-color);
   }
 
-  &#dockTop {
-    border-bottom: 1px solid var(--b3-border-color);
-  }
-
+  &#dockTop,
   &#dockBottom {
     border-top: 1px solid var(--b3-border-color);
+    border-bottom: 1px solid var(--b3-border-color);
   }
 
   svg {

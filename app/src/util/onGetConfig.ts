@@ -135,6 +135,7 @@ export const onGetConfig = () => {
         }
     });
     initBar();
+    initStatus();
     initWindow();
     appearance.onSetappearance(window.siyuan.config.appearance);
     initAssets();
@@ -153,6 +154,61 @@ export const onGetConfig = () => {
     }
 };
 
+const initStatus = () => {
+    document.querySelector(".status").innerHTML = `<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__ne${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDock : window.siyuan.languages.hideDock}">
+    <svg>
+        <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
+    </svg>
+</div>
+<div class="fn__space"></div>
+<div id="statusMsg"></div>
+<div class="fn__space"></div>
+<div class="fn__flex-1"></div>
+<div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " F9")}">
+    <svg>
+        <use xlink:href="#iconRefresh"></use>
+    </svg>
+</div>`
+    const baSyncElement = document.getElementById("barSync");
+    baSyncElement.addEventListener("click", () => {
+        if (needSubscribe()) {
+            return;
+        }
+        if (!window.siyuan.config.sync.enabled) {
+            showMessage(window.siyuan.languages._kernel[124]);
+            return;
+        }
+        if (baSyncElement.firstElementChild.classList.contains("fn__rotate")) {
+            return;
+        }
+        fetchPost("/api/sync/performSync", {});
+    });
+    const barDockElement = document.getElementById("barDock");
+    const useElement = document.querySelector("#barDock use");
+    barDockElement.addEventListener("click", () => {
+        const dockIsShow = useElement.getAttribute("xlink:href") === "#iconHideDock";
+        if (dockIsShow) {
+            useElement.setAttribute("xlink:href", "#iconDock");
+            barDockElement.setAttribute("aria-label", window.siyuan.languages.showDock);
+        } else {
+            useElement.setAttribute("xlink:href", "#iconHideDock");
+            barDockElement.setAttribute("aria-label", window.siyuan.languages.hideDock);
+        }
+        document.querySelectorAll(".dock").forEach(item => {
+            if (dockIsShow) {
+                if (item.querySelector(".dock__item")) {
+                    item.classList.add("fn__none");
+                }
+            } else {
+                if (item.querySelector(".dock__item")) {
+                    item.classList.remove("fn__none");
+                }
+            }
+        });
+        resizeTabs();
+    });
+}
+
 const initBar = () => {
     document.querySelector(".toolbar").innerHTML = `<div id="toolbarVIP" class="fn__flex"></div>
 <div id="barDailyNote" data-menu="true" aria-label="${window.siyuan.languages.dailyNote} ${updateHotkeyTip(window.siyuan.config.keymap.general.dailyNote.custom)}" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}">
@@ -165,19 +221,9 @@ const initBar = () => {
         <use xlink:href="#iconSearch"></use>
     </svg>
 </div>
-<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__s${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDock : window.siyuan.languages.hideDock}">
-    <svg>
-        <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
-    </svg>
-</div>
 <div id="barThemeMode" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.appearance.mode === 1 ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.config.appearance.mode === 1 ? window.siyuan.languages.themeLight : window.siyuan.languages.themeDark}">
     <svg>
         <use xlink:href="#iconMoon"></use>
-    </svg>
-</div>
-<div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " F9")}">
-    <svg>
-        <use xlink:href="#iconRefresh"></use>
     </svg>
 </div>
 <div data-menu="true" id="barMore" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.more}">
@@ -206,20 +252,6 @@ const initBar = () => {
     document.getElementById("barMore").addEventListener("click", (event) => {
         initToolbarMore().popup({x: event.clientX, y: event.clientY});
     });
-    const baSyncElement = document.getElementById("barSync");
-    baSyncElement.addEventListener("click", () => {
-        if (needSubscribe()) {
-            return;
-        }
-        if (!window.siyuan.config.sync.enabled) {
-            showMessage(window.siyuan.languages._kernel[124]);
-            return;
-        }
-        if (baSyncElement.firstElementChild.classList.contains("fn__rotate")) {
-            return;
-        }
-        fetchPost("/api/sync/performSync", {});
-    });
     const barThemeModeElement = document.getElementById("barThemeMode");
     barThemeModeElement.addEventListener("click", () => {
         if (barThemeModeElement.getAttribute("disabled")) {
@@ -247,30 +279,6 @@ const initBar = () => {
             /// #endif
             loadAssets(response.data.appearance);
         });
-    });
-    const barDockElement = document.getElementById("barDock");
-    const useElement = document.querySelector("#barDock use");
-    barDockElement.addEventListener("click", () => {
-        const dockIsShow = useElement.getAttribute("xlink:href") === "#iconHideDock";
-        if (dockIsShow) {
-            useElement.setAttribute("xlink:href", "#iconDock");
-            barDockElement.setAttribute("aria-label", window.siyuan.languages.showDock);
-        } else {
-            useElement.setAttribute("xlink:href", "#iconHideDock");
-            barDockElement.setAttribute("aria-label", window.siyuan.languages.hideDock);
-        }
-        document.querySelectorAll(".dock").forEach(item => {
-            if (dockIsShow) {
-                if (item.querySelector(".dock__item")) {
-                    item.classList.add("fn__none");
-                }
-            } else {
-                if (item.querySelector(".dock__item")) {
-                    item.classList.remove("fn__none");
-                }
-            }
-        });
-        resizeTabs();
     });
     document.getElementById("toolbarVIP").addEventListener("click", () => {
         const dialogSetting = openSetting();

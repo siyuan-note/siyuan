@@ -11,7 +11,14 @@ import {fetchGet, fetchPost} from "./util/fetch";
 import {addBaseURL, setNoteBook} from "./util/pathName";
 import {repos} from "./config/repos";
 import {openFileById} from "./editor/util";
-import {bootSync, downloadProgress, progressLoading, setTitle, transactionError} from "./dialog/processSystem";
+import {
+    bootSync,
+    downloadProgress,
+    progressLoading,
+    progressStatus,
+    setTitle,
+    transactionError
+} from "./dialog/processSystem";
 import {promiseTransactions} from "./protyle/wysiwyg/transaction";
 import {initMessage} from "./dialog/message";
 import {resizeDrag} from "./layout/util";
@@ -38,6 +45,9 @@ class App {
                         switch (data.cmd) {
                             case"progress":
                                 progressLoading(data);
+                                break;
+                            case"statusbar":
+                                progressStatus(data);
                                 break;
                             case"downloadProgress":
                                 downloadProgress(data.data);

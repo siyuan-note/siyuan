@@ -230,6 +230,14 @@ progressLoading: 400
   }
 }
 
+.status {
+  background-color: var(--b3-theme-surface);
+  box-sizing: border-box;
+  height: 22px;
+  line-height: 22px;
+  font-size: 12px;
+}
+
 .config {
   &-query {
     display: flex;

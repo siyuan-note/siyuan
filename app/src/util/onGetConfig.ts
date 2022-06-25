@@ -1,5 +1,5 @@
 import {openSearch} from "../search/spread";
-import {exportLayout, JSONToLayout, resizeDrag, resizeTabs} from "../layout/util";
+import {exportLayout, getDockByType, JSONToLayout, resizeDrag, resizeTabs} from "../layout/util";
 import {hotKey2Electron, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -22,6 +22,8 @@ import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
 import {openSetting} from "../config";
 import {getSearch} from "./functions";
+import {getAllDocks} from "../layout/getAll";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -155,58 +157,114 @@ export const onGetConfig = () => {
 };
 
 const initStatus = () => {
-    document.querySelector(".status").innerHTML = `<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__ne${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDock : window.siyuan.languages.hideDock}">
+    const allDocks = getAllDocks();
+    let menuHTML = ''
+    allDocks.forEach(item => {
+        menuHTML += `<button class="b3-menu__item" data-type="${item.type}"><svg class="b3-menu__icon""><use xlink:href="#${item.icon}"></use></svg><span class="b3-menu__label">${window.siyuan.languages[item.hotkeyLangId]}</span><span class="b3-menu__accelerator">${window.siyuan.config.keymap.general[item.hotkeyLangId].custom}</span></button>`
+    });
+    document.getElementById("status").innerHTML = `<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__e${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDock : window.siyuan.languages.hideDock}">
     <svg>
         <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>
+    <div class="b3-menu" style="bottom: 21px;left: 4px">
+        ${menuHTML}
+    </div>
 </div>
-<div class="fn__space"></div>
-<div id="statusMsg"></div>
-<div class="fn__space"></div>
+<div class="status__msg"></div>
 <div class="fn__flex-1"></div>
 <div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " F9")}">
-    <svg>
-        <use xlink:href="#iconRefresh"></use>
-    </svg>
+    <svg><use xlink:href="#iconRefresh"></use></svg>
+</div>
+<div id="barLock" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.lockScreen} ${updateHotkeyTip(window.siyuan.config.keymap.general.lockScreen.custom)}">
+    <svg><use xlink:href="#iconLock"></use></svg>
+</div>
+<div id="barFeedback" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.feedback}">
+    <svg><use xlink:href="#iconHeart"></use></svg>
+</div>
+<div id="barHelp" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.help}">
+    <svg><use xlink:href="#iconHelp"></use></svg>
 </div>`
-    const baSyncElement = document.getElementById("barSync");
-    baSyncElement.addEventListener("click", () => {
-        if (needSubscribe()) {
-            return;
-        }
-        if (!window.siyuan.config.sync.enabled) {
-            showMessage(window.siyuan.languages._kernel[124]);
-            return;
-        }
-        if (baSyncElement.firstElementChild.classList.contains("fn__rotate")) {
-            return;
-        }
-        fetchPost("/api/sync/performSync", {});
-    });
-    const barDockElement = document.getElementById("barDock");
-    const useElement = document.querySelector("#barDock use");
-    barDockElement.addEventListener("click", () => {
-        const dockIsShow = useElement.getAttribute("xlink:href") === "#iconHideDock";
-        if (dockIsShow) {
-            useElement.setAttribute("xlink:href", "#iconDock");
-            barDockElement.setAttribute("aria-label", window.siyuan.languages.showDock);
-        } else {
-            useElement.setAttribute("xlink:href", "#iconHideDock");
-            barDockElement.setAttribute("aria-label", window.siyuan.languages.hideDock);
-        }
-        document.querySelectorAll(".dock").forEach(item => {
-            if (dockIsShow) {
-                if (item.querySelector(".dock__item")) {
-                    item.classList.add("fn__none");
+    document.querySelector("#status").addEventListener("click", (event) => {
+        let target = event.target as HTMLElement
+        while (target.id !== "status") {
+            if (target.id === 'barDock') {
+                const useElement = target.firstElementChild.firstElementChild
+                const dockIsShow = useElement.getAttribute("xlink:href") === "#iconHideDock";
+                if (dockIsShow) {
+                    useElement.setAttribute("xlink:href", "#iconDock");
+                    target.setAttribute("aria-label", window.siyuan.languages.showDock);
+                } else {
+                    useElement.setAttribute("xlink:href", "#iconHideDock");
+                    target.setAttribute("aria-label", window.siyuan.languages.hideDock);
                 }
-            } else {
-                if (item.querySelector(".dock__item")) {
-                    item.classList.remove("fn__none");
+                document.querySelectorAll(".dock").forEach(item => {
+                    if (dockIsShow) {
+                        if (item.querySelector(".dock__item")) {
+                            item.classList.add("fn__none");
+                        }
+                    } else {
+                        if (item.querySelector(".dock__item")) {
+                            item.classList.remove("fn__none");
+                        }
+                    }
+                });
+                resizeTabs();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barSync") {
+                if (needSubscribe()) {
+                    return;
                 }
+                if (!window.siyuan.config.sync.enabled) {
+                    showMessage(window.siyuan.languages._kernel[124]);
+                    return;
+                }
+                if (target.firstElementChild.classList.contains("fn__rotate")) {
+                    return;
+                }
+                fetchPost("/api/sync/performSync", {});
+                event.stopPropagation();
+                break;
+            } else if (target.classList.contains("b3-menu__item")) {
+                const type = target.getAttribute("data-type") as TDockType
+                getDockByType(type).toggleModel(type);
+                if (type === "file" && getSelection().rangeCount > 0) {
+                    const range = getSelection().getRangeAt(0);
+                    const wysiwygElement = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
+                    if (wysiwygElement) {
+                        wysiwygElement.blur();
+                    }
+                }
+                target.parentElement.style.display = "none";
+                setTimeout(() => {
+                    target.parentElement.style.display = "";
+                }, Constants.TIMEOUT_BLOCKLOAD);
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barLock") {
+                exportLayout(false, () => {
+                    fetchPost("/api/system/logoutAuth", {}, () => {
+                        window.location.href = "/";
+                    });
+                });
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barHelp") {
+                mountHelp();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barFeedback") {
+                if ("zh_CN" === window.siyuan.config.lang) {
+                    window.open("https://ld246.com/article/1649901726096");
+                } else {
+                    window.open("https://github.com/siyuan-note/siyuan/issues");
+                }
+                event.stopPropagation();
+                break;
             }
-        });
-        resizeTabs();
-    });
+            target = target.parentElement
+        }
+    })
 }
 
 const initBar = () => {

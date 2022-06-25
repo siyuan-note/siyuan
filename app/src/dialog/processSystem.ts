@@ -145,7 +145,7 @@ export const transactionError = (data: { code: number, data: string }) => {
 };
 
 export const progressStatus = (data: IWebSocketData) => {
-    document.getElementById("statusMsg").innerHTML = data.data;
+    document.querySelector("#status .status__msg").innerHTML = data.data;
 };
 
 export const progressLoading = (data: IWebSocketData) => {

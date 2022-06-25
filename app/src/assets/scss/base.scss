@@ -235,7 +235,28 @@ progressLoading: 400
   box-sizing: border-box;
   height: 22px;
   line-height: 22px;
-  font-size: 12px;
+
+  &__msg {
+    font-size: 12px;
+    color: var(--b3-theme-on-surface);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  #barDock {
+    &:hover .b3-menu {
+      display: block;
+    }
+
+    .b3-menu {
+      display: none;
+
+      &__item:hover {
+        background-color: var(--b3-list-hover);
+      }
+    }
+  }
 }
 
 .config {

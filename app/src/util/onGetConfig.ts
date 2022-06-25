@@ -160,7 +160,7 @@ const initStatus = () => {
     const allDocks = getAllDocks();
     let menuHTML = "";
     allDocks.forEach(item => {
-        menuHTML += `<button class="b3-menu__item" data-type="${item.type}"><svg class="b3-menu__icon""><use xlink:href="#${item.icon}"></use></svg><span class="b3-menu__label">${window.siyuan.languages[item.hotkeyLangId]}</span><span class="b3-menu__accelerator">${window.siyuan.config.keymap.general[item.hotkeyLangId].custom}</span></button>`;
+        menuHTML += `<button class="b3-menu__item" data-type="${item.type}"><svg class="b3-menu__icon""><use xlink:href="#${item.icon}"></use></svg><span class="b3-menu__label">${window.siyuan.languages[item.hotkeyLangId]}</span><span class="b3-menu__accelerator">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span></button>`;
     });
     document.getElementById("status").innerHTML = `<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__e${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDock : window.siyuan.languages.hideDock}">
     <svg>
@@ -185,7 +185,7 @@ const initStatus = () => {
     <svg><use xlink:href="#iconHelp"></use></svg>
 </div>`;
     const dockElement = document.getElementById("barDock");
-    dockElement.addEventListener("mouseenter", () => {
+    dockElement.addEventListener("mousemove", () => {
         dockElement.querySelector(".b3-menu").classList.remove("fn__none");
     });
     dockElement.addEventListener("mouseleave", () => {
@@ -220,14 +220,11 @@ const initStatus = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "barSync") {
-                if (needSubscribe()) {
+                if (needSubscribe() || target.firstElementChild.classList.contains("fn__rotate")) {
                     return;
                 }
                 if (!window.siyuan.config.sync.enabled) {
                     showMessage(window.siyuan.languages._kernel[124]);
-                    return;
-                }
-                if (target.firstElementChild.classList.contains("fn__rotate")) {
                     return;
                 }
                 fetchPost("/api/sync/performSync", {});

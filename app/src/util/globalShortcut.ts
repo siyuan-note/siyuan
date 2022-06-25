@@ -33,6 +33,7 @@ import {initFileMenu, initNavigationMenu} from "../menus/navigation";
 import {bindMenuKeydown} from "../menus/Menu";
 import {showMessage} from "../dialog/message";
 import {openHistory} from "./history";
+import {needSubscribe} from "./needSubscribe";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -242,7 +243,14 @@ export const globalShortcut = () => {
         }
 
         if (event.key === "F9") {
-            document.getElementById("barSync").dispatchEvent(new Event("click"));
+            if (needSubscribe() || document.querySelector("#barSync svg").classList.contains("fn__rotate")) {
+                return;
+            }
+            if (!window.siyuan.config.sync.enabled) {
+                showMessage(window.siyuan.languages._kernel[124]);
+                return;
+            }
+            fetchPost("/api/sync/performSync", {});
             event.preventDefault();
             return;
         }

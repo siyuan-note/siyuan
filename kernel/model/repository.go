@@ -358,12 +358,17 @@ func IndexRepo(memo string) (err error) {
 	util.PushEndlessProgress(Conf.Language(143))
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
+
+	start := time.Now()
 	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
 	filelock.ReleaseAllFileLocks()
 	_, err = repo.Index(memo, map[string]interface{}{
 		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
 	})
+	elapsed := time.Since(start)
+	util.LogInfof("index data repo elapsed [%.2fs]", elapsed.Seconds())
+	util.PushStatusBar(fmt.Sprintf("Index data repo elapsed [%.2fs]", elapsed.Seconds()))
 	util.PushClearProgress()
 	return
 }
@@ -428,6 +433,6 @@ func syncRepo() (err error) {
 	})
 	elapsed := time.Since(start)
 	util.LogInfof("sync data repo elapsed [%.2fs]", elapsed.Seconds())
-	util.PushStatusBar(fmt.Sprintf("Sync data data repo elapsed [%.2fs]", elapsed.Seconds()))
+	util.PushStatusBar(fmt.Sprintf("Sync data repo elapsed [%.2fs]", elapsed.Seconds()))
 	return
 }

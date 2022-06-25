@@ -423,7 +423,9 @@ func syncRepo() (err error) {
 	}
 
 	start := time.Now()
-	err = repo.Sync(Conf.Sync.CloudName, Conf.User.UserId, Conf.User.UserToken, Conf.System.NetworkProxy.String(), util.AliyunServer)
+	err = repo.Sync(Conf.Sync.CloudName, Conf.User.UserId, Conf.User.UserToken, Conf.System.NetworkProxy.String(), util.AliyunServer, map[string]interface{}{
+		CtxPushMsg: CtxPushMsgToStatusBar,
+	})
 	elapsed := time.Since(start)
 	util.LogInfof("sync repo elapsed [%.2fs]", elapsed.Seconds())
 	return

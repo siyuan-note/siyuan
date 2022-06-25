@@ -21,6 +21,7 @@ import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
 import {openSetting} from "../config";
+import {getSearch} from "./functions";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -346,12 +347,14 @@ const initWindow = () => {
     const currentWindow = getCurrentWindow();
     currentWindow.on("focus", winOnFocus);
     ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
-        const params = url.split("?");
+        if (!/^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url)) {
+            return;
+        }
         openFileById({
             id: url.substr(16, 22),
             hasContext: true,
             action: [Constants.CB_GET_FOCUS],
-            zoomIn: params.length === 2 && params[1].startsWith("focus=1")
+            zoomIn: getSearch("focus", url) === "1"
         });
     });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {

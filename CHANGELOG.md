@@ -1,3 +1,39 @@
+## v2.0.24 / 2022-06-26
+
+### 改进功能
+
+* [支持设置页签打开最大数量](https://github.com/siyuan-note/siyuan/issues/2098)
+* [块内容较多时全局搜索定位到关键字命中位置](https://github.com/siyuan-note/siyuan/issues/3171)
+* [多次动态加载以后卡顿问题](https://github.com/siyuan-note/siyuan/issues/4620)
+* [改进复制 PDF 标注到笔记中时对换行的处理](https://github.com/siyuan-note/siyuan/issues/5213)
+* [列表项中包含多个块时 Ctrl+↑/↓ 功能等同于点击三角形](https://github.com/siyuan-note/siyuan/issues/5244)
+* [支持搜索超链接元素 URL](https://github.com/siyuan-note/siyuan/issues/5273)
+* [减少因向上动态加载的代码块渲染导致的偏差](https://github.com/siyuan-note/siyuan/issues/5280)
+* [标题和列表项以外的块标拖拽到文件树上不应有交互](https://github.com/siyuan-note/siyuan/issues/5282)
+* [桌面端加入底部状态栏](https://github.com/siyuan-note/siyuan/issues/5286)
+* [隐藏/显示停靠栏加入鼠标悬浮菜单](https://github.com/siyuan-note/siyuan/issues/5287)
+* [移除顶栏 `...` 菜单](https://github.com/siyuan-note/siyuan/issues/5288)
+
+### 文档相关
+
+* [用户指南 `引用内容块` 文档中加入 `锚文本` 和 `语法` 章节](https://github.com/siyuan-note/siyuan/issues/5276)
+
+### 开发重构
+
+* [内核中的 HTTP 客户端拆分项目](https://github.com/siyuan-note/siyuan/issues/5269)
+
+### 修复缺陷
+
+* [部分以 `\*` 开头的行级元素未被转义并在粘贴后撤销时触发状态异常](https://github.com/siyuan-note/siyuan/issues/5260)
+* [包含 `Enter` 的组合快捷键设置错误](https://github.com/siyuan-note/siyuan/issues/5264)
+* [粘贴代码块后点击菜单按钮会弹出复制提示](https://github.com/siyuan-note/siyuan/issues/5266)
+* [文档第一个块使用查询嵌入块触发状态异常](https://github.com/siyuan-note/siyuan/issues/5267)
+* [PlantUML 使用 Tab 键缩进内容时导致内容丢失且无法恢复](https://github.com/siyuan-note/siyuan/issues/5270)
+* [云端备份增量失效](https://github.com/siyuan-note/siyuan/issues/5274)
+* [关闭文档后大纲面板仍然有内容](https://github.com/siyuan-note/siyuan/issues/5275)
+* [搜索历史提示转义处理](https://github.com/siyuan-note/siyuan/issues/5279)
+* [严格校验思源块超链接地址](https://github.com/siyuan-note/siyuan/issues/5284)
+
 ## v2.0.23 / 2022-06-22
 
 ### 改进功能

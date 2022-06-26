@@ -221,7 +221,7 @@ const initStatus = () => {
                     }
                 });
                 resizeTabs();
-                target.querySelector(".b3-menu").classList.add("fn__none")
+                target.querySelector(".b3-menu").classList.add("fn__none");
                 event.stopPropagation();
                 break;
             } else if (target.id === "barSync") {

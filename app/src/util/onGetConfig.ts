@@ -178,8 +178,10 @@ const initStatus = () => {
 <div id="barLock" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.lockScreen} ${updateHotkeyTip(window.siyuan.config.keymap.general.lockScreen.custom)}">
     <svg><use xlink:href="#iconLock"></use></svg>
 </div>
-<div id="barFeedback" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.feedback}">
-    <svg><use xlink:href="#iconHeart"></use></svg>
+<div id="barDebug" class="toolbar__item b3-tooltips b3-tooltips__nw fn__none" aria-label="${window.siyuan.languages.debug}">
+    <svg>
+        <use xlink:href="#iconBug"></use>
+    </svg>
 </div>
 <div id="barHelp" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
@@ -191,6 +193,9 @@ const initStatus = () => {
     dockElement.addEventListener("mouseleave", () => {
         dockElement.querySelector(".b3-menu").classList.add("fn__none");
     });
+    /// #if !BROWSER
+    document.querySelector("#barDebug").classList.remove("fn__none");
+    /// #endif
     document.querySelector("#status").addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target.id !== "status") {
@@ -255,12 +260,10 @@ const initStatus = () => {
                 mountHelp();
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barFeedback") {
-                if ("zh_CN" === window.siyuan.config.lang) {
-                    window.open("https://ld246.com/article/1649901726096");
-                } else {
-                    window.open("https://github.com/siyuan-note/siyuan/issues");
-                }
+            } else if (target.id === "barDebug") {
+                /// #if !BROWSER
+                getCurrentWindow().webContents.openDevTools({mode: "bottom"});
+                /// #endif
                 event.stopPropagation();
                 break;
             }
@@ -296,10 +299,8 @@ const initBar = () => {
         <use xlink:href="#iconSettings"></use>
     </svg>
 </div>
-<div id="barDebug" class="toolbar__item b3-tooltips b3-tooltips__se fn__none" aria-label="${window.siyuan.languages.debug}">
-    <svg>
-        <use xlink:href="#iconBug"></use>
-    </svg>
+<div id="barFeedback" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.feedback}">
+    <svg><use xlink:href="#iconHeart"></use></svg>
 </div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
     <svg>
@@ -313,14 +314,19 @@ const initBar = () => {
 </button>
 <div class="fn__flex-1 fn__ellipsis" id="drag"><span class="fn__none">开发版，使用前请进行备份 Development version, please backup before use</span></div>
 <div class="fn__flex" style="top: -1px;z-index: 502;right: -1px;position: relative;" id="windowControls"></div>`;
-    /// #if !BROWSER
-    document.querySelector("#barDebug").classList.remove("fn__none");
-    /// #endif
     document.querySelector(".toolbar").addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         while (!target.classList.contains("toolbar")) {
             if (target.id === "barBack") {
                 goBack();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barFeedback") {
+                if ("zh_CN" === window.siyuan.config.lang) {
+                    window.open("https://ld246.com/article/1649901726096");
+                } else {
+                    window.open("https://github.com/siyuan-note/siyuan/issues");
+                }
                 event.stopPropagation();
                 break;
             } else if (target.id === "barForward") {
@@ -333,12 +339,6 @@ const initBar = () => {
                 break;
             } else if (target.id === "barSetting") {
                 openSetting();
-                event.stopPropagation();
-                break;
-            } else if (target.id === "barDebug") {
-                /// #if !BROWSER
-                getCurrentWindow().webContents.openDevTools({mode: "bottom"});
-                /// #endif
                 event.stopPropagation();
                 break;
             } else if (target.id === "toolbarVIP") {

@@ -111,7 +111,6 @@ const closeMenu = (model: Model) => {
             }).element);
         }
     }
-
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
 };
 

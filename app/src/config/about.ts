@@ -190,8 +190,13 @@ export const about = {
                 const searchData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEDATA) || "{}");
                 if (searchData.hPath) {
                     searchData.hPath = "";
+                    searchData.idPath = "";
                     localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(searchData));
                 }
+                localStorage.removeItem(Constants.LOCAL_DAILYNOTEID);
+                localStorage.removeItem(Constants.LOCAL_DOCINFO);
+                localStorage.removeItem(Constants.LOCAL_HISTORYNOTEID);
+                localStorage.removeItem("pdfjs.history");
                 exportLayout(false, () => {
                     exitSiYuan();
                 });

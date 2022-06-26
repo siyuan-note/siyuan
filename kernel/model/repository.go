@@ -360,15 +360,27 @@ func IndexRepo(memo string) (err error) {
 	defer writingDataLock.Unlock()
 
 	start := time.Now()
+	latest, _ := repo.Latest()
 	WaitForWritingFiles()
-	sql.WaitForWritingDatabase()
 	filelock.ReleaseAllFileLocks()
-	_, err = repo.Index(memo, map[string]interface{}{
+	index, err := repo.Index(memo, map[string]interface{}{
 		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
 	})
+	if nil != err {
+		util.PushStatusBar("Create data snapshot failed")
+		return
+	}
 	elapsed := time.Since(start)
-	util.LogInfof("index data repo elapsed [%.2fs]", elapsed.Seconds())
-	util.PushStatusBar(fmt.Sprintf("Indexed data repo in %.2fs", elapsed.Seconds()))
+
+	if nil != latest {
+		if latest.ID != index.ID {
+			util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
+		} else {
+			util.PushStatusBar(Conf.Language(148))
+		}
+	} else {
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
+	}
 	util.PushClearProgress()
 	return
 }
@@ -393,11 +405,12 @@ func indexRepoBeforeCloudSync() {
 	}
 
 	start := time.Now()
-	latest, err := repo.Latest()
+	latest, _ := repo.Latest()
 	index, err := repo.Index("[Auto] Cloud sync", map[string]interface{}{
 		CtxPushMsg: CtxPushMsgToStatusBar,
 	})
 	if nil != err {
+		util.PushStatusBar("Create data snapshot for cloud sync failed")
 		util.LogErrorf("index data repo before cloud sync failed: %s", err)
 		return
 	}
@@ -412,10 +425,12 @@ func indexRepoBeforeCloudSync() {
 				util.LogErrorf("put index into data repo before cloud sync failed: %s", err)
 				return
 			}
-			util.PushStatusBar("Made a new data snapshot for cloud sync")
+			util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
 		} else {
-			util.PushStatusBar("Checked data snapshot and found no changes ")
+			util.PushStatusBar(Conf.Language(148))
 		}
+	} else {
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
 	}
 	if 7000 < elapsed.Milliseconds() {
 		util.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
@@ -439,6 +454,6 @@ func syncRepo() (err error) {
 	})
 	elapsed := time.Since(start)
 	util.LogInfof("sync data repo elapsed [%.2fs]", elapsed.Seconds())
-	util.PushStatusBar(fmt.Sprintf("Synced data repo in %.2fs", elapsed.Seconds()))
+	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	return
 }

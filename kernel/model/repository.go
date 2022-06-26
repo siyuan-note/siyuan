@@ -402,13 +402,19 @@ func indexRepoBeforeCloudSync() {
 		return
 	}
 	elapsed := time.Since(start)
-	if nil != latest && latest.ID != index.ID {
-		// 对新创建的快照需要更新备注，加入耗时统计
-		index.Memo = fmt.Sprintf("[Auto] Cloud sync, completed in [%.2fs]", elapsed.Seconds())
-		err = repo.PutIndex(index)
-		if nil != err {
-			util.LogErrorf("put index into data repo before cloud sync failed: %s", err)
-			return
+	if nil != latest {
+		if latest.ID != index.ID {
+			// 对新创建的快照需要更新备注，加入耗时统计
+			index.Memo = fmt.Sprintf("[Auto] Cloud sync, completed in [%.2fs]", elapsed.Seconds())
+			err = repo.PutIndex(index)
+			if nil != err {
+				util.PushStatusBar("Save data snapshot for cloud sync failed")
+				util.LogErrorf("put index into data repo before cloud sync failed: %s", err)
+				return
+			}
+			util.PushStatusBar("Made a new data snapshot for cloud sync")
+		} else {
+			util.PushStatusBar("Checked data snapshot and found no changes ")
 		}
 	}
 	if 7000 < elapsed.Milliseconds() {

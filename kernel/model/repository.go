@@ -368,7 +368,7 @@ func IndexRepo(memo string) (err error) {
 	})
 	elapsed := time.Since(start)
 	util.LogInfof("index data repo elapsed [%.2fs]", elapsed.Seconds())
-	util.PushStatusBar(fmt.Sprintf("Index data repo elapsed [%.2fs]", elapsed.Seconds()))
+	util.PushStatusBar(fmt.Sprintf("Indexed data repo in %.2fs", elapsed.Seconds()))
 	util.PushClearProgress()
 	return
 }
@@ -439,6 +439,6 @@ func syncRepo() (err error) {
 	})
 	elapsed := time.Since(start)
 	util.LogInfof("sync data repo elapsed [%.2fs]", elapsed.Seconds())
-	util.PushStatusBar(fmt.Sprintf("Sync data repo elapsed [%.2fs]", elapsed.Seconds()))
+	util.PushStatusBar(fmt.Sprintf("Synced data repo in %.2fs", elapsed.Seconds()))
 	return
 }

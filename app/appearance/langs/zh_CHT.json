@@ -522,6 +522,8 @@
   "appearance11": "點擊關閉按鈕後縮小到託盤中",
   "appearance14": "文檔圖示使用系統原生 Emoji",
   "appearance15": "桌面端預設使用 Twitter Emoji，開啟後將使用系統原生的 Emoji",
+  "appearance16": "隱藏底部狀態欄",
+  "appearance17": "開啟後將隱藏桌面端底部狀態欄",
   "min": "最小化",
   "restore": "向下還原",
   "max": "最大化",

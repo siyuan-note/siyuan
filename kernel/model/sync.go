@@ -155,9 +155,9 @@ func SyncData(boot, exit, byHand bool) {
 	indexRepoBeforeCloudSync()
 
 	// 同步数据仓库 https://github.com/siyuan-note/siyuan/issues/5142
-	if syncRepoErr := syncRepo(); nil != syncRepoErr {
-		util.LogErrorf("sync repo failed: %s", syncRepoErr)
-	}
+	//if syncRepoErr := syncRepo(); nil != syncRepoErr {
+	//	util.LogErrorf("sync repo failed: %s", syncRepoErr)
+	//}
 
 	// 获取工作空间数据配置（数据版本）
 	dataConf, err := getWorkspaceDataConf()

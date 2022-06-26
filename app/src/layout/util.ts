@@ -25,39 +25,6 @@ import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {updatePanelByEditor} from "../editor/util";
 import {Constants} from "../constants";
 import {openSearch} from "../search/spread";
-import {Dialog} from "../dialog";
-import {isMobile} from "../util/functions";
-
-export const openCloseRecentTab = () => {
-    const recentClose = JSON.parse(localStorage.getItem(Constants.LOCAL_RECENTCLOSE) || "[]");
-    let html = ''
-    if (recentClose.length === 0) {
-        html += `<li class="b3-list-item b3-list--empty">${window.siyuan.languages.emptyContent}</li>`
-    } else {
-        recentClose.forEach((item: IObject) => {
-            html += `<li class="b3-list-item" data-instance="${item.instance}">${item.text}</li>`
-        })
-    }
-    const dialog = new Dialog({
-        title: window.siyuan.languages.recentClose,
-        content: `<div class="fn__flex-column" style="height: 100%;max-height: 70vh;">
-    <ul class="b3-list b3-list--background fn__flex-1">${html}</ul>
-    <div class="fn__hr"></div>
-</div>`,
-        width: isMobile() ? "80vw" : "50vw",
-    });
-    dialog.element.addEventListener("click", (event) => {
-        let target = event.target as HTMLElement
-        while (!target.isSameNode(dialog.element)) {
-            const instance = target.getAttribute("data-instance")
-            if (instance) {
-
-                break;
-            }
-            target = target.parentElement
-        }
-    })
-}
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("block__icons--active") || element.classList.contains("layout__wnd--active")) {

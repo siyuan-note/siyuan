@@ -315,16 +315,18 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
         if (errorTip) {
             showMessage(errorTip.substr(0, errorTip.length - 2) + " " + window.siyuan.languages.invalid);
         }
-        getAllModels().editor.forEach(item => {
-            if (item.editor.protyle.block.rootID === id) {
-                const refElement = item.editor.protyle.title.element.querySelector(".protyle-attr--refcount");
-                if (refElement) {
-                    nodeAttrHTML += refElement.outerHTML;
+        if (!isMobile()) {
+            getAllModels().editor.forEach(item => {
+                if (item.editor.protyle.block.rootID === id) {
+                    const refElement = item.editor.protyle.title.element.querySelector(".protyle-attr--refcount");
+                    if (refElement) {
+                        nodeAttrHTML += refElement.outerHTML;
+                    }
+                    item.editor.protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
+                    item.editor.protyle.wysiwyg.renderCustom(attrsResult);
                 }
-                item.editor.protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
-                item.editor.protyle.wysiwyg.renderCustom(attrsResult);
-            }
-        });
+            });
+        }
         fetchPost("/api/attr/resetBlockAttrs", {id, attrs: attrsResult}, () => {
             if (attrsResult.bookmark !== attrs.bookmark) {
                 const bookmark = getDockByType("bookmark").data.bookmark;

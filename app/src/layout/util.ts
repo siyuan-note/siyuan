@@ -414,7 +414,10 @@ export const resizeTabs = () => {
                 setPadding(item.editor.protyle);
                 if (typeof echarts !== "undefined") {
                     item.editor.protyle.wysiwyg.element.querySelectorAll('[data-subtype="echarts"], [data-subtype="mindmap"]').forEach((chartItem: HTMLElement) => {
-                        echarts.getInstanceById(chartItem.firstElementChild.nextElementSibling.getAttribute("_echarts_instance_")).resize();
+                        const chartInstance = echarts.getInstanceById(chartItem.firstElementChild.nextElementSibling.getAttribute("_echarts_instance_"))
+                        if (chartInstance) {
+                            chartInstance.resize();
+                        }
                     });
                 }
             }, 200);

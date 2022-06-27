@@ -100,6 +100,23 @@ func GetBlockDOM(id string) (ret string) {
 	return
 }
 
+func GetBlockKramdown(id string) (ret string) {
+	if "" == id {
+		return
+	}
+
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+
+	addBlockIALNodes(tree)
+	node := treenode.GetNodeInTree(tree, id)
+	luteEngine := NewLute()
+	ret, _ = lute.FormatNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
+	return
+}
+
 func GetBlock(id string) (ret *Block, err error) {
 	ret, err = getBlock(id)
 	return

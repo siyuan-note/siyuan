@@ -1262,10 +1262,31 @@ func getSyncExcludedList(localDirPath string) (ret map[string]bool) {
 }
 
 func getSyncIgnoreList() (ret []string) {
+	lines := getIgnoreLines()
+	if 1 > len(lines) {
+		return
+	}
+
+	gi := gitignore.CompileIgnoreLines(lines...)
+	filepath.Walk(util.DataDir, func(p string, info os.FileInfo, err error) error {
+		p = strings.TrimPrefix(p, util.DataDir+string(os.PathSeparator))
+		p = filepath.ToSlash(p)
+		if gi.MatchesPath(p) {
+			ret = append(ret, p)
+		}
+		return nil
+	})
+	return
+}
+
+func getIgnoreLines() (ret []string) {
 	ignore := filepath.Join(util.DataDir, ".siyuan", "syncignore")
-	os.MkdirAll(filepath.Dir(ignore), 0755)
+	err := os.MkdirAll(filepath.Dir(ignore), 0755)
+	if nil != err {
+		return
+	}
 	if !gulu.File.IsExist(ignore) {
-		if err := gulu.File.WriteFileSafer(ignore, nil, 0644); nil != err {
+		if err = gulu.File.WriteFileSafer(ignore, nil, 0644); nil != err {
 			util.LogErrorf("create syncignore [%s] failed: %s", ignore, err)
 			return
 		}
@@ -1277,23 +1298,14 @@ func getSyncIgnoreList() (ret []string) {
 	}
 	dataStr := string(data)
 	dataStr = strings.ReplaceAll(dataStr, "\r\n", "\n")
-	lines := strings.Split(dataStr, "\n")
+	ret = strings.Split(dataStr, "\n")
 
 	// 默认忽略帮助文档
-	lines = append(lines, "20210808180117-6v0mkxr/**/*")
-	lines = append(lines, "20210808180117-czj9bvb/**/*")
-	lines = append(lines, "20211226090932-5lcq56f/**/*")
+	ret = append(ret, "20210808180117-6v0mkxr/**/*")
+	ret = append(ret, "20210808180117-czj9bvb/**/*")
+	ret = append(ret, "20211226090932-5lcq56f/**/*")
 
-	lines = gulu.Str.RemoveDuplicatedElem(lines)
-	gi := gitignore.CompileIgnoreLines(lines...)
-	filepath.Walk(util.DataDir, func(p string, info os.FileInfo, err error) error {
-		p = strings.TrimPrefix(p, util.DataDir+string(os.PathSeparator))
-		p = filepath.ToSlash(p)
-		if gi.MatchesPath(p) {
-			ret = append(ret, p)
-		}
-		return nil
-	})
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
 }
 

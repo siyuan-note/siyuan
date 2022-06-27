@@ -364,6 +364,28 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 	return
 }
 
+func ContentWordCount(content string) (runeCount, wordCount int) {
+	luteEngine := NewLute()
+	tree := luteEngine.BlockDOM2Tree(content)
+	runeCount, wordCount = tree.Root.ContentLen()
+	return
+}
+
+func BlocksWordCount(ids []string) (runeCount, wordCount int) {
+	for _, id := range ids {
+		tree, _ := loadTreeByBlockID(id)
+		if nil == tree {
+			return
+		}
+
+		node := treenode.GetNodeInTree(tree, id)
+		blockRuneCount, blockWordCount := node.ContentLen()
+		runeCount += blockRuneCount
+		wordCount += blockWordCount
+	}
+	return
+}
+
 func BlockWordCount(id string) (blockRuneCount, blockWordCount, rootBlockRuneCount, rootBlockWordCount int) {
 	tree, _ := loadTreeByBlockID(id)
 	if nil == tree {

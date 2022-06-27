@@ -104,6 +104,44 @@ func getRecentUpdatedBlocks(c *gin.Context) {
 	ret.Data = blocks
 }
 
+func getContentWordCount(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	content := arg["content"].(string)
+	runeCount, wordCount := model.ContentWordCount(content)
+	ret.Data = map[string]interface{}{
+		"runeCount": runeCount,
+		"wordCount": wordCount,
+	}
+}
+
+func getBlocksWordCount(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+	runeCount, wordCount := model.BlocksWordCount(ids)
+	ret.Data = map[string]interface{}{
+		"runeCount": runeCount,
+		"wordCount": wordCount,
+	}
+}
+
 func getBlockWordCount(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -319,3 +319,20 @@ func getBlockDOM(c *gin.Context) {
 		"dom": dom,
 	}
 }
+
+func getBlockKramdown(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	kramdown := model.GetBlockKramdown(id)
+	ret.Data = map[string]string{
+		"id":       id,
+		"kramdown": kramdown,
+	}
+}

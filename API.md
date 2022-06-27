@@ -27,6 +27,7 @@
     * [Append blocks](#Append-blocks)
     * [Update a block](#Update-a-block)
     * [Delete a block](#Delete-a-block)
+    * [Get a block kramdown](#Get-a-block-kramdown)
 * [Attributes](#Attributes)
     * [Set block attributes](#Set-block-attributes)
     * [Get block attributes](#Get-block-attributes)
@@ -696,6 +697,31 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
+### Get a block kramdown
+
+* `/api/block/getBlockKramdown`
+* Parameters
+
+  ```json
+  {
+    "id": "20201225220954-dlgzk1o"
+  }
+  ```
+
+  * `id`: ID of the block to be got
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "id": "20201225220954-dlgzk1o",
+      "kramdown": "* {: id=\"20201225220954-e913snx\"}Create a new notebook, create a new document under the notebook\n  {: id=\"20210131161940-kfs31q6\"}\n* {: id=\"20201225220954-ygz217h\"}Enter <kbd>/</kbd> in the editor to trigger the function menu\n  {: id=\"20210131161940-eo0riwq\"}\n* {: id=\"20201225220954-875yybt\"}((20200924101200-gss5vee \"Navigate in the content block\")) and ((20200924100906-0u4zfq3 \"Window and tab\"))\n  {: id=\"20210131161940-b5uow2h\"}"
+    }
+  }
+  ```
+  
 ## Attributes
 
 ### Set block attributes

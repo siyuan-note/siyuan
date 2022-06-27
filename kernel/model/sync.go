@@ -34,8 +34,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
-	"github.com/emirpasic/gods/sets/hashset"
-	"github.com/mattn/go-zglob"
+	gitignore "github.com/sabhiram/go-gitignore"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -1253,9 +1252,8 @@ func IsValidCloudDirName(cloudDirName string) bool {
 func getSyncExcludedList(localDirPath string) (ret map[string]bool) {
 	syncIgnoreList := getSyncIgnoreList()
 	ret = map[string]bool{}
-	ignores := syncIgnoreList.Values()
-	for _, p := range ignores {
-		relPath := p.(string)
+	for _, p := range syncIgnoreList {
+		relPath := p
 		relPath = pathSha256Short(relPath, "/")
 		relPath = filepath.Join(localDirPath, relPath)
 		ret[relPath] = true
@@ -1263,8 +1261,7 @@ func getSyncExcludedList(localDirPath string) (ret map[string]bool) {
 	return
 }
 
-func getSyncIgnoreList() (ret *hashset.Set) {
-	ret = hashset.New()
+func getSyncIgnoreList() (ret []string) {
 	ignore := filepath.Join(util.DataDir, ".siyuan", "syncignore")
 	os.MkdirAll(filepath.Dir(ignore), 0755)
 	if !gulu.File.IsExist(ignore) {
@@ -1287,37 +1284,16 @@ func getSyncIgnoreList() (ret *hashset.Set) {
 	lines = append(lines, "20210808180117-czj9bvb/**/*")
 	lines = append(lines, "20211226090932-5lcq56f/**/*")
 
-	var parents []string
-	for _, line := range lines {
-		if idx := strings.Index(line, "/*"); -1 < idx {
-			parent := line[:idx]
-			parents = append(parents, parent)
+	lines = gulu.Str.RemoveDuplicatedElem(lines)
+	gi := gitignore.CompileIgnoreLines(lines...)
+	filepath.Walk(util.DataDir, func(p string, info os.FileInfo, err error) error {
+		p = strings.TrimPrefix(p, util.DataDir+string(os.PathSeparator))
+		p = filepath.ToSlash(p)
+		if gi.MatchesPath(p) {
+			ret = append(ret, p)
 		}
-	}
-	lines = append(lines, parents...)
-
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if "" == line {
-			continue
-		}
-		pattern := filepath.Join(util.DataDir, line)
-		pattern = filepath.FromSlash(pattern)
-		matches, globErr := zglob.Glob(pattern)
-		if nil != globErr && globErr != os.ErrNotExist {
-			util.LogErrorf("glob [%s] failed: %s", line, globErr)
-			continue
-		}
-		for _, m := range matches {
-			m = filepath.ToSlash(m)
-			if strings.Contains(m, ".siyuan/history") {
-				continue
-			}
-
-			m = strings.TrimPrefix(m, filepath.ToSlash(util.DataDir+string(os.PathSeparator)))
-			ret.Add(m)
-		}
-	}
+		return nil
+	})
 	return
 }
 

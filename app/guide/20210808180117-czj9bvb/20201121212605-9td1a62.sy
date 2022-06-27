@@ -6,7 +6,7 @@
 		"id": "20201121212605-9td1a62",
 		"title": "致谢",
 		"type": "doc",
-		"updated": "20220623012801"
+		"updated": "20220627111458"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220522101224-ctmcj3d",
-				"updated": "20220623012801"
+				"updated": "20220627111458"
 			},
 			"Children": [
 				{
@@ -2133,76 +2133,6 @@
 					]
 				},
 				{
-					"ID": "20220522101224-q20v5k9",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220522101224-q20v5k9",
-						"updated": "20220522101224"
-					},
-					"Children": [
-						{
-							"ID": "20220522101224-9rb8tjn",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220522101224-9rb8tjn",
-								"updated": "20220522101224"
-							},
-							"Children": [
-								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/mattn/go-zglob"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/mattn/go-zglob"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": " "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "MIT License"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								}
-							]
-						}
-					]
-				},
-				{
 					"ID": "20220522101224-z9gf2ew",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -2542,6 +2472,76 @@
 										{
 											"Type": "NodeCodeSpanContent",
 											"Data": "BSD-3-Clause License"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220627111458-122kj45",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220627111458-122kj45",
+						"updated": "20220627111458"
+					},
+					"Children": [
+						{
+							"ID": "20220627111458-teblixm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220627111458-teblixm",
+								"updated": "20220627111458"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "https://github.com/sabhiram/go-gitignore"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/sabhiram/go-gitignore"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "MIT License"
 										},
 										{
 											"Type": "NodeCodeSpanCloseMarker"

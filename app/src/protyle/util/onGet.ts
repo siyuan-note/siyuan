@@ -206,6 +206,7 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
     if (!protyle.scroll.element.classList.contains("fn__none") &&
         protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true" &&
         protyle.contentElement.scrollHeight > 0 && // 没有激活的页签 https://github.com/siyuan-note/siyuan/issues/5255
+        !options.action.includes(Constants.CB_GET_FOCUSFIRST) &&
         protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
         fetchPost("/api/filetree/getDoc", {
             id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),

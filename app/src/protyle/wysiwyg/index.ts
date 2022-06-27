@@ -492,10 +492,11 @@ export class WYSIWYG {
             }
         });
 
-        // https://github.com/siyuan-note/siyuan/issues/4099
+        let mousewheelTime = 0
         this.element.addEventListener("mousewheel", (event: WheelEvent) => {
             // https://ld246.com/article/1648865235549
-            if (event.deltaY < 0 && !protyle.scroll.element.classList.contains("fn__none") &&
+            if (event.timeStamp - mousewheelTime > 6000 &&
+                event.deltaY < 0 && !protyle.scroll.element.classList.contains("fn__none") &&
                 protyle.contentElement.clientHeight === protyle.contentElement.scrollHeight &&
                 protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "true") {
                 fetchPost("/api/filetree/getDoc", {
@@ -506,10 +507,13 @@ export class WYSIWYG {
                 }, getResponse => {
                     onGet(getResponse, protyle, [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID]);
                 });
+                mousewheelTime = 0;
             }
+            mousewheelTime = event.timeStamp;
             if (event.deltaX === 0) {
                 return;
             }
+            // https://github.com/siyuan-note/siyuan/issues/4099
             const tableElement = hasClosestByClassName(event.target as HTMLElement, "table");
             if (tableElement) {
                 const tableSelectElement = tableElement.querySelector(".table__select") as HTMLElement;

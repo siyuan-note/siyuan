@@ -189,7 +189,10 @@ export class Search extends Model {
                     size: foldResponse.data ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
                 }, getResponse => {
                     onGet(getResponse, this.protyle.protyle, foldResponse.data ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL]);
-                    this.protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${id}"] span[data-type="search-mark"]`).scrollIntoView();
+                    const matchElement = this.protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${id}"] span[data-type="search-mark"]`)
+                    if (matchElement) {
+                        matchElement.scrollIntoView();
+                    }
                 });
             } else {
                 this.protyle = new Protyle(this.element.querySelector("#searchPreview") as HTMLElement, {
@@ -201,7 +204,10 @@ export class Search extends Model {
                         breadcrumbDocName: true,
                     },
                     after: () => {
-                        this.protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${id}"] span[data-type="search-mark"]`).scrollIntoView();
+                        const matchElement = this.protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${id}"] span[data-type="search-mark"]`)
+                        if (matchElement) {
+                            matchElement.scrollIntoView();
+                        }
                     }
                 });
             }

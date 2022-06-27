@@ -648,7 +648,10 @@ const getArticle = (options: {
                     breadcrumbDocName: true
                 },
                 after: () => {
-                    protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`).scrollIntoView();
+                    const matchElement = protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`)
+                    if (matchElement) {
+                        matchElement.scrollIntoView();
+                    }
                 }
             });
         } else {
@@ -661,7 +664,10 @@ const getArticle = (options: {
                 size: foldResponse.data ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
             }, getResponse => {
                 onGet(getResponse, protyle.protyle, foldResponse.data ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL]);
-                protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`).scrollIntoView();
+                const matchElement = protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`)
+                if (matchElement) {
+                    matchElement.scrollIntoView();
+                }
             });
         }
     });

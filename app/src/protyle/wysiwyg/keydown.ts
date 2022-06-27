@@ -536,7 +536,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         nodeElement.contains(firstEditElement)
                     ) ||
                     (!firstEditElement && nodeElement.isSameNode(protyle.wysiwyg.element.firstElementChild))) {
-                    if (nodeElement.textContent.substr(0, getSelectionOffset(nodeElement, protyle.wysiwyg.element, range).end).indexOf("\n") === -1) {
+                    if (nodeElement.textContent.substr(0, position.end).indexOf("\n") === -1) {
                         if (protyle.title && (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||
                             protyle.contentElement.scrollTop === 0)) {
                             protyle.title.editElement.focus();
@@ -546,16 +546,19 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 } else {
-                    let previousElement: HTMLElement = getPreviousBlock(nodeElement) as HTMLElement;
-                    if (previousElement) {
-                        previousElement = getLastBlock(previousElement) as HTMLElement;
+                    // 遇到折叠块
+                    if (nodeElement.textContent.substr(0, position.end).indexOf("\n") === -1) {
+                        let previousElement: HTMLElement = getPreviousBlock(nodeElement) as HTMLElement;
                         if (previousElement) {
-                            previousElement = hasClosestByAttribute(previousElement, "fold", "1") as HTMLElement;
-                            if (previousElement && previousElement.getAttribute("data-type") !== "NodeListItem") {
-                                // 遇到折叠块
-                                focusBlock(previousElement, undefined, true);
-                                event.stopPropagation();
-                                event.preventDefault();
+                            previousElement = getLastBlock(previousElement) as HTMLElement;
+                            if (previousElement) {
+                                previousElement = hasClosestByAttribute(previousElement, "fold", "1") as HTMLElement;
+                                if (previousElement && previousElement.getAttribute("data-type") !== "NodeListItem") {
+                                    previousElement.scrollTop = 0;
+                                    focusBlock(previousElement, undefined, true);
+                                    event.stopPropagation();
+                                    event.preventDefault();
+                                }
                             }
                         }
                     }
@@ -1325,7 +1328,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectsElement.length < 2) {
-              return;
+                return;
             }
             turnsIntoTransaction({
                 protyle, selectsElement,

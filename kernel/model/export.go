@@ -531,7 +531,6 @@ func exportMarkdownZip(boxID, baseFolderName string, docPaths []string) (zipPath
 		return
 	}
 
-	copiedAssets := hashset.New()
 	luteEngine := util.NewLute()
 	for _, p := range docPaths {
 		docIAL := box.docIAL(p)
@@ -572,10 +571,6 @@ func exportMarkdownZip(boxID, baseFolderName string, docPaths []string) (zipPath
 				asset = asset[:strings.LastIndex(asset, "?")]
 			}
 
-			if copiedAssets.Contains(asset) {
-				continue
-			}
-
 			srcPath, err := GetAssetAbsPath(asset)
 			if nil != err {
 				util.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
@@ -592,8 +587,6 @@ func exportMarkdownZip(boxID, baseFolderName string, docPaths []string) (zipPath
 				util.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, err)
 				continue
 			}
-
-			copiedAssets.Add(asset)
 		}
 	}
 

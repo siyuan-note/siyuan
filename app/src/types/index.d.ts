@@ -205,6 +205,7 @@ declare interface IWebSocketData {
 }
 
 declare interface IAppearance {
+    hideStatusBar: boolean,
     nativeEmoji: boolean,
     customCSS: boolean,
     themeJS: boolean,

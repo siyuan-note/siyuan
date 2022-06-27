@@ -149,6 +149,14 @@ export const appearance = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.appearance16}
+        <div class="b3-label__text">${window.siyuan.languages.appearance17}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="hideStatusBar" type="checkbox"${window.siyuan.config.appearance.hideStatusBar ? " checked" : ""}>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.appearance10}
         <div class="b3-label__text">${window.siyuan.languages.appearance11}</div>
     </div>
@@ -231,6 +239,7 @@ export const appearance = {
             customCSS: window.siyuan.config.appearance.customCSS,
             closeButtonBehavior: (appearance.element.querySelector("#closeButtonBehavior") as HTMLInputElement).checked ? 1 : 0,
             nativeEmoji: (appearance.element.querySelector("#nativeEmoji") as HTMLInputElement).checked,
+            hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
         }, response => {
             let needTip = false;
             if (modeNumber !== window.siyuan.config.appearance.mode || themeLight !== window.siyuan.config.appearance.themeLight ||
@@ -344,7 +353,7 @@ export const appearance = {
         ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, data.closeButtonBehavior);
         /// #endif
         loadAssets(data);
-        const modeElement =  document.getElementById("barThemeMode");
+        const modeElement = document.getElementById("barThemeMode");
         if (modeElement) {
             if (data.mode === 1) {
                 modeElement.classList.add("toolbar__item--active");

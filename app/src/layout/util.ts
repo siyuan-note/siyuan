@@ -412,10 +412,10 @@ export const resizeTabs = () => {
             setTimeout(() => {
                 // .layout .fn__flex-shrink {transition: width .3s ease;} 时需要再次计算 padding
                 setPadding(item.editor.protyle);
-                if (echarts) {
-                    (item.editor.protyle.wysiwyg.element.querySelectorAll('[data-subtype="echarts"], [data-subtype="mindmap"]').forEach((chartItem: HTMLElement) => {
+                if (typeof echarts !== "undefined") {
+                    item.editor.protyle.wysiwyg.element.querySelectorAll('[data-subtype="echarts"], [data-subtype="mindmap"]').forEach((chartItem: HTMLElement) => {
                         echarts.getInstanceById(chartItem.firstElementChild.nextElementSibling.getAttribute("_echarts_instance_")).resize();
-                    }))
+                    });
                 }
             }, 200);
         }

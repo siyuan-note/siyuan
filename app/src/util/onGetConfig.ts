@@ -172,8 +172,8 @@ const initStatus = () => {
 </div>
 <div class="status__msg"></div>
 <div class="fn__flex-1"></div>
-<div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " F9")}">
-    <svg><use xlink:href="#iconRefresh"></use></svg>
+<div id="barFeedback" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.feedback}">
+    <svg><use xlink:href="#iconHeart"></use></svg>
 </div>
 <div id="barLock" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.lockScreen} ${updateHotkeyTip(window.siyuan.config.keymap.general.lockScreen.custom)}">
     <svg><use xlink:href="#iconLock"></use></svg>
@@ -224,17 +224,6 @@ const initStatus = () => {
                 target.querySelector(".b3-menu").classList.add("fn__none");
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barSync") {
-                if (needSubscribe() || target.firstElementChild.classList.contains("fn__rotate")) {
-                    return;
-                }
-                if (!window.siyuan.config.sync.enabled) {
-                    showMessage(window.siyuan.languages._kernel[124]);
-                    return;
-                }
-                fetchPost("/api/sync/performSync", {});
-                event.stopPropagation();
-                break;
             } else if (target.classList.contains("b3-menu__item")) {
                 const type = target.getAttribute("data-type") as TDockType;
                 getDockByType(type).toggleModel(type);
@@ -266,10 +255,21 @@ const initStatus = () => {
                 /// #endif
                 event.stopPropagation();
                 break;
+            } else if (target.id === "barFeedback") {
+                if ("zh_CN" === window.siyuan.config.lang) {
+                    window.open("https://ld246.com/article/1649901726096");
+                } else {
+                    window.open("https://github.com/siyuan-note/siyuan/issues");
+                }
+                event.stopPropagation();
+                break;
             }
             target = target.parentElement;
         }
     });
+    // if (window.siyuan.config.appearance.hideStatusBar) {
+    //     document.getElementById("status").classList.add("fn__none");
+    // }
 };
 
 const initBar = () => {
@@ -299,8 +299,8 @@ const initBar = () => {
         <use xlink:href="#iconSettings"></use>
     </svg>
 </div>
-<div id="barFeedback" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.feedback}">
-    <svg><use xlink:href="#iconHeart"></use></svg>
+<div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " F9")}">
+    <svg><use xlink:href="#iconRefresh"></use></svg>
 </div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
     <svg>
@@ -321,12 +321,15 @@ const initBar = () => {
                 goBack();
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barFeedback") {
-                if ("zh_CN" === window.siyuan.config.lang) {
-                    window.open("https://ld246.com/article/1649901726096");
-                } else {
-                    window.open("https://github.com/siyuan-note/siyuan/issues");
+            } else if (target.id === "barSync") {
+                if (needSubscribe() || target.firstElementChild.classList.contains("fn__rotate")) {
+                    return;
                 }
+                if (!window.siyuan.config.sync.enabled) {
+                    showMessage(window.siyuan.languages._kernel[124]);
+                    return;
+                }
+                fetchPost("/api/sync/performSync", {});
                 event.stopPropagation();
                 break;
             } else if (target.id === "barForward") {

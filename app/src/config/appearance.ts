@@ -251,6 +251,11 @@ export const appearance = {
                 return;
             }
             appearance.onSetappearance(response.data);
+            if (response.data.hideStatusBar) {
+                document.getElementById("status").classList.add("fn__none");
+            } else {
+                document.getElementById("status").classList.remove("fn__none");
+            }
         });
     },
     bindEvent: () => {

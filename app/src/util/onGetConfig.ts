@@ -267,9 +267,9 @@ const initStatus = () => {
             target = target.parentElement;
         }
     });
-    // if (window.siyuan.config.appearance.hideStatusBar) {
-    //     document.getElementById("status").classList.add("fn__none");
-    // }
+    if (window.siyuan.config.appearance.hideStatusBar) {
+        document.getElementById("status").classList.add("fn__none");
+    }
 };
 
 const initBar = () => {

@@ -1,6 +1,7 @@
 declare const echarts: {
     init(element: HTMLElement, theme?: string, options?: { width: number }): IEChart;
     dispose(element: Element): void;
+    getInstanceById(id: string): { resize: () => void };
 };
 
 declare const hljs: {

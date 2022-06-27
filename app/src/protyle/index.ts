@@ -185,6 +185,7 @@ class Protyle {
                     });
                 }
             });
+            // 需等渲染完后再回调，用于定位搜索字段 https://github.com/siyuan-note/siyuan/issues/3171
             if (mergedOptions.after) {
                 mergedOptions.after(this);
             }

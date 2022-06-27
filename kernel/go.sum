@@ -345,8 +345,6 @@ github.com/mattn/go-isatty v0.0.12/go.mod h1:cbi8OIDigv2wuxKPP5vlRcQ1OAZbq2CE4Ky
 github.com/mattn/go-isatty v0.0.14 h1:yVuAays6BHfxijgZPzw+3Zlu5yQgKGP2/hcQbHb7S9Y=
 github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27kJ6hsGG94=
 github.com/mattn/go-runewidth v0.0.10/go.mod h1:RAqKPSqVFrSLVXbA8x7dzmKdmGzieGRCM46jaSJTDAk=
-github.com/mattn/go-zglob v0.0.3 h1:6Ry4EYsScDyt5di4OI6xw1bYhOqfE5S33Z1OPy+d+To=
-github.com/mattn/go-zglob v0.0.3/go.mod h1:9fxibJccNxU2cnpIKLRRFA7zX7qhkJIQWBb449FYHOo=
 github.com/miekg/dns v1.0.14/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
 github.com/mitchellh/cli v1.0.0/go.mod h1:hNIlj7HEI86fIcpObd7a0FcrxTWetlwJDGcceTlRvqc=
 github.com/mitchellh/copystructure v1.0.0/go.mod h1:SNtv71yrdKgLRyLFxmLdkAbkKEFWgYaq1OVrnRcwhnw=
@@ -423,8 +421,6 @@ github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749/go.mod h1:ZY1cvUeJ
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/shurcooL/vfsgen v0.0.0-20200824052919-0d455de96546/go.mod h1:TrYk7fJVaAttu97ZZKrO9UbRa8izdowaMIZcxYMbVaw=
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
-github.com/siyuan-note/dejavu v0.0.0-20220626024131-25831e573009 h1:w2GvjKF1xFn+Swo+e+eOL9l/KQ8FvtJbwshsBInuPKg=
-github.com/siyuan-note/dejavu v0.0.0-20220626024131-25831e573009/go.mod h1:i7dnOgHM41EA7xIX2CYSxYe0WhksGZidQQsLvWryK7w=
 github.com/siyuan-note/dejavu v0.0.0-20220626025117-e5db5c782cbb h1:7HmFGziI6a8JctJ9ouuZ4fHSsFH1GXhGfoN5pxIc2Ds=
 github.com/siyuan-note/dejavu v0.0.0-20220626025117-e5db5c782cbb/go.mod h1:i7dnOgHM41EA7xIX2CYSxYe0WhksGZidQQsLvWryK7w=
 github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676 h1:QB9TjJQFhXhZ6dAtPpY02DlzHAQm1C+WqZq6OadG8mI=

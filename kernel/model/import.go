@@ -38,7 +38,6 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/88250/protyle"
-	"github.com/mattn/go-zglob"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -234,21 +233,22 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 	}
 
-	assetsDirs, err := zglob.Glob(unzipRootPath + "/**/assets")
-	if nil != err {
-		return
-	}
-	if 0 < len(assetsDirs) {
-		for _, assets := range assetsDirs {
-			if gulu.File.IsDir(assets) {
-				dataAssets := filepath.Join(util.DataDir, "assets")
-				if err = gulu.File.Copy(assets, dataAssets); nil != err {
-					util.LogErrorf("copy assets from [%s] to [%s] failed: %s", assets, dataAssets, err)
-					return
-				}
-			}
-			os.RemoveAll(assets)
+	var assetsDirs []string
+	filepath.Walk(unzipRootPath, func(path string, info fs.FileInfo, err error) error {
+		if strings.Contains(path, "assets") && info.IsDir() {
+			assetsDirs = append(assetsDirs, path)
 		}
+		return nil
+	})
+	for _, assets := range assetsDirs {
+		if gulu.File.IsDir(assets) {
+			dataAssets := filepath.Join(util.DataDir, "assets")
+			if err = gulu.File.Copy(assets, dataAssets); nil != err {
+				util.LogErrorf("copy assets from [%s] to [%s] failed: %s", assets, dataAssets, err)
+				return
+			}
+		}
+		os.RemoveAll(assets)
 	}
 
 	writingDataLock.Lock()

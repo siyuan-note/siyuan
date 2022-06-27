@@ -33,13 +33,13 @@ require (
 	github.com/imroc/req/v3 v3.13.1
 	github.com/jinzhu/copier v0.3.5
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
-	github.com/mattn/go-zglob v0.0.3
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/user_agent v0.5.3
 	github.com/panjf2000/ants/v2 v2.5.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/radovskyb/watcher v1.0.7
+	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/siyuan-note/dejavu v0.0.0-20220626025117-e5db5c782cbb
 	github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
@@ -93,7 +93,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
-	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect

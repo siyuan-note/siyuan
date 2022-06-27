@@ -247,6 +247,11 @@ progressLoading: 400
     overflow: hidden;
   }
 
+  &__counter {
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
   #barDock {
     .b3-menu__item:hover {
       background-color: var(--b3-list-hover);

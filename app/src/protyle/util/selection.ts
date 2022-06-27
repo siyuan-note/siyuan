@@ -1,5 +1,6 @@
 import {getContenteditableElement, getNextBlock, getPreviousBlock, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {hasClosestByMatchTag} from "./hasClosest";
+import {countSelectWord} from "../../layout/status";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -26,6 +27,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                     range.setStart(cellElement.firstChild, 0);
                     range.setEndAfter(cellElement.lastChild);
                     protyle.toolbar.render(protyle, range);
+                    countSelectWord(range);
                     return true;
                 }
             }
@@ -68,6 +70,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                     }
                 }
                 protyle.toolbar.render(protyle, range);
+                countSelectWord(range);
                 return true;
             }
         }

@@ -54,6 +54,7 @@ import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {setTableAlign} from "../util/table";
+import {countSelectWord} from "../../layout/status";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -1266,6 +1267,7 @@ export class WYSIWYG {
             if ((event.shiftKey || isCtrl(event)) && !event.isComposing && range.toString() !== "") {
                 // 工具栏
                 protyle.toolbar.render(protyle, range, event);
+                countSelectWord(range);
             }
 
             if (event.eventPhase !== 3 && !event.shiftKey && (event.key.indexOf("Arrow") > -1 || event.key === "Home" || event.key === "End" || event.key === "PageUp" || event.key === "PageDown") && !event.isComposing) {
@@ -1277,6 +1279,7 @@ export class WYSIWYG {
                     }
                     this.setEmptyOutline(protyle, nodeElement);
                 }
+                countSelectWord(range);
                 event.stopPropagation();
             }
         });
@@ -1705,6 +1708,7 @@ export class WYSIWYG {
                 } else {
                     hideElements(["toolbar"], protyle);
                 }
+                countSelectWord(range);
                 pushBack(protyle, newRange);
             }, isMobile() ? 520 : 0); // Android 双击慢了出不来
 

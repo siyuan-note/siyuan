@@ -40,7 +40,7 @@ require (
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
-	github.com/siyuan-note/dejavu v0.0.0-20220626025117-e5db5c782cbb
+	github.com/siyuan-note/dejavu v0.0.0-20220627141634-53a7e4ef9840
 	github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
 	github.com/siyuan-note/filelock v0.0.0-20220616063212-74cfba0754ee

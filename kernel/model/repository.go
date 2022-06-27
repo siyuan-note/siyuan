@@ -187,9 +187,8 @@ func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 		return
 	}
 
-	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	repo, err := newRepository()
 	if nil != err {
-		util.LogErrorf("init data repository failed: %s", err)
 		return
 	}
 
@@ -299,9 +298,8 @@ func CheckoutRepo(id string) (err error) {
 		return
 	}
 
-	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	repo, err := newRepository()
 	if nil != err {
-		util.LogErrorf("init data repo failed: %s", err)
 		return
 	}
 
@@ -349,9 +347,8 @@ func IndexRepo(memo string) (err error) {
 		return
 	}
 
-	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	repo, err := newRepository()
 	if nil != err {
-		util.LogErrorf("init data repo failed: %s", err)
 		return
 	}
 
@@ -398,9 +395,8 @@ func indexRepoBeforeCloudSync() {
 		return
 	}
 
-	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	repo, err := newRepository()
 	if nil != err {
-		util.LogErrorf("init data repo failed: %s", err)
 		return
 	}
 
@@ -442,9 +438,8 @@ func syncRepo() (err error) {
 		return
 	}
 
-	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key)
+	repo, err := newRepository()
 	if nil != err {
-		util.LogErrorf("init data repo failed: %s", err)
 		return
 	}
 
@@ -455,5 +450,14 @@ func syncRepo() (err error) {
 	elapsed := time.Since(start)
 	util.LogInfof("sync data repo elapsed [%.2fs]", elapsed.Seconds())
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+	return
+}
+
+func newRepository() (ret *dejavu.Repo, err error) {
+	ignoreLines := getIgnoreLines()
+	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key, ignoreLines)
+	if nil != err {
+		util.LogErrorf("init data repository failed: %s", err)
+	}
 	return
 }

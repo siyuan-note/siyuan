@@ -104,8 +104,13 @@ class Protyle {
                         }
                         break;
                     case "rename":
-                        if (this.protyle.path === data.data.path && this.protyle.model) {
-                            this.protyle.model.parent.updateTitle(data.data.title);
+                        if (this.protyle.path === data.data.path) {
+                            if (this.protyle.model) {
+                                this.protyle.model.parent.updateTitle(data.data.title);
+                            }
+                            if (this.protyle.background) {
+                                this.protyle.background.ial.title = data.data.title
+                            }
                         }
                         if (this.protyle.options.render.title && this.protyle.block.parentID === data.data.id) {
                             if (getSelection().rangeCount > 0 && this.protyle.element.contains(getSelection().getRangeAt(0).startContainer)) {

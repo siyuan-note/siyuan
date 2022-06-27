@@ -46,7 +46,6 @@ export class Editor extends Model {
             },
             typewriterMode: true,
             after: (editor) => {
-                editor.protyle.model = this;
                 if (window.siyuan.config.readonly) {
                     disabledProtyle(editor.protyle);
                 }
@@ -63,5 +62,6 @@ export class Editor extends Model {
                 }
             },
         });
+        this.editor.protyle.model = this;
     }
 }

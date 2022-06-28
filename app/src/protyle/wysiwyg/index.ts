@@ -1714,7 +1714,9 @@ export class WYSIWYG {
                 } else {
                     hideElements(["toolbar"], protyle);
                 }
-                countSelectWord(range);
+                if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
+                    countSelectWord(newRange);
+                }
                 pushBack(protyle, newRange);
             }, isMobile() ? 520 : 0); // Android 双击慢了出不来
 

@@ -243,6 +243,8 @@
   "blockWordCount": "Mots de bloc",
   "docRuneCount": "Caractères des documents",
   "blockRuneCount": "Caractères de bloc",
+  "wordCount": "Mots",
+  "runeCount": "Caractères",
   "kbd": "Clavier",
   "errorStyle": "Style d'Erreur",
   "successStyle": "Style de Réussite",

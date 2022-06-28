@@ -44,7 +44,7 @@ require (
 	github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
 	github.com/siyuan-note/filelock v0.0.0-20220616063212-74cfba0754ee
-	github.com/siyuan-note/httpclient v0.0.0-20220622170705-004622a8138d
+	github.com/siyuan-note/httpclient v0.0.0-20220628165651-54561796c8fd
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
@@ -110,9 +110,14 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20220412041952-88c3aaa8595e
+replace (
+	github.com/imroc/req/v3 v3.13.1 => github.com/88250/req/v3 v3.13.2
+	github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20220412041952-88c3aaa8595e
+)
 
 //replace github.com/siyuan-note/dejavu => D:\88250\dejavu
+//replace github.com/siyuan-note/httpclient => D:\88250\httpclient
+//replace github.com/imroc/req/v3 => D:\88250\req
 //replace github.com/88250/lute => D:\gogogo\src\github.com\88250\lute
 //replace github.com/88250/enumfonts => D:\88250\enumfonts
 //replace github.com/88250/pdfcpu => D:\88250\pdfcpu

@@ -127,7 +127,7 @@ export const initStatus = () => {
 };
 
 export const countSelectWord = (range: Range) => {
-    if (isMobile()) {
+    if (isMobile() || document.getElementById("status").classList.contains("fn__none")) {
         return;
     }
     const selectText = range.toString();
@@ -145,7 +145,7 @@ export const countSelectWord = (range: Range) => {
 };
 
 export const countBlockWord = (ids: string[]) => {
-    if (isMobile()) {
+    if (isMobile() || document.getElementById("status").classList.contains("fn__none")) {
         return;
     }
     if (ids.length > 0) {

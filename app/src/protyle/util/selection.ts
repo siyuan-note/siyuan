@@ -1,6 +1,6 @@
 import {getContenteditableElement, getNextBlock, getPreviousBlock, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {hasClosestByMatchTag} from "./hasClosest";
-import {countSelectWord} from "../../layout/status";
+import {countBlockWord, countSelectWord} from "../../layout/status";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -83,9 +83,12 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
     selectElements.forEach(item => {
         item.classList.remove("protyle-wysiwyg--select");
     });
+    const ids: string [] = [];
     Array.from(protyle.wysiwyg.element.children).forEach(item => {
         item.classList.add("protyle-wysiwyg--select");
+        ids.push(item.getAttribute("data-node-id"))
     });
+    countBlockWord(ids)
 };
 
 export const getEditorRange = (element: Element) => {

@@ -14,6 +14,7 @@ import {setFold, zoomOut} from "../../menus/protyle";
 import {preventScroll} from "../scroll/preventScroll";
 import {hideElements} from "../ui/hideElements";
 import {Constants} from "../../constants";
+import {countBlockWord} from "../../layout/status";
 
 const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
@@ -381,10 +382,10 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
     const editableElement = getContenteditableElement(blockElement);
     const previousLastElement = getLastBlock(previousElement) as HTMLElement;
     const isSelectNode = previousLastElement && (previousLastElement.classList.contains("table") || previousLastElement.classList.contains("render-node") || previousLastElement.classList.contains("iframe") || previousLastElement.classList.contains("hr") || previousLastElement.classList.contains("code-block"));
+    const previousId = previousLastElement.getAttribute("data-node-id");
     if (isSelectNode) {
         if (previousLastElement.classList.contains("code-block")) {
             if (editableElement.textContent.trim() === "") {
-                const previousId = previousLastElement.getAttribute("data-node-id");
                 const id = blockElement.getAttribute("data-node-id");
                 const doOperations: IOperation[] = [{
                     action: "delete",
@@ -412,20 +413,20 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             return;
         }
         previousLastElement.classList.add("protyle-wysiwyg--select");
+        countBlockWord([previousId])
         if (previousLastElement.getAttribute("data-type") === "NodeBlockQueryEmbed" || editableElement.textContent !== "") {
             focusByRange(range);
             return;
         }
     }
 
-    const newId = previousLastElement.getAttribute("data-node-id");
     const removeElement = getTopEmptyElement(blockElement);
     const removeId = removeElement.getAttribute("data-node-id");
     range.insertNode(document.createElement("wbr"));
     const undoOperations: IOperation[] = [{
         action: "update",
         data: previousLastElement.outerHTML,
-        id: newId,
+        id: previousId,
     }, {
         action: "insert",
         data: removeElement.outerHTML,
@@ -468,7 +469,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         doOperations.push({
             action: "update",
             data: previousLastElement.outerHTML,
-            id: newId,
+            id: previousId,
         });
     }
     if (parentElement.getAttribute("data-type") === "NodeSuperBlock" && parentElement.childElementCount === 2) {

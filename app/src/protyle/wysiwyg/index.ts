@@ -54,7 +54,7 @@ import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {setTableAlign} from "../util/table";
-import {countSelectWord} from "../../layout/status";
+import {countBlockWord, countSelectWord} from "../../layout/status";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -204,6 +204,7 @@ export class WYSIWYG {
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
                 !selectImgElement) {
                 nodeElement.classList.add("protyle-wysiwyg--select");
+                countBlockWord([nodeElement.getAttribute("data-node-id")])
                 selectElements = [nodeElement];
             }
             let html = "";
@@ -884,11 +885,14 @@ export class WYSIWYG {
                     // 只有一个 p 时不选中
                     protyle.selectElement.style.backgroundColor = "transparent";
                 } else {
+                    const ids: string[] = []
                     selectElements.forEach(item => {
                         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
                             item.classList.add("protyle-wysiwyg--select");
+                            ids.push(item.getAttribute("data-node-id"))
                         }
                     });
+                    countBlockWord(ids)
                     protyle.selectElement.style.backgroundColor = "";
                 }
             };
@@ -1276,10 +1280,12 @@ export class WYSIWYG {
                 if (nodeElement) {
                     if (isNotEditBlock(nodeElement) && !this.element.querySelector(".protyle-wysiwyg--select")) {
                         nodeElement.classList.add("protyle-wysiwyg--select");
+                        countBlockWord([nodeElement.getAttribute("data-node-id")])
+                    } else if (!nodeElement.classList.contains("protyle-wysiwyg--select")) {
+                        countSelectWord(range);
                     }
                     this.setEmptyOutline(protyle, nodeElement);
                 }
-                countSelectWord(range);
                 event.stopPropagation();
             }
         });
@@ -1785,9 +1791,12 @@ export class WYSIWYG {
                         // 单个 p 不选中
                         shiftStartElement = undefined;
                     } else {
+                        const ids: string[] = []
                         selectElements.forEach(item => {
                             item.classList.add("protyle-wysiwyg--select");
+                            ids.push(item.getAttribute("data-node-id"))
                         });
+                        countBlockWord(ids);
                         if (toDown) {
                             focusBlock(selectElements[selectElements.length - 1], protyle.wysiwyg.element, false);
                         } else {
@@ -1819,6 +1828,11 @@ export class WYSIWYG {
                     if (ctrlParentElement && !ctrlElement.isSameNode(ctrlParentElement)) {
                         ctrlParentElement.classList.remove("protyle-wysiwyg--select");
                     }
+                    const ids: string[] = []
+                    protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                        ids.push(item.getAttribute("data-node-id"))
+                    });
+                    countBlockWord(ids);
                 }
             }
 

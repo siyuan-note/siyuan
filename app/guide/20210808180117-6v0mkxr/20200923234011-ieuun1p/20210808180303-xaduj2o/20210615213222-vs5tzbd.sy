@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
-		"updated": "20220625231856"
+		"updated": "20220628203717"
 	},
 	"Children": [
 		{
@@ -193,7 +193,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135308-30uwxvd",
-				"updated": "20220503122549"
+				"updated": "20220628203717"
 			},
 			"Children": [
 				{
@@ -474,7 +474,7 @@
 					},
 					"Properties": {
 						"id": "20220501135308-wzazz01",
-						"updated": "20220501135536"
+						"updated": "20220628203717"
 					},
 					"Children": [
 						{
@@ -482,7 +482,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135308-xldpw4q",
-								"updated": "20220501135536"
+								"updated": "20220628203717"
 							},
 							"Children": [
 								{
@@ -490,18 +490,18 @@
 									"Data": "When using the "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
+									"Type": "NodeKbd",
+									"Data": "kbd",
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker"
+											"Type": "NodeKbdOpenMarker"
 										},
 										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "Insert a space between Chinese and Western"
+											"Type": "NodeText",
+											"Data": "Optimize typography"
 										},
 										{
-											"Type": "NodeCodeSpanCloseMarker"
+											"Type": "NodeKbdCloseMarker"
 										}
 									]
 								},

@@ -413,7 +413,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             return;
         }
         previousLastElement.classList.add("protyle-wysiwyg--select");
-        countBlockWord([previousId])
+        countBlockWord([previousId]);
         if (previousLastElement.getAttribute("data-type") === "NodeBlockQueryEmbed" || editableElement.textContent !== "") {
             focusByRange(range);
             return;

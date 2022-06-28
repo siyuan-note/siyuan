@@ -109,7 +109,7 @@ class Protyle {
                                 this.protyle.model.parent.updateTitle(data.data.title);
                             }
                             if (this.protyle.background) {
-                                this.protyle.background.ial.title = data.data.title
+                                this.protyle.background.ial.title = data.data.title;
                             }
                         }
                         if (this.protyle.options.render.title && this.protyle.block.parentID === data.data.id) {

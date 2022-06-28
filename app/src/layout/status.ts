@@ -6,6 +6,7 @@ import {fetchPost} from "../util/fetch";
 import {mountHelp} from "../util/mount";
 /// #if !BROWSER
 import {getCurrentWindow} from "@electron/remote";
+import {isMobile} from "../util/functions";
 /// #endif
 
 export const initStatus = () => {
@@ -126,23 +127,29 @@ export const initStatus = () => {
 };
 
 export const countSelectWord = (range: Range) => {
+    if (isMobile()) {
+        return;
+    }
     const selectText = range.toString();
     if (selectText) {
         fetchPost("/api/block/getContentWordCount", {"content": range.toString()}, (response) => {
             document.querySelector("#status .status__counter").innerHTML = `<span class="ft__on-surface">${window.siyuan.languages.blockRuneCount}</span> ${response.data.runeCount}<span class="ft__on-surface">${window.siyuan.languages.blockWordCount}</span> ${response.data.wordCount}`;
-        })
+        });
     } else {
         document.querySelector("#status .status__counter").innerHTML = "";
     }
-}
+};
 
 export const countBlockWord = (ids: string[]) => {
+    if (isMobile()) {
+        return;
+    }
     if (ids.length > 0) {
         fetchPost("/api/block/getBlocksWordCount", {ids}, (response) => {
             document.querySelector("#status .status__counter").innerHTML = `<span class="ft__on-surface">${window.siyuan.languages.blockRuneCount}</span> ${response.data.runeCount}<span class="ft__on-surface">${window.siyuan.languages.blockWordCount}</span> ${response.data.wordCount}`;
-        })
+        });
     } else {
         document.querySelector("#status .status__counter").innerHTML = "";
     }
-}
+};
 

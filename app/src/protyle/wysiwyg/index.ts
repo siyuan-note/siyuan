@@ -204,7 +204,7 @@ export class WYSIWYG {
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
                 !selectImgElement) {
                 nodeElement.classList.add("protyle-wysiwyg--select");
-                countBlockWord([nodeElement.getAttribute("data-node-id")])
+                countBlockWord([nodeElement.getAttribute("data-node-id")]);
                 selectElements = [nodeElement];
             }
             let html = "";
@@ -494,7 +494,7 @@ export class WYSIWYG {
             }
         });
 
-        let mousewheelTime = 0
+        let mousewheelTime = 0;
         this.element.addEventListener("mousewheel", (event: WheelEvent) => {
             // https://ld246.com/article/1648865235549
             if (event.timeStamp - mousewheelTime > 6000 &&
@@ -885,14 +885,14 @@ export class WYSIWYG {
                     // 只有一个 p 时不选中
                     protyle.selectElement.style.backgroundColor = "transparent";
                 } else {
-                    const ids: string[] = []
+                    const ids: string[] = [];
                     selectElements.forEach(item => {
                         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
                             item.classList.add("protyle-wysiwyg--select");
-                            ids.push(item.getAttribute("data-node-id"))
+                            ids.push(item.getAttribute("data-node-id"));
                         }
                     });
-                    countBlockWord(ids)
+                    countBlockWord(ids);
                     protyle.selectElement.style.backgroundColor = "";
                 }
             };
@@ -1280,7 +1280,7 @@ export class WYSIWYG {
                 if (nodeElement) {
                     if (isNotEditBlock(nodeElement) && !this.element.querySelector(".protyle-wysiwyg--select")) {
                         nodeElement.classList.add("protyle-wysiwyg--select");
-                        countBlockWord([nodeElement.getAttribute("data-node-id")])
+                        countBlockWord([nodeElement.getAttribute("data-node-id")]);
                     } else if (!nodeElement.classList.contains("protyle-wysiwyg--select")) {
                         countSelectWord(range);
                     }
@@ -1791,10 +1791,10 @@ export class WYSIWYG {
                         // 单个 p 不选中
                         shiftStartElement = undefined;
                     } else {
-                        const ids: string[] = []
+                        const ids: string[] = [];
                         selectElements.forEach(item => {
                             item.classList.add("protyle-wysiwyg--select");
-                            ids.push(item.getAttribute("data-node-id"))
+                            ids.push(item.getAttribute("data-node-id"));
                         });
                         countBlockWord(ids);
                         if (toDown) {
@@ -1828,9 +1828,9 @@ export class WYSIWYG {
                     if (ctrlParentElement && !ctrlElement.isSameNode(ctrlParentElement)) {
                         ctrlParentElement.classList.remove("protyle-wysiwyg--select");
                     }
-                    const ids: string[] = []
+                    const ids: string[] = [];
                     protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                        ids.push(item.getAttribute("data-node-id"))
+                        ids.push(item.getAttribute("data-node-id"));
                     });
                     countBlockWord(ids);
                 }

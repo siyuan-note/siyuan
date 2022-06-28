@@ -648,7 +648,7 @@ const getArticle = (options: {
                     breadcrumbDocName: true
                 },
                 after: () => {
-                    const matchElement = protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`)
+                    const matchElement = protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`);
                     if (matchElement) {
                         matchElement.scrollIntoView();
                     }
@@ -664,7 +664,7 @@ const getArticle = (options: {
                 size: foldResponse.data ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
             }, getResponse => {
                 onGet(getResponse, protyle.protyle, foldResponse.data ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL]);
-                const matchElement = protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`)
+                const matchElement = protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`);
                 if (matchElement) {
                     matchElement.scrollIntoView();
                 }

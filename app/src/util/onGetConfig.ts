@@ -1,5 +1,5 @@
 import {openSearch} from "../search/spread";
-import {exportLayout, getDockByType, JSONToLayout, resizeDrag, resizeTabs} from "../layout/util";
+import {exportLayout, JSONToLayout, resizeDrag, resizeTabs} from "../layout/util";
 import {hotKey2Electron, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";

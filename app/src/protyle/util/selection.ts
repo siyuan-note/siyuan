@@ -86,9 +86,9 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
     const ids: string [] = [];
     Array.from(protyle.wysiwyg.element.children).forEach(item => {
         item.classList.add("protyle-wysiwyg--select");
-        ids.push(item.getAttribute("data-node-id"))
+        ids.push(item.getAttribute("data-node-id"));
     });
-    countBlockWord(ids)
+    countBlockWord(ids);
 };
 
 export const getEditorRange = (element: Element) => {

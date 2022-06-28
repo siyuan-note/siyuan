@@ -153,7 +153,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
 
                     nextElement.classList.add("protyle-wysiwyg--select");
-                    countBlockWord([nextElement.getAttribute("data-node-id")])
+                    countBlockWord([nextElement.getAttribute("data-node-id")]);
                     const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
                     if (bottom > 0) {
                         protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
@@ -190,7 +190,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     if (previousElement) {
                         previousElement.classList.add("protyle-wysiwyg--select");
-                        countBlockWord([previousElement.getAttribute("data-node-id")])
+                        countBlockWord([previousElement.getAttribute("data-node-id")]);
                         const top = previousElement.getBoundingClientRect().top - protyle.contentElement.getBoundingClientRect().top;
                         if (top < 0) {
                             protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + top;
@@ -315,10 +315,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     selectElements[0].parentElement.classList.add("protyle-wysiwyg--select");
                 }
             }
-            const ids: string[] = []
+            const ids: string[] = [];
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                ids.push(item.getAttribute("data-node-id"))
-            })
+                ids.push(item.getAttribute("data-node-id"));
+            });
             countBlockWord(ids);
             event.stopPropagation();
             event.preventDefault();
@@ -362,10 +362,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     selectLastElement.parentElement.classList.add("protyle-wysiwyg--select");
                 }
             }
-            const ids: string[] = []
+            const ids: string[] = [];
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                ids.push(item.getAttribute("data-node-id"))
-            })
+                ids.push(item.getAttribute("data-node-id"));
+            });
             countBlockWord(ids);
             event.stopPropagation();
             event.preventDefault();
@@ -966,7 +966,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 protyle.hint.enableEmoji = false;
             } else if (nodeElement.classList.contains("protyle-wysiwyg--select")) {
                 hideElements(["select"], protyle);
-                countBlockWord([])
+                countBlockWord([]);
             } else if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
                 // 防止 ESC 时选中当前块
                 window.siyuan.menus.menu.remove();
@@ -975,7 +975,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     item.classList.remove("protyle-wysiwyg--select");
                 });
                 nodeElement.classList.add("protyle-wysiwyg--select");
-                countBlockWord([nodeElement.getAttribute("data-node-id")])
+                countBlockWord([nodeElement.getAttribute("data-node-id")]);
             }
             event.preventDefault();
             return;

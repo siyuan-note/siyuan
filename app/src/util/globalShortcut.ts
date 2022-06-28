@@ -34,6 +34,8 @@ import {bindMenuKeydown} from "../menus/Menu";
 import {showMessage} from "../dialog/message";
 import {openHistory} from "./history";
 import {needSubscribe} from "./needSubscribe";
+import {Dialog} from "../dialog";
+import {unicode2Emoji} from "../emoji";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -156,16 +158,62 @@ export const globalShortcut = () => {
         }
     });
 
+    let switchDialog: Dialog
     window.addEventListener("keyup", (event) => {
-        console.log(event)
         window.siyuan.ctrlIsPressed = false;
         window.siyuan.shiftIsPressed = false;
         window.siyuan.altIsPressed = false;
-        if ((event.target as HTMLElement).tagName === "INPUT" || (event.target as HTMLElement).tagName === "TEXTAREA") {
-            return;
-        }
-        if (!hasClosestBlock(document.activeElement)) {
-            return;
+        if (switchDialog && switchDialog.element.parentElement) {
+            if (event.key === "Tab") {
+                const currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus")
+                currentLiElement.classList.remove("b3-list-item--focus")
+                if (event.shiftKey) {
+                    if (currentLiElement.previousElementSibling) {
+                        currentLiElement.previousElementSibling.classList.add("b3-list-item--focus")
+                    } else if (currentLiElement.getAttribute("data-original")) {
+                        currentLiElement.parentElement.lastElementChild.classList.add("b3-list-item--focus")
+                        currentLiElement.removeAttribute("data-original")
+                    } else if (currentLiElement.parentElement.nextElementSibling) {
+                        currentLiElement.parentElement.nextElementSibling.lastElementChild.classList.add("b3-list-item--focus")
+                    } else if (currentLiElement.parentElement.previousElementSibling) {
+                        currentLiElement.parentElement.previousElementSibling.lastElementChild.classList.add("b3-list-item--focus")
+                    }
+                } else {
+                    if (currentLiElement.nextElementSibling) {
+                        currentLiElement.nextElementSibling.classList.add("b3-list-item--focus")
+                    } else if (currentLiElement.getAttribute("data-original")) {
+                        currentLiElement.parentElement.firstElementChild.classList.add("b3-list-item--focus")
+                        currentLiElement.removeAttribute("data-original")
+                    } else if (currentLiElement.parentElement.nextElementSibling) {
+                        currentLiElement.parentElement.nextElementSibling.firstElementChild.classList.add("b3-list-item--focus")
+                    } else if (currentLiElement.parentElement.previousElementSibling) {
+                        currentLiElement.parentElement.previousElementSibling.firstElementChild.classList.add("b3-list-item--focus")
+                    }
+                }
+            } else if (event.key === "Control") {
+                const currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus")
+                const currentType = currentLiElement.getAttribute("data-type") as TDockType
+                if (currentType) {
+                    getDockByType(currentType).toggleModel(currentType, true);
+                    const target = event.target as HTMLElement;
+                    if (target.classList.contains("protyle-wysiwyg") ||
+                        target.classList.contains("protyle-title__input") ||
+                        target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+                        target.blur();
+                    }
+                } else {
+                    const currentId = currentLiElement.getAttribute("data-id")
+                    getAllTabs().find(item => {
+                        if (item.id === currentId) {
+                            item.parent.switchTab(item.headElement);
+                            setPanelFocus(item.headElement.parentElement.parentElement);
+                            return true;
+                        }
+                    })
+                }
+                switchDialog.destroy();
+                switchDialog = undefined;
+            }
         }
     });
 
@@ -203,43 +251,64 @@ export const globalShortcut = () => {
         }
 
         if (event.ctrlKey && !event.metaKey && event.key === "Tab") {
-            const allTabs = getAllTabs();
-            if (allTabs.length === 0) {
+            if (switchDialog && switchDialog.element.parentElement) {
                 return;
             }
-            let currentTabElement = document.querySelector(".layout__wnd--active .layout-tab-bar > .item--focus");
+            let dockHtml = ''
+            let tabHtml = ''
+            getAllDocks().forEach(item => {
+                dockHtml += `<li data-type="${item.type}" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg><span class="b3-list-item__text">${window.siyuan.languages[item.hotkeyLangId]}</span></li>`
+            })
+            let currentTabElement = document.querySelector(".layout__wnd--active .layout-tab-bar > .item--focus")
             if (!currentTabElement) {
-                currentTabElement = allTabs[0].headElement.parentElement.querySelector(".item--focus");
-                if (!currentTabElement) {
-                    return;
-                }
+                currentTabElement = document.querySelector(".layout-tab-bar > .item--focus")
             }
-            let currentIndex = 0;
-            allTabs.find((item, index) => {
-                if (item.id === currentTabElement.getAttribute("data-id")) {
-                    currentIndex = index;
-                    return true;
-                }
+            if (currentTabElement) {
+                const currentId = currentTabElement.getAttribute("data-id")
+                getAllTabs().forEach(item => {
+                    let icon = `<svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>`
+                    if (item.model instanceof Editor) {
+                        icon = `<span class="b3-list-item__graphic">${unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE)}</span>`
+                    }
+                    tabHtml += `<li data-id="${item.id}" class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${item.title}</span></li>`
+                })
+            }
+            switchDialog = new Dialog({
+                content: `<div class="fn__flex-column b3-dialog--switch">
+    <div class="fn__hr"></div>
+    <div class="fn__flex">
+        <ul class="b3-list b3-list--background">${dockHtml}</ul>
+        <ul class="b3-list b3-list--background">${tabHtml}</ul>
+    </div>
+    <div class="fn__hr"></div>
+</div>`
             });
-            if (allTabs[currentIndex].model instanceof Editor) {
-                // range 已在新页面上才会触发 focusout，导致无法记录原有页面的 range，因此需要先记录一次。
-                (allTabs[currentIndex].model as Editor).editor.protyle.wysiwyg.element.dispatchEvent(new CustomEvent("focusout"));
-            }
-            if (event.shiftKey) {
-                if (currentIndex === 0) {
-                    currentIndex = allTabs.length - 1;
-                } else {
-                    currentIndex--;
+            switchDialog.element.addEventListener("contextmenu", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                let target = event.target as HTMLElement;
+                while (!target.isSameNode(switchDialog.element)) {
+                    if (target.classList.contains("b3-list-item")) {
+                        const currentType = target.getAttribute("data-type") as TDockType
+                        if (currentType) {
+                            getDockByType(currentType).toggleModel(currentType, true);
+                        } else {
+                            const currentId = target.getAttribute("data-id")
+                            getAllTabs().find(item => {
+                                if (item.id === currentId) {
+                                    item.parent.switchTab(item.headElement);
+                                    setPanelFocus(item.headElement.parentElement.parentElement);
+                                    return true;
+                                }
+                            })
+                        }
+                        switchDialog.destroy();
+                        switchDialog = undefined;
+                        break
+                    }
+                    target = target.parentElement;
                 }
-            } else {
-                if (currentIndex === allTabs.length - 1) {
-                    currentIndex = 0;
-                } else {
-                    currentIndex++;
-                }
-            }
-            allTabs[currentIndex].parent.switchTab(allTabs[currentIndex].headElement);
-            setPanelFocus(allTabs[currentIndex].headElement.parentElement.parentElement);
+            })
             return;
         }
 

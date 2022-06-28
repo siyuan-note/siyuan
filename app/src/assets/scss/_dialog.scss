@@ -81,4 +81,15 @@
     height: 16px;
     width: 16px;
   }
+
+  &--switch {
+    max-height: 70vh;
+
+    .b3-list:last-child {
+      border-left: 1px solid var(--b3-border-color);
+      overflow: auto;
+      max-width: 360px;
+      min-width: 200px;
+    }
+  }
 }

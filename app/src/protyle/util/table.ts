@@ -312,7 +312,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 
     // tab：光标移向下一个 cell
-    if (event.key === "Tab") {
+    if (event.key === "Tab" && !event.ctrlKey) {
         if (event.shiftKey) {
             // shift + tab 光标移动到前一个 cell
             goPreviousCell(cellElement, range);

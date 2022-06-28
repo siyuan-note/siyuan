@@ -243,6 +243,8 @@
   "blockWordCount": "　塊詞數",
   "docRuneCount": "文檔字數",
   "blockRuneCount": "　塊字數",
+  "wordCount": "詞數",
+  "runeCount": "字數",
   "kbd": "鍵盤",
   "errorStyle": "錯誤樣式",
   "successStyle": "成功樣式",

@@ -243,6 +243,8 @@
   "blockWordCount": "Block words",
   "docRuneCount": "Document characters",
   "blockRuneCount": "Block characters",
+  "wordCount": "Words",
+  "runeCount": "Characters",
   "kbd": "Keyboard",
   "errorStyle": "Error Style",
   "successStyle": "Success Style",

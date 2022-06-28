@@ -6,8 +6,8 @@ import {fetchPost} from "../util/fetch";
 import {mountHelp} from "../util/mount";
 /// #if !BROWSER
 import {getCurrentWindow} from "@electron/remote";
-import {isMobile} from "../util/functions";
 /// #endif
+import {isMobile} from "../util/functions";
 
 export const initStatus = () => {
     const allDocks = getAllDocks();

@@ -110,7 +110,7 @@ func GetBlockKramdown(id string) (ret string) {
 		return
 	}
 
-	addBlockIALNodes(tree)
+	addBlockIALNodes(tree, false)
 	node := treenode.GetNodeInTree(tree, id)
 	luteEngine := NewLute()
 	ret, _ = lute.FormatNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)

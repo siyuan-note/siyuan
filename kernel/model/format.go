@@ -17,7 +17,6 @@
 package model
 
 import (
-	"bytes"
 	"os"
 	"path/filepath"
 
@@ -41,35 +40,39 @@ func AutoSpace(rootID string) (err error) {
 
 	generateFormatHistory(tree)
 
-	var blocks []*ast.Node
-	var rootIAL [][]string
-	// 添加 block ial，后面格式化渲染需要
+	luteEngine := NewLute()
+	// 合并相邻的同类行级节点
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() {
-			return ast.WalkContinue
-		}
-
-		if ast.NodeDocument == n.Type {
-			rootIAL = n.KramdownIAL
-			return ast.WalkContinue
-		}
-
-		if ast.NodeBlockQueryEmbed == n.Type {
-			if script := n.ChildByType(ast.NodeBlockQueryEmbedScript); nil != script {
-				script.Tokens = bytes.ReplaceAll(script.Tokens, []byte("\n"), []byte(" "))
+		if entering {
+			switch n.Type {
+			case ast.NodeStrong, ast.NodeEmphasis, ast.NodeStrikethrough, ast.NodeUnderline:
+				luteEngine.MergeSameSpan(n, n.Type)
 			}
-		}
-
-		if 0 < len(n.KramdownIAL) {
-			blocks = append(blocks, n)
 		}
 		return ast.WalkContinue
 	})
-	for _, block := range blocks {
-		block.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(block.KramdownIAL)})
+
+	// 合并相邻的文本节点
+	for {
+		var unlinks []*ast.Node
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering && ast.NodeText == n.Type && nil != n.Next && ast.NodeText == n.Next.Type {
+				n.Tokens = append(n.Tokens, n.Next.Tokens...)
+				unlinks = append(unlinks, n.Next)
+			}
+			return ast.WalkContinue
+		})
+		for _, n := range unlinks {
+			n.Unlink()
+		}
+		if 1 > len(unlinks) {
+			break
+		}
 	}
 
-	luteEngine := NewLute()
+	rootIAL := tree.Root.KramdownIAL
+	addBlockIALNodes(tree, false)
+
 	luteEngine.SetAutoSpace(true)
 	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
 	md := formatRenderer.Render()

@@ -823,6 +823,7 @@ export class WYSIWYG {
                     mouseElement = newMouseElement;
                 }
                 hideElements(["select"], protyle);
+                countBlockWord([]);
                 let firstElement = document.elementFromPoint(newLeft - 1, newTop);
                 if (!firstElement) {
                     return;

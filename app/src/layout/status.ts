@@ -133,7 +133,11 @@ export const countSelectWord = (range: Range) => {
     const selectText = range.toString();
     if (selectText) {
         fetchPost("/api/block/getContentWordCount", {"content": range.toString()}, (response) => {
-            document.querySelector("#status .status__counter").innerHTML = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span> ${response.data.runeCount}<span class="fn__space"></span><span class="ft__on-surface">${window.siyuan.languages.wordCount}</span> ${response.data.wordCount}`;
+            document.querySelector("#status .status__counter").innerHTML = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>
+&nbsp;${response.data.runeCount}
+<span class="fn__space"></span>
+<span class="ft__on-surface">${window.siyuan.languages.wordCount}</span>
+&nbsp;${response.data.wordCount}<span class="fn__space"></span>`;
         });
     } else {
         document.querySelector("#status .status__counter").innerHTML = "";
@@ -146,7 +150,11 @@ export const countBlockWord = (ids: string[]) => {
     }
     if (ids.length > 0) {
         fetchPost("/api/block/getBlocksWordCount", {ids}, (response) => {
-            document.querySelector("#status .status__counter").innerHTML = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span> ${response.data.runeCount}<span class="fn__space"></span><span class="ft__on-surface">${window.siyuan.languages.wordCount}</span> ${response.data.wordCount}`;
+            document.querySelector("#status .status__counter").innerHTML = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>
+&nbsp;${response.data.runeCount}
+<span class="fn__space"></span>
+<span class="ft__on-surface">${window.siyuan.languages.wordCount}</span>
+&nbsp;${response.data.wordCount}<span class="fn__space"></span>`;
         });
     } else {
         document.querySelector("#status .status__counter").innerHTML = "";

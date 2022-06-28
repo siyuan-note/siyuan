@@ -823,7 +823,6 @@ export class WYSIWYG {
                     mouseElement = newMouseElement;
                 }
                 hideElements(["select"], protyle);
-                countBlockWord([]);
                 let firstElement = document.elementFromPoint(newLeft - 1, newTop);
                 if (!firstElement) {
                     return;
@@ -886,14 +885,11 @@ export class WYSIWYG {
                     // 只有一个 p 时不选中
                     protyle.selectElement.style.backgroundColor = "transparent";
                 } else {
-                    const ids: string[] = [];
                     selectElements.forEach(item => {
                         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
                             item.classList.add("protyle-wysiwyg--select");
-                            ids.push(item.getAttribute("data-node-id"));
                         }
                     });
-                    countBlockWord(ids);
                     protyle.selectElement.style.backgroundColor = "";
                 }
             };
@@ -1125,6 +1121,13 @@ export class WYSIWYG {
                         setPosition(window.siyuan.menus.menu.element, mouseUpEvent.clientX - 16, mouseUpEvent.clientY - 46);
                     }
                 }
+
+                const ids: string[] = [];
+                const selectElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")
+                selectElement.forEach(item => {
+                    ids.push(item.getAttribute("data-node-id"));
+                });
+                countBlockWord(ids);
                 // 划选后不能存在跨块的 range https://github.com/siyuan-note/siyuan/issues/4473
                 if (getSelection().rangeCount > 0) {
                     const range = getSelection().getRangeAt(0);
@@ -1133,7 +1136,7 @@ export class WYSIWYG {
                     ) {
                         return;
                     }
-                    if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
+                    if (selectElement.length > 0) {
                         range.collapse(true);
                         return;
                     }

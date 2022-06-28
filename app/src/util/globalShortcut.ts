@@ -157,6 +157,7 @@ export const globalShortcut = () => {
     });
 
     window.addEventListener("keyup", (event) => {
+        console.log(event)
         window.siyuan.ctrlIsPressed = false;
         window.siyuan.shiftIsPressed = false;
         window.siyuan.altIsPressed = false;

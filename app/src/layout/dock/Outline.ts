@@ -12,6 +12,7 @@ import {focusBlock} from "../../protyle/util/selection";
 import {pushBack} from "../../util/backForward";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
+import {onGet} from "../../protyle/util/onGet";
 
 export class Outline extends Model {
     private tree: Tree;
@@ -152,7 +153,17 @@ export class Outline extends Model {
                 } else if (target.isSameNode(this.headerElement.nextElementSibling) || target.classList.contains("block__icons")) {
                     getAllModels().editor.find(item => {
                         if (this.blockId === item.editor.protyle.block.rootID) {
-                            item.editor.protyle.contentElement.scrollTop = 0;
+                            if (item.editor.protyle.scroll.element.classList.contains("fn__none")) {
+                                item.editor.protyle.contentElement.scrollTop = 0;
+                            } else {
+                                fetchPost("/api/filetree/getDoc", {
+                                    id: item.editor.protyle.block.rootID,
+                                    mode: 0,
+                                    size: Constants.SIZE_GET,
+                                }, getResponse => {
+                                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
+                                });
+                            }
                             return true;
                         }
                     });

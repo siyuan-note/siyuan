@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
-		"updated": "20220625231706"
+		"updated": "20220628203857"
 	},
 	"Children": [
 		{
@@ -193,7 +193,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210403160319-ufy7jta",
-				"updated": "20220501135036"
+				"updated": "20220628203857"
 			},
 			"Children": [
 				{
@@ -494,7 +494,7 @@
 					},
 					"Properties": {
 						"id": "20220501134920-qb6wh0b",
-						"updated": "20220501135036"
+						"updated": "20220628203857"
 					},
 					"Children": [
 						{
@@ -502,7 +502,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501134920-k403n1r",
-								"updated": "20220501135036"
+								"updated": "20220628203857"
 							},
 							"Children": [
 								{
@@ -510,18 +510,18 @@
 									"Data": "使用 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
+									"Type": "NodeKbd",
+									"Data": "kbd",
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker"
+											"Type": "NodeKbdOpenMarker"
 										},
 										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "中西文间插入空格"
+											"Type": "NodeText",
+											"Data": "优化排版"
 										},
 										{
-											"Type": "NodeCodeSpanCloseMarker"
+											"Type": "NodeKbdCloseMarker"
 										}
 									]
 								},

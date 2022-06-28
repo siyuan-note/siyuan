@@ -95,8 +95,7 @@ func DocSaveAsTemplate(id string, overwrite bool) (code int, err error) {
 		return
 	}
 
-	// 添加 block ial，后面格式化渲染需要
-	addBlockIALNodes(tree)
+	addBlockIALNodes(tree, true)
 
 	luteEngine := NewLute()
 	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
@@ -259,7 +258,7 @@ func appendRefTextRenderResultForBlockRef(blockRef *ast.Node) {
 	blockRef.AppendChild(&ast.Node{Type: ast.NodeBlockRefDynamicText, Tokens: gulu.Str.ToBytes(text)})
 }
 
-func addBlockIALNodes(tree *parse.Tree) {
+func addBlockIALNodes(tree *parse.Tree, removeUpdated bool) {
 	var blocks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() {
@@ -272,7 +271,7 @@ func addBlockIALNodes(tree *parse.Tree) {
 			}
 		} else if ast.NodeHTMLBlock == n.Type {
 			n.Tokens = bytes.TrimSpace(n.Tokens)
-			// 使用 <div> 包裹，否则后续解析模板时会识别为行级 HTML https://github.com/siyuan-note/siyuan/issues/4244
+			// 使用 <div> 包裹，否则后续解析时会识别为行级 HTML https://github.com/siyuan-note/siyuan/issues/4244
 			if !bytes.HasPrefix(n.Tokens, []byte("<div>")) {
 				n.Tokens = append([]byte("<div>\n"), n.Tokens...)
 			}
@@ -281,7 +280,9 @@ func addBlockIALNodes(tree *parse.Tree) {
 			}
 		}
 
-		n.RemoveIALAttr("updated")
+		if removeUpdated {
+			n.RemoveIALAttr("updated")
+		}
 		if 0 < len(n.KramdownIAL) {
 			blocks = append(blocks, n)
 		}

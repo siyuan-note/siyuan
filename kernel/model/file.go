@@ -372,10 +372,21 @@ func ContentWordCount(content string) (runeCount, wordCount int) {
 }
 
 func BlocksWordCount(ids []string) (runeCount, wordCount int) {
+	trees := map[string]*parse.Tree{} // 缓存
 	for _, id := range ids {
-		tree, _ := loadTreeByBlockID(id)
+		bt := treenode.GetBlockTree(id)
+		if nil == bt {
+			util.LogWarnf("block tree not found [%s]", id)
+			continue
+		}
+
+		tree := trees[bt.RootID]
 		if nil == tree {
-			return
+			tree, _ = LoadTree(bt.BoxID, bt.Path)
+			if nil == tree {
+				continue
+			}
+			trees[bt.RootID] = tree
 		}
 
 		node := treenode.GetNodeInTree(tree, id)

@@ -213,7 +213,7 @@ export class Breadcrumb {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.spaceInZE,
+                label: window.siyuan.languages.optimizeTypography,
                 click: () => {
                     fetchPost("/api/format/autoSpace", {
                         id: protyle.block.rootID

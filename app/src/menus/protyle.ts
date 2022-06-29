@@ -302,8 +302,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             try {
                 // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
                 let clipText = await navigator.clipboard.readText();
-                clipText = clipText.replace(/\*/g, "\\*").replace(/\_/g, "\\_").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\!/g, "\\!").replace(/\\/g, "\\").replace(/\`/g, "\\`").replace(/\</g, "\\<").replace(/\>/g, "\\>").
-                replace(/\&/g, "\\&").replace(/\~/g, "\\~").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\=/g, "\\=").replace(/\#/g, "\\#").replace(/\$/g, "\\$").replace(/\^/g, "\\^").replace(/\|/g, "\\|");
+                clipText = clipText.replace(/\*/g, "\\*").replace(/\_/g, "\\_").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\!/g, "\\!").replace(/\\/g, "\\").replace(/\`/g, "\\`").replace(/\</g, "\\<").replace(/\>/g, "\\>").replace(/\&/g, "\\&").replace(/\~/g, "\\~").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\=/g, "\\=").replace(/\#/g, "\\#").replace(/\$/g, "\\$").replace(/\^/g, "\\^").replace(/\|/g, "\\|");
                 pasteText(protyle, clipText, nodeElement);
             } catch (e) {
                 console.log(e);
@@ -684,9 +683,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             }
         }).element);
     }
-    if (isLocalPath(linkAddress)) {
-        openMenu(linkAddress);
-    }
+    openMenu(linkAddress);
     window.siyuan.menus.menu.element.classList.remove("fn__none");
     if (focusText || protyle.lute.IsValidLinkDest(linkAddress)) {
         window.siyuan.menus.menu.element.querySelectorAll("input")[1].select();

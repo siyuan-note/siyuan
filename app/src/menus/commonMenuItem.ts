@@ -5,7 +5,7 @@ import {newFile} from "../util/newFile";
 import {getDockByType} from "../layout/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile} from "../util/functions";
-import {isLocalPath, movePathTo} from "../util/pathName";
+import {isLocalPath, movePathTo, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {saveExport} from "../protyle/export";
@@ -711,21 +711,38 @@ export const exportMd = (id: string) => {
 export const openMenu = (src: string, onlyMenu = false) => {
     const submenu = [];
     if (isLocalPath(src)) {
-        submenu.push({
-            label: window.siyuan.languages.insertRight,
-            accelerator: "Click",
-            click() {
-                openAsset(src.trim(), parseInt(getSearch("page", src)), "right");
-            }
-        });
+        if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(src)) &&
+            (!src.endsWith(".pdf") ||
+                (src.endsWith(".pdf") && !src.startsWith("file://")))
+        ) {
+            submenu.push({
+                label: window.siyuan.languages.insertRight,
+                accelerator: "Click",
+                click() {
+                    openAsset(src.trim(), parseInt(getSearch("page", src)), "right");
+                }
+            });
+            /// #if !BROWSER
+            submenu.push({
+                label: window.siyuan.languages.useDefault,
+                accelerator: "⇧Click",
+                click() {
+                    openBy(src, "app");
+                }
+            });
+            /// #endif
+        } else {
+            /// #if !BROWSER
+            submenu.push({
+                label: window.siyuan.languages.useDefault,
+                accelerator: "Click",
+                click() {
+                    openBy(src, "app");
+                }
+            });
+            /// #endif
+        }
         /// #if !BROWSER
-        submenu.push({
-            label: window.siyuan.languages.useDefault,
-            accelerator: "⇧Click",
-            click() {
-                openBy(src, "app");
-            }
-        });
         submenu.push({
             label: window.siyuan.languages.showInFolder,
             accelerator: "⌘Click",
@@ -736,7 +753,7 @@ export const openMenu = (src: string, onlyMenu = false) => {
         /// #endif
     } else {
         submenu.push({
-            label: window.siyuan.languages.useBrowserView,
+            label: window.siyuan.languages.useDefault,
             accelerator: "Click",
             click: () => {
                 /// #if !BROWSER

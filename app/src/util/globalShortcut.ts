@@ -1,4 +1,4 @@
-import {isCtrl, isMac, writeText} from "../protyle/util/compatibility";
+import {isCtrl, isMac, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
 import {matchHotKey} from "../protyle/util/hotKey";
 import {openSearch} from "../search/spread";
 import {
@@ -257,7 +257,11 @@ export const globalShortcut = () => {
             let dockHtml = ''
             let tabHtml = ''
             getAllDocks().forEach(item => {
-                dockHtml += `<li data-type="${item.type}" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg><span class="b3-list-item__text">${window.siyuan.languages[item.hotkeyLangId]}</span></li>`
+                dockHtml += `<li data-type="${item.type}" class="b3-list-item">
+    <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>
+    <span class="b3-list-item__text">${window.siyuan.languages[item.hotkeyLangId]}</span>
+    <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span>
+</li>`
             })
             let currentTabElement = document.querySelector(".layout__wnd--active .layout-tab-bar > .item--focus")
             if (!currentTabElement) {
@@ -265,13 +269,15 @@ export const globalShortcut = () => {
             }
             if (currentTabElement) {
                 const currentId = currentTabElement.getAttribute("data-id")
-                getAllTabs().forEach(item => {
+                getAllTabs().sort((itemA, itemB) => {
+                    return itemA.headElement.getAttribute("data-activetime") > itemB.headElement.getAttribute("data-activetime") ? -1 : 1
+                }).forEach(item => {
                     let icon = `<svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>`
                     if (item.model instanceof Editor) {
                         icon = `<span class="b3-list-item__graphic">${unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE)}</span>`
                     }
                     tabHtml += `<li data-id="${item.id}" class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${item.title}</span></li>`
-                })
+                });
             }
             switchDialog = new Dialog({
                 content: `<div class="fn__flex-column b3-dialog--switch">
@@ -283,7 +289,7 @@ export const globalShortcut = () => {
     <div class="fn__hr"></div>
 </div>`
             });
-            switchDialog.element.addEventListener("contextmenu", (event) => {
+            switchDialog.element.addEventListener(isMac() ? "contextmenu" : "click", (event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 let target = event.target as HTMLElement;

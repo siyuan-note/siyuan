@@ -55,6 +55,7 @@ import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {setTableAlign} from "../util/table";
 import {countBlockWord, countSelectWord} from "../../layout/status";
+import {showMessage} from "../../dialog/message";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -1463,7 +1464,7 @@ export class WYSIWYG {
                 } else {
                     /// #if !BROWSER
                     shell.openExternal(linkAddress).catch((e) => {
-                        console.log("openExternal error:" + e);
+                        showMessage(e);
                     });
                     /// #else
                     if (window.siyuan.config.system.container === "ios") {

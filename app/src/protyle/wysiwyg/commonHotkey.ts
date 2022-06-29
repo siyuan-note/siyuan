@@ -1,12 +1,12 @@
 import {matchHotKey} from "../util/hotKey";
 import {fetchPost} from "../../util/fetch";
 import {writeText} from "../util/compatibility";
-import {openBacklink, openGraph, openOutline} from "../../editor/util";
 import {focusByOffset, getSelectionOffset} from "../util/selection";
 import {fullscreen} from "../breadcrumb/action";
 import {addLoading, setPadding} from "../ui/initUI";
 import {Constants} from "../../constants";
 import {onGet} from "../util/onGet";
+import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;

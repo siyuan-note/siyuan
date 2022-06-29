@@ -56,7 +56,7 @@ export class Preview {
                 } else {
                     /// #if !BROWSER
                     shell.openExternal(linkAddress).catch((e) => {
-                        console.log("openExternal error:" + e);
+                        showMessage(e);
                     });
                     /// #else
                     window.open(linkAddress);

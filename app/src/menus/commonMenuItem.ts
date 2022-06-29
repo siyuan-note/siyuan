@@ -752,24 +752,31 @@ export const openMenu = (src: string, onlyMenu = false) => {
         });
         /// #endif
     } else {
+        /// #if !BROWSER
         submenu.push({
             label: window.siyuan.languages.useDefault,
             accelerator: "Click",
             click: () => {
-                /// #if !BROWSER
                 shell.openExternal(src).catch((e) => {
-                    console.log("openExternal error:" + e);
+                    showMessage(e);
                 });
-                /// #else
-                if (window.siyuan.config.system.container === "ios") {
-                    window.location.href = src;
-                } else {
-                    window.open(src);
-                }
-                /// #endif
             }
         });
+        /// #endif
     }
+    /// #if BROWSER
+    submenu.push({
+        label: window.siyuan.languages.useBrowserView,
+        accelerator: "Click",
+        click: () => {
+            if (window.siyuan.config.system.container === "ios") {
+                window.location.href = src;
+            } else {
+                window.open(src);
+            }
+        }
+    });
+    /// #endif
     if (onlyMenu) {
         return submenu;
     }

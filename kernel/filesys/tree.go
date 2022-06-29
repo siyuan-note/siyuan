@@ -71,13 +71,15 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 		}
 		parentPath += ".sy"
 		parentPath = filepath.Join(util.DataDir, boxID, parentPath)
-		data, err := filelock.LockFileRead(parentPath)
-		if nil != err {
+		parentData, readErr := filelock.LockFileRead(parentPath)
+		if nil != readErr {
+			util.LogWarnf("read tree data [%s] failed: %s", parentPath, err)
 			hPathBuilder.WriteString("Untitled/")
 			continue
 		}
-		parentTree, err := protyle.ParseJSONWithoutFix(luteEngine, data)
-		if nil != err {
+		parentTree, parseErr := protyle.ParseJSONWithoutFix(luteEngine, parentData)
+		if nil != parseErr {
+			util.LogWarnf("parse tree [%s] failed: %s", parentPath, err)
 			hPathBuilder.WriteString("Untitled/")
 			continue
 		}

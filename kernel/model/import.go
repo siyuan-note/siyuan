@@ -116,7 +116,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		trees[tree.ID] = tree
 	}
 
-	// 引用指向重新生成的块 ID
+	// 引用和嵌入指向重新生成的块 ID
 	for _, tree := range trees {
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering {
@@ -128,6 +128,11 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 					n.Tokens = gulu.Str.ToBytes(newDefID)
 				} else {
 					util.LogWarnf("not found def [" + n.TokensStr() + "]")
+				}
+			} else if ast.NodeBlockQueryEmbedScript == n.Type {
+				for oldID, newID := range blockIDs {
+					// 导入 `.sy.zip` 后查询嵌入块失效 https://github.com/siyuan-note/siyuan/issues/5316
+					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(oldID), []byte(newID))
 				}
 			}
 			return ast.WalkContinue

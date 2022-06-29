@@ -9,11 +9,13 @@ export class Dialog {
 
     constructor(options: {
         title?: string,
+        transparent?: boolean,
         content: string,
         width?: string
         height?: string,
         destroyCallback?: () => void
         disableClose?: boolean
+        disableAnimation?: boolean
     }) {
         this.disableClose = options.disableClose;
         this.id = genUUID();
@@ -22,7 +24,7 @@ export class Dialog {
         this.element = document.createElement("div") as HTMLElement;
 
         this.element.innerHTML = `<div class="b3-dialog">
-<div class="b3-dialog__scrim"></div>
+<div class="b3-dialog__scrim"${options.transparent ? 'style="background-color:transparent"' : ""}></div>
 <div class="b3-dialog__container" style="width:${options.width || "auto"}">
   <svg class="b3-dialog__close fn__a${this.disableClose ? " fn__none" : ""}"><use xlink:href="#iconClose"></use></svg>
   <div class="b3-dialog__header${options.title ? "" : " fn__none"}" onselectstart="return false;">${options.title || ""}</div>
@@ -30,7 +32,9 @@ export class Dialog {
 </div></div>`;
 
         this.element.querySelector(".b3-dialog__scrim").addEventListener(getEventName(), (event) => {
-            this.destroy();
+            if (!this.disableClose) {
+                this.destroy();
+            }
             event.stopPropagation();
         });
         if (!this.disableClose) {
@@ -40,9 +44,13 @@ export class Dialog {
             });
         }
         document.body.append(this.element);
-        setTimeout(() => {
+        if (options.disableAnimation) {
             this.element.classList.add("b3-dialog--open");
-        });
+        } else {
+            setTimeout(() => {
+                this.element.classList.add("b3-dialog--open");
+            });
+        }
     }
 
     public destroy() {

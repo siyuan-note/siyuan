@@ -48,6 +48,33 @@ const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     return nodeElement;
 };
 
+const switchDialogEvent = (event: MouseEvent, switchDialog: Dialog) => {
+    event.preventDefault();
+    event.stopPropagation();
+    let target = event.target as HTMLElement;
+    while (!target.isSameNode(switchDialog.element)) {
+        if (target.classList.contains("b3-list-item")) {
+            const currentType = target.getAttribute("data-type") as TDockType;
+            if (currentType) {
+                getDockByType(currentType).toggleModel(currentType, true);
+            } else {
+                const currentId = target.getAttribute("data-id");
+                getAllTabs().find(item => {
+                    if (item.id === currentId) {
+                        item.parent.switchTab(item.headElement);
+                        setPanelFocus(item.headElement.parentElement.parentElement);
+                        return true;
+                    }
+                });
+            }
+            switchDialog.destroy();
+            switchDialog = undefined;
+            break;
+        }
+        target = target.parentElement;
+    }
+}
+
 export const globalShortcut = () => {
     window.addEventListener("mousemove", (event) => {
         if (window.siyuan.hideBreadcrumb) {
@@ -159,6 +186,7 @@ export const globalShortcut = () => {
     });
 
     let switchDialog: Dialog;
+
     window.addEventListener("keyup", (event) => {
         window.siyuan.ctrlIsPressed = false;
         window.siyuan.shiftIsPressed = false;
@@ -288,33 +316,17 @@ export const globalShortcut = () => {
     </div>
     <div class="fn__hr"></div>
 </div>`,
-                disableClose: true
+                disableClose: true,
+                disableAnimation: true,
+                transparent: true,
             });
-            switchDialog.element.addEventListener(isMac() ? "contextmenu" : "click", (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                let target = event.target as HTMLElement;
-                while (!target.isSameNode(switchDialog.element)) {
-                    if (target.classList.contains("b3-list-item")) {
-                        const currentType = target.getAttribute("data-type") as TDockType;
-                        if (currentType) {
-                            getDockByType(currentType).toggleModel(currentType, true);
-                        } else {
-                            const currentId = target.getAttribute("data-id");
-                            getAllTabs().find(item => {
-                                if (item.id === currentId) {
-                                    item.parent.switchTab(item.headElement);
-                                    setPanelFocus(item.headElement.parentElement.parentElement);
-                                    return true;
-                                }
-                            });
-                        }
-                        switchDialog.destroy();
-                        switchDialog = undefined;
-                        break;
-                    }
-                    target = target.parentElement;
-                }
+            if (isMac()) {
+                switchDialog.element.addEventListener("contextmenu", (event) => {
+                    switchDialogEvent(event, switchDialog)
+                });
+            }
+            switchDialog.element.addEventListener("click", (event) => {
+                switchDialogEvent(event, switchDialog)
             });
             return;
         }

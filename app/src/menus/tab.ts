@@ -12,7 +12,7 @@ const closeMenu = (model: Model) => {
     const leftTabs: Tab[] = [];
     const rightTabs: Tab[] = [];
     let midIndex = -1;
-    currentTab.parent.children.forEach((item, index) => {
+    currentTab.parent.children.forEach((item: Tab, index: number) => {
         const editor = item.model as Editor;
         if (editor.editor?.protyle && !editor.editor?.protyle.updated) {
             unmodifiedTabs.push(item);

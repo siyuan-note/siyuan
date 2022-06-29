@@ -46,9 +46,6 @@ export class Dialog {
     }
 
     public destroy() {
-        if (this.disableClose) {
-            return false;
-        }
         this.element.remove();
         if (this.destroyCallback) {
             this.destroyCallback();
@@ -59,7 +56,6 @@ export class Dialog {
                 return true;
             }
         });
-        return true;
     }
 
     public bindInput(inputElement: HTMLInputElement, enterEvent?: () => void) {

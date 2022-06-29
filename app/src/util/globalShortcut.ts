@@ -287,7 +287,8 @@ export const globalShortcut = () => {
         <ul class="b3-list b3-list--background">${tabHtml}</ul>
     </div>
     <div class="fn__hr"></div>
-</div>`
+</div>`,
+                disableClose: true
             });
             switchDialog.element.addEventListener(isMac() ? "contextmenu" : "click", (event) => {
                 event.preventDefault();

@@ -548,7 +548,10 @@ export class Wnd {
 
     public moveTab(tab: Tab, nextId?: string) {
         this.element.querySelector(".layout-tab-container").append(tab.panelElement);
-
+        if (tab.model instanceof Editor) {
+            // DOM 移动后 range 会变化，因此置空
+            tab.model.editor.protyle.toolbar.range = null;
+        }
         if (nextId) {
             // 只能用 find https://github.com/siyuan-note/siyuan/issues/3455
             this.children.find((item, index) => {

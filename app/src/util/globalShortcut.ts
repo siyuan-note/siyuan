@@ -37,6 +37,7 @@ import {needSubscribe} from "./needSubscribe";
 import {Dialog} from "../dialog";
 import {unicode2Emoji} from "../emoji";
 import {deleteFile} from "../editor/deleteFile";
+import {escapeHtml} from "./escape";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -220,7 +221,27 @@ export const globalShortcut = () => {
                     }
                 }
             } else if (event.key === "Control") {
-                const currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
+                let currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
+                // 快速切换时，不触发 Tab
+                if (currentLiElement.getAttribute("data-original")) {
+                    currentLiElement.classList.remove("b3-list-item--focus");
+                    if (event.shiftKey) {
+                        if (currentLiElement.previousElementSibling) {
+                            currentLiElement.previousElementSibling.classList.add("b3-list-item--focus");
+                        } else {
+                            currentLiElement.parentElement.lastElementChild.classList.add("b3-list-item--focus");
+                            currentLiElement.removeAttribute("data-original");
+                        }
+                    } else {
+                        if (currentLiElement.nextElementSibling) {
+                            currentLiElement.nextElementSibling.classList.add("b3-list-item--focus");
+                        } else {
+                            currentLiElement.parentElement.firstElementChild.classList.add("b3-list-item--focus");
+                        }
+                    }
+                    currentLiElement.removeAttribute("data-original");
+                    currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
+                }
                 const currentType = currentLiElement.getAttribute("data-type") as TDockType;
                 if (currentType) {
                     getDockByType(currentType).toggleModel(currentType, true);
@@ -305,7 +326,7 @@ export const globalShortcut = () => {
                     if (item.model instanceof Editor) {
                         icon = `<span class="b3-list-item__graphic">${unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE)}</span>`;
                     }
-                    tabHtml += `<li data-id="${item.id}" class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${item.title}</span></li>`;
+                    tabHtml += `<li data-id="${item.id}" class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${escapeHtml(item.title)}</span></li>`;
                 });
             }
             switchDialog = new Dialog({

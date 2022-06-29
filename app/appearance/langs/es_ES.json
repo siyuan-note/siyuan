@@ -1,4 +1,6 @@
 {
+  "tabLimit": "Lsímite de la pestaña",
+  "tabLimit1": "Ordenar por hora de apertura, cerrar la primera pestaña abierta",
   "pasteEscaped": "Pegar texto escapado",
   "resetRepoTip": "Restablecer el repositorio de datos borrará completamente la clave y todas las instantáneas, ¿estás seguro de que quieres restablecer?",
   "resetRepo": "Restablecer el repositorio de datos",

@@ -1123,7 +1123,7 @@ export class WYSIWYG {
                 }
 
                 const ids: string[] = [];
-                const selectElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")
+                const selectElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
                 selectElement.forEach(item => {
                     ids.push(item.getAttribute("data-node-id"));
                 });

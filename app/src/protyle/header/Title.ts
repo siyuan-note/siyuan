@@ -18,7 +18,7 @@ import {matchHotKey} from "../util/hotKey";
 import {updateHotkeyTip, writeText} from "../util/compatibility";
 import {setPanelFocus} from "../../layout/util";
 import {escapeHtml} from "../../util/escape";
-import {deleteFile, updatePanelByEditor} from "../../editor/util";
+import {updatePanelByEditor} from "../../editor/util";
 import * as dayjs from "dayjs";
 import {setTitle} from "../../dialog/processSystem";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
@@ -26,6 +26,7 @@ import {commonHotkey} from "../wysiwyg/commonHotkey";
 import {setPosition} from "../../util/setPosition";
 import {code160to32} from "../util/code160to32";
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
+import {deleteFile} from "../../editor/deleteFile";
 
 export class Title {
     public element: HTMLElement;

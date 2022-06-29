@@ -47,7 +47,9 @@ import {setPosition} from "../../util/setPosition";
 import {openAttr} from "../../menus/commonMenuItem";
 import {blockRender} from "../markdown/blockRender";
 import {pushBack} from "../../util/backForward";
+/// #if !MOBILE
 import {openAsset, openBy, openFileById} from "../../editor/util";
+/// #endif
 import {BlockPanel} from "../../block/Panel";
 import {isCtrl} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
@@ -1342,42 +1344,42 @@ export class WYSIWYG {
                 }
 
                 fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
-                    if (isMobile()) {
-                        openMobileFileById(refBlockId, !foldResponse.data, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL]);
+                    /// #if MOBILE
+                    openMobileFileById(refBlockId, !foldResponse.data, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL]);
+                    /// #else
+                    if (window.siyuan.shiftIsPressed) {
+                        openFileById({
+                            id: refBlockId,
+                            position: "bottom",
+                            hasContext: !foldResponse.data,
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                            zoomIn: foldResponse.data
+                        });
+                    } else if (window.siyuan.altIsPressed) {
+                        openFileById({
+                            id: refBlockId,
+                            position: "right",
+                            hasContext: !foldResponse.data,
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                            zoomIn: foldResponse.data
+                        });
+                    } else if (window.siyuan.ctrlIsPressed) {
+                        openFileById({
+                            id: refBlockId,
+                            hasContext: !foldResponse.data,
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL],
+                            keepCursor: true,
+                            zoomIn: foldResponse.data
+                        });
                     } else {
-                        if (window.siyuan.shiftIsPressed) {
-                            openFileById({
-                                id: refBlockId,
-                                position: "bottom",
-                                hasContext: !foldResponse.data,
-                                action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
-                                zoomIn: foldResponse.data
-                            });
-                        } else if (window.siyuan.altIsPressed) {
-                            openFileById({
-                                id: refBlockId,
-                                position: "right",
-                                hasContext: !foldResponse.data,
-                                action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
-                                zoomIn: foldResponse.data
-                            });
-                        } else if (window.siyuan.ctrlIsPressed) {
-                            openFileById({
-                                id: refBlockId,
-                                hasContext: !foldResponse.data,
-                                action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL],
-                                keepCursor: true,
-                                zoomIn: foldResponse.data
-                            });
-                        } else {
-                            openFileById({
-                                id: refBlockId,
-                                hasContext: !foldResponse.data,
-                                action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
-                                zoomIn: foldResponse.data
-                            });
-                        }
+                        openFileById({
+                            id: refBlockId,
+                            hasContext: !foldResponse.data,
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                            zoomIn: foldResponse.data
+                        });
                     }
+                    /// #endif
                 });
                 if (protyle.model) {
                     // 打开双链需记录到后退中 https://github.com/siyuan-note/insider/issues/801
@@ -1400,14 +1402,13 @@ export class WYSIWYG {
                 event.preventDefault();
                 const fileIds = fileElement.getAttribute("data-id").split("/");
                 const linkAddress = `assets/${fileIds[1]}`;
-                if (isMobile()) {
-                    if (typeof window.JSAndroid === "undefined") {
-                        window.open(linkAddress);
-                    } else {
-                        window.JSAndroid.openExternal(linkAddress);
-                    }
-                    return;
+                /// #if MOBILE
+                if (typeof window.JSAndroid === "undefined") {
+                    window.open(linkAddress);
+                } else {
+                    window.JSAndroid.openExternal(linkAddress);
                 }
+                /// #else
                 if (window.siyuan.ctrlIsPressed) {
                     openBy(linkAddress, "folder");
                 } else if (window.siyuan.shiftIsPressed) {
@@ -1415,6 +1416,7 @@ export class WYSIWYG {
                 } else {
                     openAsset(linkAddress, fileIds[2], "right");
                 }
+                /// #endif
                 return;
             }
 
@@ -1422,16 +1424,15 @@ export class WYSIWYG {
                 event.stopPropagation();
                 event.preventDefault();
                 const linkAddress = aElement.getAttribute("data-href");
-                if (isMobile()) {
-                    if (window.siyuan.config.system.container === "ios") {
-                        window.location.href = linkAddress;
-                    } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                        window.JSAndroid.openExternal(linkAddress);
-                    } else {
-                        window.open(linkAddress);
-                    }
-                    return;
+                /// #if MOBILE
+                if (window.siyuan.config.system.container === "ios") {
+                    window.location.href = linkAddress;
+                } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
+                    window.JSAndroid.openExternal(linkAddress);
+                } else {
+                    window.open(linkAddress);
                 }
+                /// #else
                 if (isLocalPath(linkAddress)) {
                     const linkPathname = linkAddress.split("?page")[0];
                     if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(linkPathname)) &&
@@ -1474,6 +1475,7 @@ export class WYSIWYG {
                     }
                     /// #endif
                 }
+                /// #endif
                 return;
             }
 
@@ -1487,9 +1489,10 @@ export class WYSIWYG {
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
             if (embedItemElement) {
                 const embedId = embedItemElement.getAttribute("data-id");
-                if (isMobile()) {
-                    openMobileFileById(embedId, false, [Constants.CB_GET_ALL]);
-                } else if (window.siyuan.shiftIsPressed) {
+                /// #if MOBILE
+                openMobileFileById(embedId, false, [Constants.CB_GET_ALL]);
+                /// #else
+                if (window.siyuan.shiftIsPressed) {
                     openFileById({
                         id: embedId,
                         position: "bottom",
@@ -1519,6 +1522,7 @@ export class WYSIWYG {
                         nodeIds: [embedId],
                     }));
                 }
+                /// #endif
                 event.stopPropagation();
                 return;
             }

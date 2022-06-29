@@ -19,11 +19,10 @@ import {fetchPost} from "../util/fetch";
 import {onGetnotebookconf} from "./onGetnotebookconf";
 /// #if !MOBILE
 import {openSearch} from "../search/spread";
+import {openFileById} from "../editor/util";
 /// #endif
 import {confirmDialog} from "../dialog/confirmDialog";
-import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
-import {openFileById} from "../editor/util";
 
 export const initNavigationMenu = (liElement: HTMLElement) => {
     const notebookId = liElement.parentElement.getAttribute("data-url");
@@ -180,6 +179,7 @@ export const initFileMenu = (notebookId: string, pathString: string, id: string,
         /// #endif
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     }
+    /// #if !MOBILE
     const openSubmenus: IMenu[] = [{
         icon: "iconRight",
         label: window.siyuan.languages.insertRight,
@@ -227,12 +227,11 @@ export const initFileMenu = (notebookId: string, pathString: string, id: string,
         });
     }
     /// #endif
-    if (!isMobile()) {
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.openBy,
-            submenu: openSubmenus,
-        }).element);
-    }
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.openBy,
+        submenu: openSubmenus,
+    }).element);
+    /// #endif
     if (!window.siyuan.config.readonly) {
         genImportMenu(notebookId, pathString);
     }

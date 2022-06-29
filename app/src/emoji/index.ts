@@ -3,9 +3,11 @@ import {setPosition} from "../util/setPosition";
 import {fetchPost} from "../util/fetch";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
-import {getDockByType} from "../layout/util";
 import {Files} from "../layout/dock/Files";
+/// #if !MOBILE
+import {getDockByType} from "../layout/util";
 import {getAllModels} from "../layout/getAll";
+/// #endif
 import {getEventName} from "../protyle/util/compatibility";
 import {setNoteBook} from "../util/pathName";
 
@@ -392,26 +394,25 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
 };
 
 export const updateOutlineEmoji = (unicode: string) => {
-    if (isMobile()) {
-        return;
-    }
+    /// #if !MOBILE
     getAllModels().outline.forEach(model => {
         model.headerElement.nextElementSibling.firstElementChild.innerHTML = unicode2Emoji(unicode || Constants.SIYUAN_IMAGE_FILE);
     });
+    /// #endif
 };
 
 export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFile") => {
     let emojiElement;
-    if (isMobile()) {
-        emojiElement = document.querySelector(`#sidebar [data-type="sidebar-file"] [data-node-id="${id}"] .b3-list-item__icon`);
+    /// #if MOBILE
+    emojiElement = document.querySelector(`#sidebar [data-type="sidebar-file"] [data-node-id="${id}"] .b3-list-item__icon`);
+    /// #else
+    const files = getDockByType("file").data.file as Files;
+    if (icon === "iconFile") {
+        emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`);
     } else {
-        const files = getDockByType("file").data.file as Files;
-        if (icon === "iconFile") {
-            emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`);
-        } else {
-            emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`) || files.element.querySelector(`[data-url="${id}"] .b3-list-item__icon`) || files.closeElement.querySelector(`[data-url="${id}"] .b3-list-item__icon`);
-        }
+        emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`) || files.element.querySelector(`[data-url="${id}"] .b3-list-item__icon`) || files.closeElement.querySelector(`[data-url="${id}"] .b3-list-item__icon`);
     }
+    /// #endif
     if (emojiElement) {
         emojiElement.innerHTML = unicode2Emoji(unicode || (icon === "iconFile" ? (emojiElement.previousElementSibling.classList.contains("fn__hidden") ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER) : Constants.SIYUAN_IMAGE_NOTE));
     }
@@ -421,19 +422,19 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
 };
 
 const updateFileEmoji = (unicode: string, id: string) => {
-    if (isMobile()) {
-        if (window.siyuan.mobileEditor.protyle.block.rootID === id) {
-            window.siyuan.mobileEditor.protyle.background.ial.icon = unicode;
-            window.siyuan.mobileEditor.protyle.background.render(window.siyuan.mobileEditor.protyle.background.ial, id);
-        }
-    } else {
-        getAllModels().editor.find(item => {
-            if (item.editor.protyle.block.rootID === id) {
-                item.editor.protyle.background.ial.icon = unicode;
-                item.editor.protyle.background.render(item.editor.protyle.background.ial, id);
-                item.parent.setDocIcon(unicode);
-                return true;
-            }
-        });
+    /// #if MOBILE
+    if (window.siyuan.mobileEditor.protyle.block.rootID === id) {
+        window.siyuan.mobileEditor.protyle.background.ial.icon = unicode;
+        window.siyuan.mobileEditor.protyle.background.render(window.siyuan.mobileEditor.protyle.background.ial, id);
     }
+    /// #else
+    getAllModels().editor.find(item => {
+        if (item.editor.protyle.block.rootID === id) {
+            item.editor.protyle.background.ial.icon = unicode;
+            item.editor.protyle.background.render(item.editor.protyle.background.ial, id);
+            item.parent.setDocIcon(unicode);
+            return true;
+        }
+    });
+    /// #endif
 };

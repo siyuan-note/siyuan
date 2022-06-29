@@ -24,7 +24,7 @@ import {goBack, goForward} from "./backForward";
 import {onGet} from "../protyle/util/onGet";
 import {getDisplayName, getNotebookName, movePathTo} from "./pathName";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {deleteFile, openFileById} from "../editor/util";
+import {openFileById} from "../editor/util";
 import {getAllDocks, getAllModels, getAllTabs} from "../layout/getAll";
 import {openGlobalSearch} from "../search/util";
 import {getColIndex} from "../protyle/util/table";
@@ -36,6 +36,7 @@ import {openHistory} from "./history";
 import {needSubscribe} from "./needSubscribe";
 import {Dialog} from "../dialog";
 import {unicode2Emoji} from "../emoji";
+import {deleteFile} from "../editor/deleteFile";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;

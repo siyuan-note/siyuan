@@ -2,18 +2,20 @@ import {showMessage} from "../dialog/message";
 import {getAllModels} from "../layout/getAll";
 import {hasTopClosestByTag} from "../protyle/util/hasClosest";
 import {getDockByType} from "../layout/util";
+/// #if !MOBILE
 import {Files} from "../layout/dock/Files";
+import {openFileById} from "../editor/util";
+/// #endif
 import {fetchPost} from "./fetch";
 import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
-import {openFileById} from "../editor/util";
 import {Constants} from "../constants";
-import {isMobile} from "./functions";
 
 export const newFile = (notebookId?: string, currentPath?: string, open?: boolean) => {
     if (getOpenNotebookCount() === 0) {
         showMessage(window.siyuan.languages.newFileTip);
         return;
     }
+    /// #if !MOBILE
     if (!notebookId) {
         getAllModels().editor.find((item) => {
             const currentElement = item.parent.headElement;
@@ -39,15 +41,16 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
                 }
             }
         }
-        if (!notebookId) {
-            window.siyuan.notebooks.find(item => {
-                if (!item.closed) {
-                    notebookId = item.id;
-                    currentPath = "/";
-                    return true;
-                }
-            });
-        }
+    }
+    /// #endif
+    if (!notebookId) {
+        window.siyuan.notebooks.find(item => {
+            if (!item.closed) {
+                notebookId = item.id;
+                currentPath = "/";
+                return true;
+            }
+        });
     }
     fetchPost("/api/filetree/getDocNameTemplate", {notebook: notebookId}, (data) => {
         const id = Lute.NewNodeID();
@@ -57,9 +60,11 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
             title: data.data.name || "Untitled",
             md: "",
         }, () => {
-            if (open && !isMobile()) {
+            /// #if !MOBILE
+            if (open) {
                 openFileById({id, hasContext: true, action: [Constants.CB_GET_HL]});
             }
+            /// #endif
         });
     });
 };

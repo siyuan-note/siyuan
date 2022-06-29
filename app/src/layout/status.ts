@@ -1,3 +1,4 @@
+/// #if !MOBILE
 import {getAllDocks} from "./getAll";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {exportLayout, getDockByType, resizeTabs} from "./util";
@@ -7,9 +8,10 @@ import {mountHelp} from "../util/mount";
 /// #if !BROWSER
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
-import {isMobile} from "../util/functions";
+/// #endif
 
 export const initStatus = () => {
+    /// #if !MOBILE
     const allDocks = getAllDocks();
     let menuHTML = "";
     allDocks.forEach(item => {
@@ -124,10 +126,12 @@ export const initStatus = () => {
     if (window.siyuan.config.appearance.hideStatusBar) {
         document.getElementById("status").classList.add("fn__none");
     }
+    /// #endif
 };
 
 export const countSelectWord = (range: Range) => {
-    if (isMobile() || document.getElementById("status").classList.contains("fn__none")) {
+    /// #if !MOBILE
+    if (document.getElementById("status").classList.contains("fn__none")) {
         return;
     }
     const selectText = range.toString();
@@ -142,10 +146,12 @@ export const countSelectWord = (range: Range) => {
     } else {
         document.querySelector("#status .status__counter").innerHTML = "";
     }
+    /// #endif
 };
 
 export const countBlockWord = (ids: string[]) => {
-    if (isMobile() || document.getElementById("status").classList.contains("fn__none")) {
+    /// #if !MOBILE
+    if (document.getElementById("status").classList.contains("fn__none")) {
         return;
     }
     if (ids.length > 0) {
@@ -159,5 +165,6 @@ export const countBlockWord = (ids: string[]) => {
     } else {
         document.querySelector("#status .status__counter").innerHTML = "";
     }
+    /// #endif
 };
 

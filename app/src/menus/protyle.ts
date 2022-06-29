@@ -26,13 +26,14 @@ import {clipboard} from "electron";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
 import {pasteText} from "../protyle/util/paste";
+/// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
+/// #endif
 import {isMobile} from "../util/functions";
 import {removeFoldHeading} from "../protyle/util/heading";
 import {lineNumberRender} from "../protyle/markdown/highlightRender";
 import * as dayjs from "dayjs";
 import {blockRender} from "../protyle/markdown/blockRender";
-import {isLocalPath} from "../util/pathName";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -78,55 +79,55 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         type: "separator"
     }).element);
-    if (!isMobile()) {
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.openBy,
-            accelerator: "⌘Click",
-            click() {
-                fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
-                    openFileById({
-                        id: refBlockId,
-                        hasContext: !foldResponse.data,
-                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL],
-                        keepCursor: true,
-                        zoomIn: foldResponse.data
-                    });
+    /// #if !MOBILE
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.openBy,
+        accelerator: "⌘Click",
+        click() {
+            fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
+                openFileById({
+                    id: refBlockId,
+                    hasContext: !foldResponse.data,
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL],
+                    keepCursor: true,
+                    zoomIn: foldResponse.data
                 });
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.insertRight,
-            icon: "iconRight",
-            accelerator: "⌥Click",
-            click() {
-                fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
-                    openFileById({
-                        id: refBlockId,
-                        position: "right",
-                        hasContext: !foldResponse.data,
-                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
-                        zoomIn: foldResponse.data
-                    });
+            });
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.insertRight,
+        icon: "iconRight",
+        accelerator: "⌥Click",
+        click() {
+            fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
+                openFileById({
+                    id: refBlockId,
+                    position: "right",
+                    hasContext: !foldResponse.data,
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                    zoomIn: foldResponse.data
                 });
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.insertBottom,
-            icon: "iconDown",
-            accelerator: "⇧Click",
-            click() {
-                fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
-                    openFileById({
-                        id: refBlockId,
-                        position: "bottom",
-                        hasContext: !foldResponse.data,
-                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
-                        zoomIn: foldResponse.data
-                    });
+            });
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.insertBottom,
+        icon: "iconDown",
+        accelerator: "⇧Click",
+        click() {
+            fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
+                openFileById({
+                    id: refBlockId,
+                    position: "bottom",
+                    hasContext: !foldResponse.data,
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                    zoomIn: foldResponse.data
                 });
-            }
-        }).element);
-    }
+            });
+        }
+    }).element);
+    /// #endif
     let submenu: IMenu[] = [];
     if (element.getAttribute("data-subtype") === "s") {
         submenu.push({
@@ -381,9 +382,11 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
                 return;
             }
         }
+        /// #if !MOBILE
         if (protyle.model) {
             updateBacklinkGraph(getAllModels(), protyle);
         }
+        /// #endif
     });
 };
 

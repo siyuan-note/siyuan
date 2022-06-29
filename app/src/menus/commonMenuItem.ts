@@ -13,16 +13,19 @@ import {writeText} from "../protyle/util/compatibility";
 import {fetchPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
-import {getAllModels} from "../layout/getAll";
 import {focusBlock, focusByRange, getEditorRange} from "../protyle/util/selection";
 import {setPosition} from "../util/setPosition";
 import {updateTransaction} from "../protyle/wysiwyg/transaction";
+/// #if !MOBILE
+import {getAllModels} from "../layout/getAll";
 import {Bookmark} from "../layout/dock/Bookmark";
+import {openAsset, openBy} from "../editor/util";
+/// #endif
 import {rename} from "../editor/rename";
-import {deleteFile, openAsset, openBy} from "../editor/util";
 import {matchHotKey} from "../protyle/util/hotKey";
 import * as dayjs from "dayjs";
 import {Constants} from "../constants";
+import {deleteFile} from "../editor/deleteFile";
 
 const bindAttrInput = (inputElement: HTMLInputElement, confirmElement: Element) => {
     inputElement.addEventListener("keydown", (event) => {
@@ -315,18 +318,17 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
         if (errorTip) {
             showMessage(errorTip.substr(0, errorTip.length - 2) + " " + window.siyuan.languages.invalid);
         }
-        if (!isMobile()) {
-            getAllModels().editor.forEach(item => {
-                if (item.editor.protyle.block.rootID === id) {
-                    const refElement = item.editor.protyle.title.element.querySelector(".protyle-attr--refcount");
-                    if (refElement) {
-                        nodeAttrHTML += refElement.outerHTML;
-                    }
-                    item.editor.protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
-                    item.editor.protyle.wysiwyg.renderCustom(attrsResult);
+        /// #if !MOBILE
+        getAllModels().editor.forEach(item => {
+            if (item.editor.protyle.block.rootID === id) {
+                const refElement = item.editor.protyle.title.element.querySelector(".protyle-attr--refcount");
+                if (refElement) {
+                    nodeAttrHTML += refElement.outerHTML;
                 }
-            });
-        }
+                item.editor.protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
+                item.editor.protyle.wysiwyg.renderCustom(attrsResult);
+            }
+        });
         fetchPost("/api/attr/resetBlockAttrs", {id, attrs: attrsResult}, () => {
             if (attrsResult.bookmark !== attrs.bookmark) {
                 const bookmark = getDockByType("bookmark").data.bookmark;
@@ -335,6 +337,7 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                 }
             }
         });
+        /// #endif
         dialog.destroy();
     });
     dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
@@ -508,7 +511,8 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                     const escapeHTML = Lute.EscapeHTMLStr(item.value);
                     nodeElement.setAttribute(name, escapeHTML);
                     if (name === "bookmark") {
-                        if (escapeHTML !== response.data.bookmark && !isMobile()) {
+                        /// #if !MOBILE
+                        if (escapeHTML !== response.data.bookmark) {
                             const bookmark = getDockByType("bookmark").data.bookmark;
                             if (bookmark instanceof Bookmark) {
                                 setTimeout(() => {
@@ -516,6 +520,7 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                                 }, 219);
                             }
                         }
+                        /// #endif
                         nodeAttrHTML += `<div class="protyle-attr--bookmark">${escapeHTML}</div>`;
                     } else if (name === "name") {
                         nodeAttrHTML += `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${escapeHTML}</div>`;
@@ -715,6 +720,7 @@ export const openMenu = (src: string, onlyMenu = false) => {
             (!src.endsWith(".pdf") ||
                 (src.endsWith(".pdf") && !src.startsWith("file://")))
         ) {
+            /// #if !MOBILE
             submenu.push({
                 label: window.siyuan.languages.insertRight,
                 accelerator: "Click",
@@ -722,6 +728,7 @@ export const openMenu = (src: string, onlyMenu = false) => {
                     openAsset(src.trim(), parseInt(getSearch("page", src)), "right");
                 }
             });
+            /// #endif
             /// #if !BROWSER
             submenu.push({
                 label: window.siyuan.languages.useDefault,

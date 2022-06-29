@@ -3,7 +3,6 @@ import {escapeHtml} from "../../util/escape";
 import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
 import {getDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
-import {newFile} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
 import {showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
@@ -14,6 +13,7 @@ import {newNotebook} from "../../util/mount";
 import {setEmpty} from "./setEmpty";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {MenuItem} from "../../menus/Menu";
+import {newFile} from "../../util/newFile";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;

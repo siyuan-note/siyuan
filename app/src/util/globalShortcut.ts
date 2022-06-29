@@ -74,7 +74,7 @@ const switchDialogEvent = (event: MouseEvent, switchDialog: Dialog) => {
         }
         target = target.parentElement;
     }
-}
+};
 
 export const globalShortcut = () => {
     window.addEventListener("mousemove", (event) => {
@@ -323,11 +323,11 @@ export const globalShortcut = () => {
             });
             if (isMac()) {
                 switchDialog.element.addEventListener("contextmenu", (event) => {
-                    switchDialogEvent(event, switchDialog)
+                    switchDialogEvent(event, switchDialog);
                 });
             }
             switchDialog.element.addEventListener("click", (event) => {
-                switchDialogEvent(event, switchDialog)
+                switchDialogEvent(event, switchDialog);
             });
             return;
         }

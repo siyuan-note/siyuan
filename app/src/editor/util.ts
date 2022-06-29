@@ -27,7 +27,6 @@ import {
 import {getPreviousHeading} from "../protyle/wysiwyg/getBlock";
 import {lockFile, setTitle} from "../dialog/processSystem";
 import {zoomOut} from "../menus/protyle";
-import {confirmDialog} from "../dialog/confirmDialog";
 
 export const openFileById = (options: {
     id: string,

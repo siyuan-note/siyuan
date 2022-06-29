@@ -3,7 +3,7 @@ export const hideElements = (panels: string[], protyle?: IProtyle) => {
     if (!protyle) {
         if (panels.includes("dialog")) {
             for (let i = 0; i < window.siyuan.dialogs.length; i++) {
-                window.siyuan.dialogs[i].destroy()
+                window.siyuan.dialogs[i].destroy();
                 i--;
             }
         }

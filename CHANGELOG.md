@@ -1,3 +1,36 @@
+## v2.0.25 / 2022-06-29
+
+### 改进功能
+
+* [状态栏显示选中内容的字数](https://github.com/siyuan-note/siyuan/issues/4932)
+* [新增获取块 kramdown 源代码的 API](https://github.com/siyuan-note/siyuan/issues/5289)
+* [改进 Ctrl+Tab 支持选择切换](https://github.com/siyuan-note/siyuan/issues/5290)
+* [桌面端支持隐藏底部状态栏](https://github.com/siyuan-note/siyuan/issues/5292)
+* [同步按钮和反馈按钮互换位置](https://github.com/siyuan-note/siyuan/issues/5293)
+* [改进桌面端底部状态栏通知](https://github.com/siyuan-note/siyuan/issues/5294)
+* [同步忽略文件配置使用 gitignore 规则](https://github.com/siyuan-note/siyuan/issues/5295)
+* [图表和脑图宽度自适应](https://github.com/siyuan-note/siyuan/issues/5296)
+* [移动端文件树的文档菜单添加属性项、文档树菜单顺序调整](https://github.com/siyuan-note/siyuan/issues/5298)
+* [数据仓库快照支持 `syncignore` 配置](https://github.com/siyuan-note/siyuan/issues/5302)
+* [`中西文间插入空格` 改为 `优化排版`](https://github.com/siyuan-note/siyuan/issues/5312)
+
+### 文档相关
+
+* [用户指南 `数据安全` 文档中加入 `威胁模型` 章节](https://github.com/siyuan-note/siyuan/issues/5250)
+
+### 修复缺陷
+
+* [使用块滚动条跳转到最后一个块时无法加载上面的块](https://github.com/siyuan-note/siyuan/issues/5291)
+* [新建文档填入文档名后大纲显示 `Untitled`](https://github.com/siyuan-note/siyuan/issues/5297)
+* [链接的打开菜单和点击事件保持一致](https://github.com/siyuan-note/siyuan/issues/5300)
+* [复制资源文件后导出父级文档再导入问题](https://github.com/siyuan-note/siyuan/issues/5301)
+* [打开文档不会更新文档树聚焦、大纲和反链面板](https://github.com/siyuan-note/siyuan/issues/5303)
+* [代码块上方为折叠块时 ↑ 键预期错误](https://github.com/siyuan-note/siyuan/issues/5304)
+* [点击大纲顶部标题未跳转到文档开始](https://github.com/siyuan-note/siyuan/issues/5307)
+* [`优化排版` 影响行级标记符](https://github.com/siyuan-note/siyuan/issues/5308)
+* [导入 `.sy.zip` 后查询嵌入块失效](https://github.com/siyuan-note/siyuan/issues/5316)
+* [缓存参数设置不正确](https://github.com/siyuan-note/siyuan/issues/5318)
+
 ## v2.0.24 / 2022-06-26
 
 ### 改进功能

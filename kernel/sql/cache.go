@@ -27,8 +27,8 @@ import (
 )
 
 var memCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 100000,           // 10W
-	MaxCost:     1024 * 1024 * 10, // 10MB
+	NumCounters: 800000,
+	MaxCost:     1000 * 1000 * 100,
 	BufferItems: 64,
 })
 var disabled = true
@@ -110,9 +110,7 @@ func GetRefsCacheByDefID(defID string) (ret []*Ref) {
 	return
 }
 
-var (
-	defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute) // [defBlockID]map[refBlockID]*Ref
-)
+var defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute) // [defBlockID]map[refBlockID]*Ref
 
 func CacheRef(tree *parse.Tree, refIDNode *ast.Node) {
 	ref := buildRef(tree, refIDNode)

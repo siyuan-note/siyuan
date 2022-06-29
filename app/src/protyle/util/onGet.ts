@@ -8,7 +8,9 @@ import {processRender} from "./processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {blockRender} from "../markdown/blockRender";
 import {highlightById} from "../../util/highlightById";
+/// #if !MOBILE
 import {pushBack} from "../../util/backForward";
+/// #endif
 import {focusBlock} from "./selection";
 import {hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
@@ -144,9 +146,11 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
     if (options.action.includes(Constants.CB_GET_HL)) {
         preventScroll(protyle); // 搜索页签滚动会导致再次请求
         const hlElement = highlightById(protyle, protyle.block.id, true);
+        /// #if !MOBILE
         if (hlElement && !options.action.includes(Constants.CB_GET_UNUNDO)) {
             pushBack(protyle, undefined, hlElement);
         }
+        /// #endif
     } else if (options.action.includes(Constants.CB_GET_FOCUS)) {
         let focusElement: Element;
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${protyle.block.id}"]`)).find((item: HTMLElement) => {
@@ -161,9 +165,11 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
         }
         if (focusElement && !protyle.wysiwyg.element.firstElementChild.isSameNode(focusElement)) {
             focusBlock(focusElement);
+            /// #if !MOBILE
             if (!options.action.includes(Constants.CB_GET_UNUNDO)) {
                 pushBack(protyle, undefined, focusElement);
             }
+            /// #endif
             focusElement.scrollIntoView();
             // 减少抖动 https://ld246.com/article/1654263598088
             setTimeout(() => {
@@ -171,16 +177,20 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
             }, Constants.TIMEOUT_BLOCKLOAD);
         } else {
             focusBlock(protyle.wysiwyg.element.firstElementChild);
+            /// #if !MOBILE
             if (!options.action.includes(Constants.CB_GET_UNUNDO)) {
                 pushBack(protyle, undefined, protyle.wysiwyg.element.firstElementChild);
             }
+            /// #endif
         }
     } else if (options.action.includes(Constants.CB_GET_FOCUSFIRST)) {
         // settimeout 时间需短一点，否则定位后快速滚动无效
         preventScroll(protyle, 8, 256);
         protyle.contentElement.scrollTop = 8;
         focusBlock(protyle.wysiwyg.element.firstElementChild);
+        /// #if !MOBILE
         pushBack(protyle, undefined, protyle.wysiwyg.element.firstElementChild);
+        /// #endif
     }
     if (protyle.disabled) {
         disabledProtyle(protyle);

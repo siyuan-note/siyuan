@@ -25,8 +25,9 @@ import {addEmoji, filterEmoji, lazyLoadEmoji, unicode2Emoji} from "../../emoji";
 import {escapeHtml} from "../../util/escape";
 import {blockRender} from "../markdown/blockRender";
 import {uploadFiles} from "../upload";
+/// #if !MOBILE
 import {openFileById} from "../../editor/util";
-import {isMobile} from "../../util/functions";
+/// #endif
 import {openMobileFileById} from "../../mobile/editor";
 import {getIconByType} from "../../editor/getIcon";
 
@@ -497,15 +498,15 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     md: ""
                 }, () => {
                     insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">Untitled</span>`), protyle);
-                    if (isMobile()) {
-                        openMobileFileById(newSubDocId, true);
-                    } else {
-                        openFileById({
-                            id: newSubDocId,
-                            hasContext: true,
-                            action: [Constants.CB_GET_HL]
-                        });
-                    }
+                    /// #if MOBILE
+                    openMobileFileById(newSubDocId, true);
+                    /// #else
+                    openFileById({
+                        id: newSubDocId,
+                        hasContext: true,
+                        action: [Constants.CB_GET_HL]
+                    });
+                    /// #endif
                 });
                 return;
             } else if (Constants.INLINE_TYPE.includes(value)) {

@@ -10,7 +10,9 @@ import {lockFile} from "../../dialog/processSystem";
 import {setFold} from "../../menus/protyle";
 import {addLoading} from "../ui/initUI";
 import {onGet} from "../util/onGet";
+/// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
+/// #endif
 import {removeFoldHeading} from "../util/heading";
 import {genEmptyElement, genSBElement} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
@@ -311,6 +313,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                 endOffset: range.endOffset,
             };
         }
+        /// #if !MOBILE
         if (!updateElement) {
             // 打开两个相同的文档 A、A1，从 A 拖拽块 B 到 A1，在后续 ws 处理中，无法获取到拖拽出去的 B
             getAllModels().editor.forEach(editor => {
@@ -320,6 +323,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                 }
             });
         }
+        /// #endif
         if (operation.previousID) {
             let beforeElement: Element;
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).find(item => {

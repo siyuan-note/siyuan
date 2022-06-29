@@ -10,12 +10,14 @@ import {getSearch, isMobile} from "../../util/functions";
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
+/// #if !MOBILE
+import {openAsset, openBy} from "../../editor/util";
+/// #endif
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {speechRender} from "../markdown/speechRender";
 import {mediaRender} from "../markdown/mediaRender";
-import {openAsset, openBy} from "../../editor/util";
 
 export class Preview {
     public element: HTMLElement;
@@ -46,6 +48,7 @@ export class Preview {
                 event.stopPropagation();
                 event.preventDefault();
                 if (isLocalPath(linkAddress)) {
+                    /// #if !MOBILE
                     if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress.split("?page")[0])))) {
                         openAsset(linkAddress.split("?page")[0], parseInt(getSearch("page", linkAddress)));
                     } else {
@@ -53,6 +56,7 @@ export class Preview {
                         openBy(linkAddress, "folder");
                         /// #endif
                     }
+                    /// #endif
                 } else {
                     /// #if !BROWSER
                     shell.openExternal(linkAddress).catch((e) => {

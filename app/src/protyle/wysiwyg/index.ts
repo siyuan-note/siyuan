@@ -42,12 +42,12 @@ import {keydown} from "./keydown";
 import {openMobileFileById} from "../../mobile/editor";
 import {removeBlock} from "./remove";
 import {highlightRender} from "../markdown/highlightRender";
-import {getAllModels} from "../../layout/getAll";
 import {setPosition} from "../../util/setPosition";
 import {openAttr} from "../../menus/commonMenuItem";
 import {blockRender} from "../markdown/blockRender";
-import {pushBack} from "../../util/backForward";
 /// #if !MOBILE
+import {getAllModels} from "../../layout/getAll";
+import {pushBack} from "../../util/backForward";
 import {openAsset, openBy, openFileById} from "../../editor/util";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
@@ -157,6 +157,7 @@ export class WYSIWYG {
             }
             nodeElement = tempElement;
         }
+        /// #if !MOBILE
         if (protyle.model) {
             getAllModels().outline.forEach(item => {
                 if (item.blockId === protyle.block.rootID) {
@@ -173,6 +174,7 @@ export class WYSIWYG {
                 }
             });
         }
+        /// #endif
     }
 
     private bindEvent(protyle: IProtyle) {
@@ -1381,6 +1383,7 @@ export class WYSIWYG {
                     }
                     /// #endif
                 });
+                /// #if !MOBILE
                 if (protyle.model) {
                     // 打开双链需记录到后退中 https://github.com/siyuan-note/insider/issues/801
                     let blockElement: HTMLElement | false;
@@ -1393,6 +1396,7 @@ export class WYSIWYG {
                         pushBack(protyle, getEditorRange(this.element), blockElement);
                     }
                 }
+                /// #endif
                 return;
             }
 
@@ -1726,7 +1730,9 @@ export class WYSIWYG {
                 if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
                     countSelectWord(newRange);
                 }
+                /// #if !MOBILE
                 pushBack(protyle, newRange);
+                /// #endif
             }, isMobile() ? 520 : 0); // Android 双击慢了出不来
 
             protyle.toolbar.isNewEmptyInline = false;

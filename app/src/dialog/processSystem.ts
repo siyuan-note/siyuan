@@ -3,11 +3,11 @@ import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
 import {ipcRenderer} from "electron";
+import {exportLayout} from "../layout/util";
 /// #endif
 import {showMessage} from "./message";
 import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
-import {exportLayout} from "../layout/util";
 
 export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>
@@ -134,9 +134,13 @@ export const transactionError = (data: { code: number, data: string }) => {
     });
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
+        /// #if MOBILE
+        exitSiYuan();
+        /// #else
         exportLayout(false, () => {
             exitSiYuan();
         });
+        /// #endif
     });
     btnsElement[1].addEventListener("click", () => {
         fetchPost("/api/filetree/refreshFiletree", {});

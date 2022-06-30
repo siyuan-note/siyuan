@@ -29,6 +29,7 @@ import (
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -317,7 +318,7 @@ func CheckoutRepo(id string) (err error) {
 	Conf.Sync.Enabled = false
 	Conf.Save()
 
-	err = repo.Checkout(id, map[string]interface{}{
+	_, _, err = repo.Checkout(id, map[string]interface{}{
 		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
 	})
 	if nil != err {
@@ -444,12 +445,45 @@ func syncRepo() (err error) {
 	}
 
 	start := time.Now()
-	err = repo.Sync(Conf.Sync.CloudName, Conf.User.UserId, Conf.User.UserToken, Conf.System.NetworkProxy.String(), util.AliyunServer, map[string]interface{}{
+	latest, fetchedFiles, err := repo.Sync(Conf.Sync.CloudName, Conf.User.UserId, Conf.User.UserToken, Conf.System.NetworkProxy.String(), util.AliyunServer, map[string]interface{}{
 		CtxPushMsg: CtxPushMsgToStatusBar,
 	})
 	elapsed := time.Since(start)
 	util.LogInfof("sync data repo elapsed [%.2fs]", elapsed.Seconds())
+	if nil != err {
+		util.LogErrorf("sync data repo failed: %s", err)
+		util.PushStatusBar("Sync data repo failed: " + err.Error())
+		return
+	}
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+	if 1 > len(fetchedFiles) {
+		// 没有下载到新文件，直接返回
+		return
+	}
+
+	// 下载到文件后，需要恢复到工作区并重建索引
+
+	CloseWatchAssets()
+	defer WatchAssets()
+
+	upsertFiles, removeFiles, err := repo.Checkout(latest.ID, map[string]interface{}{
+		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
+	})
+	if nil != err {
+		util.PushClearProgress()
+		return
+	}
+
+	var upserts, removes []string
+	for _, file := range upsertFiles {
+		upserts = append(upserts, file.Path)
+	}
+	for _, file := range removeFiles {
+		removes = append(removes, file.Path)
+	}
+	incReindex(upserts, removes)
+	cache.ClearDocsIAL()
+	util.ReloadUI()
 	return
 }
 

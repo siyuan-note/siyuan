@@ -488,13 +488,9 @@ func InitBoxes() {
 					util.IncBootProgress(1, "Reading block trees...")
 				}
 			}()
-			if err := treenode.ReadBlockTree(); nil == err {
-				initialized = true
-			} else {
-				if err = os.RemoveAll(util.BlockTreePath); nil != err {
-					util.LogErrorf("remove block tree [%s] failed: %s", util.BlockTreePath, err)
-				}
-			}
+
+			treenode.InitBlockTree()
+			initialized = true
 		}
 	} else { // 大于 1 的话说明在同步阶段已经加载过了
 		initialized = true

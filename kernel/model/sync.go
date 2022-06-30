@@ -401,71 +401,13 @@ func SyncData(boot, exit, byHand bool) {
 
 	if boot && gulu.File.IsExist(util.BlockTreePath) {
 		// 在 blocktree 存在的情况下不会重建索引，所以这里需要刷新 blocktree 和 database
-
-		if err = treenode.ReadBlockTree(); nil != err {
-			os.RemoveAll(util.BlockTreePath)
-			util.LogWarnf("removed block tree [%s] due to %s", util.BlockTreePath, err)
-			return
-		}
-
-		for _, upsertFile := range upsertFiles {
-			if !strings.HasSuffix(upsertFile, ".sy") {
-				continue
-			}
-
-			upsertFile = filepath.ToSlash(upsertFile)
-			box := upsertFile[:strings.Index(upsertFile, "/")]
-			p := strings.TrimPrefix(upsertFile, box)
-			tree, err0 := LoadTree(box, p)
-			if nil != err0 {
-				continue
-			}
-			treenode.ReindexBlockTree(tree)
-			sql.UpsertTreeQueue(tree)
-		}
-		for _, removeFile := range removeFiles {
-			if !strings.HasSuffix(removeFile, ".sy") {
-				continue
-			}
-			id := strings.TrimSuffix(filepath.Base(removeFile), ".sy")
-			block := treenode.GetBlockTree(id)
-			if nil != block {
-				treenode.RemoveBlockTreesByRootID(block.RootID)
-				sql.RemoveTreeQueue(block.BoxID, block.RootID)
-			}
-		}
+		treenode.InitBlockTree()
+		incReindex(upsertFiles, removeFiles)
+		return
 	}
 
 	if !boot && !exit {
-		// 增量索引
-		for _, upsertFile := range upsertFiles {
-			if !strings.HasSuffix(upsertFile, ".sy") {
-				continue
-			}
-
-			upsertFile = filepath.ToSlash(upsertFile)
-			box := upsertFile[:strings.Index(upsertFile, "/")]
-			p := strings.TrimPrefix(upsertFile, box)
-			tree, err0 := LoadTree(box, p)
-			if nil != err0 {
-				continue
-			}
-			treenode.ReindexBlockTree(tree)
-			sql.UpsertTreeQueue(tree)
-			//util.LogInfof("sync index tree [%s]", tree.ID)
-		}
-		for _, removeFile := range removeFiles {
-			if !strings.HasSuffix(removeFile, ".sy") {
-				continue
-			}
-			id := strings.TrimSuffix(filepath.Base(removeFile), ".sy")
-			block := treenode.GetBlockTree(id)
-			if nil != block {
-				treenode.RemoveBlockTreesByRootID(block.RootID)
-				sql.RemoveTreeQueue(block.BoxID, block.RootID)
-				//util.LogInfof("sync remove tree [%s]", block.RootID)
-			}
-		}
+		incReindex(upsertFiles, removeFiles)
 		cache.ClearDocsIAL() // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
 		util.ReloadUI()
 	}
@@ -491,6 +433,38 @@ func clearEmptyDirs(dir string) {
 	for _, emptyDir := range emptyDirs {
 		if err := os.RemoveAll(emptyDir); nil != err {
 			util.LogErrorf("clear empty dir [%s] failed [%s]", emptyDir, err.Error())
+		}
+	}
+}
+
+// incReindex 增量重建索引。
+func incReindex(upserts, removes []string) {
+	for _, upsertFile := range upserts {
+		if !strings.HasSuffix(upsertFile, ".sy") {
+			continue
+		}
+
+		upsertFile = filepath.ToSlash(upsertFile)
+		box := upsertFile[:strings.Index(upsertFile, "/")]
+		p := strings.TrimPrefix(upsertFile, box)
+		tree, err0 := LoadTree(box, p)
+		if nil != err0 {
+			continue
+		}
+		treenode.ReindexBlockTree(tree)
+		sql.UpsertTreeQueue(tree)
+		//util.LogInfof("sync index tree [%s]", tree.ID)
+	}
+	for _, removeFile := range removes {
+		if !strings.HasSuffix(removeFile, ".sy") {
+			continue
+		}
+		id := strings.TrimSuffix(filepath.Base(removeFile), ".sy")
+		block := treenode.GetBlockTree(id)
+		if nil != block {
+			treenode.RemoveBlockTreesByRootID(block.RootID)
+			sql.RemoveTreeQueue(block.BoxID, block.RootID)
+			//util.LogInfof("sync remove tree [%s]", block.RootID)
 		}
 	}
 }

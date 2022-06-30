@@ -217,13 +217,14 @@ func AutoFlushBlockTree() {
 	}
 }
 
-func ReadBlockTree() (err error) {
+func InitBlockTree() {
 	start := time.Now()
 
 	if nil == blocktreeFileLock {
 		blocktreeFileLock = flock.New(util.BlockTreePath)
 	}
 
+	var err error
 	if err = blocktreeFileLock.Lock(); nil != err {
 		util.LogErrorf("read block tree failed: %s", err)
 		os.Exit(util.ExitCodeBlockTreeErr)

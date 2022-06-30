@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 )
 
 func IsEmptyDir(p string) bool {
@@ -45,6 +46,23 @@ func RemoveID(name string) string {
 		name = name[:len(name)-23]
 	}
 	return name + ext
+}
+
+func AssetName(name string) string {
+	_, id := LastID(name)
+	ext := path.Ext(name)
+	name = name[0 : len(name)-len(ext)]
+	if !IsIDPattern(id) {
+		id = ast.NewNodeID()
+		name = name + "-" + id + ext
+	} else {
+		if !IsIDPattern(name) {
+			name = name[:len(name)-len(id)-1] + "-" + id + ext
+		} else {
+			name = name + ext
+		}
+	}
+	return name
 }
 
 func LastID(p string) (name, id string) {

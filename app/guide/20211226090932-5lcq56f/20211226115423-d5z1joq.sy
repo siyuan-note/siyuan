@@ -6,7 +6,7 @@
 		"id": "20211226115423-d5z1joq",
 		"title": "請從這裡開始",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
-		"updated": "20211228143127"
+		"updated": "20211226115745"
 	},
 	"Children": [
 		{
@@ -78,7 +78,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20211226115745-rorv31l",
-				"updated": "20211228143127"
+				"updated": "20211226115745"
 			},
 			"Children": [
 				{
@@ -302,7 +302,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20211226115745-44ibza6",
-						"updated": "20211227210338"
+						"updated": "20211226115745"
 					},
 					"Children": [
 						{
@@ -333,7 +333,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20211226115745-dowhjkw",
-								"updated": "20211227210338"
+								"updated": "20211226115745"
 							},
 							"Children": [
 								{
@@ -448,7 +448,7 @@
 									},
 									"Properties": {
 										"id": "20211226115745-x2tcgwg",
-										"updated": "20211225212644"
+										"updated": "20211226115745"
 									},
 									"Children": [
 										{
@@ -478,7 +478,7 @@
 														},
 														{
 															"Type": "NodeLinkDest",
-															"Data": "https://github.com/siyuan-note/siyuan/projects"
+															"Data": "https://github.com/orgs/siyuan-note/projects/1"
 														},
 														{
 															"Type": "NodeCloseParen"
@@ -1026,39 +1026,6 @@
 					"Type": "NodeSuperBlockCloseMarker"
 				}
 			]
-		},
-		{
-			"ID": "20211226115803-zbeg72e",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226115803-zbeg72e",
-				"updated": "20211225213107"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "📺 影片教學"
-				}
-			]
-		},
-		{
-			"ID": "20211226115803-6h5pn90",
-			"Type": "NodeIFrame",
-			"Data": "\u003ciframe src=\"https://player.bilibili.com/player.html?bvid=BV1dF411Y79u\u0026amp;page=1\u0026amp;high_quality=1\u0026amp;as_wide=1\u0026amp;allowfullscreen=true\" data-src=\"\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\" sandbox=\"allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts allow-popups\" style=\"height: 543px; width: 868px;\"\u003e\u003c/iframe\u003e",
-			"Properties": {
-				"id": "20211226115803-6h5pn90",
-				"updated": "20211117110638"
-			}
-		},
-		{
-			"ID": "20211226115803-kfcm0yc",
-			"Type": "NodeIFrame",
-			"Data": "\u003ciframe src=\"https://player.bilibili.com/player.html?bvid=BV15L4y1z7Sp\u0026amp;page=1\u0026amp;high_quality=1\u0026amp;as_wide=1\u0026amp;allowfullscreen=true\" data-src=\"\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\" sandbox=\"allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts allow-popups\" style=\"height: 553px; width: 870px;\"\u003e\u003c/iframe\u003e",
-			"Properties": {
-				"id": "20211226115803-kfcm0yc",
-				"updated": "20211117110545"
-			}
 		},
 		{
 			"ID": "20211226115803-fcyr6ye",

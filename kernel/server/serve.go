@@ -122,11 +122,55 @@ func serveAppearance(ginServer *gin.Engine) {
 	}
 	siyuan.GET("/appearance/*filepath", func(c *gin.Context) {
 		filePath := filepath.Join(appearancePath, strings.TrimPrefix(c.Request.URL.Path, "/appearance/"))
-		if strings.HasSuffix(c.Request.URL.Path, "/theme.js") && !gulu.File.IsExist(filePath) {
-			// 主题 js 不存在时生成空内容返回
-			c.Data(200, "application/x-javascript", nil)
-			return
+		if strings.HasSuffix(c.Request.URL.Path, "/theme.js") {
+			if !gulu.File.IsExist(filePath) {
+				// 主题 js 不存在时生成空内容返回
+				c.Data(200, "application/x-javascript", nil)
+				return
+			}
+		} else if strings.Contains(c.Request.URL.Path, "/langs/") && strings.HasSuffix(c.Request.URL.Path, ".json") {
+			lang := path.Base(c.Request.URL.Path)
+			lang = strings.TrimSuffix(lang, ".json")
+			if "zh_CN" != lang && "en_US" != lang {
+				// 多语言配置缺失项使用对应英文配置项补齐 https://github.com/siyuan-note/siyuan/issues/5322
+
+				enUSFilePath := filepath.Join(appearancePath, "langs", "en_US.json")
+				enUSData, err := os.ReadFile(enUSFilePath)
+				if nil != err {
+					util.LogFatalf("read en_US.json [%s] failed: %s", enUSFilePath, err)
+					return
+				}
+				enUSMap := map[string]interface{}{}
+				if err = gulu.JSON.UnmarshalJSON(enUSData, &enUSMap); nil != err {
+					util.LogFatalf("unmarshal en_US.json [%s] failed: %s", enUSFilePath, err)
+					return
+				}
+
+				for {
+					data, err := os.ReadFile(filePath)
+					if nil != err {
+						c.JSON(200, enUSMap)
+						return
+					}
+
+					langMap := map[string]interface{}{}
+					if err = gulu.JSON.UnmarshalJSON(data, &langMap); nil != err {
+						util.LogErrorf("unmarshal json [%s] failed: %s", filePath, err)
+						c.JSON(200, enUSMap)
+						return
+					}
+
+					for enUSDataKey, enUSDataValue := range enUSMap {
+						if _, ok := langMap[enUSDataKey]; !ok {
+							langMap[enUSDataKey] = enUSDataValue
+						}
+					}
+					c.JSON(200, langMap)
+					return
+				}
+			}
 		}
+
 		c.File(filePath)
 	})
 

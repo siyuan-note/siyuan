@@ -53,6 +53,8 @@ github.com/88250/gulu v1.2.3-0.20220623112232-c502d9016360/go.mod h1:I1qBzsksFL2
 github.com/88250/lute v1.7.4-0.20220426011157-34c9bfa2e148/go.mod h1:Bdu9LRNjQhtL3TftbtpjIWTwDVAXoS7AD8QsZQPk7zo=
 github.com/88250/lute v1.7.4-0.20220628102902-e32443650b1c h1:lM3ChAFl8eNrW08JNwKOWnsFjqiX9sl+y7B2rfdDynE=
 github.com/88250/lute v1.7.4-0.20220628102902-e32443650b1c/go.mod h1:Bdu9LRNjQhtL3TftbtpjIWTwDVAXoS7AD8QsZQPk7zo=
+github.com/88250/lute v1.7.4-0.20220630111756-bda708c0c3f2 h1:N4bzquLy5PbGu6KIcp9Xi6TIJd0D5zEBDznTbwAQECY=
+github.com/88250/lute v1.7.4-0.20220630111756-bda708c0c3f2/go.mod h1:Bdu9LRNjQhtL3TftbtpjIWTwDVAXoS7AD8QsZQPk7zo=
 github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1 h1:9Cb+iN639vUI2OcIBc+4oGwml9/0J6bL6dWNb8Al+1s=
 github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1/go.mod h1:jH6MMPr8G7AMzaVmWHXZQiB1DKO3giWbcWZ7UoJ1teI=
 github.com/88250/pdfcpu v0.3.13 h1:touMWMZkCGalMIbEg9bxYp7rETM+zwb9hXjwhqi4I7Q=

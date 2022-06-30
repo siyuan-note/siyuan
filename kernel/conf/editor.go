@@ -32,6 +32,7 @@ type Editor struct {
 	VirtualBlockRefExclude          string   `json:"virtualBlockRefExclude"`          // 虚拟引用关键字排除列表
 	BlockRefDynamicAnchorTextMaxLen int      `json:"blockRefDynamicAnchorTextMaxLen"` // 块引动态锚文本最大长度
 	PlantUMLServePath               string   `json:"plantUMLServePath"`               // PlantUML 伺服地址
+	FullWidth                       bool     `json:"fullWidth"`                       // 是否使用最大宽度
 }
 
 func NewEditor() *Editor {
@@ -49,5 +50,6 @@ func NewEditor() *Editor {
 		VirtualBlockRef:                 false,
 		BlockRefDynamicAnchorTextMaxLen: 96,
 		PlantUMLServePath:               "https://www.plantuml.com/plantuml/svg/~1",
+		FullWidth:                       false,
 	}
 }

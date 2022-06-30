@@ -1,5 +1,6 @@
 {
-  "adaptiveWidth": "Ancho adaptable",
+  "fullWidth": "Ancho adaptable",
+  "fullWidthTip": "Cuando está habilitado, el área de edición se mostrará lo más amplia posible",
   "tabLimit": "Límite de la pestaña",
   "tabLimit1": "Ordenar por hora de apertura, cerrar la primera pestaña abierta",
   "pasteEscaped": "Pegar texto escapado",

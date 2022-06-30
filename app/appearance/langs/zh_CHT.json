@@ -1,5 +1,6 @@
 {
-  "adaptiveWidth": "自適應寬度",
+  "fullWidth": "自適應寬度",
+  "fullWidthTip": "開啟後將盡可能寬地顯示編輯區",
   "tabLimit": "頁簽打開最大數量",
   "tabLimit1": "按照打開時間排序，關閉最早打開的頁簽",
   "pasteEscaped": "粘貼轉義文本",

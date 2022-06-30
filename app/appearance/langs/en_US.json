@@ -1,5 +1,6 @@
 {
   "adaptiveWidth": "Adaptive Width",
+  "fullWidthTip": "After enabling, the editing area will be displayed as wide as possible",
   "tabLimit": "Tab Limit",
   "tabLimit1": "Sort by opening time, close the earliest opened tab",
   "pasteEscaped": "Paste escaped text",

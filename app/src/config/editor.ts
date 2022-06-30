@@ -12,6 +12,7 @@ export const editor = {
         return `<label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fullWidth}
+        <div class="b3-label__text">${window.siyuan.languages.fullWidthTip}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="fullWidth" type="checkbox"${window.siyuan.config.editor.fullWidth ? " checked" : ""}/>

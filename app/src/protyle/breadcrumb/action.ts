@@ -1,5 +1,6 @@
+/// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
-import {isMobile} from "../../util/functions";
+/// #endif
 import {setPadding} from "../ui/initUI";
 
 export const fullscreen = (element: Element, btnElement?: Element) => {
@@ -22,18 +23,19 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         } else {
             btnElement.querySelector("use").setAttribute("xlink:href", "#iconContract");
         }
-    } else if (!isMobile()) {
-        window.siyuan.editorIsFullscreen = !isFullscreen;
-        getAllModels().editor.forEach(item => {
-            if (window.siyuan.editorIsFullscreen) {
-                if (!element.isSameNode(item.element) && item.element.classList.contains("fullscreen")) {
-                    item.element.classList.remove("fullscreen");
-                    setPadding(item.editor.protyle);
-                }
-            } else if (item.element.classList.contains("fullscreen")) {
+    }
+    /// #if !MOBILE
+    window.siyuan.editorIsFullscreen = !isFullscreen;
+    getAllModels().editor.forEach(item => {
+        if (window.siyuan.editorIsFullscreen) {
+            if (!element.isSameNode(item.element) && item.element.classList.contains("fullscreen")) {
                 item.element.classList.remove("fullscreen");
                 setPadding(item.editor.protyle);
             }
-        });
-    }
+        } else if (item.element.classList.contains("fullscreen")) {
+            item.element.classList.remove("fullscreen");
+            setPadding(item.editor.protyle);
+        }
+    });
+    /// #endif
 };

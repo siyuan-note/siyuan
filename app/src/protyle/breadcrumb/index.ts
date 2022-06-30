@@ -14,12 +14,14 @@ import {isMobile} from "../../util/functions";
 import {zoomOut} from "../../menus/protyle";
 import {getEditorRange} from "../util/selection";
 import {setPadding} from "../ui/initUI";
-import {onGet} from "../util/onGet";
+/// #if !MOBILE
+import {openFileById} from "../../editor/util";
+import {getAllModels} from "../../layout/getAll";
+/// #endif
 /// #if !BROWSER
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
-import {openFileById} from "../../editor/util";
-import {getAllModels} from "../../layout/getAll";
+import {onGet} from "../util/onGet";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -44,9 +46,9 @@ export class Breadcrumb {
                 const id = target.getAttribute("data-node-id");
                 if (id) {
                     if (protyle.options.render.breadcrumbDocName && window.siyuan.ctrlIsPressed) {
-                        if (!isMobile()) {
-                            openFileById({id, action: [Constants.CB_GET_FOCUS]});
-                        }
+                        /// #if !MOBILE
+                        openFileById({id, action: [Constants.CB_GET_FOCUS]});
+                        /// #endif
                     } else {
                         zoomOut(protyle, id);
                     }
@@ -218,27 +220,27 @@ export class Breadcrumb {
                     fetchPost("/api/format/autoSpace", {
                         id: protyle.block.rootID
                     }, () => {
-                        if (isMobile()) {
-                            fetchPost("/api/filetree/getDoc", {
-                                id: protyle.block.id,
-                                mode: 0,
-                                size: Constants.SIZE_GET,
-                            }, getResponse => {
-                                onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
-                            });
-                        } else {
-                            getAllModels().editor.forEach(item => {
-                                if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                                    fetchPost("/api/filetree/getDoc", {
-                                        id: item.editor.protyle.block.rootID,
-                                        mode: 0,
-                                        size: Constants.SIZE_GET,
-                                    }, getResponse => {
-                                        onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
-                                    });
-                                }
-                            });
-                        }
+                        /// #if MOBILE
+                        fetchPost("/api/filetree/getDoc", {
+                            id: protyle.block.id,
+                            mode: 0,
+                            size: Constants.SIZE_GET,
+                        }, getResponse => {
+                            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+                        });
+                        /// #else
+                        getAllModels().editor.forEach(item => {
+                            if (item.editor.protyle.block.rootID === protyle.block.rootID) {
+                                fetchPost("/api/filetree/getDoc", {
+                                    id: item.editor.protyle.block.rootID,
+                                    mode: 0,
+                                    size: Constants.SIZE_GET,
+                                }, getResponse => {
+                                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
+                                });
+                            }
+                        });
+                        /// #endif
                     });
                 }
             }).element);
@@ -248,27 +250,27 @@ export class Breadcrumb {
                     fetchPost("/api/format/netImg2LocalAssets", {
                         id: protyle.block.rootID
                     }, () => {
-                        if (isMobile()) {
-                            fetchPost("/api/filetree/getDoc", {
-                                id: protyle.block.id,
-                                mode: 0,
-                                size: Constants.SIZE_GET,
-                            }, getResponse => {
-                                onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
-                            });
-                        } else {
-                            getAllModels().editor.forEach(item => {
-                                if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                                    fetchPost("/api/filetree/getDoc", {
-                                        id: item.editor.protyle.block.rootID,
-                                        mode: 0,
-                                        size: Constants.SIZE_GET,
-                                    }, getResponse => {
-                                        onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
-                                    });
-                                }
-                            });
-                        }
+                        /// #if MOBILE
+                        fetchPost("/api/filetree/getDoc", {
+                            id: protyle.block.id,
+                            mode: 0,
+                            size: Constants.SIZE_GET,
+                        }, getResponse => {
+                            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+                        });
+                        /// #else
+                        getAllModels().editor.forEach(item => {
+                            if (item.editor.protyle.block.rootID === protyle.block.rootID) {
+                                fetchPost("/api/filetree/getDoc", {
+                                    id: item.editor.protyle.block.rootID,
+                                    mode: 0,
+                                    size: Constants.SIZE_GET,
+                                }, getResponse => {
+                                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
+                                });
+                            }
+                        });
+                        /// #endif
                     });
                 }
             }).element);

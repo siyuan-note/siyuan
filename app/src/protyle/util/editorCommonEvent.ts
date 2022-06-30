@@ -10,14 +10,16 @@ import {hideElements} from "../ui/hideElements";
 import {mathRender} from "../markdown/mathRender";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "./onGet";
+/// #if !MOBILE
 import {getInstanceById} from "../../layout/util";
-import {Editor} from "../../editor";
 import {Tab} from "../../layout/Tab";
-import {blockRender} from "../markdown/blockRender";
 import {getAllModels} from "../../layout/getAll";
+import {updatePanelByEditor} from "../../editor/util";
+/// #endif
+import {Editor} from "../../editor";
+import {blockRender} from "../markdown/blockRender";
 import {processRender} from "./processCode";
 import {highlightRender} from "../markdown/highlightRender";
-import {updatePanelByEditor} from "../../editor/util";
 
 const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, direct: "col" | "row") => {
     const isSameDoc = protyle.element.contains(sourceElements[0]);
@@ -211,6 +213,7 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
         doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
         undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
     } else if (oldSourceParentElement && oldSourceParentElement.classList.contains("protyle-wysiwyg") && oldSourceParentElement.innerHTML === "") {
+        /// #if !MOBILE
         // 拖拽后，根文档原内容为空，且不为悬浮窗
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
         if (protyleElement && !protyleElement.classList.contains("block__edit")) {
@@ -229,6 +232,7 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
                 });
             }
         }
+        /// #endif
     }
     if (isSameDoc) {
         transaction(protyle, doOperations, undoOperations);
@@ -487,6 +491,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
         doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
         undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
     } else if (oldSourceParentElement && oldSourceParentElement.classList.contains("protyle-wysiwyg") && oldSourceParentElement.childElementCount === 0) {
+        /// #if !MOBILE
         // 拖拽后，根文档原内容为空，且不为悬浮窗
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
         if (protyleElement && !protyleElement.classList.contains("block__edit")) {
@@ -505,6 +510,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                 });
             }
         }
+        /// #endif
     }
     if (isSameDoc) {
         transaction(protyle, doOperations, undoOperations);
@@ -636,6 +642,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__bottom"));
                 }
             }
+            /// #if !MOBILE
             if (isBacklink) {
                 setTimeout(() => {
                     // 等待 drag transaction
@@ -644,6 +651,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     });
                 }, 200);
             }
+            /// #endif
         } else if (window.siyuan.dragElement && window.siyuan.dragElement.getAttribute("data-type") === "navigation-file" && targetElement) {
             // 文件树拖拽
             fetchPost("/api/filetree/doc2Heading", {
@@ -661,8 +669,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     size: Constants.SIZE_GET,
                 }, getResponse => {
                     onGet(getResponse, protyle);
+                    /// #if !MOBILE
                     // 文档标题互转后，需更新大纲
                     updatePanelByEditor(protyle, false, false, true);
+                    /// #endif
                     // 文档标题互转后，编辑区会跳转到开头 https://github.com/siyuan-note/siyuan/issues/2939
                     setTimeout(() => {
                         protyle.contentElement.scrollTop = scrollTop;

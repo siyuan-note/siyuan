@@ -38,6 +38,10 @@ import {isLocalPath} from "../../util/pathName";
 import {clipboard} from "electron";
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
+/// #if !MOBILE
+import {openBy, openFileById} from "../../editor/util";
+import {commonHotkey} from "./commonHotkey";
+/// #endif
 import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import {setPosition} from "../../util/setPosition";
 import {removeEmbed} from "./removeEmbed";
@@ -48,11 +52,9 @@ import {bindMenuKeydown} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {scrollCenter} from "../../util/highlightById";
-import {openBy, openFileById} from "../../editor/util";
 import {BlockPanel} from "../../block/Panel";
 import * as dayjs from "dayjs";
 import {highlightRender} from "../markdown/highlightRender";
-import {commonHotkey} from "./commonHotkey";
 import {countBlockWord} from "../../layout/status";
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
@@ -813,11 +815,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return true;
         }
-
+        /// #if !MOBILE
         if (commonHotkey(protyle, event)) {
             return true;
         }
-
+        /// #endif
         if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             let actionElement;
@@ -1404,6 +1406,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
 
+        /// #if !MOBILE
         const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
         if (refElement) {
             const id = refElement.getAttribute("data-id");
@@ -1448,8 +1451,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return true;
             }
         }
+        /// #endif
 
-        /// #if !BROWSER
+        /// #if !BROWSER && !MOBILE
         if (matchHotKey(window.siyuan.config.keymap.editor.general.pasteAsPlainText.custom, event)) {
             writeText(clipboard.readText());
             setTimeout(() => {

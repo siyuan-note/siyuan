@@ -6,7 +6,9 @@ import {fetchPost} from "../../util/fetch";
 import {getRandomEmoji, openEmojiPanel, unicode2Emoji, updateFileTreeEmoji, updateOutlineEmoji} from "../../emoji";
 import {upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
+/// #if !MOBILE
 import {openGlobalSearch} from "../../search/util";
+/// #endif
 import {getEventName} from "../util/compatibility";
 import {Dialog} from "../../dialog";
 
@@ -278,9 +280,9 @@ export class Background {
                     event.stopPropagation();
                     break;
                 } else if (type === "open-search") {
-                    if (!isMobile()) {
-                        openGlobalSearch(`#${target.textContent}#`, !window.siyuan.ctrlIsPressed);
-                    }
+                    /// #if !MOBILE
+                    openGlobalSearch(`#${target.textContent}#`, !window.siyuan.ctrlIsPressed);
+                    /// #endif
                     event.preventDefault();
                     event.stopPropagation();
                     break;

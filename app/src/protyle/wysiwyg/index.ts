@@ -19,7 +19,6 @@ import {getSearch, isMobile} from "../../util/functions";
 import {isLocalPath, pathPosix} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
 import {previewImage} from "../preview/image";
-import {openGlobalSearch} from "../../search/util";
 import {contentMenu, imgMenu, linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import * as dayjs from "dayjs";
 import {dropEvent} from "../util/editorCommonEvent";
@@ -49,6 +48,7 @@ import {blockRender} from "../markdown/blockRender";
 import {getAllModels} from "../../layout/getAll";
 import {pushBack} from "../../util/backForward";
 import {openAsset, openBy, openFileById} from "../../editor/util";
+import {openGlobalSearch} from "../../search/util";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
 import {isCtrl} from "../util/compatibility";
@@ -1483,12 +1483,14 @@ export class WYSIWYG {
                 return;
             }
 
+            /// #if !MOBILE
             const tagElement = hasClosestByAttribute(event.target, "data-type", "tag");
             if (tagElement && !window.siyuan.altIsPressed && protyle.model) {
                 openGlobalSearch(`#${tagElement.textContent}#`, !window.siyuan.ctrlIsPressed);
                 hideElements(["dialog"]);
                 return;
             }
+            /// #endif
 
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
             if (embedItemElement) {

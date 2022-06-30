@@ -16,7 +16,9 @@ import {Gutter} from "./gutter";
 import {Breadcrumb} from "./breadcrumb";
 import {onTransaction} from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
+/// #if !MOBILE
 import {Title} from "./header/Title";
+/// #endif
 import {Background} from "./header/Background";
 import {getDisplayName} from "../util/pathName";
 import {onGet} from "./util/onGet";
@@ -49,9 +51,11 @@ class Protyle {
 
         this.protyle.hint = new Hint(this.protyle);
         this.protyle.breadcrumb = new Breadcrumb(this.protyle);
+        /// #if !MOBILE
         if (mergedOptions.render.title) {
             this.protyle.title = new Title(this.protyle);
         }
+        /// #endif
         if (mergedOptions.render.background) {
             this.protyle.background = new Background(this.protyle);
         }

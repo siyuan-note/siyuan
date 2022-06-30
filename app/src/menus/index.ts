@@ -1,21 +1,21 @@
-import {initNavigationMenu, initFileMenu} from "./navigation";
-import {hasTopClosestByTag} from "../protyle/util/hasClosest";
-import {initTabMenu} from "./tab";
+/// #if !MOBILE
 import {getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {initSearchMenu} from "./search";
 import {initDockMenu} from "./dock";
+import {initNavigationMenu, initFileMenu} from "./navigation";
+import {initTabMenu} from "./tab";
+/// #endif
 import {Menu} from "./Menu";
-import {isMobile} from "../util/functions";
+import {hasTopClosestByTag} from "../protyle/util/hasClosest";
+
 
 export class Menus {
     public menu: Menu;
 
     constructor() {
         this.menu = new Menu();
-        if (isMobile()) {
-            return;
-        }
+        /// #if !MOBILE
         window.addEventListener("contextmenu", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.parentElement.isEqualNode(document.querySelector("body"))) {
@@ -68,6 +68,7 @@ export class Menus {
                 target = target.parentElement;
             }
         }, false);
+        /// #endif
     }
 
     private getDir(target: HTMLElement) {

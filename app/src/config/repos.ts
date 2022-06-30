@@ -2,10 +2,12 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {needSubscribe} from "../util/needSubscribe";
 import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
+/// #if !MOBILE
+import {exportLayout} from "../layout/util";
+/// #endif
 import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
 import {exitSiYuan} from "../dialog/processSystem";
-import {exportLayout} from "../layout/util";
 
 const getCloudList = (reload = false) => {
     const listElement = repos.element.querySelector("#reposCloudSyncList");
@@ -435,9 +437,13 @@ ${passwordHTML}
                                     fetchPost("/api/backup/downloadCloudBackup", {}, () => {
                                         fetchPost("/api/backup/recoverLocalBackup", {}, () => {
                                             setTimeout(() => {
+                                                /// #if !MOBILE
                                                 exportLayout(false, () => {
                                                     exitSiYuan();
                                                 });
+                                                /// #else
+                                                window.location.reload();
+                                                /// #endif
                                             }, 7000);
                                             return;
                                         });

@@ -2,8 +2,10 @@ import {Constants} from "../constants";
 import {addScript} from "../protyle/util/addScript";
 import {addStyle} from "../protyle/util/addStyle";
 import {setCodeTheme} from "../protyle/ui/setCodeTheme";
-import {isMobile} from "./functions";
+/// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
+/// #endif
+import {isMobile} from "./functions";
 
 export const loadAssets = (data: IAppearance) => {
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
@@ -33,11 +35,11 @@ export const loadAssets = (data: IAppearance) => {
     } else if (styleElement) {
         styleElement.remove();
     }
-    if (!isMobile()) {
-        getAllModels().graph.forEach(item => {
-            item.searchGraph(false);
-        });
-    }
+    /// #if !MOBILE
+    getAllModels().graph.forEach(item => {
+        item.searchGraph(false);
+    });
+    /// #endif
     setCodeTheme();
 
     const themeScriptElement = document.getElementById("themeScript");

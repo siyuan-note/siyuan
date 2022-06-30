@@ -1,7 +1,7 @@
 import {closePanel} from "../util/closePanel";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
-import {appearance} from "../../config/appearance";
+import {genOptions} from "../../util/genOptions";
 
 export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTMLElement) => {
     closePanel();
@@ -21,12 +21,12 @@ export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTML
     ${window.siyuan.languages.theme}
     <div class="fn__hr"></div>
     <select class="b3-select fn__block" id="themeLight">
-      ${appearance._genOptions(window.siyuan.config.appearance.lightThemes, window.siyuan.config.appearance.themeLight)}
+      ${genOptions(window.siyuan.config.appearance.lightThemes, window.siyuan.config.appearance.themeLight)}
     </select>
     <div class="b3-label__text b3-typography">${window.siyuan.languages.theme11}</div>
     <div class="fn__hr"></div>
     <select class="b3-select fn__block" id="themeDark">
-       ${appearance._genOptions(window.siyuan.config.appearance.darkThemes, window.siyuan.config.appearance.themeDark)}
+       ${genOptions(window.siyuan.config.appearance.darkThemes, window.siyuan.config.appearance.themeDark)}
     </select>
     <div class="b3-label__text b3-typography">${window.siyuan.languages.theme12}</div>
 </div>
@@ -34,14 +34,14 @@ export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTML
     ${window.siyuan.languages.icon}
     <div class="fn__hr"></div>
     <select class="b3-select fn__block" id="icon">
-        ${appearance._genOptions(window.siyuan.config.appearance.icons, window.siyuan.config.appearance.icon)}
+        ${genOptions(window.siyuan.config.appearance.icons, window.siyuan.config.appearance.icon)}
     </select>
     <div class="b3-label__text b3-typography">${window.siyuan.languages.theme2}</div>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.language}
     <div class="fn__hr"></div>
-    <select id="lang" class="b3-select fn__block">${appearance._genOptions(window.siyuan.config.langs, window.siyuan.config.appearance.lang)}</select>
+    <select id="lang" class="b3-select fn__block">${genOptions(window.siyuan.config.langs, window.siyuan.config.appearance.lang)}</select>
     <div class="b3-label__text b3-typography">${window.siyuan.languages.language1}</div>
 </div>
 <div class="b3-label">

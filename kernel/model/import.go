@@ -394,6 +394,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		})
 
 		targetPaths := map[string]string{}
+		assetsDone := map[string]string{}
 
 		// md 转换 sy
 		i := 0
@@ -481,15 +482,19 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				}
 				fullPath, exist = assets[absDest]
 				if exist {
-					name := filepath.Base(fullPath)
-					ext := filepath.Ext(name)
-					name = strings.TrimSuffix(name, ext)
-					name += "-" + ast.NewNodeID() + ext
-					assetTargetPath := filepath.Join(assetDirPath, name)
-					delete(assets, absDest)
-					if err = gulu.File.Copy(fullPath, assetTargetPath); nil != err {
-						util.LogErrorf("copy asset from [%s] to [%s] failed: %s", fullPath, assetTargetPath, err)
-						return ast.WalkContinue
+					existName := assetsDone[absDest]
+					var name string
+					if "" == existName {
+						name = filepath.Base(fullPath)
+						name = util.AssetName(name)
+						assetTargetPath := filepath.Join(assetDirPath, name)
+						if err = gulu.File.Copy(fullPath, assetTargetPath); nil != err {
+							util.LogErrorf("copy asset from [%s] to [%s] failed: %s", fullPath, assetTargetPath, err)
+							return ast.WalkContinue
+						}
+						assetsDone[absDest] = name
+					} else {
+						name = existName
 					}
 					n.Tokens = gulu.Str.ToBytes("assets/" + name)
 				}
@@ -568,9 +573,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			}
 			if exist {
 				name := filepath.Base(absolutePath)
-				ext := filepath.Ext(name)
-				name = strings.TrimSuffix(name, ext)
-				name += "-" + ast.NewNodeID() + ext
+				name = util.AssetName(name)
 				assetTargetPath := filepath.Join(assetDirPath, name)
 				if err = gulu.File.CopyFile(absolutePath, assetTargetPath); nil != err {
 					util.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)

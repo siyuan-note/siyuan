@@ -159,19 +159,7 @@ func Upload(c *gin.Context) {
 			// 已经存在同样数据的资源文件的话不重复保存
 			succMap[baseName] = existAsset.Path
 		} else {
-			_, id := util.LastID(fName)
-			ext := path.Ext(fName)
-			fName = fName[0 : len(fName)-len(ext)]
-			if !util.IsIDPattern(id) {
-				id = ast.NewNodeID()
-				fName = fName + "-" + id + ext
-			} else {
-				if !util.IsIDPattern(fName) {
-					fName = fName[:len(fName)-len(id)-1] + "-" + id + ext
-				} else {
-					fName = fName + ext
-				}
-			}
+			fName = util.AssetName(fName)
 			writePath := filepath.Join(assetsDirPath, fName)
 			if _, err = f.Seek(0, io.SeekStart); nil != err {
 				errFiles = append(errFiles, fName)

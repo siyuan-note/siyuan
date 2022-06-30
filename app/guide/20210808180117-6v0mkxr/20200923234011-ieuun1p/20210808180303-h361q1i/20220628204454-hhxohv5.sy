@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20220628204454-hhxohv5",
 		"title": "Optimize typography",
-		"updated": "20220628215421"
+		"updated": "20220630211219"
 	},
 	"Children": [
 		{
@@ -129,90 +129,6 @@
 			},
 			"Children": [
 				{
-					"ID": "20220628215200-hjfctzh",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220628215200-hjfctzh",
-						"updated": "20220628215330"
-					},
-					"Children": [
-						{
-							"ID": "20220628215200-s8crkrx",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220628215200-s8crkrx",
-								"updated": "20220628215330"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Tag"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220628215200-bdo2vnf",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220628215200-bdo2vnf",
-						"updated": "20220628215333"
-					},
-					"Children": [
-						{
-							"ID": "20220628215200-cpv1dxw",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220628215200-cpv1dxw",
-								"updated": "20220628215333"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Mark"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220628215200-3ymuu1l",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220628215200-3ymuu1l",
-						"updated": "20220628215334"
-					},
-					"Children": [
-						{
-							"ID": "20220628215200-n159ewe",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220628215200-n159ewe",
-								"updated": "20220628215334"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Strikethrough"
-								}
-							]
-						}
-					]
-				},
-				{
 					"ID": "20220628215200-jdgcfne",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -267,25 +183,190 @@
 							]
 						}
 					]
-				},
+				}
+			]
+		},
+		{
+			"ID": "20220630211201-ggozvjz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220630211201-ggozvjz",
+				"updated": "20220630211201"
+			},
+			"Children": [
 				{
-					"ID": "20220628215200-ftyia4q",
+					"Type": "NodeText",
+					"Data": "In addition, a space will be automatically inserted between Chinese and Western languages in the following elements:"
+				}
+			]
+		},
+		{
+			"ID": "20220630211201-d80xx42",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220630211201-d80xx42",
+				"updated": "20220630211219"
+			},
+			"Children": [
+				{
+					"ID": "20220630211201-2vvo1yo",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220628215200-ftyia4q",
-						"updated": "20220628215339"
+						"id": "20220630211201-2vvo1yo",
+						"updated": "20220630211210"
 					},
 					"Children": [
 						{
-							"ID": "20220628215200-ljro6gm",
+							"ID": "20220630211201-crqr0sj",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220628215200-ljro6gm",
-								"updated": "20220628215339"
+								"id": "20220630211201-crqr0sj",
+								"updated": "20220630211210"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Tag"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211201-xvvr6cb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211201-xvvr6cb",
+						"updated": "20220630211212"
+					},
+					"Children": [
+						{
+							"ID": "20220630211201-s03kxsh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211201-s03kxsh",
+								"updated": "20220630211212"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mark"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211201-lxnn7r2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211201-lxnn7r2",
+						"updated": "20220630211213"
+					},
+					"Children": [
+						{
+							"ID": "20220630211201-5gsz1zv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211201-5gsz1zv",
+								"updated": "20220630211213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Strikethrough"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211201-vg75q8p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211201-vg75q8p",
+						"updated": "20220630211201"
+					},
+					"Children": [
+						{
+							"ID": "20220630211201-wryew45",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211201-wryew45",
+								"updated": "20220630211201"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Hyperlink anchor text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211201-yhpbga9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211201-yhpbga9",
+						"updated": "20220630211216"
+					},
+					"Children": [
+						{
+							"ID": "20220630211201-6rx4x4p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211201-6rx4x4p",
+								"updated": "20220630211216"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Normal text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211201-6po0hz5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211201-6po0hz5",
+						"updated": "20220630211218"
+					},
+					"Children": [
+						{
+							"ID": "20220630211201-z7c6px5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211201-z7c6px5",
+								"updated": "20220630211218"
 							},
 							"Children": [
 								{
@@ -297,23 +378,23 @@
 					]
 				},
 				{
-					"ID": "20220628215200-kw5xfoo",
+					"ID": "20220630211201-4aezon3",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220628215200-kw5xfoo",
-						"updated": "20220628215340"
+						"id": "20220630211201-4aezon3",
+						"updated": "20220630211219"
 					},
 					"Children": [
 						{
-							"ID": "20220628215200-dmpgbnr",
+							"ID": "20220630211201-4n0bq1l",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220628215200-dmpgbnr",
-								"updated": "20220628215340"
+								"id": "20220630211201-4n0bq1l",
+								"updated": "20220630211219"
 							},
 							"Children": [
 								{
@@ -323,20 +404,6 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20220628215200-jruaraa",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220628215200-jruaraa",
-				"updated": "20220628215200"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "In addition, a space will be automatically inserted between Chinese and Western texts in the hyperlink anchor text and normal text."
 				}
 			]
 		},

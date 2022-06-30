@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20220628204420-ui79vkt",
 		"title": "優化排版",
-		"updated": "20220628215521"
+		"updated": "20220630211154"
 	},
 	"Children": [
 		{
@@ -129,90 +129,6 @@
 			},
 			"Children": [
 				{
-					"ID": "20220628215506-ejyq8wg",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220628215506-ejyq8wg",
-						"updated": "20220628215506"
-					},
-					"Children": [
-						{
-							"ID": "20220628215506-r7011ik",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220628215506-r7011ik",
-								"updated": "20220628215506"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "標籤"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220628215506-9n4aatw",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220628215506-9n4aatw",
-						"updated": "20220628215506"
-					},
-					"Children": [
-						{
-							"ID": "20220628215506-lvi8wwl",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220628215506-lvi8wwl",
-								"updated": "20220628215506"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "高亮"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220628215506-tqblhzr",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220628215506-tqblhzr",
-						"updated": "20220628215506"
-					},
-					"Children": [
-						{
-							"ID": "20220628215506-apql9i8",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220628215506-apql9i8",
-								"updated": "20220628215506"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "刪除線"
-								}
-							]
-						}
-					]
-				},
-				{
 					"ID": "20220628215506-tfhl45j",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -267,25 +183,190 @@
 							]
 						}
 					]
-				},
+				}
+			]
+		},
+		{
+			"ID": "20220630211154-d216i5j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220630211154-d216i5j",
+				"updated": "20220630211154"
+			},
+			"Children": [
 				{
-					"ID": "20220628215506-gwxg0sp",
+					"Type": "NodeText",
+					"Data": "另外，如下元素中的中西文間也會自動插入一個空格："
+				}
+			]
+		},
+		{
+			"ID": "20220630211154-7y2zlnx",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220630211154-7y2zlnx",
+				"updated": "20220630211154"
+			},
+			"Children": [
+				{
+					"ID": "20220630211154-yr6rvir",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220628215506-gwxg0sp",
-						"updated": "20220628215506"
+						"id": "20220630211154-yr6rvir",
+						"updated": "20220630211154"
 					},
 					"Children": [
 						{
-							"ID": "20220628215506-dzqlgm9",
+							"ID": "20220630211154-8ptzt3a",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220628215506-dzqlgm9",
-								"updated": "20220628215506"
+								"id": "20220630211154-8ptzt3a",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "標籤"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211154-gjt0dpy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-gjt0dpy",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-p32qfcb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-p32qfcb",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "高亮"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211154-t1yonyq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-t1yonyq",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-h54yp04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-h54yp04",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "刪除線"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211154-o3way3q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-o3way3q",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-bysdnhn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-bysdnhn",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "超鏈接錨文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211154-53u3pwi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-53u3pwi",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-dyus91j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-dyus91j",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "普通文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211154-ciwaquv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-ciwaquv",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-la9aicz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-la9aicz",
+								"updated": "20220630211154"
 							},
 							"Children": [
 								{
@@ -297,23 +378,23 @@
 					]
 				},
 				{
-					"ID": "20220628215506-gwo2byo",
+					"ID": "20220630211154-uvdbsdb",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220628215506-gwo2byo",
-						"updated": "20220628215506"
+						"id": "20220630211154-uvdbsdb",
+						"updated": "20220630211154"
 					},
 					"Children": [
 						{
-							"ID": "20220628215506-z9h8d47",
+							"ID": "20220630211154-of2mnn3",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220628215506-z9h8d47",
-								"updated": "20220628215506"
+								"id": "20220630211154-of2mnn3",
+								"updated": "20220630211154"
 							},
 							"Children": [
 								{
@@ -323,20 +404,6 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20220628215506-iixm6ws",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220628215506-iixm6ws",
-				"updated": "20220628215506"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "另外，對於超鏈接錨文本和普通文本中的中西文間也會自動插入一個空格。"
 				}
 			]
 		},

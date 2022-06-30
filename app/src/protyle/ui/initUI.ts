@@ -2,6 +2,7 @@ import {setEditMode} from "../util/setEditMode";
 import {lineNumberRender} from "../markdown/highlightRender";
 import {scrollEvent} from "../scroll/event";
 import {isMobile} from "../../util/functions";
+import {Constants} from "../../constants";
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -46,8 +47,18 @@ export const addLoading = (protyle: IProtyle) => {
 };
 
 export const setPadding = (protyle: IProtyle) => {
-    const min16 = protyle.element.clientWidth > 888 ? 96 : 16;
-    const min24 = protyle.element.clientWidth > 888 ? 96 : 24;
+    let min16 = 16;
+    let min24 = 24;
+    if (!isMobile()) {
+        const padding = (protyle.element.clientWidth - Constants.SIZE_EDITOR_WIDTH) / 2
+        if (!window.siyuan.config.editor.fullWidth && padding > 96) {
+            min16 = padding
+            min24 = padding
+        } else if (protyle.element.clientWidth > Constants.SIZE_EDITOR_WIDTH) {
+            min16 = 96
+            min24 = 96
+        }
+    }
     if (protyle.options.render.background && protyle.options.render.title) {
         protyle.background.element.lastElementChild.setAttribute("style", `left:${min16}px`);
         protyle.title.element.style.margin = `16px ${min16}px 0 ${min24}px`;

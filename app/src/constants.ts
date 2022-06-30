@@ -36,6 +36,7 @@ export abstract class Constants {
     public static readonly SIZE_GET_MAX = 102400;
     public static readonly SIZE_UNDO = 64;
     public static readonly SIZE_TITLE = 512;
+    public static readonly SIZE_EDITOR_WIDTH = 760;
 
     // ws callback
     public static readonly CB_MOUNT_HELP = "cb-mount-help";

@@ -11,7 +11,7 @@ const getLang = (keys: string[]) => {
 export const initConfigSearch = (element: HTMLElement) => {
     const configIndex = [
         // 编辑器
-        getLang(["config",
+        getLang(["config", "fullWidth",
             "editor", "md2", "md3", "md12", "md16", "md27", "md28", "md29", "md30", "md31", "md32", "md33", "md34", "md39",
             "fontSizeTip", "fontSize", "font", "font1", "generateHistory", "generateHistoryInterval",
             "historyRetentionDays", "historyRetentionDaysTip", "clearHistory"

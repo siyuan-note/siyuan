@@ -1,4 +1,5 @@
 {
+  "adaptiveWidth": "自適應寬度",
   "tabLimit": "頁簽打開最大數量",
   "tabLimit1": "按照打開時間排序，關閉最早打開的頁簽",
   "pasteEscaped": "粘貼轉義文本",

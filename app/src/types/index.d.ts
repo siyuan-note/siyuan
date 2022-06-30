@@ -177,6 +177,7 @@ declare interface IExport {
 }
 
 declare interface IEditor {
+    fullWidth: boolean;
     fontSize: number;
     generateHistoryInterval: number;
     historyRetentionDays: number;

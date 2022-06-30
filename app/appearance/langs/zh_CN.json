@@ -1,4 +1,5 @@
 {
+  "fullWidth": "自适应宽度",
   "tabLimit": "页签打开最大数量",
   "tabLimit1": "按照打开时间排序，关闭最早打开的页签",
   "pasteEscaped": "粘贴转义文本",

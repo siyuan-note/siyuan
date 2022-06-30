@@ -2,13 +2,20 @@ import {getAllModels} from "../layout/getAll";
 import {setInlineStyle} from "../util/assets";
 import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {setPadding} from "../protyle/ui/initUI";
 
 export const editor = {
     element: undefined as Element,
     genHTML: () => {
         let fontFamilyHTML = "";
         fontFamilyHTML = '<select id="fontFamily" class="b3-select fn__flex-center fn__size200"></select>';
-        return `
+        return `<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.fullWidth}
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="fullWidth" type="checkbox"${window.siyuan.config.editor.fullWidth ? " checked" : ""}/>
+</label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.md12}
@@ -146,6 +153,7 @@ export const editor = {
 
         const setEditor = () => {
             fetchPost("/api/setting/setEditor", {
+                fullWidth: (editor.element.querySelector("#fullWidth") as HTMLInputElement).checked,
                 displayBookmarkIcon: (editor.element.querySelector("#displayBookmarkIcon") as HTMLInputElement).checked,
                 displayNetImgMark: (editor.element.querySelector("#displayNetImgMark") as HTMLInputElement).checked,
                 codeSyntaxHighlightLineNum: (editor.element.querySelector("#codeSyntaxHighlightLineNum") as HTMLInputElement).checked,
@@ -186,6 +194,7 @@ export const editor = {
         window.siyuan.config.editor = editor;
         getAllModels().editor.forEach((item) => {
             item.editor.reload();
+            setPadding(item.editor.protyle);
         });
         setInlineStyle();
     }

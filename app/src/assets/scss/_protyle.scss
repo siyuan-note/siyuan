@@ -331,6 +331,7 @@
     display: flex;
     position: absolute;
     height: 80px;
+    transition: left .15s cubic-bezier(0, 0, .2, 1) 0ms;
 
     .protyle-icons {
       position: initial;
@@ -347,6 +348,7 @@
   margin: 34px 16px 0 24px;
   position: relative;
   font-size: 16px;
+  transition: margin .15s cubic-bezier(0, 0, .2, 1) 0ms;
 
   &:hover .protyle-title__icon {
     opacity: 1;

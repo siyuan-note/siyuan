@@ -71,6 +71,7 @@ func clearWorkspaceHistory(c *gin.Context) {
 		return
 	}
 	util.PushClearMsg(msgId)
+	time.Sleep(500 * time.Millisecond)
 	util.PushMsg(model.Conf.Language(99), 1000*5)
 }
 

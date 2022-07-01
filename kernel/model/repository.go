@@ -499,6 +499,11 @@ func syncRepo() (err error) {
 	incReindex(upserts, removes)
 	cache.ClearDocsIAL()
 	util.ReloadUI()
+	elapsed = time.Since(start)
+	go func() {
+		time.Sleep(2 * time.Second)
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(149)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
+	}()
 	return
 }
 

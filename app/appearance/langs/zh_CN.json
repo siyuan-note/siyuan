@@ -1,7 +1,7 @@
 {
-  "newSubFile": "新建子文档",
-  "newFileAfter": "在后新建同级文档",
-  "newFileBefore": "在前新建同级文档",
+  "newSubDoc": "新建子文档",
+  "newDocBelow": "在下方新建文档",
+  "newDocAbove": "在上方新建文档",
   "fullWidth": "自适应宽度",
   "fullWidthTip": "开启后将尽可能宽地显示编辑区",
   "tabLimit": "页签打开最大数量",

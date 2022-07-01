@@ -135,7 +135,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconFile",
-            label: window.siyuan.languages.newSubFile,
+            label: window.siyuan.languages.newSubDoc,
             click: () => {
                 newFile(notebookId, pathString, true);
             }
@@ -143,7 +143,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
         if (window.siyuan.config.fileTree.sort === 6) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconBefore",
-                label: window.siyuan.languages.newFileBefore,
+                label: window.siyuan.languages.newDocAbove,
                 click: () => {
                     const paths: string[] = [];
                     Array.from(liElement.parentElement.children).forEach((item) => {
@@ -159,7 +159,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconAfter",
-                label: window.siyuan.languages.newFileAfter,
+                label: window.siyuan.languages.newDocBelow,
                 click: () => {
                     const paths: string[] = [];
                     Array.from(liElement.parentElement.children).forEach((item) => {

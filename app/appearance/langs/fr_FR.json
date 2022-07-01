@@ -1,7 +1,7 @@
 {
-  "newSubFile": "Nouveau sous-fichier",
-  "newFileAfter": "Nouveau fichier au même niveau après",
-  "newFileBefore": "Nouveau fichier au même niveau avant",
+  "newSubDoc": "Créer un sous-doc",
+  "newDocBelow": "Créer un document ci-dessous",
+  "newDocAbove": "Créer un document ci-dessus",
   "fullWidth": "Largeur adaptative",
   "fullWidthTip": "Lorsqu'il est activé, la zone d'édition sera affichée aussi large que possible",
   "tabLimit": "Nombre maximum d'onglets ouverts",

@@ -38,6 +38,7 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtIndexWalkData, func(context map[string]interface{}, path string) {
 		msg := "Indexing data repository [walk data " + path + "]"
 		util.SetBootDetails(msg)
+		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:
@@ -52,6 +53,7 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(context map[string]interface{}, path string) {
 		msg := "Indexing data repository [get latest file " + path + "]"
 		util.SetBootDetails(msg)
+		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:
@@ -66,6 +68,7 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtIndexUpsertFile, func(context map[string]interface{}, path string) {
 		msg := "Indexing data repository [upsert file " + path + "]"
 		util.SetBootDetails(msg)
+		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:
@@ -81,6 +84,7 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
 		msg := "Checkout data repository [walk data " + path + "]"
 		util.SetBootDetails(msg)
+		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:
@@ -95,6 +99,7 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtCheckoutUpsertFile, func(context map[string]interface{}, path string) {
 		msg := "Checkout data repository [upsert file " + path + "]"
 		util.SetBootDetails(msg)
+		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:
@@ -109,6 +114,7 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtCheckoutRemoveFile, func(context map[string]interface{}, path string) {
 		msg := "Checkout data repository [remove file " + path + "]"
 		util.SetBootDetails(msg)
+		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:
@@ -124,6 +130,7 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudIndexes, func(context map[string]interface{}, latestSync string) {
 		msg := "Downloading data repository indexes..."
 		util.SetBootDetails(msg)
+		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:
@@ -139,6 +146,7 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudFile, func(context map[string]interface{}, id string) {
 		msg := "Downloading data repository object [" + id + "]"
 		util.SetBootDetails(msg)
+		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:
@@ -154,6 +162,7 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudChunk, func(context map[string]interface{}, id string) {
 		msg := "Downloading data repository object [" + id + "]"
 		util.SetBootDetails(msg)
+		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:
@@ -169,6 +178,7 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtSyncBeforeUploadObject, func(context map[string]interface{}, id string) {
 		msg := "Uploading data repository object [" + id + "]"
 		util.SetBootDetails(msg)
+		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:

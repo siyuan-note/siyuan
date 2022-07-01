@@ -45,7 +45,7 @@ export class Menus {
                 if (dataType === "navigation-file") {
                     this.unselect();
                     // navigation 文件上：删除/重命名/打开文件位置/导出
-                    initFileMenu(this.getDir(target), target.getAttribute("data-path"), target.getAttribute("data-node-id"), target.getAttribute("data-name")).popup({
+                    initFileMenu(this.getDir(target), target.getAttribute("data-path"), target).popup({
                         x: event.clientX,
                         y: event.clientY
                     });

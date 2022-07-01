@@ -1,4 +1,7 @@
 {
+  "newSubFile": "New SubFile",
+  "newFileAfter": "New file after",
+  "newFileBefore": "New file before",
   "adaptiveWidth": "Adaptive Width",
   "fullWidthTip": "After enabling, the editing area will be displayed as wide as possible",
   "tabLimit": "Tab Limit",

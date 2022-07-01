@@ -793,16 +793,6 @@ export const openMenu = (src: string, onlyMenu = false) => {
     }).element);
 };
 
-export const newFileMenu = (notebookId?: string, path?: string, open?: boolean) => {
-    return new MenuItem({
-        icon: "iconFile",
-        label: window.siyuan.languages.newFile,
-        click: () => {
-            newFile(notebookId, path, open);
-        }
-    }).element;
-};
-
 export const deleteMenu = (notebookId: string, name: string, pathString: string) => {
     return new MenuItem({
         icon: "iconTrashcan",

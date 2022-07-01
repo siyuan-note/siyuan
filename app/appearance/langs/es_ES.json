@@ -1,4 +1,7 @@
 {
+  "newSubFile": "Nuevo SubArchivo",
+  "newFileAfter": "Nuevo archivo en el mismo nivel después",
+  "newFileBefore": "Nuevo archivo en el mismo nivel anterior",
   "fullWidth": "Ancho adaptable",
   "fullWidthTip": "Cuando está habilitado, el área de edición se mostrará lo más amplia posible",
   "tabLimit": "Límite de la pestaña",

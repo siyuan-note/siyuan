@@ -3,7 +3,6 @@ import {
     deleteMenu,
     exportMd,
     movePathToMenu,
-    newFileMenu,
     openFileAttr,
     renameMenu,
 } from "./commonMenuItem";
@@ -23,12 +22,19 @@ import {openFileById} from "../editor/util";
 /// #endif
 import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
+import {newFile} from "../util/newFile";
 
 export const initNavigationMenu = (liElement: HTMLElement) => {
     const notebookId = liElement.parentElement.getAttribute("data-url");
     const name = getNotebookName(notebookId);
     window.siyuan.menus.menu.remove();
-    window.siyuan.menus.menu.append(newFileMenu(notebookId, "/", true));
+    window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconFile",
+        label: window.siyuan.languages.newFile,
+        click: () => {
+            newFile(notebookId, "/", true);
+        }
+    }).element);
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(renameMenu({
@@ -121,11 +127,53 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
     return window.siyuan.menus.menu;
 };
 
-export const initFileMenu = (notebookId: string, pathString: string, id: string, name: string) => {
+export const initFileMenu = (notebookId: string, pathString: string, liElement: HTMLElement) => {
+    const id = liElement.getAttribute("data-node-id")
+    let name = liElement.getAttribute("data-name")
     window.siyuan.menus.menu.remove();
     name = getDisplayName(name, false, true);
     if (!window.siyuan.config.readonly) {
-        window.siyuan.menus.menu.append(newFileMenu(notebookId, pathString, true));
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconFile",
+            label: window.siyuan.languages.newSubFile,
+            click: () => {
+                newFile(notebookId, pathString, true);
+            }
+        }).element);
+        if (window.siyuan.config.fileTree.sort === 6) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconBefore",
+                label: window.siyuan.languages.newFileBefore,
+                click: () => {
+                    const paths: string[] = [];
+                    Array.from(liElement.parentElement.children).forEach((item) => {
+                        if (item.tagName === "LI") {
+                            if (item.isSameNode(liElement)) {
+                                paths.push(undefined)
+                            }
+                            paths.push(item.getAttribute("data-path"));
+                        }
+                    });
+                    newFile(notebookId, pathPosix().dirname(pathString), true, paths);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconAfter",
+                label: window.siyuan.languages.newFileAfter,
+                click: () => {
+                    const paths: string[] = [];
+                    Array.from(liElement.parentElement.children).forEach((item) => {
+                        if (item.tagName === "LI") {
+                            paths.push(item.getAttribute("data-path"));
+                            if (item.isSameNode(liElement)) {
+                                paths.push(undefined);
+                            }
+                        }
+                    });
+                    newFile(notebookId, pathPosix().dirname(pathString), true, paths);
+                }
+            }).element);
+        }
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.copy,

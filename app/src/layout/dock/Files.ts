@@ -217,7 +217,7 @@ export class Files extends Model {
                             }
                         }
                         if (type === "more-file") {
-                            initFileMenu(notebookId, pathString, target.parentElement.getAttribute("data-node-id"), target.parentElement.getAttribute("data-name")).popup({
+                            initFileMenu(notebookId, pathString, target.parentElement).popup({
                                 x: event.clientX,
                                 y: event.clientY
                             });

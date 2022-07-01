@@ -10,7 +10,7 @@ import {fetchPost} from "./fetch";
 import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
 import {Constants} from "../constants";
 
-export const newFile = (notebookId?: string, currentPath?: string, open?: boolean) => {
+export const newFile = (notebookId?: string, currentPath?: string, open?: boolean, paths?: string[]) => {
     if (getOpenNotebookCount() === 0) {
         showMessage(window.siyuan.languages.newFileTip);
         return;
@@ -54,11 +54,16 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
     }
     fetchPost("/api/filetree/getDocNameTemplate", {notebook: notebookId}, (data) => {
         const id = Lute.NewNodeID();
+        const newPath = pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy")
+        if (paths) {
+            paths[paths.indexOf(undefined)] = newPath
+        }
         fetchPost("/api/filetree/createDoc", {
             notebook: notebookId,
-            path: pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy"),
+            path: newPath,
             title: data.data.name || "Untitled",
             md: "",
+            sorts: paths
         }, () => {
             /// #if !MOBILE
             if (open) {

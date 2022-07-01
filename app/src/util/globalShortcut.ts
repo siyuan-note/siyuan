@@ -812,7 +812,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     if (matchHotKey("⌘/", event)) {
         const liRect = liElement.getBoundingClientRect();
         if (isFile) {
-            initFileMenu(notebookId, pathString, liElement.getAttribute("data-node-id"), liElement.getAttribute("data-name")).popup({
+            initFileMenu(notebookId, pathString, liElement).popup({
                 x: liRect.right - 15,
                 y: liRect.top + 15
             });

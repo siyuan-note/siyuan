@@ -1,4 +1,7 @@
 {
+  "newSubFile": "新建子文檔",
+  "newFileAfter": "在後新建同級文檔",
+  "newFileBefore": "在前新建同級文檔",
   "fullWidth": "自適應寬度",
   "fullWidthTip": "開啟後將盡可能寬地顯示編輯區",
   "tabLimit": "頁簽打開最大數量",

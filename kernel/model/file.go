@@ -920,7 +920,7 @@ func DuplicateDoc(rootID string) (err error) {
 	return
 }
 
-func CreateDocByMd(boxID, p, title, md string) (err error) {
+func CreateDocByMd(boxID, p, title, md string, sorts []string) (err error) {
 	WaitForWritingFiles()
 
 	box := Conf.Box(boxID)
@@ -930,7 +930,13 @@ func CreateDocByMd(boxID, p, title, md string) (err error) {
 
 	luteEngine := NewLute()
 	dom := luteEngine.Md2BlockDOM(md)
-	return createDoc(box.ID, p, title, dom)
+	err = createDoc(box.ID, p, title, dom)
+	if nil != err {
+		return
+	}
+
+	ChangeFileTreeSort(box.ID, sorts)
+	return
 }
 
 func CreateWithMarkdown(boxID, hPath, md string) (id string, err error) {

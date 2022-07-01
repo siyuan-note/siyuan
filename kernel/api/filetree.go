@@ -342,8 +342,15 @@ func createDoc(c *gin.Context) {
 	p := arg["path"].(string)
 	title := arg["title"].(string)
 	md := arg["md"].(string)
+	sortsArg := arg["sorts"]
+	var sorts []string
+	if nil != sortsArg {
+		for _, sort := range sortsArg.([]interface{}) {
+			sorts = append(sorts, sort.(string))
+		}
+	}
 
-	err := model.CreateDocByMd(notebook, p, title, md)
+	err := model.CreateDocByMd(notebook, p, title, md, sorts)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

@@ -447,6 +447,9 @@ func incReindex(upserts, removes []string) {
 		}
 
 		upsertFile = filepath.ToSlash(upsertFile)
+		if strings.HasPrefix(upsertFile, "/") {
+			upsertFile = upsertFile[1:]
+		}
 		box := upsertFile[:strings.Index(upsertFile, "/")]
 		p := strings.TrimPrefix(upsertFile, box)
 		tree, err0 := LoadTree(box, p)

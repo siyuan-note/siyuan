@@ -38,7 +38,6 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtIndexWalkData, func(context map[string]interface{}, path string) {
 		msg := "Indexing data repository [walk data " + path + "]"
 		util.SetBootDetails(msg)
-		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:
@@ -53,7 +52,6 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(context map[string]interface{}, path string) {
 		msg := "Indexing data repository [get latest file " + path + "]"
 		util.SetBootDetails(msg)
-		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:
@@ -84,7 +82,6 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
 		msg := "Checkout data repository [walk data " + path + "]"
 		util.SetBootDetails(msg)
-		util.LogInfof(msg)
 
 		switch context[CtxPushMsg].(int) {
 		case CtxPushMsgToProgress:

@@ -36,165 +36,7 @@ import (
 )
 
 func init() {
-	eventbus.Subscribe(dejavu.EvtIndexWalkData, func(context map[string]interface{}, path string) {
-		msg := "Indexing data repository [walk data " + path + "]"
-		util.SetBootDetails(msg)
-
-		switch context[CtxPushMsg].(int) {
-		case CtxPushMsgToProgress:
-			util.PushEndlessProgress(msg)
-		case CtxPushMsgToStatusBar:
-			util.PushStatusBar(msg)
-		case CtxPushMsgToStatusBarAndProgress:
-			util.PushStatusBar(msg)
-			util.PushEndlessProgress(msg)
-		}
-	})
-	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(context map[string]interface{}, path string) {
-		msg := "Indexing data repository [get latest file " + path + "]"
-		util.SetBootDetails(msg)
-
-		switch context[CtxPushMsg].(int) {
-		case CtxPushMsgToProgress:
-			util.PushEndlessProgress(msg)
-		case CtxPushMsgToStatusBar:
-			util.PushStatusBar(msg)
-		case CtxPushMsgToStatusBarAndProgress:
-			util.PushStatusBar(msg)
-			util.PushEndlessProgress(msg)
-		}
-	})
-	eventbus.Subscribe(dejavu.EvtIndexUpsertFile, func(context map[string]interface{}, path string) {
-		msg := "Indexing data repository [upsert file " + path + "]"
-		util.SetBootDetails(msg)
-		util.LogInfof(msg)
-
-		switch context[CtxPushMsg].(int) {
-		case CtxPushMsgToProgress:
-			util.PushEndlessProgress(msg)
-		case CtxPushMsgToStatusBar:
-			util.PushStatusBar(msg)
-		case CtxPushMsgToStatusBarAndProgress:
-			util.PushStatusBar(msg)
-			util.PushEndlessProgress(msg)
-		}
-	})
-
-	eventbus.Subscribe(dejavu.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
-		msg := "Checkout data repository [walk data " + path + "]"
-		util.SetBootDetails(msg)
-
-		switch context[CtxPushMsg].(int) {
-		case CtxPushMsgToProgress:
-			util.PushEndlessProgress(msg)
-		case CtxPushMsgToStatusBar:
-			util.PushStatusBar(msg)
-		case CtxPushMsgToStatusBarAndProgress:
-			util.PushStatusBar(msg)
-			util.PushEndlessProgress(msg)
-		}
-	})
-	eventbus.Subscribe(dejavu.EvtCheckoutUpsertFile, func(context map[string]interface{}, path string) {
-		msg := "Checkout data repository [upsert file " + path + "]"
-		util.SetBootDetails(msg)
-		util.LogInfof(msg)
-
-		switch context[CtxPushMsg].(int) {
-		case CtxPushMsgToProgress:
-			util.PushEndlessProgress(msg)
-		case CtxPushMsgToStatusBar:
-			util.PushStatusBar(msg)
-		case CtxPushMsgToStatusBarAndProgress:
-			util.PushStatusBar(msg)
-			util.PushEndlessProgress(msg)
-		}
-	})
-	eventbus.Subscribe(dejavu.EvtCheckoutRemoveFile, func(context map[string]interface{}, path string) {
-		msg := "Checkout data repository [remove file " + path + "]"
-		util.SetBootDetails(msg)
-		util.LogInfof(msg)
-
-		switch context[CtxPushMsg].(int) {
-		case CtxPushMsgToProgress:
-			util.PushEndlessProgress(msg)
-		case CtxPushMsgToStatusBar:
-			util.PushStatusBar(msg)
-		case CtxPushMsgToStatusBarAndProgress:
-			util.PushStatusBar(msg)
-			util.PushEndlessProgress(msg)
-		}
-	})
-
-	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudIndexes, func(context map[string]interface{}, latestSync string) {
-		msg := "Downloading data repository indexes..."
-		util.SetBootDetails(msg)
-		util.LogInfof(msg)
-
-		switch context[CtxPushMsg].(int) {
-		case CtxPushMsgToProgress:
-			util.PushEndlessProgress(msg)
-		case CtxPushMsgToStatusBar:
-			util.PushStatusBar(msg)
-		case CtxPushMsgToStatusBarAndProgress:
-			util.PushStatusBar(msg)
-			util.PushEndlessProgress(msg)
-		}
-	})
-
-	eventbus.Subscribe(dejavu.EvtSyncAfterDownloadCloudIndexes, func(context map[string]interface{}, indexes []*entity.Index) {
-		util.LogInfof("Downloaded indexes [len=%d]", len(indexes))
-		for _, index := range indexes {
-			util.LogInfof("    [%s]", index.ID)
-		}
-	})
-
-	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudFile, func(context map[string]interface{}, id string) {
-		msg := "Downloading data repository object [" + id + "]"
-		util.SetBootDetails(msg)
-		util.LogInfof(msg)
-
-		switch context[CtxPushMsg].(int) {
-		case CtxPushMsgToProgress:
-			util.PushEndlessProgress(msg)
-		case CtxPushMsgToStatusBar:
-			util.PushStatusBar(msg)
-		case CtxPushMsgToStatusBarAndProgress:
-			util.PushStatusBar(msg)
-			util.PushEndlessProgress(msg)
-		}
-	})
-
-	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudChunk, func(context map[string]interface{}, id string) {
-		msg := "Downloading data repository object [" + id + "]"
-		util.SetBootDetails(msg)
-		util.LogInfof(msg)
-
-		switch context[CtxPushMsg].(int) {
-		case CtxPushMsgToProgress:
-			util.PushEndlessProgress(msg)
-		case CtxPushMsgToStatusBar:
-			util.PushStatusBar(msg)
-		case CtxPushMsgToStatusBarAndProgress:
-			util.PushStatusBar(msg)
-			util.PushEndlessProgress(msg)
-		}
-	})
-
-	eventbus.Subscribe(dejavu.EvtSyncBeforeUploadObject, func(context map[string]interface{}, id string) {
-		msg := "Uploading data repository object [" + id + "]"
-		util.SetBootDetails(msg)
-		util.LogInfof(msg)
-
-		switch context[CtxPushMsg].(int) {
-		case CtxPushMsgToProgress:
-			util.PushEndlessProgress(msg)
-		case CtxPushMsgToStatusBar:
-			util.PushStatusBar(msg)
-		case CtxPushMsgToStatusBarAndProgress:
-			util.PushStatusBar(msg)
-			util.PushEndlessProgress(msg)
-		}
-	})
+	subscribeEvents()
 }
 
 func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, err error) {
@@ -515,4 +357,85 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		util.LogErrorf("init data repository failed: %s", err)
 	}
 	return
+}
+
+func subscribeEvents() {
+	eventbus.Subscribe(dejavu.EvtIndexWalkData, func(context map[string]interface{}, path string) {
+		msg := "Indexing data repository [walk data " + path + "]"
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(context map[string]interface{}, path string) {
+		msg := "Indexing data repository [get latest file " + path + "]"
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(dejavu.EvtIndexUpsertFile, func(context map[string]interface{}, path string) {
+		msg := "Indexing data repository [upsert file " + path + "]"
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
+
+	eventbus.Subscribe(dejavu.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
+		msg := "Checkout data repository [walk data " + path + "]"
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(dejavu.EvtCheckoutUpsertFile, func(context map[string]interface{}, path string) {
+		msg := "Checkout data repository [upsert file " + path + "]"
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(dejavu.EvtCheckoutRemoveFile, func(context map[string]interface{}, path string) {
+		msg := "Checkout data repository [remove file " + path + "]"
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
+
+	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudIndexes, func(context map[string]interface{}, latestSync string) {
+		msg := "Downloading data repository indexes..."
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
+
+	eventbus.Subscribe(dejavu.EvtSyncAfterDownloadCloudIndexes, func(context map[string]interface{}, indexes []*entity.Index) {
+		msg := fmt.Sprintf("Downloaded indexes [len=%d]", len(indexes))
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+
+		//util.LogInfof(msg)
+		//for _, index := range indexes {
+		//	util.LogInfof("    [%s]", index.ID)
+		//}
+	})
+
+	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudFile, func(context map[string]interface{}, id string) {
+		msg := "Downloading data repository object [" + id + "]"
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
+
+	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudChunk, func(context map[string]interface{}, id string) {
+		msg := "Downloading data repository object [" + id + "]"
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
+
+	eventbus.Subscribe(dejavu.EvtSyncBeforeUploadObject, func(context map[string]interface{}, id string) {
+		msg := "Uploading data repository object [" + id + "]"
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
+}
+
+func contextPushMsg(context map[string]interface{}, msg string) {
+	switch context[CtxPushMsg].(int) {
+	case CtxPushMsgToProgress:
+		util.PushEndlessProgress(msg)
+	case CtxPushMsgToStatusBar:
+		util.PushStatusBar(msg)
+	case CtxPushMsgToStatusBarAndProgress:
+		util.PushStatusBar(msg)
+		util.PushEndlessProgress(msg)
+	}
 }

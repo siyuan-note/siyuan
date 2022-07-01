@@ -132,6 +132,18 @@ func SyncData(boot, exit, byHand bool) {
 	syncLock.Lock()
 	defer syncLock.Unlock()
 
+	// 创建数据快照 https://github.com/siyuan-note/siyuan/issues/5161
+	indexRepoBeforeCloudSync()
+
+	if !boot && !exit && byHand {
+		// 同步数据仓库 https://github.com/siyuan-note/siyuan/issues/5142
+		if syncRepoErr := syncRepo(); nil != syncRepoErr {
+			util.LogErrorf("sync repo failed: %s", syncRepoErr)
+		}
+	}
+
+	return // TODO: 测试
+
 	WaitForWritingFiles()
 	writingDataLock.Lock()
 	var err error
@@ -149,18 +161,6 @@ func SyncData(boot, exit, byHand bool) {
 		writingDataLock.Unlock()
 		return
 	}
-
-	// 创建数据快照 https://github.com/siyuan-note/siyuan/issues/5161
-	indexRepoBeforeCloudSync()
-
-	if !boot && !exit && byHand {
-		// 同步数据仓库 https://github.com/siyuan-note/siyuan/issues/5142
-		if syncRepoErr := syncRepo(); nil != syncRepoErr {
-			util.LogErrorf("sync repo failed: %s", syncRepoErr)
-		}
-	}
-
-	return // TODO: 测试
 
 	// 获取工作空间数据配置（数据版本）
 	dataConf, err := getWorkspaceDataConf()

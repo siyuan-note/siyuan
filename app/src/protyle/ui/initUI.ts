@@ -50,13 +50,13 @@ export const setPadding = (protyle: IProtyle) => {
     let min16 = 16;
     let min24 = 24;
     if (!isMobile()) {
-        const padding = (protyle.element.clientWidth - Constants.SIZE_EDITOR_WIDTH) / 2
+        const padding = (protyle.element.clientWidth - Constants.SIZE_EDITOR_WIDTH) / 2;
         if (!window.siyuan.config.editor.fullWidth && padding > 96) {
-            min16 = padding
-            min24 = padding
+            min16 = padding;
+            min24 = padding;
         } else if (protyle.element.clientWidth > Constants.SIZE_EDITOR_WIDTH) {
-            min16 = 96
-            min24 = 96
+            min16 = 96;
+            min24 = 96;
         }
         if (!window.siyuan.config.editor.fullWidth) {
             // 防止右侧分屏后，左侧页签抖动

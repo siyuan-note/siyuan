@@ -8,4 +8,4 @@ export const genOptions = (data: string[] | { label: string, name: string }[], k
         }
     });
     return html;
-}
+};

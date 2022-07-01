@@ -1075,8 +1075,8 @@ export class Gutter {
                 label: window.siyuan.languages["insert-before"],
                 accelerator: window.siyuan.config.keymap.editor.general.insertBefore.custom,
                 click() {
-                    nodeElement.classList.remove("protyle-wysiwyg--select")
-                    countBlockWord([])
+                    nodeElement.classList.remove("protyle-wysiwyg--select");
+                    countBlockWord([]);
                     insertEmptyBlock(protyle, "beforebegin", id);
                 }
             }).element);
@@ -1085,8 +1085,8 @@ export class Gutter {
                 label: window.siyuan.languages["insert-after"],
                 accelerator: window.siyuan.config.keymap.editor.general.insertAfter.custom,
                 click() {
-                    nodeElement.classList.remove("protyle-wysiwyg--select")
-                    countBlockWord([])
+                    nodeElement.classList.remove("protyle-wysiwyg--select");
+                    countBlockWord([]);
                     insertEmptyBlock(protyle, "afterend", id);
                 }
             }).element);

@@ -127,9 +127,9 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
     return window.siyuan.menus.menu;
 };
 
-export const initFileMenu = (notebookId: string, pathString: string, liElement: HTMLElement) => {
-    const id = liElement.getAttribute("data-node-id")
-    let name = liElement.getAttribute("data-name")
+export const initFileMenu = (notebookId: string, pathString: string, liElement: Element) => {
+    const id = liElement.getAttribute("data-node-id");
+    let name = liElement.getAttribute("data-name");
     window.siyuan.menus.menu.remove();
     name = getDisplayName(name, false, true);
     if (!window.siyuan.config.readonly) {
@@ -149,7 +149,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                     Array.from(liElement.parentElement.children).forEach((item) => {
                         if (item.tagName === "LI") {
                             if (item.isSameNode(liElement)) {
-                                paths.push(undefined)
+                                paths.push(undefined);
                             }
                             paths.push(item.getAttribute("data-path"));
                         }

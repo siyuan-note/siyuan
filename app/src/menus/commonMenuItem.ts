@@ -1,7 +1,6 @@
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
-import {newFile} from "../util/newFile";
 import {getDockByType} from "../layout/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile} from "../util/functions";

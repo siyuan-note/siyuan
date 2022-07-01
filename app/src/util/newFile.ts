@@ -54,9 +54,9 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
     }
     fetchPost("/api/filetree/getDocNameTemplate", {notebook: notebookId}, (data) => {
         const id = Lute.NewNodeID();
-        const newPath = pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy")
+        const newPath = pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy");
         if (paths) {
-            paths[paths.indexOf(undefined)] = newPath
+            paths[paths.indexOf(undefined)] = newPath;
         }
         fetchPost("/api/filetree/createDoc", {
             notebook: notebookId,

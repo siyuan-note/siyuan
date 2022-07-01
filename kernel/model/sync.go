@@ -136,11 +136,9 @@ func SyncData(boot, exit, byHand bool) {
 	// 创建数据快照 https://github.com/siyuan-note/siyuan/issues/5161
 	indexRepoBeforeCloudSync()
 
-	if !boot && !exit && byHand {
-		// 同步数据仓库 https://github.com/siyuan-note/siyuan/issues/5142
-		if syncRepoErr := syncRepo(); nil != syncRepoErr {
-			util.LogErrorf("sync repo failed: %s", syncRepoErr)
-		}
+	// 同步数据仓库 https://github.com/siyuan-note/siyuan/issues/5142
+	if syncRepoErr := syncRepo(); nil != syncRepoErr {
+		util.LogErrorf("sync repo failed: %s", syncRepoErr)
 	}
 
 	return // TODO: 测试

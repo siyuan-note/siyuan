@@ -27,6 +27,7 @@ import {
 import {getPreviousHeading} from "../protyle/wysiwyg/getBlock";
 import {lockFile, setTitle} from "../dialog/processSystem";
 import {zoomOut} from "../menus/protyle";
+import {countBlockWord, countSelectWord} from "../layout/status";
 
 export const openFileById = (options: {
     id: string,
@@ -315,6 +316,7 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
         if (focus) {
             if (protyle.toolbar.range) {
                 focusByRange(protyle.toolbar.range);
+                countSelectWord(protyle.toolbar.range);
                 if (pushBackStack && protyle.preview.element.classList.contains("fn__none")) {
                     pushBack(protyle, protyle.toolbar.range);
                 }
@@ -323,6 +325,8 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
                 if (pushBackStack && protyle.preview.element.classList.contains("fn__none")) {
                     pushBack(protyle, undefined, protyle.wysiwyg.element.firstElementChild);
                 }
+                // 用于清空状态栏字数统计
+                countBlockWord([]);
             }
         }
         if (window.siyuan.config.fileTree.alwaysSelectOpenedFile && protyle) {

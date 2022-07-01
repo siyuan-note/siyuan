@@ -25,6 +25,7 @@ import {scrollCenter} from "../util/highlightById";
 import {getAllModels} from "./getAll";
 import {fetchPost} from "../util/fetch";
 import {onGet} from "../protyle/util/onGet";
+import {countBlockWord} from "./status";
 
 export class Wnd {
     public id: string;
@@ -460,6 +461,7 @@ export class Wnd {
                 }
             });
             model.editor.destroy();
+            countBlockWord([]);
             return;
         }
         if (model instanceof Search) {

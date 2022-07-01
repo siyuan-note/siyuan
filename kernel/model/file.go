@@ -1483,6 +1483,10 @@ func rootChildIDs(rootID string) (ret []string) {
 }
 
 func ChangeFileTreeSort(boxID string, paths []string) {
+	if 1 > len(paths) {
+		return
+	}
+
 	WaitForWritingFiles()
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()

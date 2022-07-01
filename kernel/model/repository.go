@@ -144,7 +144,7 @@ func init() {
 	eventbus.Subscribe(dejavu.EvtSyncAfterDownloadCloudIndexes, func(context map[string]interface{}, indexes []*entity.Index) {
 		util.LogInfof("Downloaded indexes [len=%d]", len(indexes))
 		for _, index := range indexes {
-			util.LogInfof("Index [%s]", index.ID)
+			util.LogInfof("    [%s]", index.ID)
 		}
 	})
 

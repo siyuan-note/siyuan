@@ -470,7 +470,7 @@ func syncRepo() (err error) {
 		util.PushStatusBar("Sync data repo failed: " + err.Error())
 		return
 	}
-	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+	util.PushStatusBar(fmt.Sprintf(Conf.Language(149)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
 	if 1 > len(fetchedFiles) {
 		// 没有下载到新文件，直接返回
 		return

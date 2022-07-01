@@ -509,6 +509,7 @@ func syncRepo() (err error) {
 
 func newRepository() (ret *dejavu.Repo, err error) {
 	ignoreLines := getIgnoreLines()
+	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置
 	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key, ignoreLines)
 	if nil != err {
 		util.LogErrorf("init data repository failed: %s", err)

@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
@@ -137,6 +138,13 @@ func init() {
 		case CtxPushMsgToStatusBarAndProgress:
 			util.PushStatusBar(msg)
 			util.PushEndlessProgress(msg)
+		}
+	})
+
+	eventbus.Subscribe(dejavu.EvtSyncAfterDownloadCloudIndexes, func(context map[string]interface{}, indexes []*entity.Index) {
+		util.LogInfof("Downloaded indexes [len=%d]", len(indexes))
+		for _, index := range indexes {
+			util.LogInfof("Index [%s]", index.ID)
 		}
 	})
 

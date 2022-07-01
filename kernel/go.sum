@@ -423,6 +423,8 @@ github.com/shurcooL/vfsgen v0.0.0-20200824052919-0d455de96546/go.mod h1:TrYk7fJV
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
 github.com/siyuan-note/dejavu v0.0.0-20220630143851-b239e9224291 h1:q6ZASwpPzlLseZIK0B37p3IQ8mTN4HnyFhD7NN3oVtI=
 github.com/siyuan-note/dejavu v0.0.0-20220630143851-b239e9224291/go.mod h1:0t+TpAdsrrv+6LkhDlJY2Gl92CQexgp8KWOBp5Ah9kU=
+github.com/siyuan-note/dejavu v0.0.0-20220701011145-8e120e6edec7 h1:aE8uNIsIQz6OXWTW1O+2WrLumTP49pj/dbhJOuon1hU=
+github.com/siyuan-note/dejavu v0.0.0-20220701011145-8e120e6edec7/go.mod h1:0t+TpAdsrrv+6LkhDlJY2Gl92CQexgp8KWOBp5Ah9kU=
 github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676 h1:QB9TjJQFhXhZ6dAtPpY02DlzHAQm1C+WqZq6OadG8mI=
 github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f h1:JMobMNZ7AqaKKyEK+WeWFhix/2TDQXgPZDajU00IybU=
@@ -586,6 +588,8 @@ golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2/go.mod h1:9nx3DQGgdP8bBQD5qx
 golang.org/x/net v0.0.0-20220111093109-d55c255bac03/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e h1:TsQ7F31D3bUCLeqPT0u+yjp1guoArKaNKmCr22PYgTQ=
 golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e/go.mod h1:XRhObCWvk6IyKnWLug+ECip1KBveYUHfp+8e9klMJ9c=
+golang.org/x/net v0.0.0-20220630215102-69896b714898 h1:K7wO6V1IrczY9QOQ2WkVpw4JQSwCd52UsxVEirZUfiw=
+golang.org/x/net v0.0.0-20220630215102-69896b714898/go.mod h1:XRhObCWvk6IyKnWLug+ECip1KBveYUHfp+8e9klMJ9c=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=

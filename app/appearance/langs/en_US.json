@@ -2,7 +2,7 @@
   "newSubDoc": "Create sub doc",
   "newDocBelow": "Create doc below",
   "newDocAbove": "Create doc above",
-  "adaptiveWidth": "Adaptive Width",
+  "fullWidth": "Adaptive Width",
   "fullWidthTip": "After enabling, the editing area will be displayed as wide as possible",
   "tabLimit": "Tab Limit",
   "tabLimit1": "Sort by opening time, close the earliest opened tab",

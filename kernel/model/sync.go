@@ -160,7 +160,7 @@ func SyncData(boot, exit, byHand bool) {
 		}
 	}
 
-	return
+	return // TODO: 测试
 
 	// 获取工作空间数据配置（数据版本）
 	dataConf, err := getWorkspaceDataConf()

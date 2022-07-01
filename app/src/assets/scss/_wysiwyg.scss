@@ -2,6 +2,7 @@
   padding: 34px 16px 16px 24px;
   cursor: text;
   transition: padding .15s cubic-bezier(0, 0, .2, 1) 0ms;
+  box-sizing: border-box;
 
   &:focus {
     outline: none;

@@ -464,7 +464,7 @@ func syncRepo() (err error) {
 		CtxPushMsg: CtxPushMsgToStatusBar,
 	})
 	elapsed := time.Since(start)
-	util.LogInfof("sync data repo elapsed [%.2fs]", elapsed.Seconds())
+	util.LogInfof("sync data repo elapsed [%.2fs], latest [%s]", elapsed.Seconds(), latest.ID)
 	if nil != err {
 		util.LogErrorf("sync data repo failed: %s", err)
 		util.PushStatusBar("Sync data repo failed: " + err.Error())

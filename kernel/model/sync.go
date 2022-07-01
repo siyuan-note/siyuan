@@ -129,6 +129,7 @@ func SyncData(boot, exit, byHand bool) {
 		util.BroadcastByType("main", "syncing", 1, msg, nil)
 	}()
 
+	Conf.Sync.Stat = Conf.Language(133)
 	syncLock.Lock()
 	defer syncLock.Unlock()
 

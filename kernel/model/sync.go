@@ -137,11 +137,11 @@ func SyncData(boot, exit, byHand bool) {
 	indexRepoBeforeCloudSync()
 
 	// 同步数据仓库 https://github.com/siyuan-note/siyuan/issues/5142
-	//if syncRepoErr := syncRepo(); nil != syncRepoErr {
-	//	util.LogErrorf("sync repo failed: %s", syncRepoErr)
-	//}
+	if syncRepoErr := syncRepo(); nil != syncRepoErr {
+		util.LogErrorf("sync repo failed: %s", syncRepoErr)
+	}
 
-	//return // TODO: 测试
+	return // TODO: 测试
 
 	WaitForWritingFiles()
 	writingDataLock.Lock()

@@ -305,7 +305,7 @@ func syncRepo() (err error) {
 	defer WatchAssets()
 
 	start := time.Now()
-	latest, fetchedFiles, err := repo.Sync(Conf.Sync.CloudName, Conf.User.UserId, Conf.User.UserToken, Conf.System.NetworkProxy.String(), util.AliyunServer, map[string]interface{}{
+	latest, mergeUpserts, mergeRemoves, err := repo.Sync(Conf.Sync.CloudName, Conf.User.UserId, Conf.User.UserToken, Conf.System.NetworkProxy.String(), util.AliyunServer, map[string]interface{}{
 		CtxPushMsg: CtxPushMsgToStatusBar,
 	})
 	elapsed := time.Since(start)
@@ -316,30 +316,23 @@ func syncRepo() (err error) {
 		return
 	}
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
-	if 1 > len(fetchedFiles) {
-		// 没有下载到新文件，直接返回
+	if 1 > len(mergeUpserts) && 1 > len(mergeRemoves) {
+		// 没有数据变更，直接返回
 		return
 	}
 
-	// 下载到文件后，需要恢复到工作区并重建索引
-
-	upsertFiles, removeFiles, err := repo.Checkout(latest.ID, map[string]interface{}{
-		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
-	})
-	if nil != err {
-		util.PushClearProgress()
-		return
-	}
-
+	// 有数据变更，需要重建索引
 	var upserts, removes []string
-	for _, file := range upsertFiles {
+	for _, file := range mergeUpserts {
 		upserts = append(upserts, file.Path)
 	}
-	for _, file := range removeFiles {
+	for _, file := range mergeRemoves {
 		removes = append(removes, file.Path)
 	}
 	incReindex(upserts, removes)
 	cache.ClearDocsIAL()
+
+	// 刷新界面
 	util.ReloadUI()
 	elapsed = time.Since(start)
 	go func() {

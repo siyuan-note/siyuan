@@ -38,7 +38,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, err error) {
+func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize, repoSize int64, err error) {
 	result := map[string]interface{}{}
 	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
 	resp, err := request.
@@ -47,7 +47,8 @@ func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, e
 		Post(util.AliyunServer + "/apis/siyuan/data/getSiYuanWorkspace?uid=" + Conf.User.UserId)
 	if nil != err {
 		util.LogErrorf("get cloud space failed: %s", err)
-		return nil, nil, 0, ErrFailedToConnectCloudServer
+		err = ErrFailedToConnectCloudServer
+		return
 	}
 
 	if 401 == resp.StatusCode {
@@ -58,13 +59,15 @@ func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, e
 	code := result["code"].(float64)
 	if 0 != code {
 		util.LogErrorf("get cloud space failed: %s", result["msg"])
-		return nil, nil, 0, errors.New(result["msg"].(string))
+		err = errors.New(result["msg"].(string))
+		return
 	}
 
 	data := result["data"].(map[string]interface{})
 	sync = data["sync"].(map[string]interface{})
 	backup = data["backup"].(map[string]interface{})
 	assetSize = int64(data["assetSize"].(float64))
+	repoSize = int64(data["repoSize"].(float64))
 	return
 }
 

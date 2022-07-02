@@ -231,7 +231,7 @@ func IndexRepo(memo string) (err error) {
 		if latest.ID != index.ID {
 			util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
 		} else {
-			util.PushStatusBar(Conf.Language(148))
+			util.PushStatusBar(Conf.Language(148) + " [" + latest.ID[:7] + "]")
 		}
 	} else {
 		util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
@@ -281,7 +281,7 @@ func indexRepoBeforeCloudSync() {
 			}
 			util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
 		} else {
-			util.PushStatusBar(Conf.Language(148))
+			util.PushStatusBar(Conf.Language(148) + " [" + latest.ID[:7] + "]")
 		}
 	} else {
 		util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))

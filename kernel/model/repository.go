@@ -307,9 +307,16 @@ func syncRepo(byHand bool) {
 	defer WatchAssets()
 
 	start := time.Now()
-	latest, mergeUpserts, mergeRemoves, err := repo.Sync(Conf.Sync.CloudName, Conf.User.UserId, Conf.User.UserToken, Conf.System.NetworkProxy.String(), util.AliyunServer, map[string]interface{}{
-		CtxPushMsg: CtxPushMsgToStatusBar,
-	})
+	cloudInfo := &dejavu.CloudInfo{
+		Dir:       Conf.Sync.CloudName,
+		UserID:    Conf.User.UserId,
+		Token:     Conf.User.UserToken,
+		LimitSize: int64(Conf.User.UserSiYuanRepoSize),
+		ProxyURL:  Conf.System.NetworkProxy.String(),
+		Server:    util.AliyunServer,
+	}
+	syncContext := map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar}
+	latest, mergeUpserts, mergeRemoves, err := repo.Sync(cloudInfo, syncContext)
 	elapsed := time.Since(start)
 	util.LogInfof("sync data repo elapsed [%.2fs], latest [%s]", elapsed.Seconds(), latest.ID)
 	if nil != err {

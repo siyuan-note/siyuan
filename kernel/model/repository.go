@@ -320,8 +320,7 @@ func syncRepo(byHand bool) {
 		return
 	}
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
-	if 1 > len(mergeUpserts) && 1 > len(mergeRemoves) {
-		// 没有数据变更，直接返回
+	if 1 > len(mergeUpserts) && 1 > len(mergeRemoves) { // 没有数据变更
 		syncSameCount++
 		if 10 < syncSameCount {
 			syncSameCount = 5

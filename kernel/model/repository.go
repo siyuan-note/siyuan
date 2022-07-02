@@ -229,12 +229,12 @@ func IndexRepo(memo string) (err error) {
 
 	if nil != latest {
 		if latest.ID != index.ID {
-			util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
+			util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
 		} else {
 			util.PushStatusBar(Conf.Language(148) + " [" + latest.ID[:7] + "]")
 		}
 	} else {
-		util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
 	}
 	util.PushClearProgress()
 	return
@@ -279,12 +279,12 @@ func indexRepoBeforeCloudSync() {
 				util.LogErrorf("put index into data repo before cloud sync failed: %s", err)
 				return
 			}
-			util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
+			util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
 		} else {
 			util.PushStatusBar(Conf.Language(148) + " [" + latest.ID[:7] + "]")
 		}
 	} else {
-		util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
 	}
 	if 7000 < elapsed.Milliseconds() {
 		util.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())

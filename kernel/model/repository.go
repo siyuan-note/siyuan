@@ -272,7 +272,7 @@ func indexRepoBeforeCloudSync() {
 	if nil != latest {
 		if latest.ID != index.ID {
 			// 对新创建的快照需要更新备注，加入耗时统计
-			index.Memo = fmt.Sprintf("[Auto] Cloud sync, completed in [%.2fs]", elapsed.Seconds())
+			index.Memo = fmt.Sprintf("[Auto] Cloud sync, completed in %.2fs", elapsed.Seconds())
 			err = repo.PutIndex(index)
 			if nil != err {
 				util.PushStatusBar("Save data snapshot for cloud sync failed")
@@ -312,7 +312,9 @@ func syncRepo() (err error) {
 	util.LogInfof("sync data repo elapsed [%.2fs], latest [%s]", elapsed.Seconds(), latest.ID)
 	if nil != err {
 		util.LogErrorf("sync data repo failed: %s", err)
-		util.PushStatusBar("Sync data repo failed: " + err.Error())
+		msg := "Sync data repo failed: " + err.Error()
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
 		return
 	}
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149)+" [%s]", elapsed.Seconds(), latest.ID[:7]))

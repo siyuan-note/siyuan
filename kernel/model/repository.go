@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"time"
 
@@ -291,13 +292,14 @@ func indexRepoBeforeCloudSync() {
 	}
 }
 
-func syncRepo() (err error) {
+func syncRepo(byHand bool) {
 	if 1 > len(Conf.Repo.Key) {
 		return
 	}
 
 	repo, err := newRepository()
 	if nil != err {
+		util.LogErrorf("sync repo failed: %s", err)
 		return
 	}
 
@@ -320,6 +322,17 @@ func syncRepo() (err error) {
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
 	if 1 > len(mergeUpserts) && 1 > len(mergeRemoves) {
 		// 没有数据变更，直接返回
+		syncSameCount++
+		if 10 < syncSameCount {
+			syncSameCount = 5
+		}
+		if !byHand {
+			after := time.Minute * time.Duration(int(math.Pow(2, float64(syncSameCount))))
+			if fixSyncInterval.Minutes() > after.Minutes() {
+				after = time.Minute * 8
+			}
+			planSyncAfter(after)
+		}
 		return
 	}
 

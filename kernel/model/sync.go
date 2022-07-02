@@ -48,8 +48,7 @@ var (
 	syncSameCount        = 0
 	syncDownloadErrCount = 0
 	fixSyncInterval      = 5 * time.Minute
-	syncInterval         = fixSyncInterval
-	syncPlanTime         = time.Now().Add(syncInterval)
+	syncPlanTime         = time.Now().Add(fixSyncInterval)
 
 	BootSyncSucc = -1 // -1：未执行，0：执行成功，1：执行失败
 	ExitSyncSucc = -1
@@ -60,7 +59,6 @@ func AutoSync() {
 		time.Sleep(5 * time.Second)
 		if time.Now().After(syncPlanTime) {
 			SyncData(false, false, false)
-			syncPlanTime = time.Now().Add(syncInterval)
 		}
 	}
 }
@@ -74,7 +72,7 @@ func SyncData(boot, exit, byHand bool) {
 
 	if util.IsMutexLocked(&syncLock) {
 		util.LogWarnf("sync has been locked")
-		syncInterval = 30 * time.Second
+		planSyncAfter(30 * time.Second)
 		return
 	}
 
@@ -113,7 +111,7 @@ func SyncData(boot, exit, byHand bool) {
 	if 7 < syncDownloadErrCount && !byHand {
 		util.LogErrorf("sync download error too many times, cancel auto sync, try to sync by hand")
 		util.PushErrMsg(Conf.Language(125), 1000*60*60)
-		syncInterval = 64 * time.Minute
+		planSyncAfter(64 * time.Minute)
 		return
 	}
 
@@ -137,9 +135,7 @@ func SyncData(boot, exit, byHand bool) {
 	indexRepoBeforeCloudSync()
 
 	// 同步数据仓库 https://github.com/siyuan-note/siyuan/issues/5142
-	if syncRepoErr := syncRepo(); nil != syncRepoErr {
-		util.LogErrorf("sync repo failed: %s", syncRepoErr)
-	}
+	syncRepo(byHand)
 
 	return // TODO: 测试
 
@@ -201,11 +197,11 @@ func SyncData(boot, exit, byHand bool) {
 			syncSameCount = 5
 		}
 		if !byHand {
-			syncInterval = time.Minute * time.Duration(int(math.Pow(2, float64(syncSameCount))))
-			if fixSyncInterval.Minutes() > syncInterval.Minutes() {
-				syncInterval = time.Minute * 8
+			after := time.Minute * time.Duration(int(math.Pow(2, float64(syncSameCount))))
+			if fixSyncInterval.Minutes() > after.Minutes() {
+				after = time.Minute * 8
 			}
-			util.LogInfof("set sync interval to [%dm]", int(syncInterval.Minutes()))
+			planSyncAfter(after)
 		}
 
 		Conf.Sync.Stat = Conf.Language(133)
@@ -284,7 +280,7 @@ func SyncData(boot, exit, byHand bool) {
 		BootSyncSucc = 0
 		ExitSyncSucc = 0
 		if !byHand {
-			syncInterval = fixSyncInterval
+			planSyncAfter(fixSyncInterval)
 		}
 		return
 	}
@@ -399,7 +395,7 @@ func SyncData(boot, exit, byHand bool) {
 	BootSyncSucc = 0
 	ExitSyncSucc = 0
 	if !byHand {
-		syncInterval = fixSyncInterval
+		planSyncAfter(fixSyncInterval)
 	}
 
 	if boot && gulu.File.IsExist(util.BlockTreePath) {
@@ -1337,8 +1333,7 @@ func GetSyncDirection(cloudDirName string) (code int, msg string) { // 0：失�
 func IncWorkspaceDataVer() {
 	filesys.IncWorkspaceDataVer(true, Conf.System.ID)
 	syncSameCount = 0
-	syncInterval = fixSyncInterval
-	syncPlanTime = time.Now().Add(30 * time.Second)
+	planSyncAfter(30 * time.Second)
 }
 
 func stableCopy(src, dest string) (err error) {
@@ -1371,4 +1366,8 @@ func stableCopy(src, dest string) (err error) {
 		util.LogErrorf("robocopy data from [%s] to [%s] failed: %s %s", src, dest, string(output), err)
 	}
 	return gulu.File.Copy(src, dest)
+}
+
+func planSyncAfter(d time.Duration) {
+	syncPlanTime = time.Now().Add(d)
 }

@@ -248,7 +248,7 @@ export class Wnd {
                     newWnd.headersElement.append(oldTab.headElement);
                     newWnd.moveTab(oldTab);
 
-                    if (dragElement.style.bottom === "auto" && newWnd.element.previousElementSibling && targetWnd.element.parentElement) {
+                    if (dragElement.style.bottom === "50%" && newWnd.element.previousElementSibling && targetWnd.element.parentElement) {
                         // 交换位置
                         switchWnd(newWnd, targetWnd);
                     }
@@ -258,7 +258,7 @@ export class Wnd {
                     newWnd.headersElement.append(oldTab.headElement);
                     newWnd.moveTab(oldTab);
 
-                    if (dragElement.style.right === "auto" && newWnd.element.previousElementSibling && targetWnd.element.parentElement) {
+                    if (dragElement.style.right === "50%" && newWnd.element.previousElementSibling && targetWnd.element.parentElement) {
                         // 交换位置
                         switchWnd(newWnd, targetWnd);
                     }

@@ -6,7 +6,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20220619172447"
+		"updated": "20220703000708"
 	},
 	"Children": [
 		{
@@ -2287,7 +2287,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201224120448-20hmjfc",
-				"updated": "20220226124938"
+				"updated": "20220703000708"
 			},
 			"Children": [
 				{
@@ -2322,21 +2322,47 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " requires annual subscription, price is $72/year。"
+					"Data": " requires annual subscription."
 				}
 			]
 		},
 		{
-			"ID": "20201224120448-8uydzg3",
+			"ID": "20220703000434-rpabrb5",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20201224120448-8uydzg3",
-				"updated": "20211102091430"
+				"id": "20220703000434-rpabrb5",
+				"updated": "20220703000510"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Users in non-Mainland China regions should not pay for subscriptions, because SiYuan Cloud Server cannot guarantee availability in non-Mainland China regions."
+					"Data": "🐦 Limited to 1024 early bird seats, $36/year "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "Cloud service supports non-mainland China regions"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/issues/5331\n"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
 				}
 			]
 		}

@@ -6,7 +6,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20220619172004"
+		"updated": "20220703000831"
 	},
 	"Children": [
 		{
@@ -2445,14 +2445,47 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201224120447-s45uw5h",
-				"updated": "20211102091242"
+				"updated": "20220703000831"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "非中国大陆地区的用户请勿付费订阅，因为思源云端服务器无法保证非中国大陆地区可用。"
+					"Data": "非中国大陆地区用户请关注 "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "Cloud service supports non-mainland China regions"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/issues/5331"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
 				}
 			]
+		},
+		{
+			"ID": "20220703000808-kodzuhs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220703000808-kodzuhs"
+			}
 		}
 	]
 }

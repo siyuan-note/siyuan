@@ -244,9 +244,9 @@ If it is a mobile-end, uninstall and reinstall it (note: When the mobile-endunin
 
 ### Do I need to pay for it?
 
-Local functions are completely free to use, [Cloud services](https://b3log.org/siyuan/en/pricing.html) requires annual subscription, price is $72/year。
+Local functions are completely free to use, [Cloud services](https://b3log.org/siyuan/en/pricing.html) requires annual subscription.
 
-Users in non-Mainland China regions should not pay for subscriptions, because SiYuan Cloud Server cannot guarantee availability in non-Mainland China regions.
+🐦 Limited to 1024 early bird seats, $36/year https://github.com/siyuan-note/siyuan/issues/5331
 
 ## 🙏 Acknowledgement
 

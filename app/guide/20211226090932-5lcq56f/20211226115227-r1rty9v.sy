@@ -5,7 +5,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20220619172140"
+		"updated": "20211226115356"
 	},
 	"Children": [
 		{
@@ -2299,7 +2299,7 @@
 						},
 						{
 							"Type": "NodeLinkDest",
-							"Data": "https://b3log.org/siyuan/pricing.html"
+							"Data": "https://b3log.org/siyuan/en/pricing.html"
 						},
 						{
 							"Type": "NodeCloseParen"
@@ -2317,12 +2317,38 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226115356-zk19o1w",
-				"updated": "20211228143236"
+				"updated": "20220703000552"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "非中國大陸地區的用戶請勿付費訂閱，因為思源雲端伺服器無法保證非中國大陸地區可用。"
+					"Data": "🐦 Limited to 1024 early bird seats, $36/year "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "Cloud service supports non-mainland China regions"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/issues/5331"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
 				}
 			]
 		}

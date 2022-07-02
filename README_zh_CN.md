@@ -255,7 +255,7 @@
 
 本地功能完全免费使用，[云端服务](https://b3log.org/siyuan/pricing.html)需要年付订阅。
 
-非中国大陆地区的用户请勿付费订阅，因为思源云端服务器无法保证非中国大陆地区可用。
+非中国大陆地区用户请关注 [Cloud service supports non-mainland China regions](https://github.com/siyuan-note/siyuan/issues/5331)
 
 ## 🙏 鸣谢
 

@@ -301,6 +301,9 @@ func syncRepo() (err error) {
 		return
 	}
 
+	CloseWatchAssets()
+	defer WatchAssets()
+
 	start := time.Now()
 	latest, fetchedFiles, err := repo.Sync(Conf.Sync.CloudName, Conf.User.UserId, Conf.User.UserToken, Conf.System.NetworkProxy.String(), util.AliyunServer, map[string]interface{}{
 		CtxPushMsg: CtxPushMsgToStatusBar,
@@ -319,9 +322,6 @@ func syncRepo() (err error) {
 	}
 
 	// 下载到文件后，需要恢复到工作区并重建索引
-
-	CloseWatchAssets()
-	defer WatchAssets()
 
 	upsertFiles, removeFiles, err := repo.Checkout(latest.ID, map[string]interface{}{
 		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,

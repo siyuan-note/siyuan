@@ -218,9 +218,9 @@ export const openHistory = () => {
         </ul>
         <div data-type="repo" class="fn__none history__repo">
             <div class="fn__flex history__repoheader">
-                <span data-type="previous" class="block__icon b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
+                <span data-type="previous" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                 <span class="fn__space"></span>
-                <span data-type="next" class="block__icon b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+                <span data-type="next" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                 <div class="fn__flex-1"></div>
                 <button class="b3-button b3-button--outline" data-type="genRepo">${window.siyuan.languages.createSnapshot}</button>
             </div>    

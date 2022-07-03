@@ -308,7 +308,7 @@ func syncRepo(byHand bool) {
 
 	start := time.Now()
 	cloudInfo := &dejavu.CloudInfo{
-		Dir:       Conf.Sync.CloudName,
+		Dir:       "main",
 		UserID:    Conf.User.UserId,
 		Token:     Conf.User.UserToken,
 		LimitSize: int64(Conf.User.UserSiYuanRepoSize - Conf.User.UserSiYuanAssetSize),

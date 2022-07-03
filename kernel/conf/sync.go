@@ -35,9 +35,10 @@ type Sync struct {
 
 func NewSync() *Sync {
 	return &Sync{
-		CloudName: "main",
-		Enabled:   true,
-		Mode:      1,
+		CloudName:   "main",
+		Enabled:     true,
+		Mode:        1,
+		UseDataRepo: true,
 	}
 }
 

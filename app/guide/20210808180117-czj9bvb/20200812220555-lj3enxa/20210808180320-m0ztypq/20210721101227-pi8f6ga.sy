@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210721101227-pi8f6ga",
 		"title": "存储空间",
-		"updated": "20210721154411"
+		"updated": "20220703223351"
 	},
 	"Children": [
 		{
@@ -12,7 +12,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210721101227-ihokmao",
-				"updated": "20210721102906"
+				"updated": "20220703223351"
 			},
 			"Children": [
 				{
@@ -37,7 +37,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，分为三个部分："
+					"Data": "，分为以下部分："
 				}
 			]
 		},
@@ -47,7 +47,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721102906-c702lun",
-				"updated": "20210721103222"
+				"updated": "20210721103035"
 			},
 			"Children": [
 				{
@@ -79,34 +79,6 @@
 					]
 				},
 				{
-					"ID": "20210721102917-hlzlmod",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210721102917-hlzlmod",
-						"updated": "20210721103201"
-					},
-					"Children": [
-						{
-							"ID": "20210721102917-3iozeti",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210721102917-3iozeti",
-								"updated": "20210721103201"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "备份数据：提供给备份功能使用，数据是加密的"
-								}
-							]
-						}
-					]
-				},
-				{
 					"ID": "20210721102922-6m5qwbk",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -128,7 +100,11 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "资源文件：提供给复制到公众号、知乎和语雀等使用，HTTPS CDN"
+									"Data": "资源文件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：提供给复制到公众号、知乎和语雀等使用，HTTPS CDN"
 								}
 							]
 						}

@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210721103420-vn6g2yy",
 		"title": "数据同步",
-		"updated": "20220510104801"
+		"updated": "20220703232528"
 	},
 	"Children": [
 		{
@@ -52,7 +52,147 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 文件夹数据一致，包括资源文件、模板、挂件以及笔记本数据。"
+					"Data": " 文件夹数据一致，包括"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "资源文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、模板、"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "挂件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "以及笔记本数据。"
+				}
+			]
+		},
+		{
+			"ID": "20210721110423-5m6vo52",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721110423-5m6vo52",
+				"updated": "20220703222554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "端到端加密"
+				}
+			]
+		},
+		{
+			"ID": "20210525215124-ifljpao",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210525215124-ifljpao",
+				"updated": "20220703222031"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数据同步通过端到端加密传输，云端不保存任何明文数据。"
+				}
+			]
+		},
+		{
+			"ID": "20210525215316-438zsvu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210525215316-438zsvu",
+				"updated": "20210525220426"
+			},
+			"Children": [
+				{
+					"ID": "20220703222217-vfqq9x9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703222217-vfqq9x9",
+						"updated": "20220703222217"
+					},
+					"Children": [
+						{
+							"ID": "20220703222217-cvrogps",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703222217-cvrogps",
+								"updated": "20220703222217"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "密钥仅存储在本地，不会上传到云端"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210525220029-7myvzw8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210525220029-7myvzw8",
+						"updated": "20210721111300"
+					},
+					"Children": [
+						{
+							"ID": "20210525220029-c9i66lb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210525220029-c9i66lb",
+								"updated": "20210721111300"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密和解密过程完全在本地设备上进行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210525220320-a9li63c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210525220320-a9li63c",
+						"updated": "20210525220426"
+					},
+					"Children": [
+						{
+							"ID": "20210525220320-h0rm7h0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210525220320-h0rm7h0",
+								"updated": "20210525220426"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密算法为业界公认安全的 AES GCM"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -72,16 +212,59 @@
 			]
 		},
 		{
-			"ID": "20210721103955-bqzteuz",
+			"ID": "20211027205711-07u1glm",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210721103955-bqzteuz",
-				"updated": "20211106114053"
+				"id": "20211027205711-07u1glm",
+				"updated": "20220703225408"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20220615113758-i2279ot"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "初始化数据仓库密钥"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "后如果一切正常就已经配置好同步了。"
+				}
+			]
+		},
+		{
+			"ID": "20220703225413-0ir4w8k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220703225413-0ir4w8k",
+				"updated": "20220703225453"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "打开 "
+					"Data": "如果需要暂停同步，可关闭选项 "
 				},
 				{
 					"Type": "NodeKbd",
@@ -92,7 +275,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "设置 - 云端 - 云端同步"
+							"Data": "设置"
 						},
 						{
 							"Type": "NodeKbdCloseMarker"
@@ -101,154 +284,47 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ，通过同步设置向导进行操作。"
-				}
-			]
-		},
-		{
-			"ID": "20210721103758-pc3i4x8",
-			"Type": "NodeList",
-			"ListData": {
-				"Typ": 1
-			},
-			"Properties": {
-				"id": "20210721103758-pc3i4x8",
-				"updated": "20211027205734"
-			},
-			"Children": [
-				{
-					"ID": "20211027205711-eup41br",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "MS4=",
-						"Num": 1
-					},
-					"Properties": {
-						"id": "20211027205711-eup41br",
-						"updated": "20220110113741"
-					},
-					"Children": [
-						{
-							"ID": "20211027205711-07u1glm",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211027205711-07u1glm",
-								"updated": "20220110113741"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "设置"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "端到端加密"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "密码"
-								}
-							]
-						}
-					]
+					"Data": " - "
 				},
 				{
-					"ID": "20210721104534-zgn4ihf",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "Mi4=",
-						"Num": 2
-					},
-					"Properties": {
-						"id": "20210721104534-zgn4ihf",
-						"updated": "20211027205734"
-					},
+					"Type": "NodeKbd",
+					"Data": "kbd",
 					"Children": [
 						{
-							"ID": "20210721104534-2yhd04d",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210721104534-2yhd04d",
-								"updated": "20211027205734"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "创建或选择一个云端同步目录，选择以后该云端同步目录将用于当前工作空间数据同步"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210721103957-niox81t",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "My4=",
-						"Num": 3
-					},
-					"Properties": {
-						"id": "20210721103957-niox81t",
-						"updated": "20210901163120"
-					},
-					"Children": [
-						{
-							"ID": "20210721103957-6v20946",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210721103957-6v20946",
-								"updated": "20211027205115"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "启用同步开关"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20210727102835-sm3eyau",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210727102835-sm3eyau",
-				"updated": "20210727103336"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "以上操作请先在"
-				},
-				{
-					"Type": "NodeEmphasis",
-					"Data": "em",
-					"Children": [
-						{
-							"Type": "NodeEmA6kOpenMarker",
-							"Data": "*"
+							"Type": "NodeKbdOpenMarker"
 						},
 						{
 							"Type": "NodeText",
-							"Data": "主力"
+							"Data": "云端"
 						},
 						{
-							"Type": "NodeEmA6kCloseMarker",
-							"Data": "*"
+							"Type": "NodeKbdCloseMarker"
 						}
 					]
 				},
 				{
 					"Type": "NodeText",
-					"Data": "设备上进行，然后在其他设备上选择相同的云端同步目录，并打开同步开关即可。如果要切换、重命名或者删除云端同步目录，请先在所有设备上关闭同步开关后再操作。"
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "启用云端同步"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},
@@ -420,12 +496,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210721103726-sbnev8w",
-				"updated": "20220510104539"
+				"updated": "20220703225614"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源通过对比云端数据版本和本地数据版本进行相应操作："
+					"Data": "思源通过对比云端数据快照和本地数据快照进行相应操作："
 				}
 			]
 		},
@@ -435,7 +511,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721105306-biv12a6",
-				"updated": "20220510104208"
+				"updated": "20220703230810"
 			},
 			"Children": [
 				{
@@ -455,12 +531,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210721105353-aseijn5",
-								"updated": "20210901163356"
+								"updated": "20220703230507"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果版本相等则略过"
+									"Data": "如果快照相同则忽略本次同步"
 								}
 							]
 						}
@@ -475,7 +551,7 @@
 					},
 					"Properties": {
 						"id": "20210721105305-dt1ritx",
-						"updated": "20220510104208"
+						"updated": "20220703230810"
 					},
 					"Children": [
 						{
@@ -483,136 +559,78 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210721105305-kx4c8fj",
-								"updated": "20220510104208"
+								"updated": "20220703230630"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果云端版本大于本地版本，则将云端数据下载到本地并解密到 "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "工作空间/data/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 文件夹下，本地被覆盖或者删除的文件会移动到 "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "工作空间/history/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 文件夹下"
+									"Data": "如果快照不同，则将本地距离上次同步的变更上传到云端，将云端最新的变更合并到本地"
 								}
 							]
-						}
-					]
-				},
-				{
-					"ID": "20210721105329-52g70vv",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210721105329-52g70vv",
-						"updated": "20210901163421"
-					},
-					"Children": [
+						},
 						{
-							"ID": "20210721105329-ypobf4a",
-							"Type": "NodeParagraph",
+							"ID": "20220703230633-13vbbzy",
+							"Type": "NodeList",
+							"ListData": {},
 							"Properties": {
-								"id": "20210721105329-ypobf4a",
-								"updated": "20210901163421"
+								"id": "20220703230633-13vbbzy",
+								"updated": "20220703230810"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "如果"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "云端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "版本小于本地，则扫描 "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
+									"ID": "20220703230631-lbfy9lc",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220703230631-lbfy9lc"
+									},
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "/工作空间/data/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
+											"ID": "20220703230631-0tywed7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220703230631-0tywed7",
+												"updated": "20220703230650"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "如果两端的变更没有冲突则直接合并"
+												}
+											]
 										}
 									]
 								},
 								{
-									"Type": "NodeText",
-									"Data": " 变更，然后将变更加密复制到 "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
+									"ID": "20220703230651-ofu1uh9",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220703230651-ofu1uh9",
+										"updated": "20220703230810"
+									},
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "工作空间/sync/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
+											"ID": "20220703230651-vzbvnjf",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220703230651-vzbvnjf",
+												"updated": "20220703230810"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "如果存在文件冲突，则以本地为准覆盖云端，同时拉取到的云端冲突文件会归入到数据历史中"
+												}
+											]
 										}
 									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 文件夹下，最后进行上传并覆盖"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "云端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "数据"
 								}
 							]
 						}
@@ -625,12 +643,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220510104118-7cotqs7",
-				"updated": "20220510104547"
+				"updated": "20220703230821"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "版本对比每隔一段时间自动进行，时间间隔算法描述如下："
+					"Data": "同步每隔一段时间自动进行，时间间隔算法描述如下："
 				}
 			]
 		},
@@ -895,12 +913,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220307093107-2e2r5ps",
-				"updated": "20220307093112"
+				"updated": "20220703231010"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "覆盖场景"
+					"Data": "冲突场景"
 				}
 			]
 		},
@@ -912,7 +930,7 @@
 			},
 			"Properties": {
 				"id": "20220307093112-lz7p32d",
-				"updated": "20220307093113"
+				"updated": "20220703232528"
 			},
 			"Children": [
 				{
@@ -933,12 +951,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220307093113-bxpwcpj",
-								"updated": "20220307093144"
+								"updated": "20220703231043"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在设备 A 上编辑后不同步（比如没有网络处于离线状态时）"
+									"Data": "在设备 A 上编辑 a 文件后同步"
 								}
 							]
 						}
@@ -954,7 +972,8 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20220307093124-wkxgisu"
+						"id": "20220307093124-wkxgisu",
+						"updated": "20220703231050"
 					},
 					"Children": [
 						{
@@ -962,41 +981,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220307093124-0pb8mwl",
-								"updated": "20220307093152"
+								"updated": "20220703231050"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在设备 B 上编辑后不同步"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220307093153-alpffju",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "My4=",
-						"Num": 3
-					},
-					"Properties": {
-						"id": "20220307093153-alpffju"
-					},
-					"Children": [
-						{
-							"ID": "20220307093153-znl772s",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220307093153-znl772s",
-								"updated": "20220307094020"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "设备 A 上执行同步，此时云端数据会被设备 A 数据覆盖，既云端和设备 A 保持数据一致"
+									"Data": "在设备 B 上编辑 a 文件后同步"
 								}
 							]
 						}
@@ -1008,11 +998,12 @@
 					"ListData": {
 						"Typ": 1,
 						"Delimiter": 46,
-						"Marker": "NC4=",
-						"Num": 4
+						"Marker": "My4=",
+						"Num": 3
 					},
 					"Properties": {
-						"id": "20220307094021-74y5lau"
+						"id": "20220307094021-74y5lau",
+						"updated": "20220703232528"
 					},
 					"Children": [
 						{
@@ -1020,122 +1011,16 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220307094021-jtlbgw4",
-								"updated": "20220307094152"
+								"updated": "20220703232528"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在设备 B 上执行同步，此时会出现三种可能的情况"
-								}
-							]
-						},
-						{
-							"ID": "20220307094056-jmfulxx",
-							"Type": "NodeList",
-							"ListData": {},
-							"Properties": {
-								"id": "20220307094056-jmfulxx",
-								"updated": "20220307094059"
-							},
-							"Children": [
-								{
-									"ID": "20220307094201-bbiy343",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20220307094201-bbiy343"
-									},
-									"Children": [
-										{
-											"ID": "20220307094201-d28icvq",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20220307094201-d28icvq",
-												"updated": "20220307094237"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "设备 B 数据因为版本和云端相同进而略过同步"
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20220307094059-pxgspk6",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20220307094059-pxgspk6"
-									},
-									"Children": [
-										{
-											"ID": "20220307094059-11ww58o",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20220307094059-11ww58o",
-												"updated": "20220307094116"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "设备 B 数据覆盖云端"
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20220307094116-s90arq8",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20220307094116-s90arq8"
-									},
-									"Children": [
-										{
-											"ID": "20220307094116-q6j55pf",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20220307094116-q6j55pf",
-												"updated": "20220307094210"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "设备 B 数据被云端覆盖"
-												}
-											]
-										}
-									]
+									"Data": "此时云端 a 文件会被 B 设备上的 a 覆盖，同时在 B 设备上生成之前 A 设备 a 的历史"
 								}
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20220307094246-38jrwfr",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220307094246-38jrwfr",
-				"updated": "20220307094825"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "该场景下，使用同步的过程是在两个设备上都离线编辑，然后再执行同步，这样无法得到正常的同步预期结果。尽管如此，数据也不会发生丢失，可通过历史找回被覆盖的数据。"
 				}
 			]
 		},
@@ -1198,42 +1083,6 @@
 								{
 									"Type": "NodeText",
 									"Data": "睡眠或关机等突然断网的情况下不会触发同步，请手动点击同步按钮进行同步"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210721195711-c0ljv7q",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210721195711-c0ljv7q",
-						"updated": "20210721195828"
-					},
-					"Children": [
-						{
-							"ID": "20210721195711-gvej1i2",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210721195711-gvej1i2",
-								"updated": "20210721195828"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "重命名或删除"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "云端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "目录前，请在所有设备上关闭同步后再修改或删除"
 								}
 							]
 						}

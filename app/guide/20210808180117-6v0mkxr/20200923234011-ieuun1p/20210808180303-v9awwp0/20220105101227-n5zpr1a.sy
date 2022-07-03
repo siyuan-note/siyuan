@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20220105101227-n5zpr1a",
 		"title": "Limitations",
-		"updated": "20220325115446"
+		"updated": "20220703223555"
 	},
 	"Children": [
 		{
@@ -13,7 +13,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220105101254-dhwb8a1",
-				"updated": "20220325115446"
+				"updated": "20220703223555"
 			},
 			"Children": [
 				{
@@ -25,7 +25,7 @@
 					},
 					"Properties": {
 						"id": "20220105101254-jmyydpw",
-						"updated": "20220325115446"
+						"updated": "20220703223555"
 					},
 					"Children": [
 						{
@@ -33,12 +33,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220105101254-gm1ctyf",
-								"updated": "20220325115446"
+								"updated": "20220703223555"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "During synchronization or backup, single file transfer larger than 100MB is not supported"
+									"Data": "Sync does not support single file transfers larger than 100MB"
 								}
 							]
 						}

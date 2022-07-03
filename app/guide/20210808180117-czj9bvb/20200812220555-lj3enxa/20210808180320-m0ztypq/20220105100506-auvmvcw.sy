@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20220105100506-auvmvcw",
 		"title": "限制",
-		"updated": "20220325115453"
+		"updated": "20220703223435"
 	},
 	"Children": [
 		{
@@ -13,7 +13,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220105100506-t539921",
-				"updated": "20220325115453"
+				"updated": "20220703223435"
 			},
 			"Children": [
 				{
@@ -25,7 +25,7 @@
 					},
 					"Properties": {
 						"id": "20220105100537-cv7d0lj",
-						"updated": "20220325115453"
+						"updated": "20220703223435"
 					},
 					"Children": [
 						{
@@ -33,12 +33,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220105100537-d94pnme",
-								"updated": "20220325115453"
+								"updated": "20220703223435"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "同步或备份时，不支持大于 100MB 的单个文件传输"
+									"Data": "同步不支持大于 100MB 的单个文件传输"
 								}
 							]
 						}

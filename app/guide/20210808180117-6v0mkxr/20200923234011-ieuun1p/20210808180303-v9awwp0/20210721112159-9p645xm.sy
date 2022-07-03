@@ -12,7 +12,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210721112251-nlv1v47",
-				"updated": "20210721112251"
+				"updated": "20220703223420"
 			},
 			"Children": [
 				{
@@ -37,7 +37,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", divided into three parts:"
+					"Data": ", divided into the following sections:"
 				}
 			]
 		},
@@ -47,7 +47,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721112251-y58mwa8",
-				"updated": "20210721112319"
+				"updated": "20210721112251"
 			},
 			"Children": [
 				{
@@ -58,7 +58,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210721112251-2g73fn6"
+						"id": "20210721112251-2g73fn6",
+						"updated": "20210721112251"
 					},
 					"Children": [
 						{
@@ -71,32 +72,6 @@
 								{
 									"Type": "NodeText",
 									"Data": "Synchronized data: Provided to the synchronization function, the data is encrypted"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210721112251-evmyz01",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210721112251-evmyz01"
-					},
-					"Children": [
-						{
-							"ID": "20210721112251-mvo15y4",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210721112251-mvo15y4"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Backup data: Provided to the backup function, the data is encrypted"
 								}
 							]
 						}

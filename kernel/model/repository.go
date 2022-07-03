@@ -317,6 +317,7 @@ func syncRepo(byHand bool) {
 	}
 	syncContext := map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar}
 	latest, mergeUpserts, mergeRemoves, err := repo.Sync(cloudInfo, syncContext)
+
 	elapsed := time.Since(start)
 	util.LogInfof("sync data repo elapsed [%.2fs], latest [%s]", elapsed.Seconds(), latest.ID)
 	if nil != err {
@@ -330,6 +331,7 @@ func syncRepo(byHand bool) {
 		return
 	}
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
+
 	if 1 > len(mergeUpserts) && 1 > len(mergeRemoves) { // 没有数据变更
 		syncSameCount++
 		if 10 < syncSameCount {

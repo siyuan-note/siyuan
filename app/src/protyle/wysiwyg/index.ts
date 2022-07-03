@@ -373,8 +373,10 @@ export class WYSIWYG {
                                 parentElement = getContenteditableElement(nodeElement);
                             }
                             if (parentElement) {
+                                // 引用文本剪切 https://ld246.com/article/1647689760545
+                                // 表格多行剪切 https://ld246.com/article/1652603836350
                                 Array.from(parentElement.children).forEach(item => {
-                                    if (item.textContent === "") {
+                                    if (item.textContent === "" && (item.nodeType === 1 && item.tagName !== "BR")) {
                                         item.remove();
                                     }
                                 });

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <style id="editorFontSize" type="text/css"></style>
+    <style id="editorAttr" type="text/css"></style>
 </head>
 <body class="fn__flex-column">
 <div id="loading" class="b3-dialog b3-dialog--open">

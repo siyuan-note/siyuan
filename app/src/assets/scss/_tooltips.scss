@@ -39,6 +39,7 @@
     max-width: 60vw;
     overflow: hidden;
     text-overflow: ellipsis;
+    box-sizing: border-box;
   }
 
   &::before {

@@ -85,4 +85,10 @@ export const setPadding = (protyle: IProtyle) => {
             lineNumberRender(block);
         });
     }
+    if (window.siyuan.config.editor.displayBookmarkIcon) {
+        const editorAttrElement = document.getElementById("editorAttr")
+        if (editorAttrElement) {
+            editorAttrElement.innerHTML = `.protyle-wysiwyg--attr .b3-tooltips:after { max-width: ${protyle.wysiwyg.element.clientWidth - min16 - min24}px; }`;
+        }
+    }
 };

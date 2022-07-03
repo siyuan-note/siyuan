@@ -5,6 +5,7 @@
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag
     <meta http-equiv="Content-Security-Policy" content="script-src 'self'"/>-->
     <style id="editorFontSize" type="text/css"></style>
+    <style id="editorAttr" type="text/css"></style>
 </head>
 <body class="fn__flex-column">
 <div id="loading" class="b3-dialog b3-dialog--open">

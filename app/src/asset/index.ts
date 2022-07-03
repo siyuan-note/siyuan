@@ -142,17 +142,25 @@ export class Asset extends Model {
             <button id="findNext" class="toolbarButton findNext b3-tooltips b3-tooltips__n" tabindex="93" aria-label="${window.siyuan.languages.next}">
                 <svg><use xlink:href="#iconDown"></use></svg>
             </button>
-            <input type="checkbox" id="findHighlightAll" class="toolbarField" tabindex="94">
-            <label for="findHighlightAll" class="b3-button b3-button--outline b3-button--small">${window.siyuan.languages.findHighlight}</label>
+            <label class="b3-button b3-button--outline b3-button--small">
+                <input type="checkbox" id="findHighlightAll" class="toolbarField" tabindex="94">
+                ${window.siyuan.languages.findHighlight}
+            </label>
             <div class="fn__space"></div>
-            <input type="checkbox" id="findMatchCase" class="toolbarField" tabindex="95">
-            <label for="findMatchCase" class="b3-button b3-button--outline b3-button--small">${window.siyuan.languages.searchCaseSensitive}</label>
+            <label class="b3-button b3-button--outline b3-button--small">
+                <input type="checkbox" id="findMatchCase" class="toolbarField" tabindex="95">
+                ${window.siyuan.languages.searchCaseSensitive}
+            </label>
             <div class="fn__space"></div>
-            <input type="checkbox" id="findMatchDiacritics" class="toolbarField" tabindex="96">
-            <label for="findMatchDiacritics" class="b3-button b3-button--outline b3-button--small">${window.siyuan.languages.matchDiacritics}</label>
+            <label class="b3-button b3-button--outline b3-button--small">
+                <input type="checkbox" id="findMatchDiacritics" class="toolbarField" tabindex="96">
+                ${window.siyuan.languages.matchDiacritics}
+            </label>
             <div class="fn__space"></div>
-            <input type="checkbox" id="findEntireWord" class="toolbarField" tabindex="97">
-            <label for="findEntireWord" class="b3-button b3-button--outline b3-button--small">${window.siyuan.languages.findEntireWord}</label>
+            <label class="b3-button b3-button--outline b3-button--small">
+                <input type="checkbox" id="findEntireWord" class="toolbarField" tabindex="97">
+                ${window.siyuan.languages.findEntireWord}
+            </label>
             <div class="fn__space"></div>
             <span id="findResultsCount" class="b3-button b3-button--small b3-button--cancel"></span>
             <span id="findMsg" class="b3-button b3-button--small b3-button--cancel"></span>

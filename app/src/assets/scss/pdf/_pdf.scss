@@ -391,11 +391,6 @@
   margin: 10px 0 3px 7px;
 }
 
-.findbar .toolbarField[type="checkbox"]:checked + .b3-button {
-  background-color: var(--b3-theme-primary);
-  color: var(--b3-theme-on-primary);
-}
-
 .toolbarField.pageNumber {
   min-width: 16px;
   text-align: right;

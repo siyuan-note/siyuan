@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data Sync",
-		"updated": "20220510105000"
+		"updated": "20220703223222"
 	},
 	"Children": [
 		{
@@ -53,6 +53,131 @@
 				{
 					"Type": "NodeText",
 					"Data": " folder data consistent on multiple devices, including asset files, templates, widgets, and notebook data."
+				}
+			]
+		},
+		{
+			"ID": "20210721112229-fp97j3c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721112229-fp97j3c",
+				"title": "End-to-end Encryption",
+				"updated": "20220703223222"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "End-to-end Encryption"
+				}
+			]
+		},
+		{
+			"ID": "20220703223157-9xwnaxy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220703223157-9xwnaxy",
+				"updated": "20220703223157"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data synchronization is transmitted through end-to-end encryption, and the cloud does not store any plaintext data."
+				}
+			]
+		},
+		{
+			"ID": "20220703223157-z6lmqw5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220703223157-z6lmqw5",
+				"updated": "20220703223157"
+			},
+			"Children": [
+				{
+					"ID": "20220703223157-mzolzze",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223157-mzolzze",
+						"updated": "20220703223157"
+					},
+					"Children": [
+						{
+							"ID": "20220703223157-80pgm8w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223157-80pgm8w",
+								"updated": "20220703223157"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The key is only stored locally and will not be uploaded to the cloud"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220703223157-6qldbi9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223157-6qldbi9",
+						"updated": "20220703223157"
+					},
+					"Children": [
+						{
+							"ID": "20220703223157-4t6fh6p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223157-4t6fh6p",
+								"updated": "20220703223157"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Encryption and decryption process is performed entirely on the local device"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220703223157-dpfgnuy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223157-dpfgnuy",
+						"updated": "20220703223157"
+					},
+					"Children": [
+						{
+							"ID": "20220703223157-gh25cti",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223157-gh25cti",
+								"updated": "20220703223157"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The encryption algorithm is the industry-recognized and secure AES GCM"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

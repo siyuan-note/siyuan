@@ -5,7 +5,7 @@
 		"icon": "1f50f",
 		"id": "20211226115043-afhev0g",
 		"title": "資料安全",
-		"updated": "20220626214021"
+		"updated": "20220703223919"
 	},
 	"Children": [
 		{
@@ -234,12 +234,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226115155-04oj3rp",
-				"updated": "20220111133353"
+				"updated": "20220703223003"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源雲端備份和同步使用"
+					"Data": "思源雲端同步使用"
 				},
 				{
 					"Type": "NodeBlockRef",
@@ -253,7 +253,7 @@
 						},
 						{
 							"Type": "NodeBlockRefID",
-							"Data": "20211226121407-gvqi3gd"
+							"Data": "20211227210109-0f92zh2"
 						},
 						{
 							"Type": "NodeBlockRefSpace"
@@ -297,7 +297,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226115155-z39qt19",
-				"updated": "20211228141139"
+				"updated": "20220703223919"
 			},
 			"Children": [
 				{
@@ -309,7 +309,7 @@
 					},
 					"Properties": {
 						"id": "20211226115155-h7jnnu0",
-						"updated": "20211228141139"
+						"updated": "20220703223919"
 					},
 					"Children": [
 						{
@@ -317,12 +317,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115155-vyt8fzz",
-								"updated": "20211228141139"
+								"updated": "20220703223919"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "定期將資料同時備份到雲端和離線設備上"
+									"Data": "定期備份數據，參考 321 備份原則（至少 3 個副本、2 種介質和 1 個異地存儲）"
 								}
 							]
 						}

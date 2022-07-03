@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
-		"updated": "20220510105029"
+		"updated": "20220703223113"
 	},
 	"Children": [
 		{
@@ -53,6 +53,130 @@
 				{
 					"Type": "NodeText",
 					"Data": " 文件夾資料一致，包括資料文件、範本、小工具以及筆記本資料。"
+				}
+			]
+		},
+		{
+			"ID": "20211227210109-0f92zh2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211227210109-0f92zh2",
+				"title": "端到端加密",
+				"updated": "20220703223113"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "端到端加密"
+				}
+			]
+		},
+		{
+			"ID": "20220703223050-c15s118",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220703223050-c15s118"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "數據同步通過端到端加密傳輸，雲端不保存任何明文數據。"
+				}
+			]
+		},
+		{
+			"ID": "20220703223050-mrhujtt",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220703223050-mrhujtt",
+				"updated": "20220703223050"
+			},
+			"Children": [
+				{
+					"ID": "20220703223050-bc8yax3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223050-bc8yax3",
+						"updated": "20220703223050"
+					},
+					"Children": [
+						{
+							"ID": "20220703223050-hb3id1r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223050-hb3id1r",
+								"updated": "20220703223050"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "密鑰僅存儲在本地，不會上傳到雲端"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220703223050-r6ah4qz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223050-r6ah4qz",
+						"updated": "20220703223050"
+					},
+					"Children": [
+						{
+							"ID": "20220703223050-z2k2sr1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223050-z2k2sr1",
+								"updated": "20220703223050"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密和解密過程完全在本地設備上進行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220703223050-cwpobbf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223050-cwpobbf",
+						"updated": "20220703223050"
+					},
+					"Children": [
+						{
+							"ID": "20220703223050-3ot9kpq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223050-3ot9kpq",
+								"updated": "20220703223050"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密算法為業界公認安全的 AES GCM"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

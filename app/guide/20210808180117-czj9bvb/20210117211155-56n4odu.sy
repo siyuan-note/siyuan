@@ -6,7 +6,7 @@
 		"id": "20210117211155-56n4odu",
 		"title": "数据安全",
 		"type": "doc",
-		"updated": "20220626213935"
+		"updated": "20220703223831"
 	},
 	"Children": [
 		{
@@ -263,12 +263,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210721110555-81sqopb",
-				"updated": "20220111133217"
+				"updated": "20220703222819"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源云端备份和同步使用"
+					"Data": "思源云端同步使用"
 				},
 				{
 					"Type": "NodeBlockRef",
@@ -334,7 +334,8 @@
 				"Num": -1
 			},
 			"Properties": {
-				"id": "20210117214728-szj3mg9"
+				"id": "20210117214728-szj3mg9",
+				"updated": "20220703223831"
 			},
 			"Children": [
 				{
@@ -349,7 +350,8 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20210117215237-1mbl2ly"
+						"id": "20210117215237-1mbl2ly",
+						"updated": "20220703223831"
 					},
 					"Children": [
 						{
@@ -357,12 +359,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210302223430-wz2k547",
-								"updated": "20210525221031"
+								"updated": "20220703223831"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "定期将数据同时备份到云端和离线设备上"
+									"Data": "定期备份数据，参考 321 备份原则（至少 3 个副本、2 种介质和 1 个异地存储）"
 								}
 							]
 						}

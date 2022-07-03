@@ -135,8 +135,8 @@ func SyncData(boot, exit, byHand bool) {
 	indexRepoBeforeCloudSync()
 
 	//同步数据仓库 https://github.com/siyuan-note/siyuan/issues/5142
-	//syncRepo(byHand)
-	//return // TODO: 测试
+	syncRepo(byHand)
+	return // TODO: 测试
 
 	WaitForWritingFiles()
 	writingDataLock.Lock()

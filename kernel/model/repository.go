@@ -311,7 +311,7 @@ func syncRepo(byHand bool) {
 		Dir:       Conf.Sync.CloudName,
 		UserID:    Conf.User.UserId,
 		Token:     Conf.User.UserToken,
-		LimitSize: int64(Conf.User.UserSiYuanRepoSize),
+		LimitSize: int64(Conf.User.UserSiYuanRepoSize - Conf.User.UserSiYuanAssetSize),
 		ProxyURL:  Conf.System.NetworkProxy.String(),
 		Server:    util.AliyunServer,
 	}
@@ -322,6 +322,9 @@ func syncRepo(byHand bool) {
 	if nil != err {
 		util.LogErrorf("sync data repo failed: %s", err)
 		msg := "Sync data repo failed: " + err.Error()
+		if errors.Is(err, dejavu.ErrSyncCloudStorageSizeExceeded) {
+			msg = fmt.Sprintf(Conf.Language(43), byteCountSI(int64(Conf.User.UserSiYuanRepoSize)))
+		}
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 0)
 		return

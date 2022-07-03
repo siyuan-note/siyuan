@@ -249,57 +249,25 @@ const (
 	CtxPushMsgToStatusBarAndProgress
 )
 
-func indexRepoBeforeCloudSync() {
-	if 1 > len(Conf.Repo.Key) {
-		return
-	}
-
-	repo, err := newRepository()
-	if nil != err {
-		return
-	}
-
-	start := time.Now()
-	latest, _ := repo.Latest()
-	index, err := repo.Index("[Auto] Cloud sync", map[string]interface{}{
-		CtxPushMsg: CtxPushMsgToStatusBar,
-	})
-	if nil != err {
-		util.PushStatusBar("Create data snapshot for cloud sync failed")
-		util.LogErrorf("index data repo before cloud sync failed: %s", err)
-		return
-	}
-	elapsed := time.Since(start)
-	if nil != latest {
-		if latest.ID != index.ID {
-			// 对新创建的快照需要更新备注，加入耗时统计
-			index.Memo = fmt.Sprintf("[Auto] Cloud sync, completed in %.2fs", elapsed.Seconds())
-			err = repo.PutIndex(index)
-			if nil != err {
-				util.PushStatusBar("Save data snapshot for cloud sync failed")
-				util.LogErrorf("put index into data repo before cloud sync failed: %s", err)
-				return
-			}
-			util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
-		} else {
-			util.PushStatusBar(Conf.Language(148) + " [" + latest.ID[:7] + "]")
-		}
-	} else {
-		util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
-	}
-	if 7000 < elapsed.Milliseconds() {
-		util.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
-	}
-}
-
 func syncRepo(byHand bool) {
 	if 1 > len(Conf.Repo.Key) {
+		msg := Conf.Language(26)
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
 		return
 	}
 
 	repo, err := newRepository()
 	if nil != err {
-		util.LogErrorf("sync repo failed: %s", err)
+		msg := fmt.Sprintf("sync repo failed: %s", err)
+		util.LogErrorf(msg)
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		return
+	}
+
+	err = indexRepoBeforeCloudSync(repo)
+	if nil != err {
 		return
 	}
 
@@ -365,6 +333,41 @@ func syncRepo(byHand bool) {
 		time.Sleep(2 * time.Second)
 		util.PushStatusBar(fmt.Sprintf(Conf.Language(149)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
 	}()
+	return
+}
+
+func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
+	start := time.Now()
+	latest, _ := repo.Latest()
+	index, err := repo.Index("[Auto] Cloud sync", map[string]interface{}{
+		CtxPushMsg: CtxPushMsgToStatusBar,
+	})
+	if nil != err {
+		util.PushStatusBar(Conf.Language(140))
+		util.LogErrorf("index data repo before cloud sync failed: %s", err)
+		return
+	}
+	elapsed := time.Since(start)
+	if nil != latest {
+		if latest.ID != index.ID {
+			// 对新创建的快照需要更新备注，加入耗时统计
+			index.Memo = fmt.Sprintf("[Auto] Cloud sync, completed in %.2fs", elapsed.Seconds())
+			err = repo.PutIndex(index)
+			if nil != err {
+				util.PushStatusBar("Save data snapshot for cloud sync failed")
+				util.LogErrorf("put index into data repo before cloud sync failed: %s", err)
+				return
+			}
+			util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
+		} else {
+			util.PushStatusBar(Conf.Language(148) + " [" + latest.ID[:7] + "]")
+		}
+	} else {
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
+	}
+	if 7000 < elapsed.Milliseconds() {
+		util.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
+	}
 	return
 }
 

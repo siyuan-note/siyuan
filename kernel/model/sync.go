@@ -131,12 +131,10 @@ func SyncData(boot, exit, byHand bool) {
 	syncLock.Lock()
 	defer syncLock.Unlock()
 
-	// 创建数据快照 https://github.com/siyuan-note/siyuan/issues/5161
-	indexRepoBeforeCloudSync()
-
-	//同步数据仓库 https://github.com/siyuan-note/siyuan/issues/5142
-	syncRepo(byHand)
-	return // TODO: 测试
+	if Conf.Sync.UseDataRepo {
+		syncRepo(byHand)
+		return
+	}
 
 	WaitForWritingFiles()
 	writingDataLock.Lock()
@@ -412,6 +410,7 @@ func SyncData(boot, exit, byHand bool) {
 	return
 }
 
+// TODO: 新版同步上线后移除
 // 清理 dir 下符合 ID 规则的空文件夹。
 // 因为是深度遍历，所以可能会清理不完全空文件夹，每次遍历仅能清理叶子节点。但是多次调用后，可以清理完全。
 func clearEmptyDirs(dir string) {

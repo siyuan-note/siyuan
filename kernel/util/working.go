@@ -140,7 +140,7 @@ func SetBooted() {
 }
 
 func GetHistoryDirNow(now, suffix string) (ret string, err error) {
-	ret = filepath.Join(WorkspaceDir, "history", now+"-"+suffix)
+	ret = filepath.Join(HistoryDir, now+"-"+suffix)
 	if err = os.MkdirAll(ret, 0755); nil != err {
 		LogErrorf("make history dir failed: %s", err)
 		return
@@ -149,7 +149,7 @@ func GetHistoryDirNow(now, suffix string) (ret string, err error) {
 }
 
 func GetHistoryDir(suffix string) (ret string, err error) {
-	ret = filepath.Join(WorkspaceDir, "history", time.Now().Format("2006-01-02-150405")+"-"+suffix)
+	ret = filepath.Join(HistoryDir, time.Now().Format("2006-01-02-150405")+"-"+suffix)
 	if err = os.MkdirAll(ret, 0755); nil != err {
 		LogErrorf("make history dir failed: %s", err)
 		return
@@ -165,6 +165,7 @@ var (
 	ConfDir        string        // 配置目录路径
 	DataDir        string        // 数据目录路径
 	RepoDir        string        // 仓库目录路径
+	HistoryDir     string        // 数据历史目录路径
 	TempDir        string        // 临时目录路径
 	LogPath        string        // 配置目录下的日志文件 siyuan.log 路径
 	DBName         = "siyuan.db" // SQLite 数据库文件名
@@ -253,6 +254,7 @@ func initWorkspaceDir(workspaceArg string) {
 	ConfDir = filepath.Join(WorkspaceDir, "conf")
 	DataDir = filepath.Join(WorkspaceDir, "data")
 	RepoDir = filepath.Join(WorkspaceDir, "repo")
+	HistoryDir = filepath.Join(WorkspaceDir, "history")
 	TempDir = filepath.Join(WorkspaceDir, "temp")
 	osTmpDir := filepath.Join(TempDir, "os")
 	os.RemoveAll(osTmpDir)

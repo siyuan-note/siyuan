@@ -316,7 +316,7 @@ func syncRepo(byHand bool) {
 		Server:    util.AliyunServer,
 	}
 	syncContext := map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar}
-	latest, mergeUpserts, mergeRemoves, err := repo.Sync(cloudInfo, syncContext)
+	latest, mergeUpserts, mergeRemoves, _, err := repo.Sync(cloudInfo, syncContext)
 
 	elapsed := time.Since(start)
 	util.LogInfof("sync data repo elapsed [%.2fs], latest [%s]", elapsed.Seconds(), latest.ID)
@@ -338,11 +338,11 @@ func syncRepo(byHand bool) {
 			syncSameCount = 5
 		}
 		if !byHand {
-			after := time.Minute * time.Duration(int(math.Pow(2, float64(syncSameCount))))
-			if fixSyncInterval.Minutes() > after.Minutes() {
-				after = time.Minute * 8
+			delay := time.Minute * time.Duration(int(math.Pow(2, float64(syncSameCount))))
+			if fixSyncInterval.Minutes() > delay.Minutes() {
+				delay = time.Minute * 8
 			}
-			planSyncAfter(after)
+			planSyncAfter(delay)
 		}
 		return
 	}
@@ -371,7 +371,7 @@ func syncRepo(byHand bool) {
 func newRepository() (ret *dejavu.Repo, err error) {
 	ignoreLines := getIgnoreLines()
 	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置
-	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, Conf.Repo.Key, ignoreLines)
+	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines)
 	if nil != err {
 		util.LogErrorf("init data repository failed: %s", err)
 	}

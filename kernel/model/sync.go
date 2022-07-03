@@ -196,11 +196,11 @@ func SyncData(boot, exit, byHand bool) {
 			syncSameCount = 5
 		}
 		if !byHand {
-			after := time.Minute * time.Duration(int(math.Pow(2, float64(syncSameCount))))
-			if fixSyncInterval.Minutes() > after.Minutes() {
-				after = time.Minute * 8
+			delay := time.Minute * time.Duration(int(math.Pow(2, float64(syncSameCount))))
+			if fixSyncInterval.Minutes() > delay.Minutes() {
+				delay = time.Minute * 8
 			}
-			planSyncAfter(after)
+			planSyncAfter(delay)
 		}
 
 		Conf.Sync.Stat = Conf.Language(133)
@@ -460,6 +460,7 @@ func incReindex(upserts, removes []string) {
 		if !strings.HasSuffix(removeFile, ".sy") {
 			continue
 		}
+
 		id := strings.TrimSuffix(filepath.Base(removeFile), ".sy")
 		block := treenode.GetBlockTree(id)
 		if nil != block {

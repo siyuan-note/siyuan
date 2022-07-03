@@ -37,6 +37,7 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	WorkspaceDir = workspaceDir
 	ConfDir = filepath.Join(workspaceDir, "conf")
 	DataDir = filepath.Join(workspaceDir, "data")
+	HistoryDir = filepath.Join(workspaceDir, "history")
 	RepoDir = filepath.Join(WorkspaceDir, "repo")
 	TempDir = filepath.Join(workspaceDir, "temp")
 	osTmpDir := filepath.Join(TempDir, "os")

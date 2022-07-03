@@ -208,7 +208,7 @@ func serveAssets(ginServer *gin.Engine) {
 		dir := context.Param("dir")
 		name := context.Param("name")
 		relativePath := path.Join(dir, "assets", name)
-		p := filepath.Join(util.WorkspaceDir, "history", relativePath)
+		p := filepath.Join(util.HistoryDir, relativePath)
 		http.ServeFile(context.Writer, context.Request, p)
 		return
 	})

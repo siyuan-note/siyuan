@@ -54,7 +54,7 @@ func generateDocHistory() {
 		box.generateDocHistory0()
 	}
 
-	historyDir := filepath.Join(util.WorkspaceDir, "history")
+	historyDir := util.HistoryDir
 	clearOutdatedHistoryDir(historyDir)
 
 	// 以下部分是老版本的清理逻辑，暂时保留
@@ -79,7 +79,7 @@ func ChangeHistoryTick(minutes int) {
 }
 
 func ClearWorkspaceHistory() (err error) {
-	historyDir := filepath.Join(util.WorkspaceDir, "history")
+	historyDir := util.HistoryDir
 	if gulu.File.IsDir(historyDir) {
 		if err = os.RemoveAll(historyDir); nil != err {
 			util.LogErrorf("remove workspace history dir [%s] failed: %s", historyDir, err)
@@ -257,7 +257,7 @@ const maxHistory = 32
 func GetDocHistory(boxID string) (ret []*History, err error) {
 	ret = []*History{}
 
-	historyDir := filepath.Join(util.WorkspaceDir, "history")
+	historyDir := util.HistoryDir
 	if !gulu.File.IsDir(historyDir) {
 		return
 	}
@@ -342,7 +342,7 @@ func GetDocHistory(boxID string) (ret []*History, err error) {
 func GetNotebookHistory() (ret []*History, err error) {
 	ret = []*History{}
 
-	historyDir := filepath.Join(util.WorkspaceDir, "history")
+	historyDir := util.HistoryDir
 	if !gulu.File.IsDir(historyDir) {
 		return
 	}
@@ -402,7 +402,7 @@ func GetNotebookHistory() (ret []*History, err error) {
 func GetAssetsHistory() (ret []*History, err error) {
 	ret = []*History{}
 
-	historyDir := filepath.Join(util.WorkspaceDir, "history")
+	historyDir := util.HistoryDir
 	if !gulu.File.IsDir(historyDir) {
 		return
 	}

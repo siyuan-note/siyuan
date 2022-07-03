@@ -409,14 +409,14 @@ func subscribeEvents() {
 		contextPushMsg(context, msg)
 	})
 
-	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudIndexes, func(context map[string]interface{}, latestSync string) {
-		msg := "Downloading data repository indexes..."
+	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudLatest, func(context map[string]interface{}) {
+		msg := "Downloading data repository latest..."
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 
-	eventbus.Subscribe(dejavu.EvtSyncAfterDownloadCloudIndexes, func(context map[string]interface{}, indexes []*entity.Index) {
-		msg := fmt.Sprintf("Downloaded indexes [len=%d]", len(indexes))
+	eventbus.Subscribe(dejavu.EvtSyncAfterDownloadCloudLatest, func(context map[string]interface{}, latest *entity.Index) {
+		msg := fmt.Sprintf("Downloaded latest [%s]", latest.ID[:7])
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 

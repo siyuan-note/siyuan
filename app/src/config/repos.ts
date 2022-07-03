@@ -361,6 +361,14 @@ ${passwordHTML}
         <option value="2" ${window.siyuan.config.sync.mode === 2 ? "selected" : ""}>${window.siyuan.languages.syncMode2}</option>
     </select>
 </label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.syncDataRepo}
+        <div class="b3-label__text">${window.siyuan.languages.syncDataRepoTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input type="checkbox" id="useDataRepo"${window.siyuan.config.sync.useDataRepo ? " checked='checked'" : ""} class="b3-switch fn__flex-center">
+</label>
 <div class="b3-label">
     <div class="fn__flex">
         <div class="fn__flex-center">${window.siyuan.languages.cloudSync}</div>
@@ -406,6 +414,17 @@ ${passwordHTML}
                     syncModeElement.value = "1";
                 } else {
                     window.siyuan.config.sync.mode = parseInt(syncModeElement.value, 10);
+                }
+            });
+        });
+        const useDataRepoElement = repos.element.querySelector("#useDataRepo") as HTMLInputElement;
+        useDataRepoElement.addEventListener("change", () => {
+            fetchPost("/api/sync/setSyncUseDataRepo", {enabled: useDataRepoElement.checked}, (response) => {
+                if (response.code === 1) {
+                    showMessage(response.msg);
+                    useDataRepoElement.checked = false;
+                } else {
+                    window.siyuan.config.sync.useDataRepo = useDataRepoElement.checked;
                 }
             });
         });

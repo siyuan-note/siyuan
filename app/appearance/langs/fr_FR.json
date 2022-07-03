@@ -1,4 +1,6 @@
 {
+  "syncDataRepo": "⏰ Utiliser le mécanisme de synchronisation du référentiel de données",
+  "syncDataRepoTip": "Le mécanisme de synchronisation du référentiel de données sera utilisé dans la prochaine v2.1.0, le mécanisme de synchronisation existant sera hors ligne",
   "dataRepo": "Dépôt de données",
   "newSubDoc": "Créer un sous-doc",
   "newDocBelow": "Créer un document ci-dessous",

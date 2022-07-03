@@ -1,4 +1,6 @@
 {
+  "syncDataRepo": "⏰ 使用数据仓库同步机制",
+  "syncDataRepoTip": "在即将到来的 v2.1.0 版本将使用数据仓库同步机制，届时现有的同步机制会下线",
   "dataRepo": "数据仓库",
   "newSubDoc": "新建子文档",
   "newDocBelow": "在下方新建文档",

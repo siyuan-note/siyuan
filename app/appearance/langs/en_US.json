@@ -1,4 +1,6 @@
 {
+  "syncDataRepo": "⏰ Use data repo sync mechanism",
+  "syncDataRepoTip": "The data repo sync mechanism will be used in the upcoming v2.1.0, the existing sync mechanism will be offline",
   "dataRepo": "Data repo",
   "newSubDoc": "Create sub doc",
   "newDocBelow": "Create doc below",

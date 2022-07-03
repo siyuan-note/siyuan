@@ -491,6 +491,15 @@ func SetSyncEnable(b bool) (err error) {
 	return
 }
 
+func SetSyncUseDataRepo(b bool) (err error) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	Conf.Sync.UseDataRepo = b
+	Conf.Save()
+	return
+}
+
 func SetSyncMode(mode int) (err error) {
 	syncLock.Lock()
 	defer syncLock.Unlock()

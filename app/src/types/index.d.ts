@@ -255,6 +255,7 @@ declare interface IConfig {
         stat: string
         interval: number
         cloudName: string
+        useDataRepo: boolean
     },
     lang: string
     api: {

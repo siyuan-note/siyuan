@@ -45,14 +45,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         return;
     }
     let id = blockElement.getAttribute("data-node-id");
-    if (range.toString() === "") {
-        // 连续粘贴 PDF 标注不生效 https://github.com/siyuan-note/siyuan/issues/3018
-        const fileAnnoElement = hasClosestByAttribute(range.startContainer, "data-type", "file-annotation-ref");
-        if (fileAnnoElement) {
-            range.setEndAfter(fileAnnoElement);
-            range.collapse(false);
-        }
-    }
     range.insertNode(document.createElement("wbr"));
     let oldHTML = blockElement.outerHTML;
     if (range.toString() !== "") {

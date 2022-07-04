@@ -230,12 +230,12 @@ func IndexRepo(memo string) (err error) {
 
 	if nil != latest {
 		if latest.ID != index.ID {
-			util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
+			util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), index.ID[:7]))
 		} else {
-			util.PushStatusBar(Conf.Language(148) + " [" + latest.ID[:7] + "]")
+			util.PushStatusBar(Conf.Language(148) + " [" + index.ID[:7] + "]")
 		}
 	} else {
-		util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), latest.ID[:7]))
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(147)+" [%s]", elapsed.Seconds(), index.ID[:7]))
 	}
 	util.PushClearProgress()
 	return

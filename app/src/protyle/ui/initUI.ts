@@ -58,10 +58,6 @@ export const setPadding = (protyle: IProtyle) => {
             min16 = 96;
             min24 = 96;
         }
-        if (!window.siyuan.config.editor.fullWidth) {
-            // 防止右侧分屏后，左侧页签抖动
-            protyle.wysiwyg.element.style.width = (protyle.element.clientWidth - 10) + "px";
-        }
     }
     if (protyle.options.render.background && protyle.options.render.title) {
         protyle.background.element.lastElementChild.setAttribute("style", `left:${min16}px`);
@@ -80,6 +76,13 @@ export const setPadding = (protyle: IProtyle) => {
         }
     }
     protyle.wysiwyg.element.style.padding = `16px ${min16}px ${bottomHeight} ${min24}px`;
+    if (!isMobile() && !window.siyuan.config.editor.fullWidth) {
+        // 防止右侧分屏后，左侧页签抖动；10 为滚动条宽度
+        protyle.wysiwyg.element.style.width = (protyle.element.clientWidth - 10) + "px";
+        if (protyle.options.render.title) {
+            protyle.title.element.style.width = (protyle.element.clientWidth - min16 - min24 - 10) + "px";
+        }
+    }
     if (window.siyuan.config.editor.codeSyntaxHighlightLineNum) {
         protyle.wysiwyg.element.querySelectorAll('.code-block [contenteditable="true"]').forEach((block: HTMLElement) => {
             lineNumberRender(block);

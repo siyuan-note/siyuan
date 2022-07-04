@@ -29,7 +29,7 @@ import (
 var assetsWatcher *fsnotify.Watcher
 
 func WatchAssets() {
-	if "android" == util.Container {
+	if "android" == util.Container || "ios" == util.Container {
 		return
 	}
 

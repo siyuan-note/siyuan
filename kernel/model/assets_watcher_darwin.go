@@ -29,10 +29,6 @@ import (
 var assetsWatcher *watcher.Watcher
 
 func WatchAssets() {
-	if "iOS" == util.Container {
-		return
-	}
-
 	go func() {
 		watchAssets()
 	}()

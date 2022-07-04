@@ -271,9 +271,6 @@ func syncRepo(boot, exit, byHand bool) {
 		return
 	}
 
-	CloseWatchAssets()
-	defer WatchAssets()
-
 	start := time.Now()
 	cloudInfo := &dejavu.CloudInfo{
 		Dir:       "main",

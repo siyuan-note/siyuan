@@ -286,7 +286,7 @@ func syncRepo(boot, exit, byHand bool) {
 	syncContext := map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar}
 
 	_, mergeUpserts, mergeRemoves, _,
-		uploadFileCount, uploadChunkCount, downloadFileCount, downloadChunkCount,
+		uploadFileCount, downloadFileCount, uploadChunkCount, downloadChunkCount,
 		uploadBytes, downloadBytes, err := repo.Sync(cloudInfo, syncContext)
 
 	elapsed := time.Since(start)
@@ -305,11 +305,12 @@ func syncRepo(boot, exit, byHand bool) {
 		if exit {
 			ExitSyncSucc = 1
 		}
+		planSyncAfter(fixSyncInterval)
 		return
 	}
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), uploadFileCount, uploadChunkCount, downloadFileCount, downloadChunkCount, byteCountSI(uploadBytes), byteCountSI(downloadBytes))
+	msg := fmt.Sprintf(Conf.Language(150), uploadFileCount, downloadFileCount, uploadChunkCount, downloadChunkCount, byteCountSI(uploadBytes), byteCountSI(downloadBytes))
 	Conf.Sync.Stat = msg
 
 	if 1 > len(mergeUpserts) && 1 > len(mergeRemoves) { // 没有数据变更

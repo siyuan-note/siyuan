@@ -38,7 +38,7 @@ func NewSync() *Sync {
 		CloudName:   "main",
 		Enabled:     true,
 		Mode:        1,
-		UseDataRepo: true,
+		UseDataRepo: false,
 	}
 }
 

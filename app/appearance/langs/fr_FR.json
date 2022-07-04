@@ -912,6 +912,6 @@
     "147": "Créé un nouvel instantané de données, a pris %.2fs",
     "148": "Vérifié l'instantané des données et n'a trouvé aucun changement",
     "149": "L'instantané des données a été synchronisé, a pris %.2fs",
-    "150": "Fichiers téléchargés %d\nFichiers téléchargés %d\nBlocs téléchargés %d\nBlocs téléchargés %d\nOctets envoyés %s\nOctets reçus %s\n"
+    "150": "Fichiers chargés/téléchargés %d/%d\nMorceaux chargés/téléchargés %d/%d\nOctets envoyés/reçus %s/%s"
   }
 }

@@ -436,6 +436,9 @@ func clearEmptyDirs(dir string) {
 
 // incReindex 增量重建索引。
 func incReindex(upserts, removes []string) {
+	needPushUpsertProgress := 32 < len(upserts)
+	needPushRemoveProgress := 32 < len(removes)
+
 	for _, upsertFile := range upserts {
 		if !strings.HasSuffix(upsertFile, ".sy") {
 			continue
@@ -453,7 +456,11 @@ func incReindex(upserts, removes []string) {
 		}
 		treenode.ReindexBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
-		//util.LogInfof("sync index tree [%s]", tree.ID)
+		msg := fmt.Sprintf("Sync reindex tree [%s]", tree.ID)
+		util.PushStatusBar(msg)
+		if needPushUpsertProgress {
+			util.PushEndlessProgress(msg)
+		}
 	}
 	for _, removeFile := range removes {
 		if !strings.HasSuffix(removeFile, ".sy") {
@@ -465,8 +472,16 @@ func incReindex(upserts, removes []string) {
 		if nil != block {
 			treenode.RemoveBlockTreesByRootID(block.RootID)
 			sql.RemoveTreeQueue(block.BoxID, block.RootID)
-			//util.LogInfof("sync remove tree [%s]", block.RootID)
+			msg := fmt.Sprintf("Sync remove tree [%s]", block.RootID)
+			util.PushStatusBar(msg)
+			if needPushRemoveProgress {
+				util.PushEndlessProgress(msg)
+			}
 		}
+	}
+
+	if needPushRemoveProgress || needPushUpsertProgress {
+		util.PushClearProgress()
 	}
 }
 

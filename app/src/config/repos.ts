@@ -369,7 +369,7 @@ ${passwordHTML}
     <span class="fn__space"></span>
     <input type="checkbox" id="useDataRepo"${window.siyuan.config.sync.useDataRepo ? " checked='checked'" : ""} class="b3-switch fn__flex-center">
 </label>
-<div class="b3-label${window.siyuan.config.sync.useDataRepo ? " fn__none" : ""}">
+<div class="b3-label">
     <div class="fn__flex">
         <div class="fn__flex-center">${window.siyuan.languages.cloudSync}</div>
         <div class="fn__flex-1"></div>
@@ -427,10 +427,8 @@ ${passwordHTML}
                     window.siyuan.config.sync.useDataRepo = useDataRepoElement.checked;
                     const reposBackupElement = repos.element.querySelector("#reposBackup") as HTMLElement;
                     if (useDataRepoElement.checked) {
-                        reposBackupElement.previousElementSibling.classList.add("fn__none")
                         reposBackupElement.classList.add("fn__none");
                     } else {
-                        reposBackupElement.previousElementSibling.classList.remove("fn__none")
                         reposBackupElement.classList.remove("fn__none");
                     }
                 }

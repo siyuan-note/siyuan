@@ -83,7 +83,7 @@ func SyncData(boot, exit, byHand bool) {
 	if exit {
 		ExitSyncSucc = 0
 	}
-	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName || "" == Conf.E2EEPasswd {
+	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName || ("" == Conf.E2EEPasswd && !Conf.Sync.UseDataRepo) {
 		if byHand {
 			if "" == Conf.Sync.CloudName {
 				util.PushMsg(Conf.Language(123), 5000)

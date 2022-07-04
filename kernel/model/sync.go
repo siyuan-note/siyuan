@@ -132,7 +132,7 @@ func SyncData(boot, exit, byHand bool) {
 	defer syncLock.Unlock()
 
 	if Conf.Sync.UseDataRepo {
-		syncRepo(byHand)
+		syncRepo(boot, exit, byHand)
 		return
 	}
 

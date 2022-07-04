@@ -911,6 +911,7 @@
     "146": "Failed to reset data repository: %s",
     "147": "Created a new data snapshot, took %.2fs",
     "148": "Checked the data snapshot and found no changes",
-    "149": "Data snapshot has been synchronized, took %.2fs"
+    "149": "Data snapshot has been synchronized, took %.2fs",
+    "150": "Uploaded files %d\nDownloaded files %d\nUploaded chunks %d\nDownloaded chunks %d\nSent bytes %s\nReceived bytes %s\n"
   }
 }

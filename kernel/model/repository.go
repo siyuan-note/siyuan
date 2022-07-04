@@ -249,7 +249,7 @@ const (
 	CtxPushMsgToStatusBarAndProgress
 )
 
-func syncRepo(byHand bool) {
+func syncRepo(boot, exit, byHand bool) {
 	if 1 > len(Conf.Repo.Key) {
 		msg := Conf.Language(26)
 		util.PushStatusBar(msg)
@@ -284,21 +284,33 @@ func syncRepo(byHand bool) {
 		Server:    util.AliyunServer,
 	}
 	syncContext := map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar}
-	latest, mergeUpserts, mergeRemoves, _, err := repo.Sync(cloudInfo, syncContext)
+
+	_, mergeUpserts, mergeRemoves, _,
+		uploadFileCount, uploadChunkCount, downloadFileCount, downloadChunkCount,
+		uploadBytes, downloadBytes, err := repo.Sync(cloudInfo, syncContext)
 
 	elapsed := time.Since(start)
-	util.LogInfof("sync data repo elapsed [%.2fs], latest [%s]", elapsed.Seconds(), latest.ID)
 	if nil != err {
 		util.LogErrorf("sync data repo failed: %s", err)
-		msg := "Sync data repo failed: " + err.Error()
+		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		if errors.Is(err, dejavu.ErrSyncCloudStorageSizeExceeded) {
 			msg = fmt.Sprintf(Conf.Language(43), byteCountSI(int64(Conf.User.UserSiYuanRepoSize)))
 		}
+		Conf.Sync.Stat = msg
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 0)
+		if boot {
+			BootSyncSucc = 1
+		}
+		if exit {
+			ExitSyncSucc = 1
+		}
 		return
 	}
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+	Conf.Sync.Synced = util.CurrentTimeMillis()
+	msg := fmt.Sprintf(Conf.Language(150), uploadFileCount, uploadChunkCount, downloadFileCount, downloadChunkCount, byteCountSI(uploadBytes), byteCountSI(downloadBytes))
+	Conf.Sync.Stat = msg
 
 	if 1 > len(mergeUpserts) && 1 > len(mergeRemoves) { // 没有数据变更
 		syncSameCount++
@@ -343,7 +355,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 		CtxPushMsg: CtxPushMsgToStatusBar,
 	})
 	if nil != err {
-		util.PushStatusBar(Conf.Language(140))
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(140), err))
 		util.LogErrorf("index data repo before cloud sync failed: %s", err)
 		return
 	}

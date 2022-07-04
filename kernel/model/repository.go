@@ -272,13 +272,9 @@ func syncRepo(boot, exit, byHand bool) {
 	}
 
 	start := time.Now()
-	cloudInfo := &dejavu.CloudInfo{
-		Dir:       "main",
-		UserID:    Conf.User.UserId,
-		Token:     Conf.User.UserToken,
-		LimitSize: int64(Conf.User.UserSiYuanRepoSize - Conf.User.UserSiYuanAssetSize),
-		ProxyURL:  Conf.System.NetworkProxy.String(),
-		Server:    util.AliyunServer,
+	cloudInfo, err := buildCloudInfo()
+	if nil != err {
+		return
 	}
 	syncContext := map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar}
 
@@ -470,4 +466,21 @@ func contextPushMsg(context map[string]interface{}, msg string) {
 		util.PushStatusBar(msg)
 		util.PushEndlessProgress(msg)
 	}
+}
+
+func buildCloudInfo() (ret *dejavu.CloudInfo, err error) {
+	if nil == Conf.User || "" == Conf.Sync.CloudName {
+		err = errors.New("invalid cloud info")
+		return
+	}
+
+	ret = &dejavu.CloudInfo{
+		Dir:       Conf.Sync.CloudName,
+		UserID:    Conf.User.UserId,
+		Token:     Conf.User.UserToken,
+		LimitSize: int64(Conf.User.UserSiYuanRepoSize - Conf.User.UserSiYuanAssetSize),
+		ProxyURL:  Conf.System.NetworkProxy.String(),
+		Server:    util.AliyunServer,
+	}
+	return
 }

@@ -35,6 +35,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	gitignore "github.com/sabhiram/go-gitignore"
+	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -1150,9 +1151,16 @@ func CreateCloudSyncDir(name string) (err error) {
 		return errors.New(Conf.Language(37))
 	}
 
-	err = createCloudSyncDirOSS(name)
-	if nil != err {
-		return
+	if Conf.Sync.UseDataRepo {
+		var cloudInfo *dejavu.CloudInfo
+		cloudInfo, err = buildCloudInfo()
+		if nil != err {
+			return
+		}
+
+		err = dejavu.CreateCloudRepo(name, cloudInfo)
+	} else {
+		err = createCloudSyncDirOSS(name)
 	}
 	return
 }
@@ -1165,7 +1173,18 @@ func RemoveCloudSyncDir(name string) (err error) {
 		return
 	}
 
-	err = removeCloudDirPath("sync/" + name)
+	if Conf.Sync.UseDataRepo {
+		var cloudInfo *dejavu.CloudInfo
+		cloudInfo, err = buildCloudInfo()
+		if nil != err {
+			return
+		}
+
+		err = dejavu.RemoveCloudRepo(name, cloudInfo)
+	} else {
+		err = removeCloudDirPath("sync/" + name)
+	}
+
 	if nil != err {
 		return
 	}
@@ -1179,8 +1198,23 @@ func RemoveCloudSyncDir(name string) (err error) {
 
 func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 	syncDirs = []*Sync{}
+	var dirs []map[string]interface{}
+	var size int64
+	if Conf.Sync.UseDataRepo {
+		var cloudInfo *dejavu.CloudInfo
+		cloudInfo, err = buildCloudInfo()
+		if nil != err {
+			return
+		}
 
-	dirs, size, err := listCloudSyncDirOSS()
+		dirs, size, err = dejavu.GetCloudRepos(cloudInfo)
+	} else {
+		dirs, size, err = listCloudSyncDirOSS()
+	}
+	if nil != err {
+		return
+	}
+
 	for _, d := range dirs {
 		dirSize := int64(d["size"].(float64))
 		syncDirs = append(syncDirs, &Sync{

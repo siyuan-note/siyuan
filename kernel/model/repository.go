@@ -212,7 +212,9 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 		return
 	}
 	util.PushClearProgress()
-	util.PushMsg(fmt.Sprintf(Conf.Language(153), downloadFileCount, downloadChunkCount, byteCountSI(downloadBytes)), 5000)
+	msg := fmt.Sprintf(Conf.Language(153), downloadFileCount, downloadChunkCount, byteCountSI(downloadBytes))
+	util.PushMsg(msg, 5000)
+	util.PushStatusBar(msg)
 	return
 }
 
@@ -237,7 +239,9 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 		return
 	}
 	util.PushClearProgress()
-	util.PushMsg(fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, byteCountSI(uploadBytes)), 5000)
+	msg := fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, byteCountSI(uploadBytes))
+	util.PushMsg(msg, 5000)
+	util.PushStatusBar(msg)
 	return
 }
 

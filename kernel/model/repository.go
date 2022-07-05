@@ -207,11 +207,11 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 		return
 	}
 
+	defer util.PushClearProgress()
 	downloadFileCount, downloadChunkCount, downloadBytes, err := repo.DownloadTagIndex(tag, id, cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
 		return
 	}
-	util.PushClearProgress()
 	msg := fmt.Sprintf(Conf.Language(153), downloadFileCount, downloadChunkCount, byteCountSI(downloadBytes))
 	util.PushMsg(msg, 5000)
 	util.PushStatusBar(msg)
@@ -234,11 +234,11 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 		return
 	}
 
+	defer util.PushClearProgress()
 	uploadFileCount, uploadChunkCount, uploadBytes, err := repo.UploadTagIndex(tag, id, cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
 		return
 	}
-	util.PushClearProgress()
 	msg := fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, byteCountSI(uploadBytes))
 	util.PushMsg(msg, 5000)
 	util.PushStatusBar(msg)

@@ -85,7 +85,7 @@ func ImportRepoKey(base64Key string) (err error) {
 	time.Sleep(1 * time.Second)
 	util.PushUpdateMsg(msgId, Conf.Language(138), 3000)
 	time.Sleep(1 * time.Second)
-	if initErr := indexRepo("[Init] Init data repo"); nil != initErr {
+	if initErr := IndexRepo("[Init] Init data repo"); nil != initErr {
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(140), initErr), 7000)
 	}
 	return
@@ -145,7 +145,7 @@ func InitRepoKey() (err error) {
 	time.Sleep(1 * time.Second)
 	util.PushUpdateMsg(msgId, Conf.Language(138), 3000)
 	time.Sleep(1 * time.Second)
-	if initErr := indexRepo("[Init] Init data repo"); nil != initErr {
+	if initErr := IndexRepo("[Init] Init data repo"); nil != initErr {
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(140), initErr), 7000)
 	}
 	return
@@ -194,7 +194,7 @@ func CheckoutRepo(id string) (err error) {
 	return
 }
 
-func CreateSnapshot(name string) (err error) {
+func TagSnapshot(id, name string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -216,19 +216,8 @@ func CreateSnapshot(name string) (err error) {
 		return
 	}
 
-	util.PushEndlessProgress(Conf.Language(143))
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
-	start := time.Now()
-	latest, _ := repo.Latest()
-	WaitForWritingFiles()
-	filelock.ReleaseAllFileLocks()
-	index, err := repo.Index("[Snapshot] "+name, map[string]interface{}{
-		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
-	})
+	index, err := repo.GetIndex(id)
 	if nil != err {
-		util.PushStatusBar("Create data snapshot failed: " + err.Error())
 		return
 	}
 
@@ -237,23 +226,10 @@ func CreateSnapshot(name string) (err error) {
 		util.PushStatusBar(msg)
 		return
 	}
-
-	elapsed := time.Since(start)
-
-	if nil == latest || latest.ID != index.ID {
-		msg := fmt.Sprintf(Conf.Language(147), elapsed.Seconds())
-		util.PushStatusBar(msg)
-		util.PushMsg(msg, 5000)
-	} else {
-		msg := fmt.Sprintf(Conf.Language(148), elapsed.Seconds())
-		util.PushStatusBar(msg)
-		util.PushMsg(msg, 5000)
-	}
-	util.PushClearProgress()
 	return
 }
 
-func indexRepo(memo string) (err error) {
+func IndexRepo(memo string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return

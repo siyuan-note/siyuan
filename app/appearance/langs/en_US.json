@@ -1,6 +1,8 @@
 {
-  "snapshotName": "Snapshot Name",
-  "snapshotNameTip": "Do not include symbols \\ / : * ? &quot; &#039; &lt; &gt; |",
+  "snapshotMemo": "Snapshot Memo",
+  "snapshotMemoTip": "Please enter the snapshot memo",
+  "tagSnapshot": "Tag Snapshot",
+  "tagSnapshotTip": "Do not include symbols \\ / : * ? &quot; &#039; &lt; &gt; |",
   "syncDataRepo": "⚗️ Use data repo sync mechanism",
   "syncDataRepoTip": "The data repo sync mechanism can better handle data conflicts, and the sync performance is also better",
   "dataRepo": "Data repo",

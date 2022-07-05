@@ -255,6 +255,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/repo/resetRepo", model.CheckAuth, resetRepo)
 	ginServer.Handle("POST", "/api/repo/importRepoKey", model.CheckAuth, importRepoKey)
 	ginServer.Handle("POST", "/api/repo/createSnapshot", model.CheckAuth, createSnapshot)
+	ginServer.Handle("POST", "/api/repo/tagSnapshot", model.CheckAuth, tagSnapshot)
 	ginServer.Handle("POST", "/api/repo/checkoutRepo", model.CheckAuth, checkoutRepo)
 	ginServer.Handle("POST", "/api/repo/getRepoIndexLogs", model.CheckAuth, getRepoIndexLogs)
 

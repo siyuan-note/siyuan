@@ -75,8 +75,27 @@ func createSnapshot(c *gin.Context) {
 		return
 	}
 
+	memo := arg["memo"].(string)
+	if err := model.IndexRepo(memo); nil != err {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(140), err)
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+}
+
+func tagSnapshot(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
 	name := arg["name"].(string)
-	if err := model.CreateSnapshot(name); nil != err {
+	if err := model.TagSnapshot(id, name); nil != err {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(140), err)
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}

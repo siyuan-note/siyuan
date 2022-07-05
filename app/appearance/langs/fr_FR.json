@@ -1,4 +1,6 @@
 {
+  "snapshotName": "Nom de l'instantané",
+  "snapshotNameTip": "Ne pas inclure les symboles \\ / : * ? &quot; &#039; &lt; &gt; |",
   "syncDataRepo": "⚗️ Utiliser le mécanisme de synchronisation du référentiel de données",
   "syncDataRepoTip": "Le mécanisme de synchronisation du référentiel de données peut mieux gérer les conflits de données, et les performances de synchronisation sont également meilleures",
   "dataRepo": "Dépôt de données",
@@ -910,8 +912,9 @@
     "145": "Réinitialisation du référentiel de données terminée",
     "146": "Échec de la réinitialisation du référentiel de données : %s",
     "147": "Créé un nouvel instantané de données, a pris %.2fs",
-    "148": "Vérifié l'instantané des données et n'a trouvé aucun changement",
+    "148": "Vérifié l'instantané des données et n'a trouvé aucun changement, a pris %.2fs",
     "149": "L'instantané des données a été synchronisé, a pris %.2fs",
-    "150": "Fichiers chargés/téléchargés %d/%d\nMorceaux chargés/téléchargés %d/%d\nOctets envoyés/reçus %s/%s"
+    "150": "Fichiers chargés/téléchargés %d/%d\nMorceaux chargés/téléchargés %d/%d\nOctets envoyés/reçus %s/%s",
+    "151": "Ne pas inclure les symboles \\ / : * ? &quot; &#039; &lt; &gt; |"
   }
 }

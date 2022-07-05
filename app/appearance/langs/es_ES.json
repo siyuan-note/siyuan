@@ -1,4 +1,6 @@
 {
+  "snapshotName": "Nombre de la instantánea",
+  "snapshotNameTip": "No incluir símbolos \\ / : * ? &quot; &#039; &lt; &gt; |",
   "syncDataRepo": "⚗️ Usar mecanismo de sincronización de repositorio de datos",
   "syncDataRepoTip": "El mecanismo de sincronización del repositorio de datos puede manejar mejor los conflictos de datos y el rendimiento de la sincronización también es mejor",
   "dataRepo": "Repositorio de datos",
@@ -910,8 +912,9 @@
     "145": "Restablecimiento del repositorio de datos completado",
     "146": "Fallo en el restablecimiento del repositorio de datos: %s",
     "147": "Creó una nueva instantánea de datos, tomó %.2fs",
-    "148": "Se ha comprobado la instantánea de los datos y no se encontro ningún cambio",
+    "148": "Se ha comprobado la instantánea de los datos y no se encontro ningún cambio, tomó %.2fs",
     "149": "La instantánea de datos ha sido sincronizada, ha tomado %.2fs",
-    "150": "Archivos cargados/descargados %d/%d\nFragmentos cargados/descargados %d/%d\nBytes enviados/recibidos %s/%s"
+    "150": "Archivos cargados/descargados %d/%d\nFragmentos cargados/descargados %d/%d\nBytes enviados/recibidos %s/%s",
+    "151": "No incluir símbolos \\ / : * ? &quot; &#039; &lt; &gt; |"
   }
 }

@@ -66,7 +66,7 @@ func getRepoIndexLogs(c *gin.Context) {
 	}
 }
 
-func indexRepo(c *gin.Context) {
+func createSnapshot(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -75,8 +75,8 @@ func indexRepo(c *gin.Context) {
 		return
 	}
 
-	message := arg["message"].(string)
-	if err := model.IndexRepo(message); nil != err {
+	name := arg["name"].(string)
+	if err := model.CreateSnapshot(name); nil != err {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(140), err)
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}

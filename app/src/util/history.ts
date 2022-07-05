@@ -379,9 +379,9 @@ export const openHistory = () => {
                 break;
             } else if (type === "genRepo") {
                 const genRepoDialog = new Dialog({
-                    title: window.siyuan.languages.memo,
+                    title: window.siyuan.languages.snapshotName,
                     content: `<div class="b3-dialog__content">
-    <textarea class="b3-text-field fn__block"></textarea>
+    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.snapshotNameTip}"></input>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -389,14 +389,14 @@ export const openHistory = () => {
 </div>`,
                     width: isMobile() ? "80vw" : "520px",
                 });
-                const textAreaElement = genRepoDialog.element.querySelector("textarea");
-                textAreaElement.focus();
+                const inputElement = genRepoDialog.element.querySelector("input");
+                inputElement.focus();
                 const btnsElement = genRepoDialog.element.querySelectorAll(".b3-button");
                 btnsElement[0].addEventListener("click", () => {
                     genRepoDialog.destroy();
                 });
                 btnsElement[1].addEventListener("click", () => {
-                    fetchPost("/api/repo/indexRepo", {message: textAreaElement.value}, () => {
+                    fetchPost("/api/repo/createSnapshot", {name: inputElement.value}, () => {
                         renderRepo(repoElement, 1);
                     });
                     genRepoDialog.destroy();

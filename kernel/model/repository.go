@@ -85,7 +85,7 @@ func ImportRepoKey(base64Key string) (err error) {
 	time.Sleep(1 * time.Second)
 	util.PushUpdateMsg(msgId, Conf.Language(138), 3000)
 	time.Sleep(1 * time.Second)
-	if initErr := IndexRepo("Init data repo"); nil != initErr {
+	if initErr := indexRepo("[Auto] Init data repo"); nil != initErr {
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(140), initErr), 7000)
 	}
 	return
@@ -145,7 +145,7 @@ func InitRepoKey() (err error) {
 	time.Sleep(1 * time.Second)
 	util.PushUpdateMsg(msgId, Conf.Language(138), 3000)
 	time.Sleep(1 * time.Second)
-	if initErr := IndexRepo("Init data repo"); nil != initErr {
+	if initErr := indexRepo("[Auto] Init data repo"); nil != initErr {
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(140), initErr), 7000)
 	}
 	return
@@ -194,7 +194,59 @@ func CheckoutRepo(id string) (err error) {
 	return
 }
 
-func IndexRepo(memo string) (err error) {
+func CreateSnapshot(name string) (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	name = gulu.Str.RemoveInvisible(name)
+	if "" == name {
+		err = errors.New(Conf.Language(142))
+		return
+	}
+
+	if !gulu.File.IsValidFilename(name) {
+		err = errors.New(Conf.Language(151))
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	util.PushEndlessProgress(Conf.Language(143))
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
+
+	start := time.Now()
+	latest, _ := repo.Latest()
+	WaitForWritingFiles()
+	filelock.ReleaseAllFileLocks()
+	index, err := repo.Index("[Snapshot] "+name, map[string]interface{}{
+		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
+	})
+	if nil != err {
+		util.PushStatusBar("Create data snapshot failed")
+		return
+	}
+	elapsed := time.Since(start)
+
+	if nil == latest || latest.ID != index.ID {
+		msg := fmt.Sprintf(Conf.Language(147), elapsed.Seconds())
+		util.PushStatusBar(msg)
+		util.PushMsg(msg, 5000)
+	} else {
+		msg := fmt.Sprintf(Conf.Language(148), elapsed.Seconds())
+		util.PushStatusBar(msg)
+		util.PushMsg(msg, 5000)
+	}
+	util.PushClearProgress()
+	return
+}
+
+func indexRepo(memo string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -223,7 +275,7 @@ func IndexRepo(memo string) (err error) {
 		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
 	})
 	if nil != err {
-		util.PushStatusBar("Create data snapshot failed")
+		util.PushStatusBar("Index data repo failed: " + err.Error())
 		return
 	}
 	elapsed := time.Since(start)
@@ -233,7 +285,7 @@ func IndexRepo(memo string) (err error) {
 		util.PushStatusBar(msg)
 		util.PushMsg(msg, 5000)
 	} else {
-		msg := Conf.Language(148)
+		msg := fmt.Sprintf(Conf.Language(148), elapsed.Seconds())
 		util.PushStatusBar(msg)
 		util.PushMsg(msg, 5000)
 	}
@@ -354,23 +406,20 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 		return
 	}
 	elapsed := time.Since(start)
-	if nil != latest {
-		if latest.ID != index.ID {
-			// 对新创建的快照需要更新备注，加入耗时统计
-			index.Memo = fmt.Sprintf("[Auto] Cloud sync, completed in %.2fs", elapsed.Seconds())
-			err = repo.PutIndex(index)
-			if nil != err {
-				util.PushStatusBar("Save data snapshot for cloud sync failed")
-				util.LogErrorf("put index into data repo before cloud sync failed: %s", err)
-				return
-			}
-			util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
-		} else {
-			util.PushStatusBar(Conf.Language(148))
+
+	if nil == latest || latest.ID != index.ID {
+		// 对新创建的快照需要更新备注，加入耗时统计
+		index.Memo = fmt.Sprintf("[Auto] Cloud sync, completed in %.2fs", elapsed.Seconds())
+		if err = repo.PutIndex(index); nil != err {
+			util.PushStatusBar("Save data snapshot for cloud sync failed")
+			util.LogErrorf("put index into data repo before cloud sync failed: %s", err)
+			return
 		}
-	} else {
 		util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
+	} else {
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(148), elapsed.Seconds()))
 	}
+
 	if 7000 < elapsed.Milliseconds() {
 		util.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
 	}

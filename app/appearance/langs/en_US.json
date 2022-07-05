@@ -1,4 +1,6 @@
 {
+  "snapshotName": "Snapshot Name",
+  "snapshotNameTip": "Do not include symbols \\ / : * ? &quot; &#039; &lt; &gt; |",
   "syncDataRepo": "⚗️ Use data repo sync mechanism",
   "syncDataRepoTip": "The data repo sync mechanism can better handle data conflicts, and the sync performance is also better",
   "dataRepo": "Data repo",
@@ -910,8 +912,9 @@
     "145": "Data repository reset completed",
     "146": "Failed to reset data repository: %s",
     "147": "Created a new data snapshot, took %.2fs",
-    "148": "Checked the data snapshot and found no changes",
+    "148": "Checked the data snapshot and found no changes, took %.2fs",
     "149": "Data snapshot has been synchronized, took %.2fs",
-    "150": "Uploaded/Downloaded files %d/%d\nUploaded/Downloaded chunks %d/%d\nSent/Received bytes %s/%s"
+    "150": "Uploaded/Downloaded files %d/%d\nUploaded/Downloaded chunks %d/%d\nSent/Received bytes %s/%s",
+    "151": "Do not include symbols \\ / : * ? &quot; &#039; &lt; &gt; |"
   }
 }

@@ -2,7 +2,7 @@
   "localSnapshot": "Local Snapshot",
   "localTagSnapshot": "Local Tag Snapshot",
   "cloudTagSnapshot": "Cloud Tag Snapshot",
-  "cloudBackupTip": "Move to Data History => Data Snapshot",
+  "cloudBackupTip": "Please go to [Data History - Data Snapshot] to operate",
   "snapshotMemo": "Snapshot Memo",
   "snapshotMemoTip": "Please enter the snapshot memo",
   "tagSnapshot": "Tag Snapshot",

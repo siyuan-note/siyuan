@@ -2,7 +2,7 @@
   "localSnapshot": "Instantané local",
   "localTagSnapshot": "Instantané de balise locale",
   "cloudTagSnapshot": "Instantané de balise cloud",
-  "cloudBackupTip": "Déplacer vers l'historique des données => Instantané des données",
+  "cloudBackupTip": "Veuillez accéder à [Historique des données - Instantané des données] pour opérer",
   "snapshotMemo": "Mémo d'instantané",
   "snapshotMemoTip": "Veuillez entrer le mémo instantané",
   "tagSnapshot": "Instantané de balise",

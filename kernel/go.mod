@@ -112,7 +112,7 @@ require (
 
 replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20220412041952-88c3aaa8595e
 
-//replace github.com/siyuan-note/dejavu => D:\88250\dejavu
+replace github.com/siyuan-note/dejavu => D:\88250\dejavu
 //replace github.com/siyuan-note/httpclient => D:\88250\httpclient
 //replace github.com/siyuan-note/filelock => D:\88250\filelock
 //replace github.com/88250/lute => D:\gogogo\src\github.com\88250\lute

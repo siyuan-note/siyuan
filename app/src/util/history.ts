@@ -114,13 +114,13 @@ const renderRepo = (element: Element, currentPage: number) => {
     } else {
         previousElement.setAttribute("disabled", "disabled");
     }
-    fetchPost("/api/repo/getRepoIndexLogs", {page: currentPage}, (response) => {
+    fetchPost("/api/repo/getRepoSnapshots", {page: currentPage}, (response) => {
         if (currentPage < response.data.pageCount) {
             nextElement.removeAttribute("disabled");
         } else {
             nextElement.setAttribute("disabled", "disabled");
         }
-        if (response.data.logs.length === 0) {
+        if (response.data.snapshots.length === 0) {
             element.lastElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             return;
         }

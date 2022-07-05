@@ -27,7 +27,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/dejavu"
-	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
@@ -191,6 +190,21 @@ func CheckoutRepo(id string) (err error) {
 			util.PushMsg(Conf.Language(134), 0)
 		}()
 	}
+	return
+}
+
+func GetTagSnapshots() (ret []*dejavu.Log, err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	ret, err = repo.GetTagLogs()
 	return
 }
 
@@ -452,36 +466,25 @@ func subscribeEvents() {
 		contextPushMsg(context, msg)
 	})
 
-	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudLatest, func(context map[string]interface{}) {
+	eventbus.Subscribe(dejavu.EvtBeforeDownloadCloudIndex, func(context map[string]interface{}) {
 		msg := "Downloading data repository latest..."
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 
-	eventbus.Subscribe(dejavu.EvtSyncAfterDownloadCloudLatest, func(context map[string]interface{}, latest *entity.Index) {
-		msg := fmt.Sprintf("Downloaded latest [%s]", latest.ID[:7])
-		util.SetBootDetails(msg)
-		contextPushMsg(context, msg)
-
-		//util.LogInfof(msg)
-		//for _, index := range indexes {
-		//	util.LogInfof("    [%s]", index.ID)
-		//}
-	})
-
-	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudFile, func(context map[string]interface{}, id string) {
+	eventbus.Subscribe(dejavu.EvtBeforeDownloadCloudFile, func(context map[string]interface{}, id string) {
 		msg := "Downloading data repository object [" + id + "]"
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 
-	eventbus.Subscribe(dejavu.EvtSyncBeforeDownloadCloudChunk, func(context map[string]interface{}, id string) {
+	eventbus.Subscribe(dejavu.EvtBeforeDownloadCloudChunk, func(context map[string]interface{}, id string) {
 		msg := "Downloading data repository object [" + id + "]"
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 
-	eventbus.Subscribe(dejavu.EvtSyncBeforeUploadObject, func(context map[string]interface{}, id string) {
+	eventbus.Subscribe(dejavu.EvtBeforeUploadObject, func(context map[string]interface{}, id string) {
 		msg := "Uploading data repository object [" + id + "]"
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)

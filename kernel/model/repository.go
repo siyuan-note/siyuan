@@ -213,6 +213,7 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 	}
 	util.LogInfof("downloaded snapshot [%s], files [%d] chunks [%d], received bytes [%d]", tag, downloadFileCount, downloadChunkCount, downloadBytes)
 	util.PushClearProgress()
+	// TODO push msg
 	return
 }
 
@@ -238,6 +239,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 	}
 	util.LogInfof("uploaded snapshot [%s], files [%d] chunks [%d], sent bytes [%d]", tag, uploadFileCount, uploadChunkCount, uploadBytes)
 	util.PushClearProgress()
+	// TODO push msg
 	return
 }
 

@@ -221,7 +221,7 @@ export const openHistory = () => {
                 <span class="fn__space"></span>
                 <span data-type="next" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                 <div class="fn__flex-1"></div>
-                <select>
+                <select class="b3-select">
                     <option value="">${window.siyuan.languages.localRepo}</option>
                     <option value="">${window.siyuan.languages.localRepo}</option>
                     <option value="">${window.siyuan.languages.localSnapshotRepo}</option>

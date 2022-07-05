@@ -112,10 +112,10 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     let actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.tagSnapshot}"><svg><use xlink:href="#iconTags"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
     if (type === "download") {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>`
+        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>`;
     } else if (type === "upload") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}"><svg><use xlink:href="#iconUpload"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`
+<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
     }
     let repoHTML = "";
     response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string, tag: string }) => {
@@ -131,7 +131,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
 </li>`;
     });
     element.lastElementChild.innerHTML = `${repoHTML}`;
-}
+};
 
 const renderRepo = (element: Element, currentPage: number) => {
     const previousElement = element.querySelector('[data-type="previous"]');
@@ -140,18 +140,18 @@ const renderRepo = (element: Element, currentPage: number) => {
         if (currentPage === -1) {
             fetchPost("/api/repo/getRepoTagSnapshots", {}, (response) => {
                 renderRepoItem(response, element, "upload");
-            })
+            });
         }
         if (currentPage === -2) {
             fetchPost("/api/repo/getCloudRepoTagSnapshots", {}, (response) => {
                 renderRepoItem(response, element, "download");
-            })
+            });
         }
-        previousElement.classList.add("fn__none")
-        nextElement.classList.add("fn__none")
+        previousElement.classList.add("fn__none");
+        nextElement.classList.add("fn__none");
     } else {
-        previousElement.classList.remove("fn__none")
-        nextElement.classList.remove("fn__none")
+        previousElement.classList.remove("fn__none");
+        nextElement.classList.remove("fn__none");
         element.setAttribute("data-init", "true");
         element.setAttribute("data-page", currentPage.toString());
         if (currentPage > 1) {
@@ -299,7 +299,7 @@ export const openHistory = () => {
         } else if (value === "2") {
             renderRepo(repoElement, -2);
         }
-    })
+    });
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(dialog.element)) {
@@ -436,7 +436,7 @@ export const openHistory = () => {
                 fetchPost("/api/repo/downloadCloudSnapshot", {
                     tag: target.parentElement.getAttribute("data-tag"),
                     id: target.parentElement.getAttribute("data-id")
-                })
+                });
             } else if (type === "genTag") {
                 const genTagDialog = new Dialog({
                     title: window.siyuan.languages.tagSnapshot,

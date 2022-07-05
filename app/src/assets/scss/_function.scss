@@ -157,7 +157,9 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    box-sizing: border-box
+    box-sizing: border-box;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
   }
 
   &__repoheader {

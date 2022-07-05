@@ -64,8 +64,8 @@
         display: none;
       }
 
-      &:hover .b3-list-item__action,
-      &:hover .fn__space {
+      &:hover > .b3-list-item__action,
+      &:hover > .fn__space {
         display: flex;
       }
     }

@@ -1,5 +1,5 @@
 {
-  "localRepo": "本地",
+  "localSnapshot": "本地快照",
   "localTagSnapshot": "本地标记的快照",
   "cloudTagSnapshot": "云端标记的快照",
   "cloudBackupTip": "迁移至数据历史 => 数据快照",

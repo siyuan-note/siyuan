@@ -1,5 +1,5 @@
 {
-  "localRepo": "local",
+  "localSnapshot": "Instantánea local",
   "localTagSnapshot": "Instantánea de etiqueta local",
   "cloudTagSnapshot": "Instantánea de etiquetas en la nube",
   "cloudBackupTip": "Mover a Historial de datos => Instantánea de datos",

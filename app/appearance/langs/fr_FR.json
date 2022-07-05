@@ -1,5 +1,5 @@
 {
-  "localRepo": "local",
+  "localSnapshot": "Instantané local",
   "localTagSnapshot": "Instantané de balise locale",
   "cloudTagSnapshot": "Instantané de balise cloud",
   "cloudBackupTip": "Déplacer vers l'historique des données => Instantané des données",

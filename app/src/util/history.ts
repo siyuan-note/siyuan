@@ -109,9 +109,11 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         element.lastElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
         return;
     }
-    let actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}"><svg><use xlink:href="#iconUpload"></use></svg></span>`
+    let actionHTML = ` <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.tagSnapshot}"><svg><use xlink:href="#iconTags"></use></svg></span>`;
     if (type === "download") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>`
+    } else if (type === "upload") {
+        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}"><svg><use xlink:href="#iconUpload"></use></svg></span>`
     }
     let repoHTML = "";
     response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string, tag: string }) => {
@@ -123,9 +125,6 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         <span class="b3-list-item__meta">${window.siyuan.languages.fileCount}${item.count}</span>
     </div>
     ${actionHTML}
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.tagSnapshot}">
-        <svg><use xlink:href="#iconTags"></use></svg>
-    </span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
@@ -244,7 +243,7 @@ export const openHistory = () => {
                 <span data-type="next" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                 <div class="fn__flex-1"></div>
                 <select class="b3-select">
-                    <option value="0">${window.siyuan.languages.localRepo}</option>
+                    <option value="0">${window.siyuan.languages.localSnapshot}</option>
                     <option value="1">${window.siyuan.languages.localTagSnapshot}</option>
                     <option value="2">${window.siyuan.languages.cloudTagSnapshot}</option>
                 </select>

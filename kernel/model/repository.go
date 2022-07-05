@@ -175,9 +175,7 @@ func CheckoutRepo(id string) (err error) {
 	Conf.Sync.Enabled = false
 	Conf.Save()
 
-	_, _, err = repo.Checkout(id, map[string]interface{}{
-		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
-	})
+	_, _, err = repo.Checkout(id, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
 		util.PushClearProgress()
 		return
@@ -190,6 +188,56 @@ func CheckoutRepo(id string) (err error) {
 			util.PushMsg(Conf.Language(134), 0)
 		}()
 	}
+	return
+}
+
+func DownloadCloudSnapshot(tag, id string) (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	cloudInfo, err := buildCloudInfo()
+	if nil != err {
+		return
+	}
+
+	downloadFileCount, downloadChunkCount, downloadBytes, err := repo.DownloadTagIndex(tag, id, cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBarAndProgress})
+	if nil != err {
+		return
+	}
+	util.LogInfof("downloaded snapshot [%s], files [%d] chunks [%d], received bytes [%d]", tag, downloadFileCount, downloadChunkCount, downloadBytes)
+	util.PushClearProgress()
+	return
+}
+
+func UploadCloudSnapshot(tag, id string) (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	cloudInfo, err := buildCloudInfo()
+	if nil != err {
+		return
+	}
+
+	uploadFileCount, uploadChunkCount, uploadBytes, err := repo.UploadTagIndex(tag, id, cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBarAndProgress})
+	if nil != err {
+		return
+	}
+	util.LogInfof("uploaded snapshot [%s], files [%d] chunks [%d], sent bytes [%d]", tag, uploadFileCount, uploadChunkCount, uploadBytes)
+	util.PushClearProgress()
 	return
 }
 

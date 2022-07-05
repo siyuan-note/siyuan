@@ -104,49 +104,71 @@ const renderAssets = (element: HTMLElement) => {
     });
 };
 
-const renderRepo = (element: Element, currentPage: number) => {
-    element.setAttribute("data-init", "true");
-    element.setAttribute("data-page", currentPage.toString());
-    const previousElement = element.querySelector('[data-type="previous"]');
-    const nextElement = element.querySelector('[data-type="next"]');
-    if (currentPage > 1) {
-        previousElement.removeAttribute("disabled");
-    } else {
-        previousElement.setAttribute("disabled", "disabled");
+const renderRepoItem = (response: IWebSocketData, element: Element, type: string) => {
+    if (response.data.snapshots.length === 0) {
+        element.lastElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+        return;
     }
-    fetchPost("/api/repo/getRepoSnapshots", {page: currentPage}, (response) => {
-        if (currentPage < response.data.pageCount) {
-            nextElement.removeAttribute("disabled");
-        } else {
-            nextElement.setAttribute("disabled", "disabled");
-        }
-        if (response.data.snapshots.length === 0) {
-            element.lastElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-            return;
-        }
-        let repoHTML = "";
-        response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string }) => {
-            repoHTML += `<li class="b3-list-item b3-list-item--hide-action" data-id="${item.id}">
+    let actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}"><svg><use xlink:href="#iconUpload"></use></svg></span>`
+    if (type === "download") {
+        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>`
+    }
+    let repoHTML = "";
+    response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string, tag: string }) => {
+        repoHTML += `<li class="b3-list-item b3-list-item--hide-action" data-id="${item.id}" data-tag="${item.tag}">
     <div class="b3-list-item__text">
-        ${item.hCreated}<span class="fn__space"></span>${escapeHtml(item.memo)}<span class="b3-list-item__meta">${item.hSize}</span>
+        ${item.hCreated}<span class="fn__space"></span>
+        ${escapeHtml(item.memo)}
+        <span class="b3-list-item__meta">${item.hSize}</span>
+        <span class="b3-list-item__meta">${window.siyuan.languages.fileCount}${item.count}</span>
     </div>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}">
-        <svg><use xlink:href="#iconUpload"></use></svg>
-    </span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}">
-        <svg><use xlink:href="#iconDownload"></use></svg>
-    </span>
+    ${actionHTML}
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.createSnapshot}">
         <svg><use xlink:href="#iconAdd"></use></svg>
     </span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
-    <span class="counter">${item.count}</span>
 </li>`;
-        });
-        element.lastElementChild.innerHTML = `${repoHTML}`;
     });
+    element.lastElementChild.innerHTML = `${repoHTML}`;
+}
+
+const renderRepo = (element: Element, currentPage: number) => {
+    const previousElement = element.querySelector('[data-type="previous"]');
+    const nextElement = element.querySelector('[data-type="next"]');
+    if (currentPage < 0) {
+        if (currentPage === -1) {
+            fetchPost("/api/repo/getRepoTagSnapshots", {}, (response) => {
+                renderRepoItem(response, element, "upload");
+            })
+        }
+        if (currentPage === -2) {
+            fetchPost("/api/repo/getCloudRepoTagSnapshots", {}, (response) => {
+                renderRepoItem(response, element, "download");
+            })
+        }
+        previousElement.classList.add("fn__none")
+        nextElement.classList.add("fn__none")
+    } else {
+        previousElement.classList.remove("fn__none")
+        nextElement.classList.remove("fn__none")
+        element.setAttribute("data-init", "true");
+        element.setAttribute("data-page", currentPage.toString());
+        if (currentPage > 1) {
+            previousElement.removeAttribute("disabled");
+        } else {
+            previousElement.setAttribute("disabled", "disabled");
+        }
+        fetchPost("/api/repo/getRepoSnapshots", {page: currentPage}, (response) => {
+            if (currentPage < response.data.pageCount) {
+                nextElement.removeAttribute("disabled");
+            } else {
+                nextElement.setAttribute("disabled", "disabled");
+            }
+            renderRepoItem(response, element, "upload");
+        });
+    }
 };
 
 const renderRmNotebook = (element: HTMLElement) => {
@@ -222,10 +244,9 @@ export const openHistory = () => {
                 <span data-type="next" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                 <div class="fn__flex-1"></div>
                 <select class="b3-select">
-                    <option value="">${window.siyuan.languages.localRepo}</option>
-                    <option value="">${window.siyuan.languages.localRepo}</option>
-                    <option value="">${window.siyuan.languages.localSnapshotRepo}</option>
-                    <option value="">${window.siyuan.languages.cloudSnapshotRepo}</option>
+                    <option value="0">${window.siyuan.languages.localRepo}</option>
+                    <option value="1">${window.siyuan.languages.localSnapshotRepo}</option>
+                    <option value="2">${window.siyuan.languages.cloudSnapshotRepo}</option>
                 </select>
                 <span class="fn__space"></span>
                 <button class="b3-button b3-button--outline" data-type="genRepo">
@@ -269,6 +290,17 @@ export const openHistory = () => {
     const firstPanelElement = dialog.element.querySelector("#historyContainer [data-type=doc]") as HTMLElement;
     renderDoc(currentNotebook, firstPanelElement);
     const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
+    const selectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
+    selectElement.addEventListener("change", () => {
+        const value = selectElement.value;
+        if (value === "0") {
+            renderRepo(repoElement, 1);
+        } else if (value === "1") {
+            renderRepo(repoElement, -1);
+        } else if (value === "2") {
+            renderRepo(repoElement, -2);
+        }
+    })
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(dialog.element)) {
@@ -397,9 +429,15 @@ export const openHistory = () => {
                 });
                 break;
             } else if (type === "uploadSnapshot") {
-                // TODO
+                fetchPost("/api/repo/uploadCloudSnapshot", {
+                    tag: target.parentElement.getAttribute("data-tag"),
+                    id: target.parentElement.getAttribute("data-id")
+                });
             } else if (type === "downloadSnapshot") {
-                // TODO
+                fetchPost("/api/repo/downloadCloudSnapshot", {
+                    tag: target.parentElement.getAttribute("data-tag"),
+                    id: target.parentElement.getAttribute("data-id")
+                })
             } else if (type === "genTag") {
                 const genTagDialog = new Dialog({
                     title: window.siyuan.languages.snapshotMemo,

@@ -1,4 +1,8 @@
 {
+  "localRepo":"本地",
+  "localSnapshotRepo":"本地快照",
+  "cloudSnapshotRepo":"雲端快照",
+  "cloudBackupTip":"遷移至數據歷史 => 數據快照",
   "snapshotMemo": "快照備註",
   "snapshotMemoTip": "請輸入快照備註",
   "tagSnapshot": "標記快照",

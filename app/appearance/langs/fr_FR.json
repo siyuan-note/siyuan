@@ -1,4 +1,8 @@
 {
+  "localRepo":"local",
+  "localSnapshotRepo":"instantané local",
+  "cloudSnapshotRepo":"Instantané cloud",
+  "cloudBackupTip":"Déplacer vers l'historique des données => Instantané des données",
   "snapshotMemo": "Mémo d'instantané",
   "snapshotMemoTip": "Veuillez entrer le mémo instantané",
   "tagSnapshot": "Instantané de balise",

@@ -292,15 +292,6 @@
       flex: 1;
     }
   }
-
-  .history__repo > .fn__flex-1 {
-    flex-direction: column;
-
-    ul {
-      width: auto !important;
-      flex: 1;
-    }
-  }
 }
 
 @media (max-width: 620px) {

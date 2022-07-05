@@ -125,15 +125,17 @@ const renderRepo = (element: Element, currentPage: number) => {
             return;
         }
         let repoHTML = "";
-        response.data.logs.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string }, index: number) => {
-            repoHTML += `<li class="b3-list-item b3-list-item--hide-action${index === 0 ? " b3-list-item--focus" : ""}" data-id="${item.id}">
+        response.data.logs.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string }) => {
+            repoHTML += `<li class="b3-list-item b3-list-item--hide-action" data-id="${item.id}">
     <div class="b3-list-item__text">
-        ${item.hCreated}
-        <span class="fn__space"></span>
-        ${escapeHtml(item.memo)}
-        <span class="fn__space"></span>
-        <span class="ft__smaller ft__on-surface">${item.hSize}</span>
+        ${item.hCreated}<span class="fn__space"></span>${escapeHtml(item.memo)}<span class="b3-list-item__meta">${item.hSize}</span>
     </div>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}">
+        <svg><use xlink:href="#iconUpload"></use></svg>
+    </span>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}">
+        <svg><use xlink:href="#iconDownload"></use></svg>
+    </span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.createSnapshot}">
         <svg><use xlink:href="#iconAdd"></use></svg>
     </span>
@@ -219,6 +221,13 @@ export const openHistory = () => {
                 <span class="fn__space"></span>
                 <span data-type="next" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                 <div class="fn__flex-1"></div>
+                <select>
+                    <option value="">${window.siyuan.languages.localRepo}</option>
+                    <option value="">${window.siyuan.languages.localRepo}</option>
+                    <option value="">${window.siyuan.languages.localSnapshotRepo}</option>
+                    <option value="">${window.siyuan.languages.cloudSnapshotRepo}</option>
+                </select>
+                <span class="fn__space"></span>
                 <button class="b3-button b3-button--outline" data-type="genRepo">
                     <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.createSnapshot}
                 </button>
@@ -387,6 +396,10 @@ export const openHistory = () => {
                     genRepoDialog.destroy();
                 });
                 break;
+            } else if (type === "uploadSnapshot") {
+                // TODO
+            } else if (type === "downloadSnapshot") {
+                // TODO
             } else if (type === "genTag") {
                 const genTagDialog = new Dialog({
                     title: window.siyuan.languages.snapshotMemo,

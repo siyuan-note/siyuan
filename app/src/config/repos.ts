@@ -380,6 +380,10 @@ ${passwordHTML}
     <div id="reposCloudSyncList" class="fn__none config-repos__sync"><img style="margin: 0 auto;display: block;" src="/stage/loading-pure.svg"></div>
 </div>
 <div id="reposBackup" class="b3-label${window.siyuan.config.sync.useDataRepo ? " fn__none" : ""}">${window.siyuan.languages.cloudBackup}</div>
+<div class="b3-label fn__flex${window.siyuan.config.sync.useDataRepo ? "" : " fn__none"}">
+    <div class="fn__flex-center">${window.siyuan.languages.cloudBackup}</div>
+    <div class="b3-list-item__meta fn__flex-center">${window.siyuan.languages.cloudBackupTip}</div>
+</div>
 </div>`;
     },
     bindEvent: () => {
@@ -428,8 +432,10 @@ ${passwordHTML}
                     const reposBackupElement = repos.element.querySelector("#reposBackup") as HTMLElement;
                     if (useDataRepoElement.checked) {
                         reposBackupElement.classList.add("fn__none");
+                        reposBackupElement.nextElementSibling.classList.remove("fn__none");
                     } else {
                         reposBackupElement.classList.remove("fn__none");
+                        reposBackupElement.nextElementSibling.classList.add("fn__none");
                     }
                 }
             });

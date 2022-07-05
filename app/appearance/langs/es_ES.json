@@ -1,4 +1,8 @@
 {
+  "localRepo":"local",
+  "localSnapshotRepo":"Instantánea local",
+  "cloudSnapshotRepo":"Instantánea de la nube",
+  "cloudBackupTip":"Mover a Historial de datos => Instantánea de datos",
   "snapshotMemo": "Memo de Instantánea",
   "snapshotMemoTip": "Ingrese la nota instantánea",
   "tagSnapshot": "Instantánea de la etiqueta",

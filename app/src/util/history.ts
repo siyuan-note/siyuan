@@ -246,7 +246,7 @@ export const openHistory = () => {
                 <select class="b3-select">
                     <option value="0">${window.siyuan.languages.localRepo}</option>
                     <option value="1">${window.siyuan.languages.localTagSnapshot}</option>
-                    <option value="2">${window.siyuan.languages.cloudSnapshotRepo}</option>
+                    <option value="2">${window.siyuan.languages.cloudTagSnapshot}</option>
                 </select>
                 <span class="fn__space"></span>
                 <button class="b3-button b3-button--outline" data-type="genRepo">

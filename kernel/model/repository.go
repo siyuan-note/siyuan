@@ -85,7 +85,7 @@ func ImportRepoKey(base64Key string) (err error) {
 	time.Sleep(1 * time.Second)
 	util.PushUpdateMsg(msgId, Conf.Language(138), 3000)
 	time.Sleep(1 * time.Second)
-	if initErr := indexRepo("[Auto] Init data repo"); nil != initErr {
+	if initErr := indexRepo("[Init] Init data repo"); nil != initErr {
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(140), initErr), 7000)
 	}
 	return
@@ -145,7 +145,7 @@ func InitRepoKey() (err error) {
 	time.Sleep(1 * time.Second)
 	util.PushUpdateMsg(msgId, Conf.Language(138), 3000)
 	time.Sleep(1 * time.Second)
-	if initErr := indexRepo("[Auto] Init data repo"); nil != initErr {
+	if initErr := indexRepo("[Init] Init data repo"); nil != initErr {
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(140), initErr), 7000)
 	}
 	return
@@ -228,9 +228,16 @@ func CreateSnapshot(name string) (err error) {
 		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
 	})
 	if nil != err {
-		util.PushStatusBar("Create data snapshot failed")
+		util.PushStatusBar("Create data snapshot failed: " + err.Error())
 		return
 	}
+
+	if err = repo.AddTag(index.ID, name); nil != err {
+		msg := fmt.Sprintf("Add tag to data snapshot [%s] failed: %s", index.ID, err)
+		util.PushStatusBar(msg)
+		return
+	}
+
 	elapsed := time.Since(start)
 
 	if nil == latest || latest.ID != index.ID {
@@ -397,7 +404,7 @@ func syncRepo(boot, exit, byHand bool) {
 func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 	start := time.Now()
 	latest, _ := repo.Latest()
-	index, err := repo.Index("[Auto] Cloud sync", map[string]interface{}{
+	index, err := repo.Index("[Sync] Cloud sync", map[string]interface{}{
 		CtxPushMsg: CtxPushMsgToStatusBar,
 	})
 	if nil != err {
@@ -409,7 +416,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 
 	if nil == latest || latest.ID != index.ID {
 		// 对新创建的快照需要更新备注，加入耗时统计
-		index.Memo = fmt.Sprintf("[Auto] Cloud sync, completed in %.2fs", elapsed.Seconds())
+		index.Memo = fmt.Sprintf("[Sync] Cloud sync, completed in %.2fs", elapsed.Seconds())
 		if err = repo.PutIndex(index); nil != err {
 			util.PushStatusBar("Save data snapshot for cloud sync failed")
 			util.LogErrorf("put index into data repo before cloud sync failed: %s", err)

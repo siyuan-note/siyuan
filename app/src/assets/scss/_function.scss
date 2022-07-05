@@ -160,6 +160,13 @@
     box-sizing: border-box;
     border-radius: 0 0 4px 4px;
     overflow: hidden;
+
+    .b3-chip--secondary {
+      padding: 2px 8px;
+      display: inline;
+      margin-right: 8px;
+      font-size: 12px;
+    }
   }
 
   &__repoheader {

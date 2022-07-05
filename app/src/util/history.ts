@@ -119,6 +119,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string, tag: string }) => {
         repoHTML += `<li class="b3-list-item b3-list-item--hide-action" data-id="${item.id}" data-tag="${item.tag}">
     <div class="b3-list-item__text">
+        <span class="b3-chip b3-chip--secondary${item.tag ? "" : " fn__none"}">${item.tag}</span>
         ${item.hCreated}<span class="fn__space"></span>
         ${escapeHtml(item.memo)}
         <span class="b3-list-item__meta">${item.hSize}</span>

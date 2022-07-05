@@ -241,7 +241,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 	return
 }
 
-func GetCloudRepoTagSnapshots() (tags []*dejavu.Log, err error) {
+func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -256,7 +256,10 @@ func GetCloudRepoTagSnapshots() (tags []*dejavu.Log, err error) {
 	if nil != err {
 		return
 	}
-	tags, err = repo.GetCloudRepoTagLogs(cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar})
+	ret, err = repo.GetCloudRepoTagLogs(cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar})
+	if 1 > len(ret) {
+		ret = []*dejavu.Log{}
+	}
 	return
 }
 
@@ -272,6 +275,9 @@ func GetTagSnapshots() (ret []*dejavu.Log, err error) {
 	}
 
 	ret, err = repo.GetTagLogs()
+	if 1 > len(ret) {
+		ret = []*dejavu.Log{}
+	}
 	return
 }
 

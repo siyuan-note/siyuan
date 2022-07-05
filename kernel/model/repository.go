@@ -193,6 +193,25 @@ func CheckoutRepo(id string) (err error) {
 	return
 }
 
+func GetCloudRepoTagSnapshots() (tags []*dejavu.Log, err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	cloudInfo, err := buildCloudInfo()
+	if nil != err {
+		return
+	}
+	tags, err = repo.GetCloudRepoTagLogs(cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar})
+	return
+}
+
 func GetTagSnapshots() (ret []*dejavu.Log, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))

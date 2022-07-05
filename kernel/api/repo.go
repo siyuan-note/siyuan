@@ -66,6 +66,22 @@ func getRepoSnapshots(c *gin.Context) {
 	}
 }
 
+func getCloudRepoTagSnapshots(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	snapshots, err := model.GetCloudRepoTagSnapshots()
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"snapshots": snapshots,
+	}
+}
+
 func getRepoTagSnapshots(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

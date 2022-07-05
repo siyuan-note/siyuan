@@ -211,9 +211,8 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 	if nil != err {
 		return
 	}
-	util.LogInfof("downloaded snapshot [%s], files [%d] chunks [%d], received bytes [%d]", tag, downloadFileCount, downloadChunkCount, downloadBytes)
 	util.PushClearProgress()
-	// TODO push msg
+	util.PushMsg(fmt.Sprintf(Conf.Language(153), downloadFileCount, downloadChunkCount, byteCountSI(downloadBytes)), 5000)
 	return
 }
 
@@ -237,9 +236,8 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 	if nil != err {
 		return
 	}
-	util.LogInfof("uploaded snapshot [%s], files [%d] chunks [%d], sent bytes [%d]", tag, uploadFileCount, uploadChunkCount, uploadBytes)
 	util.PushClearProgress()
-	// TODO push msg
+	util.PushMsg(fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, byteCountSI(uploadBytes)), 5000)
 	return
 }
 

@@ -42,7 +42,7 @@ func getBootSync(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	if 1 == model.BootSyncSucc {
+	if model.Conf.Sync.Enabled && 1 == model.BootSyncSucc {
 		ret.Code = 1
 		ret.Msg = model.Conf.Language(17)
 		return

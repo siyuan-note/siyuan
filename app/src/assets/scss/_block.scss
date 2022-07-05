@@ -79,6 +79,10 @@
     flex-direction: column;
     border-bottom: 1px solid var(--b3-border-color);
 
+    .protyle-wysiwyg {
+      transition: none;
+    }
+
     &:last-child {
       border-bottom: 0;
     }

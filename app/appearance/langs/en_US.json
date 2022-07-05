@@ -1,8 +1,8 @@
 {
-  "localRepo":"local",
-  "localSnapshotRepo":"Local Snapshot",
-  "cloudSnapshotRepo":"Cloud Snapshot",
-  "cloudBackupTip":"Move to Data History => Data Snapshot",
+  "localRepo": "local",
+  "localTagSnapshot": "Local Tag Snapshot",
+  "cloudTagSnapshot": "Cloud Tag Snapshot",
+  "cloudBackupTip": "Move to Data History => Data Snapshot",
   "snapshotMemo": "Snapshot Memo",
   "snapshotMemoTip": "Please enter the snapshot memo",
   "tagSnapshot": "Tag Snapshot",

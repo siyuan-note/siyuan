@@ -123,8 +123,8 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         <span class="b3-list-item__meta">${window.siyuan.languages.fileCount}${item.count}</span>
     </div>
     ${actionHTML}
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.createSnapshot}">
-        <svg><use xlink:href="#iconAdd"></use></svg>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.tagSnapshot}">
+        <svg><use xlink:href="#iconTags"></use></svg>
     </span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
@@ -245,7 +245,7 @@ export const openHistory = () => {
                 <div class="fn__flex-1"></div>
                 <select class="b3-select">
                     <option value="0">${window.siyuan.languages.localRepo}</option>
-                    <option value="1">${window.siyuan.languages.localSnapshotRepo}</option>
+                    <option value="1">${window.siyuan.languages.localTagSnapshot}</option>
                     <option value="2">${window.siyuan.languages.cloudSnapshotRepo}</option>
                 </select>
                 <span class="fn__space"></span>
@@ -440,9 +440,9 @@ export const openHistory = () => {
                 })
             } else if (type === "genTag") {
                 const genTagDialog = new Dialog({
-                    title: window.siyuan.languages.snapshotMemo,
+                    title: window.siyuan.languages.tagSnapshot,
                     content: `<div class="b3-dialog__content">
-    <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.snapshotMemoTip}"></textarea>
+    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.tagSnapshotTip}">
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -450,8 +450,8 @@ export const openHistory = () => {
 </div>`,
                     width: isMobile() ? "80vw" : "520px",
                 });
-                const textareaElement = genTagDialog.element.querySelector("textarea");
-                textareaElement.focus();
+                const inputElement = genTagDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+                inputElement.focus();
                 const btnsElement = genTagDialog.element.querySelectorAll(".b3-button");
                 btnsElement[0].addEventListener("click", () => {
                     genTagDialog.destroy();
@@ -459,7 +459,7 @@ export const openHistory = () => {
                 btnsElement[1].addEventListener("click", () => {
                     fetchPost("/api/repo/tagSnapshot", {
                         id: target.parentElement.getAttribute("data-id"),
-                        name: textareaElement.value
+                        name: inputElement.value
                     }, () => {
                         renderRepo(repoElement, 1);
                     });

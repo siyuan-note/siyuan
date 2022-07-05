@@ -53,14 +53,14 @@ func getRepoSnapshots(c *gin.Context) {
 	}
 
 	page := arg["page"].(float64)
-	logs, pageCount, totalCount, err := model.GetRepoIndexLogs(int(page))
+	snapshots, pageCount, totalCount, err := model.GetRepoSnapshots(int(page))
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 	ret.Data = map[string]interface{}{
-		"logs":       logs,
+		"snapshots":  snapshots,
 		"pageCount":  pageCount,
 		"totalCount": totalCount,
 	}

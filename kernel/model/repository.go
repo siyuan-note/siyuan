@@ -39,7 +39,7 @@ func init() {
 	subscribeEvents()
 }
 
-func GetRepoIndexLogs(page int) (logs []*dejavu.Log, pageCount, totalCount int, err error) {
+func GetRepoSnapshots(page int) (logs []*dejavu.Log, pageCount, totalCount int, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return

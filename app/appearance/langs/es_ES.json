@@ -2,7 +2,7 @@
   "localSnapshot": "Instantánea local",
   "localTagSnapshot": "Instantánea de etiqueta local",
   "cloudTagSnapshot": "Instantánea de etiquetas en la nube",
-  "cloudBackupTip": "Mover a Historial de datos => Instantánea de datos",
+  "cloudBackupTip": "Vaya a [Historial de datos - Instantánea de datos] para operar",
   "snapshotMemo": "Memo de Instantánea",
   "snapshotMemoTip": "Ingrese la nota instantánea",
   "tagSnapshot": "Instantánea de la etiqueta",

@@ -2,7 +2,7 @@
   "localSnapshot": "本地快照",
   "localTagSnapshot": "本地标记的快照",
   "cloudTagSnapshot": "云端标记的快照",
-  "cloudBackupTip": "迁移至数据历史 => 数据快照",
+  "cloudBackupTip": "请到 [数据历史 - 数据快照] 中进行操作",
   "snapshotMemo": "快照备注",
   "snapshotMemoTip": "请输入快照备注",
   "tagSnapshot": "标记快照",

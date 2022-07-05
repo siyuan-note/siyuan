@@ -125,7 +125,7 @@ const renderRepo = (element: Element, currentPage: number) => {
             return;
         }
         let repoHTML = "";
-        response.data.logs.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string }) => {
+        response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string }) => {
             repoHTML += `<li class="b3-list-item b3-list-item--hide-action" data-id="${item.id}">
     <div class="b3-list-item__text">
         ${item.hCreated}<span class="fn__space"></span>${escapeHtml(item.memo)}<span class="b3-list-item__meta">${item.hSize}</span>

@@ -59,7 +59,7 @@ func RemoveCloudBackup() (err error) {
 }
 
 func getCloudAvailableBackupSize() (size int64, err error) {
-	sync, _, assetSize, repoSize, err := getCloudSpaceOSS()
+	sync, _, assetSize, err := getCloudSpaceOSS()
 	if nil != err {
 		return
 	}
@@ -68,12 +68,12 @@ func getCloudAvailableBackupSize() (size int64, err error) {
 	if nil != sync {
 		syncSize = int64(sync["size"].(float64))
 	}
-	size = int64(Conf.User.UserSiYuanRepoSize) - syncSize - assetSize - repoSize
+	size = int64(Conf.User.UserSiYuanRepoSize) - syncSize - assetSize
 	return
 }
 
-func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hRepoSize, hTotalSize string, err error) {
-	sync, backup, assetSize, repoSize, err := getCloudSpaceOSS()
+func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize string, err error) {
+	sync, backup, assetSize, err := getCloudSpaceOSS()
 	if nil != err {
 		err = errors.New(Conf.Language(30) + " " + err.Error())
 		return
@@ -100,9 +100,8 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hRepoSize, hTotalSi
 		HSize:   humanize.Bytes(uint64(backupSize)),
 		Updated: backupUpdated,
 	}
-	totalSize = syncSize + backupSize + assetSize + repoSize
+	totalSize = syncSize + backupSize + assetSize
 	hAssetSize = humanize.Bytes(uint64(assetSize))
-	hRepoSize = humanize.Bytes(uint64(repoSize))
 	hSize = humanize.Bytes(uint64(totalSize))
 	hTotalSize = byteCountSI(int64(Conf.User.UserSiYuanRepoSize))
 	return

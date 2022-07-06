@@ -32,19 +32,29 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/imroc/req/v3"
 	"github.com/panjf2000/ants/v2"
 	"github.com/qiniu/go-sdk/v7/storage"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize, repoSize int64, err error) {
+func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, err error) {
 	result := map[string]interface{}{}
 	request := httpclient.NewCloudRequest(Conf.System.NetworkProxy.String())
-	resp, err := request.
-		SetResult(&result).
-		SetBody(map[string]string{"token": Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/data/getSiYuanWorkspace?uid=" + Conf.User.UserId)
+
+	var resp *req.Response
+	if Conf.Sync.UseDataRepo {
+		resp, err = request.
+			SetResult(&result).
+			SetBody(map[string]string{"token": Conf.User.UserToken}).
+			Post(util.AliyunServer + "/apis/siyuan/dejavu/getRepoStat?uid=" + Conf.User.UserId)
+	} else {
+		resp, err = request.
+			SetResult(&result).
+			SetBody(map[string]string{"token": Conf.User.UserToken}).
+			Post(util.AliyunServer + "/apis/siyuan/data/getSiYuanWorkspace?uid=" + Conf.User.UserId)
+	}
 	if nil != err {
 		util.LogErrorf("get cloud space failed: %s", err)
 		err = ErrFailedToConnectCloudServer
@@ -67,7 +77,6 @@ func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize, repoSiz
 	sync = data["sync"].(map[string]interface{})
 	backup = data["backup"].(map[string]interface{})
 	assetSize = int64(data["assetSize"].(float64))
-	repoSize = int64(data["repoSize"].(float64))
 	return
 }
 

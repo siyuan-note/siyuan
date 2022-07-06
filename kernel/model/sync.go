@@ -1354,7 +1354,7 @@ func pathSha256Short(p, sep string) string {
 	return buf.String()
 }
 
-func GetSyncDirection(cloudDirName string) (code int, msg string) { // 0：失败，10：上传，20：下载，30：一致
+func GetSyncDirection(cloudDirName string) (code int, msg string) { // 0：失败，10：上传，20：下载，30：一致，40：使用数据仓库同步
 	if !IsSubscriber() {
 		return
 	}
@@ -1365,6 +1365,10 @@ func GetSyncDirection(cloudDirName string) (code int, msg string) { // 0：失�
 
 	if !IsValidCloudDirName(cloudDirName) {
 		return
+	}
+
+	if Conf.Sync.UseDataRepo {
+		return 40, ""
 	}
 
 	syncConf, err := getWorkspaceDataConf()

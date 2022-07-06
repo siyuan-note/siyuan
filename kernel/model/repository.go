@@ -245,6 +245,34 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 	return
 }
 
+func RemoveCloudRepoTag(tag string) (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	if "" == tag {
+		err = errors.New("tag is empty")
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	cloudInfo, err := buildCloudInfo()
+	if nil != err {
+		return
+	}
+
+	err = repo.RemoveCloudRepoTag(tag, cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar})
+	if nil != err {
+		return
+	}
+	return
+}
+
 func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
@@ -282,6 +310,21 @@ func GetTagSnapshots() (ret []*dejavu.Log, err error) {
 	if 1 > len(ret) {
 		ret = []*dejavu.Log{}
 	}
+	return
+}
+
+func RemoveTagSnapshot(tag string) (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	err = repo.RemoveTag(tag)
 	return
 }
 

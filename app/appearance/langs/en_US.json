@@ -924,6 +924,7 @@
     "151": "Do not include symbols \\ / : * ? &quot; &#039; &lt; &gt; |",
     "152": "Uploaded files %d, chunks %d, sent bytes %s",
     "153": "Downloaded files %d, chunks %d, received bytes %s",
-    "154": "The cloud can only support backup up to 12 snapshots"
+    "154": "The cloud can only support backup up to 12 snapshots",
+    "155": "Cloud sync directory has been reset to [main]"
   }
 }

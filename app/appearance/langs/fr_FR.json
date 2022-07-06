@@ -924,6 +924,7 @@
     "151": "Ne pas inclure les symboles \\ / : * ? &quot; &#039; &lt; &gt; |",
     "152": "Fichiers téléchargés %d, morceaux %d, octets envoyés %s",
     "153": "Fichiers chargés %d, morceaux %d, octets reçus %s",
-    "154": "Le cloud ne peut prendre en charge que la sauvegarde jusqu'à 12 instantanés"
+    "154": "Le cloud ne peut prendre en charge que la sauvegarde jusqu'à 12 instantanés",
+    "155": "Le répertoire de synchronisation du cloud a été réinitialisé sur [main]"
   }
 }

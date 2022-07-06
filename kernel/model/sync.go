@@ -72,7 +72,7 @@ func SyncData(boot, exit, byHand bool) {
 	}
 
 	if util.IsMutexLocked(&syncLock) {
-		util.LogWarnf("sync has been locked")
+		util.LogWarnf("a cloud sync operation still processing")
 		planSyncAfter(30 * time.Second)
 		return
 	}
@@ -1190,8 +1190,9 @@ func RemoveCloudSyncDir(name string) (err error) {
 	}
 
 	if Conf.Sync.CloudName == name {
-		Conf.Sync.CloudName = ""
+		Conf.Sync.CloudName = "main"
 		Conf.Save()
+		util.PushMsg(Conf.Language(155), 5000)
 	}
 	return
 }

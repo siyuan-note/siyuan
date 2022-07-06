@@ -138,6 +138,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
 };
 
 const renderRepo = (element: Element, currentPage: number) => {
+    element.lastElementChild.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
     const previousElement = element.querySelector('[data-type="previous"]');
     const nextElement = element.querySelector('[data-type="next"]');
     if (currentPage < 0) {

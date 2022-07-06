@@ -172,7 +172,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
         } else {
-            this.element.insertAdjacentHTML("beforeend", "<div class=\"fn__loading\"><img width=\"64px\" src=\"/stage/loading-pure.svg\"></div>");
+            this.element.insertAdjacentHTML("beforeend", '<div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div>');
         }
     }
 

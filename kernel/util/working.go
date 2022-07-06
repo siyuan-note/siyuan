@@ -64,7 +64,7 @@ func Boot() {
 	readOnly := flag.Bool("readonly", false, "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
-	lang := flag.String("lang", "en_US", "zh_CN/zh_CHT/en_US/fr_FR/es_ES")
+	lang := flag.String("lang", "", "zh_CN/zh_CHT/en_US/fr_FR/es_ES")
 	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
 
@@ -272,7 +272,7 @@ var (
 	Resident       bool
 	ReadOnly       bool
 	AccessAuthCode string
-	Lang           = "en_US"
+	Lang           = ""
 
 	Container string // docker, android, ios, std
 )

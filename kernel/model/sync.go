@@ -72,7 +72,7 @@ func SyncData(boot, exit, byHand bool) {
 	}
 
 	if util.IsMutexLocked(&syncLock) {
-		util.LogWarnf("a cloud sync operation still processing")
+		util.LogWarnf("sync is in progress")
 		planSyncAfter(30 * time.Second)
 		return
 	}

@@ -443,16 +443,19 @@ export const openHistory = () => {
                         }
                     });
                 });
+                break;
             } else if (type === "uploadSnapshot") {
                 fetchPost("/api/repo/uploadCloudSnapshot", {
                     tag: target.parentElement.getAttribute("data-tag"),
                     id: target.parentElement.getAttribute("data-id")
                 });
+                break;
             } else if (type === "downloadSnapshot") {
                 fetchPost("/api/repo/downloadCloudSnapshot", {
                     tag: target.parentElement.getAttribute("data-tag"),
                     id: target.parentElement.getAttribute("data-id")
                 });
+                break;
             } else if (type === "genTag") {
                 const genTagDialog = new Dialog({
                     title: window.siyuan.languages.tagSnapshot,

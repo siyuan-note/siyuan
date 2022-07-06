@@ -239,9 +239,8 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 	uploadFileCount, uploadChunkCount, uploadBytes, err := repo.UploadTagIndex(tag, id, cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
 		if errors.Is(err, dejavu.ErrCloudBackupCountExceeded) {
-
+			err = errors.New(Conf.Language(154))
 		}
-
 		return
 	}
 	msg := fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, byteCountSI(uploadBytes))

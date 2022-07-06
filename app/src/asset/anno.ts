@@ -369,6 +369,24 @@ const getHightlightCoordsByRect = (pdf: any, color: string, rectResizeElement: H
     return result;
 };
 
+const mergeRects = (range: Range) => {
+    const rects = range.getClientRects();
+    const mergedRects: { left: number, top: number, right: number, bottom: number }[] = [];
+    let lastTop: number = undefined
+    Array.from(rects).forEach(item => {
+        if (item.height === 0 || item.width === 0) {
+            return;
+        }
+        if (typeof lastTop === "undefined" || Math.abs(lastTop - item.top) > 4) {
+            mergedRects.push({left: item.left, top: item.top, right: item.right, bottom: item.bottom});
+            lastTop = item.top;
+        } else {
+            mergedRects[mergedRects.length - 1].right = item.right
+        }
+    })
+    return mergedRects
+}
+
 const getHightlightCoordsByRange = (pdf: any, color: string) => {
     const range = window.getSelection().getRangeAt(0);
     const startPageElement = hasClosestByClassName(range.startContainer, "page");
@@ -409,9 +427,8 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
         range.setEndAfter(startDivs[startDivs.length - 1]);
     }
 
-    const startSelectionRects = range.getClientRects();
     const startSelected: number[] = [];
-    Array.from(startSelectionRects).forEach(function (r) {
+    mergeRects(range).forEach(function (r) {
         startSelected.push(
             startViewport.convertToPdfPoint(r.left - startPageRect.x,
                 r.top - startPageRect.y).concat(startViewport.convertToPdfPoint(r.right - startPageRect.x,
@@ -427,8 +444,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
         const endViewport = endPage.viewport;
         const endDivs = endPage.textLayer.textDivs;
         cloneRange.setStart(endDivs[0], 0);
-        const endSelectionRects = cloneRange.getClientRects();
-        Array.from(endSelectionRects).forEach(function (r) {
+        mergeRects(cloneRange).forEach(function (r) {
             endSelected.push(
                 endViewport.convertToPdfPoint(r.left - endPageRect.x,
                     r.top - endPageRect.y).concat(endViewport.convertToPdfPoint(r.right - endPageRect.x,

@@ -15,6 +15,7 @@ require (
 	github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732
 	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/Xuanwo/go-locale v1.1.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/denisbrodbeck/machineid v1.0.1
@@ -40,7 +41,7 @@ require (
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
-	github.com/siyuan-note/dejavu v0.0.0-20220706073837-ba878f02864c
+	github.com/siyuan-note/dejavu v0.0.0-20220706122309-9deb35eba89c
 	github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
 	github.com/siyuan-note/filelock v0.0.0-20220704090116-54dfb035283f
@@ -56,7 +57,6 @@ require (
 	dmitri.shuralyov.com/font/woff2 v0.0.0-20180220214647-957792cbbdab // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
-	github.com/Xuanwo/go-locale v1.1.0 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
@@ -113,8 +113,7 @@ require (
 
 replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20220412041952-88c3aaa8595e
 
-replace github.com/siyuan-note/dejavu => D:\88250\dejavu
-
+//replace github.com/siyuan-note/dejavu => D:\88250\dejavu
 //replace github.com/siyuan-note/httpclient => D:\88250\httpclient
 //replace github.com/siyuan-note/filelock => D:\88250\filelock
 //replace github.com/88250/lute => D:\gogogo\src\github.com\88250\lute

@@ -432,14 +432,15 @@ export const openHistory = () => {
                 });
                 break;
             } else if (type === "removeRepoTagSnapshot" || type === "removeCloudRepoTagSnapshot") {
-                fetchPost("/api/repo/" + type, {
-                    tag: target.parentElement.getAttribute("data-tag")
-                }, () => {
-                    if (target.parentElement.parentElement.childElementCount === 1) {
-                        target.parentElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`
-                    } else {
-                        target.parentElement.remove();
-                    }
+                const tag = target.parentElement.getAttribute("data-tag");
+                confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <i>${tag}</i>?`, () => {
+                    fetchPost("/api/repo/" + type, {tag}, () => {
+                        if (target.parentElement.parentElement.childElementCount === 1) {
+                            target.parentElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`
+                        } else {
+                            target.parentElement.remove();
+                        }
+                    });
                 });
             } else if (type === "uploadSnapshot") {
                 fetchPost("/api/repo/uploadCloudSnapshot", {

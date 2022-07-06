@@ -518,8 +518,16 @@ ${passwordHTML}
                                 target.parentElement.setAttribute("disabled", "disabled");
                                 fetchPost("/api/sync/getSyncDirection", {name: target.getAttribute("data-name")}, (response) => {
                                     target.parentElement.removeAttribute("disabled");
+                                    const name = target.getAttribute("data-name");
+                                    if (40 == response.code) { // 使用数据仓库同步不需要对比同步方向
+                                        fetchPost("/api/sync/setCloudSyncDir", {name}, () => {
+                                            window.siyuan.config.sync.cloudName = name;
+                                            getCloudList(true);
+                                        });
+                                        return
+                                    }
+
                                     confirmDialog(window.siyuan.languages.confirm, response.msg, () => {
-                                        const name = target.getAttribute("data-name");
                                         fetchPost("/api/sync/setCloudSyncDir", {name}, () => {
                                             window.siyuan.config.sync.cloudName = name;
                                             getCloudList(true);

@@ -1265,7 +1265,7 @@ func formatErrorMsg(err error) string {
 }
 
 func IsValidCloudDirName(cloudDirName string) bool {
-	if 16 < utf8.RuneCountInString(cloudDirName) {
+	if 16 < utf8.RuneCountInString(cloudDirName) || 1 > utf8.RuneCountInString(cloudDirName) {
 		return false
 	}
 

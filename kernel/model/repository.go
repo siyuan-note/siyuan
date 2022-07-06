@@ -628,8 +628,14 @@ func contextPushMsg(context map[string]interface{}, msg string) {
 }
 
 func buildCloudInfo() (ret *dejavu.CloudInfo, err error) {
-	if nil == Conf.User || "" == Conf.Sync.CloudName {
-		err = errors.New("invalid cloud info")
+	if !IsValidCloudDirName(Conf.Sync.CloudName) {
+		util.LogWarnf("invalid cloud repo name, rename it to [main]")
+		Conf.Sync.CloudName = "main"
+		Conf.Save()
+	}
+
+	if nil == Conf.User {
+		err = errors.New("user auth failed")
 		return
 	}
 

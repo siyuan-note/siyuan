@@ -234,6 +234,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 		return
 	}
 
+	util.PushEndlessProgress(Conf.Language(116))
 	defer util.PushClearProgress()
 	uploadFileCount, uploadChunkCount, uploadBytes, err := repo.UploadTagIndex(tag, id, cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
@@ -455,7 +456,7 @@ func syncRepo(boot, exit, byHand bool) {
 	if nil != err {
 		util.LogErrorf("sync data repo failed: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
-		if errors.Is(err, dejavu.ErrSyncCloudStorageSizeExceeded) {
+		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			msg = fmt.Sprintf(Conf.Language(43), byteCountSI(int64(Conf.User.UserSiYuanRepoSize)))
 		}
 		Conf.Sync.Stat = msg

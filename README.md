@@ -71,6 +71,7 @@ Cloud services require a paid subscription.
 
 * VIP identity
 * End-to-end encrypted data synchronization
+* End-to-end encrypted data backup
 * Cloud assets serving
 * WeChat notification
 * Cloud inbox

@@ -175,7 +175,7 @@ func CheckoutRepo(id string) (err error) {
 	Conf.Sync.Enabled = false
 	Conf.Save()
 
-	_, _, err = repo.Checkout(id, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBarAndProgress})
+	_, _, err = repo.Checkout(id, map[string]interface{}{dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
 		util.PushClearProgress()
 		return
@@ -208,7 +208,7 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 	}
 
 	defer util.PushClearProgress()
-	downloadFileCount, downloadChunkCount, downloadBytes, err := repo.DownloadTagIndex(tag, id, cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBarAndProgress})
+	downloadFileCount, downloadChunkCount, downloadBytes, err := repo.DownloadTagIndex(tag, id, cloudInfo, map[string]interface{}{dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
 		return
 	}
@@ -236,7 +236,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 
 	util.PushEndlessProgress(Conf.Language(116))
 	defer util.PushClearProgress()
-	uploadFileCount, uploadChunkCount, uploadBytes, err := repo.UploadTagIndex(tag, id, cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBarAndProgress})
+	uploadFileCount, uploadChunkCount, uploadBytes, err := repo.UploadTagIndex(tag, id, cloudInfo, map[string]interface{}{dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
 		if errors.Is(err, dejavu.ErrCloudBackupCountExceeded) {
 			err = errors.New(Conf.Language(154))
@@ -270,7 +270,7 @@ func RemoveCloudRepoTag(tag string) (err error) {
 		return
 	}
 
-	err = repo.RemoveCloudRepoTag(tag, cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar})
+	err = repo.RemoveCloudRepoTag(tag, cloudInfo, map[string]interface{}{dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBar})
 	if nil != err {
 		return
 	}
@@ -292,7 +292,7 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 	if nil != err {
 		return
 	}
-	ret, err = repo.GetCloudRepoTagLogs(cloudInfo, map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar})
+	ret, err = repo.GetCloudRepoTagLogs(cloudInfo, map[string]interface{}{dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBar})
 	if 1 > len(ret) {
 		ret = []*dejavu.Log{}
 	}
@@ -393,7 +393,7 @@ func IndexRepo(memo string) (err error) {
 	WaitForWritingFiles()
 	filelock.ReleaseAllFileLocks()
 	index, err := repo.Index(memo, map[string]interface{}{
-		CtxPushMsg: CtxPushMsgToStatusBarAndProgress,
+		dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBarAndProgress,
 	})
 	if nil != err {
 		util.PushStatusBar("Index data repo failed: " + err.Error())
@@ -413,14 +413,6 @@ func IndexRepo(memo string) (err error) {
 	util.PushClearProgress()
 	return
 }
-
-const (
-	CtxPushMsg = "pushMsg"
-
-	CtxPushMsgToProgress = iota
-	CtxPushMsgToStatusBar
-	CtxPushMsgToStatusBarAndProgress
-)
 
 func syncRepo(boot, exit, byHand bool) {
 	if 1 > len(Conf.Repo.Key) {
@@ -449,7 +441,7 @@ func syncRepo(boot, exit, byHand bool) {
 	if nil != err {
 		return
 	}
-	syncContext := map[string]interface{}{CtxPushMsg: CtxPushMsgToStatusBar}
+	syncContext := map[string]interface{}{dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBar}
 
 	_, mergeUpserts, mergeRemoves, _,
 		uploadFileCount, downloadFileCount, uploadChunkCount, downloadChunkCount,
@@ -491,6 +483,7 @@ func syncRepo(boot, exit, byHand bool) {
 			}
 			planSyncAfter(delay)
 		}
+		util.PushClearProgress()
 		return
 	}
 
@@ -519,7 +512,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 	start := time.Now()
 	latest, _ := repo.Latest()
 	index, err := repo.Index("[Sync] Cloud sync", map[string]interface{}{
-		CtxPushMsg: CtxPushMsgToStatusBar,
+		dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBar,
 	})
 	if nil != err {
 		util.PushStatusBar(fmt.Sprintf(Conf.Language(140), err))
@@ -616,12 +609,12 @@ func subscribeEvents() {
 }
 
 func contextPushMsg(context map[string]interface{}, msg string) {
-	switch context[CtxPushMsg].(int) {
-	case CtxPushMsgToProgress:
+	switch context[dejavu.CtxPushMsg].(int) {
+	case dejavu.CtxPushMsgToProgress:
 		util.PushEndlessProgress(msg)
-	case CtxPushMsgToStatusBar:
+	case dejavu.CtxPushMsgToStatusBar:
 		util.PushStatusBar(msg)
-	case CtxPushMsgToStatusBarAndProgress:
+	case dejavu.CtxPushMsgToStatusBarAndProgress:
 		util.PushStatusBar(msg)
 		util.PushEndlessProgress(msg)
 	}

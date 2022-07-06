@@ -258,8 +258,8 @@ const setE2eePassword = () => {
 };
 
 const needPassword = () => {
-    if (window.siyuan.config.e2eePasswd === "") {
-        confirmDialog(window.siyuan.languages.config, window.siyuan.languages["_kernel"]["11"]);
+    if (window.siyuan.config.e2eePasswd === "" && !window.siyuan.config.sync.useDataRepo) {
+        confirmDialog(window.siyuan.languages.config, window.siyuan.languages._kernel[11]);
         return true;
     }
     return false;

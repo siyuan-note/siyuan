@@ -30,7 +30,6 @@
     border: 0;
     color: var(--b3-theme-on-background);
     margin-top: 0 !important;
-    transition: var(--b3-transition);
 
     &[draggable="true"]:active {
       cursor: grabbing;

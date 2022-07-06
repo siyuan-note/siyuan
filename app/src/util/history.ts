@@ -109,12 +109,16 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         element.lastElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
         return;
     }
-    let actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.tagSnapshot}"><svg><use xlink:href="#iconTags"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
-    if (type === "download") {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>`;
-    } else if (type === "upload") {
+    let actionHTML = ''
+    if (type === "cloudTag") {
+        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>
+<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeCloudRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
+    } else if (type === "localTag") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}"><svg><use xlink:href="#iconUpload"></use></svg></span>
+<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>
+<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
+    } else if (type === "local") {
+        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.tagSnapshot}"><svg><use xlink:href="#iconTags"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
     }
     let repoHTML = "";
@@ -139,12 +143,12 @@ const renderRepo = (element: Element, currentPage: number) => {
     if (currentPage < 0) {
         if (currentPage === -1) {
             fetchPost("/api/repo/getRepoTagSnapshots", {}, (response) => {
-                renderRepoItem(response, element, "upload");
+                renderRepoItem(response, element, "localTag");
             });
         }
         if (currentPage === -2) {
             fetchPost("/api/repo/getCloudRepoTagSnapshots", {}, (response) => {
-                renderRepoItem(response, element, "download");
+                renderRepoItem(response, element, "cloudTag");
             });
         }
         previousElement.classList.add("fn__none");
@@ -165,7 +169,7 @@ const renderRepo = (element: Element, currentPage: number) => {
             } else {
                 nextElement.setAttribute("disabled", "disabled");
             }
-            renderRepoItem(response, element, "upload");
+            renderRepoItem(response, element, "local");
         });
     }
 };
@@ -427,6 +431,16 @@ export const openHistory = () => {
                     genRepoDialog.destroy();
                 });
                 break;
+            } else if (type === "removeRepoTagSnapshot" || type === "removeCloudRepoTagSnapshot") {
+                fetchPost("/api/repo/" + type, {
+                    tag: target.parentElement.getAttribute("data-tag")
+                }, () => {
+                    if (target.parentElement.parentElement.childElementCount === 1) {
+                        target.parentElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`
+                    } else {
+                        target.parentElement.remove();
+                    }
+                });
             } else if (type === "uploadSnapshot") {
                 fetchPost("/api/repo/uploadCloudSnapshot", {
                     tag: target.parentElement.getAttribute("data-tag"),

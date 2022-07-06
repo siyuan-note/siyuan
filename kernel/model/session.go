@@ -140,6 +140,12 @@ func CheckAuth(c *gin.Context) {
 	if session.AccessAuthCode != Conf.AccessAuthCode {
 		userAgentHeader := c.GetHeader("User-Agent")
 		if strings.HasPrefix(userAgentHeader, "SiYuan/") || strings.HasPrefix(userAgentHeader, "Mozilla/") {
+			if "GET" != c.Request.Method {
+				c.JSON(401, map[string]interface{}{"code": -1, "msg": Conf.Language(156)})
+				c.Abort()
+				return
+			}
+
 			c.Redirect(302, "/check-auth")
 			c.Abort()
 			return

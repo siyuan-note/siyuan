@@ -925,6 +925,7 @@
     "152": "Archivos cargados %d, fragmentos %d, bytes enviados %s",
     "153": "Archivos descargados %d, fragmentos %d, bytes recibidos %s",
     "154": "La nube solo admite copias de seguridad de hasta 12 instantáneas",
-    "155": "El directorio de sincronización de la nube se ha restablecido a [main]"
+    "155": "El directorio de sincronización de la nube se ha restablecido a [main]",
+    "156": "Error en la autenticación de acceso, actualice la página"
   }
 }

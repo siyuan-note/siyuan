@@ -40,7 +40,7 @@ require (
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
-	github.com/siyuan-note/dejavu v0.0.0-20220705162638-58c67df5a0ca
+	github.com/siyuan-note/dejavu v0.0.0-20220706020527-a7a0d661f81b
 	github.com/siyuan-note/encryption v0.0.0-20220612074546-f1dd94fe8676
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
 	github.com/siyuan-note/filelock v0.0.0-20220704090116-54dfb035283f
@@ -112,7 +112,7 @@ require (
 
 replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20220412041952-88c3aaa8595e
 
-//replace github.com/siyuan-note/dejavu => D:\88250\dejavu
+replace github.com/siyuan-note/dejavu => D:\88250\dejavu
 //replace github.com/siyuan-note/httpclient => D:\88250\httpclient
 //replace github.com/siyuan-note/filelock => D:\88250\filelock
 //replace github.com/88250/lute => D:\gogogo\src\github.com\88250\lute

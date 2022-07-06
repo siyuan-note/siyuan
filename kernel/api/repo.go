@@ -118,6 +118,24 @@ func getCloudRepoTagSnapshots(c *gin.Context) {
 	}
 }
 
+func removeCloudRepoTagSnapshot(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	tag := arg["tag"].(string)
+	err := model.RemoveCloudRepoTag(tag)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
 func getRepoTagSnapshots(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -131,6 +149,24 @@ func getRepoTagSnapshots(c *gin.Context) {
 
 	ret.Data = map[string]interface{}{
 		"snapshots": snapshots,
+	}
+}
+
+func removeRepoTagSnapshot(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	tag := arg["tag"].(string)
+	err := model.RemoveTagSnapshot(tag)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
 }
 

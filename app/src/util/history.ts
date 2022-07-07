@@ -123,7 +123,19 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     }
     let repoHTML = "";
     response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string, tag: string }) => {
-        repoHTML += `<li class="b3-list-item b3-list-item--hide-action" data-id="${item.id}" data-tag="${item.tag}">
+        if (isMobile()) {
+            repoHTML += `<li class="b3-list-item b3-list-item--two" data-id="${item.id}" data-tag="${item.tag}">
+    <div class="b3-list-item__first">
+        <span class="b3-chip b3-chip--secondary${item.tag ? "" : " fn__none"}">${item.tag}</span>
+        ${item.hCreated}<span class="fn__space"></span>
+        <span class="b3-list-item__meta">${item.hSize}</span>
+        <span class="fn__flex-1"></span>
+        ${actionHTML}
+    </div>
+    <span class="b3-list-item__meta">${escapeHtml(item.memo)}</span>
+</li>`;
+        } else {
+            repoHTML += `<li class="b3-list-item b3-list-item--hide-action" data-id="${item.id}" data-tag="${item.tag}">
     <div class="b3-list-item__text">
         <span class="b3-chip b3-chip--secondary${item.tag ? "" : " fn__none"}">${item.tag}</span>
         ${item.hCreated}<span class="fn__space"></span>
@@ -133,6 +145,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     </div>
     ${actionHTML}
 </li>`;
+        }
     });
     element.lastElementChild.innerHTML = `${repoHTML}`;
 };
@@ -247,7 +260,7 @@ export const openHistory = () => {
                 <span class="fn__space"></span>
                 <span data-type="next" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                 <div class="fn__flex-1"></div>
-                <select class="b3-select">
+                <select class="b3-select" style="min-width: auto">
                     <option value="0">${window.siyuan.languages.localSnapshot}</option>
                     <option value="1">${window.siyuan.languages.localTagSnapshot}</option>
                     <option value="2">${window.siyuan.languages.cloudTagSnapshot}</option>

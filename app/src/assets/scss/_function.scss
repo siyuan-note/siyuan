@@ -162,10 +162,11 @@
     overflow: hidden;
 
     .b3-chip--secondary {
-      padding: 2px 8px;
+      padding: 0 8px;
       display: inline;
       margin-right: 8px;
       font-size: 12px;
+      line-height: 16px;
     }
   }
 

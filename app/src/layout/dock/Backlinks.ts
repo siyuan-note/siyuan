@@ -265,20 +265,24 @@ export class Backlinks extends Model {
                         case "layout":
                             if (this.mTree.element.style.flex) {
                                 if (this.mTree.element.style.height === "0px") {
+                                    this.tree.element.classList.remove("fn__none");
                                     this.mTree.element.removeAttribute("style");
                                     target.setAttribute("aria-label", window.siyuan.languages.up);
                                     target.querySelector("use").setAttribute("xlink:href", "#iconUp");
                                 } else {
+                                    this.tree.element.classList.remove("fn__none");
                                     this.mTree.element.removeAttribute("style");
                                     target.setAttribute("aria-label", window.siyuan.languages.down);
                                     target.querySelector("use").setAttribute("xlink:href", "#iconDown");
                                 }
                             } else {
                                 if (target.getAttribute("aria-label") === window.siyuan.languages.down) {
+                                    this.tree.element.classList.remove("fn__none");
                                     this.mTree.element.setAttribute("style", "flex:none;height:0px");
                                     target.setAttribute("aria-label", window.siyuan.languages.up);
                                     target.querySelector("use").setAttribute("xlink:href", "#iconUp");
                                 } else {
+                                    this.tree.element.classList.add("fn__none");
                                     this.mTree.element.setAttribute("style", `flex:none;height:${this.element.clientHeight - this.tree.element.previousElementSibling.clientHeight * 2}px`);
                                     target.setAttribute("aria-label", window.siyuan.languages.down);
                                     target.querySelector("use").setAttribute("xlink:href", "#iconDown");
@@ -395,16 +399,19 @@ export class Backlinks extends Model {
             return;
         }
         if (data.mentionsCount === 0) {
+            this.tree.element.classList.remove("fn__none");
             this.mTree.element.setAttribute("style", "flex:none;height:0px");
             layoutElement.setAttribute("aria-label", window.siyuan.languages.up);
             layoutElement.querySelector("use").setAttribute("xlink:href", "#iconUp");
             return;
         }
         if (data.linkRefsCount === 0) {
+            this.tree.element.classList.add("fn__none");
             this.mTree.element.setAttribute("style", `flex:none;height:${this.element.clientHeight - this.tree.element.previousElementSibling.clientHeight * 2}px`);
             layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
             layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
         } else {
+            this.tree.element.classList.remove("fn__none");
             this.mTree.element.removeAttribute("style");
             layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
             layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");

@@ -592,14 +592,12 @@ func subscribeEvents() {
 		msg := "Downloading data repo file [" + id + "]"
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
-		//util.LogInfof("%s", msg)
 	})
 
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadChunk, func(context map[string]interface{}, id string) {
 		msg := "Downloading data repo chunk [" + id + "]"
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
-		//util.LogInfof("%s", msg)
 	})
 
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadRef, func(context map[string]interface{}, ref string) {
@@ -618,14 +616,12 @@ func subscribeEvents() {
 		msg := "Uploading data repo file [" + id + "]"
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
-		//util.LogInfof("%s", msg)
 	})
 
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadChunk, func(context map[string]interface{}, id string) {
 		msg := "Uploading data repo chunk [" + id + "]"
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
-		//util.LogInfof("%s", msg)
 	})
 
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadRef, func(context map[string]interface{}, ref string) {

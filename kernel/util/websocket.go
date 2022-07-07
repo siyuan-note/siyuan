@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute/html"
 	"github.com/88250/melody"
 )
 
@@ -126,33 +125,28 @@ func ReloadUI() {
 }
 
 func PushTxErr(msg string, code int, data interface{}) {
-	msg = html.EscapeHTMLStr(msg)
 	BroadcastByType("main", "txerr", code, msg, data)
 }
 
 func PushUpdateMsg(msgId string, msg string, timeout int) {
-	msg = html.EscapeHTMLStr(msg)
 	BroadcastByType("main", "msg", 0, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
 	return
 }
 
 func PushMsg(msg string, timeout int) (msgId string) {
 	msgId = gulu.Rand.String(7)
-	msg = html.EscapeHTMLStr(msg)
 	BroadcastByType("main", "msg", 0, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
 	return
 }
 
 func PushErrMsg(msg string, timeout int) (msgId string) {
 	msgId = gulu.Rand.String(7)
-	msg = html.EscapeHTMLStr(msg)
 	BroadcastByType("main", "msg", -1, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
 	return
 }
 
 func PushStatusBar(msg string) {
 	msg += " (" + time.Now().Format("2006-01-02 15:04:05") + ")"
-	msg = html.EscapeHTMLStr(msg)
 	BroadcastByType("main", "statusbar", 0, msg, nil)
 }
 

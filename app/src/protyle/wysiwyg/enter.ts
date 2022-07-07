@@ -1,4 +1,4 @@
-import {genEmptyElement} from "../../block/util";
+import {genEmptyElement, insertEmptyBlock} from "../../block/util";
 import {getSelectionOffset, focusByWbr} from "../util/selection";
 import {
     getContenteditableElement,
@@ -188,6 +188,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     if (isNotEditBlock(blockElement)) {
         if (blockElement.classList.contains("render-node")) {
             protyle.toolbar.showRender(protyle, blockElement);
+        } else if (blockElement.classList.contains("hr")) {
+            insertEmptyBlock(protyle, "afterend");
         } else {
             protyle.gutter.renderMenu(protyle, blockElement);
             window.siyuan.menus.menu.element.classList.remove("fn__none");

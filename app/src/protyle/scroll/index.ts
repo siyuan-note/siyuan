@@ -7,6 +7,7 @@ export class Scroll {
     private inputElement: HTMLInputElement;
     public blockSize: number;
     public lastScrollTop: number;
+    public keepLazyLoad: boolean;
 
     constructor(protyle: IProtyle) {
         const divElement = document.createElement("div");
@@ -14,6 +15,7 @@ export class Scroll {
         divElement.className = "fn__none protyle-scroll b3-tooltips b3-tooltips__s";
         divElement.setAttribute("aria-label", "Blocks 1/1");
         this.element = divElement;
+        this.keepLazyLoad =  false;
         if (!protyle.options.render.scroll) {
             this.element.classList.add("fn__none");
         }

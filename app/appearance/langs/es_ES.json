@@ -1,4 +1,6 @@
 {
+  "crossKeepLazyLoad": "La selección múltiple entre páginas debe seleccionar [Mantener contenido cargado] en el menú más",
+  "keepLazyLoad": "Mantener el contenido cargado",
   "localSnapshot": "Instantánea local",
   "localTagSnapshot": "Instantánea de etiqueta local",
   "cloudTagSnapshot": "Instantánea de etiquetas en la nube",

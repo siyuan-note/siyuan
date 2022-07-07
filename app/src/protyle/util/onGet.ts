@@ -104,7 +104,7 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
     if (options.action.includes(Constants.CB_GET_APPEND)) {
         // 动态加载移除
-        if (protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
+        if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
             preventScroll(protyle);
             let removeElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
             const removeElements = [];
@@ -130,9 +130,11 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
         protyle.wysiwyg.element.insertAdjacentHTML("afterbegin", options.content);
         protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (lastElement.getBoundingClientRect().top - lastTop);
         // 动态加载移除
-        while (protyle.wysiwyg.element.childElementCount > 2 && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT &&
-        protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().top > window.innerHeight) {
-            protyle.wysiwyg.element.lastElementChild.remove();
+        if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad) {
+            while (protyle.wysiwyg.element.childElementCount > 2 && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT &&
+            protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().top > window.innerHeight) {
+                protyle.wysiwyg.element.lastElementChild.remove();
+            }
         }
     } else {
         protyle.wysiwyg.element.innerHTML = options.content;

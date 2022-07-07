@@ -1813,6 +1813,10 @@ export class WYSIWYG {
                         shiftStartElement = undefined;
                     } else {
                         const ids: string[] = [];
+                        if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && protyle.scroll && !protyle.scroll.element.classList.contains("fn__none") && !protyle.scroll.keepLazyLoad &&
+                            (startElement.getBoundingClientRect().top < -protyle.contentElement.clientHeight * 2 || endElement.getBoundingClientRect().bottom > protyle.contentElement.clientHeight * 2)) {
+                            showMessage(window.siyuan.languages.crossKeepLazyLoad);
+                        }
                         selectElements.forEach(item => {
                             item.classList.add("protyle-wysiwyg--select");
                             ids.push(item.getAttribute("data-node-id"));

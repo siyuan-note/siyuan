@@ -215,36 +215,6 @@ export class Breadcrumb {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.optimizeTypography,
-                click: () => {
-                    fetchPost("/api/format/autoSpace", {
-                        id: protyle.block.rootID
-                    }, () => {
-                        /// #if MOBILE
-                        fetchPost("/api/filetree/getDoc", {
-                            id: protyle.block.id,
-                            mode: 0,
-                            size: Constants.SIZE_GET,
-                        }, getResponse => {
-                            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
-                        });
-                        /// #else
-                        getAllModels().editor.forEach(item => {
-                            if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                                fetchPost("/api/filetree/getDoc", {
-                                    id: item.editor.protyle.block.rootID,
-                                    mode: 0,
-                                    size: Constants.SIZE_GET,
-                                }, getResponse => {
-                                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
-                                });
-                            }
-                        });
-                        /// #endif
-                    });
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.netImg2LocalAsset,
                 click: () => {
                     fetchPost("/api/format/netImg2LocalAssets", {
@@ -274,6 +244,45 @@ export class Breadcrumb {
                     });
                 }
             }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.optimizeTypography,
+                click: () => {
+                    fetchPost("/api/format/autoSpace", {
+                        id: protyle.block.rootID
+                    }, () => {
+                        /// #if MOBILE
+                        fetchPost("/api/filetree/getDoc", {
+                            id: protyle.block.id,
+                            mode: 0,
+                            size: Constants.SIZE_GET,
+                        }, getResponse => {
+                            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+                        });
+                        /// #else
+                        getAllModels().editor.forEach(item => {
+                            if (item.editor.protyle.block.rootID === protyle.block.rootID) {
+                                fetchPost("/api/filetree/getDoc", {
+                                    id: item.editor.protyle.block.rootID,
+                                    mode: 0,
+                                    size: Constants.SIZE_GET,
+                                }, getResponse => {
+                                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
+                                });
+                            }
+                        });
+                        /// #endif
+                    });
+                }
+            }).element);
+            if (!protyle.scroll?.element.classList.contains("fn__none")) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    current: protyle.scroll.keepLazyLoad,
+                    label: window.siyuan.languages.keepLazyLoad,
+                    click: () => {
+                        protyle.scroll.keepLazyLoad = !protyle.scroll.keepLazyLoad;
+                    }
+                }).element);
+            }
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconRefresh",

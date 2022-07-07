@@ -1,4 +1,6 @@
 {
+  "crossKeepLazyLoad": "跨頁多選需在更多菜單中選中【保持已加載內容】",
+  "keepLazyLoad": "保持已加載的內容",
   "localSnapshot": "本地快照",
   "localTagSnapshot": "本地標記的快照",
   "cloudTagSnapshot": "雲端標記的快照",

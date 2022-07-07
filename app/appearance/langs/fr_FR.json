@@ -1,4 +1,6 @@
 {
+  "crossKeepLazyLoad": "La multi-sélection sur plusieurs pages doit sélectionner [Conserver le contenu chargé] dans le menu plus",
+  "keepLazyLoad": "Conserver le contenu chargé",
   "localSnapshot": "Instantané local",
   "localTagSnapshot": "Instantané de balise locale",
   "cloudTagSnapshot": "Instantané de balise cloud",

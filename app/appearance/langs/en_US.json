@@ -1,4 +1,6 @@
 {
+  "crossKeepLazyLoad": "Cross-page multi-selection needs to select [Keep Loaded Content] in the more menu",
+  "keepLazyLoad": "Keep loaded content",
   "localSnapshot": "Local Snapshot",
   "localTagSnapshot": "Local Tag Snapshot",
   "cloudTagSnapshot": "Cloud Tag Snapshot",

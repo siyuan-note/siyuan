@@ -35,10 +35,10 @@ export const lockFile = (id: string) => {
         getAllModels().editor.find((item) => {
             if (item.editor.protyle.block.rootID === id) {
                 item.parent.parent.removeTab(item.parent.id);
-                logElement.remove();
                 return true;
             }
         });
+        logElement.remove();
         /// #endif
     });
     logElement.querySelector(".b3-button--text").addEventListener("click", () => {

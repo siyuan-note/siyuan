@@ -109,6 +109,7 @@ export const getTopAloneElement = (topSourceElement: Element) => {
             if (topSourceElement.parentElement.getAttribute("data-type") === "NodeBlockquote" && topSourceElement.parentElement.childElementCount === 2) {
                 topSourceElement = topSourceElement.parentElement;
             } else {
+                topSourceElement = getTopAloneElement(topSourceElement);
                 break;
             }
         }

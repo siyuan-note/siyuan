@@ -149,7 +149,7 @@ const openFile = (options: IOpenFileOptions) => {
                 wnd.split(direction).addTab(newTab(options));
             }
         } else if (options.keepCursor && wnd.children[0].model) {
-            const tab = newTab(options)
+            const tab = newTab(options);
             tab.headElement.setAttribute("keep-cursor", options.id);
             wnd.addTab(tab, options.keepCursor);
         } else if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
@@ -239,7 +239,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     if (options.mode) {
         setEditMode(editor.editor.protyle, options.mode);
     }
-}
+};
 
 const newTab = (options: IOpenFileOptions) => {
     let tab: Tab;
@@ -293,7 +293,7 @@ const newTab = (options: IOpenFileOptions) => {
         });
     }
     return tab;
-}
+};
 
 export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackStack = false, reload = false) => {
     let title = window.siyuan.languages.siyuanNote;

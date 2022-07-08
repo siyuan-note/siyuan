@@ -524,7 +524,7 @@ ${passwordHTML}
                                             window.siyuan.config.sync.cloudName = name;
                                             getCloudList(true);
                                         });
-                                        return
+                                        return;
                                     }
 
                                     confirmDialog(window.siyuan.languages.confirm, response.msg, () => {

@@ -372,7 +372,7 @@ const getHightlightCoordsByRect = (pdf: any, color: string, rectResizeElement: H
 const mergeRects = (range: Range) => {
     const rects = range.getClientRects();
     const mergedRects: { left: number, top: number, right: number, bottom: number }[] = [];
-    let lastTop: number = undefined
+    let lastTop: number = undefined;
     Array.from(rects).forEach(item => {
         if (item.height === 0 || item.width === 0) {
             return;
@@ -381,11 +381,11 @@ const mergeRects = (range: Range) => {
             mergedRects.push({left: item.left, top: item.top, right: item.right, bottom: item.bottom});
             lastTop = item.top;
         } else {
-            mergedRects[mergedRects.length - 1].right = item.right
+            mergedRects[mergedRects.length - 1].right = item.right;
         }
-    })
-    return mergedRects
-}
+    });
+    return mergedRects;
+};
 
 const getHightlightCoordsByRange = (pdf: any, color: string) => {
     const range = window.getSelection().getRangeAt(0);

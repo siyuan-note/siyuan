@@ -109,7 +109,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         element.lastElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
         return;
     }
-    let actionHTML = ''
+    let actionHTML = "";
     if (type === "cloudTag") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeCloudRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
@@ -450,7 +450,7 @@ export const openHistory = () => {
                 confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <i>${tag}</i>?`, () => {
                     fetchPost("/api/repo/" + type, {tag}, () => {
                         if (target.parentElement.parentElement.childElementCount === 1) {
-                            target.parentElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`
+                            target.parentElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                         } else {
                             target.parentElement.remove();
                         }

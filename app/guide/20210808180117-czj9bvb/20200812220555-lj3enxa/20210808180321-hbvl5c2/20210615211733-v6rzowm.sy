@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
-		"updated": "20220628203857"
+		"updated": "20220708101301"
 	},
 	"Children": [
 		{
@@ -1730,6 +1730,161 @@
 					"Data": " 文件夹可以清空全部数据快照。"
 				}
 			]
+		},
+		{
+			"ID": "20210928094544-vg2c2ts",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210928094544-vg2c2ts",
+				"updated": "20210928094608"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略文件"
+				}
+			]
+		},
+		{
+			"ID": "20210928094612-rymbb43",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210928094612-rymbb43",
+				"updated": "20220708101301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在创建快照时忽略一些文件，请在文件系统上创建或编辑文本文件 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": " 工作空间/data/.siyuan/syncignore"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "， 其中每一行使用 data 文件夹的相对路径进行配置，表示忽略文件或文件夹的路径，支持通配符。例如："
+				}
+			]
+		},
+		{
+			"ID": "20210928094821-syjcgbp",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210928094821-syjcgbp",
+				"updated": "20211222185741"
+			},
+			"Children": [
+				{
+					"ID": "20210928094822-nn422ie",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210928094822-nn422ie",
+						"updated": "20211222185741"
+					},
+					"Children": [
+						{
+							"ID": "20210928094822-ipyjn3n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210928094822-ipyjn3n",
+								"updated": "20211222185741"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "20210808180117-6v0mkxr/**/*"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "： 忽略 data/20210808180117-6v0mkxr 笔记本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210928095121-tyfox35",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210928095121-tyfox35",
+						"updated": "20210928095254"
+					},
+					"Children": [
+						{
+							"ID": "20210928095121-tng5faj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210928095121-tng5faj",
+								"updated": "20210928095254"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "assets/*.pdf"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：忽略 data/assets/ 下的 PDF 文件"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220708101225-a2lxbp0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220708101225-a2lxbp0"
+			}
 		}
 	]
 }

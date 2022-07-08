@@ -1,9 +1,9 @@
 {
   "crossKeepLazyLoad": "Cross-page multi-selection needs to select [Keep Loaded Content] in the more menu",
   "keepLazyLoad": "Keep loaded content",
-  "localSnapshot": "Local Snapshot",
-  "localTagSnapshot": "Local Tag Snapshot",
-  "cloudTagSnapshot": "Cloud Tag Snapshot",
+  "localSnapshot": "Local snapshot",
+  "localTagSnapshot": "Local tag snapshot",
+  "cloudTagSnapshot": "Cloud tag snapshot",
   "cloudBackupTip": "Please go to [Data History - Data Snapshot] to operate",
   "snapshotMemo": "Snapshot Memo",
   "snapshotMemoTip": "Please enter the snapshot memo",

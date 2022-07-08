@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210721103420-vn6g2yy",
 		"title": "数据同步",
-		"updated": "20220703232528"
+		"updated": "20220708101339"
 	},
 	"Children": [
 		{
@@ -73,130 +73,6 @@
 			]
 		},
 		{
-			"ID": "20210721110423-5m6vo52",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210721110423-5m6vo52",
-				"updated": "20220703222554"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "端到端加密"
-				}
-			]
-		},
-		{
-			"ID": "20210525215124-ifljpao",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210525215124-ifljpao",
-				"updated": "20220703222031"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "数据同步通过端到端加密传输，云端不保存任何明文数据。"
-				}
-			]
-		},
-		{
-			"ID": "20210525215316-438zsvu",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20210525215316-438zsvu",
-				"updated": "20210525220426"
-			},
-			"Children": [
-				{
-					"ID": "20220703222217-vfqq9x9",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220703222217-vfqq9x9",
-						"updated": "20220703222217"
-					},
-					"Children": [
-						{
-							"ID": "20220703222217-cvrogps",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220703222217-cvrogps",
-								"updated": "20220703222217"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "密钥仅存储在本地，不会上传到云端"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210525220029-7myvzw8",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210525220029-7myvzw8",
-						"updated": "20210721111300"
-					},
-					"Children": [
-						{
-							"ID": "20210525220029-c9i66lb",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210525220029-c9i66lb",
-								"updated": "20210721111300"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "加密和解密过程完全在本地设备上进行"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210525220320-a9li63c",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210525220320-a9li63c",
-						"updated": "20210525220426"
-					},
-					"Children": [
-						{
-							"ID": "20210525220320-h0rm7h0",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210525220320-h0rm7h0",
-								"updated": "20210525220426"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "加密算法为业界公认安全的 AES GCM"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
 			"ID": "20210721103754-930h5gz",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -256,219 +132,145 @@
 		},
 		{
 			"ID": "20220703225413-0ir4w8k",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220703225413-0ir4w8k",
-				"updated": "20220703225453"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果需要暂停同步，可关闭选项 "
-				},
-				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "设置"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "云端"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "启用云端同步"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
-				}
-			]
-		},
-		{
-			"ID": "20210928094544-vg2c2ts",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210928094544-vg2c2ts",
-				"updated": "20210928094608"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "忽略文件"
-				}
-			]
-		},
-		{
-			"ID": "20210928094612-rymbb43",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210928094612-rymbb43",
-				"updated": "20210928220514"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果需要在同步时忽略一些文件，请在文件系统上创建或编辑文本文件 "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": " 工作空间/data/.siyuan/syncignore"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "， 其中每一行使用 data 文件夹的相对路径进行配置，表示忽略文件或文件夹的路径，支持通配符。例如："
-				}
-			]
-		},
-		{
-			"ID": "20210928094821-syjcgbp",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20210928094821-syjcgbp",
-				"updated": "20211222185741"
+				"id": "20220703225413-0ir4w8k",
+				"updated": "20220708101339"
 			},
 			"Children": [
 				{
-					"ID": "20210928094822-nn422ie",
+					"ID": "20220708101329-6ve3vlo",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210928094822-nn422ie",
-						"updated": "20211222185741"
+						"id": "20220708101329-6ve3vlo",
+						"updated": "20220708101329"
 					},
 					"Children": [
 						{
-							"ID": "20210928094822-ipyjn3n",
+							"ID": "20220708101329-qd2vfmr",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210928094822-ipyjn3n",
-								"updated": "20211222185741"
+								"id": "20220708101329-qd2vfmr",
+								"updated": "20220708101330"
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
+									"Type": "NodeText",
+									"Data": "如果需要暂停同步，可关闭选项 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker"
+											"Type": "NodeKbdOpenMarker"
 										},
 										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "20210808180117-6v0mkxr/**/*"
+											"Type": "NodeText",
+											"Data": "设置"
 										},
 										{
-											"Type": "NodeCodeSpanCloseMarker"
+											"Type": "NodeKbdCloseMarker"
 										}
 									]
 								},
 								{
 									"Type": "NodeText",
-									"Data": "： 忽略 data/20210808180117-6v0mkxr 笔记本"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "云端"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "启用云端同步"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20210928095121-tyfox35",
+					"ID": "20220708101330-z0i7utn",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210928095121-tyfox35",
-						"updated": "20210928095254"
+						"id": "20220708101330-z0i7utn",
+						"updated": "20220708101339"
 					},
 					"Children": [
 						{
-							"ID": "20210928095121-tng5faj",
+							"ID": "20220708101330-pcruha3",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210928095121-tng5faj",
-								"updated": "20210928095254"
+								"id": "20220708101330-pcruha3",
+								"updated": "20220708101339"
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
+									"Type": "NodeBlockRef",
+									"Data": "span",
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker"
+											"Type": "NodeOpenParen"
 										},
 										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "assets/*.pdf"
+											"Type": "NodeOpenParen"
 										},
 										{
-											"Type": "NodeCodeSpanCloseMarker"
+											"Type": "NodeBlockRefID",
+											"Data": "20210928094544-vg2c2ts"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "忽略文件"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
 										}
 									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": "：忽略 data/assets/ 下的 PDF 文件"
 								}
 							]
 						}

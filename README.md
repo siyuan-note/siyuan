@@ -234,13 +234,16 @@ In addition, you can consider manually exporting and importing Data to achieve d
 * Desktop: <kbd>Settings</kbd> - <kbd>Export</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
 * Mobile: <kbd>Right column</kbd> - <kbd>About</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
 
-### What should I do if I forget the end-to-end password?
+### What should I do if the data repo key is lost?
 
-* Use the new workspace on the main device, manually copy the old workspace data folder to the new workspace
-* New workspace can reset password
-* The cloud uses the new cloud synchronization directory
+* If the data repo key is correctly initialized on multiple devices before, the key is the same on all devices and can be set in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data repo key</kbd> - <kbd>Copy key string</kbd> retrieve
+* If it has not been configured correctly before (for example, the keys on multiple devices are inconsistent) or all devices are unavailable and the key string cannot be obtained, you can reset the key by following the steps below:
 
-If it is a mobile-end, uninstall and reinstall it (note: When the mobile-enduninstalls the application, the local workspace data will be deleted together).
+  1. Manually back up the data, you can use <kbd>Export Data</kbd> or directly copy the <kbd>workspace/data/</kbd> folder on the file system
+  2. <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data rep key</kbd> - <kbd>Reset data repo</kbd>
+  3. Reinitialize the data repo key. After initializing the key on one device, other devices import the key
+  4. The cloud uses the new synchronization directory, the old synchronization directory is no longer available and can be deleted
+  5. The existing cloud snapshots are no longer available and can be deleted
 
 ### Do I need to pay for it?
 

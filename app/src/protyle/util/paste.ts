@@ -14,6 +14,19 @@ import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 
+const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
+    let needRender = true;
+    protyle.options.hint.extend.find(item => {
+        if (item.key === textPlain) {
+            needRender = false;
+            return true;
+        }
+    })
+    if (needRender) {
+        protyle.hint.render(protyle);
+    }
+}
+
 export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element) => {
     const range = getEditorRange(protyle.wysiwyg.element);
     const id = nodeElement.getAttribute("data-node-id");
@@ -46,9 +59,7 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
     blockRender(protyle, protyle.wysiwyg.element);
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);
-    if (textPlain.indexOf("[[") === -1 && textPlain.indexOf("((") === -1 && textPlain.indexOf("【【") === -1 && textPlain.indexOf("（（") === -1) {
-        protyle.hint.render(protyle);
-    }
+    filterClipboardHint(protyle, textPlain)
     scrollCenter(protyle);
 };
 
@@ -188,9 +199,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 // 转换为 md，避免再次粘贴 ID 重复
                 const tempMd = protyle.lute.BlockDOM2StdMd(tempElement.innerHTML);
                 writeText(tempMd);
-                if (tempMd.indexOf("[[") === -1 && tempMd.indexOf("((") === -1 && tempMd.indexOf("【【") === -1 && tempMd.indexOf("（（") === -1) {
-                    protyle.hint.render(protyle);
-                }
+                filterClipboardHint(protyle, tempMd)
             } else if (textHTML.endsWith(Constants.ZWSP)) {
                 // 编辑器内部粘贴
                 tempElement.innerHTML = textHTML.substr(0, textHTML.length - 1);
@@ -204,9 +213,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 });
                 const tempInnerHTML = tempElement.innerHTML;
                 insertHTML(tempInnerHTML, protyle);
-                if (tempInnerHTML.indexOf("[[") === -1 && tempInnerHTML.indexOf("((") === -1 && tempInnerHTML.indexOf("【【") === -1 && tempInnerHTML.indexOf("（（") === -1) {
-                    protyle.hint.render(protyle);
-                }
+                filterClipboardHint(protyle, tempInnerHTML)
             } else {
                 tempElement.innerHTML = textHTML;
                 tempElement.querySelectorAll("[style]").forEach((e) => {
@@ -232,9 +239,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     blockRender(protyle, protyle.wysiwyg.element);
                     processRender(protyle.wysiwyg.element);
                     highlightRender(protyle.wysiwyg.element);
-                    if (response.data.indexOf("[[") === -1 && response.data.indexOf("((") === -1 && response.data.indexOf("【【") === -1 && response.data.indexOf("（（") === -1) {
-                        protyle.hint.render(protyle);
-                    }
+                    filterClipboardHint(protyle, response.data)
                     scrollCenter(protyle);
                 });
                 return;
@@ -253,9 +258,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
             const textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
             insertHTML(textPlainDom, protyle);
-            if (textPlainDom.indexOf("[[") === -1 && textPlainDom.indexOf("((") === -1 && textPlainDom.indexOf("【【") === -1 && textPlainDom.indexOf("（（") === -1) {
-                protyle.hint.render(protyle);
-            }
+            filterClipboardHint(protyle, textPlainDom)
         }
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);

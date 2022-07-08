@@ -248,12 +248,17 @@ const openFile = (options: {
                 }
             });
         }
-        if (options.position === "right" && wnd.children[0].model) {
+        if ((options.position === "right" || options.position === "bottom") && wnd.children[0].model) {
+            const direction = options.position === "right" ? "lr" : "tb";
             let targetWnd: Wnd;
-            if (wnd.parent.children.length > 1 && wnd.parent instanceof Layout && wnd.parent.direction === "lr") {
+            if (wnd.parent.children.length > 1 && wnd.parent instanceof Layout && wnd.parent.direction === direction) {
                 wnd.parent.children.find((item, index) => {
                     if (item.id === wnd.id) {
-                        targetWnd = wnd.parent.children[index + 1] as Wnd;
+                        let nextWnd = wnd.parent.children[index + 1];
+                        while (nextWnd instanceof Layout) {
+                            nextWnd = nextWnd.children[0];
+                        }
+                        targetWnd = nextWnd;
                         return true;
                     }
                 });
@@ -261,22 +266,7 @@ const openFile = (options: {
             if (targetWnd) {
                 targetWnd.addTab(tab);
             } else {
-                wnd.split("lr").addTab(tab);
-            }
-        } else if (options.position === "bottom" && wnd.children[0].model) {
-            let targetWnd: Wnd;
-            if (wnd.parent.children.length > 1 && wnd.parent instanceof Layout && wnd.parent.direction === "tb") {
-                wnd.parent.children.find((item, index) => {
-                    if (item.id === wnd.id) {
-                        targetWnd = wnd.parent.children[index + 1] as Wnd;
-                        return true;
-                    }
-                });
-            }
-            if (targetWnd) {
-                targetWnd.addTab(tab);
-            } else {
-                wnd.split("tb").addTab(tab);
+                wnd.split(direction).addTab(tab);
             }
         } else if (options.keepCursor && wnd.children[0].model) {
             tab.headElement.setAttribute("keep-cursor", options.id);

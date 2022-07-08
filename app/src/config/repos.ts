@@ -294,7 +294,7 @@ export const repos = {
     </div>
 </div>`;
         }
-        let passwordHTML = `<div class="b3-label fn__flex${window.siyuan.config.e2eePasswd === "" ? "" : " fn__none"}">
+        let passwordHTML = `<div class="b3-label fn__flex${(window.siyuan.config.e2eePasswd !== "" || window.siyuan.config.sync.useDataRepo) ? " fn__none" : ""}">
     <div class="fn__flex-1 fn__flex-center">
         ${window.siyuan.languages.e2eePasswd}
         <div class="b3-label__text ft__error">${window.siyuan.languages.e2eePasswdTip}</div>
@@ -305,7 +305,7 @@ export const repos = {
         ${window.siyuan.languages.setPasswd}
     </button>
 </div>
-<div class="b3-label${window.siyuan.config.e2eePasswd === "" ? " fn__none" : ""}">
+<div class="b3-label${(window.siyuan.config.e2eePasswd === "" || window.siyuan.config.sync.useDataRepo) ? " fn__none" : ""}">
     ${window.siyuan.languages.e2eePasswd}
     <div class="b3-label__text"><i>${window.siyuan.languages.passwdSet}</i></div>
     <div class="b3-label__text ft__error">${0 === window.siyuan.config.e2eePasswdMode ? window.siyuan.languages.builtinE2EEPasswdTip : window.siyuan.languages.changeE2EEPasswdTip}</div>
@@ -429,12 +429,23 @@ ${passwordHTML}
                 } else {
                     window.siyuan.config.sync.useDataRepo = useDataRepoElement.checked;
                     const reposBackupElement = repos.element.querySelector("#reposBackup") as HTMLElement;
+                    const reposPasswordElement = repos.element.querySelector("#updatePassword").parentElement as HTMLElement;
                     if (useDataRepoElement.checked) {
                         reposBackupElement.classList.add("fn__none");
                         reposBackupElement.nextElementSibling.classList.remove("fn__none");
+                        if (window.siyuan.config.e2eePasswd === "") {
+                            reposPasswordElement.classList.add("fn__none");
+                        } else {
+                            reposPasswordElement.nextElementSibling.classList.add("fn__none");
+                        }
                     } else {
                         reposBackupElement.classList.remove("fn__none");
                         reposBackupElement.nextElementSibling.classList.add("fn__none");
+                        if (window.siyuan.config.e2eePasswd === "") {
+                            reposPasswordElement.classList.remove("fn__none");
+                        } else {
+                            reposPasswordElement.nextElementSibling.classList.remove("fn__none");
+                        }
                     }
                 }
             });

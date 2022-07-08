@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
-		"updated": "20220628203717"
+		"updated": "20210928101257"
 	},
 	"Children": [
 		{
@@ -1709,6 +1709,152 @@
 				{
 					"Type": "NodeText",
 					"Data": " folder will clear all data snapshots."
+				}
+			]
+		},
+		{
+			"ID": "20210928101257-l27t5uo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210928101257-l27t5uo",
+				"updated": "20210928101257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ignore files"
+				}
+			]
+		},
+		{
+			"ID": "20210928101257-3m7efdr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210928101257-3m7efdr",
+				"updated": "20210928220616"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to ignore some files during synchronization, please create or edit the text file "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "workspace/data/.siyuan/syncignore"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on the file system, each line is configured with the relative path of the data folder, which means that the path of the file or folder is ignored and wildcard characters are supported. E.g:"
+				}
+			]
+		},
+		{
+			"ID": "20210928101257-apwzr8j",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210928101257-apwzr8j",
+				"updated": "20211222190049"
+			},
+			"Children": [
+				{
+					"ID": "20210928101257-9rghi7d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210928101257-9rghi7d",
+						"updated": "20211222190049"
+					},
+					"Children": [
+						{
+							"ID": "20210928101257-tjmd13g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210928101257-tjmd13g",
+								"updated": "20211222190049"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "20210808180117-6v0mkxr/**/*"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Ignore the data/20210808180117-6v0mkxr notebook"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210928101257-egaymco",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210928101257-egaymco"
+					},
+					"Children": [
+						{
+							"ID": "20210928101257-jj2836a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210928101257-jj2836a"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "assets/*.pdf"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ignore PDF files under data/assets/"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

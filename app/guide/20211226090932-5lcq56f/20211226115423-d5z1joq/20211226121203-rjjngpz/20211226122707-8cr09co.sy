@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226122707-8cr09co",
 		"title": "數據歷史",
-		"updated": "20220628203918"
+		"updated": "20211226121454"
 	},
 	"Children": [
 		{
@@ -1709,6 +1709,150 @@
 				{
 					"Type": "NodeText",
 					"Data": " 文件夾可以清空全部數據快照。"
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-8ay5lbb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226121454-8ay5lbb",
+				"updated": "20211226010158"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略文件"
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-03u8yy2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226121454-03u8yy2",
+				"updated": "20211228135319"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在同步時忽略一些文件，請在文件系統上創建或編輯文本文件 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": " 工作空間/data/.siyuan/syncignore"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "， 其中每一行使用 data 文件夾的相對路徑進行配置，表示忽略文件或文件夾的路徑，支援通配符。例如："
+				}
+			]
+		},
+		{
+			"ID": "20211226121454-yx47k6p",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226121454-yx47k6p",
+				"updated": "20211226010158"
+			},
+			"Children": [
+				{
+					"ID": "20211226121454-ptlrqog",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121454-ptlrqog"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-fhzab8c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-fhzab8c"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "20210808180117-6v0mkxr/**/*"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "： 忽略 data/20210808180117-6v0mkxr 筆記本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121454-73oeoyd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121454-73oeoyd"
+					},
+					"Children": [
+						{
+							"ID": "20211226121454-x4g40uq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121454-x4g40uq"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "assets/*.pdf"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：忽略 data/assets/ 下的 PDF 文件"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

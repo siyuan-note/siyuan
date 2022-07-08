@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
-		"updated": "20220703232524"
+		"updated": "20220708102401"
 	},
 	"Children": [
 		{
@@ -53,130 +53,6 @@
 				{
 					"Type": "NodeText",
 					"Data": " 文件夾資料一致，包括資料文件、範本、小工具以及筆記本資料。"
-				}
-			]
-		},
-		{
-			"ID": "20211227210109-0f92zh2",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211227210109-0f92zh2",
-				"title": "端到端加密",
-				"updated": "20220703223113"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "端到端加密"
-				}
-			]
-		},
-		{
-			"ID": "20220703223050-c15s118",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220703223050-c15s118"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "數據同步通過端到端加密傳輸，雲端不保存任何明文數據。"
-				}
-			]
-		},
-		{
-			"ID": "20220703223050-mrhujtt",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220703223050-mrhujtt",
-				"updated": "20220703223050"
-			},
-			"Children": [
-				{
-					"ID": "20220703223050-bc8yax3",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220703223050-bc8yax3",
-						"updated": "20220703223050"
-					},
-					"Children": [
-						{
-							"ID": "20220703223050-hb3id1r",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220703223050-hb3id1r",
-								"updated": "20220703223050"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "密鑰僅存儲在本地，不會上傳到雲端"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220703223050-r6ah4qz",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220703223050-r6ah4qz",
-						"updated": "20220703223050"
-					},
-					"Children": [
-						{
-							"ID": "20220703223050-z2k2sr1",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220703223050-z2k2sr1",
-								"updated": "20220703223050"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "加密和解密過程完全在本地設備上進行"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220703223050-cwpobbf",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220703223050-cwpobbf",
-						"updated": "20220703223050"
-					},
-					"Children": [
-						{
-							"ID": "20220703223050-3ot9kpq",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220703223050-3ot9kpq",
-								"updated": "20220703223050"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "加密算法為業界公認安全的 AES GCM"
-								}
-							]
-						}
-					]
 				}
 			]
 		},
@@ -240,215 +116,145 @@
 		},
 		{
 			"ID": "20220703231555-yc4t5qa",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220703231555-yc4t5qa",
-				"updated": "20220703231604"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果需要暫停同步，可關閉選項 "
-				},
-				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "設置"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "雲端"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "啟用雲端同步"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
-				}
-			]
-		},
-		{
-			"ID": "20211226121454-8ay5lbb",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226121454-8ay5lbb",
-				"updated": "20211226010158"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "忽略文件"
-				}
-			]
-		},
-		{
-			"ID": "20211226121454-03u8yy2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226121454-03u8yy2",
-				"updated": "20211228135319"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果需要在同步時忽略一些文件，請在文件系統上創建或編輯文本文件 "
-				},
-				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": " 工作空間/data/.siyuan/syncignore"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "， 其中每一行使用 data 文件夾的相對路徑進行配置，表示忽略文件或文件夾的路徑，支援通配符。例如："
-				}
-			]
-		},
-		{
-			"ID": "20211226121454-yx47k6p",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20211226121454-yx47k6p",
-				"updated": "20211226010158"
+				"id": "20220703231555-yc4t5qa",
+				"updated": "20220708102401"
 			},
 			"Children": [
 				{
-					"ID": "20211226121454-ptlrqog",
+					"ID": "20220708102233-tk3qmmv",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226121454-ptlrqog"
+						"id": "20220708102233-tk3qmmv",
+						"updated": "20220708102233"
 					},
 					"Children": [
 						{
-							"ID": "20211226121454-fhzab8c",
+							"ID": "20220708102233-81pb7sf",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226121454-fhzab8c"
+								"id": "20220708102233-81pb7sf",
+								"updated": "20220708102235"
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
+									"Type": "NodeText",
+									"Data": "如果需要暫停同步，可關閉選項 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker"
+											"Type": "NodeKbdOpenMarker"
 										},
 										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "20210808180117-6v0mkxr/**/*"
+											"Type": "NodeText",
+											"Data": "設置"
 										},
 										{
-											"Type": "NodeCodeSpanCloseMarker"
+											"Type": "NodeKbdCloseMarker"
 										}
 									]
 								},
 								{
 									"Type": "NodeText",
-									"Data": "： 忽略 data/20210808180117-6v0mkxr 筆記本"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "雲端"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "啟用雲端同步"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20211226121454-73oeoyd",
+					"ID": "20220708102235-855mfu5",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226121454-73oeoyd"
+						"id": "20220708102235-855mfu5",
+						"updated": "20220708102401"
 					},
 					"Children": [
 						{
-							"ID": "20211226121454-x4g40uq",
+							"ID": "20220708102235-tsri69k",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226121454-x4g40uq"
+								"id": "20220708102235-tsri69k",
+								"updated": "20220708102401"
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
+									"Type": "NodeBlockRef",
+									"Data": "span",
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker"
+											"Type": "NodeOpenParen"
 										},
 										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "assets/*.pdf"
+											"Type": "NodeOpenParen"
 										},
 										{
-											"Type": "NodeCodeSpanCloseMarker"
+											"Type": "NodeBlockRefID",
+											"Data": "20211226121454-8ay5lbb"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefDynamicText",
+											"Data": "忽略文件"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
 										}
 									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": "：忽略 data/assets/ 下的 PDF 文件"
 								}
 							]
 						}

@@ -6,7 +6,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20220703000708"
+		"updated": "20220708111614"
 	},
 	"Children": [
 		{
@@ -2119,148 +2119,439 @@
 			]
 		},
 		{
-			"ID": "20211222010813-ftnc2x4",
+			"ID": "20220708111435-xmj42q4",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20211222010813-ftnc2x4",
-				"updated": "20211222010813"
+				"id": "20220708111435-xmj42q4",
+				"updated": "20220708111439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "What should I do if I forget the end-to-end password?"
+					"Data": "What should I do if the data repo key is lost?"
 				}
 			]
 		},
 		{
-			"ID": "20211222010813-zbajcmo",
+			"ID": "20220708111435-a2z4tpd",
 			"Type": "NodeList",
-			"ListData": {
-				"Typ": 1
-			},
+			"ListData": {},
 			"Properties": {
-				"id": "20211222010813-zbajcmo",
-				"updated": "20211222010813"
+				"id": "20220708111435-a2z4tpd",
+				"updated": "20220708111614"
 			},
 			"Children": [
 				{
-					"ID": "20211222010813-ru0kl9w",
+					"ID": "20220708111435-kw4fp2b",
 					"Type": "NodeListItem",
 					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "MS4=",
-						"Num": 1
+						"BulletChar": 42,
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211222010813-ru0kl9w"
+						"id": "20220708111435-kw4fp2b",
+						"updated": "20220708111614"
 					},
 					"Children": [
 						{
-							"ID": "20211222010813-62e87x8",
+							"ID": "20220708111435-2ozs1pt",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211222010813-62e87x8"
+								"id": "20220708111435-2ozs1pt",
+								"updated": "20220708111614"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Use the new workspace on the main device, manually copy the old workspace data folder to the new workspace"
+									"Data": "If the data repo key is correctly initialized on multiple devices before, the key is the same on all devices and can be set in "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Settings"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "About"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Data repo key"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Copy key string"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " retrieve"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20211222010813-08qwbrg",
+					"ID": "20220708111435-ptoqng0",
 					"Type": "NodeListItem",
 					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "Mi4=",
-						"Num": 2
+						"BulletChar": 42,
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211222010813-08qwbrg"
+						"id": "20220708111435-ptoqng0",
+						"updated": "20220708111603"
 					},
 					"Children": [
 						{
-							"ID": "20211222010813-ta53o9h",
+							"ID": "20220708111435-vqcxyea",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211222010813-ta53o9h"
+								"id": "20220708111435-vqcxyea",
+								"updated": "20220708111435"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "New workspace can reset password"
+									"Data": "If it has not been configured correctly before (for example, the keys on multiple devices are inconsistent) or all devices are unavailable and the key string cannot be obtained, you can reset the key by following the steps below:"
 								}
 							]
-						}
-					]
-				},
-				{
-					"ID": "20211222010813-t2nitz1",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "My4=",
-						"Num": 3
-					},
-					"Properties": {
-						"id": "20211222010813-t2nitz1"
-					},
-					"Children": [
-						{
-							"ID": "20211222010813-b08dqu3",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211222010813-b08dqu3"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "The cloud uses the new cloud synchronization directory"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20211222010813-1xph0t0",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211222010813-1xph0t0",
-				"updated": "20211222190830"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "If it is a mobile-end, uninstall and reinstall it ("
-				},
-				{
-					"Type": "NodeTag",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeTagOpenMarker"
 						},
 						{
-							"Type": "NodeText",
-							"Data": "Note"
-						},
-						{
-							"Type": "NodeTagCloseMarker"
+							"ID": "20220708111435-w2hbl28",
+							"Type": "NodeList",
+							"ListData": {
+								"Typ": 1
+							},
+							"Properties": {
+								"id": "20220708111435-w2hbl28",
+								"updated": "20220708111603"
+							},
+							"Children": [
+								{
+									"ID": "20220708111435-nev43mp",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "MS4=",
+										"Num": 1
+									},
+									"Properties": {
+										"id": "20220708111435-nev43mp",
+										"updated": "20220708111435"
+									},
+									"Children": [
+										{
+											"ID": "20220708111435-zrahxh3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220708111435-zrahxh3",
+												"updated": "20220708111435"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Manually back up the data, you can use "
+												},
+												{
+													"Type": "NodeKbd",
+													"Data": "kbd",
+													"Children": [
+														{
+															"Type": "NodeKbdOpenMarker"
+														},
+														{
+															"Type": "NodeText",
+															"Data": "Export Data"
+														},
+														{
+															"Type": "NodeKbdCloseMarker"
+														}
+													]
+												},
+												{
+													"Type": "NodeText",
+													"Data": " or directly copy the "
+												},
+												{
+													"Type": "NodeKbd",
+													"Data": "kbd",
+													"Children": [
+														{
+															"Type": "NodeKbdOpenMarker"
+														},
+														{
+															"Type": "NodeText",
+															"Data": "workspace/data/"
+														},
+														{
+															"Type": "NodeKbdCloseMarker"
+														}
+													]
+												},
+												{
+													"Type": "NodeText",
+													"Data": " folder on the file system"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220708111435-extloil",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "Mi4=",
+										"Num": 2
+									},
+									"Properties": {
+										"id": "20220708111435-extloil",
+										"updated": "20220708111603"
+									},
+									"Children": [
+										{
+											"ID": "20220708111435-cjteir8",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220708111435-cjteir8",
+												"updated": "20220708111603"
+											},
+											"Children": [
+												{
+													"Type": "NodeKbd",
+													"Data": "kbd",
+													"Children": [
+														{
+															"Type": "NodeKbdOpenMarker"
+														},
+														{
+															"Type": "NodeText",
+															"Data": "Settings"
+														},
+														{
+															"Type": "NodeKbdCloseMarker"
+														}
+													]
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeKbd",
+													"Data": "kbd",
+													"Children": [
+														{
+															"Type": "NodeKbdOpenMarker"
+														},
+														{
+															"Type": "NodeText",
+															"Data": "About"
+														},
+														{
+															"Type": "NodeKbdCloseMarker"
+														}
+													]
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeKbd",
+													"Data": "kbd",
+													"Children": [
+														{
+															"Type": "NodeKbdOpenMarker"
+														},
+														{
+															"Type": "NodeText",
+															"Data": "Data rep key"
+														},
+														{
+															"Type": "NodeKbdCloseMarker"
+														}
+													]
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeKbd",
+													"Data": "kbd",
+													"Children": [
+														{
+															"Type": "NodeKbdOpenMarker"
+														},
+														{
+															"Type": "NodeText",
+															"Data": "Reset data repo"
+														},
+														{
+															"Type": "NodeKbdCloseMarker"
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220708111435-29zhnwl",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "My4=",
+										"Num": 3
+									},
+									"Properties": {
+										"id": "20220708111435-29zhnwl",
+										"updated": "20220708111456"
+									},
+									"Children": [
+										{
+											"ID": "20220708111435-pfbzbnj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220708111435-pfbzbnj",
+												"updated": "20220708111456"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Reinitialize the data repo key. After initializing the key on one device, other devices import the key"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220708111435-rsas3a7",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "NC4=",
+										"Num": 4
+									},
+									"Properties": {
+										"id": "20220708111435-rsas3a7",
+										"updated": "20220708111435"
+									},
+									"Children": [
+										{
+											"ID": "20220708111435-i8ykkah",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220708111435-i8ykkah",
+												"updated": "20220708111435"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "The cloud uses the new synchronization directory, the old synchronization directory is no longer available and can be deleted"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220708111435-jjdh23m",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "NS4=",
+										"Num": 5
+									},
+									"Properties": {
+										"id": "20220708111435-jjdh23m",
+										"updated": "20220708111435"
+									},
+									"Children": [
+										{
+											"ID": "20220708111435-yrc4wlj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220708111435-yrc4wlj",
+												"updated": "20220708111435"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "The existing cloud snapshots are no longer available and can be deleted"
+												}
+											]
+										}
+									]
+								}
+							]
 						}
 					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": ": When the mobile-enduninstalls the application, the local workspace data will be deleted together)."
 				}
 			]
 		},

@@ -147,6 +147,21 @@ declare interface IDockTab {
     hotkeyLangId: string
 }
 
+declare interface IOpenFileOptions {
+    assetPath?: string, // asset 必填
+    fileName?: string, // file 必填
+    rootIcon?: string, // 文档图标
+    id?: string,  // file 必填
+    rootID?: string, // file 必填
+    position?: string, // file 或者 asset，打开位置
+    page?: number | string, // asset
+    mode?: TEditorMode // file
+    hasContext?: boolean // file，是否带上下文
+    action?: string[]
+    keepCursor?: boolean // file，是否跳转到新 tab 上
+    zoomIn?: boolean // 是否缩放
+}
+
 declare interface ILayoutOptions {
     direction?: TDirection;
     size?: string

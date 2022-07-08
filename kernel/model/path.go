@@ -153,6 +153,11 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 			if "NodeListItem" == c.Type {
 				tree, _ := loadTreeByBlockID(c.RootID)
 				li := treenode.GetNodeInTree(tree, c.ID)
+				if nil == li || nil == li.FirstChild {
+					// 反链面板拖拽到文档以后可能会出现这种情况 https://github.com/siyuan-note/siyuan/issues/5363
+					continue
+				}
+
 				var first *sql.Block
 				if 3 != li.ListData.Typ {
 					first = sql.GetBlock(li.FirstChild.ID)
@@ -250,6 +255,10 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 			} else if "NodeHeading" == c.Type {
 				tree, _ := loadTreeByBlockID(c.RootID)
 				h := treenode.GetNodeInTree(tree, c.ID)
+				if nil == h {
+					continue
+				}
+
 				name := sql.GetBlock(h.ID).Content
 				parentPos := 0
 				if "" != keyword {

@@ -594,9 +594,13 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 if ((event.key === "Enter" || event.key === "Escape") && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
-                    protyle.toolbar.range.selectNodeContents(linkElement);
-                    protyle.toolbar.range.collapse(false);
-                    focusByRange(protyle.toolbar.range);
+                    if (linkElement.textContent === "" || linkElement.textContent === Constants.ZWSP) {
+                        protyle.toolbar.setInlineMark(protyle, "link", "remove");
+                    } else {
+                        protyle.toolbar.range.selectNodeContents(linkElement);
+                        protyle.toolbar.range.collapse(false);
+                        focusByRange(protyle.toolbar.range);
+                    }
                     window.siyuan.menus.menu.remove();
                 }
             });
@@ -627,9 +631,13 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 if ((event.key === "Enter" || event.key === "Escape") && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
-                    protyle.toolbar.range.selectNodeContents(linkElement);
-                    protyle.toolbar.range.collapse(false);
-                    focusByRange(protyle.toolbar.range);
+                    if (!inputElement.value) {
+                        protyle.toolbar.setInlineMark(protyle, "link", "remove");
+                    } else {
+                        protyle.toolbar.range.selectNodeContents(linkElement);
+                        protyle.toolbar.range.collapse(false);
+                        focusByRange(protyle.toolbar.range);
+                    }
                     window.siyuan.menus.menu.remove();
                 }
             });
@@ -653,9 +661,13 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 if ((event.key === "Enter" || event.key === "Escape") && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
-                    protyle.toolbar.range.selectNodeContents(linkElement);
-                    protyle.toolbar.range.collapse(false);
-                    focusByRange(protyle.toolbar.range);
+                    if (linkElement.textContent === "" || linkElement.textContent === Constants.ZWSP) {
+                        protyle.toolbar.setInlineMark(protyle, "link", "remove");
+                    } else {
+                        protyle.toolbar.range.selectNodeContents(linkElement);
+                        protyle.toolbar.range.collapse(false);
+                        focusByRange(protyle.toolbar.range);
+                    }
                     window.siyuan.menus.menu.remove();
                 }
             });

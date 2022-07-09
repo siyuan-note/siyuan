@@ -552,8 +552,16 @@ export const globalShortcut = () => {
             event.stopPropagation();
             let activeTabElement = document.querySelector(".block__icons--active");
             if (activeTabElement && activeTabElement.getBoundingClientRect().width > 0) {
-                const type = activeTabElement.parentElement.className.split("sy__")[1] as TDockType;
-                getDockByType(type).toggleModel(type, false, true);
+                let type: TDockType
+                Array.from(activeTabElement.parentElement.classList).find(item => {
+                    if (item.startsWith("sy__")) {
+                        type = item.replace("sy__", "") as TDockType;
+                        return true;
+                    }
+                });
+                if (type) {
+                    getDockByType(type).toggleModel(type, false, true);
+                }
                 return;
             }
             activeTabElement = document.querySelector(".layout__wnd--active .item--focus");

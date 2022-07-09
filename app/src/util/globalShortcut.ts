@@ -353,7 +353,7 @@ export const globalShortcut = () => {
             return;
         }
 
-        if (event.key === "F9") {
+        if (event.key === window.siyuan.config.keymap.general.syncNow.custom) {
             if (needSubscribe() || document.querySelector("#barSync svg").classList.contains("fn__rotate")) {
                 return;
             }

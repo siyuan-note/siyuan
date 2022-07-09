@@ -1,4 +1,5 @@
 {
+  "initRepoKeyTip": "If the key has been initialized on other devices, be sure to use the [Import key] function, otherwise the data cannot be synced to the cloud, so be sure to use the same key on all devices",
   "crossKeepLazyLoad": "Cross-page multi-selection needs to select [Keep Loaded Content] in the more menu",
   "keepLazyLoad": "Keep loaded content",
   "localSnapshot": "Local snapshot",
@@ -30,7 +31,7 @@
   "key": "Key",
   "genKey": "Generate key",
   "dataRepoKeyTip1": "The data repo is used to encrypt and save data snapshots. Snapshots can be created and rolled back in the data history",
-  "dataRepoKeyTip2": "After the key is initialized on the main device, other devices need to import the key. If the device keys are inconsistent, data snapshots cannot be synced to the cloud, so be sure to use the same key on all devices",
+  "dataRepoKeyTip2": "After the key is initialized, other devices need to import the key. If the device keys don't match, you won't be able to sync data in the cloud, so be sure to use the same key on all devices",
   "dataRepoKey": "Data repo key",
   "plsChoose": "Please choose first",
   "clearMessage": "Read",
@@ -909,7 +910,7 @@
     "134": "In order to prevent the newly restored data from being overwritten by synchronization, the data synchronization function has been automatically suspended",
     "135": "Please make sure that all devices have been updated to the latest version, and then trigger synchronization after randomly changing a document on the main device, and finally trigger synchronization on other devices",
     "136": "Initializing data repository key...",
-    "137": "Failed to initialize data repository key",
+    "137": "Failed to initialize data repository key: %s",
     "138": "Data repository key is set",
     "139": "Data snapshot is being generated, [%s] data files have been processed, [%s] remaining...",
     "140": "Failed to create data snapshot: %s",
@@ -928,6 +929,7 @@
     "153": "Downloaded files %d, chunks %d, received bytes %s",
     "154": "The cloud can only support backup up to 12 snapshots",
     "155": "Cloud sync directory has been reset to [main]",
-    "156": "Access authentication failed, please refresh the page"
+    "156": "Access authentication failed, please refresh the page",
+    "157": "The key is not recognized, please confirm that the copied key string is correct"
   }
 }

@@ -218,7 +218,7 @@ export const about = {
         const importKeyElement = about.element.querySelector("#importKey");
         importKeyElement.addEventListener("click", () => {
             const passwordDialog = new Dialog({
-                title: window.siyuan.languages.key,
+                title: "🔑 " + window.siyuan.languages.key,
                 content: `<div class="b3-dialog__content">
     <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}"></textarea>
 </div>
@@ -244,7 +244,7 @@ export const about = {
             });
         });
         about.element.querySelector("#initKey").addEventListener("click", () => {
-            confirmDialog(window.siyuan.languages.genKey, "TODO", () => {
+            confirmDialog("🔑 " + window.siyuan.languages.genKey, window.siyuan.languages.initRepoKeyTip, () => {
                 fetchPost("/api/repo/initRepoKey", {}, (response) => {
                     window.siyuan.config.repo.key = response.data.key;
                     importKeyElement.parentElement.classList.add("fn__none");

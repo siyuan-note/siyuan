@@ -120,6 +120,9 @@ export class Dock {
                 } else {
                     this.layout.element.style.height = "0px";
                 }
+                if (document.querySelector("body").classList.contains("body--win32")) {
+                    document.getElementById("drag").classList.remove("fn__hidden");
+                }
                 this.resizeElement.classList.add("fn__none");
             }
         } else {
@@ -233,6 +236,10 @@ export class Dock {
                 this.layout.element.style.width = this.getMaxSize() + "px";
             } else {
                 this.layout.element.style.height = this.getMaxSize() + "px";
+            }
+            if ((type === "graph" || type === "globalGraph") &&
+                document.querySelector("body").classList.contains("body--win32") && this.layout.element.querySelector(".fullscreen")) {
+                document.getElementById("drag").classList.add("fn__hidden");
             }
             this.resizeElement.classList.remove("fn__none");
         }

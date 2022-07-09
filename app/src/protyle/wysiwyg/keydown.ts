@@ -285,18 +285,19 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectElements.length > 0) {
                 event.stopPropagation();
                 event.preventDefault();
-            }
-            const start = getSelectionOffset(nodeElement, editorElement, range).start;
-            if (start !== 0) {
-                const editElement = getContenteditableElement(nodeElement);
-                const firstIndex = editElement.textContent.indexOf("\n");
-                if (firstIndex === -1 || start < firstIndex || start === editElement.textContent.replace("\n", " ").indexOf("\n")) {
-                    setFirstNodeRange(editElement, range);
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                } else {
-                    return;
+            } else {
+                const start = getSelectionOffset(nodeElement, editorElement, range).start;
+                if (start !== 0) {
+                    const editElement = getContenteditableElement(nodeElement);
+                    const firstIndex = editElement.textContent.indexOf("\n");
+                    if (firstIndex === -1 || start < firstIndex || start === editElement.textContent.replace("\n", " ").indexOf("\n")) {
+                        setFirstNodeRange(editElement, range);
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
+                    } else {
+                        return;
+                    }
                 }
             }
             range.collapse(true);
@@ -332,17 +333,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectElements.length > 0) {
                 event.stopPropagation();
                 event.preventDefault();
-            }
-            const editElement = getContenteditableElement(nodeElement);
-            const end = getSelectionOffset(nodeElement, editorElement, range).end;
-            if (end < editElement.textContent.length) {
-                if (end > editElement.textContent.lastIndexOf("\n")) {
-                    setLastNodeRange(editElement, range, false);
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                } else {
-                    return;
+            } else {
+                const editElement = getContenteditableElement(nodeElement);
+                const end = getSelectionOffset(nodeElement, editorElement, range).end;
+                if (end < editElement.textContent.length) {
+                    if (end > editElement.textContent.lastIndexOf("\n")) {
+                        setLastNodeRange(editElement, range, false);
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
+                    } else {
+                        return;
+                    }
                 }
             }
             range.collapse(false);
@@ -985,6 +987,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                     item.classList.remove("protyle-wysiwyg--select");
                 });
+                range.collapse(false);
                 nodeElement.classList.add("protyle-wysiwyg--select");
                 countBlockWord([nodeElement.getAttribute("data-node-id")]);
             }

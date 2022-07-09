@@ -93,6 +93,11 @@ func getDocInfo(c *gin.Context) {
 
 	id := arg["id"].(string)
 	info := model.GetDocInfo(id)
+	if nil == info {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
+		return
+	}
 	ret.Data = info
 }
 
@@ -266,7 +271,7 @@ func getBlockInfo(c *gin.Context) {
 		return
 	}
 	if nil == block {
-		ret.Code = 1
+		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
 		return
 	}

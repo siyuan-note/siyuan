@@ -208,7 +208,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!isCtrl(event) && event.key !== "Backspace" && event.key !== "Escape" && event.key !== "Delete" && !event.shiftKey && !event.altKey &&
             !matchHotKey(window.siyuan.config.keymap.editor.list.indent.custom, event) &&
             !matchHotKey(window.siyuan.config.keymap.editor.list.outdent.custom, event) &&
-            !matchHotKey(window.siyuan.config.keymap.editor.general.newContentFile.custom, event)) {
+            !matchHotKey(window.siyuan.config.keymap.editor.general.newContentFile.custom, event) &&
+            event.key !== "Enter") {
             hideElements(["select"], protyle);
         }
 

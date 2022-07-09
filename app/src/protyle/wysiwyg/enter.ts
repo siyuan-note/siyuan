@@ -1,5 +1,5 @@
 import {genEmptyElement, insertEmptyBlock} from "../../block/util";
-import {getSelectionOffset, focusByWbr} from "../util/selection";
+import {getSelectionOffset, focusByWbr, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement,
     getTopEmptyElement,
@@ -185,7 +185,14 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
 };
 
 export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
-    if (isNotEditBlock(blockElement)) {
+    const disableElement = isNotEditBlock(blockElement)
+    if ((!disableElement || blockElement.classList.contains("hr")) && blockElement.classList.contains("protyle-wysiwyg--select")) {
+        setLastNodeRange(getContenteditableElement(blockElement), range, false);
+        range.collapse(false);
+        blockElement.classList.remove("protyle-wysiwyg--select");
+        return;
+    }
+    if (disableElement) {
         if (blockElement.classList.contains("render-node")) {
             protyle.toolbar.showRender(protyle, blockElement);
         } else if (blockElement.classList.contains("hr")) {

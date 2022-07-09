@@ -17,6 +17,7 @@
 package util
 
 import (
+	"os"
 	"reflect"
 	"runtime"
 	"sync"
@@ -73,4 +74,17 @@ func GetDeviceID() string {
 		return machineID
 	}
 	return gulu.Rand.String(12)
+}
+
+func SetNetworkProxy(proxyURL string) {
+	if err := os.Setenv("HTTPS_PROXY", proxyURL); nil != err {
+		logger.Errorf("set env [HTTPS_PROXY] failed: %s", err)
+	}
+	if err := os.Setenv("HTTP_PROXY", proxyURL); nil != err {
+		logger.Errorf("set env [HTTP_PROXY] failed: %s", err)
+	}
+
+	if "" != proxyURL {
+		logger.Infof("use network proxy [%s]", proxyURL)
+	}
 }

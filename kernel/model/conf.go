@@ -304,6 +304,8 @@ func InitConf() {
 			Environment: util.Mode,
 		})
 	}
+
+	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
 }
 
 var langs = map[string]map[int]string{}

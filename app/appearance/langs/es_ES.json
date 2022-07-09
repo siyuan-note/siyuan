@@ -1,4 +1,5 @@
 {
+  "initRepoKeyTip": "Si la clave se ha inicializado en otros dispositivos, asegúrese de usar la función [Importar la clave], de lo contrario, los datos no se pueden sincronizar con la nube, así que asegúrese de usar la misma clave en todos los dispositivos",
   "crossKeepLazyLoad": "La selección múltiple entre páginas debe seleccionar [Mantener contenido cargado] en el menú más",
   "keepLazyLoad": "Mantener el contenido cargado",
   "localSnapshot": "Instantánea local",
@@ -30,7 +31,7 @@
   "key": "Clave",
   "genKey": "Generación de la clave",
   "dataRepoKeyTip1": "El repositorio de datos se utiliza para cifrar y guardar instantáneas de datos. Las instantáneas pueden crearse y revertirse en el historial de datos",
-  "dataRepoKeyTip2": "Una vez inicializada la clave en el dispositivo principal, los demás dispositivos deben importarla. Si las claves de los dispositivos son incoherentes, las instantáneas de datos no se pueden sincronizar con la nube, así que asegúrate de utilizar la misma clave en todos los dispositivos",
+  "dataRepoKeyTip2": "Después de inicializar la clave, otros dispositivos deben importar la clave. Si las claves del dispositivo no coinciden, no podrá sincronizar datos en la nube, así que asegúrese de usar la misma clave en todos los dispositivos",
   "dataRepoKey": "Clave del repositorio de datos",
   "plsChoose": "Por favor, elija primero",
   "clearMessage": "Leer",
@@ -909,7 +910,7 @@
     "134": "Para evitar que los datos recién restaurados sean sobrescritos por la sincronización, se ha suspendido automáticamente la función de sincronización de datos",
     "135": "Por favor, asegúrese de que todos los dispositivos han sido actualizados a la última versión y, a continuación, active la sincronización después de cambiar aleatoriamente un documento en el dispositivo principal y, finalmente, active la sincronización en otros dispositivos",
     "136": "Inicializando la clave del repositorio de datos...",
-    "137": "Fallo en la inicialización de la clave del repositorio de datos",
+    "137": "Fallo en la inicialización de la clave del repositorio de datos: %s",
     "138": "La clave del repositorio de datos está configurada",
     "139": "Se está generando la instantánea de datos, se han procesado [%s] archivos de datos, quedan [%s]...",
     "140": "Fallo en la creación de la instantánea de datos: %s",
@@ -928,6 +929,7 @@
     "153": "Archivos descargados %d, fragmentos %d, bytes recibidos %s",
     "154": "La nube solo admite copias de seguridad de hasta 12 instantáneas",
     "155": "El directorio de sincronización de la nube se ha restablecido a [main]",
-    "156": "Error en la autenticación de acceso, actualice la página"
+    "156": "Error en la autenticación de acceso, actualice la página",
+    "157": "No se reconoce la clave, confirme que la cadena de clave copiada es correcta"
   }
 }

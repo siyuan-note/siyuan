@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -65,11 +66,19 @@ func GetRepoSnapshots(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 }
 
 func ImportRepoKey(base64Key string) (err error) {
-	msgId := util.PushMsg(Conf.Language(136), 1000*7)
+	util.PushMsg(Conf.Language(136), 3000)
+
+	base64Key = strings.TrimSpace(base64Key)
+	base64Key = gulu.Str.RemoveInvisible(base64Key)
+	if 1 > len(base64Key) {
+		err = errors.New(Conf.Language(142))
+		return
+	}
 
 	key, err := base64.StdEncoding.DecodeString(base64Key)
 	if nil != err {
-		return
+		util.LogErrorf("import data repo key failed: %s", err)
+		return errors.New(Conf.Language(157))
 	}
 	Conf.Repo.Key = key
 	Conf.Save()
@@ -82,10 +91,10 @@ func ImportRepoKey(base64Key string) (err error) {
 	}
 
 	time.Sleep(1 * time.Second)
-	util.PushUpdateMsg(msgId, Conf.Language(138), 3000)
+	util.PushMsg(Conf.Language(138), 3000)
 	time.Sleep(1 * time.Second)
 	if initErr := IndexRepo("[Init] Init data repo"); nil != initErr {
-		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(140), initErr), 7000)
+		util.PushErrMsg(fmt.Sprintf(Conf.Language(140), initErr), 0)
 	}
 	return
 }
@@ -108,7 +117,7 @@ func ResetRepo() (err error) {
 }
 
 func InitRepoKey() (err error) {
-	msgId := util.PushMsg(Conf.Language(136), 1000*7)
+	util.PushMsg(Conf.Language(136), 3000)
 
 	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); nil != err {
 		return
@@ -127,7 +136,6 @@ func InitRepoKey() (err error) {
 	_, err = rand.Read(randomBytes)
 	if nil != err {
 		util.LogErrorf("init data repo key failed: %s", err)
-		util.PushUpdateMsg(msgId, Conf.Language(137), 5000)
 		return
 	}
 	salt := string(randomBytes)
@@ -135,17 +143,16 @@ func InitRepoKey() (err error) {
 	key, err := encryption.KDF(password, salt)
 	if nil != err {
 		util.LogErrorf("init data repo key failed: %s", err)
-		util.PushUpdateMsg(msgId, Conf.Language(137), 5000)
 		return
 	}
 	Conf.Repo.Key = key
 	Conf.Save()
 
 	time.Sleep(1 * time.Second)
-	util.PushUpdateMsg(msgId, Conf.Language(138), 3000)
+	util.PushMsg(Conf.Language(138), 3000)
 	time.Sleep(1 * time.Second)
 	if initErr := IndexRepo("[Init] Init data repo"); nil != initErr {
-		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(140), initErr), 7000)
+		util.PushErrMsg(fmt.Sprintf(Conf.Language(140), initErr), 0)
 	}
 	return
 }

@@ -1,4 +1,5 @@
 {
+  "initRepoKeyTip": "If the key has been initialized on other devices, be sure to use the [Importer la clé] function, otherwise the data cannot be synced to the cloud, so be sure to use the same key on all devices",
   "crossKeepLazyLoad": "La multi-sélection sur plusieurs pages doit sélectionner [Conserver le contenu chargé] dans le menu plus",
   "keepLazyLoad": "Conserver le contenu chargé",
   "localSnapshot": "Instantané local",
@@ -30,7 +31,7 @@
   "clé": "Clé",
   "genKey": "Générer la clé",
   "dataRepoKeyTip1": "Le référentiel de données est utilisé pour chiffrer et enregistrer des instantanés de données. Des instantanés peuvent être créés et restaurés dans l'historique des données",
-  "dataRepoKeyTip2": "Une fois la clé initialisée sur l'appareil principal, d'autres appareils doivent importer la clé. Si les clés de l'appareil sont incohérentes, les instantanés de données ne peuvent pas être synchronisés avec le cloud, alors assurez-vous d'utiliser la même clé sur tous les appareils",
+  "dataRepoKeyTip2": "Une fois la clé initialisée, d'autres appareils doivent importer la clé. Si les clés de l'appareil ne correspondent pas, vous ne pourrez pas synchroniser les données dans le cloud, alors assurez-vous d'utiliser la même clé sur tous les appareils",
   "dataRepoKey": "Clé de référentiel de données",
   "plsChoose": "Veuillez d'abord choisir",
   "clearMessage": "Lire",
@@ -909,7 +910,7 @@
     "134": "Afin d'éviter que les données nouvellement restaurées ne soient écrasées par la synchronisation, la fonction de synchronisation des données a été automatiquement suspendue",
     "135": "Assurez-vous que tous les appareils ont été mis à jour vers la dernière version, puis déclenchez la synchronisation après avoir modifié de manière aléatoire un document sur l'appareil principal, et enfin déclenchez la synchronisation sur d'autres appareils.",
     "136": "Initialisation de la clé du référentiel de données...",
-    "137": "Échec de l'initialisation de la clé du référentiel de données",
+    "137": "Échec de l'initialisation de la clé du référentiel de données: %s",
     "138": "La clé du référentiel de données est définie",
     "139": "L'instantané des données est en cours de génération, [%s] fichiers de données ont été traités, [%s] restants...",
     "140": "Échec de la création de l'instantané des données: %s",
@@ -928,6 +929,7 @@
     "153": "Fichiers chargés %d, morceaux %d, octets reçus %s",
     "154": "Le cloud ne peut prendre en charge que la sauvegarde jusqu'à 12 instantanés",
     "155": "Le répertoire de synchronisation du cloud a été réinitialisé sur [main]",
-    "156": "Échec de l'authentification d'accès, veuillez actualiser la page"
+    "156": "Échec de l'authentification d'accès, veuillez actualiser la page",
+    "157": "La clé n'est pas reconnue, veuillez confirmer que la chaîne de clé copiée est correcte"
   }
 }

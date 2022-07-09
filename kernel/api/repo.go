@@ -219,7 +219,7 @@ func importRepoKey(c *gin.Context) {
 	base64Key := arg["key"].(string)
 	if err := model.ImportRepoKey(base64Key); nil != err {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(137)
+		ret.Msg = fmt.Sprintf(model.Conf.Language(137), err)
 		return
 	}
 }
@@ -230,7 +230,7 @@ func initRepoKey(c *gin.Context) {
 
 	if err := model.InitRepoKey(); nil != err {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(137)
+		ret.Msg = fmt.Sprintf(model.Conf.Language(137), err)
 		return
 	}
 

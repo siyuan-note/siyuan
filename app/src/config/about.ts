@@ -244,10 +244,12 @@ export const about = {
             });
         });
         about.element.querySelector("#initKey").addEventListener("click", () => {
-            fetchPost("/api/repo/initRepoKey", {}, (response) => {
-                window.siyuan.config.repo.key = response.data.key;
-                importKeyElement.parentElement.classList.add("fn__none");
-                importKeyElement.parentElement.nextElementSibling.classList.remove("fn__none");
+            confirmDialog(window.siyuan.languages.genKey, "TODO", () => {
+                fetchPost("/api/repo/initRepoKey", {}, (response) => {
+                    window.siyuan.config.repo.key = response.data.key;
+                    importKeyElement.parentElement.classList.add("fn__none");
+                    importKeyElement.parentElement.nextElementSibling.classList.remove("fn__none");
+                });
             });
         });
         about.element.querySelector("#copyKey").addEventListener("click", () => {

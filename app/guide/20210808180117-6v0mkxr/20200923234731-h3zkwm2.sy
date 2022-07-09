@@ -6,7 +6,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20220708111614"
+		"updated": "20220709130711"
 	},
 	"Children": [
 		{
@@ -1431,6 +1431,85 @@
 				{
 					"Type": "NodeText",
 					"Data": " after selecting the keyword in the editor."
+				}
+			]
+		},
+		{
+			"ID": "20220709125521-z3airid",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220709125521-z3airid",
+				"updated": "20220709130711"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to insert the same inline element to the left of an existing inline element?"
+				}
+			]
+		},
+		{
+			"ID": "20220709125521-toztfnl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220709125521-toztfnl",
+				"updated": "20220709130704"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ambiguity may occur when using Markdown markers to insert, please refer to "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "here"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/issues/5372"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for details. Please use "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or the corresponding shortcut key for inline elements to insert."
 				}
 			]
 		},

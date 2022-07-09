@@ -1289,10 +1289,7 @@ export class WYSIWYG {
                 // 不可编辑的块处理
                 const nodeElement = hasClosestBlock(range.startContainer);
                 if (nodeElement) {
-                    if (isNotEditBlock(nodeElement) && !this.element.querySelector(".protyle-wysiwyg--select")) {
-                        nodeElement.classList.add("protyle-wysiwyg--select");
-                        countBlockWord([nodeElement.getAttribute("data-node-id")]);
-                    } else if (!nodeElement.classList.contains("protyle-wysiwyg--select")) {
+                    if (!nodeElement.classList.contains("protyle-wysiwyg--select")) {
                         countSelectWord(range);
                     }
                     this.setEmptyOutline(protyle, nodeElement);

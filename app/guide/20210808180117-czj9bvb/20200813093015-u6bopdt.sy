@@ -6,7 +6,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20220708111119"
+		"updated": "20220709130624"
 	},
 	"Children": [
 		{
@@ -1508,7 +1508,11 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "编辑器中选择关键字后按下 "
+					"Data": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "中选择关键字后按下 "
 				},
 				{
 					"Type": "NodeKbd",
@@ -1529,6 +1533,85 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20220709125134-u32yjjv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220709125134-u32yjjv",
+				"updated": "20220709125156"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如何在已有的行级元素左侧插入相同的行级元素？"
+				}
+			]
+		},
+		{
+			"ID": "20220709125157-h0trtiq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220709125157-h0trtiq",
+				"updated": "20220709130624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 Markdown 标记符插入的话可能会出现二义性问题，具体讨论细节请参考"
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "这里"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/issues/5372"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。请使用 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或者行级元素对应快捷键插入。"
 				}
 			]
 		},

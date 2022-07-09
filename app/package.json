@@ -4,7 +4,7 @@
   "description": "A local-first personal knowledge management system, supports fine-grained block-level reference, and Markdown WYSIWYG.",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
-  "packageManager": "pnpm@7.2.1",
+  "packageManager": "pnpm@7.5.0",
   "scripts": {
     "lint": "eslint . --fix --ext .ts",
     "dev": "webpack --mode development",
@@ -60,7 +60,7 @@
     "css-loader": "^6.3.0",
     "dayjs": "^1.10.7",
     "electron": "14.2.5",
-    "electron-builder": "^23.0.9",
+    "electron-builder": "^23.3.1",
     "encoding": "^0.1.13",
     "eslint": "^8.16.0",
     "file-loader": "^6.2.0",
@@ -69,9 +69,9 @@
     "iconv-lite": "^0.6.3",
     "ifdef-loader": "^2.3.0",
     "mini-css-extract-plugin": "2.3.0",
-    "sass": "^1.52.1",
     "path-browserify": "^1.0.1",
     "safer-buffer": "^2.1.2",
+    "sass": "^1.52.1",
     "sass-loader": "^12.1.0",
     "terser-webpack-plugin": "^5.2.4",
     "ts-loader": "^9.2.6",
@@ -82,6 +82,7 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",
-    "electron-fetch": "^1.7.4"
+    "electron-fetch": "^1.7.4",
+    "pnpm": "^7.5.0"
   }
 }

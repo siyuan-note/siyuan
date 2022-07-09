@@ -352,8 +352,9 @@ export const globalShortcut = () => {
             });
             return;
         }
-
-        if (event.key === window.siyuan.config.keymap.general.syncNow.custom) {
+        if (matchHotKey(window.siyuan.config.keymap.general.syncNow.custom, event)) {
+            event.preventDefault();
+            event.stopPropagation();
             if (needSubscribe() || document.querySelector("#barSync svg").classList.contains("fn__rotate")) {
                 return;
             }
@@ -362,7 +363,6 @@ export const globalShortcut = () => {
                 return;
             }
             fetchPost("/api/sync/performSync", {});
-            event.preventDefault();
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {
@@ -372,23 +372,20 @@ export const globalShortcut = () => {
                 });
             });
             event.preventDefault();
+            event.stopPropagation();
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.history.custom, event)) {
             openHistory();
             event.preventDefault();
+            event.stopPropagation();
             return;
         }
         if (!window.siyuan.config.readonly && matchHotKey(window.siyuan.config.keymap.general.config.custom, event)) {
             openSetting();
             event.preventDefault();
-            return;
-        }
-        // https://github.com/siyuan-note/insider/issues/445
-        if (matchHotKey("⌘S", event)) {
-            event.preventDefault();
             event.stopPropagation();
-            return true;
+            return;
         }
         const target = event.target as HTMLElement;
         if (matchHotKey("⌘A", event) && target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
@@ -404,6 +401,7 @@ export const globalShortcut = () => {
                     target.blur();
                 }
                 event.preventDefault();
+                event.stopPropagation();
                 return true;
             }
         });
@@ -418,11 +416,13 @@ export const globalShortcut = () => {
                 target.blur();
             }
             event.preventDefault();
+            event.stopPropagation();
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
             newFile(undefined, undefined, true);
             event.preventDefault();
+            event.stopPropagation();
             return;
         }
 
@@ -587,6 +587,7 @@ export const globalShortcut = () => {
                 openGlobalSearch("", false);
             }
             event.preventDefault();
+            event.stopPropagation();
             return;
         }
 
@@ -615,7 +616,15 @@ export const globalShortcut = () => {
                 openSearch(searchKey);
             }
             event.preventDefault();
+            event.stopPropagation();
             return;
+        }
+
+        // https://github.com/siyuan-note/insider/issues/445
+        if (matchHotKey("⌘S", event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         }
     });
 
@@ -717,6 +726,7 @@ const editKeydown = (event: KeyboardEvent) => {
             openSearch(searchKey);
         }
         event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
@@ -732,6 +742,7 @@ const editKeydown = (event: KeyboardEvent) => {
             movePathTo(protyle.notebookId, protyle.path);
         }
         event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     const target = event.target as HTMLElement;
@@ -741,6 +752,7 @@ const editKeydown = (event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.preview.custom, event)) {
         setEditMode(protyle, "preview");
         event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.wysiwyg.custom, event)) {
@@ -753,17 +765,20 @@ const editKeydown = (event: KeyboardEvent) => {
             onGet(getResponse, protyle);
         });
         event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     // 没有光标时，无法撤销 https://ld246.com/article/1624021111567
     if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {
         protyle.undo.undo(protyle);
         event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.redo.custom, event)) {
         protyle.undo.redo(protyle);
         event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     return false;
@@ -777,6 +792,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     const files = dockFile.data.file as Files;
     if (matchHotKey(window.siyuan.config.keymap.general.selectOpen1.custom, event)) {
         event.preventDefault();
+        event.stopPropagation();
         const element = document.querySelector(".layout__wnd--active > .layout-tab-bar > .item--focus") ||
             document.querySelector(".layout-tab-bar > .item--focus");
         if (element) {
@@ -815,6 +831,8 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             name: isFile ? getDisplayName(liElement.getAttribute("data-name"), false, true) : getNotebookName(notebookId),
             type: isFile ? "file" : "notebook",
         });
+        event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     if (matchHotKey("⌘/", event)) {
@@ -832,6 +850,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     if (isFile && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
         movePathTo(notebookId, pathString, false);
         event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     let searchKey = "";
@@ -847,6 +866,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             openSearch(searchKey, undefined, notebookId);
         }
         event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     const target = event.target as HTMLElement;

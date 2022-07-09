@@ -44,9 +44,6 @@ export const openFileById = (options: {
             lockFile(data.data);
             return;
         }
-        if (data.code === 1) {
-            showMessage(data.msg);
-        }
         openFile({
             fileName: data.data.rootTitle,
             rootIcon: data.data.rootIcon,

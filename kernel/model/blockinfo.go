@@ -48,7 +48,7 @@ func GetDocInfo(rootID string) (ret *BlockInfo) {
 
 	tree, err := loadTreeByBlockID(rootID)
 	if nil != err {
-		util.LogErrorf("load tree by block id failed: %s", err)
+		util.LogErrorf("load tree by root id [%s] failed: %s", rootID, err)
 		return
 	}
 

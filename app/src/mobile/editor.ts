@@ -49,10 +49,6 @@ export const openMobileFileById = (id: string, hasContext?: boolean, action = [C
             lockFile(data.data);
             return;
         }
-        if (data.code === 1) {
-            showMessage(data.msg);
-            return;
-        }
         if (window.siyuan.mobileEditor) {
             addLoading(window.siyuan.mobileEditor.protyle);
             fetchPost("/api/filetree/getDoc", {

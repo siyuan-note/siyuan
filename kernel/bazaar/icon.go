@@ -54,17 +54,17 @@ type Icon struct {
 	Downloads  int    `json:"downloads"`
 }
 
-func Icons(proxyURL string) (icons []*Icon) {
+func Icons() (icons []*Icon) {
 	icons = []*Icon{}
-	result, err := util.GetRhyResult(false, proxyURL)
+	result, err := util.GetRhyResult(false)
 	if nil != err {
 		return
 	}
 
-	bazaarIndex := getBazaarIndex(proxyURL)
+	bazaarIndex := getBazaarIndex()
 	bazaarHash := result["bazaar"].(string)
 	result = map[string]interface{}{}
-	request := httpclient.NewBrowserRequest(proxyURL)
+	request := httpclient.NewBrowserRequest()
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/icons.json"
 	resp, err := request.SetResult(&result).Get(u)
 	if nil != err {
@@ -86,7 +86,7 @@ func Icons(proxyURL string) (icons []*Icon) {
 
 		icon := &Icon{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/icon.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest(proxyURL).SetResult(icon).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(icon).Get(innerU)
 		if nil != innerErr {
 			util.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
 			return
@@ -126,9 +126,9 @@ func Icons(proxyURL string) (icons []*Icon) {
 	return
 }
 
-func InstallIcon(repoURL, repoHash, installPath, proxyURL string, chinaCDN bool, systemID string) error {
+func InstallIcon(repoURL, repoHash, installPath string, chinaCDN bool, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, proxyURL, chinaCDN, true, systemID)
+	data, err := downloadPackage(repoURLHash, chinaCDN, true, systemID)
 	if nil != err {
 		return err
 	}

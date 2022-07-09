@@ -667,7 +667,6 @@ func buildCloudInfo() (ret *dejavu.CloudInfo, err error) {
 		UserID:    Conf.User.UserId,
 		Token:     Conf.User.UserToken,
 		LimitSize: int64(Conf.User.UserSiYuanRepoSize - Conf.User.UserSiYuanAssetSize),
-		ProxyURL:  Conf.System.NetworkProxy.String(),
 		Server:    util.AliyunServer,
 	}
 	return

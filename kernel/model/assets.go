@@ -92,7 +92,7 @@ func NetImg2LocalAssets(rootID string) (err error) {
 					}
 				}
 				util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(119), u), 15000)
-				request := httpclient.NewBrowserRequest(Conf.System.NetworkProxy.String())
+				request := httpclient.NewBrowserRequest()
 				resp, reqErr := request.Get(u)
 				if nil != reqErr {
 					util.LogErrorf("download net img [%s] failed: %s", u, reqErr)
@@ -286,7 +286,7 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 		}
 
 		requestResult := gulu.Ret.NewResult()
-		request := httpclient.NewCloudFileRequest2m(Conf.System.NetworkProxy.String())
+		request := httpclient.NewCloudFileRequest2m()
 		resp, reqErr := request.
 			SetResult(requestResult).
 			SetFile("file[]", absAsset).

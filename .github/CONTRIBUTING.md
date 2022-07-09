@@ -13,7 +13,7 @@ Install pnpm: `npm install -g pnpm`
 <summary>For China mainland</summary>
 Set the Electron mirror environment variable:
 
-* macOS/Linux: ELECTRON_MIRROR="https://cnpmjs.org/mirrors/electron/" pnpm install electron@14.2.5 -D
+* macOS/Linux: ELECTRON_MIRROR="https://cnpmjs.org/mirrors/electron/" pnpm install electron@19.0.8 -D
 * Windows: `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
 
 NPM mirror:

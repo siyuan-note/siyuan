@@ -54,17 +54,17 @@ type Widget struct {
 	Downloads  int    `json:"downloads"`
 }
 
-func Widgets(proxyURL string) (widgets []*Widget) {
+func Widgets() (widgets []*Widget) {
 	widgets = []*Widget{}
-	result, err := util.GetRhyResult(false, proxyURL)
+	result, err := util.GetRhyResult(false)
 	if nil != err {
 		return
 	}
 
-	bazaarIndex := getBazaarIndex(proxyURL)
+	bazaarIndex := getBazaarIndex()
 	bazaarHash := result["bazaar"].(string)
 	result = map[string]interface{}{}
-	request := httpclient.NewBrowserRequest(proxyURL)
+	request := httpclient.NewBrowserRequest()
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/widgets.json"
 	resp, err := request.SetResult(&result).Get(u)
 	if nil != err {
@@ -87,7 +87,7 @@ func Widgets(proxyURL string) (widgets []*Widget) {
 
 		widget := &Widget{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/widget.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest(proxyURL).SetResult(widget).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(widget).Get(innerU)
 		if nil != innerErr {
 			util.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
 			return
@@ -127,9 +127,9 @@ func Widgets(proxyURL string) (widgets []*Widget) {
 	return
 }
 
-func InstallWidget(repoURL, repoHash, installPath, proxyURL string, chinaCDN bool, systemID string) error {
+func InstallWidget(repoURL, repoHash, installPath string, chinaCDN bool, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, proxyURL, chinaCDN, true, systemID)
+	data, err := downloadPackage(repoURLHash, chinaCDN, true, systemID)
 	if nil != err {
 		return err
 	}

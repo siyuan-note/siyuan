@@ -54,17 +54,17 @@ type Template struct {
 	Downloads  int    `json:"downloads"`
 }
 
-func Templates(proxyURL string) (templates []*Template) {
+func Templates() (templates []*Template) {
 	templates = []*Template{}
-	result, err := util.GetRhyResult(false, proxyURL)
+	result, err := util.GetRhyResult(false)
 	if nil != err {
 		return
 	}
 
-	bazaarIndex := getBazaarIndex(proxyURL)
+	bazaarIndex := getBazaarIndex()
 	bazaarHash := result["bazaar"].(string)
 	result = map[string]interface{}{}
-	request := httpclient.NewBrowserRequest(proxyURL)
+	request := httpclient.NewBrowserRequest()
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/templates.json"
 	resp, reqErr := request.SetResult(&result).Get(u)
 	if nil != reqErr {
@@ -87,7 +87,7 @@ func Templates(proxyURL string) (templates []*Template) {
 
 		template := &Template{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/template.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest(proxyURL).SetResult(template).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(template).Get(innerU)
 		if nil != innerErr {
 			util.LogErrorf("get community template [%s] failed: %s", repoURL, innerErr)
 			return
@@ -129,9 +129,9 @@ func Templates(proxyURL string) (templates []*Template) {
 	return
 }
 
-func InstallTemplate(repoURL, repoHash, installPath, proxyURL string, chinaCDN bool, systemID string) error {
+func InstallTemplate(repoURL, repoHash, installPath string, chinaCDN bool, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, proxyURL, chinaCDN, true, systemID)
+	data, err := downloadPackage(repoURLHash, chinaCDN, true, systemID)
 	if nil != err {
 		return err
 	}

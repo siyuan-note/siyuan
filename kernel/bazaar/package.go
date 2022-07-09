@@ -36,9 +36,9 @@ import (
 	"golang.org/x/text/transform"
 )
 
-func GetPackageREADME(repoURL, repoHash, proxyURL string, chinaCDN bool, systemID string) (ret string) {
+func GetPackageREADME(repoURL, repoHash string, chinaCDN bool, systemID string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash+"/README.md", proxyURL, chinaCDN, false, systemID)
+	data, err := downloadPackage(repoURLHash+"/README.md", chinaCDN, false, systemID)
 	if nil != err {
 		ret = "Load bazaar package's README.md failed: " + err.Error()
 		return
@@ -74,7 +74,7 @@ func GetPackageREADME(repoURL, repoHash, proxyURL string, chinaCDN bool, systemI
 	return
 }
 
-func downloadPackage(repoURLHash, proxyURL string, chinaCDN, pushProgress bool, systemID string) (data []byte, err error) {
+func downloadPackage(repoURLHash string, chinaCDN, pushProgress bool, systemID string) (data []byte, err error) {
 	// repoURLHash: https://github.com/88250/Comfortably-Numb@6286912c381ef3f83e455d06ba4d369c498238dc
 	pushID := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
 	repoURLHash = strings.TrimPrefix(repoURLHash, "https://github.com/")
@@ -83,14 +83,14 @@ func downloadPackage(repoURLHash, proxyURL string, chinaCDN, pushProgress bool, 
 		u = util.BazaarOSSServer + "/package/" + repoURLHash
 	}
 	buf := &bytes.Buffer{}
-	resp, err := httpclient.NewBrowserDownloadRequest(proxyURL).SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+	resp, err := httpclient.NewBrowserDownloadRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 		if pushProgress {
 			util.PushDownloadProgress(pushID, float32(info.DownloadedSize)/float32(info.Response.ContentLength))
 		}
 	}).Get(u)
 	if nil != err {
 		u = util.BazaarOSSServer + "/package/" + repoURLHash
-		resp, err = httpclient.NewBrowserDownloadRequest(proxyURL).SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+		resp, err = httpclient.NewBrowserDownloadRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 			if pushProgress {
 				util.PushDownloadProgress(pushID, float32(info.DownloadedSize)/float32(info.Response.ContentLength))
 			}
@@ -106,18 +106,18 @@ func downloadPackage(repoURLHash, proxyURL string, chinaCDN, pushProgress bool, 
 	}
 	data = buf.Bytes()
 
-	go incPackageDownloads(repoURLHash, proxyURL, systemID)
+	go incPackageDownloads(repoURLHash, systemID)
 	return
 }
 
-func incPackageDownloads(repoURLHash, proxyURL, systemID string) {
+func incPackageDownloads(repoURLHash, systemID string) {
 	if strings.Contains(repoURLHash, ".md") {
 		return
 	}
 
 	repo := strings.Split(repoURLHash, "@")[0]
 	u := util.AliyunServer + "/apis/siyuan/bazaar/addBazaarPackageDownloadCount"
-	httpclient.NewCloudRequest(proxyURL).SetBody(
+	httpclient.NewCloudRequest().SetBody(
 		map[string]interface{}{
 			"systemID": systemID,
 			"repo":     repo,
@@ -182,7 +182,7 @@ var cachedBazaarIndex = map[string]*bazaarPackage{}
 var bazaarIndexCacheTime int64
 var bazaarIndexLock = sync.Mutex{}
 
-func getBazaarIndex(proxyURL string) map[string]*bazaarPackage {
+func getBazaarIndex() map[string]*bazaarPackage {
 	bazaarIndexLock.Lock()
 	defer bazaarIndexLock.Unlock()
 
@@ -191,7 +191,7 @@ func getBazaarIndex(proxyURL string) map[string]*bazaarPackage {
 		return cachedBazaarIndex
 	}
 
-	request := httpclient.NewBrowserRequest(proxyURL)
+	request := httpclient.NewBrowserRequest()
 	u := util.BazaarStatServer + "/bazaar/index.json"
 	resp, reqErr := request.SetResult(&cachedBazaarIndex).Get(u)
 	if nil != reqErr {

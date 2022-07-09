@@ -43,7 +43,7 @@ export const about = {
         <select id="aboutScheme" class="b3-select">
             <option value="" ${window.siyuan.config.system.networkProxy.scheme === "" ? "selected" : ""}>${window.siyuan.languages.directConnection}</option>
             <option value="socks5" ${window.siyuan.config.system.networkProxy.scheme === "socks5" ? "selected" : ""}>SOCKS5</option>
-            <option value="http" ${window.siyuan.config.system.networkProxy.scheme === "http" ? "selected" : ""}>HTTP</option>
+            <option value="http" ${window.siyuan.config.system.networkProxy.scheme === "https" ? "selected" : ""}>HTTPS</option>
         </select>
         <span class="fn__space"></span>
         <input id="aboutHost" placeholder="Host/IP" class="b3-text-field fn__flex-1 fn__block" value="${window.siyuan.config.system.networkProxy.host}"/>

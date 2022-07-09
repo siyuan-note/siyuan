@@ -210,9 +210,6 @@ func InitConf() {
 	if nil == Conf.System.NetworkProxy {
 		Conf.System.NetworkProxy = &conf.NetworkProxy{}
 	}
-	if "" != Conf.System.NetworkProxy.Scheme {
-		util.LogInfof("using network proxy [%s]", Conf.System.NetworkProxy.String())
-	}
 	if "" == Conf.System.ID {
 		Conf.System.ID = util.GetDeviceID()
 	}
@@ -304,6 +301,8 @@ func InitConf() {
 			Environment: util.Mode,
 		})
 	}
+
+	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
 }
 
 var langs = map[string]map[int]string{}

@@ -55,17 +55,17 @@ type Theme struct {
 	Downloads  int    `json:"downloads"`
 }
 
-func Themes(proxyURL string) (ret []*Theme) {
+func Themes() (ret []*Theme) {
 	ret = []*Theme{}
-	result, err := util.GetRhyResult(false, proxyURL)
+	result, err := util.GetRhyResult(false)
 	if nil != err {
 		return
 	}
 
-	bazaarIndex := getBazaarIndex(proxyURL)
+	bazaarIndex := getBazaarIndex()
 	bazaarHash := result["bazaar"].(string)
 	result = map[string]interface{}{}
-	request := httpclient.NewBrowserRequest(proxyURL)
+	request := httpclient.NewBrowserRequest()
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/themes.json"
 	resp, reqErr := request.SetResult(&result).Get(u)
 	if nil != reqErr {
@@ -88,7 +88,7 @@ func Themes(proxyURL string) (ret []*Theme) {
 
 		theme := &Theme{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/theme.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest(proxyURL).SetResult(theme).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(theme).Get(innerU)
 		if nil != innerErr {
 			util.LogErrorf("get bazaar package [%s] failed: %s", innerU, innerErr)
 			return
@@ -128,9 +128,9 @@ func Themes(proxyURL string) (ret []*Theme) {
 	return
 }
 
-func InstallTheme(repoURL, repoHash, installPath, proxyURL string, chinaCDN bool, systemID string) error {
+func InstallTheme(repoURL, repoHash, installPath string, chinaCDN bool, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, proxyURL, chinaCDN, true, systemID)
+	data, err := downloadPackage(repoURLHash, chinaCDN, true, systemID)
 	if nil != err {
 		return err
 	}

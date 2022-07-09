@@ -28,12 +28,12 @@ import (
 )
 
 func GetPackageREADME(repoURL, repoHash string) (ret string) {
-	ret = bazaar.GetPackageREADME(repoURL, repoHash, Conf.System.NetworkProxy.String(), IsSubscriber(), Conf.System.ID)
+	ret = bazaar.GetPackageREADME(repoURL, repoHash, IsSubscriber(), Conf.System.ID)
 	return
 }
 
 func BazaarWidgets() (widgets []*bazaar.Widget) {
-	widgets = bazaar.Widgets(Conf.System.NetworkProxy.String())
+	widgets = bazaar.Widgets()
 	for _, widget := range widgets {
 		widget.Installed = gulu.File.IsDir(filepath.Join(util.DataDir, "widgets", widget.Name))
 		if widget.Installed {
@@ -54,7 +54,7 @@ func InstallBazaarWidget(repoURL, repoHash, widgetName string) error {
 	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.DataDir, "widgets", widgetName)
-	err := bazaar.InstallWidget(repoURL, repoHash, installPath, Conf.System.NetworkProxy.String(), IsSubscriber(), Conf.System.ID)
+	err := bazaar.InstallWidget(repoURL, repoHash, installPath, IsSubscriber(), Conf.System.ID)
 	if nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(46), widgetName))
 	}
@@ -74,7 +74,7 @@ func UninstallBazaarWidget(widgetName string) error {
 }
 
 func BazaarIcons() (icons []*bazaar.Icon) {
-	icons = bazaar.Icons(Conf.System.NetworkProxy.String())
+	icons = bazaar.Icons()
 	for _, installed := range Conf.Appearance.Icons {
 		for _, icon := range icons {
 			if installed == icon.Name {
@@ -96,7 +96,7 @@ func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
 	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.IconsPath, iconName)
-	err := bazaar.InstallIcon(repoURL, repoHash, installPath, Conf.System.NetworkProxy.String(), IsSubscriber(), Conf.System.ID)
+	err := bazaar.InstallIcon(repoURL, repoHash, installPath, IsSubscriber(), Conf.System.ID)
 	if nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(46), iconName))
 	}
@@ -121,7 +121,7 @@ func UninstallBazaarIcon(iconName string) error {
 }
 
 func BazaarThemes() (ret []*bazaar.Theme) {
-	ret = bazaar.Themes(Conf.System.NetworkProxy.String())
+	ret = bazaar.Themes()
 	installs := Conf.Appearance.DarkThemes
 	installs = append(installs, Conf.Appearance.LightThemes...)
 	for _, installed := range installs {
@@ -145,7 +145,7 @@ func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bo
 	closeThemeWatchers()
 
 	installPath := filepath.Join(util.ThemesPath, themeName)
-	err := bazaar.InstallTheme(repoURL, repoHash, installPath, Conf.System.NetworkProxy.String(), IsSubscriber(), Conf.System.ID)
+	err := bazaar.InstallTheme(repoURL, repoHash, installPath, IsSubscriber(), Conf.System.ID)
 	if nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(46), themeName))
 	}
@@ -183,7 +183,7 @@ func UninstallBazaarTheme(themeName string) error {
 }
 
 func BazaarTemplates() (templates []*bazaar.Template) {
-	templates = bazaar.Templates(Conf.System.NetworkProxy.String())
+	templates = bazaar.Templates()
 	for _, template := range templates {
 		template.Installed = gulu.File.IsExist(filepath.Join(util.DataDir, "templates", template.Name))
 		if template.Installed {
@@ -202,7 +202,7 @@ func InstallBazaarTemplate(repoURL, repoHash, templateName string) error {
 	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.DataDir, "templates", templateName)
-	err := bazaar.InstallTemplate(repoURL, repoHash, installPath, Conf.System.NetworkProxy.String(), IsSubscriber(), Conf.System.ID)
+	err := bazaar.InstallTemplate(repoURL, repoHash, installPath, IsSubscriber(), Conf.System.ID)
 	if nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(46), templateName))
 	}

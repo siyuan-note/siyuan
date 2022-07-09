@@ -327,7 +327,7 @@ func checkPort() {
 
 	LogInfof("port [%s] is opened, try to check version of running kernel", ServerPort)
 	result := NewResult()
-	_, err := httpclient.NewBrowserRequest("").
+	_, err := httpclient.NewBrowserRequest().
 		SetResult(result).
 		SetHeader("User-Agent", UserAgent).
 		Get("http://127.0.0.1:" + ServerPort + "/api/system/version")

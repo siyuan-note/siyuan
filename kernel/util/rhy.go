@@ -27,7 +27,7 @@ var cachedRhyResult = map[string]interface{}{}
 var rhyResultCacheTime int64
 var rhyResultLock = sync.Mutex{}
 
-func GetRhyResult(force bool, proxyURL string) (map[string]interface{}, error) {
+func GetRhyResult(force bool) (map[string]interface{}, error) {
 	rhyResultLock.Lock()
 	defer rhyResultLock.Unlock()
 
@@ -36,7 +36,7 @@ func GetRhyResult(force bool, proxyURL string) (map[string]interface{}, error) {
 		return cachedRhyResult, nil
 	}
 
-	request := httpclient.NewCloudRequest(proxyURL)
+	request := httpclient.NewCloudRequest()
 	_, err := request.SetResult(&cachedRhyResult).Get(AliyunServer + "/apis/siyuan/version?ver=" + Ver)
 	if nil != err {
 		LogErrorf("get version meta info failed: %s", err)

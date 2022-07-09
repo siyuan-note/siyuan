@@ -42,7 +42,7 @@ func CheckUpdate(showMsg bool) {
 	checkUpdateLock.Lock()
 	defer checkUpdateLock.Unlock()
 
-	result, err := util.GetRhyResult(showMsg, Conf.System.NetworkProxy.String())
+	result, err := util.GetRhyResult(showMsg)
 	if nil != err {
 		return
 	}

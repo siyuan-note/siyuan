@@ -801,6 +801,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
                 files.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
             }
         }
+        dockFile.toggleModel("file", true);
         return;
     }
     if (!files.element.previousElementSibling.classList.contains("block__icons--active")) {

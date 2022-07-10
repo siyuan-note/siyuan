@@ -930,6 +930,20 @@
     "154": "Le cloud ne peut prendre en charge que la sauvegarde jusqu'à 12 instantanés",
     "155": "Le répertoire de synchronisation du cloud a été réinitialisé sur [main]",
     "156": "Échec de l'authentification d'accès, veuillez actualiser la page",
-    "157": "La clé n'est pas reconnue, veuillez confirmer que la chaîne de clé copiée est correcte"
+    "157": "La clé n'est pas reconnue, veuillez confirmer que la chaîne de clé copiée est correcte",
+    "158": "Indexation du référentiel de données, données de marche %s",
+    "159": "Indexation du référentiel de données, obtention du dernier fichier %v",
+    "160": "Indexation du référentiel de données, insertion du fichier %v",
+    "161": "Vérification du référentiel de données, données piétonnes %s",
+    "162": "Vérification du référentiel de données, insertion du fichier %s",
+    "163": "Vérification du référentiel de données, suppression du fichier %s",
+    "164": "Téléchargement du l'instantané du référentiel de données %s",
+    "165": "Téléchargement du fichier de référentiel de données %v",
+    "166": "Téléchargement du bloc de dépôt de données %v",
+    "167": "Téléchargement de la référence de référentiel de données %s",
+    "168": "Téléchargement de l'instantané du référentiel de données %s",
+    "169": "Téléchargement du fichier de référentiel de données %v",
+    "170": "Téléchargement du bloc de dépôt de données %v",
+    "171": "Téléchargement de la référence de référentiel de données %s"
   }
 }

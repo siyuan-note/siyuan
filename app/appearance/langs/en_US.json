@@ -930,6 +930,20 @@
     "154": "The cloud can only support backup up to 12 snapshots",
     "155": "Cloud sync directory has been reset to [main]",
     "156": "Access authentication failed, please refresh the page",
-    "157": "The key is not recognized, please confirm that the copied key string is correct"
+    "157": "The key is not recognized, please confirm that the copied key string is correct",
+    "158": "Indexing data repo, walking data %s",
+    "159": "Indexing data repo, getting the latest file %v",
+    "160": "Indexing data repo, inserting file %v",
+    "161": "Checking out of data repo, walking data %s",
+    "162": "Checking out data repo, inserting file %s",
+    "163": "Checking out data repo, deleting file %s",
+    "164": "Downloading data repo snapshot %s",
+    "165": "Downloading data repo file %v",
+    "166": "Downloading data repo chunk %v",
+    "167": "Downloading data repo reference %s",
+    "168": "Uploading data repo snapshot %s",
+    "169": "Uploading data repo file %v",
+    "170": "Uploading data repo chunk %v",
+    "171": "Uploading data repo reference %s"
   }
 }

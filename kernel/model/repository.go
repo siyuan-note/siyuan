@@ -559,115 +559,118 @@ func newRepository() (ret *dejavu.Repo, err error) {
 
 func subscribeEvents() {
 	eventbus.Subscribe(dejavu.EvtIndexBeforeWalkData, func(context map[string]interface{}, path string) {
-		msg := "Indexing data repo [walk data " + path + "]"
+		msg := fmt.Sprintf(Conf.Language(158), path)
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtIndexWalkData, func(context map[string]interface{}, path string) {
-		//msg := "Indexing data repo [walk data " + path + "]"
-		//util.SetBootDetails(msg)
-		//contextPushMsg(context, msg)
+		msg := fmt.Sprintf(Conf.Language(158), path)
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtIndexBeforeGetLatestFiles, func(context map[string]interface{}, files []string) {
-		msg := fmt.Sprintf("Indexing data repo [get latest files %d]", len(files))
+		msg := fmt.Sprintf(Conf.Language(159), len(files))
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
+
 	})
 	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(context map[string]interface{}, path string) {
-		//msg := "Indexing data repo [get latest file " + path + "]"
-		//util.SetBootDetails(msg)
-		//contextPushMsg(context, msg)
-	})
-	eventbus.Subscribe(dejavu.EvtIndexUpsertFiles, func(context map[string]interface{}, files []*entity.File) {
-		msg := fmt.Sprintf("Indexing data repo [upsert files %d]", len(files))
+		msg := fmt.Sprintf(Conf.Language(159), path)
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
+
+	})
+	eventbus.Subscribe(dejavu.EvtIndexUpsertFiles, func(context map[string]interface{}, files []*entity.File) {
+		msg := fmt.Sprintf(Conf.Language(160), len(files))
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+
 	})
 	eventbus.Subscribe(dejavu.EvtIndexUpsertFile, func(context map[string]interface{}, path string) {
-		//msg := "Indexing data repo [upsert file " + path + "]"
-		//util.SetBootDetails(msg)
-		//contextPushMsg(context, msg)
+		msg := fmt.Sprintf(Conf.Language(160), path)
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(dejavu.EvtCheckoutBeforeWalkData, func(context map[string]interface{}, path string) {
-		msg := "Checkout data repo [walk data " + path + "]"
+		msg := fmt.Sprintf(Conf.Language(161), path)
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
-		//msg := "Checkout data repo [walk data " + path + "]"
-		//util.SetBootDetails(msg)
-		//contextPushMsg(context, msg)
+		msg := fmt.Sprintf(Conf.Language(161), path)
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCheckoutUpsertFile, func(context map[string]interface{}, path string) {
-		//msg := "Checkout data repo [upsert file " + path + "]"
-		//util.SetBootDetails(msg)
-		//contextPushMsg(context, msg)
+		msg := fmt.Sprintf(Conf.Language(162), path)
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCheckoutRemoveFile, func(context map[string]interface{}, path string) {
-		msg := "Checkout data repo [remove file " + path + "]"
+		msg := fmt.Sprintf(Conf.Language(163), path)
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadIndex, func(context map[string]interface{}, id string) {
-		msg := "Downloading data repo index [" + id[:7] + "]"
+		msg := fmt.Sprintf(Conf.Language(164), id[:7])
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadFiles, func(context map[string]interface{}, ids []string) {
-		msg := fmt.Sprintf("Downloading data repo files %d", len(ids))
+		msg := fmt.Sprintf(Conf.Language(165), len(ids))
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadFile, func(context map[string]interface{}, id string) {
-		//msg := "Downloading data repo file [" + id[:7] + "]"
-		//util.SetBootDetails(msg)
-		//contextPushMsg(context, msg)
+		msg := fmt.Sprintf(Conf.Language(165), id[:7])
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadChunks, func(context map[string]interface{}, ids []string) {
-		msg := fmt.Sprintf("Downloading data repo chunks %d", len(ids))
+		msg := fmt.Sprintf(Conf.Language(166), len(ids))
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadChunk, func(context map[string]interface{}, id string) {
-		//msg := "Downloading data repo chunk [" + id[:7] + "]"
-		//util.SetBootDetails(msg)
-		//contextPushMsg(context, msg)
+		msg := fmt.Sprintf(Conf.Language(166), id[:7])
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadRef, func(context map[string]interface{}, ref string) {
-		msg := "Downloading data repo ref [" + ref + "]"
+		msg := fmt.Sprintf(Conf.Language(167), ref)
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadIndex, func(context map[string]interface{}, id string) {
-		msg := "Uploading data repo index [" + id[:7] + "]"
+		msg := fmt.Sprintf(Conf.Language(168), id[:7])
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadFiles, func(context map[string]interface{}, files []*entity.File) {
-		msg := fmt.Sprintf("Uploading data repo files %d", len(files))
+		msg := fmt.Sprintf(Conf.Language(169), len(files))
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadFile, func(context map[string]interface{}, id string) {
-		//msg := "Uploading data repo file [" + id[:7] + "]"
-		//util.SetBootDetails(msg)
-		//contextPushMsg(context, msg)
+		msg := fmt.Sprintf(Conf.Language(169), id[:7])
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadChunks, func(context map[string]interface{}, ids []string) {
-		msg := fmt.Sprintf("Uploading data repo chunks %d", len(ids))
+		msg := fmt.Sprintf(Conf.Language(170), len(ids))
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadChunk, func(context map[string]interface{}, id string) {
-		//msg := "Uploading data repo chunk [" + id[:7] + "]"
-		//util.SetBootDetails(msg)
-		//contextPushMsg(context, msg)
+		msg := fmt.Sprintf(Conf.Language(170), id[:7])
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadRef, func(context map[string]interface{}, ref string) {
-		msg := "Uploading data repo ref [" + ref + "]"
+		msg := fmt.Sprintf(Conf.Language(171), ref)
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})

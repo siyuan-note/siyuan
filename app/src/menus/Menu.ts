@@ -35,6 +35,8 @@ export class Menu {
             if (rect.right > window.innerWidth && (rect.left - this.element.clientWidth - rect.width > 0 ||
                 Math.abs(rect.left - this.element.clientWidth - rect.width) < (rect.right - window.innerWidth))) {
                 style = "left:auto;right:100%;";
+            } else if (rect.right > window.innerWidth) {
+                style = `z-index:1;mix-blend-mode: normal;left:${window.innerWidth - rect.width}px;`;
             }
             if (rect.bottom > window.innerHeight) {
                 style += `top: auto;bottom:-5px;max-height:${Math.min(rect.top, window.innerHeight * 0.4)}px`;

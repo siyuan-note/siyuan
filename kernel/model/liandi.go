@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -350,6 +351,8 @@ func getUser(token string) (*conf.User, error) {
 }
 
 func UseActivationcode(code string) (err error) {
+	code = strings.TrimSpace(code)
+	code = gulu.Str.RemoveInvisible(code)
 	requestResult := gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest()
 	_, err = request.
@@ -368,6 +371,8 @@ func UseActivationcode(code string) (err error) {
 }
 
 func CheckActivationcode(code string) (retCode int, msg string) {
+	code = strings.TrimSpace(code)
+	code = gulu.Str.RemoveInvisible(code)
 	retCode = 1
 	requestResult := gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest()

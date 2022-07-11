@@ -6,7 +6,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20220709130624"
+		"updated": "20220711123431"
 	},
 	"Children": [
 		{
@@ -1661,6 +1661,75 @@
 				{
 					"Type": "NodeText",
 					"Data": " 触发它的块标菜单。"
+				}
+			]
+		},
+		{
+			"ID": "20220711122412-g3avmxt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220711122412-g3avmxt",
+				"updated": "20220711122436"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有的网络图片为什么无法查看？"
+				}
+			]
+		},
+		{
+			"ID": "20220711122438-j161jkx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220711122438-j161jkx",
+				"updated": "20220711123431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "为了避免一些潜在的安全问题，思源在发起互联网服务请求时不会绕过目标站点的安全标头校验（比如安全策略标头和防盗链校验）。可以试一下编辑器右上角 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "..."
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中的 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "网络图片转换为本地图片"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 功能将网络图片拉取到本地，这样即使以后目标站点改变安全策略或者不可用本地图片也不受影响。"
 				}
 			]
 		},

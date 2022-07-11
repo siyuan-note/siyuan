@@ -516,11 +516,11 @@ func UnusedAssets() (ret []string) {
 		}
 	}
 
-	// 排除文件注解
+	// 排除文件注解和对应文件
 	var toRemoves []string
 	for asset, _ := range assetsPathMap {
 		if strings.HasSuffix(asset, ".sya") {
-			toRemoves = append(toRemoves, asset)
+			toRemoves = append(toRemoves, asset, strings.TrimSuffix(asset, ".sya"))
 		}
 	}
 	for _, toRemove := range toRemoves {

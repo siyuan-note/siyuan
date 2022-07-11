@@ -25,10 +25,10 @@ require (
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
 	github.com/flopp/go-findfont v0.1.0
 	github.com/fsnotify/fsnotify v1.5.4
-	github.com/gabriel-vasile/mimetype v1.4.0
+	github.com/gabriel-vasile/mimetype v1.4.1
 	github.com/getsentry/sentry-go v0.13.0
-	github.com/gin-contrib/cors v1.3.1
-	github.com/gin-contrib/gzip v0.0.5
+	github.com/gin-contrib/cors v1.4.0
+	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.8.1
 	github.com/imroc/req/v3 v3.13.2
@@ -48,7 +48,7 @@ require (
 	github.com/siyuan-note/httpclient v0.0.0-20220709030145-2bfb50f28e73
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
-	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
+	golang.org/x/image v0.0.0-20220617043117-41969df76e82
 	golang.org/x/mobile v0.0.0-20220518205345-8578da9835fd
 	golang.org/x/text v0.3.7
 )
@@ -67,7 +67,7 @@ require (
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.0 // indirect
-	github.com/goccy/go-json v0.9.7 // indirect
+	github.com/goccy/go-json v0.9.8 // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
@@ -83,7 +83,7 @@ require (
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/juju/errors v0.0.0-20220331221717-b38fca44723b // indirect
+	github.com/juju/errors v0.0.0-20220622220526-54a94488269b // indirect
 	github.com/klauspost/compress v1.15.7 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect

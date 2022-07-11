@@ -944,6 +944,7 @@
     "168": "Uploading data repo snapshot %s",
     "169": "Uploading data repo file %v",
     "170": "Uploading data repo chunk %v",
-    "171": "Uploading data repo reference %s"
+    "171": "Uploading data repo reference %s",
+    "172": "Data repo key does not match, data cannot be decrypted"
   }
 }

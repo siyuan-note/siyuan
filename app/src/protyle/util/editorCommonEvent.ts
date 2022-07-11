@@ -590,7 +590,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 transaction(protyle, doOperations, undoOperations);
                 mathRender(protyle.wysiwyg.element);
-                focusByWbr(protyle.wysiwyg.element, range);
+                if (targetElement.classList.contains("code-block")) {
+                    highlightRender(protyle.wysiwyg.element);
+                } else {
+                    focusByWbr(protyle.wysiwyg.element, range);
+                }
+                // 拖拽后无法使用快捷键
+                protyle.selectElement.classList.add("fn__none");
             });
             return;
         }

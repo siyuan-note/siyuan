@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20220503122338"
+		"updated": "20220711122031"
 	},
 	"Children": [
 		{
@@ -27,12 +27,32 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123051-wvk5a7h",
-				"updated": "20211228132912"
+				"updated": "20220711121751"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "通過編輯器插入的附件會被認為是資料文件，預設放置在工作空間 data/assets 文件夾下。"
+					"Data": "通過編輯器插入的附件會被認為是資料文件，預設放置在 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "工作空間/data/assets/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文件夾下。"
 				}
 			]
 		},
@@ -222,7 +242,7 @@
 			},
 			"Properties": {
 				"id": "20211226123051-1qp7a9g",
-				"updated": "20211228104718"
+				"updated": "20220711121953"
 			},
 			"Children": [
 				{
@@ -236,7 +256,7 @@
 					},
 					"Properties": {
 						"id": "20211226123051-mmn60x5",
-						"updated": "20211228104716"
+						"updated": "20220711121953"
 					},
 					"Children": [
 						{
@@ -244,12 +264,45 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226123051-p8dr1dy",
-								"updated": "20211228104716"
+								"updated": "20220711121953"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用具體的資料文件，比如圖片或者文件"
+									"Data": "引用具體的資料文件，比如圖片或者文件。如果資源文件是 PDF 且做過"
+								},
+								{
+									"Type": "NodeBlockRef",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20211226122955-ganeraz"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "標註"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，那麼無論它是否被引用都不會計入清理"
 								}
 							]
 						}
@@ -266,7 +319,7 @@
 					},
 					"Properties": {
 						"id": "20211226123051-0az1yw2",
-						"updated": "20211228104718"
+						"updated": "20220711121803"
 					},
 					"Children": [
 						{
@@ -274,7 +327,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226123051-heoyfe2",
-								"updated": "20211228104718"
+								"updated": "20220711121803"
 							},
 							"Children": [
 								{
@@ -316,6 +369,10 @@
 											"Type": "NodeCodeSpanCloseMarker"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。一個資料文件夾如果被引用，則下面所有資料文件無論是否被單獨引用，都會被算作已經引用"
 								}
 							]
 						}
@@ -324,25 +381,11 @@
 			]
 		},
 		{
-			"ID": "20211226123051-8ftluwy",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226123051-8ftluwy",
-				"updated": "20211228104725"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "第二種情況比較特殊：一個資料文件夾如果被引用，則下面所有資料文件無論是否被單獨引用，都會被算作已經引用。"
-				}
-			]
-		},
-		{
 			"ID": "20211226123051-tkps9jc",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123051-tkps9jc",
-				"updated": "20211228104732"
+				"updated": "20220711122031"
 			},
 			"Children": [
 				{
@@ -387,7 +430,15 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中可以一鍵清理未引用資料，如果需要找回被誤刪的文件，請通過"
+					"Data": " 中可以一鍵"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "清理未引用資料"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，如果需要找回被誤刪的文件，請通過"
 				},
 				{
 					"Type": "NodeBlockRef",
@@ -408,7 +459,7 @@
 						},
 						{
 							"Type": "NodeBlockRefText",
-							"Data": "回滾(rollback)"
+							"Data": "回滾（Rollback）"
 						},
 						{
 							"Type": "NodeCloseParen"

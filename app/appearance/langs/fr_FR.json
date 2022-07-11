@@ -944,6 +944,7 @@
     "168": "Téléchargement de l'instantané du référentiel de données %s",
     "169": "Téléchargement du fichier de référentiel de données %v",
     "170": "Téléchargement du bloc de dépôt de données %v",
-    "171": "Téléchargement de la référence de référentiel de données %s"
+    "171": "Téléchargement de la référence de référentiel de données %s",
+    "172": "La clé du référentiel de données ne correspond pas, les données ne peuvent pas être déchiffrées"
   }
 }

@@ -5,7 +5,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20220503121834"
+		"updated": "20220711122042"
 	},
 	"Children": [
 		{
@@ -32,12 +32,32 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210503095358-zr3uijl",
-				"updated": "20210615102655"
+				"updated": "20220711121657"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "通过编辑器插入的附件会被认为是资源文件，默认放置在工作空间 data/assets 文件夹下。"
+					"Data": "通过编辑器插入的附件会被认为是资源文件，默认放置在 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "工作空间/data/assets/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文件夹下。"
 				}
 			]
 		},
@@ -255,7 +275,8 @@
 				"Num": 1
 			},
 			"Properties": {
-				"id": "20210115222514-tqfsawm"
+				"id": "20210115222514-tqfsawm",
+				"updated": "20220711121929"
 			},
 			"Children": [
 				{
@@ -272,19 +293,29 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20210115222515-47r5lop"
+						"id": "20210115222515-47r5lop",
+						"updated": "20220711121929"
 					},
 					"Children": [
 						{
 							"ID": "20210204172443-a8xpkb9",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210204172443-a8xpkb9"
+								"id": "20210204172443-a8xpkb9",
+								"updated": "20220711121929"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用具体的资源文件，比如图片或者文件"
+									"Data": "引用具体的资源文件，比如图片或者文件。如果资源文件是 PDF 且做过"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "标注"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，那么无论它是否被引用都不会计入清理"
 								}
 							]
 						}
@@ -304,14 +335,16 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20210115222545-nilj84d"
+						"id": "20210115222545-nilj84d",
+						"updated": "20220711121528"
 					},
 					"Children": [
 						{
 							"ID": "20210204172443-zyll68d",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210204172443-zyll68d"
+								"id": "20210204172443-zyll68d",
+								"updated": "20220711121528"
 							},
 							"Children": [
 								{
@@ -320,19 +353,17 @@
 								},
 								{
 									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
+									"Data": "code",
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
+											"Type": "NodeCodeSpanOpenMarker"
 										},
 										{
 											"Type": "NodeCodeSpanContent",
 											"Data": "/"
 										},
 										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
+											"Type": "NodeCodeSpanCloseMarker"
 										}
 									]
 								},
@@ -342,21 +373,23 @@
 								},
 								{
 									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
+									"Data": "code",
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
+											"Type": "NodeCodeSpanOpenMarker"
 										},
 										{
 											"Type": "NodeCodeSpanContent",
 											"Data": "[foo](assets/bar/)"
 										},
 										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
+											"Type": "NodeCodeSpanCloseMarker"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。一个资源文件夹如果被引用，则下面所有资源文件无论是否被单独引用，都会被算作已经引用"
 								}
 							]
 						}
@@ -365,24 +398,11 @@
 			]
 		},
 		{
-			"ID": "20210115223119-4mzx5a8",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210115223119-4mzx5a8"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "第二种情况比较特殊：一个资源文件夹如果被引用，则下面所有资源文件无论是否被单独引用，都会被算作已经引用。"
-				}
-			]
-		},
-		{
 			"ID": "20210115223610-ffnxstf",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210115223610-ffnxstf",
-				"updated": "20210512160443"
+				"updated": "20220711122042"
 			},
 			"Children": [
 				{
@@ -391,6 +411,7 @@
 				},
 				{
 					"Type": "NodeKbd",
+					"Data": "kbd",
 					"Children": [
 						{
 							"Type": "NodeKbdOpenMarker"
@@ -410,6 +431,7 @@
 				},
 				{
 					"Type": "NodeKbd",
+					"Data": "kbd",
 					"Children": [
 						{
 							"Type": "NodeKbdOpenMarker"
@@ -425,35 +447,19 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中可以一键清理未引用资源，如果需要找回被误删的文件，请通过"
+					"Data": " 中可以一键"
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20210104090742-hjfornp"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "回滚"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeText",
+					"Data": "清理未引用资源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，如果需要找回被误删的文件，请通过"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "回滚"
 				},
 				{
 					"Type": "NodeText",

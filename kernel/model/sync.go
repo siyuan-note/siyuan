@@ -449,7 +449,13 @@ func incReindex(upserts, removes []string) {
 		if strings.HasPrefix(upsertFile, "/") {
 			upsertFile = upsertFile[1:]
 		}
-		box := upsertFile[:strings.Index(upsertFile, "/")]
+		idx := strings.Index(upsertFile, "/")
+		if 0 > idx {
+			// .sy 直接出现在 data 文件夹下，没有出现在笔记本文件夹下的情况
+			continue
+		}
+
+		box := upsertFile[:idx]
 		p := strings.TrimPrefix(upsertFile, box)
 		tree, err0 := LoadTree(box, p)
 		if nil != err0 {
@@ -1260,6 +1266,8 @@ func formatErrorMsg(err error) string {
 		msg = Conf.Language(33)
 	} else if strings.Contains(msg, "Device or resource busy") {
 		msg = Conf.Language(85)
+	} else if strings.Contains(msg, "cipher: message authentication failed") {
+		msg = Conf.Language(172)
 	}
 	msg = msg + " v" + util.Ver
 	return msg

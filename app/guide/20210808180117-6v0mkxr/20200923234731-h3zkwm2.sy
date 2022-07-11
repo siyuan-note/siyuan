@@ -6,7 +6,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20220709130711"
+		"updated": "20220711123705"
 	},
 	"Children": [
 		{
@@ -1559,6 +1559,75 @@
 				{
 					"Type": "NodeText",
 					"Data": " ."
+				}
+			]
+		},
+		{
+			"ID": "20220711123529-bjd0rvv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220711123529-bjd0rvv",
+				"updated": "20220711123529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Why can't some online pictures be viewed?"
+				}
+			]
+		},
+		{
+			"ID": "20220711123529-xgrcde0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220711123529-xgrcde0",
+				"updated": "20220711123705"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In order to avoid some potential security problems, SiYuan will not bypass the security header verification (such as security policy header and anti-leech verification) of the target site when initiating Internet service requests. You can try the "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "Convert network images to local images"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " function in the "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "..."
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the upper right corner of the editor to pull the network image to the local, so that even if the target site changes the security policy or the local image is unavailable later, it will not be affected."
 				}
 			]
 		},

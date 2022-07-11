@@ -5,7 +5,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20220709130743"
+		"updated": "20220711123511"
 	},
 	"Children": [
 		{
@@ -1556,6 +1556,75 @@
 				{
 					"Type": "NodeText",
 					"Data": " 觸發它的塊標菜單。"
+				}
+			]
+		},
+		{
+			"ID": "20220711123511-bzzrzif",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220711123511-bzzrzif",
+				"updated": "20220711123511"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有的網絡圖片為什麼無法查看？"
+				}
+			]
+		},
+		{
+			"ID": "20220711123511-7kicy5w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220711123511-7kicy5w",
+				"updated": "20220711123511"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "為了避免一些潛在的安全問題，思源在發起互聯網服務請求時不會繞過目標站點的安全標頭校驗（比如安全策略標頭和防盜鏈校驗）。可以試一下編輯器右上角 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "..."
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中的 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "網絡圖片轉換為本地圖片"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 功能將網絡圖片拉取到本地，這樣即使以後目標站點改變安全策略或者不可用本地圖片也不受影響。"
 				}
 			]
 		},

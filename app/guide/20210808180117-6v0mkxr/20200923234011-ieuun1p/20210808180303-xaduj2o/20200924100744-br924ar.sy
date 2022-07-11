@@ -5,7 +5,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20220503122616"
+		"updated": "20220711122005"
 	},
 	"Children": [
 		{
@@ -32,12 +32,32 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210503095710-1vp1uxw",
-				"updated": "20210615102935"
+				"updated": "20220711121739"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Attachments inserted through the editor will be regarded as asset files and will be placed in the workspace data/assets folder by default."
+					"Data": "Attachments inserted through the editor will be regarded as asset files and will be placed in the "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "workspace/data/assets/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " folder by default."
 				}
 			]
 		},
@@ -295,7 +315,8 @@
 				"Num": 1
 			},
 			"Properties": {
-				"id": "20210115224203-r3mwskz"
+				"id": "20210115224203-r3mwskz",
+				"updated": "20220711122005"
 			},
 			"Children": [
 				{
@@ -312,19 +333,54 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20210115224203-1g8zvdg"
+						"id": "20210115224203-1g8zvdg",
+						"updated": "20220711122005"
 					},
 					"Children": [
 						{
 							"ID": "20210204172630-7rtyepg",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210204172630-7rtyepg"
+								"id": "20210204172630-7rtyepg",
+								"updated": "20220711122005"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Reference to a specific asset file, such as a picture or a file"
+									"Data": "Reference to a specific asset file, such as a picture or a file. If the asset file is a PDF and is "
+								},
+								{
+									"Type": "NodeBlockRef",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20210923104413-csbeop3"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "annotated"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", it will not count towards cleanup whether it is referenced or not"
 								}
 							]
 						}
@@ -344,14 +400,16 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20210115224203-xb0ycqg"
+						"id": "20210115224203-xb0ycqg",
+						"updated": "20220711121811"
 					},
 					"Children": [
 						{
 							"ID": "20210204172630-kq680iv",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210204172630-kq680iv"
+								"id": "20210204172630-kq680iv",
+								"updated": "20220711121811"
 							},
 							"Children": [
 								{
@@ -360,19 +418,17 @@
 								},
 								{
 									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
+									"Data": "code",
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
+											"Type": "NodeCodeSpanOpenMarker"
 										},
 										{
 											"Type": "NodeCodeSpanContent",
 											"Data": "/"
 										},
 										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
+											"Type": "NodeCodeSpanCloseMarker"
 										}
 									]
 								},
@@ -382,38 +438,27 @@
 								},
 								{
 									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
+									"Data": "code",
 									"Children": [
 										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
+											"Type": "NodeCodeSpanOpenMarker"
 										},
 										{
 											"Type": "NodeCodeSpanContent",
 											"Data": "[foo](assets/bar/)"
 										},
 										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
+											"Type": "NodeCodeSpanCloseMarker"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". If a asset folder is referenced, all the following asset files will be counted as already referenced regardless of whether they are individually referenced."
 								}
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20210115224203-hb1ykk2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210115224203-hb1ykk2"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The second case is special: if a asset folder is referenced, all the following asset files will be counted as already referenced regardless of whether they are individually referenced."
 				}
 			]
 		},

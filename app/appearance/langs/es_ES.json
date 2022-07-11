@@ -944,6 +944,7 @@
     "168": "Cargando instantánea de repositorio de datos %s",
     "169": "Cargando archivo de repositorio de datos %v",
     "170": "Cargando fragmento de repositorio de datos %v",
-    "171": "Cargando referencia de repositorio de datos %s"
+    "171": "Cargando referencia de repositorio de datos %s",
+    "172": "La clave del repositorio de datos no coincide, los datos no se pueden descifrar"
   }
 }

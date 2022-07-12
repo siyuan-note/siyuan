@@ -311,7 +311,7 @@ export const repos = {
     <div class="b3-label__text ft__error">${0 === window.siyuan.config.e2eePasswdMode ? window.siyuan.languages.builtinE2EEPasswdTip : window.siyuan.languages.changeE2EEPasswdTip}</div>
 </div>`;
         if (isMobile()) {
-            passwordHTML = `<div class="b3-label${window.siyuan.config.e2eePasswd === "" ? "" : " fn__none"}">
+            passwordHTML = `<div class="b3-label${(window.siyuan.config.e2eePasswd !== "" || window.siyuan.config.sync.useDataRepo) ? " fn__none" : ""}">
     ${window.siyuan.languages.e2eePasswd}
     <div class="fn__hr"></div>
     <button id="updatePassword" class="b3-button b3-button--outline fn__block">
@@ -320,7 +320,7 @@ export const repos = {
     </button>
     <div class="b3-label__text ft__error">${window.siyuan.languages.e2eePasswdTip}</div>
 </div>
-<div class="b3-label${window.siyuan.config.e2eePasswd !== "" ? "" : " fn__none"}">
+<div class="b3-label${(window.siyuan.config.e2eePasswd === "" || window.siyuan.config.sync.useDataRepo) ? " fn__none" : ""}">
     ${window.siyuan.languages.e2eePasswd}
     <div class="fn__hr"></div>
     <div class="b3-label__text"><i>${window.siyuan.languages.passwdSet}</i></div>

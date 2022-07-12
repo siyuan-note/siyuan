@@ -123,6 +123,8 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
             protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop);
         }
         protyle.wysiwyg.element.insertAdjacentHTML("beforeend", options.content);
+        // https://github.com/siyuan-note/siyuan/issues/5395
+        protyle.scroll.lastScrollTop = 0;
     } else if (options.action.includes(Constants.CB_GET_BEFORE)) {
         preventScroll(protyle);
         const lastElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
@@ -136,6 +138,8 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
                 protyle.wysiwyg.element.lastElementChild.remove();
             }
         }
+        // https://github.com/siyuan-note/siyuan/issues/5395
+        protyle.scroll.lastScrollTop = 0;
     } else {
         protyle.wysiwyg.element.innerHTML = options.content;
     }

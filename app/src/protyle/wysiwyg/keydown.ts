@@ -781,9 +781,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!event.altKey && !event.shiftKey && !isCtrl(event) && event.key === "Enter") {
             event.stopPropagation();
             event.preventDefault();
-            if (event.repeat) {
-                return;
-            }
             enter(nodeElement, range, protyle);
             return;
         }

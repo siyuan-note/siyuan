@@ -180,8 +180,7 @@ const boot = () => {
   })
 
   require('@electron/remote/main').enable(mainWindow.webContents)
-  mainWindow.webContents.userAgent = 'SiYuan/' + appVer +
-    ' https://b3log.org/siyuan ' + mainWindow.webContents.userAgent
+  mainWindow.webContents.userAgent = 'SiYuan/' + appVer + ' https://b3log.org/siyuan Electron'
   mainWindow.webContents.on('did-finish-load', () => {
     if ('win32' === process.platform || 'linux' === process.platform) {
       siyuanOpenURL = process.argv.find((arg) => arg.startsWith('siyuan://'))

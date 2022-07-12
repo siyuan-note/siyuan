@@ -105,7 +105,6 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
     if (options.action.includes(Constants.CB_GET_APPEND)) {
         // 动态加载移除
         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
-            preventScroll(protyle);
             let removeElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
             const removeElements = [];
             while (protyle.wysiwyg.element.childElementCount > 2) {
@@ -121,16 +120,15 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
                 item.remove();
             });
             protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop);
+            protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
         }
         protyle.wysiwyg.element.insertAdjacentHTML("beforeend", options.content);
-        // https://github.com/siyuan-note/siyuan/issues/5395
-        protyle.scroll.lastScrollTop = 0;
     } else if (options.action.includes(Constants.CB_GET_BEFORE)) {
-        preventScroll(protyle);
         const lastElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
         const lastTop = lastElement.getBoundingClientRect().top;
         protyle.wysiwyg.element.insertAdjacentHTML("afterbegin", options.content);
         protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (lastElement.getBoundingClientRect().top - lastTop);
+        protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
         // 动态加载移除
         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad) {
             while (protyle.wysiwyg.element.childElementCount > 2 && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT &&
@@ -138,8 +136,6 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
                 protyle.wysiwyg.element.lastElementChild.remove();
             }
         }
-        // https://github.com/siyuan-note/siyuan/issues/5395
-        protyle.scroll.lastScrollTop = 0;
     } else {
         protyle.wysiwyg.element.innerHTML = options.content;
     }

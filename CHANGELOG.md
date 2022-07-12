@@ -1,3 +1,60 @@
+## v2.0.26 / 2022-07-12
+
+### 改进功能
+
+* [当自定义排序时支持在文档上/下新建同级文档](https://github.com/siyuan-note/siyuan/issues/5098)
+* [桌面端编辑器设置支持自适应宽度](https://github.com/siyuan-note/siyuan/issues/5182)
+* [新增西班牙语 `es_ES` 支持](https://github.com/siyuan-note/siyuan/pull/5319)
+* [多语言配置缺失项使用对应英文配置项补齐](https://github.com/siyuan-note/siyuan/issues/5322)
+* [块备注过长时悬浮提示不完整](https://github.com/siyuan-note/siyuan/issues/5334)
+* [云端支持多个数据仓库目录](https://github.com/siyuan-note/siyuan/issues/5335)
+* [数据仓库支持云端备份](https://github.com/siyuan-note/siyuan/issues/5336)
+* [公测云端同步数据仓库](https://github.com/siyuan-note/siyuan/issues/5337)
+* [PDF 标注高亮文字中间出现空格](https://github.com/siyuan-note/siyuan/issues/5351)
+* [切换到新的工作空间时优先使用系统语言](https://github.com/siyuan-note/siyuan/issues/5355)
+* [反链面板多出一条横线](https://github.com/siyuan-note/siyuan/issues/5357)
+* [改进分割线回车交互](https://github.com/siyuan-note/siyuan/issues/5358)
+* [为动态加载增加保持所有已加载内容的选项](https://github.com/siyuan-note/siyuan/issues/5362)
+* [粘贴内容包含 `/`、`#`、`、`、`[`、`{{` 和 `:` 时不进行提示](https://github.com/siyuan-note/siyuan/issues/5365)
+* [在右侧/下侧打开时如果已有页签将不再打开新页签](https://github.com/siyuan-note/siyuan/issues/5366)
+* [iPad 端的外观调整](https://github.com/siyuan-note/siyuan/issues/5370)
+* [支持自定义同步快捷键](https://github.com/siyuan-note/siyuan/issues/5376)
+* [忽略环境变量中的代理设置](https://github.com/siyuan-note/siyuan/issues/5377)
+* [网络代理支持 HTTPS 协议，移除 HTTP 代理协议](https://github.com/siyuan-note/siyuan/issues/5381)
+* [↑/↓ 键经过非编辑块时不应变为选中状态](https://github.com/siyuan-note/siyuan/issues/5386)
+* [文档树面板隐藏时 `定位打开的文档` 快捷键需打开文档树](https://github.com/siyuan-note/siyuan/issues/5389)
+* [识别未引用资源时考虑 PDF 标注引用](https://github.com/siyuan-note/siyuan/issues/5392)
+* [动态加载滚动太快时无法继续加载](https://github.com/siyuan-note/siyuan/issues/5395)
+* [Enter 键长按可以进行多次换行](https://github.com/siyuan-note/siyuan/issues/5399)
+
+### 开发重构
+
+* [移除移动端不需要的前端依赖](https://github.com/siyuan-note/siyuan/issues/5315)
+* [简化数据同步计划任务实现](https://github.com/siyuan-note/siyuan/issues/5329)
+* [重构内核代理设置](https://github.com/siyuan-note/siyuan/issues/5380)
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/5385)
+
+### 修复缺陷
+
+* [表格单元格内剪切行文本导致换行失效](https://github.com/siyuan-note/siyuan/issues/4911)
+* [浏览器端开启访问鉴权后文档更新未保存](https://github.com/siyuan-note/siyuan/issues/5096)
+* [复制资源文件后导出再导入后丢失](https://github.com/siyuan-note/siyuan/issues/5320)
+* [行内代码删除后不保留标记符](https://github.com/siyuan-note/siyuan/issues/5323)
+* [块标菜单选择起始/末尾插入行后未取消选中状态](https://github.com/siyuan-note/siyuan/issues/5324)
+* [导出 PDF 图表无法渲染](https://github.com/siyuan-note/siyuan/issues/5326)
+* [切换/关闭页签后状态栏字数统计没有更新](https://github.com/siyuan-note/siyuan/issues/5328)
+* [左侧分屏拖拽到右侧分屏的左侧应保持分屏位置不变](https://github.com/siyuan-note/siyuan/issues/5330)
+* [当打开多个 PDF 时 PDF 内搜索功能失效](https://github.com/siyuan-note/siyuan/issues/5338)
+* [PDF Annotation 锚文本 中无法直接插入 Emoji](https://github.com/siyuan-note/siyuan/issues/5341)
+* [嵌入超级块中的列表项删除撤销后状态异常](https://github.com/siyuan-note/siyuan/issues/5361)
+* [反链面板拖拽列表项到文档中异常](https://github.com/siyuan-note/siyuan/issues/5363)
+* [Ctrl+K 后 Esc 应清除空链接](https://github.com/siyuan-note/siyuan/issues/5364)
+* [如下布局右侧打开文档失败 ](https://github.com/siyuan-note/siyuan/issues/5367)
+* [关系图全屏再最小化后无法移动窗体](https://github.com/siyuan-note/siyuan/issues/5378)
+* [关系图全屏后 Ctrl+W 最小化失效](https://github.com/siyuan-note/siyuan/issues/5379)
+* [移动端菜单外观超出屏幕](https://github.com/siyuan-note/siyuan/issues/5390)
+* [拖拽后代码块异常及不能撤销](https://github.com/siyuan-note/siyuan/issues/5396)
+
 ## v2.0.25 / 2022-06-29
 
 ### 改进功能

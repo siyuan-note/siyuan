@@ -25,19 +25,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getSyncDirection(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	cloudDirName := arg["name"].(string)
-	ret.Code, ret.Msg = model.GetSyncDirection(cloudDirName)
-}
-
 func getBootSync(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -115,25 +102,6 @@ func createCloudSyncDir(c *gin.Context) {
 	err := model.CreateCloudSyncDir(name)
 	if nil != err {
 		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
-		return
-	}
-}
-
-func setSyncUseDataRepo(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	enabled := arg["enabled"].(bool)
-	err := model.SetSyncUseDataRepo(enabled)
-	if nil != err {
-		ret.Code = 1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return

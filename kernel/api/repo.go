@@ -21,10 +21,37 @@ import (
 	"net/http"
 
 	"github.com/88250/gulu"
+	"github.com/dustin/go-humanize"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func getCloudSpace(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	sync, backup, size, assetSize, totalSize, err := model.GetCloudSpace()
+	if nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		util.PushErrMsg(err.Error(), 3000)
+		return
+	}
+
+	hTrafficUploadSize := humanize.Bytes(uint64(model.Conf.User.UserTrafficUpload))
+	hTrafficDownloadSize := humanize.Bytes(uint64(model.Conf.User.UserTrafficDownload))
+
+	ret.Data = map[string]interface{}{
+		"sync":                 sync,
+		"backup":               backup,
+		"hAssetSize":           assetSize,
+		"hSize":                size,
+		"hTotalSize":           totalSize,
+		"hTrafficUploadSize":   hTrafficUploadSize,
+		"hTrafficDownloadSize": hTrafficDownloadSize,
+	}
+}
 
 func checkoutRepo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

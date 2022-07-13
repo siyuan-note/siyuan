@@ -44,7 +44,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/listWorkspaceDirs", model.CheckAuth, listWorkspaceDirs)
 	ginServer.Handle("POST", "/api/system/setAppearanceMode", model.CheckAuth, setAppearanceMode)
 	ginServer.Handle("POST", "/api/system/getSysFonts", model.CheckAuth, getSysFonts)
-	ginServer.Handle("POST", "/api/system/setE2EEPasswd", model.CheckAuth, setE2EEPasswd)
 	ginServer.Handle("POST", "/api/system/exit", model.CheckAuth, exit)
 	ginServer.Handle("POST", "/api/system/setUILayout", model.CheckAuth, setUILayout)
 	ginServer.Handle("POST", "/api/system/getConf", model.CheckAuth, getConf)
@@ -159,15 +158,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/cloud/getCloudSpace", model.CheckAuth, getCloudSpace)
 
-	ginServer.Handle("POST", "/api/backup/getLocalBackup", model.CheckAuth, getLocalBackup)
-	ginServer.Handle("POST", "/api/backup/createLocalBackup", model.CheckAuth, model.CheckReadonly, createLocalBackup)
-	ginServer.Handle("POST", "/api/backup/recoverLocalBackup", model.CheckAuth, model.CheckReadonly, recoverLocalBackup)
-	ginServer.Handle("POST", "/api/backup/uploadLocalBackup", model.CheckAuth, model.CheckReadonly, uploadLocalBackup)
-	ginServer.Handle("POST", "/api/backup/downloadCloudBackup", model.CheckAuth, model.CheckReadonly, downloadCloudBackup)
-	ginServer.Handle("POST", "/api/backup/removeCloudBackup", model.CheckAuth, model.CheckReadonly, removeCloudBackup)
-
 	ginServer.Handle("POST", "/api/sync/setSyncEnable", model.CheckAuth, setSyncEnable)
-	ginServer.Handle("POST", "/api/sync/setSyncUseDataRepo", model.CheckAuth, setSyncUseDataRepo)
 	ginServer.Handle("POST", "/api/sync/setSyncMode", model.CheckAuth, setSyncMode)
 	ginServer.Handle("POST", "/api/sync/setCloudSyncDir", model.CheckAuth, setCloudSyncDir)
 	ginServer.Handle("POST", "/api/sync/createCloudSyncDir", model.CheckAuth, model.CheckReadonly, createCloudSyncDir)
@@ -176,7 +167,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/sync/performSync", model.CheckAuth, performSync)
 	ginServer.Handle("POST", "/api/sync/performBootSync", model.CheckAuth, performBootSync)
 	ginServer.Handle("POST", "/api/sync/getBootSync", model.CheckAuth, getBootSync)
-	ginServer.Handle("POST", "/api/sync/getSyncDirection", model.CheckAuth, getSyncDirection)
 
 	ginServer.Handle("POST", "/api/inbox/getShorthands", model.CheckAuth, getShorthands)
 	ginServer.Handle("POST", "/api/inbox/removeShorthands", model.CheckAuth, removeShorthands)

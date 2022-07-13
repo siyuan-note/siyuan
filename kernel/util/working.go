@@ -139,15 +139,6 @@ func SetBooted() {
 	LogInfof("kernel booted")
 }
 
-func GetHistoryDirNow(now, suffix string) (ret string, err error) {
-	ret = filepath.Join(HistoryDir, now+"-"+suffix)
-	if err = os.MkdirAll(ret, 0755); nil != err {
-		LogErrorf("make history dir failed: %s", err)
-		return
-	}
-	return
-}
-
 func GetHistoryDir(suffix string) (ret string, err error) {
 	ret = filepath.Join(HistoryDir, time.Now().Format("2006-01-02-150405")+"-"+suffix)
 	if err = os.MkdirAll(ret, 0755); nil != err {

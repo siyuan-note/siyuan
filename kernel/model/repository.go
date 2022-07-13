@@ -27,11 +27,13 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -220,7 +222,7 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 	if nil != err {
 		return
 	}
-	msg := fmt.Sprintf(Conf.Language(153), downloadFileCount, downloadChunkCount, byteCountSI(downloadBytes))
+	msg := fmt.Sprintf(Conf.Language(153), downloadFileCount, downloadChunkCount, humanize.Bytes(uint64(downloadBytes)))
 	util.PushMsg(msg, 5000)
 	util.PushStatusBar(msg)
 	return
@@ -251,7 +253,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 		}
 		return
 	}
-	msg := fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, byteCountSI(uploadBytes))
+	msg := fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, humanize.Bytes(uint64(uploadBytes)))
 	util.PushMsg(msg, 5000)
 	util.PushStatusBar(msg)
 	return
@@ -457,7 +459,7 @@ func syncRepo(boot, exit, byHand bool) {
 		util.LogErrorf("sync data repo failed: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
-			msg = fmt.Sprintf(Conf.Language(43), byteCountSI(int64(Conf.User.UserSiYuanRepoSize)))
+			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
 		}
 		Conf.Sync.Stat = msg
 		util.PushStatusBar(msg)
@@ -473,7 +475,7 @@ func syncRepo(boot, exit, byHand bool) {
 	}
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
-	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, byteCountSI(trafficStat.UploadBytes), byteCountSI(trafficStat.DownloadBytes))
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
 	Conf.Sync.Stat = msg
 
 	if 1 > len(mergeResult.Upserts) && 1 > len(mergeResult.Removes) { // 没有数据变更
@@ -736,5 +738,87 @@ func buildCloudInfo() (ret *dejavu.CloudInfo, err error) {
 		LimitSize: int64(Conf.User.UserSiYuanRepoSize - Conf.User.UserSiYuanAssetSize),
 		Server:    util.AliyunServer,
 	}
+	return
+}
+
+type Backup struct {
+	Size    int64  `json:"size"`
+	HSize   string `json:"hSize"`
+	Updated string `json:"updated"`
+	SaveDir string `json:"saveDir"` // 本地备份数据存放目录路径
+}
+
+type Sync struct {
+	Size      int64  `json:"size"`
+	HSize     string `json:"hSize"`
+	Updated   string `json:"updated"`
+	CloudName string `json:"cloudName"` // 云端同步数据存放目录名
+	SaveDir   string `json:"saveDir"`   // 本地同步数据存放目录路径
+}
+
+func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize string, err error) {
+	sync, backup, assetSize, err := getCloudSpaceOSS()
+	if nil != err {
+		err = errors.New(Conf.Language(30) + " " + err.Error())
+		return
+	}
+
+	var totalSize, syncSize, backupSize int64
+	var syncUpdated, backupUpdated string
+	if nil != sync {
+		syncSize = int64(sync["size"].(float64))
+		syncUpdated = sync["updated"].(string)
+	}
+	s = &Sync{
+		Size:    syncSize,
+		HSize:   humanize.Bytes(uint64(syncSize)),
+		Updated: syncUpdated,
+	}
+
+	if nil != backup {
+		backupSize = int64(backup["size"].(float64))
+		backupUpdated = backup["updated"].(string)
+	}
+	b = &Backup{
+		Size:    backupSize,
+		HSize:   humanize.Bytes(uint64(backupSize)),
+		Updated: backupUpdated,
+	}
+	totalSize = syncSize + backupSize + assetSize
+	hAssetSize = humanize.Bytes(uint64(assetSize))
+	hSize = humanize.Bytes(uint64(totalSize))
+	hTotalSize = humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize))
+	return
+}
+
+func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, err error) {
+	result := map[string]interface{}{}
+	resp, err := httpclient.NewCloudRequest().
+		SetResult(&result).
+		SetBody(map[string]string{"token": Conf.User.UserToken}).
+		Post(util.AliyunServer + "/apis/siyuan/dejavu/getRepoStat?uid=" + Conf.User.UserId)
+
+	if nil != err {
+		util.LogErrorf("get cloud space failed: %s", err)
+		err = ErrFailedToConnectCloudServer
+		return
+	}
+
+	if 401 == resp.StatusCode {
+		err = errors.New(Conf.Language(31))
+		return
+	}
+
+	code := result["code"].(float64)
+	if 0 != code {
+		util.LogErrorf("get cloud space failed: %s", result["msg"])
+		err = errors.New(result["msg"].(string))
+		return
+	}
+
+	data := result["data"].(map[string]interface{})
+	sync = data["sync"].(map[string]interface{})
+	backup = data["backup"].(map[string]interface{})
+	assetSize = int64(data["assetSize"].(float64))
 	return
 }

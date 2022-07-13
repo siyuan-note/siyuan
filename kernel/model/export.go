@@ -120,7 +120,7 @@ func exportData(exportFolder string) (err error) {
 	data := filepath.Join(util.WorkspaceDir, "data")
 	if err = stableCopy(data, exportFolder); nil != err {
 		util.LogErrorf("copy data dir from [%s] to [%s] failed: %s", data, baseFolderName, err)
-		err = errors.New(fmt.Sprintf(Conf.Language(23), formatErrorMsg(err)))
+		err = errors.New(fmt.Sprintf(Conf.Language(14), formatErrorMsg(err)))
 		return
 	}
 

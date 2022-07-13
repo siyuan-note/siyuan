@@ -158,13 +158,6 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/cloud/getCloudSpace", model.CheckAuth, getCloudSpace)
 
-	ginServer.Handle("POST", "/api/backup/getLocalBackup", model.CheckAuth, getLocalBackup)
-	ginServer.Handle("POST", "/api/backup/createLocalBackup", model.CheckAuth, model.CheckReadonly, createLocalBackup)
-	ginServer.Handle("POST", "/api/backup/recoverLocalBackup", model.CheckAuth, model.CheckReadonly, recoverLocalBackup)
-	ginServer.Handle("POST", "/api/backup/uploadLocalBackup", model.CheckAuth, model.CheckReadonly, uploadLocalBackup)
-	ginServer.Handle("POST", "/api/backup/downloadCloudBackup", model.CheckAuth, model.CheckReadonly, downloadCloudBackup)
-	ginServer.Handle("POST", "/api/backup/removeCloudBackup", model.CheckAuth, model.CheckReadonly, removeCloudBackup)
-
 	ginServer.Handle("POST", "/api/sync/setSyncEnable", model.CheckAuth, setSyncEnable)
 	ginServer.Handle("POST", "/api/sync/setSyncMode", model.CheckAuth, setSyncMode)
 	ginServer.Handle("POST", "/api/sync/setCloudSyncDir", model.CheckAuth, setCloudSyncDir)

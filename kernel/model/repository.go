@@ -32,6 +32,7 @@ import (
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -736,5 +737,37 @@ func buildCloudInfo() (ret *dejavu.CloudInfo, err error) {
 		LimitSize: int64(Conf.User.UserSiYuanRepoSize - Conf.User.UserSiYuanAssetSize),
 		Server:    util.AliyunServer,
 	}
+	return
+}
+
+func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, err error) {
+	result := map[string]interface{}{}
+	resp, err := httpclient.NewCloudRequest().
+		SetResult(&result).
+		SetBody(map[string]string{"token": Conf.User.UserToken}).
+		Post(util.AliyunServer + "/apis/siyuan/dejavu/getRepoStat?uid=" + Conf.User.UserId)
+
+	if nil != err {
+		util.LogErrorf("get cloud space failed: %s", err)
+		err = ErrFailedToConnectCloudServer
+		return
+	}
+
+	if 401 == resp.StatusCode {
+		err = errors.New(Conf.Language(31))
+		return
+	}
+
+	code := result["code"].(float64)
+	if 0 != code {
+		util.LogErrorf("get cloud space failed: %s", result["msg"])
+		err = errors.New(result["msg"].(string))
+		return
+	}
+
+	data := result["data"].(map[string]interface{})
+	sync = data["sync"].(map[string]interface{})
+	backup = data["backup"].(map[string]interface{})
+	assetSize = int64(data["assetSize"].(float64))
 	return
 }

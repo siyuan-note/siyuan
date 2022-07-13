@@ -19,8 +19,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"io"
-	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -120,73 +118,7 @@ func SyncData(boot, exit, byHand bool) {
 		util.BroadcastByType("main", "syncing", 1, msg, nil)
 	}()
 
-	if Conf.Sync.UseDataRepo {
-		syncRepo(boot, exit, byHand)
-		return
-	}
-
-	localSyncDirPath := Conf.Sync.GetSaveDir()
-	syncSameCount = 0
-	if cloudSyncVer < dataConf.SyncVer {
-		// 上传
-
-		if -1 == cloudSyncVer {
-			// 初次上传
-			IncWorkspaceDataVer()
-			incLocalSyncVer()
-		}
-
-		start := time.Now()
-		//util.LogInfof("sync [cloud=%d, local=%d] uploading...", cloudSyncVer, dataConf.SyncVer)
-		syncSize, err := util.SizeOfDirectory(localSyncDirPath, false)
-		if nil != err {
-			util.PushErrMsg(fmt.Sprintf(Conf.Language(80), formatErrorMsg(err)), 7000)
-			return
-		}
-
-		leftSyncSize := int64(Conf.User.UserSiYuanRepoSize) - cloudUsedAssetSize - cloudUsedBackupSize
-		if leftSyncSize < syncSize {
-			util.PushErrMsg(fmt.Sprintf(Conf.Language(43), byteCountSI(int64(Conf.User.UserSiYuanRepoSize))), 7000)
-			if boot {
-				BootSyncSucc = 1
-			}
-			if exit {
-				ExitSyncSucc = 1
-			}
-			return
-		}
-
-		wroteFiles, transferSize, err := ossUpload(false, localSyncDirPath, "sync/"+Conf.Sync.CloudName, device, boot)
-		if nil != err {
-			util.PushClearProgress()
-			IncWorkspaceDataVer() // 上传失败的话提升本地版本，以备下次上传
-
-			msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
-			Conf.Sync.Stat = msg
-			util.PushErrMsg(msg, 7000)
-			if boot {
-				BootSyncSucc = 1
-			}
-			if exit {
-				ExitSyncSucc = 1
-			}
-			return
-		}
-
-		util.PushClearProgress()
-		elapsed := time.Now().Sub(start).Seconds()
-		stat := fmt.Sprintf(Conf.Language(130), wroteFiles, humanize.Bytes(transferSize)) + fmt.Sprintf(Conf.Language(132), elapsed)
-		util.LogInfof("sync [cloud=%d, local=%d, wroteFiles=%d, transferSize=%s] uploaded in [%.2fs]", cloudSyncVer, dataConf.SyncVer, wroteFiles, humanize.Bytes(transferSize), elapsed)
-
-		Conf.Sync.Uploaded = now
-		Conf.Sync.Stat = stat
-		BootSyncSucc = 0
-		ExitSyncSucc = 0
-		if !byHand {
-			planSyncAfter(fixSyncInterval)
-		}
-		return
-	}
+	syncRepo(boot, exit, byHand)
 	return
 }
 
@@ -278,57 +210,6 @@ func SetSyncMode(mode int) (err error) {
 }
 
 var syncLock = sync.Mutex{}
-
-type CloudIndex struct {
-	Hash    string `json:"hash"`
-	Size    int64  `json:"size"`
-	Updated int64  `json:"updated"` // Unix timestamp 秒
-}
-
-// genCloudIndex 生成云端索引文件。
-func genCloudIndex(localDirPath string, excludes map[string]bool, calcHash bool) (cloudIndex map[string]*CloudIndex, err error) {
-	cloudIndex = map[string]*CloudIndex{}
-	err = filepath.Walk(localDirPath, func(path string, info fs.FileInfo, err error) error {
-		if nil != err {
-			return err
-		}
-		if localDirPath == path || info.IsDir() || excludes[path] {
-			return nil
-		}
-
-		if util.CloudSingleFileMaxSizeLimit < info.Size() {
-			return nil
-		}
-
-		p := strings.TrimPrefix(path, localDirPath)
-		p = filepath.ToSlash(p)
-		hash := ""
-		if calcHash {
-			var hashErr error
-			hash, hashErr = util.GetEtag(path)
-			if nil != hashErr {
-				err = hashErr
-				return io.EOF
-			}
-		}
-		cloudIndex[p] = &CloudIndex{Hash: hash, Size: info.Size(), Updated: info.ModTime().Unix()}
-		return nil
-	})
-	if nil != err {
-		util.LogErrorf("walk sync dir [%s] failed: %s", localDirPath, err)
-		return
-	}
-	data, err := gulu.JSON.MarshalJSON(cloudIndex)
-	if nil != err {
-		util.LogErrorf("marshal sync cloud index failed: %s", err)
-		return
-	}
-	if err = gulu.File.WriteFileSafer(filepath.Join(localDirPath, "index.json"), data, 0644); nil != err {
-		util.LogErrorf("write sync cloud index failed: %s", err)
-		return
-	}
-	return
-}
 
 func getWorkspaceDataConf() (conf *filesys.DataConf, err error) {
 	conf = &filesys.DataConf{Updated: util.CurrentTimeMillis(), Device: Conf.System.ID}

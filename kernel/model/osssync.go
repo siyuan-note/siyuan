@@ -105,37 +105,6 @@ func removeCloudDirPath(dirPath string) (err error) {
 	return
 }
 
-func createCloudSyncDirOSS(name string) (err error) {
-	result := map[string]interface{}{}
-	request := httpclient.NewCloudRequest()
-	resp, err := request.
-		SetResult(&result).
-		SetBody(map[string]string{"name": name, "token": Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/data/createSiYuanSyncDir")
-	if nil != err {
-		util.LogErrorf("create cloud sync dir failed: %s", err)
-		return ErrFailedToConnectCloudServer
-	}
-
-	if 200 != resp.StatusCode {
-		if 401 == resp.StatusCode {
-			err = errors.New(Conf.Language(31))
-			return
-		}
-		msg := fmt.Sprintf("create cloud sync dir failed: %d", resp.StatusCode)
-		util.LogErrorf(msg)
-		err = errors.New(msg)
-		return
-	}
-
-	code := result["code"].(float64)
-	if 0 != code {
-		util.LogErrorf("create cloud sync dir failed: %s", result["msg"])
-		return errors.New(result["msg"].(string))
-	}
-	return
-}
-
 func listCloudSyncDirOSS() (dirs []map[string]interface{}, size int64, err error) {
 	result := map[string]interface{}{}
 	request := httpclient.NewCloudRequest()

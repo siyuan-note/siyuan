@@ -18,9 +18,7 @@ package model
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -63,8 +61,6 @@ type AppConf struct {
 	ReadOnly       bool             `json:"readonly"`       // 是否是只读
 	LocalIPs       []string         `json:"localIPs"`       // 本地 IP 列表
 	AccessAuthCode string           `json:"accessAuthCode"` // 访问授权码
-	E2EEPasswd     string           `json:"e2eePasswd"`     // 端到端加密密码，用于备份和同步
-	E2EEPasswdMode int              `json:"e2eePasswdMode"` // 端到端加密密码生成方式，0：自动，1：自定义
 	System         *conf.System     `json:"system"`         // 系统
 	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键
 	Backup         *conf.Backup     `json:"backup"`         // 备份配置
@@ -281,11 +277,6 @@ func InitConf() {
 	Conf.ReadOnly = util.ReadOnly
 	if "" != util.AccessAuthCode {
 		Conf.AccessAuthCode = util.AccessAuthCode
-	}
-
-	Conf.E2EEPasswdMode = 0
-	if !isBuiltInE2EEPasswd() {
-		Conf.E2EEPasswdMode = 1
 	}
 
 	Conf.LocalIPs = util.GetLocalIPs()
@@ -553,23 +544,6 @@ func InitBoxes() {
 
 func IsSubscriber() bool {
 	return nil != Conf.User && (-1 == Conf.User.UserSiYuanProExpireTime || 0 < Conf.User.UserSiYuanProExpireTime) && 0 == Conf.User.UserSiYuanSubscriptionStatus
-}
-
-func isBuiltInE2EEPasswd() bool {
-	if nil == Conf || nil == Conf.User || "" == Conf.E2EEPasswd {
-		return true
-	}
-
-	pwd := GetBuiltInE2EEPasswd()
-	return Conf.E2EEPasswd == util.AESEncrypt(pwd)
-}
-
-func GetBuiltInE2EEPasswd() (ret string) {
-	part1 := Conf.User.UserId[:7]
-	part2 := Conf.User.UserId[7:]
-	ret = part2 + part1
-	ret = fmt.Sprintf("%x", sha256.Sum256([]byte(ret)))[:7]
-	return
 }
 
 func clearWorkspaceTemp() {

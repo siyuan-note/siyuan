@@ -44,7 +44,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/listWorkspaceDirs", model.CheckAuth, listWorkspaceDirs)
 	ginServer.Handle("POST", "/api/system/setAppearanceMode", model.CheckAuth, setAppearanceMode)
 	ginServer.Handle("POST", "/api/system/getSysFonts", model.CheckAuth, getSysFonts)
-	ginServer.Handle("POST", "/api/system/setE2EEPasswd", model.CheckAuth, setE2EEPasswd)
 	ginServer.Handle("POST", "/api/system/exit", model.CheckAuth, exit)
 	ginServer.Handle("POST", "/api/system/setUILayout", model.CheckAuth, setUILayout)
 	ginServer.Handle("POST", "/api/system/getConf", model.CheckAuth, getConf)
@@ -167,7 +166,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/backup/removeCloudBackup", model.CheckAuth, model.CheckReadonly, removeCloudBackup)
 
 	ginServer.Handle("POST", "/api/sync/setSyncEnable", model.CheckAuth, setSyncEnable)
-	ginServer.Handle("POST", "/api/sync/setSyncUseDataRepo", model.CheckAuth, setSyncUseDataRepo)
 	ginServer.Handle("POST", "/api/sync/setSyncMode", model.CheckAuth, setSyncMode)
 	ginServer.Handle("POST", "/api/sync/setCloudSyncDir", model.CheckAuth, setCloudSyncDir)
 	ginServer.Handle("POST", "/api/sync/createCloudSyncDir", model.CheckAuth, model.CheckReadonly, createCloudSyncDir)

@@ -84,12 +84,10 @@ func SyncData(boot, exit, byHand bool) {
 	if exit {
 		ExitSyncSucc = 0
 	}
-	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName || ("" == Conf.E2EEPasswd && !Conf.Sync.UseDataRepo) {
+	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName {
 		if byHand {
 			if "" == Conf.Sync.CloudName {
 				util.PushMsg(Conf.Language(123), 5000)
-			} else if "" == Conf.E2EEPasswd {
-				util.PushMsg(Conf.Language(11), 5000)
 			} else if !Conf.Sync.Enabled {
 				util.PushMsg(Conf.Language(124), 5000)
 			}
@@ -509,15 +507,6 @@ func SetSyncEnable(b bool) (err error) {
 	defer syncLock.Unlock()
 
 	Conf.Sync.Enabled = b
-	Conf.Save()
-	return
-}
-
-func SetSyncUseDataRepo(b bool) (err error) {
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
-	Conf.Sync.UseDataRepo = b
 	Conf.Save()
 	return
 }
@@ -1009,83 +998,6 @@ func calcUnchangedSyncList() (ret map[string]bool, removes []string, err error) 
 	return
 }
 
-// calcUnchangedDataList 计算 sync 和 data 一致（没有修改过）的文件列表 unchangedDataList，并删除 sync 中不存在于 data 中的多余文件 removeList。
-func calcUnchangedDataList(passwd string) (unchangedDataList map[string]bool, removeList map[string]bool, err error) {
-	syncDir := Conf.Sync.GetSaveDir()
-	meta := filepath.Join(syncDir, pathJSON)
-	if !gulu.File.IsExist(meta) {
-		return
-	}
-	data, err := os.ReadFile(meta)
-	if nil != err {
-		return
-	}
-	data, err = encryption.AESGCMDecryptBinBytes(data, passwd)
-	if nil != err {
-		err = errors.New(Conf.Language(40))
-		return
-	}
-
-	metaJSON := map[string]string{}
-	if err = gulu.JSON.UnmarshalJSON(data, &metaJSON); nil != err {
-		return
-	}
-
-	unchangedDataList = map[string]bool{}
-	removeList = map[string]bool{}
-	filepath.Walk(syncDir, func(path string, info fs.FileInfo, _ error) error {
-		if syncDir == path || pathJSON == info.Name() || "index.json" == info.Name() || info.IsDir() {
-			return nil
-		}
-
-		encryptedP := strings.TrimPrefix(path, syncDir+string(os.PathSeparator))
-		encryptedP = filepath.ToSlash(encryptedP)
-		decryptedP := metaJSON[encryptedP]
-		if "" == decryptedP {
-			removeList[path] = true
-			if gulu.File.IsDir(path) {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-		dataP := filepath.Join(util.DataDir, decryptedP)
-		dataP = filepath.FromSlash(dataP)
-		if !gulu.File.IsExist(dataP) { // data 已经删除的文件
-			removeList[path] = true
-			if gulu.File.IsDir(path) {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-
-		stat, _ := os.Stat(dataP)
-		dataModTime := stat.ModTime()
-		if info.ModTime() == dataModTime {
-			unchangedDataList[dataP] = true
-			return nil
-		}
-		return nil
-	})
-
-	tmp := map[string]bool{}
-	// 在 sync 中删除 data 中已经删除的文件
-	for remove, _ := range removeList {
-		if strings.HasSuffix(remove, "index.json") {
-			continue
-		}
-
-		p := strings.TrimPrefix(remove, syncDir)
-		p = filepath.ToSlash(p)
-		tmp[p] = true
-
-		if err = os.RemoveAll(remove); nil != err {
-			util.LogErrorf("remove [%s] failed: %s", remove, err)
-		}
-	}
-	removeList = tmp
-	return
-}
-
 func getWorkspaceDataConf() (conf *filesys.DataConf, err error) {
 	conf = &filesys.DataConf{Updated: util.CurrentTimeMillis(), Device: Conf.System.ID}
 	confPath := filepath.Join(Conf.Sync.GetSaveDir(), ".siyuan", "conf.json")
@@ -1157,17 +1069,13 @@ func CreateCloudSyncDir(name string) (err error) {
 		return errors.New(Conf.Language(37))
 	}
 
-	if Conf.Sync.UseDataRepo {
-		var cloudInfo *dejavu.CloudInfo
-		cloudInfo, err = buildCloudInfo()
-		if nil != err {
-			return
-		}
-
-		err = dejavu.CreateCloudRepo(name, cloudInfo)
-	} else {
-		err = createCloudSyncDirOSS(name)
+	var cloudInfo *dejavu.CloudInfo
+	cloudInfo, err = buildCloudInfo()
+	if nil != err {
+		return
 	}
+
+	err = dejavu.CreateCloudRepo(name, cloudInfo)
 	return
 }
 
@@ -1376,28 +1284,8 @@ func GetSyncDirection(cloudDirName string) (code int, msg string) { // 0：失�
 		return
 	}
 
-	if Conf.Sync.UseDataRepo {
-		return 40, ""
-	}
-
-	syncConf, err := getWorkspaceDataConf()
-	if nil != err {
-		msg = fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
-		return
-	}
-
-	cloudSyncVer, err := getCloudSyncVer(cloudDirName)
-	if nil != err {
-		msg = fmt.Sprintf(Conf.Language(24), err.Error())
-		return
-	}
-	if cloudSyncVer < syncConf.SyncVer {
-		return 10, fmt.Sprintf(Conf.Language(89), cloudDirName) // 上传
-	}
-	if cloudSyncVer > syncConf.SyncVer {
-		return 20, fmt.Sprintf(Conf.Language(90), cloudDirName) // 下载
-	}
-	return 30, fmt.Sprintf(Conf.Language(91), cloudDirName) // 一致
+	// TODO: 彻底移除方向判断
+	return 40, ""
 }
 
 func IncWorkspaceDataVer() {

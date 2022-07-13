@@ -30,7 +30,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -211,47 +210,6 @@ func SetSyncMode(mode int) (err error) {
 
 var syncLock = sync.Mutex{}
 
-func getWorkspaceDataConf() (conf *filesys.DataConf, err error) {
-	conf = &filesys.DataConf{Updated: util.CurrentTimeMillis(), Device: Conf.System.ID}
-	confPath := filepath.Join(Conf.Sync.GetSaveDir(), ".siyuan", "conf.json")
-	if !gulu.File.IsExist(confPath) {
-		os.MkdirAll(filepath.Dir(confPath), 0755)
-		data, _ := gulu.JSON.MarshalIndentJSON(conf, "", "  ")
-		if err = filelock.NoLockFileWrite(confPath, data); nil != err {
-			util.LogErrorf("save sync conf [%s] failed: %s", confPath, err)
-		}
-		return
-	}
-
-	data, err := filelock.NoLockFileRead(confPath)
-	if nil != err {
-		util.LogErrorf("read sync conf [%s] failed: %s", confPath, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, conf); nil != err {
-		filesys.IncWorkspaceDataVer(false, Conf.System.ID) // 尝试恢复 data/.siyuan/conf.json
-		util.LogErrorf("unmarshal sync conf [%s] failed: %s", confPath, err)
-		err = errors.New(Conf.Language(84))
-		return
-	}
-	return
-}
-
-func incLocalSyncVer() {
-	conf, err := getWorkspaceDataConf()
-	if nil != err {
-		return
-	}
-
-	conf.SyncVer++
-	data, _ := gulu.JSON.MarshalIndentJSON(conf, "", "  ")
-	confPath := filepath.Join(Conf.Sync.GetSaveDir(), ".siyuan", "conf.json")
-	if err = gulu.File.WriteFileSafer(confPath, data, 0644); nil != err {
-		util.LogErrorf("save sync conf [%s] failed: %s", confPath, err)
-	}
-	return
-}
-
 func CreateCloudSyncDir(name string) (err error) {
 	syncLock.Lock()
 	defer syncLock.Unlock()
@@ -387,23 +345,6 @@ func getIgnoreLines() (ret []string) {
 
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
-}
-
-func GetSyncDirection(cloudDirName string) (code int, msg string) { // 0：失败，10：上传，20：下载，30：一致，40：使用数据仓库同步
-	if !IsSubscriber() {
-		return
-	}
-
-	if "" == cloudDirName {
-		return
-	}
-
-	if !IsValidCloudDirName(cloudDirName) {
-		return
-	}
-
-	// TODO: 彻底移除方向判断
-	return 40, ""
 }
 
 func IncWorkspaceDataVer() {

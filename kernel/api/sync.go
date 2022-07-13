@@ -25,19 +25,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getSyncDirection(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	cloudDirName := arg["name"].(string)
-	ret.Code, ret.Msg = model.GetSyncDirection(cloudDirName)
-}
-
 func getBootSync(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

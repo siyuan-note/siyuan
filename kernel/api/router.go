@@ -167,7 +167,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/sync/performSync", model.CheckAuth, performSync)
 	ginServer.Handle("POST", "/api/sync/performBootSync", model.CheckAuth, performBootSync)
 	ginServer.Handle("POST", "/api/sync/getBootSync", model.CheckAuth, getBootSync)
-	ginServer.Handle("POST", "/api/sync/getSyncDirection", model.CheckAuth, getSyncDirection)
 
 	ginServer.Handle("POST", "/api/inbox/getShorthands", model.CheckAuth, getShorthands)
 	ginServer.Handle("POST", "/api/inbox/removeShorthands", model.CheckAuth, removeShorthands)

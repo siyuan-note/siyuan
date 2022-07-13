@@ -410,7 +410,7 @@ export const resizeTabs = () => {
         if (item.editor && item.editor.protyle && item.element.parentElement) {
             hideElements(["gutter"], item.editor.protyle);
             setTimeout(() => {
-                // .layout .fn__flex-shrink {transition: width .3s ease;} 时需要再次计算 padding
+                // .layout .fn__flex-shrink {width .15s cubic-bezier(0, 0, .2, 1) 0ms} 时需要再次计算 padding
                 setPadding(item.editor.protyle);
                 if (typeof echarts !== "undefined") {
                     item.editor.protyle.wysiwyg.element.querySelectorAll('[data-subtype="echarts"], [data-subtype="mindmap"]').forEach((chartItem: HTMLElement) => {

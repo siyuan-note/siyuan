@@ -261,8 +261,6 @@ declare interface IConfig {
     repo: {
         key: string
     },
-    e2eePasswd: string
-    e2eePasswdMode: number
     sync: {
         enabled: boolean
         mode: number
@@ -270,7 +268,6 @@ declare interface IConfig {
         stat: string
         interval: number
         cloudName: string
-        useDataRepo: boolean
     },
     lang: string
     api: {

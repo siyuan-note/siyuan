@@ -53,9 +53,8 @@ export const initConfigSearch = (element: HTMLElement) => {
             .concat(Object.keys(Constants.SIYUAN_KEYMAP.editor.table))),
 
         // 云端
-        getLang(["sync", "cloudSpace", "backup", "cdn", "total", "cloudBackup", "downloadRecover", "backupUpload",
-            "downloadCloud", "downloadCloudTip", "account3Tip", "updatePath", "cloudSync",
-            "changeE2EEPasswd", "e2eePasswdTip", "changeE2EEPasswdTip", "e2eePasswd", "setPasswd", "syncTip", "reposTip", "openSyncTip1", "openSyncTip2", "downloadRecover1", "backupUpload1", "deleteCloudBackup", "cloudSyncDir"]),
+        getLang(["sync", "cloudSpace", "backup", "cdn", "total", "cloudBackup", "updatePath", "cloudSync",
+            "syncTip", "reposTip", "openSyncTip1", "openSyncTip2", "cloudSyncDir"]),
 
         // 账号
         getLang(["accountTip", "accountName", "password", "captcha", "forgetPassword", "login", "register", "twoFactorCaptcha",

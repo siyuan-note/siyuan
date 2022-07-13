@@ -75,18 +75,37 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (!event.repeat) {
             hideElements(["toolbar"], protyle);
         }
-
-        if (event.isComposing) {
-            event.stopPropagation();
-            return;
-        }
-
         const range = getEditorRange(protyle.wysiwyg.element);
         const nodeElement = hasClosestBlock(range.startContainer);
         if (!nodeElement) {
             return;
         }
-
+        if (nodeElement.classList.contains("protyle-wysiwyg--select")) {
+            if (event.key.toLowerCase() === "a") {
+                event.stopPropagation();
+                event.preventDefault();
+                protyle.wysiwyg.element.blur();
+                // 阻止中文输入的残留
+                setTimeout(() => {
+                    insertEmptyBlock(protyle, "afterend");
+                }, 100);
+                nodeElement.classList.remove("protyle-wysiwyg--select");
+                return false;
+            } else if (event.key.toLowerCase() === "b") {
+                event.stopPropagation();
+                event.preventDefault();
+                protyle.wysiwyg.element.blur();
+                setTimeout(() => {
+                    insertEmptyBlock(protyle, "beforebegin");
+                }, 100);
+                nodeElement.classList.remove("protyle-wysiwyg--select");
+                return false;
+            }
+        }
+        if (event.isComposing) {
+            event.stopPropagation();
+            return;
+        }
         // https://github.com/siyuan-note/siyuan/issues/2261
         if (!isCtrl(event) && !event.shiftKey && !event.altKey) {
             if (event.code === "Slash") {

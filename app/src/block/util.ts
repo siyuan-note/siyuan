@@ -73,6 +73,9 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
             } else {
                 blockElement = selectElements[selectElements.length - 1];
             }
+            selectElements.forEach(item => {
+                item.classList.remove("protyle-wysiwyg--select");
+            });
         } else {
             blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
             blockElement = getTopAloneElement(blockElement);

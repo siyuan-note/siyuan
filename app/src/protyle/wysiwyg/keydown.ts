@@ -89,7 +89,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 setTimeout(() => {
                     insertEmptyBlock(protyle, "afterend");
                 }, 100);
-                nodeElement.classList.remove("protyle-wysiwyg--select");
                 return false;
             } else if (event.key.toLowerCase() === "b") {
                 event.stopPropagation();
@@ -98,7 +97,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 setTimeout(() => {
                     insertEmptyBlock(protyle, "beforebegin");
                 }, 100);
-                nodeElement.classList.remove("protyle-wysiwyg--select");
                 return false;
             }
         }

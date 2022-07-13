@@ -240,27 +240,10 @@ export const repos = {
                             });
                             break;
                         case "selectCloud":
-                            if (target.parentElement.getAttribute("disabled") !== "disabled") {
-                                target.parentElement.setAttribute("disabled", "disabled");
-                                fetchPost("/api/sync/getSyncDirection", {name: target.getAttribute("data-name")}, (response) => {
-                                    target.parentElement.removeAttribute("disabled");
-                                    const name = target.getAttribute("data-name");
-                                    if (40 == response.code) { // 使用数据仓库同步不需要对比同步方向
-                                        fetchPost("/api/sync/setCloudSyncDir", {name}, () => {
-                                            window.siyuan.config.sync.cloudName = name;
-                                            getCloudList(true);
-                                        });
-                                        return;
-                                    }
-
-                                    confirmDialog(window.siyuan.languages.confirm, response.msg, () => {
-                                        fetchPost("/api/sync/setCloudSyncDir", {name}, () => {
-                                            window.siyuan.config.sync.cloudName = name;
-                                            getCloudList(true);
-                                        });
-                                    });
-                                });
-                            }
+                            fetchPost("/api/sync/setCloudSyncDir", {name: target.getAttribute("data-name")}, () => {
+                                window.siyuan.config.sync.cloudName = target.getAttribute("data-name");
+                                getCloudList(true);
+                            });
                             break;
                     }
                     event.preventDefault();

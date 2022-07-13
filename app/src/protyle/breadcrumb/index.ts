@@ -216,6 +216,7 @@ export class Breadcrumb {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.netImg2LocalAsset,
+                icon: "iconTransform",
                 click: () => {
                     fetchPost("/api/format/netImg2LocalAssets", {
                         id: protyle.block.rootID
@@ -246,6 +247,7 @@ export class Breadcrumb {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.optimizeTypography,
+                icon: "iconFormat",
                 click: () => {
                     fetchPost("/api/format/autoSpace", {
                         id: protyle.block.rootID

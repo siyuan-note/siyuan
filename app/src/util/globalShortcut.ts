@@ -195,7 +195,7 @@ export const globalShortcut = () => {
         window.siyuan.altIsPressed = false;
         if (switchDialog && switchDialog.element.parentElement) {
             if (event.key === "Tab") {
-                const currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
+                let currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
                 currentLiElement.classList.remove("b3-list-item--focus");
                 if (event.shiftKey) {
                     if (currentLiElement.previousElementSibling) {
@@ -204,7 +204,11 @@ export const globalShortcut = () => {
                         currentLiElement.parentElement.lastElementChild.classList.add("b3-list-item--focus");
                         currentLiElement.removeAttribute("data-original");
                     } else if (currentLiElement.parentElement.nextElementSibling) {
-                        currentLiElement.parentElement.nextElementSibling.lastElementChild.classList.add("b3-list-item--focus");
+                        if (currentLiElement.parentElement.nextElementSibling.lastElementChild) {
+                            currentLiElement.parentElement.nextElementSibling.lastElementChild.classList.add("b3-list-item--focus");
+                        } else {
+                            currentLiElement.parentElement.lastElementChild.classList.add("b3-list-item--focus");
+                        }
                     } else if (currentLiElement.parentElement.previousElementSibling) {
                         currentLiElement.parentElement.previousElementSibling.lastElementChild.classList.add("b3-list-item--focus");
                     }
@@ -215,9 +219,26 @@ export const globalShortcut = () => {
                         currentLiElement.parentElement.firstElementChild.classList.add("b3-list-item--focus");
                         currentLiElement.removeAttribute("data-original");
                     } else if (currentLiElement.parentElement.nextElementSibling) {
-                        currentLiElement.parentElement.nextElementSibling.firstElementChild.classList.add("b3-list-item--focus");
+                        if (currentLiElement.parentElement.nextElementSibling.firstElementChild) {
+                            currentLiElement.parentElement.nextElementSibling.firstElementChild.classList.add("b3-list-item--focus");
+                        } else {
+                            currentLiElement.parentElement.firstElementChild.classList.add("b3-list-item--focus");
+                        }
                     } else if (currentLiElement.parentElement.previousElementSibling) {
                         currentLiElement.parentElement.previousElementSibling.firstElementChild.classList.add("b3-list-item--focus");
+                    }
+                }
+                currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
+                if (currentLiElement) {
+                    const rootId = currentLiElement.getAttribute("data-node-id");
+                    if (rootId) {
+                        fetchPost("/api/filetree/getFullHPathByID", {
+                            id: rootId
+                        }, (response) => {
+                            currentLiElement.parentElement.parentElement.nextElementSibling.innerHTML = escapeHtml(response.data);
+                        });
+                    } else {
+                        currentLiElement.parentElement.parentElement.nextElementSibling.innerHTML = currentLiElement.querySelector(".b3-list-item__text").innerHTML;
                     }
                 }
             } else if (event.key === "Control") {
@@ -304,15 +325,7 @@ export const globalShortcut = () => {
             if (switchDialog && switchDialog.element.parentElement) {
                 return;
             }
-            let dockHtml = "";
             let tabHtml = "";
-            getAllDocks().forEach(item => {
-                dockHtml += `<li data-type="${item.type}" class="b3-list-item">
-    <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>
-    <span class="b3-list-item__text">${window.siyuan.languages[item.hotkeyLangId]}</span>
-    <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span>
-</li>`;
-            });
             let currentTabElement = document.querySelector(".layout__wnd--active .layout-tab-bar > .item--focus");
             if (!currentTabElement) {
                 currentTabElement = document.querySelector(".layout-tab-bar > .item--focus");
@@ -323,12 +336,22 @@ export const globalShortcut = () => {
                     return itemA.headElement.getAttribute("data-activetime") > itemB.headElement.getAttribute("data-activetime") ? -1 : 1;
                 }).forEach(item => {
                     let icon = `<svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>`;
+                    let rootId = "";
                     if (item.model instanceof Editor) {
+                        rootId = ` data-node-id="${item.model.editor.protyle.block.rootID}"`
                         icon = `<span class="b3-list-item__graphic">${unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE)}</span>`;
                     }
-                    tabHtml += `<li data-id="${item.id}" class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${escapeHtml(item.title)}</span></li>`;
+                    tabHtml += `<li data-id="${item.id}"${rootId} class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${escapeHtml(item.title)}</span></li>`;
                 });
             }
+            let dockHtml = "";
+            getAllDocks().forEach(item => {
+                dockHtml += `<li data-type="${item.type}" class="b3-list-item${(!tabHtml && !dockHtml) ? " b3-list-item--focus" : ""}">
+    <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>
+    <span class="b3-list-item__text">${window.siyuan.languages[item.hotkeyLangId]}</span>
+    <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span>
+</li>`;
+            });
             switchDialog = new Dialog({
                 content: `<div class="fn__flex-column b3-dialog--switch">
     <div class="fn__hr"></div>
@@ -336,7 +359,7 @@ export const globalShortcut = () => {
         <ul class="b3-list b3-list--background">${dockHtml}</ul>
         <ul class="b3-list b3-list--background">${tabHtml}</ul>
     </div>
-    <div class="fn__hr"></div>
+    <div class="dialog__path"></div>
 </div>`,
                 disableClose: true,
                 disableAnimation: true,

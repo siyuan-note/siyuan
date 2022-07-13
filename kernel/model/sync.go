@@ -289,11 +289,11 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 func formatErrorMsg(err error) string {
 	msg := err.Error()
 	if strings.Contains(msg, "Permission denied") || strings.Contains(msg, "Access is denied") {
-		msg = Conf.Language(33)
+		msg = Conf.Language(33) + " " + err.Error()
 	} else if strings.Contains(msg, "Device or resource busy") {
-		msg = Conf.Language(85)
+		msg = Conf.Language(85) + " " + err.Error()
 	} else if strings.Contains(msg, "cipher: message authentication failed") {
-		msg = Conf.Language(172)
+		msg = Conf.Language(172) + " " + err.Error()
 	}
 	msg = msg + " v" + util.Ver
 	return msg

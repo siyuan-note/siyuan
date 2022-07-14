@@ -21,6 +21,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -150,6 +152,8 @@ func AutoRefreshUser() {
 		if !subscriptionExpirationReminded {
 			subscriptionExpirationReminded = true
 			go func() {
+				defer util.Recover()
+
 				if "ios" == util.Container {
 					return
 				}
@@ -170,13 +174,65 @@ func AutoRefreshUser() {
 			}()
 		}
 
-		if nil != Conf.User {
-			time.Sleep(3 * time.Minute)
+		go func() {
+			defer util.Recover()
+
 			if nil != Conf.User {
-				RefreshUser(Conf.User.UserToken)
+				time.Sleep(3 * time.Minute)
+				if nil != Conf.User {
+					RefreshUser(Conf.User.UserToken)
+				}
+				subscriptionExpirationReminded = false
 			}
-			subscriptionExpirationReminded = false
-		}
+		}()
+
+		go func() {
+			defer util.Recover()
+
+			time.Sleep(1 * time.Minute)
+			announcementConf := filepath.Join(util.HomeDir, ".config", "siyuan", "announcement.json")
+			var existingAnnouncements, newAnnouncements []*Announcement
+			if gulu.File.IsExist(announcementConf) {
+				data, err := os.ReadFile(announcementConf)
+				if nil != err {
+					util.LogErrorf("read announcement conf failed: %s", err)
+					return
+				}
+				if err = gulu.JSON.UnmarshalJSON(data, &existingAnnouncements); nil != err {
+					util.LogErrorf("unmarshal announcement conf failed: %s", err)
+					return
+				}
+			}
+
+			for _, announcement := range GetAnnouncements() {
+				var exist bool
+				for _, existingAnnouncement := range existingAnnouncements {
+					if announcement.Id == existingAnnouncement.Id {
+						exist = true
+						break
+					}
+				}
+				if !exist {
+					existingAnnouncements = append(existingAnnouncements, announcement)
+					newAnnouncements = append(newAnnouncements, announcement)
+				}
+			}
+
+			data, err := gulu.JSON.MarshalJSON(existingAnnouncements)
+			if nil != err {
+				util.LogErrorf("marshal announcement conf failed: %s", err)
+				return
+			}
+			if err = os.WriteFile(announcementConf, data, 0644); nil != err {
+				util.LogErrorf("write announcement conf failed: %s", err)
+				return
+			}
+
+			for _, newAnnouncement := range newAnnouncements {
+				util.PushMsg(fmt.Sprintf(Conf.Language(11), newAnnouncement.URL, newAnnouncement.Title), 0)
+			}
+		}()
+
 		<-refreshUserTicker.C
 	}
 }

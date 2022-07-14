@@ -27,15 +27,33 @@ var (
 	checkUpdateLock = &sync.Mutex{}
 )
 
-func CheckUpdate(showMsg bool) {
-	if !showMsg {
+type Announcement struct {
+	Id    string `json:"id"`
+	Title string `json:"title"`
+	URL   string `json:"url"`
+}
+
+func GetAnnouncements() (ret []*Announcement) {
+	result, err := util.GetRhyResult(false)
+	if nil != err {
+		util.LogErrorf("get ")
 		return
 	}
 
-	if "ios" == util.Container {
-		if showMsg {
-			util.PushMsg(Conf.Language(36), 5000)
-		}
+	announcements := result["announcement"].([]interface{})
+	for _, announcement := range announcements {
+		ann := announcement.(map[string]interface{})
+		ret = append(ret, &Announcement{
+			Id:    ann["id"].(string),
+			Title: ann["title"].(string),
+			URL:   ann["url"].(string),
+		})
+	}
+	return
+}
+
+func CheckUpdate(showMsg bool) {
+	if !showMsg {
 		return
 	}
 

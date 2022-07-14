@@ -83,6 +83,10 @@ func ImportRepoKey(base64Key string) (err error) {
 		util.LogErrorf("import data repo key failed: %s", err)
 		return errors.New(Conf.Language(157))
 	}
+	if 32 != len(key) {
+		return errors.New(Conf.Language(157))
+	}
+
 	Conf.Repo.Key = key
 	Conf.Save()
 
@@ -429,6 +433,7 @@ func syncRepo(boot, exit, byHand bool) {
 		msg := Conf.Language(26)
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 0)
+		planSyncAfter(30 * time.Second)
 		return
 	}
 

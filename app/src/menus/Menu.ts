@@ -1,13 +1,14 @@
 import {getEventName, isCtrl, updateHotkeyTip} from "../protyle/util/compatibility";
 import {setPosition} from "../util/setPosition";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {isMobile} from "../util/functions";
 
 export class Menu {
     public element: HTMLElement;
 
     constructor() {
         this.element = document.getElementById("commonMenu");
-        this.element.addEventListener("mouseover", (event) => {
+        this.element.addEventListener(isMobile() ? getEventName() : "mouseover", (event) => {
             const target = event.target as Element;
             const itemElement = hasClosestByClassName(target, "b3-menu__item");
             if (!itemElement) {

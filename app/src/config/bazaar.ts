@@ -320,7 +320,8 @@ export const bazaar = {
                                 if (window.siyuan.config.appearance.themeJS) {
                                     exportLayout(true);
                                 } else {
-                                    loadAssets(window.siyuan.config.appearance);
+                                    const linkElement = (document.getElementById("themeDefaultStyle") as HTMLLinkElement);
+                                    linkElement.href = linkElement.href + "1";
                                 }
                             }
                         });

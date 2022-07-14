@@ -311,12 +311,20 @@ func ImportData(zipPath string) (err error) {
 	if 0 < len(files) {
 		return errors.New("invalid data.zip")
 	}
+	dirs, err := os.ReadDir(unzipPath)
+	if nil != err {
+		util.LogErrorf("check data.zip failed: %s", err)
+		return errors.New("check data.zip failed")
+	}
+	if 1 != len(dirs) {
+		return errors.New("invalid data.zip")
+	}
 
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
 
 	filelock.ReleaseAllFileLocks()
-	tmpDataPath := unzipPath
+	tmpDataPath := filepath.Join(unzipPath, dirs[0].Name())
 	if err = stableCopy(tmpDataPath, util.DataDir); nil != err {
 		util.LogErrorf("copy data dir from [%s] to [%s] failed: %s", tmpDataPath, util.DataDir, err)
 		err = errors.New("copy data failed")

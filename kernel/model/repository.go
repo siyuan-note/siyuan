@@ -430,15 +430,20 @@ func IndexRepo(memo string) (err error) {
 
 func syncRepo(boot, exit, byHand bool) {
 	if 1 > len(Conf.Repo.Key) {
+		syncDownloadErrCount++
+		planSyncAfter(fixSyncInterval)
+
 		msg := Conf.Language(26)
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 0)
-		planSyncAfter(30 * time.Second)
 		return
 	}
 
 	repo, err := newRepository()
 	if nil != err {
+		syncDownloadErrCount++
+		planSyncAfter(fixSyncInterval)
+
 		msg := fmt.Sprintf("sync repo failed: %s", err)
 		util.LogErrorf(msg)
 		util.PushStatusBar(msg)
@@ -448,6 +453,8 @@ func syncRepo(boot, exit, byHand bool) {
 
 	err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
+		syncDownloadErrCount++
+		planSyncAfter(fixSyncInterval)
 		return
 	}
 
@@ -461,6 +468,9 @@ func syncRepo(boot, exit, byHand bool) {
 
 	elapsed := time.Since(start)
 	if nil != err {
+		syncDownloadErrCount++
+		planSyncAfter(fixSyncInterval)
+
 		util.LogErrorf("sync data repo failed: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
@@ -475,13 +485,13 @@ func syncRepo(boot, exit, byHand bool) {
 		if exit {
 			ExitSyncSucc = 1
 		}
-		planSyncAfter(fixSyncInterval)
 		return
 	}
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
 	Conf.Sync.Stat = msg
+	syncDownloadErrCount = 0
 
 	if 1 > len(mergeResult.Upserts) && 1 > len(mergeResult.Removes) { // 没有数据变更
 		syncSameCount++

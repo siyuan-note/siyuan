@@ -241,6 +241,7 @@ declare interface IAppearance {
 }
 
 declare interface IFileTree {
+    closeTabsOnStart: boolean
     alwaysSelectOpenedFile: boolean
     openFilesUseCurrentTab: boolean
     removeDocWithoutConfirm: boolean

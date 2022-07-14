@@ -18,8 +18,9 @@ export const initConfigSearch = (element: HTMLElement) => {
         ]),
 
         // 文档树
-        getLang(["selectOpen", "tabLimit", "fileTree", "fileTree2", "fileTree3", "fileTree4",
-            "fileTree5", "fileTree6", "fileTree7", "fileTree8", "fileTree12", "fileTree13", "fileTree15", "fileTree16", "fileTree17"]),
+        getLang(["selectOpen", "tabLimit", "fileTree", "fileTree2", "fileTree3", "fileTree4", "fileTree5",
+            "fileTree6", "fileTree7", "fileTree8", "fileTree9", "fileTree10", "fileTree12", "fileTree13", "fileTree15",
+            "fileTree16", "fileTree17"]),
 
         // 图片
         getLang(["assets", "clearUnused"]),

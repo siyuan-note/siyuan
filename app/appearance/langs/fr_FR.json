@@ -556,6 +556,8 @@
   "fileTree6": "Lors de l'utilisation de <code>((</code>, le chemin d'enregistrement du nouveau document (par exemple, /dossier1/ dossier2/, le chemin relatif du doc actuel est utilisé s'il ne commence pas par /).",
   "fileTree7": "Ouvrir dans l'Onglet actuel",
   "fileTree8": "L'onglet du document nouvellement ouvert remplacera l'Onglet non modifié.",
+  "fileTree9": "Fermer tous les onglets au démarrage",
+  "fileTree10": "Lorsqu'il est activé, les onglets non épinglés qui ont été ouverts la dernière fois seront automatiquement fermés à chaque démarrage de l'interface",
   "fileTree11": "Nouvelle note quotidienne",
   "fileTree12": "Nouveau template de nom de document",
   "fileTree13": "L'extrait de modèle est utilisé par défaut lors de la création d'un nouveau document pour le nommage, par exemple <code>{{maintenant | date \"20060102150405\"}}</code>.",

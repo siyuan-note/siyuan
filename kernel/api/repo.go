@@ -247,6 +247,7 @@ func importRepoKey(c *gin.Context) {
 	if err := model.ImportRepoKey(base64Key); nil != err {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(137), err)
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
 	}
 }
@@ -258,6 +259,7 @@ func initRepoKey(c *gin.Context) {
 	if err := model.InitRepoKey(); nil != err {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(137), err)
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
 	}
 
@@ -273,6 +275,7 @@ func resetRepo(c *gin.Context) {
 	if err := model.ResetRepo(); nil != err {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(146), err.Error())
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
 	}
 }

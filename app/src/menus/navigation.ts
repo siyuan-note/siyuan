@@ -103,7 +103,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.showInFolder,
         click: () => {
-            shell.openPath(pathPosix().join(window.siyuan.config.system.dataDir, notebookId));
+            shell.openPath(path.join(window.siyuan.config.system.dataDir, notebookId));
         }
     }).element);
     if (!window.siyuan.config.readonly) {

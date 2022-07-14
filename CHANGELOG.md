@@ -1,3 +1,27 @@
+## v2.0.27 / 2022-07-14
+
+### 改进功能
+
+* [支持设置启动时关闭所有页签](https://github.com/siyuan-note/siyuan/issues/5189)
+* [编辑器 `...` 菜单增加 `优化排版` 和 `网络图片转换为本地图片` 图标](https://github.com/siyuan-note/siyuan/issues/5321)
+* [当选中块时添加按键 `A`、`B` 和 `Enter` 交互](https://github.com/siyuan-note/siyuan/issues/5384)
+* [Ctrl+Tab 切换面板添加路径显示](https://github.com/siyuan-note/siyuan/issues/5394)
+* [Search ignore case supports Unicode character folding](https://github.com/siyuan-note/siyuan/issues/5398)
+* [系统公告消息提醒](https://github.com/siyuan-note/siyuan/issues/5409)
+* [当前应用的主题更新即时生效](https://github.com/siyuan-note/siyuan/issues/5411)
+* [云端同步和备份忽略 `.git`](https://github.com/siyuan-note/siyuan/issues/5414)
+
+### 移除功能
+
+* [不再支持 Android 32 位系统](https://github.com/siyuan-note/siyuan/issues/5165)
+* [移除旧版云端同步和备份功能入口](https://github.com/siyuan-note/siyuan/issues/5405)
+
+### 修复缺陷
+
+* [引用锚文本中粘贴行级元素问题](https://github.com/siyuan-note/siyuan/issues/5342)
+* [移动端点击外观会触发颜色面板的选中](https://github.com/siyuan-note/siyuan/issues/5410)
+* [Windows 端笔记本右键 `打开文件位置` 报错](https://github.com/siyuan-note/siyuan/issues/5413)
+
 ## v2.0.26 / 2022-07-12
 
 ### 改进功能

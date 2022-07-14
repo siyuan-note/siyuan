@@ -6,7 +6,7 @@
 		"id": "20201121212605-9td1a62",
 		"title": "致谢",
 		"type": "doc",
-		"updated": "20220627111458"
+		"updated": "20220714213505"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220522101224-ctmcj3d",
-				"updated": "20220627111458"
+				"updated": "20220714213505"
 			},
 			"Children": [
 				{
@@ -943,6 +943,76 @@
 					]
 				},
 				{
+					"ID": "20220714213505-1jo69vh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220714213505-1jo69vh",
+						"updated": "20220714213505"
+					},
+					"Children": [
+						{
+							"ID": "20220714213505-2fv6zng",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220714213505-2fv6zng",
+								"updated": "20220714213505"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "https://github.com/Xuanwo/go-locale"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/Xuanwo/go-locale"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "Apache-2.0 License"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20220522101224-kd4artt",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -1052,76 +1122,6 @@
 										{
 											"Type": "NodeLinkDest",
 											"Data": "https://github.com/common-nighthawk/go-figure"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": " "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "MIT License"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220522101224-y04bj0j",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220522101224-y04bj0j",
-						"updated": "20220522101224"
-					},
-					"Children": [
-						{
-							"ID": "20220522101224-44d4hhu",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220522101224-44d4hhu",
-								"updated": "20220522101224"
-							},
-							"Children": [
-								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/denisbrodbeck/machineid"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/denisbrodbeck/machineid"
 										},
 										{
 											"Type": "NodeCloseParen"

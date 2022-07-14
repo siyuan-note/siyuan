@@ -556,6 +556,8 @@
   "fileTree6": "When using <code>((</code>, the save path of the new document (for example, /folder1/folder2/, the relative path of the current doc is used if it does not start with /)",
   "fileTree7": "Open in the current tab",
   "fileTree8": "The newly opened document tab will replace the unmodified tab",
+  "fileTree9": "Close all tabs at startup",
+  "fileTree10": "After enabling, the unpinned tabs that were opened the last time will be automatically closed every time the interface is started",
   "fileTree11": "New daily note",
   "fileTree12": "New doc name template",
   "fileTree13": "The template snippet is used by default when creating a new doc for naming, for example <code>{{now | date \"20060102150405\"}}</code>",

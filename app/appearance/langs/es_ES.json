@@ -556,6 +556,8 @@
   "fileTree6": "Al utilizar <code>((</code>, la ruta de guardado del nuevo documento (por ejemplo, /carpeta1/carpeta2/, se utiliza la ruta relativa del documento actual si no empieza por /)",
   "fileTree7": "Abrir en la pestaña actual",
   "fileTree8": "La pestaña del documento recién abierto sustituirá a la pestaña no modificada",
+  "fileTree9": "Cerrar todas las pestañas al inicio",
+  "fileTree10": "Cuando está habilitado, las pestañas no fijadas que se abrieron la última vez se cerrarán automáticamente cada vez que se inicie la interfaz",
   "fileTree11": "Nueva nota diaria",
   "fileTree12": "Nueva pantilla de nombre de documento",
   "fileTree13": "El fragmento de plantilla se utiliza por defecto cuando se crea un nuevo documento para nombrar, por ejemplo <code>{{now | date \"20060102150405\"}}</code>",

@@ -164,7 +164,7 @@ export const repos = {
 </label>
 <div class="b3-label">
     <div class="fn__flex">
-        <div class="fn__flex-center">${window.siyuan.languages.cloudSync}</div>
+        <div class="fn__flex-center">${window.siyuan.languages.cloudSyncDir}</div>
         <div class="fn__flex-1"></div>
         <button class="b3-button b3-button--outline fn__flex-center${isMobile() ? "" : " fn__size200"}" data-type="config">
             <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}

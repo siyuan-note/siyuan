@@ -181,10 +181,7 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
             child.element.classList.remove("fn__flex-1");
             child.element.style.height = json.height;
         }
-    } else if (json.instance === "Tab" && (
-        (window.siyuan.config.fileTree.closeTabsOnStart && json.pin) ||
-        !window.siyuan.config.fileTree.closeTabsOnStart)
-    ) {
+    } else if (json.instance === "Tab") {
         if (!json.title) {
             child = newCenterEmptyTab();
         } else {
@@ -208,14 +205,14 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
             child.headElement.setAttribute("data-init-active", "true");
         }
         (layout as Wnd).addTab(child);
-    } else if (json.instance === "Editor" && json.blockId && layout) {
+    } else if (json.instance === "Editor" && json.blockId) {
         (layout as Tab).addModel(new Editor({
             tab: (layout as Tab),
             blockId: json.blockId,
             mode: json.mode,
             action: [json.action]
         }));
-    } else if (json.instance === "Asset" && layout) {
+    } else if (json.instance === "Asset") {
         (layout as Tab).addModel(new Asset({
             tab: (layout as Tab),
             path: json.path,
@@ -233,22 +230,22 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
         (layout as Tab).addModel(new Files({
             tab: (layout as Tab),
         }));
-    } else if (json.instance === "Graph" && layout) {
+    } else if (json.instance === "Graph") {
         (layout as Tab).addModel(new Graph({
             tab: (layout as Tab),
             blockId: json.blockId,
             rootId: json.rootId,
             type: json.type
         }));
-    } else if (json.instance === "Outline" && layout) {
+    } else if (json.instance === "Outline") {
         (layout as Tab).addModel(new Outline({
             tab: (layout as Tab),
             blockId: json.blockId,
             type: json.type
         }));
-    } else if (json.instance === "Tag" && layout) {
+    } else if (json.instance === "Tag") {
         (layout as Tab).addModel(new Tag((layout as Tab)));
-    } else if (json.instance === "Search" && layout) {
+    } else if (json.instance === "Search") {
         (layout as Tab).addModel(new Search({
             tab: (layout as Tab),
             text: json.text
@@ -275,10 +272,41 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
 export const JSONToLayout = () => {
     JSONToCenter(window.siyuan.config.uiLayout.layout);
     JSONToDock(window.siyuan.config.uiLayout);
-    // 启动时不打开页签且没有钉住的页签，需要添加空白页
-    if (window.siyuan.layout.centerLayout.children[0].children.length === 0) {
-        (window.siyuan.layout.centerLayout.children[0] as Wnd).addTab(newCenterEmptyTab());
+    const allModels = getAllModels();
+    // 启动时不打开页签，需要移除没有钉住的页签
+    if (window.siyuan.config.fileTree.closeTabsOnStart) {
+        allModels.editor.forEach(item => {
+            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
+                item.parent.parent.removeTab(item.parent.id);
+            }
+        })
+        allModels.outline.forEach(item => {
+            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
+                item.parent.parent.removeTab(item.parent.id);
+            }
+        })
+        allModels.search.forEach(item => {
+            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
+                item.parent.parent.removeTab(item.parent.id);
+            }
+        })
+        allModels.asset.forEach(item => {
+            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
+                item.parent.parent.removeTab(item.parent.id);
+            }
+        })
+        allModels.graph.forEach(item => {
+            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
+                item.parent.parent.removeTab(item.parent.id);
+            }
+        })
+        allModels.backlinks.forEach(item => {
+            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
+                item.parent.parent.removeTab(item.parent.id);
+            }
+        })
     }
+
     setTimeout(() => {
         getAllModels().editor.find(item => {
             if (item.headElement.classList.contains("item--focus")) {

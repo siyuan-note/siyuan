@@ -6,6 +6,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {highlightRender} from "../protyle/markdown/highlightRender";
 import {exportLayout} from "../layout/util";
 import {Constants} from "../constants";
+import {loadAssets} from "../util/assets";
 
 export const bazaar = {
     element: undefined as Element,
@@ -301,15 +302,27 @@ export const bazaar = {
                             url = "/api/bazaar/installBazaarWidget";
                         }
                         target.parentElement.insertAdjacentHTML("afterend", "<img data-type=\"img-loading\" style=\"position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;\" src=\"/stage/loading-pure.svg\">");
+                        const name = target.parentElement.getAttribute("data-name")
                         fetchPost(url, {
                             repoURL: target.parentElement.getAttribute("data-url"),
-                            packageName: target.parentElement.getAttribute("data-name"),
+                            packageName: name,
                             repoHash: target.parentElement.getAttribute("data-hash"),
                             mode: target.parentElement.parentElement.getAttribute("data-type") === "dark" ? 1 : 0,
                             update: true,
                         }, response => {
                             // 更新主题后不需要对该主题进行切换 https://github.com/siyuan-note/siyuan/issues/4966
                             bazaar.onBazaar(response, bazaarType, ["icons"].includes(bazaarType));
+                            // https://github.com/siyuan-note/siyuan/issues/5411
+                            if (bazaarType === "themes" && (
+                                (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === name) ||
+                                (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === name)
+                            )) {
+                                if (window.siyuan.config.appearance.themeJS) {
+                                    exportLayout(true);
+                                } else {
+                                    loadAssets(window.siyuan.config.appearance);
+                                }
+                            }
                         });
                     });
                     event.preventDefault();

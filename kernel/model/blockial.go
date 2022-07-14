@@ -87,7 +87,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 	if err = indexWriteJSONQueue(tree); nil != err {
 		return
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	cache.PutBlockIAL(id, attrs)
 	return
 }
@@ -124,7 +124,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	if err = indexWriteJSONQueue(tree); nil != err {
 		return
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	cache.PutBlockIAL(id, parse.IAL2Map(node.KramdownIAL))
 	return
 }
@@ -158,7 +158,7 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	if err = indexWriteJSONQueue(tree); nil != err {
 		return
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	cache.RemoveBlockIAL(id)
 	return
 }

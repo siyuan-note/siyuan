@@ -105,7 +105,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 	if err = indexWriteJSONQueue(newTree); nil != err {
 		return "", "", err
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	RefreshBacklink(srcTree.ID)
 	RefreshBacklink(newTree.ID)
 	return

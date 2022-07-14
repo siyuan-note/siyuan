@@ -1107,7 +1107,7 @@ func (tx *Transaction) commit() (err error) {
 		}
 	}
 	refreshDynamicRefText(tx.nodes, tx.trees)
-	IncWorkspaceDataVer()
+	IncSync()
 	tx.trees = nil
 	return
 }

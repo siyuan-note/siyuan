@@ -184,7 +184,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	writingDataLock.Unlock()
 
 	RefreshFileTree()
-	IncWorkspaceDataVer()
+	IncSync()
 	return nil
 }
 
@@ -220,7 +220,7 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 		util.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return nil
 }
 
@@ -238,7 +238,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	}
 
 	RefreshFileTree()
-	IncWorkspaceDataVer()
+	IncSync()
 	return nil
 }
 

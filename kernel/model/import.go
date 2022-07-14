@@ -284,7 +284,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		return
 	}
 
-	IncWorkspaceDataVer()
+	IncSync()
 	RefreshFileTree()
 	return
 }
@@ -303,48 +303,27 @@ func ImportData(zipPath string) (err error) {
 	}
 	defer os.RemoveAll(unzipPath)
 
-	files, err := filepath.Glob(filepath.Join(unzipPath, "*/.siyuan/conf.json"))
+	files, err := filepath.Glob(filepath.Join(unzipPath, "*/*.sy"))
 	if nil != err {
-		util.LogErrorf("glob conf.json failed: %s", err)
-		return errors.New("not found conf.json")
+		util.LogErrorf("check data.zip failed: %s", err)
+		return errors.New("check data.zip failed")
 	}
-	if 1 > len(files) {
-		return errors.New("not found conf.json")
-	}
-
-	confPath := files[0]
-	confData, err := os.ReadFile(confPath)
-	if nil != err {
-		return errors.New("read conf.json failed")
-	}
-	dataConf := &filesys.DataConf{}
-	if err = gulu.JSON.UnmarshalJSON(confData, dataConf); nil != err {
-		util.LogErrorf("unmarshal conf.json failed: %s", err)
-		return errors.New("unmarshal conf.json failed")
-	}
-	dataConf.Device = util.GetDeviceID()
-	confData, err = gulu.JSON.MarshalJSON(dataConf)
-	if nil != err {
-		util.LogErrorf("marshal conf.json failed: %s", err)
-		return errors.New("marshal conf.json failed")
-	}
-	if err = os.WriteFile(confPath, confData, 0644); nil != err {
-		util.LogErrorf("write conf.json failed: %s", err)
-		return errors.New("write conf.json failed")
+	if 0 < len(files) {
+		return errors.New("invalid data.zip")
 	}
 
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
 
 	filelock.ReleaseAllFileLocks()
-	tmpDataPath := filepath.Dir(filepath.Dir(confPath))
+	tmpDataPath := unzipPath
 	if err = stableCopy(tmpDataPath, util.DataDir); nil != err {
 		util.LogErrorf("copy data dir from [%s] to [%s] failed: %s", tmpDataPath, util.DataDir, err)
 		err = errors.New("copy data failed")
 		return
 	}
 
-	IncWorkspaceDataVer()
+	IncSync()
 	RefreshFileTree()
 	return
 }
@@ -516,7 +495,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			return err
 		}
 
-		IncWorkspaceDataVer()
+		IncSync()
 		RefreshFileTree()
 	} else { // 导入单个文件
 		fileName := filepath.Base(localPath)
@@ -588,7 +567,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		if err = indexWriteJSONQueue(tree); nil != err {
 			return
 		}
-		IncWorkspaceDataVer()
+		IncSync()
 		sql.WaitForWritingDatabase()
 
 		util.PushEndlessProgress(Conf.Language(58))
@@ -598,7 +577,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		}()
 	}
 	debug.FreeOSMemory()
-	IncWorkspaceDataVer()
+	IncSync()
 	return
 }
 

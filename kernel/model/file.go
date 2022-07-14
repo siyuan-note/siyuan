@@ -1130,7 +1130,7 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 		moveSorts(tree.ID, fromBoxID, toBoxID)
 	}
 	cache.ClearDocsIAL()
-	IncWorkspaceDataVer()
+	IncSync()
 	return
 }
 
@@ -1251,7 +1251,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 		refreshDynamicRefText(changedDefs, changedTrees)
 	}()
 
-	IncWorkspaceDataVer()
+	IncSync()
 	return
 }
 
@@ -1319,7 +1319,7 @@ func CreateDailyNote(boxID string) (p string, err error) {
 			}
 		}
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 
 	b := treenode.GetBlockTree(id)
 	p = b.Path
@@ -1559,7 +1559,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 		return
 	}
 
-	IncWorkspaceDataVer()
+	IncSync()
 }
 
 func (box *Box) fillSort(files *[]*File) {

@@ -261,7 +261,7 @@ func (box *Box) Mkdir(path string) error {
 		util.LogErrorf("mkdir [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return nil
 }
 
@@ -271,7 +271,7 @@ func (box *Box) MkdirAll(path string) error {
 		util.LogErrorf("mkdir all [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return nil
 }
 
@@ -292,7 +292,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 			os.Remove(fromDir)
 		}
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return nil
 }
 
@@ -305,7 +305,7 @@ func (box *Box) Remove(path string) error {
 		util.LogErrorf("remove [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return nil
 }
 

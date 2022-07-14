@@ -18,6 +18,7 @@ require (
 	github.com/Xuanwo/go-locale v1.1.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
+	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/dgraph-io/ristretto v0.1.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/emirpasic/gods v1.18.1
@@ -103,7 +104,7 @@ require (
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/net v0.0.0-20220708220712-1185a9018129 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
-	golang.org/x/sys v0.0.0-20220708085239-5a0f0661e09d // indirect
+	golang.org/x/sys v0.0.0-20220712014510-0a85c31ab51e // indirect
 	golang.org/x/tools v0.1.11 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	google.golang.org/protobuf v1.28.0 // indirect

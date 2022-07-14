@@ -150,7 +150,7 @@ OK:
 		if err = indexWriteJSONQueue(refTree); nil != err {
 			return "", err
 		}
-		IncWorkspaceDataVer()
+		IncSync()
 	}
 	sql.WaitForWritingDatabase()
 	return

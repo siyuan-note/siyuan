@@ -52,7 +52,7 @@ func watchAssets() {
 
 				//util.LogInfof("assets changed: %s", event)
 				if watcher.Write == event.Op {
-					IncWorkspaceDataVer()
+					IncSync()
 				}
 			case err, ok := <-assetsWatcher.Error:
 				if !ok {

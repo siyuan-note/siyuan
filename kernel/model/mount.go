@@ -48,7 +48,7 @@ func CreateBox(name string) (id string, err error) {
 	boxConf := box.GetConf()
 	boxConf.Name = name
 	box.SaveConf(boxConf)
-	IncWorkspaceDataVer()
+	IncSync()
 	return
 }
 
@@ -66,7 +66,7 @@ func RenameBox(boxID, name string) (err error) {
 	boxConf.Name = name
 	box.Name = name
 	box.SaveConf(boxConf)
-	IncWorkspaceDataVer()
+	IncSync()
 	return
 }
 
@@ -109,7 +109,7 @@ func RemoveBox(boxID string) (err error) {
 	if err = os.RemoveAll(localPath); nil != err {
 		return
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return
 }
 

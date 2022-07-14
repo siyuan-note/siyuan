@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/denisbrodbeck/machineid"
 	"github.com/dustin/go-humanize"
 )
 
@@ -62,6 +63,17 @@ func IsMutexLocked(m *sync.Mutex) bool {
 func RandomSleep(minMills, maxMills int) {
 	r := gulu.Rand.Int(minMills, maxMills)
 	time.Sleep(time.Duration(r) * time.Millisecond)
+}
+
+func GetDeviceID() string {
+	if "std" == Container {
+		machineID, err := machineid.ID()
+		if nil != err {
+			return gulu.Rand.String(12)
+		}
+		return machineID
+	}
+	return gulu.Rand.String(12)
 }
 
 func SetNetworkProxy(proxyURL string) {

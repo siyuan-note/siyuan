@@ -55,7 +55,7 @@ func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 	if err = tx.writeTree(tree); nil != err {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: headingID}
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 
 	cache.PutBlockIAL(headingID, parse.IAL2Map(heading.KramdownIAL))
 	for _, child := range children {
@@ -89,7 +89,7 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	if err = tx.writeTree(tree); nil != err {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: headingID}
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 
 	cache.PutBlockIAL(headingID, parse.IAL2Map(heading.KramdownIAL))
 	for _, child := range children {
@@ -208,7 +208,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 
 	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	err = indexWriteJSONQueue(targetTree)
-	IncWorkspaceDataVer()
+	IncSync()
 	RefreshBacklink(srcTree.ID)
 	RefreshBacklink(targetTree.ID)
 	return
@@ -306,7 +306,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	if err = indexWriteJSONQueue(newTree); nil != err {
 		return "", "", err
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	RefreshBacklink(srcTree.ID)
 	RefreshBacklink(newTree.ID)
 	return

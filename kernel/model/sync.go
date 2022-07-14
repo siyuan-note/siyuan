@@ -30,7 +30,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -347,8 +346,7 @@ func getIgnoreLines() (ret []string) {
 	return
 }
 
-func IncWorkspaceDataVer() {
-	filesys.IncWorkspaceDataVer(true, Conf.System.ID)
+func IncSync() {
 	syncSameCount = 0
 	planSyncAfter(30 * time.Second)
 }

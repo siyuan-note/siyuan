@@ -404,7 +404,7 @@ func RemoveUnusedAssets() (ret []string) {
 		ret = append(ret, unusedAsset)
 	}
 	if 0 < len(ret) {
-		IncWorkspaceDataVer()
+		IncSync()
 	}
 	return
 }
@@ -431,7 +431,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 		util.LogErrorf("remove unused asset [%s] failed: %s", p, err)
 	}
 	ret = p
-	IncWorkspaceDataVer()
+	IncSync()
 	return
 }
 

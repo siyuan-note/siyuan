@@ -92,7 +92,7 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 			succMap[baseName] = "assets/" + fName
 		}
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return
 }
 
@@ -183,7 +183,7 @@ func Upload(c *gin.Context) {
 		"succMap":  succMap,
 	}
 
-	IncWorkspaceDataVer()
+	IncSync()
 }
 
 func getAssetsDir(boxLocalPath, docDirLocalPath string) (assets string) {

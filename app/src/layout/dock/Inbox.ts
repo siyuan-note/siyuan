@@ -295,7 +295,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
         <input class="fn__flex-center" type="checkbox"${this.selectIds.includes(item.oId) ? " checked" : ""}>
         <span class="fn__space"></span>
     </label>
-    <span class="b3-list-item__text">${item.shorthandTitle}</span>
+    <span class="b3-list-item__text" title="${item.shorthandTitle}${item.shorthandTitle === item.shorthandDesc ? "" : "\n" + item.shorthandDesc}">${item.shorthandTitle}</span>
     <span class="b3-list-item__meta">${item.hCreated}</span>
 </li>`;
                     this.data[item.oId] = item;

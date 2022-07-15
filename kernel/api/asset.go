@@ -28,6 +28,20 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func renameAsset(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	oldName := arg["oldName"].(string)
+	newName := arg["newName"].(string)
+	model.RenameAsset(oldName, newName)
+}
+
 func getDocImageAssets(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

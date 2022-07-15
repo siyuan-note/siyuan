@@ -34,6 +34,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/protyle"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
@@ -441,6 +442,53 @@ func RemoveUnusedAsset(p string) (ret string) {
 	ret = p
 	IncSync()
 	return
+}
+
+func RenameAsset(oldName, newName string) {
+	util.PushEndlessProgress(Conf.Language(110))
+	defer util.PushClearProgress()
+
+	notebooks, err := ListNotebooks()
+	if nil != err {
+		return
+	}
+
+	luteEngine := NewLute()
+	for _, notebook := range notebooks {
+		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
+		for _, paths := range pages {
+			for _, treeAbsPath := range paths {
+				data, err := filelock.NoLockFileRead(treeAbsPath)
+				if nil != err {
+					util.LogErrorf("get data [path=%s] failed: %s", treeAbsPath, err)
+					return
+				}
+
+				if !bytes.Contains(data, []byte(oldName)) {
+					return
+				}
+
+				data = bytes.Replace(data, []byte(oldName), []byte(newName), -1)
+				if err = filelock.NoLockFileWrite(treeAbsPath, data); nil != err {
+					util.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, err)
+					return
+				}
+
+				tree, err := protyle.ParseJSONWithoutFix(luteEngine, data)
+				if nil != err {
+					util.LogErrorf("parse json to tree [%s] failed: %s", treeAbsPath, err)
+					return
+				}
+
+				treenode.ReindexBlockTree(tree)
+				sql.UpsertTreeQueue(tree)
+
+				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), tree.Root.IALAttr("title")))
+			}
+		}
+	}
+
+	IncSync()
 }
 
 func UnusedAssets() (ret []string) {

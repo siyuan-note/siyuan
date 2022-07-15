@@ -453,6 +453,8 @@ func RenameAsset(oldPath, newName string) {
 		return
 	}
 
+	newPath := util.AssetName(newName)
+
 	luteEngine := NewLute()
 	for _, notebook := range notebooks {
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
@@ -468,7 +470,7 @@ func RenameAsset(oldPath, newName string) {
 					return
 				}
 
-				data = bytes.Replace(data, []byte(oldPath), []byte(newName), -1)
+				data = bytes.Replace(data, []byte(oldPath), []byte(newPath), -1)
 				if writeErr := filelock.NoLockFileWrite(treeAbsPath, data); nil != writeErr {
 					util.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
 					return
@@ -486,6 +488,10 @@ func RenameAsset(oldPath, newName string) {
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), tree.Root.IALAttr("title")))
 			}
 		}
+	}
+
+	if err = os.Rename(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
+		util.LogErrorf("rename asset [%s] failed: %s", oldPath, err)
 	}
 
 	IncSync()

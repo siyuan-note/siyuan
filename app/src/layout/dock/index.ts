@@ -41,7 +41,8 @@ export class Dock {
                 break;
         }
         this.element = document.getElementById("dock" + options.position);
-        this.element.innerHTML = '<div></div><div class="fn__flex-1"></div><div></div>';
+        const dockClass = (options.position === "Bottom" || options.position === "Top") ? ' class="fn__flex"' : "";
+        this.element.innerHTML = `<div${dockClass}></div><div class="fn__flex-1"></div><div${dockClass}></div>`;
         this.position = options.position;
         this.data = {};
         if (options.data.length === 0) {

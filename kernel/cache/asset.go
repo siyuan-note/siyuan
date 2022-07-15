@@ -60,6 +60,6 @@ func LoadAssets() {
 	})
 	elapsed := time.Since(start)
 	if 2000 < elapsed.Milliseconds() {
-		util.LogInfof("loaded assets [%s]", elapsed)
+		util.LogInfof("loaded assets [%.2fs]", elapsed.Seconds())
 	}
 }

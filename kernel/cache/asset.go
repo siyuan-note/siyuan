@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -34,6 +35,7 @@ type Asset struct {
 var Assets = sync.Map{}
 
 func LoadAssets() {
+	start := time.Now()
 	Assets = sync.Map{}
 	assets := filepath.Join(util.DataDir, "assets")
 	filepath.Walk(assets, func(path string, info fs.FileInfo, err error) error {
@@ -56,4 +58,8 @@ func LoadAssets() {
 		})
 		return nil
 	})
+	elapsed := time.Since(start)
+	if 2000 < elapsed.Milliseconds() {
+		util.LogInfof("loaded assets [%s]", elapsed)
+	}
 }

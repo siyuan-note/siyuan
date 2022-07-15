@@ -495,6 +495,10 @@ func RenameAsset(oldPath, newName string) {
 	}
 
 	IncSync()
+
+	util.PushEndlessProgress(Conf.Language(113))
+	sql.WaitForWritingDatabase()
+	util.ReloadUI()
 }
 
 func UnusedAssets() (ret []string) {

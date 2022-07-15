@@ -468,6 +468,11 @@ func RenameAsset(oldPath, newName string) (err error) {
 	}
 
 	newPath := util.AssetName(newName)
+	if err = gulu.File.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
+		util.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
+		return
+	}
+
 	luteEngine := NewLute()
 	for _, notebook := range notebooks {
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
@@ -504,11 +509,6 @@ func RenameAsset(oldPath, newName string) (err error) {
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), tree.Root.IALAttr("title")))
 			}
 		}
-	}
-
-	if err = os.Rename(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
-		util.LogErrorf("rename asset [%s] failed: %s", oldPath, err)
-		return
 	}
 
 	IncSync()

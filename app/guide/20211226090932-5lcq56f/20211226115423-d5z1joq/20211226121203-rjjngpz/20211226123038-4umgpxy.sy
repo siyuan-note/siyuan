@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20220715092951"
+		"updated": "20220715105038"
 	},
 	"Children": [
 		{
@@ -554,7 +554,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220503122338-jmr7c2k",
-				"updated": "20220715092938"
+				"updated": "20220715105038"
 			},
 			"Children": [
 				{
@@ -579,7 +579,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "刪除該筆記本時，為保證跨筆記本資料文件引用正常工作，該筆記本下的資料文件會被批量複製到全局 assets 中"
+									"Data": "刪除該筆記本時，為保證跨筆記本資料文件引用正常工作，該筆記本下的資料文件會被批量複製到全局 "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "assets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中"
 								}
 							]
 						}
@@ -607,7 +615,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "不支持在數據歷史中查看筆記本級資料文件歷史"
+									"Data": "不支持在"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "數據歷史"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中查看筆記本級資料文件歷史"
 								}
 							]
 						}
@@ -656,6 +672,34 @@
 								{
 									"Type": "NodeText",
 									"Data": " 搜索"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220715105038-bwu5wmg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220715105038-bwu5wmg",
+						"updated": "20220715105038"
+					},
+					"Children": [
+						{
+							"ID": "20220715105038-mmy9v15",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220715105038-mmy9v15",
+								"updated": "20220715105038"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持重命名"
 								}
 							]
 						}

@@ -444,7 +444,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 	return
 }
 
-func RenameAsset(oldName, newName string) {
+func RenameAsset(oldPath, newName string) {
 	util.PushEndlessProgress(Conf.Language(110))
 	defer util.PushClearProgress()
 
@@ -458,25 +458,25 @@ func RenameAsset(oldName, newName string) {
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
 		for _, paths := range pages {
 			for _, treeAbsPath := range paths {
-				data, err := filelock.NoLockFileRead(treeAbsPath)
-				if nil != err {
-					util.LogErrorf("get data [path=%s] failed: %s", treeAbsPath, err)
+				data, readErr := filelock.NoLockFileRead(treeAbsPath)
+				if nil != readErr {
+					util.LogErrorf("get data [path=%s] failed: %s", treeAbsPath, readErr)
 					return
 				}
 
-				if !bytes.Contains(data, []byte(oldName)) {
+				if !bytes.Contains(data, []byte(oldPath)) {
 					return
 				}
 
-				data = bytes.Replace(data, []byte(oldName), []byte(newName), -1)
-				if err = filelock.NoLockFileWrite(treeAbsPath, data); nil != err {
-					util.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, err)
+				data = bytes.Replace(data, []byte(oldPath), []byte(newName), -1)
+				if writeErr := filelock.NoLockFileWrite(treeAbsPath, data); nil != writeErr {
+					util.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
 					return
 				}
 
-				tree, err := protyle.ParseJSONWithoutFix(luteEngine, data)
-				if nil != err {
-					util.LogErrorf("parse json to tree [%s] failed: %s", treeAbsPath, err)
+				tree, parseErr := protyle.ParseJSONWithoutFix(luteEngine, data)
+				if nil != parseErr {
+					util.LogErrorf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
 					return
 				}
 

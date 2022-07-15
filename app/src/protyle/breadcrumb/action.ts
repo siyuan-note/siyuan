@@ -25,7 +25,9 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         }
     }
     /// #if !MOBILE
-    window.siyuan.editorIsFullscreen = !isFullscreen;
+    if (element.classList.contains("protyle")) {
+        window.siyuan.editorIsFullscreen = !isFullscreen;
+    }
     getAllModels().editor.forEach(item => {
         if (window.siyuan.editorIsFullscreen) {
             if (!element.isSameNode(item.element) && item.element.classList.contains("fullscreen")) {

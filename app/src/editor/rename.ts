@@ -85,6 +85,40 @@ export const rename = (options: {
     });
 };
 
+export const renameAsset = (assetPath: string) => {
+    const dialog = new Dialog({
+        title: window.siyuan.languages.rename,
+        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "80vw" : "520px",
+    });
+    const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
+    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    dialog.bindInput(inputElement, () => {
+        (btnsElement[1] as HTMLButtonElement).click();
+    });
+    const oldName = assetPath.substring(7, assetPath.length - pathPosix().extname(assetPath).length - 23);
+    inputElement.value = oldName;
+    inputElement.focus();
+    inputElement.select();
+    btnsElement[0].addEventListener("click", () => {
+        dialog.destroy();
+    });
+    btnsElement[1].addEventListener("click", () => {
+        if (!validateName(inputElement.value)) {
+            return false;
+        }
+        if (inputElement.value === oldName || !inputElement.value) {
+            dialog.destroy();
+            return false;
+        }
+        fetchPost("/api/asset/renameAsset", {oldPath: assetPath, newName: inputElement.value});
+    });
+};
+
 export const newFileContentBySelect = (protyle: IProtyle) => {
     if (getSelection().rangeCount === 0) {
         return;

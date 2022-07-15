@@ -34,6 +34,7 @@ import {removeFoldHeading} from "../protyle/util/heading";
 import {lineNumberRender} from "../protyle/markdown/highlightRender";
 import * as dayjs from "dayjs";
 import {blockRender} from "../protyle/markdown/blockRender";
+import {renameAsset} from "../editor/rename";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -509,6 +510,15 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+    const imagePath =  imgElement.getAttribute("data-src")
+    if (imagePath.startsWith("assets/")) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.rename,
+            click() {
+                renameAsset(imagePath);
+            }
+        }).element);
+    }
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconAlignCenter",
         label: window.siyuan.languages.alignCenter,

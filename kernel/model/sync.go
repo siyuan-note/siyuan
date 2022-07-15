@@ -122,8 +122,28 @@ func SyncData(boot, exit, byHand bool) {
 
 // incReindex 增量重建索引。
 func incReindex(upserts, removes []string) {
-	needPushUpsertProgress := 32 < len(upserts)
 	needPushRemoveProgress := 32 < len(removes)
+	needPushUpsertProgress := 32 < len(upserts)
+
+	// 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
+
+	for _, removeFile := range removes {
+		if !strings.HasSuffix(removeFile, ".sy") {
+			continue
+		}
+
+		id := strings.TrimSuffix(filepath.Base(removeFile), ".sy")
+		block := treenode.GetBlockTree(id)
+		if nil != block {
+			treenode.RemoveBlockTreesByRootID(block.RootID)
+			sql.RemoveTreeQueue(block.BoxID, block.RootID)
+			msg := fmt.Sprintf("Sync remove tree [%s]", block.RootID)
+			util.PushStatusBar(msg)
+			if needPushRemoveProgress {
+				util.PushEndlessProgress(msg)
+			}
+		}
+	}
 
 	for _, upsertFile := range upserts {
 		if !strings.HasSuffix(upsertFile, ".sy") {
@@ -152,23 +172,6 @@ func incReindex(upserts, removes []string) {
 		util.PushStatusBar(msg)
 		if needPushUpsertProgress {
 			util.PushEndlessProgress(msg)
-		}
-	}
-	for _, removeFile := range removes {
-		if !strings.HasSuffix(removeFile, ".sy") {
-			continue
-		}
-
-		id := strings.TrimSuffix(filepath.Base(removeFile), ".sy")
-		block := treenode.GetBlockTree(id)
-		if nil != block {
-			treenode.RemoveBlockTreesByRootID(block.RootID)
-			sql.RemoveTreeQueue(block.BoxID, block.RootID)
-			msg := fmt.Sprintf("Sync remove tree [%s]", block.RootID)
-			util.PushStatusBar(msg)
-			if needPushRemoveProgress {
-				util.PushEndlessProgress(msg)
-			}
 		}
 	}
 

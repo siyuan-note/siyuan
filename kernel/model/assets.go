@@ -34,7 +34,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/88250/protyle"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
@@ -462,13 +461,14 @@ func RenameAsset(oldPath, newName string) (err error) {
 		return
 	}
 
-	newPath := util.AssetName(newName) + filepath.Ext(oldPath)
+	newName = util.AssetName(newName) + filepath.Ext(oldPath)
+	newPath := "assets/" + newName
 	if err = gulu.File.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
 		util.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
 		return
 	}
+	oldName := path.Base(oldPath)
 
-	luteEngine := NewLute()
 	notebooks, err := ListNotebooks()
 	if nil != err {
 		return
@@ -484,18 +484,19 @@ func RenameAsset(oldPath, newName string) (err error) {
 					return
 				}
 
-				if !bytes.Contains(data, []byte(oldPath)) {
-					return
+				if !bytes.Contains(data, []byte(oldName)) {
+					continue
 				}
 
-				data = bytes.Replace(data, []byte(oldPath), []byte(newPath), -1)
+				data = bytes.Replace(data, []byte(oldName), []byte(newName), -1)
 				if writeErr := filelock.NoLockFileWrite(treeAbsPath, data); nil != writeErr {
 					util.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
 					err = writeErr
 					return
 				}
 
-				tree, parseErr := protyle.ParseJSONWithoutFix(luteEngine, data)
+				p := filepath.ToSlash(strings.TrimPrefix(treeAbsPath, filepath.Join(util.DataDir, notebook.ID)))
+				tree, parseErr := LoadTree(notebook.ID, p)
 				if nil != parseErr {
 					util.LogErrorf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
 					err = parseErr

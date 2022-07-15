@@ -108,9 +108,6 @@ export const renameAsset = (assetPath: string) => {
         dialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
-        if (!validateName(inputElement.value)) {
-            return false;
-        }
         if (inputElement.value === oldName || !inputElement.value) {
             dialog.destroy();
             return false;

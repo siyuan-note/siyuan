@@ -178,7 +178,7 @@ func AutoRefreshUser() {
 			defer util.Recover()
 
 			if nil != Conf.User {
-				time.Sleep(3 * time.Minute)
+				time.Sleep(2 * time.Minute)
 				if nil != Conf.User {
 					RefreshUser(Conf.User.UserToken)
 				}
@@ -200,6 +200,7 @@ func AutoRefreshUser() {
 				}
 				if err = gulu.JSON.UnmarshalJSON(data, &existingAnnouncements); nil != err {
 					util.LogErrorf("unmarshal announcement conf failed: %s", err)
+					os.Remove(announcementConf)
 					return
 				}
 			}

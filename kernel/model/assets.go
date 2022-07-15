@@ -34,6 +34,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/protyle"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
@@ -440,6 +441,81 @@ func RemoveUnusedAsset(p string) (ret string) {
 	}
 	ret = p
 	IncSync()
+	return
+}
+
+func RenameAsset(oldPath, newName string) (err error) {
+	util.PushEndlessProgress(Conf.Language(110))
+	defer util.PushClearProgress()
+
+	notebooks, err := ListNotebooks()
+	if nil != err {
+		return
+	}
+
+	newName = strings.TrimSpace(newName)
+	newName = gulu.Str.RemoveInvisible(newName)
+	if path.Base(oldPath) == newName {
+		return
+	}
+	if "" == newName {
+		return
+	}
+
+	if !gulu.File.IsValidFilename(newName) {
+		err = errors.New(Conf.Language(151))
+		return
+	}
+
+	newPath := util.AssetName(newName)
+	if err = gulu.File.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
+		util.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
+		return
+	}
+
+	luteEngine := NewLute()
+	for _, notebook := range notebooks {
+		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
+		for _, paths := range pages {
+			for _, treeAbsPath := range paths {
+				data, readErr := filelock.NoLockFileRead(treeAbsPath)
+				if nil != readErr {
+					util.LogErrorf("get data [path=%s] failed: %s", treeAbsPath, readErr)
+					err = readErr
+					return
+				}
+
+				if !bytes.Contains(data, []byte(oldPath)) {
+					return
+				}
+
+				data = bytes.Replace(data, []byte(oldPath), []byte(newPath), -1)
+				if writeErr := filelock.NoLockFileWrite(treeAbsPath, data); nil != writeErr {
+					util.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
+					err = writeErr
+					return
+				}
+
+				tree, parseErr := protyle.ParseJSONWithoutFix(luteEngine, data)
+				if nil != parseErr {
+					util.LogErrorf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
+					err = parseErr
+					return
+				}
+
+				treenode.ReindexBlockTree(tree)
+				sql.UpsertTreeQueue(tree)
+
+				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), tree.Root.IALAttr("title")))
+			}
+		}
+	}
+
+	IncSync()
+
+	util.PushEndlessProgress(Conf.Language(113))
+	sql.WaitForWritingDatabase()
+	util.ReloadUI()
 	return
 }
 

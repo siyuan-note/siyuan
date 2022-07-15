@@ -130,11 +130,19 @@ func checkUpdate(c *gin.Context) {
 	model.CheckUpdate(showMsg)
 }
 
+var start = true // 是否是启动
 func getConf(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	ret.Data = model.Conf
+	ret.Data = map[string]interface{}{
+		"conf":  model.Conf,
+		"start": start,
+	}
+
+	if start {
+		start = false
+	}
 }
 
 func setUILayout(c *gin.Context) {

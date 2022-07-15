@@ -448,11 +448,6 @@ func RenameAsset(oldPath, newName string) (err error) {
 	util.PushEndlessProgress(Conf.Language(110))
 	defer util.PushClearProgress()
 
-	notebooks, err := ListNotebooks()
-	if nil != err {
-		return
-	}
-
 	newName = strings.TrimSpace(newName)
 	newName = gulu.Str.RemoveInvisible(newName)
 	if path.Base(oldPath) == newName {
@@ -467,13 +462,17 @@ func RenameAsset(oldPath, newName string) (err error) {
 		return
 	}
 
-	newPath := util.AssetName(newName)
+	newPath := util.AssetName(newName) + filepath.Ext(oldPath)
 	if err = gulu.File.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
 		util.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
 		return
 	}
 
 	luteEngine := NewLute()
+	notebooks, err := ListNotebooks()
+	if nil != err {
+		return
+	}
 	for _, notebook := range notebooks {
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
 		for _, paths := range pages {

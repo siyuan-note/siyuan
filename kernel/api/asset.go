@@ -39,7 +39,13 @@ func renameAsset(c *gin.Context) {
 
 	oldPath := arg["oldPath"].(string)
 	newName := arg["newName"].(string)
-	model.RenameAsset(oldPath, newName)
+	err := model.RenameAsset(oldPath, newName)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
 }
 
 func getDocImageAssets(c *gin.Context) {

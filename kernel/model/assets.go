@@ -444,7 +444,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 	return
 }
 
-func RenameAsset(oldPath, newName string) {
+func RenameAsset(oldPath, newName string) (err error) {
 	util.PushEndlessProgress(Conf.Language(110))
 	defer util.PushClearProgress()
 
@@ -462,6 +462,11 @@ func RenameAsset(oldPath, newName string) {
 		return
 	}
 
+	if !gulu.File.IsValidFilename(newName) {
+		err = errors.New(Conf.Language(151))
+		return
+	}
+
 	newPath := util.AssetName(newName)
 	luteEngine := NewLute()
 	for _, notebook := range notebooks {
@@ -471,6 +476,7 @@ func RenameAsset(oldPath, newName string) {
 				data, readErr := filelock.NoLockFileRead(treeAbsPath)
 				if nil != readErr {
 					util.LogErrorf("get data [path=%s] failed: %s", treeAbsPath, readErr)
+					err = readErr
 					return
 				}
 
@@ -481,12 +487,14 @@ func RenameAsset(oldPath, newName string) {
 				data = bytes.Replace(data, []byte(oldPath), []byte(newPath), -1)
 				if writeErr := filelock.NoLockFileWrite(treeAbsPath, data); nil != writeErr {
 					util.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
+					err = writeErr
 					return
 				}
 
 				tree, parseErr := protyle.ParseJSONWithoutFix(luteEngine, data)
 				if nil != parseErr {
 					util.LogErrorf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
+					err = parseErr
 					return
 				}
 
@@ -500,6 +508,7 @@ func RenameAsset(oldPath, newName string) {
 
 	if err = os.Rename(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
 		util.LogErrorf("rename asset [%s] failed: %s", oldPath, err)
+		return
 	}
 
 	IncSync()
@@ -507,6 +516,7 @@ func RenameAsset(oldPath, newName string) {
 	util.PushEndlessProgress(Conf.Language(113))
 	sql.WaitForWritingDatabase()
 	util.ReloadUI()
+	return
 }
 
 func UnusedAssets() (ret []string) {

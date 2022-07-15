@@ -93,22 +93,6 @@ func docTitleImgAsset(root *ast.Node) *Asset {
 	return nil
 }
 
-func QueryAssetsByName(name string) (ret []*Asset) {
-	ret = []*Asset{}
-	sqlStmt := "SELECT * FROM assets WHERE name LIKE ? GROUP BY id ORDER BY id DESC LIMIT 32"
-	rows, err := query(sqlStmt, "%"+name+"%")
-	if nil != err {
-		util.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		asset := scanAssetRows(rows)
-		ret = append(ret, asset)
-	}
-	return
-}
-
 func QueryAssetByHash(hash string) (ret *Asset) {
 	sqlStmt := "SELECT * FROM assets WHERE hash = ?"
 	row := queryRow(sqlStmt, hash)

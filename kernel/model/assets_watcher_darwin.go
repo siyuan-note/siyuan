@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/radovskyb/watcher"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -54,6 +55,9 @@ func watchAssets() {
 				if watcher.Write == event.Op {
 					IncSync()
 				}
+
+				// 重新缓存资源文件，以便使用 /资源 搜索
+				cache.LoadAssets()
 			case err, ok := <-assetsWatcher.Error:
 				if !ok {
 					return

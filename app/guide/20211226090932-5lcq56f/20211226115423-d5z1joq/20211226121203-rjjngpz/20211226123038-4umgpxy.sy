@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20220711122031"
+		"updated": "20220715092951"
 	},
 	"Children": [
 		{
@@ -242,7 +242,7 @@
 			},
 			"Properties": {
 				"id": "20211226123051-1qp7a9g",
-				"updated": "20220711121953"
+				"updated": "20220715092951"
 			},
 			"Children": [
 				{
@@ -256,7 +256,7 @@
 					},
 					"Properties": {
 						"id": "20211226123051-mmn60x5",
-						"updated": "20220711121953"
+						"updated": "20220715092951"
 					},
 					"Children": [
 						{
@@ -264,12 +264,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226123051-p8dr1dy",
-								"updated": "20220711121953"
+								"updated": "20220715092951"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用具體的資料文件，比如圖片或者文件。如果資源文件是 PDF 且做過"
+									"Data": "引用具體的資料文件，比如圖片或者文件。如果資料文件是 PDF 且做過"
 								},
 								{
 									"Type": "NodeBlockRef",
@@ -511,12 +511,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220503122338-a69glac",
-				"updated": "20220503122338"
+				"updated": "20220715092913"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "筆記本級資源文件"
+					"Data": "筆記本級資料文件"
 				}
 			]
 		},
@@ -525,12 +525,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220503122338-re7pyhf",
-				"updated": "20220503122338"
+				"updated": "20220715092933"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果需要默認將插入的資源文件放置在文檔同級 assets 文件夾下，則需要先手動創建名為 assets 的文件夾，這樣思源會優先選擇該 assets 文件夾來存放資源文件。"
+					"Data": "如果需要默認將插入的資料文件放置在文檔同級 assets 文件夾下，則需要先手動創建名為 assets 的文件夾，這樣思源會優先選擇該 assets 文件夾來存放資料文件。"
 				}
 			]
 		},
@@ -539,12 +539,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220503122338-gxfzjcm",
-				"updated": "20220503122338"
+				"updated": "20220715092934"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "建議盡量不要使用筆記本級資源文件，因為這會帶來一些副作用："
+					"Data": "建議盡量不要使用筆記本級資料文件，因為這會帶來一些副作用："
 				}
 			]
 		},
@@ -554,7 +554,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220503122338-jmr7c2k",
-				"updated": "20220503122338"
+				"updated": "20220715092938"
 			},
 			"Children": [
 				{
@@ -566,7 +566,7 @@
 					},
 					"Properties": {
 						"id": "20220503122338-4zg71qe",
-						"updated": "20220503122338"
+						"updated": "20220715092936"
 					},
 					"Children": [
 						{
@@ -574,12 +574,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220503122338-t6apzrh",
-								"updated": "20220503122338"
+								"updated": "20220715092936"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "刪除該筆記本時，為保證跨筆記本資源文件引用正常工作，該筆記本下的資源文件會被批量複製到全局 assets 中"
+									"Data": "刪除該筆記本時，為保證跨筆記本資料文件引用正常工作，該筆記本下的資料文件會被批量複製到全局 assets 中"
 								}
 							]
 						}
@@ -594,7 +594,7 @@
 					},
 					"Properties": {
 						"id": "20220503122338-64cnjli",
-						"updated": "20220503122338"
+						"updated": "20220715092938"
 					},
 					"Children": [
 						{
@@ -602,12 +602,60 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220503122338-e5zlrvp",
-								"updated": "20220503122338"
+								"updated": "20220715092938"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "不支持在數據歷史中查看筆記本級資源文件歷史"
+									"Data": "不支持在數據歷史中查看筆記本級資料文件歷史"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220715092849-nxblvyk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220715092849-nxblvyk",
+						"updated": "20220715092907"
+					},
+					"Children": [
+						{
+							"ID": "20220715092849-n45ydou",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220715092849-n45ydou",
+								"updated": "20220715092907"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持使用 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "/資料"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 搜索"
 								}
 							]
 						}

@@ -219,7 +219,7 @@ ${window.siyuan.languages.account8}`;
             });
             const activationCodeElement = account.element.querySelector("#activationCode");
             activationCodeElement.addEventListener("click", () => {
-                const activationCodeInput = (activationCodeElement.previousElementSibling as HTMLInputElement)
+                const activationCodeInput = (activationCodeElement.previousElementSibling as HTMLInputElement);
                 fetchPost("/api/account/checkActivationcode", {data: activationCodeInput.value}, (response) => {
                     if (0 !== response.code) {
                         activationCodeInput.value = "";

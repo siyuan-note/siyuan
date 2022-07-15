@@ -185,7 +185,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
 };
 
 export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
-    const disableElement = isNotEditBlock(blockElement)
+    const disableElement = isNotEditBlock(blockElement);
     if ((!disableElement || blockElement.classList.contains("hr")) && blockElement.classList.contains("protyle-wysiwyg--select")) {
         setLastNodeRange(getContenteditableElement(blockElement), range, false);
         range.collapse(false);

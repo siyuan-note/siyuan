@@ -279,32 +279,32 @@ export const JSONToLayout = () => {
             if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
                 item.parent.parent.removeTab(item.parent.id);
             }
-        })
+        });
         allModels.outline.forEach(item => {
             if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
                 item.parent.parent.removeTab(item.parent.id);
             }
-        })
+        });
         allModels.search.forEach(item => {
             if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
                 item.parent.parent.removeTab(item.parent.id);
             }
-        })
+        });
         allModels.asset.forEach(item => {
             if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
                 item.parent.parent.removeTab(item.parent.id);
             }
-        })
+        });
         allModels.graph.forEach(item => {
             if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
                 item.parent.parent.removeTab(item.parent.id);
             }
-        })
+        });
         allModels.backlinks.forEach(item => {
             if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
                 item.parent.parent.removeTab(item.parent.id);
             }
-        })
+        });
     }
 
     setTimeout(() => {

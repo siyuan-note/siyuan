@@ -338,7 +338,7 @@ export const globalShortcut = () => {
                     let icon = `<svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>`;
                     let rootId = "";
                     if (item.model instanceof Editor) {
-                        rootId = ` data-node-id="${item.model.editor.protyle.block.rootID}"`
+                        rootId = ` data-node-id="${item.model.editor.protyle.block.rootID}"`;
                         icon = `<span class="b3-list-item__graphic">${unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE)}</span>`;
                     }
                     tabHtml += `<li data-id="${item.id}"${rootId} class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${escapeHtml(item.title)}</span></li>`;
@@ -575,7 +575,7 @@ export const globalShortcut = () => {
             event.stopPropagation();
             let activeTabElement = document.querySelector(".block__icons--active");
             if (activeTabElement && activeTabElement.getBoundingClientRect().width > 0) {
-                let type: TDockType
+                let type: TDockType;
                 Array.from(activeTabElement.parentElement.classList).find(item => {
                     if (item.startsWith("sy__")) {
                         type = item.replace("sy__", "") as TDockType;

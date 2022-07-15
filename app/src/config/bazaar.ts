@@ -302,7 +302,7 @@ export const bazaar = {
                             url = "/api/bazaar/installBazaarWidget";
                         }
                         target.parentElement.insertAdjacentHTML("afterend", "<img data-type=\"img-loading\" style=\"position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;\" src=\"/stage/loading-pure.svg\">");
-                        const name = target.parentElement.getAttribute("data-name")
+                        const name = target.parentElement.getAttribute("data-name");
                         fetchPost(url, {
                             repoURL: target.parentElement.getAttribute("data-url"),
                             packageName: name,

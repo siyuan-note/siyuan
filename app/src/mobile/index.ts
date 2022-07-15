@@ -43,13 +43,13 @@ class App {
             }
         });
         fetchPost("/api/system/getConf", {}, confResponse => {
-            confResponse.data.keymap = Constants.SIYUAN_KEYMAP;
-            window.siyuan.config = confResponse.data;
+            confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
+            window.siyuan.config = confResponse.data.conf;
             fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                 window.siyuan.languages = lauguages;
                 document.title = window.siyuan.languages.siyuanNote;
                 bootSync();
-                loadAssets(confResponse.data.appearance);
+                loadAssets(confResponse.data.conf.appearance);
                 initAssets();
                 fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                     window.siyuan.emojis = emojiResponse.data as IEmoji[];

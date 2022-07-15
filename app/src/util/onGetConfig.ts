@@ -92,7 +92,7 @@ export const setProxy = () => {
     /// #endif
 };
 
-export const onGetConfig = () => {
+export const onGetConfig = (isStart:boolean) => {
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");
     const matchKeymap3 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.insert, "editor", "insert");
@@ -128,7 +128,7 @@ export const onGetConfig = () => {
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
         try {
-            JSONToLayout();
+            JSONToLayout(isStart);
         } catch (e) {
             fetchPost("/api/system/setUILayout", {layout: {}}, () => {
                 window.location.reload();

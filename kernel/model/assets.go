@@ -453,8 +453,16 @@ func RenameAsset(oldPath, newName string) {
 		return
 	}
 
-	newPath := util.AssetName(newName)
+	newName = strings.TrimSpace(newName)
+	newName = gulu.Str.RemoveInvisible(newName)
+	if path.Base(oldPath) == newName {
+		return
+	}
+	if "" == newName {
+		return
+	}
 
+	newPath := util.AssetName(newName)
 	luteEngine := NewLute()
 	for _, notebook := range notebooks {
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)

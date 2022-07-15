@@ -6,7 +6,6 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {highlightRender} from "../protyle/markdown/highlightRender";
 import {exportLayout} from "../layout/util";
 import {Constants} from "../constants";
-import {loadAssets} from "../util/assets";
 
 export const bazaar = {
     element: undefined as Element,

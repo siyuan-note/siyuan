@@ -10,7 +10,6 @@ import {setEditMode} from "../protyle/util/setEditMode";
 import {Files} from "../layout/dock/Files";
 import {setPadding} from "../protyle/ui/initUI";
 import {fetchPost} from "../util/fetch";
-import {showMessage} from "../dialog/message";
 import {focusBlock, focusByRange} from "../protyle/util/selection";
 import {onGet} from "../protyle/util/onGet";
 /// #if !BROWSER

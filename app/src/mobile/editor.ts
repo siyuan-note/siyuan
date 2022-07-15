@@ -3,7 +3,6 @@ import {setEditor} from "./util/setEmpty";
 import {closePanel} from "./util/closePanel";
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
-import {showMessage} from "../dialog/message";
 import {disabledProtyle, enableProtyle, onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
 import {focusBlock} from "../protyle/util/selection";

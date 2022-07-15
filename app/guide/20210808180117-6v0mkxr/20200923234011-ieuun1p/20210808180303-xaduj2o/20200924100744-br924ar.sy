@@ -5,7 +5,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20220711122005"
+		"updated": "20220715092808"
 	},
 	"Children": [
 		{
@@ -625,7 +625,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220503122349-o26mvnq",
-				"updated": "20220503122616"
+				"updated": "20220715092808"
 			},
 			"Children": [
 				{
@@ -650,7 +650,23 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "When deleting the notebook, in order to ensure that cross-notebook asset references work properly, the assets under the notebook will be copied to the global assets in batches"
+									"Data": "When deleting the notebook, in order to ensure that cross-notebook asset references work properly, the "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "assets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " under the notebook will be copied to the global "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "assets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in batches"
 								}
 							]
 						}
@@ -678,7 +694,63 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Does not support viewing notebook-level assets history in data history"
+									"Data": "Does not support viewing notebook-level "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "assets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " history in "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "data history"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220715092756-f5azf15",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220715092756-f5azf15",
+						"updated": "20220715092808"
+					},
+					"Children": [
+						{
+							"ID": "20220715092756-4bzibji",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220715092756-4bzibji",
+								"updated": "20220715092808"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Dose not support search by "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "/Assets"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
 								}
 							]
 						}

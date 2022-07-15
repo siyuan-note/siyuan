@@ -5,7 +5,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20220711122042"
+		"updated": "20220715092726"
 	},
 	"Children": [
 		{
@@ -547,7 +547,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220503121213-afjyt05",
-				"updated": "20220503121834"
+				"updated": "20220715092726"
 			},
 			"Children": [
 				{
@@ -600,7 +600,63 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "不支持在数据历史中查看笔记本级资源文件历史"
+									"Data": "不支持在"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "数据历史"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中查看笔记本级资源文件历史"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220715092717-dbd9ih9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220715092717-dbd9ih9",
+						"updated": "20220715092726"
+					},
+					"Children": [
+						{
+							"ID": "20220715092717-btrw2bk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220715092717-btrw2bk",
+								"updated": "20220715092726"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持使用 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "/资源"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 搜索"
 								}
 							]
 						}

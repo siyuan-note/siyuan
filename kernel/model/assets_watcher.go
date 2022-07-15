@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -78,6 +79,9 @@ func watchAssets() {
 					// 外部修改已有资源文件后纳入云端同步 https://github.com/siyuan-note/siyuan/issues/4694
 					IncSync()
 				}
+
+				// 重新缓存资源文件，以便使用 /资源 搜索
+				cache.LoadAssets()
 			}
 		}
 	}()

@@ -487,6 +487,7 @@
       document.querySelector('#message').classList.add('b3-snackbar--show')
       document.querySelector('#message').firstElementChild.textContent = response.msg
       inputElement.value = ''
+      captchaElement.value = ''
       inputElement.focus()
       setTimeout(() => {
         document.querySelector('#message').classList.remove('b3-snackbar--show')

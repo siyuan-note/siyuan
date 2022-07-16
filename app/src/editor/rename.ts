@@ -6,7 +6,7 @@ import {removeEmbed} from "../protyle/wysiwyg/removeEmbed";
 import {insertHTML} from "../protyle/util/insertHTML";
 import {genEmptyBlock} from "../block/util";
 import {isMobile} from "../util/functions";
-import {getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
+import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
 import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 
@@ -100,7 +100,7 @@ export const renameAsset = (assetPath: string) => {
     dialog.bindInput(inputElement, () => {
         (btnsElement[1] as HTMLButtonElement).click();
     });
-    const oldName = assetPath.substring(7, assetPath.length - pathPosix().extname(assetPath).length - 23);
+    const oldName = getAssetName(assetPath);
     inputElement.value = oldName;
     inputElement.focus();
     inputElement.select();

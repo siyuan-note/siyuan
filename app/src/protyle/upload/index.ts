@@ -4,6 +4,7 @@ import {Constants} from "../../constants";
 import {destroy} from "../util/destroy";
 import {fetchPost} from "../../util/fetch";
 import {getEditorRange} from "../util/selection";
+import {pathPosix} from "../../util/pathName";
 
 export class Upload {
     public element: HTMLElement;
@@ -99,18 +100,12 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
     const keys = Object.keys(response.data.succMap);
     keys.forEach((key, index) => {
         const path = response.data.succMap[key];
-        const lastIndex = key.lastIndexOf(".");
-        let type = key.substr(lastIndex);
-        let filename = protyle.options.upload.filename(key.substr(0, lastIndex)) + type;
-        if (-1 === lastIndex) {
-            type = "";
-            filename = protyle.options.upload.filename(key);
-        }
-        type = type.toLowerCase();
+        const type = pathPosix().extname(key).toLowerCase();
+        const filename = protyle.options.upload.filename(key);
         if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
             succFileText += `<audio controls="controls" src="${path}"></audio>`;
         } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-            succFileText += `![${filename}](${path})`;
+            succFileText += `![${filename.substring(0, filename.length - type.length)}](${path})`;
         } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
             succFileText += `<video controls="controls" src="${path}"></video>`;
         } else {

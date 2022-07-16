@@ -11,7 +11,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {getContenteditableElement, getTopAloneElement} from "../wysiwyg/getBlock";
 import {replaceFileName} from "../../editor/rename";
 import {transaction} from "../wysiwyg/transaction";
-import {getDisplayName} from "../../util/pathName";
+import {getAssetName, getDisplayName, pathPosix} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
 import {updateListOrder} from "../wysiwyg/list";
 import {escapeHtml} from "../../util/escape";
@@ -425,8 +425,8 @@ export const hintRenderWidget = (value: string, protyle: IProtyle) => {
 
 export const hintRenderAssets = (value: string, protyle: IProtyle) => {
     focusByRange(protyle.toolbar.range);
-    const type = value.substring(value.lastIndexOf("."));
-    const filename = value.replace("assets/", "");
+    const type = pathPosix().extname(value).toLowerCase();
+    const filename = value.startsWith("assets/") ? getAssetName(value) : value;
     let fileMD = "";
     if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
         fileMD += `<audio controls="controls" src="${value}"></audio>`;
@@ -435,7 +435,7 @@ export const hintRenderAssets = (value: string, protyle: IProtyle) => {
     } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
         fileMD += `<video controls="controls" src="${value}"></video>`;
     } else {
-        fileMD += `[${filename}](${value})`;
+        fileMD += `[${value.startsWith("assets/") ? filename + type : value}](${value})`;
     }
     insertHTML(protyle.lute.SpinBlockDOM(fileMD), protyle);
     protyle.toolbar.subElement.classList.add("fn__none");

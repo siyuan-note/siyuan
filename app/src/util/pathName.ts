@@ -28,6 +28,10 @@ export const getDisplayName = (filePath: string, basename = true, removeSY = fal
     return name;
 };
 
+export const getAssetName = (assetPath: string) => {
+    return assetPath.substring(7, assetPath.length - pathPosix().extname(assetPath).length - 23)
+}
+
 export const isLocalPath = (link: string) => {
     if (!link) {
         return false;

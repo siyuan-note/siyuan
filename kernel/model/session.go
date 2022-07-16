@@ -63,21 +63,19 @@ func LoginAuth(c *gin.Context) {
 	var inputCaptcha string
 	session := util.GetSession(c)
 	if session.NeedCaptcha() {
-		_ = inputCaptcha
-		//captchaArg := arg["captcha"]
-		//if nil == captchaArg {
-		//	c.Status(400)
-		//	ret.Code = -1
-		//	ret.Msg = "need input captcha"
-		//	return
-		//}
-		//inputCaptcha = captchaArg.(string)
-		//
-		//if session.Captcha != inputCaptcha {
-		//	ret.Code = -1
-		//	ret.Msg = "invalid captcha"
-		//	return
-		//}
+		captchaArg := arg["captcha"]
+		if nil == captchaArg {
+			ret.Code = 1
+			ret.Msg = "need input captcha"
+			return
+		}
+		inputCaptcha = captchaArg.(string)
+
+		if session.Captcha != inputCaptcha {
+			ret.Code = 1
+			ret.Msg = "invalid captcha"
+			return
+		}
 	}
 
 	authCode := arg["authCode"].(string)
@@ -110,7 +108,12 @@ func LoginAuth(c *gin.Context) {
 }
 
 func GetCaptcha(c *gin.Context) {
-	img, err := captcha.NewMathExpr(150, 30)
+	img, err := captcha.New(100, 26, func(options *captcha.Options) {
+		options.CharPreset = "abcdefghjkmnpqrtuvwxyz2346789"
+		options.Noise = 0.5
+		options.CurveNumber = 0
+		options.FontScale = 1.2
+	})
 	if nil != err {
 		util.LogErrorf("generates captcha failed: " + err.Error())
 		c.Status(500)

@@ -437,7 +437,7 @@
         } else {
           exitApp()
         }
-      }).catch(() =>{
+      }).catch(() => {
         exitApp()
       })
     } catch (e) {
@@ -462,15 +462,16 @@
     }).then((response) => {
       if (0 === response.code) {
         window.location.href = '/'
-      } else {
-        document.querySelector('#message').classList.add('b3-snackbar--show')
-        document.querySelector('#message').firstElementChild.textContent = response.msg
-        inputElement.value = ''
-        setTimeout(() => {
-          document.querySelector('#message').classList.remove('b3-snackbar--show')
-          document.querySelector('#message').firstElementChild.textContent = ''
-        }, 6000)
+        return
       }
+
+      document.querySelector('#message').classList.add('b3-snackbar--show')
+      document.querySelector('#message').firstElementChild.textContent = response.msg
+      inputElement.value = ''
+      setTimeout(() => {
+        document.querySelector('#message').classList.remove('b3-snackbar--show')
+        document.querySelector('#message').firstElementChild.textContent = ''
+      }, 6000)
     })
   }
 </script>

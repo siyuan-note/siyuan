@@ -32,6 +32,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/uiproc", addUIProcess)
 	ginServer.Handle("POST", "/api/system/loginAuth", model.LoginAuth)
 	ginServer.Handle("POST", "/api/system/logoutAuth", model.LogoutAuth)
+	ginServer.Handle("GET", "/api/system/getCaptcha", model.GetCaptcha)
 
 	// 需要鉴权
 

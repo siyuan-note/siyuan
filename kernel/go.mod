@@ -44,6 +44,7 @@ require (
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
 	github.com/siyuan-note/filelock v0.0.0-20220704090116-54dfb035283f
 	github.com/siyuan-note/httpclient v0.0.0-20220709030145-2bfb50f28e73
+	github.com/steambap/captcha v1.4.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	golang.org/x/image v0.0.0-20220617043117-41969df76e82
@@ -107,7 +108,6 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/steambap/captcha v1.4.1 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect

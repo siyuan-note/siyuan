@@ -5,7 +5,7 @@
 		"icon": "1f64f",
 		"id": "20211226114929-08ap1r0",
 		"title": "致謝",
-		"updated": "20220714214924"
+		"updated": "20220716105852"
 	},
 	"Children": [
 		{
@@ -28,7 +28,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220326092650-r61gazd",
-				"updated": "20220714214924"
+				"updated": "20220716105852"
 			},
 			"Children": [
 				{
@@ -2890,6 +2890,76 @@
 										{
 											"Type": "NodeCodeSpanContent",
 											"Data": "Mulan PSL v2"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220716105851-g73ysy4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220716105851-g73ysy4",
+						"updated": "20220716105852"
+					},
+					"Children": [
+						{
+							"ID": "20220716105851-yzv7qyo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220716105851-yzv7qyo",
+								"updated": "20220716105852"
+							},
+							"Children": [
+								{
+									"Type": "NodeLink",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "https://github.com/steambap/captcha"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "https://github.com/steambap/captcha"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "MIT License"
 										},
 										{
 											"Type": "NodeCodeSpanCloseMarker"

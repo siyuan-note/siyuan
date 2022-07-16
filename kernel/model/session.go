@@ -63,20 +63,21 @@ func LoginAuth(c *gin.Context) {
 	var inputCaptcha string
 	session := util.GetSession(c)
 	if session.NeedCaptcha() {
-		captchaArg := arg["captcha"]
-		if nil == captchaArg {
-			c.Status(400)
-			ret.Code = -1
-			ret.Msg = "need input captcha"
-			return
-		}
-		inputCaptcha = captchaArg.(string)
-
-		if session.Captcha != inputCaptcha {
-			ret.Code = -1
-			ret.Msg = "invalid captcha"
-			return
-		}
+		_ = inputCaptcha
+		//captchaArg := arg["captcha"]
+		//if nil == captchaArg {
+		//	c.Status(400)
+		//	ret.Code = -1
+		//	ret.Msg = "need input captcha"
+		//	return
+		//}
+		//inputCaptcha = captchaArg.(string)
+		//
+		//if session.Captcha != inputCaptcha {
+		//	ret.Code = -1
+		//	ret.Msg = "invalid captcha"
+		//	return
+		//}
 	}
 
 	authCode := arg["authCode"].(string)
@@ -98,6 +99,7 @@ func LoginAuth(c *gin.Context) {
 		return
 	}
 
+	session.AccessAuthCode = authCode
 	session.WrongAuthCount = 0
 	session.Captcha = gulu.Rand.String(7)
 	if err := session.Save(c); nil != err {

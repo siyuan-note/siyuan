@@ -466,7 +466,7 @@
       method: 'POST',
       body: JSON.stringify({
         authCode: inputElement.value,
-        captchaImg: captchaElement.value,
+        captcha: captchaElement.value,
       }),
     }).then((response) => {
       return response.json()

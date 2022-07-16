@@ -1169,6 +1169,8 @@ export class Toolbar {
                 upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
                 if (event.key === "Enter") {
                     hintRenderAssets(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"), protyle);
+                    // 空行处插入 mp3 会多一个空的 mp3 块
+                    event.preventDefault();
                 } else if (event.key === "Escape") {
                     this.subElement.classList.add("fn__none");
                     focusByRange(this.range);

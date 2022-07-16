@@ -64,7 +64,6 @@
         }
 
         .b3-text-filed {
-            text-align: center;
             width: 240px;
             border: 1px solid #5f6368;
             border-radius: 4px;
@@ -148,6 +147,10 @@
 <div style="position: relative;z-index: 2;text-align: center">
     <h1 style="margin-bottom: 48px;">思源 SiYuan</h1>
     <input class="b3-text-filed" id="authCode" type="password" placeholder="授权码 Auth code"/><br>
+    <div style="position: relative;width: 240px;margin: 8px auto 0;display: none">
+        <img id="captchaImg" style="top: 1px;position: absolute;height: 28px;right: 1px;">
+        <input id="captcha" class="b3-text-filed" placeholder="验证码 Captcha">
+    </div>
     <button class="b3-button" onclick="submitAuth()">解锁 Unlock</button>
     <div style="color: #5f6368;font-size: 14px;margin: 16px 0;">
         如果你在使用中遇到问题，请到<a href="https://ld246.com/domain/siyuan" target="_blank">社区</a>进行反馈<br>
@@ -446,6 +449,7 @@
   }
 
   const inputElement = document.getElementById('authCode')
+  const captchaElement = document.getElementById('captcha')
   inputElement.focus()
   inputElement.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
@@ -456,13 +460,24 @@
   const submitAuth = () => {
     fetch('/api/system/loginAuth', {
       method: 'POST',
-      body: JSON.stringify({'authCode': inputElement.value}),
+      body: JSON.stringify({
+        authCode: inputElement.value,
+        captchaImg: captchaElement.value,
+      }),
     }).then((response) => {
       return response.json()
     }).then((response) => {
       if (0 === response.code) {
         window.location.href = '/'
         return
+      }
+
+      if (response.code === 1) {
+        captchaElement.previousElementSibling.src = '/api/system/getCaptcha'
+        captchaElement.parentElement.style.display = 'block'
+      } else {
+        captchaElement.parentElement.style.display = 'none'
+        captchaElement.previousElementSibling.src = ''
       }
 
       document.querySelector('#message').classList.add('b3-snackbar--show')

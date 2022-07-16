@@ -24,6 +24,7 @@ import (
 	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/steambap/captcha"
 )
 
 func LogoutAuth(c *gin.Context) {
@@ -53,25 +54,83 @@ func LogoutAuth(c *gin.Context) {
 func LoginAuth(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
+
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
 		return
+	}
+
+	var inputCaptcha string
+	session := util.GetSession(c)
+	if session.NeedCaptcha() {
+		_ = inputCaptcha
+		//captchaArg := arg["captcha"]
+		//if nil == captchaArg {
+		//	c.Status(400)
+		//	ret.Code = -1
+		//	ret.Msg = "need input captcha"
+		//	return
+		//}
+		//inputCaptcha = captchaArg.(string)
+		//
+		//if session.Captcha != inputCaptcha {
+		//	ret.Code = -1
+		//	ret.Msg = "invalid captcha"
+		//	return
+		//}
 	}
 
 	authCode := arg["authCode"].(string)
 	if Conf.AccessAuthCode != authCode {
 		ret.Code = -1
 		ret.Msg = Conf.Language(83)
+
+		session.WrongAuthCount++
+		session.Captcha = gulu.Rand.String(7)
+		if session.NeedCaptcha() {
+			ret.Code = 1 // 需要渲染验证码
+		}
+
+		if err := session.Save(c); nil != err {
+			util.LogErrorf("save session failed: " + err.Error())
+			c.Status(500)
+			return
+		}
 		return
 	}
 
-	session := &util.SessionData{ID: gulu.Rand.Int(0, 1024), AccessAuthCode: authCode}
+	session.AccessAuthCode = authCode
+	session.WrongAuthCount = 0
+	session.Captcha = gulu.Rand.String(7)
 	if err := session.Save(c); nil != err {
-		util.LogErrorf("saves session failed: " + err.Error())
-		ret.Code = -1
-		ret.Msg = "save session failed"
+		util.LogErrorf("save session failed: " + err.Error())
+		c.Status(500)
 		return
 	}
+}
+
+func GetCaptcha(c *gin.Context) {
+	img, err := captcha.NewMathExpr(150, 30)
+	if nil != err {
+		util.LogErrorf("generates captcha failed: " + err.Error())
+		c.Status(500)
+		return
+	}
+
+	session := util.GetSession(c)
+	session.Captcha = img.Text
+	if err = session.Save(c); nil != err {
+		util.LogErrorf("save session failed: " + err.Error())
+		c.Status(500)
+		return
+	}
+
+	if err = img.WriteImage(c.Writer); nil != err {
+		util.LogErrorf("writes captcha image failed: " + err.Error())
+		c.Status(500)
+		return
+	}
+	c.Status(200)
 }
 
 func CheckReadonly(c *gin.Context) {

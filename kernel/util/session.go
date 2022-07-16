@@ -26,6 +26,12 @@ import (
 type SessionData struct {
 	ID             int
 	AccessAuthCode string
+	WrongAuthCount int
+	Captcha        string
+}
+
+func (sd *SessionData) NeedCaptcha() bool {
+	return 3 < sd.WrongAuthCount
 }
 
 // Save saves the current session of the specified context.

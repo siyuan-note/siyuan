@@ -305,6 +305,7 @@
 * [https://github.com/siyuan-note/encryption](https://github.com/siyuan-note/encryption) `Mulan PSL v2`
 * [https://github.com/siyuan-note/filelock](https://github.com/siyuan-note/filelock) `Mulan PSL v2`
 * [https://github.com/siyuan-note/httpclient](https://github.com/siyuan-note/httpclient) `Mulan PSL v2`
+* [https://github.com/steambap/captcha](https://github.com/steambap/captcha) `MIT License`
 * [https://github.com/vmihailenco/msgpack](https://github.com/vmihailenco/msgpack) `BSD-2-Clause License`
 * [https://github.com/xrash/smetrics](https://github.com/xrash/smetrics) `MIT License`
 * [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`

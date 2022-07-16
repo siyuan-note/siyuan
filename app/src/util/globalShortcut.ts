@@ -985,6 +985,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         return true;
     }
     if (event.key === "Delete" || (event.key === "Backspace" && isMac())) {
+        window.siyuan.menus.menu.remove();
         if (isFile) {
             deleteFile(notebookId, pathString, getDisplayName(liElement.getAttribute("data-name"), false, true));
         } else {

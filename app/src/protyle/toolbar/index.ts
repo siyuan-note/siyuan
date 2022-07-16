@@ -40,6 +40,7 @@ import {unicode2Emoji} from "../../emoji";
 import {escapeHtml} from "../../util/escape";
 import {hideElements} from "../ui/hideElements";
 import {linkMenu} from "../../menus/protyle";
+import {renderAssetsPreview} from "../../asset/renderAssets";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -1152,21 +1153,38 @@ export class Toolbar {
         }, (response) => {
             let html = "";
             response.data.forEach((item: { hName: string, path: string }, index: number) => {
-                html += `<di data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</di>`;
+                html += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</div>`;
             });
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
-            this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
-<div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
+            this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
+<div class="fn__flex-column" style="min-width: 260px">
+    <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
+</div>
+<div style="width: 260px;display: flex;padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
 </div>`;
-
+            const listElement = this.subElement.querySelector(".b3-list");
+            listElement.addEventListener("mouseover", (event) => {
+                const target = event.target as HTMLElement;
+                const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
+                if (!hoverItemElement) {
+                    return;
+                }
+                previewElement.innerHTML = renderAssetsPreview(hoverItemElement.getAttribute("data-value"))
+            })
+            const previewElement = this.subElement.firstElementChild.lastElementChild
+            previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
             const inputElement = this.subElement.querySelector("input");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 event.stopPropagation();
                 if (event.isComposing) {
                     return;
                 }
-                upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
+                const currentElement = upDownHint(listElement, event);
+                if (currentElement) {
+                    previewElement.innerHTML = renderAssetsPreview(currentElement.getAttribute("data-value"))
+                }
                 if (event.key === "Enter") {
                     hintRenderAssets(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"), protyle);
                     // 空行处插入 mp3 会多一个空的 mp3 块
@@ -1185,16 +1203,17 @@ export class Toolbar {
                     response.data.forEach((item: { path: string, hName: string }, index: number) => {
                         searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</div>`;
                     });
-                    this.subElement.firstElementChild.lastElementChild.innerHTML = searchHTML;
+                    listElement.innerHTML = searchHTML;
+                    previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
                 });
             });
             this.subElement.lastElementChild.addEventListener("click", (event) => {
                 const target = event.target as HTMLElement;
-                const listElement = hasClosestByClassName(target, "b3-list-item");
-                if (!listElement) {
+                const listItemElement = hasClosestByClassName(target, "b3-list-item");
+                if (!listItemElement) {
                     return;
                 }
-                hintRenderAssets(listElement.getAttribute("data-value"), protyle);
+                hintRenderAssets(listItemElement.getAttribute("data-value"), protyle);
             });
             const rangePosition = getSelectionPosition(nodeElement, range);
             this.subElement.classList.remove("fn__none");

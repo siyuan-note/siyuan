@@ -7,6 +7,7 @@ import {unicode2Emoji} from "../emoji";
 import {escapeHtml} from "./escape";
 import {isMobile} from "./functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {renderAssetsPreview} from "../asset/renderAssets";
 
 const renderDoc = (notebook: INotebook, element: HTMLElement) => {
     if (!notebook || !notebook.id) {
@@ -87,16 +88,7 @@ const renderAssets = (element: HTMLElement) => {
                 logsHTML += "</ul>";
 
                 if (index === 0) {
-                    const type = item.items[0].title.substr(item.items[0].title.lastIndexOf(".")).toLowerCase();
-                    if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-                        element.lastElementChild.innerHTML = `<img src="${item.items[0].path}">`;
-                    } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
-                        element.lastElementChild.innerHTML = `<audio controls="controls" src="${item.items[0].path}"></audio>`;
-                    } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
-                        element.lastElementChild.innerHTML = `<video controls="controls" src="${item.items[0].path}"></video>`;
-                    } else {
-                        element.lastElementChild.innerHTML = item.items[0].path;
-                    }
+                    element.lastElementChild.innerHTML = renderAssetsPreview(item.items[0].path);
                 }
             }
         });
@@ -394,16 +386,7 @@ export const openHistory = () => {
             } else if (target.classList.contains("b3-list-item") && (type === "assets" || type === "doc")) {
                 const dataPath = target.getAttribute("data-path");
                 if (type === "assets") {
-                    const type = dataPath.substr(dataPath.lastIndexOf(".")).toLowerCase();
-                    if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-                        firstPanelElement.nextElementSibling.lastElementChild.innerHTML = `<img src="${dataPath}">`;
-                    } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
-                        firstPanelElement.nextElementSibling.lastElementChild.innerHTML = `<audio controls="controls" src="${dataPath}"></audio>`;
-                    } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
-                        firstPanelElement.nextElementSibling.lastElementChild.innerHTML = `<video controls="controls" src="${dataPath}"></video>`;
-                    } else {
-                        firstPanelElement.nextElementSibling.lastElementChild.innerHTML = dataPath;
-                    }
+                    firstPanelElement.nextElementSibling.lastElementChild.innerHTML = renderAssetsPreview(dataPath);
                 } else if (type === "doc") {
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath

@@ -19,6 +19,7 @@ export const upDownHint = (listElement: Element, event: KeyboardEvent) => {
             listElement.scrollTop > currentHintElement.offsetTop) {
             listElement.scrollTop = currentHintElement.offsetTop - listElement.clientHeight + currentHintElement.clientHeight;
         }
+        return currentHintElement;
     } else if (event.key === "ArrowUp") {
         event.preventDefault();
         event.stopPropagation();
@@ -38,5 +39,6 @@ export const upDownHint = (listElement: Element, event: KeyboardEvent) => {
             listElement.scrollTop > currentHintElement.offsetTop - currentHintElement.clientHeight * 2) {
             listElement.scrollTop = currentHintElement.offsetTop - currentHintElement.clientHeight * 2;
         }
+        return currentHintElement;
     }
 };

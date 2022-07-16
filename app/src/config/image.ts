@@ -1,12 +1,12 @@
 import {escapeHtml} from "../util/escape";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {Constants} from "../constants";
 import {pathPosix} from "../util/pathName";
 import {isBrowser} from "../util/functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
 import {getAllModels} from "../layout/getAll";
 import {openBy} from "../editor/util";
+import {renderAssetsPreview} from "../asset/renderAssets";
 
 export const image = {
     element: undefined as Element,
@@ -90,18 +90,8 @@ export const image = {
             const liElement = hasClosestByClassName(event.target as Element, "b3-list-item");
             if (liElement && liElement.getAttribute("data-path") !== assetsListElement.nextElementSibling.getAttribute("data-path")) {
                 const item = liElement.getAttribute("data-path");
-                const type = item.substr(item.lastIndexOf(".")).toLowerCase();
-                const pathString = item;
                 assetsListElement.nextElementSibling.setAttribute("data-path", item);
-                if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-                    assetsListElement.nextElementSibling.innerHTML = `<img src="${pathString}">`;
-                } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
-                    assetsListElement.nextElementSibling.innerHTML = `<audio controls="controls" src="${pathString}"></audio>`;
-                } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
-                    assetsListElement.nextElementSibling.innerHTML = `<video controls="controls" src="${pathString}"></video>`;
-                } else {
-                    assetsListElement.nextElementSibling.innerHTML = "";
-                }
+                assetsListElement.nextElementSibling.innerHTML = renderAssetsPreview(item);
             }
         });
         fetchPost("/api/asset/getUnusedAssets", {}, response => {

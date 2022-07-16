@@ -627,8 +627,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             inputElement.value = linkElement.textContent.replace(Constants.ZWSP, "");
             inputElement.addEventListener("change", () => {
                 if (!inputElement.value) {
-                    protyle.toolbar.setInlineMark(protyle, "link", "remove");
-                    window.siyuan.menus.menu.remove();
+                    linkElement.remove();
                 }
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 html = nodeElement.outerHTML;

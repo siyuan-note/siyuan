@@ -458,7 +458,7 @@
   })
 
   captchaElement.previousElementSibling.addEventListener('click', function () {
-    this.src = '/api/system/getCaptcha'
+    this.src = `/api/system/getCaptcha?v=${new Date().getTime()}`
   })
 
   const submitAuth = () => {
@@ -477,7 +477,7 @@
       }
 
       if (response.code === 1) {
-        captchaElement.previousElementSibling.src = '/api/system/getCaptcha'
+        captchaElement.previousElementSibling.src = `/api/system/getCaptcha?v=${new Date().getTime()}`
         captchaElement.parentElement.style.display = 'block'
       } else {
         captchaElement.parentElement.style.display = 'none'

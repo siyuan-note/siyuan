@@ -66,14 +66,14 @@ func LoginAuth(c *gin.Context) {
 		captchaArg := arg["captcha"]
 		if nil == captchaArg {
 			ret.Code = 1
-			ret.Msg = "need input captcha"
+			ret.Msg = Conf.Language(21)
 			return
 		}
 		inputCaptcha = captchaArg.(string)
 
 		if session.Captcha != inputCaptcha {
 			ret.Code = 1
-			ret.Msg = "invalid captcha"
+			ret.Msg = Conf.Language(22)
 			return
 		}
 	}

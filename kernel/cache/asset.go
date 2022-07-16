@@ -45,7 +45,7 @@ func LoadAssets() {
 			}
 			return nil
 		}
-		if strings.HasSuffix(info.Name(), ".sya") {
+		if strings.HasSuffix(info.Name(), ".sya") || strings.HasPrefix(info.Name(), ".") {
 			return nil
 		}
 

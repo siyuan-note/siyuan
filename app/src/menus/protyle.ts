@@ -612,6 +612,10 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                         focusByRange(protyle.toolbar.range);
                     }
                     window.siyuan.menus.menu.remove();
+                } else if (event.key === "Tab" && !event.isComposing) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    element.nextElementSibling.querySelector("input").focus();
                 }
             });
         }
@@ -649,6 +653,14 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                         focusByRange(protyle.toolbar.range);
                     }
                     window.siyuan.menus.menu.remove();
+                } else if (event.key === "Tab" && !event.isComposing) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (event.shiftKey) {
+                        element.previousElementSibling.querySelector("input").focus();
+                    } else {
+                        element.nextElementSibling.querySelector("input").focus();
+                    }
                 }
             });
         }
@@ -679,6 +691,10 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                         focusByRange(protyle.toolbar.range);
                     }
                     window.siyuan.menus.menu.remove();
+                } else if (event.key === "Tab" && event.shiftKey && !event.isComposing) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    element.previousElementSibling.querySelector("input").focus();
                 }
             });
         }
@@ -690,7 +706,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             protyle.toolbar.setInlineMark(protyle, "link", "remove");
         }
     }).element);
-    if (linkAddress.startsWith("assets/")) {
+    if (linkAddress?.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.rename,
             click() {

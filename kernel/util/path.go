@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
 )
 
 var (
@@ -96,7 +97,7 @@ func GetLocalIPs() (ret []string) {
 	ret = []string{}
 	addrs, err := net.InterfaceAddrs()
 	if nil != err {
-		LogWarnf("get interface addresses failed: %s", err)
+		logging.LogWarnf("get interface addresses failed: %s", err)
 		return
 	}
 	for _, addr := range addrs {

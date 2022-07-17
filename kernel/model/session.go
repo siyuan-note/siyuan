@@ -23,6 +23,7 @@ import (
 	"github.com/88250/gulu"
 	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/steambap/captcha"
 )
@@ -45,7 +46,7 @@ func LogoutAuth(c *gin.Context) {
 	})
 	session.Clear()
 	if err := session.Save(); nil != err {
-		util.LogErrorf("saves session failed: " + err.Error())
+		logging.LogErrorf("saves session failed: " + err.Error())
 		ret.Code = -1
 		ret.Msg = "save session failed"
 	}
@@ -90,7 +91,7 @@ func LoginAuth(c *gin.Context) {
 		}
 
 		if err := session.Save(c); nil != err {
-			util.LogErrorf("save session failed: " + err.Error())
+			logging.LogErrorf("save session failed: " + err.Error())
 			c.Status(500)
 			return
 		}
@@ -101,7 +102,7 @@ func LoginAuth(c *gin.Context) {
 	session.WrongAuthCount = 0
 	session.Captcha = gulu.Rand.String(7)
 	if err := session.Save(c); nil != err {
-		util.LogErrorf("save session failed: " + err.Error())
+		logging.LogErrorf("save session failed: " + err.Error())
 		c.Status(500)
 		return
 	}
@@ -114,7 +115,7 @@ func GetCaptcha(c *gin.Context) {
 		options.CurveNumber = 0
 	})
 	if nil != err {
-		util.LogErrorf("generates captcha failed: " + err.Error())
+		logging.LogErrorf("generates captcha failed: " + err.Error())
 		c.Status(500)
 		return
 	}
@@ -122,13 +123,13 @@ func GetCaptcha(c *gin.Context) {
 	session := util.GetSession(c)
 	session.Captcha = img.Text
 	if err = session.Save(c); nil != err {
-		util.LogErrorf("save session failed: " + err.Error())
+		logging.LogErrorf("save session failed: " + err.Error())
 		c.Status(500)
 		return
 	}
 
 	if err = img.WriteImage(c.Writer); nil != err {
-		util.LogErrorf("writes captcha image failed: " + err.Error())
+		logging.LogErrorf("writes captcha image failed: " + err.Error())
 		c.Status(500)
 		return
 	}
@@ -148,7 +149,7 @@ func CheckReadonly(c *gin.Context) {
 }
 
 func CheckAuth(c *gin.Context) {
-	//util.LogInfof("check auth for [%s]", c.Request.RequestURI)
+	//logging.LogInfof("check auth for [%s]", c.Request.RequestURI)
 
 	// 放过 /appearance/
 	if strings.HasPrefix(c.Request.RequestURI, "/appearance/") ||

@@ -27,6 +27,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -102,7 +103,7 @@ func Upload(c *gin.Context) {
 
 	form, err := c.MultipartForm()
 	if nil != err {
-		util.LogErrorf("insert asset failed: %s", err)
+		logging.LogErrorf("insert asset failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

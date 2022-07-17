@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -60,6 +61,6 @@ func LoadAssets() {
 	})
 	elapsed := time.Since(start)
 	if 2000 < elapsed.Milliseconds() {
-		util.LogInfof("loaded assets [%.2fs]", elapsed.Seconds())
+		logging.LogInfof("loaded assets [%.2fs]", elapsed.Seconds())
 	}
 }

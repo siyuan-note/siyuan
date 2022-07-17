@@ -37,6 +37,7 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -96,16 +97,16 @@ func NetImg2LocalAssets(rootID string) (err error) {
 				request := httpclient.NewBrowserRequest()
 				resp, reqErr := request.Get(u)
 				if nil != reqErr {
-					util.LogErrorf("download net img [%s] failed: %s", u, reqErr)
+					logging.LogErrorf("download net img [%s] failed: %s", u, reqErr)
 					return ast.WalkSkipChildren
 				}
 				if 200 != resp.StatusCode {
-					util.LogErrorf("download net img [%s] failed: %d", u, resp.StatusCode)
+					logging.LogErrorf("download net img [%s] failed: %d", u, resp.StatusCode)
 					return ast.WalkSkipChildren
 				}
 				data, repErr := resp.ToBytes()
 				if nil != repErr {
-					util.LogErrorf("download net img [%s] failed: %s", u, repErr)
+					logging.LogErrorf("download net img [%s] failed: %s", u, repErr)
 					return ast.WalkSkipChildren
 				}
 				var name string
@@ -138,7 +139,7 @@ func NetImg2LocalAssets(rootID string) (err error) {
 				name = "net-img-" + name + "-" + ast.NewNodeID() + ext
 				writePath := filepath.Join(util.DataDir, "assets", name)
 				if err = gulu.File.WriteFileSafer(writePath, data, 0644); nil != err {
-					util.LogErrorf("write downloaded net img [%s] to local assets [%s] failed: %s", u, writePath, err)
+					logging.LogErrorf("write downloaded net img [%s] to local assets [%s] failed: %s", u, writePath, err)
 					return ast.WalkSkipChildren
 				}
 
@@ -259,11 +260,11 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 		var absPath string
 		absPath, err = GetAssetAbsPath(asset)
 		if nil != err {
-			util.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
+			logging.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
 			return
 		}
 		if "" == absPath {
-			util.LogErrorf("not found asset [%s]", asset)
+			logging.LogErrorf("not found asset [%s]", asset)
 			err = errors.New(fmt.Sprintf(Conf.Language(12), asset))
 			return
 		}
@@ -277,7 +278,7 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 
 	uploadAbsAssets = gulu.Str.RemoveDuplicatedElem(uploadAbsAssets)
 
-	util.LogInfof("uploading [%d] assets", len(uploadAbsAssets))
+	logging.LogInfof("uploading [%d] assets", len(uploadAbsAssets))
 	if loadErr := LoadUploadToken(); nil != loadErr {
 		util.PushMsg(loadErr.Error(), 5000)
 		return
@@ -286,10 +287,10 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 	var completedUploadAssets []string
 	for _, absAsset := range uploadAbsAssets {
 		if fi, statErr := os.Stat(absAsset); nil != statErr {
-			util.LogErrorf("stat file [%s] failed: %s", absAsset, statErr)
+			logging.LogErrorf("stat file [%s] failed: %s", absAsset, statErr)
 			return statErr
 		} else if util.CloudSingleFileMaxSizeLimit/10 <= fi.Size() {
-			util.LogWarnf("file [%s] larger than 10MB, ignore uploading it", absAsset)
+			logging.LogWarnf("file [%s] larger than 10MB, ignore uploading it", absAsset)
 			continue
 		}
 
@@ -301,7 +302,7 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 			SetCookies(&http.Cookie{Name: "symphony", Value: uploadToken}).
 			Post(util.AliyunServer + "/apis/siyuan/upload?ver=" + util.Ver)
 		if nil != reqErr {
-			util.LogErrorf("upload assets failed: %s", reqErr)
+			logging.LogErrorf("upload assets failed: %s", reqErr)
 			return ErrFailedToConnectCloudServer
 		}
 
@@ -311,7 +312,7 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 		}
 
 		if 0 != requestResult.Code {
-			util.LogErrorf("upload assets failed: %s", requestResult.Msg)
+			logging.LogErrorf("upload assets failed: %s", requestResult.Msg)
 			err = errors.New(fmt.Sprintf(Conf.Language(94), requestResult.Msg))
 			return
 		}
@@ -319,12 +320,12 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 		absAsset = filepath.ToSlash(absAsset)
 		relAsset := absAsset[strings.Index(absAsset, "assets/"):]
 		completedUploadAssets = append(completedUploadAssets, relAsset)
-		util.LogInfof("uploaded asset [%s]", relAsset)
+		logging.LogInfof("uploaded asset [%s]", relAsset)
 	}
 
 	if 0 < len(completedUploadAssets) {
 		syncedAssets = readWorkspaceAssets()
-		util.LogInfof("uploaded [%d] assets", len(completedUploadAssets))
+		logging.LogInfof("uploaded [%d] assets", len(completedUploadAssets))
 		for _, completedSyncAsset := range completedUploadAssets {
 			syncedAssets = append(syncedAssets, completedSyncAsset)
 		}
@@ -337,7 +338,7 @@ func readWorkspaceAssets() (ret []string) {
 	ret = []string{}
 	confDir := filepath.Join(util.DataDir, "assets", ".siyuan")
 	if err := os.MkdirAll(confDir, 0755); nil != err {
-		util.LogErrorf("create assets conf dir [%s] failed: %s", confDir, err)
+		logging.LogErrorf("create assets conf dir [%s] failed: %s", confDir, err)
 		return
 	}
 	confPath := filepath.Join(confDir, "assets.json")
@@ -347,11 +348,11 @@ func readWorkspaceAssets() (ret []string) {
 
 	data, err := os.ReadFile(confPath)
 	if nil != err {
-		util.LogErrorf("read assets conf failed: %s", err)
+		logging.LogErrorf("read assets conf failed: %s", err)
 		return
 	}
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		util.LogErrorf("parse assets conf failed: %s, re-init it", err)
+		logging.LogErrorf("parse assets conf failed: %s, re-init it", err)
 		return
 	}
 	return
@@ -360,7 +361,7 @@ func readWorkspaceAssets() (ret []string) {
 func saveWorkspaceAssets(assets []string) {
 	confDir := filepath.Join(util.DataDir, "assets", ".siyuan")
 	if err := os.MkdirAll(confDir, 0755); nil != err {
-		util.LogErrorf("create assets conf dir [%s] failed: %s", confDir, err)
+		logging.LogErrorf("create assets conf dir [%s] failed: %s", confDir, err)
 		return
 	}
 	confPath := filepath.Join(confDir, "assets.json")
@@ -369,11 +370,11 @@ func saveWorkspaceAssets(assets []string) {
 	sort.Strings(assets)
 	data, err := gulu.JSON.MarshalIndentJSON(assets, "", "  ")
 	if nil != err {
-		util.LogErrorf("create assets conf failed: %s", err)
+		logging.LogErrorf("create assets conf failed: %s", err)
 		return
 	}
 	if err = gulu.File.WriteFileSafer(confPath, data, 0644); nil != err {
-		util.LogErrorf("write assets conf failed: %s", err)
+		logging.LogErrorf("write assets conf failed: %s", err)
 		return
 	}
 }
@@ -390,7 +391,7 @@ func RemoveUnusedAssets() (ret []string) {
 
 	historyDir, err := util.GetHistoryDir("delete")
 	if nil != err {
-		util.LogErrorf("get history dir failed: %s", err)
+		logging.LogErrorf("get history dir failed: %s", err)
 		return
 	}
 
@@ -406,7 +407,7 @@ func RemoveUnusedAssets() (ret []string) {
 	for _, unusedAsset := range unusedAssets {
 		if unusedAsset = filepath.Join(util.DataDir, unusedAsset); gulu.File.IsExist(unusedAsset) {
 			if err := os.RemoveAll(unusedAsset); nil != err {
-				util.LogErrorf("remove unused asset [%s] failed: %s", unusedAsset, err)
+				logging.LogErrorf("remove unused asset [%s] failed: %s", unusedAsset, err)
 			}
 		}
 		ret = append(ret, unusedAsset)
@@ -425,7 +426,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 
 	historyDir, err := util.GetHistoryDir("delete")
 	if nil != err {
-		util.LogErrorf("get history dir failed: %s", err)
+		logging.LogErrorf("get history dir failed: %s", err)
 		return
 	}
 
@@ -436,7 +437,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 	}
 
 	if err = os.RemoveAll(p); nil != err {
-		util.LogErrorf("remove unused asset [%s] failed: %s", p, err)
+		logging.LogErrorf("remove unused asset [%s] failed: %s", p, err)
 	}
 	ret = p
 	IncSync()
@@ -464,7 +465,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 	newName = util.AssetName(newName) + filepath.Ext(oldPath)
 	newPath := "assets/" + newName
 	if err = gulu.File.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
-		util.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
+		logging.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
 		return
 	}
 	oldName := path.Base(oldPath)
@@ -479,7 +480,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 			for _, treeAbsPath := range paths {
 				data, readErr := filelock.NoLockFileRead(treeAbsPath)
 				if nil != readErr {
-					util.LogErrorf("get data [path=%s] failed: %s", treeAbsPath, readErr)
+					logging.LogErrorf("get data [path=%s] failed: %s", treeAbsPath, readErr)
 					err = readErr
 					return
 				}
@@ -490,7 +491,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 
 				data = bytes.Replace(data, []byte(oldName), []byte(newName), -1)
 				if writeErr := filelock.NoLockFileWrite(treeAbsPath, data); nil != writeErr {
-					util.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
+					logging.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
 					err = writeErr
 					return
 				}
@@ -498,7 +499,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 				p := filepath.ToSlash(strings.TrimPrefix(treeAbsPath, filepath.Join(util.DataDir, notebook.ID)))
 				tree, parseErr := LoadTree(notebook.ID, p)
 				if nil != parseErr {
-					util.LogErrorf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
+					logging.LogErrorf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
 					err = parseErr
 					return
 				}
@@ -795,7 +796,7 @@ func copyAssetsToDataAssets(rootPath string) {
 	dataAssetsPath := filepath.Join(util.DataDir, "assets")
 	for _, assetsDirPath := range assetsDirPaths {
 		if err := gulu.File.Copy(assetsDirPath, dataAssetsPath); nil != err {
-			util.LogErrorf("copy tree assets from [%s] to [%s] failed: %s", assetsDirPaths, dataAssetsPath, err)
+			logging.LogErrorf("copy tree assets from [%s] to [%s] failed: %s", assetsDirPaths, dataAssetsPath, err)
 		}
 	}
 }

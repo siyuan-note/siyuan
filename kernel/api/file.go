@@ -29,6 +29,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -49,12 +50,12 @@ func getFile(c *gin.Context) {
 		return
 	}
 	if nil != err {
-		util.LogErrorf("stat [%s] failed: %s", filePath, err)
+		logging.LogErrorf("stat [%s] failed: %s", filePath, err)
 		c.Status(500)
 		return
 	}
 	if info.IsDir() {
-		util.LogErrorf("file [%s] is a directory", filePath)
+		logging.LogErrorf("file [%s] is a directory", filePath)
 		c.Status(405)
 		return
 	}
@@ -78,28 +79,28 @@ func putFile(c *gin.Context) {
 	if isDir {
 		err = os.MkdirAll(filePath, 0755)
 		if nil != err {
-			util.LogErrorf("make a dir [%s] failed: %s", filePath, err)
+			logging.LogErrorf("make a dir [%s] failed: %s", filePath, err)
 		}
 	} else {
 		file, _ := c.FormFile("file")
 		if nil == file {
-			util.LogErrorf("form file is nil [path=%s]", filePath)
+			logging.LogErrorf("form file is nil [path=%s]", filePath)
 			c.Status(400)
 			return
 		}
 
 		dir := filepath.Dir(filePath)
 		if err = os.MkdirAll(dir, 0755); nil != err {
-			util.LogErrorf("put a file [%s] make dir [%s] failed: %s", filePath, dir, err)
+			logging.LogErrorf("put a file [%s] make dir [%s] failed: %s", filePath, dir, err)
 		} else {
 			if filelock.IsLocked(filePath) {
 				msg := fmt.Sprintf("file [%s] is locked", filePath)
-				util.LogErrorf(msg)
+				logging.LogErrorf(msg)
 				err = errors.New(msg)
 			} else {
 				err = writeFile(file, filePath)
 				if nil != err {
-					util.LogErrorf("put a file [%s] failed: %s", filePath, err)
+					logging.LogErrorf("put a file [%s] failed: %s", filePath, err)
 				}
 			}
 		}
@@ -113,13 +114,13 @@ func putFile(c *gin.Context) {
 	modTimeStr := c.PostForm("modTime")
 	modTimeInt, err := strconv.ParseInt(modTimeStr, 10, 64)
 	if nil != err {
-		util.LogErrorf("parse mod time [%s] failed: %s", modTimeStr, err)
+		logging.LogErrorf("parse mod time [%s] failed: %s", modTimeStr, err)
 		c.Status(500)
 		return
 	}
 	modTime := millisecond2Time(modTimeInt)
 	if err = os.Chtimes(filePath, modTime, modTime); nil != err {
-		util.LogErrorf("change time failed: %s", err)
+		logging.LogErrorf("change time failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

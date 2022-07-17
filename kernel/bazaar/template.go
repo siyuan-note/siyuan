@@ -27,6 +27,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -68,11 +69,11 @@ func Templates() (templates []*Template) {
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/templates.json"
 	resp, reqErr := request.SetResult(&result).Get(u)
 	if nil != reqErr {
-		util.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
+		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
 		return
 	}
 	if 200 != resp.StatusCode {
-		util.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
+		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
 		return
 	}
 
@@ -89,11 +90,11 @@ func Templates() (templates []*Template) {
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/template.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(template).Get(innerU)
 		if nil != innerErr {
-			util.LogErrorf("get community template [%s] failed: %s", repoURL, innerErr)
+			logging.LogErrorf("get community template [%s] failed: %s", repoURL, innerErr)
 			return
 		}
 		if 200 != innerResp.StatusCode {
-			util.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
+			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
 
@@ -140,7 +141,7 @@ func InstallTemplate(repoURL, repoHash, installPath string, chinaCDN bool, syste
 
 func UninstallTemplate(installPath string) error {
 	if err := os.RemoveAll(installPath); nil != err {
-		util.LogErrorf("remove template [%s] failed: %s", installPath, err)
+		logging.LogErrorf("remove template [%s] failed: %s", installPath, err)
 		return errors.New("remove community template failed")
 	}
 	return nil
@@ -153,7 +154,7 @@ func filterLegacyTemplates(templates []*Template) (ret []*Template) {
 			updated := theme.Updated[:len("2006-01-02T15:04:05")]
 			t, err := time.Parse("2006-01-02T15:04:05", updated)
 			if nil != err {
-				util.LogErrorf("convert update time [%s] failed: %s", updated, err)
+				logging.LogErrorf("convert update time [%s] failed: %s", updated, err)
 				continue
 			}
 			if t.After(verTime) {

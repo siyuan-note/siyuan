@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -39,7 +40,7 @@ func listWorkspaceDirs(c *gin.Context) {
 	data, err := os.ReadFile(workspaceConf)
 	var workspacePaths []string
 	if err = gulu.JSON.UnmarshalJSON(data, &workspacePaths); nil != err {
-		util.LogErrorf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogErrorf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
 		return
 	}
 	ret.Data = workspacePaths
@@ -76,10 +77,10 @@ func setWorkspaceDir(c *gin.Context) {
 	workspaceConf := filepath.Join(util.HomeDir, ".config", "siyuan", "workspace.json")
 	data, err := os.ReadFile(workspaceConf)
 	if nil != err {
-		util.LogErrorf("read workspace conf failed: %s", err)
+		logging.LogErrorf("read workspace conf failed: %s", err)
 	} else {
 		if err = gulu.JSON.UnmarshalJSON(data, &workspacePaths); nil != err {
-			util.LogErrorf("unmarshal workspace conf failed: %s", err)
+			logging.LogErrorf("unmarshal workspace conf failed: %s", err)
 		}
 	}
 

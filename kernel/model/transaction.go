@@ -33,6 +33,7 @@ import (
 	util2 "github.com/88250/lute/util"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -88,11 +89,11 @@ func WaitForWritingFiles() {
 	for i := 0; isWritingFiles(); i++ {
 		time.Sleep(5 * time.Millisecond)
 		if 2000 < i && !printLog { // 10s 后打日志
-			util.LogWarnf("file is writing: \n%s", util.ShortStack())
+			logging.LogWarnf("file is writing: \n%s", logging.ShortStack())
 			printLog = true
 		}
 		if 12000 < i && !lastPrintLog { // 60s 后打日志
-			util.LogWarnf("file is still writing")
+			logging.LogWarnf("file is still writing")
 			lastPrintLog = true
 		}
 	}
@@ -116,7 +117,7 @@ func AutoFlushTx() {
 func flushTx() {
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
-	defer util.Recover()
+	defer logging.Recover()
 
 	currentTx = mergeTx()
 	start := time.Now()
@@ -129,13 +130,13 @@ func flushTx() {
 			util.PushTxErr(Conf.Language(76), txErr.code, txErr.id)
 			return
 		default:
-			util.LogFatalf("transaction failed: %s", txErr.msg)
+			logging.LogFatalf("transaction failed: %s", txErr.msg)
 		}
 	}
 	elapsed := time.Now().Sub(start).Milliseconds()
 	if 0 < len(currentTx.DoOperations) {
 		if 2000 < elapsed {
-			util.LogWarnf("tx [%dms]", elapsed)
+			logging.LogWarnf("tx [%dms]", elapsed)
 		}
 	}
 	currentTx = nil
@@ -214,7 +215,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		if strings.Contains(err.Error(), "database is closed") {
 			return
 		}
-		util.LogErrorf("begin tx failed: %s", err)
+		logging.LogErrorf("begin tx failed: %s", err)
 		ret = &TxErr{msg: err.Error()}
 		return
 	}
@@ -225,7 +226,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			return
 		}
 		if cr := tx.commit(); nil != cr {
-			util.LogErrorf("commit tx failed: %s", cr)
+			logging.LogErrorf("commit tx failed: %s", cr)
 			return &TxErr{msg: cr.Error()}
 		}
 		return
@@ -263,7 +264,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	}
 
 	if cr := tx.commit(); nil != cr {
-		util.LogErrorf("commit tx failed: %s", cr)
+		logging.LogErrorf("commit tx failed: %s", cr)
 		return &TxErr{msg: cr.Error()}
 	}
 	elapsed := int(time.Now().Sub(start).Milliseconds())
@@ -279,13 +280,13 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	srcTree, err := tx.loadTree(id)
 	if nil != err {
-		util.LogErrorf("load tree [id=%s] failed: %s", id, err)
+		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
 	srcNode := treenode.GetNodeInTree(srcTree, id)
 	if nil == srcNode {
-		util.LogErrorf("get node [%s] in tree [%s] failed", id, srcTree.Root.ID)
+		logging.LogErrorf("get node [%s] in tree [%s] failed", id, srcTree.Root.ID)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
@@ -309,7 +310,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		var targetTree *parse.Tree
 		targetTree, err = tx.loadTree(targetPreviousID)
 		if nil != err {
-			util.LogErrorf("load tree [id=%s] failed: %s", targetPreviousID, err)
+			logging.LogErrorf("load tree [id=%s] failed: %s", targetPreviousID, err)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: targetPreviousID}
 		}
 		isSameTree := srcTree.ID == targetTree.ID
@@ -319,7 +320,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 		targetNode := treenode.GetNodeInTree(targetTree, targetPreviousID)
 		if nil == targetNode {
-			util.LogErrorf("get node [%s] in tree [%s] failed", targetPreviousID, targetTree.Root.ID)
+			logging.LogErrorf("get node [%s] in tree [%s] failed", targetPreviousID, targetTree.Root.ID)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: targetPreviousID}
 		}
 
@@ -357,7 +358,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 	targetTree, err := tx.loadTree(targetParentID)
 	if nil != err {
-		util.LogErrorf("load tree [id=%s] failed: %s", targetParentID, err)
+		logging.LogErrorf("load tree [id=%s] failed: %s", targetParentID, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: targetParentID}
 	}
 	isSameTree := srcTree.ID == targetTree.ID
@@ -367,7 +368,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 	targetNode := treenode.GetNodeInTree(targetTree, targetParentID)
 	if nil == targetNode {
-		util.LogErrorf("get node [%s] in tree [%s] failed", targetParentID, targetTree.Root.ID)
+		logging.LogErrorf("get node [%s] in tree [%s] failed", targetParentID, targetTree.Root.ID)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: targetParentID}
 	}
 
@@ -430,7 +431,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	block := treenode.GetBlockTree(operation.ParentID)
 	if nil == block {
 		msg := fmt.Sprintf("not found parent block [id=%s]", operation.ParentID)
-		util.LogErrorf(msg)
+		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	tree, err := tx.loadTree(block.ID)
@@ -439,7 +440,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	}
 	if nil != err {
 		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
-		util.LogErrorf(msg)
+		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
 
@@ -467,7 +468,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 
 	node := treenode.GetNodeInTree(tree, operation.ParentID)
 	if nil == node {
-		util.LogErrorf("get node [%s] in tree [%s] failed", operation.ParentID, tree.Root.ID)
+		logging.LogErrorf("get node [%s] in tree [%s] failed", operation.ParentID, tree.Root.ID)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	isContainer := node.IsContainerBlock()
@@ -518,7 +519,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	block := treenode.GetBlockTree(operation.ParentID)
 	if nil == block {
 		msg := fmt.Sprintf("not found parent block [id=%s]", operation.ParentID)
-		util.LogErrorf(msg)
+		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	tree, err := tx.loadTree(block.ID)
@@ -527,7 +528,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	}
 	if nil != err {
 		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
-		util.LogErrorf(msg)
+		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
 
@@ -555,7 +556,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 
 	node := treenode.GetNodeInTree(tree, operation.ParentID)
 	if nil == node {
-		util.LogErrorf("get node [%s] in tree [%s] failed", operation.ParentID, tree.Root.ID)
+		logging.LogErrorf("get node [%s] in tree [%s] failed", operation.ParentID, tree.Root.ID)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	isContainer := node.IsContainerBlock()
@@ -594,18 +595,18 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	srcTree, err := tx.loadTree(id)
 	if nil != err {
-		util.LogErrorf("load tree [id=%s] failed: %s", id, err)
+		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
 	srcNode := treenode.GetNodeInTree(srcTree, id)
 	if nil == srcNode {
-		util.LogErrorf("get node [%s] in tree [%s] failed", id, srcTree.Root.ID)
+		logging.LogErrorf("get node [%s] in tree [%s] failed", id, srcTree.Root.ID)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
 	if ast.NodeDocument == srcNode.Type {
-		util.LogWarnf("can't append a root to another root")
+		logging.LogWarnf("can't append a root to another root")
 		return
 	}
 
@@ -626,13 +627,13 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 
 	targetRootID := operation.ParentID
 	if id == targetRootID {
-		util.LogWarnf("target root id is nil")
+		logging.LogWarnf("target root id is nil")
 		return
 	}
 
 	targetTree, err := tx.loadTree(targetRootID)
 	if nil != err {
-		util.LogErrorf("load tree [id=%s] failed: %s", targetRootID, err)
+		logging.LogErrorf("load tree [id=%s] failed: %s", targetRootID, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: targetRootID}
 	}
 	isSameTree := srcTree.ID == targetTree.ID
@@ -717,7 +718,7 @@ func (tx *Transaction) doLargeInsert() (ret *TxErr) {
 		parentID := operations[0].ParentID
 		parentBlock = treenode.GetBlockTree(parentID)
 		if nil == parentBlock {
-			util.LogErrorf("not found previous block [id=%s]", parentID)
+			logging.LogErrorf("not found previous block [id=%s]", parentID)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: parentID}
 		}
 	}
@@ -727,7 +728,7 @@ func (tx *Transaction) doLargeInsert() (ret *TxErr) {
 		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: id}
 	}
 	if nil != err {
-		util.LogErrorf("load tree [id=%s] failed: %s", id, err)
+		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
@@ -751,7 +752,7 @@ func (tx *Transaction) doLargeInsert() (ret *TxErr) {
 
 		node := treenode.GetNodeInTree(tree, previousID)
 		if nil == node {
-			util.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
+			logging.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: previousID}
 		}
 		if ast.NodeList == insertedNode.Type && nil != node.Parent && ast.NodeList == node.Parent.Type {
@@ -765,7 +766,7 @@ func (tx *Transaction) doLargeInsert() (ret *TxErr) {
 	if "delete" == operations[length-1].Action {
 		node := treenode.GetNodeInTree(tree, previousID)
 		if nil == node {
-			util.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
+			logging.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: previousID}
 		}
 		node.Unlink()
@@ -779,7 +780,7 @@ func (tx *Transaction) doLargeInsert() (ret *TxErr) {
 }
 
 func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
-	//	util.LogInfof("commit delete [%+v]", operation)
+	//	logging.LogInfof("commit delete [%+v]", operation)
 
 	var err error
 	id := operation.ID
@@ -793,7 +794,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 
 	if nil != err {
 		msg := fmt.Sprintf("load tree [id=%s] failed: %s", id, err)
-		util.LogErrorf(msg)
+		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
@@ -830,7 +831,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		block = treenode.GetBlockTree(operation.PreviousID)
 		if nil == block {
 			msg := fmt.Sprintf("not found previous block [id=%s]", operation.PreviousID)
-			util.LogErrorf(msg)
+			logging.LogErrorf(msg)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: operation.PreviousID}
 		}
 	}
@@ -840,7 +841,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	}
 	if nil != err {
 		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
-		util.LogErrorf(msg)
+		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
 
@@ -862,7 +863,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 				assetP := gulu.Str.FromBytes(n.Tokens)
 				assetPath, e := GetAssetAbsPath(assetP)
 				if nil != e {
-					util.LogErrorf("get path of asset [%s] failed: %s", assetP, err)
+					logging.LogErrorf("get path of asset [%s] failed: %s", assetP, err)
 					return ast.WalkContinue
 				}
 
@@ -874,7 +875,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 				// 只有全局 assets 才移动到相对 assets
 				targetP := filepath.Join(assets, filepath.Base(assetPath))
 				if e = os.Rename(assetPath, targetP); nil != err {
-					util.LogErrorf("copy path of asset from [%s] to [%s] failed: %s", assetPath, targetP, err)
+					logging.LogErrorf("copy path of asset from [%s] to [%s] failed: %s", assetPath, targetP, err)
 					return ast.WalkContinue
 				}
 			}
@@ -905,7 +906,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	if "" != previousID {
 		node = treenode.GetNodeInTree(tree, previousID)
 		if nil == node {
-			util.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
+			logging.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: previousID}
 		}
 
@@ -926,7 +927,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {
-			util.LogErrorf("get node [%s] in tree [%s] failed", operation.ParentID, tree.Root.ID)
+			logging.LogErrorf("get node [%s] in tree [%s] failed", operation.ParentID, tree.Root.ID)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 		}
 		if ast.NodeSuperBlock == node.Type {
@@ -973,13 +974,13 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: id}
 	}
 	if nil != err {
-		util.LogErrorf("load tree [id=%s] failed: %s", id, err)
+		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
 	data := strings.ReplaceAll(operation.Data.(string), util2.FrontEndCaret, "")
 	if "" == data {
-		util.LogErrorf("update data is nil")
+		logging.LogErrorf("update data is nil")
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
@@ -988,7 +989,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	subTree.ID, subTree.Box, subTree.Path = tree.ID, tree.Box, tree.Path
 	oldNode := treenode.GetNodeInTree(tree, id)
 	if nil == oldNode {
-		util.LogErrorf("get node [%s] in tree [%s] failed", id, tree.Root.ID)
+		logging.LogErrorf("get node [%s] in tree [%s] failed", id, tree.Root.ID)
 		return &TxErr{msg: ErrBlockNotFound.Error(), id: id}
 	}
 
@@ -1016,7 +1017,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	updatedNode := subTree.Root.FirstChild
 	if nil == updatedNode {
-		util.LogErrorf("get fist node in sub tree [%s] failed", subTree.Root.ID)
+		logging.LogErrorf("get fist node in sub tree [%s] failed", subTree.Root.ID)
 		return &TxErr{msg: ErrBlockNotFound.Error(), id: id}
 	}
 	if ast.NodeList == updatedNode.Type && ast.NodeList == oldNode.Parent.Type {

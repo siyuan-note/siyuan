@@ -23,6 +23,7 @@ import (
 
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -35,14 +36,14 @@ func init() {
 
 func InsertBlocksSpans(tx *sql.Tx, tree *parse.Tree) (err error) {
 	if err = insertBlocksSpans(tx, tree); nil != err {
-		util.LogErrorf("insert tree [%s] into database failed: %s", tree.Box+tree.Path, err)
+		logging.LogErrorf("insert tree [%s] into database failed: %s", tree.Box+tree.Path, err)
 	}
 	return
 }
 
 func InsertRefs(tx *sql.Tx, tree *parse.Tree) {
 	if err := insertRef(tx, tree); nil != err {
-		util.LogErrorf("insert refs tree [%s] into database failed: %s", tree.Box+tree.Path, err)
+		logging.LogErrorf("insert refs tree [%s] into database failed: %s", tree.Box+tree.Path, err)
 	}
 }
 
@@ -465,7 +466,7 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree) (err error) {
 		}
 		subTree := parse.Parse("", []byte(block.Markdown), luteEngine.ParseOptions)
 		if nil == subTree {
-			util.LogErrorf("parse temp block [%s] failed: %s", block.ID, err)
+			logging.LogErrorf("parse temp block [%s] failed: %s", block.ID, err)
 			continue
 		}
 		if 0 < len(treenode.GetLegacyDynamicBlockRefDefIDs(subTree.Root)) {

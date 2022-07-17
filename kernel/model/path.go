@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -65,7 +66,7 @@ func createDocsByHPath(boxID, hPath, content string) (id string, err error) {
 			if isNotLast {
 				dirPath := filepath.Join(util.DataDir, boxID, pathBuilder.String())
 				if err = os.MkdirAll(dirPath, 0755); nil != err {
-					util.LogErrorf("mkdir [%s] failed: %s", dirPath, err)
+					logging.LogErrorf("mkdir [%s] failed: %s", dirPath, err)
 					return
 				}
 			}

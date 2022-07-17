@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/css"
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -133,7 +134,7 @@ func currentCSSValue(key string) string {
 	if 1 > len(data) {
 		data, err = os.ReadFile(theme)
 		if nil != err {
-			util.LogErrorf("read theme css [%s] failed: %s", theme, err)
+			logging.LogErrorf("read theme css [%s] failed: %s", theme, err)
 			return "#ffffff"
 		}
 	}
@@ -161,14 +162,14 @@ func ReadCustomCSS(themeName string) (ret map[string]map[string]string, err erro
 
 	if !gulu.File.IsExist(custom) {
 		if err = gulu.File.CopyFile(theme, custom); nil != err {
-			util.LogErrorf("copy theme [%s] to [%s] failed: %s", theme, custom, err)
+			logging.LogErrorf("copy theme [%s] to [%s] failed: %s", theme, custom, err)
 			return
 		}
 	}
 
 	data, err := os.ReadFile(custom)
 	if nil != err {
-		util.LogErrorf("read custom css [%s] failed: %s", custom, err)
+		logging.LogErrorf("read custom css [%s] failed: %s", custom, err)
 		return
 	}
 
@@ -186,7 +187,7 @@ func ReadCustomCSS(themeName string) (ret map[string]map[string]string, err erro
 	// 补充现有主题中的样式
 	data, err = os.ReadFile(theme)
 	if nil != err {
-		util.LogErrorf("read theme css [%s] failed: %s", theme, err)
+		logging.LogErrorf("read theme css [%s] failed: %s", theme, err)
 		return
 	}
 	ss = css.Parse(string(data))
@@ -232,7 +233,7 @@ func WriteCustomCSS(themeName string, cssMap map[string]interface{}) (err error)
 	custom := filepath.Join(themePath, "custom.css")
 	data, err := os.ReadFile(custom)
 	if nil != err {
-		util.LogErrorf("read custom css [%s] failed: %s", custom, err)
+		logging.LogErrorf("read custom css [%s] failed: %s", custom, err)
 		return
 	}
 
@@ -268,7 +269,7 @@ func WriteCustomCSS(themeName string, cssMap map[string]interface{}) (err error)
 	}
 
 	if err := gulu.File.WriteFileSafer(custom, buf.Bytes(), 0644); nil != err {
-		util.LogErrorf("write custom css [%s] failed: %s", custom, err)
+		logging.LogErrorf("write custom css [%s] failed: %s", custom, err)
 	}
 
 	util.BroadcastByType("main", "refreshtheme", 0, "", map[string]interface{}{

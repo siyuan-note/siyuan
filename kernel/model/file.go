@@ -40,6 +40,7 @@ import (
 	"github.com/facette/natsort"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
@@ -138,19 +139,19 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 	if util.IsCorruptedSYData(data) {
 		filelock.UnlockFile(filePath)
 		if removeErr := os.RemoveAll(filePath); nil == removeErr {
-			util.LogInfof("removed corrupted data file [path=%s, length=%d]", filePath, len(data))
+			logging.LogInfof("removed corrupted data file [path=%s, length=%d]", filePath, len(data))
 		} else {
-			util.LogWarnf("remove corrupted data file [path=%s, length=%d] failed: %s", filePath, len(data), removeErr)
+			logging.LogWarnf("remove corrupted data file [path=%s, length=%d] failed: %s", filePath, len(data), removeErr)
 		}
 		return nil
 	}
 	if nil != err {
-		util.LogErrorf("read file [%s] failed: %s", p, err)
+		logging.LogErrorf("read file [%s] failed: %s", p, err)
 		return nil
 	}
 	ret = readDocIAL(data)
 	if nil == ret {
-		util.LogWarnf("tree [%s] is corrupted", filePath)
+		logging.LogWarnf("tree [%s] is corrupted", filePath)
 		return nil
 	}
 	cache.PutDocIAL(p, ret)
@@ -160,7 +161,7 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 func readDocIAL(data []byte) (ret map[string]string) {
 	doc := map[string]interface{}{}
 	if err := gulu.JSON.UnmarshalJSON(data, &doc); nil != err {
-		util.LogErrorf("unmarshal data failed: %s", err)
+		logging.LogErrorf("unmarshal data failed: %s", err)
 		return nil
 	}
 
@@ -241,7 +242,7 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 	}
 	elapsed := time.Now().Sub(start).Milliseconds()
 	if 100 < elapsed {
-		util.LogWarnf("ls elapsed [%dms]", elapsed)
+		logging.LogWarnf("ls elapsed [%dms]", elapsed)
 	}
 
 	start = time.Now()
@@ -286,7 +287,7 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 	}
 	elapsed = time.Now().Sub(start).Milliseconds()
 	if 500 < elapsed {
-		util.LogWarnf("build docs elapsed [%dms]", elapsed)
+		logging.LogWarnf("build docs elapsed [%dms]", elapsed)
 	}
 
 	start = time.Now()
@@ -298,7 +299,7 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 	}
 	elapsed = time.Now().Sub(start).Milliseconds()
 	if 500 < elapsed {
-		util.LogWarnf("query root block ref count elapsed [%dms]", elapsed)
+		logging.LogWarnf("query root block ref count elapsed [%dms]", elapsed)
 	}
 
 	start = time.Now()
@@ -359,7 +360,7 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 
 	elapsed = time.Now().Sub(start).Milliseconds()
 	if 200 < elapsed {
-		util.LogInfof("sort docs elapsed [%dms]", elapsed)
+		logging.LogInfof("sort docs elapsed [%dms]", elapsed)
 	}
 	return
 }
@@ -376,7 +377,7 @@ func BlocksWordCount(ids []string) (runeCount, wordCount int) {
 	for _, id := range ids {
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
-			util.LogWarnf("block tree not found [%s]", id)
+			logging.LogWarnf("block tree not found [%s]", id)
 			continue
 		}
 
@@ -908,12 +909,12 @@ func DuplicateDoc(rootID string) (err error) {
 	if nil != err {
 		tx, txErr := sql.BeginTx()
 		if nil != txErr {
-			util.LogFatalf("transaction failed: %s", txErr)
+			logging.LogFatalf("transaction failed: %s", txErr)
 			return
 		}
 		sql.ClearBoxHash(tx)
 		sql.CommitTx(tx)
-		util.LogFatalf("transaction failed: %s", err)
+		logging.LogFatalf("transaction failed: %s", err)
 		return
 	}
 	sql.WaitForWritingDatabase()
@@ -1090,7 +1091,7 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 			}
 			if err = os.Rename(absFromPath, absToPath); nil != err {
 				msg := fmt.Sprintf(Conf.Language(5), fromBox.Name, fromPath, err)
-				util.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBoxID, err)
+				logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBoxID, err)
 				err = errors.New(msg)
 				return
 			}
@@ -1116,7 +1117,7 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 		filelock.ReleaseFileLocks(absFromPath)
 		if err = os.Rename(absFromPath, absToPath); nil != err {
 			msg := fmt.Sprintf(Conf.Language(5), fromBox.Name, fromPath, err)
-			util.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBoxID, err)
+			logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBoxID, err)
 			err = errors.New(msg)
 			return
 		}
@@ -1152,7 +1153,7 @@ func RemoveDoc(boxID, p string) (err error) {
 
 	historyDir, err := util.GetHistoryDir("delete")
 	if nil != err {
-		util.LogErrorf("get history dir failed: %s", err)
+		logging.LogErrorf("get history dir failed: %s", err)
 		return
 	}
 
@@ -1290,11 +1291,11 @@ func CreateDailyNote(boxID string) (p string, err error) {
 	if "" != boxConf.DailyNoteTemplatePath {
 		tplPath := filepath.Join(util.DataDir, "templates", boxConf.DailyNoteTemplatePath)
 		if !gulu.File.IsExist(tplPath) {
-			util.LogWarnf("not found daily note template [%s]", tplPath)
+			logging.LogWarnf("not found daily note template [%s]", tplPath)
 		} else {
 			dom, err = renderTemplate(tplPath, id)
 			if nil != err {
-				util.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, err)
+				logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, err)
 			}
 		}
 	}
@@ -1350,7 +1351,7 @@ func createDoc(boxID, p, title, dom string) (err error) {
 		parentID := path.Base(folder)
 		parentTree, err := loadTreeByBlockID(parentID)
 		if nil != err {
-			util.LogErrorf("get parent tree [id=%s] failed", parentID)
+			logging.LogErrorf("get parent tree [id=%s] failed", parentID)
 			return ErrBlockNotFound
 		}
 		hPath = path.Join(parentTree.HPath, title)
@@ -1392,12 +1393,12 @@ func createDoc(boxID, p, title, dom string) (err error) {
 	if nil != err {
 		tx, txErr := sql.BeginTx()
 		if nil != txErr {
-			util.LogFatalf("transaction failed: %s", txErr)
+			logging.LogFatalf("transaction failed: %s", txErr)
 			return
 		}
 		sql.ClearBoxHash(tx)
 		sql.CommitTx(tx)
-		util.LogFatalf("transaction failed: %s", err)
+		logging.LogFatalf("transaction failed: %s", err)
 		return
 	}
 	WaitForWritingFiles()
@@ -1417,12 +1418,12 @@ func moveSorts(rootID, fromBox, toBox string) {
 	if gulu.File.IsExist(fromConfPath) {
 		data, err := filelock.LockFileRead(fromConfPath)
 		if nil != err {
-			util.LogErrorf("read sort conf failed: %s", err)
+			logging.LogErrorf("read sort conf failed: %s", err)
 			return
 		}
 
 		if err = gulu.JSON.UnmarshalJSON(data, &fromFullSortIDs); nil != err {
-			util.LogErrorf("unmarshal sort conf failed: %s", err)
+			logging.LogErrorf("unmarshal sort conf failed: %s", err)
 		}
 	}
 	for _, id := range ids {
@@ -1434,12 +1435,12 @@ func moveSorts(rootID, fromBox, toBox string) {
 	if gulu.File.IsExist(toConfPath) {
 		data, err := filelock.LockFileRead(toConfPath)
 		if nil != err {
-			util.LogErrorf("read sort conf failed: %s", err)
+			logging.LogErrorf("read sort conf failed: %s", err)
 			return
 		}
 
 		if err = gulu.JSON.UnmarshalJSON(data, &toFullSortIDs); nil != err {
-			util.LogErrorf("unmarshal sort conf failed: %s", err)
+			logging.LogErrorf("unmarshal sort conf failed: %s", err)
 			return
 		}
 	}
@@ -1450,11 +1451,11 @@ func moveSorts(rootID, fromBox, toBox string) {
 
 	data, err := gulu.JSON.MarshalIndentJSON(toFullSortIDs, "", "  ")
 	if nil != err {
-		util.LogErrorf("marshal sort conf failed: %s", err)
+		logging.LogErrorf("marshal sort conf failed: %s", err)
 		return
 	}
 	if err = filelock.LockFileWrite(toConfPath, data); nil != err {
-		util.LogErrorf("write sort conf failed: %s", err)
+		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
 }
@@ -1507,7 +1508,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	absParentPath := filepath.Join(util.DataDir, boxID, parentPath)
 	files, err := os.ReadDir(absParentPath)
 	if nil != err {
-		util.LogErrorf("read dir [%s] failed: %s", err)
+		logging.LogErrorf("read dir [%s] failed: %s", err)
 	}
 
 	sortFolderIDs := map[string]int{}
@@ -1527,7 +1528,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 
 	confDir := filepath.Join(util.DataDir, box.ID, ".siyuan")
 	if err = os.MkdirAll(confDir, 0755); nil != err {
-		util.LogErrorf("create conf dir failed: %s", err)
+		logging.LogErrorf("create conf dir failed: %s", err)
 		return
 	}
 	confPath := filepath.Join(confDir, "sort.json")
@@ -1536,12 +1537,12 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	if gulu.File.IsExist(confPath) {
 		data, err = filelock.LockFileRead(confPath)
 		if nil != err {
-			util.LogErrorf("read sort conf failed: %s", err)
+			logging.LogErrorf("read sort conf failed: %s", err)
 			return
 		}
 
 		if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); nil != err {
-			util.LogErrorf("unmarshal sort conf failed: %s", err)
+			logging.LogErrorf("unmarshal sort conf failed: %s", err)
 		}
 	}
 
@@ -1551,11 +1552,11 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 
 	data, err = gulu.JSON.MarshalIndentJSON(fullSortIDs, "", "  ")
 	if nil != err {
-		util.LogErrorf("marshal sort conf failed: %s", err)
+		logging.LogErrorf("marshal sort conf failed: %s", err)
 		return
 	}
 	if err = filelock.LockFileWrite(confPath, data); nil != err {
-		util.LogErrorf("write sort conf failed: %s", err)
+		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
 
@@ -1570,13 +1571,13 @@ func (box *Box) fillSort(files *[]*File) {
 
 	data, err := filelock.LockFileRead(confPath)
 	if nil != err {
-		util.LogErrorf("read sort conf failed: %s", err)
+		logging.LogErrorf("read sort conf failed: %s", err)
 		return
 	}
 
 	fullSortIDs := map[string]int{}
 	if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); nil != err {
-		util.LogErrorf("unmarshal sort conf failed: %s", err)
+		logging.LogErrorf("unmarshal sort conf failed: %s", err)
 		return
 	}
 
@@ -1617,13 +1618,13 @@ func (box *Box) removeSort(rootID, path string) {
 
 	data, err := filelock.LockFileRead(confPath)
 	if nil != err {
-		util.LogErrorf("read sort conf failed: %s", err)
+		logging.LogErrorf("read sort conf failed: %s", err)
 		return
 	}
 
 	fullSortIDs := map[string]int{}
 	if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); nil != err {
-		util.LogErrorf("unmarshal sort conf failed: %s", err)
+		logging.LogErrorf("unmarshal sort conf failed: %s", err)
 		return
 	}
 
@@ -1633,11 +1634,11 @@ func (box *Box) removeSort(rootID, path string) {
 
 	data, err = gulu.JSON.MarshalIndentJSON(fullSortIDs, "", "  ")
 	if nil != err {
-		util.LogErrorf("marshal sort conf failed: %s", err)
+		logging.LogErrorf("marshal sort conf failed: %s", err)
 		return
 	}
 	if err = filelock.LockFileWrite(confPath, data); nil != err {
-		util.LogErrorf("write sort conf failed: %s", err)
+		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
 }
@@ -1647,10 +1648,10 @@ func ServeFile(c *gin.Context, filePath string) (err error) {
 
 	if filelock.IsLocked(filePath) {
 		if err = filelock.UnlockFile(filePath); nil == err {
-			util.LogInfof("unlocked file [%s]", filePath)
+			logging.LogInfof("unlocked file [%s]", filePath)
 		} else {
 			msg := fmt.Sprintf("unlock file [%s] failed: %s", filePath, err)
-			util.LogErrorf(msg)
+			logging.LogErrorf(msg)
 			return errors.New(msg)
 		}
 	}

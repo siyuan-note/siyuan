@@ -34,6 +34,7 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -62,7 +63,7 @@ func GetRepoSnapshots(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 			return
 		}
 
-		util.LogErrorf("get data repo index logs failed: %s", err)
+		logging.LogErrorf("get data repo index logs failed: %s", err)
 		return
 	}
 	return
@@ -80,7 +81,7 @@ func ImportRepoKey(base64Key string) (err error) {
 
 	key, err := base64.StdEncoding.DecodeString(base64Key)
 	if nil != err {
-		util.LogErrorf("import data repo key failed: %s", err)
+		logging.LogErrorf("import data repo key failed: %s", err)
 		return errors.New(Conf.Language(157))
 	}
 	if 32 != len(key) {
@@ -142,14 +143,14 @@ func InitRepoKey() (err error) {
 	randomBytes = make([]byte, 16)
 	_, err = rand.Read(randomBytes)
 	if nil != err {
-		util.LogErrorf("init data repo key failed: %s", err)
+		logging.LogErrorf("init data repo key failed: %s", err)
 		return
 	}
 	salt := string(randomBytes)
 
 	key, err := encryption.KDF(password, salt)
 	if nil != err {
-		util.LogErrorf("init data repo key failed: %s", err)
+		logging.LogErrorf("init data repo key failed: %s", err)
 		return
 	}
 	Conf.Repo.Key = key
@@ -447,7 +448,7 @@ func syncRepo(boot, exit, byHand bool) {
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", err)
-		util.LogErrorf(msg)
+		logging.LogErrorf(msg)
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 0)
 		return
@@ -473,7 +474,7 @@ func syncRepo(boot, exit, byHand bool) {
 		syncDownloadErrCount++
 		planSyncAfter(fixSyncInterval)
 
-		util.LogErrorf("sync data repo failed: %s", err)
+		logging.LogErrorf("sync data repo failed: %s", err)
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
@@ -542,7 +543,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 		msg := fmt.Sprintf(Conf.Language(140), err)
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 5000)
-		util.LogErrorf("index data repo before cloud sync failed: %s", err)
+		logging.LogErrorf("index data repo before cloud sync failed: %s", err)
 		return
 	}
 	elapsed := time.Since(start)
@@ -552,7 +553,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 		index.Memo = fmt.Sprintf("[Sync] Cloud sync, completed in %.2fs", elapsed.Seconds())
 		if err = repo.PutIndex(index); nil != err {
 			util.PushStatusBar("Save data snapshot for cloud sync failed")
-			util.LogErrorf("put index into data repo before cloud sync failed: %s", err)
+			logging.LogErrorf("put index into data repo before cloud sync failed: %s", err)
 			return
 		}
 		util.PushStatusBar(fmt.Sprintf(Conf.Language(147), elapsed.Seconds()))
@@ -561,7 +562,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 	}
 
 	if 7000 < elapsed.Milliseconds() {
-		util.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
+		logging.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
 	}
 	return
 }
@@ -571,7 +572,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置
 	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines)
 	if nil != err {
-		util.LogErrorf("init data repo failed: %s", err)
+		logging.LogErrorf("init data repo failed: %s", err)
 	}
 	return
 }
@@ -738,7 +739,7 @@ func contextPushMsg(context map[string]interface{}, msg string) {
 
 func buildCloudInfo() (ret *dejavu.CloudInfo, err error) {
 	if !IsValidCloudDirName(Conf.Sync.CloudName) {
-		util.LogWarnf("invalid cloud repo name, rename it to [main]")
+		logging.LogWarnf("invalid cloud repo name, rename it to [main]")
 		Conf.Sync.CloudName = "main"
 		Conf.Save()
 	}
@@ -816,7 +817,7 @@ func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, e
 		Post(util.AliyunServer + "/apis/siyuan/dejavu/getRepoStat?uid=" + Conf.User.UserId)
 
 	if nil != err {
-		util.LogErrorf("get cloud space failed: %s", err)
+		logging.LogErrorf("get cloud space failed: %s", err)
 		err = ErrFailedToConnectCloudServer
 		return
 	}
@@ -828,7 +829,7 @@ func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, e
 
 	code := result["code"].(float64)
 	if 0 != code {
-		util.LogErrorf("get cloud space failed: %s", result["msg"])
+		logging.LogErrorf("get cloud space failed: %s", result["msg"])
 		err = errors.New(result["msg"].(string))
 		return
 	}

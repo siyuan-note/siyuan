@@ -30,6 +30,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -55,14 +56,14 @@ func AutoSync() {
 }
 
 func SyncData(boot, exit, byHand bool) {
-	defer util.Recover()
+	defer logging.Recover()
 
 	if !boot && !exit && 2 == Conf.Sync.Mode && !byHand {
 		return
 	}
 
 	if util.IsMutexLocked(&syncLock) {
-		util.LogWarnf("sync is in progress")
+		logging.LogWarnf("sync is in progress")
 		planSyncAfter(30 * time.Second)
 		return
 	}
@@ -90,15 +91,15 @@ func SyncData(boot, exit, byHand bool) {
 	}
 
 	if boot {
-		util.LogInfof("sync before boot")
+		logging.LogInfof("sync before boot")
 	}
 	if exit {
-		util.LogInfof("sync before exit")
+		logging.LogInfof("sync before exit")
 		util.PushMsg(Conf.Language(81), 1000*60*15)
 	}
 
 	if 7 < syncDownloadErrCount && !byHand {
-		util.LogErrorf("sync download error too many times, cancel auto sync, try to sync by hand")
+		logging.LogErrorf("sync download error too many times, cancel auto sync, try to sync by hand")
 		util.PushErrMsg(Conf.Language(125), 1000*60*60)
 		planSyncAfter(64 * time.Minute)
 		return
@@ -329,13 +330,13 @@ func getIgnoreLines() (ret []string) {
 	}
 	if !gulu.File.IsExist(ignore) {
 		if err = gulu.File.WriteFileSafer(ignore, nil, 0644); nil != err {
-			util.LogErrorf("create syncignore [%s] failed: %s", ignore, err)
+			logging.LogErrorf("create syncignore [%s] failed: %s", ignore, err)
 			return
 		}
 	}
 	data, err := os.ReadFile(ignore)
 	if nil != err {
-		util.LogErrorf("read syncignore [%s] failed: %s", ignore, err)
+		logging.LogErrorf("read syncignore [%s] failed: %s", ignore, err)
 		return
 	}
 	dataStr := string(data)
@@ -383,7 +384,7 @@ func stableCopy(src, dest string) (err error) {
 			strings.Contains(err.Error(), "exit status 7") {
 			return nil
 		}
-		util.LogErrorf("robocopy data from [%s] to [%s] failed: %s %s", src, dest, string(output), err)
+		logging.LogErrorf("robocopy data from [%s] to [%s] failed: %s %s", src, dest, string(output), err)
 	}
 	return gulu.File.Copy(src, dest)
 }

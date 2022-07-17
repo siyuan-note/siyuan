@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/protyle"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -73,13 +74,13 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 		parentPath = filepath.Join(util.DataDir, boxID, parentPath)
 		parentData, readErr := filelock.LockFileRead(parentPath)
 		if nil != readErr {
-			util.LogWarnf("read tree data [%s] failed: %s", parentPath, readErr)
+			logging.LogWarnf("read tree data [%s] failed: %s", parentPath, readErr)
 			hPathBuilder.WriteString("Untitled/")
 			continue
 		}
 		parentTree, parseErr := protyle.ParseJSONWithoutFix(luteEngine, parentData)
 		if nil != parseErr {
-			util.LogWarnf("parse tree [%s] failed: %s", parentPath, parseErr)
+			logging.LogWarnf("parse tree [%s] failed: %s", parentPath, parseErr)
 			hPathBuilder.WriteString("Untitled/")
 			continue
 		}
@@ -118,7 +119,7 @@ func WriteTree(tree *parse.Tree) (err error) {
 	}
 	if err = filelock.LockFileWrite(filePath, output); nil != err {
 		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
-		util.LogErrorf(msg)
+		logging.LogErrorf(msg)
 		return errors.New(msg)
 	}
 
@@ -131,39 +132,39 @@ func recoverParseJSON2Tree(boxID, p, filePath string, luteEngine *lute.Lute) (re
 	// 尝试从临时文件恢复
 	tmp := util.LatestTmpFile(filePath)
 	if "" == tmp {
-		util.LogWarnf("recover tree [%s] not found tmp", filePath)
+		logging.LogWarnf("recover tree [%s] not found tmp", filePath)
 		return
 	}
 
 	stat, err := os.Stat(filePath)
 	if nil != err {
-		util.LogErrorf("stat tmp [%s] failed: %s", tmp, err)
+		logging.LogErrorf("stat tmp [%s] failed: %s", tmp, err)
 		return
 	}
 
 	if stat.ModTime().Before(time.Now().Add(-time.Hour * 24)) {
-		util.LogWarnf("tmp [%s] is too old, remove it", tmp)
+		logging.LogWarnf("tmp [%s] is too old, remove it", tmp)
 		os.RemoveAll(tmp)
 		return
 	}
 
 	data, err := filelock.NoLockFileRead(tmp)
 	if nil != err {
-		util.LogErrorf("recover tree read from tmp [%s] failed: %s", tmp, err)
+		logging.LogErrorf("recover tree read from tmp [%s] failed: %s", tmp, err)
 		return
 	}
 	if err = filelock.NoLockFileWrite(filePath, data); nil != err {
-		util.LogErrorf("recover tree write [%s] from tmp [%s] failed: %s", filePath, tmp, err)
+		logging.LogErrorf("recover tree write [%s] from tmp [%s] failed: %s", filePath, tmp, err)
 		return
 	}
 
 	ret = parseJSON2Tree(boxID, p, data, luteEngine)
 	if nil == ret {
-		util.LogErrorf("recover tree from tmp [%s] parse failed, remove it", tmp)
+		logging.LogErrorf("recover tree from tmp [%s] parse failed, remove it", tmp)
 		os.RemoveAll(tmp)
 		return
 	}
-	util.LogInfof("recovered tree [%s] from [%s]", filePath, tmp)
+	logging.LogInfof("recovered tree [%s] from [%s]", filePath, tmp)
 	os.RemoveAll(tmp)
 	return
 }
@@ -173,7 +174,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 	var needFix bool
 	ret, needFix, err = protyle.ParseJSON(luteEngine, jsonData)
 	if nil != err {
-		util.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
+		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
 		return
 	}
 
@@ -196,7 +197,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		}
 		if err = filelock.LockFileWrite(filePath, output); nil != err {
 			msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
-			util.LogErrorf(msg)
+			logging.LogErrorf(msg)
 		}
 	}
 	return

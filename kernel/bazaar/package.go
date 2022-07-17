@@ -31,6 +31,7 @@ import (
 	"github.com/araddon/dateparse"
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	textUnicode "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
@@ -60,7 +61,7 @@ func GetPackageREADME(repoURL, repoHash string, chinaCDN bool, systemID string) 
 	ret = luteEngine.Md2HTML(string(data))
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(ret))
 	if nil != err {
-		util.LogErrorf("parse HTML failed: %s", err)
+		logging.LogErrorf("parse HTML failed: %s", err)
 		return ret
 	}
 
@@ -96,12 +97,12 @@ func downloadPackage(repoURLHash string, chinaCDN, pushProgress bool, systemID s
 			}
 		}).Get(u)
 		if nil != err {
-			util.LogErrorf("get bazaar package [%s] failed: %s", u, err)
+			logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
 			return nil, errors.New("get bazaar package failed")
 		}
 	}
 	if 200 != resp.StatusCode {
-		util.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)
+		logging.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)
 		return nil, errors.New("get bazaar package failed")
 	}
 	data = buf.Bytes()
@@ -137,7 +138,7 @@ func installPackage(data []byte, installPath string) (err error) {
 
 	unzipPath := filepath.Join(dir, name)
 	if err = gulu.Zip.Unzip(tmp, unzipPath); nil != err {
-		util.LogErrorf("write file [%s] failed: %s", installPath, err)
+		logging.LogErrorf("write file [%s] failed: %s", installPath, err)
 		err = errors.New("write file failed")
 		return
 	}
@@ -195,11 +196,11 @@ func getBazaarIndex() map[string]*bazaarPackage {
 	u := util.BazaarStatServer + "/bazaar/index.json"
 	resp, reqErr := request.SetResult(&cachedBazaarIndex).Get(u)
 	if nil != reqErr {
-		util.LogErrorf("get bazaar index [%s] failed: %s", u, reqErr)
+		logging.LogErrorf("get bazaar index [%s] failed: %s", u, reqErr)
 		return cachedBazaarIndex
 	}
 	if 200 != resp.StatusCode {
-		util.LogErrorf("get bazaar index [%s] failed: %d", u, resp.StatusCode)
+		logging.LogErrorf("get bazaar index [%s] failed: %d", u, resp.StatusCode)
 		return cachedBazaarIndex
 	}
 	bazaarIndexCacheTime = now

@@ -20,6 +20,7 @@ import (
 	"database/sql"
 	"strings"
 
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -34,7 +35,7 @@ func getDatabaseVer() (ret string) {
 	row := db.QueryRow(stmt, key)
 	if err := row.Scan(&ret); nil != err {
 		if !strings.Contains(err.Error(), "no such table") {
-			util.LogErrorf("query database version failed: %s", err)
+			logging.LogErrorf("query database version failed: %s", err)
 		}
 	}
 	return

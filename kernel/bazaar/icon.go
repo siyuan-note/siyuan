@@ -26,6 +26,7 @@ import (
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -68,11 +69,11 @@ func Icons() (icons []*Icon) {
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/icons.json"
 	resp, err := request.SetResult(&result).Get(u)
 	if nil != err {
-		util.LogErrorf("get community stage index [%s] failed: %s", u, err)
+		logging.LogErrorf("get community stage index [%s] failed: %s", u, err)
 		return
 	}
 	if 200 != resp.StatusCode {
-		util.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
+		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
 		return
 	}
 	repos := result["repos"].([]interface{})
@@ -88,11 +89,11 @@ func Icons() (icons []*Icon) {
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/icon.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(icon).Get(innerU)
 		if nil != innerErr {
-			util.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
+			logging.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
 			return
 		}
 		if 200 != innerResp.StatusCode {
-			util.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
+			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
 
@@ -137,9 +138,9 @@ func InstallIcon(repoURL, repoHash, installPath string, chinaCDN bool, systemID 
 
 func UninstallIcon(installPath string) error {
 	if err := os.RemoveAll(installPath); nil != err {
-		util.LogErrorf("remove icon [%s] failed: %s", installPath, err)
+		logging.LogErrorf("remove icon [%s] failed: %s", installPath, err)
 		return errors.New("remove community icon failed")
 	}
-	//util.Logger.Infof("uninstalled icon [%s]", installPath)
+	//logging.Logger.Infof("uninstalled icon [%s]", installPath)
 	return nil
 }

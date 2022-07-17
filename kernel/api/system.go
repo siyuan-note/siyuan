@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -38,7 +39,7 @@ func getEmojiConf(c *gin.Context) {
 	builtConfPath := filepath.Join(util.AppearancePath, "emojis", "conf.json")
 	data, err := os.ReadFile(builtConfPath)
 	if nil != err {
-		util.LogErrorf("read emojis conf.json failed: %s", err)
+		logging.LogErrorf("read emojis conf.json failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -46,7 +47,7 @@ func getEmojiConf(c *gin.Context) {
 
 	var conf []map[string]interface{}
 	if err = gulu.JSON.UnmarshalJSON(data, &conf); nil != err {
-		util.LogErrorf("unmarshal emojis conf.json failed: %s", err)
+		logging.LogErrorf("unmarshal emojis conf.json failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -64,7 +65,7 @@ func getEmojiConf(c *gin.Context) {
 		model.CustomEmojis = sync.Map{}
 		customEmojis, err := os.ReadDir(customConfDir)
 		if nil != err {
-			util.LogErrorf("read custom emojis failed: %s", err)
+			logging.LogErrorf("read custom emojis failed: %s", err)
 		} else {
 			for _, customEmoji := range customEmojis {
 				name := customEmoji.Name()
@@ -76,7 +77,7 @@ func getEmojiConf(c *gin.Context) {
 					// 子级
 					subCustomEmojis, err := os.ReadDir(filepath.Join(customConfDir, name))
 					if nil != err {
-						util.LogErrorf("read custom emojis failed: %s", err)
+						logging.LogErrorf("read custom emojis failed: %s", err)
 						continue
 					}
 

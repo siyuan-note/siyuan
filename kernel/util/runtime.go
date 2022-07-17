@@ -26,6 +26,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/denisbrodbeck/machineid"
 	"github.com/dustin/go-humanize"
+	"github.com/siyuan-note/logging"
 )
 
 const DatabaseVer = "20220501" // 修改表结构的话需要修改这里
@@ -43,7 +44,7 @@ func logBootInfo() {
 	s, _ := SizeOfDirectory(DataDir, true)
 	dataDirSize := humanize.Bytes(uint64(s))
 
-	LogInfof("kernel is booting:\n"+
+	logging.LogInfof("kernel is booting:\n"+
 		"    * ver [%s]\n"+
 		"    * arch [%s]\n"+
 		"    * runtime mode [%s]\n"+
@@ -78,13 +79,13 @@ func GetDeviceID() string {
 
 func SetNetworkProxy(proxyURL string) {
 	if err := os.Setenv("HTTPS_PROXY", proxyURL); nil != err {
-		logger.Errorf("set env [HTTPS_PROXY] failed: %s", err)
+		logging.LogErrorf("set env [HTTPS_PROXY] failed: %s", err)
 	}
 	if err := os.Setenv("HTTP_PROXY", proxyURL); nil != err {
-		logger.Errorf("set env [HTTP_PROXY] failed: %s", err)
+		logging.LogErrorf("set env [HTTP_PROXY] failed: %s", err)
 	}
 
 	if "" != proxyURL {
-		logger.Infof("use network proxy [%s]", proxyURL)
+		logging.LogInfof("use network proxy [%s]", proxyURL)
 	}
 }

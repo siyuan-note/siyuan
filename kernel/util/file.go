@@ -25,6 +25,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/logging"
 )
 
 func IsEmptyDir(p string) bool {
@@ -79,7 +80,7 @@ func LatestTmpFile(p string) string {
 	dir, base := filepath.Split(p)
 	files, err := os.ReadDir(dir)
 	if nil != err {
-		LogErrorf("read dir [%s] failed: %s", dir, err)
+		logging.LogErrorf("read dir [%s] failed: %s", dir, err)
 		return ""
 	}
 
@@ -100,12 +101,12 @@ func LatestTmpFile(p string) string {
 	sort.Slice(tmps, func(i, j int) bool {
 		info1, err := tmps[i].Info()
 		if nil != err {
-			LogErrorf("read file info [%s] failed: %s", tmps[i].Name(), err)
+			logging.LogErrorf("read file info [%s] failed: %s", tmps[i].Name(), err)
 			return false
 		}
 		info2, err := tmps[j].Info()
 		if nil != err {
-			LogErrorf("read file info [%s] failed: %s", tmps[j].Name(), err)
+			logging.LogErrorf("read file info [%s] failed: %s", tmps[j].Name(), err)
 			return false
 		}
 		return info1.ModTime().After(info2.ModTime())
@@ -208,7 +209,7 @@ func SizeOfDirectory(path string, includeBigFile bool) (int64, error) {
 		return nil
 	})
 	if nil != err {
-		LogErrorf("size of dir [%s] failed: %s", path, err)
+		logging.LogErrorf("size of dir [%s] failed: %s", path, err)
 	}
 	return size, err
 }

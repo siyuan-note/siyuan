@@ -25,7 +25,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
-	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/siyuan-note/logging"
 )
 
 func NodeStaticMdContent(node *ast.Node, luteEngine *lute.Lute) (md, content string) {
@@ -38,7 +38,7 @@ func FormatNode(node *ast.Node, luteEngine *lute.Lute) string {
 	markdown, err := lute.FormatNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	if nil != err {
 		root := TreeRoot(node)
-		util.LogFatalf("format node [%s] in tree [%s] failed: %s", node.ID, root.ID, err)
+		logging.LogFatalf("format node [%s] in tree [%s] failed: %s", node.ID, root.ID, err)
 	}
 	return markdown
 }

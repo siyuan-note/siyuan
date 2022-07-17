@@ -29,6 +29,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/protyle"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -82,10 +83,10 @@ func ClearWorkspaceHistory() (err error) {
 	historyDir := util.HistoryDir
 	if gulu.File.IsDir(historyDir) {
 		if err = os.RemoveAll(historyDir); nil != err {
-			util.LogErrorf("remove workspace history dir [%s] failed: %s", historyDir, err)
+			logging.LogErrorf("remove workspace history dir [%s] failed: %s", historyDir, err)
 			return
 		}
-		util.LogInfof("removed workspace history dir [%s]", historyDir)
+		logging.LogInfof("removed workspace history dir [%s]", historyDir)
 	}
 
 	// 以下部分是老版本的清理逻辑，暂时保留
@@ -103,27 +104,27 @@ func ClearWorkspaceHistory() (err error) {
 		}
 
 		if err = os.RemoveAll(historyDir); nil != err {
-			util.LogErrorf("remove notebook history dir [%s] failed: %s", historyDir, err)
+			logging.LogErrorf("remove notebook history dir [%s] failed: %s", historyDir, err)
 			return
 		}
-		util.LogInfof("removed notebook history dir [%s]", historyDir)
+		logging.LogInfof("removed notebook history dir [%s]", historyDir)
 	}
 
 	historyDir = filepath.Join(util.DataDir, ".siyuan", "history")
 	if gulu.File.IsDir(historyDir) {
 		if err = os.RemoveAll(historyDir); nil != err {
-			util.LogErrorf("remove data history dir [%s] failed: %s", historyDir, err)
+			logging.LogErrorf("remove data history dir [%s] failed: %s", historyDir, err)
 			return
 		}
-		util.LogInfof("removed data history dir [%s]", historyDir)
+		logging.LogInfof("removed data history dir [%s]", historyDir)
 	}
 	historyDir = filepath.Join(util.DataDir, "assets", ".siyuan", "history")
 	if gulu.File.IsDir(historyDir) {
 		if err = os.RemoveAll(historyDir); nil != err {
-			util.LogErrorf("remove assets history dir [%s] failed: %s", historyDir, err)
+			logging.LogErrorf("remove assets history dir [%s] failed: %s", historyDir, err)
 			return
 		}
-		util.LogInfof("removed assets history dir [%s]", historyDir)
+		logging.LogInfof("removed assets history dir [%s]", historyDir)
 	}
 	return
 }
@@ -135,13 +136,13 @@ func GetDocHistoryContent(historyPath string) (content string, err error) {
 
 	data, err := filelock.NoLockFileRead(historyPath)
 	if nil != err {
-		util.LogErrorf("read file [%s] failed: %s", historyPath, err)
+		logging.LogErrorf("read file [%s] failed: %s", historyPath, err)
 		return
 	}
 	luteEngine := NewLute()
 	historyTree, err := protyle.ParseJSONWithoutFix(luteEngine, data)
 	if nil != err {
-		util.LogErrorf("parse tree from file [%s] failed, remove it", historyPath)
+		logging.LogErrorf("parse tree from file [%s] failed, remove it", historyPath)
 		os.RemoveAll(historyPath)
 		return
 	}
@@ -217,7 +218,7 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 	to := filepath.Join(util.DataDir, "assets", filepath.Base(historyPath))
 
 	if err = gulu.File.Copy(from, to); nil != err {
-		util.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
+		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
 	IncSync()
@@ -233,7 +234,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	to := filepath.Join(util.DataDir, filepath.Base(historyPath))
 
 	if err = gulu.File.Copy(from, to); nil != err {
-		util.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
+		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
 
@@ -264,7 +265,7 @@ func GetDocHistory(boxID string) (ret []*History, err error) {
 
 	historyBoxDirs, err := filepath.Glob(historyDir + "/*/" + boxID)
 	if nil != err {
-		util.LogErrorf("read dir [%s] failed: %s", historyDir, err)
+		logging.LogErrorf("read dir [%s] failed: %s", historyDir, err)
 		return
 	}
 	sort.Slice(historyBoxDirs, func(i, j int) bool {
@@ -287,12 +288,12 @@ func GetDocHistory(boxID string) (ret []*History, err error) {
 
 			data, err := filelock.NoLockFileRead(path)
 			if nil != err {
-				util.LogErrorf("read file [%s] failed: %s", path, err)
+				logging.LogErrorf("read file [%s] failed: %s", path, err)
 				return nil
 			}
 			historyTree, err := protyle.ParseJSONWithoutFix(luteEngine, data)
 			if nil != err {
-				util.LogErrorf("parse tree from file [%s] failed, remove it", path)
+				logging.LogErrorf("parse tree from file [%s] failed, remove it", path)
 				os.RemoveAll(path)
 				return nil
 			}
@@ -349,7 +350,7 @@ func GetNotebookHistory() (ret []*History, err error) {
 
 	historyNotebookConfs, err := filepath.Glob(historyDir + "/*-delete/*/.siyuan/conf.json")
 	if nil != err {
-		util.LogErrorf("read dir [%s] failed: %s", historyDir, err)
+		logging.LogErrorf("read dir [%s] failed: %s", historyDir, err)
 		return
 	}
 	sort.Slice(historyNotebookConfs, func(i, j int) bool {
@@ -369,11 +370,11 @@ func GetNotebookHistory() (ret []*History, err error) {
 		var c conf.BoxConf
 		data, readErr := os.ReadFile(historyNotebookConf)
 		if nil != readErr {
-			util.LogErrorf("read notebook conf [%s] failed: %s", historyNotebookConf, readErr)
+			logging.LogErrorf("read notebook conf [%s] failed: %s", historyNotebookConf, readErr)
 			continue
 		}
 		if err = json.Unmarshal(data, &c); nil != err {
-			util.LogErrorf("parse notebook conf [%s] failed: %s", historyNotebookConf, err)
+			logging.LogErrorf("parse notebook conf [%s] failed: %s", historyNotebookConf, err)
 			continue
 		}
 
@@ -409,7 +410,7 @@ func GetAssetsHistory() (ret []*History, err error) {
 
 	historyAssetsDirs, err := filepath.Glob(historyDir + "/*/assets")
 	if nil != err {
-		util.LogErrorf("read dir [%s] failed: %s", historyDir, err)
+		logging.LogErrorf("read dir [%s] failed: %s", historyDir, err)
 		return
 	}
 	sort.Slice(historyAssetsDirs, func(i, j int) bool {
@@ -477,25 +478,25 @@ func (box *Box) generateDocHistory0() {
 
 	historyDir, err := util.GetHistoryDir("update")
 	if nil != err {
-		util.LogErrorf("get history dir failed: %s", err)
+		logging.LogErrorf("get history dir failed: %s", err)
 		return
 	}
 
 	for _, file := range files {
 		historyPath := filepath.Join(historyDir, box.ID, strings.TrimPrefix(file, filepath.Join(util.DataDir, box.ID)))
 		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
-			util.LogErrorf("generate history failed: %s", err)
+			logging.LogErrorf("generate history failed: %s", err)
 			return
 		}
 
 		var data []byte
 		if data, err = filelock.NoLockFileRead(file); err != nil {
-			util.LogErrorf("generate history failed: %s", err)
+			logging.LogErrorf("generate history failed: %s", err)
 			return
 		}
 
 		if err = gulu.File.WriteFileSafer(historyPath, data, 0644); err != nil {
-			util.LogErrorf("generate history failed: %s", err)
+			logging.LogErrorf("generate history failed: %s", err)
 			return
 		}
 	}
@@ -509,7 +510,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 
 	dirs, err := os.ReadDir(historyDir)
 	if nil != err {
-		util.LogErrorf("clear history [%s] failed: %s", historyDir, err)
+		logging.LogErrorf("clear history [%s] failed: %s", historyDir, err)
 		return
 	}
 
@@ -518,7 +519,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 	for _, dir := range dirs {
 		dirInfo, err := dir.Info()
 		if nil != err {
-			util.LogErrorf("read history dir [%s] failed: %s", dir.Name(), err)
+			logging.LogErrorf("read history dir [%s] failed: %s", dir.Name(), err)
 			continue
 		}
 		if Conf.Editor.HistoryRetentionDays < int(now.Sub(dirInfo.ModTime()).Hours()/24) {
@@ -527,10 +528,10 @@ func clearOutdatedHistoryDir(historyDir string) {
 	}
 	for _, dir := range removes {
 		if err = os.RemoveAll(dir); nil != err {
-			util.LogErrorf("remove history dir [%s] failed: %s", dir, err)
+			logging.LogErrorf("remove history dir [%s] failed: %s", dir, err)
 			continue
 		}
-		//util.LogInfof("auto removed history dir [%s]", dir)
+		//logging.LogInfof("auto removed history dir [%s]", dir)
 	}
 }
 

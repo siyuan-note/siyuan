@@ -26,9 +26,9 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/protyle"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func pagedPaths(localPath string, pageSize int) (ret map[int][]string) {
@@ -55,13 +55,13 @@ func pagedPaths(localPath string, pageSize int) (ret map[int][]string) {
 func loadTree(localPath string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	data, err := filelock.NoLockFileRead(localPath)
 	if nil != err {
-		util.LogErrorf("get data [path=%s] failed: %s", localPath, err)
+		logging.LogErrorf("get data [path=%s] failed: %s", localPath, err)
 		return
 	}
 
 	ret, err = protyle.ParseJSONWithoutFix(luteEngine, data)
 	if nil != err {
-		util.LogErrorf("parse json to tree [%s] failed: %s", localPath, err)
+		logging.LogErrorf("parse json to tree [%s] failed: %s", localPath, err)
 		return
 	}
 	return
@@ -91,7 +91,7 @@ func LoadTree(boxID, p string) (*parse.Tree, error) {
 	luteEngine := NewLute()
 	tree, err := filesys.LoadTree(boxID, p, luteEngine)
 	if nil != err {
-		util.LogErrorf("load tree [%s] failed: %s", boxID+p, err)
+		logging.LogErrorf("load tree [%s] failed: %s", boxID+p, err)
 		return nil, err
 	}
 	return tree, nil

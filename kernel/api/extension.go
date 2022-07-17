@@ -29,6 +29,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -48,7 +49,7 @@ func extensionCopy(c *gin.Context) {
 	}
 
 	if err := os.MkdirAll(assets, 0755); nil != err {
-		util.LogErrorf("create assets folder [%s] failed: %s", assets, err)
+		logging.LogErrorf("create assets folder [%s] failed: %s", assets, err)
 		ret.Msg = err.Error()
 		return
 	}

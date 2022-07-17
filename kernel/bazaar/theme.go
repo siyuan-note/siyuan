@@ -26,6 +26,7 @@ import (
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -69,11 +70,11 @@ func Themes() (ret []*Theme) {
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/themes.json"
 	resp, reqErr := request.SetResult(&result).Get(u)
 	if nil != reqErr {
-		util.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
+		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
 		return
 	}
 	if 200 != resp.StatusCode {
-		util.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
+		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
 		return
 	}
 
@@ -90,11 +91,11 @@ func Themes() (ret []*Theme) {
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/theme.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(theme).Get(innerU)
 		if nil != innerErr {
-			util.LogErrorf("get bazaar package [%s] failed: %s", innerU, innerErr)
+			logging.LogErrorf("get bazaar package [%s] failed: %s", innerU, innerErr)
 			return
 		}
 		if 200 != innerResp.StatusCode {
-			util.LogErrorf("get bazaar package [%s] failed: %d", innerU, resp.StatusCode)
+			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, resp.StatusCode)
 			return
 		}
 
@@ -139,9 +140,9 @@ func InstallTheme(repoURL, repoHash, installPath string, chinaCDN bool, systemID
 
 func UninstallTheme(installPath string) error {
 	if err := os.RemoveAll(installPath); nil != err {
-		util.LogErrorf("remove theme [%s] failed: %s", installPath, err)
+		logging.LogErrorf("remove theme [%s] failed: %s", installPath, err)
 		return errors.New("remove community theme failed")
 	}
-	//util.Logger.Infof("uninstalled theme [%s]", installPath)
+	//logging.Logger.Infof("uninstalled theme [%s]", installPath)
 	return nil
 }

@@ -24,6 +24,7 @@ import (
 
 	figure "github.com/common-nighthawk/go-figure"
 	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 )
 
 func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, lang string) {
@@ -49,6 +50,7 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	AndroidNativeLibDir = nativeLibDir
 	AndroidPrivateDataDir = privateDataDir
 	LogPath = filepath.Join(TempDir, "siyuan.log")
+	logging.SetLogPath(LogPath)
 	AppearancePath = filepath.Join(ConfDir, "appearance")
 	ThemesPath = filepath.Join(AppearancePath, "themes")
 	IconsPath = filepath.Join(AppearancePath, "icons")
@@ -57,6 +59,6 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	Lang = lang
 	initPathDir()
 	bootBanner := figure.NewFigure("SiYuan", "", true)
-	LogInfof("\n" + bootBanner.String())
+	logging.LogInfof("\n" + bootBanner.String())
 	logBootInfo()
 }

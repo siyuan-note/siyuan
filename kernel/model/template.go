@@ -33,6 +33,7 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/88250/protyle"
 	"github.com/araddon/dateparse"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 
@@ -167,7 +168,7 @@ func renderTemplate(p, id string) (string, error) {
 		now := time.Now()
 		ret, err := dateparse.ParseIn(dateStr, now.Location())
 		if nil != err {
-			util.LogWarnf("parse date [%s] failed [%s], return current time instead", dateStr, err)
+			logging.LogWarnf("parse date [%s] failed [%s], return current time instead", dateStr, err)
 			return now
 		}
 		return ret
@@ -188,7 +189,7 @@ func renderTemplate(p, id string) (string, error) {
 	tree = parseKTree(md)
 	if nil == tree {
 		msg := fmt.Sprintf("parse tree [%s] failed", p)
-		util.LogErrorf(msg)
+		logging.LogErrorf(msg)
 		return "", errors.New(msg)
 	}
 

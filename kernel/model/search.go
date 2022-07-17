@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/jinzhu/copier"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -201,7 +202,7 @@ func FullTextSearchBlock(query, box, path string, types map[string]bool, querySy
 func searchFilter(types map[string]bool) string {
 	s := conf.NewSearch()
 	if err := copier.Copy(s, Conf.Search); nil != err {
-		util.LogErrorf("copy search conf failed: %s", err)
+		logging.LogErrorf("copy search conf failed: %s", err)
 	}
 	if nil != types {
 		s.Document = types["document"]

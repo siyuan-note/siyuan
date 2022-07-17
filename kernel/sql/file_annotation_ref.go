@@ -17,7 +17,7 @@
 package sql
 
 import (
-	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/siyuan-note/logging"
 )
 
 type FileAnnotationRef struct {
@@ -36,14 +36,14 @@ func QueryRefIDsByAnnotationID(annotationID string) (refIDs, refTexts []string) 
 	refIDs = []string{}
 	rows, err := query("SELECT block_id, content FROM file_annotation_refs WHERE annotation_id = ?", annotationID)
 	if nil != err {
-		util.LogErrorf("sql query failed: %s", err)
+		logging.LogErrorf("sql query failed: %s", err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var id, content string
 		if err = rows.Scan(&id, &content); nil != err {
-			util.LogErrorf("query scan field failed: %s", err)
+			logging.LogErrorf("query scan field failed: %s", err)
 			return
 		}
 		refIDs = append(refIDs, id)

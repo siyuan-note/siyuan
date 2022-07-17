@@ -25,6 +25,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -94,24 +95,24 @@ func AutoSpace(rootID string) (err error) {
 func generateFormatHistory(tree *parse.Tree) {
 	historyDir, err := util.GetHistoryDir("format")
 	if nil != err {
-		util.LogErrorf("get history dir failed: %s", err)
+		logging.LogErrorf("get history dir failed: %s", err)
 		return
 	}
 
 	historyPath := filepath.Join(historyDir, tree.Box, tree.Path)
 	if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
-		util.LogErrorf("generate history failed: %s", err)
+		logging.LogErrorf("generate history failed: %s", err)
 		return
 	}
 
 	var data []byte
 	if data, err = filelock.NoLockFileRead(filepath.Join(util.DataDir, tree.Box, tree.Path)); err != nil {
-		util.LogErrorf("generate history failed: %s", err)
+		logging.LogErrorf("generate history failed: %s", err)
 		return
 	}
 
 	if err = gulu.File.WriteFileSafer(historyPath, data, 0644); err != nil {
-		util.LogErrorf("generate history failed: %s", err)
+		logging.LogErrorf("generate history failed: %s", err)
 		return
 	}
 

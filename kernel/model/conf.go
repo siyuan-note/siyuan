@@ -34,6 +34,7 @@ import (
 	humanize "github.com/dustin/go-humanize"
 	"github.com/getsentry/sentry-go"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -78,7 +79,7 @@ func InitConf() {
 	windowStateConf := filepath.Join(util.ConfDir, "windowState.json")
 	if !gulu.File.IsExist(windowStateConf) {
 		if err := gulu.File.WriteFileSafer(windowStateConf, []byte("{}"), 0644); nil != err {
-			util.LogErrorf("create [windowState.json] failed: %s", err)
+			logging.LogErrorf("create [windowState.json] failed: %s", err)
 		}
 	}
 
@@ -87,17 +88,17 @@ func InitConf() {
 	if gulu.File.IsExist(confPath) {
 		data, err := os.ReadFile(confPath)
 		if nil != err {
-			util.LogErrorf("load conf [%s] failed: %s", confPath, err)
+			logging.LogErrorf("load conf [%s] failed: %s", confPath, err)
 		}
 		err = gulu.JSON.UnmarshalJSON(data, Conf)
 		if err != nil {
-			util.LogErrorf("parse conf [%s] failed: %s", confPath, err)
+			logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
 		}
 	}
 
 	if "" != util.Lang {
 		Conf.Lang = util.Lang
-		util.LogInfof("initialized the specified language [%s]", util.Lang)
+		logging.LogInfof("initialized the specified language [%s]", util.Lang)
 	} else {
 		if "" == Conf.Lang {
 			// 未指定外观语言时使用系统语言
@@ -108,7 +109,7 @@ func InitConf() {
 					if tag, err := language.Parse(lang); nil == err {
 						supportLangs = append(supportLangs, tag)
 					} else {
-						util.LogErrorf("load language [%s] failed: %s", lang, err)
+						logging.LogErrorf("load language [%s] failed: %s", lang, err)
 					}
 				}
 				matcher := language.NewMatcher(supportLangs)
@@ -117,9 +118,9 @@ func InitConf() {
 				region, _ := lang.Region()
 				util.Lang = base.String() + "_" + region.String()
 				Conf.Lang = util.Lang
-				util.LogInfof("initialized language [%s] based on device locale", Conf.Lang)
+				logging.LogInfof("initialized language [%s] based on device locale", Conf.Lang)
 			} else {
-				util.LogDebugf("check device locale failed [%s], using default language [en_US]", err)
+				logging.LogDebugf("check device locale failed [%s], using default language [en_US]", err)
 				util.Lang = "en_US"
 				Conf.Lang = util.Lang
 			}
@@ -235,7 +236,7 @@ func InitConf() {
 	}
 	if !gulu.File.IsExist(Conf.Backup.GetSaveDir()) {
 		if err := os.MkdirAll(Conf.Backup.GetSaveDir(), 0755); nil != err {
-			util.LogErrorf("create backup dir [%s] failed: %s", Conf.Backup.GetSaveDir(), err)
+			logging.LogErrorf("create backup dir [%s] failed: %s", Conf.Backup.GetSaveDir(), err)
 		}
 	}
 
@@ -244,7 +245,7 @@ func InitConf() {
 	}
 	if !gulu.File.IsExist(Conf.Sync.GetSaveDir()) {
 		if err := os.MkdirAll(Conf.Sync.GetSaveDir(), 0755); nil != err {
-			util.LogErrorf("create sync dir [%s] failed: %s", Conf.Sync.GetSaveDir(), err)
+			logging.LogErrorf("create sync dir [%s] failed: %s", Conf.Sync.GetSaveDir(), err)
 		}
 	}
 	if 0 == Conf.Sync.Mode {
@@ -282,10 +283,10 @@ func InitConf() {
 	Conf.LocalIPs = util.GetLocalIPs()
 
 	Conf.Save()
-	util.SetLogLevel(Conf.LogLevel)
+	logging.SetLogLevel(Conf.LogLevel)
 
 	if Conf.System.UploadErrLog {
-		util.LogInfof("user has enabled [Automatically upload error messages and diagnostic data]")
+		logging.LogInfof("user has enabled [Automatically upload error messages and diagnostic data]")
 		sentry.Init(sentry.ClientOptions{
 			Dsn:         "https://bdff135f14654ae58a054adeceb2c308@o1173696.ingest.sentry.io/6269178",
 			Release:     util.Ver,
@@ -303,25 +304,25 @@ func initLang() {
 	p := filepath.Join(util.WorkingDir, "appearance", "langs")
 	dir, err := os.Open(p)
 	if nil != err {
-		util.LogFatalf("open language configuration folder [%s] failed: %s", p, err)
+		logging.LogFatalf("open language configuration folder [%s] failed: %s", p, err)
 	}
 	defer dir.Close()
 
 	langNames, err := dir.Readdirnames(-1)
 	if nil != err {
-		util.LogFatalf("list language configuration folder [%s] failed: %s", p, err)
+		logging.LogFatalf("list language configuration folder [%s] failed: %s", p, err)
 	}
 
 	for _, langName := range langNames {
 		jsonPath := filepath.Join(p, langName)
 		data, err := os.ReadFile(jsonPath)
 		if nil != err {
-			util.LogErrorf("read language configuration [%s] failed: %s", jsonPath, err)
+			logging.LogErrorf("read language configuration [%s] failed: %s", jsonPath, err)
 			continue
 		}
 		langMap := map[string]interface{}{}
 		if err := gulu.JSON.UnmarshalJSON(data, &langMap); nil != err {
-			util.LogErrorf("parse language configuration failed [%s] failed: %s", jsonPath, err)
+			logging.LogErrorf("parse language configuration failed [%s] failed: %s", jsonPath, err)
 			continue
 		}
 
@@ -331,7 +332,7 @@ func initLang() {
 		for k, v := range kernelLangs {
 			num, err := strconv.Atoi(k)
 			if nil != err {
-				util.LogErrorf("parse language configuration [%s] item [%d] failed [%s] failed: %s", p, num, err)
+				logging.LogErrorf("parse language configuration [%s] item [%d] failed [%s] failed: %s", p, num, err)
 				continue
 			}
 			kernelMap[num] = v.(string)
@@ -382,7 +383,7 @@ func Close(force bool) (err error) {
 	sql.CloseDatabase()
 	util.WebSocketServer.Close()
 	clearWorkspaceTemp()
-	util.LogInfof("exited kernel")
+	logging.LogInfof("exited kernel")
 	go func() {
 		time.Sleep(500 * time.Millisecond)
 		os.Exit(util.ExitCodeOk)
@@ -431,7 +432,7 @@ func (conf *AppConf) Save() {
 func (conf *AppConf) save0(data []byte) {
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	if err := filelock.LockFileWrite(confPath, data); nil != err {
-		util.LogFatalf("write conf [%s] failed: %s", confPath, err)
+		logging.LogFatalf("write conf [%s] failed: %s", confPath, err)
 	}
 }
 
@@ -539,7 +540,7 @@ func InitBoxes() {
 	if dbFile, err := os.Stat(util.DBPath); nil == err {
 		dbSize = humanize.Bytes(uint64(dbFile.Size()))
 	}
-	util.LogInfof("database size [%s], block count [%d]", dbSize, blockCount)
+	logging.LogInfof("database size [%s], block count [%d]", dbSize, blockCount)
 }
 
 func IsSubscriber() bool {
@@ -554,25 +555,25 @@ func clearWorkspaceTemp() {
 
 	tmps, err := filepath.Glob(filepath.Join(util.TempDir, "*.tmp"))
 	if nil != err {
-		util.LogErrorf("glob temp files failed: %s", err)
+		logging.LogErrorf("glob temp files failed: %s", err)
 	}
 	for _, tmp := range tmps {
 		if err = os.RemoveAll(tmp); nil != err {
-			util.LogErrorf("remove temp file [%s] failed: %s", tmp, err)
+			logging.LogErrorf("remove temp file [%s] failed: %s", tmp, err)
 		} else {
-			util.LogInfof("removed temp file [%s]", tmp)
+			logging.LogInfof("removed temp file [%s]", tmp)
 		}
 	}
 
 	tmps, err = filepath.Glob(filepath.Join(util.DataDir, ".siyuan", "*.tmp"))
 	if nil != err {
-		util.LogErrorf("glob temp files failed: %s", err)
+		logging.LogErrorf("glob temp files failed: %s", err)
 	}
 	for _, tmp := range tmps {
 		if err = os.RemoveAll(tmp); nil != err {
-			util.LogErrorf("remove temp file [%s] failed: %s", tmp, err)
+			logging.LogErrorf("remove temp file [%s] failed: %s", tmp, err)
 		} else {
-			util.LogInfof("removed temp file [%s]", tmp)
+			logging.LogInfof("removed temp file [%s]", tmp)
 		}
 	}
 }

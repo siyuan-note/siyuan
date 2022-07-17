@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	"github.com/88250/vitess-sqlparser/sqlparser"
-	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/siyuan-note/logging"
 )
 
 type Span struct {
@@ -40,7 +40,7 @@ type Span struct {
 func SelectSpansRawStmt(stmt string, limit int) (ret []*Span) {
 	parsedStmt, err := sqlparser.Parse(stmt)
 	if nil != err {
-		//util.LogErrorf("select [%s] failed: %s", stmt, err)
+		//logging.LogErrorf("select [%s] failed: %s", stmt, err)
 		return
 	}
 	switch parsedStmt.(type) {
@@ -69,7 +69,7 @@ func SelectSpansRawStmt(stmt string, limit int) (ret []*Span) {
 		if strings.Contains(err.Error(), "syntax error") {
 			return
 		}
-		util.LogWarnf("sql query [%s] failed: %s", stmt, err)
+		logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
 		return
 	}
 	defer rows.Close()
@@ -85,7 +85,7 @@ func QueryTagSpansByKeyword(keyword string, limit int) (ret []*Span) {
 	stmt += " LIMIT " + strconv.Itoa(limit)
 	rows, err := query(stmt)
 	if nil != err {
-		util.LogErrorf("sql query failed: %s", err)
+		logging.LogErrorf("sql query failed: %s", err)
 		return
 	}
 	defer rows.Close()
@@ -104,7 +104,7 @@ func QueryTagSpans(p string, limit int) (ret []*Span) {
 	stmt += " LIMIT " + strconv.Itoa(limit)
 	rows, err := query(stmt)
 	if nil != err {
-		util.LogErrorf("sql query failed: %s", err)
+		logging.LogErrorf("sql query failed: %s", err)
 		return
 	}
 	defer rows.Close()
@@ -118,7 +118,7 @@ func QueryTagSpans(p string, limit int) (ret []*Span) {
 func scanSpanRows(rows *sql.Rows) (ret *Span) {
 	var span Span
 	if err := rows.Scan(&span.ID, &span.BlockID, &span.RootID, &span.Box, &span.Path, &span.Content, &span.Markdown, &span.Type, &span.IAL); nil != err {
-		util.LogErrorf("query scan field failed: %s", err)
+		logging.LogErrorf("query scan field failed: %s", err)
 		return
 	}
 	ret = &span

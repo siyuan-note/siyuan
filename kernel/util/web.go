@@ -24,6 +24,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/melody"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 )
 
 func GetRemoteAddr(session *melody.Session) string {
@@ -70,14 +71,14 @@ func tryToListenPort() bool {
 		time.Sleep(time.Second * 3)
 		listener, err = net.Listen("tcp", "127.0.0.1:"+ServerPort)
 		if nil != err {
-			LogErrorf("try to listen port [%s] failed: %s", ServerPort, err)
+			logging.LogErrorf("try to listen port [%s] failed: %s", ServerPort, err)
 			return false
 		}
 	}
 	if err = listener.Close(); nil != err {
 		time.Sleep(time.Second * 1)
 		if err = listener.Close(); nil != err {
-			LogErrorf("close listen port [%s] failed: %s", ServerPort, err)
+			logging.LogErrorf("close listen port [%s] failed: %s", ServerPort, err)
 		}
 	}
 	return true

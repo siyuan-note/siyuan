@@ -27,6 +27,7 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/88250/protyle"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -112,7 +113,7 @@ func html2BlockDOM(c *gin.Context) {
 			name = name + "-" + ast.NewNodeID() + ext
 			targetPath := filepath.Join(util.DataDir, "assets", name)
 			if err = gulu.File.CopyFile(localPath, targetPath); nil != err {
-				util.LogErrorf("copy asset from [%s] to [%s] failed: %s", localPath, targetPath, err)
+				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", localPath, targetPath, err)
 				return ast.WalkStop
 			}
 			n.Tokens = gulu.Str.ToBytes("assets/" + name)

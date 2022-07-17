@@ -32,6 +32,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -59,7 +60,7 @@ func (box *Box) BootIndex() {
 		p := file.path
 		tree, err := filesys.LoadTree(box.ID, p, luteEngine)
 		if nil != err {
-			util.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, p, err)
+			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, p, err)
 			continue
 		}
 
@@ -113,7 +114,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 
 		tree, err := filesys.LoadTree(box.ID, p, luteEngine)
 		if nil != err {
-			util.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, p, err)
+			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, p, err)
 			continue
 		}
 
@@ -155,7 +156,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 
 	dbBoxHash := sql.GetBoxHash(box.ID)
 	if boxHash == dbBoxHash {
-		//util.LogInfof("use existing database for box [%s]", box.ID)
+		//logging.LogInfof("use existing database for box [%s]", box.ID)
 		util.SetBootDetails("Use existing database for notebook " + box.ID)
 		return
 	}
@@ -194,7 +195,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 
 		tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
 		if nil != err {
-			util.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, file.path, err)
+			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, file.path, err)
 			continue
 		}
 
@@ -218,7 +219,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 
 	end := time.Now()
 	elapsed := end.Sub(start).Seconds()
-	util.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.Bytes(uint64(treeSize)))
+	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.Bytes(uint64(treeSize)))
 
 	util.PushEndlessProgress(fmt.Sprintf(Conf.Language(56), treeCount))
 	return
@@ -286,12 +287,12 @@ func IndexRefs() {
 				util.IncBootProgress(bootProgressPart, "Persisting block ref text "+util.ShortPathForBootingDisplay(dynamicRefTreeID))
 				tree, err := loadTreeByBlockID(dynamicRefTreeID)
 				if nil != err {
-					util.LogErrorf("tree [%s] dynamic ref text to static failed: %s", dynamicRefTreeID, err)
+					logging.LogErrorf("tree [%s] dynamic ref text to static failed: %s", dynamicRefTreeID, err)
 					continue
 				}
 				legacyDynamicRefTreeToStatic(tree)
 				if err := filesys.WriteTree(tree); nil == err {
-					//util.LogInfof("persisted tree [%s] dynamic ref text", tree.Box+tree.Path)
+					//logging.LogInfof("persisted tree [%s] dynamic ref text", tree.Box+tree.Path)
 				}
 			}
 		}
@@ -335,7 +336,7 @@ func IndexRefs() {
 
 				tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
 				if nil != err {
-					util.LogErrorf("parse box [%s] tree [%s] failed", box.ID, file.path)
+					logging.LogErrorf("parse box [%s] tree [%s] failed", box.ID, file.path)
 					continue
 				}
 
@@ -355,7 +356,7 @@ func IndexRefs() {
 			}
 		}
 	}
-	util.LogInfof("resolved refs [%d] in [%dms]", len(refBlocks), time.Now().Sub(start).Milliseconds())
+	logging.LogInfof("resolved refs [%d] in [%dms]", len(refBlocks), time.Now().Sub(start).Milliseconds())
 }
 
 func legacyDynamicRefTreeToStatic(tree *parse.Tree) {

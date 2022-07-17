@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -51,7 +52,7 @@ func RefreshBacklink(id string) {
 		if nil == tree {
 			tree, err = loadTreeByBlockID(ref.RootID)
 			if nil != err {
-				util.LogErrorf("refresh tree refs failed: %s", err)
+				logging.LogErrorf("refresh tree refs failed: %s", err)
 				continue
 			}
 			trees[ref.RootID] = tree

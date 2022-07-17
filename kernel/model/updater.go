@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -36,7 +37,7 @@ type Announcement struct {
 func GetAnnouncements() (ret []*Announcement) {
 	result, err := util.GetRhyResult(false)
 	if nil != err {
-		util.LogErrorf("get ")
+		logging.LogErrorf("get announcement failed: %s", err)
 		return
 	}
 

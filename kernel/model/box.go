@@ -33,6 +33,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/facette/natsort"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -65,7 +66,7 @@ func ListNotebooks() (ret []*Box, err error) {
 	ret = []*Box{}
 	dirs, err := os.ReadDir(util.DataDir)
 	if nil != err {
-		util.LogErrorf("read dir [%s] failed: %s", util.DataDir, err)
+		logging.LogErrorf("read dir [%s] failed: %s", util.DataDir, err)
 		return ret, err
 	}
 	for _, dir := range dirs {
@@ -87,18 +88,18 @@ func ListNotebooks() (ret []*Box, err error) {
 			if isUserGuide(dir.Name()) {
 				filelock.ReleaseAllFileLocks()
 				os.RemoveAll(filepath.Join(util.DataDir, dir.Name()))
-				util.LogWarnf("not found user guid box conf [%s], removed it", boxConfPath)
+				logging.LogWarnf("not found user guid box conf [%s], removed it", boxConfPath)
 				continue
 			}
-			util.LogWarnf("not found box conf [%s], recreate it", boxConfPath)
+			logging.LogWarnf("not found box conf [%s], recreate it", boxConfPath)
 		} else {
 			data, readErr := filelock.NoLockFileRead(boxConfPath)
 			if nil != readErr {
-				util.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
+				logging.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
 				continue
 			}
 			if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
-				util.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
+				logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
 				continue
 			}
 		}
@@ -154,12 +155,12 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 
 	data, err := filelock.LockFileRead(confPath)
 	if nil != err {
-		util.LogErrorf("read box conf [%s] failed: %s", confPath, err)
+		logging.LogErrorf("read box conf [%s] failed: %s", confPath, err)
 		return
 	}
 
 	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
-		util.LogErrorf("parse box conf [%s] failed: %s", confPath, err)
+		logging.LogErrorf("parse box conf [%s] failed: %s", confPath, err)
 		return
 	}
 	return
@@ -169,7 +170,7 @@ func (box *Box) SaveConf(conf *conf.BoxConf) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	newData, err := gulu.JSON.MarshalIndentJSON(conf, "", "  ")
 	if nil != err {
-		util.LogErrorf("marshal box conf [%s] failed: %s", confPath, err)
+		logging.LogErrorf("marshal box conf [%s] failed: %s", confPath, err)
 		return
 	}
 
@@ -189,10 +190,10 @@ func (box *Box) SaveConf(conf *conf.BoxConf) {
 func (box *Box) saveConf0(data []byte) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); nil != err {
-		util.LogErrorf("save box conf [%s] failed: %s", confPath, err)
+		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
 	if err := filelock.LockFileWrite(confPath, data); nil != err {
-		util.LogErrorf("save box conf [%s] failed: %s", confPath, err)
+		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
 }
 
@@ -238,7 +239,7 @@ func (box *Box) Stat(p string) (ret *FileInfo) {
 	info, err := os.Stat(absPath)
 	if nil != err {
 		if !os.IsNotExist(err) {
-			util.LogErrorf("stat [%s] failed: %s", absPath, err)
+			logging.LogErrorf("stat [%s] failed: %s", absPath, err)
 		}
 		return
 	}
@@ -258,7 +259,7 @@ func (box *Box) Exist(p string) bool {
 func (box *Box) Mkdir(path string) error {
 	if err := os.Mkdir(filepath.Join(util.DataDir, box.ID, path), 0755); nil != err {
 		msg := fmt.Sprintf(Conf.Language(6), box.Name, path, err)
-		util.LogErrorf("mkdir [path=%s] in box [%s] failed: %s", path, box.ID, err)
+		logging.LogErrorf("mkdir [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
 	}
 	IncSync()
@@ -268,7 +269,7 @@ func (box *Box) Mkdir(path string) error {
 func (box *Box) MkdirAll(path string) error {
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, path), 0755); nil != err {
 		msg := fmt.Sprintf(Conf.Language(6), box.Name, path, err)
-		util.LogErrorf("mkdir all [path=%s] in box [%s] failed: %s", path, box.ID, err)
+		logging.LogErrorf("mkdir all [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
 	}
 	IncSync()
@@ -282,7 +283,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 	filelock.ReleaseFileLocks(fromPath)
 	if err := os.Rename(fromPath, toPath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(5), box.Name, fromPath, err)
-		util.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, box.Name, err)
+		logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, box.Name, err)
 		return errors.New(msg)
 	}
 
@@ -302,7 +303,7 @@ func (box *Box) Remove(path string) error {
 	filelock.ReleaseFileLocks(filePath)
 	if err := os.RemoveAll(filePath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(7), box.Name, path, err)
-		util.LogErrorf("remove [path=%s] in box [%s] failed: %s", path, box.ID, err)
+		logging.LogErrorf("remove [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
 	}
 	IncSync()

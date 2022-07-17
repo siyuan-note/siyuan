@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 )
 
 var cachedRhyResult = map[string]interface{}{}
@@ -39,7 +40,7 @@ func GetRhyResult(force bool) (map[string]interface{}, error) {
 	request := httpclient.NewCloudRequest()
 	_, err := request.SetResult(&cachedRhyResult).Get(AliyunServer + "/apis/siyuan/version?ver=" + Ver)
 	if nil != err {
-		LogErrorf("get version info failed: %s", err)
+		logging.LogErrorf("get version info failed: %s", err)
 		return nil, err
 	}
 	rhyResultCacheTime = now

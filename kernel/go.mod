@@ -44,6 +44,7 @@ require (
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
 	github.com/siyuan-note/filelock v0.0.0-20220704090116-54dfb035283f
 	github.com/siyuan-note/httpclient v0.0.0-20220709030145-2bfb50f28e73
+	github.com/siyuan-note/logging v0.0.0-20220717040626-f796b05ee520
 	github.com/steambap/captcha v1.4.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673

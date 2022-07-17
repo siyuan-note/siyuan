@@ -27,19 +27,20 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/fsnotify/fsnotify"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func InitAppearance() {
 	util.SetBootDetails("Initializing appearance...")
 	if err := os.Mkdir(util.AppearancePath, 0755); nil != err && !os.IsExist(err) {
-		util.LogFatalf("create appearance folder [%s] failed: %s", util.AppearancePath, err)
+		logging.LogFatalf("create appearance folder [%s] failed: %s", util.AppearancePath, err)
 	}
 
 	unloadThemes()
 	from := filepath.Join(util.WorkingDir, "appearance")
 	if err := gulu.File.Copy(from, util.AppearancePath); nil != err {
-		util.LogFatalf("copy appearance resources from [%s] to [%s] failed: %s", from, util.AppearancePath, err)
+		logging.LogFatalf("copy appearance resources from [%s] to [%s] failed: %s", from, util.AppearancePath, err)
 	}
 	loadThemes()
 
@@ -65,7 +66,7 @@ var themeWatchers = sync.Map{} // [string]*fsnotify.Watcher{}
 func closeThemeWatchers() {
 	themeWatchers.Range(func(key, value interface{}) bool {
 		if err := value.(*fsnotify.Watcher).Close(); nil != err {
-			util.LogErrorf("close file watcher failed: %s", err)
+			logging.LogErrorf("close file watcher failed: %s", err)
 		}
 		return true
 	})
@@ -78,12 +79,12 @@ func unloadThemes() {
 
 	dir, err := os.Open(util.ThemesPath)
 	if nil != err {
-		util.LogErrorf("open appearance themes folder [%s] failed: %s", util.ThemesPath, err)
+		logging.LogErrorf("open appearance themes folder [%s] failed: %s", util.ThemesPath, err)
 		return
 	}
 	themeDirs, err := dir.Readdir(-1)
 	if nil != err {
-		util.LogErrorf("read appearance themes folder failed: %s", err)
+		logging.LogErrorf("read appearance themes folder failed: %s", err)
 		return
 	}
 	dir.Close()
@@ -99,11 +100,11 @@ func unloadThemes() {
 func loadThemes() {
 	dir, err := os.Open(util.ThemesPath)
 	if nil != err {
-		util.LogFatalf("open appearance themes folder [%s] failed: %s", util.ThemesPath, err)
+		logging.LogFatalf("open appearance themes folder [%s] failed: %s", util.ThemesPath, err)
 	}
 	themeDirs, err := dir.Readdir(-1)
 	if nil != err {
-		util.LogFatalf("read appearance themes folder failed: %s", err)
+		logging.LogFatalf("read appearance themes folder failed: %s", err)
 	}
 	dir.Close()
 
@@ -152,15 +153,15 @@ func themeJSON(themeName string) (ret map[string]interface{}, err error) {
 	}
 	data, err := os.ReadFile(p)
 	if nil != err {
-		util.LogErrorf("read theme.json [%s] failed: %s", p, err)
+		logging.LogErrorf("read theme.json [%s] failed: %s", p, err)
 		return
 	}
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		util.LogErrorf("parse theme.json [%s] failed: %s", p, err)
+		logging.LogErrorf("parse theme.json [%s] failed: %s", p, err)
 		return
 	}
 	if 5 > len(ret) {
-		util.LogWarnf("invalid theme.json [%s]", p)
+		logging.LogWarnf("invalid theme.json [%s]", p)
 		return nil, errors.New("invalid theme.json")
 	}
 	return
@@ -174,15 +175,15 @@ func iconJSON(iconName string) (ret map[string]interface{}, err error) {
 	}
 	data, err := os.ReadFile(p)
 	if nil != err {
-		util.LogErrorf("read icon.json [%s] failed: %s", p, err)
+		logging.LogErrorf("read icon.json [%s] failed: %s", p, err)
 		return
 	}
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		util.LogErrorf("parse icon.json [%s] failed: %s", p, err)
+		logging.LogErrorf("parse icon.json [%s] failed: %s", p, err)
 		return
 	}
 	if 4 > len(ret) {
-		util.LogWarnf("invalid icon.json [%s]", p)
+		logging.LogWarnf("invalid icon.json [%s]", p)
 		return nil, errors.New("invalid icon.json")
 	}
 	return
@@ -196,15 +197,15 @@ func templateJSON(templateName string) (ret map[string]interface{}, err error) {
 	}
 	data, err := os.ReadFile(p)
 	if nil != err {
-		util.LogErrorf("read template.json [%s] failed: %s", p, err)
+		logging.LogErrorf("read template.json [%s] failed: %s", p, err)
 		return
 	}
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		util.LogErrorf("parse template.json [%s] failed: %s", p, err)
+		logging.LogErrorf("parse template.json [%s] failed: %s", p, err)
 		return
 	}
 	if 4 > len(ret) {
-		util.LogWarnf("invalid template.json [%s]", p)
+		logging.LogWarnf("invalid template.json [%s]", p)
 		return nil, errors.New("invalid template.json")
 	}
 	return
@@ -218,15 +219,15 @@ func widgetJSON(widgetName string) (ret map[string]interface{}, err error) {
 	}
 	data, err := os.ReadFile(p)
 	if nil != err {
-		util.LogErrorf("read widget.json [%s] failed: %s", p, err)
+		logging.LogErrorf("read widget.json [%s] failed: %s", p, err)
 		return
 	}
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		util.LogErrorf("parse widget.json [%s] failed: %s", p, err)
+		logging.LogErrorf("parse widget.json [%s] failed: %s", p, err)
 		return
 	}
 	if 4 > len(ret) {
-		util.LogWarnf("invalid widget.json [%s]", p)
+		logging.LogWarnf("invalid widget.json [%s]", p)
 		return nil, errors.New("invalid widget.json")
 	}
 	return
@@ -235,11 +236,11 @@ func widgetJSON(widgetName string) (ret map[string]interface{}, err error) {
 func loadIcons() {
 	dir, err := os.Open(util.IconsPath)
 	if nil != err {
-		util.LogFatalf("open appearance icons folder [%s] failed: %s", util.IconsPath, err)
+		logging.LogFatalf("open appearance icons folder [%s] failed: %s", util.IconsPath, err)
 	}
 	iconDirs, err := dir.Readdir(-1)
 	if nil != err {
-		util.LogFatalf("read appearance icons folder failed: %s", err)
+		logging.LogFatalf("read appearance icons folder failed: %s", err)
 	}
 	dir.Close()
 
@@ -278,7 +279,7 @@ func watchTheme(folder string) {
 
 	var err error
 	if themeWatcher, err = fsnotify.NewWatcher(); nil != err {
-		util.LogErrorf("add theme file watcher for folder [%s] failed: %s", folder, err)
+		logging.LogErrorf("add theme file watcher for folder [%s] failed: %s", folder, err)
 		return
 	}
 	themeWatchers.Store(folder, themeWatcher)
@@ -292,7 +293,7 @@ func watchTheme(folder string) {
 					return
 				}
 
-				//util.LogInfof(event.String())
+				//logging.LogInfof(event.String())
 				if event.Op&fsnotify.Write == fsnotify.Write &&
 					(strings.HasSuffix(event.Name, "theme.css") || strings.HasSuffix(event.Name, "custom.css")) {
 					var themeName string
@@ -318,14 +319,14 @@ func watchTheme(folder string) {
 				if !ok {
 					return
 				}
-				util.LogErrorf("watch theme file failed: %s", err)
+				logging.LogErrorf("watch theme file failed: %s", err)
 			}
 		}
 	}()
 
-	//util.LogInfof("add file watcher [%s]", folder)
+	//logging.LogInfof("add file watcher [%s]", folder)
 	if err := themeWatcher.Add(folder); err != nil {
-		util.LogErrorf("add theme files watcher for folder [%s] failed: %s", folder, err)
+		logging.LogErrorf("add theme files watcher for folder [%s] failed: %s", folder, err)
 	}
 	<-done
 }

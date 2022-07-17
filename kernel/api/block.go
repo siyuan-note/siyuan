@@ -25,6 +25,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -285,7 +286,7 @@ func getBlockInfo(c *gin.Context) {
 			break
 		}
 		if b, _ = model.GetBlock(parentID); nil == b {
-			util.LogErrorf("not found parent")
+			logging.LogErrorf("not found parent")
 			break
 		}
 	}

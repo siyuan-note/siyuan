@@ -299,6 +299,8 @@ func formatErrorMsg(err error) string {
 		msg = Conf.Language(172) + " " + err.Error()
 	} else if strings.Contains(msg, "repo fatal error") {
 		msg = Conf.Language(23) + " " + err.Error()
+	} else if strings.Contains(msg, "no such host") || strings.Contains(msg, "connection failed") {
+		msg = Conf.Language(24)
 	}
 	msg = msg + " v" + util.Ver
 	return msg

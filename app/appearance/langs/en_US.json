@@ -779,7 +779,7 @@
     "21": "Please enter the captcha",
     "22": "The captcha is incorrect",
     "23": "The data repo is damaged due to external changes (such as using a third-party real-time synchronization disk), please reset the data repo",
-    "24": "TODO",
+    "24": "The network is abnormal, please try again later",
     "25": "The attribute name only supports English letters and digits",
     "26": "Please initialize the data repo key first in [Settings - About - Data repo key]",
     "27": "Data integrity check failed",

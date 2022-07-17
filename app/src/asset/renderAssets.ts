@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {pathPosix} from "../util/pathName";
 
 export const renderAssetsPreview = (pathString: string) => {
-    const type = pathPosix().extname(pathString).toLowerCase()
+    const type = pathPosix().extname(pathString).toLowerCase();
     if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
         return `<img style="max-height: 100%" src="${pathString}">`;
     } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
@@ -12,4 +12,4 @@ export const renderAssetsPreview = (pathString: string) => {
     } else {
         return "";
     }
-}
+};

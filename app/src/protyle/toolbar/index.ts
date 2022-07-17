@@ -1171,9 +1171,9 @@ export class Toolbar {
                 if (!hoverItemElement) {
                     return;
                 }
-                previewElement.innerHTML = renderAssetsPreview(hoverItemElement.getAttribute("data-value"))
-            })
-            const previewElement = this.subElement.firstElementChild.lastElementChild
+                previewElement.innerHTML = renderAssetsPreview(hoverItemElement.getAttribute("data-value"));
+            });
+            const previewElement = this.subElement.firstElementChild.lastElementChild;
             previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
             const inputElement = this.subElement.querySelector("input");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -1183,7 +1183,7 @@ export class Toolbar {
                 }
                 const currentElement = upDownHint(listElement, event);
                 if (currentElement) {
-                    previewElement.innerHTML = renderAssetsPreview(currentElement.getAttribute("data-value"))
+                    previewElement.innerHTML = renderAssetsPreview(currentElement.getAttribute("data-value"));
                 }
                 if (event.key === "Enter") {
                     hintRenderAssets(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"), protyle);

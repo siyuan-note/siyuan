@@ -1,7 +1,7 @@
 {
   "name": "SiYuan",
   "version": "2.0.27",
-  "description": "A local-first personal knowledge management system, supports fine-grained block-level reference, and Markdown WYSIWYG.",
+  "description": "Build Your Eternal Digital Garden",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
   "packageManager": "pnpm@7.5.1",

@@ -514,8 +514,8 @@ github.com/shurcooL/users v0.0.0-20180125191416-49c67e49c537/go.mod h1:QJTqeLYED
 github.com/shurcooL/vfsgen v0.0.0-20200824052919-0d455de96546/go.mod h1:TrYk7fJVaAttu97ZZKrO9UbRa8izdowaMIZcxYMbVaw=
 github.com/shurcooL/webdavfs v0.0.0-20170829043945-18c3829fa133/go.mod h1:hKmq5kWdCj2z2KEozexVbfEZIWiTjhE0+UjmZgPqehw=
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
-github.com/siyuan-note/dejavu v0.0.0-20220716164152-fe0371110dcb h1:2E/kpgD8QXdu9vaN/1clMatxOcmqd6al6oQ7QRW6ORI=
-github.com/siyuan-note/dejavu v0.0.0-20220716164152-fe0371110dcb/go.mod h1:cri+XyZAqmK5fJ98En9aOHB+YkuU8+XQcJdQ31EUhis=
+github.com/siyuan-note/dejavu v0.0.0-20220717022546-6b1fccfe0590 h1:eqZgonnzyChgdmyCeyikbejYgnssFkewJ++jSrSguSI=
+github.com/siyuan-note/dejavu v0.0.0-20220717022546-6b1fccfe0590/go.mod h1:cri+XyZAqmK5fJ98En9aOHB+YkuU8+XQcJdQ31EUhis=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f h1:JMobMNZ7AqaKKyEK+WeWFhix/2TDQXgPZDajU00IybU=

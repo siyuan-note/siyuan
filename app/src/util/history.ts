@@ -128,12 +128,17 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
 </li>`;
         } else {
             repoHTML += `<li class="b3-list-item b3-list-item--hide-action" data-id="${item.id}" data-tag="${item.tag}">
-    <div class="b3-list-item__text">
-        <span class="b3-chip b3-chip--secondary${item.tag ? "" : " fn__none"}">${item.tag}</span>
-        ${item.hCreated}<span class="fn__space"></span>
-        ${escapeHtml(item.memo)}
-        <span class="b3-list-item__meta">${item.hSize}</span>
-        <span class="b3-list-item__meta">${window.siyuan.languages.fileCount}${item.count}</span>
+    <div class="fn__flex-1">
+        <div class="b3-list-item__text">
+            ${escapeHtml(item.memo)}
+            <span class="fn__space"></span>
+            <span class="b3-chip b3-chip--secondary${item.tag ? "" : " fn__none"}">${item.tag}</span>
+        </div>
+        <div>
+            <span class="ft__smaller ft__on-surface">${item.hCreated}</span>
+            <span class="b3-list-item__meta">${item.hSize}</span>
+            <span class="b3-list-item__meta">${window.siyuan.languages.fileCount}${item.count}</span>
+        </div>
     </div>
     ${actionHTML}
 </li>`;

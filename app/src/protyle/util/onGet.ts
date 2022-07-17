@@ -107,7 +107,7 @@ const setHTML = (options: { content: string, action?: string[] }, protyle: IProt
         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
             let removeElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
             const removeElements = [];
-            while (protyle.wysiwyg.element.childElementCount > 2) {
+            while (protyle.wysiwyg.element.childElementCount > 2 && removeElements && !protyle.wysiwyg.element.lastElementChild.isSameNode(removeElement)) {
                 if (protyle.contentElement.scrollHeight - removeElement.offsetTop > REMOVED_OVER_HEIGHT) {
                     removeElements.push(removeElement);
                 } else {

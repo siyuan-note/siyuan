@@ -66,9 +66,9 @@ export class Dialog {
         });
     }
 
-    public bindInput(inputElement: HTMLInputElement, enterEvent?: () => void) {
+    public bindInput(inputElement: HTMLInputElement | HTMLTextAreaElement, enterEvent?: () => void) {
         inputElement.focus();
-        inputElement.addEventListener("keydown", (event) => {
+        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.isComposing) {
                 event.preventDefault();
                 return;

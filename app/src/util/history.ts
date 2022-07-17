@@ -423,6 +423,9 @@ export const openHistory = () => {
                 const textareaElement = genRepoDialog.element.querySelector("textarea");
                 textareaElement.focus();
                 const btnsElement = genRepoDialog.element.querySelectorAll(".b3-button");
+                genRepoDialog.bindInput(textareaElement, () => {
+                    (btnsElement[1] as HTMLButtonElement).click();
+                });
                 btnsElement[0].addEventListener("click", () => {
                     genRepoDialog.destroy();
                 });
@@ -474,6 +477,9 @@ export const openHistory = () => {
                 const btnsElement = genTagDialog.element.querySelectorAll(".b3-button");
                 btnsElement[0].addEventListener("click", () => {
                     genTagDialog.destroy();
+                });
+                genTagDialog.bindInput(inputElement, () => {
+                    (btnsElement[1] as HTMLButtonElement).click();
                 });
                 btnsElement[1].addEventListener("click", () => {
                     fetchPost("/api/repo/tagSnapshot", {

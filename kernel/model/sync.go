@@ -125,6 +125,11 @@ func SyncData(boot, exit, byHand bool) {
 func incReindex(upserts, removes []string) {
 	needPushRemoveProgress := 32 < len(removes)
 	needPushUpsertProgress := 32 < len(upserts)
+	msg := fmt.Sprintf(Conf.Language(35))
+	util.PushStatusBar(msg)
+	if needPushRemoveProgress || needPushUpsertProgress {
+		util.PushEndlessProgress(msg)
+	}
 
 	// 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
 
@@ -138,13 +143,20 @@ func incReindex(upserts, removes []string) {
 		if nil != block {
 			treenode.RemoveBlockTreesByRootID(block.RootID)
 			sql.RemoveTreeQueue(block.BoxID, block.RootID)
-			msg := fmt.Sprintf("Sync remove tree [%s]", block.RootID)
+			msg = fmt.Sprintf(Conf.Language(39), block.RootID)
 			util.PushStatusBar(msg)
 			if needPushRemoveProgress {
 				util.PushEndlessProgress(msg)
 			}
 		}
 	}
+
+	msg = fmt.Sprintf(Conf.Language(35))
+	util.PushStatusBar(msg)
+	if needPushRemoveProgress || needPushUpsertProgress {
+		util.PushEndlessProgress(msg)
+	}
+	sql.WaitForWritingDatabase()
 
 	for _, upsertFile := range upserts {
 		if !strings.HasSuffix(upsertFile, ".sy") {
@@ -169,15 +181,16 @@ func incReindex(upserts, removes []string) {
 		}
 		treenode.ReindexBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
-		msg := fmt.Sprintf("Sync reindex tree [%s]", tree.ID)
+		msg = fmt.Sprintf(Conf.Language(40), tree.ID)
 		util.PushStatusBar(msg)
 		if needPushUpsertProgress {
 			util.PushEndlessProgress(msg)
 		}
 	}
 
+	util.PushStatusBar(Conf.Language(58))
 	if needPushRemoveProgress || needPushUpsertProgress {
-		util.PushClearProgress()
+		util.PushEndlessProgress(Conf.Language(58))
 	}
 }
 

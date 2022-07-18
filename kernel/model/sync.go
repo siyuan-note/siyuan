@@ -132,8 +132,9 @@ func incReindex(upserts, removes []string) {
 		util.PushEndlessProgress(msg)
 	}
 
-	// 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
+	logging.LogDebugf("sync reindex [upserts=%d, removes=%d]", len(upserts), len(removes))
 
+	// 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
 	for _, removeFile := range removes {
 		if !strings.HasSuffix(removeFile, ".sy") {
 			continue

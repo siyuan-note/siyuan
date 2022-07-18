@@ -78,10 +78,7 @@ func NewCommand(cmdStr string, cmdId float64, param map[string]interface{}, sess
 
 func Exec(cmd Cmd) {
 	go func() {
-		//start := time.Now()
 		defer logging.Recover()
 		cmd.Exec()
-		//end := time.Now()
-		//util.Logger.Infof("cmd [%s] exec consumed [%d]ms", cmd.Name(), end.Sub(start).Milliseconds())
 	}()
 }

@@ -164,7 +164,6 @@ func BuildGraph(query string) (boxID string, nodes []*GraphNode, links []*GraphL
 		// 文档块关联
 		rootBlock := getBlockIn(treeBlocks, root.ID)
 		if nil == rootBlock {
-			//util.LogWarnf("root block is nil [rootID=%s], tree blocks [len=%d], just skip it", root.ID, len(treeBlocks))
 			continue
 		}
 

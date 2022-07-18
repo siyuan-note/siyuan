@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/radovskyb/watcher"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -51,7 +52,7 @@ func watchAssets() {
 					return
 				}
 
-				//util.LogInfof("assets changed: %s", event)
+				//logging.LogInfof("assets changed: %s", event)
 				if watcher.Write == event.Op {
 					IncSync()
 				}
@@ -62,7 +63,7 @@ func watchAssets() {
 				if !ok {
 					return
 				}
-				util.LogErrorf("watch assets failed: %s", err)
+				logging.LogErrorf("watch assets failed: %s", err)
 			case <-assetsWatcher.Closed:
 				return
 			}
@@ -70,13 +71,13 @@ func watchAssets() {
 	}()
 
 	if err := assetsWatcher.Add(assetsDir); nil != err {
-		util.LogErrorf("add assets watcher for folder [%s] failed: %s", assetsDir, err)
+		logging.LogErrorf("add assets watcher for folder [%s] failed: %s", assetsDir, err)
 		return
 	}
 
-	//util.LogInfof("added file watcher [%s]", assetsDir)
+	//logging.LogInfof("added file watcher [%s]", assetsDir)
 	if err := assetsWatcher.Start(10 * time.Second); nil != err {
-		util.LogErrorf("start assets watcher for folder [%s] failed: %s", assetsDir, err)
+		logging.LogErrorf("start assets watcher for folder [%s] failed: %s", assetsDir, err)
 		return
 	}
 }

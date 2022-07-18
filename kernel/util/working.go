@@ -302,6 +302,7 @@ func initPathDir() {
 	}
 }
 
+// TODO: v2.2.0 移除
 func cleanOld() {
 	dirs, _ := os.ReadDir(WorkingDir)
 	for _, dir := range dirs {

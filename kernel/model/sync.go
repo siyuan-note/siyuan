@@ -123,6 +123,7 @@ func SyncData(boot, exit, byHand bool) {
 
 // incReindex 增量重建索引。
 func incReindex(upserts, removes []string) {
+	util.IncBootProgress(3, "Sync reindexing...")
 	needPushRemoveProgress := 32 < len(removes)
 	needPushUpsertProgress := 32 < len(upserts)
 	msg := fmt.Sprintf(Conf.Language(35))
@@ -141,6 +142,7 @@ func incReindex(upserts, removes []string) {
 		id := strings.TrimSuffix(filepath.Base(removeFile), ".sy")
 		block := treenode.GetBlockTree(id)
 		if nil != block {
+			util.SetBootDetails("Sync remove tree " + block.Path)
 			treenode.RemoveBlockTreesByRootID(block.RootID)
 			sql.RemoveTreeQueue(block.BoxID, block.RootID)
 			msg = fmt.Sprintf(Conf.Language(39), block.RootID)
@@ -156,7 +158,6 @@ func incReindex(upserts, removes []string) {
 	if needPushRemoveProgress || needPushUpsertProgress {
 		util.PushEndlessProgress(msg)
 	}
-	sql.WaitForWritingDatabase()
 
 	for _, upsertFile := range upserts {
 		if !strings.HasSuffix(upsertFile, ".sy") {
@@ -175,6 +176,7 @@ func incReindex(upserts, removes []string) {
 
 		box := upsertFile[:idx]
 		p := strings.TrimPrefix(upsertFile, box)
+		util.SetBootDetails("Sync upsert tree " + p)
 		tree, err0 := LoadTree(box, p)
 		if nil != err0 {
 			continue

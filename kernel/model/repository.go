@@ -37,6 +37,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -520,16 +521,25 @@ func syncRepo(boot, exit, byHand bool) {
 	for _, file := range mergeResult.Removes {
 		removes = append(removes, file.Path)
 	}
-	incReindex(upserts, removes)
-	cache.ClearDocsIAL()
 
-	// 刷新界面
-	util.ReloadUI()
+	if boot && gulu.File.IsExist(util.BlockTreePath) {
+		treenode.InitBlockTree()
+	}
+
+	incReindex(upserts, removes)
+	cache.ClearDocsIAL() // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
+
+	if !boot && !exit {
+		util.ReloadUI()
+	}
+
 	elapsed = time.Since(start)
-	go func() {
-		time.Sleep(2 * time.Second)
-		util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
-	}()
+	if !exit {
+		go func() {
+			time.Sleep(2 * time.Second)
+			util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+		}()
+	}
 	return
 }
 

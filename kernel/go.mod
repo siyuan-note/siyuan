@@ -39,7 +39,7 @@ require (
 	github.com/panjf2000/ants/v2 v2.5.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20220717085949-1fcc8abe03a7
+	github.com/siyuan-note/dejavu v0.0.0-20220718172206-7cf1bc791bdc
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
 	github.com/siyuan-note/filelock v0.0.0-20220704090116-54dfb035283f

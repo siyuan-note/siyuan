@@ -209,19 +209,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                 focusBlock(nodeElement);
                 scrollCenter(editor.editor.protyle, nodeElement, true);
             } else if (editor.editor.protyle.block.rootID === options.id) {
-                if (editor.editor.protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0") {
-                    focusBlock(editor.editor.protyle.wysiwyg.element.firstElementChild);
-                    editor.editor.protyle.contentElement.scrollTop = 0;
-                } else {
-                    // 动态加载
-                    fetchPost("/api/filetree/getDoc", {
-                        id: options.id,
-                        mode: 3,
-                        size: Constants.SIZE_GET,
-                    }, getResponse => {
-                        onGet(getResponse, editor.editor.protyle, options.action);
-                    });
-                }
+               // 由于 https://github.com/siyuan-note/siyuan/issues/5420，移除定位
             } else if (editor.editor.protyle.toolbar.range) {
                 nodeElement = hasClosestBlock(editor.editor.protyle.toolbar.range.startContainer) as Element;
                 focusByRange(editor.editor.protyle.toolbar.range);

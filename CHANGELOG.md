@@ -1,3 +1,37 @@
+## v2.1.0 / 2022-07-18
+
+### 引入特性
+
+* [`/资源` 搜索时支持图片预览](https://github.com/siyuan-note/siyuan/issues/3048)
+* [资源文件重命名](https://github.com/siyuan-note/siyuan/issues/3454)
+* [云端同步数据仓库](https://github.com/siyuan-note/siyuan/issues/5142)
+
+### 改进功能
+
+* [`/资源` 支持搜索未索引的文件](https://github.com/siyuan-note/siyuan/issues/5416)
+* [开启 `启动时关闭所有页签` 后仅启动时关闭没有钉住的页签](https://github.com/siyuan-note/siyuan/issues/5418)
+* [优化插入文件链接的锚文本和图片的提示文本](https://github.com/siyuan-note/siyuan/issues/5419)
+* [收集箱列表项鼠标悬停显示完整标题与摘要](https://github.com/siyuan-note/siyuan/issues/5425)
+* [移动端新建日记均弹出选择笔记本的界面且默认选中上一次选项](https://github.com/siyuan-note/siyuan/issues/5428)
+* [访问授权码输入错误 3 次后加入验证码](https://github.com/siyuan-note/siyuan/issues/5429)
+* [链接菜单中支持 Tab 和 Shift+Tab 切换输入框](https://github.com/siyuan-note/siyuan/issues/5434)
+* [优化云端同步上传性能](https://github.com/siyuan-note/siyuan/issues/5436)
+* [优化云端同步下载性能](https://github.com/siyuan-note/siyuan/issues/5437)
+* [调整桌面端程序图标大小](https://github.com/siyuan-note/siyuan/issues/5438)
+* [系统唤醒后网络报错 `no such host`](https://github.com/siyuan-note/siyuan/issues/5442)
+
+### 开发重构
+
+* [日志组件单独抽取项目](https://github.com/siyuan-note/siyuan/issues/5439)
+
+### 修复缺陷
+
+* [顶部停靠栏与底部停靠栏图标多于一个时排列错误](https://github.com/siyuan-note/siyuan/issues/5415)
+* [编辑器模式切换后面包屑菜单按钮位置错位](https://github.com/siyuan-note/siyuan/issues/5417)
+* [有些文档的内容和块动态加载有问题](https://github.com/siyuan-note/siyuan/issues/5423)
+* [关系图全屏再最小化后打开文档会自动全屏](https://github.com/siyuan-note/siyuan/issues/5424)
+* [使用 Delete 删除文档后菜单不消失](https://github.com/siyuan-note/siyuan/issues/5435)
+
 ## v2.0.27 / 2022-07-14
 
 ### 改进功能

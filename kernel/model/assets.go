@@ -279,6 +279,7 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 	uploadAbsAssets = gulu.Str.RemoveDuplicatedElem(uploadAbsAssets)
 
 	logging.LogInfof("uploading [%d] assets", len(uploadAbsAssets))
+	msgId := util.PushMsg(fmt.Sprintf(Conf.Language(27), len(uploadAbsAssets)), 3000)
 	if loadErr := LoadUploadToken(); nil != loadErr {
 		util.PushMsg(loadErr.Error(), 5000)
 		return
@@ -293,6 +294,10 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 			logging.LogWarnf("file [%s] larger than 10MB, ignore uploading it", absAsset)
 			continue
 		}
+
+		msg := fmt.Sprintf(Conf.Language(27), absAsset)
+		util.PushStatusBar(msg)
+		util.PushUpdateMsg(msgId, msg, 3000)
 
 		requestResult := gulu.Ret.NewResult()
 		request := httpclient.NewCloudFileRequest2m()
@@ -322,6 +327,7 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 		completedUploadAssets = append(completedUploadAssets, relAsset)
 		logging.LogInfof("uploaded asset [%s]", relAsset)
 	}
+	util.PushClearMsg(msgId)
 
 	if 0 < len(completedUploadAssets) {
 		syncedAssets = readWorkspaceAssets()

@@ -16,12 +16,6 @@
 
 package conf
 
-import (
-	"path/filepath"
-
-	"github.com/siyuan-note/siyuan/kernel/util"
-)
-
 type Sync struct {
 	CloudName string `json:"cloudName"` // 云端同步目录名称
 	Enabled   bool   `json:"enabled"`   // 是否开启同步
@@ -36,8 +30,4 @@ func NewSync() *Sync {
 		Enabled:   false,
 		Mode:      1,
 	}
-}
-
-func (s *Sync) GetSaveDir() string {
-	return filepath.Join(util.WorkspaceDir, "sync")
 }

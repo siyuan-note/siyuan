@@ -64,7 +64,6 @@ type AppConf struct {
 	AccessAuthCode string           `json:"accessAuthCode"` // 访问授权码
 	System         *conf.System     `json:"system"`         // 系统
 	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键
-	Backup         *conf.Backup     `json:"backup"`         // 备份配置
 	Sync           *conf.Sync       `json:"sync"`           // 同步配置
 	Search         *conf.Search     `json:"search"`         // 搜索配置
 	Stat           *conf.Stat       `json:"stat"`           // 统计
@@ -231,22 +230,8 @@ func InitConf() {
 		Conf.Account = conf.NewAccount()
 	}
 
-	if nil == Conf.Backup {
-		Conf.Backup = conf.NewBackup()
-	}
-	if !gulu.File.IsExist(Conf.Backup.GetSaveDir()) {
-		if err := os.MkdirAll(Conf.Backup.GetSaveDir(), 0755); nil != err {
-			logging.LogErrorf("create backup dir [%s] failed: %s", Conf.Backup.GetSaveDir(), err)
-		}
-	}
-
 	if nil == Conf.Sync {
 		Conf.Sync = conf.NewSync()
-	}
-	if !gulu.File.IsExist(Conf.Sync.GetSaveDir()) {
-		if err := os.MkdirAll(Conf.Sync.GetSaveDir(), 0755); nil != err {
-			logging.LogErrorf("create sync dir [%s] failed: %s", Conf.Sync.GetSaveDir(), err)
-		}
 	}
 	if 0 == Conf.Sync.Mode {
 		Conf.Sync.Mode = 1
@@ -505,10 +490,10 @@ func InitBoxes() {
 	blockCount := 0
 	if 1 > len(treenode.GetBlockTrees()) {
 		if gulu.File.IsExist(util.BlockTreePath) {
-			util.IncBootProgress(30, "Reading block trees...")
+			util.IncBootProgress(20, "Reading block trees...")
 			go func() {
 				for i := 0; i < 40; i++ {
-					util.RandomSleep(100, 200)
+					util.RandomSleep(50, 100)
 					util.IncBootProgress(1, "Reading block trees...")
 				}
 			}()

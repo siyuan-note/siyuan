@@ -974,10 +974,14 @@ export class Gutter {
                         element.querySelector("input").addEventListener("change", (event) => {
                             const newHeight = ((event.target as HTMLInputElement).value || "420") + "px";
                             (nodeElement as HTMLElement).style.height = newHeight;
-                            (nodeElement.firstElementChild as HTMLElement).style.height = newHeight;
+                            (nodeElement.firstElementChild.nextElementSibling as HTMLElement).style.height = newHeight;
                             updateTransaction(protyle, id, nodeElement.outerHTML, html);
                             html = nodeElement.outerHTML;
                             event.stopPropagation();
+                            const chartInstance = echarts.getInstanceById(nodeElement.firstElementChild.nextElementSibling.getAttribute("_echarts_instance_"));
+                            if (chartInstance) {
+                                chartInstance.resize();
+                            }
                         });
                     }
                 }, {

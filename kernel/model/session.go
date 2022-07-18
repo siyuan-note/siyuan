@@ -63,7 +63,7 @@ func LoginAuth(c *gin.Context) {
 
 	var inputCaptcha string
 	session := util.GetSession(c)
-	if session.NeedCaptcha() {
+	if util.NeedCaptcha() {
 		captchaArg := arg["captcha"]
 		if nil == captchaArg {
 			ret.Code = 1
@@ -71,6 +71,11 @@ func LoginAuth(c *gin.Context) {
 			return
 		}
 		inputCaptcha = captchaArg.(string)
+		if "" == inputCaptcha {
+			ret.Code = 1
+			ret.Msg = Conf.Language(21)
+			return
+		}
 
 		if strings.ToLower(session.Captcha) != strings.ToLower(inputCaptcha) {
 			ret.Code = 1
@@ -84,9 +89,9 @@ func LoginAuth(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = Conf.Language(83)
 
-		session.WrongAuthCount++
+		util.WrongAuthCount++
 		session.Captcha = gulu.Rand.String(7)
-		if session.NeedCaptcha() {
+		if util.NeedCaptcha() {
 			ret.Code = 1 // 需要渲染验证码
 		}
 
@@ -99,7 +104,7 @@ func LoginAuth(c *gin.Context) {
 	}
 
 	session.AccessAuthCode = authCode
-	session.WrongAuthCount = 0
+	util.WrongAuthCount = 0
 	session.Captcha = gulu.Rand.String(7)
 	if err := session.Save(c); nil != err {
 		logging.LogErrorf("save session failed: " + err.Error())

@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/88250/gulu"
 	figure "github.com/common-nighthawk/go-figure"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -34,6 +35,10 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	httpclient.SetUserAgent(UserAgent)
 
 	HomeDir = filepath.Join(workspaceDir, "home")
+	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")
+	if !gulu.File.IsExist(userHomeConfDir) {
+		os.MkdirAll(userHomeConfDir, 0755)
+	}
 	WorkingDir = filepath.Join(appDir, "app")
 	WorkspaceDir = workspaceDir
 	ConfDir = filepath.Join(workspaceDir, "conf")

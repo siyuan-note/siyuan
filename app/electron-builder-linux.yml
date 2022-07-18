@@ -15,7 +15,7 @@ extraFiles:
     to: "LICENSE"
 
 linux:
-  icon: "stage/icon.png"
+  icon: "src/assets/icon.png"
   category: "Utility"
   extraResources:
     - from: "kernel-linux"

@@ -662,44 +662,47 @@ func subscribeEvents() {
 
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadIndex, func(context map[string]interface{}, id string) {
 		msg := fmt.Sprintf(Conf.Language(164), id[:7])
-		util.SetBootDetails(msg)
+		util.IncBootProgress(1, msg)
 		contextPushMsg(context, msg)
 	})
 
+	var bootProgressPart float64
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadFiles, func(context map[string]interface{}, ids []string) {
 		msg := fmt.Sprintf(Conf.Language(165), len(ids))
 		util.SetBootDetails(msg)
+		bootProgressPart = 20 / float64(len(ids))
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadFile, func(context map[string]interface{}, id string) {
 		msg := fmt.Sprintf(Conf.Language(165), id[:7])
+		util.IncBootProgress(bootProgressPart, msg)
 		count++
 		if 0 == count%32 {
-			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadChunks, func(context map[string]interface{}, ids []string) {
 		msg := fmt.Sprintf(Conf.Language(166), len(ids))
 		util.SetBootDetails(msg)
+		bootProgressPart = 20 / float64(len(ids))
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadChunk, func(context map[string]interface{}, id string) {
 		msg := fmt.Sprintf(Conf.Language(166), id[:7])
+		util.IncBootProgress(bootProgressPart, msg)
 		count++
 		if 0 == count%32 {
-			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadRef, func(context map[string]interface{}, ref string) {
 		msg := fmt.Sprintf(Conf.Language(167), ref)
-		util.SetBootDetails(msg)
+		util.IncBootProgress(1, msg)
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadIndex, func(context map[string]interface{}, id string) {
 		msg := fmt.Sprintf(Conf.Language(168), id[:7])
-		util.SetBootDetails(msg)
+		util.IncBootProgress(1, msg)
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadFiles, func(context map[string]interface{}, files []*entity.File) {

@@ -135,6 +135,7 @@ func incReindex(upserts, removes []string) {
 	logging.LogDebugf("sync reindex [upserts=%d, removes=%d]", len(upserts), len(removes))
 
 	// 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
+	bootProgressPart := 10 / float64(len(removes))
 	for _, removeFile := range removes {
 		if !strings.HasSuffix(removeFile, ".sy") {
 			continue
@@ -143,7 +144,7 @@ func incReindex(upserts, removes []string) {
 		id := strings.TrimSuffix(filepath.Base(removeFile), ".sy")
 		block := treenode.GetBlockTree(id)
 		if nil != block {
-			util.SetBootDetails("Sync remove tree " + block.Path)
+			util.IncBootProgress(bootProgressPart, "Sync remove tree "+block.Path)
 			treenode.RemoveBlockTreesByRootID(block.RootID)
 			sql.RemoveTreeQueue(block.BoxID, block.RootID)
 			msg = fmt.Sprintf(Conf.Language(39), block.RootID)
@@ -160,6 +161,7 @@ func incReindex(upserts, removes []string) {
 		util.PushEndlessProgress(msg)
 	}
 
+	bootProgressPart = 10 / float64(len(upserts))
 	for _, upsertFile := range upserts {
 		if !strings.HasSuffix(upsertFile, ".sy") {
 			continue
@@ -177,7 +179,7 @@ func incReindex(upserts, removes []string) {
 
 		box := upsertFile[:idx]
 		p := strings.TrimPrefix(upsertFile, box)
-		util.SetBootDetails("Sync upsert tree " + p)
+		util.IncBootProgress(bootProgressPart, "Sync upsert tree "+p)
 		tree, err0 := LoadTree(box, p)
 		if nil != err0 {
 			continue

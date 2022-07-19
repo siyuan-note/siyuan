@@ -142,7 +142,7 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
             title: window.siyuan.languages.export + " " + exportType,
             defaultPath: response.data.rootTitle + "." + extension,
             filters: [{
-                name: "Word",
+                name: exportType,
                 extensions: [extension]
             }],
             properties: ["showOverwriteConfirmation"],

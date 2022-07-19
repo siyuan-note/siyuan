@@ -455,7 +455,7 @@ func syncRepo(boot, exit, byHand bool) {
 		return
 	}
 
-	err = indexRepoBeforeCloudSync(repo)
+	indexBeforeSync, err := indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		syncDownloadErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -467,9 +467,9 @@ func syncRepo(boot, exit, byHand bool) {
 	if nil != err {
 		return
 	}
+
 	syncContext := map[string]interface{}{dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBar}
 	_, mergeResult, trafficStat, err := repo.Sync(cloudInfo, syncContext)
-
 	elapsed := time.Since(start)
 	if nil != err {
 		syncDownloadErrCount++
@@ -526,8 +526,14 @@ func syncRepo(boot, exit, byHand bool) {
 		treenode.InitBlockTree()
 	}
 
-	incReindex(upserts, removes)
 	cache.ClearDocsIAL() // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
+
+	fullReindex := 0.2 < float64(len(upserts))/float64(len(indexBeforeSync.Files))
+	if fullReindex {
+		RefreshFileTree()
+		return
+	}
+	incReindex(upserts, removes)
 
 	if !boot && !exit {
 		util.ReloadUI()
@@ -543,10 +549,10 @@ func syncRepo(boot, exit, byHand bool) {
 	return
 }
 
-func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
+func indexRepoBeforeCloudSync(repo *dejavu.Repo) (index *entity.Index, err error) {
 	start := time.Now()
 	latest, _ := repo.Latest()
-	index, err := repo.Index("[Sync] Cloud sync", map[string]interface{}{
+	index, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
 		dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBar,
 	})
 	if nil != err {
@@ -682,7 +688,7 @@ func subscribeEvents() {
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadFiles, func(context map[string]interface{}, ids []string) {
 		msg := fmt.Sprintf(Conf.Language(165), len(ids))
 		util.SetBootDetails(msg)
-		bootProgressPart = 20 / float64(len(ids))
+		bootProgressPart = 10 / float64(len(ids))
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadFile, func(context map[string]interface{}, id string) {
@@ -696,7 +702,7 @@ func subscribeEvents() {
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadChunks, func(context map[string]interface{}, ids []string) {
 		msg := fmt.Sprintf(Conf.Language(166), len(ids))
 		util.SetBootDetails(msg)
-		bootProgressPart = 20 / float64(len(ids))
+		bootProgressPart = 10 / float64(len(ids))
 		contextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadChunk, func(context map[string]interface{}, id string) {

@@ -183,7 +183,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 		}
 	}
 
-	bootProgressPart = 40.0 / float64(boxLen) / float64(treeCount)
+	bootProgressPart = 20.0 / float64(boxLen) / float64(treeCount)
 
 	i = 0
 	// 块级行级入库，缓存块

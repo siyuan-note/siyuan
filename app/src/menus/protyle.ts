@@ -304,7 +304,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             try {
                 // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
                 let clipText = await navigator.clipboard.readText();
-                clipText = clipText.replace(/\*/g, "\\*").replace(/\_/g, "\\_").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\!/g, "\\!").replace(/\\/g, "\\").replace(/\`/g, "\\`").replace(/\</g, "\\<").replace(/\>/g, "\\>").replace(/\&/g, "\\&").replace(/\~/g, "\\~").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\=/g, "\\=").replace(/\#/g, "\\#").replace(/\$/g, "\\$").replace(/\^/g, "\\^").replace(/\|/g, "\\|");
+                clipText = clipText.replace(/\*/g, "\\*").replace(/\_/g, "\\_").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\!/g, "\\!").replace(/\`/g, "\\`").replace(/\</g, "\\<").replace(/\>/g, "\\>").replace(/\&/g, "\\&").replace(/\~/g, "\\~").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\=/g, "\\=").replace(/\#/g, "\\#").replace(/\$/g, "\\$").replace(/\^/g, "\\^").replace(/\|/g, "\\|") .replace(/\\/g, "\\\\");
                 pasteText(protyle, clipText, nodeElement);
             } catch (e) {
                 console.log(e);

@@ -47,6 +47,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
     let id = blockElement.getAttribute("data-node-id");
     range.insertNode(document.createElement("wbr"));
     let oldHTML = blockElement.outerHTML;
+    const undoOperation: IOperation[] = [];
+    const doOperation: IOperation[] = [];
     if (range.toString() !== "") {
         const inlineMathElement = hasClosestByAttribute(range.commonAncestorContainer, "data-type", "inline-math");
         if (inlineMathElement) {
@@ -59,6 +61,16 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             range.deleteContents();
         }
         range.insertNode(document.createElement("wbr"));
+        undoOperation.push({
+            action: "update",
+            id,
+            data: oldHTML
+        })
+        doOperation.push({
+            action: "update",
+            id,
+            data: blockElement.outerHTML
+        })
     }
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
@@ -114,8 +126,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             }
         }
     }
-    const undoOperation: IOperation[] = [];
-    const doOperation: IOperation[] = [];
     const cursorLiElement = hasClosestByClassName(blockElement, "li");
     // 列表项不能单独进行粘贴 https://ld246.com/article/1628681120576/comment/1628681209731#comments
     if (tempElement.content.children[0]?.getAttribute("data-type") === "NodeListItem") {

@@ -323,7 +323,7 @@ func formatErrorMsg(err error) string {
 	} else if strings.Contains(msg, "no such host") || strings.Contains(msg, "connection failed") {
 		msg = Conf.Language(24)
 	} else if strings.Contains(msg, "net/http: request canceled while waiting for connection") {
-		msg = Conf.Language(24)
+		msg = Conf.Language(24) + " net/http timeout"
 	}
 	msg = msg + " v" + util.Ver
 	return msg

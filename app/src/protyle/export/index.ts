@@ -121,8 +121,30 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
             lockFile(response.data);
             return;
         }
+
+        let exportType = "HTML (SiYuan)"
+        let extension = "html"
+        switch (option.type) {
+            case "htmlmd":
+                exportType = "HTML (Markdown)";
+                break;
+            case "word":
+                exportType = "Word .docx";
+                extension = "docx";
+                break;
+            case "pdf":
+                exportType = "PDF";
+                extension = "pdf";
+                break;
+        }
+
         dialog.showSaveDialog({
-            defaultPath: response.data.rootTitle,
+            title: window.siyuan.languages.export + " " + exportType,
+            defaultPath: response.data.rootTitle + "." + extension,
+            filters: [{
+                name: "Word",
+                extensions: [extension]
+            }],
             properties: ["showOverwriteConfirmation"],
         }).then((result: SaveDialogReturnValue) => {
             if (!result.canceled) {

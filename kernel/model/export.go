@@ -180,13 +180,17 @@ func ExportDocx(id, savePath string) (err error) {
 		return errors.New(msg)
 	}
 
-	if err = gulu.File.Copy(tmpDocxPath, filepath.Join(savePath, name+".docx")); nil != err {
+	if 1 < strings.Count(savePath, filepath.Base(savePath)) {
+		savePath = filepath.Dir(savePath)
+	}
+
+	if err = gulu.File.Copy(tmpDocxPath, savePath); nil != err {
 		logging.LogErrorf("export docx failed: %s", err)
 		return errors.New(fmt.Sprintf(Conf.Language(14), err))
 	}
 	tmpAssets := filepath.Join(tmpDir, "assets")
 	if gulu.File.IsDir(tmpAssets) {
-		if err = gulu.File.Copy(tmpAssets, filepath.Join(savePath, "assets")); nil != err {
+		if err = gulu.File.Copy(tmpAssets, filepath.Join(filepath.Dir(savePath), "assets")); nil != err {
 			logging.LogErrorf("export docx failed: %s", err)
 			return errors.New(fmt.Sprintf(Conf.Language(14), err))
 		}
@@ -199,6 +203,9 @@ func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
 
 	tree = exportTree(tree, true)
 	name = path.Base(tree.HPath)
+	if 1 < strings.Count(savePath, filepath.Base(savePath)) {
+		savePath = filepath.Dir(savePath)
+	}
 
 	if err := os.MkdirAll(savePath, 0755); nil != err {
 		logging.LogErrorf("mkdir [%s] failed: %s", savePath, err)
@@ -282,6 +289,10 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 
 	tree = exportTree(tree, true)
 	name = path.Base(tree.Path)
+
+	if 1 < strings.Count(savePath, filepath.Base(savePath)) {
+		savePath = filepath.Dir(savePath)
+	}
 
 	if err := os.MkdirAll(savePath, 0755); nil != err {
 		logging.LogErrorf("mkdir [%s] failed: %s", savePath, err)

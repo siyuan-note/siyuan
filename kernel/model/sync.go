@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -144,14 +145,15 @@ func incReindex(upserts, removes []string) {
 		id := strings.TrimSuffix(filepath.Base(removeFile), ".sy")
 		block := treenode.GetBlockTree(id)
 		if nil != block {
-			util.IncBootProgress(bootProgressPart, "Sync remove tree "+block.Path)
-			treenode.RemoveBlockTreesByRootID(block.RootID)
-			sql.RemoveTreeQueue(block.BoxID, block.RootID)
 			msg = fmt.Sprintf(Conf.Language(39), block.RootID)
+			util.IncBootProgress(bootProgressPart, msg)
 			util.PushStatusBar(msg)
 			if needPushRemoveProgress {
 				util.PushEndlessProgress(msg)
 			}
+
+			treenode.RemoveBlockTreesByRootID(block.RootID)
+			sql.RemoveTreeQueue(block.BoxID, block.RootID)
 		}
 	}
 
@@ -179,18 +181,19 @@ func incReindex(upserts, removes []string) {
 
 		box := upsertFile[:idx]
 		p := strings.TrimPrefix(upsertFile, box)
-		util.IncBootProgress(bootProgressPart, "Sync upsert tree "+p)
+		msg = fmt.Sprintf(Conf.Language(40), strings.TrimSuffix(path.Base(p), ".sy"))
+		util.IncBootProgress(bootProgressPart, msg)
+		util.PushStatusBar(msg)
+		if needPushUpsertProgress {
+			util.PushEndlessProgress(msg)
+		}
+
 		tree, err0 := LoadTree(box, p)
 		if nil != err0 {
 			continue
 		}
 		treenode.ReindexBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
-		msg = fmt.Sprintf(Conf.Language(40), tree.ID)
-		util.PushStatusBar(msg)
-		if needPushUpsertProgress {
-			util.PushEndlessProgress(msg)
-		}
 	}
 
 	util.PushStatusBar(Conf.Language(58))

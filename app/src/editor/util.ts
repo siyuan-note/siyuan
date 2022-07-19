@@ -209,7 +209,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                 focusBlock(nodeElement);
                 scrollCenter(editor.editor.protyle, nodeElement, true);
             } else if (editor.editor.protyle.block.rootID === options.id) {
-               // 由于 https://github.com/siyuan-note/siyuan/issues/5420，移除定位
+                // 由于 https://github.com/siyuan-note/siyuan/issues/5420，移除定位
             } else if (editor.editor.protyle.toolbar.range) {
                 nodeElement = hasClosestBlock(editor.editor.protyle.toolbar.range.startContainer) as Element;
                 focusByRange(editor.editor.protyle.toolbar.range);
@@ -326,6 +326,19 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
     setTitle(title);
 };
 
+export const isCurrentEditor = (blockId: string) => {
+    const activeElement = document.querySelector('.layout__wnd--active > .layout-tab-bar > .item--focus')
+    if (activeElement) {
+        const tab = getInstanceById(activeElement.getAttribute("data-id"))
+        if (tab instanceof Tab && tab.model instanceof Editor) {
+            if (tab.model.editor.protyle.block.rootID !== blockId) {
+                return false;
+            }
+        }
+    }
+    return true
+}
+
 const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
     models.outline.find(item => {
         if (reload || (item.type === "pin" && (!protyle || item.blockId !== protyle.block?.rootID))) {
@@ -339,6 +352,9 @@ const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
             fetchPost("/api/outline/getDocOutline", {
                 id: blockId,
             }, response => {
+                if (!isCurrentEditor(blockId)) {
+                    return;
+                }
                 item.update(response, blockId);
                 if (protyle) {
                     item.updateDocTitle(protyle.background.ial);
@@ -388,8 +404,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             if (blockId === item.blockId) {
                 return;
             }
-            item.blockId = blockId;
-            item.searchGraph(true);
+            item.searchGraph(true, blockId);
         }
     });
     models.backlinks.forEach(item => {
@@ -410,6 +425,9 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             k: item.inputsElement[0].value,
             mk: item.inputsElement[1].value,
         }, response => {
+            if (!isCurrentEditor(blockId)) {
+                return;
+            }
             item.blockId = blockId;
             item.render(response.data);
         });

@@ -7,7 +7,7 @@ import {addScript} from "../../protyle/util/addScript";
 import {BlockPanel} from "../../block/Panel";
 import {fullscreen} from "../../protyle/breadcrumb/action";
 import {fetchPost} from "../../util/fetch";
-import {openFileById} from "../../editor/util";
+import {isCurrentEditor, openFileById} from "../../editor/util";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 
 declare const vis: any;
@@ -401,9 +401,9 @@ export class Graph extends Model {
         this.searchGraph(false);
     }
 
-    public searchGraph(focus: boolean) {
+    public searchGraph(focus: boolean, id?: string) {
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
-        if (element.classList.contains("fn__rotate")) {
+        if (element.classList.contains("fn__rotate") && !id) {
             return;
         }
         element.classList.add("fn__rotate");
@@ -448,17 +448,23 @@ export class Graph extends Model {
         } else {
             fetchPost("/api/graph/getLocalGraph", {
                 k: this.inputElement.value,
-                id: this.blockId,
+                id: id || this.blockId,
                 conf: {
                     type,
                     d3,
                     dailyNote: (this.panelElement.querySelector("[data-type='dailyNote']") as HTMLInputElement).checked,
                 },
             }, response => {
+                element.classList.remove("fn__rotate");
+                if (id) {
+                    this.blockId = id
+                }
+                if (!isCurrentEditor(this.blockId)) {
+                    return;
+                }
                 this.graphData = response.data;
                 window.siyuan.config.graph.local = response.data.conf;
                 this.onGraph(focus);
-                element.classList.remove("fn__rotate");
             });
         }
     }

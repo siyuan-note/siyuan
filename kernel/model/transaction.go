@@ -220,18 +220,6 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		return
 	}
 
-	if isLargePaste(tx) {
-		if ret = tx.doLargeInsert(); nil != ret {
-			tx.rollback()
-			return
-		}
-		if cr := tx.commit(); nil != cr {
-			logging.LogErrorf("commit tx failed: %s", cr)
-			return &TxErr{msg: cr.Error()}
-		}
-		return
-	}
-
 	start := time.Now()
 	for _, op := range tx.DoOperations {
 		switch op.Action {
@@ -671,110 +659,6 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 		if err = tx.writeTree(targetTree); nil != err {
 			return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 		}
-	}
-	return
-}
-
-// isLargePaste 用于判断 transaction 是否是粘贴大量数据。
-// 粘贴大量数据时：
-//   1. 最后一个 op 是 delete 或者 insert，且 id 是之前 ops 的 previous id
-//   2. 除了最后一个 op，之前的所有 op 都是 insert，且 previous id 一样
-func isLargePaste(transaction *Transaction) bool {
-	length := len(transaction.DoOperations)
-	if 16 > length {
-		return false
-	}
-
-	lastOp := transaction.DoOperations[length-1]
-	if "delete" != lastOp.Action && "insert" != lastOp.Action {
-		return false
-	}
-	ops := transaction.DoOperations[:length-1]
-	previousID := ops[0].PreviousID
-	if "insert" == lastOp.Action {
-		ops = transaction.DoOperations
-	} else {
-		if previousID != lastOp.ID {
-			return false
-		}
-	}
-	for _, op := range ops {
-		if "insert" != op.Action {
-			return false
-		}
-		if previousID != op.PreviousID {
-			return false
-		}
-	}
-	return true
-}
-
-func (tx *Transaction) doLargeInsert() (ret *TxErr) {
-	var err error
-	operations := tx.DoOperations
-	previousID := operations[0].PreviousID
-	parentBlock := treenode.GetBlockTree(previousID)
-	if nil == parentBlock {
-		parentID := operations[0].ParentID
-		parentBlock = treenode.GetBlockTree(parentID)
-		if nil == parentBlock {
-			logging.LogErrorf("not found previous block [id=%s]", parentID)
-			return &TxErr{code: TxErrCodeBlockNotFound, id: parentID}
-		}
-	}
-	id := parentBlock.ID
-	tree, err := tx.loadTree(id)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
-		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: id}
-	}
-	if nil != err {
-		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
-	}
-
-	luteEngine := NewLute()
-	length := len(operations)
-
-	var inserts []*Operation
-	if "insert" == operations[length-1].Action {
-		inserts = operations
-	} else {
-		inserts = operations[:length-1]
-	}
-	for _, op := range inserts {
-		data := strings.ReplaceAll(op.Data.(string), util2.FrontEndCaret, "")
-		subTree := luteEngine.BlockDOM2Tree(data)
-		insertedNode := subTree.Root.FirstChild
-		if "" == insertedNode.ID {
-			insertedNode.ID = ast.NewNodeID()
-			insertedNode.SetIALAttr("id", insertedNode.ID)
-		}
-
-		node := treenode.GetNodeInTree(tree, previousID)
-		if nil == node {
-			logging.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
-			return &TxErr{code: TxErrCodeBlockNotFound, id: previousID}
-		}
-		if ast.NodeList == insertedNode.Type && nil != node.Parent && ast.NodeList == node.Parent.Type {
-			insertedNode = insertedNode.FirstChild
-		}
-		node.InsertAfter(insertedNode)
-		createdUpdated(insertedNode)
-		tx.nodes[insertedNode.ID] = insertedNode
-	}
-
-	if "delete" == operations[length-1].Action {
-		node := treenode.GetNodeInTree(tree, previousID)
-		if nil == node {
-			logging.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
-			return &TxErr{code: TxErrCodeBlockNotFound, id: previousID}
-		}
-		node.Unlink()
-		delete(tx.nodes, node.ID)
-	}
-
-	if err = tx.writeTree(tree); nil != err {
-		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 	}
 	return
 }

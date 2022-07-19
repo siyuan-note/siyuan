@@ -55,7 +55,7 @@ const showErrorWindow = (title, content) => {
     width: screen.getPrimaryDisplay().size.width / 2,
     height: screen.getPrimaryDisplay().workAreaSize.height / 2,
     frame: false,
-    icon: path.join(appDir, 'stage', 'icon.png'),
+    icon: path.join(appDir, 'stage', 'icon-large.png'),
     webPreferences: {
       nativeWindowOpen: true,
       nodeIntegration: true,
@@ -71,7 +71,7 @@ const showErrorWindow = (title, content) => {
       v: appVer,
       title: title,
       content: content,
-      icon: path.join(appDir, 'stage', 'icon.png'),
+      icon: path.join(appDir, 'stage', 'icon-large.png'),
     },
   })
   errWindow.show()
@@ -176,7 +176,7 @@ const boot = () => {
     },
     frame: 'darwin' === process.platform,
     titleBarStyle: 'hidden',
-    icon: path.join(appDir, 'stage', 'icon.png'),
+    icon: path.join(appDir, 'stage', 'icon-large.png'),
   })
 
   require('@electron/remote/main').enable(mainWindow.webContents)
@@ -361,7 +361,7 @@ const boot = () => {
 
   if ('win32' === process.platform || 'linux' === process.platform) {
     // 系统托盘
-    tray = new Tray(path.join(appDir, 'stage', 'icon.png'))
+    tray = new Tray(path.join(appDir, 'stage', 'icon-large.png'))
     tray.setToolTip('SiYuan')
     const trayMenuTemplate = [
       {
@@ -432,7 +432,7 @@ const initKernel = (initData) => {
       width: screen.getPrimaryDisplay().size.width / 2,
       height: screen.getPrimaryDisplay().workAreaSize.height / 2,
       frame: false,
-      icon: path.join(appDir, 'stage', 'icon.png'),
+      icon: path.join(appDir, 'stage', 'icon-large.png'),
       transparent: 'linux' !== process.platform,
       webPreferences: {
         nativeWindowOpen: true,
@@ -586,7 +586,7 @@ app.whenReady().then(() => {
       width: screen.getPrimaryDisplay().size.width / 2,
       height: screen.getPrimaryDisplay().workAreaSize.height / 2,
       frame: false,
-      icon: path.join(appDir, 'stage', 'icon.png'),
+      icon: path.join(appDir, 'stage', 'icon-large.png'),
       transparent: 'linux' !== process.platform,
       webPreferences: {
         nativeWindowOpen: true,
@@ -606,7 +606,7 @@ app.whenReady().then(() => {
         query: {
           home: app.getPath('home'),
           v: appVer,
-          icon: path.join(appDir, 'stage', 'icon.png'),
+          icon: path.join(appDir, 'stage', 'icon-large.png'),
         },
       })
     firstOpenWindow.show()

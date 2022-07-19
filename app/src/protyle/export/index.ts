@@ -1,7 +1,7 @@
 import {showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {PrintToPDFOptions, SaveDialogReturnValue} from "electron";
+import {PrintToPDFOptions, OpenDialogReturnValue} from "electron";
 import {BrowserWindow, dialog} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
@@ -138,15 +138,10 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
                 break;
         }
 
-        dialog.showSaveDialog({
+        dialog.showOpenDialog({
             title: window.siyuan.languages.export + " " + exportType,
-            defaultPath: response.data.rootTitle + "." + extension,
-            filters: [{
-                name: exportType,
-                extensions: [extension]
-            }],
-            properties: ["showOverwriteConfirmation"],
-        }).then((result: SaveDialogReturnValue) => {
+            properties: ["createDirectory", "openDirectory"],
+        }).then((result: OpenDialogReturnValue) => {
             if (!result.canceled) {
                 const msgId = showMessage(window.siyuan.languages.exporting, -1);
                 let url = "/api/export/exportHTML";
@@ -158,12 +153,12 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
                 fetchPost(url, {
                     id: option.id,
                     pdf: option.type === "pdf",
-                    savePath: result.filePath
+                    savePath: result.filePaths[0]
                 }, exportResponse => {
                     if (option.type === "word") {
-                        afterExport(result.filePath, msgId);
+                        afterExport(result.filePaths[0], msgId);
                     } else {
-                        onExport(exportResponse, result.filePath, option.type, pdfOption, removeAssets, msgId);
+                        onExport(exportResponse, result.filePaths[0], option.type, pdfOption, removeAssets, msgId);
                     }
                 });
             }

@@ -82,14 +82,16 @@ try {
   if (!fs.existsSync(confDir)) {
     fs.mkdirSync(confDir, {mode: 0o755, recursive: true})
   }
-  const documents = path.join(app.getPath('home'), "Documents")
+  const documents = path.join(app.getPath('home'), 'Documents')
   if (!fs.existsSync(documents)) {
     fs.mkdirSync(documents, {mode: 0o755, recursive: true})
   }
 } catch (e) {
   console.error(e)
-  require('electron').dialog.showErrorBox('创建配置目录失败 Failed to create config directory',
-    '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
+  require('electron').
+    dialog.
+    showErrorBox('创建配置目录失败 Failed to create config directory',
+      '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
   app.exit()
 }
 
@@ -125,8 +127,16 @@ const boot = () => {
   } catch (e) {
     fs.writeFileSync(windowStatePath, '{}')
   }
-  const defaultWidth = screen.getPrimaryDisplay().size.width * 4 / 5
-  const defaultHeight = screen.getPrimaryDisplay().workAreaSize.height * 4 / 5
+  let defaultWidth
+  let defaultHeight
+  let workArea
+  try {
+    defaultWidth = screen.getPrimaryDisplay().size.width * 4 / 5
+    defaultHeight = screen.getPrimaryDisplay().workAreaSize.height * 4 / 5
+    workArea = screen.getPrimaryDisplay().workArea
+  } catch (e) {
+    console.error(e)
+  }
   const windowState = Object.assign({}, {
     isMaximized: true,
     fullscreen: false,
@@ -136,26 +146,27 @@ const boot = () => {
     height: defaultHeight,
   }, oldWindowState)
 
-  // 窗口大小等同于或大于 workArea 时，缩小会隐藏到左下角
-  const workArea = screen.getPrimaryDisplay().workArea
-  if (windowState.width >= workArea.width || windowState.height >=
-    workArea.height) {
-    windowState.width = Math.min(defaultWidth, workArea.width)
-    windowState.height = Math.min(defaultHeight, workArea.height)
-  }
-  if (windowState.width < 256) {
-    windowState.width = Math.min(defaultWidth, workArea.width)
-  }
-  if (windowState.height < 256) {
-    windowState.height = Math.min(defaultHeight, workArea.height)
-  }
-
-  let x = windowState.x, y = windowState.y
-  if (x > workArea.width || x < 0) {
-    x = 0
-  }
-  if (y > workArea.height || y < 0) {
-    y = 0
+  let x = windowState.x
+  let y = windowState.y
+  if (workArea) {
+    // 窗口大小等同于或大于 workArea 时，缩小会隐藏到左下角
+    if (windowState.width >= workArea.width || windowState.height >=
+      workArea.height) {
+      windowState.width = Math.min(defaultWidth, workArea.width)
+      windowState.height = Math.min(defaultHeight, workArea.height)
+    }
+    if (windowState.width < 256) {
+      windowState.width = Math.min(defaultWidth, workArea.width)
+    }
+    if (windowState.height < 256) {
+      windowState.height = Math.min(defaultHeight, workArea.height)
+    }
+    if (x > workArea.width || x < 0) {
+      x = 0
+    }
+    if (y > workArea.height || y < 0) {
+      y = 0
+    }
   }
 
   // 创建主窗体
@@ -164,7 +175,8 @@ const boot = () => {
     backgroundColor: '#FFF', // 桌面端主窗体背景色设置为 `#FFF` Fix https://github.com/siyuan-note/siyuan/issues/4544
     width: windowState.width,
     height: windowState.height,
-    x: x, y: y,
+    x,
+    y,
     fullscreenable: true,
     fullscreen: windowState.fullscreen,
     webPreferences: {
@@ -180,7 +192,8 @@ const boot = () => {
   })
 
   require('@electron/remote/main').enable(mainWindow.webContents)
-  mainWindow.webContents.userAgent = 'SiYuan/' + appVer + ' https://b3log.org/siyuan Electron'
+  mainWindow.webContents.userAgent = 'SiYuan/' + appVer +
+    ' https://b3log.org/siyuan Electron'
   mainWindow.webContents.on('did-finish-load', () => {
     if ('win32' === process.platform || 'linux' === process.platform) {
       siyuanOpenURL = process.argv.find((arg) => arg.startsWith('siyuan://'))
@@ -383,19 +396,19 @@ const boot = () => {
         label: 'Official Website',
         click: () => {
           shell.openExternal('https://b3log.org/siyuan/')
-        }
+        },
       },
       {
         label: 'Open Source',
         click: () => {
           shell.openExternal('https://github.com/siyuan-note/siyuan')
-        }
+        },
       },
       {
         label: '中文反馈',
         click: () => {
           shell.openExternal('https://ld246.com/article/1649901726096')
-        }
+        },
       },
       {
         label: 'Quit',
@@ -444,7 +457,8 @@ const initKernel = (initData) => {
       : 'SiYuan-Kernel'
     const kernelPath = path.join(appDir, 'kernel', kernelName)
     if (!fs.existsSync(kernelPath)) {
-      showErrorWindow('⚠️ 内核文件丢失 Kernel is missing', `<div>内核可执行文件丢失，请重新安装思源，并将思源加入杀毒软件信任列表。</div><div>The kernel binary is not found, please reinstall SiYuan and add SiYuan into the trust list of your antivirus software.</div>`)
+      showErrorWindow('⚠️ 内核文件丢失 Kernel is missing',
+        `<div>内核可执行文件丢失，请重新安装思源，并将思源加入杀毒软件信任列表。</div><div>The kernel binary is not found, please reinstall SiYuan and add SiYuan into the trust list of your antivirus software.</div>`)
       bootWindow.destroy()
       resolve(false)
       return
@@ -472,25 +486,31 @@ const initKernel = (initData) => {
         writeLog(`kernel exited with code [${code}]`)
         switch (code) {
           case 20:
-            showErrorWindow('⚠️ 数据库被锁定 The database is locked', `<div>数据库文件正在被其他程序锁定。如果你使用了第三方同步盘，请在思源运行期间关闭同步。</div><div>The database file is being locked by another program. If you use a third-party sync disk, please turn off sync while SiYuan is running.</div>`)
+            showErrorWindow('⚠️ 数据库被锁定 The database is locked',
+              `<div>数据库文件正在被其他程序锁定。如果你使用了第三方同步盘，请在思源运行期间关闭同步。</div><div>The database file is being locked by another program. If you use a third-party sync disk, please turn off sync while SiYuan is running.</div>`)
             break
           case 21:
-            showErrorWindow('⚠️ 6806 端口不可用 The port 6806 is unavailable', '<div>思源需要监听 6806 端口，请确保该端口可用且不是其他程序的保留端口。可尝试使用管理员运行命令：' +
+            showErrorWindow('⚠️ 6806 端口不可用 The port 6806 is unavailable',
+              '<div>思源需要监听 6806 端口，请确保该端口可用且不是其他程序的保留端口。可尝试使用管理员运行命令：' +
               '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=6806 numberofports=1\nnet start winnat</code></pre></div>' +
               '<div>SiYuan needs to listen to port 6806, please make sure this port is available, and not a reserved port by other software. Try running the command as an administrator: ' +
               '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=6806 numberofports=1\nnet start winnat</code></pre></div>')
             break
           case 22:
-            showErrorWindow('⚠️ 创建配置目录失败 Failed to create config directory', `<div>思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。</div><div>SiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.</div>`)
+            showErrorWindow('⚠️ 创建配置目录失败 Failed to create config directory',
+              `<div>思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。</div><div>SiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.</div>`)
             break
           case 23:
-            showErrorWindow('⚠️ 无法读写块树文件 Failed to access blocktree file', `<div>块树文件正在被其他程序锁定。如果你使用了第三方同步盘，请在思源运行期间关闭同步。</div><div>The block tree file is being locked by another program. If you use a third-party sync disk, please turn off the sync while SiYuan is running.</div>`)
+            showErrorWindow('⚠️ 无法读写块树文件 Failed to access blocktree file',
+              `<div>块树文件正在被其他程序锁定。如果你使用了第三方同步盘，请在思源运行期间关闭同步。</div><div>The block tree file is being locked by another program. If you use a third-party sync disk, please turn off the sync while SiYuan is running.</div>`)
             break
           case 0:
           case 1: // Fatal error
             break
           default:
-            showErrorWindow('⚠️ 内核因未知原因退出 The kernel exited for unknown reasons', `<div>思源内核因未知原因退出 [code=${code}]，请尝试重启操作系统后再启动思源。如果该问题依然发生，请检查杀毒软件是否阻止思源内核启动。</div>
+            showErrorWindow(
+              '⚠️ 内核因未知原因退出 The kernel exited for unknown reasons',
+              `<div>思源内核因未知原因退出 [code=${code}]，请尝试重启操作系统后再启动思源。如果该问题依然发生，请检查杀毒软件是否阻止思源内核启动。</div>
 <div>SiYuan Kernel exited for unknown reasons [code=${code}], please try to reboot your operating system and then start SiYuan again. If occurs this problem still, please check your anti-virus software whether kill the SiYuan Kernel.</div>`)
             break
         }
@@ -682,19 +702,19 @@ app.on('before-quit', (event) => {
   }
 })
 
-const {powerMonitor} = require("electron");
+const {powerMonitor} = require('electron')
 
 powerMonitor.on('suspend', () => {
-  writeLog("system suspend");
-  fetch("http://127.0.0.1:6806/api/sync/performSync", {method: "POST"});
+  writeLog('system suspend')
+  fetch('http://127.0.0.1:6806/api/sync/performSync', {method: 'POST'})
 })
 
 powerMonitor.on('resume', () => {
-  writeLog("system resume");
-  fetch("http://127.0.0.1:6806/api/sync/performSync", {method: "POST"});
+  writeLog('system resume')
+  fetch('http://127.0.0.1:6806/api/sync/performSync', {method: 'POST'})
 })
 
 powerMonitor.on('shutdown', () => {
-  writeLog("system shutdown");
+  writeLog('system shutdown')
   fetch('http://127.0.0.1:6806/api/system/exit', {method: 'POST'})
 })

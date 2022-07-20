@@ -496,6 +496,8 @@ func syncRepo(boot, exit, byHand bool) {
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
 	Conf.Sync.Stat = msg
 	syncDownloadErrCount = 0
+	logging.LogInfof("synced data repo [uploadFileCount=%d, downloadFileCount=%d, uploadChunkCount=%d, downloadChunkCount=%d, uploadBytes=%d, downloadBytes=%d] in [%.2fs]",
+		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, trafficStat.UploadBytes, trafficStat.DownloadBytes, elapsed.Seconds())
 
 	if 1 > len(mergeResult.Upserts) && 1 > len(mergeResult.Removes) { // 没有数据变更
 		syncSameCount++

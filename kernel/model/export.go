@@ -155,7 +155,7 @@ func Preview(id string) string {
 	return luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
 }
 
-func ExportDocx(id, savePath string) (err error) {
+func ExportDocx(id, savePath string, removeAssets bool) (err error) {
 	if !util.IsValidPandocBin(Conf.Export.PandocBin) {
 		return errors.New(Conf.Language(115))
 	}
@@ -184,8 +184,8 @@ func ExportDocx(id, savePath string) (err error) {
 		logging.LogErrorf("export docx failed: %s", err)
 		return errors.New(fmt.Sprintf(Conf.Language(14), err))
 	}
-	tmpAssets := filepath.Join(tmpDir, "assets")
-	if gulu.File.IsDir(tmpAssets) {
+
+	if tmpAssets := filepath.Join(tmpDir, "assets"); !removeAssets && gulu.File.IsDir(tmpAssets) {
 		if err = gulu.File.Copy(tmpAssets, filepath.Join(savePath, "assets")); nil != err {
 			logging.LogErrorf("export docx failed: %s", err)
 			return errors.New(fmt.Sprintf(Conf.Language(14), err))

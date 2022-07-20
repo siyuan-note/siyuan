@@ -135,7 +135,8 @@ func exportDocx(c *gin.Context) {
 
 	id := arg["id"].(string)
 	savePath := arg["savePath"].(string)
-	err := model.ExportDocx(id, savePath)
+	removeAssets := arg["removeAssets"].(bool)
+	err := model.ExportDocx(id, savePath, removeAssets)
 	if nil != err {
 		ret.Code = 1
 		ret.Msg = err.Error()

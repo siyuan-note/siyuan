@@ -457,7 +457,7 @@ export class Graph extends Model {
             }, response => {
                 element.classList.remove("fn__rotate");
                 if (id) {
-                    this.blockId = id
+                    this.blockId = id;
                 }
                 if (!isCurrentEditor(this.blockId)) {
                     return;

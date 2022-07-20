@@ -65,12 +65,12 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             action: "update",
             id,
             data: oldHTML
-        })
+        });
         doOperation.push({
             action: "update",
             id,
             data: blockElement.outerHTML
-        })
+        });
     }
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;

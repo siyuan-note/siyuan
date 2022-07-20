@@ -327,17 +327,17 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
 };
 
 export const isCurrentEditor = (blockId: string) => {
-    const activeElement = document.querySelector('.layout__wnd--active > .layout-tab-bar > .item--focus')
+    const activeElement = document.querySelector(".layout__wnd--active > .layout-tab-bar > .item--focus");
     if (activeElement) {
-        const tab = getInstanceById(activeElement.getAttribute("data-id"))
+        const tab = getInstanceById(activeElement.getAttribute("data-id"));
         if (tab instanceof Tab && tab.model instanceof Editor) {
             if (tab.model.editor.protyle.block.rootID !== blockId) {
                 return false;
             }
         }
     }
-    return true
-}
+    return true;
+};
 
 const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
     models.outline.find(item => {

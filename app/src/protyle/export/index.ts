@@ -122,19 +122,16 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
             return;
         }
 
-        let exportType = "HTML (SiYuan)"
-        let extension = "html"
+        let exportType = "HTML (SiYuan)";
         switch (option.type) {
             case "htmlmd":
                 exportType = "HTML (Markdown)";
                 break;
             case "word":
                 exportType = "Word .docx";
-                extension = "docx";
                 break;
             case "pdf":
                 exportType = "PDF";
-                extension = "pdf";
                 break;
         }
 

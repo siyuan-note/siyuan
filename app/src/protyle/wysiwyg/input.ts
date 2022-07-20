@@ -5,7 +5,7 @@ import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "./transaction";
 import {mathRender} from "../markdown/mathRender";
 import {highlightRender} from "../markdown/highlightRender";
-import {getContenteditableElement, getNextBlock} from "./getBlock";
+import {getContenteditableElement, getNextBlock, isNotEditBlock} from "./getBlock";
 import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../markdown/blockRender";
 import {hideElements} from "../ui/hideElements";
@@ -80,10 +80,12 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     let html = blockElement.outerHTML;
     let todoOldHTML = "";
     if (editElement.textContent === "---" && !blockElement.classList.contains("code-block")) {
-        html = `<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div></div></div>`;
+        html = `<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div><wbr></div></div>`;
         const nextBlockElement = getNextBlock(editElement);
         if (nextBlockElement) {
-            focusBlock(nextBlockElement);
+            if (!isNotEditBlock(nextBlockElement)) {
+                focusBlock(nextBlockElement);
+            }
         } else {
             html += genEmptyBlock(false, true);
         }

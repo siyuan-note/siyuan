@@ -1,9 +1,9 @@
 import {Constants} from "../../constants";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByMatchTag} from "../util/hasClosest";
 import {
+    focusBlock,
     focusByRange,
     focusByWbr,
-    focusSideBlock,
     getEditorRange,
     getSelectionOffset,
     getSelectionPosition
@@ -599,7 +599,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     window.siyuan.menus.menu.element.querySelector('[data-id="assetSubMenu"]').classList.add("b3-menu__item--show");
                     window.siyuan.menus.menu.element.querySelectorAll("input")[0].focus();
                 } else if (value === "---") {
-                    focusSideBlock(nodeElement);
+                    focusBlock(nodeElement);
                 } else {
                     focusByWbr(nodeElement, range);
                 }

@@ -1,4 +1,4 @@
-import {showMessage} from "../../dialog/message";
+import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {PrintToPDFOptions, OpenDialogReturnValue} from "electron";
@@ -147,15 +147,21 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
                 } else if (option.type === "word") {
                     url = "/api/export/exportDocx";
                 }
+                const savePath = result.filePaths[0].endsWith(response.data.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], response.data.rootTitle);
                 fetchPost(url, {
                     id: option.id,
                     pdf: option.type === "pdf",
-                    savePath: result.filePaths[0]
+                    savePath
                 }, exportResponse => {
                     if (option.type === "word") {
-                        afterExport(result.filePaths[0], msgId);
+                        if (exportResponse.code === 1) {
+                            hideMessage(msgId);
+                            showMessage(exportResponse.msg, undefined, "error");
+                            return;
+                        }
+                        afterExport(savePath, msgId);
                     } else {
-                        onExport(exportResponse, result.filePaths[0], option.type, pdfOption, removeAssets, msgId);
+                        onExport(exportResponse, savePath, option.type, pdfOption, removeAssets, msgId);
                     }
                 });
             }

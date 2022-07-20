@@ -313,7 +313,8 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
         inputElement.focus();
     }
     lazyLoadEmoji(window.siyuan.menus.menu.element);
-    window.siyuan.menus.menu.element.firstElementChild.addEventListener(getEventName(), (event) => {
+    // 不能使用 getEventName 否则 https://github.com/siyuan-note/siyuan/issues/5472
+    window.siyuan.menus.menu.element.firstElementChild.addEventListener("click", (event) => {
         const eventTarget = event.target as HTMLElement;
         const typeElement = hasClosestByClassName(eventTarget, "emojis__type");
         if (typeElement) {

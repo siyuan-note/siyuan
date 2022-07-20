@@ -1,4 +1,4 @@
-import {focusBlock, focusSideBlock, focusByWbr, focusByRange} from "../util/selection";
+import {focusBlock, focusSideBlock, focusByWbr} from "../util/selection";
 import {
     getContenteditableElement,
     getLastBlock,
@@ -14,7 +14,6 @@ import {setFold, zoomOut} from "../../menus/protyle";
 import {preventScroll} from "../scroll/preventScroll";
 import {hideElements} from "../ui/hideElements";
 import {Constants} from "../../constants";
-import {countBlockWord} from "../../layout/status";
 
 const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
@@ -412,10 +411,8 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             }
             return;
         }
-        previousLastElement.classList.add("protyle-wysiwyg--select");
-        countBlockWord([previousId]);
-        if (previousLastElement.getAttribute("data-type") === "NodeBlockQueryEmbed" || editableElement.textContent !== "") {
-            focusByRange(range);
+        focusBlock(previousLastElement, undefined, false);
+        if (editableElement.textContent !== "") {
             return;
         }
     }

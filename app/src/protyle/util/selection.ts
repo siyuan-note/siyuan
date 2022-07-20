@@ -416,19 +416,23 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             range.selectNodeContents(element.firstElementChild);
             setRange = true;
         } else if (type === "NodeBlockQueryEmbed") {
-            if (element.lastElementChild.previousElementSibling) {
-                range.selectNodeContents(element.lastElementChild.previousElementSibling);
+            if (element.lastElementChild.previousElementSibling?.firstChild) {
+                range.selectNodeContents(element.lastElementChild.previousElementSibling.firstChild);
+                range.collapse(true);
             } else {
                 // https://github.com/siyuan-note/siyuan/issues/5267
                 range.selectNodeContents(element);
+                range.collapse(true);
             }
             setRange = true;
         } else if (["NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
-            if (element.lastElementChild.previousElementSibling?.lastElementChild) {
+            if (element.lastElementChild.previousElementSibling?.lastElementChild?.firstChild) {
                 // https://ld246.com/article/1655714737572
-                range.selectNodeContents(element.lastElementChild.previousElementSibling.lastElementChild);
+                range.selectNodeContents(element.lastElementChild.previousElementSibling.lastElementChild.firstChild);
+                range.collapse(true);
             } else if (element.lastElementChild.previousElementSibling) {
                 range.selectNodeContents(element.lastElementChild.previousElementSibling);
+                range.collapse(true);
             }
             setRange = true;
         } else if (type === "NodeIFrame" || type === "NodeWidget") {
@@ -442,6 +446,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             setRange = true;
         } else if (type === "NodeCodeBlock") {
             range.selectNodeContents(element);
+            range.collapse(true);
             setRange = true;
         }
         if (setRange) {

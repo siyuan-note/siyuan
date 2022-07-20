@@ -105,9 +105,38 @@ export const saveExport = (option: { type: string, id: string }) => {
                 pdfDialog.destroy();
             }
         });
-        return;
+    } else if (option.type === "word") {
+        const localData = localStorage.getItem(Constants.LOCAL_EXPORTWORD);
+        const wordDialog = new Dialog({
+            title: "Word " + window.siyuan.languages.config,
+            content: `<div class="b3-dialog__content">
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.exportPDF4}
+        </div>
+        <span class="fn__space"></span>
+        <input id="removeAssets" class="b3-switch" type="checkbox" ${localData === "true" ? "checked" : ""}>
+    </label>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+            width: "520px",
+        });
+        const btnsElement = wordDialog.element.querySelectorAll(".b3-button");
+        btnsElement[0].addEventListener("click", () => {
+            wordDialog.destroy();
+        });
+        btnsElement[1].addEventListener("click", () => {
+            const removeAssets = (wordDialog.element.querySelector("#removeAssets") as HTMLInputElement).checked;
+            localStorage.setItem(Constants.LOCAL_EXPORTWORD, removeAssets.toString());
+            getExportPath(option, undefined, removeAssets);
+            wordDialog.destroy();
+        });
+    } else {
+        getExportPath(option);
     }
-    getExportPath(option);
     /// #endif
 };
 
@@ -151,6 +180,7 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
                 fetchPost(url, {
                     id: option.id,
                     pdf: option.type === "pdf",
+                    removeAssets,
                     savePath
                 }, exportResponse => {
                     if (option.type === "word") {
@@ -339,26 +369,6 @@ pre code {
                             path: pdfFilePath
                         }, () => {
                             afterExport(pdfFilePath, msgId);
-                            if (removeAssets) {
-                                const removePromise = (dir: string) => {
-                                    return new Promise(function (resolve) {
-                                        //先读文件夹
-                                        fs.stat(dir, function (err, stat) {
-                                            if (stat.isDirectory()) {
-                                                fs.readdir(dir, function (err, files) {
-                                                    files = files.map(file => path.join(dir, file)); // a/b  a/m
-                                                    Promise.all(files.map(file => removePromise(file))).then(function () {
-                                                        fs.rmdir(dir, resolve);
-                                                    });
-                                                });
-                                            } else {
-                                                fs.unlink(dir, resolve);
-                                            }
-                                        });
-                                    });
-                                };
-                                removePromise(path.join(filePath, "assets"));
-                            }
                         });
                         win.destroy();
                     }).catch((error: string) => {

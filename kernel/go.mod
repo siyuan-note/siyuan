@@ -6,7 +6,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/css v0.1.2
 	github.com/88250/flock v0.8.2
-	github.com/88250/gulu v1.2.3-0.20220623112232-c502d9016360
+	github.com/88250/gulu v1.2.3-0.20220720144315-065ef35ec583
 	github.com/88250/lute v1.7.4-0.20220713162345-5ee1aaca2506
 	github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1
 	github.com/88250/pdfcpu v0.3.13
@@ -39,10 +39,10 @@ require (
 	github.com/panjf2000/ants/v2 v2.5.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20220720125725-d2907fbe9bd8
+	github.com/siyuan-note/dejavu v0.0.0-20220720145019-e3fd36f177b1
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
-	github.com/siyuan-note/filelock v0.0.0-20220720085501-7eb29d8a394b
+	github.com/siyuan-note/filelock v0.0.0-20220720144616-011221f7e128
 	github.com/siyuan-note/httpclient v0.0.0-20220709030145-2bfb50f28e73
 	github.com/siyuan-note/logging v0.0.0-20220717040626-f796b05ee520
 	github.com/steambap/captcha v1.4.1

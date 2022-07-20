@@ -137,7 +137,7 @@ func exportDocx(c *gin.Context) {
 	savePath := arg["savePath"].(string)
 	err := model.ExportDocx(id, savePath)
 	if nil != err {
-		ret.Code = -1
+		ret.Code = 1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
 		return

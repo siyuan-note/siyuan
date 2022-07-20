@@ -55,7 +55,6 @@ func Boot() {
 	IncBootProgress(3, "Booting...")
 	rand.Seed(time.Now().UTC().UnixNano())
 	initMime()
-	httpclient.SetUserAgent(UserAgent)
 
 	workspacePath := flag.String("workspace", "", "dir path of the workspace, default to ~/Documents/SiYuan/")
 	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
@@ -83,6 +82,9 @@ func Boot() {
 	if isRunningInDockerContainer() {
 		Container = "docker"
 	}
+
+	UserAgent = UserAgent + " " + Container
+	httpclient.SetUserAgent(UserAgent)
 
 	initWorkspaceDir(*workspacePath)
 

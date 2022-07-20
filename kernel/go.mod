@@ -39,10 +39,10 @@ require (
 	github.com/panjf2000/ants/v2 v2.5.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20220719151948-d0acac8964fd
+	github.com/siyuan-note/dejavu v0.0.0-20220720101007-753f2e22d6e8
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
-	github.com/siyuan-note/filelock v0.0.0-20220704090116-54dfb035283f
+	github.com/siyuan-note/filelock v0.0.0-20220720085501-7eb29d8a394b
 	github.com/siyuan-note/httpclient v0.0.0-20220709030145-2bfb50f28e73
 	github.com/siyuan-note/logging v0.0.0-20220717040626-f796b05ee520
 	github.com/steambap/captcha v1.4.1

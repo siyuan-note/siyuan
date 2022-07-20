@@ -312,17 +312,18 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 
 func formatErrorMsg(err error) string {
 	msg := err.Error()
-	if strings.Contains(msg, "Permission denied") || strings.Contains(msg, "Access is denied") {
+	msgLowerCase := strings.ToLower(msg)
+	if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {
 		msg = Conf.Language(33) + " " + err.Error()
-	} else if strings.Contains(msg, "Device or resource busy") {
+	} else if strings.Contains(msgLowerCase, "device or resource busy") {
 		msg = Conf.Language(85) + " " + err.Error()
-	} else if strings.Contains(msg, "cipher: message authentication failed") {
+	} else if strings.Contains(msgLowerCase, "cipher: message authentication failed") {
 		msg = Conf.Language(172) + " " + err.Error()
-	} else if strings.Contains(msg, "repo fatal error") {
+	} else if strings.Contains(msgLowerCase, "repo fatal error") {
 		msg = Conf.Language(23) + " " + err.Error()
-	} else if strings.Contains(msg, "no such host") || strings.Contains(msg, "connection failed") {
+	} else if strings.Contains(msgLowerCase, "no such host") || strings.Contains(msgLowerCase, "connection failed") {
 		msg = Conf.Language(24)
-	} else if strings.Contains(msg, "net/http: request canceled while waiting for connection") {
+	} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") {
 		msg = Conf.Language(24) + " net/http timeout"
 	}
 	msg = msg + " v" + util.Ver

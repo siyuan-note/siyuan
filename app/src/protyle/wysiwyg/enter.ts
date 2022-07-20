@@ -192,16 +192,16 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         blockElement.classList.remove("protyle-wysiwyg--select");
         return;
     }
+    // https://github.com/siyuan-note/siyuan/issues/5471
     if (disableElement) {
-        if (blockElement.classList.contains("render-node")) {
-            protyle.toolbar.showRender(protyle, blockElement);
-        } else if (blockElement.classList.contains("hr")) {
+        if (blockElement.classList.contains("hr")) {
             insertEmptyBlock(protyle, "afterend");
+            return;
+        }
+        if (blockElement.classList.contains("protyle-wysiwyg--select") && blockElement.classList.contains("render-node")) {
+            protyle.toolbar.showRender(protyle, blockElement);
         } else {
-            protyle.gutter.renderMenu(protyle, blockElement);
-            window.siyuan.menus.menu.element.classList.remove("fn__none");
-            const rect = blockElement.getBoundingClientRect();
-            setPosition(window.siyuan.menus.menu.element, rect.left - window.siyuan.menus.menu.element.clientWidth, rect.top);
+            insertEmptyBlock(protyle, "afterend");
         }
         return;
     }

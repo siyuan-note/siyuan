@@ -116,22 +116,23 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     let repoHTML = "";
     response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string, tag: string }) => {
         if (isMobile()) {
-            repoHTML += `<li class="b3-list-item b3-list-item--two" data-id="${item.id}" data-tag="${item.tag}">
+            repoHTML += `<li class="b3-list-item b3-list-item--two">
     <div class="b3-list-item__first">
+        <span class="b3-list-item__text">${escapeHtml(item.memo)}</span>
         <span class="b3-chip b3-chip--secondary${item.tag ? "" : " fn__none"}">${item.tag}</span>
-        ${item.hCreated}<span class="fn__space"></span>
-        <span class="b3-list-item__meta">${item.hSize}</span>
-        <span class="fn__flex-1"></span>
-        ${actionHTML}
     </div>
-    <span class="b3-list-item__meta">${escapeHtml(item.memo)}</span>
+    <div>
+        <span class="ft__smaller ft__on-surface">${item.hCreated}</span>
+        <span class="b3-list-item__meta">${item.hSize}</span>
+        <span class="b3-list-item__meta">${window.siyuan.languages.fileCount}${item.count}</span>
+    </div>
+    <div class="fn__flex" style="justify-content: flex-end;" data-id="${item.id}" data-tag="${item.tag}">${actionHTML}</div>
 </li>`;
         } else {
             repoHTML += `<li class="b3-list-item b3-list-item--hide-action" data-id="${item.id}" data-tag="${item.tag}">
     <div class="fn__flex-1">
         <div class="b3-list-item__text">
             ${escapeHtml(item.memo)}
-            <span class="fn__space"></span>
             <span class="b3-chip b3-chip--secondary${item.tag ? "" : " fn__none"}">${item.tag}</span>
         </div>
         <div>
@@ -440,11 +441,7 @@ export const openHistory = () => {
                 const tag = target.parentElement.getAttribute("data-tag");
                 confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <i>${tag}</i>?`, () => {
                     fetchPost("/api/repo/" + type, {tag}, () => {
-                        if (target.parentElement.parentElement.childElementCount === 1) {
-                            target.parentElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                        } else {
-                            target.parentElement.remove();
-                        }
+                        renderRepo(repoElement, type === "removeRepoTagSnapshot" ? -1 : -2);
                     });
                 });
                 break;

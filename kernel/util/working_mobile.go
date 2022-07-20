@@ -32,7 +32,6 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	IncBootProgress(3, "Booting...")
 	rand.Seed(time.Now().UTC().UnixNano())
 	initMime()
-	httpclient.SetUserAgent(UserAgent)
 
 	HomeDir = filepath.Join(workspaceDir, "home")
 	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")
@@ -61,6 +60,8 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	IconsPath = filepath.Join(AppearancePath, "icons")
 	Resident = true
 	Container = container
+	UserAgent = UserAgent + " " + Container
+	httpclient.SetUserAgent(UserAgent)
 	Lang = lang
 	initPathDir()
 	bootBanner := figure.NewFigure("SiYuan", "", true)

@@ -219,7 +219,6 @@ func InitConf() {
 	Conf.System.WorkspaceDir = util.WorkspaceDir
 	Conf.System.DataDir = util.DataDir
 	Conf.System.Container = util.Container
-	util.UserAgent = util.UserAgent + " " + util.Container
 	Conf.System.OS = runtime.GOOS
 	Conf.Newbie = util.IsNewbie
 

@@ -223,7 +223,7 @@ ${accountHTML}
         </button>
         <div class="fn__hr"></div>
         <button class="b3-button b3-button--outline fn__block" id="removeKey">
-            <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.remove}
+            <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.resetRepo}
         </button>
     </div>
     <div class="b3-label__text">${window.siyuan.languages.dataRepoKeyTip1}</div>

@@ -79,12 +79,15 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     let html = blockElement.outerHTML;
     let todoOldHTML = "";
+    let focusHR = false
     if (editElement.textContent === "---" && !blockElement.classList.contains("code-block")) {
-        html = `<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div><wbr></div></div>`;
+        html = `<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div></div></div>`;
         const nextBlockElement = getNextBlock(editElement);
         if (nextBlockElement) {
             if (!isNotEditBlock(nextBlockElement)) {
                 focusBlock(nextBlockElement);
+            } else {
+                focusHR = true;
             }
         } else {
             html += genEmptyBlock(false, true);
@@ -166,6 +169,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 blockRender(protyle, realElement);
                 protyle.toolbar.showRender(protyle, realElement);
                 hideElements(["hint"], protyle);
+            } else if (realType === "NodeThematicBreak" && focusHR) {
+                focusBlock(blockElement);
             } else {
                 mathRender(realElement);
                 if (index === tempElement.content.childElementCount - 1) {

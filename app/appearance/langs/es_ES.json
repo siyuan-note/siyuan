@@ -1,5 +1,5 @@
 {
-  "initRepoKeyTip": "Si la clave se ha inicializado en otros dispositivos, asegúrese de usar la función [Importar la clave], de lo contrario, los datos no se pueden sincronizar con la nube, así que asegúrese de usar la misma clave en todos los dispositivos",
+  "initRepoKeyTip": "Si la clave se ha inicializado en otros dispositivos, use [Importar la clave] o genere la clave con la misma contraseña; de lo contrario, los datos no se pueden sincronizar con la nube, así que asegúrese de usar la misma clave en todos los dispositivos.",
   "crossKeepLazyLoad": "La selección múltiple entre páginas debe seleccionar [Mantener contenido cargado] en el menú más",
   "keepLazyLoad": "Mantener el contenido cargado",
   "localSnapshot": "Instantánea local",
@@ -27,8 +27,8 @@
   "importKey": "Importar la clave",
   "keyPlaceholder": "Por favor, pegue la cadena de claves aquí",
   "key": "Clave",
-  "genKey": "Generación de la clave",
-  "genKeyByPW": "Generar clave a partir de contraseña",
+  "genKey": "Generar clave automáticamente",
+  "genKeyByPW": "Generar clave por contraseña",
   "dataRepoKeyTip1": "El repositorio de datos se utiliza para cifrar y guardar instantáneas de datos. Las instantáneas pueden crearse y revertirse en el historial de datos",
   "dataRepoKeyTip2": "Después de inicializar la clave, otros dispositivos deben importar la clave. Si las claves del dispositivo no coinciden, no podrá sincronizar datos en la nube, así que asegúrese de usar la misma clave en todos los dispositivos",
   "dataRepoKey": "Clave del repositorio de datos",

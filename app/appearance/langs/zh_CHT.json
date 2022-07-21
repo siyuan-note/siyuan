@@ -1,5 +1,5 @@
 {
-  "initRepoKeyTip": "如果其他設備上已經初始化過密鑰，請務必使用 [導入密鑰] 功能，否則無法雲端同步數據，所以請務必在所有設備上使用相同的密鑰",
+  "initRepoKeyTip": "如果其他設備上已經初始化過密鑰，請使用 [導入密鑰] 或者通過相同的密碼生成密鑰，否則無法雲端同步數據，所以請務必在所有設備上使用相同的密鑰",
   "crossKeepLazyLoad": "跨頁多選需在更多菜單中選中【保持已加載內容】",
   "keepLazyLoad": "保持已加載的內容",
   "localSnapshot": "本地快照",
@@ -27,8 +27,8 @@
   "importKey": "導入密鑰",
   "keyPlaceholder": "請在此處粘貼密鑰字符串",
   "key": "密鑰",
-  "genKey": "生成密鑰",
-  "genKeyByPW": "從密碼生成密鑰",
+  "genKey": "Auto-generate key",
+  "genKeyByPW": "Generate key by passphrase",
   "dataRepoKeyTip1": "數據倉庫用於加密保存數據快照，可在數據歷史中可創建快照和回滾快照",
   "dataRepoKeyTip2": "初始化密鑰以後其他設備需要導入該密鑰。如果設備密鑰不一致，則無法雲端同步數據，所以請務必在所有設備上使用相同的密鑰",
   "dataRepoKey": "數據倉庫密鑰",

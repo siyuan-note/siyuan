@@ -185,8 +185,8 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
                 }, exportResponse => {
                     if (option.type === "word") {
                         if (exportResponse.code === 1) {
-                            hideMessage(msgId);
                             showMessage(exportResponse.msg, undefined, "error");
+                            hideMessage(msgId);
                             return;
                         }
                         afterExport(savePath, msgId);
@@ -369,6 +369,26 @@ pre code {
                             path: pdfFilePath
                         }, () => {
                             afterExport(pdfFilePath, msgId);
+                            if (removeAssets) {
+                                const removePromise = (dir: string) => {
+                                    return new Promise(function (resolve) {
+                                        //先读文件夹
+                                        fs.stat(dir, function (err, stat) {
+                                            if (stat.isDirectory()) {
+                                                fs.readdir(dir, function (err, files) {
+                                                    files = files.map(file => path.join(dir, file)); // a/b  a/m
+                                                    Promise.all(files.map(file => removePromise(file))).then(function () {
+                                                        fs.rmdir(dir, resolve);
+                                                    });
+                                                });
+                                            } else {
+                                                fs.unlink(dir, resolve);
+                                            }
+                                        });
+                                    });
+                                };
+                                removePromise(path.join(filePath, "assets"));
+                            }
                         });
                         win.destroy();
                     }).catch((error: string) => {

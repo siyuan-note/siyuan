@@ -331,7 +331,7 @@ export const isCurrentEditor = (blockId: string) => {
     if (activeElement) {
         const tab = getInstanceById(activeElement.getAttribute("data-id"));
         if (tab instanceof Tab && tab.model instanceof Editor) {
-            if (tab.model.editor.protyle.block.rootID !== blockId) {
+            if (tab.model.editor.protyle.block.rootID !== blockId && tab.model.editor.protyle.block.id !== blockId) {
                 return false;
             }
         }
@@ -426,6 +426,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             mk: item.inputsElement[1].value,
         }, response => {
             if (!isCurrentEditor(blockId)) {
+                item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
                 return;
             }
             item.blockId = blockId;

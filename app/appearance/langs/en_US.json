@@ -30,7 +30,7 @@
   "genKey": "Auto-generate key",
   "genKeyByPW": "Generate key by passphrase",
   "dataRepoKeyTip1": "The data repo is used to encrypt and save data snapshots. Snapshots can be created and rolled back in the data history",
-  "dataRepoKeyTip2": "After the key is initialized, other devices need to import the key. If the device keys don't match, you won't be able to sync data in the cloud, so be sure to use the same key on all devices",
+  "dataRepoKeyTip2": "All devices must use the same key, if the keys are inconsistent, the data cannot be synced to the cloud",
   "dataRepoKey": "Data repo key",
   "plsChoose": "Please choose first",
   "clearMessage": "Read",

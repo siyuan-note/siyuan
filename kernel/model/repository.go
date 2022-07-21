@@ -127,6 +127,12 @@ func ResetRepo() (err error) {
 }
 
 func InitRepoKeyFromPassphrase(passphrase string) (err error) {
+	passphrase = gulu.Str.RemoveInvisible(passphrase)
+	passphrase = strings.TrimSpace(passphrase)
+	if "" == passphrase {
+		return errors.New(Conf.Language(142))
+	}
+
 	util.PushMsg(Conf.Language(136), 3000)
 
 	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); nil != err {
@@ -134,12 +140,6 @@ func InitRepoKeyFromPassphrase(passphrase string) (err error) {
 	}
 	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); nil != err {
 		return
-	}
-
-	passphrase = gulu.Str.RemoveInvisible(passphrase)
-	passphrase = strings.TrimSpace(passphrase)
-	if "" == passphrase {
-		return errors.New(Conf.Language(142))
 	}
 
 	salt := fmt.Sprintf("%x", sha256.Sum256([]byte(passphrase)))[:16]

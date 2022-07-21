@@ -822,6 +822,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
             if (tab && tab.model instanceof Editor) {
                 tab.model.editor.protyle.wysiwyg.element.blur();
+                tab.model.editor.protyle.title.editElement.blur();
                 files.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
             }
         }

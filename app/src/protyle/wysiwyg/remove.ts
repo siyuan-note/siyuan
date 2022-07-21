@@ -443,7 +443,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         focusSideBlock(previousElement);
     } else {
         const previousLastEditElement = getContenteditableElement(previousLastElement);
-        if (editableElement.textContent !== "") {
+        if (editableElement && editableElement.textContent !== "") {
             // 非空块
             range.setEndAfter(editableElement.lastChild);
             // 数学公式会车后再删除 https://github.com/siyuan-note/siyuan/issues/3850

@@ -25,7 +25,7 @@ import {dropEvent} from "../util/editorCommonEvent";
 import {input} from "./input";
 import {
     getContenteditableElement,
-    getLastBlock,
+    getLastBlock, getNextBlock,
     getPreviousHeading,
     getTopAloneElement,
     hasNextSibling,
@@ -297,7 +297,12 @@ export class WYSIWYG {
                         html = `<div data-subtype="${selectElements[0].getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">${html}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
                     }
                 }
+                const nextElement = getNextBlock(selectElements[selectElements.length - 1]);
                 removeBlock(protyle, nodeElement, range);
+                if (nextElement) {
+                    // Ctrl+X 剪切后光标应跳到下一行行首 https://github.com/siyuan-note/siyuan/issues/5485
+                    focusBlock(nextElement);
+                }
             } else {
                 const id = nodeElement.getAttribute("data-node-id");
                 const oldHTML = nodeElement.outerHTML;

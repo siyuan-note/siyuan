@@ -1362,11 +1362,19 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if (isNotEditBlock(nodeElement) && matchHotKey("⌘X", event)) {
             let html = "";
-            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+            nodeElement.classList.add("protyle-wysiwyg--select");
+            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")
+            selectElements.forEach(item => {
                 html += removeEmbed(item);
             });
             writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
+            const nextElement = getNextBlock(selectElements[selectElements.length - 1]);
             removeBlock(protyle, nodeElement, range);
+            if (nextElement) {
+                focusBlock(nextElement);
+            }
+            event.preventDefault();
+            event.stopPropagation();
         }
 
         if (matchHotKey(window.siyuan.config.keymap.editor.general.vLayout.custom, event)) {

@@ -1,5 +1,5 @@
 {
-  "initRepoKeyTip": "If the key has been initialized on other devices, be sure to use the [Importer la clé] function, otherwise the data cannot be synced to the cloud, so be sure to use the same key on all devices",
+  "initRepoKeyTip": "Si la clé a été initialisée sur d'autres appareils, veuillez utiliser [Importer la clé] ou générer la clé avec le même mot de passe, sinon les données ne peuvent pas être synchronisées avec le cloud, alors assurez-vous d'utiliser la même clé sur tous les appareils",
   "crossKeepLazyLoad": "La multi-sélection sur plusieurs pages doit sélectionner [Conserver le contenu chargé] dans le menu plus",
   "keepLazyLoad": "Conserver le contenu chargé",
   "localSnapshot": "Instantané local",
@@ -27,8 +27,8 @@
   "importKey": "Importer la clé",
   "keyPlaceholder": "Veuillez coller la chaîne de clé ici",
   "clé": "Clé",
-  "genKey": "Générer la clé",
-  "genKeyByPW": "Générer la clé à partir du mot de passe",
+  "genKey": "Clé de génération automatique",
+  "genKeyByPW": "Générer une clé par phrase secrète",
   "dataRepoKeyTip1": "Le référentiel de données est utilisé pour chiffrer et enregistrer des instantanés de données. Des instantanés peuvent être créés et restaurés dans l'historique des données",
   "dataRepoKeyTip2": "Une fois la clé initialisée, d'autres appareils doivent importer la clé. Si les clés de l'appareil ne correspondent pas, vous ne pourrez pas synchroniser les données dans le cloud, alors assurez-vous d'utiliser la même clé sur tous les appareils",
   "dataRepoKey": "Clé de référentiel de données",

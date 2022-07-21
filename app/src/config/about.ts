@@ -95,6 +95,10 @@ export const about = {
             <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.genKey}
         </button>
         <div class="fn__hr"></div>
+        <button class="b3-button b3-button--outline fn__size200" id="initKeyByPW">
+            ${window.siyuan.languages.genKeyByPW}
+        </button>
+        <div class="fn__hr"></div>
         <button class="b3-button b3-button--outline fn__size200" id="importKey">
             <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.importKey}
         </button>
@@ -249,6 +253,37 @@ export const about = {
                     window.siyuan.config.repo.key = response.data.key;
                     importKeyElement.parentElement.classList.add("fn__none");
                     importKeyElement.parentElement.nextElementSibling.classList.remove("fn__none");
+                });
+            });
+        });
+        about.element.querySelector("#initKeyByPW").addEventListener("click", () => {
+            const initDialog = new Dialog({
+                title: "🔑 " + window.siyuan.languages.genKeyByPW,
+                content: `<div class="b3-dialog__content">
+    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.password}">
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                width: "520px",
+            });
+            const inputElement = initDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+            inputElement.focus();
+            const btnsElement = initDialog.element.querySelectorAll(".b3-button");
+            initDialog.bindInput(inputElement, () => {
+                (btnsElement[1] as HTMLButtonElement).click();
+            });
+            btnsElement[0].addEventListener("click", () => {
+                initDialog.destroy();
+            });
+            btnsElement[1].addEventListener("click", () => {
+                confirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
+                    fetchPost("/api/repo/InitRepoKeyFromPassphrase", {pass: inputElement.value}, (response) => {
+                        window.siyuan.config.repo.key = response.data.key;
+                        importKeyElement.parentElement.classList.add("fn__none");
+                        importKeyElement.parentElement.nextElementSibling.classList.remove("fn__none");
+                    });
                 });
             });
         });

@@ -28,6 +28,7 @@
   "keyPlaceholder": "Por favor, pegue la cadena de claves aquí",
   "key": "Clave",
   "genKey": "Generación de la clave",
+  "genKeyByPW": "Generar clave a partir de contraseña",
   "dataRepoKeyTip1": "El repositorio de datos se utiliza para cifrar y guardar instantáneas de datos. Las instantáneas pueden crearse y revertirse en el historial de datos",
   "dataRepoKeyTip2": "Después de inicializar la clave, otros dispositivos deben importar la clave. Si las claves del dispositivo no coinciden, no podrá sincronizar datos en la nube, así que asegúrese de usar la misma clave en todos los dispositivos",
   "dataRepoKey": "Clave del repositorio de datos",

@@ -279,11 +279,11 @@ export const about = {
             });
             btnsElement[1].addEventListener("click", () => {
                 confirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
+                    initDialog.destroy();
                     fetchPost("/api/repo/InitRepoKeyFromPassphrase", {pass: inputElement.value}, (response) => {
                         window.siyuan.config.repo.key = response.data.key;
                         importKeyElement.parentElement.classList.add("fn__none");
                         importKeyElement.parentElement.nextElementSibling.classList.remove("fn__none");
-                        initDialog.destroy();
                     });
                 });
             });

@@ -18,6 +18,7 @@ package model
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -122,6 +123,40 @@ func ResetRepo() (err error) {
 	Conf.Save()
 
 	util.PushUpdateMsg(msgId, Conf.Language(145), 3000)
+	return
+}
+
+func InitRepoKeyFromPassphrase(passphrase string) (err error) {
+	util.PushMsg(Conf.Language(136), 3000)
+
+	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); nil != err {
+		return
+	}
+	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); nil != err {
+		return
+	}
+
+	passphrase = gulu.Str.RemoveInvisible(passphrase)
+	passphrase = strings.TrimSpace(passphrase)
+	if "" == passphrase {
+		return errors.New(Conf.Language(142))
+	}
+
+	salt := fmt.Sprintf("%x", sha256.Sum256([]byte(passphrase)))[:16]
+	key, err := encryption.KDF(passphrase, salt)
+	if nil != err {
+		logging.LogErrorf("init data repo key failed: %s", err)
+		return
+	}
+	Conf.Repo.Key = key
+	Conf.Save()
+
+	time.Sleep(1 * time.Second)
+	util.PushMsg(Conf.Language(138), 3000)
+	time.Sleep(1 * time.Second)
+	if initErr := IndexRepo("[Init] Init data repo"); nil != initErr {
+		util.PushErrMsg(fmt.Sprintf(Conf.Language(140), initErr), 0)
+	}
 	return
 }
 

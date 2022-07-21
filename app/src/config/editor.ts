@@ -196,6 +196,11 @@ export const editor = {
         getAllModels().editor.forEach((item) => {
             item.editor.reload();
             setPadding(item.editor.protyle);
+            if (window.siyuan.config.editor.fullWidth) {
+                item.editor.protyle.wysiwyg.element.setAttribute("data-fullwidth", "true");
+            } else {
+                item.editor.protyle.wysiwyg.element.removeAttribute("data-fullwidth");
+            }
         });
         setInlineStyle();
     }

@@ -311,6 +311,10 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 }
 
 func formatErrorMsg(err error) string {
+	if errors.Is(err, dejavu.ErrCloudAuthFailed) {
+		return Conf.Language(31) + " v" + util.Ver
+	}
+
 	msg := err.Error()
 	msgLowerCase := strings.ToLower(msg)
 	if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {

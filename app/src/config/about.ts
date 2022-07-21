@@ -91,16 +91,16 @@ export const about = {
     </div>
     <div class="fn__space"></div>
     <div class="fn__size200 fn__flex-center${window.siyuan.config.repo.key ? " fn__none" : ""}">
+        <button class="b3-button b3-button--outline fn__size200" id="importKey">
+            <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.importKey}
+        </button>
+        <div class="fn__hr"></div>
         <button class="b3-button b3-button--outline fn__size200" id="initKey">
             <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.genKey}
         </button>
         <div class="fn__hr"></div>
         <button class="b3-button b3-button--outline fn__size200" id="initKeyByPW">
             ${window.siyuan.languages.genKeyByPW}
-        </button>
-        <div class="fn__hr"></div>
-        <button class="b3-button b3-button--outline fn__size200" id="importKey">
-            <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.importKey}
         </button>
     </div>
     <div class="fn__size200 fn__flex-center${window.siyuan.config.repo.key ? "" : " fn__none"}">

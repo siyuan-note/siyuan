@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
-		"updated": "20220716174244"
+		"updated": "20220722002029"
 	},
 	"Children": [
 		{
@@ -1319,7 +1319,15 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "第一次使用数据快照前需要在 "
+					"Data": "第一次使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "数据快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "前需要在 "
 				},
 				{
 					"Type": "NodeKbd",
@@ -1384,56 +1392,188 @@
 			]
 		},
 		{
-			"ID": "20220615113953-4o3uc9z",
+			"ID": "20220722001510-mtrrbj0",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220615113953-4o3uc9z",
-				"updated": "20220716174244"
+				"id": "20220722001510-mtrrbj0",
+				"updated": "20220722001555"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果你有多台设备，仅需在其中一台设备上 "
-				},
+					"Data": "初始化密钥有三种方式："
+				}
+			]
+		},
+		{
+			"ID": "20220722001555-3wcanjb",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220722001555-3wcanjb",
+				"updated": "20220722001917"
+			},
+			"Children": [
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
+					"ID": "20220722001556-sjm48yn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722001556-sjm48yn",
+						"updated": "20220722001556"
+					},
 					"Children": [
 						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "生成密钥"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
+							"ID": "20220722001556-8sc4mqb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722001556-8sc4mqb",
+								"updated": "20220722001656"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "导入密钥"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：将其他设备上的密钥字符串复制到此粘贴导入"
+								}
+							]
 						}
 					]
 				},
 				{
-					"Type": "NodeText",
-					"Data": "，然后拷贝该密钥字符串到其他设备上，通过 "
-				},
-				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
+					"ID": "20220722001657-79plg0z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722001657-79plg0z"
+					},
 					"Children": [
 						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "导入密钥"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
+							"ID": "20220722001657-gh22p4n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722001657-gh22p4n",
+								"updated": "20220722001831"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "自动生成密钥"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：使用随机数生成密钥，该方式只需在一台设备上执行一次，其他设备使用 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "导入密钥"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
 						}
 					]
 				},
 				{
+					"ID": "20220722001834-8kc1pdr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722001834-8kc1pdr",
+						"updated": "20220722001917"
+					},
+					"Children": [
+						{
+							"ID": "20220722001834-13o5rzz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722001834-13o5rzz",
+								"updated": "20220722001917"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "通过密码生成密钥"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：使用自定义的密码短语生成密钥，该方式需要在所有设备上都使用相同的密码短语"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220615113953-4o3uc9z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615113953-4o3uc9z",
+				"updated": "20220722002029"
+			},
+			"Children": [
+				{
 					"Type": "NodeText",
-					"Data": " 进行导入。切勿在多台设备上重复初始化密钥，否则数据快照将无法跨设备使用，比如无法通过云端同步数据快照。"
+					"Data": "总而言之，请务必保证所有设备都使用相同的密钥，否则数据快照将无法跨设备使用，比如无法通过云端同步数据快照。"
 				}
 			]
 		},

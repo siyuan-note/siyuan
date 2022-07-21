@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226122707-8cr09co",
 		"title": "數據歷史",
-		"updated": "20220716174547"
+		"updated": "20220722002508"
 	},
 	"Children": [
 		{
@@ -1364,56 +1364,189 @@
 			]
 		},
 		{
-			"ID": "20220716174547-35l2lc3",
+			"ID": "20220722002508-sd5vbbt",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220716174547-35l2lc3",
-				"updated": "20220716174547"
+				"id": "20220722002508-sd5vbbt",
+				"updated": "20220722002508"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果你有多台設備，僅需在其中一台設備上 "
-				},
+					"Data": "初始化密鑰有三種方式："
+				}
+			]
+		},
+		{
+			"ID": "20220722002508-jixu469",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220722002508-jixu469",
+				"updated": "20220722002508"
+			},
+			"Children": [
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
+					"ID": "20220722002508-bxfg13s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722002508-bxfg13s",
+						"updated": "20220722002508"
+					},
 					"Children": [
 						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "生成密鑰"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
+							"ID": "20220722002508-q7wnooz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722002508-q7wnooz",
+								"updated": "20220722002508"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "導入密鑰"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：將其他設備上的密鑰字符串複製到此粘貼導入"
+								}
+							]
 						}
 					]
 				},
 				{
-					"Type": "NodeText",
-					"Data": "，然後拷貝該密鑰字符串到其他設備上，通過 "
-				},
-				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
+					"ID": "20220722002508-rfta23n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722002508-rfta23n",
+						"updated": "20220722002508"
+					},
 					"Children": [
 						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "導入密鑰"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
+							"ID": "20220722002508-jlajl9s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722002508-jlajl9s",
+								"updated": "20220722002508"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "自動生成密鑰"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：使用隨機數生成密鑰，該方式只需在一台設備上執行一次，其他設備使用 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "導入密鑰"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
 						}
 					]
 				},
 				{
+					"ID": "20220722002508-p6exuz0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722002508-p6exuz0",
+						"updated": "20220722002508"
+					},
+					"Children": [
+						{
+							"ID": "20220722002508-8pmkbbh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722002508-8pmkbbh",
+								"updated": "20220722002508"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "通過密碼生成密鑰"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：使用自定義的密碼短語生成密鑰，該方式需要在所有設備上都使用相同的密碼短語"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220722002508-6e1thfk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220722002508-6e1thfk",
+				"updated": "20220722002508"
+			},
+			"Children": [
+				{
 					"Type": "NodeText",
-					"Data": " 進行導入。切勿在多台設備上重複初始化密鑰，否則數據快照將無法跨設備使用，比如無法通過雲端同步數據快照。"
+					"Data": "總而言之，請務必保證所有設備都使用相同的密鑰，否則數據快照將無法跨設備使用，比如無法通過雲端同步數據快照。"
 				}
 			]
 		},

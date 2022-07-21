@@ -252,6 +252,28 @@ func importRepoKey(c *gin.Context) {
 	}
 }
 
+func initRepoKeyFromPassphrase(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	pass := arg["pass"].(string)
+	if err := model.InitRepoKeyFromPassphrase(pass); nil != err {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(137), err)
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"key": model.Conf.Repo.Key,
+	}
+}
+
 func initRepoKey(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

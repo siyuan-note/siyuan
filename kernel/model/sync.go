@@ -272,11 +272,12 @@ func RemoveCloudSyncDir(name string) (err error) {
 
 	err = dejavu.RemoveCloudRepo(name, cloudInfo)
 	if nil != err {
-		util.PushUpdateMsg(msgId, formatErrorMsg(err), 5000)
+		err = errors.New(formatErrorMsg(err))
 		return
 	}
 
 	util.PushClearMsg(msgId)
+	time.Sleep(500 * time.Millisecond)
 	if Conf.Sync.CloudName == name {
 		Conf.Sync.CloudName = "main"
 		Conf.Save()

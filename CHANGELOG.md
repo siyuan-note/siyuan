@@ -1,3 +1,34 @@
+## v2.1.1 / 2022-07-21
+
+### 改进功能
+
+* [云端图床支持按页批量删除](https://github.com/siyuan-note/siyuan/issues/4568)
+* [导出 Word 时可选择不导出资源文件](https://github.com/siyuan-note/siyuan/issues/5223)
+* [导出 PDF、HTML 和 Word 时支持覆盖已有文件](https://github.com/siyuan-note/siyuan/issues/5309)
+* [删除遇到不可编辑的块时不应该选中该块](https://github.com/siyuan-note/siyuan/issues/5387)
+* [使用文档树切换文档时无法回到上次编辑位置](https://github.com/siyuan-note/siyuan/issues/5420)
+* [macOS 端程序图标调小](https://github.com/siyuan-note/siyuan/issues/5444)
+* [启动时同步进度展现](https://github.com/siyuan-note/siyuan/issues/5451)
+* [改进访问授权验证码安全性](https://github.com/siyuan-note/siyuan/issues/5452)
+* [脑图和图表设置高度后没有即时生效](https://github.com/siyuan-note/siyuan/issues/5454)
+* [同步下载后如果 20% 的文件存在更新则全量重建索引](https://github.com/siyuan-note/siyuan/issues/5456)
+* [开启自适应宽度的两种状态下设置不同的选择器](https://github.com/siyuan-note/siyuan/issues/5468)
+* [分割线后是不可编辑块时，光标落于分割线后](https://github.com/siyuan-note/siyuan/issues/5470)
+* [改进选中或光标位于不可编辑块时回车和 Ctrl+/  的行为](https://github.com/siyuan-note/siyuan/issues/5471)
+
+### 修复缺陷
+
+* [剪切板复制 `粘贴转义文本` 丢失 `\`](https://github.com/siyuan-note/siyuan/issues/5446)
+* [快速切换文档，大纲、局部关系图和反链未切换](https://github.com/siyuan-note/siyuan/issues/5448)
+* [移动端点击空白后菜单不消失](https://github.com/siyuan-note/siyuan/issues/5453)
+* [`定位打开的文档` 快捷键执行后光标没有离开编辑器](https://github.com/siyuan-note/siyuan/issues/5458)
+* [剪切撤销大段内容后导致内容错乱](https://github.com/siyuan-note/siyuan/issues/5459)
+* [macOS 端启动时有概率会报错](https://github.com/siyuan-note/siyuan/issues/5462)
+* [复制块粘贴到选中的文本中，撤销后选中的文本无法恢复](https://github.com/siyuan-note/siyuan/issues/5463)
+* [移动端数据快照无法操作](https://github.com/siyuan-note/siyuan/issues/5466)
+* [移动端表情无法滚动](https://github.com/siyuan-note/siyuan/issues/5472)
+* [在鸿蒙系统上同步后报错 `cloud object not found`](https://github.com/siyuan-note/siyuan/issues/5477)
+
 ## v2.1.0 / 2022-07-18
 
 ### 引入特性

@@ -510,6 +510,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 });
                 return;
             } else if (Constants.INLINE_TYPE.includes(value)) {
+                focusByRange(range);
                 protyle.toolbar.range = range;
                 protyle.toolbar.setInlineMark(protyle, value, "add");
                 return;

@@ -278,6 +278,10 @@ export const about = {
                 initDialog.destroy();
             });
             btnsElement[1].addEventListener("click", () => {
+                if (!inputElement.value) {
+                    showMessage(window.siyuan.languages._kernel[142]);
+                    return;
+                }
                 confirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
                     initDialog.destroy();
                     fetchPost("/api/repo/InitRepoKeyFromPassphrase", {pass: inputElement.value}, (response) => {

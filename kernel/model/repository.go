@@ -438,8 +438,6 @@ func IndexRepo(memo string) (err error) {
 	}
 
 	util.PushEndlessProgress(Conf.Language(143))
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
 
 	start := time.Now()
 	latest, _ := repo.Latest()

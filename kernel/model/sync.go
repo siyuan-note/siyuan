@@ -255,6 +255,8 @@ func CreateCloudSyncDir(name string) (err error) {
 }
 
 func RemoveCloudSyncDir(name string) (err error) {
+	msgId := util.PushMsg(Conf.Language(116), 15000)
+
 	syncLock.Lock()
 	defer syncLock.Unlock()
 
@@ -270,9 +272,11 @@ func RemoveCloudSyncDir(name string) (err error) {
 
 	err = dejavu.RemoveCloudRepo(name, cloudInfo)
 	if nil != err {
+		util.PushUpdateMsg(msgId, formatErrorMsg(err), 5000)
 		return
 	}
 
+	util.PushClearMsg(msgId)
 	if Conf.Sync.CloudName == name {
 		Conf.Sync.CloudName = "main"
 		Conf.Save()

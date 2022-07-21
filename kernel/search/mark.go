@@ -26,7 +26,7 @@ import (
 
 func MarkText(text string, keyword string, beforeLen int, caseSensitive bool) (pos int, marked string) {
 	if "" == keyword {
-		return -1, text
+		return -1, html.EscapeString(text)
 	}
 	text = html.EscapeString(text)
 	keywords := SplitKeyword(keyword)

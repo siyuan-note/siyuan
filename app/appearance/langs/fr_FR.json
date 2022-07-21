@@ -30,7 +30,7 @@
   "genKey": "Clé de génération automatique",
   "genKeyByPW": "Générer une clé par phrase secrète",
   "dataRepoKeyTip1": "Le référentiel de données est utilisé pour chiffrer et enregistrer des instantanés de données. Des instantanés peuvent être créés et restaurés dans l'historique des données",
-  "dataRepoKeyTip2": "Une fois la clé initialisée, d'autres appareils doivent importer la clé. Si les clés de l'appareil ne correspondent pas, vous ne pourrez pas synchroniser les données dans le cloud, alors assurez-vous d'utiliser la même clé sur tous les appareils",
+  "dataRepoKeyTip2": "Tous les appareils doivent utiliser la même clé, si les clés sont incohérentes, les données ne peuvent pas être synchronisées avec le cloud",
   "dataRepoKey": "Clé de référentiel de données",
   "plsChoose": "Veuillez d'abord choisir",
   "clearMessage": "Lire",

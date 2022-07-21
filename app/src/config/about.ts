@@ -283,6 +283,7 @@ export const about = {
                         window.siyuan.config.repo.key = response.data.key;
                         importKeyElement.parentElement.classList.add("fn__none");
                         importKeyElement.parentElement.nextElementSibling.classList.remove("fn__none");
+                        initDialog.destroy();
                     });
                 });
             });

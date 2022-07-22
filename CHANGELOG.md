@@ -1,3 +1,23 @@
+## v2.1.2 / 2022-07-22
+
+### 改进功能
+
+* [云端同步和云端备份不再限制单个文件大小](https://github.com/siyuan-note/siyuan/issues/5345)
+* [支持通过密码短语派生数据仓库密钥](https://github.com/siyuan-note/siyuan/issues/5478)
+* [Ctrl+X 剪切后光标应跳到下一行行首](https://github.com/siyuan-note/siyuan/issues/5485)
+* [同步合并数据时不依赖系统时间](https://github.com/siyuan-note/siyuan/issues/5486)
+* [取消数据同步时的进度遮罩](https://github.com/siyuan-note/siyuan/issues/5491)
+* [引用锚文本中粘贴行级元素后转换为普通文本](https://github.com/siyuan-note/siyuan/issues/5493)
+
+### 修复缺陷
+
+* [选中块之后按 Ctrl+A 或 Ctrl+B 会在当前块前后插入新行](https://github.com/siyuan-note/siyuan/issues/5483)
+* [当光标在文档标题栏时按下 `定位打开的文档` 焦点依然在编辑区](https://github.com/siyuan-note/siyuan/issues/5484)
+* [块聚焦后反链面板没有跟随聚焦](https://github.com/siyuan-note/siyuan/issues/5487)
+* [分割线后回车不会自动换行到下一行](https://github.com/siyuan-note/siyuan/issues/5488)
+* [移动端 `/` 弹出的行内元素不可用](https://github.com/siyuan-note/siyuan/issues/5490)
+* [搜索结果未转义导致脚本执行或白屏](https://github.com/siyuan-note/siyuan/issues/5492)
+
 ## v2.1.1 / 2022-07-21
 
 ### 改进功能

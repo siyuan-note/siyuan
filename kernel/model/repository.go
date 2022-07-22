@@ -639,7 +639,7 @@ func subscribeEvents() {
 	eventbus.Subscribe(dejavu.EvtIndexWalkData, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(158), path)
 		count++
-		if 0 == count%32 {
+		if 0 == count%128 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
@@ -652,7 +652,7 @@ func subscribeEvents() {
 	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(159), path)
 		count++
-		if 0 == count%32 {
+		if 0 == count%128 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
@@ -665,7 +665,7 @@ func subscribeEvents() {
 	eventbus.Subscribe(dejavu.EvtIndexUpsertFile, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(160), path)
 		count++
-		if 0 == count%32 {
+		if 0 == count%64 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
@@ -679,7 +679,7 @@ func subscribeEvents() {
 	eventbus.Subscribe(dejavu.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(161), path)
 		count++
-		if 0 == count%32 {
+		if 0 == count%128 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
@@ -695,7 +695,7 @@ func subscribeEvents() {
 		msg := fmt.Sprintf(Conf.Language(162), path)
 		util.IncBootProgress(bootProgressPart, msg)
 		count++
-		if 0 == count%32 {
+		if 0 == count%64 {
 			contextPushMsg(context, msg)
 		}
 	})
@@ -709,7 +709,7 @@ func subscribeEvents() {
 		msg := fmt.Sprintf(Conf.Language(163), path)
 		util.IncBootProgress(bootProgressPart, msg)
 		count++
-		if 0 == count%32 {
+		if 0 == count%64 {
 			contextPushMsg(context, msg)
 		}
 	})
@@ -730,7 +730,7 @@ func subscribeEvents() {
 		msg := fmt.Sprintf(Conf.Language(165), id[:7])
 		util.IncBootProgress(bootProgressPart, msg)
 		count++
-		if 0 == count%32 {
+		if 0 == count%8 {
 			contextPushMsg(context, msg)
 		}
 	})
@@ -744,7 +744,7 @@ func subscribeEvents() {
 		msg := fmt.Sprintf(Conf.Language(166), id[:7])
 		util.IncBootProgress(bootProgressPart, msg)
 		count++
-		if 0 == count%32 {
+		if 0 == count%8 {
 			contextPushMsg(context, msg)
 		}
 	})
@@ -766,7 +766,7 @@ func subscribeEvents() {
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadFile, func(context map[string]interface{}, id string) {
 		msg := fmt.Sprintf(Conf.Language(169), id[:7])
 		count++
-		if 0 == count%32 {
+		if 0 == count%8 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
@@ -779,7 +779,7 @@ func subscribeEvents() {
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadChunk, func(context map[string]interface{}, id string) {
 		msg := fmt.Sprintf(Conf.Language(170), id[:7])
 		count++
-		if 0 == count%32 {
+		if 0 == count%8 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}

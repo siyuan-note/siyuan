@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20220105100506-auvmvcw",
 		"title": "限制",
-		"updated": "20220703223435"
+		"updated": "20220722230325"
 	},
 	"Children": [
 		{
@@ -13,37 +13,9 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220105100506-t539921",
-				"updated": "20220703223435"
+				"updated": "20220722230325"
 			},
 			"Children": [
-				{
-					"ID": "20220105100537-cv7d0lj",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220105100537-cv7d0lj",
-						"updated": "20220703223435"
-					},
-					"Children": [
-						{
-							"ID": "20220105100537-d94pnme",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220105100537-d94pnme",
-								"updated": "20220703223435"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "同步不支持大于 100MB 的单个文件传输"
-								}
-							]
-						}
-					]
-				},
 				{
 					"ID": "20220105100920-t56zj22",
 					"Type": "NodeListItem",
@@ -65,7 +37,43 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最多支持创建 7 个云端同步目录"
+									"Data": "最多支持创建 7 个"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "云端"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "同步目录"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220722230314-2ddddcz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722230314-2ddddcz",
+						"updated": "20220722230325"
+					},
+					"Children": [
+						{
+							"ID": "20220722230314-01npkcu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722230314-01npkcu",
+								"updated": "20220722230325"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最多支持保存 12 个数据快照"
 								}
 							]
 						}
@@ -93,7 +101,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "云端存储空间初始化总大小为 "
+									"Data": "云端"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "存储空间"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "初始化总大小为 "
 								},
 								{
 									"Type": "NodeCodeSpan",
@@ -137,7 +153,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "付费订阅到期以后，云端存储会被彻底删除"
+									"Data": "付费订阅到期以后，"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "云端"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "存储会被彻底删除"
 								}
 							]
 						}

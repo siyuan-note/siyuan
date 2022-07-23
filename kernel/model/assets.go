@@ -618,18 +618,26 @@ func UnusedAssets() (ret []string) {
 		delete(assetsPathMap, toRemove)
 	}
 
+	dataAssetsAbsPath, err := getDataAssetsAbsPath()
+	if nil != err {
+		return
+	}
+
 	for _, assetAbsPath := range assetsPathMap {
 		if _, ok := linkDestMap[assetAbsPath]; ok {
 			continue
 		}
 
 		var p string
-		if strings.HasPrefix(filepath.Join(util.DataDir, "assets"), assetAbsPath) {
+		if strings.HasPrefix(dataAssetsAbsPath, assetAbsPath) {
 			p = assetAbsPath[strings.Index(assetAbsPath, "assets"):]
 		} else {
-			p = strings.TrimPrefix(assetAbsPath, util.DataDir)[1:]
+			p = strings.TrimPrefix(assetAbsPath, filepath.Dir(dataAssetsAbsPath))
 		}
 		p = filepath.ToSlash(p)
+		if strings.HasPrefix(p, "/") {
+			p = p[1:]
+		}
 		ret = append(ret, p)
 	}
 	sort.Strings(ret)
@@ -737,10 +745,14 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 			return nil
 		})
 	}
+
 	// 全局 assets
-	assets := filepath.Join(util.DataDir, "assets")
-	filepath.Walk(assets, func(assetPath string, info fs.FileInfo, err error) error {
-		if assets == assetPath {
+	dataAssetsAbsPath, err := getDataAssetsAbsPath()
+	if nil != err {
+		return
+	}
+	filepath.Walk(dataAssetsAbsPath, func(assetPath string, info fs.FileInfo, err error) error {
+		if dataAssetsAbsPath == assetPath {
 			return nil
 		}
 
@@ -805,4 +817,21 @@ func copyAssetsToDataAssets(rootPath string) {
 			logging.LogErrorf("copy tree assets from [%s] to [%s] failed: %s", assetsDirPaths, dataAssetsPath, err)
 		}
 	}
+}
+
+func getDataAssetsAbsPath() (ret string, err error) {
+	ret = filepath.Join(util.DataDir, "assets")
+	stat, statErr := os.Lstat(ret)
+	if nil != statErr {
+		err = statErr
+		return
+	}
+	if 0 != stat.Mode()&os.ModeSymlink {
+		// 跟随符号链接 https://github.com/siyuan-note/siyuan/issues/5480
+		ret, err = os.Readlink(ret)
+		if nil != err {
+			return
+		}
+	}
+	return
 }

@@ -98,8 +98,8 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             }
         }).element);
     }
-    /// #if !BROWSER
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+    /// #if !BROWSER
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.showInFolder,
         click: () => {
@@ -109,21 +109,38 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
     if (!window.siyuan.config.readonly) {
         genImportMenu(notebookId, "/");
     }
+    /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.export,
+        type: "submenu",
         icon: "iconUpload",
-        click: () => {
-            const msgId = showMessage(window.siyuan.languages.exporting, -1);
-            fetchPost("/api/export/batchExportMd", {
-                notebook: notebookId,
-                path: "/"
-            }, response => {
-                hideMessage(msgId);
-                window.open(response.data.zip);
-            });
-        }
+        submenu: [{
+            label: "Markdown",
+            icon: "iconMarkdown",
+            click: () => {
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                fetchPost("/api/export/batchExportMd", {
+                    notebook: notebookId,
+                    path: "/"
+                }, response => {
+                    hideMessage(msgId);
+                    window.open(response.data.zip);
+                });
+            }
+        }, {
+            label: "SiYuan .sy.zip",
+            icon: "iconSiYuan",
+            click: () => {
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                fetchPost("/api/export/exportNotebookSY", {
+                    id: notebookId,
+                }, response => {
+                    hideMessage(msgId);
+                    window.open(response.data.zip);
+                });
+            }
+        }]
     }).element);
-    /// #endif
     return window.siyuan.menus.menu;
 };
 

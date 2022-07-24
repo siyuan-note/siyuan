@@ -620,67 +620,64 @@ export const exportMd = (id: string) => {
         label: window.siyuan.languages.export,
         type: "submenu",
         icon: "iconUpload",
-        submenu: [
-            {
-                label: window.siyuan.languages.template,
-                icon: "iconMarkdown",
-                click: () => {
-                    fetchPost("/api/template/docSaveAsTemplate", {
-                        id,
-                        overwrite: false
-                    }, response => {
-                        if (response.code === 1) {
-                            // 重名
-                            confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
-                                fetchPost("/api/template/docSaveAsTemplate", {
-                                    id,
-                                    overwrite: true
-                                });
+        submenu: [{
+            label: window.siyuan.languages.template,
+            icon: "iconMarkdown",
+            click: () => {
+                fetchPost("/api/template/docSaveAsTemplate", {
+                    id,
+                    overwrite: false
+                }, response => {
+                    if (response.code === 1) {
+                        // 重名
+                        confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
+                            fetchPost("/api/template/docSaveAsTemplate", {
+                                id,
+                                overwrite: true
                             });
-                            return;
-                        }
-                        showMessage(window.siyuan.languages.exportTplSucc);
-                    });
-                }
-            },
-            {
-                label: "Markdown",
-                icon: "iconMarkdown",
-                click: () => {
-                    const msgId = showMessage(window.siyuan.languages.exporting, -1);
-                    fetchPost("/api/export/exportMd", {
-                        id,
-                    }, response => {
-                        hideMessage(msgId);
-                        if (window.siyuan.config.system.container === "ios") {
-                            window.location.href = response.data.zip;
-                        } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                            window.JSAndroid.openExternal(response.data.zip);
-                        } else {
-                            window.open(response.data.zip);
-                        }
-                    });
-                }
-            },
-            {
-                label: "SiYuan .sy.zip",
-                icon: "iconSiYuan",
-                click: () => {
-                    const msgId = showMessage(window.siyuan.languages.exporting, -1);
-                    fetchPost("/api/export/exportSY", {
-                        id,
-                    }, response => {
-                        hideMessage(msgId);
-                        if (window.siyuan.config.system.container === "ios") {
-                            window.location.href = response.data.zip;
-                        } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                            window.JSAndroid.openExternal(response.data.zip);
-                        } else {
-                            window.open(response.data.zip);
-                        }
-                    });
-                }
-            },
+                        });
+                        return;
+                    }
+                    showMessage(window.siyuan.languages.exportTplSucc);
+                });
+            }
+        }, {
+            label: "Markdown",
+            icon: "iconMarkdown",
+            click: () => {
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                fetchPost("/api/export/exportMd", {
+                    id,
+                }, response => {
+                    hideMessage(msgId);
+                    if (window.siyuan.config.system.container === "ios") {
+                        window.location.href = response.data.zip;
+                    } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
+                        window.JSAndroid.openExternal(response.data.zip);
+                    } else {
+                        window.open(response.data.zip);
+                    }
+                });
+            }
+        }, {
+            label: "SiYuan .sy.zip",
+            icon: "iconSiYuan",
+            click: () => {
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                fetchPost("/api/export/exportSY", {
+                    id,
+                }, response => {
+                    hideMessage(msgId);
+                    if (window.siyuan.config.system.container === "ios") {
+                        window.location.href = response.data.zip;
+                    } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
+                        window.JSAndroid.openExternal(response.data.zip);
+                    } else {
+                        window.open(response.data.zip);
+                    }
+                });
+            }
+        },
             /// #if !BROWSER
             {
                 label: "PDF",

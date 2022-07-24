@@ -36,6 +36,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
+	"github.com/88250/lute/html/atom"
 	"github.com/88250/lute/parse"
 	"github.com/88250/protyle"
 	"github.com/siyuan-note/filelock"
@@ -440,6 +441,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				logging.LogErrorf("parse tree [%s] failed", currentPath)
 				return nil
 			}
+			imgHtmlBlock2InlineImg(tree)
 			tree.ID = id
 			tree.Root.ID = id
 			tree.Root.SetIALAttr("id", tree.Root.ID)
@@ -528,6 +530,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			logging.LogErrorf(msg)
 			return errors.New(msg)
 		}
+		imgHtmlBlock2InlineImg(tree)
 		tree.ID = id
 		tree.Root.ID = id
 		tree.Root.SetIALAttr("id", tree.Root.ID)
@@ -590,6 +593,53 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	return
 }
 
+func imgHtmlBlock2InlineImg(tree *parse.Tree) {
+	imgHtmlBlocks := map[*ast.Node]*html.Node{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeHTMLBlock == n.Type {
+			htmlNodes, pErr := html.ParseFragment(bytes.NewReader(n.Tokens), &html.Node{Type: html.ElementNode})
+			if nil != pErr {
+				logging.LogErrorf("parse html block [%s] failed: %s", n.Tokens, pErr)
+				return ast.WalkContinue
+			}
+			if atom.Img == htmlNodes[0].DataAtom {
+				imgHtmlBlocks[n] = htmlNodes[0]
+			}
+		}
+		return ast.WalkContinue
+	})
+
+	for n, htmlImg := range imgHtmlBlocks {
+		src := domAttrValue(htmlImg, "src")
+		alt := domAttrValue(htmlImg, "alt")
+		title := domAttrValue(htmlImg, "title")
+
+		p := &ast.Node{Type: ast.NodeParagraph, ID: n.ID}
+		img := &ast.Node{Type: ast.NodeImage}
+		p.AppendChild(img)
+		img.AppendChild(&ast.Node{Type: ast.NodeBang})
+		img.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
+		img.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(alt)})
+		img.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
+		img.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
+		img.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(src)})
+		if "" != title {
+			img.AppendChild(&ast.Node{Type: ast.NodeLinkSpace})
+			img.AppendChild(&ast.Node{Type: ast.NodeLinkTitle})
+		}
+		img.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+
+		n.InsertBefore(p)
+		n.Unlink()
+	}
+
+	return
+}
+
 func reassignIDUpdated(tree *parse.Tree) {
 	var blockCount int
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -636,4 +686,17 @@ func randStr(length int) string {
 		b[i] = letter[rand.Intn(len(letter))]
 	}
 	return string(b)
+}
+
+func domAttrValue(n *html.Node, attrName string) string {
+	if nil == n {
+		return ""
+	}
+
+	for _, attr := range n.Attr {
+		if attr.Key == attrName {
+			return attr.Val
+		}
+	}
+	return ""
 }

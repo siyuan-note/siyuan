@@ -570,8 +570,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			spans = append(spans, tags...)
 		}
 	case ast.NodeInlineHTML, ast.NodeHTMLBlock, ast.NodeIFrame, ast.NodeWidget, ast.NodeAudio, ast.NodeVideo:
-		htmlRoot := &html.Node{Type: html.ElementNode}
-		nodes, err := html.ParseFragment(strings.NewReader(gulu.Str.FromBytes(n.Tokens)), htmlRoot)
+		nodes, err := html.ParseFragment(bytes.NewReader(n.Tokens), &html.Node{Type: html.ElementNode})
 		if nil != err {
 			logging.LogErrorf("parse HTML failed: %s", err)
 			walkStatus = ast.WalkContinue

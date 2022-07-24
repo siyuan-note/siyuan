@@ -90,6 +90,22 @@ func exportMd(c *gin.Context) {
 	}
 }
 
+func exportNotebookSY(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	zipPath := model.ExportNotebookSY(id)
+	ret.Data = map[string]interface{}{
+		"zip": zipPath,
+	}
+}
+
 func exportSY(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

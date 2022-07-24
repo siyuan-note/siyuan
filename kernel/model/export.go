@@ -47,6 +47,11 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func ExportNotebookSY(id string) (zipPath string) {
+	zipPath = exportBoxSYZip(id)
+	return
+}
+
 func ExportSY(id string) (name, zipPath string) {
 	block := treenode.GetBlockTree(id)
 	if nil == block {
@@ -609,6 +614,23 @@ func exportMarkdownZip(boxID, baseFolderName string, docPaths []string) (zipPath
 
 	os.RemoveAll(exportFolder)
 	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
+	return
+}
+
+func exportBoxSYZip(boxID string) (zipPath string) {
+	box := Conf.Box(boxID)
+	if nil == box {
+		logging.LogErrorf("not found box [%s]", boxID)
+		return
+	}
+	baseFolderName := box.Name
+
+	var docPaths []string
+	docFiles := box.ListFiles("/")
+	for _, docFile := range docFiles {
+		docPaths = append(docPaths, docFile.path)
+	}
+	zipPath = exportSYZip(boxID, "/", baseFolderName, docPaths)
 	return
 }
 

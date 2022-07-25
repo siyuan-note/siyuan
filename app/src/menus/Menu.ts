@@ -33,9 +33,13 @@ export class Menu {
             itemElement.classList.add("b3-menu__item--show");
             const rect = subMenuElement.getBoundingClientRect();
             let style = "";
-            if (rect.right > window.innerWidth && (rect.left - this.element.clientWidth - rect.width > 0 ||
-                Math.abs(rect.left - this.element.clientWidth - rect.width) < (rect.right - window.innerWidth))) {
-                style = "left:auto;right:100%;";
+            const leftPosition = rect.left - this.element.clientWidth - rect.width
+            if (rect.right > window.innerWidth && Math.abs(leftPosition) < (rect.right - window.innerWidth)) {
+                if (leftPosition >= 0) {
+                    style = "left:auto;right:100%;";
+                } else {
+                    style = `z-index:1;mix-blend-mode: normal;left:-${this.element.style.left};`;
+                }
             } else if (rect.right > window.innerWidth) {
                 style = `z-index:1;mix-blend-mode: normal;left:${window.innerWidth - rect.width}px;`;
             }

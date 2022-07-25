@@ -9,6 +9,7 @@ const forwardStack: IBackStack[] = [];
 let previousIsBack = false;
 
 export const handleTouchEnd = () => {
+    window.siyuan.mobileEditor?.protyle.breadcrumb.show();
     if (!clientX || !clientY) return;
 
     if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > window.innerWidth / 2) {

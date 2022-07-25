@@ -635,40 +635,42 @@ func subscribeEvents() {
 		contextPushMsg(context, msg)
 	})
 
-	count := 0
+	indexWalkDataCount := 0
 	eventbus.Subscribe(dejavu.EvtIndexWalkData, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(158), path)
-		count++
-		if 0 == count%128 {
+		if 0 == indexWalkDataCount%512 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
+		indexWalkDataCount++
 	})
 	eventbus.Subscribe(dejavu.EvtIndexBeforeGetLatestFiles, func(context map[string]interface{}, files []string) {
 		msg := fmt.Sprintf(Conf.Language(159), len(files))
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
+	getLatestFileCount := 0
 	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(159), path)
-		count++
-		if 0 == count%128 {
+		if 0 == getLatestFileCount%512 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
+		getLatestFileCount++
 	})
 	eventbus.Subscribe(dejavu.EvtIndexUpsertFiles, func(context map[string]interface{}, files []*entity.File) {
 		msg := fmt.Sprintf(Conf.Language(160), len(files))
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
+	indexUpsertFileCount := 0
 	eventbus.Subscribe(dejavu.EvtIndexUpsertFile, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(160), path)
-		count++
-		if 0 == count%64 {
+		if 0 == indexUpsertFileCount%128 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
+		indexUpsertFileCount++
 	})
 
 	eventbus.Subscribe(dejavu.EvtCheckoutBeforeWalkData, func(context map[string]interface{}, path string) {
@@ -676,13 +678,14 @@ func subscribeEvents() {
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
+	coWalkDataCount := 0
 	eventbus.Subscribe(dejavu.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(161), path)
-		count++
-		if 0 == count%128 {
+		if 0 == coWalkDataCount%512 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
+		coWalkDataCount++
 	})
 	var bootProgressPart float64
 	eventbus.Subscribe(dejavu.EvtCheckoutUpsertFiles, func(context map[string]interface{}, files []*entity.File) {
@@ -691,13 +694,14 @@ func subscribeEvents() {
 		bootProgressPart = 10 / float64(len(files))
 		contextPushMsg(context, msg)
 	})
+	coUpsertFileCount := 0
 	eventbus.Subscribe(dejavu.EvtCheckoutUpsertFile, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(162), path)
 		util.IncBootProgress(bootProgressPart, msg)
-		count++
-		if 0 == count%64 {
+		if 0 == coUpsertFileCount%128 {
 			contextPushMsg(context, msg)
 		}
+		coUpsertFileCount++
 	})
 	eventbus.Subscribe(dejavu.EvtCheckoutRemoveFiles, func(context map[string]interface{}, files []*entity.File) {
 		msg := fmt.Sprintf(Conf.Language(163), files)
@@ -705,13 +709,14 @@ func subscribeEvents() {
 		bootProgressPart = 10 / float64(len(files))
 		contextPushMsg(context, msg)
 	})
+	coRemoveFileCount := 0
 	eventbus.Subscribe(dejavu.EvtCheckoutRemoveFile, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(163), path)
 		util.IncBootProgress(bootProgressPart, msg)
-		count++
-		if 0 == count%64 {
+		if 0 == coRemoveFileCount%512 {
 			contextPushMsg(context, msg)
 		}
+		coRemoveFileCount++
 	})
 
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadIndex, func(context map[string]interface{}, id string) {
@@ -726,13 +731,14 @@ func subscribeEvents() {
 		bootProgressPart = 10 / float64(len(ids))
 		contextPushMsg(context, msg)
 	})
+	downloadFileCount := 0
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadFile, func(context map[string]interface{}, id string) {
 		msg := fmt.Sprintf(Conf.Language(165), id[:7])
 		util.IncBootProgress(bootProgressPart, msg)
-		count++
-		if 0 == count%8 {
+		if 0 == downloadFileCount%8 {
 			contextPushMsg(context, msg)
 		}
+		downloadFileCount++
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadChunks, func(context map[string]interface{}, ids []string) {
 		msg := fmt.Sprintf(Conf.Language(166), len(ids))
@@ -740,13 +746,14 @@ func subscribeEvents() {
 		bootProgressPart = 10 / float64(len(ids))
 		contextPushMsg(context, msg)
 	})
+	downloadChunkCount := 0
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadChunk, func(context map[string]interface{}, id string) {
 		msg := fmt.Sprintf(Conf.Language(166), id[:7])
 		util.IncBootProgress(bootProgressPart, msg)
-		count++
-		if 0 == count%8 {
+		if 0 == downloadChunkCount%8 {
 			contextPushMsg(context, msg)
 		}
+		downloadChunkCount++
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeDownloadRef, func(context map[string]interface{}, ref string) {
 		msg := fmt.Sprintf(Conf.Language(167), ref)
@@ -763,26 +770,28 @@ func subscribeEvents() {
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
+	uploadFileCount := 0
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadFile, func(context map[string]interface{}, id string) {
 		msg := fmt.Sprintf(Conf.Language(169), id[:7])
-		count++
-		if 0 == count%8 {
+		if 0 == uploadFileCount%8 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
+		uploadFileCount++
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadChunks, func(context map[string]interface{}, ids []string) {
 		msg := fmt.Sprintf(Conf.Language(170), len(ids))
 		util.SetBootDetails(msg)
 		contextPushMsg(context, msg)
 	})
+	uploadChunkCount := 0
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadChunk, func(context map[string]interface{}, id string) {
 		msg := fmt.Sprintf(Conf.Language(170), id[:7])
-		count++
-		if 0 == count%8 {
+		if 0 == uploadChunkCount%8 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
 		}
+		uploadChunkCount++
 	})
 	eventbus.Subscribe(dejavu.EvtCloudBeforeUploadRef, func(context map[string]interface{}, ref string) {
 		msg := fmt.Sprintf(Conf.Language(171), ref)

@@ -430,23 +430,36 @@ export class Wnd {
         if (this.parent.type === "center" && this.children.length === 2 && !this.children[0].headElement) {
             this.removeTab(this.children[0].id);
         } else if (this.children.length > window.siyuan.config.fileTree.maxOpenTabCount) {
-            let removeId: string;
-            let openTime: string;
+            this.removeOverCounter(oldFocusIndex);
+        }
+    }
+
+    private removeOverCounter(oldFocusIndex?: number) {
+        if (typeof oldFocusIndex === "undefined") {
             this.children.forEach((item, index) => {
-                if (item.headElement.classList.contains("item--pin") || item.headElement.classList.contains("item--focus") || index === oldFocusIndex) {
-                    return;
-                }
-                if (!openTime) {
-                    openTime = item.headElement.getAttribute("data-activetime");
-                    removeId = this.children[index].id;
-                } else if (item.headElement.getAttribute("data-activetime") < openTime) {
-                    openTime = item.headElement.getAttribute("data-activetime");
-                    removeId = this.children[index].id;
+                if (item.headElement && item.headElement.classList.contains("item--focus")) {
+                    oldFocusIndex = index;
                 }
             });
-            if (removeId) {
-                this.removeTab(removeId);
+        }
+        let removeId: string;
+        let openTime: string;
+        this.children.forEach((item, index) => {
+            if (item.headElement.classList.contains("item--pin") ||
+                item.headElement.classList.contains("item--focus") ||
+                index === oldFocusIndex) {
+                return;
             }
+            if (!openTime) {
+                openTime = item.headElement.getAttribute("data-activetime");
+                removeId = this.children[index].id;
+            } else if (item.headElement.getAttribute("data-activetime") < openTime) {
+                openTime = item.headElement.getAttribute("data-activetime");
+                removeId = this.children[index].id;
+            }
+        });
+        if (removeId) {
+            this.removeTab(removeId);
         }
     }
 
@@ -518,11 +531,14 @@ export class Wnd {
                 return true;
             }
         });
-        const wnd = getWndByLayout(window.siyuan.layout.centerLayout);
-        if (!wnd) {
-            const wnd = new Wnd();
-            window.siyuan.layout.centerLayout.addWnd(wnd);
-            wnd.addTab(newCenterEmptyTab());
+        // 初始化移除窗口，但 centerLayout 还没有赋值 https://ld246.com/article/1658718634416
+        if (window.siyuan.layout.centerLayout) {
+            const wnd = getWndByLayout(window.siyuan.layout.centerLayout);
+            if (!wnd) {
+                const wnd = new Wnd();
+                window.siyuan.layout.centerLayout.addWnd(wnd);
+                wnd.addTab(newCenterEmptyTab());
+            }
         }
         /// #if !BROWSER
         webFrame.clearCache();
@@ -564,6 +580,9 @@ export class Wnd {
             });
         } else {
             this.children.push(tab);
+        }
+        if (this.children.length > window.siyuan.config.fileTree.maxOpenTabCount) {
+            this.removeOverCounter();
         }
         this.switchTab(tab.headElement);
 

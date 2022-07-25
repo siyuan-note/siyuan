@@ -328,15 +328,17 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                 item.editor.protyle.wysiwyg.renderCustom(attrsResult);
             }
         });
+        /// #endif
         fetchPost("/api/attr/resetBlockAttrs", {id, attrs: attrsResult}, () => {
+            /// #if !MOBILE
             if (attrsResult.bookmark !== attrs.bookmark) {
                 const bookmark = getDockByType("bookmark").data.bookmark;
                 if (bookmark instanceof Bookmark) {
                     bookmark.update();
                 }
             }
+            /// #endif
         });
-        /// #endif
         dialog.destroy();
     });
     dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {

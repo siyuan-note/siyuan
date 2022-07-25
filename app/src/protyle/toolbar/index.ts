@@ -7,7 +7,9 @@ import {
     focusSideBlock,
     getEditorRange,
     getSelectionOffset,
-    getSelectionPosition, setFirstNodeRange, setLastNodeRange
+    getSelectionPosition,
+    setFirstNodeRange,
+    setLastNodeRange
 } from "../util/selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByMatchTag} from "../util/hasClosest";
 import {Link} from "./Link";
@@ -18,11 +20,7 @@ import {mathRender} from "../markdown/mathRender";
 import {getEventName} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../markdown/highlightRender";
-import {
-    getContenteditableElement,
-    hasNextSibling,
-    hasPreviousSibling
-} from "../wysiwyg/getBlock";
+import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {processRender} from "../util/processCode";
 import {BlockRef} from "./BlockRef";
 import {hintMoveBlock, hintRef, hintRenderAssets, hintRenderTemplate, hintRenderWidget} from "../hint/extend";
@@ -746,6 +744,12 @@ export class Toolbar {
                         });
                     }, 100);
                     /// #endif
+
+                    // TODO: V，Android 端图片复制 PNG 粘贴问题 https://github.com/siyuan-note/siyuan/issues/5494
+                    // if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
+                    //     window.JSAndroid.writeImageClipboard(uri);
+                    //     return;
+                    // }
                     break;
             }
         });

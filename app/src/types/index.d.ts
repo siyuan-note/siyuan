@@ -16,6 +16,7 @@ interface Window {
         openExternal(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
+        writeImageClipboard(uri: string): void
     }
 
     goBack(): void

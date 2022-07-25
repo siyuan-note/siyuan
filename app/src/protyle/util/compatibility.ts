@@ -2,7 +2,6 @@ export const writeText = async (text: string) => {
     try {
         // navigator.clipboard.writeText 抛出异常不进入 catch，这里需要先处理移动端复制
         if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
-
             window.JSAndroid.writeClipboard(text);
             return;
         }

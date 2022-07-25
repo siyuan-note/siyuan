@@ -1473,6 +1473,8 @@ export class WYSIWYG {
                         /// #else
                         if (window.siyuan.config.system.container === "ios") {
                             window.location.href = linkAddress;
+                        } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
+                            window.JSAndroid.openExternal(linkAddress);
                         } else {
                             window.open(linkAddress);
                         }
@@ -1486,6 +1488,8 @@ export class WYSIWYG {
                     /// #else
                     if (window.siyuan.config.system.container === "ios") {
                         window.location.href = linkAddress;
+                    } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
+                        window.JSAndroid.openExternal(linkAddress);
                     } else {
                         window.open(linkAddress);
                     }

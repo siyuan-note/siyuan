@@ -774,6 +774,8 @@ export const openMenu = (src: string, onlyMenu = false) => {
         click: () => {
             if (window.siyuan.config.system.container === "ios") {
                 window.location.href = src;
+            } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
+                window.JSAndroid.openExternal(src);
             } else {
                 window.open(src);
             }

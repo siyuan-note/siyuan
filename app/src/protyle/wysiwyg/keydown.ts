@@ -553,9 +553,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!event.altKey && !event.shiftKey && !isCtrl(event) && !event.isComposing && (event.key.indexOf("Arrow") > -1)) {
             protyle.toolbar.isNewEmptyInline = false;
             protyle.hint.enableEmoji = false;
-            const position = getSelectionOffset(nodeElement, protyle.wysiwyg.element, range);
+            // 需使用 editabled，否则代码块会把语言字数算入
+            const nodeEditableElement = getContenteditableElement(nodeElement)
+            const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
             const tdElement = hasClosestByMatchTag(range.startContainer, "TD");
-            if (event.key === "ArrowDown" && getContenteditableElement(nodeElement)?.textContent.trimRight().substr(position.start).indexOf("\n") === -1 && (
+            if (event.key === "ArrowDown" && nodeEditableElement?.textContent.trimRight().substr(position.start).indexOf("\n") === -1 && (
                 (tdElement && !tdElement.parentElement.nextElementSibling && nodeElement.getAttribute("data-type") === "NodeTable" && !getNextBlock(nodeElement)) ||
                 (nodeElement.getAttribute("data-type") === "NodeCodeBlock" && !getNextBlock(nodeElement)) ||
                 (nodeElement.parentElement.getAttribute("data-type") === "NodeBlockquote" && nodeElement.nextElementSibling.classList.contains("protyle-attr") && !getNextBlock(nodeElement.parentElement))
@@ -573,7 +575,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         nodeElement.contains(firstEditElement)
                     ) ||
                     (!firstEditElement && nodeElement.isSameNode(protyle.wysiwyg.element.firstElementChild))) {
-                    if (nodeElement.textContent.substr(0, position.end).indexOf("\n") === -1) {
+                    if (nodeEditableElement?.textContent.substr(0, position.end).indexOf("\n") === -1) {
                         if (protyle.title && (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||
                             protyle.contentElement.scrollTop === 0)) {
                             protyle.title.editElement.focus();
@@ -583,16 +585,21 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 } else {
-                    // 遇到折叠块
-                    if (nodeElement.textContent.substr(0, position.end).indexOf("\n") === -1) {
+                    if (nodeEditableElement?.textContent.substr(0, position.end).indexOf("\n") === -1) {
                         let previousElement: HTMLElement = getPreviousBlock(nodeElement) as HTMLElement;
                         if (previousElement) {
                             previousElement = getLastBlock(previousElement) as HTMLElement;
                             if (previousElement) {
-                                previousElement = hasClosestByAttribute(previousElement, "fold", "1") as HTMLElement;
-                                if (previousElement && previousElement.getAttribute("data-type") !== "NodeListItem") {
-                                    previousElement.scrollTop = 0;
-                                    focusBlock(previousElement, undefined, true);
+                                const foldElement = hasClosestByAttribute(previousElement, "fold", "1") as HTMLElement;
+                                // 代码块或以软换行结尾的块移动光标 ↑ 会跳过 https://github.com/siyuan-note/siyuan/issues/5498
+                                if (getContenteditableElement(previousElement)?.textContent.endsWith("\n") && !foldElement) {
+                                    focusBlock(previousElement, undefined, false);
+                                    event.stopPropagation();
+                                    event.preventDefault();
+                                } else if (foldElement && foldElement.getAttribute("data-type") !== "NodeListItem") {
+                                    // 遇到折叠块
+                                    foldElement.scrollTop = 0;
+                                    focusBlock(foldElement, undefined, true);
                                     event.stopPropagation();
                                     event.preventDefault();
                                 }
@@ -623,6 +630,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (event.key === "ArrowDown") {
                 const foldElement = hasClosestByAttribute(range.startContainer, "fold", "1");
                 if (foldElement) {
+                    // 本身为折叠块
                     let nextElement = getNextBlock(foldElement) as HTMLElement;
                     if (nextElement) {
                         if (nextElement.getAttribute("fold") === "1"
@@ -632,6 +640,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             nextElement = getFirstBlock(nextElement) as HTMLElement;
                         }
                         focusBlock(nextElement);
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                } else if (nodeEditableElement?.textContent.substr(position.end + 1).indexOf("\n") === -1) {
+                    // 下一个块是折叠块
+                    const nextFoldElement = getNextBlock(nodeElement) as HTMLElement;
+                    if (nextFoldElement && nextFoldElement.getAttribute("fold") === "1") {
+                        focusBlock(nextFoldElement);
                         event.stopPropagation();
                         event.preventDefault();
                     }

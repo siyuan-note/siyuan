@@ -88,10 +88,8 @@ try {
   }
 } catch (e) {
   console.error(e)
-  require('electron').
-    dialog.
-    showErrorBox('创建配置目录失败 Failed to create config directory',
-      '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
+  require('electron').dialog.showErrorBox('创建配置目录失败 Failed to create config directory',
+    '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
   app.exit()
 }
 
@@ -192,8 +190,37 @@ const boot = () => {
   })
 
   require('@electron/remote/main').enable(mainWindow.webContents)
-  mainWindow.webContents.userAgent = 'SiYuan/' + appVer +
-    ' https://b3log.org/siyuan Electron'
+  mainWindow.webContents.userAgent = 'SiYuan/' + appVer + ' https://b3log.org/siyuan Electron'
+
+  // 发起互联网服务请求时绕过安全策略 https://github.com/siyuan-note/siyuan/issues/5516
+  mainWindow.webContents.session.webRequest.onBeforeSendHeaders(
+    (details, cb) => {
+      if (-1 < details.url.indexOf('bili')) {
+        // B 站不移除 Referer https://github.com/siyuan-note/siyuan/issues/94
+        cb({requestHeaders: details.requestHeaders})
+        return
+      }
+
+      for (let key in details.requestHeaders) {
+        if ('referer' === key.toLowerCase()) {
+          delete details.requestHeaders[key]
+        }
+      }
+      cb({requestHeaders: details.requestHeaders})
+    })
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, cb) => {
+    for (let key in details.responseHeaders) {
+      if ('x-frame-options' === key.toLowerCase()) {
+        delete details.responseHeaders[key]
+      } else if ('content-security-policy' === key.toLowerCase()) {
+        delete details.responseHeaders[key]
+      } else if ('access-control-allow-origin' === key.toLowerCase()) {
+        delete details.responseHeaders[key]
+      }
+    }
+    cb({responseHeaders: details.responseHeaders})
+  })
+
   mainWindow.webContents.on('did-finish-load', () => {
     if ('win32' === process.platform || 'linux' === process.platform) {
       siyuanOpenURL = process.argv.find((arg) => arg.startsWith('siyuan://'))

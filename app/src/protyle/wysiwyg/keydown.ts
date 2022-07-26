@@ -1372,7 +1372,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (isNotEditBlock(nodeElement) && matchHotKey("⌘C", event)) {
+        if (isNotEditBlock(nodeElement) &&
+            nodeElement.getAttribute("data-type") !== "NodeHTMLBlock" // HTML 块选中部分内容无法复制 https://github.com/siyuan-note/siyuan/issues/5521
+            && matchHotKey("⌘C", event)) {
             let html = "";
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                 html += removeEmbed(item);

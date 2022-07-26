@@ -579,8 +579,11 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             genImageWidthMenu(window.siyuan.languages.default, assetElement, imgElement, protyle, id, nodeElement, html),
         ]
     }).element);
-    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-    openMenu(imgElement.getAttribute("src"));
+    const imgSrc = imgElement.getAttribute("src")
+    if (imgSrc) {
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        openMenu(imgSrc);
+    }
     window.siyuan.menus.menu.popup({x: position.clientX, y: position.clientY});
     window.siyuan.menus.menu.element.querySelector("input").focus();
 };
@@ -736,7 +739,9 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             }
         }).element);
     }
-    openMenu(linkAddress);
+    if (linkAddress) {
+        openMenu(linkAddress);
+    }
     window.siyuan.menus.menu.element.classList.remove("fn__none");
     if (focusText || protyle.lute.IsValidLinkDest(linkAddress)) {
         window.siyuan.menus.menu.element.querySelectorAll("input")[1].select();
@@ -812,10 +817,15 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
                 event.stopPropagation();
             });
         }
-    }, {
-        type: "separator"
     }];
-    return subMenus.concat(openMenu(iframeElement.getAttribute("src") || "", true) as IMenu[]);
+    const iframeSrc = iframeElement.getAttribute("src");
+    if (iframeSrc) {
+        subMenus.push({
+            type: "separator"
+        })
+        return subMenus.concat(openMenu(iframeSrc, true) as IMenu[]);
+    }
+    return subMenus;
 };
 
 export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string) => {
@@ -833,11 +843,12 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
                 event.stopPropagation();
             });
         }
-    }, {
-        type: "separator"
     }];
     const src = videoElement.getAttribute("src");
     if (src.startsWith("assets/")) {
+        subMenus.push({
+            type: "separator"
+        })
         subMenus.push({
             label: window.siyuan.languages.rename,
             click() {
@@ -845,7 +856,11 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
             }
         });
     }
-    return subMenus.concat(openMenu(videoElement.getAttribute("src"), true) as IMenu[]);
+    const VideoSrc = videoElement.getAttribute("src");
+    if (VideoSrc) {
+        return subMenus.concat(openMenu(VideoSrc, true) as IMenu[]);
+    }
+    return subMenus;
 };
 
 export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLTableCellElement, range: Range) => {

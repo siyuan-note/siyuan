@@ -51,7 +51,7 @@ import {openAsset, openBy, openFileById} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {isCtrl} from "../util/compatibility";
+import {isCtrl, openByMobile} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -1419,11 +1419,7 @@ export class WYSIWYG {
                 const fileIds = fileElement.getAttribute("data-id").split("/");
                 const linkAddress = `assets/${fileIds[1]}`;
                 /// #if MOBILE
-                if (typeof window.JSAndroid === "undefined") {
-                    window.open(linkAddress);
-                } else {
-                    window.JSAndroid.openExternal(linkAddress);
-                }
+                openByMobile(linkAddress)
                 /// #else
                 if (window.siyuan.ctrlIsPressed) {
                     openBy(linkAddress, "folder");
@@ -1441,13 +1437,7 @@ export class WYSIWYG {
                 event.preventDefault();
                 const linkAddress = aElement.getAttribute("data-href");
                 /// #if MOBILE
-                if (window.siyuan.config.system.container === "ios") {
-                    window.location.href = linkAddress;
-                } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                    window.JSAndroid.openExternal(linkAddress);
-                } else {
-                    window.open(linkAddress);
-                }
+                openByMobile(linkAddress);
                 /// #else
                 if (isLocalPath(linkAddress)) {
                     const linkPathname = linkAddress.split("?page")[0];
@@ -1471,13 +1461,7 @@ export class WYSIWYG {
                             openBy(linkAddress, "app");
                         }
                         /// #else
-                        if (window.siyuan.config.system.container === "ios") {
-                            window.location.href = linkAddress;
-                        } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                            window.JSAndroid.openExternal(linkAddress);
-                        } else {
-                            window.open(linkAddress);
-                        }
+                        openByMobile(linkAddress)
                         /// #endif
                     }
                 } else {
@@ -1486,13 +1470,7 @@ export class WYSIWYG {
                         showMessage(e);
                     });
                     /// #else
-                    if (window.siyuan.config.system.container === "ios") {
-                        window.location.href = linkAddress;
-                    } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                        window.JSAndroid.openExternal(linkAddress);
-                    } else {
-                        window.open(linkAddress);
-                    }
+                    openByMobile(linkAddress)
                     /// #endif
                 }
                 /// #endif

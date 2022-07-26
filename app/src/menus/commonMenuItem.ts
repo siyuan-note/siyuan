@@ -8,7 +8,7 @@ import {isLocalPath, movePathTo, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {saveExport} from "../protyle/export";
-import {writeText} from "../protyle/util/compatibility";
+import {openByMobile, writeText} from "../protyle/util/compatibility";
 import {fetchPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -652,13 +652,7 @@ export const exportMd = (id: string) => {
                     id,
                 }, response => {
                     hideMessage(msgId);
-                    if (window.siyuan.config.system.container === "ios") {
-                        window.location.href = response.data.zip;
-                    } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                        window.JSAndroid.openExternal(response.data.zip);
-                    } else {
-                        window.open(response.data.zip);
-                    }
+                    openByMobile(response.data.zip);
                 });
             }
         }, {
@@ -670,13 +664,7 @@ export const exportMd = (id: string) => {
                     id,
                 }, response => {
                     hideMessage(msgId);
-                    if (window.siyuan.config.system.container === "ios") {
-                        window.location.href = response.data.zip;
-                    } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                        window.JSAndroid.openExternal(response.data.zip);
-                    } else {
-                        window.open(response.data.zip);
-                    }
+                    openByMobile(response.data.zip);
                 });
             }
         },
@@ -774,13 +762,7 @@ export const openMenu = (src: string, onlyMenu = false) => {
         label: window.siyuan.languages.useBrowserView,
         accelerator: "Click",
         click: () => {
-            if (window.siyuan.config.system.container === "ios") {
-                window.location.href = src;
-            } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                window.JSAndroid.openExternal(src);
-            } else {
-                window.open(src);
-            }
+            openByMobile(src);
         }
     });
     /// #endif

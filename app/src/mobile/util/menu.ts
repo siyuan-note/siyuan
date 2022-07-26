@@ -1,5 +1,5 @@
 import {fetchPost} from "../../util/fetch";
-import {getEventName, writeText} from "../../protyle/util/compatibility";
+import {getEventName, openByMobile, writeText} from "../../protyle/util/compatibility";
 import {popSearch} from "./search";
 import {initAppearance} from "../settings/appearance";
 import {closePanel} from "./closePanel";
@@ -382,11 +382,7 @@ ${accountHTML}
                     });
                     modelMainElement.querySelector("#exportData").addEventListener("click", () => {
                         fetchPost("/api/export/exportData", {}, response => {
-                            if (window.JSAndroid) {
-                                window.JSAndroid.openExternal(response.data.zip);
-                                return;
-                            }
-                            window.location.href = response.data.zip;
+                            openByMobile(response.data.zip);
                         });
                     });
                     modelMainElement.querySelector("#importData").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {

@@ -1,4 +1,4 @@
-import {getEventName, writeText} from "../util/compatibility";
+import {getEventName, openByMobile, writeText} from "../util/compatibility";
 import {hasClosestByTag} from "../util/hasClosest";
 import {focusByRange} from "../util/selection";
 import {showMessage} from "../../dialog/message";
@@ -38,11 +38,9 @@ export class Preview {
             if (event.target.tagName === "A") {
                 const linkAddress = event.target.getAttribute("href");
                 if (isMobile()) {
-                    if (window.JSAndroid) {
-                        window.JSAndroid.openExternal(linkAddress);
-                        event.stopPropagation();
-                        event.preventDefault();
-                    }
+                    openByMobile(linkAddress);
+                    event.stopPropagation();
+                    event.preventDefault();
                     return;
                 }
                 event.stopPropagation();

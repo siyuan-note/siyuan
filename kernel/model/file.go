@@ -615,7 +615,7 @@ func GetDoc(id string, index int, keyword string, mode int, size int) (blockCoun
 				return ast.WalkSkipChildren
 			}
 
-			// TODO: 支持代码块搜索定位和高亮 https://github.com/siyuan-note/siyuan/issues/5520
+			// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
 			if ast.NodeCodeBlockCode == n.Type {
 				// 搜索高亮
 				text := string(n.Tokens)

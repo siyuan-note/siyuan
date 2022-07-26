@@ -1156,11 +1156,11 @@ export class Toolbar {
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
             this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="min-width: 260px">
+<div class="fn__flex-column" style="min-width: 260px;max-width: 100vw">
     <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>
-<div style="width: 260px;display: flex;padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
+<div style="width: 260px;display: ${isMobile() ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
 </div>`;
             const listElement = this.subElement.querySelector(".b3-list");
             listElement.addEventListener("mouseover", (event) => {

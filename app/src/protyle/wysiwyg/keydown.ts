@@ -554,7 +554,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             protyle.toolbar.isNewEmptyInline = false;
             protyle.hint.enableEmoji = false;
             // 需使用 editabled，否则代码块会把语言字数算入
-            const nodeEditableElement = getContenteditableElement(nodeElement) || nodeElement
+            const nodeEditableElement = getContenteditableElement(nodeElement) || nodeElement;
             const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
             const tdElement = hasClosestByMatchTag(range.startContainer, "TD");
             if (event.key === "ArrowDown" && nodeEditableElement?.textContent.trimRight().substr(position.start).indexOf("\n") === -1 && (
@@ -594,14 +594,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 // 代码块或以软换行结尾的块移动光标 ↑ 会跳过 https://github.com/siyuan-note/siyuan/issues/5498
                                 if (getContenteditableElement(previousElement)?.textContent.endsWith("\n") && !foldElement) {
                                     focusBlock(previousElement, undefined, false);
-                                    scrollCenter(protyle, previousElement)
+                                    scrollCenter(protyle, previousElement);
                                     event.stopPropagation();
                                     event.preventDefault();
                                 } else if (foldElement && foldElement.getAttribute("data-type") !== "NodeListItem") {
                                     // 遇到折叠块
                                     foldElement.scrollTop = 0;
                                     focusBlock(foldElement, undefined, true);
-                                    scrollCenter(protyle, foldElement)
+                                    scrollCenter(protyle, foldElement);
                                     event.stopPropagation();
                                     event.preventDefault();
                                 }
@@ -642,7 +642,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             nextElement = getFirstBlock(nextElement) as HTMLElement;
                         }
                         focusBlock(nextElement);
-                        scrollCenter(protyle, nextElement)
+                        scrollCenter(protyle, nextElement);
                     }
                     event.stopPropagation();
                     event.preventDefault();
@@ -651,7 +651,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const nextFoldElement = getNextBlock(nodeElement) as HTMLElement;
                     if (nextFoldElement && nextFoldElement.getAttribute("fold") === "1") {
                         focusBlock(nextFoldElement);
-                        scrollCenter(protyle, nextFoldElement)
+                        scrollCenter(protyle, nextFoldElement);
                         event.stopPropagation();
                         event.preventDefault();
                     }
@@ -1385,7 +1385,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (isNotEditBlock(nodeElement) && matchHotKey("⌘X", event)) {
             let html = "";
             nodeElement.classList.add("protyle-wysiwyg--select");
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")
+            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             selectElements.forEach(item => {
                 html += removeEmbed(item);
             });

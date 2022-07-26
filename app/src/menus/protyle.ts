@@ -579,7 +579,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             genImageWidthMenu(window.siyuan.languages.default, assetElement, imgElement, protyle, id, nodeElement, html),
         ]
     }).element);
-    const imgSrc = imgElement.getAttribute("src")
+    const imgSrc = imgElement.getAttribute("src");
     if (imgSrc) {
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         openMenu(imgSrc);
@@ -822,7 +822,7 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
     if (iframeSrc) {
         subMenus.push({
             type: "separator"
-        })
+        });
         return subMenus.concat(openMenu(iframeSrc, true) as IMenu[]);
     }
     return subMenus;
@@ -848,7 +848,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     if (src.startsWith("assets/")) {
         subMenus.push({
             type: "separator"
-        })
+        });
         subMenus.push({
             label: window.siyuan.languages.rename,
             click() {

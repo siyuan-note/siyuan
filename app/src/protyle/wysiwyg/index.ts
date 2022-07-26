@@ -1419,7 +1419,7 @@ export class WYSIWYG {
                 const fileIds = fileElement.getAttribute("data-id").split("/");
                 const linkAddress = `assets/${fileIds[1]}`;
                 /// #if MOBILE
-                openByMobile(linkAddress)
+                openByMobile(linkAddress);
                 /// #else
                 if (window.siyuan.ctrlIsPressed) {
                     openBy(linkAddress, "folder");
@@ -1461,7 +1461,7 @@ export class WYSIWYG {
                             openBy(linkAddress, "app");
                         }
                         /// #else
-                        openByMobile(linkAddress)
+                        openByMobile(linkAddress);
                         /// #endif
                     }
                 } else {
@@ -1470,7 +1470,7 @@ export class WYSIWYG {
                         showMessage(e);
                     });
                     /// #else
-                    openByMobile(linkAddress)
+                    openByMobile(linkAddress);
                     /// #endif
                 }
                 /// #endif

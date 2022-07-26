@@ -8,7 +8,6 @@ import {Files} from "../layout/dock/Files";
 import {getDockByType} from "../layout/util";
 import {getAllModels} from "../layout/getAll";
 /// #endif
-import {getEventName} from "../protyle/util/compatibility";
 import {setNoteBook} from "../util/pathName";
 
 export const getRandomEmoji = () => {

@@ -79,7 +79,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     let html = blockElement.outerHTML;
     let todoOldHTML = "";
-    let focusHR = false
+    let focusHR = false;
     if (editElement.textContent === "---" && !blockElement.classList.contains("code-block")) {
         html = `<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div></div></div>`;
         const nextBlockElement = getNextBlock(editElement);

@@ -33,7 +33,7 @@ export class Menu {
             itemElement.classList.add("b3-menu__item--show");
             const rect = subMenuElement.getBoundingClientRect();
             let style = "";
-            const leftPosition = rect.left - this.element.clientWidth - rect.width
+            const leftPosition = rect.left - this.element.clientWidth - rect.width;
             if (rect.right > window.innerWidth && (
                 leftPosition > 0 || Math.abs(leftPosition) < (rect.right - window.innerWidth))) {
                 if (leftPosition >= 0) {

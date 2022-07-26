@@ -64,15 +64,15 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                     language = "plaintext";
                 }
                 block.classList.add("hljs");
-                block.innerHTML = hljs.highlight(
-                    block.textContent + (block.textContent.endsWith("\n") ? "" : "\n"), // https://github.com/siyuan-note/siyuan/issues/4609
-                    {
-                        language,
-                        ignoreIllegals: true
-                    }).value;
-
+                // TODO 等待讨论是否需要渲染 if (!hasClosestByAttribute(block, "id", "searchPreview", true) || isPreview) {
+                    block.innerHTML = hljs.highlight(
+                        block.textContent + (block.textContent.endsWith("\n") ? "" : "\n"), // https://github.com/siyuan-note/siyuan/issues/4609
+                        {
+                            language,
+                            ignoreIllegals: true
+                        }).value;
+                // }
                 block.setAttribute("data-render", "true");
-
                 const autoEnter = block.parentElement.getAttribute("linewrap");
                 const ligatures = block.parentElement.getAttribute("ligatures");
                 const lineNumber = block.parentElement.getAttribute("linenumber");

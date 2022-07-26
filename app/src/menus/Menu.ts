@@ -34,7 +34,8 @@ export class Menu {
             const rect = subMenuElement.getBoundingClientRect();
             let style = "";
             const leftPosition = rect.left - this.element.clientWidth - rect.width
-            if (rect.right > window.innerWidth && Math.abs(leftPosition) < (rect.right - window.innerWidth)) {
+            if (rect.right > window.innerWidth && (
+                leftPosition > 0 || Math.abs(leftPosition) < (rect.right - window.innerWidth))) {
                 if (leftPosition >= 0) {
                     style = "left:auto;right:100%;";
                 } else {

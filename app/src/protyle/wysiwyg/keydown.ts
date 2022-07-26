@@ -594,12 +594,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 // 代码块或以软换行结尾的块移动光标 ↑ 会跳过 https://github.com/siyuan-note/siyuan/issues/5498
                                 if (getContenteditableElement(previousElement)?.textContent.endsWith("\n") && !foldElement) {
                                     focusBlock(previousElement, undefined, false);
+                                    scrollCenter(protyle, previousElement)
                                     event.stopPropagation();
                                     event.preventDefault();
                                 } else if (foldElement && foldElement.getAttribute("data-type") !== "NodeListItem") {
                                     // 遇到折叠块
                                     foldElement.scrollTop = 0;
                                     focusBlock(foldElement, undefined, true);
+                                    scrollCenter(protyle, foldElement)
                                     event.stopPropagation();
                                     event.preventDefault();
                                 }
@@ -640,6 +642,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             nextElement = getFirstBlock(nextElement) as HTMLElement;
                         }
                         focusBlock(nextElement);
+                        scrollCenter(protyle, nextElement)
                     }
                     event.stopPropagation();
                     event.preventDefault();
@@ -648,6 +651,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const nextFoldElement = getNextBlock(nodeElement) as HTMLElement;
                     if (nextFoldElement && nextFoldElement.getAttribute("fold") === "1") {
                         focusBlock(nextFoldElement);
+                        scrollCenter(protyle, nextFoldElement)
                         event.stopPropagation();
                         event.preventDefault();
                     }

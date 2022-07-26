@@ -615,6 +615,14 @@ func GetDoc(id string, index int, keyword string, mode int, size int) (blockCoun
 				return ast.WalkSkipChildren
 			}
 
+			// TODO: 支持代码块搜索定位和高亮 https://github.com/siyuan-note/siyuan/issues/5520
+			if ast.NodeCodeBlockCode == n.Type {
+				// 搜索高亮
+				text := string(n.Tokens)
+				text = search.EncloseHighlighting(text, keywords, "__@mark__", "__mark@__", Conf.Search.CaseSensitive)
+				n.Tokens = gulu.Str.ToBytes(text)
+			}
+
 			if ast.NodeText == n.Type {
 				if 0 < len(keywords) {
 					// 搜索高亮

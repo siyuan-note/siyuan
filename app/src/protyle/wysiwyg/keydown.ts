@@ -554,7 +554,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             protyle.toolbar.isNewEmptyInline = false;
             protyle.hint.enableEmoji = false;
             // 需使用 editabled，否则代码块会把语言字数算入
-            const nodeEditableElement = getContenteditableElement(nodeElement)
+            const nodeEditableElement = getContenteditableElement(nodeElement) || nodeElement
             const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
             const tdElement = hasClosestByMatchTag(range.startContainer, "TD");
             if (event.key === "ArrowDown" && nodeEditableElement?.textContent.trimRight().substr(position.start).indexOf("\n") === -1 && (

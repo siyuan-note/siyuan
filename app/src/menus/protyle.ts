@@ -468,22 +468,27 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         label: window.siyuan.languages.copy + " PNG",
         icon: "iconImage",
         click() {
-            const canvas = document.createElement("canvas");
-            const tempElement = document.createElement("img");
-            tempElement.onload = (e: Event & { target: HTMLImageElement }) => {
-                canvas.width = e.target.width;
-                canvas.height = e.target.height;
-                canvas.getContext("2d").drawImage(e.target, 0, 0, e.target.width, e.target.height);
-                canvas.toBlob((blob) => {
-                    navigator.clipboard.write([
-                        new ClipboardItem({
-                            // @ts-ignore
-                            ["image/png"]: blob
-                        })
-                    ]);
-                }, "image/png", 1);
-            };
-            tempElement.src = imgElement.getAttribute("src");
+            if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
+                window.JSAndroid.writeImageClipboard(imgElement.getAttribute("src"));
+                return;
+            } else {
+                const canvas = document.createElement("canvas");
+                const tempElement = document.createElement("img");
+                tempElement.onload = (e: Event & { target: HTMLImageElement }) => {
+                    canvas.width = e.target.width;
+                    canvas.height = e.target.height;
+                    canvas.getContext("2d").drawImage(e.target, 0, 0, e.target.width, e.target.height);
+                    canvas.toBlob((blob) => {
+                        navigator.clipboard.write([
+                            new ClipboardItem({
+                                // @ts-ignore
+                                ["image/png"]: blob
+                            })
+                        ]);
+                    }, "image/png", 1);
+                };
+                tempElement.src = imgElement.getAttribute("src");
+            }
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({

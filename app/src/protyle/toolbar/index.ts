@@ -744,12 +744,6 @@ export class Toolbar {
                         });
                     }, 100);
                     /// #endif
-
-                    // TODO: V，Android 端图片复制 PNG 粘贴问题 https://github.com/siyuan-note/siyuan/issues/5494
-                    // if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
-                    //     window.JSAndroid.writeImageClipboard(uri);
-                    //     return;
-                    // }
                     break;
             }
         });

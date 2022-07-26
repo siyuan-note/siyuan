@@ -41,7 +41,7 @@ export class Menu {
                     style = `z-index:1;mix-blend-mode: normal;left:-${this.element.style.left};`;
                 }
             } else if (rect.right > window.innerWidth) {
-                style = `z-index:1;mix-blend-mode: normal;left:${window.innerWidth - rect.width}px;`;
+                style = `z-index:1;mix-blend-mode: normal;left:${window.innerWidth - rect.width - this.element.offsetLeft}px;`;
             }
             if (rect.bottom > window.innerHeight) {
                 style += `top: auto;bottom:-5px;max-height:${Math.min(rect.top, window.innerHeight * 0.4)}px`;

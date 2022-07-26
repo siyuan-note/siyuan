@@ -1,3 +1,31 @@
+## v2.1.3 / 2022-07-27
+
+### 改进功能
+
+* [笔记本支持导出 `.sy.zip`](https://github.com/siyuan-note/siyuan/issues/5475)
+* [`清理未引用资源` 支持跟随 assets 文件夹符号链接](https://github.com/siyuan-note/siyuan/issues/5480)
+* [改进导入 Markdown 时 `<img>` 标签的处理](https://github.com/siyuan-note/siyuan/issues/5501)
+* [改进云端同步性能](https://github.com/siyuan-note/siyuan/issues/5511)
+* [发起互联网服务请求时绕过安全策略](https://github.com/siyuan-note/siyuan/issues/5516)
+* [支持代码块搜索定位](https://github.com/siyuan-note/siyuan/issues/5520)
+
+### 修复缺陷
+
+* [Android 端资源文件 `打开` - `在浏览器中查看` 卡住](https://github.com/siyuan-note/siyuan/issues/5495)
+* [云端同步 `syncignore` 未生效导致误删文件](https://github.com/siyuan-note/siyuan/issues/5497)
+* [代码块移动光标 ↑ 跳过问题](https://github.com/siyuan-note/siyuan/issues/5498)
+* [不启用同步时无法使用备份](https://github.com/siyuan-note/siyuan/issues/5502)
+* [脚注定义元素语法问题兼容](https://github.com/siyuan-note/siyuan/issues/5503)
+* [光标在图片后面显示异常](https://github.com/siyuan-note/siyuan/issues/5504)
+* [窗口状态无法保留](https://github.com/siyuan-note/siyuan/issues/5509)
+* [移动端右侧子菜单超出屏幕](https://github.com/siyuan-note/siyuan/issues/5510)
+* [安卓端文档树上的属性项内容无法保存](https://github.com/siyuan-note/siyuan/issues/5512)
+* [移动端输入文字后面包屑无法再次显示](https://github.com/siyuan-note/siyuan/issues/5513)
+* [优化排版功能导致文档部分内容丢失](https://github.com/siyuan-note/siyuan/issues/5515)
+* [引用和链接菜单重合](https://github.com/siyuan-note/siyuan/issues/5518)
+* [移动端浏览器打开空链接白屏且菜单超出屏幕](https://github.com/siyuan-note/siyuan/issues/5519)
+* [HTML 块选中部分内容无法复制](https://github.com/siyuan-note/siyuan/issues/5521)
+
 ## v2.1.2 / 2022-07-22
 
 ### 改进功能

@@ -616,7 +616,7 @@ func GetDoc(id string, index int, keyword string, mode int, size int) (blockCoun
 			}
 
 			// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
-			if ast.NodeCodeBlockCode == n.Type {
+			if ast.NodeCodeBlockCode == n.Type && 0 < len(keywords) {
 				// 搜索高亮
 				text := string(n.Tokens)
 				text = search.EncloseHighlighting(text, keywords, "__@mark__", "__mark@__", Conf.Search.CaseSensitive)

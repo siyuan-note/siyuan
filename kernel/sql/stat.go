@@ -94,7 +94,7 @@ func getStat(key string) (ret string) {
 }
 
 func CountAllDoc() (ret int) {
-	sqlStmt := "SELECT count(*) FROM blocks WHERE type = 'd'"
+	sqlStmt := "SELECT COUNT(*) FROM blocks WHERE type = 'd'"
 	row := queryRow(sqlStmt)
 	row.Scan(&ret)
 	return

@@ -70,8 +70,9 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                                 // 光标无法移动到末尾 https://github.com/siyuan-note/siyuan/issues/2112
                                 mathElement.insertAdjacentText("afterend", "\n");
                             } else {
-                                // 光标在数学公式 _a 后，视觉上却在下个单元格中 https://ld246.com/article/1651595975481
-                                mathElement.insertAdjacentText("beforeend", Constants.ZWSP);
+                                // https://ld246.com/article/1651595975481，https://ld246.com/article/1658903123429
+                                // 随着浏览器的升级，从 beforeend 修改为 afterend
+                                mathElement.insertAdjacentText("afterend", Constants.ZWSP);
                             }
                         } else if (nextSibling && nextSibling.textContent !== "\n") {
                             // 数学公式后一个字符删除多 br https://ld246.com/article/1647157880974

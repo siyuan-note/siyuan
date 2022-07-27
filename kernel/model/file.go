@@ -34,6 +34,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	util2 "github.com/88250/lute/util"
 	"github.com/88250/protyle"
 	"github.com/dustin/go-humanize"
@@ -616,8 +617,7 @@ func GetDoc(id string, index int, keyword string, mode int, size int) (blockCoun
 			}
 
 			// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
-			if ast.NodeCodeBlockCode == n.Type && 0 < len(keywords) {
-				// 搜索高亮
+			if ast.NodeCodeBlockCode == n.Type && 0 < len(keywords) && !render.IsChartCodeBlockCode(n) {
 				text := string(n.Tokens)
 				text = search.EncloseHighlighting(text, keywords, "__@mark__", "__mark@__", Conf.Search.CaseSensitive)
 				n.Tokens = gulu.Str.ToBytes(text)

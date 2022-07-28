@@ -650,8 +650,8 @@ func subscribeEvents() {
 		contextPushMsg(context, msg)
 	})
 	getLatestFileCount := 0
-	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(context map[string]interface{}, path string) {
-		msg := fmt.Sprintf(Conf.Language(159), path)
+	eventbus.Subscribe(dejavu.EvtIndexGetLatestFile, func(context map[string]interface{}, id string) {
+		msg := fmt.Sprintf(Conf.Language(159), id[:7])
 		if 0 == getLatestFileCount%512 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)

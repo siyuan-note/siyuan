@@ -491,6 +491,10 @@ export class WYSIWYG {
                     window.siyuan.menus.menu.element.classList.remove("fn__none");
                     setPosition(window.siyuan.menus.menu.element, event.clientX, event.clientY + 13, 26);
                     protyle.toolbar?.element.classList.add("fn__none");
+                    if (nodeElement.classList.contains("table")) {
+                        nodeElement.querySelector("table").classList.remove("select");
+                        nodeElement.querySelector(".table__select").removeAttribute("style");
+                    }
                 }
             } else if (protyle.toolbar.range.toString() === "") {
                 hideElements(["util"], protyle);

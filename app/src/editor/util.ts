@@ -151,9 +151,13 @@ const openFile = (options: IOpenFileOptions) => {
         } else if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             let unUpdateTab: Tab;
             // 不能 reverse, 找到也不能提前退出循环，否则 https://github.com/siyuan-note/siyuan/issues/3271
-            wnd.children.forEach((item) => {
+            wnd.children.find((item) => {
                 if (item.headElement && item.headElement.classList.contains("item--unupdate") && !item.headElement.classList.contains("item--pin")) {
                     unUpdateTab = item;
+                    if (item.headElement.classList.contains("item--focus")) {
+                        // https://ld246.com/article/1658979494658
+                        return true;
+                    }
                 }
             });
             wnd.addTab(newTab(options));

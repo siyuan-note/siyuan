@@ -465,7 +465,7 @@ func IndexRepo(memo string) (err error) {
 	return
 }
 
-func syncRepo(boot, exit, byHand bool) {
+func syncRepo(boot, exit, byHand bool) (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		syncDownloadErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -591,9 +591,9 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (index *entity.Index, err error
 		dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBar,
 	})
 	if nil != err {
-		msg := fmt.Sprintf(Conf.Language(140), err)
+		msg := fmt.Sprintf(Conf.Language(140), formatErrorMsg(err))
 		util.PushStatusBar(msg)
-		util.PushErrMsg(msg, 5000)
+		util.PushErrMsg(msg, 12000)
 		logging.LogErrorf("index data repo before cloud sync failed: %s", err)
 		return
 	}

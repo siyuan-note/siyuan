@@ -843,7 +843,7 @@
     "82": "Sincronizado en %s",
     "83": "El código de autorización de acceso es incorrecto",
     "84": "Copia de seguridad fallida: %s",
-    "85": "El archivo está ocupado por otros programas. No utilice el administrador de archivos del sistema para abrir la carpeta del área de trabajo durante el funcionamiento; no utilice un disco de sincronización en tiempo real de terceros y compruebe si la carpeta del área de trabajo tiene permisos de escritura",
+    "85": "El archivo está siendo utilizado por otros programas %s",
     "86": "Por favor, configure [Configuración - Acerca de - Código de autorización de acceso]",
     "87": "No se puede mover a esta ubicación",
     "88": "Se ha terminado de analizar [%d] archivos de datos, quedan por procesar [%d]",

@@ -842,7 +842,7 @@
     "82": "Synchronisé à %s",
     "83": "Le code d'autorisation d'accès est incorrect",
     "84": "Échec de la sauvegarde : %s",
-    "85": "Le fichier est occupé par d'autres programmes. N'utilisez pas le gestionnaire de fichiers système pour ouvrir le dossier de l'espace de travail pendant le fonctionnement ; n'utilisez pas de disque de synchronisation en temps réel tiers et vérifiez si le dossier de l'espace de travail dispose des autorisations d'écriture",
+    "85": "Le fichier est utilisé par d'autres programmes %s",
     "86": "Veuillez configurer [Paramètres - A propos de - Code d'autorisation d'accès]",
     "87": "Impossible de se déplacer vers cet endroit",
     "88": "Fin de l'analyse des fichiers de données [%d], restant à traiter [%d]",

@@ -110,15 +110,17 @@ func SyncData(boot, exit, byHand bool) {
 	Conf.Sync.Synced = now
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	defer func() {
-		synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n" + Conf.Sync.Stat
-		msg := fmt.Sprintf(Conf.Language(82), synced)
-		Conf.Sync.Stat = msg
-		Conf.Save()
-		util.BroadcastByType("main", "syncing", 1, msg, nil)
-	}()
-
-	syncRepo(boot, exit, byHand)
+	err := syncRepo(boot, exit, byHand)
+	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
+	if nil == err {
+		synced += Conf.Sync.Stat
+	} else {
+		synced += fmt.Sprintf(Conf.Language(80), err)
+	}
+	msg := fmt.Sprintf(Conf.Language(82), synced)
+	Conf.Sync.Stat = msg
+	Conf.Save()
+	util.BroadcastByType("main", "syncing", 1, msg, nil)
 	return
 }
 
@@ -324,8 +326,8 @@ func formatErrorMsg(err error) string {
 	msgLowerCase := strings.ToLower(msg)
 	if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {
 		msg = Conf.Language(33) + " " + err.Error()
-	} else if strings.Contains(msgLowerCase, "device or resource busy") {
-		msg = Conf.Language(85) + " " + err.Error()
+	} else if strings.Contains(msgLowerCase, "device or resource busy") || strings.Contains(msg, "is being used by another") {
+		msg = fmt.Sprintf(Conf.Language(85), err)
 	} else if strings.Contains(msgLowerCase, "cipher: message authentication failed") {
 		msg = Conf.Language(172) + " " + err.Error()
 	} else if strings.Contains(msgLowerCase, "repo fatal error") {

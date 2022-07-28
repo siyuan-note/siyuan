@@ -453,7 +453,7 @@ func RefreshFileTree() {
 	WaitForWritingFiles()
 
 	if err := sql.InitDatabase(true); nil != err {
-		util.PushErrMsg(Conf.Language(85), 5000)
+		util.PushErrMsg(fmt.Sprintf(Conf.Language(85), err), 5000)
 		return
 	}
 

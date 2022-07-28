@@ -842,7 +842,7 @@
     "82": "Synced at %s",
     "83": "The access authorization code is incorrect",
     "84": "Backup failed: %s",
-    "85": "The file is occupied by other programs. Do not use the system file manager to open the workspace folder during operation; do not use a third-party real-time synchronization disk and check whether the workspace folder has write permissions",
+    "85": "The file is being used by other programs %s",
     "86": "Please configure [Settings - About - Access authorization code]",
     "87": "Cannot move to this location",
     "88": "Finished parsing [%d] data files, remaining to be processed [%d]",

@@ -1,6 +1,6 @@
-import {focusByWbr, getEditorRange} from "../protyle/util/selection";
-import {hasClosestBlock} from "../protyle/util/hasClosest";
-import {getTopAloneElement} from "../protyle/wysiwyg/getBlock";
+import {focusBlock, focusByWbr, getEditorRange} from "../protyle/util/selection";
+import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
+import {getNextBlock, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
 import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
 import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
@@ -59,6 +59,18 @@ export const genSBElement = (layout: string, id?: string, attrHTML?: string) => 
     sbElement.innerHTML = attrHTML || `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
     return sbElement;
 };
+
+export const jumpToParentNext = (protyle:IProtyle,nodeElement: Element) => {
+    const topElement = getTopAloneElement(nodeElement);
+    if (topElement) {
+        const topParentElement = hasClosestByClassName(topElement, "list") || hasClosestByClassName(topElement, "bq") || hasClosestByClassName(topElement, "sb") || topElement
+        const nextElement = getNextBlock(topParentElement)
+        if (nextElement) {
+            focusBlock(nextElement)
+            scrollCenter(protyle, nextElement);
+        }
+    }
+}
 
 export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id?: string) => {
     const range = getEditorRange(protyle.wysiwyg.element);

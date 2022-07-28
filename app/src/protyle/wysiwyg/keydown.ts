@@ -32,7 +32,7 @@ import {phTransaction, transaction, turnsIntoTransaction, updateTransaction} fro
 import {fontEvent} from "../toolbar/Font";
 import {listIndent, listOutdent, updateListOrder} from "./list";
 import {newFileBySelect, newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
-import {insertEmptyBlock} from "../../block/util";
+import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {isLocalPath} from "../../util/pathName";
 /// #if !BROWSER
 import {clipboard} from "electron";
@@ -1185,6 +1185,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.insertAfter.custom, event)) {
             insertEmptyBlock(protyle, "afterend");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.jumpToParentNext.custom, event)) {
+            jumpToParentNext(protyle, nodeElement)
             event.preventDefault();
             event.stopPropagation();
             return true;

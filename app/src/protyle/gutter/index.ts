@@ -16,7 +16,7 @@ import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost} from "../../util/fetch";
-import {cancelSB, insertEmptyBlock} from "../../block/util";
+import {cancelSB, insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {scrollCenter} from "../../util/highlightById";
 import {isMobile} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
@@ -1092,6 +1092,14 @@ export class Gutter {
                     nodeElement.classList.remove("protyle-wysiwyg--select");
                     countBlockWord([]);
                     insertEmptyBlock(protyle, "afterend", id);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.jumpToParentNext,
+                accelerator: window.siyuan.config.keymap.editor.general.jumpToParentNext.custom,
+                click() {
+                    nodeElement.classList.remove("protyle-wysiwyg--select");
+                    jumpToParentNext(protyle, nodeElement)
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

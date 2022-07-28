@@ -334,8 +334,8 @@ github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:
 github.com/imdario/mergo v0.3.11/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=
 github.com/imdario/mergo v0.3.13 h1:lFzP57bqS/wsqKssCGmtLAb8A0wKjLGrve2q3PPVcBk=
 github.com/imdario/mergo v0.3.13/go.mod h1:4lJ1jqUDcsbIECGy0RUJAXNIhg+6ocWgb1ALK2O4oXg=
-github.com/imroc/req/v3 v3.14.0 h1:N1NdLBz61Ib0epIHSpqFS1g58gTjAmRGKfTdFe/8OVc=
-github.com/imroc/req/v3 v3.14.0/go.mod h1:Y52Wz8vsqFEFTbXqmDyCFz6brGwoenIVBxTacIaECZs=
+github.com/imroc/req/v3 v3.14.1 h1:3F3KNgcef5WXTdFXDyNHEBQiacvzSJgHjMGNzRD5nEw=
+github.com/imroc/req/v3 v3.14.1/go.mod h1:Y52Wz8vsqFEFTbXqmDyCFz6brGwoenIVBxTacIaECZs=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/jellevandenhooff/dkim v0.0.0-20150330215556-f50fe3d243e1/go.mod h1:E0B/fFc00Y+Rasa88328GlI/XbtyysCtTHZS8h7IrBU=
 github.com/jinzhu/copier v0.3.5 h1:GlvfUwHk62RokgqVNvYsku0TATCF7bAHVwEXoBh3iJg=
@@ -516,8 +516,8 @@ github.com/shurcooL/users v0.0.0-20180125191416-49c67e49c537/go.mod h1:QJTqeLYED
 github.com/shurcooL/vfsgen v0.0.0-20200824052919-0d455de96546/go.mod h1:TrYk7fJVaAttu97ZZKrO9UbRa8izdowaMIZcxYMbVaw=
 github.com/shurcooL/webdavfs v0.0.0-20170829043945-18c3829fa133/go.mod h1:hKmq5kWdCj2z2KEozexVbfEZIWiTjhE0+UjmZgPqehw=
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
-github.com/siyuan-note/dejavu v0.0.0-20220728021035-2f554caac6c8 h1:3P9QjgAX1FpZIEuKMk/0RTNPdCLQr1PW2EyFTf39WiM=
-github.com/siyuan-note/dejavu v0.0.0-20220728021035-2f554caac6c8/go.mod h1:o+UdjzTM4t7gPFpbNUTPgCEVhEcFAHvonVZm6SeyJJs=
+github.com/siyuan-note/dejavu v0.0.0-20220728144128-6bd6b1e3a412 h1:WFLPxNxNvQMhpOq4MbXhX45Gc3wT2pe8g7FG2cEu5WU=
+github.com/siyuan-note/dejavu v0.0.0-20220728144128-6bd6b1e3a412/go.mod h1:o+UdjzTM4t7gPFpbNUTPgCEVhEcFAHvonVZm6SeyJJs=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f h1:JMobMNZ7AqaKKyEK+WeWFhix/2TDQXgPZDajU00IybU=
@@ -709,8 +709,8 @@ golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f/go.mod h1:9nx3DQGgdP8bBQD5qx
 golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e/go.mod h1:XRhObCWvk6IyKnWLug+ECip1KBveYUHfp+8e9klMJ9c=
 golang.org/x/net v0.0.0-20220630215102-69896b714898/go.mod h1:XRhObCWvk6IyKnWLug+ECip1KBveYUHfp+8e9klMJ9c=
-golang.org/x/net v0.0.0-20220728012108-993b7b1e3a27 h1:Khs7GS6mUxEA1e5DfKm9ojYX4BiI297wdliOwp/CPmw=
-golang.org/x/net v0.0.0-20220728012108-993b7b1e3a27/go.mod h1:YDH+HFinaLZZlnHAfSS6ZXJJ9M9t4Dl22yv3iI2vPwk=
+golang.org/x/net v0.0.0-20220728030405-41545e8bf201 h1:bvOltf3SADAfG05iRml8lAB3qjoEX5RCyN4K6G5v3N0=
+golang.org/x/net v0.0.0-20220728030405-41545e8bf201/go.mod h1:YDH+HFinaLZZlnHAfSS6ZXJJ9M9t4Dl22yv3iI2vPwk=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20181017192945-9dcd33a902f4/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=

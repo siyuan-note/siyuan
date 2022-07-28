@@ -5,7 +5,7 @@ import {fetchPost} from "../../util/fetch";
 import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
 
-const onRecentblocks = (data: IBlock[], matchedRootCount?:number, matchedBlockCount?:number) => {
+const onRecentBlocks = (data: IBlock[], matchedRootCount?:number, matchedBlockCount?:number) => {
     let resultHTML = "";
     if (matchedBlockCount) {
         resultHTML = '<div class="b3-list-item ft__smaller ft__on-surface">' + window.siyuan.languages.findInDoc.replace("${x}", matchedRootCount).replace("${y}", matchedBlockCount) + "</div>";
@@ -30,11 +30,11 @@ const toolbarSearchEvent = () => {
         const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
         if (inputElement.value === "") {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
-                onRecentblocks(response.data);
+                onRecentBlocks(response.data);
             });
         } else {
             fetchPost("/api/search/fullTextSearchBlock", {query: inputElement.value,}, (response) => {
-                onRecentblocks(response.data.blocks, response.data.matchedRootCount,response.data.matchedBlockCount);
+                onRecentBlocks(response.data.blocks, response.data.matchedRootCount,response.data.matchedBlockCount);
             });
         }
         const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEDATA) || "{}");

@@ -1,4 +1,5 @@
 {
+  "findInDoc": "${x} matches in ${y} files",
   "jumpToParentNext": "Jump to the next block in the previous level",
   "initRepoKeyTip": "If the key has been initialized on other devices, please use [Import Key] or generate the key with the same passphrase, otherwise the data cannot be synced to the cloud, so be sure to use the same key on all devices",
   "crossKeepLazyLoad": "Cross-page multi-selection needs to select [Keep Loaded Content] in the more menu",

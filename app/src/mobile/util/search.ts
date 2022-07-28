@@ -5,9 +5,12 @@ import {fetchPost} from "../../util/fetch";
 import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
 
-const onRecentblocks = (data: IWebSocketData) => {
+const onRecentblocks = (data: IBlock[], matchedRootCount?:number, matchedBlockCount?:number) => {
     let resultHTML = "";
-    data.data.forEach((item: IBlock) => {
+    if (matchedBlockCount) {
+        resultHTML = '<div class="b3-list-item ft__smaller ft__on-surface">' + window.siyuan.languages.findInDoc.replace("${x}", matchedRootCount).replace("${y}", matchedBlockCount) + "</div>";
+    }
+    data.forEach((item: IBlock) => {
         resultHTML += `<div class="b3-list-item b3-list-item--two" data-url="${item.box}" data-path="${item.path}" data-id="${item.id}">
 <div class="b3-list-item__first">
     <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
@@ -27,11 +30,11 @@ const toolbarSearchEvent = () => {
         const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
         if (inputElement.value === "") {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
-                onRecentblocks(response);
+                onRecentblocks(response.data);
             });
         } else {
             fetchPost("/api/search/fullTextSearchBlock", {query: inputElement.value,}, (response) => {
-                onRecentblocks(response);
+                onRecentblocks(response.data.blocks, response.data.matchedRootCount,response.data.matchedBlockCount);
             });
         }
         const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEDATA) || "{}");
@@ -44,7 +47,7 @@ const initToolbarSearch = () => {
     const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
     inputElement.focus();
     const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEDATA) || "{}");
-    inputElement.value = localData.k||"";
+    inputElement.value = localData.k || "";
     inputElement.addEventListener("compositionend", (event: InputEvent) => {
         if (event && event.isComposing) {
             return;

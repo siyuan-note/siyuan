@@ -1,4 +1,5 @@
 {
+  "findInDoc": "${x} coincidencias en ${y} archivos",
   "jumpToParentNext": "Saltar al siguiente bloque en el nivel anterior",
   "initRepoKeyTip": "Si la clave se ha inicializado en otros dispositivos, use [Importar la clave] o genere la clave con la misma contraseña; de lo contrario, los datos no se pueden sincronizar con la nube, así que asegúrese de usar la misma clave en todos los dispositivos.",
   "crossKeepLazyLoad": "La selección múltiple entre páginas debe seleccionar [Mantener contenido cargado] en el menú más",

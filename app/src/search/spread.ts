@@ -123,7 +123,10 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         <div id="replaceHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
     </div>
     <div class="fn__flex b3-form__space--small">
-        <span id="searchPathInput" class="ft__on-surface fn__flex-1 fn__flex-center ft__smaller fn__ellipsis" style="white-space: nowrap;" title="${localData.hPath}">${localData.hPath}</span>
+        <span id="searchResult" style="white-space: nowrap;"></span>
+        <span class="fn__space"></span>
+        <span class="fn__flex-1"></span>
+        <span id="searchPathInput" class="ft__on-surface fn__flex-center ft__smaller fn__ellipsis" style="white-space: nowrap;" title="${localData.hPath}">${localData.hPath}</span>
         <span class="fn__space"></span>
         <button id="searchPathCheck" class="b3-button b3-button--small${notebookId ? "" : " b3-button--cancel"}">${window.siyuan.languages.specifyPath}</button>
         <span class="fn__space"></span>
@@ -367,6 +370,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
                 fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                     onSearch(response.data, dialog);
                     loadingElement.classList.add("fn__none");
+                    dialog.element.querySelector("#searchResult").innerHTML = "";
                 });
             } else {
                 fetchPost("/api/search/fullTextSearchBlock", {
@@ -387,7 +391,8 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
                     },
                     path: !searchPathElement.classList.contains("b3-button--cancel") ? localData.idPath : ""
                 }, (response) => {
-                    onSearch(response.data, dialog);
+                    onSearch(response.data.blocks, dialog);
+                    dialog.element.querySelector("#searchResult").innerHTML = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
                     loadingElement.classList.add("fn__none");
                 });
             }
@@ -637,7 +642,7 @@ const getArticle = (options: {
     k: string,
     dialog: Dialog
 }) => {
-    fetchPost("/api/block/checkBlockFold", {id:options.id}, (foldResponse) => {
+    fetchPost("/api/block/checkBlockFold", {id: options.id}, (foldResponse) => {
         if (!protyle) {
             protyle = new Protyle(options.dialog.element.querySelector("#searchPreview") as HTMLElement, {
                 blockId: options.id,

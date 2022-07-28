@@ -188,13 +188,13 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 	return
 }
 
-func FullTextSearchBlock(query, box, path string, types map[string]bool, querySyntax bool) (ret []*Block) {
+func FullTextSearchBlock(query, box, path string, types map[string]bool, querySyntax bool) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = strings.TrimSpace(query)
 	if queryStrLower := strings.ToLower(query); strings.Contains(queryStrLower, "select ") && strings.Contains(queryStrLower, " * ") && strings.Contains(queryStrLower, " from ") {
-		ret = searchBySQL(query, 36)
+		ret, matchedBlockCount, matchedRootCount = searchBySQL(query, 36)
 	} else {
 		filter := searchFilter(types)
-		ret = fullTextSearch(query, box, path, filter, 36, querySyntax)
+		ret, matchedBlockCount, matchedRootCount = fullTextSearch(query, box, path, filter, 36, querySyntax)
 	}
 	return
 }
@@ -232,13 +232,24 @@ func searchFilter(types map[string]bool) string {
 	return s.TypeFilter()
 }
 
-func searchBySQL(stmt string, beforeLen int) (ret []*Block) {
+func searchBySQL(stmt string, beforeLen int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	stmt = gulu.Str.RemoveInvisible(stmt)
 	blocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
+		return
 	}
+
+	stmt = strings.ToLower(stmt)
+	stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` ")
+	result, _ := sql.Query(stmt)
+	if 1 > len(ret) {
+		return
+	}
+
+	matchedBlockCount = int(result[0]["matches"].(int64))
+	matchedRootCount = int(result[0]["docs"].(int64))
 	return
 }
 
@@ -246,7 +257,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
 	keyword = gulu.Str.RemoveInvisible(keyword)
 
 	if util.IsIDPattern(keyword) {
-		ret = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 36)
+		ret, _, _ = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 36)
 		return
 	}
 
@@ -290,10 +301,38 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
 	return
 }
 
-func fullTextSearch(query, box, path, filter string, beforeLen int, querySyntax bool) (ret []*Block) {
+func fullTextSearchCount(query, box, path, filter string) (matchedBlockCount, matchedRootCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	if util.IsIDPattern(query) {
-		ret = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen)
+		ret, _ := sql.Query("SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE `id` = '" + query + "'")
+		if 1 > len(ret) {
+			return
+		}
+		matchedBlockCount = int(ret[0]["matches"].(int64))
+		matchedRootCount = int(ret[0]["docs"].(int64))
+		return
+	}
+
+	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks_fts` WHERE `blocks_fts` MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + filter
+	if "" != box {
+		stmt += " AND box = '" + box + "'"
+	}
+	if "" != path {
+		stmt += " AND path LIKE '" + path + "%'"
+	}
+	result, _ := sql.Query(stmt)
+	if 1 > len(result) {
+		return
+	}
+	matchedBlockCount = int(result[0]["matches"].(int64))
+	matchedRootCount = int(result[0]["docs"].(int64))
+	return
+}
+
+func fullTextSearch(query, box, path, filter string, beforeLen int, querySyntax bool) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	query = gulu.Str.RemoveInvisible(query)
+	if util.IsIDPattern(query) {
+		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen)
 		return
 	}
 
@@ -326,6 +365,8 @@ func fullTextSearch(query, box, path, filter string, beforeLen int, querySyntax 
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
+
+	matchedBlockCount, matchedRootCount = fullTextSearchCount(query, box, path, filter)
 	return
 }
 

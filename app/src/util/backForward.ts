@@ -53,7 +53,21 @@ const focusStack = async (stack: IBackStack) => {
                     tab.addModel(editor);
                 }
             });
-            wnd.addTab(tab);
+            if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
+                let unUpdateTab: Tab;
+                // 不能 reverse, 找到也不能提前退出循环，否则 https://github.com/siyuan-note/siyuan/issues/3271
+                wnd.children.forEach((item) => {
+                    if (item.headElement && item.headElement.classList.contains("item--unupdate") && !item.headElement.classList.contains("item--pin")) {
+                        unUpdateTab = item;
+                    }
+                });
+                wnd.addTab(tab);
+                if (unUpdateTab) {
+                    wnd.removeTab(unUpdateTab.id);
+                }
+            } else {
+                wnd.addTab(tab);
+            }
             wnd.showHeading();
             // 页签关闭
             setTimeout(() => {

@@ -187,6 +187,9 @@ const focusStack = async (stack: IBackStack) => {
 };
 
 export const goBack = async () => {
+    if (document.querySelector("#barBack").classList.contains("toolbar__item--disabled")) {
+        return;
+    }
     if (window.siyuan.backStack.length === 0) {
         if (forwardStack.length > 0) {
             await focusStack(forwardStack[forwardStack.length - 1]);
@@ -216,6 +219,9 @@ export const goBack = async () => {
 };
 
 export const goForward = async () => {
+    if (document.querySelector("#barForward").classList.contains("toolbar__item--disabled")) {
+        return;
+    }
     if (forwardStack.length === 0) {
         if (window.siyuan.backStack.length > 0) {
             await focusStack(window.siyuan.backStack[window.siyuan.backStack.length - 1]);

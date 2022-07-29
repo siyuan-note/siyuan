@@ -808,7 +808,29 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
 ### Render a template
 
-/api/template/render
+* `/api/template/render`
+* Parameters
+
+  ```json
+  {
+    "id": "20220724223548-j6g0o87",
+    "path": "F:\\SiYuan\\data\\templates\\foo.md"
+  }
+  ```
+  * `id`: The ID of the document where the rendering is called
+  * `path`: Template file absolute path
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "content": "<div data-node-id=\"20220729234848-dlgsah7\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20220729234840\"><div contenteditable=\"true\" spellcheck=\"false\">foo</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
+      "path": "F:\\SiYuan\\data\\templates\\foo.md"
+    }
+  }
+  ```
 
 ## File
 

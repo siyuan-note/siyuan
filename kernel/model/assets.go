@@ -644,6 +644,27 @@ func UnusedAssets() (ret []string) {
 	return
 }
 
+func emojisInTree(tree *parse.Tree) (ret []string) {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		if ast.NodeEmojiImg == n.Type {
+			tokens := n.Tokens
+			idx := bytes.Index(tokens, []byte("src=\""))
+			if -1 == idx {
+				return ast.WalkContinue
+			}
+			src := tokens[idx+len("src=\""):]
+			src = src[:bytes.Index(src, []byte("\""))]
+			ret = append(ret, string(src))
+		}
+		return ast.WalkContinue
+	})
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
 func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 	ret = []string{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

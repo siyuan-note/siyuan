@@ -91,7 +91,7 @@ const focusStack = async (stack: IBackStack) => {
                             return true;
                         }
                     });
-                    focusByOffset(blockElement, stack.position.start, stack.position.end);
+                    focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
                     scrollCenter(protyle, blockElement);
                 }
             }, 500);
@@ -125,7 +125,7 @@ const focusStack = async (stack: IBackStack) => {
             return true;
         }
         if (blockElement && !stack.protyle.block.showAll) {
-            focusByOffset(blockElement, stack.position.start, stack.position.end);
+            focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
             scrollCenter(stack.protyle, blockElement, true);
             return true;
         }
@@ -142,7 +142,7 @@ const focusStack = async (stack: IBackStack) => {
                     return true;
                 }
             });
-            focusByOffset(blockElement, stack.position.start, stack.position.end);
+            focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
             setTimeout(() => {
                 // 图片、视频等加载完成后再定位
                 scrollCenter(stack.protyle, blockElement, true);
@@ -177,7 +177,7 @@ const focusStack = async (stack: IBackStack) => {
                     return true;
                 }
             });
-            focusByOffset(blockElement, stack.position.start, stack.position.end);
+            focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
             setTimeout(() => {
                 scrollCenter(stack.protyle, blockElement);
             }, Constants.TIMEOUT_INPUT);

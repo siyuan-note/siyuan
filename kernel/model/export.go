@@ -249,6 +249,14 @@ func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
 		}
 	}
 
+	// 复制自定义表情图片
+	from := filepath.Join(util.DataDir, "emojis")
+	to := filepath.Join(savePath, "emojis")
+	if err := gulu.File.Copy(from, to); nil != err {
+		logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, savePath, err)
+		return
+	}
+
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	md := treenode.FormatNode(tree.Root, luteEngine)
@@ -330,6 +338,14 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 				logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
 				return
 			}
+		}
+
+		// 复制自定义表情图片
+		from := filepath.Join(util.DataDir, "emojis")
+		to := filepath.Join(savePath, "emojis")
+		if err := gulu.File.Copy(from, to); nil != err {
+			logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, savePath, err)
+			return
 		}
 	} else { // 导出 PDF 需要将资源文件路径改为 HTTP 伺服
 		luteEngine.RenderOptions.LinkBase = "http://127.0.0.1:" + util.ServerPort + "/"

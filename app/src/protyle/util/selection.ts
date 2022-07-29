@@ -95,7 +95,7 @@ export const getEditorRange = (element: Element) => {
     let range: Range;
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
-        if (element.isEqualNode(range.startContainer) || element.contains(range.startContainer)) {
+        if (element.isSameNode(range.startContainer) || element.contains(range.startContainer)) {
             return range;
         }
     }

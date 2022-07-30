@@ -225,8 +225,13 @@ export class WYSIWYG {
                 }
             } else {
                 const tempElement = document.createElement("div");
-                if (range.toString() !== "" && range.startContainer.isSameNode(range.endContainer) && range.startContainer.nodeType === 3
-                    && range.endOffset === range.startContainer.textContent.length && range.startOffset === 0) {
+                // https://github.com/siyuan-note/siyuan/issues/5540
+                const selectTypes = protyle.toolbar.getCurrentType(range)
+                if ((selectTypes.length === 1 || range.startContainer.parentElement.parentElement.getAttribute("data-type") === "NodeHeading") &&
+                    (
+                        (range.startContainer.nodeType === 3 && range.startContainer.parentElement.textContent === range.toString()) ||
+                        (range.startContainer.nodeType !== 3 && range.startContainer.textContent === range.toString())
+                    )) {
                     if (range.startContainer.parentElement.parentElement.getAttribute("data-type") === "NodeHeading") {
                         // 复制标题 https://github.com/siyuan-note/insider/issues/297
                         tempElement.append(range.startContainer.parentElement.parentElement.cloneNode(true));

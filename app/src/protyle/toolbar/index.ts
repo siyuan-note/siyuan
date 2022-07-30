@@ -199,7 +199,7 @@ export class Toolbar {
             } else if (startType === "block-ref" || endType === "block-ref") {
                 types.push("blockRef");
             } else if (startType === "file-annotation-ref" || endType === "file-annotation-ref") {
-                types.push("blockRef");
+                types.push("fileAnnotationRef");
             } else if (startType === "inline-math") {
                 types.push("inline-math");
             }

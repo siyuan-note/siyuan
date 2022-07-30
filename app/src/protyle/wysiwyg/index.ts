@@ -452,9 +452,9 @@ export class WYSIWYG {
                 const rect = target.getBoundingClientRect();
                 setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
                 // 阻止 popover
-                target.removeAttribute("data-type");
+                target.setAttribute("prevent-popover", "true");
                 setTimeout(() => {
-                    target.setAttribute("data-type", "block-ref");
+                    target.removeAttribute("prevent-popover");
                 }, 620);
                 return false;
             }

@@ -106,7 +106,8 @@ export const initBlockPopover = () => {
             if (!popoverTargetElement && aElement && aElement.getAttribute("data-href")?.startsWith("siyuan://blocks") && aElement.getAttribute("prevent-popover") !== "true") {
                 popoverTargetElement = aElement;
             }
-            if (!popoverTargetElement || window.siyuan.altIsPressed || window.siyuan.shiftIsPressed || window.siyuan.ctrlIsPressed) {
+            if (!popoverTargetElement || window.siyuan.altIsPressed || window.siyuan.shiftIsPressed || window.siyuan.ctrlIsPressed ||
+                (popoverTargetElement && popoverTargetElement.getAttribute("prevent-popover") === "true")) {
                 return;
             }
             // https://github.com/siyuan-note/siyuan/issues/4314

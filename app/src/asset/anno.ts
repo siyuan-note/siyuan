@@ -267,9 +267,9 @@ let rectElement: HTMLElement;
 const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) => {
     if (target) {
         // 阻止 popover
-        target.classList.remove("popover__block");
+        target.setAttribute("prevent-popover", "true");
         setTimeout(() => {
-            target.classList.add("popover__block");
+            target.removeAttribute("prevent-popover");
         }, 620);
     }
 

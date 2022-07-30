@@ -1,7 +1,42 @@
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 /// #endif
-import {setPadding} from "../ui/initUI";
+import {addLoading, setPadding} from "../ui/initUI";
+import {fetchPost} from "../../util/fetch";
+import {Constants} from "../../constants";
+import {onGet} from "../util/onGet";
+
+export const netImg2LocalAssets = (protyle: IProtyle) => {
+    if (protyle.element.querySelector(".fn__loading")) {
+        return;
+    }
+    addLoading(protyle);
+    fetchPost("/api/format/netImg2LocalAssets", {
+        id: protyle.block.rootID
+    }, () => {
+        /// #if MOBILE
+        fetchPost("/api/filetree/getDoc", {
+            id: protyle.block.id,
+            mode: 0,
+            size: Constants.SIZE_GET,
+        }, getResponse => {
+            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+        });
+        /// #else
+        getAllModels().editor.forEach(item => {
+            if (item.editor.protyle.block.rootID === protyle.block.rootID) {
+                fetchPost("/api/filetree/getDoc", {
+                    id: item.editor.protyle.block.rootID,
+                    mode: 0,
+                    size: Constants.SIZE_GET,
+                }, getResponse => {
+                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
+                });
+            }
+        });
+        /// #endif
+    });
+}
 
 export const fullscreen = (element: Element, btnElement?: Element) => {
     const isFullscreen = element.className.includes("fullscreen");

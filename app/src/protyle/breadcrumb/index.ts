@@ -2,7 +2,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
-import {fullscreen} from "./action";
+import {fullscreen, netImg2LocalAssets} from "./action";
 import {exportMd} from "../../menus/commonMenuItem";
 import {setEditMode} from "../util/setEditMode";
 import {RecordMedia} from "../util/RecordMedia";
@@ -217,32 +217,9 @@ export class Breadcrumb {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.netImg2LocalAsset,
                 icon: "iconTransform",
-                click: () => {
-                    fetchPost("/api/format/netImg2LocalAssets", {
-                        id: protyle.block.rootID
-                    }, () => {
-                        /// #if MOBILE
-                        fetchPost("/api/filetree/getDoc", {
-                            id: protyle.block.id,
-                            mode: 0,
-                            size: Constants.SIZE_GET,
-                        }, getResponse => {
-                            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
-                        });
-                        /// #else
-                        getAllModels().editor.forEach(item => {
-                            if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                                fetchPost("/api/filetree/getDoc", {
-                                    id: item.editor.protyle.block.rootID,
-                                    mode: 0,
-                                    size: Constants.SIZE_GET,
-                                }, getResponse => {
-                                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
-                                });
-                            }
-                        });
-                        /// #endif
-                    });
+                accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
+                click () {
+                    netImg2LocalAssets(protyle)
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

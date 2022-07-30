@@ -2,7 +2,7 @@ import {matchHotKey} from "../util/hotKey";
 import {fetchPost} from "../../util/fetch";
 import {writeText} from "../util/compatibility";
 import {focusByOffset, getSelectionOffset} from "../util/selection";
-import {fullscreen} from "../breadcrumb/action";
+import {fullscreen, netImg2LocalAssets} from "../breadcrumb/action";
 import {addLoading, setPadding} from "../ui/initUI";
 import {Constants} from "../../constants";
 import {onGet} from "../util/onGet";
@@ -41,6 +41,12 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
         event.preventDefault();
         event.stopPropagation();
         return true;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
+        netImg2LocalAssets(protyle)
+        event.preventDefault();
+        event.stopPropagation();
+        return;
     }
     if (protyle.model) {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {

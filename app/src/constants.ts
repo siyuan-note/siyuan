@@ -116,6 +116,7 @@ export abstract class Constants {
         },
         editor: {
             general: {
+                netImg2LocalAsset: {default: "", custom: ""},
                 hLayout: {default: "", custom: ""},
                 vLayout: {default: "", custom: ""},
                 refBottom: {default: "⇧>", custom: "⇧>"},

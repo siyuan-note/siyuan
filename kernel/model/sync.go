@@ -334,8 +334,8 @@ func formatErrorMsg(err error) string {
 		msg = Conf.Language(23) + " " + err.Error()
 	} else if strings.Contains(msgLowerCase, "no such host") || strings.Contains(msgLowerCase, "connection failed") || strings.Contains(msgLowerCase, "hostname resolution") {
 		msg = Conf.Language(24)
-	} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") {
-		msg = Conf.Language(24) + " net/http timeout"
+	} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") {
+		msg = Conf.Language(24)
 	} else if strings.Contains(msgLowerCase, "cloud object not found") {
 		msg = Conf.Language(129)
 	}

@@ -1043,30 +1043,7 @@ export class WYSIWYG {
                                 }
                             }
                         }).element);
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            label: window.siyuan.languages.remove,
-                            icon: "iconTrashcan",
-                            click() {
-                                if (tableBlockElement) {
-                                    const selectCellElements: HTMLTableCellElement[] = [];
-                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                        if (!item.classList.contains("fn__none") &&
-                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
-                                            selectCellElements.push(item);
-                                        }
-                                    });
-                                    tableBlockElement.querySelector("table").classList.remove("select");
-                                    tableSelectElement.removeAttribute("style");
-                                    const oldHTML = tableBlockElement.outerHTML;
-                                    selectCellElements.forEach(item => {
-                                        item.innerHTML = "";
-                                    });
-                                    updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
-                                }
-                            }
-                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                         window.siyuan.menus.menu.append(new MenuItem({
                             icon: "iconAlignLeft",
                             accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
@@ -1133,8 +1110,33 @@ export class WYSIWYG {
                                 }
                             }
                         }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            label: window.siyuan.languages.remove,
+                            icon: "iconTrashcan",
+                            click() {
+                                if (tableBlockElement) {
+                                    const selectCellElements: HTMLTableCellElement[] = [];
+                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                        if (!item.classList.contains("fn__none") &&
+                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+                                            selectCellElements.push(item);
+                                        }
+                                    });
+                                    tableBlockElement.querySelector("table").classList.remove("select");
+                                    tableSelectElement.removeAttribute("style");
+                                    const oldHTML = tableBlockElement.outerHTML;
+                                    selectCellElements.forEach(item => {
+                                        item.innerHTML = "";
+                                    });
+                                    updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
+                                }
+                            }
+                        }).element);
                         window.siyuan.menus.menu.element.classList.remove("fn__none");
-                        setPosition(window.siyuan.menus.menu.element, mouseUpEvent.clientX - 16, mouseUpEvent.clientY - 46);
+                        setPosition(window.siyuan.menus.menu.element, mouseUpEvent.clientX - 8, mouseUpEvent.clientY - 16);
                     }
                 }
 

@@ -336,6 +336,8 @@ func formatErrorMsg(err error) string {
 		msg = Conf.Language(24)
 	} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") {
 		msg = Conf.Language(24) + " net/http timeout"
+	} else if strings.Contains(msgLowerCase, "cloud object not found") {
+		msg = Conf.Language(129)
 	}
 	msg = msg + " v" + util.Ver
 	return msg

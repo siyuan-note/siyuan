@@ -888,7 +888,7 @@
     "126": "书签不能为空",
     "127": "订阅距过期还剩 [%d] 天，过期后云端数据会被彻底删除。续订请访问<a target='_blank' href='https://ld246.com/subscribe/siyuan'>这里</a>，如果不需要续订，请登出账号关闭该提醒",
     "128": "订阅已经过期，过期后云端数据会被彻底删除。续订请访问<a target='_blank' href='https://ld246.com/subscribe/siyuan'>这里</a>，如果不需要续订，请登出账号关闭该提醒",
-    "129": "TODO",
+    "129": "云端数据已经损坏，请参考<a href=\"https://ld246.com/article/1658499492287\" target=\"_blank\">这里</a>解决该问题",
     "130": "TODO",
     "131": "TODO",
     "132": "TODO",

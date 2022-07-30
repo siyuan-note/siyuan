@@ -782,7 +782,7 @@
     "21": "Veuillez entrer le captcha",
     "22": "Le captcha est incorrect",
     "23": "Le référentiel de données est endommagé en raison de modifications externes (comme l'utilisation d'un disque de synchronisation en temps réel tiers), veuillez réinitialiser le référentiel de données",
-    "24": "Le réseau est anormal, veuillez réessayer plus tard",
+    "24": "Le réseau a expiré, veuillez réessayer plus tard",
     "25": "Le nom de l'attribut ne supporte que les lettres et les chiffres anglais.",
     "26": "Veuillez d'abord initialiser la clé du référentiel de données dans [Paramètres - À propos - Clé du référentiel de données]",
     "27": "Téléchargement de [%v]",

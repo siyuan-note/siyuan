@@ -1,3 +1,27 @@
+## v2.1.4 / 2022-07-30
+
+### 改进功能
+
+* [新增 跳转到上一层级的下一个块](https://github.com/siyuan-note/siyuan/issues/5407)
+* [搜索结果加入命中统计](https://github.com/siyuan-note/siyuan/issues/5505)
+* [划选单元格后右键应取消划选](https://github.com/siyuan-note/siyuan/issues/5527)
+* [选中单元格菜单顺序调整](https://github.com/siyuan-note/siyuan/issues/5539)
+
+### 文档相关
+
+* [API `渲染模板` 文档描述](https://github.com/siyuan-note/siyuan/issues/5538)
+
+### 修复缺陷
+
+* [ECharts、PlantUML 和 Mermaid 等图表块报错](https://github.com/siyuan-note/siyuan/issues/5522)
+* [无法原义粘贴含有 `~foo~` 的文本](https://github.com/siyuan-note/siyuan/issues/5523)
+* [Windows  端后退按钮状态不可点击但可以使用快捷键](https://github.com/siyuan-note/siyuan/issues/5525)
+* [光标无法定位到表格内的行内公式后](https://github.com/siyuan-note/siyuan/issues/5526)
+* [上传标记快照报错 `key doesn't match with scope`](https://github.com/siyuan-note/siyuan/issues/5532)
+* [开启 `在当前页签打开` 后 Ctrl+[ 会在新页签打开](https://github.com/siyuan-note/siyuan/issues/5533)
+* [开启 `在当前页签打开` 后当有多个未修改页签时新页打开位置错误](https://github.com/siyuan-note/siyuan/issues/5534)
+* [导出 PDF/HTML 时丢失自定义表情](https://github.com/siyuan-note/siyuan/issues/5535)
+
 ## v2.1.3 / 2022-07-27
 
 ### 改进功能

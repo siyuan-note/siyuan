@@ -893,7 +893,7 @@
     "132": "TODO",
     "133": "TODO",
     "134": "In order to prevent the newly restored data from being overwritten by synchronization, the data synchronization function has been automatically suspended",
-    "135": "TODO",
+    "135": "Unable to decrypt data. Make sure to use the same key on multiple devices, then create a new cloud directory to sync",
     "136": "Initializing data repository key...",
     "137": "Failed to initialize data repository key: %s",
     "138": "Data repository key is set",
@@ -929,7 +929,6 @@
     "168": "Uploading data repo snapshot %s",
     "169": "Uploading data repo file %v",
     "170": "Uploading data repo chunk %v",
-    "171": "Uploading data repo reference %s",
-    "172": "Data repo key does not match, data cannot be decrypted"
+    "171": "Uploading data repo reference %s"
   }
 }

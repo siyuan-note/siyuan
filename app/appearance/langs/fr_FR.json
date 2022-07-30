@@ -893,7 +893,7 @@
     "132": "TODO",
     "133": "TODO",
     "134": "Afin d'éviter que les données nouvellement restaurées ne soient écrasées par la synchronisation, la fonction de synchronisation des données a été automatiquement suspendue",
-    "135": "TODO",
+    "135": "Impossible de déchiffrer les données. Assurez-vous d'utiliser la même clé sur plusieurs appareils, puis créez un nouveau répertoire cloud à synchroniser",
     "136": "Initialisation de la clé du référentiel de données...",
     "137": "Échec de l'initialisation de la clé du référentiel de données: %s",
     "138": "La clé du référentiel de données est définie",
@@ -929,7 +929,6 @@
     "168": "Téléchargement de l'instantané du référentiel de données %s",
     "169": "Téléchargement du fichier de référentiel de données %v",
     "170": "Téléchargement du bloc de dépôt de données %v",
-    "171": "Téléchargement de la référence de référentiel de données %s",
-    "172": "La clé du référentiel de données ne correspond pas, les données ne peuvent pas être déchiffrées"
+    "171": "Téléchargement de la référence de référentiel de données %s"
   }
 }

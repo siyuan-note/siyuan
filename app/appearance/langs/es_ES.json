@@ -893,7 +893,7 @@
     "132": "TODO",
     "133": "TODO",
     "134": "Para evitar que los datos recién restaurados sean sobrescritos por la sincronización, se ha suspendido automáticamente la función de sincronización de datos",
-    "135": "TODO",
+    "135": "No se pueden descifrar los datos. Asegúrese de usar la misma clave en varios dispositivos, luego cree un nuevo directorio en la nube para sincronizar",
     "136": "Inicializando la clave del repositorio de datos...",
     "137": "Fallo en la inicialización de la clave del repositorio de datos: %s",
     "138": "La clave del repositorio de datos está configurada",
@@ -929,7 +929,6 @@
     "168": "Cargando instantánea de repositorio de datos %s",
     "169": "Cargando archivo de repositorio de datos %v",
     "170": "Cargando fragmento de repositorio de datos %v",
-    "171": "Cargando referencia de repositorio de datos %s",
-    "172": "La clave del repositorio de datos no coincide, los datos no se pueden descifrar"
+    "171": "Cargando referencia de repositorio de datos %s"
   }
 }

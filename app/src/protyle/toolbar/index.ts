@@ -862,6 +862,11 @@ export class Toolbar {
         });
         textElement.addEventListener("keydown", (event: KeyboardEvent) => {
             event.stopPropagation();
+            // 阻止 ctrl+m 缩小窗口 https://github.com/siyuan-note/siyuan/issues/5541
+            if (matchHotKey(window.siyuan.config.keymap.editor.insert["inline-math"].custom, event)) {
+                event.preventDefault();
+                return;
+            }
             if (event.isComposing) {
                 return;
             }
@@ -877,7 +882,6 @@ export class Toolbar {
                 return;
             }
             /// #endif
-
             if (event.key === "Escape" || matchHotKey("⌘↩", event)) {
                 this.subElement.classList.add("fn__none");
                 this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");

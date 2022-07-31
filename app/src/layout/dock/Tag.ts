@@ -7,7 +7,6 @@ import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
 import {MenuItem} from "../../menus/Menu";
 import {Dialog} from "../../dialog";
-import {isMobile} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
 

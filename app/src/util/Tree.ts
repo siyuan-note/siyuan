@@ -190,7 +190,7 @@ data-def-path="${item.defPath}">
                 }
                 if (target.classList.contains("b3-list-item__action") && this.click) {
                     // 移动端书签父节点删除按钮
-                    const liElement = hasClosestByMatchTag(target, "LI")
+                    const liElement = hasClosestByMatchTag(target, "LI");
                     if (liElement) {
                         this.click(liElement, event);
                     }

@@ -6,7 +6,6 @@ import {openMobileFileById} from "../editor";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
 import {Dialog} from "../../dialog";
-import {isMobile} from "../../util/functions";
 
 export class MobileBookmarks {
     public element: HTMLElement;
@@ -111,7 +110,7 @@ export class MobileBookmarks {
     }
 
     public update() {
-        this.element.lastElementChild.classList.remove("fn__none")
+        this.element.lastElementChild.classList.remove("fn__none");
         fetchPost("/api/bookmark/getBookmark", {}, response => {
             if (this.openNodes) {
                 this.openNodes = this.tree.getExpandIds();
@@ -122,7 +121,7 @@ export class MobileBookmarks {
             } else {
                 this.openNodes = this.tree.getExpandIds();
             }
-            this.element.lastElementChild.classList.add("fn__none")
+            this.element.lastElementChild.classList.add("fn__none");
         });
     }
 }

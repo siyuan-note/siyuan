@@ -23,8 +23,8 @@ export const initFramework = () => {
     const sidebarElement = document.getElementById("sidebar");
     let outline: MobileOutline;
     let backlink: MobileBacklinks;
-    let bookmark: MobileBookmarks
-    let tag: MobileTags
+    let bookmark: MobileBookmarks;
+    let tag: MobileTags;
     sidebarElement.querySelector(".toolbar--border").addEventListener(getEventName(), (event: Event & { target: Element }) => {
         const svgElement = hasTopClosestByTag(event.target, "svg");
         if (!svgElement || svgElement.classList.contains("toolbar__icon--active")) {

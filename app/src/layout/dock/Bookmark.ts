@@ -8,7 +8,6 @@ import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {Dialog} from "../../dialog";
-import {isMobile} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
 

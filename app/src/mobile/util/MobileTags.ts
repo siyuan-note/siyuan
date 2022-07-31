@@ -154,7 +154,7 @@ export class MobileTags {
     }
 
     public update() {
-        this.element.lastElementChild.classList.remove("fn__none")
+        this.element.lastElementChild.classList.remove("fn__none");
         fetchPost("/api/tag/getTag", {
             sort: window.siyuan.config.tag.sort
         }, response => {
@@ -167,7 +167,7 @@ export class MobileTags {
             } else {
                 this.openNodes = this.tree.getExpandIds();
             }
-            this.element.lastElementChild.classList.add("fn__none")
+            this.element.lastElementChild.classList.add("fn__none");
         });
     }
 }

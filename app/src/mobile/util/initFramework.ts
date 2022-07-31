@@ -56,7 +56,7 @@ export const initFramework = () => {
                     if (!backlink) {
                         tag = new MobileTags();
                     } else {
-                        backlink.update();
+                        tag.update();
                     }
                 }
                 svgElement.classList.add("toolbar__icon--active");

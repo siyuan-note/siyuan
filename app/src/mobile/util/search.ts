@@ -24,7 +24,7 @@ const onRecentBlocks = (data: IBlock[], matchedRootCount?:number, matchedBlockCo
 
 
 let toolbarSearchTimeout = 0;
-const toolbarSearchEvent = () => {
+export const toolbarSearchEvent = () => {
     clearTimeout(toolbarSearchTimeout);
     toolbarSearchTimeout = window.setTimeout(() => {
         const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;

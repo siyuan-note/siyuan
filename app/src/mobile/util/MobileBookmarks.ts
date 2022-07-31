@@ -50,9 +50,7 @@ export class MobileBookmarks {
                                     }
                                 });
                             } else {
-                                fetchPost("/api/bookmark/removeBookmark", {bookmark}, () => {
-                                    this.update();
-                                });
+                                fetchPost("/api/bookmark/removeBookmark", {bookmark});
                             }
                         });
                     } else {
@@ -63,7 +61,7 @@ export class MobileBookmarks {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-                            width: isMobile() ? "80vw" : "520px",
+                            width: "80vw",
                         });
                         const btnsElement = dialog.element.querySelectorAll(".b3-button");
                         btnsElement[0].addEventListener("click", () => {

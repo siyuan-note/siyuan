@@ -488,6 +488,7 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 		return
 	}
 
+	start := time.Now()
 	indexBeforeSync, err := indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		syncDownloadErrCount++
@@ -495,7 +496,6 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 		return
 	}
 
-	start := time.Now()
 	cloudInfo, err := buildCloudInfo()
 	if nil != err {
 		return

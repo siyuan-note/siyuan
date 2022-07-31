@@ -66,6 +66,10 @@ class App {
                 document.addEventListener("touchstart", handleTouchStart, false);
                 document.addEventListener("touchmove", handleTouchMove, false);
                 document.addEventListener("touchend", handleTouchEnd, false);
+            } else {
+                document.addEventListener("touchend", () => {
+                    window.siyuan.mobileEditor?.protyle.breadcrumb.show();
+                }, false);
             }
         });
         setNoteBook();

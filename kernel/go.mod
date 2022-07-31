@@ -7,7 +7,7 @@ require (
 	github.com/88250/css v0.1.2
 	github.com/88250/flock v0.8.2
 	github.com/88250/gulu v1.2.3-0.20220720144315-065ef35ec583
-	github.com/88250/lute v1.7.5-0.20220730155250-e88d7943c9fb
+	github.com/88250/lute v1.7.5-0.20220731154823-742119b1a7ea
 	github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1
 	github.com/88250/pdfcpu v0.3.13
 	github.com/88250/protyle v0.0.0-20220519012506-0a2c8dc24397

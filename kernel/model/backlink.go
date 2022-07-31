@@ -170,6 +170,7 @@ func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID
 
 	var links []*Block
 	refs := sql.QueryRefsByDefID(id, true)
+	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
 	// 为了减少查询，组装好 IDs 后一次查出
 	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
@@ -266,6 +267,22 @@ func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID
 	mentions := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen)
 	mentionsCount = len(mentions)
 	mentionPaths = toFlatTree(mentions, 0, "backlink")
+	return
+}
+
+func removeDuplicatedRefs(refs []*sql.Ref) (ret []*sql.Ref) {
+	for _, ref := range refs {
+		contain := false
+		for _, r := range ret {
+			if ref.DefBlockID == r.DefBlockID && ref.BlockID == r.BlockID {
+				contain = true
+				break
+			}
+		}
+		if !contain {
+			ret = append(ret, ref)
+		}
+	}
 	return
 }
 

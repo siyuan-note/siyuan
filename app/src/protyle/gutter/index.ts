@@ -1099,7 +1099,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.jumpToParentNext.custom,
                 click() {
                     nodeElement.classList.remove("protyle-wysiwyg--select");
-                    jumpToParentNext(protyle, nodeElement)
+                    jumpToParentNext(protyle, nodeElement);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

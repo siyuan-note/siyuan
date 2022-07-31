@@ -63,14 +63,14 @@ export const genSBElement = (layout: string, id?: string, attrHTML?: string) => 
 export const jumpToParentNext = (protyle:IProtyle,nodeElement: Element) => {
     const topElement = getTopAloneElement(nodeElement);
     if (topElement) {
-        const topParentElement = hasClosestByClassName(topElement, "list") || hasClosestByClassName(topElement, "bq") || hasClosestByClassName(topElement, "sb") || topElement
-        const nextElement = getNextBlock(topParentElement)
+        const topParentElement = hasClosestByClassName(topElement, "list") || hasClosestByClassName(topElement, "bq") || hasClosestByClassName(topElement, "sb") || topElement;
+        const nextElement = getNextBlock(topParentElement);
         if (nextElement) {
-            focusBlock(nextElement)
+            focusBlock(nextElement);
             scrollCenter(protyle, nextElement);
         }
     }
-}
+};
 
 export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id?: string) => {
     const range = getEditorRange(protyle.wysiwyg.element);

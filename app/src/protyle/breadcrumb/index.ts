@@ -219,7 +219,7 @@ export class Breadcrumb {
                 icon: "iconTransform",
                 accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
                 click () {
-                    netImg2LocalAssets(protyle)
+                    netImg2LocalAssets(protyle);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

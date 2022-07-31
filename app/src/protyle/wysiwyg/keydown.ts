@@ -1190,7 +1190,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.jumpToParentNext.custom, event)) {
-            jumpToParentNext(protyle, nodeElement)
+            jumpToParentNext(protyle, nodeElement);
             event.preventDefault();
             event.stopPropagation();
             return true;

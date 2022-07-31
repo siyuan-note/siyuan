@@ -381,7 +381,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         if (operation.previousID) {
             let beforeElement: Element;
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).find(item => {
-                const embedElement = hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")
+                const embedElement = hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed");
                 if (embedElement) {
                     // https://github.com/siyuan-note/siyuan/issues/5524
                     embedElement.removeAttribute("data-render");

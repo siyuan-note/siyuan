@@ -36,7 +36,7 @@ export const netImg2LocalAssets = (protyle: IProtyle) => {
         });
         /// #endif
     });
-}
+};
 
 export const fullscreen = (element: Element, btnElement?: Element) => {
     const isFullscreen = element.className.includes("fullscreen");

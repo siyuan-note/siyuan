@@ -43,7 +43,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
         return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
-        netImg2LocalAssets(protyle)
+        netImg2LocalAssets(protyle);
         event.preventDefault();
         event.stopPropagation();
         return;

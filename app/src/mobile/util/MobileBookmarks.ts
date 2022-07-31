@@ -2,9 +2,11 @@ import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {onGet} from "../../protyle/util/onGet";
 import {openMobileFileById} from "../editor";
-import {MenuItem} from "../../menus/Menu";
+import {confirmDialog} from "../../dialog/confirmDialog";
+import {escapeHtml} from "../../util/escape";
+import {Dialog} from "../../dialog";
+import {isMobile} from "../../util/functions";
 
 export class MobileBookmarks {
     public element: HTMLElement;
@@ -29,9 +31,66 @@ export class MobileBookmarks {
         this.tree = new Tree({
             element: this.element.querySelector(".bookmarkList") as HTMLElement,
             data: null,
-            click(element: HTMLElement) {
-                openMobileFileById(element.getAttribute("data-node-id"), true, [Constants.CB_GET_FOCUS]);
-            }
+            click: (element: HTMLElement, event: MouseEvent) => {
+                const id = element.getAttribute("data-node-id");
+                const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
+                if (actionElement) {
+                    const bookmark = (id ? element.parentElement.previousElementSibling : element).querySelector(".b3-list-item__text").textContent;
+                    if (actionElement.getAttribute("data-type") === "remove") {
+                        confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(bookmark)}</b>?`, () => {
+                            if (id) {
+                                fetchPost("/api/attr/setBlockAttrs", {id, attrs: {bookmark: ""}}, () => {
+                                    this.update();
+                                });
+                                document.querySelectorAll(`.protyle-wysiwyg [data-node-id="${id}"]`).forEach((item) => {
+                                    item.setAttribute("bookmark", "");
+                                    const bookmarkElement = item.querySelector(".protyle-attr--bookmark");
+                                    if (bookmarkElement) {
+                                        bookmarkElement.remove();
+                                    }
+                                });
+                            } else {
+                                fetchPost("/api/bookmark/removeBookmark", {bookmark}, () => {
+                                    this.update();
+                                });
+                            }
+                        });
+                    } else {
+                        const dialog = new Dialog({
+                            title: window.siyuan.languages.rename,
+                            content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block"></div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                            width: isMobile() ? "80vw" : "520px",
+                        });
+                        const btnsElement = dialog.element.querySelectorAll(".b3-button");
+                        btnsElement[0].addEventListener("click", () => {
+                            dialog.destroy();
+                        });
+                        const inputElement = dialog.element.querySelector("input");
+                        dialog.bindInput(inputElement, () => {
+                            (btnsElement[1] as HTMLButtonElement).click();
+                        });
+                        inputElement.value = bookmark;
+                        inputElement.focus();
+                        inputElement.select();
+                        btnsElement[1].addEventListener("click", () => {
+                            fetchPost("/api/bookmark/renameBookmark", {
+                                oldBookmark: bookmark,
+                                newBookmark: inputElement.value
+                            }, () => {
+                                dialog.destroy();
+                            });
+                        });
+                    }
+                } else {
+                    openMobileFileById(id, true, [Constants.CB_GET_FOCUS]);
+                }
+            },
+            blockExtHTML: '<span class="b3-list-item__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></span>',
+            topExtHTML: '<span class="b3-list-item__action" data-type="edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="b3-list-item__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></span>'
         });
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;

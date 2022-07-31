@@ -1,5 +1,5 @@
 import {getIconByType} from "../editor/getIcon";
-import {hasClosestByTag} from "../protyle/util/hasClosest";
+import {hasClosestByMatchTag, hasClosestByTag} from "../protyle/util/hasClosest";
 import {isMobile} from "./functions";
 import {mathRender} from "../protyle/markdown/mathRender";
 import {unicode2Emoji} from "../emoji";
@@ -9,6 +9,7 @@ export class Tree {
     public element: HTMLElement;
     private data: IBlockTree[];
     private blockExtHTML: string;
+    private topExtHTML: string;
 
     private click: (element: HTMLElement, event: MouseEvent) => void;
 
@@ -21,6 +22,7 @@ export class Tree {
         element: HTMLElement,
         data: IBlockTree[],
         blockExtHTML?: string,
+        topExtHTML?: string,
         click?(element: HTMLElement, event: MouseEvent): void
         ctrlClick?(element: HTMLElement): void
         altClick?(element: HTMLElement): void
@@ -34,6 +36,7 @@ export class Tree {
         this.rightClick = options.rightClick;
         this.element = options.element;
         this.blockExtHTML = options.blockExtHTML;
+        this.topExtHTML = options.topExtHTML;
         this.updateData(options.data);
         this.bindEvent();
     }
@@ -78,6 +81,7 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
     ${iconHTML}
     <span class="b3-list-item__text"${item.type === "outline" ? ' title="' + Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.name)) + '"' : ""}>${item.name}</span>
     ${countHTML}
+    ${this.topExtHTML || ""}
 </li>`;
             if (item.children && item.children.length > 0) {
                 html += this.genHTML(item.children) + "</ul>";
@@ -184,8 +188,16 @@ data-def-path="${item.defPath}">
                     event.preventDefault();
                     break;
                 }
-
-                if (target.tagName === "LI") {
+                if (target.classList.contains("b3-list-item__action") && this.click) {
+                    // 移动端书签父节点删除按钮
+                    const liElement = hasClosestByMatchTag(target, "LI")
+                    if (liElement) {
+                        this.click(liElement, event);
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.tagName === "LI") {
                     this.setCurrent(target);
                     if (target.getAttribute("data-node-id") || target.getAttribute("data-treetype") === "tag") {
                         if (this.ctrlClick && window.siyuan.ctrlIsPressed) {

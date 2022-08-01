@@ -52,21 +52,22 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                         firstChild = firstChild.firstChild;
                     }
                 }
-                let lastChild = editElement.lastChild;
+                let lastChild = editElement.lastChild as HTMLElement;
                 while (lastChild) {
                     if (lastChild.nodeType === 3) {
                         if (lastChild.textContent !== "") {
                             range.setEnd(lastChild, lastChild.textContent.length);
                             break;
                         }
-                        lastChild = lastChild.previousSibling;
+                        lastChild = lastChild.previousSibling as HTMLElement;
                     } else {
-                        if ((lastChild as HTMLElement).classList.contains("render-node") ||
-                            (lastChild as HTMLElement).classList.contains("img")) {
+                        if (lastChild.classList.contains("render-node") ||
+                            lastChild.classList.contains("img") ||
+                            lastChild.tagName === "BR") {
                             range.setEndAfter(lastChild);
                             break;
                         }
-                        lastChild = lastChild.lastChild;
+                        lastChild = lastChild.lastChild as HTMLElement;
                     }
                 }
                 protyle.toolbar.render(protyle, range);

@@ -110,11 +110,15 @@ func Boot() {
 	go cleanOld()
 }
 
+func setBootDetails(details string) {
+	bootDetails = "v" + Ver + " " + details
+}
+
 func SetBootDetails(details string) {
 	if 100 <= bootProgress {
 		return
 	}
-	bootDetails = details
+	setBootDetails(details)
 }
 
 func IncBootProgress(progress float64, details string) {
@@ -122,7 +126,7 @@ func IncBootProgress(progress float64, details string) {
 		return
 	}
 	bootProgress += progress
-	bootDetails = details
+	setBootDetails(details)
 }
 
 func IsBooted() bool {
@@ -138,7 +142,7 @@ func GetBootProgress() float64 {
 }
 
 func SetBooted() {
-	bootDetails = "Finishing boot..."
+	setBootDetails("Finishing boot...")
 	bootProgress = 100
 	logging.LogInfof("kernel booted")
 }

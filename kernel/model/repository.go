@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -488,6 +489,7 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 		return
 	}
 
+	start := time.Now()
 	indexBeforeSync, err := indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		syncDownloadErrCount++
@@ -495,7 +497,6 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 		return
 	}
 
-	start := time.Now()
 	cloudInfo, err := buildCloudInfo()
 	if nil != err {
 		return
@@ -637,7 +638,7 @@ func subscribeEvents() {
 
 	indexWalkDataCount := 0
 	eventbus.Subscribe(dejavu.EvtIndexWalkData, func(context map[string]interface{}, path string) {
-		msg := fmt.Sprintf(Conf.Language(158), path)
+		msg := fmt.Sprintf(Conf.Language(158), filepath.Base(path))
 		if 0 == indexWalkDataCount%512 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
@@ -665,7 +666,7 @@ func subscribeEvents() {
 	})
 	indexUpsertFileCount := 0
 	eventbus.Subscribe(dejavu.EvtIndexUpsertFile, func(context map[string]interface{}, path string) {
-		msg := fmt.Sprintf(Conf.Language(160), path)
+		msg := fmt.Sprintf(Conf.Language(160), filepath.Base(path))
 		if 0 == indexUpsertFileCount%128 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
@@ -680,7 +681,7 @@ func subscribeEvents() {
 	})
 	coWalkDataCount := 0
 	eventbus.Subscribe(dejavu.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
-		msg := fmt.Sprintf(Conf.Language(161), path)
+		msg := fmt.Sprintf(Conf.Language(161), filepath.Base(path))
 		if 0 == coWalkDataCount%512 {
 			util.SetBootDetails(msg)
 			contextPushMsg(context, msg)
@@ -696,7 +697,7 @@ func subscribeEvents() {
 	})
 	coUpsertFileCount := 0
 	eventbus.Subscribe(dejavu.EvtCheckoutUpsertFile, func(context map[string]interface{}, path string) {
-		msg := fmt.Sprintf(Conf.Language(162), path)
+		msg := fmt.Sprintf(Conf.Language(162), filepath.Base(path))
 		util.IncBootProgress(bootProgressPart, msg)
 		if 0 == coUpsertFileCount%128 {
 			contextPushMsg(context, msg)
@@ -711,7 +712,7 @@ func subscribeEvents() {
 	})
 	coRemoveFileCount := 0
 	eventbus.Subscribe(dejavu.EvtCheckoutRemoveFile, func(context map[string]interface{}, path string) {
-		msg := fmt.Sprintf(Conf.Language(163), path)
+		msg := fmt.Sprintf(Conf.Language(163), filepath.Base(path))
 		util.IncBootProgress(bootProgressPart, msg)
 		if 0 == coRemoveFileCount%512 {
 			contextPushMsg(context, msg)

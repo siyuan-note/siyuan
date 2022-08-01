@@ -35,6 +35,7 @@ import {lineNumberRender} from "../protyle/markdown/highlightRender";
 import * as dayjs from "dayjs";
 import {blockRender} from "../protyle/markdown/blockRender";
 import {renameAsset} from "../editor/rename";
+import {hasNextSibling} from "../protyle/wysiwyg/getBlock";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -535,6 +536,17 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             assetElement.style.display = "block";
+            let nextSibling = assetElement.nextSibling;
+            while (nextSibling) {
+                if (nextSibling.textContent === "") {
+                    nextSibling = nextSibling.nextSibling;
+                } else if (nextSibling.textContent === Constants.ZWSP) {
+                    nextSibling.textContent = "";
+                    break;
+                } else {
+                    break;
+                }
+            }
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
         }
     }).element);
@@ -545,6 +557,9 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             assetElement.style.display = "";
+            if (!hasNextSibling(assetElement)) {
+                assetElement.insertAdjacentText("afterend", Constants.ZWSP);
+            }
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
         }
     }).element);

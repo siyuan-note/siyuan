@@ -971,10 +971,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const oldHTML = nodeElement.outerHTML;
                 imgSelectElements.forEach((item: HTMLElement) => {
                     item.style.display = "";
+                    if (!hasNextSibling(item)) {
+                        item.insertAdjacentText("afterend", Constants.ZWSP);
+                    }
                 });
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
             } else {
-                let selectElements:HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+                let selectElements: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 if (selectElements.length === 0) {
                     selectElements = [nodeElement];
                 }
@@ -992,10 +995,21 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const oldHTML = nodeElement.outerHTML;
                 imgSelectElements.forEach((item: HTMLElement) => {
                     item.style.display = "block";
+                    let nextSibling = item.nextSibling;
+                    while (nextSibling) {
+                        if (nextSibling.textContent === "") {
+                            nextSibling = nextSibling.nextSibling;
+                        } else if (nextSibling.textContent === Constants.ZWSP) {
+                            nextSibling.textContent = "";
+                            break;
+                        } else {
+                            break;
+                        }
+                    }
                 });
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
             } else {
-                let selectElements:HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+                let selectElements: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 if (selectElements.length === 0) {
                     selectElements = [nodeElement];
                 }
@@ -1008,7 +1022,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.alignRight.custom, event)) {
-            let selectElements:HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            let selectElements: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
                 selectElements = [nodeElement];
             }

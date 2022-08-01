@@ -28,7 +28,13 @@ import {
 import {matchHotKey} from "../util/hotKey";
 import {enter} from "./enter";
 import {fixTable} from "../util/table";
-import {phTransaction, transaction, turnsIntoTransaction, updateTransaction} from "./transaction";
+import {
+    phTransaction,
+    transaction,
+    turnsIntoTransaction,
+    updateBatchTransaction,
+    updateTransaction
+} from "./transaction";
 import {fontEvent} from "../toolbar/Font";
 import {listIndent, listOutdent, updateListOrder} from "./list";
 import {newFileBySelect, newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
@@ -960,46 +966,55 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.alignLeft.custom, event)) {
-            let actionElement: HTMLElement = nodeElement;
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
-                actionElement = selectElements[0] as HTMLElement;
+            const imgSelectElements = nodeElement.querySelectorAll(".img--select");
+            if (imgSelectElements.length > 0) {
+                const oldHTML = nodeElement.outerHTML;
+                imgSelectElements.forEach((item: HTMLElement) => {
+                    item.style.display = "";
+                });
+                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+            } else {
+                let selectElements:HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+                if (selectElements.length === 0) {
+                    selectElements = [nodeElement];
+                }
+                updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
+                    e.style.textAlign = "";
+                });
             }
-            const oldHTML = actionElement.outerHTML;
-            actionElement.style.textAlign = "left";
-            actionElement.querySelectorAll(".img").forEach((item: HTMLElement) => {
-                item.style.display = "";
-            });
-            updateTransaction(protyle, actionElement.getAttribute("data-node-id"), actionElement.outerHTML, oldHTML);
             event.stopPropagation();
             event.preventDefault();
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.alignCenter.custom, event)) {
-            let actionElement: HTMLElement = nodeElement;
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
-                actionElement = selectElements[0] as HTMLElement;
+            const imgSelectElements = nodeElement.querySelectorAll(".img--select");
+            if (imgSelectElements.length > 0) {
+                const oldHTML = nodeElement.outerHTML;
+                imgSelectElements.forEach((item: HTMLElement) => {
+                    item.style.display = "block";
+                });
+                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+            } else {
+                let selectElements:HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+                if (selectElements.length === 0) {
+                    selectElements = [nodeElement];
+                }
+                updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
+                    e.style.textAlign = "center";
+                });
             }
-            const oldHTML = actionElement.outerHTML;
-            actionElement.style.textAlign = "center";
-            actionElement.querySelectorAll(".img").forEach((item: HTMLElement) => {
-                item.style.display = "block";
-            });
-            updateTransaction(protyle, actionElement.getAttribute("data-node-id"), actionElement.outerHTML, oldHTML);
             event.stopPropagation();
             event.preventDefault();
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.alignRight.custom, event)) {
-            let actionElement: HTMLElement = nodeElement;
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
-                actionElement = selectElements[0] as HTMLElement;
+            let selectElements:HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                selectElements = [nodeElement];
             }
-            const oldHTML = actionElement.outerHTML;
-            actionElement.style.textAlign = "right";
-            updateTransaction(protyle, actionElement.getAttribute("data-node-id"), actionElement.outerHTML, oldHTML);
+            updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
+                e.style.textAlign = "right";
+            });
             event.stopPropagation();
             event.preventDefault();
             return;

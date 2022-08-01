@@ -733,3 +733,24 @@ export const updateTransaction = (protyle: IProtyle, id: string, newHTML: string
         action: "update"
     }]);
 };
+
+export const updateBatchTransaction = (nodeElements: Element[], protyle: IProtyle, cb: (e: HTMLElement) => void) => {
+    const operations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    nodeElements.forEach((element) => {
+        const id = element.getAttribute("data-node-id");
+        element.classList.remove("protyle-wysiwyg--select");
+        undoOperations.push({
+            action: "update",
+            id,
+            data: element.outerHTML
+        });
+        cb(element as HTMLElement);
+        operations.push({
+            action: "update",
+            id,
+            data: element.outerHTML
+        });
+    });
+    transaction(protyle, operations, undoOperations);
+}

@@ -4,7 +4,13 @@ import {iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/pr
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {updateHotkeyTip, writeText} from "../util/compatibility";
-import {transaction, turnIntoTransaction, turnsIntoTransaction, updateTransaction} from "../wysiwyg/transaction";
+import {
+    transaction,
+    turnIntoTransaction,
+    turnsIntoTransaction,
+    updateBatchTransaction,
+    updateTransaction
+} from "../wysiwyg/transaction";
 import {removeBlock} from "../wysiwyg/remove";
 import {focusBlock, focusByRange, getEditorRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";
@@ -1157,24 +1163,7 @@ export class Gutter {
     }
 
     private genClick(nodeElements: Element[], protyle: IProtyle, cb: (e: HTMLElement) => void) {
-        const operations: IOperation[] = [];
-        const undoOperations: IOperation[] = [];
-        nodeElements.forEach((element) => {
-            const id = element.getAttribute("data-node-id");
-            element.classList.remove("protyle-wysiwyg--select");
-            undoOperations.push({
-                action: "update",
-                id,
-                data: element.outerHTML
-            });
-            cb(element as HTMLElement);
-            operations.push({
-                action: "update",
-                id,
-                data: element.outerHTML
-            });
-        });
-        transaction(protyle, operations, undoOperations);
+        updateBatchTransaction(nodeElements, protyle, cb);
         focusBlock(nodeElements[0]);
     }
 

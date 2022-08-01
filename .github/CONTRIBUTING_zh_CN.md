@@ -11,10 +11,13 @@
 
 <details>
 <summary>适用于中国大陆</summary>
-设置 Electron 镜像环境变量：
 
-* macOS/Linux：`export ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
-* Windows: `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
+设置 Electron 镜像环境变量并安装 Electron：
+
+* macOS/Linux: `ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@19.0.10 -D`
+* Windows:
+    * `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
+    * `pnpm install electron@19.0.10 -D`
 
 NPM 镜像：
 

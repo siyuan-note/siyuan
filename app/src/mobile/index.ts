@@ -65,12 +65,8 @@ class App {
             if (navigator.userAgent.indexOf("iPhone") > -1) {
                 document.addEventListener("touchstart", handleTouchStart, false);
                 document.addEventListener("touchmove", handleTouchMove, false);
-                document.addEventListener("touchend", handleTouchEnd, false);
-            } else {
-                document.addEventListener("touchend", () => {
-                    window.siyuan.mobileEditor?.protyle.breadcrumb.show();
-                }, false);
             }
+            document.addEventListener("touchend", handleTouchEnd, false);
         });
         setNoteBook();
         promiseTransactions();

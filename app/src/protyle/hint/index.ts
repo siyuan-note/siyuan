@@ -197,7 +197,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             // https://github.com/siyuan-note/siyuan/issues/1229 提示时，新建文件不应默认选中
             let focusClass = "";
             if (i === 0) {
-                if (hintData.value.startsWith("((newFile ") && hintData.value.endsWith(`${Lute.Caret}"))`) && data.length > 1) {
+                if (hintData.value.startsWith("((newFile ") && hintData.value.endsWith(`${Lute.Caret}'))`) && data.length > 1) {
                     focusClass = "";
                 } else {
                     focusClass = " b3-list-item--focus";
@@ -280,7 +280,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
     }
 
     private genSearchHTML(protyle: IProtyle, searchElement: HTMLInputElement, nodeElement: false | HTMLElement, oldValue: string) {
-        this.element.lastElementChild.innerHTML = "<div class=\"ft__center\"><img style=\"height:32px;width:32px;\" src=\"/stage/loading-pure.svg\"></div>";
+        this.element.lastElementChild.innerHTML = '<div class="ft__center"><img style="height:32px;width:32px;" src="/stage/loading-pure.svg"></div>';
         fetchPost("/api/search/searchRefBlock", {
             k: searchElement.value,
             id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
@@ -289,7 +289,8 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         }, (response) => {
             let searchHTML = "";
             if (response.data.newDoc) {
-                searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent('((newFile "' + oldValue + Lute.Caret + '"))')}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+                const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.data.k}${Lute.Caret}'))`
+                searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div></button>`;
             }
             response.data.blocks.forEach((item: IBlock, index: number) => {
@@ -307,7 +308,8 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 if (attrHTML) {
                     attrHTML = `<div class="fn__flex b3-list-item__meta" style="line-height: 1">${attrHTML}</div>`;
                 }
-                searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent('<span data-type="block-ref" data-id="' + item.id + '" data-subtype="s">' + oldValue + "</span>")}">${attrHTML}<div class="b3-list-item__first">
+                const blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`
+                searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">${attrHTML}<div class="b3-list-item__first">
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
     <span class="b3-list-item__text">${item.content}</span>
 </div>
@@ -409,16 +411,21 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         }
         range.deleteContents();
         // 新建文件
-        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}"))`)) {
+        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
             focusByRange(range);
-            const fileName = value.substring(11, value.length - 4);
+            const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`)
+            const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
             getSavePath(protyle.path, protyle.notebookId, (pathString) => {
                 fetchPost("/api/filetree/createDocWithMd", {
                     notebook: protyle.notebookId,
-                    path: pathPosix().join(pathString, fileName),
+                    path: pathPosix().join(pathString, realFileName),
                     markdown: ""
                 }, response => {
-                    insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(fileName)}</span>`), protyle);
+                    let blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(realFileName)}</span>`
+                    if (fileNames.length === 2) {
+                        blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="s">${escapeHtml(fileNames[0])}</span>`
+                    }
+                    insertHTML(genEmptyBlock(false, false, blockRefHTML), protyle);
                 });
             });
             return;

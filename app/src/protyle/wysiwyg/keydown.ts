@@ -669,6 +669,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         const selectText = range.toString();
         // 删除
         if (!event.altKey && !event.shiftKey && !isCtrl(event) && (event.key === "Backspace" || event.key === "Delete")) {
+            // https://github.com/siyuan-note/siyuan/issues/5547
+            const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement
+            if (range.startOffset === 1 && range.startContainer.textContent === Constants.ZWSP &&
+                previousSibling && previousSibling.nodeType !== 3 && previousSibling.classList.contains("img")) {
+                previousSibling.classList.add("img--select");
+            }
             const imgSelectElement = protyle.wysiwyg.element.querySelector(".img--select");
             if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
                 removeBlock(protyle, nodeElement, range);

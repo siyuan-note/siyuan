@@ -24,7 +24,7 @@ NPM mirror:
 
 On the desktop, go to the app folder to run:
 
-* `pnpm install electron@19.0.10 -D`
+* `ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@19.0.10 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

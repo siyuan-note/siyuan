@@ -1,3 +1,31 @@
+## v2.1.5 / 2022-08-02
+
+### 改进功能
+
+* [同一个块中引用多个相同块时反链去重](https://github.com/siyuan-note/siyuan/issues/3317)
+* [剪藏扩展无法剪藏简书的代码块](https://github.com/siyuan-note/siyuan/issues/4361)
+* [右键单击块引用元素时锚文本闪烁](https://github.com/siyuan-note/siyuan/issues/5499)
+* [划选复制内容范围改进](https://github.com/siyuan-note/siyuan/issues/5540)
+* [行内公式快捷键在公式打开界面误触以后会自动最小化程序](https://github.com/siyuan-note/siyuan/issues/5541)
+* [为 `网络图片转换为本地图片` 提供可设置的快捷键](https://github.com/siyuan-note/siyuan/issues/5542)
+* [剪藏和粘贴网页内容加粗语法兼容处理](https://github.com/siyuan-note/siyuan/issues/5543)
+* [移动端支持标签和书签面板](https://github.com/siyuan-note/siyuan/issues/5545)
+* [ 局中、左和右的快捷键不支持多块且块和图片没有进行区分](https://github.com/siyuan-note/siyuan/issues/5554)
+* [`[[`和快捷键插入的引用需进行区分](https://github.com/siyuan-note/siyuan/issues/5557)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/5546)
+
+### 修复缺陷
+
+* [嵌入块更新时渲染效果不一致](https://github.com/siyuan-note/siyuan/issues/5524)
+* [图片后 Backspace 无法删除问题](https://github.com/siyuan-note/siyuan/issues/5547)
+* [图片居中会多一个软换行](https://github.com/siyuan-note/siyuan/issues/5550)
+* [Markdown 围栏代码块输入问题](https://github.com/siyuan-note/siyuan/issues/5552)
+* [图片调整大小后光标在图片后面显示异常 ](https://github.com/siyuan-note/siyuan/issues/5553)
+* [查询嵌入块多层嵌套导出不完整](https://github.com/siyuan-note/siyuan/issues/5558)
+
 ## v2.1.4 / 2022-07-30
 
 ### 改进功能

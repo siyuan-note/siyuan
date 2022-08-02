@@ -1218,6 +1218,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string) (footn
 	}
 
 	footnotesDefBlock = &ast.Node{Type: ast.NodeFootnotesDefBlock}
+	var rendered []string
 	for _, foot := range *refFootnotes {
 		t, err := loadTreeByBlockID(foot.defID)
 		if nil != err {
@@ -1261,9 +1262,8 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string) (footn
 					stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 					stmt = html.UnescapeString(stmt)
 					sqlBlocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
-					depth := 0
 					for _, b := range sqlBlocks {
-						subNodes := renderBlockMarkdownR0(b.ID, &depth)
+						subNodes := renderBlockMarkdownR0(b.ID, &rendered)
 						for _, subNode := range subNodes {
 							if ast.NodeListItem == subNode.Type {
 								parentList := &ast.Node{Type: ast.NodeList, ListData: &ast.ListData{Typ: subNode.ListData.Typ}}

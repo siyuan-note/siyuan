@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
@@ -118,8 +119,8 @@ func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 }
 
 func renderBlockMarkdownR(id string) string {
-	depth := 0
-	nodes := renderBlockMarkdownR0(id, &depth)
+	var rendered []string
+	nodes := renderBlockMarkdownR0(id, &rendered)
 	buf := bytes.Buffer{}
 	buf.Grow(4096)
 	luteEngine := NewLute()
@@ -131,11 +132,12 @@ func renderBlockMarkdownR(id string) string {
 	return buf.String()
 }
 
-func renderBlockMarkdownR0(id string, depth *int) (ret []*ast.Node) {
-	*depth++
-	if 7 < *depth {
+func renderBlockMarkdownR0(id string, rendered *[]string) (ret []*ast.Node) {
+	if gulu.Str.Contains(id, *rendered) {
 		return
 	}
+	*rendered = append(*rendered, id)
+
 	b := treenode.GetBlockTree(id)
 	if nil == b {
 		return
@@ -175,7 +177,7 @@ func renderBlockMarkdownR0(id string, depth *int) (ret []*ast.Node) {
 				stmt = html.UnescapeString(stmt)
 				sqlBlocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
 				for _, sqlBlock := range sqlBlocks {
-					subNodes := renderBlockMarkdownR0(sqlBlock.ID, depth)
+					subNodes := renderBlockMarkdownR0(sqlBlock.ID, rendered)
 					for _, subNode := range subNodes {
 						inserts = append(inserts, subNode)
 					}

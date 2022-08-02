@@ -66,9 +66,9 @@ export class Menu {
         this.element.append(element);
     }
 
-    public popup(options: { x: number, y: number }) {
+    public popup(options: { x: number, y: number, h?: number }, isLeft = false) {
         this.element.classList.remove("fn__none");
-        setPosition(this.element, options.x, options.y);
+        setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h);
     }
 }
 

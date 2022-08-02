@@ -192,8 +192,7 @@ export class Title {
                     focusByRange(range);
                 }
             }).element);
-            window.siyuan.menus.menu.element.classList.remove("fn__none");
-            setPosition(window.siyuan.menus.menu.element, event.clientX, event.clientY);
+            window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY})
         });
         this.element.querySelector(".protyle-attr").addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             fetchPost("/api/block/getDocInfo", {

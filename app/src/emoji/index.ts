@@ -199,10 +199,8 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
 </div>
 </div>`;
     window.siyuan.menus.menu.element.firstElementChild.querySelector(".emojis__item").classList.add("emojis__item--current");
-    window.siyuan.menus.menu.element.classList.remove("fn__none");
     const rect = target.getBoundingClientRect();
-    setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + rect.height);
-
+    window.siyuan.menus.menu.popup({x: rect.left, y: rect.top + rect.height})
     const inputElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
     const emojisContentElement = window.siyuan.menus.menu.element.querySelector(".emojis__panel");
     inputElement.addEventListener("compositionend", () => {

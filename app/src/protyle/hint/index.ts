@@ -601,9 +601,11 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     highlightRender(nodeElement);
                 } else if (value.startsWith("<iframe") || value.startsWith("<video") || value.startsWith("<audio")) {
                     protyle.gutter.renderMenu(protyle, nodeElement);
-                    window.siyuan.menus.menu.element.classList.remove("fn__none");
                     const rect = nodeElement.getBoundingClientRect();
-                    setPosition(window.siyuan.menus.menu.element, rect.left - window.siyuan.menus.menu.element.clientWidth, rect.top);
+                    window.siyuan.menus.menu.popup({
+                        x: rect.left,
+                        y: rect.top
+                    }, true)
                     window.siyuan.menus.menu.element.querySelector('[data-id="assetSubMenu"]').classList.add("b3-menu__item--show");
                     window.siyuan.menus.menu.element.querySelectorAll("input")[0].focus();
                 } else if (value === "---") {

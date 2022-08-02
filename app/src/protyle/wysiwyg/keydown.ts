@@ -513,16 +513,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const type = inlineElement.getAttribute("data-type");
                 if (type === "block-ref") {
                     refMenu(protyle, inlineElement);
-                    const rect = inlineElement.getBoundingClientRect();
-                    setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
                     return;
                 } else if (type === "file-annotation-ref") {
                     protyle.toolbar.showFileAnnotationRef(protyle, inlineElement);
                     return;
                 } else if (type === "a") {
                     linkMenu(protyle, inlineElement);
-                    const rect = inlineElement.getBoundingClientRect();
-                    setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
                     return;
                 }
             }
@@ -544,9 +540,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 actionElement = selectElements[0] as HTMLElement;
             }
             protyle.gutter.renderMenu(protyle, actionElement);
-            window.siyuan.menus.menu.element.classList.remove("fn__none");
             const rect = nodeElement.getBoundingClientRect();
-            setPosition(window.siyuan.menus.menu.element, rect.left - window.siyuan.menus.menu.element.clientWidth, rect.top);
+            window.siyuan.menus.menu.popup({x: rect.left, y: rect.top}, true)
             return;
         }
 

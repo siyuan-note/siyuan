@@ -228,7 +228,12 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             focusByWbr(nodeElement, protyle.toolbar.range);
         }
     }).element);
-    window.siyuan.menus.menu.element.classList.remove("fn__none");
+    const rect = element.getBoundingClientRect();
+    window.siyuan.menus.menu.popup({
+        x: rect.left,
+        y: rect.top + 13,
+        h: 26
+    })
     window.siyuan.menus.menu.element.querySelector("input").select();
 };
 
@@ -761,7 +766,12 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     if (linkAddress) {
         openMenu(linkAddress);
     }
-    window.siyuan.menus.menu.element.classList.remove("fn__none");
+    const rect = linkElement.getBoundingClientRect();
+    window.siyuan.menus.menu.popup({
+        x: rect.left,
+        y: rect.top + 13,
+        h: 26
+    })
     if (focusText || protyle.lute.IsValidLinkDest(linkAddress)) {
         window.siyuan.menus.menu.element.querySelectorAll("input")[1].select();
     } else {

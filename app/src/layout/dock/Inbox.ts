@@ -124,7 +124,6 @@ export class Inbox extends Model {
                                         }).element);
                                     }
                                 });
-                                window.siyuan.menus.menu.element.classList.remove("fn__none");
                                 window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
                                 break;
                             case "back":
@@ -215,7 +214,6 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
                 });
             }
         }).element);
-        window.siyuan.menus.menu.element.classList.remove("fn__none");
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
     }
 

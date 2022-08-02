@@ -422,9 +422,8 @@ export class Background {
                 }
                 this.addTags(listItemElement.textContent);
             });
-            window.siyuan.menus.menu.element.classList.remove("fn__none");
             const rect = this.iconElement.nextElementSibling.getBoundingClientRect();
-            setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + rect.height);
+            window.siyuan.menus.menu.popup({x: rect.left, y: rect.top + rect.height})
             inputElement.focus();
         });
     }

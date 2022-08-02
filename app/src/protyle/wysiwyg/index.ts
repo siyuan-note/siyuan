@@ -427,8 +427,7 @@ export class WYSIWYG {
                 // 多选块
                 hideElements(["util"], protyle);
                 protyle.gutter.renderMenu(protyle, selectElements[0]);
-                window.siyuan.menus.menu.element.classList.remove("fn__none");
-                setPosition(window.siyuan.menus.menu.element, event.clientX, event.clientY);
+                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY})
                 return;
             }
             const target = event.target as HTMLElement;
@@ -438,8 +437,7 @@ export class WYSIWYG {
                     focusSideBlock(embedElement);
                 }
                 protyle.gutter.renderMenu(protyle, embedElement);
-                window.siyuan.menus.menu.element.classList.remove("fn__none");
-                setPosition(window.siyuan.menus.menu.element, event.clientX, event.clientY);
+                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY})
                 return false;
             }
             if (protyle.disabled) {
@@ -449,8 +447,6 @@ export class WYSIWYG {
             const type = target.getAttribute("data-type");
             if (type === "block-ref") {
                 refMenu(protyle, target);
-                const rect = target.getBoundingClientRect();
-                setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
                 // 阻止 popover
                 target.setAttribute("prevent-popover", "true");
                 setTimeout(() => {
@@ -464,8 +460,6 @@ export class WYSIWYG {
             }
             if (type === "a") {
                 linkMenu(protyle, target);
-                const rect = target.getBoundingClientRect();
-                setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
                 if (target.getAttribute("data-href")?.startsWith("siyuan://blocks")) {
                     // 阻止 popover
                     target.setAttribute("prevent-popover", "true");
@@ -490,8 +484,7 @@ export class WYSIWYG {
                 (isMobile() || beforeContextmenuRange && nodeElement.contains(beforeContextmenuRange.startContainer))) {
                 if (!isMobile() || protyle.toolbar?.element.classList.contains("fn__none")) {
                     contentMenu(protyle, nodeElement);
-                    window.siyuan.menus.menu.element.classList.remove("fn__none");
-                    setPosition(window.siyuan.menus.menu.element, event.clientX, event.clientY + 13, 26);
+                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 13, h: 26})
                     protyle.toolbar?.element.classList.add("fn__none");
                     if (nodeElement.classList.contains("table")) {
                         nodeElement.querySelector("table").classList.remove("select");
@@ -501,8 +494,7 @@ export class WYSIWYG {
             } else if (protyle.toolbar.range.toString() === "") {
                 hideElements(["util"], protyle);
                 protyle.gutter.renderMenu(protyle, nodeElement);
-                window.siyuan.menus.menu.element.classList.remove("fn__none");
-                setPosition(window.siyuan.menus.menu.element, event.clientX, event.clientY);
+                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY})
                 protyle.toolbar?.element.classList.add("fn__none");
             }
         });
@@ -1140,8 +1132,7 @@ export class WYSIWYG {
                                 }
                             }
                         }).element);
-                        window.siyuan.menus.menu.element.classList.remove("fn__none");
-                        setPosition(window.siyuan.menus.menu.element, mouseUpEvent.clientX - 8, mouseUpEvent.clientY - 16);
+                        window.siyuan.menus.menu.popup({x: mouseUpEvent.clientX - 8, y: mouseUpEvent.clientY - 16})
                     }
                 }
 
@@ -1575,9 +1566,11 @@ export class WYSIWYG {
             const menuElement = hasClosestByClassName(event.target, "protyle-action__menu");
             if (menuElement && !protyle.disabled) {
                 protyle.gutter.renderMenu(protyle, menuElement.parentElement.parentElement);
-                window.siyuan.menus.menu.element.classList.remove("fn__none");
                 const rect = menuElement.getBoundingClientRect();
-                setPosition(window.siyuan.menus.menu.element, rect.left - window.siyuan.menus.menu.element.clientWidth, rect.top);
+                window.siyuan.menus.menu.popup({
+                    x: rect.left,
+                    y: rect.top
+                }, true)
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -1666,8 +1659,10 @@ export class WYSIWYG {
                             updateTransaction(protyle, actionElement.parentElement.getAttribute("data-node-id"), actionElement.parentElement.outerHTML, html);
                         } else {
                             protyle.gutter.renderMenu(protyle, actionElement.parentElement);
-                            window.siyuan.menus.menu.element.classList.remove("fn__none");
-                            setPosition(window.siyuan.menus.menu.element, event.clientX - window.siyuan.menus.menu.element.clientWidth - 16, event.clientY - 16);
+                            window.siyuan.menus.menu.popup({
+                                x: event.clientX - 16,
+                                y: event.clientY - 16
+                            }, true)
                         }
                     }
                 }

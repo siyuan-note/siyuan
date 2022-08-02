@@ -272,8 +272,6 @@ export class Toolbar {
             if (type === "link") {
                 this.element.classList.add("fn__none");
                 linkMenu(protyle, this.range.startContainer.parentElement);
-                const rect = this.range.startContainer.parentElement.getBoundingClientRect();
-                setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
             }
             return;
         }
@@ -334,8 +332,6 @@ export class Toolbar {
         if (types.length > 0 && types.includes("link") && action === "range") {
             // 链接快捷键不应取消，应该显示链接信息
             linkMenu(protyle, this.range.startContainer.parentElement);
-            const rect = this.range.startContainer.parentElement.getBoundingClientRect();
-            setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
             return;
         }
         const wbrElement = document.createElement("wbr");
@@ -515,8 +511,6 @@ export class Toolbar {
                     }
                     if (needShowLink) {
                         linkMenu(protyle, newElement as HTMLElement, focusText);
-                        const rect = newElement.getBoundingClientRect();
-                        setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + 13, 26);
                     }
                 }
             }

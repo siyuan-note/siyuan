@@ -753,4 +753,4 @@ export const updateBatchTransaction = (nodeElements: Element[], protyle: IProtyl
         });
     });
     transaction(protyle, operations, undoOperations);
-}
+};

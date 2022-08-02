@@ -1,5 +1,4 @@
 import {getRandom, isMobile} from "../util/functions";
-import {setPosition} from "../util/setPosition";
 import {fetchPost} from "../util/fetch";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
@@ -200,7 +199,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
 </div>`;
     window.siyuan.menus.menu.element.firstElementChild.querySelector(".emojis__item").classList.add("emojis__item--current");
     const rect = target.getBoundingClientRect();
-    window.siyuan.menus.menu.popup({x: rect.left, y: rect.top + rect.height})
+    window.siyuan.menus.menu.popup({x: rect.left, y: rect.top + rect.height});
     const inputElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
     const emojisContentElement = window.siyuan.menus.menu.element.querySelector(".emojis__panel");
     inputElement.addEventListener("compositionend", () => {

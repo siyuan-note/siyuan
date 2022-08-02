@@ -41,7 +41,6 @@ import {keydown} from "./keydown";
 import {openMobileFileById} from "../../mobile/editor";
 import {removeBlock} from "./remove";
 import {highlightRender} from "../markdown/highlightRender";
-import {setPosition} from "../../util/setPosition";
 import {openAttr} from "../../menus/commonMenuItem";
 import {blockRender} from "../markdown/blockRender";
 /// #if !MOBILE
@@ -427,7 +426,7 @@ export class WYSIWYG {
                 // 多选块
                 hideElements(["util"], protyle);
                 protyle.gutter.renderMenu(protyle, selectElements[0]);
-                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY})
+                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
                 return;
             }
             const target = event.target as HTMLElement;
@@ -437,7 +436,7 @@ export class WYSIWYG {
                     focusSideBlock(embedElement);
                 }
                 protyle.gutter.renderMenu(protyle, embedElement);
-                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY})
+                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
                 return false;
             }
             if (protyle.disabled) {
@@ -484,7 +483,7 @@ export class WYSIWYG {
                 (isMobile() || beforeContextmenuRange && nodeElement.contains(beforeContextmenuRange.startContainer))) {
                 if (!isMobile() || protyle.toolbar?.element.classList.contains("fn__none")) {
                     contentMenu(protyle, nodeElement);
-                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 13, h: 26})
+                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 13, h: 26});
                     protyle.toolbar?.element.classList.add("fn__none");
                     if (nodeElement.classList.contains("table")) {
                         nodeElement.querySelector("table").classList.remove("select");
@@ -494,7 +493,7 @@ export class WYSIWYG {
             } else if (protyle.toolbar.range.toString() === "") {
                 hideElements(["util"], protyle);
                 protyle.gutter.renderMenu(protyle, nodeElement);
-                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY})
+                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
                 protyle.toolbar?.element.classList.add("fn__none");
             }
         });
@@ -1132,7 +1131,7 @@ export class WYSIWYG {
                                 }
                             }
                         }).element);
-                        window.siyuan.menus.menu.popup({x: mouseUpEvent.clientX - 8, y: mouseUpEvent.clientY - 16})
+                        window.siyuan.menus.menu.popup({x: mouseUpEvent.clientX - 8, y: mouseUpEvent.clientY - 16});
                     }
                 }
 
@@ -1570,7 +1569,7 @@ export class WYSIWYG {
                 window.siyuan.menus.menu.popup({
                     x: rect.left,
                     y: rect.top
-                }, true)
+                }, true);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -1662,7 +1661,7 @@ export class WYSIWYG {
                             window.siyuan.menus.menu.popup({
                                 x: event.clientX - 16,
                                 y: event.clientY - 16
-                            }, true)
+                            }, true);
                         }
                     }
                 }

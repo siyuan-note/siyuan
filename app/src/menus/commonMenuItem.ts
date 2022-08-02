@@ -13,7 +13,6 @@ import {fetchPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {focusBlock, focusByRange, getEditorRange} from "../protyle/util/selection";
-import {setPosition} from "../util/setPosition";
 import {updateTransaction} from "../protyle/wysiwyg/transaction";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
@@ -267,7 +266,7 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                         });
                     }
                     window.siyuan.menus.menu.element.style.zIndex = "310";
-                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16})
+                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
                 });
                 break;
         }
@@ -466,7 +465,7 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                             });
                         }
                         window.siyuan.menus.menu.element.style.zIndex = "310";
-                        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16})
+                        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
                     });
                     break;
             }

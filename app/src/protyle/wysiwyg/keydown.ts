@@ -49,7 +49,6 @@ import {openBy, openFileById} from "../../editor/util";
 import {commonHotkey} from "./commonHotkey";
 /// #endif
 import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
-import {setPosition} from "../../util/setPosition";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
@@ -541,7 +540,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             protyle.gutter.renderMenu(protyle, actionElement);
             const rect = nodeElement.getBoundingClientRect();
-            window.siyuan.menus.menu.popup({x: rect.left, y: rect.top}, true)
+            window.siyuan.menus.menu.popup({x: rect.left, y: rect.top}, true);
             return;
         }
 
@@ -665,7 +664,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 删除
         if (!event.altKey && !event.shiftKey && !isCtrl(event) && (event.key === "Backspace" || event.key === "Delete")) {
             // https://github.com/siyuan-note/siyuan/issues/5547
-            const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement
+            const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
             if (range.startOffset === 1 && range.startContainer.textContent === Constants.ZWSP &&
                 previousSibling && previousSibling.nodeType !== 3 && previousSibling.classList.contains("img")) {
                 previousSibling.classList.add("img--select");

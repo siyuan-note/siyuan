@@ -233,7 +233,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         x: rect.left,
         y: rect.top + 13,
         h: 26
-    })
+    });
     window.siyuan.menus.menu.element.querySelector("input").select();
 };
 
@@ -771,7 +771,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         x: rect.left,
         y: rect.top + 13,
         h: 26
-    })
+    });
     if (focusText || protyle.lute.IsValidLinkDest(linkAddress)) {
         window.siyuan.menus.menu.element.querySelectorAll("input")[1].select();
     } else {

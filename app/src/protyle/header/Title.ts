@@ -24,7 +24,6 @@ import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
 import {setTitle} from "../../dialog/processSystem";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
-import {setPosition} from "../../util/setPosition";
 import {code160to32} from "../util/code160to32";
 import {deleteFile} from "../../editor/deleteFile";
 
@@ -192,7 +191,7 @@ export class Title {
                     focusByRange(range);
                 }
             }).element);
-            window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY})
+            window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
         });
         this.element.querySelector(".protyle-attr").addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             fetchPost("/api/block/getDocInfo", {

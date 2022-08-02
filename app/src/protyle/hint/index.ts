@@ -289,7 +289,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         }, (response) => {
             let searchHTML = "";
             if (response.data.newDoc) {
-                const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.data.k}${Lute.Caret}'))`
+                const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.data.k}${Lute.Caret}'))`;
                 searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div></button>`;
             }
@@ -308,7 +308,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 if (attrHTML) {
                     attrHTML = `<div class="fn__flex b3-list-item__meta" style="line-height: 1">${attrHTML}</div>`;
                 }
-                const blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`
+                const blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
                 searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">${attrHTML}<div class="b3-list-item__first">
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
     <span class="b3-list-item__text">${item.content}</span>
@@ -413,7 +413,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         // 新建文件
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
             focusByRange(range);
-            const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`)
+            const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`);
             const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
             getSavePath(protyle.path, protyle.notebookId, (pathString) => {
                 fetchPost("/api/filetree/createDocWithMd", {
@@ -421,9 +421,9 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     path: pathPosix().join(pathString, realFileName),
                     markdown: ""
                 }, response => {
-                    let blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(realFileName)}</span>`
+                    let blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(realFileName)}</span>`;
                     if (fileNames.length === 2) {
-                        blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="s">${escapeHtml(fileNames[0])}</span>`
+                        blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="s">${escapeHtml(fileNames[0])}</span>`;
                     }
                     insertHTML(genEmptyBlock(false, false, blockRefHTML), protyle);
                 });
@@ -605,7 +605,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     window.siyuan.menus.menu.popup({
                         x: rect.left,
                         y: rect.top
-                    }, true)
+                    }, true);
                     window.siyuan.menus.menu.element.querySelector('[data-id="assetSubMenu"]').classList.add("b3-menu__item--show");
                     window.siyuan.menus.menu.element.querySelectorAll("input")[0].focus();
                 } else if (value === "---") {

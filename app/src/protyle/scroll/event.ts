@@ -6,7 +6,23 @@ import {showMessage} from "../../dialog/message";
 import {updateHotkeyTip} from "../util/compatibility";
 
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
-    element.addEventListener("scroll", () => {
+    let elementRect = element.getBoundingClientRect();
+    element.addEventListener("scroll", (event) => {
+        if (!protyle.toolbar.element.classList.contains("fn__none")) {
+            const initY = protyle.toolbar.element.getAttribute("data-inity").split(Constants.ZWSP);
+            const top = parseInt(initY[0]) + (parseInt(initY[1]) - element.scrollTop)
+            if (elementRect.width === 0) {
+                elementRect = element.getBoundingClientRect();
+            }
+            const toolbarHeight = 29;
+            if (top < elementRect.top - toolbarHeight || top > elementRect.bottom - toolbarHeight) {
+                protyle.toolbar.element.style.display = "none";
+            } else {
+                protyle.toolbar.element.style.top = top + "px";
+                protyle.toolbar.element.style.display = "";
+            }
+            return;
+        }
         if (!window.siyuan.dragElement) { // https://ld246.com/article/1649638389841
             hideElements(["gutter"], protyle);
         }
@@ -50,5 +66,9 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             });
         }
         protyle.scroll.lastScrollTop = Math.max(element.scrollTop, 0);
+    }, {
+        capture: false,
+        passive: true,
+        once: false
     });
 };

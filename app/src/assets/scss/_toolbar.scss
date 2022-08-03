@@ -6,6 +6,7 @@
     box-shadow: var(--b3-point-shadow);
     border-radius: 4px;
     display: flex;
+    transition: top .15s cubic-bezier(0, 0, .2, 1) 0ms;
 
     &__item {
       color: var(--b3-theme-on-surface);

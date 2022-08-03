@@ -23,6 +23,7 @@ export const hideElements = (panels: string[], protyle?: IProtyle) => {
     }
     if (protyle.toolbar && panels.includes("toolbar")) {
         protyle.toolbar.element.classList.add("fn__none");
+        protyle.toolbar.element.style.display  = "";
     }
     if (protyle.toolbar && panels.includes("util")) {
         const pinElement = protyle.toolbar.subElement.querySelector('[data-type="pin"]');

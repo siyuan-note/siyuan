@@ -94,27 +94,13 @@ export class Outline extends Model {
             element: options.tab.panelElement.lastElementChild as HTMLElement,
             data: null,
             click: (element: HTMLElement) => {
-                const models = getAllModels();
-                models.editor.find(item => {
-                    if (this.blockId === item.editor.protyle.block.rootID && !item.element.classList.contains("fn__none")) {
-                        const id = element.getAttribute("data-node-id");
-                        const targetElement = item.editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
-                        if (targetElement) {
-                            targetElement.scrollIntoView();
-                            focusBlock(targetElement);
-                            pushBack(item.editor.protyle, undefined, targetElement);
-                        } else {
-                            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                                openFileById({
-                                    id,
-                                    hasContext: !foldResponse.data,
-                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID],
-                                });
-                                updateBacklinkGraph(models, item.editor.protyle);
-                            });
-                        }
-                        return true;
-                    }
+                const id = element.getAttribute("data-node-id");
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openFileById({
+                        id,
+                        hasContext: !foldResponse.data,
+                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID],
+                    });
                 });
             }
         });

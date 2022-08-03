@@ -204,6 +204,8 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             size: Constants.SIZE_GET,
         }, getResponse => {
             onGet(getResponse, editor.editor.protyle, options.action);
+            // 大纲点击折叠标题下的内容时，需更新反链面板
+            updateBacklinkGraph(allModels, editor.editor.protyle);
         });
     } else {
         if (options.action.includes(Constants.CB_GET_HL)) {

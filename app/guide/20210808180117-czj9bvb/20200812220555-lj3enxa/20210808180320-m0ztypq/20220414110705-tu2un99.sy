@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20220414110705-tu2un99",
 		"title": "收集箱",
-		"updated": "20220420002346"
+		"updated": "20220803164829"
 	},
 	"Children": [
 		{
@@ -71,12 +71,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220414111331-ydv21ws",
-				"updated": "20220414111346"
+				"updated": "20220803163214"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "微信公众号输入"
+					"Data": "微信输入"
 				}
 			]
 		},
@@ -84,8 +84,7 @@
 			"ID": "20220414111447-0byxaq6",
 			"Type": "NodeList",
 			"ListData": {
-				"Typ": 1,
-				"Marker": "MS4="
+				"Typ": 1
 			},
 			"Properties": {
 				"id": "20220414111447-0byxaq6",
@@ -236,6 +235,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -292,7 +295,11 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "对该公众号发送消息（可从收藏中选择待发送消息），仅支持文本、图片和超链接"
+									"Data": "对该公众号发送消息（可从收藏中选择待发送消息），仅支持文本、图片和"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "超链接"
 								}
 							]
 						}
@@ -327,6 +334,83 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20220803163218-jp58a1p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220803163218-jp58a1p",
+				"updated": "20220803163323"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "关注公众号并绑定账号后除了可以通过公众号输入，也可以通过添加 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "思源小助手"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 为联系人后输入，这样可以直接转发聊天记录。"
+				}
+			]
+		},
+		{
+			"ID": "20220803163324-90f8rc0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220803163324-90f8rc0",
+				"updated": "20220803164829"
+			},
+			"Children": [
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "image"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/image-20220803164829-wrh3h5w.png"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},

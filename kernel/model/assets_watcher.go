@@ -53,6 +53,8 @@ func watchAssets() {
 	}
 
 	go func() {
+		logging.Recover()
+
 		var (
 			timer     *time.Timer
 			lastEvent fsnotify.Event

@@ -33,11 +33,14 @@ type Asset struct {
 	Updated int64  `json:"updated"`
 }
 
-var Assets = sync.Map{}
+var Assets = map[string]*Asset{}
+var assetsLock = sync.Mutex{}
 
 func LoadAssets() {
 	start := time.Now()
-	Assets = sync.Map{}
+	assetsLock.Lock()
+	defer assetsLock.Unlock()
+
 	assets := filepath.Join(util.DataDir, "assets")
 	filepath.Walk(assets, func(path string, info fs.FileInfo, err error) error {
 		if info.IsDir() {
@@ -52,11 +55,11 @@ func LoadAssets() {
 
 		hName := util.RemoveID(info.Name())
 		path = filepath.ToSlash(strings.TrimPrefix(path, util.DataDir))[1:]
-		Assets.Store(path, &Asset{
+		Assets[path] = &Asset{
 			HName:   hName,
 			Path:    path,
 			Updated: info.ModTime().UnixMilli(),
-		})
+		}
 		return nil
 	})
 	elapsed := time.Since(start)

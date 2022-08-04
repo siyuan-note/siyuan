@@ -167,10 +167,9 @@ func SearchAssetsByName(keyword string) (ret []*cache.Asset) {
 	ret = []*cache.Asset{}
 
 	count := 0
-	cache.Assets.Range(func(k, v interface{}) bool {
-		asset := v.(*cache.Asset)
+	for _, asset := range cache.Assets {
 		if !strings.Contains(strings.ToLower(asset.HName), strings.ToLower(keyword)) {
-			return true
+			continue
 		}
 
 		_, hName := search.MarkText(asset.HName, keyword, 64, Conf.Search.CaseSensitive)
@@ -181,10 +180,9 @@ func SearchAssetsByName(keyword string) (ret []*cache.Asset) {
 		})
 		count++
 		if Conf.Search.Limit <= count {
-			return false
+			return
 		}
-		return true
-	})
+	}
 
 	sort.Slice(ret, func(i, j int) bool {
 		return ret[i].Updated > ret[j].Updated

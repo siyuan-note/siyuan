@@ -617,9 +617,9 @@ export class WYSIWYG {
                     }
                     if (moveEvent.clientX > x - dragWidth + 8 && moveEvent.clientX < mostRight) {
                         if ((dragElement.tagName === "IMG" && dragElement.parentElement.parentElement.style.display !== "block") || !isCenter) {
-                            dragElement.style.width = (dragWidth + (moveEvent.clientX - x)) + "px";
+                            dragElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x)) + "px";
                         } else {
-                            dragElement.style.width = (dragWidth + (moveEvent.clientX - x) * 2) + "px";
+                            dragElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * 2) + "px";
                         }
                     }
                     if (dragElement.tagName !== "IMG") {

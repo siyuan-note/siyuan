@@ -80,7 +80,7 @@ export const popSearch = (modelElement: HTMLElement, modelMainElement: HTMLEleme
                     preventScroll(window.siyuan.mobileEditor.protyle);
                 }
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                    openMobileFileById(id, !foldResponse.data, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL]);
+                    openMobileFileById(id,foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL]);
                 });
                 closePanel();
                 event.preventDefault();

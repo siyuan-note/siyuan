@@ -342,7 +342,6 @@ const initWindow = () => {
         }
         openFileById({
             id: url.substr(16, 22),
-            hasContext: true,
             action: [Constants.CB_GET_FOCUS],
             zoomIn: getSearch("focus", url) === "1"
         });

@@ -137,14 +137,12 @@ export class Backlinks extends Model {
             click(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
-                    hasContext: true,
                     action: [Constants.CB_GET_FOCUS]
                 });
             },
             ctrlClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
-                    hasContext: true,
                     keepCursor: true,
                 });
             },
@@ -152,7 +150,6 @@ export class Backlinks extends Model {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "right",
-                    hasContext: true,
                     action: [Constants.CB_GET_FOCUS]
                 });
             },
@@ -160,7 +157,6 @@ export class Backlinks extends Model {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
-                    hasContext: true,
                     action: [Constants.CB_GET_FOCUS]
                 });
             }
@@ -191,7 +187,6 @@ export class Backlinks extends Model {
                 } else {
                     openFileById({
                         id: element.getAttribute("data-node-id"),
-                        hasContext: true,
                         action: [Constants.CB_GET_FOCUS]
                     });
                 }
@@ -199,7 +194,6 @@ export class Backlinks extends Model {
             ctrlClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
-                    hasContext: true,
                     keepCursor: true,
                 });
             },
@@ -207,7 +201,6 @@ export class Backlinks extends Model {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "right",
-                    hasContext: true,
                     action: [Constants.CB_GET_FOCUS]
                 });
             },
@@ -215,7 +208,6 @@ export class Backlinks extends Model {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
-                    hasContext: true,
                     action: [Constants.CB_GET_FOCUS]
                 });
             },

@@ -28,20 +28,9 @@ export class MobileOutline {
             data: null,
             click: (element: HTMLElement) => {
                 const id = element.getAttribute("data-node-id");
-                const targetElement = window.siyuan.mobileEditor.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
-                if (targetElement) {
-                    targetElement.scrollIntoView();
-                    focusBlock(targetElement);
-                    window.siyuan.backStack.push({
-                        id,
-                        scrollTop: window.siyuan.mobileEditor.protyle.contentElement.scrollTop,
-                        hasContext: true
-                    });
-                } else {
-                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                        openMobileFileById(id, !foldResponse.data, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID]);
-                    });
-                }
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openMobileFileById(id,foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID]);
+                });
             }
         });
         this.element.firstElementChild.querySelector('[data-type="collapse"]').addEventListener(getEventName(), () => {

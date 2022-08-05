@@ -333,7 +333,6 @@ export class Wnd {
                 } else {
                     openFileById({
                         id: keepCursorId,
-                        hasContext: true,
                         action: [Constants.CB_GET_FOCUS]
                     });
                 }

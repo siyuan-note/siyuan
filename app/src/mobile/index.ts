@@ -83,7 +83,7 @@ window.goBack = () => {
     }
     previousBackStack = window.siyuan.backStack.pop();
     const item = window.siyuan.backStack[window.siyuan.backStack.length - 1];
-    openMobileFileById(item.id, item.hasContext, item.callback, false);
+    openMobileFileById(item.id, item.callback, false);
     setTimeout(() => {
         window.siyuan.mobileEditor.protyle.contentElement.scrollTo({
             top: previousBackStack?.scrollTop || 0,

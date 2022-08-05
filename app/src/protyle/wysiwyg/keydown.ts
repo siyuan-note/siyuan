@@ -1532,7 +1532,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 打开块引和编辑器中引用、反链、书签中点击事件需保持一致，都加载上下文
                 openFileById({
                     id,
-                    hasContext: true,
                     keepCursor: true,
                 });
                 event.preventDefault();
@@ -1542,7 +1541,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 openFileById({
                     id,
                     position: "right",
-                    hasContext: true,
                     action: [Constants.CB_GET_FOCUS]
                 });
                 event.preventDefault();
@@ -1552,7 +1550,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 openFileById({
                     id,
                     position: "bottom",
-                    hasContext: true,
                     action: [Constants.CB_GET_FOCUS]
                 });
                 event.preventDefault();

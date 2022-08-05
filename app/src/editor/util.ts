@@ -32,7 +32,6 @@ export const openFileById = (options: {
     id: string,
     position?: string,
     mode?: TEditorMode,
-    hasContext?: boolean,
     action?: string[]
     keepCursor?: boolean
     zoomIn?: boolean
@@ -50,7 +49,6 @@ export const openFileById = (options: {
             rootID: data.data.rootID,
             position: options.position,
             mode: options.mode,
-            hasContext: options.hasContext,
             action: options.action,
             zoomIn: options.zoomIn,
             keepCursor: options.keepCursor
@@ -200,7 +198,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     if ((!nodeElement || nodeElement?.clientHeight === 0) && options.id !== options.rootID) {
         fetchPost("/api/filetree/getDoc", {
             id: options.id,
-            mode: options.hasContext ? 3 : 0,
+            mode: (options.action && !options.action.includes(Constants.CB_GET_ALL)) ? 3 : 0,
             size: Constants.SIZE_GET,
         }, getResponse => {
             onGet(getResponse, editor.editor.protyle, options.action);
@@ -274,7 +272,6 @@ const newTab = (options: IOpenFileOptions) => {
                         tab,
                         blockId: options.id,
                         mode: options.mode,
-                        hasContext: options.hasContext,
                         action: options.action,
                     });
                 }

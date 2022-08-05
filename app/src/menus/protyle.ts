@@ -89,7 +89,6 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                 openFileById({
                     id: refBlockId,
-                    hasContext: !foldResponse.data,
                     action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL],
                     keepCursor: true,
                     zoomIn: foldResponse.data
@@ -106,7 +105,6 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 openFileById({
                     id: refBlockId,
                     position: "right",
-                    hasContext: !foldResponse.data,
                     action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
                     zoomIn: foldResponse.data
                 });
@@ -122,7 +120,6 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 openFileById({
                     id: refBlockId,
                     position: "bottom",
-                    hasContext: !foldResponse.data,
                     action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
                     zoomIn: foldResponse.data
                 });
@@ -357,14 +354,12 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
     if (window.siyuan.mobileEditor) {
         window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({
             id,
-            hasContext: id === protyle.block.rootID,
             action: id === protyle.block.rootID ? [Constants.CB_GET_HL] : [Constants.CB_GET_ALL]
         }));
         window.siyuan.backStack.push({
             id: protyle.block.id,
             scrollTop: protyle.contentElement.scrollTop,
             callback: id === protyle.block.rootID ? [Constants.CB_GET_HL] : [Constants.CB_GET_ALL],
-            hasContext: false
         });
     }
     fetchPost("/api/filetree/getDoc", {

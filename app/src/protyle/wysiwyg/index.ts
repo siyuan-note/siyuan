@@ -1357,13 +1357,12 @@ export class WYSIWYG {
 
                 fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                     /// #if MOBILE
-                    openMobileFileById(refBlockId, !foldResponse.data, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL]);
+                    openMobileFileById(refBlockId, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL]);
                     /// #else
                     if (window.siyuan.shiftIsPressed) {
                         openFileById({
                             id: refBlockId,
                             position: "bottom",
-                            hasContext: !foldResponse.data,
                             action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
                             zoomIn: foldResponse.data
                         });
@@ -1371,14 +1370,12 @@ export class WYSIWYG {
                         openFileById({
                             id: refBlockId,
                             position: "right",
-                            hasContext: !foldResponse.data,
                             action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
                             zoomIn: foldResponse.data
                         });
                     } else if (window.siyuan.ctrlIsPressed) {
                         openFileById({
                             id: refBlockId,
-                            hasContext: !foldResponse.data,
                             action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL],
                             keepCursor: true,
                             zoomIn: foldResponse.data
@@ -1386,7 +1383,6 @@ export class WYSIWYG {
                     } else {
                         openFileById({
                             id: refBlockId,
-                            hasContext: !foldResponse.data,
                             action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
                             zoomIn: foldResponse.data
                         });
@@ -1488,13 +1484,12 @@ export class WYSIWYG {
             if (embedItemElement) {
                 const embedId = embedItemElement.getAttribute("data-id");
                 /// #if MOBILE
-                openMobileFileById(embedId, false, [Constants.CB_GET_ALL]);
+                openMobileFileById(embedId, [Constants.CB_GET_ALL]);
                 /// #else
                 if (window.siyuan.shiftIsPressed) {
                     openFileById({
                         id: embedId,
                         position: "bottom",
-                        hasContext: false,
                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL],
                         zoomIn: true
                     });
@@ -1502,14 +1497,12 @@ export class WYSIWYG {
                     openFileById({
                         id: embedId,
                         position: "right",
-                        hasContext: false,
                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL],
                         zoomIn: true
                     });
                 } else if (window.siyuan.ctrlIsPressed) {
                     openFileById({
                         id: embedId,
-                        hasContext: false,
                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL],
                         keepCursor: true,
                         zoomIn: true

@@ -345,7 +345,6 @@ interface IOptions {
     action?: string[],
     mode?: TEditorMode,
     blockId: string
-    hasContext?: boolean
     key?: string
     defId?: string
     render?: {

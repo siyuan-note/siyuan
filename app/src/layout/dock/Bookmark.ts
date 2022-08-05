@@ -80,7 +80,6 @@ export class Bookmark extends Model {
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
                         id,
-                        hasContext: !foldResponse.data,
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
                     });
                 });
@@ -152,7 +151,6 @@ export class Bookmark extends Model {
             ctrlClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
-                    hasContext: true,
                     keepCursor: true,
                 });
             },
@@ -160,7 +158,6 @@ export class Bookmark extends Model {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "right",
-                    hasContext: true,
                     action: [Constants.CB_GET_FOCUS]
                 });
             },
@@ -168,7 +165,6 @@ export class Bookmark extends Model {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
-                    hasContext: true,
                     action: [Constants.CB_GET_FOCUS]
                 });
             }

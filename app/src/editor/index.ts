@@ -14,7 +14,6 @@ export class Editor extends Model {
         tab: Tab,
         blockId: string,
         mode?: TEditorMode,
-        hasContext?: boolean
         action?: string[]
     }) {
         super({
@@ -30,7 +29,6 @@ export class Editor extends Model {
 
     private initProtyle(options:  {
         blockId: string,
-        hasContext?: boolean
         action?: string[]
         mode?: TEditorMode,
     }) {
@@ -38,7 +36,6 @@ export class Editor extends Model {
             action: options.action,
             blockId: options.blockId,
             mode: options.mode,
-            hasContext: options.hasContext,
             render: {
                 title: true,
                 background: true,

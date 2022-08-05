@@ -83,7 +83,7 @@ export class MobileBookmarks {
                         });
                     }
                 } else {
-                    openMobileFileById(id, true, [Constants.CB_GET_FOCUS]);
+                    openMobileFileById(id, [Constants.CB_GET_FOCUS]);
                 }
             },
             blockExtHTML: '<span class="b3-list-item__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></span>',

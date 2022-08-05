@@ -12,8 +12,8 @@ import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {setEditMode} from "../protyle/util/setEditMode";
 import {hideElements} from "../protyle/ui/hideElements";
 
-export const openMobileFileById = (id: string, hasContext?: boolean, action = [Constants.CB_GET_HL], pushStack = true) => {
-    window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({id, hasContext, action}));
+export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL], pushStack = true) => {
+    window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({id, action}));
     if (window.siyuan.mobileEditor) {
         hideElements(["toolbar", "hint", "util"], window.siyuan.mobileEditor.protyle);
         if (window.siyuan.mobileEditor.protyle.contentElement.classList.contains("fn__none")) {
@@ -32,7 +32,7 @@ export const openMobileFileById = (id: string, hasContext?: boolean, action = [C
                 window.siyuan.backStack.push({
                     id,
                     scrollTop: window.siyuan.mobileEditor.protyle.contentElement.scrollTop,
-                    hasContext
+                    callback: action,
                 });
             }
             focusBlock(blockElement);
@@ -53,7 +53,7 @@ export const openMobileFileById = (id: string, hasContext?: boolean, action = [C
             fetchPost("/api/filetree/getDoc", {
                 id,
                 size: action.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
-                mode: hasContext ? 3 : 0,
+                mode: !action.includes(Constants.CB_GET_ALL) ? 3 : 0,
             }, getResponse => {
                 onGet(getResponse, window.siyuan.mobileEditor.protyle, action);
                 window.siyuan.mobileEditor.protyle.breadcrumb.render(window.siyuan.mobileEditor.protyle);
@@ -63,7 +63,6 @@ export const openMobileFileById = (id: string, hasContext?: boolean, action = [C
             window.siyuan.mobileEditor = new Protyle(document.getElementById("editor"), {
                 blockId: id,
                 action,
-                hasContext: hasContext,
                 render: {
                     background: true,
                     gutter: true,
@@ -89,8 +88,7 @@ export const openMobileFileById = (id: string, hasContext?: boolean, action = [C
             window.siyuan.backStack.push({
                 id,
                 scrollTop: window.siyuan.mobileEditor.protyle.contentElement.scrollTop,
-                callback: [Constants.CB_GET_HL],
-                hasContext
+                callback: action,
             });
         }
     });

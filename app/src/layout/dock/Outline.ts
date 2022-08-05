@@ -98,7 +98,6 @@ export class Outline extends Model {
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
                         id,
-                        hasContext: !foldResponse.data,
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID],
                     });
                 });

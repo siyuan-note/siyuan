@@ -114,11 +114,11 @@ export const initFramework = () => {
         const localDoc = JSON.parse(window.localStorage.getItem(Constants.LOCAL_DOCINFO) || '{"id": ""}');
         fetchPost("/api/block/checkBlockExist", {id: localDoc.id}, existResponse => {
             if (existResponse.data) {
-                openMobileFileById(localDoc.id, localDoc.hasContext, localDoc.action);
+                openMobileFileById(localDoc.id, localDoc.action);
             } else {
                 fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                     if (response.data.length !== 0) {
-                        openMobileFileById(response.data[0].id, true);
+                        openMobileFileById(response.data[0].id);
                     } else {
                         setEmpty();
                     }

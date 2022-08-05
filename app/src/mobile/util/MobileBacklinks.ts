@@ -46,7 +46,7 @@ export class MobileBacklinks {
             element: this.element.querySelector(".backlinkList") as HTMLElement,
             data: null,
             click(element: HTMLElement) {
-                openMobileFileById(element.getAttribute("data-node-id"), true, [Constants.CB_GET_FOCUS]);
+                openMobileFileById(element.getAttribute("data-node-id"), [Constants.CB_GET_FOCUS]);
             }
         });
         this.mTree = new Tree({
@@ -73,7 +73,7 @@ export class MobileBacklinks {
                     }).element);
                     window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
                 } else {
-                    openMobileFileById(element.getAttribute("data-node-id"), true, [Constants.CB_GET_FOCUS]);
+                    openMobileFileById(element.getAttribute("data-node-id"), [Constants.CB_GET_FOCUS]);
                 }
             },
             blockExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>'

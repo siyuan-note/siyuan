@@ -48,7 +48,6 @@ interface IPdfAnno {
 interface IBackStack {
     id: string,
     scrollTop?: number,
-    hasContext?: boolean,
     callback?: string[],
     position?: { start: number, end: number }
     protyle?: IProtyle,
@@ -157,7 +156,6 @@ declare interface IOpenFileOptions {
     position?: string, // file 或者 asset，打开位置
     page?: number | string, // asset
     mode?: TEditorMode // file
-    hasContext?: boolean // file，是否带上下文
     action?: string[]
     keepCursor?: boolean // file，是否跳转到新 tab 上
     zoomIn?: boolean // 是否缩放

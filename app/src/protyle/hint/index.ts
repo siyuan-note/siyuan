@@ -506,11 +506,10 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 }, () => {
                     insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">Untitled</span>`), protyle);
                     /// #if MOBILE
-                    openMobileFileById(newSubDocId, true);
+                    openMobileFileById(newSubDocId);
                     /// #else
                     openFileById({
                         id: newSubDocId,
-                        hasContext: true,
                         action: [Constants.CB_GET_HL]
                     });
                     /// #endif

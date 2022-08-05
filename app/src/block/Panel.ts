@@ -190,7 +190,6 @@ export class BlockPanel {
         const index = parseInt(editorElement.getAttribute("data-index"));
         const editor = new Protyle(editorElement, {
             blockId: this.nodeIds[index],
-            hasContext: false,
             defId: this.defIds[index] ||this.defIds[0] || "",
             action: [Constants.CB_GET_ALL],
             render: {

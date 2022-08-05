@@ -157,7 +157,7 @@ class Protyle {
         fetchPost("/api/filetree/getDoc", {
             id: options.blockId,
             k: options.key || "",
-            mode: options.hasContext ? 3 : 0, // 0: 仅当前 ID，1：向上 2：向下，3：上下都加载，4：加载最后
+            mode: (options.action && !options.action.includes(Constants.CB_GET_ALL)) ? 3 : 0, // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后
             size: options.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
         }, getResponse => {
             onGet(getResponse, this.protyle, options.action);

@@ -598,14 +598,12 @@ export class Graph extends Model {
                         openFileById({
                             id: node.id,
                             position: "bottom",
-                            hasContext: true,
                             action: [Constants.CB_GET_FOCUS]
                         });
                     } else if (window.siyuan.altIsPressed) {
                         openFileById({
                             id: node.id,
                             position: "right",
-                            hasContext: true,
                             action: [Constants.CB_GET_FOCUS]
                         });
                     } else if (window.siyuan.ctrlIsPressed) {
@@ -614,7 +612,7 @@ export class Graph extends Model {
                             nodeIds: [node.id],
                         }));
                     } else {
-                        openFileById({id: node.id, hasContext: true, action: [Constants.CB_GET_FOCUS]});
+                        openFileById({id: node.id, action: [Constants.CB_GET_FOCUS]});
                     }
                 });
             }, 1000);

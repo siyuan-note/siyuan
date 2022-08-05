@@ -95,7 +95,9 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 		srcLiParent.Unlink()
 	}
 	srcTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-
+	if nil == srcTree.Root.FirstChild {
+		srcTree.Root.AppendChild(protyle.NewParagraph())
+	}
 	if err = indexWriteJSONQueue(srcTree); nil != err {
 		return "", "", err
 	}

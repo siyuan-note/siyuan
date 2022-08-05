@@ -26,6 +26,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/protyle"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -297,6 +298,9 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 
 	headingNode.Unlink()
 	srcTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+	if nil == srcTree.Root.FirstChild {
+		srcTree.Root.AppendChild(protyle.NewParagraph())
+	}
 	if err = indexWriteJSONQueue(srcTree); nil != err {
 		return "", "", err
 	}

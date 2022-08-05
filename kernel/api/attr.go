@@ -58,7 +58,11 @@ func setBlockAttrs(c *gin.Context) {
 	attrs := arg["attrs"].(map[string]interface{})
 	nameValues := map[string]string{}
 	for name, value := range attrs {
-		nameValues[name] = value.(string)
+		if nil == value { // API `setBlockAttrs` 中如果存在属性值设置为 `null` 时移除该属性 https://github.com/siyuan-note/siyuan/issues/5577
+			nameValues[name] = ""
+		} else {
+			nameValues[name] = value.(string)
+		}
 	}
 	err := model.SetBlockAttrs(id, nameValues)
 	if nil != err {

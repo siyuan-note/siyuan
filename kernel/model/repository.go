@@ -30,6 +30,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
+	"github.com/qiniu/go-sdk/v7/storage"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
@@ -831,6 +832,7 @@ func buildCloudInfo() (ret *dejavu.CloudInfo, err error) {
 		Token:     Conf.User.UserToken,
 		LimitSize: int64(Conf.User.UserSiYuanRepoSize - Conf.User.UserSiYuanAssetSize),
 		Server:    util.AliyunServer,
+		Zone:      &storage.ZoneHuadong, // TODO: 海外版需要条件编译
 	}
 	return
 }

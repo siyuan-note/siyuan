@@ -598,8 +598,16 @@ func getDoc(c *gin.Context) {
 	if nil != s {
 		size = int(s.(float64))
 	}
+	startID := ""
+	endID := ""
+	startIDArg := arg["startID"]
+	endIDArg := arg["endID"]
+	if nil != startIDArg && nil != endIDArg {
+		startID = startIDArg.(string)
+		endID = endIDArg.(string)
+	}
 
-	blockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, err := model.GetDoc(id, index, keyword, mode, size)
+	blockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, err := model.GetDoc(startID, endID, id, index, keyword, mode, size)
 	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 2
 		ret.Data = id

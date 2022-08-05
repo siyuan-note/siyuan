@@ -422,7 +422,7 @@ func BlockWordCount(id string) (blockRuneCount, blockWordCount, rootBlockRuneCou
 	return
 }
 
-func GetDoc(id string, index int, keyword string, mode int, size int) (blockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, err error) {
+func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int) (blockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, err error) {
 	WaitForWritingFiles() // 写入数据时阻塞，避免获取到的数据不一致
 
 	inputIndex := index
@@ -550,7 +550,18 @@ func GetDoc(id string, index int, keyword string, mode int, size int) (blockCoun
 		typ = node.Type.String()
 	}
 
-	nodes, eof := loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)
+	var nodes []*ast.Node
+
+	// 如果同时存在 startID 和 endID，则只加载 startID 和 endID 之间的块
+	if "" != startID && "" != endID {
+		nodes, eof = loadNodesByStartEnd(tree, startID, endID)
+		if 1 > len(nodes) {
+			// 按 mode 加载兜底
+			nodes, eof = loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)
+		}
+	} else {
+		nodes, eof = loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)
+	}
 	refCount := sql.QueryRootChildrenRefCount(rootID)
 
 	var virtualBlockRefKeywords []string
@@ -695,6 +706,28 @@ func GetDoc(id string, index int, keyword string, mode int, size int) (blockCoun
 
 	luteEngine.RenderOptions.NodeIndexStart = index
 	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions)
+	return
+}
+
+func loadNodesByStartEnd(tree *parse.Tree, startID, endID string) (nodes []*ast.Node, eof bool) {
+	node := treenode.GetNodeInTree(tree, startID)
+	if nil == node {
+		return
+	}
+	nodes = append(nodes, node)
+	for n := node.Next; nil != n; n = n.Next {
+		if n.ID == endID {
+			next := n.Next
+			if nil == next {
+				eof = true
+			} else {
+				eof = util2.IsDocIAL(n.Tokens) || util2.IsDocIAL(next.Tokens)
+			}
+			break
+		}
+
+		nodes = append(nodes, n)
+	}
 	return
 }
 

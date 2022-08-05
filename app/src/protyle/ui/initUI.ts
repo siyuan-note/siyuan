@@ -7,6 +7,11 @@ import {Constants} from "../../constants";
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
+    if (window.siyuan.config.editor.fullWidth) {
+        protyle.contentElement.setAttribute("data-fullwidth", "true");
+    } else {
+        protyle.contentElement.removeAttribute("data-fullwidth");
+    }
     if (protyle.options.render.background) {
         protyle.contentElement.appendChild(protyle.background.element);
     }

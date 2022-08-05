@@ -53,7 +53,7 @@ func watchAssets() {
 	}
 
 	go func() {
-		logging.Recover()
+		defer logging.Recover()
 
 		var (
 			timer     *time.Timer

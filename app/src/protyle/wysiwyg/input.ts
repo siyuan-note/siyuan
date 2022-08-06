@@ -61,14 +61,12 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     if (editElement.innerHTML === "》<wbr>") {
         editElement.innerHTML = "><wbr>";
     }
-    const trimStartText = editElement.textContent.trimStart();
-    if (!editElement.querySelector('[data-type="block-ref"]') &&
-        (trimStartText.startsWith("````") || trimStartText.startsWith("····") || trimStartText.startsWith("~~~~")) &&
-        editElement.innerHTML.indexOf("\n") === -1) {
+    const trimStartText = editElement.innerHTML.trimStart();
+    if ((trimStartText.startsWith("````") || trimStartText.startsWith("····") || trimStartText.startsWith("~~~~")) &&
+        trimStartText.indexOf("\n") === -1) {
         // 超过三个标记符就可以形成为代码块，下方会处理
-    } else if (!editElement.querySelector('[data-type="block-ref"]') &&
-        (trimStartText.startsWith("```") || trimStartText.startsWith("···") || trimStartText.startsWith("~~~")) &&
-        editElement.innerHTML.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") === -1) {
+    } else if ((trimStartText.startsWith("```") || trimStartText.startsWith("···") || trimStartText.startsWith("~~~")) &&
+        trimStartText.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") === -1) {
         // ```test` 后续处理，```test 不处理
         updateTransaction(protyle, id, blockElement.outerHTML, protyle.wysiwyg.lastHTMLs[id]);
         wbrElement.remove();
@@ -110,10 +108,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             todoOldHTML = blockElement.outerHTML;
         }
     } else {
-        if (!editElement.querySelector('[data-type="block-ref"]') &&
-            (trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
-                editElement.textContent.indexOf("\n```") > -1 || editElement.textContent.indexOf("\n~~~") > -1 || editElement.textContent.indexOf("\n···") > -1)) {
-            if (editElement.innerHTML.indexOf("\n") === -1 && editElement.textContent.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+        if (trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
+            trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1) {
+            if (trimStartText.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
                 // ```test` 不处理，正常渲染为段落块
             } else {
                 let replaceInnerHTML = editElement.innerHTML.replace(/^(~|·|`){3,}/g, "```").replace(/\n(~|·|`){3,}/g, "\n```").trim();

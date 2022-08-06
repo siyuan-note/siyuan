@@ -88,13 +88,11 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             range.insertNode(tempElement.content.cloneNode(true));
             range.collapse(false);
             blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            const trimStartText = editableElement ? editableElement.textContent.trimStart() : "";
-            if (editableElement &&
-                // 引用内容为 ```test% 会导致错误
-                !editableElement.querySelector('[data-type="block-ref"]') &&
-                (trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
+            // 使用 innerHTML,避免行内元素为代码块
+            const trimStartText = editableElement ? editableElement.innerHTML.trimStart() : "";
+            if (editableElement && (trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
                 trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1)) {
-                if (editableElement.innerHTML.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+                if (trimStartText.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
                     // ```test` 不处理
                 } else {
                     let replaceInnerHTML = editableElement.innerHTML.replace(/^(~|·|`){3,}/g, "```").replace(/\n(~|·|`){3,}/g, "\n```").trim();

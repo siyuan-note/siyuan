@@ -141,7 +141,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             tempElement.innerHTML = `<div${subType === "o" ? " data-marker=\"1.\"" : ""} data-subtype="${subType}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">${html}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
         }
     }
-    Array.from(tempElement.content.children).reverse().forEach(item => {
+    let lastElement: Element
+    Array.from(tempElement.content.children).reverse().forEach((item) => {
         const addId = item.getAttribute("data-node-id");
         if (addId === id) {
             doOperation.push({
@@ -169,6 +170,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         if (!render) {
             blockElement.after(item);
         }
+        if (!lastElement) {
+            lastElement = item;
+        }
     });
     if (editableElement && editableElement.textContent === "") {
         doOperation.push({
@@ -182,11 +186,15 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             previousID: blockElement.previousElementSibling ? blockElement.previousElementSibling.getAttribute("data-node-id") : "",
             parentID: blockElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
         });
-        const nextElement = blockElement.nextElementSibling;
         blockElement.remove();
-        focusBlock(nextElement, undefined, false);
-    } else {
-        focusByWbr(protyle.wysiwyg.element, range);
+    }
+    if (lastElement) {
+        // https://github.com/siyuan-note/siyuan/issues/5591
+        focusBlock(lastElement, undefined, false);
+    }
+    const wbrElement = protyle.wysiwyg.element.querySelector("wbr")
+    if (wbrElement) {
+        wbrElement.remove();
     }
     transaction(protyle, doOperation, undoOperation);
 };

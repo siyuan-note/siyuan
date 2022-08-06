@@ -27,7 +27,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/melody"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -47,7 +46,7 @@ func Serve(fastMode bool) {
 	ginServer := gin.New()
 	ginServer.MaxMultipartMemory = 1024 * 1024 * 32 // 插入较大的资源文件时内存占用较大 https://github.com/siyuan-note/siyuan/issues/5023
 	ginServer.Use(gin.Recovery())
-	ginServer.Use(cors.Default())
+	ginServer.Use(corsMiddleware()) // 后端服务支持 CORS 预检请求验证 https://github.com/siyuan-note/siyuan/pull/5593
 	ginServer.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm"})))
 
 	cookieStore.Options(sessions.Options{
@@ -360,4 +359,21 @@ func shortReqMsg(msg []byte) []byte {
 		}
 	}
 	return msg
+}
+
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Allow-Headers", "origin, Content-Length, Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
 }

@@ -26,6 +26,7 @@ import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
 import {code160to32} from "../util/code160to32";
 import {deleteFile} from "../../editor/deleteFile";
+import {restoreScroll} from "../scroll/saveScroll";
 
 export class Title {
     public element: HTMLElement;
@@ -324,7 +325,7 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
         }
     }
 
-    public render(protyle: IProtyle, refresh = false) {
+    public render(protyle: IProtyle, refresh = false, action:string[] = []) {
         if (this.editElement.getAttribute("data-render") === "true" && !refresh) {
             return;
         }
@@ -358,6 +359,10 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
                 const range = this.editElement.ownerDocument.createRange();
                 range.selectNodeContents(this.editElement);
                 focusByRange(range);
+            }
+
+            if (action.includes(Constants.CB_GET_SCROLL)) {
+                restoreScroll(protyle);
             }
         });
     }

@@ -26,6 +26,7 @@ import {getAllModels} from "./getAll";
 import {fetchPost} from "../util/fetch";
 import {onGet} from "../protyle/util/onGet";
 import {countBlockWord} from "./status";
+import {saveScroll} from "../protyle/scroll/saveScroll";
 
 export class Wnd {
     public id: string;
@@ -488,6 +489,9 @@ export class Wnd {
     private removeTabAction = (id: string, closeAll = false) => {
         this.children.find((item, index) => {
             if (item.id === id) {
+                if (item.model instanceof Editor) {
+                    saveScroll(item.model.editor.protyle);
+                }
                 if (this.children.length === 1) {
                     this.destroyModel(this.children[0].model);
                     this.children = [];

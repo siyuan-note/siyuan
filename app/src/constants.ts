@@ -50,6 +50,7 @@ export abstract class Constants {
     public static readonly CB_GET_SETID = "cb-get-setid"; // 重置 blockid
     public static readonly CB_GET_ALL = "cb-get-all"; // 获取所有块
     public static readonly CB_GET_UNUNDO = "cb-get-unundo"; // 不需要记录历史
+    public static readonly CB_GET_SCROLL = "cb-get-scroll"; // 滚动到指定位置
 
     // localstorage
     public static readonly LOCAL_SEARCHEDATA = "local-searchedata";

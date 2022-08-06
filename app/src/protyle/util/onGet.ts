@@ -80,7 +80,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     }
 
     if (protyle.options.render.title) {
-        protyle.title.render(protyle);
+        protyle.title.render(protyle, false, action);
     } else if (protyle.options.render.background) {
         fetchPost("/api/block/getDocInfo", {
             id: protyle.block.rootID

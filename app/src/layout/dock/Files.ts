@@ -235,12 +235,12 @@ export class Files extends Model {
                                         openFileById({
                                             id: target.getAttribute("data-node-id"),
                                             position: "right",
-                                            action: [Constants.CB_GET_FOCUS]
+                                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                                         });
                                     } else {
                                         openFileById({
                                             id: target.getAttribute("data-node-id"),
-                                            action: [Constants.CB_GET_FOCUS]
+                                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                                         });
                                     }
                                 } else if (target.getAttribute("data-type") === "navigation-root") {

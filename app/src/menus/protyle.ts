@@ -338,7 +338,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     }
 };
 
-export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushBack = true) => {
+export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushBack = true, callback?: () => void) => {
     const breadcrumbHLElement = protyle.breadcrumb.element.querySelector(".protyle-breadcrumb__item--active");
     if (breadcrumbHLElement && breadcrumbHLElement.getAttribute("data-node-id") === id) {
         if (id === protyle.block.rootID) {
@@ -393,6 +393,9 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
             updateBacklinkGraph(getAllModels(), protyle);
         }
         /// #endif
+        if (callback) {
+            callback();
+        }
     });
 };
 

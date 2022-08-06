@@ -4,9 +4,38 @@
 	"Properties": {
 		"id": "20211226121633-qa2fjpl",
 		"title": "圖示",
-		"updated": "20211226121706"
+		"updated": "20220806105539"
 	},
 	"Children": [
+		{
+			"ID": "20220806105539-xp23nb3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220806105539-xp23nb3",
+				"updated": "20220806105539"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自定義圖標"
+				}
+			]
+		},
+		{
+			"ID": "20220806105539-4gfpuzn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220806105539-4gfpuzn",
+				"updated": "20220806105539"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不可直接修改已有圖標的 JS 文件，否則在集市中更新或重啟後將被覆蓋。"
+				}
+			]
+		},
 		{
 			"ID": "20211226121706-w851d2z",
 			"Type": "NodeHeading",

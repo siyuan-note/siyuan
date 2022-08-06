@@ -88,9 +88,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             range.insertNode(tempElement.content.cloneNode(true));
             range.collapse(false);
             blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            if (editableElement && (editableElement.textContent.startsWith("```") || editableElement.textContent.startsWith("~~~") || editableElement.textContent.startsWith("···") ||
-                editableElement.textContent.indexOf("\n```") > -1 || editableElement.textContent.indexOf("\n~~~") > -1 || editableElement.textContent.indexOf("\n···") > -1)) {
-                if (editableElement.innerHTML.indexOf("\n") === -1 && editableElement.textContent.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+            const trimStartText = editableElement ? editableElement.textContent.trimStart() : "";
+            if (editableElement && (trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
+                trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1)) {
+                if (editableElement.innerHTML.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
                     // ```test` 不处理
                 } else {
                     let replaceInnerHTML = editableElement.innerHTML.replace(/^(~|·|`){3,}/g, "```").replace(/\n(~|·|`){3,}/g, "\n```").trim();

@@ -211,8 +211,9 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     });
     // 代码块
     const trimStartText = editableElement.textContent.trimStart();
-    if (trimStartText.startsWith("```") || trimStartText.startsWith("···") || trimStartText.startsWith("~~~") ||
-        trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1) {
+    if (!editableElement.querySelector('[data-type="block-ref"]') &&
+        (trimStartText.startsWith("```") || trimStartText.startsWith("···") || trimStartText.startsWith("~~~") ||
+            trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1)) {
         if (editableElement.innerHTML.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else {

@@ -41,9 +41,10 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     const wbrElement = document.createElement("wbr");
     range.insertNode(wbrElement);
+    let id = blockElement.getAttribute("data-node-id");
     if (type !== "NodeCodeBlock" && (editElement.innerHTML.endsWith("\n<wbr>") || editElement.innerHTML.endsWith("\n<wbr>\n"))) {
         // 软换行
-        updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, blockElement.outerHTML.replace("\n<wbr>", "<wbr>"));
+        updateTransaction(protyle, id, blockElement.outerHTML, blockElement.outerHTML.replace("\n<wbr>", "<wbr>"));
         wbrElement.remove();
         return;
     }
@@ -66,10 +67,10 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     } else if ((editElement.textContent.startsWith("```") || editElement.textContent.startsWith("···") || editElement.textContent.startsWith("~~~")) &&
         editElement.innerHTML.indexOf("\n") === -1 && editElement.textContent.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") === -1) {
         // ```test` 后续处理，```test 不处理
+        updateTransaction(protyle, id, blockElement.outerHTML,  protyle.wysiwyg.lastHTMLs[id]);
         wbrElement.remove();
         return;
     }
-    let id = blockElement.getAttribute("data-node-id");
     const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
     if (refElement && refElement.getAttribute("data-subtype") === "d") {
         const response = await fetchSyncPost("/api/block/getRefText", {id: refElement.getAttribute("data-id")});

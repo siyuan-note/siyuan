@@ -141,7 +141,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             tempElement.innerHTML = `<div${subType === "o" ? " data-marker=\"1.\"" : ""} data-subtype="${subType}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">${html}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
         }
     }
-    let lastElement: Element
+    let lastElement: Element;
     Array.from(tempElement.content.children).reverse().forEach((item) => {
         const addId = item.getAttribute("data-node-id");
         if (addId === id) {
@@ -192,7 +192,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         // https://github.com/siyuan-note/siyuan/issues/5591
         focusBlock(lastElement, undefined, false);
     }
-    const wbrElement = protyle.wysiwyg.element.querySelector("wbr")
+    const wbrElement = protyle.wysiwyg.element.querySelector("wbr");
     if (wbrElement) {
         wbrElement.remove();
     }

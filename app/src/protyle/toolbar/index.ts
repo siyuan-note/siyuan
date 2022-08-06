@@ -115,7 +115,7 @@ export class Toolbar {
         }
         const rangePosition = getSelectionPosition(nodeElement, range);
         this.element.classList.remove("fn__none");
-        const y = rangePosition.top - this.toolbarHeight - 4
+        const y = rangePosition.top - this.toolbarHeight - 4;
         this.element.setAttribute("data-inity", y + Constants.ZWSP + protyle.contentElement.scrollTop.toString());
         setPosition(this.element, rangePosition.left - 52, y);
         this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {

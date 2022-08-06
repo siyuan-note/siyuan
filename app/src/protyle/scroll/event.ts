@@ -7,10 +7,10 @@ import {updateHotkeyTip} from "../util/compatibility";
 
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
     let elementRect = element.getBoundingClientRect();
-    element.addEventListener("scroll", (event) => {
+    element.addEventListener("scroll", () => {
         if (!protyle.toolbar.element.classList.contains("fn__none")) {
             const initY = protyle.toolbar.element.getAttribute("data-inity").split(Constants.ZWSP);
-            const top = parseInt(initY[0]) + (parseInt(initY[1]) - element.scrollTop)
+            const top = parseInt(initY[0]) + (parseInt(initY[1]) - element.scrollTop);
             if (elementRect.width === 0) {
                 elementRect = element.getBoundingClientRect();
             }

@@ -89,7 +89,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             range.collapse(false);
             blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             const trimStartText = editableElement ? editableElement.textContent.trimStart() : "";
-            if (editableElement && (trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
+            if (editableElement &&
+                // 引用内容为 ```test% 会导致错误
+                !editableElement.querySelector('[data-type="block-ref"]') &&
+                (trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
                 trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1)) {
                 if (editableElement.innerHTML.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
                     // ```test` 不处理

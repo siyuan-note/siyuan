@@ -480,8 +480,13 @@ func (conf *AppConf) GetClosedBoxes() (ret []*Box) {
 	return
 }
 
-func (conf *AppConf) Language(num int) string {
-	return langs[conf.Lang][num]
+func (conf *AppConf) Language(num int) (ret string) {
+	ret = langs[conf.Lang][num]
+	if "" != ret {
+		return
+	}
+	ret = langs["en_US"][num]
+	return
 }
 
 func InitBoxes() {

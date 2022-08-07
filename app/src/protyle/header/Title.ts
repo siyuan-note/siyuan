@@ -360,6 +360,10 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
                 range.selectNodeContents(this.editElement);
                 focusByRange(range);
             }
+            const loadingElement = protyle.element.querySelector(".fn__loading");
+            if (loadingElement) {
+                loadingElement.remove();
+            }
             if (scrollAttr) {
                 restoreScroll(protyle, scrollAttr === Constants.CB_GET_SCROLL ? undefined : scrollAttr);
             }

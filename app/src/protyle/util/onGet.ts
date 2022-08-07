@@ -17,10 +17,6 @@ import {preventScroll} from "../scroll/preventScroll";
 import {restoreScroll} from "../scroll/saveScroll";
 
 export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] = [], scrollAttr?: string) => {
-    const loadingElement = protyle.element.querySelector(".fn__loading");
-    if (loadingElement) {
-        loadingElement.remove();
-    }
     protyle.wysiwyg.element.removeAttribute("data-top");
     if (data.code === 1) {
         // 其他报错
@@ -97,8 +93,14 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
         action,
     }, protyle);
 
-    if (scrollAttr && ((protyle.options.render.title && protyle.title.editElement.getAttribute("data-render") === "true") || !protyle.options.render.title)) {
-        restoreScroll(protyle, scrollAttr);
+    if ((protyle.options.render.title && protyle.title.editElement.getAttribute("data-render") === "true") || !protyle.options.render.title) {
+        const loadingElement = protyle.element.querySelector(".fn__loading");
+        if (loadingElement) {
+            loadingElement.remove();
+        }
+        if (scrollAttr) {
+            restoreScroll(protyle, scrollAttr);
+        }
     }
 };
 

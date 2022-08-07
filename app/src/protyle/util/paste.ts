@@ -119,8 +119,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
         return;
     }
-    protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-        item.classList.remove("protyle-wysiwyg--select");
+    protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select, .protyle-wysiwyg--hl").forEach(item => {
+        item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
     });
     const code = processPasteCode(textHTML, textPlain);
     const range = getEditorRange(protyle.wysiwyg.element);
@@ -189,7 +189,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 tempElement.innerHTML = textHTML.substr(1);
                 let isBlock = false;
                 tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
-                    e.classList.remove("protyle-wysiwyg--select");
+                    e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
                     isBlock = true;
                 });
                 if (nodeElement.classList.contains("table")) {
@@ -206,7 +206,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
                     const newId = Lute.NewNodeID();
                     e.setAttribute("data-node-id", newId);
-                    e.classList.remove("protyle-wysiwyg--select");
+                    e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
                     if (e.getAttribute("updated")) {
                         e.setAttribute("updated", newId.split("-")[0]);
                     }

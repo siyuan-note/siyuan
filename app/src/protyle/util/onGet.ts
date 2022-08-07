@@ -14,8 +14,9 @@ import {pushBack} from "../../util/backForward";
 import {focusBlock} from "./selection";
 import {hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
+import {restoreScroll} from "../scroll/saveScroll";
 
-export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] = []) => {
+export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] = [], scrollAttr?: string) => {
     const loadingElement = protyle.element.querySelector(".fn__loading");
     if (loadingElement) {
         loadingElement.remove();
@@ -80,7 +81,8 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     }
 
     if (protyle.options.render.title) {
-        protyle.title.render(protyle, false, action);
+        // 页签没有打开
+        protyle.title.render(protyle, false, scrollAttr ? scrollAttr : (action.includes(Constants.CB_GET_SCROLL) ? Constants.CB_GET_SCROLL : null));
     } else if (protyle.options.render.background) {
         fetchPost("/api/block/getDocInfo", {
             id: protyle.block.rootID
@@ -94,6 +96,10 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
         content: html,
         action,
     }, protyle);
+
+    if (scrollAttr && ((protyle.options.render.title && protyle.title.editElement.getAttribute("data-render") === "true") || !protyle.options.render.title)) {
+        restoreScroll(protyle, scrollAttr);
+    }
 };
 
 const setHTML = (options: { content: string, action?: string[] }, protyle: IProtyle) => {

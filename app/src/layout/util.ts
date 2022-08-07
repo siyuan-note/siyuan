@@ -25,6 +25,7 @@ import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {updatePanelByEditor} from "../editor/util";
 import {Constants} from "../constants";
 import {openSearch} from "../search/spread";
+import {saveScroll} from "../protyle/scroll/saveScroll";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("block__icons--active") || element.classList.contains("layout__wnd--active")) {
@@ -210,7 +211,8 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
             tab: (layout as Tab),
             blockId: json.blockId,
             mode: json.mode,
-            action: [json.action]
+            action: [json.action],
+            scrollAttr: json.scrollAttr,
         }));
     } else if (json.instance === "Asset") {
         (layout as Tab).addModel(new Asset({
@@ -364,6 +366,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
         json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : "";
         json.instance = "Editor";
+        json.scrollAttr = saveScroll(layout.editor.protyle, true);
     } else if (layout instanceof Asset) {
         json.path = layout.path;
         json.instance = "Asset";
@@ -470,7 +473,8 @@ export const copyTab = (tab: Tab) => {
             if (tab.model instanceof Editor) {
                 model = new Editor({
                     tab: newTab,
-                    blockId: tab.model.editor.protyle.block.rootID
+                    blockId: tab.model.editor.protyle.block.rootID,
+                    scrollAttr: saveScroll(tab.model.editor.protyle, true)
                 });
             } else if (tab.model instanceof Asset) {
                 model = new Asset({

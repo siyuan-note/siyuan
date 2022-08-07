@@ -22,6 +22,8 @@ import {getAllModels} from "../../layout/getAll";
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {onGet} from "../util/onGet";
+import {saveScroll} from "../scroll/saveScroll";
+import {hideElements} from "../ui/hideElements";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -218,7 +220,7 @@ export class Breadcrumb {
                 label: window.siyuan.languages.netImg2LocalAsset,
                 icon: "iconTransform",
                 accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
-                click () {
+                click() {
                     netImg2LocalAssets(protyle);
                 }
             }).element);
@@ -226,6 +228,7 @@ export class Breadcrumb {
                 label: window.siyuan.languages.optimizeTypography,
                 icon: "iconFormat",
                 click: () => {
+                    hideElements(["toolbar"], protyle);
                     fetchPost("/api/format/autoSpace", {
                         id: protyle.block.rootID
                     }, () => {
@@ -235,7 +238,7 @@ export class Breadcrumb {
                             mode: 0,
                             size: Constants.SIZE_GET,
                         }, getResponse => {
-                            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+                            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
                         });
                         /// #else
                         getAllModels().editor.forEach(item => {
@@ -245,7 +248,7 @@ export class Breadcrumb {
                                     mode: 0,
                                     size: Constants.SIZE_GET,
                                 }, getResponse => {
-                                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
+                                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
                                 });
                             }
                         });
@@ -274,7 +277,7 @@ export class Breadcrumb {
                         mode: 0,
                         size: protyle.block.showAll ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
                     }, getResponse => {
-                        onGet(getResponse, protyle, protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]);
+                        onGet(getResponse, protyle, protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
                     });
                 }
             }).element);

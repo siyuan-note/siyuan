@@ -14,7 +14,8 @@ export class Editor extends Model {
         tab: Tab,
         blockId: string,
         mode?: TEditorMode,
-        action?: string[]
+        action?: string[],
+        scrollAttr?: string
     }) {
         super({
             id: options.tab.id,
@@ -31,6 +32,7 @@ export class Editor extends Model {
         blockId: string,
         action?: string[]
         mode?: TEditorMode,
+        scrollAttr?: string
     }) {
         this.editor = new Protyle(this.element, {
             action: options.action,
@@ -41,6 +43,7 @@ export class Editor extends Model {
                 background: true,
                 scroll: true,
             },
+            scrollAttr: options.scrollAttr,
             typewriterMode: true,
             after: (editor) => {
                 if (window.siyuan.config.readonly) {

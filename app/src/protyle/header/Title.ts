@@ -325,9 +325,9 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
         }
     }
 
-    public render(protyle: IProtyle, refresh = false, action:string[] = []) {
+    public render(protyle: IProtyle, refresh = false, scrollAttr?: string) {
         if (this.editElement.getAttribute("data-render") === "true" && !refresh) {
-            return;
+            return false;
         }
         fetchPost("/api/block/getDocInfo", {
             id: protyle.block.rootID
@@ -360,9 +360,8 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
                 range.selectNodeContents(this.editElement);
                 focusByRange(range);
             }
-
-            if (action.includes(Constants.CB_GET_SCROLL)) {
-                restoreScroll(protyle);
+            if (scrollAttr) {
+                restoreScroll(protyle, scrollAttr === Constants.CB_GET_SCROLL ? undefined : scrollAttr);
             }
         });
     }

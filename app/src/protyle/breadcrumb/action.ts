@@ -5,12 +5,15 @@ import {addLoading, setPadding} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {onGet} from "../util/onGet";
+import {saveScroll} from "../scroll/saveScroll";
+import {hideElements} from "../ui/hideElements";
 
 export const netImg2LocalAssets = (protyle: IProtyle) => {
     if (protyle.element.querySelector(".fn__loading")) {
         return;
     }
     addLoading(protyle);
+    hideElements(["toolbar"], protyle);
     fetchPost("/api/format/netImg2LocalAssets", {
         id: protyle.block.rootID
     }, () => {
@@ -20,7 +23,7 @@ export const netImg2LocalAssets = (protyle: IProtyle) => {
             mode: 0,
             size: Constants.SIZE_GET,
         }, getResponse => {
-            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
         });
         /// #else
         getAllModels().editor.forEach(item => {
@@ -30,7 +33,7 @@ export const netImg2LocalAssets = (protyle: IProtyle) => {
                     mode: 0,
                     size: Constants.SIZE_GET,
                 }, getResponse => {
-                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
+                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
                 });
             }
         });

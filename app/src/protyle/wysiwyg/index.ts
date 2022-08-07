@@ -1357,33 +1357,33 @@ export class WYSIWYG {
 
                 fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                     /// #if MOBILE
-                    openMobileFileById(refBlockId, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL]);
+                    openMobileFileById(refBlockId, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                     /// #else
                     if (window.siyuan.shiftIsPressed) {
                         openFileById({
                             id: refBlockId,
                             position: "bottom",
-                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                             zoomIn: foldResponse.data
                         });
                     } else if (window.siyuan.altIsPressed) {
                         openFileById({
                             id: refBlockId,
                             position: "right",
-                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                             zoomIn: foldResponse.data
                         });
                     } else if (window.siyuan.ctrlIsPressed) {
                         openFileById({
                             id: refBlockId,
-                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL],
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT],
                             keepCursor: true,
                             zoomIn: foldResponse.data
                         });
                     } else {
                         openFileById({
                             id: refBlockId,
-                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                             zoomIn: foldResponse.data
                         });
                     }

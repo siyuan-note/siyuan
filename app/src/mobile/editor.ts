@@ -53,7 +53,7 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL], p
             fetchPost("/api/filetree/getDoc", {
                 id,
                 size: action.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
-                mode: !action.includes(Constants.CB_GET_ALL) ? 3 : 0,
+                mode: action.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
             }, getResponse => {
                 onGet(getResponse, window.siyuan.mobileEditor.protyle, action);
                 window.siyuan.mobileEditor.protyle.breadcrumb.render(window.siyuan.mobileEditor.protyle);

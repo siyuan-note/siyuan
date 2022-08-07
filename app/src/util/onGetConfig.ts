@@ -342,7 +342,7 @@ const initWindow = () => {
         }
         openFileById({
             id: url.substr(16, 22),
-            action: [Constants.CB_GET_FOCUS],
+            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
             zoomIn: getSearch("focus", url) === "1"
         });
     });

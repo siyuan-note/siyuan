@@ -89,7 +89,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                 openFileById({
                     id: refBlockId,
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL],
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT],
                     keepCursor: true,
                     zoomIn: foldResponse.data
                 });
@@ -105,7 +105,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 openFileById({
                     id: refBlockId,
                     position: "right",
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                     zoomIn: foldResponse.data
                 });
             });
@@ -120,7 +120,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 openFileById({
                     id: refBlockId,
                     position: "bottom",
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                     zoomIn: foldResponse.data
                 });
             });
@@ -354,7 +354,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
     if (window.siyuan.mobileEditor) {
         window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({
             id,
-            action: id === protyle.block.rootID ? [Constants.CB_GET_HL] : [Constants.CB_GET_ALL]
+            action: id === protyle.block.rootID ? [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT] : [Constants.CB_GET_ALL]
         }));
         window.siyuan.backStack.push({
             id: protyle.block.id,

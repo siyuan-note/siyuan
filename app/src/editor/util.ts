@@ -198,7 +198,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     if ((!nodeElement || nodeElement?.clientHeight === 0) && options.id !== options.rootID) {
         fetchPost("/api/filetree/getDoc", {
             id: options.id,
-            mode: (options.action && !options.action.includes(Constants.CB_GET_ALL)) ? 3 : 0,
+            mode: (options.action && options.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: Constants.SIZE_GET,
         }, getResponse => {
             onGet(getResponse, editor.editor.protyle, options.action);

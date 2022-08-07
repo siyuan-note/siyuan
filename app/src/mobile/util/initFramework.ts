@@ -118,7 +118,7 @@ export const initFramework = () => {
             } else {
                 fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                     if (response.data.length !== 0) {
-                        openMobileFileById(response.data[0].id);
+                        openMobileFileById(response.data[0].id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                     } else {
                         setEmpty();
                     }

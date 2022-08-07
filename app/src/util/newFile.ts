@@ -67,7 +67,7 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
         }, () => {
             /// #if !MOBILE
             if (open) {
-                openFileById({id, action: [Constants.CB_GET_HL]});
+                openFileById({id, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
             }
             /// #endif
         });

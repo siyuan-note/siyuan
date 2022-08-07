@@ -334,7 +334,7 @@ export class Wnd {
                 } else {
                     openFileById({
                         id: keepCursorId,
-                        action: [Constants.CB_GET_FOCUS]
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                     });
                 }
                 currentTab.headElement.removeAttribute("keep-cursor");

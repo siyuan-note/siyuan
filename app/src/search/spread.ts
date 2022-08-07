@@ -468,7 +468,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                 openFileById({
                     id,
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                     zoomIn: foldResponse.data
                 });
                 dialog.destroy();
@@ -591,7 +591,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
                             fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                                 openFileById({
                                     id,
-                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                                     zoomIn: foldResponse.data,
                                     position: "right"
                                 });
@@ -614,7 +614,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
                     fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                         openFileById({
                             id,
-                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                             zoomIn: foldResponse.data
                         });
                         dialog.destroy();
@@ -643,7 +643,7 @@ const getArticle = (options: {
         if (!protyle) {
             protyle = new Protyle(options.dialog.element.querySelector("#searchPreview") as HTMLElement, {
                 blockId: options.id,
-                action: foldResponse.data ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL],
+                action: foldResponse.data ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT],
                 key: options.k,
                 render: {
                     gutter: true,

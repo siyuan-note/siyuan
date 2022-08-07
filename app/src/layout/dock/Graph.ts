@@ -598,13 +598,13 @@ export class Graph extends Model {
                         openFileById({
                             id: node.id,
                             position: "bottom",
-                            action: [Constants.CB_GET_FOCUS]
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                         });
                     } else if (window.siyuan.altIsPressed) {
                         openFileById({
                             id: node.id,
                             position: "right",
-                            action: [Constants.CB_GET_FOCUS]
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                         });
                     } else if (window.siyuan.ctrlIsPressed) {
                         window.siyuan.blockPanels.push(new BlockPanel({
@@ -612,7 +612,7 @@ export class Graph extends Model {
                             nodeIds: [node.id],
                         }));
                     } else {
-                        openFileById({id: node.id, action: [Constants.CB_GET_FOCUS]});
+                        openFileById({id: node.id, action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]});
                     }
                 });
             }, 1000);

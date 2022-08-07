@@ -29,7 +29,7 @@ export class MobileOutline {
             click: (element: HTMLElement) => {
                 const id = element.getAttribute("data-node-id");
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                    openMobileFileById(id,foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID]);
+                    openMobileFileById(id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT]);
                 });
             }
         });

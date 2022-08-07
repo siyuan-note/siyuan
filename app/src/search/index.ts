@@ -116,7 +116,7 @@ export class Search extends Model {
                                     fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                                         openFileById({
                                             id,
-                                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                                             zoomIn: foldResponse.data,
                                             position: "right",
                                         });
@@ -135,7 +135,7 @@ export class Search extends Model {
                             fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                                 openFileById({
                                     id,
-                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS],
+                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                                     zoomIn: foldResponse.data
                                 });
                             });
@@ -196,7 +196,7 @@ export class Search extends Model {
             } else {
                 this.protyle = new Protyle(this.element.querySelector("#searchPreview") as HTMLElement, {
                     blockId: id,
-                    action: foldResponse.data ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL],
+                    action: foldResponse.data ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT],
                     key: value,
                     render: {
                         gutter: true,

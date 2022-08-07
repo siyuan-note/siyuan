@@ -506,11 +506,11 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 }, () => {
                     insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">Untitled</span>`), protyle);
                     /// #if MOBILE
-                    openMobileFileById(newSubDocId);
+                    openMobileFileById(newSubDocId, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                     /// #else
                     openFileById({
                         id: newSubDocId,
-                        action: [Constants.CB_GET_HL]
+                        action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]
                     });
                     /// #endif
                 });

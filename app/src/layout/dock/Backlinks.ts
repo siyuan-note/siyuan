@@ -137,27 +137,28 @@ export class Backlinks extends Model {
             click(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
             ctrlClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     keepCursor: true,
+                    action: [Constants.CB_GET_CONTEXT]
                 });
             },
             altClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "right",
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
             shiftClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             }
         });
@@ -187,7 +188,7 @@ export class Backlinks extends Model {
                 } else {
                     openFileById({
                         id: element.getAttribute("data-node-id"),
-                        action: [Constants.CB_GET_FOCUS]
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                     });
                 }
             },
@@ -195,20 +196,21 @@ export class Backlinks extends Model {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     keepCursor: true,
+                    action: [Constants.CB_GET_CONTEXT]
                 });
             },
             altClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "right",
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
             shiftClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
             blockExtHTML: `<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`

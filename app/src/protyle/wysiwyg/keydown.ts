@@ -1533,6 +1533,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 openFileById({
                     id,
                     keepCursor: true,
+                    action: [Constants.CB_GET_CONTEXT]
                 });
                 event.preventDefault();
                 event.stopPropagation();
@@ -1541,7 +1542,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 openFileById({
                     id,
                     position: "right",
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
                 event.preventDefault();
                 event.stopPropagation();
@@ -1550,7 +1551,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 openFileById({
                     id,
                     position: "bottom",
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
                 event.preventDefault();
                 event.stopPropagation();

@@ -1,12 +1,16 @@
-import {Constants} from "../../constants";
 import {hasClosestBlock} from "../util/hasClosest";
 import {focusByOffset, getSelectionOffset} from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {zoomOut} from "../../menus/protyle";
 import {preventScroll} from "./preventScroll";
+import {pushBack} from "../../util/backForward";
 
-export const saveScroll = (protyle: IProtyle, getString = false) => {
-    let attr = `${protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id")}${Constants.ZWSP}${protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id")}${Constants.ZWSP}${protyle.contentElement.scrollTop}`;
+export const saveScroll = (protyle: IProtyle, getObject = false) => {
+    const attr: IScrollAttr = {
+        startId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
+        endId: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+        scrollTop: protyle.contentElement.scrollTop
+    }
     let range: Range
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0)
@@ -16,45 +20,58 @@ export const saveScroll = (protyle: IProtyle, getString = false) => {
         const blockElement = hasClosestBlock(range.startContainer);
         if (blockElement) {
             const position = getSelectionOffset(blockElement, undefined, range);
-            attr += `${Constants.ZWSP}${blockElement.getAttribute("data-node-id")}${Constants.ZWSP}${position.start}${Constants.ZWSP}${position.end}`;
+            attr.focusId = blockElement.getAttribute("data-node-id");
+            attr.focusStart = position.start
+            attr.focusEnd = position.end
+
         }
     }
     if (protyle.block.showAll) {
-        attr += `${Constants.ZWSP}${protyle.block.id}`;
+        attr.zoomInId = protyle.block.id
     }
-    if (getString) {
+    if (getObject) {
         return attr;
     }
     fetchPost("/api/attr/setBlockAttrs", {id: protyle.block.rootID, attrs: {scroll: attr}}, () => {
-        protyle.wysiwyg.element.setAttribute("scroll", attr);
+        protyle.wysiwyg.element.setAttribute("scroll", JSON.stringify(attr));
     });
 }
 
-export const restoreScroll = (protyle: IProtyle, scrollAttr?: string) => {
-    const attr = scrollAttr || protyle.wysiwyg.element.getAttribute("scroll")
-    if (!attr) {
-        return;
-    }
+export const restoreScroll = (protyle: IProtyle, scrollAttr: IScrollAttr) => {
     preventScroll(protyle);
-    const [startId, endId, scrollTop, focusId, focusStart, focusEnd, zoomInId] = attr.split(Constants.ZWSP);
-    if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id") === startId &&
-        protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id") === endId) {
-        protyle.contentElement.scrollTop = parseInt(scrollTop);
-        focusByOffset(protyle.wysiwyg.element.querySelector(`[data-node-id="${focusId}"]`), parseInt(focusStart), parseInt(focusEnd));
-    } else if (zoomInId && protyle.block.id !== zoomInId) {
-        zoomOut(protyle, zoomInId, undefined, false, () => {
-            protyle.contentElement.scrollTop = parseInt(scrollTop);
-            focusByOffset(protyle.wysiwyg.element.querySelector(`[data-node-id="${focusId}"]`), parseInt(focusStart), parseInt(focusEnd));
+    if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id") === scrollAttr.startId &&
+        protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id") === scrollAttr.endId) {
+        // 需等动画效果完毕，才能获得最大高度。否则尾部定位无法滚动到底部
+        setTimeout(() => {
+            protyle.contentElement.scrollTop = scrollAttr.scrollTop;
+        }, 256);
+        if (scrollAttr.focusId) {
+            const range = focusByOffset(protyle.wysiwyg.element.querySelector(`[data-node-id="${scrollAttr.focusId}"]`), scrollAttr.focusStart, scrollAttr.focusEnd);
+            /// #if !MOBILE
+            pushBack(protyle, range || undefined);
+            /// #endif
+        }
+    } else if (scrollAttr.zoomInId && protyle.block.id !== scrollAttr.zoomInId) {
+        zoomOut(protyle, scrollAttr.zoomInId, undefined, true, () => {
+            protyle.contentElement.scrollTop = scrollAttr.scrollTop;
+            if (scrollAttr.focusId) {
+                focusByOffset(protyle.wysiwyg.element.querySelector(`[data-node-id="${scrollAttr.focusId}"]`), scrollAttr.focusStart, scrollAttr.focusEnd);
+            }
         });
     } else if (!protyle.scroll.element.classList.contains("fn__none")) {
         fetchPost("/api/filetree/getDoc", {
             id: protyle.block.id,
-            startID: startId,
-            endID: endId,
+            startID: scrollAttr.startId,
+            endID: scrollAttr.endId,
         }, getResponse => {
             protyle.wysiwyg.element.innerHTML = getResponse.data.content;
-            protyle.contentElement.scrollTop = parseInt(scrollTop);
-            focusByOffset(protyle.wysiwyg.element.querySelector(`[data-node-id="${focusId}"]`), parseInt(focusStart), parseInt(focusEnd));
+            protyle.contentElement.scrollTop = scrollAttr.scrollTop;
+            if (scrollAttr.focusId) {
+                const range = focusByOffset(protyle.wysiwyg.element.querySelector(`[data-node-id="${scrollAttr.focusId}"]`), scrollAttr.focusStart, scrollAttr.focusEnd);
+                /// #if !MOBILE
+                pushBack(protyle, range || undefined);
+                /// #endif
+            }
         })
     }
 }

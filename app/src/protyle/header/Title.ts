@@ -325,48 +325,37 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
         }
     }
 
-    public render(protyle: IProtyle, refresh = false, scrollAttr?: string) {
+    public render(protyle: IProtyle, response: IWebSocketData, refresh = false) {
         if (this.editElement.getAttribute("data-render") === "true" && !refresh) {
             return false;
         }
-        fetchPost("/api/block/getDocInfo", {
-            id: protyle.block.rootID
-        }, (response) => {
-            setTitle(response.data.ial.title);
-            protyle.background.render(response.data.ial, protyle.block.rootID);
-            protyle.wysiwyg.renderCustom(response.data.ial);
-            this.editElement.setAttribute("data-render", "true");
-            this.setTitle(response.data.ial.title);
-            let nodeAttrHTML = "";
-            if (response.data.ial.bookmark) {
-                nodeAttrHTML += `<div class="protyle-attr--bookmark">${Lute.EscapeHTMLStr(response.data.ial.bookmark)}</div>`;
-            }
-            if (response.data.ial.name) {
-                nodeAttrHTML += `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${Lute.EscapeHTMLStr(response.data.ial.name)}</div>`;
-            }
-            if (response.data.ial.alias) {
-                nodeAttrHTML += `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${Lute.EscapeHTMLStr(response.data.ial.alias)}</div>`;
-            }
-            if (response.data.ial.memo) {
-                nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${Lute.EscapeHTMLStr(response.data.ial.memo)}"><svg><use xlink:href="#iconM"></use></svg></div>`;
-            }
-            this.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
-            if (response.data.refCount !== 0) {
-                this.element.querySelector(".protyle-attr").insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids='${JSON.stringify([protyle.block.rootID])}' data-id='${JSON.stringify(response.data.refIDs)}'>${response.data.refCount}</div>`);
-            }
-            // 存在设置新建文档名模板，不能使用 Untitled 进行判断，https://ld246.com/article/1649301009888
-            if (new Date().getTime() - dayjs(response.data.id.split("-")[0]).toDate().getTime() < 2000) {
-                const range = this.editElement.ownerDocument.createRange();
-                range.selectNodeContents(this.editElement);
-                focusByRange(range);
-            }
-            const loadingElement = protyle.element.querySelector(".fn__loading");
-            if (loadingElement) {
-                loadingElement.remove();
-            }
-            if (scrollAttr) {
-                restoreScroll(protyle, scrollAttr === Constants.CB_GET_SCROLL ? undefined : scrollAttr);
-            }
-        });
+        setTitle(response.data.ial.title);
+        protyle.background.render(response.data.ial, protyle.block.rootID);
+        protyle.wysiwyg.renderCustom(response.data.ial);
+        this.editElement.setAttribute("data-render", "true");
+        this.setTitle(response.data.ial.title);
+        let nodeAttrHTML = "";
+        if (response.data.ial.bookmark) {
+            nodeAttrHTML += `<div class="protyle-attr--bookmark">${Lute.EscapeHTMLStr(response.data.ial.bookmark)}</div>`;
+        }
+        if (response.data.ial.name) {
+            nodeAttrHTML += `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${Lute.EscapeHTMLStr(response.data.ial.name)}</div>`;
+        }
+        if (response.data.ial.alias) {
+            nodeAttrHTML += `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${Lute.EscapeHTMLStr(response.data.ial.alias)}</div>`;
+        }
+        if (response.data.ial.memo) {
+            nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${Lute.EscapeHTMLStr(response.data.ial.memo)}"><svg><use xlink:href="#iconM"></use></svg></div>`;
+        }
+        this.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
+        if (response.data.refCount !== 0) {
+            this.element.querySelector(".protyle-attr").insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids='${JSON.stringify([protyle.block.rootID])}' data-id='${JSON.stringify(response.data.refIDs)}'>${response.data.refCount}</div>`);
+        }
+        // 存在设置新建文档名模板，不能使用 Untitled 进行判断，https://ld246.com/article/1649301009888
+        if (new Date().getTime() - dayjs(response.data.id.split("-")[0]).toDate().getTime() < 2000) {
+            const range = this.editElement.ownerDocument.createRange();
+            range.selectNodeContents(this.editElement);
+            focusByRange(range);
+        }
     }
 }

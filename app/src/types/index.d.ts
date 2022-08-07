@@ -126,6 +126,16 @@ interface ISiyuan {
     dialogs: import("../dialog").Dialog[],
 }
 
+interface IScrollAttr {
+    startId: string,
+    endId: string
+    scrollTop: number,
+    focusId?: string,
+    focusStart?: number
+    focusEnd?: number
+    zoomInId?: string
+}
+
 interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id: string,

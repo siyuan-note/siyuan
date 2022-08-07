@@ -346,7 +346,7 @@ interface IOptions {
     mode?: TEditorMode,
     blockId: string
     key?: string
-    scrollAttr?: string
+    scrollAttr?: IScrollAttr
     defId?: string
     render?: {
         background?: boolean

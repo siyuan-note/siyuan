@@ -271,13 +271,12 @@ export class Breadcrumb {
                 accelerator: window.siyuan.config.keymap.editor.general.refresh.custom,
                 label: window.siyuan.languages.refresh,
                 click: () => {
-                    protyle.title?.render(protyle, true);
                     fetchPost("/api/filetree/getDoc", {
                         id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
                         mode: 0,
                         size: protyle.block.showAll ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
                     }, getResponse => {
-                        onGet(getResponse, protyle, protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
+                        onGet(getResponse, protyle, protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS], saveScroll(protyle, true), true);
                     });
                 }
             }).element);

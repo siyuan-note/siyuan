@@ -15,7 +15,7 @@ export class Editor extends Model {
         blockId: string,
         mode?: TEditorMode,
         action?: string[],
-        scrollAttr?: string
+        scrollAttr?: IScrollAttr
     }) {
         super({
             id: options.tab.id,
@@ -32,7 +32,7 @@ export class Editor extends Model {
         blockId: string,
         action?: string[]
         mode?: TEditorMode,
-        scrollAttr?: string
+        scrollAttr?: IScrollAttr
     }) {
         this.editor = new Protyle(this.element, {
             action: options.action,

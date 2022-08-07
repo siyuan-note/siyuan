@@ -282,7 +282,7 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
 
 export const focusByOffset = (container: Node, start: number, end: number) => {
     if (!container) {
-        return;
+        return false;
     }
     let startNode;
     searchNode(container, container.firstChild, node => {
@@ -342,6 +342,7 @@ export const focusByOffset = (container: Node, start: number, end: number) => {
         }
     }
     focusByRange(range);
+    return range;
 };
 
 export const focusByWbr = (element: Element, range: Range) => {

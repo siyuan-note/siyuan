@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
-		"updated": "20220722002630"
+		"updated": "20220807180440"
 	},
 	"Children": [
 		{
@@ -2024,6 +2024,72 @@
 								{
 									"Type": "NodeText",
 									"Data": ": ignore PDF files under data/assets/"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220807180431-h2gd37z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220807180431-h2gd37z",
+				"updated": "20220807180440"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Note"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220807180431-4175cz3",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220807180431-4175cz3",
+				"updated": "20220807180431"
+			},
+			"Children": [
+				{
+					"ID": "20220807180431-97qvi51",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220807180431-97qvi51",
+						"updated": "20220807180431"
+					},
+					"Children": [
+						{
+							"ID": "20220807180431-8hzorql",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220807180431-8hzorql",
+								"updated": "20220807180431"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Symlinks and hidden files are not snapshotted"
 								}
 							]
 						}

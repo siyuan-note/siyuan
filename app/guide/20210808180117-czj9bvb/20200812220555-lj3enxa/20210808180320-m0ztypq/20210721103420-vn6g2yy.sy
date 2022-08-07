@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210721103420-vn6g2yy",
 		"title": "数据同步",
-		"updated": "20220708101339"
+		"updated": "20220807180028"
 	},
 	"Children": [
 		{
@@ -859,7 +859,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721105956-5brxg8n",
-				"updated": "20220420100248"
+				"updated": "20220807180028"
 			},
 			"Children": [
 				{
@@ -927,7 +927,7 @@
 					},
 					"Properties": {
 						"id": "20210930212631-4wl4ki5",
-						"updated": "20210930212733"
+						"updated": "20220807180028"
 					},
 					"Children": [
 						{
@@ -935,12 +935,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210930212631-j8fvgm3",
-								"updated": "20210930212733"
+								"updated": "20220807180028"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "符号链接不会被同步"
+									"Data": "符号链接和隐藏文件不会被同步"
 								}
 							]
 						}

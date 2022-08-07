@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
-		"updated": "20220722002029"
+		"updated": "20220807180341"
 	},
 	"Children": [
 		{
@@ -2061,10 +2061,69 @@
 		},
 		{
 			"ID": "20220708101225-a2lxbp0",
-			"Type": "NodeParagraph",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20220708101225-a2lxbp0"
-			}
+				"id": "20220708101225-a2lxbp0",
+				"updated": "20220807180307"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220807180308-7hyw96s",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220807180308-7hyw96s",
+				"updated": "20220807180341"
+			},
+			"Children": [
+				{
+					"ID": "20220807180328-2km55lx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220807180328-2km55lx",
+						"updated": "20220807180341"
+					},
+					"Children": [
+						{
+							"ID": "20220807180328-x8lpi2n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220807180328-x8lpi2n",
+								"updated": "20220807180341"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "符号链接和隐藏文件不会被快照"
+								}
+							]
+						}
+					]
+				}
+			]
 		}
 	]
 }

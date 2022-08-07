@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226122707-8cr09co",
 		"title": "數據歷史",
-		"updated": "20220722002508"
+		"updated": "20220807180409"
 	},
 	"Children": [
 		{
@@ -2022,6 +2022,72 @@
 								{
 									"Type": "NodeText",
 									"Data": "：忽略 data/assets/ 下的 PDF 文件"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220807180409-9dx2tzy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220807180409-9dx2tzy",
+				"updated": "20220807180409"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220807180409-c8hxypa",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220807180409-c8hxypa",
+				"updated": "20220807180409"
+			},
+			"Children": [
+				{
+					"ID": "20220807180409-15xx03b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220807180409-15xx03b",
+						"updated": "20220807180409"
+					},
+					"Children": [
+						{
+							"ID": "20220807180409-b973rr1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220807180409-b973rr1",
+								"updated": "20220807180409"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "符號鏈接和隱藏文件不會被快照"
 								}
 							]
 						}

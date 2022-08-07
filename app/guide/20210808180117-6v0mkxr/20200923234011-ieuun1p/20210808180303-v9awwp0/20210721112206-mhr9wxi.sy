@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
-		"updated": "20220708104604"
+		"updated": "20220807180100"
 	},
 	"Children": [
 		{
@@ -819,7 +819,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721112403-th2r6zf",
-				"updated": "20220420100331"
+				"updated": "20220807180100"
 			},
 			"Children": [
 				{
@@ -887,7 +887,7 @@
 					},
 					"Properties": {
 						"id": "20210930212724-54kv4ez",
-						"updated": "20210930212744"
+						"updated": "20220807180100"
 					},
 					"Children": [
 						{
@@ -895,12 +895,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210930212724-tzon0le",
-								"updated": "20210930212744"
+								"updated": "20220807180100"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Symbolic links will not be synchronized"
+									"Data": "Symbolic links and hidden files will not be synchronized"
 								}
 							]
 						}

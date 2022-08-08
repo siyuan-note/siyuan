@@ -190,7 +190,7 @@
 
 * [界面和内核](https://github.com/siyuan-note/siyuan)
 * [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)和[外观](https://github.com/siyuan-note/appearance)
-* [数据解析器](https://github.com/88250/protyle)和[编辑器引擎](https://github.com/88250/lute)
+* [编辑器引擎](https://github.com/88250/lute)
 * [端到端加密](https://github.com/siyuan-note/encryption)和[数据仓库](https://github.com/siyuan-note/dejavu)
 * [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
 * [Android 端](https://github.com/siyuan-note/siyuan-android)和 [iOS 端](https://github.com/siyuan-note/siyuan-ios)
@@ -272,7 +272,6 @@
 * [https://github.com/88250/lute](https://github.com/88250/lute) `Mulan PSL v2`
 * [https://github.com/olahol/melody](https://github.com/olahol/melody) `BSD-2-Clause License`
 * [https://github.com/pdfcpu/pdfcpu](https://github.com/pdfcpu/pdfcpu) `Apache-2.0 License`
-* [https://github.com/88250/protyle](https://github.com/88250/protyle) `Mulan PSL v2`
 * [https://github.com/blastrain/vitess-sqlparser](https://github.com/blastrain/vitess-sqlparser) `Apache-2.0 License`
 * [https://github.com/ConradIrwin/font](https://github.com/ConradIrwin/font) `MIT License`
 * [https://github.com/Masterminds/sprig](https://github.com/Masterminds/sprig) `MIT License`

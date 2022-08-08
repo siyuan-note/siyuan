@@ -24,7 +24,6 @@ import (
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/parse"
-	"github.com/88250/protyle"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -59,7 +58,7 @@ func loadTree(localPath string, luteEngine *lute.Lute) (ret *parse.Tree, err err
 		return
 	}
 
-	ret, err = protyle.ParseJSONWithoutFix(luteEngine, data)
+	ret, err = parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if nil != err {
 		logging.LogErrorf("parse json to tree [%s] failed: %s", localPath, err)
 		return

@@ -38,7 +38,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/html/atom"
 	"github.com/88250/lute/parse"
-	"github.com/88250/protyle"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -94,7 +94,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			err = readErr
 			return
 		}
-		tree, _, parseErr := protyle.ParseJSON(luteEngine, data)
+		tree, _, parseErr := parse.ParseJSON(data, luteEngine.ParseOptions)
 		if nil != parseErr {
 			logging.LogErrorf("parse .sy [%s] failed: %s", syPath, parseErr)
 			err = parseErr
@@ -144,7 +144,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	// 写回 .sy
 	for _, tree := range trees {
 		syPath := filepath.Join(unzipRootPath, tree.Path)
-		renderer := protyle.NewJSONRenderer(tree, luteEngine.RenderOptions)
+		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
 		data := renderer.Render()
 
 		buf := bytes.Buffer{}

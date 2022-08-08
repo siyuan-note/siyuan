@@ -7,10 +7,9 @@ require (
 	github.com/88250/css v0.1.2
 	github.com/88250/flock v0.8.2
 	github.com/88250/gulu v1.2.3-0.20220720144315-065ef35ec583
-	github.com/88250/lute v1.7.5-0.20220805051605-c55f139858b7
+	github.com/88250/lute v1.7.5-0.20220808043452-0771b1423c31
 	github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1
 	github.com/88250/pdfcpu v0.3.13
-	github.com/88250/protyle v0.0.0-20220808015153-2743f8d8dd1b
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732
 	github.com/Masterminds/sprig/v3 v3.2.2
@@ -131,7 +130,6 @@ replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20
 //replace github.com/88250/lute => D:\gogogo\src\github.com\88250\lute
 //replace github.com/88250/enumfonts => D:\88250\enumfonts
 //replace github.com/88250/pdfcpu => D:\88250\pdfcpu
-//replace github.com/88250/protyle => D:\88250\protyle
 //replace github.com/88250/gulu => D:\88250\gulu
 //replace github.com/88250/melody => D:\88250\melody
 //replace github.com/mattn/go-sqlite3 => D:\88250\go-sqlite3

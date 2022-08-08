@@ -25,7 +25,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/88250/protyle"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -70,7 +69,7 @@ func html2BlockDOM(c *gin.Context) {
 		}
 
 		if ast.NodeListItem == n.Type && nil == n.FirstChild {
-			newNode := protyle.NewParagraph()
+			newNode := parse.NewParagraph()
 			n.AppendChild(newNode)
 			n.SetIALAttr("updated", util.TimeFromID(newNode.ID))
 			return ast.WalkSkipChildren

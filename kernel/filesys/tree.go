@@ -28,7 +28,7 @@ import (
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/parse"
-	"github.com/88250/protyle"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -78,7 +78,7 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 			hPathBuilder.WriteString("Untitled/")
 			continue
 		}
-		parentTree, parseErr := protyle.ParseJSONWithoutFix(luteEngine, parentData)
+		parentTree, parseErr := parse.ParseJSONWithoutFix(parentData, luteEngine.ParseOptions)
 		if nil != parseErr {
 			logging.LogWarnf("parse parent tree [%s] failed: %s", parentPath, parseErr)
 			hPathBuilder.WriteString("Untitled/")
@@ -97,12 +97,12 @@ func WriteTree(tree *parse.Tree) (err error) {
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
 
 	if nil == tree.Root.FirstChild {
-		newP := protyle.NewParagraph()
+		newP := parse.NewParagraph()
 		tree.Root.AppendChild(newP)
 		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
 	}
 
-	renderer := protyle.NewJSONRenderer(tree, luteEngine.RenderOptions)
+	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
 	output := renderer.Render()
 
 	// .sy 文档数据使用格式化好的 JSON 而非单行 JSON
@@ -172,7 +172,7 @@ func recoverParseJSON2Tree(boxID, p, filePath string, luteEngine *lute.Lute) (re
 func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (ret *parse.Tree) {
 	var err error
 	var needFix bool
-	ret, needFix, err = protyle.ParseJSON(luteEngine, jsonData)
+	ret, needFix, err = parse.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if nil != err {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
 		return
@@ -181,7 +181,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 	ret.Box = boxID
 	ret.Path = p
 	if needFix {
-		renderer := protyle.NewJSONRenderer(ret, luteEngine.RenderOptions)
+		renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions)
 		output := renderer.Render()
 
 		buf := bytes.Buffer{}

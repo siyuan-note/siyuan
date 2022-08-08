@@ -207,13 +207,7 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
         }
         (layout as Wnd).addTab(child);
     } else if (json.instance === "Editor" && json.blockId) {
-        (layout as Tab).addModel(new Editor({
-            tab: (layout as Tab),
-            blockId: json.blockId,
-            mode: json.mode,
-            action: [json.action],
-            scrollAttr: json.scrollAttr,
-        }));
+        (layout as Tab).headElement.setAttribute("data-initdata", JSON.stringify(json));
     } else if (json.instance === "Asset") {
         (layout as Tab).addModel(new Asset({
             tab: (layout as Tab),
@@ -308,15 +302,6 @@ export const JSONToLayout = (isStart: boolean) => {
             }
         });
     }
-
-    setTimeout(() => {
-        getAllModels().editor.find(item => {
-            if (item.headElement.classList.contains("item--focus")) {
-                updatePanelByEditor(item.editor.protyle, false, false);
-                return true;
-            }
-        });
-    }, 520);
 };
 
 export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {

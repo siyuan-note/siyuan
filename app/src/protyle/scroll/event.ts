@@ -4,6 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {showMessage} from "../../dialog/message";
 import {updateHotkeyTip} from "../util/compatibility";
+import {isMobile} from "../../util/functions";
 
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
     let elementRect = element.getBoundingClientRect();
@@ -21,8 +22,12 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 protyle.toolbar.element.style.top = top + "px";
                 protyle.toolbar.element.style.display = "";
             }
-            return;
         }
+
+        if (!protyle.element.classList.contains("block__edit") && !isMobile()) {
+            protyle.contentElement.setAttribute("data-scrolltop", element.scrollTop.toString());
+        }
+
         if (!window.siyuan.dragElement) { // https://ld246.com/article/1649638389841
             hideElements(["gutter"], protyle);
         }

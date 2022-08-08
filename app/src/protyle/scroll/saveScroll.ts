@@ -9,13 +9,15 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
     const attr: IScrollAttr = {
         startId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
         endId: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
-        scrollTop: protyle.contentElement.scrollTop
+        scrollTop: protyle.contentElement.scrollTop || parseInt(protyle.contentElement.getAttribute("data-scrolltop")) || 0,
     }
     let range: Range
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0)
     }
-
+    if (!range || !protyle.wysiwyg.element.contains(range.startContainer)) {
+        range = protyle.toolbar.range
+    }
     if (range && protyle.wysiwyg.element.contains(range.startContainer)) {
         const blockElement = hasClosestBlock(range.startContainer);
         if (blockElement) {
@@ -23,9 +25,9 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
             attr.focusId = blockElement.getAttribute("data-node-id");
             attr.focusStart = position.start
             attr.focusEnd = position.end
-
         }
     }
+
     if (protyle.block.showAll) {
         attr.zoomInId = protyle.block.id
     }

@@ -312,6 +312,24 @@ export class Wnd {
             }
         });
 
+        const initData = currentTab.headElement.getAttribute("data-initdata")
+        if (initData) {
+            const json = JSON.parse(initData);
+            currentTab.addModel(new Editor({
+                tab: currentTab,
+                blockId: json.blockId,
+                mode: json.mode,
+                action: [json.action],
+                scrollAttr: json.scrollAttr,
+            }));
+            currentTab.headElement.removeAttribute("data-initdata");
+            return;
+        }
+
+        if (currentTab && target === currentTab.headElement && currentTab.model instanceof Graph) {
+            currentTab.model.onGraph(false);
+        }
+
         if (currentTab && currentTab.model instanceof Editor) {
             const keepCursorId = currentTab.headElement.getAttribute("keep-cursor");
             if (keepCursorId) {
@@ -343,28 +361,8 @@ export class Wnd {
             if (update) {
                 updatePanelByEditor(currentTab.model.editor.protyle, true, pushBack);
             }
-
-            // 切换到屏幕太高的页签 https://github.com/siyuan-note/siyuan/issues/5018
-            const protyle = currentTab.model.editor.protyle;
-            if (!protyle.scroll.element.classList.contains("fn__none") &&
-                protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true" &&
-                protyle.contentElement.scrollHeight > 0 &&
-                protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
-                fetchPost("/api/filetree/getDoc", {
-                    id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
-                    mode: 2,
-                    k: protyle.options.key || "",
-                    size: Constants.SIZE_GET,
-                }, getResponse => {
-                    onGet(getResponse, protyle, [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]);
-                });
-            }
         } else {
             updatePanelByEditor(undefined, false);
-        }
-
-        if (currentTab && target === currentTab.headElement && currentTab.model instanceof Graph) {
-            currentTab.model.onGraph(false);
         }
     }
 

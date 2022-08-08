@@ -5,7 +5,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20220808132844"
+		"updated": "20220808181824"
 	},
 	"Children": [
 		{
@@ -1787,224 +1787,31 @@
 			]
 		},
 		{
-			"ID": "20211226115356-ha8z0ho",
+			"ID": "20220808181824-pwnc2gx",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20211226115356-ha8z0ho",
-				"updated": "20211228141228"
+				"id": "20220808181824-pwnc2gx",
+				"updated": "20220808181824"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如何使用第三方同步碟進行資料同步？"
+					"Data": "支持通過第三方同步盤進行數據同步嗎？"
 				}
 			]
 		},
 		{
-			"ID": "20211226115356-3in0o6m",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20211226115356-3in0o6m",
-				"updated": "20211228141236"
-			},
-			"Children": [
-				{
-					"ID": "20211226115356-6mz51rm",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226115356-6mz51rm"
-					},
-					"Children": [
-						{
-							"ID": "20211226115356-ceokwxz",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226115356-ceokwxz"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "請僅同步 "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "工作空間/data/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，切勿同步整個工作空間"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226115356-8js1cre",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226115356-8js1cre",
-						"updated": "20211228141231"
-					},
-					"Children": [
-						{
-							"ID": "20211226115356-d8c1p84",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226115356-d8c1p84",
-								"updated": "20211228141231"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "思源運行期間請暫停第三方同步，否則可能會出現資料損壞，細節請參考"
-								},
-								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "這裡"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://ld246.com/article/1626537583158"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226115356-k2pkly3",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226115356-k2pkly3",
-						"updated": "20211228141236"
-					},
-					"Children": [
-						{
-							"ID": "20211226115356-74boopf",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226115356-74boopf",
-								"updated": "20211228141236"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Android 端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "資料文件"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "夾路徑為 "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "內部存儲設備/Android/data/org.b3log.siyuan/files/siyuan/data/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，該路徑是應用私有路徑，其他程式無法讀取，只能手動複製"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226115356-cbazfe6",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226115356-cbazfe6"
-					},
-					"Children": [
-						{
-							"ID": "20211226115356-gv0e4sv",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226115356-gv0e4sv"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "第三方同步和思源同步存在沖突，切勿同時使用"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220619172140-6g8du8b",
+			"ID": "20220808181824-qsqqcd6",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220619172140-6g8du8b",
-				"updated": "20220619172140"
+				"id": "20220808181824-qsqqcd6",
+				"updated": "20220808181824"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "另外，可以考慮手動導出導入 Data 實現數據同步："
+					"Data": "不支持通過第三方同步盤進行數據同步，否則可能會導致數據損壞。可以考慮手動導出導入 Data 實現數據同步："
 				}
 			]
 		},

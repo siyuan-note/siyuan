@@ -6,7 +6,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20220808132857"
+		"updated": "20220808181753"
 	},
 	"Children": [
 		{
@@ -1794,226 +1794,31 @@
 			]
 		},
 		{
-			"ID": "20210918115655-8l0v4yh",
+			"ID": "20220808181753-3ligpvz",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210918115655-8l0v4yh",
-				"updated": "20210918115655"
+				"id": "20220808181753-3ligpvz",
+				"updated": "20220808181753"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "How to use a third-party sync disk for data synchronization?"
+					"Data": "Does it support data synchronization through a third-party sync disk?"
 				}
 			]
 		},
 		{
-			"ID": "20210918115655-xrdjtf2",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20210918115655-xrdjtf2",
-				"updated": "20220619172447"
-			},
-			"Children": [
-				{
-					"ID": "20210918115655-xthu31m",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210918115655-xthu31m"
-					},
-					"Children": [
-						{
-							"ID": "20210918115655-8oet34i",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210918115655-8oet34i",
-								"updated": "20210918115730"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Please only synchronize the "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "workspace/data/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", do not synchronize the entire workspace"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210918115655-xpa2gg6",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210918115655-xpa2gg6"
-					},
-					"Children": [
-						{
-							"ID": "20210918115655-0df8htn",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210918115655-0df8htn",
-								"updated": "20210918115739"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Please suspend third-party synchronization during the operation of SiYuan, otherwise data may be damaged. For details, please "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "ref"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "er to "
-								},
-								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "here"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://ld246.com/article/1626537583158"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210918115655-4l7coo5",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210918115655-4l7coo5",
-						"updated": "20220619172442"
-					},
-					"Children": [
-						{
-							"ID": "20210918115655-9cckcjq",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210918115655-9cckcjq",
-								"updated": "20220619172442"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "The data folder path on the Android is "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "Internal storage device/Android/data/org.b3log.siyuan/files/siyuan/data/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", which is a private path of the application and cannot be read by other programs and can only be copied manually"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210918115655-fduo4hv",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210918115655-fduo4hv",
-						"updated": "20220619172447"
-					},
-					"Children": [
-						{
-							"ID": "20210918115655-wf89pn0",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210918115655-wf89pn0",
-								"updated": "20220619172447"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "There is a conflict between third-party synchronization and SiYuan synchronization, please do not use at the same time"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220619172044-0nxumxj",
+			"ID": "20220808181718-tcv74v2",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220619172044-0nxumxj",
-				"updated": "20220619172044"
+				"id": "20220808181718-tcv74v2",
+				"updated": "20220808181719"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In addition, you can consider manually exporting and importing Data to achieve data synchronization:"
+					"Data": "Data synchronization through third-party synchronization disks is not supported, otherwise data may be damaged. Consider manually exporting and importing Data for data synchronization:"
 				}
 			]
 		},

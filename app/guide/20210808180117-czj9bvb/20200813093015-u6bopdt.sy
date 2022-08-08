@@ -6,7 +6,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20220808132829"
+		"updated": "20220808181532"
 	},
 	"Children": [
 		{
@@ -1894,240 +1894,26 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210918114843-6xo7hmr",
-				"updated": "20220421192258"
+				"updated": "20220808181126"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如何使用第三方同步盘进行数据同步？"
+					"Data": "支持通过第三方同步盘进行数据同步吗？"
 				}
 			]
 		},
 		{
-			"ID": "20210918114855-vrhbp4h",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20210918114855-vrhbp4h",
-				"updated": "20210918115430"
-			},
-			"Children": [
-				{
-					"ID": "20210918114944-lq7qsku",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210918114944-lq7qsku"
-					},
-					"Children": [
-						{
-							"ID": "20210918114944-8jfe9er",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210918114944-8jfe9er",
-								"updated": "20210918115719"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "请仅同步 "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "工作空间/data/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，切勿同步整个工作空间"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210918115445-74huifz",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210918115445-74huifz"
-					},
-					"Children": [
-						{
-							"ID": "20210918115445-1caj1co",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"fold": "0",
-								"id": "20210918115445-1caj1co",
-								"updated": "20210918115558"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "思源运行期间请暂停第三方同步，否则可能会出现数据损坏，细节请参考"
-								},
-								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "这里"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://ld246.com/article/1626537583158"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210918114945-4ro6tvl",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210918114945-4ro6tvl"
-					},
-					"Children": [
-						{
-							"ID": "20210918114945-3s6zx0u",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210918114945-3s6zx0u",
-								"updated": "20210918115755"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Android 端数据文件夹路径为 "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "内部存储设备/Android/data/org.b3log.siyuan/files/siyuan/data/"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，该路径是应用私有路径，其他程序无法读取，只能手动复制"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220619171358-h7imkkn",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220619171358-h7imkkn"
-					},
-					"Children": [
-						{
-							"ID": "20220619171358-foc2f1q",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220619171358-foc2f1q",
-								"updated": "20220619171555"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "iOS/iPad 端数据文件夹路径不可见"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210918115406-h9ilvo9",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210918115406-h9ilvo9",
-						"updated": "20210918115430"
-					},
-					"Children": [
-						{
-							"ID": "20210918115406-qhnbsm1",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210918115406-qhnbsm1",
-								"updated": "20210918115430"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "第三方同步和思源同步存在冲突，切勿同时使用"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220619171557-pw4qxlu",
+			"ID": "20220808181019-df3ssjs",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220619171557-pw4qxlu",
-				"updated": "20220619171756"
+				"id": "20220808181019-df3ssjs",
+				"updated": "20220808181532"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "另外，可以考虑手动导出导入 Data 实现数据同步："
+					"Data": "不支持通过第三方同步盘进行数据同步，否则可能会导致数据损坏。可以考虑手动导出导入 Data 实现数据同步："
 				}
 			]
 		},

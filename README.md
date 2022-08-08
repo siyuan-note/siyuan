@@ -222,14 +222,9 @@ The first sub-block under the list item is the block icon omitted. You can move 
 
 The first two methods can guarantee the original semantics of the data.
 
-### How to use a third-party sync disk for data synchronization?
+### Does it support data synchronization through a third-party sync disk?
 
-* Please only synchronize the `workspace/data/`, do not synchronize the entire workspace
-* Please suspend third-party synchronization during the operation of SiYuan, otherwise data may be damaged. For details, please refer to [here](https://ld246.com/article/1626537583158)
-* The data folder path on the Android is `Internal storage device/Android/data/org.b3log.siyuan/files/siyuan/data/`, which is a private path of the application and cannot be read by other programs and can only be copied manually
-* There is a conflict between third-party synchronization and SiYuan synchronization, please do not use at the same time
-
-In addition, you can consider manually exporting and importing Data to achieve data synchronization:
+Data synchronization through third-party synchronization disks is not supported, otherwise data may be damaged. Consider manually exporting and importing Data for data synchronization:
 
 * Desktop: <kbd>Settings</kbd> - <kbd>Export</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
 * Mobile: <kbd>Right column</kbd> - <kbd>About</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>

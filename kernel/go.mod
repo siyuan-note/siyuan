@@ -10,7 +10,7 @@ require (
 	github.com/88250/lute v1.7.5-0.20220805051605-c55f139858b7
 	github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1
 	github.com/88250/pdfcpu v0.3.13
-	github.com/88250/protyle v0.0.0-20220519012506-0a2c8dc24397
+	github.com/88250/protyle v0.0.0-20220808015153-2743f8d8dd1b
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732
 	github.com/Masterminds/sprig/v3 v3.2.2
@@ -27,11 +27,10 @@ require (
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/gabriel-vasile/mimetype v1.4.1
 	github.com/getsentry/sentry-go v0.13.0
-	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.8.1
-	github.com/imroc/req/v3 v3.15.0
+	github.com/imroc/req/v3 v3.16.0
 	github.com/jinzhu/copier v0.3.5
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/mitchellh/go-ps v1.0.0
@@ -40,7 +39,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20220807094810-b9d7a5469a61
+	github.com/siyuan-note/dejavu v0.0.0-20220808020015-61c248368f96
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
 	github.com/siyuan-note/filelock v0.0.0-20220720144616-011221f7e128

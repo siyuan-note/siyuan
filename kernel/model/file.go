@@ -36,7 +36,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	util2 "github.com/88250/lute/util"
-	"github.com/88250/protyle"
 	"github.com/dustin/go-humanize"
 	"github.com/facette/natsort"
 	"github.com/gin-gonic/gin"
@@ -1426,7 +1425,7 @@ func createDoc(boxID, p, title, dom string) (err error) {
 	updated := util.TimeFromID(id)
 	tree.Root.KramdownIAL = [][]string{{"id", id}, {"title", html.EscapeAttrVal(title)}, {"updated", updated}}
 	if nil == tree.Root.FirstChild {
-		tree.Root.AppendChild(protyle.NewParagraph())
+		tree.Root.AppendChild(parse.NewParagraph())
 	}
 
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}

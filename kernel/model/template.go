@@ -31,7 +31,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/88250/protyle"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -215,7 +214,7 @@ func renderTemplate(p, id string) (string, error) {
 		return ast.WalkContinue
 	})
 	for _, n := range nodesNeedAppendChild {
-		n.AppendChild(protyle.NewParagraph())
+		n.AppendChild(parse.NewParagraph())
 	}
 
 	// 折叠标题导出为模板后使用会出现内容重复 https://github.com/siyuan-note/siyuan/issues/4488

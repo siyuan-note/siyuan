@@ -89,7 +89,7 @@ func RemoveBox(boxID string) (err error) {
 	}
 
 	filelock.ReleaseFileLocks(localPath)
-	if !isUserGuide(boxID) {
+	if !IsUserGuide(boxID) {
 		var historyDir string
 		historyDir, err = util.GetHistoryDir("delete")
 		if nil != err {
@@ -148,7 +148,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	localPath := filepath.Join(util.DataDir, boxID)
 
 	var reMountGuide bool
-	if isUserGuide(boxID) {
+	if IsUserGuide(boxID) {
 		// 重新挂载帮助文档
 
 		guideBox := Conf.Box(boxID)
@@ -214,6 +214,6 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	return false, nil
 }
 
-func isUserGuide(boxID string) bool {
+func IsUserGuide(boxID string) bool {
 	return "20210808180117-czj9bvb" == boxID || "20210808180117-6v0mkxr" == boxID || "20211226090932-5lcq56f" == boxID
 }

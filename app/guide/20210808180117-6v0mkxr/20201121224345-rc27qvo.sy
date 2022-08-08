@@ -6,7 +6,7 @@
 		"id": "20201121224345-rc27qvo",
 		"title": "Acknowledgements",
 		"type": "doc",
-		"updated": "20220716105832"
+		"updated": "20220522101213"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220522101213-z3hokh2",
-				"updated": "20220716105832"
+				"updated": "20220522101213"
 			},
 			"Children": [
 				{
@@ -582,76 +582,6 @@
 										{
 											"Type": "NodeCodeSpanContent",
 											"Data": "Apache-2.0 License"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220522101213-yje0526",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220522101213-yje0526",
-						"updated": "20220522101213"
-					},
-					"Children": [
-						{
-							"ID": "20220522101213-523nxnk",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220522101213-523nxnk",
-								"updated": "20220522101213"
-							},
-							"Children": [
-								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/88250/protyle"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/88250/protyle"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": " "
-								},
-								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "Mulan PSL v2"
 										},
 										{
 											"Type": "NodeCodeSpanCloseMarker"

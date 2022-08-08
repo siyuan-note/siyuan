@@ -6,7 +6,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20220711123705"
+		"updated": "20220808132857"
 	},
 	"Children": [
 		{
@@ -704,7 +704,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220526112843-xbvl2ni",
-				"updated": "20220615152228"
+				"updated": "20220808132857"
 			},
 			"Children": [
 				{
@@ -846,7 +846,7 @@
 					},
 					"Properties": {
 						"id": "20220526112843-rnr85gt",
-						"updated": "20220526112843"
+						"updated": "20220808132857"
 					},
 					"Children": [
 						{
@@ -854,39 +854,9 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220526112843-mj4iy0b",
-								"updated": "20220615152201"
+								"updated": "20220808132857"
 							},
 							"Children": [
-								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "Data Parser"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/88250/protyle"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": " and "
-								},
 								{
 									"Type": "NodeLink",
 									"Data": "span",

@@ -182,7 +182,7 @@ SiYuan is completely open source, and contributions are welcome:
 
 * [User Interface and Kernel](https://github.com/siyuan-note/siyuan)
 * [User Guide](https://github.com/siyuan-note/user-guide-en_US) and [Appearance](https://github.com/siyuan-note/appearance)
-* [Data Parser](https://github.com/88250/protyle) and [Editor Engine](https://github.com/88250/lute)
+* [Editor Engine](https://github.com/88250/lute)
 * [End-to-end encryption](https://github.com/siyuan-note/encryption) and [Data repo](https://github.com/siyuan-note/dejavu)
 * [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
 * [Android](https://github.com/siyuan-note/siyuan-android) and [iOS](https://github.com/siyuan-note/siyuan-ios)
@@ -263,7 +263,6 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/88250/lute](https://github.com/88250/lute) `Mulan PSL v2`
 * [https://github.com/olahol/melody](https://github.com/olahol/melody) `BSD-2-Clause License`
 * [https://github.com/pdfcpu/pdfcpu](https://github.com/pdfcpu/pdfcpu) `Apache-2.0 License`
-* [https://github.com/88250/protyle](https://github.com/88250/protyle) `Mulan PSL v2`
 * [https://github.com/blastrain/vitess-sqlparser](https://github.com/blastrain/vitess-sqlparser) `Apache-2.0 License`
 * [https://github.com/ConradIrwin/font](https://github.com/ConradIrwin/font) `MIT License`
 * [https://github.com/Masterminds/sprig](https://github.com/Masterminds/sprig) `MIT License`

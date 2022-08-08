@@ -85,7 +85,7 @@ func ListNotebooks() (ret []*Box, err error) {
 		boxConf := conf.NewBoxConf()
 		boxConfPath := filepath.Join(util.DataDir, dir.Name(), ".siyuan", "conf.json")
 		if !gulu.File.IsExist(boxConfPath) {
-			if isUserGuide(dir.Name()) {
+			if IsUserGuide(dir.Name()) {
 				filelock.ReleaseAllFileLocks()
 				os.RemoveAll(filepath.Join(util.DataDir, dir.Name()))
 				logging.LogWarnf("not found user guid box conf [%s], removed it", boxConfPath)

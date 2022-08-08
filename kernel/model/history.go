@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/protyle"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -140,7 +140,7 @@ func GetDocHistoryContent(historyPath string) (content string, err error) {
 		return
 	}
 	luteEngine := NewLute()
-	historyTree, err := protyle.ParseJSONWithoutFix(luteEngine, data)
+	historyTree, err := parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if nil != err {
 		logging.LogErrorf("parse tree from file [%s] failed, remove it", historyPath)
 		os.RemoveAll(historyPath)
@@ -291,7 +291,7 @@ func GetDocHistory(boxID string) (ret []*History, err error) {
 				logging.LogErrorf("read file [%s] failed: %s", path, err)
 				return nil
 			}
-			historyTree, err := protyle.ParseJSONWithoutFix(luteEngine, data)
+			historyTree, err := parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 			if nil != err {
 				logging.LogErrorf("parse tree from file [%s] failed, remove it", path)
 				os.RemoveAll(path)

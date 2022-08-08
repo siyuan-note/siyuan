@@ -76,7 +76,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
         protyle.wysiwyg.element.setAttribute("data-doc-type", data.data.type);
     }
 
-    // 防止动态加载
+    // 防止动态加载加载过多的内容
     if (action.includes(Constants.CB_GET_APPEND) || action.includes(Constants.CB_GET_BEFORE)) {
         setHTML({
             content: html,

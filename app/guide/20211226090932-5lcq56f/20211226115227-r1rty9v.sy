@@ -5,7 +5,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20220711123511"
+		"updated": "20220808132844"
 	},
 	"Children": [
 		{
@@ -700,7 +700,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220526112905-4lumsx2",
-				"updated": "20220615152136"
+				"updated": "20220808132844"
 			},
 			"Children": [
 				{
@@ -842,7 +842,7 @@
 					},
 					"Properties": {
 						"id": "20220526112905-25zib8i",
-						"updated": "20220526112905"
+						"updated": "20220808132844"
 					},
 					"Children": [
 						{
@@ -850,39 +850,9 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220526112905-lg3tfv2",
-								"updated": "20220615152035"
+								"updated": "20220808132844"
 							},
 							"Children": [
-								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "數據解析器"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/88250/protyle"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
-								},
-								{
-									"Type": "NodeText",
-									"Data": "和"
-								},
 								{
 									"Type": "NodeLink",
 									"Data": "span",

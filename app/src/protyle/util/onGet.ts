@@ -221,8 +221,9 @@ const setHTML = (options: { content: string, action?: string[], unScroll?: boole
         }
     } else if (options.action.includes(Constants.CB_GET_FOCUSFIRST) && !options.unScroll) {
         // settimeout 时间需短一点，否则定位后快速滚动无效
-        preventScroll(protyle, 8, 256);
-        protyle.contentElement.scrollTop = 8;
+        const headerHeight = protyle.wysiwyg.element.offsetTop - 16;
+        preventScroll(protyle, headerHeight, 256);
+        protyle.contentElement.scrollTop = headerHeight;
         focusBlock(protyle.wysiwyg.element.firstElementChild);
         /// #if !MOBILE
         if (!options.action.includes(Constants.CB_GET_UNUNDO)) {

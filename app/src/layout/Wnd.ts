@@ -23,8 +23,6 @@ import {showMessage} from "../dialog/message";
 import {openFileById, updatePanelByEditor} from "../editor/util";
 import {scrollCenter} from "../util/highlightById";
 import {getAllModels} from "./getAll";
-import {fetchPost} from "../util/fetch";
-import {onGet} from "../protyle/util/onGet";
 import {countBlockWord} from "./status";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 
@@ -312,7 +310,7 @@ export class Wnd {
             }
         });
 
-        const initData = currentTab.headElement.getAttribute("data-initdata")
+        const initData = currentTab.headElement.getAttribute("data-initdata");
         if (initData) {
             const json = JSON.parse(initData);
             currentTab.addModel(new Editor({

@@ -3,7 +3,6 @@ import {fetchPost} from "../../util/fetch";
 import {openMobileFileById} from "../editor";
 import {Constants} from "../../constants";
 import {getEventName} from "../../protyle/util/compatibility";
-import {focusBlock} from "../../protyle/util/selection";
 
 export class MobileOutline {
     private tree: Tree;

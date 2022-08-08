@@ -26,7 +26,6 @@ import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
 import {code160to32} from "../util/code160to32";
 import {deleteFile} from "../../editor/deleteFile";
-import {restoreScroll} from "../scroll/saveScroll";
 
 export class Title {
     public element: HTMLElement;

@@ -22,7 +22,6 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "../util/fetch";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
-import {updatePanelByEditor} from "../editor/util";
 import {Constants} from "../constants";
 import {openSearch} from "../search/spread";
 import {saveScroll} from "../protyle/scroll/saveScroll";

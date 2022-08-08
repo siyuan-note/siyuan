@@ -34,8 +34,9 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
     if (getObject) {
         return attr;
     }
-    fetchPost("/api/attr/setBlockAttrs", {id: protyle.block.rootID, attrs: {scroll: attr}}, () => {
-        protyle.wysiwyg.element.setAttribute("scroll", JSON.stringify(attr));
+    const jsonAttr = JSON.stringify(attr);
+    fetchPost("/api/attr/setBlockAttrs", {id: protyle.block.rootID, attrs: {scroll: jsonAttr}}, () => {
+        protyle.wysiwyg.element.setAttribute("scroll", jsonAttr);
     });
 }
 

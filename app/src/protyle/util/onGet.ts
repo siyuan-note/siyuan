@@ -76,6 +76,20 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
         protyle.wysiwyg.element.setAttribute("data-doc-type", data.data.type);
     }
 
+    // 防止动态加载
+    if (action.includes(Constants.CB_GET_APPEND) || action.includes(Constants.CB_GET_BEFORE)) {
+        setHTML({
+            content: html,
+            action,
+            unScroll: false,
+        }, protyle);
+        const loadingElement = protyle.element.querySelector(".fn__loading");
+        if (loadingElement) {
+            loadingElement.remove();
+        }
+        return;
+    }
+
     fetchPost("/api/block/getDocInfo", {
         id: protyle.block.rootID
     }, (response) => {
@@ -91,7 +105,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
         if (!scrollObj) {
             if (action.includes(Constants.CB_GET_SCROLL) && response.data.ial.scroll) {
                 try {
-                    scrollObj = JSON.parse(response.data.ial.scroll)
+                    scrollObj = JSON.parse(response.data.ial.scroll.replace(/&quot;/g, '"'));
                 } catch (e) {
                     scrollObj = undefined;
                 }

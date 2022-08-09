@@ -144,7 +144,7 @@ func LoadUploadToken() (err error) {
 }
 
 var (
-	refreshUserTicker              = time.NewTicker(30 * time.Minute)
+	refreshUserTicker              = time.NewTicker(2 * time.Hour)
 	subscriptionExpirationReminded bool
 )
 

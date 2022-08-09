@@ -292,7 +292,11 @@ export class WYSIWYG {
                 } else {
                     selectElements.forEach(item => {
                         const topElement = getTopAloneElement(item);
-                        html += removeEmbed(topElement);
+                        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+                            html += removeEmbed(topElement).replace('fold="1"', "");
+                        } else {
+                            html += removeEmbed(topElement);
+                        }
                     });
                     if (selectElements[0].getAttribute("data-type") === "NodeListItem") {
                         html = `<div data-subtype="${selectElements[0].getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">${html}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
@@ -318,6 +322,7 @@ export class WYSIWYG {
                 }
                 // 选中整个标题 https://github.com/siyuan-note/siyuan/issues/4329
                 const headElement = hasClosestByAttribute(startContainer, "data-type", "NodeHeading");
+                let isFoldHeading = false
                 if (headElement && range.toString() === headElement.firstElementChild.textContent) {
                     const doOperations: IOperation[] = [{
                         action: "delete",
@@ -330,26 +335,35 @@ export class WYSIWYG {
                         previousID: headElement.previousElementSibling?.getAttribute("data-node-id"),
                         parentID: headElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID
                     }];
-                    if ((headElement.parentElement.childElementCount === 3 && headElement.parentElement.classList.contains("li")) ||
-                        (headElement.parentElement.childElementCount === 2 && (headElement.parentElement.classList.contains("bq") || headElement.parentElement.classList.contains("sb")))) {
-                        // https://github.com/siyuan-note/siyuan/issues/4040
-                        const emptyId = Lute.NewNodeID();
-                        const emptyElement = genEmptyElement(false, false, emptyId);
-                        doOperations.push({
-                            id: emptyId,
-                            data: emptyElement.outerHTML,
-                            action: "insert",
-                            parentID: headElement.parentElement.getAttribute("data-node-id")
-                        });
-                        undoOperations.push({
-                            id: emptyId,
-                            action: "delete",
-                        });
-                        headElement.before(emptyElement);
+                    if (headElement.getAttribute("fold") === "1") {
+                        isFoldHeading = true;
+                        const headCloneElement = headElement.cloneNode(true) as HTMLElement;
+                        headCloneElement.removeAttribute("fold");
+                        tempElement.append(headCloneElement);
+                        undoOperations[0].data = headCloneElement.outerHTML;
+                        setFold(protyle, headElement, undefined, true);
+                    } else {
+                        if ((headElement.parentElement.childElementCount === 3 && headElement.parentElement.classList.contains("li")) ||
+                            (headElement.parentElement.childElementCount === 2 && (headElement.parentElement.classList.contains("bq") || headElement.parentElement.classList.contains("sb")))) {
+                            // https://github.com/siyuan-note/siyuan/issues/4040
+                            const emptyId = Lute.NewNodeID();
+                            const emptyElement = genEmptyElement(false, false, emptyId);
+                            doOperations.push({
+                                id: emptyId,
+                                data: emptyElement.outerHTML,
+                                action: "insert",
+                                parentID: headElement.parentElement.getAttribute("data-node-id")
+                            });
+                            undoOperations.push({
+                                id: emptyId,
+                                action: "delete",
+                            });
+                            headElement.before(emptyElement);
+                        }
+                        focusSideBlock(headElement);
+                        tempElement.append(headElement);
                     }
                     transaction(protyle, doOperations, undoOperations);
-                    focusSideBlock(headElement);
-                    tempElement.append(headElement);
                 } else if (range.toString() !== "" && startContainer.isSameNode(range.endContainer) && range.startContainer.nodeType === 3
                     && range.endOffset === range.endContainer.textContent.length && range.startOffset === 0 &&
                     !["DIV", "TD", "TH"].includes(range.startContainer.parentElement.tagName)) {
@@ -407,7 +421,7 @@ export class WYSIWYG {
                     getContenteditableElement(nodeElement).removeAttribute("data-render");
                     highlightRender(nodeElement);
                 }
-                if (nodeElement.parentElement.parentElement) {
+                if (nodeElement.parentElement.parentElement && !isFoldHeading) {
                     // 选中 heading 时，使用删除的 transaction
                     updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
                 }

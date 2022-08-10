@@ -64,7 +64,9 @@ class Undo {
     }
 
     public replace(doOperations: IOperation[]) {
-        this.undoStack[this.undoStack.length - 1].doOperations = doOperations;
+        if (this.undoStack.length > 0) {
+            this.undoStack[this.undoStack.length - 1].doOperations = doOperations;
+        }
     }
 
     public add( doOperations: IOperation[], undoOperations: IOperation[]) {

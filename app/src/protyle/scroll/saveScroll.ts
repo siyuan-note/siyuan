@@ -10,6 +10,10 @@ import {blockRender} from "../markdown/blockRender";
 import {disabledProtyle, enableProtyle} from "../util/onGet";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
+    if (!protyle.wysiwyg.element.firstElementChild) {
+        // 报错或者空白页面
+        return undefined;
+    }
     const attr: IScrollAttr = {
         startId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
         endId: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),

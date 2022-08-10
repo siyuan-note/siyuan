@@ -254,7 +254,7 @@ export const pushBack = (protyle: IProtyle, range?: Range, blockElement?: Elemen
     if (!protyle.model) {
         return;
     }
-    if (!blockElement) {
+    if (!blockElement && range) {
         blockElement = hasClosestBlock(range.startContainer) as Element;
     }
     if (!blockElement) {

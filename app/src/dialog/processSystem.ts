@@ -34,7 +34,7 @@ export const lockFile = (id: string) => {
         /// #if !MOBILE
         getAllModels().editor.find((item) => {
             if (item.editor.protyle.block.rootID === id) {
-                item.parent.parent.removeTab(item.parent.id);
+                item.parent.parent.removeTab(item.parent.id, false, false);
                 return true;
             }
         });

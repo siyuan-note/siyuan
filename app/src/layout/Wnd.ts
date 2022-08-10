@@ -482,10 +482,10 @@ export class Wnd {
         model.send("closews", {});
     }
 
-    private removeTabAction = (id: string, closeAll = false) => {
+    private removeTabAction = (id: string, closeAll = false, hasSaveScroll = true) => {
         this.children.find((item, index) => {
             if (item.id === id) {
-                if (item.model instanceof Editor) {
+                if (item.model instanceof Editor && hasSaveScroll) {
                     saveScroll(item.model.editor.protyle);
                 }
                 if (this.children.length === 1) {
@@ -545,7 +545,7 @@ export class Wnd {
         /// #endif
     };
 
-    public removeTab(id: string, closeAll = false) {
+    public removeTab(id: string, closeAll = false, needSaveScroll = true) {
         for (let index = 0; index < this.children.length; index++) {
             const item = this.children[index];
             if (item.id === id) {
@@ -554,9 +554,9 @@ export class Wnd {
                         showMessage(window.siyuan.languages.uploading);
                         return;
                     }
-                    this.removeTabAction(id, closeAll);
+                    this.removeTabAction(id, closeAll, needSaveScroll);
                 } else {
-                    this.removeTabAction(id, closeAll);
+                    this.removeTabAction(id, closeAll, needSaveScroll);
                 }
                 return;
             }

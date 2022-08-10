@@ -21,7 +21,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     if (data.code === 1) {
         // 其他报错
         if (protyle.model) {
-            protyle.model.parent.parent.removeTab(protyle.model.parent.id);
+            protyle.model.parent.parent.removeTab(protyle.model.parent.id, false, false);
         } else {
             protyle.element.innerHTML = `<div class="ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>`;
         }

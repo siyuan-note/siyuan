@@ -414,9 +414,12 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         if (layout.model) {
             json.children = {};
             layoutToJSON(layout.model, json.children);
-        } else {
+        } else if (layout.headElement) {
             // 当前页签没有激活时编辑器没有初始化
-            json.children = JSON.parse(layout.headElement.getAttribute("data-initdata")||"{}");
+            json.children = JSON.parse(layout.headElement.getAttribute("data-initdata") || "{}");
+        } else {
+            // 关闭所有页签
+            json.children = {};
         }
     }
 };

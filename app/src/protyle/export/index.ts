@@ -13,6 +13,7 @@ import {fetchPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {lockFile} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
+import {replaceLocalPath} from "../../editor/rename";
 
 export const saveExport = (option: { type: string, id: string }) => {
     /// #if !BROWSER
@@ -176,7 +177,7 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
                 } else if (option.type === "word") {
                     url = "/api/export/exportDocx";
                 }
-                const savePath = result.filePaths[0].endsWith(response.data.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], response.data.rootTitle);
+                const savePath = result.filePaths[0].endsWith(response.data.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(response.data.rootTitle));
                 fetchPost(url, {
                     id: option.id,
                     pdf: option.type === "pdf",

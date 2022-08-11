@@ -22,6 +22,10 @@ export const replaceFileName = (name: string) => {
     return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|\//g, "");
 };
 
+export const replaceLocalPath = (name: string) => {
+    return name.replace(/\\\\|\/|:|\*|\?|\\|'|<|>|\|/g, "");
+};
+
 export const rename = (options: {
     path: string
     notebookId: string

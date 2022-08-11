@@ -13,7 +13,7 @@ import {Bookmark} from "./dock/Bookmark";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {Backlinks} from "./dock/Backlinks";
 import {Tag} from "./dock/Tag";
-import {getAllModels} from "./getAll";
+import {getAllModels, getAllTabs} from "./getAll";
 import {Asset} from "../asset";
 import {Search} from "../search";
 import {Dock} from "./dock";
@@ -267,37 +267,11 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
 export const JSONToLayout = (isStart: boolean) => {
     JSONToCenter(window.siyuan.config.uiLayout.layout);
     JSONToDock(window.siyuan.config.uiLayout);
-    const allModels = getAllModels();
     // 启动时不打开页签，需要移除没有钉住的页签
     if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
-        allModels.editor.forEach(item => {
-            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
-                item.parent.parent.removeTab(item.parent.id);
-            }
-        });
-        allModels.outline.forEach(item => {
-            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
-                item.parent.parent.removeTab(item.parent.id);
-            }
-        });
-        allModels.search.forEach(item => {
-            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
-                item.parent.parent.removeTab(item.parent.id);
-            }
-        });
-        allModels.asset.forEach(item => {
-            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
-                item.parent.parent.removeTab(item.parent.id);
-            }
-        });
-        allModels.graph.forEach(item => {
-            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
-                item.parent.parent.removeTab(item.parent.id);
-            }
-        });
-        allModels.backlinks.forEach(item => {
-            if (item.parent.headElement && !item.parent.headElement.classList.contains("item--pin")) {
-                item.parent.parent.removeTab(item.parent.id);
+        getAllTabs().forEach(item => {
+            if (item.headElement && !item.headElement.classList.contains("item--pin")) {
+                item.parent.removeTab(item.id);
             }
         });
     }

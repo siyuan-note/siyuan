@@ -1,3 +1,40 @@
+## v2.1.6 / 2022-08-11
+
+### 改进功能
+
+* [使用快速滚动条时题头图显示错误](https://github.com/siyuan-note/siyuan/issues/3614)
+* [记录文档浏览位置](https://github.com/siyuan-note/siyuan/issues/4042)
+* [浮动工具栏跟随滚动](https://github.com/siyuan-note/siyuan/issues/5551)
+* [云端收集箱支持直接转发微信聊天记录](https://github.com/siyuan-note/siyuan/issues/5555)
+* [弹出菜单后禁止滚动](https://github.com/siyuan-note/siyuan/issues/5559)
+* [CSDN 代码块剪藏会多出行号](https://github.com/siyuan-note/siyuan/issues/5564)
+* [Android 端支持批量插入图片](https://github.com/siyuan-note/siyuan/issues/5569)
+* [API `setBlockAttrs` 中如果存在属性值设置为 `null` 时移除该属性](https://github.com/siyuan-note/siyuan/issues/5577)
+* [图片缩放限制最小宽度](https://github.com/siyuan-note/siyuan/issues/5580)
+* [改进云端同步性能](https://github.com/siyuan-note/siyuan/issues/5581)
+* [复制多块后光标定位修改](https://github.com/siyuan-note/siyuan/issues/5591)
+* [后端服务支持 CORS 预检请求验证](https://github.com/siyuan-note/siyuan/pull/5593)
+* [数据仓库快照忽略隐藏文件](https://github.com/siyuan-note/siyuan/issues/5597)
+* [改进意外情况下同步点损坏导致无法同步的问题](https://github.com/siyuan-note/siyuan/issues/5603)
+
+### 文档相关
+
+* [明确说明不支持通过第三方同步盘进行数据同步](https://github.com/siyuan-note/siyuan/issues/5611)
+
+### 开发重构
+
+* [将解析渲染器 Protyle 项目合并到 Lute 项目中](https://github.com/siyuan-note/siyuan/issues/5602)
+
+### 修复缺陷
+
+* [大纲、引用块点击应跳转对应激活的页签](https://github.com/siyuan-note/siyuan/issues/5565)
+* [Markdown 围栏代码块相关问题](https://github.com/siyuan-note/siyuan/issues/5570)
+* [插入/更新资源文件导致内核崩溃](https://github.com/siyuan-note/siyuan/issues/5574)
+* [标题转换文档后编辑原文档触发状态异常](https://github.com/siyuan-note/siyuan/issues/5576)
+* [鼠标移动在光标所在的块标上时进行剪切，粘贴后的块标会高亮](https://github.com/siyuan-note/siyuan/issues/5594)
+* [折叠标题剪切后没有展开下方块](https://github.com/siyuan-note/siyuan/issues/5606)
+* [优化排版功能导致文档部分内容丢失](https://github.com/siyuan-note/siyuan/issues/5609)
+
 ## v2.1.5 / 2022-08-02
 
 ### 改进功能

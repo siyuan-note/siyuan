@@ -661,8 +661,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         const selectText = range.toString();
-        // 删除
-        if (!event.altKey && !event.shiftKey && !isCtrl(event) && (event.key === "Backspace" || event.key === "Delete")) {
+        // 删除，不可使用 !isCtrl(event)，否则软删除回导致 https://github.com/siyuan-note/siyuan/issues/5607
+        if (!event.altKey && !event.shiftKey && (event.key === "Backspace" || event.key === "Delete")) {
             // https://github.com/siyuan-note/siyuan/issues/5547
             const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
             if (range.startOffset === 1 && range.startContainer.textContent === Constants.ZWSP &&

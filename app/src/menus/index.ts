@@ -23,7 +23,7 @@ export class Menus {
                 const dataType = target.getAttribute("data-type");
                 if (dataType === "tab-header") {
                     this.unselect();
-                    initTabMenu(dataType, (getInstanceById(target.getAttribute("data-id")) as Tab).model).popup({
+                    initTabMenu((getInstanceById(target.getAttribute("data-id")) as Tab)).popup({
                         x: event.clientX,
                         y: event.clientY
                     });

@@ -525,6 +525,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 }
 
 func UnusedAssets() (ret []string) {
+	defer logging.Recover()
 	ret = []string{}
 
 	assetsPathMap, err := allAssetAbsPaths()

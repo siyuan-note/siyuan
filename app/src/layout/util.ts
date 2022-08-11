@@ -411,8 +411,13 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
             });
         }
     } else if (layout instanceof Tab) {
-        json.children = {};
-        layoutToJSON(layout.model, json.children);
+        if (layout.model) {
+            json.children = {};
+            layoutToJSON(layout.model, json.children);
+        } else {
+            // 当前页签没有激活时编辑器没有初始化
+            json.children = JSON.parse(layout.headElement.getAttribute("data-initdata")||"{}");
+        }
     }
 };
 

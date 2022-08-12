@@ -77,7 +77,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     }
 
     // 防止动态加载加载过多的内容
-    if (action.includes(Constants.CB_GET_APPEND) || action.includes(Constants.CB_GET_BEFORE)) {
+    if (action.includes(Constants.CB_GET_APPEND) || action.includes(Constants.CB_GET_BEFORE) || action.includes(Constants.CB_GET_HTML)) {
         setHTML({
             content: html,
             action,

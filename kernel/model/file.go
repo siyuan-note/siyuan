@@ -551,7 +551,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 
 	var nodes []*ast.Node
 
-	// 如果同时存在 startID 和 endID，则只加载 startID 和 endID 之间的块
+	// 如果同时存在 startID 和 endID，则只加载 startID 和 endID 之间的块 [startID, endID]
 	if "" != startID && "" != endID {
 		nodes, eof = loadNodesByStartEnd(tree, startID, endID)
 		if 1 > len(nodes) {
@@ -715,17 +715,16 @@ func loadNodesByStartEnd(tree *parse.Tree, startID, endID string) (nodes []*ast.
 	}
 	nodes = append(nodes, node)
 	for n := node.Next; nil != n; n = n.Next {
+		nodes = append(nodes, n)
+
 		if n.ID == endID {
-			next := n.Next
-			if nil == next {
+			if next := n.Next; nil == next {
 				eof = true
 			} else {
 				eof = util2.IsDocIAL(n.Tokens) || util2.IsDocIAL(next.Tokens)
 			}
 			break
 		}
-
-		nodes = append(nodes, n)
 	}
 	return
 }

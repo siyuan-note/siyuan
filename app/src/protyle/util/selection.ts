@@ -280,9 +280,14 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
     return range;
 };
 
-export const focusByOffset = (container: Node, start: number, end: number) => {
+export const focusByOffset = (container: Element, start: number, end: number) => {
     if (!container) {
         return false;
+    }
+    // 空块无法 focus
+    const editElement = getContenteditableElement(container);
+    if (editElement) {
+        container = editElement;
     }
     let startNode;
     searchNode(container, container.firstChild, node => {

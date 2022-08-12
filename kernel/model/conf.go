@@ -510,9 +510,8 @@ func InitBoxes() {
 	}
 
 	for _, box := range Conf.GetOpenedBoxes() {
-		box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 		if !initialized {
-			box.BootIndex()
+			box.Index(true)
 		}
 
 		ListDocTree(box.ID, "/", Conf.FileTree.Sort) // 缓存根一级的文档树展开

@@ -146,7 +146,7 @@ ${data.shorthandTitle}
 <div class="fn__hr"></div>
 <a href="${data.shorthandURL}" target="_blank">${data.shorthandURL}</a>
 <div class="fn__hr"></div>
-<div class="b3-typography">
+<div class="b3-typography b3-typography--default">
 ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
 </div>`;
                             detailsElement.setAttribute("data-id", data.oId);

@@ -241,7 +241,7 @@ export const openHistory = () => {
             <ul style="width:200px;overflow: auto;" class="b3-list b3-list--background">
                 <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
             </ul>
-            <textarea class="fn__flex-1 b3-typography history__text" readonly></textarea>
+            <textarea class="fn__flex-1 history__text" readonly></textarea>
         </div>
         <div data-type="assets" class="fn__flex fn__none">
             <ul style="width:200px;overflow: auto;" class="b3-list b3-list--background">

@@ -204,15 +204,7 @@
   }
 
   code:not(.hljs) {
-    padding: 0.2em 0.4em;
-    margin: 0;
-    font-size: 85%;
-    border-radius: 3px;
-    font-family: var(--b3-font-family-code);
-    word-break: break-word;
-    background-size: 20px 20px;
-    white-space: pre-wrap;
-    background-color: var(--b3-protyle-code-background);
+    @extend .fn__code;
   }
 
   a[href^=pdf-outline] {
@@ -252,7 +244,7 @@
       }
 
       .protyle-icon,
-      .protyle-action__language{
+      .protyle-action__language {
         opacity: 0;
         transition: var(--b3-transition);
       }
@@ -463,7 +455,7 @@
 
       &:hover {
         color: var(--b3-theme-surface);
-        background-color:  var(--b3-theme-on-surface);
+        background-color: var(--b3-theme-on-surface);
       }
     }
 

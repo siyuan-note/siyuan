@@ -27,16 +27,15 @@ export const about = {
 <div class="fn__flex b3-label${isBrowser() ? " fn__none" : ""}">
     <div class="fn__flex-1">
        ${window.siyuan.languages.about2}
-        <div class="b3-label__text b3-typography">${window.siyuan.languages.about3}</div>
-        <div class='fn__hr'></div>
-        <span class="b3-label__text b3-typography"><code>${window.siyuan.config.localIPs.join("</code> <code>")}</code></span>
+        <div class="b3-label__text">${window.siyuan.languages.about3}</div>
+        <span class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.join("</code> <code class='fn__code'>")}</code></span>
     </div>
     <div class="fn__space"></div>
     <button data-type="open" data-url="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:6806" class="b3-button b3-button--outline fn__size200 fn__flex-center">${window.siyuan.languages.about4}</button>
 </div>
 <div class="b3-label${(window.siyuan.config.system.container === "std" || window.siyuan.config.system.container === "docker") ? "" : " fn__none"}">
     ${window.siyuan.languages.networkProxy}
-    <div class="b3-label__text b3-typography">
+    <div class="b3-label__text">
         ${window.siyuan.languages.about17}
     </div>
     <div class="b3-label__text fn__flex" style="padding: 4px 0 4px 4px;">

@@ -193,9 +193,9 @@ ${accountHTML}
        ${window.siyuan.languages.about2}
        <div class="fn__hr"></div>
        <input class="b3-text-field fn__block" readonly value="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:6806">
-       <div class="b3-label__text b3-typography">${window.siyuan.languages.about3}</div>
+       <div class="b3-label__text">${window.siyuan.languages.about3}</div>
        <div class="fn__hr"></div>
-       <span class="b3-label__text b3-typography"><code>${window.siyuan.config.localIPs.join("</code> <code>")}</code></span>
+       <span class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.join("</code> <code class='fn__code'>")}</code></span>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.about5}
@@ -203,7 +203,7 @@ ${accountHTML}
     <button class="b3-button b3-button--outline fn__block" id="authCode">
         <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
     </button>
-    <div class="b3-label__text b3-typography">${window.siyuan.languages.about6}</div>
+    <div class="b3-label__text">${window.siyuan.languages.about6}</div>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.dataRepoKey}
@@ -240,7 +240,7 @@ ${accountHTML}
     <button class="b3-button b3-button--outline fn__block" id="token">
         <svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copy}
     </button>
-    <div class="b3-label__text b3-typography">${window.siyuan.languages.about14}</div>
+    <div class="b3-label__text">${window.siyuan.languages.about14}</div>
 </div>
 <div class="b3-label">
     <div class="fn__flex">
@@ -251,7 +251,7 @@ ${accountHTML}
        <svg><use xlink:href="#iconUpload"></use></svg> ${window.siyuan.languages.export} Data
     </button>
     <div class="fn__hr"></div>
-    <div class="b3-label__text b3-typography">${window.siyuan.languages.exportDataTip}</div>
+    <div class="b3-label__text">${window.siyuan.languages.exportDataTip}</div>
 </div>
 <div class="b3-label">
     <div class="fn__flex">
@@ -263,7 +263,7 @@ ${accountHTML}
         <svg><use xlink:href="#iconDownload"></use></svg> ${window.siyuan.languages.import} Data
     </button>
     <div class="fn__hr"></div>
-    <div class="b3-label__text b3-typography">${window.siyuan.languages.importDataTip}</div>
+    <div class="b3-label__text">${window.siyuan.languages.importDataTip}</div>
 </div>
 <div class="b3-label">
     <div class="config-about__logo">

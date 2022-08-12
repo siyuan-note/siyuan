@@ -60,7 +60,7 @@ export const editor = {
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.md39}
-        <div class="b3-label__text b3-typography">${window.siyuan.languages.md40}</div>
+        <div class="b3-label__text">${window.siyuan.languages.md40}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="plantUMLServePath" value="${window.siyuan.config.editor.plantUMLServePath}"/>
@@ -76,7 +76,7 @@ export const editor = {
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.md35}
-        <div class="b3-label__text b3-typography">${window.siyuan.languages.md36}</div>
+        <div class="b3-label__text">${window.siyuan.languages.md36}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="virtualBlockRefExclude" value="${window.siyuan.config.editor.virtualBlockRefExclude}" />
@@ -104,7 +104,7 @@ export const editor = {
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.font}
-        <div class="b3-label__text b3-typography">${window.siyuan.languages.font1}</div>
+        <div class="b3-label__text">${window.siyuan.languages.font1}</div>
     </div>
     <span class="fn__space"></span>
     ${fontFamilyHTML}

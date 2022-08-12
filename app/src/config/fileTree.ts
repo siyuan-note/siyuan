@@ -46,7 +46,7 @@ export const fileTree = {
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fileTree12}
-        <div class="b3-label__text b3-typography">${window.siyuan.languages.fileTree13}</div>
+        <div class="b3-label__text">${window.siyuan.languages.fileTree13}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="createDocNameTemplate" value="">
@@ -54,7 +54,7 @@ export const fileTree = {
 <label class="b3-label fn__flex">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fileTree5}
-        <div class="b3-label__text b3-typography">${window.siyuan.languages.fileTree6}</div>
+        <div class="b3-label__text">${window.siyuan.languages.fileTree6}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="refCreateSavePath" value="${window.siyuan.config.fileTree.refCreateSavePath}">

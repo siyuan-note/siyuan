@@ -108,8 +108,8 @@ export const repos = {
             return `<div class="b3-label">${window.siyuan.config.system.container === "ios" ? window.siyuan.languages._kernel[122] : window.siyuan.languages._kernel[29]}</div>
 <div class="b3-label">
     ${window.siyuan.languages.cloudIntro1}
-    <div class="b3-label__text b3-typography">
-        <ul>
+    <div class="b3-label__text">
+        <ul style="padding-left: 2em">
             <li>${window.siyuan.languages.cloudIntro2}</li>
             <li>${window.siyuan.languages.cloudIntro3}</li>
             <li>${window.siyuan.languages.cloudIntro4}</li>
@@ -122,8 +122,8 @@ export const repos = {
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.cloudIntro9}
-    <div class="b3-label__text b3-typography">
-        <ul>
+    <div class="b3-label__text">
+        <ul style="padding-left: 2em">
             <li>${window.siyuan.languages.cloudIntro10}</li>
             <li>${window.siyuan.languages.cloudIntro11}</li>
         </ul>

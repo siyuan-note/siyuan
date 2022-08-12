@@ -93,7 +93,7 @@ export const exportConfig = {
 <label class="fn__flex b3-label">
     <div class="fn__flex-1 fn__flex-center">
         ${window.siyuan.languages.export} Data
-        <div class="b3-label__text b3-typography">${window.siyuan.languages.exportDataTip}</div>
+        <div class="b3-label__text">${window.siyuan.languages.exportDataTip}</div>
     </div>
     <span class="fn__space"></span>
     <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="exportData"><svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}</button>
@@ -101,7 +101,7 @@ export const exportConfig = {
 <div class="fn__flex b3-label">
     <div class="fn__flex-1 fn__flex-center">
         ${window.siyuan.languages.import} Data
-        <div class="b3-label__text b3-typography">${window.siyuan.languages.importDataTip}</div>
+        <div class="b3-label__text">${window.siyuan.languages.importDataTip}</div>
     </div>
     <span class="fn__space"></span>
     <button class="b3-button b3-button--outline fn__flex-center fn__size200" style="position: relative">

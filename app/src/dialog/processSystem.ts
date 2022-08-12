@@ -13,7 +13,7 @@ export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>
 <div class="b3-dialog__container">
     <div class="b3-dialog__header" onselectstart="return false;">🔒 ${window.siyuan.languages.lockFile0} <small>v${Constants.SIYUAN_VERSION}</small></div>
-    <div class="b3-dialog__content b3-typography">
+    <div class="b3-dialog__content">
         <p>${window.siyuan.languages.lockFile1}</p>
         <p>${window.siyuan.languages.lockFile2}</p>
     </div>
@@ -58,7 +58,7 @@ export const kernelError = () => {
     const html = `<div class="b3-dialog__scrim"></div>
 <div class="b3-dialog__container">
     <div class="b3-dialog__header" onselectstart="return false;">💔 ${window.siyuan.languages.kernelFault0} <small>v${Constants.SIYUAN_VERSION}</small></div>
-    <div class="b3-dialog__content b3-typography">
+    <div class="b3-dialog__content">
         <p>${window.siyuan.languages.kernelFault1}</p>
         <p>${window.siyuan.languages.kernelFault2}</p>
         ${iosReStart}

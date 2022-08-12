@@ -229,7 +229,7 @@ export const bazaar = {
 </div>
 <div class="item__main">
     <div class="item__preview" style="background-image: url(${data.previewURL})"></div>
-    <div class="item__readme b3-typography" style="position:relative;">
+    <div class="item__readme b3-typography b3-typography--default" style="position:relative;">
         <img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;" src="/stage/loading-pure.svg">
     </div>
 </div>`;

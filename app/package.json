@@ -59,7 +59,7 @@
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.7.1",
     "dayjs": "^1.11.3",
-    "electron": "19.0.10",
+    "electron": "20.0.2",
     "electron-builder": "^23.3.1",
     "encoding": "^0.1.13",
     "eslint": "^8.19.0",

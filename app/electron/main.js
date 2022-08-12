@@ -529,7 +529,7 @@ const initKernel = (initData) => {
             break
           case 23:
             showErrorWindow('⚠️ 无法读写块树文件 Failed to access blocktree file',
-              `<div>块树文件正在被其他程序锁定。如果你使用了第三方同步盘，请在思源运行期间关闭同步。</div><div>The block tree file is being locked by another program. If you use a third-party sync disk, please turn off the sync while SiYuan is running.</div>`)
+              `<div>块树文件正在被其他程序锁定或者已经损坏，请删除 工作空间/temp/ 文件夹后重启</div><div>The block tree file is being locked by another program or is damaged, please delete the workspace/temp/ folder and restart.</div>`)
             break
           case 0:
           case 1: // Fatal error

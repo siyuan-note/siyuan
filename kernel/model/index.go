@@ -40,44 +40,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func (box *Box) BootIndex() {
-	util.SetBootDetails("Listing files...")
-	files := box.ListFiles("/")
-	boxLen := len(Conf.GetOpenedBoxes())
-	if 1 > boxLen {
-		boxLen = 1
-	}
-	bootProgressPart := 10.0 / float64(boxLen) / float64(len(files))
-
-	luteEngine := NewLute()
-	i := 0
-	// 读取并缓存路径映射
-	for _, file := range files {
-		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
-			continue
-		}
-
-		p := file.path
-		tree, err := filesys.LoadTree(box.ID, p, luteEngine)
-		if nil != err {
-			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, p, err)
-			continue
-		}
-
-		docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
-		cache.PutDocIAL(p, docIAL)
-
-		util.IncBootProgress(bootProgressPart, "Parsing tree "+util.ShortPathForBootingDisplay(tree.Path))
-		// 缓存块树
-		treenode.IndexBlockTree(tree)
-		if 1 < i && 0 == i%64 {
-			filelock.ReleaseAllFileLocks()
-		}
-		i++
-	}
-	return
-}
-
 func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 	defer debug.FreeOSMemory()
 

@@ -57,7 +57,9 @@ export class Menu {
     }
 
     private preventDefault(event: KeyboardEvent) {
-        event.preventDefault();
+        if (!hasClosestByClassName(event.target as Element, "b3-menu")) {
+            event.preventDefault();
+        }
     }
 
     public remove() {

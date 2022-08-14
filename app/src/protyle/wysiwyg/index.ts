@@ -322,7 +322,7 @@ export class WYSIWYG {
                 }
                 // 选中整个标题 https://github.com/siyuan-note/siyuan/issues/4329
                 const headElement = hasClosestByAttribute(startContainer, "data-type", "NodeHeading");
-                let isFoldHeading = false
+                let isFoldHeading = false;
                 if (headElement && range.toString() === headElement.firstElementChild.textContent) {
                     const doOperations: IOperation[] = [{
                         action: "delete",

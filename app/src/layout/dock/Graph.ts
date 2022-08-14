@@ -343,6 +343,11 @@ export class Graph extends Model {
             if (event.isComposing) {
                 return;
             }
+            if (this.inputElement.value === "") {
+                this.inputElement.classList.remove("search__input--block")
+            } else {
+                this.inputElement.classList.add("search__input--block")
+            }
             this.searchGraph(false);
         });
         this.element.querySelectorAll(".b3-slider").forEach((item: HTMLInputElement) => {

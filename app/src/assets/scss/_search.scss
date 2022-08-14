@@ -52,7 +52,8 @@
       padding-right: 0;
       border-radius: 2px;
 
-      &:focus {
+      &:focus,
+      &.search__input--block {
         width: 100%;
         border-color: var(--b3-theme-primary);
       }

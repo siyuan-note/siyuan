@@ -129,6 +129,14 @@ export class Backlinks extends Model {
                     this.searchBacklinks();
                 }
             });
+            item.addEventListener("input", (event: KeyboardEvent) => {
+                const inputElement = event.target as HTMLInputElement
+                if (inputElement.value === "") {
+                    inputElement.classList.remove("search__input--block")
+                } else {
+                    inputElement.classList.add("search__input--block")
+                }
+            });
         });
 
         this.tree = new Tree({

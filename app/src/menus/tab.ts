@@ -3,7 +3,6 @@ import {MenuItem} from "./Menu";
 import {Editor} from "../editor";
 import {copyTab} from "../layout/util";
 import {copySubMenu} from "./commonMenuItem";
-import {Model} from "../layout/Model";
 
 const closeMenu = (tab: Tab) => {
     const allTabs: Tab[] = [];

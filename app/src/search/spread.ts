@@ -635,12 +635,12 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
 };
 
 const getKey = (element: HTMLElement) => {
-    const keys: string[] = []
+    const keys: string[] = [];
     element.querySelectorAll("mark").forEach(item => {
         keys.push(item.textContent);
-    })
+    });
     return [...new Set(keys)].join(" ");
-}
+};
 
 const getArticle = (options: {
     id: string,

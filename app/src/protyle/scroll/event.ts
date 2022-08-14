@@ -45,8 +45,9 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         }
         if (protyle.scroll.lastScrollTop - element.scrollTop > 0) {
             // up
-            if (element.scrollTop < element.clientHeight / 2 &&
+            if (element.scrollTop < element.clientHeight &&
                 protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "true") {
+                protyle.contentElement.style.overflow = "hidden";
                 protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
                 fetchPost("/api/filetree/getDoc", {
                     id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
@@ -54,6 +55,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                     k: protyle.options.key || "",
                     size: Constants.SIZE_GET,
                 }, getResponse => {
+                    protyle.contentElement.style.overflow = "";
                     onGet(getResponse, protyle, [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID]);
                 });
             }

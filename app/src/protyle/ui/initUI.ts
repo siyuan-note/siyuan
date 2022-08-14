@@ -96,9 +96,11 @@ export const setPadding = (protyle: IProtyle) => {
         }
     }
     if (window.siyuan.config.editor.codeSyntaxHighlightLineNum) {
-        protyle.wysiwyg.element.querySelectorAll('.code-block [contenteditable="true"]').forEach((block: HTMLElement) => {
-            lineNumberRender(block);
-        });
+        setTimeout(() => { // https://github.com/siyuan-note/siyuan/issues/5612
+            protyle.wysiwyg.element.querySelectorAll('.code-block [contenteditable="true"]').forEach((block: HTMLElement) => {
+                lineNumberRender(block);
+            });
+        }, 300);
     }
     if (window.siyuan.config.editor.displayBookmarkIcon) {
         const editorAttrElement = document.getElementById("editorAttr");

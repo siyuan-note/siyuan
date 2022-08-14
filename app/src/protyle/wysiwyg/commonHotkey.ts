@@ -21,6 +21,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
         event.stopPropagation();
         return true;
     }
+
     if (matchHotKey(window.siyuan.config.keymap.editor.general.refresh.custom, event)) {
         addLoading(protyle);
         fetchPost("/api/filetree/getDoc", {

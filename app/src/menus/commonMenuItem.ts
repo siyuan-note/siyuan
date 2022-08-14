@@ -603,7 +603,8 @@ export const copySubMenu = (id: string, name: string, accelerator = true, focusE
                 });
             }
         }, {
-            label: window.siyuan.languages.copy + " ID",
+            label: window.siyuan.languages.copyID,
+            accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
             click: () => {
                 writeText(id);
                 if (focusElement) {

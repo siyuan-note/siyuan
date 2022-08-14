@@ -105,6 +105,10 @@ export class Title {
                 writeText(`((${protyle.block.rootID} '${this.editElement.textContent}'))`);
                 event.preventDefault();
                 event.stopPropagation();
+            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID.custom, event)) {
+                writeText(protyle.block.rootID);
+                event.preventDefault();
+                event.stopPropagation();
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom, event)) {
                 writeText(`{{select * from blocks where id='${protyle.block.rootID}'}}`);
                 event.preventDefault();

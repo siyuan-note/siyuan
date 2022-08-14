@@ -119,6 +119,7 @@ export abstract class Constants {
         },
         editor: {
             general: {
+                copyID: {default: "", custom: ""},
                 netImg2LocalAsset: {default: "", custom: ""},
                 hLayout: {default: "", custom: ""},
                 vLayout: {default: "", custom: ""},

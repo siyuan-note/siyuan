@@ -866,6 +866,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
         /// #endif
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID.custom, event)) {
+            writeText(nodeElement.getAttribute("data-node-id"));
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             let actionElement;

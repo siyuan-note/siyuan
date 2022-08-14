@@ -635,22 +635,31 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 
 			if ast.NodeText == n.Type {
 				if 0 < len(keywords) {
-					// 搜索高亮
-					text := string(n.Tokens)
-					text = search.EncloseHighlighting(text, keywords, "<span data-type=\"search-mark\">", "</span>", Conf.Search.CaseSensitive)
-					n.Tokens = gulu.Str.ToBytes(text)
-					if bytes.Contains(n.Tokens, []byte("search-mark")) {
-						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<span data-type=\"search-mark\">"), []byte("\\\\<span data-type=\"search-mark\">"))
-						linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
-						var children []*ast.Node
-						for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
-							children = append(children, c)
+					hitBlock := false
+					for p := n.Parent; nil != p; p = p.Parent {
+						if p.ID == id {
+							hitBlock = true
+							break
 						}
-						for _, c := range children {
-							n.InsertBefore(c)
+					}
+					if hitBlock {
+						// 搜索高亮
+						text := string(n.Tokens)
+						text = search.EncloseHighlighting(text, keywords, "<span data-type=\"search-mark\">", "</span>", Conf.Search.CaseSensitive)
+						n.Tokens = gulu.Str.ToBytes(text)
+						if bytes.Contains(n.Tokens, []byte("search-mark")) {
+							n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<span data-type=\"search-mark\">"), []byte("\\\\<span data-type=\"search-mark\">"))
+							linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
+							var children []*ast.Node
+							for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+								children = append(children, c)
+							}
+							for _, c := range children {
+								n.InsertBefore(c)
+							}
+							unlinks = append(unlinks, n)
+							return ast.WalkContinue
 						}
-						unlinks = append(unlinks, n)
-						return ast.WalkContinue
 					}
 				}
 

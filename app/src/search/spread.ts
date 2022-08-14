@@ -441,7 +441,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             getArticle({
                 dialog,
                 id: currentList.getAttribute("data-node-id"),
-                k: searchInputElement.value,
+                k: getKey(currentList),
             });
             event.preventDefault();
         } else if (event.key === "ArrowUp") {
@@ -460,7 +460,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             getArticle({
                 dialog,
                 id: currentList.getAttribute("data-node-id"),
-                k: searchInputElement.value,
+                k: getKey(currentList)
             });
             event.preventDefault();
         } else if (event.key === "Enter") {
@@ -509,7 +509,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             rootIds = [currentList.getAttribute("data-root-id")];
         }
         fetchPost("/api/search/findReplace", {
-            k: searchInputElement.value,
+            k: getKey(currentList),
             r: replaceInputElement.value,
             ids,
             types: {
@@ -558,7 +558,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             getArticle({
                 dialog,
                 id: currentList.getAttribute("data-node-id"),
-                k: searchInputElement.value,
+                k: getKey(currentList)
             });
         });
     };
@@ -603,7 +603,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
                             getArticle({
                                 dialog,
                                 id: target.getAttribute("data-node-id"),
-                                k: searchInputElement.value,
+                                k: getKey(target)
                             });
                             searchInputElement.focus();
                         }
@@ -633,6 +633,14 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
 
     inputEvent();
 };
+
+const getKey = (element: HTMLElement) => {
+    const keys: string[] = []
+    element.querySelectorAll("mark").forEach(item => {
+        keys.push(item.textContent);
+    })
+    return [...new Set(keys)].join(" ");
+}
 
 const getArticle = (options: {
     id: string,
@@ -694,10 +702,12 @@ const onSearch = (data: IBlock[], dialog: Dialog) => {
         } else {
             dialog.element.querySelector("#searchPreview").classList.remove("fn__none");
         }
+        const contentElement = document.createElement("div");
+        contentElement.innerHTML = data[0].content;
         getArticle({
             dialog,
             id: data[0].id,
-            k: (dialog.element.querySelector("input") as HTMLInputElement).value,
+            k: getKey(contentElement),
         });
     } else {
         if (protyle) {

@@ -106,10 +106,9 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             shell.openPath(path.join(window.siyuan.config.system.dataDir, notebookId));
         }
     }).element);
-    if (!window.siyuan.config.readonly) {
-        genImportMenu(notebookId, "/");
-    }
     /// #endif
+    genImportMenu(notebookId, "/");
+
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.export,
         type: "submenu",
@@ -297,16 +296,14 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
         submenu: openSubmenus,
     }).element);
     /// #endif
-    if (!window.siyuan.config.readonly) {
-        genImportMenu(notebookId, pathString);
-    }
+    genImportMenu(notebookId, pathString);
     window.siyuan.menus.menu.append(exportMd(id));
     return window.siyuan.menus.menu;
 };
 
 const genImportMenu = (notebookId: string, pathString: string) => {
-    /// #if !BROWSER
     if (!window.siyuan.config.readonly) {
+        /// #if !BROWSER
         const importstdmd = (label: string, isDoc?: boolean) => {
             return {
                 icon: isDoc ? "iconMarkdown" : "iconFolder",
@@ -332,6 +329,7 @@ const genImportMenu = (notebookId: string, pathString: string) => {
                 }
             };
         };
+        /// #endif
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconDownload",
             label: window.siyuan.languages.import,
@@ -348,9 +346,11 @@ const genImportMenu = (notebookId: string, pathString: string) => {
                     });
                 }
             },
+                /// #if !BROWSER
                 importstdmd("Markdown " + window.siyuan.languages.doc, true),
-                importstdmd("Markdown " + window.siyuan.languages.folder)],
+                importstdmd("Markdown " + window.siyuan.languages.folder)
+                /// #endif
+            ],
         }).element);
     }
-    /// #endif
 };

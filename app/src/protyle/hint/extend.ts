@@ -307,13 +307,13 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
             const iconName = getIconByType(item.type);
             let attrHTML = "";
             if (item.name) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconN"></use></svg>&nbsp;${item.name}</span><span class="fn__space"></span>`;
+                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconN"></use></svg>&nbsp;${escapeHtml(item.name)}</span><span class="fn__space"></span>`;
             }
             if (item.alias) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconA"></use></svg>&nbsp;${item.alias}</span><span class="fn__space"></span>`;
+                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconA"></use></svg>&nbsp;${escapeHtml(item.alias)}</span><span class="fn__space"></span>`;
             }
             if (item.memo) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconM"></use></svg>&nbsp;${item.memo}</span>`;
+                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconM"></use></svg>&nbsp;${escapeHtml(item.memo)}</span>`;
             }
             if (attrHTML) {
                 attrHTML = `<div class="fn__flex b3-list-item__meta" style="line-height: 1">${attrHTML}</div>`;
@@ -326,9 +326,9 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
                 value,
                 html: `${attrHTML}<div class="b3-list-item__first">
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
-    <span class="b3-list-item__text">${item.content}</span>
+    <span class="b3-list-item__text">${escapeHtml(item.content)}</span>
 </div>
-<div class="b3-list-item__meta">${escapeHtml(item.hPath)}</div>`,
+<div class="b3-list-item__meta">${item.hPath}</div>`,
             });
         });
         if (isQuick) {
@@ -363,13 +363,13 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
             const iconName = getIconByType(item.type);
             let attrHTML = "";
             if (item.name) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconN"></use></svg>&nbsp;${item.name}</span><span class="fn__space"></span>`;
+                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconN"></use></svg>&nbsp;${escapeHtml(item.name)}</span><span class="fn__space"></span>`;
             }
             if (item.alias) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconA"></use></svg>&nbsp;${item.alias}</span><span class="fn__space"></span>`;
+                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconA"></use></svg>&nbsp;${escapeHtml(item.alias)}</span><span class="fn__space"></span>`;
             }
             if (item.memo) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconM"></use></svg>&nbsp;${item.memo}</span>`;
+                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconM"></use></svg>&nbsp;${escapeHtml(item.memo)}</span>`;
             }
             if (attrHTML) {
                 attrHTML = `<div class="fn__flex b3-list-item__meta" style="line-height: 1">${attrHTML}</div>`;
@@ -378,7 +378,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
                 value: `{{select * from blocks where id='${item.id}'}}`,
                 html: `${attrHTML}<div class="b3-list-item__first">
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
-    <span class="b3-list-item__text">${item.content}</span>
+    <span class="b3-list-item__text">${escapeHtml(item.content)}</span>
 </div>
 <div class="b3-list-item__meta">${item.hPath}</div>`,
             });

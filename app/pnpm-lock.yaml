@@ -1906,10 +1906,10 @@ packages:
     resolution: {integrity: sha512-mi4DG3m32cMJ5CtO9iYk41gBvGWLzJjQsaQgGOd4ZhmIuKyj8M/0rT1g0s/0qD4Tw8jsa//NXMXCC7vpGIfkTg==}
     engines: {node: '>=14.0.0'}
     dependencies:
-      7zip-bin: 5.1.1
       '@develar/schema-utils': 2.6.5
       '@electron/universal': 1.2.1
       '@malept/flatpak-bundler': 0.4.0
+      7zip-bin: 5.1.1
       async-exit-hook: 2.0.1
       bluebird-lst: 1.0.9
       builder-util: 23.3.0
@@ -2193,9 +2193,9 @@ packages:
   /builder-util/23.3.0:
     resolution: {integrity: sha512-m7RRd21N2yrnuGFd+ZqOY0ryeqWmBslDKmGDVz0wETqoEEqpiJsF3CGlsb6MRN2EQKDubvE5e+lBf8ATt06fnA==}
     dependencies:
-      7zip-bin: 5.1.1
       '@types/debug': 4.1.7
       '@types/fs-extra': 9.0.13
+      7zip-bin: 5.1.1
       app-builder-bin: 4.0.0
       bluebird-lst: 1.0.9
       builder-util-runtime: 9.0.3

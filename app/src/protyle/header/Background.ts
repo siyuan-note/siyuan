@@ -80,7 +80,7 @@ export class Background {
             }
             uploadFiles(protyle, event.target.files, event.target, (responseText) => {
                 const response = JSON.parse(responseText);
-                const style = `background-image:url(${response.data.succMap[Object.keys(response.data.succMap)[0]]})`;
+                const style = `background-image:url("${response.data.succMap[Object.keys(response.data.succMap)[0]]}")`;
                 this.ial["title-img"] = Lute.EscapeHTMLStr(style);
                 this.render(this.ial, protyle.block.rootID);
                 fetchPost("/api/attr/setBlockAttrs", {
@@ -111,7 +111,7 @@ export class Background {
                     iconElements[1].classList.add("fn__none");
                     iconElements[2].classList.add("fn__none");
                     if (type === "confirm") {
-                        const style = Lute.EscapeHTMLStr(`background-image:url(${this.imgElement.getAttribute("src")});object-position:${this.imgElement.style.objectPosition}`);
+                        const style = Lute.EscapeHTMLStr(`background-image:url("${this.imgElement.getAttribute("src")}");object-position:${this.imgElement.style.objectPosition}`);
                         this.ial["title-img"] = style;
                         fetchPost("/api/attr/setBlockAttrs", {
                             id: protyle.block.rootID,
@@ -334,9 +334,9 @@ export class Background {
             this.imgElement.classList.remove("fn__none");
             // 历史数据解析：background-image: url(\"assets/沙发背景墙11-20220418171700-w6vilzt.jpeg\"); background-position: center -254px; background-size: cover; background-repeat: no-repeat; min-height: 30vh
             this.imgElement.setAttribute("style", Lute.UnEscapeHTMLStr(img));
-            const position = this.imgElement.style.backgroundPosition || this.imgElement.style.objectPosition;
-            const url = this.imgElement.style.backgroundImage?.replace(/^url\(["']?/, "").replace(/["']?\)$/, "");
             if (img.indexOf("url(") > -1) {
+                const position = this.imgElement.style.backgroundPosition || this.imgElement.style.objectPosition;
+                const url = this.imgElement.style.backgroundImage?.replace(/^url\(["']?/, "").replace(/["']?\)$/, "");
                 this.imgElement.removeAttribute("style");
                 this.imgElement.setAttribute("src", url);
                 this.imgElement.style.objectPosition = position;

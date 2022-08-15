@@ -35,6 +35,7 @@ import {transaction, updateTransaction} from "./transaction";
 import {hideElements} from "../ui/hideElements";
 /// #if !BROWSER
 import {shell} from "electron";
+import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {removeEmbed} from "./removeEmbed";
 import {keydown} from "./keydown";
@@ -1251,9 +1252,16 @@ export class WYSIWYG {
 
         this.element.addEventListener("input", (event: InputEvent) => {
             const target = event.target as HTMLElement;
-            if (target.tagName === "VIDEO" || target.tagName === "AUDIO") {
+            if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRndo") {
                 return;
             }
+            /// #if !BROWSER
+            if (event.inputType === "historyUndo") {
+                getCurrentWindow().webContents.redo();
+                window.siyuan.menus.menu.remove();
+                return;
+            }
+            /// #endif
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
             if (!blockElement) {

@@ -96,13 +96,14 @@ export const electronUndo = (event: KeyboardEvent) => {
         getCurrentWindow().webContents.undo();
         event.preventDefault();
         event.stopPropagation();
-        return;
+        return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.redo.custom, event)) {
         getCurrentWindow().webContents.redo();
         event.preventDefault();
         event.stopPropagation();
-        return;
+        return true;
     }
     /// #endif
+    return false;
 };

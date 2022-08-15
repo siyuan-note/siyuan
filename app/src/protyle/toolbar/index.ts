@@ -867,7 +867,6 @@ export class Toolbar {
             if (event.isComposing) {
                 return;
             }
-            electronUndo(event);
             if (event.key === "Escape" || matchHotKey("⌘↩", event)) {
                 this.subElement.classList.add("fn__none");
                 this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");
@@ -883,6 +882,8 @@ export class Toolbar {
                 // https://github.com/siyuan-note/siyuan/issues/5270
                 document.execCommand("insertText", false, "\t");
                 event.preventDefault();
+            } else if (electronUndo(event)) {
+                return;
             }
         });
 

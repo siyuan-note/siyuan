@@ -316,7 +316,7 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
                 attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconM"></use></svg>&nbsp;${escapeHtml(item.memo)}</span>`;
             }
             if (attrHTML) {
-                attrHTML = `<div class="fn__flex b3-list-item__meta" style="line-height: 1">${attrHTML}</div>`;
+                attrHTML = `<div class="fn__flex b3-list-item__meta b3-list-item__showall">${attrHTML}</div>`;
             }
             let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${item.name || item.refText}</span>`;
             if (isQuick) {
@@ -328,7 +328,7 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
     <span class="b3-list-item__text">${escapeHtml(item.content)}</span>
 </div>
-<div class="b3-list-item__meta">${item.hPath}</div>`,
+<div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div>`,
             });
         });
         if (isQuick) {
@@ -372,7 +372,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
                 attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconM"></use></svg>&nbsp;${escapeHtml(item.memo)}</span>`;
             }
             if (attrHTML) {
-                attrHTML = `<div class="fn__flex b3-list-item__meta" style="line-height: 1">${attrHTML}</div>`;
+                attrHTML = `<div class="fn__flex b3-list-item__meta b3-list-item__showall">${attrHTML}</div>`;
             }
             dataList.push({
                 value: `{{select * from blocks where id='${item.id}'}}`,
@@ -380,7 +380,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
     <span class="b3-list-item__text">${escapeHtml(item.content)}</span>
 </div>
-<div class="b3-list-item__meta">${item.hPath}</div>`,
+<div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div>`,
             });
         });
         if (dataList.length === 0) {

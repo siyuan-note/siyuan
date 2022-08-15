@@ -306,14 +306,14 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconM"></use></svg>&nbsp;${escapeHtml(item.memo)}</span>`;
                 }
                 if (attrHTML) {
-                    attrHTML = `<div class="fn__flex b3-list-item__meta" style="line-height: 1">${attrHTML}</div>`;
+                    attrHTML = `<div class="fn__flex b3-list-item__meta b3-list-item__showall">${attrHTML}</div>`;
                 }
                 const blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
                 searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">${attrHTML}<div class="b3-list-item__first">
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
     <span class="b3-list-item__text">${escapeHtml(item.content)}</span>
 </div>
-<div class="b3-list-item__meta">${item.hPath}</div></button>`;
+<div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div></button>`;
             });
             if (searchHTML === "") {
                 searchHTML = `<button class="b3-list-item b3-list-item--two fn__block" data-value="">${window.siyuan.languages.emptyContent}</button>`;

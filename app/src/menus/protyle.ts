@@ -75,9 +75,9 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             inputElement.addEventListener("keydown", (event) => {
                 if (event.key === "Enter" && !event.isComposing) {
                     window.siyuan.menus.menu.remove();
+                } else if (electronUndo(event)) {
                     return;
                 }
-                electronUndo(event);
             });
         }
     }).element);
@@ -231,7 +231,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const rect = element.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,
-        y: rect.top + 13,
+        y: rect.top + 26,
         h: 26
     });
     window.siyuan.menus.menu.element.querySelector("input").select();
@@ -645,14 +645,13 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                         focusByRange(protyle.toolbar.range);
                     }
                     window.siyuan.menus.menu.remove();
-                    return;
                 } else if (event.key === "Tab" && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
                     element.nextElementSibling.querySelector("input").focus();
+                } else if (electronUndo(event)) {
                     return;
                 }
-                electronUndo(event);
             });
         }
     }).element);
@@ -688,7 +687,6 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                         focusByRange(protyle.toolbar.range);
                     }
                     window.siyuan.menus.menu.remove();
-                    return;
                 } else if (event.key === "Tab" && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -697,9 +695,9 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     } else {
                         element.nextElementSibling.querySelector("input").focus();
                     }
+                } else if (electronUndo(event)) {
                     return;
                 }
-                electronUndo(event);
             });
         }
     }).element);
@@ -729,14 +727,13 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                         focusByRange(protyle.toolbar.range);
                     }
                     window.siyuan.menus.menu.remove();
-                    return;
                 } else if (event.key === "Tab" && event.shiftKey && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
                     element.previousElementSibling.querySelector("input").focus();
+                } else if (electronUndo(event)) {
                     return;
                 }
-                electronUndo(event);
             });
         }
     }).element);
@@ -779,7 +776,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     const rect = linkElement.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,
-        y: rect.top + 13,
+        y: rect.top + 26,
         h: 26
     });
     if (focusText || protyle.lute.IsValidLinkDest(linkAddress)) {

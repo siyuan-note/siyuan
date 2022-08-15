@@ -6,6 +6,7 @@ import {isMobile} from "./functions";
 import {focusByRange} from "../protyle/util/selection";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {unicode2Emoji} from "../emoji";
+import {Constants} from "../constants";
 
 export const addBaseURL = () => {
     let baseURLElement = document.getElementById("baseURL");
@@ -105,7 +106,7 @@ export const movePathTo = async (notebookId: string, path: string, focus = true)
                     return;
                 }
                 fileHTML += `<li class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}">
-    ${item.boxIcon ? ('<span class="b3-list-item__icon">' + unicode2Emoji(item.boxIcon) + "</span>") : ""}
+    <span class="b3-list-item__icon">${unicode2Emoji(item.boxIcon || Constants.SIYUAN_IMAGE_NOTE)}</span>
     <span class="b3-list-item__showall">${escapeHtml(item.hPath)}</span>
 </li>`;
             });

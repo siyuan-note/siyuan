@@ -344,9 +344,9 @@ export class Graph extends Model {
                 return;
             }
             if (this.inputElement.value === "") {
-                this.inputElement.classList.remove("search__input--block")
+                this.inputElement.classList.remove("search__input--block");
             } else {
-                this.inputElement.classList.add("search__input--block")
+                this.inputElement.classList.add("search__input--block");
             }
             this.searchGraph(false);
         });

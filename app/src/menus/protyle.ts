@@ -77,7 +77,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                     window.siyuan.menus.menu.remove();
                     return;
                 }
-                electronUndo(event)
+                electronUndo(event);
             });
         }
     }).element);
@@ -652,7 +652,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     element.nextElementSibling.querySelector("input").focus();
                     return;
                 }
-                electronUndo(event)
+                electronUndo(event);
             });
         }
     }).element);
@@ -699,7 +699,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     }
                     return;
                 }
-                electronUndo(event)
+                electronUndo(event);
             });
         }
     }).element);
@@ -736,7 +736,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     element.previousElementSibling.querySelector("input").focus();
                     return;
                 }
-                electronUndo(event)
+                electronUndo(event);
             });
         }
     }).element);

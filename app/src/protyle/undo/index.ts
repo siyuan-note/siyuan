@@ -103,4 +103,4 @@ export const electronUndo = (event: KeyboardEvent) => {
         return;
     }
     /// #endif
-}
+};

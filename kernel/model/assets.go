@@ -694,13 +694,17 @@ func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 			} else { // HTMLBlock/InlineHTML/IFrame/Audio/Video
 				if index := bytes.Index(n.Tokens, []byte("src=\"")); 0 < index {
 					src := n.Tokens[index+len("src=\""):]
-					src = src[:bytes.Index(src, []byte("\""))]
-					if !isRelativePath(src) {
-						return ast.WalkContinue
-					}
+					if index = bytes.Index(src, []byte("\"")); 0 < index {
+						src = src[:bytes.Index(src, []byte("\""))]
+						if !isRelativePath(src) {
+							return ast.WalkContinue
+						}
 
-					dest := strings.TrimSpace(string(src))
-					ret = append(ret, dest)
+						dest := strings.TrimSpace(string(src))
+						ret = append(ret, dest)
+					} else {
+						logging.LogWarnf("src is missing the closing double quote in tree [%s] ", tree.Box+tree.Path)
+					}
 				}
 			}
 		}

@@ -81,11 +81,11 @@ export class Background {
             uploadFiles(protyle, event.target.files, event.target, (responseText) => {
                 const response = JSON.parse(responseText);
                 const style = `background-image:url("${response.data.succMap[Object.keys(response.data.succMap)[0]]}")`;
-                this.ial["title-img"] = Lute.EscapeHTMLStr(style);
+                this.ial["title-img"] = style;
                 this.render(this.ial, protyle.block.rootID);
                 fetchPost("/api/attr/setBlockAttrs", {
                     id: protyle.block.rootID,
-                    attrs: {"title-img": Lute.EscapeHTMLStr(style)}
+                    attrs: {"title-img": style}
                 });
             });
         });
@@ -111,7 +111,7 @@ export class Background {
                     iconElements[1].classList.add("fn__none");
                     iconElements[2].classList.add("fn__none");
                     if (type === "confirm") {
-                        const style = Lute.EscapeHTMLStr(`background-image:url("${this.imgElement.getAttribute("src")}");object-position:${this.imgElement.style.objectPosition}`);
+                        const style = `background-image:url("${this.imgElement.getAttribute("src")}");object-position:${this.imgElement.style.objectPosition}`;
                         this.ial["title-img"] = style;
                         fetchPost("/api/attr/setBlockAttrs", {
                             id: protyle.block.rootID,
@@ -206,7 +206,7 @@ export class Background {
                         "background-image:linear-gradient(-225deg, #231557 0%, #44107A 29%, #FF1361 67%, #FFF800 100%)"
                     ];
                     const style = bgs[getRandom(0, bgs.length - 1)];
-                    this.ial["title-img"] = Lute.EscapeHTMLStr(style);
+                    this.ial["title-img"] = style;
                     this.render(this.ial, protyle.block.rootID);
                     fetchPost("/api/attr/setBlockAttrs", {
                         id: protyle.block.rootID,
@@ -266,7 +266,7 @@ export class Background {
                     });
                     btnsElement[1].addEventListener("click", () => {
                         const style = `background-image:url(${dialog.element.querySelector("input").value});`;
-                        this.ial["title-img"] = Lute.EscapeHTMLStr(style);
+                        this.ial["title-img"] = style;
                         this.render(this.ial, protyle.block.rootID);
                         fetchPost("/api/attr/setBlockAttrs", {
                             id: protyle.block.rootID,

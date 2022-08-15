@@ -2,15 +2,7 @@
 @import "tooltips";
 @import "typography";
 @import "wysiwyg";
-
-// https://ld246.com/article/1645943925484 问题3
-.fn__flex-1 {
-  flex: 1
-}
-
-.fn__none {
-  display: none;
-}
+@import "function";
 
 .protyle-wysiwyg a {
   color: var(--b3-protyle-inline-link-color);

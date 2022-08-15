@@ -39,6 +39,7 @@ import {escapeHtml} from "../../util/escape";
 import {hideElements} from "../ui/hideElements";
 import {linkMenu} from "../../menus/protyle";
 import {renderAssetsPreview} from "../../asset/renderAssets";
+import {electronUndo} from "../undo";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -866,18 +867,7 @@ export class Toolbar {
             if (event.isComposing) {
                 return;
             }
-            /// #if !BROWSER
-            if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {
-                getCurrentWindow().webContents.undo();
-                event.preventDefault();
-                return;
-            }
-            if (matchHotKey(window.siyuan.config.keymap.editor.general.redo.custom, event)) {
-                getCurrentWindow().webContents.redo();
-                event.preventDefault();
-                return;
-            }
-            /// #endif
+            electronUndo(event);
             if (event.key === "Escape" || matchHotKey("⌘↩", event)) {
                 this.subElement.classList.add("fn__none");
                 this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");

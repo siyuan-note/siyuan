@@ -36,6 +36,7 @@ import * as dayjs from "dayjs";
 import {blockRender} from "../protyle/markdown/blockRender";
 import {renameAsset} from "../editor/rename";
 import {hasNextSibling} from "../protyle/wysiwyg/getBlock";
+import {electronUndo} from "../protyle/undo";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -74,7 +75,9 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             inputElement.addEventListener("keydown", (event) => {
                 if (event.key === "Enter" && !event.isComposing) {
                     window.siyuan.menus.menu.remove();
+                    return;
                 }
+                electronUndo(event)
             });
         }
     }).element);
@@ -642,11 +645,14 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                         focusByRange(protyle.toolbar.range);
                     }
                     window.siyuan.menus.menu.remove();
+                    return;
                 } else if (event.key === "Tab" && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
                     element.nextElementSibling.querySelector("input").focus();
+                    return;
                 }
+                electronUndo(event)
             });
         }
     }).element);
@@ -682,6 +688,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                         focusByRange(protyle.toolbar.range);
                     }
                     window.siyuan.menus.menu.remove();
+                    return;
                 } else if (event.key === "Tab" && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -690,7 +697,9 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     } else {
                         element.nextElementSibling.querySelector("input").focus();
                     }
+                    return;
                 }
+                electronUndo(event)
             });
         }
     }).element);
@@ -720,11 +729,14 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                         focusByRange(protyle.toolbar.range);
                     }
                     window.siyuan.menus.menu.remove();
+                    return;
                 } else if (event.key === "Tab" && event.shiftKey && !event.isComposing) {
                     event.preventDefault();
                     event.stopPropagation();
                     element.previousElementSibling.querySelector("input").focus();
+                    return;
                 }
+                electronUndo(event)
             });
         }
     }).element);

@@ -1252,7 +1252,7 @@ export class WYSIWYG {
 
         this.element.addEventListener("input", (event: InputEvent) => {
             const target = event.target as HTMLElement;
-            if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRndo") {
+            if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRedo") {
                 return;
             }
             /// #if !BROWSER

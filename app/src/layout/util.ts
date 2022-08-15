@@ -115,10 +115,11 @@ const dockToJSON = (dock: Dock) => {
         return data;
     };
     const data0 = subDockToJSON(0);
-    if (data0.length > 0) {
+    const data2 = subDockToJSON(1);
+    if (data0.length > 0 || data2.length > 0) {
+        // https://github.com/siyuan-note/siyuan/issues/5641
         json.push(data0);
     }
-    const data2 = subDockToJSON(1);
     if (data2.length > 0) {
         json.push(data2);
     }

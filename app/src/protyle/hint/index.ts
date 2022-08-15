@@ -605,7 +605,9 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                         x: rect.left,
                         y: rect.top
                     }, true);
-                    window.siyuan.menus.menu.element.querySelector('[data-id="assetSubMenu"]').classList.add("b3-menu__item--show");
+                    const itemElement = window.siyuan.menus.menu.element.querySelector('[data-id="assetSubMenu"]')
+                    itemElement.classList.add("b3-menu__item--show");
+                    window.siyuan.menus.menu.showSubMenu(itemElement.querySelector(".b3-menu__submenu"));
                     window.siyuan.menus.menu.element.querySelectorAll("input")[0].focus();
                 } else if (value === "---") {
                     focusBlock(nodeElement);

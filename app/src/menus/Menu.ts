@@ -34,26 +34,30 @@ export class Menu {
                 return;
             }
             itemElement.classList.add("b3-menu__item--show");
-            const rect = subMenuElement.getBoundingClientRect();
-            let style = "";
-            const leftPosition = rect.left - this.element.clientWidth - rect.width;
-            if (rect.right > window.innerWidth && (
-                leftPosition > 0 || Math.abs(leftPosition) < (rect.right - window.innerWidth))) {
-                if (leftPosition >= 0) {
-                    style = "left:auto;right:100%;";
-                } else {
-                    style = `z-index:1;mix-blend-mode: normal;left:-${this.element.style.left};`;
-                }
-            } else if (rect.right > window.innerWidth) {
-                style = `z-index:1;mix-blend-mode: normal;left:${window.innerWidth - rect.width - this.element.offsetLeft}px;`;
-            }
-            if (rect.bottom > window.innerHeight) {
-                style += `top: auto;bottom:-5px;max-height:${Math.min(rect.top, window.innerHeight * 0.4)}px`;
-            }
-            if (style) {
-                subMenuElement.setAttribute("style", style);
-            }
+            this.showSubMenu(subMenuElement);
         });
+    }
+
+    public showSubMenu(subMenuElement: Element) {
+        const rect = subMenuElement.getBoundingClientRect();
+        let style = "";
+        const leftPosition = rect.left - this.element.clientWidth - rect.width;
+        if (rect.right > window.innerWidth && (
+            leftPosition > 0 || Math.abs(leftPosition) < (rect.right - window.innerWidth))) {
+            if (leftPosition >= 0) {
+                style = "left:auto;right:100%;";
+            } else {
+                style = `z-index:1;mix-blend-mode: normal;left:-${this.element.style.left};`;
+            }
+        } else if (rect.right > window.innerWidth) {
+            style = `z-index:1;mix-blend-mode: normal;left:${window.innerWidth - rect.width - this.element.offsetLeft}px;`;
+        }
+        if (rect.bottom > window.innerHeight) {
+            style += `top: auto;bottom:-5px;max-height:${Math.min(rect.top, window.innerHeight * 0.4)}px`;
+        }
+        if (style) {
+            subMenuElement.setAttribute("style", style);
+        }
     }
 
     private preventDefault(event: KeyboardEvent) {

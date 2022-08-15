@@ -30,6 +30,12 @@
 * [表格中的块引锚文本中包含 `|` 时导致表格解析不正确](https://github.com/siyuan-note/siyuan/issues/5633)
 * [Windows 端 Ctrl+K 添加超链接后撤销触发状态异常](https://github.com/siyuan-note/siyuan/issues/5637)
 * [恢复文档浏览位置时折叠标题下方块被计入](https://github.com/siyuan-note/siyuan/issues/5639)
+* [停靠栏下方右侧仅剩一个图标后重启会被自动移动到下方左侧](https://github.com/siyuan-note/siyuan/issues/5641)
+* [查询未引用资源文件异常](https://github.com/siyuan-note/siyuan/issues/5642)
+* [Android 端在选择插入图片或文件的界面返回会导致应用崩溃](https://github.com/siyuan-note/siyuan/issues/5643)
+* [带空格文件名的图片无法作为题头图](https://github.com/siyuan-note/siyuan/issues/5644)
+* [Ctrl+T 创建标签后撤销再创建标记符重复](https://github.com/siyuan-note/siyuan/issues/5647)
+* [云端流量统计失效](https://github.com/siyuan-note/siyuan/issues/5648)
 
 ## v2.1.6 / 2022-08-11
 

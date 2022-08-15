@@ -1,3 +1,36 @@
+## v2.1.7 / 2022-08-15
+
+### 改进功能
+
+* [移动端和 Web 端支持导入 `*.sy.zip`](https://github.com/siyuan-note/siyuan/issues/5601)
+* [添加复制块 ID 快捷键](https://github.com/siyuan-note/siyuan/issues/5605)
+* [字体设置不应该影响非编辑器内容](https://github.com/siyuan-note/siyuan/issues/5610)
+* [改进无法读写块树文件后的处理](https://github.com/siyuan-note/siyuan/issues/5619)
+* [改进 Windows 端默认工作空间路径](https://github.com/siyuan-note/siyuan/issues/5622)
+* [提升块标在边界范围的高度](https://github.com/siyuan-note/siyuan/issues/5623)
+* [关系图搜索框存在内容时不收缩隐藏](https://github.com/siyuan-note/siyuan/issues/5628)
+* [向上滚动文档时题头图不应该闪现](https://github.com/siyuan-note/siyuan/issues/5630)
+* [移动端插入 iframe 输入框位置错误](https://github.com/siyuan-note/siyuan/issues/5638)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/5621)
+
+### 修复缺陷
+
+* [列表中无法使用 `[]` 插入子待办列表](https://github.com/siyuan-note/siyuan/issues/5548)
+* [代码块设置换行后渲染异常](https://github.com/siyuan-note/siyuan/issues/5612)
+* [导出 PDF、HTML 和 Word 时未移除不支持的文件名符号](https://github.com/siyuan-note/siyuan/issues/5614)
+* [关闭所有文档后无法退出程序](https://github.com/siyuan-note/siyuan/issues/5615)
+* [启动时关闭所有页签失效](https://github.com/siyuan-note/siyuan/issues/5616)
+* [恢复文档浏览位置时最后一个块没有显示](https://github.com/siyuan-note/siyuan/issues/5618)
+* [图片居中后打开会多一行](https://github.com/siyuan-note/siyuan/issues/5626)
+* [表情无法滚动](https://github.com/siyuan-note/siyuan/issues/5627)
+* [使用查询语法搜索时编辑区高亮不正确](https://github.com/siyuan-note/siyuan/issues/5632)
+* [表格中的块引锚文本中包含 `|` 时导致表格解析不正确](https://github.com/siyuan-note/siyuan/issues/5633)
+* [Windows 端 Ctrl+K 添加超链接后撤销触发状态异常](https://github.com/siyuan-note/siyuan/issues/5637)
+* [恢复文档浏览位置时折叠标题下方块被计入](https://github.com/siyuan-note/siyuan/issues/5639)
+
 ## v2.1.6 / 2022-08-11
 
 ### 改进功能

@@ -724,6 +724,9 @@ func loadNodesByStartEnd(tree *parse.Tree, startID, endID string) (nodes []*ast.
 	}
 	nodes = append(nodes, node)
 	for n := node.Next; nil != n; n = n.Next {
+		if treenode.IsInFoldedHeading(n, nil) {
+			continue
+		}
 		nodes = append(nodes, n)
 
 		if n.ID == endID {

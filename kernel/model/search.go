@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
@@ -268,12 +269,12 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
 	}
 
 	projections := "id, parent_id, root_id, hash, box, path, " +
-		"snippet(" + table + ", 6, '<mark>__r', '</mark>', '...', 64) AS hpath, " +
-		"snippet(" + table + ", 7, '<mark>__r', '</mark>', '...', 64) AS name, " +
-		"snippet(" + table + ", 8, '<mark>__r', '</mark>', '...', 64) AS alias, " +
-		"snippet(" + table + ", 9, '<mark>__r', '</mark>', '...', 64) AS memo, " +
+		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS hpath, " +
+		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS name, " +
+		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS alias, " +
+		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS memo, " +
 		"tag, " +
-		"snippet(" + table + ", 11, '<mark>__r', '</mark>', '...', 64) AS content, " +
+		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(" + quotedKeyword + ")' AND type IN " + Conf.Search.TypeFilter()
 	orderBy := ` order by case
@@ -345,12 +346,12 @@ func fullTextSearch(query, box, path, filter string, beforeLen int, querySyntax 
 		table = "blocks_fts_case_insensitive"
 	}
 	projections := "id, parent_id, root_id, hash, box, path, " +
-		"highlight(" + table + ", 6, '__@mark__', '__mark@__') AS hpath, " +
-		"highlight(" + table + ", 7, '__@mark__', '__mark@__') AS name, " +
-		"highlight(" + table + ", 8, '__@mark__', '__mark@__') AS alias, " +
-		"highlight(" + table + ", 9, '__@mark__', '__mark@__') AS memo, " +
+		"highlight(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS hpath, " +
+		"highlight(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS name, " +
+		"highlight(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS alias, " +
+		"highlight(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS memo, " +
 		"tag, " +
-		"highlight(" + table + ", 11, '__@mark__', '__mark@__') AS content, " +
+		"highlight(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + filter
 	if "" != box {
@@ -439,16 +440,19 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 			marked = gulu.Str.SubStr(marked, maxLen) + "..."
 		}
 
-		if strings.Contains(marked, "<mark>__r") { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
-			marked = strings.ReplaceAll(marked, "<mark>__r", "<mark>")
+		marked = html.EscapeString(text)
+
+		if strings.Contains(marked, search.SearchMarkLeft) { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
+			marked = strings.ReplaceAll(marked, search.SearchMarkLeft, "<mark>")
+			marked = strings.ReplaceAll(marked, search.SearchMarkRight, "</mark>")
 			return
 		}
 
-		keywords := gulu.Str.SubstringsBetween(marked, "__@mark__", "__mark@__")
+		keywords := gulu.Str.SubstringsBetween(marked, search.SearchMarkLeft, search.SearchMarkRight)
 		keywords = gulu.Str.RemoveDuplicatedElem(keywords)
 		keyword = strings.Join(keywords, search.TermSep)
-		marked = strings.ReplaceAll(marked, "__@mark__", "")
-		marked = strings.ReplaceAll(marked, "__mark@__", "")
+		marked = strings.ReplaceAll(marked, search.SearchMarkLeft, "")
+		marked = strings.ReplaceAll(marked, search.SearchMarkRight, "")
 		_, marked = search.MarkText(marked, keyword, beforeLen, Conf.Search.CaseSensitive)
 		return
 	}

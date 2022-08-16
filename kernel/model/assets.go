@@ -573,6 +573,11 @@ func UnusedAssets() (ret []string) {
 				continue
 			}
 
+			if idx := strings.Index(dest, "?"); 0 < idx {
+				// `pdf?page` 资源文件链接会被判定为未引用资源 https://github.com/siyuan-note/siyuan/issues/5649
+				dest = dest[:idx]
+			}
+
 			if "" == assetsPathMap[dest] {
 				continue
 			}

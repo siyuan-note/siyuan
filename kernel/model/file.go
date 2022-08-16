@@ -629,7 +629,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 			// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
 			if ast.NodeCodeBlockCode == n.Type && 0 < len(keywords) && !render.IsChartCodeBlockCode(n) {
 				text := string(n.Tokens)
-				text = search.EncloseHighlighting(text, keywords, "__@mark__", "__mark@__", Conf.Search.CaseSensitive)
+				text = search.EncloseHighlighting(text, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.CaseSensitive)
 				n.Tokens = gulu.Str.ToBytes(text)
 			}
 

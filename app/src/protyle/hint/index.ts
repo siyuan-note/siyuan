@@ -297,13 +297,13 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 const iconName = getIconByType(item.type);
                 let attrHTML = "";
                 if (item.name) {
-                    attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconN"></use></svg>&nbsp;${escapeHtml(item.name)}</span><span class="fn__space"></span>`;
+                    attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg>${item.name}</span><span class="fn__space"></span>`;
                 }
                 if (item.alias) {
-                    attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconA"></use></svg>&nbsp;${escapeHtml(item.alias)}</span><span class="fn__space"></span>`;
+                    attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconA"></use></svg>${item.alias}</span><span class="fn__space"></span>`;
                 }
                 if (item.memo) {
-                    attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconM"></use></svg>&nbsp;${escapeHtml(item.memo)}</span>`;
+                    attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconM"></use></svg>${item.memo}</span>`;
                 }
                 if (attrHTML) {
                     attrHTML = `<div class="fn__flex b3-list-item__meta b3-list-item__showall">${attrHTML}</div>`;
@@ -311,7 +311,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 const blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
                 searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">${attrHTML}<div class="b3-list-item__first">
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
-    <span class="b3-list-item__text">${escapeHtml(item.content)}</span>
+    <span class="b3-list-item__text">${item.content}</span>
 </div>
 <div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div></button>`;
             });

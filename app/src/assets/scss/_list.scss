@@ -110,6 +110,16 @@
       }
     }
 
+    &__hinticon {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+      color: var(--b3-theme-on-background);
+      align-self: center;
+      flex-shrink: 0;
+      margin-right: 4px;
+    }
+
     &__graphic {
       margin-right: 4px;
       padding: 0 2px;

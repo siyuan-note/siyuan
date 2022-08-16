@@ -440,9 +440,8 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 			marked = gulu.Str.SubStr(marked, maxLen) + "..."
 		}
 
-		marked = html.EscapeString(text)
-
 		if strings.Contains(marked, search.SearchMarkLeft) { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
+			marked = html.EscapeString(text)
 			marked = strings.ReplaceAll(marked, search.SearchMarkLeft, "<mark>")
 			marked = strings.ReplaceAll(marked, search.SearchMarkRight, "</mark>")
 			return

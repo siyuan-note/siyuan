@@ -737,25 +737,13 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             });
         }
     }).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        icon: "iconTrashcan",
-        label: window.siyuan.languages.remove,
-        click() {
-            protyle.toolbar.setInlineMark(protyle, "link", "remove");
-        }
-    }).element);
-    if (linkAddress?.startsWith("assets/")) {
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.rename,
-            click() {
-                renameAsset(linkAddress);
-            }
-        }).element);
+    if (linkAddress) {
+        openMenu(linkAddress);
     }
+    const submenu: IMenu[] = [];
     if (linkAddress?.startsWith("siyuan://blocks/")) {
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconRefresh",
-            label: window.siyuan.languages.turnInto + " " + window.siyuan.languages.blockRef,
+        submenu.push({
+            label: window.siyuan.languages.blockRef,
             click() {
                 linkElement.setAttribute("data-subtype", "s");
                 linkElement.setAttribute("data-type", "block-ref");
@@ -768,11 +756,39 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 protyle.toolbar.range.collapse(false);
                 focusByRange(protyle.toolbar.range);
             }
+        });
+    }
+    submenu.push({
+        label: window.siyuan.languages.text,
+        click() {
+            protyle.toolbar.setInlineMark(protyle, "link", "remove");
+        }
+    })
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.turnInto,
+        icon: "iconRefresh",
+        submenu
+    }).element);
+    if (linkAddress?.startsWith("assets/")) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.rename,
+            click() {
+                renameAsset(linkAddress);
+            }
         }).element);
     }
-    if (linkAddress) {
-        openMenu(linkAddress);
-    }
+    window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconTrashcan",
+        label: window.siyuan.languages.remove,
+        click() {
+            const oldHTML = nodeElement.outerHTML;
+            linkElement.insertAdjacentHTML("afterend", "<wbr>");
+            linkElement.remove();
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+            focusByWbr(nodeElement, protyle.toolbar.range);
+        }
+    }).element);
     const rect = linkElement.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,

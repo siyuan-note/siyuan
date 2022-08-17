@@ -415,7 +415,7 @@ func (conf *AppConf) Save() {
 
 func (conf *AppConf) save0(data []byte) {
 	confPath := filepath.Join(util.ConfDir, "conf.json")
-	if err := filelock.LockFileWrite(confPath, data); nil != err {
+	if err := filelock.NoLockFileWrite(confPath, data); nil != err {
 		logging.LogFatalf("write conf [%s] failed: %s", confPath, err)
 	}
 }

@@ -131,6 +131,8 @@ export class Gutter {
                 } else {
                     gutterFold();
                 }
+                hideElements(["select"], protyle);
+                window.siyuan.menus.menu.remove();
                 return;
             }
             if (protyle.disabled) {

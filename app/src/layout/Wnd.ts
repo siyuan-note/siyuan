@@ -681,7 +681,8 @@ export class Wnd {
                         }
                         previous.resize = undefined;
                         previous.element.classList.add("fn__flex-1");
-                    } else {
+                    } else if (!previous.element.classList.contains("fn__flex-1")) {
+                        // 分屏后要均分 https://github.com/siyuan-note/siyuan/issues/5657
                         if (layout.direction === "lr") {
                             previous.element.style.width = (previous.element.clientWidth + element.clientWidth) + "px";
                         } else {

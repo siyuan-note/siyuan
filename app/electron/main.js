@@ -82,10 +82,6 @@ try {
   if (!fs.existsSync(confDir)) {
     fs.mkdirSync(confDir, {mode: 0o755, recursive: true})
   }
-  const documents = path.join(app.getPath('home'), 'Documents')
-  if (!fs.existsSync(documents)) {
-    fs.mkdirSync(documents, {mode: 0o755, recursive: true})
-  }
 } catch (e) {
   console.error(e)
   require('electron').dialog.showErrorBox('创建配置目录失败 Failed to create config directory',

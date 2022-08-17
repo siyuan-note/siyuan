@@ -194,6 +194,10 @@ func buildBlockBreadcrumb(node *ast.Node) (ret []*BlockPath) {
 			continue
 		}
 		id := parent.ID
+		fc := parent.FirstChild
+		if nil != fc && ast.NodeTaskListItemMarker == fc.Type {
+			fc = fc.Next
+		}
 
 		name := html.EscapeHTMLStr(parent.IALAttr("name"))
 		if ast.NodeDocument == parent.Type {
@@ -201,7 +205,7 @@ func buildBlockBreadcrumb(node *ast.Node) (ret []*BlockPath) {
 		} else {
 			if "" == name {
 				if ast.NodeListItem == parent.Type {
-					name = gulu.Str.SubStr(renderBlockText(parent.FirstChild), maxNameLen)
+					name = gulu.Str.SubStr(renderBlockText(fc), maxNameLen)
 				} else {
 					name = gulu.Str.SubStr(renderBlockText(parent), maxNameLen)
 				}
@@ -215,12 +219,12 @@ func buildBlockBreadcrumb(node *ast.Node) (ret []*BlockPath) {
 		if ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type {
 			add = false
 		}
-		if ast.NodeParagraph == parent.Type && nil != parent.Parent && ast.NodeListItem == parent.Parent.Type && nil == parent.Next && nil == parent.Previous {
+		if ast.NodeParagraph == parent.Type && nil != parent.Parent && ast.NodeListItem == parent.Parent.Type && nil == parent.Next && (nil == parent.Previous || ast.NodeTaskListItemMarker == parent.Previous.Type) {
 			add = false
 		}
 		if ast.NodeListItem == parent.Type {
 			if "" == name {
-				name = gulu.Str.SubStr(renderBlockText(parent.FirstChild), maxNameLen)
+				name = gulu.Str.SubStr(renderBlockText(fc), maxNameLen)
 			}
 		}
 

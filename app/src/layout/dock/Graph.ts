@@ -338,6 +338,7 @@ export class Graph extends Model {
         });
         this.inputElement.addEventListener("compositionend", () => {
             this.searchGraph(false);
+            this.inputElement.classList.add("search__input--block");
         });
         this.inputElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {

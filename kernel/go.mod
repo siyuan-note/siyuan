@@ -7,7 +7,7 @@ require (
 	github.com/88250/css v0.1.2
 	github.com/88250/flock v0.8.2
 	github.com/88250/gulu v1.2.3-0.20220720144315-065ef35ec583
-	github.com/88250/lute v1.7.5-0.20220815152609-e9832b6247eb
+	github.com/88250/lute v1.7.5-0.20220817095606-2f371c527d93
 	github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1
 	github.com/88250/pdfcpu v0.3.13
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
@@ -29,7 +29,7 @@ require (
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.8.1
-	github.com/imroc/req/v3 v3.17.0
+	github.com/imroc/req/v3 v3.18.0
 	github.com/jinzhu/copier v0.3.5
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/mitchellh/go-ps v1.0.0
@@ -38,11 +38,11 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20220808062540-4570cc7e4f10
+	github.com/siyuan-note/dejavu v0.0.0-20220817100354-86e98bc81dfe
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
 	github.com/siyuan-note/filelock v0.0.0-20220720144616-011221f7e128
-	github.com/siyuan-note/httpclient v0.0.0-20220709030145-2bfb50f28e73
+	github.com/siyuan-note/httpclient v0.0.0-20220817100036-8b9e60a1291e
 	github.com/siyuan-note/logging v0.0.0-20220717040626-f796b05ee520
 	github.com/steambap/captcha v1.4.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
@@ -109,13 +109,13 @@ require (
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	go.uber.org/atomic v1.9.0 // indirect
+	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
-	golang.org/x/net v0.0.0-20220805013720-a33c5aa5df48 // indirect
+	golang.org/x/net v0.0.0-20220812174116-3211cb980234 // indirect
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
-	golang.org/x/sys v0.0.0-20220804214406-8e32c043e418 // indirect
+	golang.org/x/sys v0.0.0-20220817070843-5a390386f1f2 // indirect
 	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect

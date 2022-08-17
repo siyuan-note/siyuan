@@ -59,6 +59,8 @@ func RenderCreateDocNameTemplate(nameTemplate string) (ret string, err error) {
 }
 
 func SearchTemplate(keyword string) (ret []*Block) {
+	ret = []*Block{}
+
 	templates := filepath.Join(util.DataDir, "templates")
 	k := strings.ToLower(keyword)
 	filepath.Walk(templates, func(path string, info fs.FileInfo, err error) error {

@@ -1,7 +1,14 @@
 import {fetchPost} from "../../util/fetch";
 
-export const previewTemplate = (pathString: string, element: Element) => {
-    fetchPost("/api/file/getFile", {path: pathString.replace(window.siyuan.config.system.dataDir.substring(0, window.siyuan.config.system.dataDir.length - 4), "")}, (response) => {
-        element.innerHTML = `<div class="b3-typography">${response.data}</div>`;
+export const previewTemplate = (pathString: string, element: Element, parentId: string) => {
+    if (!pathString) {
+        element.innerHTML = ""
+        return;
+    }
+    fetchPost("/api/template/render", {
+        id: parentId,
+        path: pathString
+    }, (response) => {
+        element.innerHTML = `<div class="protyle-wysiwyg" style="padding: 8px">${response.data.content.replace(/contenteditable="true"/g, "")}</div>`;
     })
 }

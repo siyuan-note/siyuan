@@ -1037,18 +1037,18 @@ export class Toolbar {
     <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>
-<div style="width: 260px;display: ${isMobile() ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
+<div style="width: 520px;${isMobile() ? "display:none" : ""};overflow: auto;"></div>
 </div>`;
             const listElement = this.subElement.querySelector(".b3-list");
             const previewElement = this.subElement.firstElementChild.lastElementChild;
-            previewTemplate(listElement.firstElementChild.getAttribute("data-value"), previewElement)
+            previewTemplate(listElement.firstElementChild.getAttribute("data-value"), previewElement, protyle.block.parentID)
             listElement.addEventListener("mouseover", (event) => {
                 const target = event.target as HTMLElement;
                 const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
                 if (!hoverItemElement) {
                     return;
                 }
-                previewTemplate(hoverItemElement.getAttribute("data-value"), previewElement)
+                previewTemplate(hoverItemElement.getAttribute("data-value"), previewElement, protyle.block.parentID)
             });
             const inputElement = this.subElement.querySelector("input");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -1060,7 +1060,7 @@ export class Toolbar {
                 if (!isEmpty) {
                     const currentElement = upDownHint(listElement, event);
                     if (currentElement) {
-                        previewTemplate(currentElement.getAttribute("data-value"), previewElement)
+                        previewTemplate(currentElement.getAttribute("data-value"), previewElement, protyle.block.parentID)
                     }
                 }
                 if (event.key === "Enter") {
@@ -1086,7 +1086,7 @@ export class Toolbar {
                         searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
                     });
                     listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                    previewTemplate(response.data.blocks[0].path, previewElement);
+                    previewTemplate(response.data.blocks[0]?.path, previewElement, protyle.block.parentID);
                 });
             });
             this.subElement.lastElementChild.addEventListener("click", (event) => {

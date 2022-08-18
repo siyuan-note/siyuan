@@ -63,10 +63,14 @@ export const restoreScroll = (protyle: IProtyle, scrollAttr: IScrollAttr) => {
             /// #endif
         }
     } else if (scrollAttr.zoomInId && protyle.block.id !== scrollAttr.zoomInId) {
-        zoomOut(protyle, scrollAttr.zoomInId, undefined, true, () => {
-            protyle.contentElement.scrollTop = scrollAttr.scrollTop;
-            if (scrollAttr.focusId) {
-                focusByOffset(protyle.wysiwyg.element.querySelector(`[data-node-id="${scrollAttr.focusId}"]`), scrollAttr.focusStart, scrollAttr.focusEnd);
+        fetchPost("/api/block/checkBlockExist", {id: scrollAttr.zoomInId}, existResponse => {
+            if (existResponse.data) {
+                zoomOut(protyle, scrollAttr.zoomInId, undefined, true, () => {
+                    protyle.contentElement.scrollTop = scrollAttr.scrollTop;
+                    if (scrollAttr.focusId) {
+                        focusByOffset(protyle.wysiwyg.element.querySelector(`[data-node-id="${scrollAttr.focusId}"]`), scrollAttr.focusStart, scrollAttr.focusEnd);
+                    }
+                });
             }
         });
     } else if (!protyle.scroll.element.classList.contains("fn__none")) {

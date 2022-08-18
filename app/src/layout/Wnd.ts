@@ -25,6 +25,7 @@ import {scrollCenter} from "../util/highlightById";
 import {getAllModels} from "./getAll";
 import {countBlockWord} from "./status";
 import {saveScroll} from "../protyle/scroll/saveScroll";
+import {Asset} from "../asset";
 
 export class Wnd {
     public id: string;
@@ -324,8 +325,13 @@ export class Wnd {
             return;
         }
 
-        if (currentTab && target === currentTab.headElement && currentTab.model instanceof Graph) {
-            currentTab.model.onGraph(false);
+        if (currentTab && target === currentTab.headElement) {
+            if (currentTab.model instanceof Graph) {
+                currentTab.model.onGraph(false);
+            } else if (currentTab.model instanceof Asset && currentTab.model.pdfObject) {
+                // https://ld246.com/article/1660283484105
+                currentTab.model.pdfObject.pdfViewer.container.focus();
+            }
         }
 
         if (currentTab && currentTab.model instanceof Editor) {

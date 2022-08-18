@@ -100,6 +100,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         textHTML = "";
     }
 
+    // 剪切复制中首位包含空格或仅有空格 https://github.com/siyuan-note/siyuan/issues/5667
     if (!textHTML.endsWith(Constants.ZWSP) && !textHTML.startsWith(Constants.ZWSP)) {
         // process word
         const doc = new DOMParser().parseFromString(textHTML, "text/html");

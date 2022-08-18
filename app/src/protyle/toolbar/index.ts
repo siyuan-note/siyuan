@@ -1022,10 +1022,13 @@ export class Toolbar {
         fetchPost("/api/search/searchTemplate", {
             k: "",
         }, (response) => {
-            let html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+            let html = "";
             response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
                 html += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
             });
+            if (html === "") {
+                html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+            }
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
             this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
@@ -1060,11 +1063,11 @@ export class Toolbar {
                 fetchPost("/api/search/searchTemplate", {
                     k: inputElement.value,
                 }, (response) => {
-                    let searchHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                    let searchHTML = "";
                     response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
                         searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
                     });
-                    this.subElement.firstElementChild.lastElementChild.innerHTML = searchHTML;
+                    this.subElement.firstElementChild.lastElementChild.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                 });
             });
             this.subElement.lastElementChild.addEventListener("click", (event) => {

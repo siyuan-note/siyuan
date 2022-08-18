@@ -329,7 +329,7 @@ export class Wnd {
             if (currentTab.model instanceof Graph) {
                 currentTab.model.onGraph(false);
             } else if (currentTab.model instanceof Asset && currentTab.model.pdfObject) {
-                // https://ld246.com/article/1660283484105
+                // https://github.com/siyuan-note/siyuan/issues/5655
                 currentTab.model.pdfObject.pdfViewer.container.focus();
             }
         }

@@ -100,16 +100,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         textHTML = "";
     }
 
-    // process word
-    const doc = new DOMParser().parseFromString(textHTML, "text/html");
-    let wordHTML = "";
-    if (doc.body) {
-        wordHTML = doc.body.innerHTML;
+    if (!textHTML.endsWith(Constants.ZWSP) && !textHTML.startsWith(Constants.ZWSP)) {
+        // process word
+        const doc = new DOMParser().parseFromString(textHTML, "text/html");
+        if (doc.body && doc.body.innerHTML) {
+            textHTML = doc.body.innerHTML;
+        }
     }
-    // 复制空格的时候不能让其转换为空
-    if (wordHTML !== Constants.ZWSP) {
-        textHTML = wordHTML;
-    }
+
     textHTML = Lute.Sanitize(textHTML);
 
     const nodeElement = hasClosestBlock(event.target);

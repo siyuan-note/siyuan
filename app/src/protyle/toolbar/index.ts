@@ -1022,7 +1022,7 @@ export class Toolbar {
         fetchPost("/api/search/searchTemplate", {
             k: "",
         }, (response) => {
-            let html = "";
+            let html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
                 html += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
             });
@@ -1038,9 +1038,16 @@ export class Toolbar {
                 if (event.isComposing) {
                     return;
                 }
-                upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
+                const isEmpty = !this.subElement.querySelector(".b3-list-item")
+                if (!isEmpty) {
+                    upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
+                }
                 if (event.key === "Enter") {
-                    hintRenderTemplate(decodeURIComponent(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, nodeElement);
+                    if (!isEmpty) {
+                        hintRenderTemplate(decodeURIComponent(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, nodeElement);
+                    } else {
+                        focusByRange(this.range);
+                    }
                     this.subElement.classList.add("fn__none");
                     event.preventDefault();
                 } else if (event.key === "Escape") {
@@ -1053,7 +1060,7 @@ export class Toolbar {
                 fetchPost("/api/search/searchTemplate", {
                     k: inputElement.value,
                 }, (response) => {
-                    let searchHTML = "";
+                    let searchHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                     response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
                         searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
                     });
@@ -1062,6 +1069,11 @@ export class Toolbar {
             });
             this.subElement.lastElementChild.addEventListener("click", (event) => {
                 const target = event.target as HTMLElement;
+                if (target.classList.contains("b3-list--empty")) {
+                    this.subElement.classList.add("fn__none");
+                    focusByRange(this.range);
+                    return;
+                }
                 const listElement = hasClosestByClassName(target, "b3-list-item");
                 if (!listElement) {
                     return;

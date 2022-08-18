@@ -40,6 +40,7 @@ import {hideElements} from "../ui/hideElements";
 import {linkMenu} from "../../menus/protyle";
 import {renderAssetsPreview} from "../../asset/renderAssets";
 import {electronUndo} from "../undo";
+import {previewTemplate} from "./util";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -1031,10 +1032,24 @@ export class Toolbar {
             }
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
-            this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
-<div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
+            this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
+<div class="fn__flex-column" style="min-width: 260px;max-width: 100vw">
+    <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
+</div>
+<div style="width: 260px;display: ${isMobile() ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
 </div>`;
-
+            const listElement = this.subElement.querySelector(".b3-list");
+            const previewElement = this.subElement.firstElementChild.lastElementChild;
+            previewTemplate(listElement.firstElementChild.getAttribute("data-value"), previewElement)
+            listElement.addEventListener("mouseover", (event) => {
+                const target = event.target as HTMLElement;
+                const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
+                if (!hoverItemElement) {
+                    return;
+                }
+                previewTemplate(hoverItemElement.getAttribute("data-value"), previewElement)
+            });
             const inputElement = this.subElement.querySelector("input");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 event.stopPropagation();
@@ -1043,7 +1058,10 @@ export class Toolbar {
                 }
                 const isEmpty = !this.subElement.querySelector(".b3-list-item")
                 if (!isEmpty) {
-                    upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
+                    const currentElement = upDownHint(listElement, event);
+                    if (currentElement) {
+                        previewTemplate(currentElement.getAttribute("data-value"), previewElement)
+                    }
                 }
                 if (event.key === "Enter") {
                     if (!isEmpty) {
@@ -1067,7 +1085,8 @@ export class Toolbar {
                     response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
                         searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
                     });
-                    this.subElement.firstElementChild.lastElementChild.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                    listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                    previewTemplate(response.data.blocks[0].path, previewElement);
                 });
             });
             this.subElement.lastElementChild.addEventListener("click", (event) => {
@@ -1159,6 +1178,9 @@ export class Toolbar {
             response.data.forEach((item: { hName: string, path: string }, index: number) => {
                 html += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</div>`;
             });
+            if (html === "") {
+                html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+            }
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
             this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
@@ -1185,12 +1207,21 @@ export class Toolbar {
                 if (event.isComposing) {
                     return;
                 }
-                const currentElement = upDownHint(listElement, event);
-                if (currentElement) {
-                    previewElement.innerHTML = renderAssetsPreview(currentElement.getAttribute("data-value"));
+                const isEmpty = !this.subElement.querySelector(".b3-list-item")
+                if (!isEmpty) {
+                    const currentElement = upDownHint(listElement, event);
+                    if (currentElement) {
+                        previewElement.innerHTML = renderAssetsPreview(currentElement.getAttribute("data-value"));
+                    }
                 }
+
                 if (event.key === "Enter") {
-                    hintRenderAssets(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"), protyle);
+                    if (!isEmpty) {
+                        hintRenderAssets(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"), protyle);
+                    } else {
+                        focusByRange(this.range);
+                    }
+                    this.subElement.classList.add("fn__none");
                     // 空行处插入 mp3 会多一个空的 mp3 块
                     event.preventDefault();
                 } else if (event.key === "Escape") {
@@ -1207,12 +1238,17 @@ export class Toolbar {
                     response.data.forEach((item: { path: string, hName: string }, index: number) => {
                         searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</div>`;
                     });
-                    listElement.innerHTML = searchHTML;
+                    listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                     previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
                 });
             });
             this.subElement.lastElementChild.addEventListener("click", (event) => {
                 const target = event.target as HTMLElement;
+                if (target.classList.contains("b3-list--empty")) {
+                    this.subElement.classList.add("fn__none");
+                    focusByRange(this.range);
+                    return;
+                }
                 const listItemElement = hasClosestByClassName(target, "b3-list-item");
                 if (!listItemElement) {
                     return;

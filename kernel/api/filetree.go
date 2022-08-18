@@ -605,6 +605,7 @@ func getDoc(c *gin.Context) {
 	if nil != startIDArg && nil != endIDArg {
 		startID = startIDArg.(string)
 		endID = endIDArg.(string)
+		size = 36
 	}
 
 	blockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, err := model.GetDoc(startID, endID, id, index, keyword, mode, size)

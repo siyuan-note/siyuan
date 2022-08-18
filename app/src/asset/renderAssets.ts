@@ -2,6 +2,9 @@ import {Constants} from "../constants";
 import {pathPosix} from "../util/pathName";
 
 export const renderAssetsPreview = (pathString: string) => {
+    if (!pathString) {
+        return "";
+    }
     const type = pathPosix().extname(pathString).toLowerCase();
     if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
         return `<img style="max-height: 100%" src="${pathString}">`;

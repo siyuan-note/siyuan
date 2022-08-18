@@ -763,7 +763,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         click() {
             protyle.toolbar.setInlineMark(protyle, "link", "remove");
         }
-    })
+    });
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.turnInto,
         icon: "iconRefresh",

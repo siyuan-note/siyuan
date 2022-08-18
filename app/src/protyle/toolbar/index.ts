@@ -1041,14 +1041,14 @@ export class Toolbar {
 </div>`;
             const listElement = this.subElement.querySelector(".b3-list");
             const previewElement = this.subElement.firstElementChild.lastElementChild;
-            previewTemplate(listElement.firstElementChild.getAttribute("data-value"), previewElement, protyle.block.parentID)
+            previewTemplate(listElement.firstElementChild.getAttribute("data-value"), previewElement, protyle.block.parentID);
             listElement.addEventListener("mouseover", (event) => {
                 const target = event.target as HTMLElement;
                 const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
                 if (!hoverItemElement) {
                     return;
                 }
-                previewTemplate(hoverItemElement.getAttribute("data-value"), previewElement, protyle.block.parentID)
+                previewTemplate(hoverItemElement.getAttribute("data-value"), previewElement, protyle.block.parentID);
             });
             const inputElement = this.subElement.querySelector("input");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -1056,11 +1056,11 @@ export class Toolbar {
                 if (event.isComposing) {
                     return;
                 }
-                const isEmpty = !this.subElement.querySelector(".b3-list-item")
+                const isEmpty = !this.subElement.querySelector(".b3-list-item");
                 if (!isEmpty) {
                     const currentElement = upDownHint(listElement, event);
                     if (currentElement) {
-                        previewTemplate(currentElement.getAttribute("data-value"), previewElement, protyle.block.parentID)
+                        previewTemplate(currentElement.getAttribute("data-value"), previewElement, protyle.block.parentID);
                     }
                 }
                 if (event.key === "Enter") {
@@ -1207,7 +1207,7 @@ export class Toolbar {
                 if (event.isComposing) {
                     return;
                 }
-                const isEmpty = !this.subElement.querySelector(".b3-list-item")
+                const isEmpty = !this.subElement.querySelector(".b3-list-item");
                 if (!isEmpty) {
                     const currentElement = upDownHint(listElement, event);
                     if (currentElement) {

@@ -107,6 +107,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         if (doc.body && doc.body.innerHTML) {
             textHTML = doc.body.innerHTML;
         }
+        // windows 剪切板
+        if (textHTML.startsWith("\n<!--StartFragment-->") && textHTML.endsWith("<!--EndFragment-->\n\n")) {
+            textHTML = doc.body.innerHTML.trim().replace("<!--StartFragment-->", "").replace("<!--EndFragment-->", "");
+        }
     }
 
     textHTML = Lute.Sanitize(textHTML);

@@ -18,11 +18,7 @@ import {shell} from "electron";
 import {pushBack} from "../util/backForward";
 import {Asset} from "../asset";
 import {Layout} from "../layout";
-import {
-    hasClosestBlock,
-    hasClosestByAttribute,
-    hasClosestByClassName,
-} from "../protyle/util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
 import {getPreviousHeading} from "../protyle/wysiwyg/getBlock";
 import {lockFile, setTitle} from "../dialog/processSystem";
 import {zoomOut} from "../menus/protyle";
@@ -451,7 +447,13 @@ export const openBy = (url: string, type: "folder" | "app") => {
         });
         return;
     } else {
-        address = url.replace("file://", "");
+        address = url.replace("file:///", "");
+        address = address.replace("file://", "");
+        address = address.replace("file://\\", "");
+        if ("windows" === window.siyuan.config.system.os) {
+            // `file://` 协议兼容 Window 平台使用 `/` 作为目录分割线 https://github.com/siyuan-note/siyuan/issues/5681
+            address = address.replace("/", "\\");
+        }
     }
 
     if (type === "app") {

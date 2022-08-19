@@ -244,7 +244,7 @@ Data synchronization through third-party synchronization disks is not supported,
 
 Local functions are completely free to use, [Cloud services](https://b3log.org/siyuan/en/pricing.html) requires annual subscription.
 
-🐦 Limited to 1024 early bird seats, $36/year https://github.com/siyuan-note/siyuan/issues/5331
+Currently, only users in mainland China are supported to subscribe. For users in non-mainland China regions, please follow [Cloud service supports non-mainland China regions](https://github.com/siyuan-note/siyuan/issues/5331).
 
 ## 🙏 Acknowledgement
 

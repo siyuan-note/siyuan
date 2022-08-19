@@ -6,7 +6,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20220808181753"
+		"updated": "20220820000523"
 	},
 	"Children": [
 		{
@@ -2545,12 +2545,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220703000434-rpabrb5",
-				"updated": "20220703000510"
+				"updated": "20220820000523"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "🐦 Limited to 1024 early bird seats, $36/year "
+					"Data": "Currently, only users in mainland China are supported to subscribe. For users in non-mainland China regions, please follow "
 				},
 				{
 					"Type": "NodeLink",
@@ -2571,12 +2571,16 @@
 						},
 						{
 							"Type": "NodeLinkDest",
-							"Data": "https://github.com/siyuan-note/siyuan/issues/5331\n"
+							"Data": "https://github.com/siyuan-note/siyuan/issues/5331"
 						},
 						{
 							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		}

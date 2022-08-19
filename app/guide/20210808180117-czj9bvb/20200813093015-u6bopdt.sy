@@ -6,7 +6,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20220808181532"
+		"updated": "20220820000334"
 	},
 	"Children": [
 		{
@@ -2593,7 +2593,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201224120447-xj9cd10",
-				"updated": "20210726165013"
+				"updated": "20220820000331"
 			},
 			"Children": [
 				{
@@ -2633,16 +2633,16 @@
 			]
 		},
 		{
-			"ID": "20201224120447-s45uw5h",
+			"ID": "20220820000332-5y9gknk",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20201224120447-s45uw5h",
-				"updated": "20220703000831"
+				"id": "20220820000332-5y9gknk",
+				"updated": "20220820000334"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "非中国大陆地区用户请关注 "
+					"Data": "目前仅支持中国大陆地区用户订阅，非中国大陆地区用户请关注 "
 				},
 				{
 					"Type": "NodeLink",
@@ -2669,15 +2669,12 @@
 							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
-		},
-		{
-			"ID": "20220703000808-kodzuhs",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220703000808-kodzuhs"
-			}
 		}
 	]
 }

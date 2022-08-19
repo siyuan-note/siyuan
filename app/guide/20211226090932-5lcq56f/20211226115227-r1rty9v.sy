@@ -5,7 +5,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20220808181824"
+		"updated": "20220820000508"
 	},
 	"Children": [
 		{
@@ -2535,12 +2535,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226115356-zk19o1w",
-				"updated": "20220703000552"
+				"updated": "20220820000508"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "🐦 Limited to 1024 early bird seats, $36/year "
+					"Data": "目前僅支持中國大陸地區用戶訂閱，非中國大陸地區用戶請關注 "
 				},
 				{
 					"Type": "NodeLink",
@@ -2567,6 +2567,10 @@
 							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		}

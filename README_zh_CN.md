@@ -252,7 +252,7 @@
 
 本地功能完全免费使用，[云端服务](https://b3log.org/siyuan/pricing.html)需要年付订阅。
 
-非中国大陆地区用户请关注 [Cloud service supports non-mainland China regions](https://github.com/siyuan-note/siyuan/issues/5331)
+目前仅支持中国大陆地区用户订阅，非中国大陆地区用户请关注 [Cloud service supports non-mainland China regions](https://github.com/siyuan-note/siyuan/issues/5331)。
 
 ## 🙏 鸣谢
 

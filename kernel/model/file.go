@@ -923,31 +923,31 @@ func renameWriteJSONQueue(tree *parse.Tree, oldHPath string) (err error) {
 	return
 }
 
-func DuplicateDoc(rootID string) (err error) {
+func DuplicateDoc(rootID string) (ret *parse.Tree, err error) {
 	msgId := util.PushMsg(Conf.Language(116), 30000)
 	defer util.PushClearMsg(msgId)
 
 	WaitForWritingFiles()
-	tree, err := loadTreeByBlockID(rootID)
+	ret, err = loadTreeByBlockID(rootID)
 	if nil != err {
 		return
 	}
 
-	tree.ID = ast.NewNodeID()
-	tree.Root.ID = tree.ID
+	ret.ID = ast.NewNodeID()
+	ret.Root.ID = ret.ID
 	titleSuffix := "Duplicated"
-	if t, parseErr := time.Parse("20060102150405", util.TimeFromID(tree.ID)); nil == parseErr {
+	if t, parseErr := time.Parse("20060102150405", util.TimeFromID(ret.ID)); nil == parseErr {
 		titleSuffix = t.Format("2006-01-02 15:04:05")
 	}
-	tree.Root.SetIALAttr("id", tree.ID)
-	tree.Root.SetIALAttr("title", tree.Root.IALAttr("title")+" "+titleSuffix)
-	p := path.Join(path.Dir(tree.Path), tree.ID) + ".sy"
-	tree.Path = p
-	tree.HPath = tree.HPath + " " + titleSuffix
+	ret.Root.SetIALAttr("id", ret.ID)
+	ret.Root.SetIALAttr("title", ret.Root.IALAttr("title")+" "+titleSuffix)
+	p := path.Join(path.Dir(ret.Path), ret.ID) + ".sy"
+	ret.Path = p
+	ret.HPath = ret.HPath + " " + titleSuffix
 
 	// 收集所有引用
 	refIDs := map[string]string{}
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeBlockRefID != n.Type {
 			return ast.WalkContinue
 		}
@@ -956,7 +956,7 @@ func DuplicateDoc(rootID string) (err error) {
 	})
 
 	// 重置块 ID
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeDocument == n.Type {
 			return ast.WalkContinue
 		}
@@ -973,7 +973,7 @@ func DuplicateDoc(rootID string) (err error) {
 	})
 
 	// 重置内部引用
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeBlockRefID != n.Type {
 			return ast.WalkContinue
 		}
@@ -983,7 +983,7 @@ func DuplicateDoc(rootID string) (err error) {
 		return ast.WalkContinue
 	})
 
-	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
+	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: ret}}}
 	err = PerformTransactions(&[]*Transaction{transaction})
 	if nil != err {
 		tx, txErr := sql.BeginTx()

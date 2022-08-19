@@ -27,7 +27,7 @@ export const hideElements = (panels: string[], protyle?: IProtyle) => {
     }
     if (protyle.toolbar && panels.includes("util")) {
         const pinElement = protyle.toolbar.subElement.querySelector('[data-type="pin"]');
-        if (!pinElement || (pinElement && !pinElement.classList.contains("ft__primary"))) {
+        if (!pinElement || (pinElement && !pinElement.classList.contains("block__icon--active"))) {
             protyle.toolbar.subElement.classList.add("fn__none");
         }
     }

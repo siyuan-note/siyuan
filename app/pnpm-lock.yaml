@@ -15,7 +15,7 @@ specifiers:
   clean-webpack-plugin: ^4.0.0
   css-loader: ^6.7.1
   dayjs: ^1.11.3
-  electron: 20.0.2
+  electron: 20.0.3
   electron-builder: ^23.3.1
   electron-fetch: ^1.7.4
   encoding: ^0.1.13
@@ -27,7 +27,7 @@ specifiers:
   ifdef-loader: ^2.3.2
   mini-css-extract-plugin: 2.3.0
   path-browserify: ^1.0.1
-  pnpm: ^7.5.1
+  pnpm: 7.9.3
   safer-buffer: ^2.1.2
   sass: ^1.53.0
   sass-loader: ^12.6.0
@@ -39,9 +39,9 @@ specifiers:
   webpack-cli: ^4.10.0
 
 dependencies:
-  '@electron/remote': 2.0.8_electron@20.0.2
+  '@electron/remote': 2.0.8_electron@20.0.3
   electron-fetch: 1.7.4
-  pnpm: 7.5.1
+  pnpm: 7.9.3
 
 devDependencies:
   '@babel/core': 7.18.6
@@ -57,7 +57,7 @@ devDependencies:
   clean-webpack-plugin: 4.0.0_webpack@5.73.0
   css-loader: 6.7.1_webpack@5.73.0
   dayjs: 1.11.3
-  electron: 20.0.2
+  electron: 20.0.3
   electron-builder: 23.3.1
   encoding: 0.1.13
   eslint: 8.19.0
@@ -1274,12 +1274,12 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@electron/remote/2.0.8_electron@20.0.2:
+  /@electron/remote/2.0.8_electron@20.0.3:
     resolution: {integrity: sha512-P10v3+iFCIvEPeYzTWWGwwHmqWnjoh8RYnbtZAb3RlQefy4guagzIwcWtfftABIfm6JJTNQf4WPSKWZOpLmHXw==}
     peerDependencies:
       electron: '>= 13.0.0'
     dependencies:
-      electron: 20.0.2
+      electron: 20.0.3
     dev: false
 
   /@electron/universal/1.2.1:
@@ -1906,10 +1906,10 @@ packages:
     resolution: {integrity: sha512-mi4DG3m32cMJ5CtO9iYk41gBvGWLzJjQsaQgGOd4ZhmIuKyj8M/0rT1g0s/0qD4Tw8jsa//NXMXCC7vpGIfkTg==}
     engines: {node: '>=14.0.0'}
     dependencies:
+      7zip-bin: 5.1.1
       '@develar/schema-utils': 2.6.5
       '@electron/universal': 1.2.1
       '@malept/flatpak-bundler': 0.4.0
-      7zip-bin: 5.1.1
       async-exit-hook: 2.0.1
       bluebird-lst: 1.0.9
       builder-util: 23.3.0
@@ -2193,9 +2193,9 @@ packages:
   /builder-util/23.3.0:
     resolution: {integrity: sha512-m7RRd21N2yrnuGFd+ZqOY0ryeqWmBslDKmGDVz0wETqoEEqpiJsF3CGlsb6MRN2EQKDubvE5e+lBf8ATt06fnA==}
     dependencies:
+      7zip-bin: 5.1.1
       '@types/debug': 4.1.7
       '@types/fs-extra': 9.0.13
-      7zip-bin: 5.1.1
       app-builder-bin: 4.0.0
       bluebird-lst: 1.0.9
       builder-util-runtime: 9.0.3
@@ -2815,8 +2815,8 @@ packages:
     resolution: {integrity: sha512-YoVeFrGd/7ROjz4R9uPoND1K/hSRC/xADy9639ZmIZeJSaBnKdYx3I6LMPsY7CXLpK7JFgKQVzeZ/dk2br6Eaw==}
     dev: true
 
-  /electron/20.0.2:
-    resolution: {integrity: sha512-Op4nxSyXH0tXjhvWC+WDn9EI0gep5etPccainxu1A4wes+ZFQBMCBXxibotanJfG+WNW4RaOv88NArwHIsSmPw==}
+  /electron/20.0.3:
+    resolution: {integrity: sha512-Yx0a/SGgus/XqDAoMMs165JUikgE5vBmQpNJ+0XMDG/IYFj6TNNzfY2ATI+t171JjhKKO+MYPO8xqyZdFRoIDw==}
     engines: {node: '>= 10.17.0'}
     hasBin: true
     requiresBuild: true
@@ -4268,8 +4268,8 @@ packages:
       xmlbuilder: 9.0.7
     dev: true
 
-  /pnpm/7.5.1:
-    resolution: {integrity: sha512-/WbI4+V4QLJvMn4mp6dw4q+fbvwIyLTr7qmkoCpqs/xIYMpVXA3wdkvI5I9O9k1DJfYNuH8yY7Uf4vCCEdObJw==}
+  /pnpm/7.9.3:
+    resolution: {integrity: sha512-0hpAD1vtILw0i9gTN4ffagnScWMW9/avfZIKllBUd++fAvCss+hVgPPDd0HS9XcOT675gid4H9esGkbLdaFy+w==}
     engines: {node: '>=14.6'}
     hasBin: true
     dev: false

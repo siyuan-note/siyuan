@@ -56,7 +56,8 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
         const keyCode = hotKeys.length === 3 ? hotKeys[2] : hotKeys[1];
         if ((hotKeys.length === 3 ? isCtrl(event) : !isCtrl(event)) && event.altKey && !event.shiftKey &&
             (
-                event.code === (/^[0-9]$/.test(keyCode) ? "Digit" : "Key") + keyCode || event.code === keyCode ||
+                (/^[0-9]$/.test(keyCode) ? event.key === keyCode : event.code === "Key" + keyCode) ||
+                event.code === keyCode ||
                 (event.code === "Period" && keyCode === ".") ||
                 (event.code === "BracketLeft" && keyCode === "[") || (event.code === "BracketRight" && keyCode === "]")
             )) {

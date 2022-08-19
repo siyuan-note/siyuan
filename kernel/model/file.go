@@ -944,13 +944,41 @@ func DuplicateDoc(rootID string) (err error) {
 	p := path.Join(path.Dir(tree.Path), tree.ID) + ".sy"
 	tree.Path = p
 	tree.HPath = tree.HPath + " " + titleSuffix
+
+	// 收集所有引用
+	refIDs := map[string]string{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeBlockRefID != n.Type {
+			return ast.WalkContinue
+		}
+		refIDs[n.TokensStr()] = "1"
+		return ast.WalkContinue
+	})
+
+	// 重置块 ID
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeDocument == n.Type {
 			return ast.WalkContinue
 		}
 		if n.IsBlock() && "" != n.ID {
-			n.ID = ast.NewNodeID()
+			newID := ast.NewNodeID()
+			if "1" == refIDs[n.ID] {
+				// 如果是文档自身的内部引用
+				refIDs[n.ID] = newID
+			}
+			n.ID = newID
 			n.SetIALAttr("id", n.ID)
+		}
+		return ast.WalkContinue
+	})
+
+	// 重置内部引用
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeBlockRefID != n.Type {
+			return ast.WalkContinue
+		}
+		if "1" != refIDs[n.TokensStr()] {
+			n.Tokens = []byte(refIDs[n.TokensStr()])
 		}
 		return ast.WalkContinue
 	})

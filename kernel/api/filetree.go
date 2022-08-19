@@ -307,7 +307,7 @@ func duplicateDoc(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	err := model.DuplicateDoc(id)
+	newTree, err := model.DuplicateDoc(id)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -327,6 +327,13 @@ func duplicateDoc(c *gin.Context) {
 	}
 
 	pushCreate(box, p, tree.Root.ID, arg)
+
+	ret.Data = map[string]interface{}{
+		"id":       newTree.Root.ID,
+		"notebook": notebook,
+		"path":     newTree.Path,
+		"hPath":    newTree.HPath,
+	}
 }
 
 func createDoc(c *gin.Context) {

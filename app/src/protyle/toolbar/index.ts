@@ -701,10 +701,21 @@ export class Toolbar {
                 setPosition(this.subElement, nodeRect.right, nodeRect.bottom);
             }
         };
-        this.subElement.querySelector(".block__icons").addEventListener("click", (event: MouseEvent) => {
+        const headerElement = this.subElement.querySelector(".block__icons")
+        headerElement.addEventListener("click", (event: MouseEvent) => {
             const target = event.target as HTMLElement;
             const btnElement = hasClosestByClassName(target, "b3-tooltips");
             if (!btnElement) {
+                if (event.detail === 2) {
+                    const pingElement = headerElement.querySelector('[data-type="pin"]');
+                    if (pingElement.classList.contains("block__icon--active")) {
+                        pingElement.classList.remove("block__icon--active");
+                        pingElement.setAttribute("aria-label", window.siyuan.languages.pin);
+                    } else {
+                        pingElement.classList.add("block__icon--active");
+                        pingElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+                    }
+                }
                 return;
             }
             event.stopPropagation();
@@ -714,7 +725,13 @@ export class Toolbar {
                     this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");
                     break;
                 case "pin":
-                    btnElement.classList.toggle("block__icon--active");
+                    if (btnElement.classList.contains("block__icon--active")) {
+                        btnElement.classList.remove("block__icon--active");
+                        btnElement.setAttribute("aria-label", window.siyuan.languages.pin);
+                    } else {
+                        btnElement.classList.add("block__icon--active");
+                        btnElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+                    }
                     break;
                 case "refresh":
                     btnElement.classList.toggle("block__icon--active");
@@ -745,7 +762,7 @@ export class Toolbar {
                     break;
             }
         });
-        this.subElement.querySelector(".block__icons").addEventListener("mousedown", (event: MouseEvent) => {
+        headerElement.addEventListener("mousedown", (event: MouseEvent) => {
             if (hasClosestByClassName(event.target as HTMLElement, "block__icon")) {
                 return;
             }

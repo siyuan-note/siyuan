@@ -29,14 +29,13 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                 if (mathElement.getAttribute("data-render") === "true") {
                     return;
                 }
-                const math = Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content"));
                 mathElement.setAttribute("data-render", "true");
                 let renderElement = mathElement;
                 if (mathElement.tagName === "DIV") {
                     renderElement = mathElement.firstElementChild as HTMLElement;
                 }
                 try {
-                    renderElement.innerHTML = katex.renderToString(math, {
+                    renderElement.innerHTML = katex.renderToString(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")), {
                         displayMode: mathElement.tagName === "DIV",
                         output: "html",
                     });

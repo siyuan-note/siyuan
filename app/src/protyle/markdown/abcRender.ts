@@ -19,17 +19,21 @@ export const abcRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     if (abcElements.length > 0) {
         addScript(`${cdn}/js/abcjs/abcjs-basic-min.js?v=0.0.0`, "protyleAbcjsScript").then(() => {
             abcElements.forEach((e: HTMLDivElement) => {
+                if (e.getAttribute("data-render") === "true") {
+                    return;
+                }
                 if(!e.firstElementChild.classList.contains("protyle-icons")) {
                     e.insertAdjacentHTML("afterbegin", '<div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div>');
+                }
+                if (e.childElementCount < 4) {
+                    e.lastElementChild.insertAdjacentHTML("beforebegin", `<span style="position: absolute">${Constants.ZWSP}</span>`);
                 }
                 const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
                 ABCJS.renderAbc(renderElement, Lute.UnEscapeHTMLStr(e.getAttribute("data-content")), {
                     responsive: "resize"
                 });
                 renderElement.setAttribute("contenteditable", "false");
-                if (!e.textContent.endsWith(Constants.ZWSP)) {
-                    e.insertAdjacentHTML("beforeend", `<span style="position: absolute">${Constants.ZWSP}</span>`);
-                }
+                e.setAttribute("data-render", "true");
             });
         });
     }

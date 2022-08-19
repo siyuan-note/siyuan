@@ -1,4 +1,10 @@
-import {getContenteditableElement, getNextBlock, getPreviousBlock, hasPreviousSibling} from "../wysiwyg/getBlock";
+import {
+    getContenteditableElement,
+    getNextBlock,
+    getPreviousBlock,
+    hasPreviousSibling,
+    isNotEditBlock
+} from "../wysiwyg/getBlock";
 import {hasClosestByMatchTag} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 
@@ -288,6 +294,8 @@ export const focusByOffset = (container: Element, start: number, end: number) =>
     const editElement = getContenteditableElement(container);
     if (editElement) {
         container = editElement;
+    } else if (isNotEditBlock(container)) {
+        return focusBlock(container);
     }
     let startNode;
     searchNode(container, container.firstChild, node => {

@@ -27,8 +27,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
             }
         }
         mindmapElements.forEach((e: HTMLDivElement) => {
-            const text = Lute.UnEscapeHTMLStr(e.getAttribute("data-content"));
-            if (!text || e.getAttribute("data-render") === "true") {
+            if (e.getAttribute("data-render") === "true") {
                 return;
             }
             if (!e.firstElementChild.classList.contains("protyle-icons")) {
@@ -42,7 +41,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 }).setOption({
                     series: [
                         {
-                            data: [JSON.parse(Lute.EChartsMindmapStr(text))],
+                            data: [JSON.parse(Lute.EChartsMindmapStr(Lute.UnEscapeHTMLStr(e.getAttribute("data-content"))))],
                             initialTreeDepth: -1,
                             itemStyle: {
                                 borderWidth: 0,
@@ -87,7 +86,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 renderElement.classList.remove("ft__error");
             } catch (error) {
                 renderElement.classList.add("ft__error");
-                renderElement.innerHTML = `mindmap render error: <br>${error}`;
+                renderElement.innerHTML = `Mindmap render error: <br>${error}`;
             }
         });
     });

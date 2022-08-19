@@ -36,16 +36,25 @@ export const flowchartRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
 
 const initFlowchart = (flowchartElements:Element[]) => {
     flowchartElements.forEach((item: HTMLElement) => {
+        if (item.getAttribute("data-render") === "true") {
+            return;
+        }
         if (!item.firstElementChild.classList.contains("protyle-icons")) {
             item.insertAdjacentHTML("afterbegin", '<div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div>');
+        }
+        if (item.childElementCount < 4) {
+            item.lastElementChild.insertAdjacentHTML("beforebegin", `<span style="position: absolute">${Constants.ZWSP}</span>`);
         }
         const renderElement = item.firstElementChild.nextElementSibling as HTMLElement;
         const flowchartObj = flowchart.parse(Lute.UnEscapeHTMLStr(item.getAttribute("data-content")));
         renderElement.innerHTML = "";
-        flowchartObj.drawSVG(renderElement);
-        renderElement.setAttribute("contenteditable", "false");
-        if (!item.textContent.endsWith(Constants.ZWSP)) {
-            item.insertAdjacentHTML("beforeend", `<span style="position: absolute">${Constants.ZWSP}</span>`);
+        try {
+            flowchartObj.drawSVG(renderElement);
+        } catch (error) {
+            renderElement.classList.add("ft__error");
+            renderElement.innerHTML = `Flow Chart render error: <br>${error}`;
         }
+        renderElement.setAttribute("contenteditable", "false");
+        item.setAttribute("data-render", "true");
     });
 };

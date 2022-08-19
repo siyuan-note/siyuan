@@ -30,6 +30,7 @@ import {openFileById} from "../../editor/util";
 /// #endif
 import {openMobileFileById} from "../../mobile/editor";
 import {getIconByType} from "../../editor/getIcon";
+import {processRender} from "../util/processCode";
 
 export class Hint {
     public timeId: number;
@@ -596,6 +597,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 }
                 if (value === "<div>" || value === "$$" || (value.indexOf("```") > -1 && value.length > 3)) {
                     protyle.toolbar.showRender(protyle, nodeElement);
+                    processRender(nodeElement);
                 } else if (value.startsWith("```")) {
                     highlightRender(nodeElement);
                 } else if (value.startsWith("<iframe") || value.startsWith("<video") || value.startsWith("<audio")) {

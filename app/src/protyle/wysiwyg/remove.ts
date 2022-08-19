@@ -406,8 +406,8 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             }
             return;
         }
-        focusBlock(previousLastElement, undefined, false);
         if (editableElement.textContent !== "") {
+            focusBlock(previousLastElement, undefined, false);
             return;
         }
     }
@@ -435,7 +435,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
     if (isSelectNode) {
         // 需先移除 removeElement，否则 side 会选中 removeElement
         removeElement.remove();
-        focusSideBlock(previousElement);
+        focusBlock(previousLastElement, undefined, false);
     } else {
         const previousLastEditElement = getContenteditableElement(previousLastElement);
         if (editableElement && editableElement.textContent !== "") {

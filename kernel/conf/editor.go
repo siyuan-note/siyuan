@@ -50,6 +50,6 @@ func NewEditor() *Editor {
 		VirtualBlockRef:                 false,
 		BlockRefDynamicAnchorTextMaxLen: 96,
 		PlantUMLServePath:               "https://www.plantuml.com/plantuml/svg/~1",
-		FullWidth:                       false,
+		FullWidth:                       true,
 	}
 }

@@ -212,14 +212,9 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                     }
                 }
             } else {
-                // https://github.com/siyuan-note/siyuan/issues/4113
-                if (topElement.getAttribute("data-render") === "true" && ["mindmap", "echarts"].includes(topElement.getAttribute("data-subtype"))) {
-                    topElement.removeAttribute("data-render");
-                    topElement.firstElementChild.outerHTML = '<div spin="1"></div>';
-                }
                 inserts.push({
                     action: "insert",
-                    data: topElement.outerHTML,
+                    data: protyle.lute.SpinBlockDOM(topElement.outerHTML),  // 防止图标撤销问题
                     id,
                     previousID: topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "",
                     parentID: topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID

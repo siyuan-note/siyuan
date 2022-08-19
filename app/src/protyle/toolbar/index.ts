@@ -614,7 +614,7 @@ export class Toolbar {
         }
         const id = nodeElement.getAttribute("data-node-id");
         const type = renderElement.getAttribute("data-type");
-        let html = nodeElement.outerHTML;
+        let html = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
         let title = "HTML";
         let placeholder = "";
         switch (renderElement.getAttribute("data-subtype")) {
@@ -854,8 +854,9 @@ export class Toolbar {
                 renderElement.setAttribute("data-content", renderElement.getAttribute("data-content").replace(/\n/g, ""));
             }
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
-            html = nodeElement.outerHTML;
+            const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML)
+            updateTransaction(protyle, id, newHTML, html);
+            html = newHTML;
             event.stopPropagation();
         });
         textElement.addEventListener("keydown", (event: KeyboardEvent) => {

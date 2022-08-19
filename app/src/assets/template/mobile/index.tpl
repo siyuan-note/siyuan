@@ -53,7 +53,6 @@
     <div id="modelMain" class="fn__flex-1"></div>
 </div>
 <div id="commonMenu" class="b3-menu fn__none"></div>
-<div id="dragBg" style="z-index:199;pointer-events: none;" class="b3-dialog__scrim fn__none"></div>
 <div id="message" class="b3-snackbars"></div>
 </body>
 </html>

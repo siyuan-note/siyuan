@@ -770,12 +770,8 @@ export class Toolbar {
             }
             const documentSelf = document;
             this.subElement.style.userSelect = "none";
-            const dragBgElement = documentSelf.querySelector("#dragBg");
-            dragBgElement.classList.remove("fn__none");
             const x = event.clientX - parseInt(this.subElement.style.left);
             const y = event.clientY - parseInt(this.subElement.style.top);
-            // setTimeout(() => {
-            // windows 需等待 dragBgElement 显示后才可以进行 move https://github.com/siyuan-note/siyuan/issues/2950
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 let positionX = moveEvent.clientX - x;
                 let positionY = moveEvent.clientY - y;
@@ -789,19 +785,14 @@ export class Toolbar {
                 this.subElement.style.top = Math.max(positionY, Constants.SIZE_TOOLBAR_HEIGHT) + "px";
                 this.subElement.firstElementChild.setAttribute("data-drag", "true");
             };
-            // });
-            console.log("onmousedown");
             documentSelf.onmouseup = () => {
-                console.log("onmouseup");
                 this.subElement.style.userSelect = "auto";
                 documentSelf.onmousemove = null;
                 documentSelf.onmouseup = null;
                 documentSelf.ondragstart = null;
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
-                dragBgElement.classList.add("fn__none");
             };
-
             return;
         });
         const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;

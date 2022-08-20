@@ -485,6 +485,29 @@ export class Gutter {
                 }
             }
         }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.copyPlainText,
+            click() {
+                let html = "";
+                selectsElement.forEach(item => {
+                    const editElement = getContenteditableElement(item);
+                    if (editElement) {
+                        html += editElement.textContent + "\n";
+                    }
+                });
+                writeText(html.trimEnd());
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.copy + " HTML",
+            click() {
+                let html = "";
+                selectsElement.forEach(item => {
+                    html += item.outerHTML
+                });
+                writeText(protyle.lute.BlockDOM2HTML(html));
+            }
+        }).element);
         if (window.siyuan.config.readonly) {
             return;
         }
@@ -825,6 +848,19 @@ export class Gutter {
                         focusByRange(getEditorRange(nodeElement));
                         document.execCommand("copy");
                     }
+                }
+            }, {
+                label: window.siyuan.languages.copyPlainText,
+                click() {
+                    const editElement = getContenteditableElement(nodeElement);
+                    if (editElement) {
+                        writeText(editElement.textContent);
+                    }
+                }
+            }, {
+                label: window.siyuan.languages.copy + " HTML",
+                click() {
+                    writeText(protyle.lute.BlockDOM2HTML(nodeElement.outerHTML));
                 }
             }, {
                 label: window.siyuan.languages.duplicate,

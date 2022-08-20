@@ -206,6 +206,8 @@ declare class Lute {
     public IsValidLinkDest(text: string): boolean;
 
     public BlockDOM2InlineBlockDOM(html: string): string;
+
+    public BlockDOM2HTML(html: string): string;
 }
 
 declare const webkitAudioContext: {

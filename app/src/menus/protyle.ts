@@ -252,6 +252,30 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.copyPlainText,
+            click() {
+                focusByRange(getEditorRange(nodeElement));
+                writeText(range.toString())
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.copy +" HTML",
+            click() {
+                focusByRange(getEditorRange(nodeElement));
+                let html = ''
+                range.cloneContents().childNodes.forEach(item => {
+                    if (item.nodeType === 3) {
+                        html += item.textContent
+                    } else {
+                        html += (item as Element).outerHTML
+                    }
+                })
+                const tempElement = document.createElement('template')
+                tempElement.innerHTML = protyle.lute.BlockDOM2HTML(html)
+                writeText(tempElement.content.firstElementChild.innerHTML);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconCut",
             accelerator: "⌘X",
             label: window.siyuan.languages.cut,

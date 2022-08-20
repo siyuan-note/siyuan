@@ -6,7 +6,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20220602101151"
+		"updated": "20220820214308"
 	},
 	"Children": [
 		{
@@ -3638,36 +3638,26 @@
 			"ID": "20210104091509-2kh9v50",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
-			"CodeBlockFenceChar": 96,
-			"CodeBlockFenceLen": 3,
-			"CodeBlockOpenFence": "YGBg",
-			"CodeBlockInfo": "ZWNoYXJ0cw==",
-			"CodeBlockCloseFence": "YGBg",
 			"Properties": {
-				"id": "20210104091509-2kh9v50"
+				"id": "20210104091509-2kh9v50",
+				"updated": "20220820214308"
 			},
 			"Children": [
 				{
 					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
+					"Data": "```"
 				},
 				{
 					"Type": "NodeCodeBlockFenceInfoMarker",
 					"CodeBlockInfo": "ZWNoYXJ0cw=="
 				},
 				{
-					"ID": "20220307092214-2jyjqe1",
 					"Type": "NodeCodeBlockCode",
-					"Data": "{\n  \"title\": { \"text\": \"Latest 30 days\" },\n  \"tooltip\": { \"trigger\": \"axis\", \"axisPointer\": { \"lineStyle\": { \"width\": 0 } } },\n  \"legend\": { \"data\": [\"Articles\", \"Users\", \"Replies\"] },\n  \"xAxis\": [{\n      \"type\": \"category\",\n      \"boundaryGap\": false,\n      \"data\": [\"2019-05-08\",\"2019-05-09\",\"2019-05-10\",\"2019-05-11\",\"2019-05-12\",\"2019-05-13\",\"2019-05-14\",\"2019-05-15\",\"2019-05-16\",\"2019-05-17\",\"2019-05-18\",\"2019-05-19\",\"2019-05-20\",\"2019-05-21\",\"2019-05-22\",\"2019-05-23\",\"2019-05-24\",\"2019-05-25\",\"2019-05-26\",\"2019-05-27\",\"2019-05-28\",\"2019-05-29\",\"2019-05-30\",\"2019-05-31\",\"2019-06-01\",\"2019-06-02\",\"2019-06-03\",\"2019-06-04\",\"2019-06-05\",\"2019-06-06\",\"2019-06-07\"],\n      \"axisTick\": { \"show\": false },\n      \"axisLine\": { \"show\": false }\n  }],\n  \"yAxis\": [{ \"type\": \"value\", \"axisTick\": { \"show\": false }, \"axisLine\": { \"show\": false }, \"splitLine\": { \"lineStyle\": { \"color\": \"rgba(0, 0, 0, .38)\", \"type\": \"dashed\" } } }],\n  \"series\": [\n    {\n      \"name\": \"Articles\", \"type\": \"line\", \"smooth\": true, \"itemStyle\": { \"color\": \"#d23f31\" }, \"areaStyle\": { \"normal\": {} }, \"z\": 3,\n      \"data\": [\"18\",\"14\",\"22\",\"9\",\"7\",\"18\",\"10\",\"12\",\"13\",\"16\",\"6\",\"9\",\"15\",\"15\",\"12\",\"15\",\"8\",\"14\",\"9\",\"10\",\"29\",\"22\",\"14\",\"22\",\"9\",\"10\",\"15\",\"9\",\"9\",\"15\",\"0\"]\n    },\n    {\n      \"name\": \"Users\", \"type\": \"line\", \"smooth\": true, \"itemStyle\": { \"color\": \"#f1e05a\" }, \"areaStyle\": { \"normal\": {} }, \"z\": 2,\n      \"data\": [\"31\",\"33\",\"30\",\"23\",\"16\",\"29\",\"23\",\"37\",\"41\",\"29\",\"16\",\"13\",\"39\",\"23\",\"38\",\"136\",\"89\",\"35\",\"22\",\"50\",\"57\",\"47\",\"36\",\"59\",\"14\",\"23\",\"46\",\"44\",\"51\",\"43\",\"0\"]\n    },\n    {\n      \"name\": \"Replies\", \"type\": \"line\", \"smooth\": true, \"itemStyle\": { \"color\": \"#4285f4\" }, \"areaStyle\": { \"normal\": {} }, \"z\": 1,\n      \"data\": [\"35\",\"42\",\"73\",\"15\",\"43\",\"58\",\"55\",\"35\",\"46\",\"87\",\"36\",\"15\",\"44\",\"76\",\"130\",\"73\",\"50\",\"20\",\"21\",\"54\",\"48\",\"73\",\"60\",\"89\",\"26\",\"27\",\"70\",\"63\",\"55\",\"37\",\"0\"]\n    }\n  ]\n}\n",
-					"Properties": {
-						"id": "20220307092214-2jyjqe1"
-					}
+					"Data": "{\n  \u0026quot;title\u0026quot;: { \u0026quot;text\u0026quot;: \u0026quot;Latest 30 days\u0026quot; },\n  \u0026quot;backgroundColor\u0026quot;: \u0026quot;transparent\u0026quot;,\n  \u0026quot;tooltip\u0026quot;: { \u0026quot;trigger\u0026quot;: \u0026quot;axis\u0026quot;, \u0026quot;axisPointer\u0026quot;: { \u0026quot;lineStyle\u0026quot;: { \u0026quot;width\u0026quot;: 0 } } },\n  \u0026quot;legend\u0026quot;: { \u0026quot;data\u0026quot;: [\u0026quot;Articles\u0026quot;, \u0026quot;Users\u0026quot;, \u0026quot;Replies\u0026quot;] },\n  \u0026quot;xAxis\u0026quot;: [{\n      \u0026quot;type\u0026quot;: \u0026quot;category\u0026quot;,\n      \u0026quot;boundaryGap\u0026quot;: false,\n      \u0026quot;data\u0026quot;: [\u0026quot;2019-05-08\u0026quot;,\u0026quot;2019-05-09\u0026quot;,\u0026quot;2019-05-10\u0026quot;,\u0026quot;2019-05-11\u0026quot;,\u0026quot;2019-05-12\u0026quot;,\u0026quot;2019-05-13\u0026quot;,\u0026quot;2019-05-14\u0026quot;,\u0026quot;2019-05-15\u0026quot;,\u0026quot;2019-05-16\u0026quot;,\u0026quot;2019-05-17\u0026quot;,\u0026quot;2019-05-18\u0026quot;,\u0026quot;2019-05-19\u0026quot;,\u0026quot;2019-05-20\u0026quot;,\u0026quot;2019-05-21\u0026quot;,\u0026quot;2019-05-22\u0026quot;,\u0026quot;2019-05-23\u0026quot;,\u0026quot;2019-05-24\u0026quot;,\u0026quot;2019-05-25\u0026quot;,\u0026quot;2019-05-26\u0026quot;,\u0026quot;2019-05-27\u0026quot;,\u0026quot;2019-05-28\u0026quot;,\u0026quot;2019-05-29\u0026quot;,\u0026quot;2019-05-30\u0026quot;,\u0026quot;2019-05-31\u0026quot;,\u0026quot;2019-06-01\u0026quot;,\u0026quot;2019-06-02\u0026quot;,\u0026quot;2019-06-03\u0026quot;,\u0026quot;2019-06-04\u0026quot;,\u0026quot;2019-06-05\u0026quot;,\u0026quot;2019-06-06\u0026quot;,\u0026quot;2019-06-07\u0026quot;],\n      \u0026quot;axisTick\u0026quot;: { \u0026quot;show\u0026quot;: false },\n      \u0026quot;axisLine\u0026quot;: { \u0026quot;show\u0026quot;: false }\n  }],\n  \u0026quot;yAxis\u0026quot;: [{ \u0026quot;type\u0026quot;: \u0026quot;value\u0026quot;, \u0026quot;axisTick\u0026quot;: { \u0026quot;show\u0026quot;: false }, \u0026quot;axisLine\u0026quot;: { \u0026quot;show\u0026quot;: false }, \u0026quot;splitLine\u0026quot;: { \u0026quot;lineStyle\u0026quot;: { \u0026quot;color\u0026quot;: \u0026quot;rgba(0, 0, 0, .38)\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;dashed\u0026quot; } } }],\n  \u0026quot;series\u0026quot;: [\n    {\n      \u0026quot;name\u0026quot;: \u0026quot;Articles\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;line\u0026quot;, \u0026quot;smooth\u0026quot;: true, \u0026quot;itemStyle\u0026quot;: { \u0026quot;color\u0026quot;: \u0026quot;#d23f31\u0026quot; }, \u0026quot;areaStyle\u0026quot;: { \u0026quot;normal\u0026quot;: {} }, \u0026quot;z\u0026quot;: 3,\n      \u0026quot;data\u0026quot;: [\u0026quot;18\u0026quot;,\u0026quot;14\u0026quot;,\u0026quot;22\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;7\u0026quot;,\u0026quot;18\u0026quot;,\u0026quot;10\u0026quot;,\u0026quot;12\u0026quot;,\u0026quot;13\u0026quot;,\u0026quot;16\u0026quot;,\u0026quot;6\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;12\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;8\u0026quot;,\u0026quot;14\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;10\u0026quot;,\u0026quot;29\u0026quot;,\u0026quot;22\u0026quot;,\u0026quot;14\u0026quot;,\u0026quot;22\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;10\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;0\u0026quot;]\n    },\n    {\n      \u0026quot;name\u0026quot;: \u0026quot;Users\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;line\u0026quot;, \u0026quot;smooth\u0026quot;: true, \u0026quot;itemStyle\u0026quot;: { \u0026quot;color\u0026quot;: \u0026quot;#f1e05a\u0026quot; }, \u0026quot;areaStyle\u0026quot;: { \u0026quot;normal\u0026quot;: {} }, \u0026quot;z\u0026quot;: 2,\n      \u0026quot;data\u0026quot;: [\u0026quot;31\u0026quot;,\u0026quot;33\u0026quot;,\u0026quot;30\u0026quot;,\u0026quot;23\u0026quot;,\u0026quot;16\u0026quot;,\u0026quot;29\u0026quot;,\u0026quot;23\u0026quot;,\u0026quot;37\u0026quot;,\u0026quot;41\u0026quot;,\u0026quot;29\u0026quot;,\u0026quot;16\u0026quot;,\u0026quot;13\u0026quot;,\u0026quot;39\u0026quot;,\u0026quot;23\u0026quot;,\u0026quot;38\u0026quot;,\u0026quot;136\u0026quot;,\u0026quot;89\u0026quot;,\u0026quot;35\u0026quot;,\u0026quot;22\u0026quot;,\u0026quot;50\u0026quot;,\u0026quot;57\u0026quot;,\u0026quot;47\u0026quot;,\u0026quot;36\u0026quot;,\u0026quot;59\u0026quot;,\u0026quot;14\u0026quot;,\u0026quot;23\u0026quot;,\u0026quot;46\u0026quot;,\u0026quot;44\u0026quot;,\u0026quot;51\u0026quot;,\u0026quot;43\u0026quot;,\u0026quot;0\u0026quot;]\n    },\n    {\n      \u0026quot;name\u0026quot;: \u0026quot;Replies\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;line\u0026quot;, \u0026quot;smooth\u0026quot;: true, \u0026quot;itemStyle\u0026quot;: { \u0026quot;color\u0026quot;: \u0026quot;#4285f4\u0026quot; }, \u0026quot;areaStyle\u0026quot;: { \u0026quot;normal\u0026quot;: {} }, \u0026quot;z\u0026quot;: 1,\n      \u0026quot;data\u0026quot;: [\u0026quot;35\u0026quot;,\u0026quot;42\u0026quot;,\u0026quot;73\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;43\u0026quot;,\u0026quot;58\u0026quot;,\u0026quot;55\u0026quot;,\u0026quot;35\u0026quot;,\u0026quot;46\u0026quot;,\u0026quot;87\u0026quot;,\u0026quot;36\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;44\u0026quot;,\u0026quot;76\u0026quot;,\u0026quot;130\u0026quot;,\u0026quot;73\u0026quot;,\u0026quot;50\u0026quot;,\u0026quot;20\u0026quot;,\u0026quot;21\u0026quot;,\u0026quot;54\u0026quot;,\u0026quot;48\u0026quot;,\u0026quot;73\u0026quot;,\u0026quot;60\u0026quot;,\u0026quot;89\u0026quot;,\u0026quot;26\u0026quot;,\u0026quot;27\u0026quot;,\u0026quot;70\u0026quot;,\u0026quot;63\u0026quot;,\u0026quot;55\u0026quot;,\u0026quot;37\u0026quot;,\u0026quot;0\u0026quot;]\n    }\n  ]\n}"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
+					"Data": "```"
 				}
 			]
 		},

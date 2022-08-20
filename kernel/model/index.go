@@ -137,9 +137,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 		sql.PutBoxHash(tx, box.ID, boxHash)
 		util.SetBootDetails("Cleaning obsolete indexes...")
 		util.PushEndlessProgress(Conf.Language(108))
-		if err = sql.DeleteByBoxTx(tx, box.ID); nil != err {
-			return
-		}
+		sql.DeleteByBoxTx(tx, box.ID)
 		if err = sql.CommitTx(tx); nil != err {
 			return
 		}

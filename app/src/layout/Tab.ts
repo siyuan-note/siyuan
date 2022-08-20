@@ -44,9 +44,18 @@ export class Tab {
             this.headElement.addEventListener("mouseenter", (event) => {
                 event.stopPropagation();
                 event.preventDefault();
+                let id = ""
                 if (this.model instanceof Editor && this.model.editor?.protyle?.block?.rootID) {
+                    id = (this.model as Editor).editor.protyle.block.rootID
+                } else if (!this.model){
+                    const initData = JSON.parse(this.headElement.getAttribute("data-initdata")||"{}")
+                    if (initData) {
+                        id = initData.blockId
+                    }
+                }
+                if (id) {
                     fetchPost("/api/filetree/getFullHPathByID", {
-                        id: (this.model as Editor).editor.protyle.block.rootID
+                        id
                     }, (response) => {
                         if (!this.headElement.getAttribute("aria-label")) {
                             showTooltip(escapeHtml(response.data), this.headElement);

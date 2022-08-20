@@ -167,6 +167,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 			continue
 		}
 		if err = sql.InsertBlocksSpans(tx, tree); nil != err {
+			sql.RollbackTx(tx)
 			continue
 		}
 		if err = sql.CommitTx(tx); nil != err {

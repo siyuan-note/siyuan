@@ -336,6 +336,10 @@
     text-align: center;
   }
 
+  [data-subtype="plantuml"] img {
+    border-radius: 4px;
+  }
+
   .abcjs-container svg,
   .abcjs-container path {
     fill: currentColor;

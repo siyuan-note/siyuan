@@ -78,6 +78,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                         trigger: "item",
                         triggerOn: "mousemove",
                     },
+                    backgroundColor: "transparent",
                 });
                 e.setAttribute("data-render", "true");
                 if (!renderElement.textContent.endsWith(Constants.ZWSP)) {

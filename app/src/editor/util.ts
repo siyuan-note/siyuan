@@ -447,9 +447,9 @@ export const openBy = (url: string, type: "folder" | "app") => {
         });
         return;
     } else {
-        address = url.replace("file:///", "");
-        address = address.replace("file://", "");
-        address = address.replace("file://\\", "");
+        address = url.replace("file:///", "")
+            .replace("file://\\", "")
+            .replace("file://", "");
         if ("windows" === window.siyuan.config.system.os) {
             // `file://` 协议兼容 Window 平台使用 `/` 作为目录分割线 https://github.com/siyuan-note/siyuan/issues/5681
             address = address.replace("/", "\\");

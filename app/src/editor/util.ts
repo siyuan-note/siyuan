@@ -436,7 +436,6 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
 
 export const openBy = (url: string, type: "folder" | "app") => {
     /// #if !BROWSER
-    let address;
     if (url.startsWith("assets/")) {
         fetchPost("/api/asset/resolveAssetPath", {path: url.replace(/\.pdf\?page=\d{1,}$/, ".pdf")}, (response) => {
             if (type === "app") {
@@ -446,16 +445,14 @@ export const openBy = (url: string, type: "folder" | "app") => {
             }
         });
         return;
-    } else {
-        address = url.replace("file:///", "")
-            .replace("file://\\", "")
-            .replace("file://", "");
-        if ("windows" === window.siyuan.config.system.os) {
-            // `file://` 协议兼容 Window 平台使用 `/` 作为目录分割线 https://github.com/siyuan-note/siyuan/issues/5681
-            address = address.replace("/", "\\");
-        }
     }
-
+    let address = "";
+    if ("windows" === window.siyuan.config.system.os) {
+        // `file://` 协议兼容 Window 平台使用 `/` 作为目录分割线 https://github.com/siyuan-note/siyuan/issues/5681
+        address = url.replace("file:///", "").replace("file://\\", "").replace("file://", "").replace("/", "\\");
+    } else {
+        address = url.replace("file://", "");
+    }
     if (type === "app") {
         shell.openPath(address);
     } else if (type === "folder") {

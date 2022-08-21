@@ -174,13 +174,13 @@ const setKey = () => {
     const dialog = new Dialog({
         title: window.siyuan.languages.syncConfGuide1,
         content: `<div class="b3-dialog__content ft__center">
-    <img style="height: 120px" src="/stage/images/sync-guide.svg"/>
+    <img style="width: 260px" src="/stage/images/sync-guide.svg"/>
     <div class="fn__hr--b"></div>
     <div class="ft__on-surface">${window.siyuan.languages.syncConfGuide2}</div>
      <div class="fn__hr--b"></div>
-    <input class="b3-text-field fn__size200 ft__center" placeholder="${window.siyuan.languages.passphrase}">
+    <input class="b3-text-field fn__block ft__center" placeholder="${window.siyuan.languages.passphrase}">
     <div class="fn__hr"></div>
-    <button class="b3-button fn__size200" id="initKeyByPW">
+    <button class="b3-button fn__block" id="initKeyByPW">
         <svg><use xlink:href="#iconHand"></use></svg>${window.siyuan.languages.genKeyByPW}
     </button>
 </div>

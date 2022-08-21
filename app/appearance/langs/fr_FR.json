@@ -910,7 +910,7 @@
     "142": "L'entrée ne peut pas être vide",
     "143": "Création d'un instantané de données...",
     "144": "Réinitialisation du référentiel de données...",
-    "145": "Réinitialisation du référentiel de données terminée",
+    "145": "Le référentiel de données a été réinitialisé et l'interface sera automatiquement actualisée ultérieurement...",
     "146": "Échec de la réinitialisation du référentiel de données : %s",
     "147": "Créé un nouvel instantané de données, a pris %.2fs",
     "148": "Vérifié l'instantané des données et n'a trouvé aucun changement, a pris %.2fs",

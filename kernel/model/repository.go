@@ -126,6 +126,10 @@ func ResetRepo() (err error) {
 	Conf.Save()
 
 	util.PushUpdateMsg(msgId, Conf.Language(145), 3000)
+	go func() {
+		time.Sleep(2 * time.Second)
+		util.ReloadUI()
+	}()
 	return
 }
 

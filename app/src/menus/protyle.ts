@@ -255,23 +255,23 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             label: window.siyuan.languages.copyPlainText,
             click() {
                 focusByRange(getEditorRange(nodeElement));
-                writeText(range.toString())
+                writeText(range.toString());
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.copy +" HTML",
             click() {
                 focusByRange(getEditorRange(nodeElement));
-                let html = ''
+                let html = "";
                 range.cloneContents().childNodes.forEach(item => {
                     if (item.nodeType === 3) {
-                        html += item.textContent
+                        html += item.textContent;
                     } else {
-                        html += (item as Element).outerHTML
+                        html += (item as Element).outerHTML;
                     }
-                })
-                const tempElement = document.createElement('template')
-                tempElement.innerHTML = protyle.lute.BlockDOM2HTML(html)
+                });
+                const tempElement = document.createElement("template");
+                tempElement.innerHTML = protyle.lute.BlockDOM2HTML(html);
                 writeText(tempElement.content.firstElementChild.innerHTML);
             }
         }).element);

@@ -12,8 +12,6 @@ import {fetchPost} from "./fetch";
 import {mountHelp, newDailyNote} from "./mount";
 import {MenuItem} from "../menus/Menu";
 import {initAssets, loadAssets, setInlineStyle} from "./assets";
-import {showMessage} from "../dialog/message";
-import {needSubscribe} from "./needSubscribe";
 import {goBack, goForward} from "./backForward";
 import {getOpenNotebookCount} from "./pathName";
 import {openFileById} from "../editor/util";

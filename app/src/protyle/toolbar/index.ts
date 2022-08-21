@@ -701,7 +701,7 @@ export class Toolbar {
                 setPosition(this.subElement, nodeRect.right, nodeRect.bottom);
             }
         };
-        const headerElement = this.subElement.querySelector(".block__icons")
+        const headerElement = this.subElement.querySelector(".block__icons");
         headerElement.addEventListener("click", (event: MouseEvent) => {
             const target = event.target as HTMLElement;
             const btnElement = hasClosestByClassName(target, "b3-tooltips");
@@ -715,7 +715,7 @@ export class Toolbar {
                         pingElement.classList.add("block__icon--active");
                         pingElement.setAttribute("aria-label", window.siyuan.languages.unpin);
                     }
-                    event.preventDefault()
+                    event.preventDefault();
                     event.stopPropagation();
                 }
                 return;
@@ -866,7 +866,7 @@ export class Toolbar {
                 renderElement.setAttribute("data-content", renderElement.getAttribute("data-content").replace(/\n/g, ""));
             }
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML)
+            const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
             updateTransaction(protyle, id, newHTML, html);
             html = newHTML;
             event.stopPropagation();

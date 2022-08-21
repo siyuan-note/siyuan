@@ -65,6 +65,28 @@ export const repos = {
     </div>
 </div>`;
         }
+        let syncModeHTML = `<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.syncMode}
+        <div class="b3-label__text">${window.siyuan.languages.syncModeTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <select id="syncMode" class="b3-select fn__flex-center fn__size200">
+        <option value="1" ${window.siyuan.config.sync.mode === 1 ? "selected" : ""}>${window.siyuan.languages.syncMode1}</option>
+        <option value="2" ${window.siyuan.config.sync.mode === 2 ? "selected" : ""}>${window.siyuan.languages.syncMode2}</option>
+    </select>
+</label>`;
+        if (isMobile()) {
+            syncModeHTML = `<div class="b3-label">
+    ${window.siyuan.languages.syncMode}
+    <div class="fn__hr"></div>
+    <select id="syncMode" class="b3-select fn__block">
+        <option value="1" ${window.siyuan.config.sync.mode === 1 ? "selected" : ""}>${window.siyuan.languages.syncMode1}</option>
+        <option value="2" ${window.siyuan.config.sync.mode === 2 ? "selected" : ""}>${window.siyuan.languages.syncMode2}</option>
+    </select>
+    <div class="b3-label__text">${window.siyuan.languages.syncModeTip}</div>
+</div>`;
+        }
         return `<div><div style="position: fixed;width: 800px;height: 434px;box-sizing: border-box;text-align: center;display: flex;align-items: center;justify-content: center;z-index: 1;" id="reposLoading">
     <img src="/stage/loading-pure.svg">
 </div>
@@ -86,17 +108,7 @@ export const repos = {
     <span class="fn__space"></span>
     <input type="checkbox" id="reposCloudSyncSwitch"${window.siyuan.config.sync.enabled ? " checked='checked'" : ""} class="b3-switch fn__flex-center">
 </label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.syncMode}
-        <div class="b3-label__text">${window.siyuan.languages.syncModeTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <select id="syncMode" class="b3-select fn__flex-center fn__size200">
-        <option value="1" ${window.siyuan.config.sync.mode === 1 ? "selected" : ""}>${window.siyuan.languages.syncMode1}</option>
-        <option value="2" ${window.siyuan.config.sync.mode === 2 ? "selected" : ""}>${window.siyuan.languages.syncMode2}</option>
-    </select>
-</label>
+${syncModeHTML}
 <div class="b3-label">
     <div class="fn__flex">
         <div class="fn__flex-center">${window.siyuan.languages.cloudSyncDir}</div>
@@ -150,7 +162,7 @@ export const repos = {
         loadingElement.style.height = repos.element.clientHeight + "px";
         const syncConfigElement = repos.element.querySelector("#reposCloudSyncList");
         bindSyncCloudListEvent(syncConfigElement);
-        repos.element.querySelector('[data-type="config"]').addEventListener("click", (event) => {
+        repos.element.querySelector('[data-type="config"]').addEventListener("click", () => {
             if (syncConfigElement.classList.contains("fn__none")) {
                 getSyncCloudList(syncConfigElement);
                 syncConfigElement.classList.remove("fn__none");

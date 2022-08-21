@@ -33,7 +33,6 @@ import {initFileMenu, initNavigationMenu} from "../menus/navigation";
 import {bindMenuKeydown} from "../menus/Menu";
 import {showMessage} from "../dialog/message";
 import {openHistory} from "./history";
-import {needSubscribe} from "./needSubscribe";
 import {Dialog} from "../dialog";
 import {unicode2Emoji} from "../emoji";
 import {deleteFile} from "../editor/deleteFile";

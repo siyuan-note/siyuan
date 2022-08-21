@@ -44,13 +44,13 @@ export class Tab {
             this.headElement.addEventListener("mouseenter", (event) => {
                 event.stopPropagation();
                 event.preventDefault();
-                let id = ""
+                let id = "";
                 if (this.model instanceof Editor && this.model.editor?.protyle?.block?.rootID) {
-                    id = (this.model as Editor).editor.protyle.block.rootID
+                    id = (this.model as Editor).editor.protyle.block.rootID;
                 } else if (!this.model){
-                    const initData = JSON.parse(this.headElement.getAttribute("data-initdata")||"{}")
+                    const initData = JSON.parse(this.headElement.getAttribute("data-initdata")||"{}");
                     if (initData) {
-                        id = initData.blockId
+                        id = initData.blockId;
                     }
                 }
                 if (id) {

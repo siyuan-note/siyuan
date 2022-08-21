@@ -1,4 +1,4 @@
-import {focusBlock, focusSideBlock, focusByWbr} from "../util/selection";
+import {focusBlock, focusByWbr} from "../util/selection";
 import {
     getContenteditableElement,
     getLastBlock,

@@ -503,7 +503,7 @@ export class Gutter {
             click() {
                 let html = "";
                 selectsElement.forEach(item => {
-                    html += item.outerHTML
+                    html += item.outerHTML;
                 });
                 writeText(protyle.lute.BlockDOM2HTML(html));
             }

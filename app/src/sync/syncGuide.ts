@@ -192,8 +192,8 @@ const setKey = () => {
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => {
         dialog.destroy();
     });
+    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement
     dialog.element.querySelector("#initKeyByPW").addEventListener("click", () => {
-        const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement
         if (!inputElement.value) {
             showMessage(window.siyuan.languages._kernel[142]);
             return;
@@ -204,4 +204,5 @@ const setKey = () => {
             });
         });
     });
+    inputElement.focus();
 };

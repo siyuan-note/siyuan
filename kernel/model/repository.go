@@ -122,6 +122,7 @@ func ResetRepo() (err error) {
 	}
 
 	Conf.Repo.Key = nil
+	Conf.Sync.Enabled = false
 	Conf.Save()
 
 	util.PushUpdateMsg(msgId, Conf.Language(145), 3000)

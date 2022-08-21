@@ -299,6 +299,7 @@ export const about = {
             confirmDialog("⚠️ " + window.siyuan.languages.resetRepo, window.siyuan.languages.resetRepoTip, () => {
                 fetchPost("/api/repo/resetRepo", {}, () => {
                     window.siyuan.config.repo.key = "";
+                    window.siyuan.config.sync.enabled = false;
                     importKeyElement.parentElement.classList.remove("fn__none");
                     importKeyElement.parentElement.nextElementSibling.classList.add("fn__none");
                 });

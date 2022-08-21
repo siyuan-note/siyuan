@@ -130,7 +130,10 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         removeEmptyNode(newElement);
         return true;
     }
-
+    if (range.toString() === "" && range.startContainer.nodeType === 3 && range.startContainer.textContent === Constants.ZWSP && range.startOffset === 0) {
+        // 图片后的零宽空格前回车 https://github.com/siyuan-note/siyuan/issues/5690
+        range.setStart(range.startContainer, 1);
+    }
     range.insertNode(document.createElement("wbr"));
     const listItemHTML = listItemElement.outerHTML;
     const html = listItemElement.parentElement.outerHTML;
@@ -212,7 +215,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     // 代码块
     const trimStartText = editableElement.innerHTML.trimStart();
     if (trimStartText.startsWith("```") || trimStartText.startsWith("···") || trimStartText.startsWith("~~~") ||
-            trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1) {
+        trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1) {
         if (trimStartText.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else {
@@ -353,6 +356,10 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         blockElement.insertAdjacentElement("beforebegin", newElement);
         removeEmptyNode(newElement);
         return true;
+    }
+    if (range.toString() === "" && range.startContainer.nodeType === 3 && range.startContainer.textContent === Constants.ZWSP && range.startOffset === 0) {
+        // 图片后的零宽空格前回车 https://github.com/siyuan-note/siyuan/issues/5690
+        range.setStart(range.startContainer, 1);
     }
     range.insertNode(document.createElement("wbr"));
     const html = blockElement.outerHTML;

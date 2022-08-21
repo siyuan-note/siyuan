@@ -372,6 +372,7 @@ ${accountHTML}
                         confirmDialog(window.siyuan.languages.remove, "", () => {
                             fetchPost("/api/repo/resetRepo", {}, () => {
                                 window.siyuan.config.repo.key = "";
+                                window.siyuan.config.sync.enabled = false;
                                 importKeyElement.parentElement.classList.remove("fn__none");
                                 importKeyElement.parentElement.nextElementSibling.classList.add("fn__none");
                             });

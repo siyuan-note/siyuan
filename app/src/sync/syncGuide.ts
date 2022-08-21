@@ -125,13 +125,17 @@ const setSync = (key?: string, dialog?: Dialog) => {
         window.siyuan.config.repo.key = key;
     }
     if (!window.siyuan.config.sync.enabled) {
-        const listHTML = `<div class="b3-dialog__content" style="display: flex;flex-direction: column;height: 40vh;">
-    <img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">
+        const listHTML = `<div class="b3-dialog__content">
+    <div class="ft__on-surface">TODO</div>
+    <div style="display: flex;flex-direction: column;height: 40vh;">
+        <img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">
+    </div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button">${window.siyuan.languages.openSyncTip1}</button>
 </div>`;
         if (dialog) {
+            dialog.element.querySelector(".b3-dialog__header").innerHTML = window.siyuan.languages.cloudSyncDir;
             dialog.element.querySelector(".b3-dialog__container").lastElementChild.innerHTML = listHTML;
         } else {
             dialog = new Dialog({
@@ -140,7 +144,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
                 width: isMobile() ? "80vw" : "520px",
             });
         }
-        const contentElement = dialog.element.querySelector(".b3-dialog__content");
+        const contentElement = dialog.element.querySelector(".b3-dialog__content").lastElementChild;
         bindSyncCloudListEvent(contentElement);
         getSyncCloudList(contentElement);
         dialog.element.querySelector(".b3-button").addEventListener("click", () => {

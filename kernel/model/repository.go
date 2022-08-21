@@ -568,7 +568,7 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 		}
 	}
 
-	if 1 > len(mergeResult.Upserts) && 1 > len(mergeResult.Removes) { // 没有数据变更
+	if 1 > len(mergeResult.Upserts) && 1 > len(mergeResult.Removes) && 1 > len(mergeResult.Conflicts) { // 没有数据变更
 		syncSameCount++
 		if 10 < syncSameCount {
 			syncSameCount = 5

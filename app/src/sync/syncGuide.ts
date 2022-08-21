@@ -126,7 +126,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
     }
     if (!window.siyuan.config.sync.enabled) {
         const listHTML = `<div class="b3-dialog__content">
-    <div class="ft__on-surface">TODO</div>
+    <div class="ft__on-surface">${window.siyuan.languages.syncConfGuide3}</div>
     <div style="display: flex;flex-direction: column;height: 40vh;">
         <img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">
     </div>
@@ -178,7 +178,7 @@ const setKey = () => {
     <div class="fn__hr--b"></div>
     <div class="ft__on-surface">${window.siyuan.languages.syncConfGuide2}</div>
      <div class="fn__hr--b"></div>
-    <input class="b3-text-field fn__size200 ft__center" placeholder="${window.siyuan.languages.password}">
+    <input class="b3-text-field fn__size200 ft__center" placeholder="${window.siyuan.languages.passphrase}">
     <div class="fn__hr"></div>
     <button class="b3-button fn__size200" id="initKeyByPW">
         <svg><use xlink:href="#iconHand"></use></svg>${window.siyuan.languages.genKeyByPW}

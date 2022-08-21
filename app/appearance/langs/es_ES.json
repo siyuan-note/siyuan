@@ -1,4 +1,9 @@
 {
+  "syncConfGuide1": "Clave de Inicialización",
+  "syncConfGuide2": "Esta clave se utiliza para el cifrado de extremo a extremo de sincronización de datos<br>La clave se genera en función de la contraseña que ingresa, recuerde la contraseña",
+  "syncConfGuide3": "El directorio de sincronización en la nube se utiliza para almacenar los datos cifrados correspondientes al espacio de trabajo actual. El nombre predeterminado es <code>main</code>. Si solo tiene un espacio de trabajo para sincronizar, agregue y use <code> main</code directamente. > puedes",
+  "syncConfGuide4": "¿Sincronizar ahora?",
+  "syncConfGuide5": "Si la cantidad de datos es grande, la primera sincronización será lenta, espere pacientemente<br>No cambie de aplicación y mantenga la pantalla brillante mientras iOS/iPad se sincroniza",
   "copyPlainText": "Copiar texto sin formato",
   "findInDoc": "${x} coincidencias en ${y} archivos",
   "jumpToParentNext": "Saltar al siguiente bloque en el nivel anterior",
@@ -646,6 +651,7 @@
   "config": "Configuración",
   "userName": "Nombre de usuario",
   "password": "Contraseña",
+  "passphrase": "Frase de contraseña",
   "theme": "Tema",
   "language": "Idioma",
   "about": "Acerca de",

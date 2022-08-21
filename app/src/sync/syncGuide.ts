@@ -160,7 +160,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
         if (dialog) {
             dialog.destroy();
         }
-        confirmDialog(window.siyuan.languages.sync, window.siyuan.languages.syncNow, () => {
+        confirmDialog(window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
             fetchPost("/api/sync/performSync", {});
         });
     }
@@ -168,18 +168,17 @@ const setSync = (key?: string, dialog?: Dialog) => {
 
 const setKey = () => {
     const dialog = new Dialog({
-        title: window.siyuan.languages.dataRepoKey,
+        title: window.siyuan.languages.syncConfGuide1,
         content: `<div class="b3-dialog__content ft__center">
-    <img style="height: 80px" src="/stage/images/sync-guide.svg"/>
+    <img style="height: 120px" src="/stage/images/sync-guide.svg"/>
     <div class="fn__hr--b"></div>
+    <div class="ft__on-surface">${window.siyuan.languages.syncConfGuide2}</div>
+     <div class="fn__hr--b"></div>
     <input class="b3-text-field fn__size200 ft__center" placeholder="${window.siyuan.languages.password}">
     <div class="fn__hr"></div>
     <button class="b3-button fn__size200" id="initKeyByPW">
         <svg><use xlink:href="#iconHand"></use></svg>${window.siyuan.languages.genKeyByPW}
     </button>
-    <div class="fn__hr--b"></div>
-    <div class="ft__on-surface">${window.siyuan.languages.dataRepoKeyTip1}</div>
-    <div class="ft__error">${window.siyuan.languages.dataRepoKeyTip2}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>

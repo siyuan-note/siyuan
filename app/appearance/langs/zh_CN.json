@@ -1,4 +1,9 @@
 {
+  "syncConfGuide1": "初始化密钥",
+  "syncConfGuide2": "该密钥用于数据同步端到端加密<br>此处通过你输入的密码来生成密钥，请务必牢记该密码",
+  "syncConfGuide3": "云端同步目录用于存放当前工作空间对应的加密数据，默认名称为 main。如果你只有一个工作空间需要同步，直接使用 main 即可",
+  "syncConfGuide4": "立即同步？",
+  "syncConfGuide5": "如果数据量较大，第一次同步会比较慢，请耐心等待；iOS/iPad 端在同步时请勿切换应用并保持亮屏",
   "copyPlainText": "复制纯文本",
   "findInDoc": "${x} 个文档中匹配 ${y} 项",
   "jumpToParentNext": "跳转到上一层级的下一个块",

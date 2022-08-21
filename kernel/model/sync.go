@@ -303,6 +303,13 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 	if nil != err {
 		return
 	}
+	if 1 > len(dirs) {
+		dirs = append(dirs, map[string]interface{}{
+			"name":    "main",
+			"size":    float64(0),
+			"updated": time.Now().Format("2006-01-02 15:04:05"),
+		})
+	}
 
 	for _, d := range dirs {
 		dirSize := int64(d["size"].(float64))

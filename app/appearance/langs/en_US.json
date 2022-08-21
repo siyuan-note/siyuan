@@ -910,7 +910,7 @@
     "142": "Snapshot memo cannot be empty",
     "143": "Creating data snapshot...",
     "144": "Resetting data repository...",
-    "145": "Data repository reset completed",
+    "145": "The data repo has been reset, and the interface will be automatically refreshed later...",
     "146": "Failed to reset data repository: %s",
     "147": "Created a new data snapshot, took %.2fs",
     "148": "Checked the data snapshot and found no changes, took %.2fs",

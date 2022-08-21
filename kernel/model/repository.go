@@ -475,6 +475,7 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 		msg := Conf.Language(26)
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 0)
+		err = errors.New(msg)
 		return
 	}
 

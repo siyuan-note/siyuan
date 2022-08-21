@@ -208,7 +208,7 @@
   "cloudIntro10": "Upload local asset files to the cloud with one click",
   "cloudIntro11": "One-click to copy the document to the Wechat MP, Zhihu, Yuque etc. platforms",
   "selectAll": "Select all",
-  "reposTip": "The name of the cloud synchronization directory corresponding to the current workspace, which can be selected on other devices after creation on the main device",
+  "reposTip": "The name of the cloud synchronization directory corresponding to the current workspace, you can select it on other devices after it is created on the first device",
   "stickOpen": "Keep all opened",
   "cloud": "Cloud",
   "setEmojiTip": "Please go to [Settings - Appearance to add emoji]",

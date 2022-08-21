@@ -150,7 +150,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
                     showMessage(response.msg);
                 } else {
                     window.siyuan.config.sync.enabled = true;
-                    confirmDialog(window.siyuan.languages.sync, window.siyuan.languages.syncNow, () => {
+                    confirmDialog(window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
                         fetchPost("/api/sync/performSync", {});
                     });
                 }

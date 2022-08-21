@@ -88,7 +88,7 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false) => 
 <span>${item.cloudName}</span>
 <span class="fn__space"></span>
 <span class="ft__on-surface">${item.hSize}</span>
-<span class="b3-list-item__meta">${item.updated}</span>
+<span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${item.updated}</span>
 <span class="fn__flex-1 fn__space"></span>
 <span data-type="removeCloud" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>

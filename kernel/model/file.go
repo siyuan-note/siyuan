@@ -933,58 +933,15 @@ func DuplicateDoc(rootID string) (ret *parse.Tree, err error) {
 		return
 	}
 
-	ret.ID = ast.NewNodeID()
-	ret.Root.ID = ret.ID
-	titleSuffix := "Duplicated"
-	if t, parseErr := time.Parse("20060102150405", util.TimeFromID(ret.ID)); nil == parseErr {
-		titleSuffix = t.Format("2006-01-02 15:04:05")
-	}
-	ret.Root.SetIALAttr("id", ret.ID)
-	ret.Root.SetIALAttr("title", ret.Root.IALAttr("title")+" "+titleSuffix)
-	p := path.Join(path.Dir(ret.Path), ret.ID) + ".sy"
-	ret.Path = p
-	ret.HPath = ret.HPath + " " + titleSuffix
+	resetTree(ret, "Duplicated")
+	createTreeTx(ret)
+	sql.WaitForWritingDatabase()
+	return
+}
 
-	// 收集所有引用
-	refIDs := map[string]string{}
-	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeBlockRefID != n.Type {
-			return ast.WalkContinue
-		}
-		refIDs[n.TokensStr()] = "1"
-		return ast.WalkContinue
-	})
-
-	// 重置块 ID
-	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeDocument == n.Type {
-			return ast.WalkContinue
-		}
-		if n.IsBlock() && "" != n.ID {
-			newID := ast.NewNodeID()
-			if "1" == refIDs[n.ID] {
-				// 如果是文档自身的内部引用
-				refIDs[n.ID] = newID
-			}
-			n.ID = newID
-			n.SetIALAttr("id", n.ID)
-		}
-		return ast.WalkContinue
-	})
-
-	// 重置内部引用
-	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeBlockRefID != n.Type {
-			return ast.WalkContinue
-		}
-		if "1" != refIDs[n.TokensStr()] {
-			n.Tokens = []byte(refIDs[n.TokensStr()])
-		}
-		return ast.WalkContinue
-	})
-
-	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: ret}}}
-	err = PerformTransactions(&[]*Transaction{transaction})
+func createTreeTx(tree *parse.Tree) {
+	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
+	err := PerformTransactions(&[]*Transaction{transaction})
 	if nil != err {
 		tx, txErr := sql.BeginTx()
 		if nil != txErr {
@@ -996,8 +953,6 @@ func DuplicateDoc(rootID string) (ret *parse.Tree, err error) {
 		logging.LogFatalf("transaction failed: %s", err)
 		return
 	}
-	sql.WaitForWritingDatabase()
-	return
 }
 
 func CreateDocByMd(boxID, p, title, md string, sorts []string) (err error) {

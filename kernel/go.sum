@@ -200,8 +200,8 @@ github.com/huandu/xstrings v1.3.2/go.mod h1:y5/lhBue+AyNmUVz9RLU9xbLR0o4KIIExikq
 github.com/imdario/mergo v0.3.11/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=
 github.com/imdario/mergo v0.3.13 h1:lFzP57bqS/wsqKssCGmtLAb8A0wKjLGrve2q3PPVcBk=
 github.com/imdario/mergo v0.3.13/go.mod h1:4lJ1jqUDcsbIECGy0RUJAXNIhg+6ocWgb1ALK2O4oXg=
-github.com/imroc/req/v3 v3.18.0 h1:IKJOLXnjPG/IzC8bIuTIo77/8/j4VbVFw71D+gh4O1c=
-github.com/imroc/req/v3 v3.18.0/go.mod h1:EluRnkfh8A39BmrCARYhcUrfGyR8qPw+O0BZyTy4j9k=
+github.com/imroc/req/v3 v3.19.0 h1:CgUA54GlgeivADx8nodAFwlgifctXZSxf+V8XibzdDs=
+github.com/imroc/req/v3 v3.19.0/go.mod h1:EluRnkfh8A39BmrCARYhcUrfGyR8qPw+O0BZyTy4j9k=
 github.com/jellevandenhooff/dkim v0.0.0-20150330215556-f50fe3d243e1/go.mod h1:E0B/fFc00Y+Rasa88328GlI/XbtyysCtTHZS8h7IrBU=
 github.com/jinzhu/copier v0.3.5 h1:GlvfUwHk62RokgqVNvYsku0TATCF7bAHVwEXoBh3iJg=
 github.com/jinzhu/copier v0.3.5/go.mod h1:DfbEm0FYsaqBcKcFuvmOZb218JkPGtvSHsKg8S8hyyg=
@@ -349,8 +349,8 @@ github.com/shurcooL/reactions v0.0.0-20181006231557-f2e0b4ca5b82/go.mod h1:TCR1l
 github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/shurcooL/users v0.0.0-20180125191416-49c67e49c537/go.mod h1:QJTqeLYEDaXHZDBsXlPCDqdhQuJkuw4NOtaxYe3xii4=
 github.com/shurcooL/webdavfs v0.0.0-20170829043945-18c3829fa133/go.mod h1:hKmq5kWdCj2z2KEozexVbfEZIWiTjhE0+UjmZgPqehw=
-github.com/siyuan-note/dejavu v0.0.0-20220817100354-86e98bc81dfe h1:5n6FyzATQyjrT9DZNVxqCV/CDwkvbTsa3F7icpMrchI=
-github.com/siyuan-note/dejavu v0.0.0-20220817100354-86e98bc81dfe/go.mod h1:8MoQSqxsyMbvMlDgLqs60k7SewDjoYUiJT4h9jeqUJI=
+github.com/siyuan-note/dejavu v0.0.0-20220821052517-f8edbabd0423 h1:isIyTU/P59uEY9Teol3F55Va0NWrcMF1cbu+LqyEkY8=
+github.com/siyuan-note/dejavu v0.0.0-20220821052517-f8edbabd0423/go.mod h1:/7pAviNPlpJiwZkEg2eyLTEq2/8sfW/AU4eHBvyrHFk=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f h1:JMobMNZ7AqaKKyEK+WeWFhix/2TDQXgPZDajU00IybU=

@@ -188,7 +188,8 @@ const setKey = () => {
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
-</div>`
+</div>`,
+        width: isMobile() ? "80vw" : "520px",
     });
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => {
         dialog.destroy();

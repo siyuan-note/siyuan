@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
-		"updated": "20220807180200"
+		"updated": "20220821170702"
 	},
 	"Children": [
 		{
@@ -76,7 +76,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220703231425-knmdjxb",
-				"updated": "20220703231555"
+				"updated": "20220821170702"
 			},
 			"Children": [
 				{
@@ -110,7 +110,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "后如果一切正常就已经配置好同步了。"
+					"Data": "后如果一切正常就已经配置好同步了。如果你不太熟悉同步配置，建議通過點擊同步按鈕打開同步配置嚮導，通過嚮導進行配置會更簡便一些。"
 				}
 			]
 		},
@@ -712,7 +712,7 @@
 			},
 			"Properties": {
 				"id": "20220703231640-9pkvgzl",
-				"updated": "20220703232524"
+				"updated": "20220821165506"
 			},
 			"Children": [
 				{
@@ -786,7 +786,7 @@
 					},
 					"Properties": {
 						"id": "20220703231640-ytzbgh6",
-						"updated": "20220703232524"
+						"updated": "20220821165506"
 					},
 					"Children": [
 						{
@@ -794,12 +794,32 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220703231640-qqg6ca6",
-								"updated": "20220703232524"
+								"updated": "20220821165506"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "此時雲端 a 文件會被 B 設備上的 a 覆蓋，同時在 B 設備上生成之前 A 設備 a 的歷史"
+									"Data": "此時雲端 a 文件會被 B 設備上的 a 覆蓋，同時在 B 設備上生成之前 A 設備 a 的歷史。如果 a 文件是文檔的話，生成歷史的同時也會在同級目錄下生成該文檔的副本（以 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "(Conflicted 2006-01-02 15:04:05)"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 作為文檔名後綴），以方便後續手動編輯合併衝突"
 								}
 							]
 						}

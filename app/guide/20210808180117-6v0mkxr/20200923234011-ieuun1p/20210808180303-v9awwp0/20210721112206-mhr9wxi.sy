@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
-		"updated": "20220807180100"
+		"updated": "20220821170709"
 	},
 	"Children": [
 		{
@@ -76,7 +76,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220703231817-nbhxxb6",
-				"updated": "20220708104604"
+				"updated": "20220821170709"
 			},
 			"Children": [
 				{
@@ -114,7 +114,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", if all goes well, the synchronization is already configured."
+					"Data": ", if all goes well, the synchronization is already configured. If you are not familiar with synchronization configuration, it is recommended to open the synchronization configuration wizard by clicking the synchronization button. It is easier to configure through the wizard."
 				}
 			]
 		},
@@ -691,7 +691,7 @@
 			},
 			"Properties": {
 				"id": "20220703232421-gmxxahn",
-				"updated": "20220703232715"
+				"updated": "20220821165444"
 			},
 			"Children": [
 				{
@@ -765,7 +765,7 @@
 					},
 					"Properties": {
 						"id": "20220703232421-axvmpcs",
-						"updated": "20220703232715"
+						"updated": "20220821165444"
 					},
 					"Children": [
 						{
@@ -773,12 +773,32 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220703232421-r4nw5op",
-								"updated": "20220703232715"
+								"updated": "20220821165444"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "At this time, the cloud file a will be overwritten by a of the B device, and the history of the previous A device file a will be generated on the B device"
+									"Data": "At this time, the cloud file a will be overwritten by a of the B device, and the history of the previous A device file a will be generated on the B device. If the file a is a document, a copy of the document (with "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "(Conflicted 2006-01-02 15:04:05)"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " as the document name suffix) will be generated in the same level directory at the same time as the history is generated, so as to facilitate subsequent manual edit merge conflicts"
 								}
 							]
 						}

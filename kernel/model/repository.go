@@ -553,7 +553,7 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 			absPath := filepath.Join(util.TempDir, "repo", "sync", "conflicts", file.Path)
 			tree, loadTreeErr := loadTree(absPath, luteEngine)
 			if nil != loadTreeErr {
-				logging.LogErrorf("loadd conflicted file [%s] failed: %s", absPath, loadTreeErr)
+				logging.LogErrorf("load conflicted file [%s] failed: %s", absPath, loadTreeErr)
 				continue
 			}
 			tree.Box = boxID

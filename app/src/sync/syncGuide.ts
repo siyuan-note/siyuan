@@ -121,28 +121,30 @@ export const syncGuide = (element?: Element) => {
 }
 
 const setSync = (key?: string, dialog?: Dialog) => {
-    if (dialog) {
-        dialog.destroy();
-    }
     if (key) {
         window.siyuan.config.repo.key = key;
     }
     if (!window.siyuan.config.sync.enabled) {
-        const listDialog = new Dialog({
-            title: window.siyuan.languages.cloudSyncDir,
-            content: `<div class="b3-dialog__content" style="display: flex;flex-direction: column;height: 40vh;">
+        const listHTML = `<div class="b3-dialog__content" style="display: flex;flex-direction: column;height: 40vh;">
     <img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button">${window.siyuan.languages.openSyncTip1}</button>
-</div>`,
-            width: isMobile() ? "80vw" : "520px",
-        });
-        const contentElement = listDialog.element.querySelector(".b3-dialog__content")
+</div>`
+        if (dialog) {
+            dialog.element.querySelector(".b3-dialog__container").lastElementChild.innerHTML = listHTML;
+        } else {
+            dialog = new Dialog({
+                title: window.siyuan.languages.cloudSyncDir,
+                content: listHTML,
+                width: isMobile() ? "80vw" : "520px",
+            });
+        }
+        const contentElement = dialog.element.querySelector(".b3-dialog__content")
         bindSyncCloudListEvent(contentElement);
         getSyncCloudList(contentElement);
-        listDialog.element.querySelector(".b3-button").addEventListener("click", () => {
-            listDialog.destroy()
+        dialog.element.querySelector(".b3-button").addEventListener("click", () => {
+            dialog.destroy()
             fetchPost("/api/sync/setSyncEnable", {enabled: true}, (response) => {
                 if (response.code === 1) {
                     showMessage(response.msg);
@@ -155,6 +157,9 @@ const setSync = (key?: string, dialog?: Dialog) => {
             });
         });
     } else {
+        if (dialog) {
+            dialog.destroy();
+        }
         confirmDialog(window.siyuan.languages.sync, window.siyuan.languages.syncNow, () => {
             fetchPost("/api/sync/performSync", {});
         });
@@ -167,19 +172,19 @@ const setKey = () => {
         content: `<div class="b3-dialog__content">
     <div class="ft__on-surface">${window.siyuan.languages.dataRepoKeyTip1}</div>
     <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__size200" id="importKey">
+    <div class="ft__error">${window.siyuan.languages.dataRepoKeyTip2}</div>
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="importKey">
         <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.importKey}
     </button>
-    <div class="fn__space"></div>
-    <button class="b3-button b3-button--outline fn__size200" id="initKey">
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="initKey">
         <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.genKey}
     </button>
-    <div class="fn__space"></div>
-    <button class="b3-button b3-button--outline fn__size200" id="initKeyByPW">
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="initKeyByPW">
         <svg><use xlink:href="#iconHand"></use></svg>${window.siyuan.languages.genKeyByPW}
     </button>
-    <div class="fn__hr"></div>
-    <div class="ft__error">${window.siyuan.languages.dataRepoKeyTip2}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>

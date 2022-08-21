@@ -23,6 +23,7 @@ import {openSetting} from "../config";
 import {getSearch} from "./functions";
 import {openHistory} from "./history";
 import {initStatus} from "../layout/status";
+import {syncGuide} from "../sync/syncGuide";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -205,14 +206,7 @@ const initBar = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "barSync") {
-                if (needSubscribe() || target.firstElementChild.classList.contains("fn__rotate")) {
-                    return;
-                }
-                if (!window.siyuan.config.sync.enabled) {
-                    showMessage(window.siyuan.languages._kernel[124]);
-                    return;
-                }
-                fetchPost("/api/sync/performSync", {});
+               syncGuide(target.firstElementChild);
                 event.stopPropagation();
                 break;
             } else if (target.id === "barForward") {

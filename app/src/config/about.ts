@@ -99,7 +99,7 @@ export const about = {
         </button>
         <div class="fn__hr"></div>
         <button class="b3-button b3-button--outline fn__size200" id="initKeyByPW">
-            ${window.siyuan.languages.genKeyByPW}
+            <svg><use xlink:href="#iconHand"></use></svg>${window.siyuan.languages.genKeyByPW}
         </button>
     </div>
     <div class="fn__size200 fn__flex-center${window.siyuan.config.repo.key ? "" : " fn__none"}">

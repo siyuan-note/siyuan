@@ -38,6 +38,7 @@ import {Dialog} from "../dialog";
 import {unicode2Emoji} from "../emoji";
 import {deleteFile} from "../editor/deleteFile";
 import {escapeHtml} from "./escape";
+import {syncGuide} from "../sync/syncGuide";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -378,14 +379,7 @@ export const globalShortcut = () => {
         if (matchHotKey(window.siyuan.config.keymap.general.syncNow.custom, event)) {
             event.preventDefault();
             event.stopPropagation();
-            if (needSubscribe() || document.querySelector("#barSync svg").classList.contains("fn__rotate")) {
-                return;
-            }
-            if (!window.siyuan.config.sync.enabled) {
-                showMessage(window.siyuan.languages._kernel[124]);
-                return;
-            }
-            fetchPost("/api/sync/performSync", {});
+            syncGuide(document.querySelector("#barSync svg"));
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {

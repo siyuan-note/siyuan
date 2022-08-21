@@ -14,6 +14,7 @@ import {exitSiYuan} from "../../dialog/processSystem";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {openHistory} from "../../util/history";
 import {Dialog} from "../../dialog";
+import {syncGuide} from "../../sync/syncGuide";
 
 const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) => {
     closePanel();
@@ -435,14 +436,7 @@ ${accountHTML}
                     event.stopPropagation();
                     break;
                 } else if (target.id === "menuSyncNow") {
-                    if (needSubscribe()) {
-                        return;
-                    }
-                    if (!window.siyuan.config.sync.enabled) {
-                        showMessage(window.siyuan.languages._kernel[124]);
-                        return;
-                    }
-                    fetchPost("/api/sync/performSync", {});
+                    syncGuide();
                     event.preventDefault();
                     event.stopPropagation();
                     break;

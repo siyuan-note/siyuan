@@ -169,22 +169,17 @@ const setSync = (key?: string, dialog?: Dialog) => {
 const setKey = () => {
     const dialog = new Dialog({
         title: window.siyuan.languages.dataRepoKey,
-        content: `<div class="b3-dialog__content">
-    <div class="ft__on-surface">${window.siyuan.languages.dataRepoKeyTip1}</div>
+        content: `<div class="b3-dialog__content ft__center">
+    <img style="height: 80px" src="/stage/images/sync-guide.svg"/>
+    <div class="fn__hr--b"></div>
+    <input class="b3-text-field fn__size200 ft__center" placeholder="${window.siyuan.languages.password}">
     <div class="fn__hr"></div>
-    <div class="ft__error">${window.siyuan.languages.dataRepoKeyTip2}</div>
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="importKey">
-        <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.importKey}
-    </button>
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="initKey">
-        <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.genKey}
-    </button>
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="initKeyByPW">
+    <button class="b3-button fn__size200" id="initKeyByPW">
         <svg><use xlink:href="#iconHand"></use></svg>${window.siyuan.languages.genKeyByPW}
     </button>
+    <div class="fn__hr--b"></div>
+    <div class="ft__on-surface">${window.siyuan.languages.dataRepoKeyTip1}</div>
+    <div class="ft__error">${window.siyuan.languages.dataRepoKeyTip2}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
@@ -194,69 +189,15 @@ const setKey = () => {
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => {
         dialog.destroy();
     });
-    dialog.element.querySelector("#importKey").addEventListener("click", () => {
-        const passwordDialog = new Dialog({
-            title: "🔑 " + window.siyuan.languages.key,
-            content: `<div class="b3-dialog__content">
-    <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}"></textarea>
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-            width: isMobile() ? "80vw" : "520px",
-        });
-        const textAreaElement = passwordDialog.element.querySelector("textarea");
-        textAreaElement.focus();
-        const btnsElement = passwordDialog.element.querySelectorAll(".b3-button");
-        btnsElement[0].addEventListener("click", () => {
-            passwordDialog.destroy();
-        });
-        btnsElement[1].addEventListener("click", () => {
-            fetchPost("/api/repo/importRepoKey", {key: textAreaElement.value}, () => {
-                setSync(textAreaElement.value, dialog);
-                passwordDialog.destroy();
-            });
-        });
-    });
-    dialog.element.querySelector("#initKey").addEventListener("click", () => {
-        confirmDialog("🔑 " + window.siyuan.languages.genKey, window.siyuan.languages.initRepoKeyTip, () => {
-            fetchPost("/api/repo/initRepoKey", {}, (response) => {
-                setSync(response.data.key, dialog);
-            });
-        });
-    });
     dialog.element.querySelector("#initKeyByPW").addEventListener("click", () => {
-        const initDialog = new Dialog({
-            title: "🔑 " + window.siyuan.languages.genKeyByPW,
-            content: `<div class="b3-dialog__content">
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.password}">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-            width: isMobile() ? "80vw" : "520px",
-        });
-        const inputElement = initDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
-        inputElement.focus();
-        const btnsElement = initDialog.element.querySelectorAll(".b3-button");
-        initDialog.bindInput(inputElement, () => {
-            (btnsElement[1] as HTMLButtonElement).click();
-        });
-        btnsElement[0].addEventListener("click", () => {
-            initDialog.destroy();
-        });
-        btnsElement[1].addEventListener("click", () => {
-            if (!inputElement.value) {
-                showMessage(window.siyuan.languages._kernel[142]);
-                return;
-            }
-            confirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
-                initDialog.destroy();
-                fetchPost("/api/repo/InitRepoKeyFromPassphrase", {pass: inputElement.value}, (response) => {
-                    setSync(response.data.key, dialog);
-                });
+        const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement
+        if (!inputElement.value) {
+            showMessage(window.siyuan.languages._kernel[142]);
+            return;
+        }
+        confirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
+            fetchPost("/api/repo/InitRepoKeyFromPassphrase", {pass: inputElement.value}, (response) => {
+                setSync(response.data.key, dialog);
             });
         });
     });

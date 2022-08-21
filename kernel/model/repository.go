@@ -534,6 +534,40 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 	logging.LogInfof("synced data repo [ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs]",
 		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)), elapsed.Seconds())
 
+	if 0 < len(mergeResult.Conflicts) {
+		// 云端同步发生冲突时生成副本 https://github.com/siyuan-note/siyuan/issues/5687
+
+		luteEngine := NewLute()
+		waitTx := false
+		for _, file := range mergeResult.Conflicts {
+			if !strings.HasSuffix(file.Path, ".sy") {
+				continue
+			}
+
+			parts := strings.Split(file.Path[1:], "/")
+			if 2 > len(parts) {
+				continue
+			}
+			boxID := parts[0]
+
+			absPath := filepath.Join(util.TempDir, "repo", "sync", "conflicts", file.Path)
+			tree, loadTreeErr := loadTree(absPath, luteEngine)
+			if nil != loadTreeErr {
+				logging.LogErrorf("loadd conflicted file [%s] failed: %s", absPath, loadTreeErr)
+				continue
+			}
+			tree.Box = boxID
+			tree.Path = strings.TrimPrefix(file.Path, "/"+boxID)
+
+			resetTree(tree, "Conflicted")
+			createTreeTx(tree)
+			waitTx = true
+		}
+		if waitTx {
+			sql.WaitForWritingDatabase()
+		}
+	}
+
 	if 1 > len(mergeResult.Upserts) && 1 > len(mergeResult.Removes) { // 没有数据变更
 		syncSameCount++
 		if 10 < syncSameCount {
@@ -566,7 +600,7 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 	cache.ClearDocsIAL() // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
 
 	fullReindex := 0.2 < float64(len(upserts))/float64(len(indexBeforeSync.Files))
-	if fullReindex {
+	if fullReindex { // 如果更新的文件比较多则全量重建索引
 		RefreshFileTree()
 		return
 	}

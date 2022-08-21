@@ -48,6 +48,7 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	osTmpDir := filepath.Join(TempDir, "os")
 	os.RemoveAll(osTmpDir)
 	os.MkdirAll(osTmpDir, 0755)
+	os.RemoveAll(filepath.Join(TempDir, "repo"))
 	os.Setenv("TMPDIR", osTmpDir)
 	DBPath = filepath.Join(TempDir, DBName)
 	BlockTreePath = filepath.Join(TempDir, "blocktree.msgpack")

@@ -36,8 +36,7 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-//var Mode = "dev"
-//
+// var Mode = "dev"
 var Mode = "prod"
 
 const (
@@ -267,6 +266,7 @@ func initWorkspaceDir(workspaceArg string) {
 	if err := os.MkdirAll(osTmpDir, 0755); nil != err {
 		log.Fatalf("create os tmp dir [%s] failed: %s", osTmpDir, err)
 	}
+	os.RemoveAll(filepath.Join(TempDir, "repo"))
 	os.Setenv("TMPDIR", osTmpDir)
 	os.Setenv("TEMP", osTmpDir)
 	os.Setenv("TMP", osTmpDir)

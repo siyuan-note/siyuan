@@ -19,16 +19,74 @@ package model
 import (
 	"errors"
 	"io/fs"
+	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/88250/lute"
+	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func resetTree(tree *parse.Tree, titleSuffix string) {
+	tree.ID = ast.NewNodeID()
+	tree.Root.ID = tree.ID
+	if t, parseErr := time.Parse("20060102150405", util.TimeFromID(tree.ID)); nil == parseErr {
+		titleSuffix += " " + t.Format("2006-01-02 15:04:05")
+	} else {
+		titleSuffix = "Duplicated " + time.Now().Format("2006-01-02 15:04:05")
+	}
+	titleSuffix = "(" + titleSuffix + ")"
+	tree.Root.SetIALAttr("id", tree.ID)
+	tree.Root.SetIALAttr("title", tree.Root.IALAttr("title")+" "+titleSuffix)
+	p := path.Join(path.Dir(tree.Path), tree.ID) + ".sy"
+	tree.Path = p
+	tree.HPath = tree.HPath + " " + titleSuffix
+
+	// 收集所有引用
+	refIDs := map[string]string{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeBlockRefID != n.Type {
+			return ast.WalkContinue
+		}
+		refIDs[n.TokensStr()] = "1"
+		return ast.WalkContinue
+	})
+
+	// 重置块 ID
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeDocument == n.Type {
+			return ast.WalkContinue
+		}
+		if n.IsBlock() && "" != n.ID {
+			newID := ast.NewNodeID()
+			if "1" == refIDs[n.ID] {
+				// 如果是文档自身的内部引用
+				refIDs[n.ID] = newID
+			}
+			n.ID = newID
+			n.SetIALAttr("id", n.ID)
+		}
+		return ast.WalkContinue
+	})
+
+	// 重置内部引用
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeBlockRefID != n.Type {
+			return ast.WalkContinue
+		}
+		if "1" != refIDs[n.TokensStr()] {
+			n.Tokens = []byte(refIDs[n.TokensStr()])
+		}
+		return ast.WalkContinue
+	})
+}
 
 func pagedPaths(localPath string, pageSize int) (ret map[int][]string) {
 	ret = map[int][]string{}

@@ -1450,7 +1450,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 	fromConfPath := filepath.Join(util.DataDir, fromBox, ".siyuan", "sort.json")
 	fromFullSortIDs := map[string]int{}
 	if gulu.File.IsExist(fromConfPath) {
-		data, err := filelock.LockFileRead(fromConfPath)
+		data, err := filelock.NoLockFileRead(fromConfPath)
 		if nil != err {
 			logging.LogErrorf("read sort conf failed: %s", err)
 			return
@@ -1467,7 +1467,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 	toConfPath := filepath.Join(util.DataDir, toBox, ".siyuan", "sort.json")
 	toFullSortIDs := map[string]int{}
 	if gulu.File.IsExist(toConfPath) {
-		data, err := filelock.LockFileRead(toConfPath)
+		data, err := filelock.NoLockFileRead(toConfPath)
 		if nil != err {
 			logging.LogErrorf("read sort conf failed: %s", err)
 			return
@@ -1488,7 +1488,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 		logging.LogErrorf("marshal sort conf failed: %s", err)
 		return
 	}
-	if err = filelock.LockFileWrite(toConfPath, data); nil != err {
+	if err = filelock.NoLockFileWrite(toConfPath, data); nil != err {
 		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
@@ -1569,7 +1569,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	fullSortIDs := map[string]int{}
 	var data []byte
 	if gulu.File.IsExist(confPath) {
-		data, err = filelock.LockFileRead(confPath)
+		data, err = filelock.NoLockFileRead(confPath)
 		if nil != err {
 			logging.LogErrorf("read sort conf failed: %s", err)
 			return
@@ -1589,7 +1589,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 		logging.LogErrorf("marshal sort conf failed: %s", err)
 		return
 	}
-	if err = filelock.LockFileWrite(confPath, data); nil != err {
+	if err = filelock.NoLockFileWrite(confPath, data); nil != err {
 		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
@@ -1603,7 +1603,7 @@ func (box *Box) fillSort(files *[]*File) {
 		return
 	}
 
-	data, err := filelock.LockFileRead(confPath)
+	data, err := filelock.NoLockFileRead(confPath)
 	if nil != err {
 		logging.LogErrorf("read sort conf failed: %s", err)
 		return
@@ -1650,7 +1650,7 @@ func (box *Box) removeSort(rootID, path string) {
 		return
 	}
 
-	data, err := filelock.LockFileRead(confPath)
+	data, err := filelock.NoLockFileRead(confPath)
 	if nil != err {
 		logging.LogErrorf("read sort conf failed: %s", err)
 		return
@@ -1671,7 +1671,7 @@ func (box *Box) removeSort(rootID, path string) {
 		logging.LogErrorf("marshal sort conf failed: %s", err)
 		return
 	}
-	if err = filelock.LockFileWrite(confPath, data); nil != err {
+	if err = filelock.NoLockFileWrite(confPath, data); nil != err {
 		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}

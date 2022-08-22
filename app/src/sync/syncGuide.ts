@@ -73,13 +73,15 @@ export const bindSyncCloudListEvent = (cloudPanelElement: Element) => {
     });
 };
 
-export const getSyncCloudList = (cloudPanelElement: Element, reload = false) => {
+export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?:() =>void) => {
     if (!reload && cloudPanelElement.firstElementChild.tagName !== "IMG") {
         return;
     }
     fetchPost("/api/sync/listCloudSyncDir", {}, (response) => {
         let syncListHTML = `<div class="fn__hr"></div><ul><li style="padding: 0 16px" class="b3-list--empty">${window.siyuan.languages.emptyCloudSyncList}</li></ul>`;
-        if (response.code !== 1) {
+        if (response.code === 1) {
+            syncListHTML = `<div class="fn__hr"></div><ul><li style="padding: 0 16px" class="b3-list--empty ft__error">${response.msg}</li></ul>`;
+        } else if (response.code !== 1) {
             syncListHTML = '<div class="fn__hr"></div><ul class="b3-list b3-list--background fn__flex-1" style="overflow: auto;">';
             response.data.syncDirs.forEach((item: { hSize: string, cloudName: string, updated: string }) => {
                 syncListHTML += `<li data-type="selectCloud" data-name="${item.cloudName}" class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}">
@@ -102,6 +104,9 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false) => 
 </div>`;
         }
         cloudPanelElement.innerHTML = syncListHTML;
+        if (cb) {
+            cb();
+        }
     });
 };
 
@@ -132,7 +137,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
     </div>
 </div>
 <div class="b3-dialog__action">
-    <button class="b3-button">${window.siyuan.languages.openSyncTip1}</button>
+    <button class="b3-button" disabled="disabled">${window.siyuan.languages.openSyncTip1}</button>
 </div>`;
         if (dialog) {
             dialog.element.querySelector(".b3-dialog__header").innerHTML = window.siyuan.languages.cloudSyncDir;
@@ -146,8 +151,15 @@ const setSync = (key?: string, dialog?: Dialog) => {
         }
         const contentElement = dialog.element.querySelector(".b3-dialog__content").lastElementChild;
         bindSyncCloudListEvent(contentElement);
-        getSyncCloudList(contentElement);
-        dialog.element.querySelector(".b3-button").addEventListener("click", () => {
+        const btnElement =  dialog.element.querySelector(".b3-button");
+        getSyncCloudList(contentElement, false, () => {
+            if (contentElement.querySelector("input[checked]")) {
+                btnElement.removeAttribute("disabled");
+            } else {
+                btnElement.setAttribute("disabled", "disabled");
+            }
+        });
+        btnElement.addEventListener("click", () => {
             dialog.destroy();
             fetchPost("/api/sync/setSyncEnable", {enabled: true}, (response) => {
                 if (response.code === 1) {

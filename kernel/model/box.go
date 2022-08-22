@@ -153,7 +153,7 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 		return
 	}
 
-	data, err := filelock.LockFileRead(confPath)
+	data, err := filelock.NoLockFileRead(confPath)
 	if nil != err {
 		logging.LogErrorf("read box conf [%s] failed: %s", confPath, err)
 		return
@@ -192,7 +192,7 @@ func (box *Box) saveConf0(data []byte) {
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); nil != err {
 		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
-	if err := filelock.LockFileWrite(confPath, data); nil != err {
+	if err := filelock.NoLockFileWrite(confPath, data); nil != err {
 		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
 }

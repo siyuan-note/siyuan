@@ -490,10 +490,9 @@ export class Gutter {
             click() {
                 let html = "";
                 selectsElement.forEach(item => {
-                    const editElement = getContenteditableElement(item);
-                    if (editElement) {
-                        html += editElement.textContent + "\n";
-                    }
+                    item.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
+                        html += editItem.textContent + "\n";
+                    });
                 });
                 writeText(html.trimEnd());
             }
@@ -852,10 +851,11 @@ export class Gutter {
             }, {
                 label: window.siyuan.languages.copyPlainText,
                 click() {
-                    const editElement = getContenteditableElement(nodeElement);
-                    if (editElement) {
-                        writeText(editElement.textContent);
-                    }
+                    let text = "";
+                    nodeElement.querySelectorAll('[contenteditable="true"]').forEach(item => {
+                        text += item.textContent + "\n";
+                    });
+                    writeText(text.trimEnd());
                 }
             }, {
                 label: window.siyuan.languages.copy + " HTML",

@@ -369,7 +369,7 @@ ${accountHTML}
                         writeText(window.siyuan.config.repo.key);
                     });
                     modelMainElement.querySelector("#removeKey").addEventListener("click", () => {
-                        confirmDialog(window.siyuan.languages.remove, "", () => {
+                        confirmDialog("⚠️ " + window.siyuan.languages.resetRepo, window.siyuan.languages.resetRepoTip, () => {
                             fetchPost("/api/repo/resetRepo", {}, () => {
                                 window.siyuan.config.repo.key = "";
                                 window.siyuan.config.sync.enabled = false;

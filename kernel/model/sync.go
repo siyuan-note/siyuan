@@ -301,6 +301,7 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 
 	dirs, size, err = dejavu.GetCloudRepos(cloudInfo)
 	if nil != err {
+		err = errors.New(formatErrorMsg(err))
 		return
 	}
 	if 1 > len(dirs) {

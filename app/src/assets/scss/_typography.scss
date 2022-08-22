@@ -270,10 +270,14 @@
     overflow-x: overlay;
   }
 
-  [data-subtype="echarts"] > div,
-  [data-subtype="mindmap"] > div {
-    overflow: hidden;
-    height: 420px;
+  [data-subtype="echarts"],
+  [data-subtype="mindmap"] {
+    z-index: 1;
+
+    & > div {
+      overflow: hidden;
+      height: 420px;
+    }
   }
 
   .katex-display {
@@ -334,6 +338,10 @@
   [data-subtype="plantuml"],
   [data-subtype="abc"] {
     text-align: center;
+  }
+
+  [data-subtype="mermaid"] {
+    overflow: auto;
   }
 
   [data-subtype="plantuml"] img {

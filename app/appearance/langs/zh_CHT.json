@@ -1,5 +1,5 @@
 {
-  "syncConfGuide1": "初始化密鑰",
+  "syncConfGuide1": "初始化同步密鑰",
   "syncConfGuide2": "該密鑰用於數據同步端到端加密<br>密鑰基於你輸入的密碼生成，請務必牢記密碼",
   "syncConfGuide3": "雲端同步目錄用於存放當前工作空間對應的加密數據，默認名稱為 <code>main</code>。如果你只有一個工作空間需要同步，直接使用 <code>main</code> 即可",
   "syncConfGuide4": "立即同步？",

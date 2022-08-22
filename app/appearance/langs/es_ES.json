@@ -1,5 +1,5 @@
 {
-  "syncConfGuide1": "Clave de Inicialización",
+  "syncConfGuide1": "Inicializar clave de sincronización",
   "syncConfGuide2": "Esta clave se utiliza para el cifrado de extremo a extremo de sincronización de datos<br>La clave se genera en función de la contraseña que ingresa, recuerde la contraseña",
   "syncConfGuide3": "El directorio de sincronización en la nube se utiliza para almacenar los datos cifrados correspondientes al espacio de trabajo actual. El nombre predeterminado es <code>main</code>. Si solo tiene un espacio de trabajo para sincronizar, agregue y use <code>main</code> directamente.",
   "syncConfGuide4": "¿Sincronizar ahora?",

@@ -255,15 +255,15 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             label: window.siyuan.languages.copyPlainText,
             click() {
                 focusByRange(getEditorRange(nodeElement));
-                writeText(range.toString());
+                writeText(getSelection().getRangeAt(0).toString());
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.copy +" HTML",
+            label: window.siyuan.languages.copy + " HTML",
             click() {
                 focusByRange(getEditorRange(nodeElement));
                 let html = "";
-                range.cloneContents().childNodes.forEach(item => {
+                getSelection().getRangeAt(0).cloneContents().childNodes.forEach(item => {
                     if (item.nodeType === 3) {
                         html += item.textContent;
                     } else {

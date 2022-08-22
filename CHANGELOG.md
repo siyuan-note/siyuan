@@ -1,3 +1,48 @@
+## v2.1.8 / 2022-08-22
+
+### 改进功能
+
+* [斜杆菜单模板预览](https://github.com/siyuan-note/siyuan/issues/2892)
+* [支持复制为 HTML](https://github.com/siyuan-note/siyuan/issues/5375)
+* [暗色主题下 `mindmap` 背景颜色设置为透明](https://github.com/siyuan-note/siyuan/issues/5582)
+* [为链接新增转化为文本选项，删除选项修改为删除链接](https://github.com/siyuan-note/siyuan/issues/5608)
+* [改进没有模板时 `/模板` 的交互](https://github.com/siyuan-note/siyuan/issues/5636)
+* [`pdf?page` 资源文件链接会被判定为未引用资源](https://github.com/siyuan-note/siyuan/issues/5649)
+* [每次启动程序不再自动创建 Documents 文件夹](https://github.com/siyuan-note/siyuan/issues/5653)
+* [大纲切换页面题头图闪现](https://github.com/siyuan-note/siyuan/issues/5659)
+* [支持任务列表通过任务框拖动](https://github.com/siyuan-note/siyuan/issues/5660)
+* [支持复制为纯文本](https://github.com/siyuan-note/siyuan/issues/5661)
+* [工作空间/conf/conf.json 文件读写不再加锁](https://github.com/siyuan-note/siyuan/issues/5664)
+* [复制粘贴支持首尾空格](https://github.com/siyuan-note/siyuan/issues/5667)
+* [API `/api/filetree/duplicateDoc` 返回新文档的 id/box/path/hpath](https://github.com/siyuan-note/siyuan/issues/5669)
+* [`.dev` 域名网址纳入超链接](https://github.com/siyuan-note/siyuan/issues/5670)
+* [重复（克隆）文档后自身内部块引不应该指向原文档中的块](https://github.com/siyuan-note/siyuan/issues/5673)
+* [快捷键中使用小键盘无效](https://github.com/siyuan-note/siyuan/issues/5680)
+* [`file://` 协议兼容 Window 平台使用 `/` 作为目录分割线](https://github.com/siyuan-note/siyuan/issues/5681)
+* [云端同步设置向导](https://github.com/siyuan-note/siyuan/issues/5685)
+* [剪藏时过滤空的超链接](https://github.com/siyuan-note/siyuan/issues/5686)
+* [云端同步发生冲突时生成副本](https://github.com/siyuan-note/siyuan/issues/5687)
+* [移动端若干问题改进](https://github.com/siyuan-note/siyuan/issues/5691)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/5679)
+
+### 修复缺陷
+
+* [块引搜索结果出现 `<mark>` 标记](https://github.com/siyuan-note/siyuan/issues/5650)
+* [Ctrl+Tab 切换焦点没有跟随切换](https://github.com/siyuan-note/siyuan/issues/5655)
+* [拖动并交换两个窗口后重启宽度没有保持现状](https://github.com/siyuan-note/siyuan/issues/5657)
+* [空列表中插入任务列表面包屑显示问题](https://github.com/siyuan-note/siyuan/issues/5665)
+* [点击折叠箭头菜单不消失](https://github.com/siyuan-note/siyuan/issues/5666)
+* [恢复文档浏览位置报错导致文档无法打开](https://github.com/siyuan-note/siyuan/issues/5671)
+* [图表删除后撤销下方出现空白](https://github.com/siyuan-note/siyuan/issues/5674)
+* [图表类内容块编辑框钉住改进](https://github.com/siyuan-note/siyuan/issues/5675)
+* [浏览器剪藏扩展剪藏某些网页代码块丢失注释](https://github.com/siyuan-note/siyuan/issues/5676)
+* [启动后已打开文档鼠标悬浮不显示路径](https://github.com/siyuan-note/siyuan/issues/5683)
+* [数据库索引报错卡住](https://github.com/siyuan-note/siyuan/issues/5684)
+* [列表中图片末尾光标和回车异常](https://github.com/siyuan-note/siyuan/issues/5690)
+
 ## v2.1.7 / 2022-08-15
 
 ### 改进功能

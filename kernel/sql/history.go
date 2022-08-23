@@ -31,6 +31,14 @@ type History struct {
 	Path    string
 }
 
+func DeleteHistoriesByPathPrefix(tx *sql.Tx, pathPrefix string) (err error) {
+	stmt := "DELETE FROM histories_fts_case_insensitive WHERE path LIKE ?"
+	if err = execStmtTx(tx, stmt, pathPrefix+"%"); nil != err {
+		return
+	}
+	return
+}
+
 const (
 	HistoriesFTSCaseInsensitiveInsert = "INSERT INTO histories_fts_case_insensitive (type, op, title, content, path, created) VALUES %s"
 	HistoriesPlaceholder              = "(?, ?, ?, ?, ?, ?)"

@@ -91,6 +91,8 @@ func ClearWorkspaceHistory() (err error) {
 		logging.LogInfof("removed workspace history dir [%s]", historyDir)
 	}
 
+	sql.InitHistoryDatabase(true)
+
 	// 以下部分是老版本的清理逻辑，暂时保留
 
 	notebooks, err := ListNotebooks()
@@ -534,6 +536,26 @@ func clearOutdatedHistoryDir(historyDir string) {
 			continue
 		}
 		//logging.LogInfof("auto removed history dir [%s]", dir)
+
+		// 清理历史库
+
+		tx, txErr := sql.BeginHistoryTx()
+		if nil != txErr {
+			logging.LogErrorf("begin history tx failed: %s", txErr)
+			return
+		}
+
+		p := strings.TrimPrefix(dir, util.HistoryDir)
+		p = filepath.ToSlash(p[1:])
+		if txErr = sql.DeleteHistoriesByPathPrefix(tx, dir); nil != txErr {
+			sql.RollbackTx(tx)
+			logging.LogErrorf("delete history [%s] failed: %s", dir, txErr)
+			return
+		}
+		if txErr = sql.CommitTx(tx); nil != txErr {
+			logging.LogErrorf("commit history tx failed: %s", txErr)
+			return
+		}
 	}
 }
 
@@ -614,7 +636,7 @@ func indexHistory() {
 		filepath.Walk(entryPath, func(path string, info os.FileInfo, err error) error {
 			if strings.HasSuffix(info.Name(), ".sy") {
 				docs = append(docs, path)
-			} else if strings.Contains(path, "assets"+string(os.PathSeparator)) {
+			} else if strings.Contains(path, "assets/") {
 				assets = append(assets, path)
 			}
 			return nil
@@ -623,29 +645,33 @@ func indexHistory() {
 		var histories []*sql.History
 		for _, doc := range docs {
 			tree, loadErr := loadTree(doc, lutEngine)
-			if nil != err {
+			if nil != loadErr {
 				logging.LogErrorf("load tree [%s] failed: %s", doc, loadErr)
 				continue
 			}
 
 			title := tree.Root.IALAttr("title")
 			content := tree.Root.Content()
+			p := strings.TrimPrefix(doc, util.HistoryDir)
+			p = filepath.ToSlash(p[1:])
 			histories = append(histories, &sql.History{
 				Type:    0,
 				Op:      op,
 				Title:   title,
 				Content: content,
-				Path:    doc,
+				Path:    p,
 				Created: created,
 			})
 		}
 
 		for _, asset := range assets {
+			p := strings.TrimPrefix(asset, util.HistoryDir)
+			p = filepath.ToSlash(p[1:])
 			histories = append(histories, &sql.History{
 				Type:    1,
 				Op:      op,
 				Title:   filepath.Base(asset),
-				Path:    asset,
+				Path:    p,
 				Created: created,
 			})
 		}
@@ -658,6 +684,10 @@ func indexHistory() {
 		if err = sql.InsertHistories(tx, histories); nil != err {
 			logging.LogErrorf("insert histories failed: %s", err)
 			sql.RollbackTx(tx)
+			return
+		}
+		if err = sql.CommitTx(tx); nil != err {
+			logging.LogErrorf("commit transaction failed: %s", err)
 			return
 		}
 	}

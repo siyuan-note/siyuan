@@ -146,15 +146,6 @@ func SetBooted() {
 	logging.LogInfof("kernel booted")
 }
 
-func GetHistoryDir(suffix string) (ret string, err error) {
-	ret = filepath.Join(HistoryDir, time.Now().Format("2006-01-02-150405")+"-"+suffix)
-	if err = os.MkdirAll(ret, 0755); nil != err {
-		logging.LogErrorf("make history dir failed: %s", err)
-		return
-	}
-	return
-}
-
 var (
 	HomeDir, _    = gulu.OS.Home()
 	WorkingDir, _ = os.Getwd()
@@ -168,6 +159,7 @@ var (
 	LogPath        string        // 配置目录下的日志文件 siyuan.log 路径
 	DBName         = "siyuan.db" // SQLite 数据库文件名
 	DBPath         string        // SQLite 数据库文件路径
+	HistoryDBPath  string        // SQLite 历史数据库文件路径
 	BlockTreePath  string        // 区块树文件路径
 	AppearancePath string        // 配置目录下的外观目录 appearance/ 路径
 	ThemesPath     string        // 配置目录下的外观目录下的 themes/ 路径
@@ -271,6 +263,7 @@ func initWorkspaceDir(workspaceArg string) {
 	os.Setenv("TEMP", osTmpDir)
 	os.Setenv("TMP", osTmpDir)
 	DBPath = filepath.Join(TempDir, DBName)
+	HistoryDBPath = filepath.Join(TempDir, "history.db")
 	BlockTreePath = filepath.Join(TempDir, "blocktree.msgpack")
 }
 

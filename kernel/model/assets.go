@@ -393,7 +393,7 @@ func RemoveUnusedAssets() (ret []string) {
 	ret = []string{}
 	unusedAssets := UnusedAssets()
 
-	historyDir, err := util.GetHistoryDir("delete")
+	historyDir, err := GetHistoryDir(HistoryOpClean)
 	if nil != err {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -428,7 +428,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 		return p
 	}
 
-	historyDir, err := util.GetHistoryDir("delete")
+	historyDir, err := GetHistoryDir(HistoryOpClean)
 	if nil != err {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return

@@ -79,7 +79,7 @@ func AutoSpace(rootID string) (err error) {
 }
 
 func generateFormatHistory(tree *parse.Tree) {
-	historyDir, err := util.GetHistoryDir("format")
+	historyDir, err := GetHistoryDir(HistoryOpFormat)
 	if nil != err {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return

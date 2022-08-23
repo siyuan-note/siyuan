@@ -48,6 +48,7 @@ func StartKernel(container, appDir, workspaceDir, nativeLibDir, privateDataDir, 
 	go func() {
 		model.InitAppearance()
 		sql.InitDatabase(false)
+		sql.InitHistoryDatabase(false)
 		sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
 
 		model.SyncData(true, false, false)

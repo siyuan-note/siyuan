@@ -38,7 +38,10 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-var db *sql.DB
+var (
+	db        *sql.DB
+	historyDB *sql.DB
+)
 
 func init() {
 	regex := func(re, s string) (bool, error) {
@@ -140,6 +143,40 @@ func initDBTables() {
 	_, err = db.Exec("CREATE TABLE file_annotation_refs (id, file_path, annotation_id, block_id, root_id, box, path, content, type)")
 	if nil != err {
 		logging.LogFatalf("create table [refs] failed: %s", err)
+	}
+}
+
+func InitHistoryDatabase(forceRebuild bool) {
+	if !forceRebuild && gulu.File.IsExist(util.HistoryDBPath) {
+		return
+	}
+
+	if nil != historyDB {
+		historyDB.Close()
+	}
+	dsn := util.HistoryDBPath + "?_journal_mode=OFF" +
+		"&_synchronous=OFF" +
+		"&_secure_delete=OFF" +
+		"&_cache_size=-20480" +
+		"&_page_size=8192" +
+		"&_busy_timeout=7000" +
+		"&_ignore_check_constraints=ON" +
+		"&_temp_store=MEMORY" +
+		"&_case_sensitive_like=OFF" +
+		"&_locking_mode=EXCLUSIVE"
+	var err error
+	historyDB, err = sql.Open("sqlite3_extended", dsn)
+	if nil != err {
+		logging.LogFatalf("create database failed: %s", err)
+	}
+	historyDB.SetMaxIdleConns(1)
+	historyDB.SetMaxOpenConns(1)
+	historyDB.SetConnMaxLifetime(365 * 24 * time.Hour)
+
+	historyDB.Exec("DROP TABLE histories_fts_case_insensitive")
+	_, err = historyDB.Exec("CREATE VIRTUAL TABLE histories_fts_case_insensitive USING fts5(type UNINDEXED, op UNINDEXED, title, content, path UNINDEXED, created UNINDEXED, tokenize=\"siyuan case_insensitive\")")
+	if nil != err {
+		logging.LogFatalf("create table [histories_fts_case_insensitive] failed: %s", err)
 	}
 }
 
@@ -1029,6 +1066,9 @@ func CloseDatabase() {
 	if err := db.Close(); nil != err {
 		logging.LogErrorf("close database failed: %s", err)
 	}
+	if err := historyDB.Close(); nil != err {
+		logging.LogErrorf("close history database failed: %s", err)
+	}
 }
 
 func queryRow(query string, args ...interface{}) *sql.Row {
@@ -1051,6 +1091,16 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 func BeginTx() (tx *sql.Tx, err error) {
 	if tx, err = db.Begin(); nil != err {
 		logging.LogErrorf("begin tx failed: %s\n  %s", err, logging.ShortStack())
+		if strings.Contains(err.Error(), "database is locked") {
+			os.Exit(util.ExitCodeReadOnlyDatabase)
+		}
+	}
+	return
+}
+
+func BeginHistoryTx() (tx *sql.Tx, err error) {
+	if tx, err = historyDB.Begin(); nil != err {
+		logging.LogErrorf("begin history tx failed: %s\n  %s", err, logging.ShortStack())
 		if strings.Contains(err.Error(), "database is locked") {
 			os.Exit(util.ExitCodeReadOnlyDatabase)
 		}

@@ -51,6 +51,7 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	os.RemoveAll(filepath.Join(TempDir, "repo"))
 	os.Setenv("TMPDIR", osTmpDir)
 	DBPath = filepath.Join(TempDir, DBName)
+	HistoryDBPath = filepath.Join(TempDir, "history.db")
 	BlockTreePath = filepath.Join(TempDir, "blocktree.msgpack")
 	AndroidNativeLibDir = nativeLibDir
 	AndroidPrivateDataDir = privateDataDir

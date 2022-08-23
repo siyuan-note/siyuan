@@ -34,6 +34,51 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func copyFile(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	src := arg["src"].(string)
+	src, err := model.GetAssetAbsPath(src)
+	if nil != err {
+		logging.LogErrorf("get asset [%s] abs path failed: %s", src, err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
+	info, err := os.Stat(src)
+	if nil != err {
+		logging.LogErrorf("stat [%s] failed: %s", src, err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
+	if info.IsDir() {
+		ret.Code = -1
+		ret.Msg = "file is a directory"
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
+	dest := arg["dest"].(string)
+	if err = gulu.File.CopyFile(src, dest); nil != err {
+		logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+}
+
 func getFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	arg, ok := util.JsonArg(c, ret)

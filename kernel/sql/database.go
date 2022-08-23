@@ -144,6 +144,34 @@ func initDBTables() {
 	if nil != err {
 		logging.LogFatalf("create table [refs] failed: %s", err)
 	}
+}
+
+func InitHistoryDatabase(forceRebuild bool) {
+	if !forceRebuild && gulu.File.IsExist(util.HistoryDBPath) {
+		return
+	}
+
+	if nil != historyDB {
+		historyDB.Close()
+	}
+	dsn := util.HistoryDBPath + "?_journal_mode=OFF" +
+		"&_synchronous=OFF" +
+		"&_secure_delete=OFF" +
+		"&_cache_size=-20480" +
+		"&_page_size=8192" +
+		"&_busy_timeout=7000" +
+		"&_ignore_check_constraints=ON" +
+		"&_temp_store=MEMORY" +
+		"&_case_sensitive_like=OFF" +
+		"&_locking_mode=EXCLUSIVE"
+	var err error
+	historyDB, err = sql.Open("sqlite3_extended", dsn)
+	if nil != err {
+		logging.LogFatalf("create database failed: %s", err)
+	}
+	historyDB.SetMaxIdleConns(1)
+	historyDB.SetMaxOpenConns(1)
+	historyDB.SetConnMaxLifetime(365 * 24 * time.Hour)
 
 	historyDB.Exec("DROP TABLE history_fts_case_insensitive")
 	_, err = db.Exec("CREATE VIRTUAL TABLE history_fts_case_insensitive USING fts5(type UNINDEXED, op UNINDEXED, title, content, created UNINDEXED, path UNINDEXED, tokenize=\"siyuan case_insensitive\")")
@@ -201,27 +229,6 @@ func initDBConnection() {
 	db.SetMaxIdleConns(20)
 	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(365 * 24 * time.Hour)
-
-	if nil != historyDB {
-		historyDB.Close()
-	}
-	dsn = util.HistoryDBPath + "?_journal_mode=OFF" +
-		"&_synchronous=OFF" +
-		"&_secure_delete=OFF" +
-		"&_cache_size=-20480" +
-		"&_page_size=8192" +
-		"&_busy_timeout=7000" +
-		"&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY" +
-		"&_case_sensitive_like=OFF" +
-		"&_locking_mode=EXCLUSIVE"
-	historyDB, err = sql.Open("sqlite3_extended", dsn)
-	if nil != err {
-		logging.LogFatalf("create database failed: %s", err)
-	}
-	historyDB.SetMaxIdleConns(1)
-	historyDB.SetMaxOpenConns(1)
-	historyDB.SetConnMaxLifetime(365 * 24 * time.Hour)
 }
 
 func SetCaseSensitive(b bool) {

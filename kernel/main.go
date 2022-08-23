@@ -34,6 +34,7 @@ func main() {
 	go server.Serve(false)
 	model.InitAppearance()
 	sql.InitDatabase(false)
+	sql.InitHistoryDatabase(false)
 	sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
 
 	model.SyncData(true, false, false)

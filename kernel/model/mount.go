@@ -91,7 +91,7 @@ func RemoveBox(boxID string) (err error) {
 	filelock.ReleaseFileLocks(localPath)
 	if !IsUserGuide(boxID) {
 		var historyDir string
-		historyDir, err = util.GetHistoryDir("delete")
+		historyDir, err = GetHistoryDir(HistoryOpDelete)
 		if nil != err {
 			logging.LogErrorf("get history dir failed: %s", err)
 			return

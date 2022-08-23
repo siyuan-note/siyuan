@@ -146,15 +146,6 @@ func SetBooted() {
 	logging.LogInfof("kernel booted")
 }
 
-func GetHistoryDir(suffix string) (ret string, err error) {
-	ret = filepath.Join(HistoryDir, time.Now().Format("2006-01-02-150405")+"-"+suffix)
-	if err = os.MkdirAll(ret, 0755); nil != err {
-		logging.LogErrorf("make history dir failed: %s", err)
-		return
-	}
-	return
-}
-
 var (
 	HomeDir, _    = gulu.OS.Home()
 	WorkingDir, _ = os.Getwd()

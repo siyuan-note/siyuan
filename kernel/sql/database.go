@@ -173,10 +173,10 @@ func InitHistoryDatabase(forceRebuild bool) {
 	historyDB.SetMaxOpenConns(1)
 	historyDB.SetConnMaxLifetime(365 * 24 * time.Hour)
 
-	historyDB.Exec("DROP TABLE history_fts_case_insensitive")
-	_, err = db.Exec("CREATE VIRTUAL TABLE history_fts_case_insensitive USING fts5(type UNINDEXED, op UNINDEXED, title, content, created UNINDEXED, path UNINDEXED, tokenize=\"siyuan case_insensitive\")")
+	historyDB.Exec("DROP TABLE histories_fts_case_insensitive")
+	_, err = historyDB.Exec("CREATE VIRTUAL TABLE histories_fts_case_insensitive USING fts5(type UNINDEXED, op UNINDEXED, title, content, path UNINDEXED, created UNINDEXED, tokenize=\"siyuan case_insensitive\")")
 	if nil != err {
-		logging.LogFatalf("create table [history_fts_case_insensitive] failed: %s", err)
+		logging.LogFatalf("create table [histories_fts_case_insensitive] failed: %s", err)
 	}
 }
 
@@ -1066,6 +1066,9 @@ func CloseDatabase() {
 	if err := db.Close(); nil != err {
 		logging.LogErrorf("close database failed: %s", err)
 	}
+	if err := historyDB.Close(); nil != err {
+		logging.LogErrorf("close history database failed: %s", err)
+	}
 }
 
 func queryRow(query string, args ...interface{}) *sql.Row {
@@ -1088,6 +1091,16 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 func BeginTx() (tx *sql.Tx, err error) {
 	if tx, err = db.Begin(); nil != err {
 		logging.LogErrorf("begin tx failed: %s\n  %s", err, logging.ShortStack())
+		if strings.Contains(err.Error(), "database is locked") {
+			os.Exit(util.ExitCodeReadOnlyDatabase)
+		}
+	}
+	return
+}
+
+func BeginHistoryTx() (tx *sql.Tx, err error) {
+	if tx, err = historyDB.Begin(); nil != err {
+		logging.LogErrorf("begin history tx failed: %s\n  %s", err, logging.ShortStack())
 		if strings.Contains(err.Error(), "database is locked") {
 			os.Exit(util.ExitCodeReadOnlyDatabase)
 		}

@@ -1185,7 +1185,7 @@ func RemoveDoc(boxID, p string) (err error) {
 		return
 	}
 
-	historyDir, err := util.GetHistoryDir("delete")
+	historyDir, err := GetHistoryDir(HistoryOpDelete)
 	if nil != err {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return

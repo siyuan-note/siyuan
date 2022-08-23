@@ -18,6 +18,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -31,6 +32,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -476,7 +478,7 @@ func (box *Box) generateDocHistory0() {
 		return
 	}
 
-	historyDir, err := util.GetHistoryDir("update")
+	historyDir, err := GetHistoryDir(HistoryOpUpdate)
 	if nil != err {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -561,4 +563,102 @@ func (box *Box) recentModifiedDocs() (ret []string) {
 	})
 	box.UpdateHistoryGenerated()
 	return
+}
+
+const (
+	HistoryOpClean  = "clean"
+	HistoryOpUpdate = "update"
+	HistoryOpDelete = "delete"
+	HistoryOpFormat = "format"
+)
+
+func GetHistoryDir(suffix string) (ret string, err error) {
+	ret = filepath.Join(util.HistoryDir, time.Now().Format("2006-01-02-150405")+"-"+suffix)
+	if err = os.MkdirAll(ret, 0755); nil != err {
+		logging.LogErrorf("make history dir failed: %s", err)
+		return
+	}
+	return
+}
+
+func indexHistory() {
+	historyDirs, err := os.ReadDir(util.HistoryDir)
+	if nil != err {
+		logging.LogErrorf("read history dir [%s] failed: %s", util.HistoryDir, err)
+		return
+	}
+
+	validOps := []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat}
+	lutEngine := NewLute()
+	for _, historyDir := range historyDirs {
+		if !historyDir.IsDir() {
+			continue
+		}
+
+		name := historyDir.Name()
+		op := name[strings.LastIndex(name, "-")+1:]
+		if !gulu.Str.Contains(op, validOps) {
+			logging.LogWarnf("invalid history op [%s]", op)
+			continue
+		}
+		t := name[:strings.LastIndex(name, "-")]
+		tt, parseErr := time.Parse("2006-01-02-150405", t)
+		if nil != parseErr {
+			logging.LogWarnf("parse time [%s] failed: %s", t, parseErr)
+			continue
+		}
+		created := fmt.Sprintf("%d", tt.Unix())
+
+		entryPath := filepath.Join(util.HistoryDir, name)
+		var docs, assets []string
+		filepath.Walk(entryPath, func(path string, info os.FileInfo, err error) error {
+			if strings.HasSuffix(info.Name(), ".sy") {
+				docs = append(docs, path)
+			} else if strings.Contains(path, "assets"+string(os.PathSeparator)) {
+				assets = append(assets, path)
+			}
+			return nil
+		})
+
+		var histories []*sql.History
+		for _, doc := range docs {
+			tree, loadErr := loadTree(doc, lutEngine)
+			if nil != err {
+				logging.LogErrorf("load tree [%s] failed: %s", doc, loadErr)
+				continue
+			}
+
+			title := tree.Root.IALAttr("title")
+			content := tree.Root.Content()
+			histories = append(histories, &sql.History{
+				Type:    0,
+				Op:      op,
+				Title:   title,
+				Content: content,
+				Path:    doc,
+				Created: created,
+			})
+		}
+
+		for _, asset := range assets {
+			histories = append(histories, &sql.History{
+				Type:    1,
+				Op:      op,
+				Title:   filepath.Base(asset),
+				Path:    asset,
+				Created: created,
+			})
+		}
+
+		tx, txErr := sql.BeginHistoryTx()
+		if nil != txErr {
+			logging.LogErrorf("begin transaction failed: %s", txErr)
+			return
+		}
+		if err = sql.InsertHistories(tx, histories); nil != err {
+			logging.LogErrorf("insert histories failed: %s", err)
+			sql.RollbackTx(tx)
+			return
+		}
+	}
 }

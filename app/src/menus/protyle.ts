@@ -21,13 +21,15 @@ import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
 import {writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
-import {getCurrentWindow} from "@electron/remote";
-import {clipboard} from "electron";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
 import {pasteText} from "../protyle/util/paste";
 /// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
+/// #endif
+/// #if !BROWSER
+import {getCurrentWindow} from "@electron/remote";
+import {clipboard} from "electron";
 /// #endif
 import {isMobile} from "../util/functions";
 import {removeFoldHeading} from "../protyle/util/heading";
@@ -38,6 +40,7 @@ import {renameAsset} from "../editor/rename";
 import {hasNextSibling} from "../protyle/wysiwyg/getBlock";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
+import {exportAsset} from "./util";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -525,6 +528,9 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             }
         }
     }).element);
+    /// #if !BROWSER
+    window.siyuan.menus.menu.append(new MenuItem(exportAsset(imgElement.getAttribute("data-src"))).element);
+    /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconCut",
         accelerator: "⌘X",
@@ -931,6 +937,9 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
             }
         });
     }
+    /// #if !BROWSER
+    subMenus.push(exportAsset(src));
+    /// #endif
     const VideoSrc = videoElement.getAttribute("src");
     if (VideoSrc) {
         return subMenus.concat(openMenu(VideoSrc, true) as IMenu[]);

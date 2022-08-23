@@ -168,6 +168,7 @@ var (
 	LogPath        string        // 配置目录下的日志文件 siyuan.log 路径
 	DBName         = "siyuan.db" // SQLite 数据库文件名
 	DBPath         string        // SQLite 数据库文件路径
+	HistoryDBPath  string        // SQLite 历史数据库文件路径
 	BlockTreePath  string        // 区块树文件路径
 	AppearancePath string        // 配置目录下的外观目录 appearance/ 路径
 	ThemesPath     string        // 配置目录下的外观目录下的 themes/ 路径
@@ -271,6 +272,7 @@ func initWorkspaceDir(workspaceArg string) {
 	os.Setenv("TEMP", osTmpDir)
 	os.Setenv("TMP", osTmpDir)
 	DBPath = filepath.Join(TempDir, DBName)
+	HistoryDBPath = filepath.Join(TempDir, "history.db")
 	BlockTreePath = filepath.Join(TempDir, "blocktree.msgpack")
 }
 

@@ -147,13 +147,27 @@ func initDBTables() {
 }
 
 func InitHistoryDatabase(forceRebuild bool) {
+	initHistoryDBConnection()
+
 	if !forceRebuild && gulu.File.IsExist(util.HistoryDBPath) {
 		return
 	}
 
+	historyDB.Close()
+	if err := os.RemoveAll(util.HistoryDBPath); nil != err {
+		logging.LogErrorf("remove history database file [%s] failed: %s", util.HistoryDBPath, err)
+		return
+	}
+
+	initHistoryDBConnection()
+	initHistoryDBTables()
+}
+
+func initHistoryDBConnection() {
 	if nil != historyDB {
 		historyDB.Close()
 	}
+
 	dsn := util.HistoryDBPath + "?_journal_mode=OFF" +
 		"&_synchronous=OFF" +
 		"&_secure_delete=OFF" +
@@ -172,9 +186,11 @@ func InitHistoryDatabase(forceRebuild bool) {
 	historyDB.SetMaxIdleConns(1)
 	historyDB.SetMaxOpenConns(1)
 	historyDB.SetConnMaxLifetime(365 * 24 * time.Hour)
+}
 
+func initHistoryDBTables() {
 	historyDB.Exec("DROP TABLE histories_fts_case_insensitive")
-	_, err = historyDB.Exec("CREATE VIRTUAL TABLE histories_fts_case_insensitive USING fts5(type UNINDEXED, op UNINDEXED, title, content, path UNINDEXED, created UNINDEXED, tokenize=\"siyuan case_insensitive\")")
+	_, err := historyDB.Exec("CREATE VIRTUAL TABLE histories_fts_case_insensitive USING fts5(type UNINDEXED, op UNINDEXED, title, content, path UNINDEXED, created UNINDEXED, tokenize=\"siyuan case_insensitive\")")
 	if nil != err {
 		logging.LogFatalf("create table [histories_fts_case_insensitive] failed: %s", err)
 	}

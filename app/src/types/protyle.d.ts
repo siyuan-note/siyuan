@@ -394,6 +394,7 @@ interface IProtyle {
         showAll?: boolean
         mode?: number
         blockCount?: number
+        action?: string[]
     },
     disabled: boolean,
     selectElement?: HTMLElement,

@@ -37,6 +37,7 @@ import {blockRender} from "../protyle/markdown/blockRender";
 import {renameAsset} from "../editor/rename";
 import {hasNextSibling} from "../protyle/wysiwyg/getBlock";
 import {electronUndo} from "../protyle/undo";
+import {pushBack} from "../mobile/util/MobileBackFoward";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -383,11 +384,9 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
             id,
             action: id === protyle.block.rootID ? [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT] : [Constants.CB_GET_ALL]
         }));
-        window.siyuan.backStack.push({
-            id: protyle.block.id,
-            scrollTop: protyle.contentElement.scrollTop,
-            callback: id === protyle.block.rootID ? [Constants.CB_GET_HL] : [Constants.CB_GET_ALL],
-        });
+        if (isPushBack) {
+            pushBack();
+        }
     }
     fetchPost("/api/filetree/getDoc", {
         id,

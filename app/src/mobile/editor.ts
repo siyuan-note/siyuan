@@ -11,8 +11,9 @@ import {lockFile} from "../dialog/processSystem";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {setEditMode} from "../protyle/util/setEditMode";
 import {hideElements} from "../protyle/ui/hideElements";
+import {pushBack} from "./util/MobileBackFoward";
 
-export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL], pushStack = true) => {
+export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) => {
     window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({id, action}));
     if (window.siyuan.mobileEditor) {
         hideElements(["toolbar", "hint", "util"], window.siyuan.mobileEditor.protyle);
@@ -27,14 +28,7 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL], p
             }
         });
         if (blockElement) {
-            // https://github.com/siyuan-note/siyuan/issues/4327
-            if (pushStack) {
-                window.siyuan.backStack.push({
-                    id,
-                    scrollTop: window.siyuan.mobileEditor.protyle.contentElement.scrollTop,
-                    callback: action,
-                });
-            }
+            pushBack();
             focusBlock(blockElement);
             scrollCenter(window.siyuan.mobileEditor.protyle, blockElement, true);
             closePanel();
@@ -49,6 +43,7 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL], p
             return;
         }
         if (window.siyuan.mobileEditor) {
+            pushBack();
             addLoading(window.siyuan.mobileEditor.protyle);
             fetchPost("/api/filetree/getDoc", {
                 id,
@@ -84,12 +79,5 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL], p
         (document.getElementById("toolbarName") as HTMLInputElement).value = data.data.rootTitle === "Untitled" ? "" : data.data.rootTitle;
         setEditor();
         closePanel();
-        if (pushStack) {
-            window.siyuan.backStack.push({
-                id,
-                scrollTop: window.siyuan.mobileEditor.protyle.contentElement.scrollTop,
-                callback: action,
-            });
-        }
     });
 };

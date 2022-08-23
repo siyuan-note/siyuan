@@ -11,10 +11,10 @@ import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {initAssets, loadAssets} from "../util/assets";
-import {openMobileFileById} from "./editor";
 import {promiseTransactions} from "../protyle/wysiwyg/transaction";
 import {bootSync} from "../dialog/processSystem";
 import {initMessage} from "../dialog/message";
+import {goBack} from "./util/MobileBackFoward";
 
 class App {
     constructor() {
@@ -75,20 +75,4 @@ class App {
 
 new App();
 
-let previousBackStack: IBackStack;
-window.goBack = () => {
-    if (window.JSAndroid && window.siyuan.backStack.length < 2) {
-        window.JSAndroid.returnDesktop();
-        return;
-    }
-    previousBackStack = window.siyuan.backStack.pop();
-    const item = window.siyuan.backStack[window.siyuan.backStack.length - 1];
-    openMobileFileById(item.id, item.callback, false);
-    setTimeout(() => {
-        window.siyuan.mobileEditor.protyle.contentElement.scrollTo({
-            top: previousBackStack?.scrollTop || 0,
-            behavior: "smooth"
-        });
-        previousBackStack = item;
-    }, 300);
-};
+window.goBack = goBack;

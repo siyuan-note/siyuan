@@ -69,6 +69,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     protyle.block.showAll = false;
     protyle.block.mode = data.data.mode;
     protyle.block.blockCount = data.data.blockCount;
+    protyle.block.action = action;
     if (!action.includes(Constants.CB_GET_UNCHANGEID)) {
         protyle.block.id = data.data.id;
         protyle.scroll.lastScrollTop = 0;

@@ -695,7 +695,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
             focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
             if (event.dataTransfer.types[0] === "Files") {
-                const files:string[] = [];
+                const files: string[] = [];
                 let isAllFile = true;
                 for (let i = 0; i < event.dataTransfer.files.length; i++) {
                     files.push(event.dataTransfer.files[i].path);
@@ -706,19 +706,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (isAllFile) {
                     window.siyuan.menus.menu.remove();
                     window.siyuan.menus.menu.append(new MenuItem({
-                        label:window.siyuan.languages.copyInsertAsAssets,
-                        icon:"iconUpload",
+                        label: window.siyuan.languages.copyInsertAsAssets,
+                        icon: "iconUpload",
                         click() {
                             uploadLocalFiles(files, protyle);
                         }
                     }).element);
                     window.siyuan.menus.menu.append(new MenuItem({
-                        label:window.siyuan.languages.useFileProtoLink,
-                        icon:"iconLink",
+                        label: window.siyuan.languages.useFileProtoLink,
+                        icon: "iconLink",
                         click() {
                             let fileText = "";
                             files.forEach((item) => {
-                                fileText = `[${pathPosix().basename(item)}](file://${item})\n`;
+                                fileText += `[${pathPosix().basename(item)}](file://${item})\n`;
                             });
                             insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
                         }

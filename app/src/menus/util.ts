@@ -16,10 +16,10 @@ export const exportAsset = (src: string) => {
                 properties: ["showOverwriteConfirmation"],
             }).then((result: SaveDialogReturnValue) => {
                 if (!result.canceled) {
-                    fetchPost("/api/file/copyFile", {src, dest: result.filePath})
+                    fetchPost("/api/file/copyFile", {src, dest: result.filePath});
                 }
             });
         }
-    }
+    };
     /// #endif
-}
+};

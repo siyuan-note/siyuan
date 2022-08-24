@@ -42,7 +42,7 @@ export class Preview {
                     // 对于超链接锚点不做任何处理
                     event.stopPropagation();
                     event.preventDefault();
-                    return
+                    return;
                 }
 
                 if (isMobile()) {

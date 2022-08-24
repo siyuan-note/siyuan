@@ -695,12 +695,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
             focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
             if (event.dataTransfer.types[0] === "Files") {
-                const files:string[] = []
-                let isAllFile = true
+                const files:string[] = [];
+                let isAllFile = true;
                 for (let i = 0; i < event.dataTransfer.files.length; i++) {
                     files.push(event.dataTransfer.files[i].path);
                     if (event.dataTransfer.files[i].type === "") {
-                        isAllFile = false
+                        isAllFile = false;
                     }
                 }
                 if (isAllFile) {
@@ -708,18 +708,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     window.siyuan.menus.menu.append(new MenuItem({
                         label:window.siyuan.languages.upload,
                         icon:"iconUpload",
-                        click(element) {
+                        click() {
                             uploadLocalFiles(files, protyle);
                         }
                     }).element);
                     window.siyuan.menus.menu.append(new MenuItem({
                         label:window.siyuan.languages.link,
                         icon:"iconLink",
-                        click(element) {
-                            let fileText = ""
+                        click() {
+                            let fileText = "";
                             files.forEach((item) => {
-                                fileText = `[${pathPosix().basename(item)}](${item})\n`
-                            })
+                                fileText = `[${pathPosix().basename(item)}](${item})\n`;
+                            });
                             insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
                         }
                     }).element);

@@ -218,7 +218,7 @@ const setKey = () => {
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => {
         dialog.destroy();
     });
-    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement
+    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
     dialog.element.querySelector("#initKeyByPW").addEventListener("click", () => {
         if (!inputElement.value) {
             showMessage(window.siyuan.languages._kernel[142]);

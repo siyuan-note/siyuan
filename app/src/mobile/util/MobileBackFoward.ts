@@ -69,7 +69,7 @@ const focusStack = (backStack: IBackStack) => {
         protyle.contentElement.scrollTop = backStack.scrollTop;
         window.siyuan.mobileEditor.protyle.breadcrumb.render(protyle);
     });
-}
+};
 
 export const pushBack = () => {
     const protyle = window.siyuan.mobileEditor.protyle;
@@ -80,7 +80,7 @@ export const pushBack = () => {
         callback: protyle.block.action,
         isZoom: protyle.block.showAll
     });
-}
+};
 
 export const goForward = () => {
     if (window.JSAndroid && forwardStack.length < 2) {
@@ -90,9 +90,9 @@ export const goForward = () => {
     if (forwardStack.length < 2) {
         return;
     }
-    window.siyuan.backStack.push(forwardStack.pop())
-    focusStack(forwardStack[forwardStack.length - 1])
-}
+    window.siyuan.backStack.push(forwardStack.pop());
+    focusStack(forwardStack[forwardStack.length - 1]);
+};
 
 export const goBack = () => {
     if (window.JSAndroid && window.siyuan.backStack.length < 1) {
@@ -114,5 +114,5 @@ export const goBack = () => {
     }
     const item = window.siyuan.backStack.pop();
     forwardStack.push(item);
-    focusStack(item)
+    focusStack(item);
 };

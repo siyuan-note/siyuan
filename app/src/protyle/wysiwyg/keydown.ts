@@ -39,7 +39,7 @@ import {fontEvent} from "../toolbar/Font";
 import {listIndent, listOutdent, updateListOrder} from "./list";
 import {newFileBySelect, newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
-import {isLocalPath} from "../../util/pathName";
+import {isLocalPath, pathPosix} from "../../util/pathName";
 /// #if !BROWSER
 import {clipboard} from "electron";
 import {getCurrentWindow} from "@electron/remote";
@@ -54,16 +54,17 @@ import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {preventScroll} from "../scroll/preventScroll";
 import {bindMenuKeydown} from "../../menus/Menu";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {scrollCenter} from "../../util/highlightById";
 import {BlockPanel} from "../../block/Panel";
 import * as dayjs from "dayjs";
 import {highlightRender} from "../markdown/highlightRender";
 import {countBlockWord} from "../../layout/status";
+import {insertHTML} from "../util/insertHTML";
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
-    editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
+    editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
         if (event.target.localName === "protyle-html") {
             event.stopPropagation();
             return;
@@ -1569,10 +1570,32 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         /// #if !BROWSER && !MOBILE
         if (matchHotKey(window.siyuan.config.keymap.editor.general.pasteAsPlainText.custom, event)) {
-            writeText(clipboard.readText());
-            setTimeout(() => {
-                getCurrentWindow().webContents.pasteAndMatchStyle();
-            }, 100);
+            let localFiles: string[] = [];
+            if ("darwin" === window.siyuan.config.system.os) {
+                const xmlString = clipboard.read("NSFilenamesPboardType");
+                const domParser = new DOMParser();
+                const xmlDom = domParser.parseFromString(xmlString, "application/xml");
+                Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
+                    localFiles.push(item.childNodes[0].nodeValue);
+                });
+            } else {
+                const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
+                if (xmlString.data.length > 0) {
+                    localFiles = xmlString.data;
+                }
+            }
+            if (localFiles.length > 0) {
+                let fileText = ""
+                localFiles.forEach((item) => {
+                    fileText = `[${pathPosix().basename(item)}](${item})\n`;
+                });
+                insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
+            } else {
+                writeText(clipboard.readText());
+                setTimeout(() => {
+                    getCurrentWindow().webContents.pasteAndMatchStyle();
+                }, 100);
+            }
             event.preventDefault();
             event.stopPropagation();
             return;

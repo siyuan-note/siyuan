@@ -25,6 +25,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -708,6 +709,43 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) (err error) {
 		msg := fmt.Sprintf("commit transaction failed: %s", err)
 		err = errors.New(msg)
 		return
+	}
+	return
+}
+
+func fullTextSearchHistory(query string, page int) (ret []*History, matchedBlockCount, matchedRootCount int) {
+	query = gulu.Str.RemoveInvisible(query)
+	query = stringQuery(query)
+
+	table := "histories_fts_case_insensitive"
+	projections := "type, op, title, content, path"
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '{title content}:(" + query + ")'"
+	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(page)
+	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
+	if 1 > len(sqlHistories) {
+		ret = []*History{}
+		return
+	}
+
+	var items []*HistoryItem
+	var tmpTime int64
+	for _, sqlHistory := range sqlHistories {
+		unixSec, _ := strconv.ParseInt(sqlHistory.Created, 10, 64)
+		if 0 == tmpTime {
+			tmpTime = unixSec
+		}
+		if tmpTime == unixSec {
+			items = append(items, &HistoryItem{
+				Title: sqlHistory.Title,
+				Path:  filepath.Join(util.HistoryDir, sqlHistory.Path),
+			})
+		} else {
+			ret = append(ret, &History{
+				HCreated: time.Unix(unixSec, 0).Format("2006-01-02 15:04:05"),
+				Items:    items,
+			})
+			items = []*HistoryItem{}
+		}
 	}
 	return
 }

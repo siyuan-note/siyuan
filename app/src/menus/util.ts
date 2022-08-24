@@ -16,7 +16,7 @@ export const exportAsset = (src: string) => {
                 properties: ["showOverwriteConfirmation"],
             }).then((result: SaveDialogReturnValue) => {
                 if (!result.canceled) {
-                    fetchPost("/api/file/saveAs", {src, targe: result.filePath})
+                    fetchPost("/api/file/copyFile", {src, dest: result.filePath})
                 }
             });
         }

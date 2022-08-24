@@ -147,6 +147,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/file/getFile", model.CheckAuth, getFile)
 	ginServer.Handle("POST", "/api/file/putFile", model.CheckAuth, putFile)
+	ginServer.Handle("POST", "/api/file/copyFile", model.CheckAuth, copyFile)
 
 	ginServer.Handle("POST", "/api/ref/refreshBacklink", model.CheckAuth, refreshBacklink)
 	ginServer.Handle("POST", "/api/ref/getBacklink", model.CheckAuth, getBacklink)

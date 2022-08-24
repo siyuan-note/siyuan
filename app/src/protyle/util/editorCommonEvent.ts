@@ -20,6 +20,10 @@ import {Editor} from "../../editor";
 import {blockRender} from "../markdown/blockRender";
 import {processRender} from "./processCode";
 import {highlightRender} from "../markdown/highlightRender";
+import {uploadLocalFiles} from "../upload";
+import {MenuItem} from "../../menus/Menu";
+import {insertHTML} from "./insertHTML";
+import {pathPosix} from "../../util/pathName";
 
 const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, direct: "col" | "row") => {
     const isSameDoc = protyle.element.contains(sourceElements[0]);
@@ -690,7 +694,42 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
             focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
-            paste(protyle, event);
+            if (event.dataTransfer.types[0] === "Files") {
+                const files:string[] = []
+                let isAllFile = true
+                for (let i = 0; i < event.dataTransfer.files.length; i++) {
+                    files.push(event.dataTransfer.files[i].path);
+                    if (event.dataTransfer.files[i].type === "") {
+                        isAllFile = false
+                    }
+                }
+                if (isAllFile) {
+                    window.siyuan.menus.menu.remove();
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        label:window.siyuan.languages.upload,
+                        icon:"iconUpload",
+                        click(element) {
+                            uploadLocalFiles(files, protyle);
+                        }
+                    }).element);
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        label:window.siyuan.languages.link,
+                        icon:"iconLink",
+                        click(element) {
+                            let fileText = ""
+                            files.forEach((item) => {
+                                fileText = `[${pathPosix().basename(item)}](${item})\n`
+                            })
+                            insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
+                        }
+                    }).element);
+                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                } else {
+                    uploadLocalFiles(files, protyle);
+                }
+            } else {
+                paste(protyle, event);
+            }
         }
         if (window.siyuan.dragElement) {
             window.siyuan.dragElement.style.opacity = "";

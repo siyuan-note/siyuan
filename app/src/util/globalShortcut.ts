@@ -589,7 +589,7 @@ export const globalShortcut = () => {
             getAllTabs().find(item => {
                 if (item.headElement?.classList.contains("item--focus")) {
                     item.parent.removeTab(item.id);
-                    return;
+                    return true;
                 }
             });
             return;

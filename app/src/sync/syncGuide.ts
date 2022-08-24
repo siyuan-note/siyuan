@@ -4,6 +4,7 @@ import {fetchPost} from "../util/fetch";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile} from "../util/functions";
+import {account} from "../config/account";
 
 export const addCloudName = (cloudPanelElement: Element) => {
     const dialog = new Dialog({
@@ -73,7 +74,7 @@ export const bindSyncCloudListEvent = (cloudPanelElement: Element) => {
     });
 };
 
-export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?:() =>void) => {
+export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?: () => void) => {
     if (!reload && cloudPanelElement.firstElementChild.tagName !== "IMG") {
         return;
     }
@@ -111,7 +112,20 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
 };
 
 export const syncGuide = (element?: Element) => {
-    if (needSubscribe() || (element && element.classList.contains("fn__rotate"))) {
+    if (element && element.classList.contains("fn__rotate")) {
+        return;
+    }
+    if (isMobile()) {
+        if (needSubscribe()) {
+            return;
+        }
+    } else if (needSubscribe("")) {
+        const dialog = new Dialog({
+            title: window.siyuan.languages.account,
+            content: `<div class="account" style="background-color: var(--b3-theme-background)">${account.genHTML()}</div>`,
+            width: "80vw",
+        });
+        account.bindEvent(dialog.element.querySelector(".account"));
         return;
     }
     if (!window.siyuan.config.repo.key) {
@@ -151,7 +165,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
         }
         const contentElement = dialog.element.querySelector(".b3-dialog__content").lastElementChild;
         bindSyncCloudListEvent(contentElement);
-        const btnElement =  dialog.element.querySelector(".b3-button");
+        const btnElement = dialog.element.querySelector(".b3-button");
         getSyncCloudList(contentElement, false, () => {
             if (contentElement.querySelector("input[checked]")) {
                 btnElement.removeAttribute("disabled");

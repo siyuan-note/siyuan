@@ -103,7 +103,7 @@ export const openSetting = () => {
                     case "account":
                         containerElement.innerHTML = account.genHTML();
                         account.element = dialog.element.querySelector('.b3-tab-container[data-name="account"]');
-                        account.bindEvent();
+                        account.bindEvent(account.element);
                         break;
                     case "repos":
                         containerElement.innerHTML = repos.genHTML();

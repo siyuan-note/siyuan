@@ -16,6 +16,7 @@ import {Tab} from "../../layout/Tab";
 import {getAllModels} from "../../layout/getAll";
 import {updatePanelByEditor} from "../../editor/util";
 /// #endif
+import * as path from "path";
 import {Editor} from "../../editor";
 import {blockRender} from "../markdown/blockRender";
 import {processRender} from "./processCode";
@@ -23,7 +24,6 @@ import {highlightRender} from "../markdown/highlightRender";
 import {uploadLocalFiles} from "../upload";
 import {MenuItem} from "../../menus/Menu";
 import {insertHTML} from "./insertHTML";
-import {pathPosix} from "../../util/pathName";
 
 const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, direct: "col" | "row") => {
     const isSameDoc = protyle.element.contains(sourceElements[0]);
@@ -718,7 +718,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         click() {
                             let fileText = "";
                             files.forEach((item) => {
-                                fileText += `[${pathPosix().basename(item)}](file://${item})\n`;
+                                fileText += `[${path.basename(item)}](file://${item})\n`;
                             });
                             insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
                         }

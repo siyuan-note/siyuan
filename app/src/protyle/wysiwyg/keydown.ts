@@ -5,7 +5,8 @@ import {
     focusByRange,
     focusByWbr,
     getEditorRange,
-    getSelectionOffset, selectAll,
+    getSelectionOffset,
+    selectAll,
     setFirstNodeRange,
     setLastNodeRange
 } from "../util/selection";
@@ -22,7 +23,9 @@ import {
     getLastBlock,
     getNextBlock,
     getPreviousBlock,
-    getTopAloneElement, hasNextSibling, hasPreviousSibling,
+    getTopAloneElement,
+    hasNextSibling,
+    hasPreviousSibling,
     isNotEditBlock,
 } from "./getBlock";
 import {matchHotKey} from "../util/hotKey";
@@ -39,10 +42,11 @@ import {fontEvent} from "../toolbar/Font";
 import {listIndent, listOutdent, updateListOrder} from "./list";
 import {newFileBySelect, newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
-import {isLocalPath, pathPosix} from "../../util/pathName";
+import {isLocalPath} from "../../util/pathName";
 /// #if !BROWSER
 import {clipboard} from "electron";
 import {getCurrentWindow} from "@electron/remote";
+import * as path from "path";
 /// #endif
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
@@ -1570,6 +1574,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         /// #if !BROWSER && !MOBILE
         if (matchHotKey(window.siyuan.config.keymap.editor.general.pasteAsPlainText.custom, event)) {
+            event.returnValue = false;
+            event.preventDefault();
+            event.stopPropagation();
             let localFiles: string[] = [];
             if ("darwin" === window.siyuan.config.system.os) {
                 const xmlString = clipboard.read("NSFilenamesPboardType");
@@ -1587,7 +1594,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (localFiles.length > 0) {
                 let fileText = ""
                 localFiles.forEach((item) => {
-                    fileText += `[${pathPosix().basename(item)}](file://${item})\n`;
+                    fileText += `[${path.basename(item)}](file://${item})\n`;
                 });
                 insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
             } else {
@@ -1596,8 +1603,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     getCurrentWindow().webContents.pasteAndMatchStyle();
                 }, 100);
             }
-            event.preventDefault();
-            event.stopPropagation();
             return;
         }
 

@@ -69,7 +69,6 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent) & { target: HTMLElement }) => {
     event.stopPropagation();
     event.preventDefault();
-
     let textHTML;
     let textPlain;
     let files;
@@ -87,6 +86,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     /// #if !MOBILE
     if (!textHTML && !textPlain && ("clipboardData" in event)) {
         if ("darwin" === window.siyuan.config.system.os) {
+            /// #if !BROWSER
             const xmlString = clipboard.read("NSFilenamesPboardType");
             const domParser = new DOMParser();
             const xmlDom = domParser.parseFromString(xmlString, "application/xml");
@@ -96,6 +96,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             });
             uploadLocalFiles(localFiles, protyle);
             writeText("");
+            /// #endif
             return;
         } else {
             const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});

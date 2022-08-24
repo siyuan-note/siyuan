@@ -119,7 +119,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
             unScroll: (scrollObj && scrollObj.focusId) ? true : false,
         }, protyle);
 
-        if (scrollObj) {
+        if (scrollObj && protyle.options.mode === "wysiwyg") {
             restoreScroll(protyle, scrollObj);
         }
         const loadingElement = protyle.element.querySelector(".fn__loading");

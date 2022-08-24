@@ -1,4 +1,6 @@
 {
+  "copyInsertAsAssets": "复制为资源文件并插入",
+  "useFileProtoLink": "使用 file:// 绝对路径并链接",
   "syncConfGuide1": "初始化同步密钥",
   "syncConfGuide2": "该密钥用于数据同步端到端加密<br>密钥基于你输入的密码生成，请务必牢记密码",
   "syncConfGuide3": "云端同步目录用于存放当前工作空间对应的加密数据，默认名称为 <code>main</code>。如果你只有一个工作空间需要同步，直接使用 <code>main</code> 即可",

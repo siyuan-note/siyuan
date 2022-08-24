@@ -1,4 +1,6 @@
 {
+  "copyInsertAsAssets": "Copy as asset and insert",
+  "useFileProtoLink": "Use file:// absolute path and link",
   "syncConfGuide1": "Initialize sync key",
   "syncConfGuide2": "This key is used for data sync end-to-end encryption<br>The key is generated based on the password you enter, please remember the password",
   "syncConfGuide3": "The cloud sync directory is used to store the encrypted data corresponding to the current workspace. The default name is <code>main</code>. If you only have one workspace to sync, use <code>main</code> directly",

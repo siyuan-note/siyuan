@@ -1,4 +1,6 @@
 {
+  "copyInsertAsAssets": "Copier en tant que fichier d'actif et insérer",
+  "useFileProtoLink": "Utiliser file:// chemin absolu et lien",
   "syncConfGuide1": "Initialiser la clé de synchronisation",
   "syncConfGuide2": "Cette clé est utilisée pour le chiffrement de bout en bout de la synchronisation des données<br> La clé est générée en fonction du mot de passe que vous saisissez, veuillez vous souvenir du mot de passe",
   "syncConfGuide3": "Le répertoire de synchronisation cloud est utilisé pour stocker les données chiffrées correspondant à l'espace de travail actuel. Le nom par défaut est <code>main</code>. Si vous n'avez qu'un seul espace de travail à synchroniser, ajoutez et utilisez <code>main</code> directement",

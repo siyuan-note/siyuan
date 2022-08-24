@@ -706,19 +706,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (isAllFile) {
                     window.siyuan.menus.menu.remove();
                     window.siyuan.menus.menu.append(new MenuItem({
-                        label:window.siyuan.languages.upload,
+                        label:window.siyuan.languages.copyInsertAsAssets,
                         icon:"iconUpload",
                         click() {
                             uploadLocalFiles(files, protyle);
                         }
                     }).element);
                     window.siyuan.menus.menu.append(new MenuItem({
-                        label:window.siyuan.languages.link,
+                        label:window.siyuan.languages.useFileProtoLink,
                         icon:"iconLink",
                         click() {
                             let fileText = "";
                             files.forEach((item) => {
-                                fileText = `[${pathPosix().basename(item)}](${item})\n`;
+                                fileText = `[${pathPosix().basename(item)}](file://${item})\n`;
                             });
                             insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
                         }

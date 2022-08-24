@@ -5,7 +5,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20220715105016"
+		"updated": "20220824172745"
 	},
 	"Children": [
 		{
@@ -66,16 +66,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201210194734-lr6v0s2"
+				"id": "20201210194734-lr6v0s2",
+				"updated": "20220824171919"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "插入图片"
+					"Data": "插入图片或文件"
 				}
 			]
 		},
@@ -84,12 +81,143 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091255-8s7avcx",
-				"updated": "20210503095618"
+				"updated": "20220824172231"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在编辑器中可以直接粘贴系统剪切板中复制好的图片，或者通过拖拽图片文件到编辑器中也可以实现图片插入。"
+					"Data": "在编辑器中可以直接粘贴系统剪切板中复制好的图片或文件，或者通过拖拽图片或文件到编辑器中也可以实现插入。插入时有两个选择："
+				}
+			]
+		},
+		{
+			"ID": "20220824172203-etwu4qu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220824172203-etwu4qu",
+				"updated": "20220824172531"
+			},
+			"Children": [
+				{
+					"ID": "20220824172204-xxh346y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220824172204-xxh346y",
+						"updated": "20220824172527"
+					},
+					"Children": [
+						{
+							"ID": "20220824172204-fct1t0t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220824172204-fct1t0t",
+								"updated": "20220824172527"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "复制为资源文件并插入"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：将图片或文件复制为资源文件并插入，快捷键 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Ctrl+V"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220824172403-agsj358",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220824172403-agsj358",
+						"updated": "20220824172531"
+					},
+					"Children": [
+						{
+							"ID": "20220824172403-0fkrw8o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220824172403-0fkrw8o",
+								"updated": "20220824172531"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "使用 file:// 绝对路径并链接"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：将图片或文件以本地绝对路径方式插入超链接，快捷键 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Ctrl+Shift+V"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -98,12 +226,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091255-7fwvx7a",
-				"updated": "20210615101500"
+				"updated": "20220824172301"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果排版时指定了图片标题，则标题会被渲染在图片下方作为图注。"
+					"Data": "对于图片，如果排版时指定了图片标题，则标题会被渲染在图片下方作为图注。"
 				}
 			]
 		},
@@ -112,13 +240,14 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210512171633-u3iy2xx",
-				"updated": "20210604092212"
+				"updated": "20220824172745"
 			},
 			"Children": [
 				{
 					"Type": "NodeImage",
 					"Data": "span",
 					"Properties": {
+						"parent-style": "display: block;",
 						"style": "display: block;"
 					},
 					"Children": [
@@ -156,7 +285,7 @@
 				},
 				{
 					"Type": "NodeKramdownSpanIAL",
-					"Data": "{: style=\"display: block;\"}"
+					"Data": "{: style=\"display: block;\" parent-style=\"display: block;\"}"
 				},
 				{
 					"Type": "NodeText",

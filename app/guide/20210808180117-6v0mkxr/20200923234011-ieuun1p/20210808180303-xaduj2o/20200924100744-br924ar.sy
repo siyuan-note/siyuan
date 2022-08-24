@@ -5,7 +5,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20220715105117"
+		"updated": "20220824172918"
 	},
 	"Children": [
 		{
@@ -66,44 +66,172 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201210194734-v2rmiaq"
+				"id": "20201210194734-v2rmiaq",
+				"updated": "20220824172803"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
+					"Type": "NodeText",
+					"Data": "Insert picture or file"
+				}
+			]
+		},
+		{
+			"ID": "20220824172815-s8znsau",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220824172815-s8znsau",
+				"updated": "20220824172918"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the editor, you can directly paste the copied picture or file in the system clipboard, or insert it by dragging and dropping the picture or file into the editor. There are two options when inserting:"
+				}
+			]
+		},
+		{
+			"ID": "20220824172815-ckivl7c",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220824172815-ckivl7c",
+				"updated": "20220824172815"
+			},
+			"Children": [
+				{
+					"ID": "20220824172815-q1oeusj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220824172815-q1oeusj",
+						"updated": "20220824172815"
+					},
+					"Children": [
+						{
+							"ID": "20220824172815-fqyy0l6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220824172815-fqyy0l6",
+								"updated": "20220824172815"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Copy as a resource file and insert"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Copy a picture or file as a resource file and insert, shortcut key "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Ctrl+V"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
 				},
 				{
-					"Type": "NodeText",
-					"Data": "Insert picture"
+					"ID": "20220824172815-0lsclx1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220824172815-0lsclx1",
+						"updated": "20220824172815"
+					},
+					"Children": [
+						{
+							"ID": "20220824172815-dqfasin",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220824172815-dqfasin",
+								"updated": "20220824172815"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Use file:// absolute path and link"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Insert a picture or file into a hyperlink as a local absolute path, shortcut key "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Ctrl+Shift+V"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20210104091430-uqs502r",
+			"ID": "20220824172815-6f3pj5z",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091430-uqs502r",
-				"updated": "20210503095810"
+				"id": "20220824172815-6f3pj5z",
+				"updated": "20220824172910"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the editor, you can directly paste the copied picture from the system clipboard, or you can also insert pictures by dragging and dropping picture files into the editor."
-				}
-			]
-		},
-		{
-			"ID": "20210104091430-tj5w1co",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104091430-tj5w1co",
-				"updated": "20210615102951"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "If you specify a title for a picture, then the title will be rendered below the image as a legend."
+					"Data": "For pictures, if a picture title is specified during layout, the title will be rendered below the picture as a legend."
 				}
 			]
 		},
@@ -112,13 +240,14 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091430-yd3zyeu",
-				"updated": "20210604092437"
+				"updated": "20220824172752"
 			},
 			"Children": [
 				{
 					"Type": "NodeImage",
 					"Data": "span",
 					"Properties": {
+						"parent-style": "display: block;",
 						"style": "display: block;"
 					},
 					"Children": [
@@ -153,6 +282,10 @@
 							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeKramdownSpanIAL",
+					"Data": "{: style=\"display: block;\" parent-style=\"display: block;\"}"
 				},
 				{
 					"Type": "NodeText",

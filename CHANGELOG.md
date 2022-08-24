@@ -10,6 +10,7 @@
 ### 修复缺陷
 
 * [启动后会生成一次全量数据历史文件](https://github.com/siyuan-note/siyuan/issues/5689)
+* [行级公式复制转义问题](https://github.com/siyuan-note/siyuan/issues/5695)
 * [导出预览模式点击块引转换后的脚注跳转不正确](https://github.com/siyuan-note/siyuan/issues/5700)
 * [复制列表块纯文本内容不完整](https://github.com/siyuan-note/siyuan/issues/5701)
 * [移动端复制纯文本内容不完整](https://github.com/siyuan-note/siyuan/issues/5702)

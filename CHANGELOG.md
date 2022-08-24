@@ -1,3 +1,23 @@
+## v2.1.9 / 2022-08-24
+
+### 改进功能
+
+* [桌面端拖入文件时可选择 `使用 file:// 绝对路径并链接` 或 `复制为资源文件并插入`](https://github.com/siyuan-note/siyuan/issues/5369)
+* [桌面端支持导出图片、音频和视频](https://github.com/siyuan-note/siyuan/issues/5693)
+* [`清理未引用资源` 生成历史文件夹后缀改为 `-clean`](https://github.com/siyuan-note/siyuan/issues/5706)
+* [同步向导加入账号登录引导](https://github.com/siyuan-note/siyuan/issues/5712)
+
+### 修复缺陷
+
+* [启动后会生成一次全量数据历史文件](https://github.com/siyuan-note/siyuan/issues/5689)
+* [导出预览模式点击块引转换后的脚注跳转不正确](https://github.com/siyuan-note/siyuan/issues/5700)
+* [复制列表块纯文本内容不完整](https://github.com/siyuan-note/siyuan/issues/5701)
+* [移动端复制纯文本内容不完整](https://github.com/siyuan-note/siyuan/issues/5702)
+* [移动端后退到动态页面下拉无法加载](https://github.com/siyuan-note/siyuan/issues/5703)
+* [macOS 端中带 alt 的组合数字键失效](https://github.com/siyuan-note/siyuan/issues/5704)
+* [设置为预览模式后重启打开页签一直转圈](https://github.com/siyuan-note/siyuan/issues/5711)
+* [编辑器窗口没有激活时 Ctrl+W 会关闭当前窗口中的所有页签](https://github.com/siyuan-note/siyuan/issues/5714)
+
 ## v2.1.8 / 2022-08-22
 
 ### 改进功能

@@ -49,6 +49,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setUILayout", model.CheckAuth, setUILayout)
 	ginServer.Handle("POST", "/api/system/getConf", model.CheckAuth, getConf)
 	ginServer.Handle("POST", "/api/system/checkUpdate", model.CheckAuth, checkUpdate)
+	ginServer.Handle("POST", "/api/system/exportLog", model.CheckAuth, exportLog)
 
 	ginServer.Handle("POST", "/api/account/login", model.CheckAuth, login)
 	ginServer.Handle("POST", "/api/account/checkActivationcode", model.CheckAuth, checkActivationcode)

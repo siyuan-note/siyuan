@@ -131,6 +131,16 @@ func checkUpdate(c *gin.Context) {
 	model.CheckUpdate(showMsg)
 }
 
+func exportLog(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	zipPath := model.ExportSystemLog()
+	ret.Data = map[string]interface{}{
+		"zip": zipPath,
+	}
+}
+
 var start = true // 是否是启动
 func getConf(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

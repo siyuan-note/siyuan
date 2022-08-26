@@ -47,6 +47,50 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func ExportSystemLog() (zipPath string) {
+	exportFolder := filepath.Join(util.TempDir, "export", "system-log")
+	os.RemoveAll(exportFolder)
+	if err := os.MkdirAll(exportFolder, 0755); nil != err {
+		logging.LogErrorf("create export temp folder failed: %s", err)
+		return
+	}
+
+	appLog := filepath.Join(util.HomeDir, ".config", "siyuan", "app.log")
+	if gulu.File.IsExist(appLog) {
+		to := filepath.Join(exportFolder, "app.log")
+		if err := gulu.File.CopyFile(appLog, to); nil != err {
+			logging.LogErrorf("copy app log from [%s] to [%s] failed: %s", err, appLog, to)
+		}
+	}
+	kernelLog := filepath.Join(util.TempDir, "siyuan.log")
+	if gulu.File.IsExist(kernelLog) {
+		to := filepath.Join(exportFolder, "siyuan.log")
+		if err := gulu.File.CopyFile(kernelLog, to); nil != err {
+			logging.LogErrorf("copy kernel log from [%s] to [%s] failed: %s", err, kernelLog, to)
+		}
+	}
+
+	zipPath = exportFolder + ".zip"
+	zip, err := gulu.Zip.Create(zipPath)
+	if nil != err {
+		logging.LogErrorf("create export log zip [%s] failed: %s", exportFolder, err)
+		return ""
+	}
+
+	if err = zip.AddDirectory("log", exportFolder); nil != err {
+		logging.LogErrorf("create export log zip [%s] failed: %s", exportFolder, err)
+		return ""
+	}
+
+	if err = zip.Close(); nil != err {
+		logging.LogErrorf("close export log zip failed: %s", err)
+	}
+
+	os.RemoveAll(exportFolder)
+	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
+	return
+}
+
 func ExportNotebookSY(id string) (zipPath string) {
 	zipPath = exportBoxSYZip(id)
 	return

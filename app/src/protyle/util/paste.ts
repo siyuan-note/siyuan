@@ -94,10 +94,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
                 localFiles.push(item.childNodes[0].nodeValue);
             });
-            uploadLocalFiles(localFiles, protyle);
-            writeText("");
+            if (localFiles.length > 0) {
+                uploadLocalFiles(localFiles, protyle);
+                writeText("");
+                return;
+            }
             /// #endif
-            return;
         } else {
             const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
             if (xmlString.data.length > 0) {

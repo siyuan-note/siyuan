@@ -8,7 +8,7 @@ import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode} from "./util";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan} from "../dialog/processSystem";
-import {writeText} from "../protyle/util/compatibility";
+import {openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -121,6 +121,13 @@ export const about = {
     <div class="fn__space"></div>
     <button id="checkUpdateBtn" class="b3-button b3-button--outline fn__size200 fn__flex-center">${window.siyuan.languages.checkUpdate}</button>
 </div>
+<div class="fn__flex b3-label">
+    <div class="fn__flex-1 fn__flex-center">
+        ${window.siyuan.languages.log}
+    </div>
+    <div class="fn__space"></div>
+    <button id="exportLog" class="b3-button b3-button--outline fn__size200 fn__flex-center">${window.siyuan.languages.export}</button>
+</div>
 <div class="b3-label fn__flex">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about9}
@@ -149,6 +156,11 @@ export const about = {
         const tokenElement = about.element.querySelector("#token") as HTMLInputElement;
         tokenElement.addEventListener("click", () => {
             tokenElement.select();
+        });
+        about.element.querySelector("#exportLog").addEventListener("click", () => {
+            fetchPost("/api/system/exportLog", {}, (response) => {
+                openByMobile(response.data.zip);
+            })
         });
         const updateElement = about.element.querySelector("#checkUpdateBtn");
         updateElement.addEventListener("click", () => {

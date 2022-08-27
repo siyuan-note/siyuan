@@ -1,4 +1,5 @@
 {
+  "log": "Journal",
   "copyInsertAsAssets": "Copier en tant que fichier d'actif et insérer",
   "useFileProtoLink": "Utiliser file:// chemin absolu et lien",
   "syncConfGuide1": "Initialiser la clé de synchronisation",

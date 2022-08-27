@@ -1,4 +1,5 @@
 {
+  "log": "Registro",
   "copyInsertAsAssets": "Copiar como archivo de activos e insertar",
   "useFileProtoLink": "Usar archivo:// ruta absoluta y enlace",
   "syncConfGuide1": "Inicializar clave de sincronización",

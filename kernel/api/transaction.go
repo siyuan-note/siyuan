@@ -49,6 +49,13 @@ func performTransactions(c *gin.Context) {
 		return
 	}
 
+	if !util.IsBooted() {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(74), int(util.GetBootProgress()))
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
 	var transactions []*model.Transaction
 	if err = gulu.JSON.UnmarshalJSON(data, &transactions); nil != err {
 		ret.Code = -1
@@ -68,12 +75,6 @@ func performTransactions(c *gin.Context) {
 
 	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 1
-		return
-	}
-	if model.ErrNotFullyBoot == err {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf(model.Conf.Language(74), int(util.GetBootProgress()))
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
 	}
 	if nil != err {

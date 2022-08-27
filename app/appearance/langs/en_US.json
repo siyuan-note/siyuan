@@ -1,4 +1,5 @@
 {
+  "systemLogTip": "Program running records are saved in the system log. By exporting the system log and sending it to developers, it can better help developers diagnose program problems",
   "systemLog": "System log",
   "copyInsertAsAssets": "Copy as asset and insert",
   "useFileProtoLink": "Use file:// absolute path and link",

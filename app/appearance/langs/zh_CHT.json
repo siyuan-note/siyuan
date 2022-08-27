@@ -1,4 +1,5 @@
 {
+  "systemLogTip": "系統日誌中保存了程序運行記錄，通過導出系統日誌發送給開發者可以更好地幫助開發者診斷程序問題",
   "systemLog": "系統日誌",
   "copyInsertAsAssets": "複製為資源文件並插入",
   "useFileProtoLink": "使用 file:// 絕對路徑並鏈接",

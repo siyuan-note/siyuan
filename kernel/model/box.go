@@ -450,8 +450,19 @@ func parseKTree(kramdown []byte) (ret *parse.Tree) {
 }
 
 func ReindexTree(path string) (err error) {
-	luteEngine := NewLute()
-	tree, err := loadTree(path, luteEngine)
+	if !strings.HasPrefix(path, "/data/") {
+		return errors.New("path must start with /data/")
+	}
+
+	part := strings.TrimPrefix(path, "/data/")
+	idx := strings.Index(part, "/")
+	if 0 > idx {
+		return errors.New("parse box failed")
+	}
+	box := part[:idx]
+
+	p := strings.TrimPrefix(path, "/data/"+box)
+	tree, err := LoadTree(box, p)
 	if nil != err {
 		return
 	}

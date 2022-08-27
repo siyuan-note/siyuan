@@ -59,14 +59,6 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.md39}
-        <div class="b3-label__text">${window.siyuan.languages.md40}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="plantUMLServePath" value="${window.siyuan.config.editor.plantUMLServePath}"/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
         ${window.siyuan.languages.md33}
         <div class="b3-label__text">${window.siyuan.languages.md34}</div>
     </div>
@@ -83,31 +75,11 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.md29}
-        <div class="b3-label__text">${window.siyuan.languages.md30}</div>
+        ${window.siyuan.languages.md39}
+        <div class="b3-label__text">${window.siyuan.languages.md40}</div>
     </div>
     <span class="fn__space"></span>
-    <div class="b3-tooltips b3-tooltips__n fn__flex-center" aria-label="${window.siyuan.config.editor.codeTabSpaces}">   
-        <input class="b3-slider fn__size200" id="codeTabSpaces" max="8" min="0" step="2" type="range" value="${window.siyuan.config.editor.codeTabSpaces}">
-    </div>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.fontSize}
-        <div class="b3-label__text">${window.siyuan.languages.fontSizeTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <div class="b3-tooltips b3-tooltips__n fn__flex-center" aria-label="${window.siyuan.config.editor.fontSize}">   
-        <input class="b3-slider fn__size200" id="fontSize" max="72" min="9" step="1" type="range" value="${window.siyuan.config.editor.fontSize}">
-    </div>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.font}
-        <div class="b3-label__text">${window.siyuan.languages.font1}</div>
-    </div>
-    <span class="fn__space"></span>
-    ${fontFamilyHTML}
+    <input class="b3-text-field fn__flex-center fn__size200" id="plantUMLServePath" value="${window.siyuan.config.editor.plantUMLServePath}"/>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -133,7 +105,41 @@ export const editor = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="historyRetentionDays" type="number" min="0" max="120" value="${window.siyuan.config.editor.historyRetentionDays}"/>
-</label>`;
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.font}
+        <div class="b3-label__text">${window.siyuan.languages.font1}</div>
+    </div>
+    <span class="fn__space"></span>
+    ${fontFamilyHTML}
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.fontSize}
+        <div class="b3-label__text">${window.siyuan.languages.fontSizeTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <div class="b3-tooltips b3-tooltips__n fn__flex-center" aria-label="${window.siyuan.config.editor.fontSize}">   
+        <input class="b3-slider fn__size200" id="fontSize" max="72" min="9" step="1" type="range" value="${window.siyuan.config.editor.fontSize}">
+    </div>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.md29}
+        <div class="b3-label__text">${window.siyuan.languages.md30}</div>
+    </div>
+    <span class="fn__space"></span>
+    <div class="b3-tooltips b3-tooltips__n fn__flex-center" aria-label="${window.siyuan.config.editor.codeTabSpaces}">   
+        <input class="b3-slider fn__size200" id="codeTabSpaces" max="8" min="0" step="2" type="range" value="${window.siyuan.config.editor.codeTabSpaces}">
+    </div>
+</label>
+<div class="b3-label">
+    ${window.siyuan.languages.katexMacros}
+    <div class="b3-label__text">${window.siyuan.languages.katexMacrosTip}</div>
+    <div class="fn__hr"></div>
+    <textarea class="b3-text-field fn__block" id="katexMacros">${window.siyuan.config.editor.katexMacros}</textarea>
+</div>`;
     },
     bindEvent: () => {
         const fontFamilyElement = editor.element.querySelector("#fontFamily") as HTMLSelectElement;
@@ -159,6 +165,7 @@ export const editor = {
                 displayNetImgMark: (editor.element.querySelector("#displayNetImgMark") as HTMLInputElement).checked,
                 codeSyntaxHighlightLineNum: (editor.element.querySelector("#codeSyntaxHighlightLineNum") as HTMLInputElement).checked,
                 plantUMLServePath: (editor.element.querySelector("#plantUMLServePath") as HTMLInputElement).value,
+                katexMacros: (editor.element.querySelector("#katexMacros") as HTMLTextAreaElement).value,
                 codeLineWrap: (editor.element.querySelector("#codeLineWrap") as HTMLInputElement).checked,
                 virtualBlockRef: (editor.element.querySelector("#virtualBlockRef") as HTMLInputElement).checked,
                 virtualBlockRefExclude: (editor.element.querySelector("#virtualBlockRefExclude") as HTMLInputElement).value,
@@ -179,7 +186,7 @@ export const editor = {
                 setEditor();
             });
         });
-        editor.element.querySelectorAll("input.b3-text-field, input.b3-slider").forEach((item) => {
+        editor.element.querySelectorAll("textarea.b3-text-field, input.b3-text-field, input.b3-slider").forEach((item) => {
             item.addEventListener("blur", () => {
                 setEditor();
             });

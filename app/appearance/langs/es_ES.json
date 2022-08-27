@@ -1,6 +1,6 @@
 {
   "katexMacros": "Definición de macro de KaTex",
-  "katexMacrosTip": "Utilice el formato de objeto JSON (<code>{}</code>) para envolver definiciones de macro, por ejemplo, <code>{ \\def\\foo{x^2} \\foo + \\foo }</code>",
+  "katexMacrosTip": "Utilice el formato de objeto JSON (<code class='fn__code'>{}</code>) para envolver definiciones de macro, por ejemplo, <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "Los registros de ejecución del programa se guardan en el registro del sistema. Al exportar el registro del sistema y enviarlo a los desarrolladores, puede ayudarlos a diagnosticar mejor los problemas del programa",
   "systemLog": "Registro del sistema",
   "copyInsertAsAssets": "Copiar como archivo de activos e insertar",

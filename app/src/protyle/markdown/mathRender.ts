@@ -8,6 +8,7 @@ declare const katex: {
     renderToString(math: string, option: {
         displayMode: boolean;
         output: string;
+        macros: IObject
     }): string;
 };
 
@@ -34,10 +35,17 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                 if (mathElement.tagName === "DIV") {
                     renderElement = mathElement.firstElementChild as HTMLElement;
                 }
+                let macros = {};
+                try {
+                    macros = JSON.parse(window.siyuan.config.editor.katexMacros || "{}")
+                } catch (e) {
+                    console.warn("KaTex macros is not JSON", e);
+                }
                 try {
                     renderElement.innerHTML = katex.renderToString(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")), {
                         displayMode: mathElement.tagName === "DIV",
                         output: "html",
+                        macros
                     });
                     renderElement.classList.remove("ft__error");
                     const blockElement = hasClosestBlock(mathElement);

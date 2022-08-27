@@ -202,6 +202,7 @@ declare interface IExport {
 }
 
 declare interface IEditor {
+    katexMacros: string;
     fullWidth: boolean;
     fontSize: number;
     generateHistoryInterval: number;

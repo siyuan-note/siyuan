@@ -449,6 +449,19 @@ func parseKTree(kramdown []byte) (ret *parse.Tree) {
 	return
 }
 
+func ReindexTree(path string) (err error) {
+	luteEngine := NewLute()
+	tree, err := loadTree(path, luteEngine)
+	if nil != err {
+		return
+	}
+
+	treenode.ReindexBlockTree(tree)
+	sql.UpsertTreeQueue(tree)
+	sql.WaitForWritingDatabase()
+	return
+}
+
 func RefreshFileTree() {
 	WaitForWritingFiles()
 

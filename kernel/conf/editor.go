@@ -33,7 +33,7 @@ type Editor struct {
 	BlockRefDynamicAnchorTextMaxLen int      `json:"blockRefDynamicAnchorTextMaxLen"` // 块引动态锚文本最大长度
 	PlantUMLServePath               string   `json:"plantUMLServePath"`               // PlantUML 伺服地址
 	FullWidth                       bool     `json:"fullWidth"`                       // 是否使用最大宽度
-	KaTexMacros                     string   `json:"kaTexMacros"`                     // KeTex 宏定义
+	KaTexMacros                     string   `json:"katexMacros"`                     // KeTex 宏定义
 }
 
 func NewEditor() *Editor {

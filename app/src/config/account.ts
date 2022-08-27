@@ -4,6 +4,9 @@ import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 import {repos} from "./repos";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {needSubscribe} from "../util/needSubscribe";
+import {syncGuide} from "../sync/syncGuide";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 export const account = {
     element: undefined as Element,
@@ -329,10 +332,7 @@ ${window.siyuan.languages.account8}`;
                 fetchPost("/api/setting/getCloudUser", {
                     token: data.data.token,
                 }, response => {
-                    window.siyuan.user = response.data;
-                    element.innerHTML = account.genHTML();
-                    account.bindEvent(element);
-                    account.onSetaccount();
+                    account._afterLogin(response, element)
                 });
             });
         });
@@ -345,13 +345,29 @@ ${window.siyuan.languages.account8}`;
                 fetchPost("/api/setting/getCloudUser", {
                     token: response.data.token,
                 }, userResponse => {
-                    window.siyuan.user = userResponse.data;
-                    element.innerHTML = account.genHTML();
-                    account.bindEvent(element);
-                    account.onSetaccount();
+                    account._afterLogin(userResponse, element)
                 });
             });
         });
+    },
+    _afterLogin(userResponse: IWebSocketData, element: Element) {
+        window.siyuan.user = userResponse.data;
+        if (element.classList.contains("account") && !needSubscribe("")) {
+            const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
+            if (dialogElement) {
+                window.siyuan.dialogs.find((item) => {
+                    if (item.element.isSameNode(dialogElement)) {
+                        item.destroy();
+                        return true;
+                    }
+                });
+                syncGuide();
+                return;
+            }
+        }
+        element.innerHTML = account.genHTML();
+        account.bindEvent(element);
+        account.onSetaccount();
     },
     onSetaccount() {
         if (repos.element) {

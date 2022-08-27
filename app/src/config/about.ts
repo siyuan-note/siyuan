@@ -123,7 +123,7 @@ export const about = {
 </div>
 <div class="fn__flex b3-label">
     <div class="fn__flex-1 fn__flex-center">
-        ${window.siyuan.languages.log}
+        ${window.siyuan.languages.systemLog}
     </div>
     <div class="fn__space"></div>
     <button id="exportLog" class="b3-button b3-button--outline fn__size200 fn__flex-center">${window.siyuan.languages.export}</button>

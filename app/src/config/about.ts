@@ -31,7 +31,9 @@ export const about = {
         <span class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.join("</code> <code class='fn__code'>")}</code></span>
     </div>
     <div class="fn__space"></div>
-    <button data-type="open" data-url="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:6806" class="b3-button b3-button--outline fn__size200 fn__flex-center">${window.siyuan.languages.about4}</button>
+    <button data-type="open" data-url="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:6806" class="b3-button b3-button--outline fn__size200 fn__flex-center">
+        <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
+    </button>
 </div>
 <div class="b3-label${(window.siyuan.config.system.container === "std" || window.siyuan.config.system.container === "docker") ? "" : " fn__none"}">
     ${window.siyuan.languages.networkProxy}
@@ -119,14 +121,19 @@ export const about = {
         <div class="b3-label__text">${window.siyuan.languages.visitAnnouncements}</div>
     </div>
     <div class="fn__space"></div>
-    <button id="checkUpdateBtn" class="b3-button b3-button--outline fn__size200 fn__flex-center">${window.siyuan.languages.checkUpdate}</button>
+    <button id="checkUpdateBtn" class="b3-button b3-button--outline fn__size200 fn__flex-center">
+        <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
+    </button>
 </div>
 <div class="fn__flex b3-label">
-    <div class="fn__flex-1 fn__flex-center">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.systemLog}
+        <div class="b3-label__text">${window.siyuan.languages.systemLog}</div>
     </div>
     <div class="fn__space"></div>
-    <button id="exportLog" class="b3-button b3-button--outline fn__size200 fn__flex-center">${window.siyuan.languages.export}</button>
+    <button id="exportLog" class="b3-button b3-button--outline fn__size200 fn__flex-center">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.systemLogTip}
+    </button>
 </div>
 <div class="b3-label fn__flex">
     <div class="fn__flex-1">

@@ -40,10 +40,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-var (
-	ErrNotFullyBoot = errors.New("the kernel has not been fully booted, please try again later")
-)
-
 var writingDataLock = sync.Mutex{}
 
 func IsFoldHeading(transactions *[]*Transaction) bool {
@@ -171,11 +167,6 @@ func mergeTx() (ret *Transaction) {
 }
 
 func PerformTransactions(transactions *[]*Transaction) (err error) {
-	if !util.IsBooted() {
-		err = ErrNotFullyBoot
-		return
-	}
-
 	txQueueLock.Lock()
 	txQueue = append(txQueue, *transactions...)
 	txQueueLock.Unlock()

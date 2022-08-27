@@ -87,6 +87,10 @@ func setEditor(c *gin.Context) {
 		editor.PlantUMLServePath = "https://www.plantuml.com/plantuml/svg/~1"
 	}
 
+	if "" == editor.KaTexMacros {
+		editor.KaTexMacros = "{}"
+	}
+
 	model.Conf.Editor = editor
 	model.Conf.Save()
 

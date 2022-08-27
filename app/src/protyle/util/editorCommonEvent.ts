@@ -170,7 +170,8 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
             if (item.classList.contains("protyle-attr")) {
                 return;
             }
-            undoOperations.push({
+            // 撤销更新不能位于最后，否则又更新为最新结果 https://github.com/siyuan-note/siyuan/issues/5725
+            undoOperations.splice(0, 0, {
                 action: "update",
                 id: item.getAttribute("data-node-id"),
                 data: item.outerHTML

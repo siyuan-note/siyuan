@@ -543,7 +543,6 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
-	os.RemoveAll(filepath.Join(util.WorkspaceDir, "incremental")) // `工作空间/incremental/` 文件夹移动到 `工作空间/temp/incremental/` https://github.com/siyuan-note/siyuan/issues/5119
 
 	tmps, err := filepath.Glob(filepath.Join(util.TempDir, "*.tmp"))
 	if nil != err {

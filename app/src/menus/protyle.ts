@@ -769,10 +769,10 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     if (linkAddress) {
         openMenu(linkAddress);
     }
-    const submenu: IMenu[] = [];
     if (linkAddress?.startsWith("siyuan://blocks/")) {
-        submenu.push({
-            label: window.siyuan.languages.blockRef,
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.blockRef}</b>`,
+            icon: "iconGraph",
             click() {
                 linkElement.setAttribute("data-subtype", "s");
                 linkElement.setAttribute("data-type", "block-ref");
@@ -785,18 +785,14 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 protyle.toolbar.range.collapse(false);
                 focusByRange(protyle.toolbar.range);
             }
-        });
+        }).element);
     }
-    submenu.push({
-        label: window.siyuan.languages.text,
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
+        icon: "iconRefresh",
         click() {
             protyle.toolbar.setInlineMark(protyle, "link", "remove");
         }
-    });
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.turnInto,
-        icon: "iconRefresh",
-        submenu
     }).element);
     if (linkAddress?.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem({

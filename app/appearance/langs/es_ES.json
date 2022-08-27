@@ -1,4 +1,5 @@
 {
+  "systemLogTip": "Los registros de ejecución del programa se guardan en el registro del sistema. Al exportar el registro del sistema y enviarlo a los desarrolladores, puede ayudarlos a diagnosticar mejor los problemas del programa",
   "systemLog": "Registro del sistema",
   "copyInsertAsAssets": "Copiar como archivo de activos e insertar",
   "useFileProtoLink": "Usar archivo:// ruta absoluta y enlace",

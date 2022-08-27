@@ -249,10 +249,16 @@ ${accountHTML}
     </div>
     <div class="fn__hr"></div>
     <button class="b3-button b3-button--outline fn__block" id="exportData">
-       <svg><use xlink:href="#iconUpload"></use></svg> ${window.siyuan.languages.export} Data
+       <svg><use xlink:href="#iconUpload"></use></svg>Data
     </button>
     <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.exportDataTip}</div>
+    <div class="fn__hr--b"></div>
+    <button class="b3-button b3-button--outline fn__block" id="exportLog">
+       <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.systemLog}
+    </button>
+    <div class="fn__hr"></div>
+    <div class="b3-label__text">${window.siyuan.languages.systemLogTip}</div>
 </div>
 <div class="b3-label">
     <div class="fn__flex">
@@ -386,6 +392,11 @@ ${accountHTML}
                         fetchPost("/api/export/exportData", {}, response => {
                             openByMobile(response.data.zip);
                         });
+                    });
+                    modelMainElement.querySelector("#exportLog").addEventListener("click", () => {
+                        fetchPost("/api/system/exportLog", {}, (response) => {
+                            openByMobile(response.data.zip);
+                        })
                     });
                     modelMainElement.querySelector("#importData").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                         const formData = new FormData();

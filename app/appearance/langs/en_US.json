@@ -1,5 +1,5 @@
 {
-  "log": "Log",
+  "systemLog": "System log",
   "copyInsertAsAssets": "Copy as asset and insert",
   "useFileProtoLink": "Use file:// absolute path and link",
   "syncConfGuide1": "Initialize sync key",

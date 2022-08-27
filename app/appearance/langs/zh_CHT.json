@@ -1,5 +1,5 @@
 {
-  "log": "日誌",
+  "systemLog": "系統日誌",
   "copyInsertAsAssets": "複製為資源文件並插入",
   "useFileProtoLink": "使用 file:// 絕對路徑並鏈接",
   "syncConfGuide1": "初始化同步密鑰",

@@ -199,8 +199,8 @@ progressLoading: 400
     }
 
     &--sync {
-      background-color: var(--b3-theme-primary);
-      color: var(--b3-theme-on-primary);
+      background-color: var(--b3-theme-primary) !important;
+      color: var(--b3-theme-on-primary) !important;
     }
 
     svg {

@@ -25,32 +25,31 @@ import (
 
 // Block 描述了内容块。
 type Block struct {
-	Box       string            `json:"box"`
-	Path      string            `json:"path"`
-	HPath     string            `json:"hPath"`
-	ID        string            `json:"id"`
-	RootID    string            `json:"rootID"`
-	ParentID  string            `json:"parentID"`
-	Name      string            `json:"name"`
-	Alias     string            `json:"alias"`
-	Memo      string            `json:"memo"`
-	Tag       string            `json:"tag"`
-	Content   string            `json:"content"`
-	FContent  string            `json:"fcontent"`
-	Markdown  string            `json:"markdown"`
-	FMarkdown string            `json:"fmarkdown"`
-	Folded    bool              `json:"folded"`
-	Type      string            `json:"type"`
-	SubType   string            `json:"subType"`
-	RefText   string            `json:"refText"`
-	Defs      []*Block          `json:"-"`    // 当前块引用了这些块，避免序列化 JSON 时产生循环引用
-	Refs      []*Block          `json:"refs"` // 当前块被这些块引用
-	DefID     string            `json:"defID"`
-	DefPath   string            `json:"defPath"`
-	IAL       map[string]string `json:"ial"`
-	Children  []*Block          `json:"children"`
-	Depth     int               `json:"depth"`
-	Count     int               `json:"count"`
+	Box      string            `json:"box"`
+	Path     string            `json:"path"`
+	HPath    string            `json:"hPath"`
+	ID       string            `json:"id"`
+	RootID   string            `json:"rootID"`
+	ParentID string            `json:"parentID"`
+	Name     string            `json:"name"`
+	Alias    string            `json:"alias"`
+	Memo     string            `json:"memo"`
+	Tag      string            `json:"tag"`
+	Content  string            `json:"content"`
+	FContent string            `json:"fcontent"`
+	Markdown string            `json:"markdown"`
+	Folded   bool              `json:"folded"`
+	Type     string            `json:"type"`
+	SubType  string            `json:"subType"`
+	RefText  string            `json:"refText"`
+	Defs     []*Block          `json:"-"`    // 当前块引用了这些块，避免序列化 JSON 时产生循环引用
+	Refs     []*Block          `json:"refs"` // 当前块被这些块引用
+	DefID    string            `json:"defID"`
+	DefPath  string            `json:"defPath"`
+	IAL      map[string]string `json:"ial"`
+	Children []*Block          `json:"children"`
+	Depth    int               `json:"depth"`
+	Count    int               `json:"count"`
 }
 
 func (block *Block) IsContainerBlock() bool {

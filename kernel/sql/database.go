@@ -99,19 +99,19 @@ func initDBTables() {
 	setDatabaseVer()
 
 	db.Exec("DROP TABLE blocks")
-	_, err = db.Exec("CREATE TABLE blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, fmarkdown, length, type, subtype, ial, sort, created, updated)")
+	_, err = db.Exec("CREATE TABLE blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated)")
 	if nil != err {
 		logging.LogFatalf("create table [blocks] failed: %s", err)
 	}
 
 	db.Exec("DROP TABLE blocks_fts")
-	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, fmarkdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan\")")
+	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan\")")
 	if nil != err {
 		logging.LogFatalf("create table [blocks_fts] failed: %s", err)
 	}
 
 	db.Exec("DROP TABLE blocks_fts_case_insensitive")
-	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts_case_insensitive USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, fmarkdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan case_insensitive\")")
+	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts_case_insensitive USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan case_insensitive\")")
 	if nil != err {
 		logging.LogFatalf("create table [blocks_fts_case_insensitive] failed: %s", err)
 	}
@@ -712,19 +712,18 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 	memo := html.UnescapeString(n.IALAttr("memo"))
 	tag := tagFromNode(n)
 
-	var content, fcontent, markdown, fmarkdown, parentID string
+	var content, fcontent, markdown, parentID string
 	ialContent := treenode.IALStr(n)
 	hash := treenode.NodeHash(n, tree, luteEngine)
 	var length int
 	if ast.NodeDocument == n.Type {
 		content = n.IALAttr("title")
 		fcontent = content
-		fmarkdown = content
 		length = utf8.RuneCountInString(fcontent)
 	} else if n.IsContainerBlock() {
 		markdown, content = treenode.NodeStaticMdContent(n, luteEngine)
 		fc := treenode.FirstLeafBlock(n)
-		fmarkdown, fcontent = treenode.NodeStaticMdContent(fc, luteEngine)
+		fcontent = treenode.NodeStaticContent(fc)
 		parentID = n.Parent.ID
 		// 将标题块作为父节点
 		if h := heading(n); nil != h {
@@ -742,28 +741,27 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 	}
 
 	block = &Block{
-		ID:        n.ID,
-		ParentID:  parentID,
-		RootID:    rootID,
-		Hash:      hash,
-		Box:       boxID,
-		Path:      p,
-		HPath:     tree.HPath,
-		Name:      name,
-		Alias:     alias,
-		Memo:      memo,
-		Tag:       tag,
-		Content:   content,
-		FContent:  fcontent,
-		Markdown:  markdown,
-		FMarkdown: fmarkdown,
-		Length:    length,
-		Type:      treenode.TypeAbbr(n.Type.String()),
-		SubType:   treenode.SubTypeAbbr(n),
-		IAL:       ialContent,
-		Sort:      nSort(n),
-		Created:   util.TimeFromID(n.ID),
-		Updated:   n.IALAttr("updated"),
+		ID:       n.ID,
+		ParentID: parentID,
+		RootID:   rootID,
+		Hash:     hash,
+		Box:      boxID,
+		Path:     p,
+		HPath:    tree.HPath,
+		Name:     name,
+		Alias:    alias,
+		Memo:     memo,
+		Tag:      tag,
+		Content:  content,
+		FContent: fcontent,
+		Markdown: markdown,
+		Length:   length,
+		Type:     treenode.TypeAbbr(n.Type.String()),
+		SubType:  treenode.SubTypeAbbr(n),
+		IAL:      ialContent,
+		Sort:     nSort(n),
+		Created:  util.TimeFromID(n.ID),
+		Updated:  n.IALAttr("updated"),
 	}
 
 	attrs := parse.IAL2Map(n.KramdownIAL)

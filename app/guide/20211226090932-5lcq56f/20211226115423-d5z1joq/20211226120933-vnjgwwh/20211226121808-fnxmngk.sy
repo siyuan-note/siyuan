@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226121808-fnxmngk",
 		"title": "資料庫表",
-		"updated": "20220427104444"
+		"updated": "20220828090211"
 	},
 	"Children": [
 		{
@@ -62,7 +62,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20211226121831-s0emrpw",
-				"updated": "20220419111132"
+				"updated": "20220828090211"
 			},
 			"Children": [
 				{
@@ -444,6 +444,33 @@
 								{
 									"Type": "NodeText",
 									"Data": "包含完整 Markdown 標記符的文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 3,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "fmarkdown"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "第一個子塊包含完整 Markdown 標記符的文本"
 								}
 							]
 						}

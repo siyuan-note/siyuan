@@ -101,7 +101,7 @@ const openFile = (options: IOpenFileOptions) => {
             const initData = item.headElement?.getAttribute("data-initdata");
             if (initData) {
                 const initObj = JSON.parse(initData);
-                if (initObj.rootID === options.rootID || initObj.blockId === options.rootID) {
+                if (initObj.rootId === options.rootID || initObj.blockId === options.rootID) {
                     initObj.blockId = options.id
                     initObj.mode = options.mode
                     if (options.zoomIn) {

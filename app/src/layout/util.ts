@@ -322,7 +322,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         json.instance = "Tab";
     } else if (layout instanceof Editor) {
         json.blockId = layout.editor.protyle.block.id;
-        json.rootID = layout.editor.protyle.block.rootID;
+        json.rootId = layout.editor.protyle.block.rootID;
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
         json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : "";
         json.instance = "Editor";
@@ -481,6 +481,15 @@ export const copyTab = (tab: Tab) => {
                 model = new Search({
                     tab: newTab,
                     text: tab.model.text
+                });
+            } else if (!tab.model && tab.headElement) {
+                const initData = JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}");
+                model = new Editor({
+                    tab: newTab,
+                    blockId: initData.rootId || initData.blockId,
+                    mode: initData.mode,
+                    action: typeof initData.action === "string" ? [initData.action] : initData.action,
+                    scrollAttr: initData.scrollAttr,
                 });
             }
             newTab.addModel(model);

@@ -156,20 +156,28 @@ const splitSubMenu = (tab: Tab) => {
 export const initTabMenu = (tab: Tab) => {
     window.siyuan.menus.menu.remove();
     closeMenu(tab);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.split,
+        submenu: splitSubMenu(tab)
+    }).element);
     const model = tab.model;
-    if (model) {
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.split,
-            submenu: splitSubMenu(tab)
-        }).element);
-        if (model instanceof Editor) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.copy,
-                icon: "iconCopy",
-                type: "submenu",
-                submenu: copySubMenu(model.editor.protyle.block.rootID, "", false)
-            }).element);
+    let rootId;
+    if ((model && model instanceof Editor)) {
+        rootId = model.editor.protyle.block.rootID
+    } else {
+        const initData = tab.headElement.getAttribute("data-initdata")
+        if (initData) {
+            const initDataObj = JSON.parse(initData);
+            rootId = initDataObj.rootId || initDataObj.blockId
         }
+    }
+    if (rootId) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.copy,
+            icon: "iconCopy",
+            type: "submenu",
+            submenu: copySubMenu(rootId, "", false)
+        }).element);
     }
     if (tab.headElement.classList.contains("item--pin")) {
         window.siyuan.menus.menu.append(new MenuItem({

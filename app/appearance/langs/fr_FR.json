@@ -1,4 +1,5 @@
 {
+  "htmlBlockTip": "Plusieurs blocs HTML sont formés. Pour éviter la perte de données, veuillez utiliser les balises <code class='fn__code'>&lt;div&gt;</code> pour envelopper et supprimer les lignes vides",
   "katexMacros": "Définition de la macro KaTex",
   "katexMacrosTip": "Veuillez utiliser le format d'objet JSON (<code class='fn__code'>{}</code>) pour envelopper les définitions de macro, par exemple <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "Les enregistrements en cours d'exécution du programme sont enregistrés dans le journal système. En exportant le journal système et en l'envoyant aux développeurs, cela peut mieux aider les développeurs à diagnostiquer les problèmes du programme",

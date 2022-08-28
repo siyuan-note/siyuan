@@ -1,4 +1,5 @@
 {
+  "htmlBlockTip": "形成了多個 HTML 塊，為防止數據丟失請使用 <code class='fn__code'>&lt;div&gt;</code> 標籤包裹並去掉空行",
   "katexMacros": "KaTex 宏定義",
   "katexMacrosTip": "請使用 JSON 對象格式（<code class='fn__code'>{}</code>）來包裹宏定義，例如 <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "系統日誌中保存了程序運行記錄，通過導出系統日誌發送給開發者可以更好地幫助開發者診斷程序問題",

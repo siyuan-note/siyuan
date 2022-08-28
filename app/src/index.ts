@@ -56,9 +56,9 @@ class App {
                                 break;
                             case"syncing":
                                 if (data.code === 0) {
-                                    document.querySelector("#barSync").classList.add("toolbar__item--sync");
+                                    document.querySelector("#barSync").classList.add("toolbar__item--active");
                                 } else {
-                                    document.querySelector("#barSync").classList.remove("toolbar__item--sync");
+                                    document.querySelector("#barSync").classList.remove("toolbar__item--active");
                                 }
                                 document.querySelector("#barSync").setAttribute("aria-label", data.msg);
                                 break;

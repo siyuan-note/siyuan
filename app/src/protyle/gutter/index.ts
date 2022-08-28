@@ -491,7 +491,11 @@ export class Gutter {
                 let html = "";
                 selectsElement.forEach(item => {
                     item.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
-                        html += editItem.textContent + "\n";
+                        const cloneNode = editItem.cloneNode(true) as HTMLElement
+                        cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
+                            slashItem.firstElementChild.remove();
+                        });
+                        html += cloneNode.textContent + "\n";
                     });
                 });
                 writeText(html.trimEnd());
@@ -853,7 +857,11 @@ export class Gutter {
                 click() {
                     let text = "";
                     nodeElement.querySelectorAll('[contenteditable="true"]').forEach(item => {
-                        text += item.textContent + "\n";
+                        const cloneNode = item.cloneNode(true) as HTMLElement
+                        cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
+                            slashItem.firstElementChild.remove();
+                        });
+                        text += cloneNode.textContent + "\n";
                     });
                     writeText(text.trimEnd());
                 }

@@ -396,7 +396,7 @@ ${accountHTML}
                     modelMainElement.querySelector("#exportLog").addEventListener("click", () => {
                         fetchPost("/api/system/exportLog", {}, (response) => {
                             openByMobile(response.data.zip);
-                        })
+                        });
                     });
                     modelMainElement.querySelector("#importData").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                         const formData = new FormData();

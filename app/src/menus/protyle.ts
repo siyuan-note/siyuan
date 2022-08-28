@@ -259,7 +259,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             label: window.siyuan.languages.copyPlainText,
             click() {
                 focusByRange(getEditorRange(nodeElement));
-                const cloneContents = getSelection().getRangeAt(0).cloneContents()
+                const cloneContents = getSelection().getRangeAt(0).cloneContents();
                 cloneContents.querySelectorAll('[data-type="backslash"]').forEach(item => {
                     item.firstElementChild.remove();
                 });

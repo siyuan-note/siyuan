@@ -167,7 +167,7 @@ export const about = {
         about.element.querySelector("#exportLog").addEventListener("click", () => {
             fetchPost("/api/system/exportLog", {}, (response) => {
                 openByMobile(response.data.zip);
-            })
+            });
         });
         const updateElement = about.element.querySelector("#checkUpdateBtn");
         updateElement.addEventListener("click", () => {

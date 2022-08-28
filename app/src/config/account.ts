@@ -332,7 +332,7 @@ ${window.siyuan.languages.account8}`;
                 fetchPost("/api/setting/getCloudUser", {
                     token: data.data.token,
                 }, response => {
-                    account._afterLogin(response, element)
+                    account._afterLogin(response, element);
                 });
             });
         });
@@ -345,7 +345,7 @@ ${window.siyuan.languages.account8}`;
                 fetchPost("/api/setting/getCloudUser", {
                     token: response.data.token,
                 }, userResponse => {
-                    account._afterLogin(userResponse, element)
+                    account._afterLogin(userResponse, element);
                 });
             });
         });

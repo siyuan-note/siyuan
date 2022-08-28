@@ -491,7 +491,7 @@ export class Gutter {
                 let html = "";
                 selectsElement.forEach(item => {
                     item.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
-                        const cloneNode = editItem.cloneNode(true) as HTMLElement
+                        const cloneNode = editItem.cloneNode(true) as HTMLElement;
                         cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
                             slashItem.firstElementChild.remove();
                         });
@@ -857,7 +857,7 @@ export class Gutter {
                 click() {
                     let text = "";
                     nodeElement.querySelectorAll('[contenteditable="true"]').forEach(item => {
-                        const cloneNode = item.cloneNode(true) as HTMLElement
+                        const cloneNode = item.cloneNode(true) as HTMLElement;
                         cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
                             slashItem.firstElementChild.remove();
                         });

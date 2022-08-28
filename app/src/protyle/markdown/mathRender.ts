@@ -37,7 +37,7 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                 }
                 let macros = {};
                 try {
-                    macros = JSON.parse(window.siyuan.config.editor.katexMacros || "{}")
+                    macros = JSON.parse(window.siyuan.config.editor.katexMacros || "{}");
                 } catch (e) {
                     console.warn("KaTex macros is not JSON", e);
                 }

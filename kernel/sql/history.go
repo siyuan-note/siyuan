@@ -50,7 +50,7 @@ func SelectHistoriesRawStmt(stmt string) (ret []*History) {
 
 func scanHistoryRows(rows *sql.Rows) (ret *History) {
 	var history History
-	if err := rows.Scan(&history.Type, &history.Op, &history.Title, &history.Content, &history.Created, &history.Path); nil != err {
+	if err := rows.Scan(&history.Type, &history.Op, &history.Title, &history.Content, &history.Path, &history.Created); nil != err {
 		logging.LogErrorf("query scan field failed: %s\n%s", err, logging.ShortStack())
 		return
 	}

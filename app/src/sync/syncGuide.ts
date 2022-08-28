@@ -112,7 +112,7 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
 };
 
 export const syncGuide = (element?: Element) => {
-    if (element && element.classList.contains("fn__rotate")) {
+    if (element && element.classList.contains("toolbar__item--sync")) {
         return;
     }
     if (isMobile()) {

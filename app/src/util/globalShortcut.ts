@@ -378,7 +378,7 @@ export const globalShortcut = () => {
         if (matchHotKey(window.siyuan.config.keymap.general.syncNow.custom, event)) {
             event.preventDefault();
             event.stopPropagation();
-            syncGuide(document.querySelector("#barSync svg"));
+            syncGuide(document.querySelector("#barSync"));
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {

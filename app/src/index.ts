@@ -9,7 +9,6 @@ import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
 import {fetchGet, fetchPost} from "./util/fetch";
 import {addBaseURL, setNoteBook} from "./util/pathName";
-import {repos} from "./config/repos";
 import {openFileById} from "./editor/util";
 import {
     bootSync,
@@ -57,13 +56,9 @@ class App {
                                 break;
                             case"syncing":
                                 if (data.code === 0) {
-                                    document.querySelector("#barSync svg").classList.add("fn__rotate");
-                                    document.querySelector("#barSync").classList.add("toolbar__item--active");
-                                    repos.element?.querySelector('[data-type="sync"] svg')?.classList.add("fn__rotate");
+                                    document.querySelector("#barSync").classList.add("toolbar__item--sync");
                                 } else {
-                                    document.querySelector("#barSync svg").classList.remove("fn__rotate");
-                                    document.querySelector("#barSync").classList.remove("toolbar__item--active");
-                                    repos.element?.querySelector('[data-type="sync"] svg')?.classList.remove("fn__rotate");
+                                    document.querySelector("#barSync").classList.remove("toolbar__item--sync");
                                 }
                                 document.querySelector("#barSync").setAttribute("aria-label", data.msg);
                                 break;

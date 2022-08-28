@@ -198,6 +198,11 @@ progressLoading: 400
       background-color: var(--b3-theme-background-light);
     }
 
+    &--sync {
+      background-color: var(--b3-theme-primary);
+      color: var(--b3-theme-on-primary);
+    }
+
     svg {
       height: 14px;
       width: 14px;

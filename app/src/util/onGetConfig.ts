@@ -91,7 +91,7 @@ export const setProxy = () => {
     /// #endif
 };
 
-export const onGetConfig = (isStart:boolean) => {
+export const onGetConfig = (isStart: boolean) => {
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");
     const matchKeymap3 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.insert, "editor", "insert");
@@ -182,7 +182,7 @@ const initBar = () => {
     </svg>
 </div>
 <div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom))}">
-    <svg><use xlink:href="#iconRefresh"></use></svg>
+    <svg><use xlink:href="#iconCloud"></use></svg>
 </div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
     <svg>
@@ -204,7 +204,7 @@ const initBar = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "barSync") {
-               syncGuide(target.firstElementChild);
+                syncGuide(target);
                 event.stopPropagation();
                 break;
             } else if (target.id === "barForward") {

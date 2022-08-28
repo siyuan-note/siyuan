@@ -26,6 +26,35 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func searchHistory(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	query := arg["query"].(string)
+	page := int(arg["page"].(float64))
+	histories := model.FullTextSearchHistory(query, page)
+	ret.Data = map[string]interface{}{
+		"histories": histories,
+	}
+}
+
+func reindexHistory(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	err := model.ReindexHistory()
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
 func getNotebookHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

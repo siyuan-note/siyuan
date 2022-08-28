@@ -132,7 +132,7 @@ const openFile = (options: IOpenFileOptions) => {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
     if (wnd) {
-        if ((options.position === "right" || options.position === "bottom") && wnd.children[0].model) {
+        if ((options.position === "right" || options.position === "bottom") && wnd.children[0].headElement) {
             const direction = options.position === "right" ? "lr" : "tb";
             let targetWnd: Wnd;
             if (wnd.parent.children.length > 1 && wnd.parent instanceof Layout && wnd.parent.direction === direction) {
@@ -161,7 +161,7 @@ const openFile = (options: IOpenFileOptions) => {
             } else {
                 wnd.split(direction).addTab(newTab(options));
             }
-        } else if (options.keepCursor && wnd.children[0].model) {
+        } else if (options.keepCursor && wnd.children[0].headElement) {
             const tab = newTab(options);
             tab.headElement.setAttribute("keep-cursor", options.id);
             wnd.addTab(tab, options.keepCursor);

@@ -98,7 +98,7 @@ const openFile = (options: IOpenFileOptions) => {
         }
         // 没有初始化的页签无法检测到
         const hasEditor = getAllTabs().find(item => {
-            const initData = item.headElement.getAttribute("data-initdata");
+            const initData = item.headElement?.getAttribute("data-initdata");
             if (initData) {
                 const initObj = JSON.parse(initData);
                 if (initObj.rootID === options.rootID || initObj.blockId === options.rootID) {

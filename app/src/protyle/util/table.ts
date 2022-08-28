@@ -548,6 +548,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     if (matchHotKey(window.siyuan.config.keymap.editor.table.insertRowAbove.custom, event)) {
         insertRowAbove(protyle, range, cellElement, nodeElement);
         event.preventDefault();
+        event.stopPropagation();
         return true;
     }
 

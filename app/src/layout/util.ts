@@ -322,6 +322,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         json.instance = "Tab";
     } else if (layout instanceof Editor) {
         json.blockId = layout.editor.protyle.block.id;
+        json.rootID = layout.editor.protyle.block.rootID;
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
         json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : "";
         json.instance = "Editor";

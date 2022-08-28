@@ -2,7 +2,7 @@ import {Tab} from "../layout/Tab";
 import {Editor} from "./index";
 import {Wnd} from "../layout/Wnd";
 import {getDockByType, getInstanceById, getWndByLayout} from "../layout/util";
-import {getAllModels} from "../layout/getAll";
+import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
 import {getDisplayName, pathPosix} from "../util/pathName";
 import {Constants} from "../constants";
@@ -95,6 +95,29 @@ const openFile = (options: IOpenFileOptions) => {
         if (editor) {
             switchEditor(editor, options, allModels);
             return true;
+        }
+        // 没有初始化的页签无法检测到
+        const hasEditor = getAllTabs().find(item => {
+            const initData = item.headElement.getAttribute("data-initdata");
+            if (initData) {
+                const initObj = JSON.parse(initData);
+                if (initObj.rootID === options.rootID || initObj.blockId === options.rootID) {
+                    initObj.blockId = options.id
+                    initObj.mode = options.mode
+                    if (options.zoomIn) {
+                        initObj.action = [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS]
+                    } else {
+                        initObj.action = options.action
+                    }
+                    delete initObj.scrollAttr
+                    item.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
+                    item.parent.switchTab(item.headElement);
+                    return true;
+                }
+            }
+        });
+        if (hasEditor) {
+            return;
         }
     }
 

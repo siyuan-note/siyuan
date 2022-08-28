@@ -318,7 +318,7 @@ export class Wnd {
                 tab: currentTab,
                 blockId: json.blockId,
                 mode: json.mode,
-                action: [json.action],
+                action: typeof json.action === "string" ? [json.action] : json.action,
                 scrollAttr: json.scrollAttr,
             }));
             currentTab.headElement.removeAttribute("data-initdata");

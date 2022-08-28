@@ -331,6 +331,8 @@ func fullTextSearchCount(query, box, path, filter string) (matchedBlockCount, ma
 }
 
 func fullTextSearch(query, box, path, filter string, beforeLen int, querySyntax bool) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	fullTextSearchHistory(query, 1)
+
 	query = gulu.Str.RemoveInvisible(query)
 	if util.IsIDPattern(query) {
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen)
@@ -490,21 +492,20 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 	markdown := maxContent(sqlBlock.Markdown, 5120)
 
 	block = &Block{
-		Box:       sqlBlock.Box,
-		Path:      p,
-		ID:        id,
-		RootID:    sqlBlock.RootID,
-		ParentID:  sqlBlock.ParentID,
-		Alias:     sqlBlock.Alias,
-		Name:      sqlBlock.Name,
-		Memo:      sqlBlock.Memo,
-		Tag:       sqlBlock.Tag,
-		Content:   content,
-		FContent:  sqlBlock.FContent,
-		Markdown:  markdown,
-		FMarkdown: sqlBlock.FMarkdown,
-		Type:      treenode.FromAbbrType(sqlBlock.Type),
-		SubType:   sqlBlock.SubType,
+		Box:      sqlBlock.Box,
+		Path:     p,
+		ID:       id,
+		RootID:   sqlBlock.RootID,
+		ParentID: sqlBlock.ParentID,
+		Alias:    sqlBlock.Alias,
+		Name:     sqlBlock.Name,
+		Memo:     sqlBlock.Memo,
+		Tag:      sqlBlock.Tag,
+		Content:  content,
+		FContent: sqlBlock.FContent,
+		Markdown: markdown,
+		Type:     treenode.FromAbbrType(sqlBlock.Type),
+		SubType:  sqlBlock.SubType,
 	}
 	if "" != sqlBlock.IAL {
 		block.IAL = map[string]string{}

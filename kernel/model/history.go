@@ -718,7 +718,7 @@ func fullTextSearchHistory(query string, page int) (ret []*History, matchedBlock
 	query = stringQuery(query)
 
 	table := "histories_fts_case_insensitive"
-	projections := "type, op, title, content, path"
+	projections := "type, op, title, content, path, created"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '{title content}:(" + query + ")'"
 	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(page)
 	sqlHistories := sql.SelectHistoriesRawStmt(stmt)

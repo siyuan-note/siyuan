@@ -375,7 +375,7 @@ func DefRefs(condition string) (ret []map[*Block]*Block) {
 	for rows.Next() {
 		var ref Block
 		var rel string
-		if err = rows.Scan(&ref.ID, &ref.ParentID, &ref.RootID, &ref.Hash, &ref.Box, &ref.Path, &ref.HPath, &ref.Name, &ref.Alias, &ref.Memo, &ref.Tag, &ref.Content, &ref.FContent, &ref.Markdown, &ref.FMarkdown, &ref.Length, &ref.Type, &ref.SubType, &ref.IAL, &ref.Sort, &ref.Created, &ref.Updated,
+		if err = rows.Scan(&ref.ID, &ref.ParentID, &ref.RootID, &ref.Hash, &ref.Box, &ref.Path, &ref.HPath, &ref.Name, &ref.Alias, &ref.Memo, &ref.Tag, &ref.Content, &ref.FContent, &ref.Markdown, &ref.Length, &ref.Type, &ref.SubType, &ref.IAL, &ref.Sort, &ref.Created, &ref.Updated,
 			&rel); nil != err {
 			logging.LogErrorf("query scan field failed: %s", err)
 			return

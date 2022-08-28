@@ -873,7 +873,7 @@ export class Toolbar {
                 const tempElement = document.createElement("template");
                 tempElement.innerHTML = newHTML;
                 if (tempElement.content.childElementCount > 1) {
-                    showMessage(window.siyuan.languages.htmlTip)
+                    showMessage(window.siyuan.languages.htmlBlockTip)
                 }
             }
             updateTransaction(protyle, id, newHTML, html);

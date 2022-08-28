@@ -48,10 +48,10 @@ func InsertRefs(tx *sql.Tx, tree *parse.Tree) {
 }
 
 const (
-	BlocksInsert                   = "INSERT INTO blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) VALUES %s"
-	BlocksFTSInsert                = "INSERT INTO blocks_fts (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) VALUES %s"
-	BlocksFTSCaseInsensitiveInsert = "INSERT INTO blocks_fts_case_insensitive (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) VALUES %s"
-	BlocksPlaceholder              = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	BlocksInsert                   = "INSERT INTO blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, fmarkdown, length, type, subtype, ial, sort, created, updated) VALUES %s"
+	BlocksFTSInsert                = "INSERT INTO blocks_fts (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, fmarkdown, length, type, subtype, ial, sort, created, updated) VALUES %s"
+	BlocksFTSCaseInsensitiveInsert = "INSERT INTO blocks_fts_case_insensitive (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, fmarkdown, length, type, subtype, ial, sort, created, updated) VALUES %s"
+	BlocksPlaceholder              = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 	SpansInsert      = "INSERT INTO spans (id, block_id, root_id, box, path, content, markdown, type, ial) VALUES %s"
 	SpansPlaceholder = "(?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -106,6 +106,7 @@ func insertBlocks0(tx *sql.Tx, bulk []*Block) (err error) {
 		valueArgs = append(valueArgs, b.Content)
 		valueArgs = append(valueArgs, b.FContent)
 		valueArgs = append(valueArgs, b.Markdown)
+		valueArgs = append(valueArgs, b.FMarkdown)
 		valueArgs = append(valueArgs, b.Length)
 		valueArgs = append(valueArgs, b.Type)
 		valueArgs = append(valueArgs, b.SubType)

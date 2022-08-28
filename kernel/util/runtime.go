@@ -29,7 +29,7 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-const DatabaseVer = "20220501" // 修改表结构的话需要修改这里
+const DatabaseVer = "20220828" // 修改表结构的话需要修改这里
 
 const (
 	ExitCodeReadOnlyDatabase = 20 // 数据库文件被锁

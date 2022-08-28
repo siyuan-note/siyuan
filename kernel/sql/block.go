@@ -21,27 +21,28 @@ import (
 )
 
 type Block struct {
-	ID       string
-	ParentID string
-	RootID   string
-	Hash     string
-	Box      string
-	Path     string
-	HPath    string
-	Name     string
-	Alias    string
-	Memo     string
-	Tag      string
-	Content  string
-	FContent string
-	Markdown string
-	Length   int
-	Type     string
-	SubType  string
-	IAL      string
-	Sort     int
-	Created  string
-	Updated  string
+	ID        string
+	ParentID  string
+	RootID    string
+	Hash      string
+	Box       string
+	Path      string
+	HPath     string
+	Name      string
+	Alias     string
+	Memo      string
+	Tag       string
+	Content   string
+	FContent  string
+	Markdown  string
+	FMarkdown string
+	Length    int
+	Type      string
+	SubType   string
+	IAL       string
+	Sort      int
+	Created   string
+	Updated   string
 }
 
 func updateRootContent(tx *sql.Tx, content, id string) {

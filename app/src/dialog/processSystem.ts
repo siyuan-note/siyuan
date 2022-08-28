@@ -147,7 +147,18 @@ export const transactionError = (data: { code: number, data: string }) => {
     });
 };
 
+let progressStatusTimeoutId: number
 export const progressStatus = (data: IWebSocketData) => {
+    if (isMobile()) {
+        clearTimeout(progressStatusTimeoutId);
+        const statusElement = document.querySelector("#status")
+        statusElement.innerHTML = data.msg;
+        statusElement.classList.remove("status--hide")
+        progressStatusTimeoutId = window.setTimeout(() => {
+            statusElement.classList.add("status--hide");
+        }, 6000);
+        return;
+    }
     document.querySelector("#status .status__msg").innerHTML = data.msg;
 };
 

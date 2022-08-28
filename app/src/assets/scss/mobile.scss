@@ -294,6 +294,24 @@
   }
 }
 
+.status {
+  position: fixed;
+  bottom: 0;
+  transition: var(--b3-transition);
+  font-size: 12px;
+  color: var(--b3-theme-on-surface);
+  padding: 4px;
+  white-space: nowrap;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--b3-theme-surface);
+  @extend .fn__ellipsis;
+
+  &--hide {
+    bottom: -30px;
+  }
+}
+
 @media (max-width: 620px) {
   .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"] {
     flex-direction: column;

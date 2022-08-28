@@ -1,5 +1,5 @@
 import {openMobileFileById} from "../editor";
-import {progressLoading, transactionError} from "../../dialog/processSystem";
+import {progressLoading, progressStatus, transactionError} from "../../dialog/processSystem";
 
 export const onMessage = (data: IWebSocketData) => {
     if (data) {
@@ -22,6 +22,9 @@ export const onMessage = (data: IWebSocketData) => {
                 break;
             case"txerr":
                 transactionError(data);
+                break;
+            case"statusbar":
+                progressStatus(data);
                 break;
         }
     }

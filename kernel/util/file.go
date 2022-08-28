@@ -142,9 +142,12 @@ func FilterUploadFileName(name string) string {
 }
 
 func FilterFilePath(p string) (ret string) {
-	ret = strings.ReplaceAll(p, "/", "__@sep__")
-	ret = FilterFileName(ret)
-	ret = strings.ReplaceAll(ret, "__@sep__", "/")
+	parts := strings.Split(p, "/")
+	var filteredParts []string
+	for _, part := range parts {
+		filteredParts = append(filteredParts, FilterFileName(part))
+	}
+	ret = strings.Join(filteredParts, "/")
 	return
 }
 
@@ -159,6 +162,7 @@ func FilterFileName(name string) string {
 	name = strings.ReplaceAll(name, "<", "")
 	name = strings.ReplaceAll(name, ">", "")
 	name = strings.ReplaceAll(name, "|", "")
+	name = strings.TrimSpace(name)
 	return name
 }
 

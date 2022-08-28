@@ -1,3 +1,31 @@
+## v2.1.10 / 2022-08-28
+
+### 改进功能
+
+* [数学公式支持设置全局宏定义](https://github.com/siyuan-note/siyuan/issues/5682)
+* [提供重建单个文档索引的 API](https://github.com/siyuan-note/siyuan/issues/5719)
+* [支持导出系统日志](https://github.com/siyuan-note/siyuan/issues/5726)
+* [同步向导优化，登录后根据条件进行下一步提示](https://github.com/siyuan-note/siyuan/issues/5727)
+* [链接菜单中的转化为文本移动到删除上](https://github.com/siyuan-note/siyuan/issues/5731)
+* [使用 HTML 块时建议使用 `<div>` 包裹 HTML 代码](https://github.com/siyuan-note/siyuan/issues/5732)
+* [表格中的代码包含 `\|` 时复制纯文本应该剔除掉 `\`](https://github.com/siyuan-note/siyuan/issues/5733)
+* [改进云端同步图标](https://github.com/siyuan-note/siyuan/issues/5734)
+* [移动端实现状态栏提示](https://github.com/siyuan-note/siyuan/issues/5736)
+
+### 开发重构
+
+* [Android 端升级 SDK 为 32](https://github.com/siyuan-note/siyuan/issues/5737)
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/5738)
+
+### 修复缺陷
+
+* [macOS 端无法使用 ⌘V 粘贴图片](https://github.com/siyuan-note/siyuan/issues/5722)
+* [复制粘贴带换行的文本拆分为多个块后解析不正确](https://github.com/siyuan-note/siyuan/issues/5723)
+* [拖动有序列表项生产超级块后撤销不正确](https://github.com/siyuan-note/siyuan/issues/5725)
+* [嵌入块中存在换行 SQL 语句时会被转换为段落文本](https://github.com/siyuan-note/siyuan/issues/5728)
+* [第一次打开页签有光标，关闭后第二次打开无光标](https://github.com/siyuan-note/siyuan/issues/5729)
+* [云端同步失败重试后导致旧数据覆盖新数据](https://github.com/siyuan-note/siyuan/issues/5730)
+
 ## v2.1.9 / 2022-08-24
 
 ### 改进功能

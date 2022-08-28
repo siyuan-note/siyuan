@@ -331,8 +331,6 @@ func fullTextSearchCount(query, box, path, filter string) (matchedBlockCount, ma
 }
 
 func fullTextSearch(query, box, path, filter string, beforeLen int, querySyntax bool) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	fullTextSearchHistory(query, 1)
-
 	query = gulu.Str.RemoveInvisible(query)
 	if util.IsIDPattern(query) {
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen)

@@ -112,6 +112,9 @@ func GetLocalIPs() (ret []string) {
 }
 
 func isRunningInDockerContainer() bool {
+	if _, runInContainer := os.LookupEnv("RUN_IN_CONTAINER"); runInContainer {
+		return true
+	}
 	if _, err := os.Stat("/.dockerenv"); err == nil {
 		return true
 	}

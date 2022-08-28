@@ -611,7 +611,7 @@ func GetHistoryDir(suffix string) (ret string, err error) {
 	return
 }
 
-func indexHistory() {
+func ReindexHistory() (err error) {
 	historyDirs, err := os.ReadDir(util.HistoryDir)
 	if nil != err {
 		logging.LogErrorf("read history dir [%s] failed: %s", util.HistoryDir, err)
@@ -630,6 +630,7 @@ func indexHistory() {
 			return
 		}
 	}
+	return
 }
 
 var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat}
@@ -713,7 +714,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) (err error) {
 	return
 }
 
-func fullTextSearchHistory(query string, page int) (ret []*History, matchedBlockCount, matchedRootCount int) {
+func FullTextSearchHistory(query string, page int) (ret []*History) {
 	query = gulu.Str.RemoveInvisible(query)
 	query = stringQuery(query)
 

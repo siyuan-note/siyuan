@@ -41,6 +41,7 @@ import {linkMenu} from "../../menus/protyle";
 import {renderAssetsPreview} from "../../asset/renderAssets";
 import {electronUndo} from "../undo";
 import {previewTemplate} from "./util";
+import {showMessage} from "../../dialog/message";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -843,8 +844,8 @@ export class Toolbar {
             if (!renderElement.parentElement) {
                 return;
             }
+            const target = event.target as HTMLTextAreaElement;
             if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) {
-                const target = event.target as HTMLTextAreaElement;
                 if (type === "NodeHTMLBlock") {
                     renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
                 } else {
@@ -867,6 +868,14 @@ export class Toolbar {
             }
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
+            // HTML 块中包含多个 <pre> 时只能保存第一个 https://github.com/siyuan-note/siyuan/issues/5732
+            if (type === "NodeHTMLBlock") {
+                const tempElement = document.createElement("template");
+                tempElement.innerHTML = newHTML;
+                if (tempElement.content.childElementCount > 1) {
+                    showMessage(window.siyuan.languages.htmlTip)
+                }
+            }
             updateTransaction(protyle, id, newHTML, html);
             html = newHTML;
             event.stopPropagation();

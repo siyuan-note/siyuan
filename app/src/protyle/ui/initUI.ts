@@ -48,7 +48,14 @@ export const initUI = (protyle: IProtyle) => {
 };
 
 export const addLoading = (protyle: IProtyle) => {
-    protyle.element.insertAdjacentHTML("beforeend", "<div style=\"background-color: var(--b3-theme-background)\" class=\"fn__loading\"><img width=\"48px\" src=\"/stage/loading-pure.svg\"></div>");
+    protyle.element.insertAdjacentHTML("beforeend", '<div style="background-color: var(--b3-theme-background)" class="fn__loading wysiwygLoading"><img width="48px" src="/stage/loading-pure.svg"></div>');
+};
+
+export const removeLoading = (protyle: IProtyle) => {
+    const loadingElement = protyle.element.querySelector(".wysiwygLoading");
+    if (loadingElement) {
+        loadingElement.remove();
+    }
 };
 
 export const setPadding = (protyle: IProtyle) => {

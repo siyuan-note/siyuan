@@ -15,6 +15,7 @@ import {focusBlock} from "./selection";
 import {hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
 import {restoreScroll} from "../scroll/saveScroll";
+import {removeLoading} from "../ui/initUI";
 
 export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] = [], scrollAttr?: IScrollAttr, renderTitle = false) => {
     protyle.wysiwyg.element.removeAttribute("data-top");
@@ -84,10 +85,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
             action,
             unScroll: false,
         }, protyle);
-        const loadingElement = protyle.element.querySelector(".fn__loading");
-        if (loadingElement) {
-            loadingElement.remove();
-        }
+        removeLoading(protyle);
         return;
     }
 
@@ -122,10 +120,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
         if (scrollObj && protyle.options.mode !== "preview") {
             restoreScroll(protyle, scrollObj);
         }
-        const loadingElement = protyle.element.querySelector(".fn__loading");
-        if (loadingElement) {
-            loadingElement.remove();
-        }
+        removeLoading(protyle)
     });
 };
 

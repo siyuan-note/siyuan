@@ -9,7 +9,7 @@ import {saveScroll} from "../scroll/saveScroll";
 import {hideElements} from "../ui/hideElements";
 
 export const netImg2LocalAssets = (protyle: IProtyle) => {
-    if (protyle.element.querySelector(".fn__loading")) {
+    if (protyle.element.querySelector(".wysiwygLoading")) {
         return;
     }
     addLoading(protyle);

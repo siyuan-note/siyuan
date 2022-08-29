@@ -262,8 +262,8 @@ export const openHistory = () => {
                 <span class="fn__space"></span>
                 <span data-type="docnext" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                 <div class="fn__flex-1"></div>
-                <div>
-                    <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+                <div style="position: relative">
+                    <svg class="b3-form__icon-icon ft__on-surface"><use xlink:href="#iconSearch"></use></svg>
                     <input class="b3-text-field b3-form__icon-input">
                 </div>
                 <span class="fn__space"></span>
@@ -328,6 +328,15 @@ export const openHistory = () => {
             renderDoc(firstPanelElement, 1);
         });
     });
+    firstPanelElement.querySelector(".b3-text-field").addEventListener("input", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        renderDoc(firstPanelElement, 1);
+    });
+    firstPanelElement.querySelector(".b3-text-field").addEventListener("compositionend", () => {
+        renderDoc(firstPanelElement, 1);
+    });
     renderDoc(firstPanelElement, 1);
     const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
     const selectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
@@ -367,7 +376,7 @@ export const openHistory = () => {
                     }
                 });
                 break;
-            }  else if (target.classList.contains("b3-list-item__action") && type === "rollback" && !window.siyuan.config.readonly) {
+            } else if (target.classList.contains("b3-list-item__action") && type === "rollback" && !window.siyuan.config.readonly) {
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback, `${window.siyuan.languages.rollbackConfirm.replace("${date}", target.parentElement.textContent.trim())}`, () => {
                     const dataType = target.parentElement.getAttribute("data-type");
                     if (dataType === "assets") {

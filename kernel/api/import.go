@@ -43,9 +43,9 @@ func importSY(c *gin.Context) {
 
 	files := form.File["file"]
 	if 1 > len(files) {
-		logging.LogErrorf("parse import .sy.zip failed: %s", err)
+		logging.LogErrorf("parse import .sy.zip failed, no file found")
 		ret.Code = -1
-		ret.Msg = err.Error()
+		ret.Msg = "no file found"
 		return
 	}
 	file := files[0]

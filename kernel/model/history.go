@@ -262,92 +262,21 @@ type HistoryItem struct {
 	Path  string `json:"path"`
 }
 
-const maxHistory = 32
+func GetDocHistory(boxID string, page int) (ret []*History, err error) {
+	pageSize := 32
+	from := (page - 1) * pageSize
+	to := page * pageSize
 
-func GetDocHistory(boxID string) (ret []*History, err error) {
-	ret = []*History{}
-
-	historyDir := util.HistoryDir
-	if !gulu.File.IsDir(historyDir) {
-		return
-	}
-
-	historyBoxDirs, err := filepath.Glob(historyDir + "/*/" + boxID)
-	if nil != err {
-		logging.LogErrorf("read dir [%s] failed: %s", historyDir, err)
-		return
-	}
-	sort.Slice(historyBoxDirs, func(i, j int) bool {
-		return historyBoxDirs[i] > historyBoxDirs[j]
-	})
-
-	luteEngine := NewLute()
-	count := 0
-	for _, historyBoxDir := range historyBoxDirs {
-		var docs []*HistoryItem
-		itemCount := 0
-		filepath.Walk(historyBoxDir, func(path string, info fs.FileInfo, err error) error {
-			if info.IsDir() {
-				return nil
-			}
-
-			if !strings.HasSuffix(info.Name(), ".sy") {
-				return nil
-			}
-
-			data, err := filelock.NoLockFileRead(path)
-			if nil != err {
-				logging.LogErrorf("read file [%s] failed: %s", path, err)
-				return nil
-			}
-			historyTree, err := parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
-			if nil != err {
-				logging.LogErrorf("parse tree from file [%s] failed, remove it", path)
-				os.RemoveAll(path)
-				return nil
-			}
-			historyName := historyTree.Root.IALAttr("title")
-			if "" == historyName {
-				historyName = info.Name()
-			}
-
-			docs = append(docs, &HistoryItem{
-				Title: historyTree.Root.IALAttr("title"),
-				Path:  path,
-			})
-			itemCount++
-			if maxHistory < itemCount {
-				return io.EOF
-			}
-			return nil
-		})
-
-		if 1 > len(docs) {
-			continue
-		}
-
-		timeDir := filepath.Base(filepath.Dir(historyBoxDir))
-		t := timeDir[:strings.LastIndex(timeDir, "-")]
-		if ti, parseErr := time.Parse("2006-01-02-150405", t); nil == parseErr {
-			t = ti.Format("2006-01-02 15:04:05")
-		}
-
-		ret = append(ret, &History{
-			HCreated: t,
-			Items:    docs,
-		})
-
-		count++
-		if maxHistory <= count {
-			break
-		}
-	}
-
-	sort.Slice(ret, func(i, j int) bool {
-		return ret[i].HCreated > ret[j].HCreated
-	})
+	table := "histories_fts_case_insensitive"
+	projections := "type, op, title, content, path, created"
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE path LIKE '%/" + boxID + "/%.sy'"
+	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(from) + ", " + strconv.Itoa(to)
+	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
+	ret = fromSQLHistories(sqlHistories)
 	return
 }
+
+const maxHistory = 32
 
 func GetNotebookHistory() (ret []*History, err error) {
 	ret = []*History{}
@@ -642,7 +571,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) (err error) {
 		return
 	}
 	t := name[:strings.LastIndex(name, "-")]
-	tt, parseErr := time.Parse("2006-01-02-150405", t)
+	tt, parseErr := time.ParseInLocation("2006-01-02-150405", t, time.Local)
 	if nil != parseErr {
 		logging.LogWarnf("parse history dir time [%s] failed: %s", t, parseErr)
 		return
@@ -718,11 +647,20 @@ func FullTextSearchHistory(query string, page int) (ret []*History) {
 	query = gulu.Str.RemoveInvisible(query)
 	query = stringQuery(query)
 
+	pageSize := 32
+	from := (page - 1) * pageSize
+	to := page * pageSize
+
 	table := "histories_fts_case_insensitive"
 	projections := "type, op, title, content, path, created"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '{title content}:(" + query + ")'"
-	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(page)
+	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(from) + ", " + strconv.Itoa(to)
 	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
+	ret = fromSQLHistories(sqlHistories)
+	return
+}
+
+func fromSQLHistories(sqlHistories []*sql.History) (ret []*History) {
 	if 1 > len(sqlHistories) {
 		ret = []*History{}
 		return
@@ -746,6 +684,10 @@ func FullTextSearchHistory(query string, page int) (ret []*History) {
 				Items:    items,
 			})
 			items = []*HistoryItem{}
+			items = append(items, &HistoryItem{
+				Title: sqlHistory.Title,
+				Path:  filepath.Join(util.HistoryDir, sqlHistory.Path),
+			})
 		}
 	}
 	return

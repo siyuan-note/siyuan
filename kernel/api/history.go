@@ -114,7 +114,11 @@ func getDocHistory(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
-	histories, err := model.GetDocHistory(notebook)
+	page := 1
+	if nil != arg["page"] {
+		page = int(arg["page"].(float64))
+	}
+	histories, err := model.GetDocHistory(notebook, page)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

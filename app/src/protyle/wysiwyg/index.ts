@@ -345,7 +345,8 @@ export class WYSIWYG {
                         setFold(protyle, headElement, undefined, true);
                     } else {
                         if ((headElement.parentElement.childElementCount === 3 && headElement.parentElement.classList.contains("li")) ||
-                            (headElement.parentElement.childElementCount === 2 && (headElement.parentElement.classList.contains("bq") || headElement.parentElement.classList.contains("sb")))) {
+                            (headElement.parentElement.childElementCount === 2 && (headElement.parentElement.classList.contains("bq") || headElement.parentElement.classList.contains("sb"))) ||
+                            (headElement.parentElement.childElementCount === 1 && headElement.parentElement.classList.contains("protyle-wysiwyg"))) {
                             // https://github.com/siyuan-note/siyuan/issues/4040
                             const emptyId = Lute.NewNodeID();
                             const emptyElement = genEmptyElement(false, false, emptyId);

@@ -232,14 +232,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
 
-        if (!isCtrl(event) && event.key !== "Backspace" && event.key !== "Escape" && event.key !== "Delete" && !event.shiftKey && !event.altKey &&
-            !matchHotKey(window.siyuan.config.keymap.editor.list.indent.custom, event) &&
-            !matchHotKey(window.siyuan.config.keymap.editor.list.outdent.custom, event) &&
-            !matchHotKey(window.siyuan.config.keymap.editor.general.newContentFile.custom, event) &&
-            event.key !== "Enter") {
-            hideElements(["select"], protyle);
-        }
-
         if (range.toString() !== "") {
             // 选中后继续输入 https://ld246.com/article/1626710391372
             if (protyle.toolbar.getCurrentType(range).length > 0) {
@@ -1446,6 +1438,35 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
         }
 
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyPlainText.custom, event)) {
+            if (range.toString() === "") {
+                const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+                let html = "";
+                if (selectsElement.length === 0) {
+                    selectsElement.push(nodeElement)
+                }
+                selectsElement.forEach(item => {
+                    item.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
+                        const cloneNode = editItem.cloneNode(true) as HTMLElement;
+                        cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
+                            slashItem.firstElementChild.remove();
+                        });
+                        html += cloneNode.textContent + "\n";
+                    });
+                });
+                writeText(html.trimEnd());
+            } else {
+                const cloneContents = range.cloneContents();
+                cloneContents.querySelectorAll('[data-type="backslash"]').forEach(item => {
+                    item.firstElementChild.remove();
+                });
+                writeText(cloneContents.textContent);
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+
         if (matchHotKey(window.siyuan.config.keymap.editor.general.vLayout.custom, event)) {
             event.preventDefault();
             event.stopPropagation();
@@ -1619,5 +1640,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         /// #endif
+
+        // 置于最后，太多快捷键会使用到选中元素
+        if (!isCtrl(event) && event.key !== "Backspace" && event.key !== "Escape" && event.key !== "Delete" && !event.shiftKey && !event.altKey && event.key !== "Enter") {
+            hideElements(["select"], protyle);
+        }
     });
 };

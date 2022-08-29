@@ -487,6 +487,7 @@ export class Gutter {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.copyPlainText,
+            accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
             click() {
                 let html = "";
                 selectsElement.forEach(item => {
@@ -854,6 +855,7 @@ export class Gutter {
                 }
             }, {
                 label: window.siyuan.languages.copyPlainText,
+                accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
                 click() {
                     let text = "";
                     nodeElement.querySelectorAll('[contenteditable="true"]').forEach(item => {

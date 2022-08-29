@@ -257,6 +257,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.copyPlainText,
+            accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
             click() {
                 focusByRange(getEditorRange(nodeElement));
                 const cloneContents = getSelection().getRangeAt(0).cloneContents();

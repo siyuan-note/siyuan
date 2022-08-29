@@ -346,7 +346,8 @@ export class WYSIWYG {
                     } else {
                         if ((headElement.parentElement.childElementCount === 3 && headElement.parentElement.classList.contains("li")) ||
                             (headElement.parentElement.childElementCount === 2 && (headElement.parentElement.classList.contains("bq") || headElement.parentElement.classList.contains("sb"))) ||
-                            (headElement.parentElement.childElementCount === 1 && headElement.parentElement.classList.contains("protyle-wysiwyg"))) {
+                            (headElement.parentElement.childElementCount === 1 && headElement.parentElement.classList.contains("protyle-wysiwyg"))  // 全选剪切标题
+                        ) {
                             // https://github.com/siyuan-note/siyuan/issues/4040
                             const emptyId = Lute.NewNodeID();
                             const emptyElement = genEmptyElement(false, false, emptyId);
@@ -354,7 +355,7 @@ export class WYSIWYG {
                                 id: emptyId,
                                 data: emptyElement.outerHTML,
                                 action: "insert",
-                                parentID: headElement.parentElement.getAttribute("data-node-id")
+                                parentID: headElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
                             });
                             undoOperations.push({
                                 id: emptyId,

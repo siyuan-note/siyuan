@@ -26,7 +26,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         op: (selectElements[0] as HTMLSelectElement).value,
         type: 0
     }, (response) => {
-        if (currentPage < response.data.totalCount) {
+        if (currentPage < response.data.pageCount) {
             nextElement.removeAttribute("disabled");
         } else {
             nextElement.setAttribute("disabled", "disabled");
@@ -277,6 +277,8 @@ export const openHistory = () => {
                 <select class="b3-select" style="min-width: auto">
                     ${notebookSelectHTML}
                 </select>
+                <span class="fn__space"></span>
+                <button data-type="rebuildIndex" class="b3-button b3-button--outline">${window.siyuan.languages.rebuildIndex}</button>
             </div>
             <div class="fn__flex fn__flex-1">
                 <ul style="width:200px;overflow: auto;" class="b3-list b3-list--background">
@@ -505,8 +507,13 @@ export const openHistory = () => {
                 renderRepo(repoElement, type === "previous" ? currentPage - 1 : currentPage + 1);
                 break;
             } else if ((type === "docprevious" || type === "docnext") && target.getAttribute("disabled") !== "disabled") {
-                const currentPage = parseInt(repoElement.getAttribute("data-page"));
+                const currentPage = parseInt(firstPanelElement.getAttribute("data-page"));
                 renderDoc(firstPanelElement, type === "docprevious" ? currentPage - 1 : currentPage + 1);
+                break;
+            } else if (type === "rebuildIndex") {
+                fetchPost("/api/history/reindexHistory", {}, ()=> {
+                    renderDoc(firstPanelElement, 1);
+                });
                 break;
             }
             target = target.parentElement;

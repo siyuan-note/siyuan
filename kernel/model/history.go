@@ -275,7 +275,7 @@ func GetDocHistory(boxID string, page int) (ret []*History, err error) {
 	return
 }
 
-func FullTextSearchHistory(query string, page int) (ret []*History) {
+func FullTextSearchHistory(query, op string, page int) (ret []*History) {
 	query = gulu.Str.RemoveInvisible(query)
 	query = stringQuery(query)
 
@@ -284,8 +284,10 @@ func FullTextSearchHistory(query string, page int) (ret []*History) {
 	to := page * pageSize
 
 	table := "histories_fts_case_insensitive"
-	projections := "type, op, title, content, path, created"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '{title content}:(" + query + ")'"
+	stmt := "SELECT * FROM " + table + " WHERE " + table + " MATCH '{title content}:(" + query + ")'"
+	if "all" != op {
+		stmt += " AND op = '" + op + "'"
+	}
 	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(from) + ", " + strconv.Itoa(to)
 	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
 	ret = fromSQLHistories(sqlHistories)

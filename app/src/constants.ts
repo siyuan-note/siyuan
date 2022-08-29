@@ -119,6 +119,7 @@ export abstract class Constants {
         },
         editor: {
             general: {
+                copyPlainText: {default: "", custom: ""},
                 copyID: {default: "", custom: ""},
                 netImg2LocalAsset: {default: "", custom: ""},
                 hLayout: {default: "", custom: ""},
@@ -176,6 +177,7 @@ export abstract class Constants {
                 code: {default: "⇧⌘K", custom: "⇧⌘K"},
             },
             heading: {
+                paragraph: {default: "⌥⌘0", custom: "⌥⌘0"},
                 heading1: {default: "⌥⌘1", custom: "⌥⌘1"},
                 heading2: {default: "⌥⌘2", custom: "⌥⌘2"},
                 heading3: {default: "⌥⌘3", custom: "⌥⌘3"},

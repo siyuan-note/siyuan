@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -276,7 +275,22 @@ func GetDocHistory(boxID string, page int) (ret []*History, err error) {
 	return
 }
 
-const maxHistory = 32
+func FullTextSearchHistory(query string, page int) (ret []*History) {
+	query = gulu.Str.RemoveInvisible(query)
+	query = stringQuery(query)
+
+	pageSize := 32
+	from := (page - 1) * pageSize
+	to := page * pageSize
+
+	table := "histories_fts_case_insensitive"
+	projections := "type, op, title, content, path, created"
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '{title content}:(" + query + ")'"
+	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(from) + ", " + strconv.Itoa(to)
+	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
+	ret = fromSQLHistories(sqlHistories)
+	return
+}
 
 func GetNotebookHistory() (ret []*History, err error) {
 	ret = []*History{}
@@ -297,7 +311,6 @@ func GetNotebookHistory() (ret []*History, err error) {
 		return iTimeDir > jTimeDir
 	})
 
-	historyCount := 0
 	for _, historyNotebookConf := range historyNotebookConfs {
 		timeDir := filepath.Base(filepath.Dir(filepath.Dir(filepath.Dir(historyNotebookConf))))
 		t := timeDir[:strings.LastIndex(timeDir, "-")]
@@ -318,18 +331,11 @@ func GetNotebookHistory() (ret []*History, err error) {
 
 		ret = append(ret, &History{
 			HCreated: t,
-			Items: []*HistoryItem{
-				{
-					Title: c.Name,
-					Path:  filepath.Dir(filepath.Dir(historyNotebookConf)),
-				},
-			},
+			Items: []*HistoryItem{{
+				Title: c.Name,
+				Path:  filepath.Dir(filepath.Dir(historyNotebookConf)),
+			}},
 		})
-
-		historyCount++
-		if maxHistory <= historyCount {
-			break
-		}
 	}
 
 	sort.Slice(ret, func(i, j int) bool {
@@ -338,73 +344,17 @@ func GetNotebookHistory() (ret []*History, err error) {
 	return
 }
 
-func GetAssetsHistory() (ret []*History, err error) {
-	ret = []*History{}
+func GetAssetsHistory(page int) (ret []*History, err error) {
+	pageSize := 32
+	from := (page - 1) * pageSize
+	to := page * pageSize
 
-	historyDir := util.HistoryDir
-	if !gulu.File.IsDir(historyDir) {
-		return
-	}
-
-	historyAssetsDirs, err := filepath.Glob(historyDir + "/*/assets")
-	if nil != err {
-		logging.LogErrorf("read dir [%s] failed: %s", historyDir, err)
-		return
-	}
-	sort.Slice(historyAssetsDirs, func(i, j int) bool {
-		return historyAssetsDirs[i] > historyAssetsDirs[j]
-	})
-
-	historyCount := 0
-	for _, historyAssetsDir := range historyAssetsDirs {
-		var assets []*HistoryItem
-		itemCount := 0
-		filepath.Walk(historyAssetsDir, func(path string, info fs.FileInfo, err error) error {
-			if isSkipFile(info.Name()) {
-				if info.IsDir() {
-					return filepath.SkipDir
-				}
-				return nil
-			}
-			if info.IsDir() {
-				return nil
-			}
-
-			assets = append(assets, &HistoryItem{
-				Title: info.Name(),
-				Path:  filepath.ToSlash(strings.TrimPrefix(path, util.WorkspaceDir)),
-			})
-			itemCount++
-			if maxHistory < itemCount {
-				return io.EOF
-			}
-			return nil
-		})
-
-		if 1 > len(assets) {
-			continue
-		}
-
-		timeDir := filepath.Base(filepath.Dir(historyAssetsDir))
-		t := timeDir[:strings.LastIndex(timeDir, "-")]
-		if ti, parseErr := time.Parse("2006-01-02-150405", t); nil == parseErr {
-			t = ti.Format("2006-01-02 15:04:05")
-		}
-
-		ret = append(ret, &History{
-			HCreated: t,
-			Items:    assets,
-		})
-
-		historyCount++
-		if maxHistory <= historyCount {
-			break
-		}
-	}
-
-	sort.Slice(ret, func(i, j int) bool {
-		return ret[i].HCreated > ret[j].HCreated
-	})
+	table := "histories_fts_case_insensitive"
+	projections := "type, op, title, content, path, created"
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE path LIKE '%/assets/%'"
+	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(from) + ", " + strconv.Itoa(to)
+	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
+	ret = fromSQLHistories(sqlHistories)
 	return
 }
 
@@ -529,6 +479,7 @@ const (
 	HistoryOpUpdate = "update"
 	HistoryOpDelete = "delete"
 	HistoryOpFormat = "format"
+	HistoryOpSync   = "sync"
 )
 
 func GetHistoryDir(suffix string) (ret string, err error) {
@@ -562,7 +513,7 @@ func ReindexHistory() (err error) {
 	return
 }
 
-var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat}
+var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync}
 
 func indexHistoryDir(name string, luteEngine *lute.Lute) (err error) {
 	op := name[strings.LastIndex(name, "-")+1:]
@@ -583,7 +534,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) (err error) {
 	filepath.Walk(entryPath, func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(info.Name(), ".sy") {
 			docs = append(docs, path)
-		} else if strings.Contains(path, "assets/") {
+		} else if strings.Contains(path, "assets"+string(os.PathSeparator)) {
 			assets = append(assets, path)
 		}
 		return nil
@@ -643,23 +594,6 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) (err error) {
 	return
 }
 
-func FullTextSearchHistory(query string, page int) (ret []*History) {
-	query = gulu.Str.RemoveInvisible(query)
-	query = stringQuery(query)
-
-	pageSize := 32
-	from := (page - 1) * pageSize
-	to := page * pageSize
-
-	table := "histories_fts_case_insensitive"
-	projections := "type, op, title, content, path, created"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '{title content}:(" + query + ")'"
-	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(from) + ", " + strconv.Itoa(to)
-	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
-	ret = fromSQLHistories(sqlHistories)
-	return
-}
-
 func fromSQLHistories(sqlHistories []*sql.History) (ret []*History) {
 	if 1 > len(sqlHistories) {
 		ret = []*History{}
@@ -689,6 +623,12 @@ func fromSQLHistories(sqlHistories []*sql.History) (ret []*History) {
 				Path:  filepath.Join(util.HistoryDir, sqlHistory.Path),
 			})
 		}
+	}
+	if 1 < len(items) {
+		ret = append(ret, &History{
+			HCreated: time.Unix(tmpTime, 0).Format("2006-01-02 15:04:05"),
+			Items:    items,
+		})
 	}
 	return
 }

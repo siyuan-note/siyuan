@@ -100,6 +100,7 @@ func WriteTree(tree *parse.Tree) (err error) {
 		newP := parse.NewParagraph()
 		tree.Root.AppendChild(newP)
 		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
+		treenode.ReindexBlockTree(tree)
 	}
 
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)

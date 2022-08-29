@@ -36,7 +36,10 @@ func searchHistory(c *gin.Context) {
 	}
 
 	query := arg["query"].(string)
-	page := int(arg["page"].(float64))
+	page := 1
+	if nil != arg["page"] {
+		page = int(arg["page"].(float64))
+	}
 	histories := model.FullTextSearchHistory(query, page)
 	ret.Data = map[string]interface{}{
 		"histories": histories,
@@ -75,7 +78,16 @@ func getAssetsHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	histories, err := model.GetAssetsHistory()
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	page := 1
+	if nil != arg["page"] {
+		page = int(arg["page"].(float64))
+	}
+	histories, err := model.GetAssetsHistory(page)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -114,7 +126,11 @@ func getDocHistory(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
-	histories, err := model.GetDocHistory(notebook)
+	page := 1
+	if nil != arg["page"] {
+		page = int(arg["page"].(float64))
+	}
+	histories, err := model.GetDocHistory(notebook, page)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

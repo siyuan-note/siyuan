@@ -35,6 +35,15 @@ func searchHistory(c *gin.Context) {
 		return
 	}
 
+	notebook := ""
+	if nil != arg["notebook"] {
+		notebook = arg["notebook"].(string)
+	}
+	typ := model.HistoryTypeDoc
+	if nil != arg["type"] {
+		typ = int(arg["type"].(float64))
+	}
+
 	query := arg["query"].(string)
 	page := 1
 	if nil != arg["page"] {
@@ -44,7 +53,7 @@ func searchHistory(c *gin.Context) {
 	if nil != arg["op"] {
 		op = arg["op"].(string)
 	}
-	histories, pageCount, totalCount := model.FullTextSearchHistory(query, op, page)
+	histories, pageCount, totalCount := model.FullTextSearchHistory(query, notebook, op, typ, page)
 	ret.Data = map[string]interface{}{
 		"histories":  histories,
 		"pageCount":  pageCount,
@@ -80,31 +89,6 @@ func getNotebookHistory(c *gin.Context) {
 	}
 }
 
-func getAssetsHistory(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	page := 1
-	if nil != arg["page"] {
-		page = int(arg["page"].(float64))
-	}
-	histories, err := model.GetAssetsHistory(page)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	ret.Data = map[string]interface{}{
-		"histories": histories,
-	}
-}
-
 func clearWorkspaceHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -120,33 +104,6 @@ func clearWorkspaceHistory(c *gin.Context) {
 	util.PushClearMsg(msgId)
 	time.Sleep(500 * time.Millisecond)
 	util.PushMsg(model.Conf.Language(99), 1000*5)
-}
-
-func getDocHistory(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	notebook := arg["notebook"].(string)
-	page := 1
-	if nil != arg["page"] {
-		page = int(arg["page"].(float64))
-	}
-	histories, err := model.GetDocHistory(notebook, page)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	ret.Data = map[string]interface{}{
-		"box":       notebook,
-		"histories": histories,
-	}
 }
 
 func getDocHistoryContent(c *gin.Context) {

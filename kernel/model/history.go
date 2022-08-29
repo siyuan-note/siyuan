@@ -262,21 +262,7 @@ type HistoryItem struct {
 	Path  string `json:"path"`
 }
 
-func GetDocHistory(boxID string, page int) (ret []*History, err error) {
-	pageSize := 32
-	from := (page - 1) * pageSize
-	to := page * pageSize
-
-	table := "histories_fts_case_insensitive"
-	projections := "type, op, title, content, path, created"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE path LIKE '%/" + boxID + "/%.sy'"
-	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(from) + ", " + strconv.Itoa(to)
-	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
-	ret = fromSQLHistories(sqlHistories)
-	return
-}
-
-func FullTextSearchHistory(query, op string, page int) (ret []*History, pageCount, totalCount int) {
+func FullTextSearchHistory(query, box, op string, typ, page int) (ret []*History, pageCount, totalCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	query = stringQuery(query)
 
@@ -289,6 +275,12 @@ func FullTextSearchHistory(query, op string, page int) (ret []*History, pageCoun
 	if "all" != op {
 		stmt += " AND op = '" + op + "'"
 	}
+
+	if HistoryTypeDoc == typ {
+		stmt += " AND path LIKE '%/" + box + "/%'"
+	} else if HistoryTypeAsset == typ {
+		stmt += " AND path LIKE '%/assets/%'"
+	}
 	countStmt := strings.ReplaceAll(stmt, "SELECT *", "SELECT COUNT(*) AS total")
 	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(from) + ", " + strconv.Itoa(to)
 	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
@@ -300,7 +292,7 @@ func FullTextSearchHistory(query, op string, page int) (ret []*History, pageCoun
 	if 1 > len(result) {
 		return
 	}
-	totalCount = int(result[0]["matches"].(int64))
+	totalCount = int(result[0]["total"].(int64))
 	pageCount = int(math.Ceil(float64(totalCount) / float64(pageSize)))
 	return
 }
@@ -354,20 +346,6 @@ func GetNotebookHistory() (ret []*History, err error) {
 	sort.Slice(ret, func(i, j int) bool {
 		return ret[i].HCreated > ret[j].HCreated
 	})
-	return
-}
-
-func GetAssetsHistory(page int) (ret []*History, err error) {
-	pageSize := 32
-	from := (page - 1) * pageSize
-	to := page * pageSize
-
-	table := "histories_fts_case_insensitive"
-	projections := "type, op, title, content, path, created"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE path LIKE '%/assets/%'"
-	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(from) + ", " + strconv.Itoa(to)
-	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
-	ret = fromSQLHistories(sqlHistories)
 	return
 }
 
@@ -528,6 +506,11 @@ func ReindexHistory() (err error) {
 
 var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync}
 
+const (
+	HistoryTypeDoc   = 0
+	HistoryTypeAsset = 1
+)
+
 func indexHistoryDir(name string, luteEngine *lute.Lute) (err error) {
 	op := name[strings.LastIndex(name, "-")+1:]
 	if !gulu.Str.Contains(op, validOps) {
@@ -566,7 +549,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) (err error) {
 		p := strings.TrimPrefix(doc, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
 		histories = append(histories, &sql.History{
-			Type:    0,
+			Type:    HistoryTypeDoc,
 			Op:      op,
 			Title:   title,
 			Content: content,
@@ -579,7 +562,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) (err error) {
 		p := strings.TrimPrefix(asset, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
 		histories = append(histories, &sql.History{
-			Type:    1,
+			Type:    HistoryTypeAsset,
 			Op:      op,
 			Title:   filepath.Base(asset),
 			Path:    p,

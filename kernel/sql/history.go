@@ -18,6 +18,7 @@ package sql
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -31,6 +32,49 @@ type History struct {
 	Content string
 	Created string
 	Path    string
+}
+
+func QueryHistory(stmt string) (ret []map[string]interface{}, err error) {
+	ret = []map[string]interface{}{}
+	rows, err := queryHistory(stmt)
+	if nil != err {
+		logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
+		return
+	}
+	defer rows.Close()
+
+	cols, _ := rows.Columns()
+	if nil == cols {
+		return
+	}
+
+	for rows.Next() {
+		columns := make([]interface{}, len(cols))
+		columnPointers := make([]interface{}, len(cols))
+		for i := range columns {
+			columnPointers[i] = &columns[i]
+		}
+
+		if err = rows.Scan(columnPointers...); nil != err {
+			return
+		}
+
+		m := make(map[string]interface{})
+		for i, colName := range cols {
+			val := columnPointers[i].(*interface{})
+			m[colName] = *val
+		}
+		ret = append(ret, m)
+	}
+	return
+}
+
+func queryHistory(query string, args ...interface{}) (*sql.Rows, error) {
+	query = strings.TrimSpace(query)
+	if "" == query {
+		return nil, errors.New("statement is empty")
+	}
+	return historyDB.Query(query, args...)
 }
 
 func SelectHistoriesRawStmt(stmt string) (ret []*History) {

@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -275,7 +276,7 @@ func GetDocHistory(boxID string, page int) (ret []*History, err error) {
 	return
 }
 
-func FullTextSearchHistory(query, op string, page int) (ret []*History) {
+func FullTextSearchHistory(query, op string, page int) (ret []*History, pageCount, totalCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	query = stringQuery(query)
 
@@ -288,9 +289,19 @@ func FullTextSearchHistory(query, op string, page int) (ret []*History) {
 	if "all" != op {
 		stmt += " AND op = '" + op + "'"
 	}
+	countStmt := strings.ReplaceAll(stmt, "SELECT *", "SELECT COUNT(*) AS total")
 	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(from) + ", " + strconv.Itoa(to)
 	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
 	ret = fromSQLHistories(sqlHistories)
+	result, err := sql.QueryHistory(countStmt)
+	if nil != err {
+		return
+	}
+	if 1 > len(result) {
+		return
+	}
+	totalCount = int(result[0]["matches"].(int64))
+	pageCount = int(math.Ceil(float64(totalCount) / float64(pageSize)))
 	return
 }
 

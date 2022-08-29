@@ -44,9 +44,11 @@ func searchHistory(c *gin.Context) {
 	if nil != arg["op"] {
 		op = arg["op"].(string)
 	}
-	histories := model.FullTextSearchHistory(query, op, page)
+	histories, pageCount, totalCount := model.FullTextSearchHistory(query, op, page)
 	ret.Data = map[string]interface{}{
-		"histories": histories,
+		"histories":  histories,
+		"pageCount":  pageCount,
+		"totalCount": totalCount,
 	}
 }
 

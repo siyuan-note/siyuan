@@ -18,7 +18,6 @@ package model
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/fs"
 	"math"
@@ -387,8 +386,7 @@ func (box *Box) generateDocHistory0() {
 		}
 	}
 
-	luteEngine := NewLute()
-	indexHistoryDir(filepath.Base(historyDir), luteEngine)
+	indexHistoryDir(filepath.Base(historyDir), NewLute())
 	return
 }
 
@@ -503,10 +501,7 @@ func ReindexHistory() (err error) {
 		}
 
 		name := historyDir.Name()
-		err = indexHistoryDir(name, lutEngine)
-		if nil != err {
-			return
-		}
+		indexHistoryDir(name, lutEngine)
 	}
 	return
 }
@@ -518,7 +513,9 @@ const (
 	HistoryTypeAsset = 1
 )
 
-func indexHistoryDir(name string, luteEngine *lute.Lute) (err error) {
+func indexHistoryDir(name string, luteEngine *lute.Lute) {
+	defer logging.Recover()
+
 	op := name[strings.LastIndex(name, "-")+1:]
 	if !gulu.Str.Contains(op, validOps) {
 		logging.LogWarnf("invalid history op [%s]", op)
@@ -579,19 +576,16 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) (err error) {
 
 	tx, txErr := sql.BeginHistoryTx()
 	if nil != txErr {
-		msg := fmt.Sprintf("begin transaction failed: %s", txErr)
-		err = errors.New(msg)
+		logging.LogErrorf("begin transaction failed: %s", txErr)
 		return
 	}
-	if err = sql.InsertHistories(tx, histories); nil != err {
-		msg := fmt.Sprintf("insert histories failed: %s", err)
-		err = errors.New(msg)
+	if err := sql.InsertHistories(tx, histories); nil != err {
+		logging.LogErrorf("insert histories failed: %s", err)
 		sql.RollbackTx(tx)
 		return
 	}
-	if err = sql.CommitTx(tx); nil != err {
-		msg := fmt.Sprintf("commit transaction failed: %s", err)
-		err = errors.New(msg)
+	if err := sql.CommitTx(tx); nil != err {
+		logging.LogErrorf("commit transaction failed: %s", err)
 		return
 	}
 	return
@@ -627,7 +621,7 @@ func fromSQLHistories(sqlHistories []*sql.History) (ret []*History) {
 			})
 		}
 	}
-	if 1 < len(items) {
+	if 0 < len(items) {
 		ret = append(ret, &History{
 			HCreated: time.Unix(tmpTime, 0).Format("2006-01-02 15:04:05"),
 			Items:    items,

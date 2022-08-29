@@ -419,6 +419,8 @@ func RemoveUnusedAssets() (ret []string) {
 	if 0 < len(ret) {
 		IncSync()
 	}
+
+	indexHistoryDir(filepath.Base(historyDir), NewLute())
 	return
 }
 
@@ -445,6 +447,8 @@ func RemoveUnusedAsset(p string) (ret string) {
 	}
 	ret = p
 	IncSync()
+
+	indexHistoryDir(filepath.Base(historyDir), NewLute())
 	return
 }
 

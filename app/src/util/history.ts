@@ -9,26 +9,38 @@ import {isMobile} from "./functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {renderAssetsPreview} from "../asset/renderAssets";
 
-const renderDoc = (notebook: INotebook, element: HTMLElement) => {
-    if (!notebook || !notebook.id) {
-        return;
+const renderDoc = (element: HTMLElement, currentPage: number) => {
+    const previousElement = element.querySelector('[data-type="docprevious"]');
+    const nextElement = element.querySelector('[data-type="docnext"]');
+    element.setAttribute("data-page", currentPage.toString());
+    if (currentPage > 1) {
+        previousElement.removeAttribute("disabled");
+    } else {
+        previousElement.setAttribute("disabled", "disabled");
     }
-    fetchPost("/api/history/getDocHistory", {
-        notebook: notebook.id
+    const inputElement = element.querySelector(".b3-text-field") as HTMLInputElement;
+    const selectElements = element.querySelectorAll(".b3-select");
+    window.localStorage.setItem(Constants.LOCAL_HISTORYNOTEID, (selectElements[1] as HTMLSelectElement).value);
+    fetchPost("/api/history/searchHistory", {
+        notebook: (selectElements[1] as HTMLSelectElement).value,
+        query: inputElement.value,
+        page: currentPage,
+        op: (selectElements[0] as HTMLSelectElement).value,
+        type: 0
     }, (response) => {
-        const switchHTML = `<li style="background-color: var(--b3-theme-background)" data-type="switchNotebook" data-menu="true" class="b3-list-item">
-    <span class="b3-list-item__icon">${unicode2Emoji(notebook.icon || Constants.SIYUAN_IMAGE_NOTE)}</span>
-    <span class="b3-list-item__text">${escapeHtml(notebook.name)}</span>
-    <span class="b3-list-item__action" data-type="switchNotebook">
-        <svg style="height: 10px"><use xlink:href="#iconDown"></use></svg>
-    </span>
-</li>`;
+        if (currentPage < response.data.pageCount) {
+            nextElement.removeAttribute("disabled");
+        } else {
+            nextElement.setAttribute("disabled", "disabled");
+        }
+
         if (response.data.histories.length === 0) {
-            element.lastElementChild.innerHTML = "";
-            element.firstElementChild.innerHTML = `${switchHTML}<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+            element.lastElementChild.lastElementChild.innerHTML = "";
+            element.lastElementChild.firstElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             return;
         }
-        let logsHTML = switchHTML;
+
+        let logsHTML = "";
         response.data.histories.forEach((item: { items: { path: string, title: string }[], hCreated: string }, index: number) => {
             logsHTML += `<li class="b3-list-item" data-type="toggle" style="padding-left: 0">
     <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
@@ -50,13 +62,13 @@ const renderDoc = (notebook: INotebook, element: HTMLElement) => {
                 if (index === 0) {
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: item.items[0].path
-                    }, (response) => {
-                        element.lastElementChild.innerHTML = response.data.content;
+                    }, (contentResponse) => {
+                        element.lastElementChild.lastElementChild.innerHTML = contentResponse.data.content;
                     });
                 }
             }
         });
-        element.firstElementChild.innerHTML = logsHTML;
+        element.lastElementChild.firstElementChild.innerHTML = logsHTML;
     });
 };
 
@@ -228,6 +240,13 @@ export const openHistory = () => {
         return;
     }
 
+    const currentNotebookId = localStorage.getItem(Constants.LOCAL_HISTORYNOTEID);
+    let notebookSelectHTML = '';
+    window.siyuan.notebooks.forEach((item) => {
+        if (!item.closed) {
+            notebookSelectHTML += ` <option value="${item.id}"${item.id === currentNotebookId ? " selected" : ""}>${item.name}</option>`
+        }
+    });
     const dialog = new Dialog({
         content: `<div class="fn__flex-column" style="height: 100%;">
     <div class="layout-tab-bar fn__flex" style="border-radius: 4px 4px 0 0">
@@ -237,11 +256,36 @@ export const openHistory = () => {
         <div data-type="repo" class="item"><span class="item__text">${window.siyuan.languages.dataSnapshot}</span></div>
     </div>
     <div class="fn__flex-1 fn__flex" id="historyContainer">
-        <div data-type="doc" class="fn__flex fn__block" data-init="true">
-            <ul style="width:200px;overflow: auto;" class="b3-list b3-list--background">
-                <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
-            </ul>
-            <textarea class="fn__flex-1 history__text" readonly></textarea>
+        <div data-type="doc" class="history__repo fn__block" data-init="true">
+            <div class="fn__flex history__repoheader">
+                <span data-type="docprevious" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
+                <span class="fn__space"></span>
+                <span data-type="docnext" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+                <div class="fn__flex-1"></div>
+                <div>
+                    <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+                    <input class="b3-text-field b3-form__icon-input">
+                </div>
+                <span class="fn__space"></span>
+                <select class="b3-select" style="min-width: auto">
+                    <option value="all" selected>all</option>
+                    <option value="clean">clean</option>
+                    <option value="update">update</option>
+                    <option value="delete">delete</option>
+                    <option value="format">format</option>
+                    <option value="sync">sync</option>
+                </select>
+                <span class="fn__space"></span>
+                <select class="b3-select" style="min-width: auto">
+                    ${notebookSelectHTML}
+                </select>
+            </div>
+            <div class="fn__flex fn__flex-1">
+                <ul style="width:200px;overflow: auto;" class="b3-list b3-list--background">
+                    <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
+                </ul>
+                <textarea class="fn__flex-1 history__text" readonly></textarea>
+            </div>
         </div>
         <div data-type="assets" class="fn__flex fn__none">
             <ul style="width:200px;overflow: auto;" class="b3-list b3-list--background">
@@ -277,33 +321,14 @@ export const openHistory = () => {
         width: "80vw",
         height: "80vh",
     });
-    let currentNotebook: INotebook = {
-        name: window.siyuan.languages.newFileTip,
-        id: "",
-        closed: true,
-        icon: "",
-        sort: 0
-    };
-    const currentNotebookId = localStorage.getItem(Constants.LOCAL_HISTORYNOTEID);
-    window.siyuan.notebooks.find((item) => {
-        if (!item.closed) {
-            if (!currentNotebook.id) {
-                currentNotebook = item;
-            }
-            if (currentNotebookId) {
-                if (item.id === currentNotebookId) {
-                    currentNotebook = item;
-                    return true;
-                }
-            } else {
-                currentNotebook = item;
-                return true;
-            }
-        }
-    });
 
     const firstPanelElement = dialog.element.querySelector("#historyContainer [data-type=doc]") as HTMLElement;
-    renderDoc(currentNotebook, firstPanelElement);
+    firstPanelElement.querySelectorAll(".b3-select").forEach((itemElement) => {
+        itemElement.addEventListener("change", () => {
+            renderDoc(firstPanelElement, 1);
+        });
+    });
+    renderDoc(firstPanelElement, 1);
     const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
     const selectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
     selectElement.addEventListener("change", () => {
@@ -342,27 +367,7 @@ export const openHistory = () => {
                     }
                 });
                 break;
-            } else if (type === "switchNotebook") {
-                window.siyuan.menus.menu.remove();
-                window.siyuan.notebooks.forEach(item => {
-                    if (!item.closed) {
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            label: item.name,
-                            click: () => {
-                                if (item.id === currentNotebook.id) {
-                                    return;
-                                }
-                                currentNotebook = item;
-                                window.localStorage.setItem(Constants.LOCAL_HISTORYNOTEID, item.id);
-                                renderDoc(item, firstPanelElement);
-                            }
-                        }).element);
-                    }
-                });
-                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
-                window.siyuan.menus.menu.element.style.zIndex = "310";
-                break;
-            } else if (target.classList.contains("b3-list-item__action") && type === "rollback" && !window.siyuan.config.readonly) {
+            }  else if (target.classList.contains("b3-list-item__action") && type === "rollback" && !window.siyuan.config.readonly) {
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback, `${window.siyuan.languages.rollbackConfirm.replace("${date}", target.parentElement.textContent.trim())}`, () => {
                     const dataType = target.parentElement.getAttribute("data-type");
                     if (dataType === "assets") {
@@ -371,7 +376,7 @@ export const openHistory = () => {
                         });
                     } else if (dataType === "doc") {
                         fetchPost("/api/history/rollbackDocHistory", {
-                            notebook: currentNotebook.id,
+                            notebook: (firstPanelElement.querySelectorAll(".b3-select")[1] as HTMLSelectElement).value,
                             historyPath: target.parentElement.getAttribute("data-path")
                         });
                     } else if (dataType === "notebook") {
@@ -491,6 +496,10 @@ export const openHistory = () => {
             } else if ((type === "previous" || type === "next") && target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(repoElement.getAttribute("data-page"));
                 renderRepo(repoElement, type === "previous" ? currentPage - 1 : currentPage + 1);
+                break;
+            } else if ((type === "docprevious" || type === "docnext") && target.getAttribute("disabled") !== "disabled") {
+                const currentPage = parseInt(repoElement.getAttribute("data-page"));
+                renderDoc(firstPanelElement, type === "docprevious" ? currentPage - 1 : currentPage + 1);
                 break;
             }
             target = target.parentElement;

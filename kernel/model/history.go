@@ -264,14 +264,21 @@ type HistoryItem struct {
 
 func FullTextSearchHistory(query, box, op string, typ, page int) (ret []*History, pageCount, totalCount int) {
 	query = gulu.Str.RemoveInvisible(query)
-	query = stringQuery(query)
+	if "" != query {
+		query = stringQuery(query)
+	}
 
 	pageSize := 32
 	from := (page - 1) * pageSize
 	to := page * pageSize
 
 	table := "histories_fts_case_insensitive"
-	stmt := "SELECT * FROM " + table + " WHERE " + table + " MATCH '{title content}:(" + query + ")'"
+	stmt := "SELECT * FROM " + table + " WHERE "
+	if "" != query {
+		stmt += table + " MATCH '{title content}:(" + query + ")'"
+	} else {
+		stmt += "1=1"
+	}
 	if "all" != op {
 		stmt += " AND op = '" + op + "'"
 	}

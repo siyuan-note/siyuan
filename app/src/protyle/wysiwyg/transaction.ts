@@ -1,6 +1,6 @@
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {fetchPost} from "../../util/fetch";
 import {focusBlock, focusByRange, focusByWbr, focusSideBlock, getEditorRange} from "../util/selection";
-import {getContenteditableElement, getTopAloneElement} from "./getBlock";
+import {getTopAloneElement} from "./getBlock";
 import {Constants} from "../../constants";
 import {blockRender} from "../markdown/blockRender";
 import {processRender} from "../util/processCode";

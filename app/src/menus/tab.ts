@@ -163,12 +163,12 @@ export const initTabMenu = (tab: Tab) => {
     const model = tab.model;
     let rootId;
     if ((model && model instanceof Editor)) {
-        rootId = model.editor.protyle.block.rootID
+        rootId = model.editor.protyle.block.rootID;
     } else {
-        const initData = tab.headElement.getAttribute("data-initdata")
+        const initData = tab.headElement.getAttribute("data-initdata");
         if (initData) {
             const initDataObj = JSON.parse(initData);
-            rootId = initDataObj.rootId || initDataObj.blockId
+            rootId = initDataObj.rootId || initDataObj.blockId;
         }
     }
     if (rootId) {

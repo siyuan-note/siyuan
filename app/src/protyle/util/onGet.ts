@@ -120,7 +120,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
         if (scrollObj && protyle.options.mode !== "preview") {
             restoreScroll(protyle, scrollObj);
         }
-        removeLoading(protyle)
+        removeLoading(protyle);
     });
 };
 

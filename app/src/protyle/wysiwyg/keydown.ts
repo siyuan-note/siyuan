@@ -1068,7 +1068,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 protyle,
                 nodeElement,
                 type: "Blocks2Ps",
-            })
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -1079,7 +1079,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 nodeElement,
                 type: "Blocks2Hs",
                 level: 1
-            })
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -1090,7 +1090,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 nodeElement,
                 type: "Blocks2Hs",
                 level: 2
-            })
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -1101,7 +1101,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 nodeElement,
                 type: "Blocks2Hs",
                 level: 3
-            })
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -1112,7 +1112,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 nodeElement,
                 type: "Blocks2Hs",
                 level: 4
-            })
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -1123,7 +1123,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 nodeElement,
                 type: "Blocks2Hs",
                 level: 5
-            })
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -1134,7 +1134,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 nodeElement,
                 type: "Blocks2Hs",
                 level: 6
-            })
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -1482,7 +1482,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 let html = "";
                 if (selectsElement.length === 0) {
-                    selectsElement.push(nodeElement)
+                    selectsElement.push(nodeElement);
                 }
                 selectsElement.forEach(item => {
                     item.querySelectorAll('[contenteditable="true"]').forEach(editItem => {

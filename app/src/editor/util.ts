@@ -102,14 +102,14 @@ const openFile = (options: IOpenFileOptions) => {
             if (initData) {
                 const initObj = JSON.parse(initData);
                 if (initObj.rootId === options.rootID || initObj.blockId === options.rootID) {
-                    initObj.blockId = options.id
-                    initObj.mode = options.mode
+                    initObj.blockId = options.id;
+                    initObj.mode = options.mode;
                     if (options.zoomIn) {
-                        initObj.action = [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS]
+                        initObj.action = [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS];
                     } else {
-                        initObj.action = options.action
+                        initObj.action = options.action;
                     }
-                    delete initObj.scrollAttr
+                    delete initObj.scrollAttr;
                     item.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
                     item.parent.switchTab(item.headElement);
                     return true;

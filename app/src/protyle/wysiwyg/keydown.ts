@@ -32,9 +32,7 @@ import {matchHotKey} from "../util/hotKey";
 import {enter} from "./enter";
 import {fixTable} from "../util/table";
 import {
-    phTransaction,
-    transaction,
-    turnsIntoTransaction,
+    transaction, turnsIntoOneTransaction, turnsIntoTransaction,
     updateBatchTransaction,
     updateTransaction
 } from "./transaction";
@@ -244,6 +242,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             !isCtrl(event) && event.key !== "Escape" && !event.shiftKey && !event.altKey && !/^F\d{1,2}$/.test(event.key) &&
             event.key !== "Enter" && event.key !== "Tab" && event.key !== "Backspace" && event.key !== "Delete") {
             event.stopPropagation();
+            hideElements(["select"], protyle);
             return false;
         }
         if (!isCtrl(event) && !event.shiftKey && event.key !== "Backspace" && event.key !== "PageUp" && event.key !== "PageDown" && event.key.indexOf("Arrow") === -1) {
@@ -1064,38 +1063,78 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // h1 - h6 hotkey
+        if (matchHotKey(window.siyuan.config.keymap.editor.heading.paragraph.custom, event)) {
+            turnsIntoTransaction({
+                protyle,
+                nodeElement,
+                type: "Blocks2Ps",
+            })
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
         if (matchHotKey(window.siyuan.config.keymap.editor.heading.heading1.custom, event)) {
-            phTransaction(protyle, range, nodeElement, 1);
+            turnsIntoTransaction({
+                protyle,
+                nodeElement,
+                type: "Blocks2Hs",
+                level: 1
+            })
             event.preventDefault();
             event.stopPropagation();
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.heading.heading2.custom, event)) {
-            phTransaction(protyle, range, nodeElement, 2);
+            turnsIntoTransaction({
+                protyle,
+                nodeElement,
+                type: "Blocks2Hs",
+                level: 2
+            })
             event.preventDefault();
             event.stopPropagation();
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.heading.heading3.custom, event)) {
-            phTransaction(protyle, range, nodeElement, 3);
+            turnsIntoTransaction({
+                protyle,
+                nodeElement,
+                type: "Blocks2Hs",
+                level: 3
+            })
             event.preventDefault();
             event.stopPropagation();
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.heading.heading4.custom, event)) {
-            phTransaction(protyle, range, nodeElement, 4);
+            turnsIntoTransaction({
+                protyle,
+                nodeElement,
+                type: "Blocks2Hs",
+                level: 4
+            })
             event.preventDefault();
             event.stopPropagation();
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.heading.heading5.custom, event)) {
-            phTransaction(protyle, range, nodeElement, 5);
+            turnsIntoTransaction({
+                protyle,
+                nodeElement,
+                type: "Blocks2Hs",
+                level: 5
+            })
             event.preventDefault();
             event.stopPropagation();
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.heading.heading6.custom, event)) {
-            phTransaction(protyle, range, nodeElement, 6);
+            turnsIntoTransaction({
+                protyle,
+                nodeElement,
+                type: "Blocks2Hs",
+                level: 6
+            })
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -1474,7 +1513,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectsElement.length < 2) {
                 return;
             }
-            turnsIntoTransaction({
+            turnsIntoOneTransaction({
                 protyle, selectsElement,
                 type: "BlocksMergeSuperBlock",
                 level: "row"
@@ -1489,7 +1528,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectsElement.length < 2) {
                 return;
             }
-            turnsIntoTransaction({
+            turnsIntoOneTransaction({
                 protyle, selectsElement,
                 type: "BlocksMergeSuperBlock",
                 level: "col"

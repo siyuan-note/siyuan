@@ -2,8 +2,6 @@ import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchPost} from "./fetch";
 import {Constants} from "../constants";
-import {MenuItem} from "../menus/Menu";
-import {unicode2Emoji} from "../emoji";
 import {escapeHtml} from "./escape";
 import {isMobile} from "./functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -28,7 +26,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         op: (selectElements[0] as HTMLSelectElement).value,
         type: 0
     }, (response) => {
-        if (currentPage < response.data.pageCount) {
+        if (currentPage < response.data.totalCount) {
             nextElement.removeAttribute("disabled");
         } else {
             nextElement.setAttribute("disabled", "disabled");
@@ -411,7 +409,7 @@ export const openHistory = () => {
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath
                     }, (response) => {
-                        firstPanelElement.lastElementChild.innerHTML = response.data.content;
+                        firstPanelElement.lastElementChild.lastElementChild.innerHTML = response.data.content;
                     });
                 }
                 let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement;

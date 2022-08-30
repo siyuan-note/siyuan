@@ -494,6 +494,9 @@ func ReindexHistory() (err error) {
 		return
 	}
 
+	util.PushEndlessProgress(Conf.Language(35))
+	defer util.PushClearProgress()
+
 	sql.InitHistoryDatabase(true)
 	lutEngine := NewLute()
 	for _, historyDir := range historyDirs {
@@ -503,6 +506,7 @@ func ReindexHistory() (err error) {
 
 		name := historyDir.Name()
 		indexHistoryDir(name, lutEngine)
+		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(40), name))
 	}
 	return
 }

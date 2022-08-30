@@ -23,7 +23,7 @@ class ProtyleHtml extends HTMLElement {
       let fatalHTML = ''
       for (let i = 0; i < scripts.length; i++) {
         if (scripts[i].textContent.indexOf('document.write') > -1) {
-          fatalHTML += `<div style="color:#d23f31;font-size: 12px">${window.siyuan.languages.htmlBlockError}</div>
+          fatalHTML += `<div style="color:var(--b3-theme-error);font-size: 12px">${window.siyuan.languages.htmlBlockError}</div>
 <textarea style="width: 100%;box-sizing: border-box;height: 120px"><script>${scripts[i].textContent}</script></textarea>`
         } else {
           const s = document.createElement('script')

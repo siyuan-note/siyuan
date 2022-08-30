@@ -304,7 +304,8 @@
   white-space: nowrap;
   width: 100%;
   box-sizing: border-box;
-  background-color: var(--b3-theme-surface);
+  background-color: var(--b3-theme-background);
+  z-index: 221;
   @extend .fn__ellipsis;
 
   &--hide {

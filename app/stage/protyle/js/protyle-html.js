@@ -22,13 +22,14 @@ class ProtyleHtml extends HTMLElement {
       const scripts = el.getElementsByTagName('script')
       let fatalHTML = ''
       for (let i = 0; i < scripts.length; i++) {
-        const s = document.createElement('script')
         if (scripts[i].textContent.indexOf('document.write') > -1) {
-          fatalHTML += `<div style="color:#d23f31;font-size: 12px">${window.siyuan.languages.htmlBlockError}</div><textarea style="width: 100%;box-sizing: border-box;height: 120px"><script>${scripts[i].textContent}</script></textarea>`
+          fatalHTML += `<div style="color:#d23f31;font-size: 12px">${window.siyuan.languages.htmlBlockError}</div>
+<textarea style="width: 100%;box-sizing: border-box;height: 120px"><script>${scripts[i].textContent}</script></textarea>`
         } else {
+          const s = document.createElement('script')
           s.textContent = scripts[i].textContent
+          this.display.appendChild(s)
         }
-        this.display.appendChild(s)
       }
       if (fatalHTML) {
         this.display.innerHTML += fatalHTML

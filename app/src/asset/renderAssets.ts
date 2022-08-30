@@ -13,6 +13,6 @@ export const renderAssetsPreview = (pathString: string) => {
     } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
         return `<video style="max-width: 100%" controls="controls" src="${pathString}"></video>`;
     } else {
-        return "";
+        return pathString;
     }
 };

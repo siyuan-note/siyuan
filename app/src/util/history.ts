@@ -17,27 +17,34 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         previousElement.setAttribute("disabled", "disabled");
     }
     const inputElement = element.querySelector(".b3-text-field") as HTMLInputElement;
-    const selectElements = element.querySelectorAll(".b3-select");
-    window.localStorage.setItem(Constants.LOCAL_HISTORYNOTEID, (selectElements[1] as HTMLSelectElement).value);
+    const opElement = element.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
+    const typeElement = element.querySelector('.b3-select[data-type="typeselect"]') as HTMLSelectElement;
+    const notebookElement = element.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement;
+    window.localStorage.setItem(Constants.LOCAL_HISTORYNOTEID, notebookElement.value);
+    if (typeElement.value === "0") {
+        opElement.removeAttribute("disabled")
+        notebookElement.removeAttribute("disabled")
+    } else {
+        opElement.setAttribute("disabled", "disabled")
+        notebookElement.setAttribute("disabled", "disabled")
+    }
     fetchPost("/api/history/searchHistory", {
-        notebook: (selectElements[1] as HTMLSelectElement).value,
+        notebook: notebookElement.value,
         query: inputElement.value,
         page: currentPage,
-        op: (selectElements[0] as HTMLSelectElement).value,
-        type: 0
+        op: opElement.value,
+        type: parseInt(typeElement.value)
     }, (response) => {
         if (currentPage < response.data.pageCount) {
             nextElement.removeAttribute("disabled");
         } else {
             nextElement.setAttribute("disabled", "disabled");
         }
-
         if (response.data.histories.length === 0) {
             element.lastElementChild.lastElementChild.innerHTML = "";
             element.lastElementChild.firstElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             return;
         }
-
         let logsHTML = "";
         response.data.histories.forEach((item: { items: { path: string, title: string }[], hCreated: string }, index: number) => {
             logsHTML += `<li class="b3-list-item" data-type="toggle" style="padding-left: 0">
@@ -47,7 +54,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
             if (item.items.length > 0) {
                 logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
                 item.items.forEach((docItem, docIndex) => {
-                    logsHTML += `<li title="${escapeHtml(docItem.title)}" data-type="doc" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action${(index === 0 && docIndex === 0) ? " b3-list-item--focus" : ""}" style="padding-left: 32px">
+                    logsHTML += `<li title="${escapeHtml(docItem.title)}" data-type="${typeElement.value === "1" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action${(index === 0 && docIndex === 0) ? " b3-list-item--focus" : ""}" style="padding-left: 32px">
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
@@ -56,53 +63,20 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
 </li>`;
                 });
                 logsHTML += "</ul>";
-
                 if (index === 0) {
-                    fetchPost("/api/history/getDocHistoryContent", {
-                        historyPath: item.items[0].path
-                    }, (contentResponse) => {
-                        element.lastElementChild.lastElementChild.innerHTML = contentResponse.data.content;
-                    });
+                    if (typeElement.value === "1") {
+                        element.lastElementChild.lastElementChild.innerHTML = renderAssetsPreview(item.items[0].path);
+                    } else {
+                        fetchPost("/api/history/getDocHistoryContent", {
+                            historyPath: item.items[0].path
+                        }, (contentResponse) => {
+                            element.lastElementChild.lastElementChild.innerHTML = contentResponse.data.content;
+                        });
+                    }
                 }
             }
         });
         element.lastElementChild.firstElementChild.innerHTML = logsHTML;
-    });
-};
-
-const renderAssets = (element: HTMLElement) => {
-    element.setAttribute("data-init", "true");
-    fetchPost("/api/history/getAssetsHistory", {}, (response) => {
-        if (response.data.histories.length === 0) {
-            element.lastElementChild.innerHTML = "";
-            element.firstElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-            return;
-        }
-        let logsHTML = "";
-        response.data.histories.forEach((item: { items: { path: string, title: string }[], hCreated: string }, index: number) => {
-            logsHTML += `<li class="b3-list-item" data-type="toggle" style="padding-left: 0">
-    <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
-    <span class="b3-list-item__text">${item.hCreated}</span>
-</li>`;
-            if (item.items.length > 0) {
-                logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
-                item.items.forEach((docItem, docIndex) => {
-                    logsHTML += `<li title="${escapeHtml(docItem.title)}" data-type="assets" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action${(index === 0 && docIndex === 0) ? " b3-list-item--focus" : ""}" style="padding-left: 32px">
-    <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
-    <span class="fn__space"></span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
-        <svg><use xlink:href="#iconUndo"></use></svg>
-    </span>
-</li>`;
-                });
-                logsHTML += "</ul>";
-
-                if (index === 0) {
-                    element.lastElementChild.innerHTML = renderAssetsPreview(item.items[0].path);
-                }
-            }
-        });
-        element.firstElementChild.innerHTML = logsHTML;
     });
 };
 
@@ -248,8 +222,7 @@ export const openHistory = () => {
     const dialog = new Dialog({
         content: `<div class="fn__flex-column" style="height: 100%;">
     <div class="layout-tab-bar fn__flex" style="border-radius: 4px 4px 0 0">
-        <div data-type="doc" class="item item--focus"><span class="item__text">${window.siyuan.languages.doc}</span></div>
-        <div data-type="assets" class="item"><span class="item__text">${window.siyuan.languages.assets}</span></div>
+        <div data-type="doc" class="item item--focus"><span class="item__text">${window.siyuan.languages.dataHistory}</span></div>
         <div data-type="notebook" class="item"><span class="item__text">${window.siyuan.languages.removedNotebook}</span></div>
         <div data-type="repo" class="item"><span class="item__text">${window.siyuan.languages.dataSnapshot}</span></div>
     </div>
@@ -265,7 +238,12 @@ export const openHistory = () => {
                     <input class="b3-text-field b3-form__icon-input">
                 </div>
                 <span class="fn__space"></span>
-                <select class="b3-select" style="min-width: auto">
+                <select data-type="typeselect" class="b3-select" style="min-width: auto">
+                    <option value="0" selected>${window.siyuan.languages.doc}</option>
+                    <option value="1">${window.siyuan.languages.assets}</option>
+                </select>
+                <span class="fn__space"></span>
+                <select data-type="opselect" class="b3-select" style="min-width: auto">
                     <option value="all" selected>all</option>
                     <option value="clean">clean</option>
                     <option value="update">update</option>
@@ -274,7 +252,7 @@ export const openHistory = () => {
                     <option value="sync">sync</option>
                 </select>
                 <span class="fn__space"></span>
-                <select class="b3-select" style="min-width: auto">
+                <select data-type="notebookselect" class="b3-select" style="min-width: auto">
                     ${notebookSelectHTML}
                 </select>
                 <span class="fn__space"></span>
@@ -284,14 +262,8 @@ export const openHistory = () => {
                 <ul style="width:200px;overflow: auto;" class="b3-list b3-list--background">
                     <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
                 </ul>
-                <textarea class="fn__flex-1 history__text" readonly></textarea>
+                <div class="fn__flex-1 history__text" readonly></div>
             </div>
-        </div>
-        <div data-type="assets" class="fn__flex fn__none">
-            <ul style="width:200px;overflow: auto;" class="b3-list b3-list--background">
-                <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
-            </ul>
-            <div class="fn__flex-1 history__asset"></div>
         </div>
         <ul data-type="notebook" style="background-color: var(--b3-theme-background);border-radius: 0 0 4px 4px" class="fn__none b3-list b3-list--background">
             <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
@@ -362,9 +334,7 @@ export const openHistory = () => {
                         item.classList.add("fn__block");
                         target.classList.add("item--focus");
                         if (item.getAttribute("data-init") !== "true") {
-                            if (type === "assets") {
-                                renderAssets(item);
-                            } else if (type === "notebook") {
+                            if (type === "notebook") {
                                 renderRmNotebook(item);
                             } else if (type === "repo") {
                                 renderRepo(item, 1);
@@ -511,7 +481,7 @@ export const openHistory = () => {
                 renderDoc(firstPanelElement, type === "docprevious" ? currentPage - 1 : currentPage + 1);
                 break;
             } else if (type === "rebuildIndex") {
-                fetchPost("/api/history/reindexHistory", {}, ()=> {
+                fetchPost("/api/history/reindexHistory", {}, () => {
                     renderDoc(firstPanelElement, 1);
                 });
                 break;

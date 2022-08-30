@@ -466,33 +466,6 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "fmarkdown"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "The first child block text with complete Markdown markers"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"TableCellAlign": 3,
-							"Children": [
-								{
-									"Type": "NodeText",
 									"Data": "length"
 								}
 							]

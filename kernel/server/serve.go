@@ -204,11 +204,8 @@ func serveAssets(ginServer *gin.Engine) {
 		http.ServeFile(context.Writer, context.Request, p)
 		return
 	})
-	ginServer.GET("/history/:dir/assets/*name", model.CheckAuth, func(context *gin.Context) {
-		dir := context.Param("dir")
-		name := context.Param("name")
-		relativePath := path.Join(dir, "assets", name)
-		p := filepath.Join(util.HistoryDir, relativePath)
+	ginServer.GET("/history/*path", model.CheckAuth, func(context *gin.Context) {
+		p := filepath.Join(util.HistoryDir, context.Param("path"))
 		http.ServeFile(context.Writer, context.Request, p)
 		return
 	})

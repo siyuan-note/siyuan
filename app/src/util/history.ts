@@ -376,7 +376,7 @@ export const openHistory = () => {
             } else if (target.classList.contains("b3-list-item") && (type === "assets" || type === "doc")) {
                 const dataPath = target.getAttribute("data-path");
                 if (type === "assets") {
-                    firstPanelElement.nextElementSibling.lastElementChild.innerHTML = renderAssetsPreview(dataPath);
+                    firstPanelElement.lastElementChild.lastElementChild.innerHTML = renderAssetsPreview(dataPath);
                 } else if (type === "doc") {
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath

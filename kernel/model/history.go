@@ -283,7 +283,7 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []*History
 	}
 
 	if HistoryTypeDoc == typ {
-		stmt += " AND path LIKE '%/" + box + "/%'"
+		stmt += " AND path LIKE '%/" + box + "/%' AND path LIKE '%.sy'"
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"
 	}
@@ -494,6 +494,7 @@ func ReindexHistory() (err error) {
 		return
 	}
 
+	sql.InitHistoryDatabase(true)
 	lutEngine := NewLute()
 	for _, historyDir := range historyDirs {
 		if !historyDir.IsDir() {

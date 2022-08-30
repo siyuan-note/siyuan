@@ -355,7 +355,7 @@ export const openHistory = () => {
                         });
                     } else if (dataType === "doc") {
                         fetchPost("/api/history/rollbackDocHistory", {
-                            notebook: (firstPanelElement.querySelectorAll(".b3-select")[1] as HTMLSelectElement).value,
+                            notebook: (firstPanelElement.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement).value,
                             historyPath: target.parentElement.getAttribute("data-path")
                         });
                     } else if (dataType === "notebook") {

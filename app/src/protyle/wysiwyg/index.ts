@@ -78,6 +78,7 @@ export class WYSIWYG {
         if (window.siyuan.config.editor.displayBookmarkIcon) {
             this.element.classList.add("protyle-wysiwyg--attr");
         }
+        this.bindCopyEvent(protyle);
         if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
             return;
         }
@@ -180,20 +181,7 @@ export class WYSIWYG {
         /// #endif
     }
 
-    private bindEvent(protyle: IProtyle) {
-        this.element.addEventListener("focusout", () => {
-            if (getSelection().rangeCount > 0 && !this.element.contains(getSelection().getRangeAt(0).startContainer)) {
-                // 对 ctrl+tab 切换后 range 已经在新页面中才会触发的 focusout 进行忽略，因为在切换之前已经 dispatchEvent 了。
-                if (!protyle.toolbar.range) {
-                    protyle.toolbar.range = this.element.ownerDocument.createRange();
-                    protyle.toolbar.range.setStart(getContenteditableElement(this.element) || this.element, 0);
-                    protyle.toolbar.range.collapse(true);
-                }
-            } else {
-                protyle.toolbar.range = getEditorRange(this.element);
-            }
-        });
-
+    private bindCopyEvent (protyle: IProtyle) {
         this.element.addEventListener("copy", (event: ClipboardEvent & { target: HTMLElement }) => {
             // https://github.com/siyuan-note/siyuan/issues/4600
             if (event.target.tagName === "PROTYLE-HTML") {
@@ -266,6 +254,21 @@ export class WYSIWYG {
             }
             event.clipboardData.setData("text/plain", textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd());
             event.clipboardData.setData("text/html", html + Constants.ZWSP);
+        });
+    }
+
+    private bindEvent(protyle: IProtyle) {
+        this.element.addEventListener("focusout", () => {
+            if (getSelection().rangeCount > 0 && !this.element.contains(getSelection().getRangeAt(0).startContainer)) {
+                // 对 ctrl+tab 切换后 range 已经在新页面中才会触发的 focusout 进行忽略，因为在切换之前已经 dispatchEvent 了。
+                if (!protyle.toolbar.range) {
+                    protyle.toolbar.range = this.element.ownerDocument.createRange();
+                    protyle.toolbar.range.setStart(getContenteditableElement(this.element) || this.element, 0);
+                    protyle.toolbar.range.collapse(true);
+                }
+            } else {
+                protyle.toolbar.range = getEditorRange(this.element);
+            }
         });
 
         this.element.addEventListener("cut", (event: ClipboardEvent & { target: HTMLElement }) => {

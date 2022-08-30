@@ -985,7 +985,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     selectElements = [nodeElement];
                 }
                 updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
-                    e.style.textAlign = "";
+                    e.style.textAlign = "left";
                 });
             }
             event.stopPropagation();

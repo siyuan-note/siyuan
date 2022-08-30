@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
-		"updated": "20220807180341"
+		"updated": "20220830230716"
 	},
 	"Children": [
 		{
@@ -148,12 +148,45 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615112117-57abhen",
-				"updated": "20220615112255"
+				"updated": "20220830225617"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "数据快照除了用于本地数据历史，还将用于云端数据快照同步。"
+					"Data": "数据快照除了用于本地数据历史，还用于云端"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20210721103420-vn6g2yy"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "数据同步"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},
@@ -193,7 +226,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210403160319-ufy7jta",
-				"updated": "20220628203857"
+				"updated": "20220830225509"
 			},
 			"Children": [
 				{
@@ -417,7 +450,7 @@
 					},
 					"Properties": {
 						"id": "20210524213119-wybx1kh",
-						"updated": "20220501134919"
+						"updated": "20220830225509"
 					},
 					"Children": [
 						{
@@ -425,7 +458,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210524213119-ofmb315",
-								"updated": "20220501134919"
+								"updated": "20220830225509"
 							},
 							"Children": [
 								{
@@ -474,7 +507,7 @@
 										},
 										{
 											"Type": "NodeCodeSpanContent",
-											"Data": "-delete"
+											"Data": "-clean"
 										},
 										{
 											"Type": "NodeCodeSpanCloseMarker"
@@ -572,7 +605,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104090742-8rmcz3i",
-				"updated": "20220625231706"
+				"updated": "20220830230716"
 			},
 			"Children": [
 				{
@@ -584,7 +617,7 @@
 					},
 					"Properties": {
 						"id": "20220501135052-k47n4ms",
-						"updated": "20220625231706"
+						"updated": "20220830230716"
 					},
 					"Children": [
 						{
@@ -592,7 +625,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135052-o3r30jj",
-								"updated": "20220625231706"
+								"updated": "20220830230716"
 							},
 							"Children": [
 								{
@@ -637,7 +670,43 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 可打开数据历史界面，仅支持浏览最新的 32 次文件历史"
+									"Data": " 可打开数据历史界面，切换到 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "文件历史"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 页签，如果没有历史数据显示，可以试下该界面的 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "重建索引"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
 								}
 							]
 						}
@@ -1190,7 +1259,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615115625-3dx0t1j",
-				"updated": "20220615115755"
+				"updated": "20220830230414"
 			},
 			"Children": [
 				{
@@ -1275,7 +1344,47 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 文件夹。"
+					"Data": " 文件夹，然后在 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "文件历史"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "重建索引"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

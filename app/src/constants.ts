@@ -53,6 +53,7 @@ export abstract class Constants {
     public static readonly CB_GET_SCROLL = "cb-get-scroll"; // 滚动到指定位置
     public static readonly CB_GET_CONTEXT = "cb-get-context"; // 包含上下文
     public static readonly CB_GET_HTML = "cb-get-html"; // 直接渲染，不需要再 /api/block/getDocInfo，否则搜索表格无法定位
+    public static readonly CB_GET_HISTORY = "cb-get-history"; // 历史渲染
 
     // localstorage
     public static readonly LOCAL_SEARCHEDATA = "local-searchedata";

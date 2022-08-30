@@ -584,7 +584,7 @@ export class Gutter {
                         html += removeEmbed(item);
                     });
                     writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
-                    protyle.breadcrumb.hide();
+                    protyle.breadcrumb?.hide();
                     removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]));
                 } else {
                     focusByRange(getEditorRange(selectsElement[0]));
@@ -605,7 +605,7 @@ export class Gutter {
             icon: "iconTrashcan",
             accelerator: "⌫",
             click: () => {
-                protyle.breadcrumb.hide();
+                protyle.breadcrumb?.hide();
                 removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]));
             }
         }).element);
@@ -965,7 +965,7 @@ export class Gutter {
                     if (isNotEditBlock(nodeElement)) {
                         writeText(protyle.lute.BlockDOM2StdMd(removeEmbed(nodeElement)).trimEnd());
                         removeBlock(protyle, nodeElement, getEditorRange(nodeElement));
-                        protyle.breadcrumb.hide();
+                        protyle.breadcrumb?.hide();
                     } else {
                         focusByRange(getEditorRange(nodeElement));
                         document.execCommand("cut");
@@ -985,7 +985,7 @@ export class Gutter {
                 icon: "iconTrashcan",
                 accelerator: "⌫",
                 click: () => {
-                    protyle.breadcrumb.hide();
+                    protyle.breadcrumb?.hide();
                     removeBlock(protyle, nodeElement, getEditorRange(nodeElement));
                 }
             }).element);

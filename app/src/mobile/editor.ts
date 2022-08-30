@@ -51,7 +51,7 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) =
                 mode: action.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
             }, getResponse => {
                 onGet(getResponse, window.siyuan.mobileEditor.protyle, action);
-                window.siyuan.mobileEditor.protyle.breadcrumb.render(window.siyuan.mobileEditor.protyle);
+                window.siyuan.mobileEditor.protyle.breadcrumb?.render(window.siyuan.mobileEditor.protyle);
             });
             window.siyuan.mobileEditor.protyle.undo.clear();
         } else {

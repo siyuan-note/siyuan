@@ -35,7 +35,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             showMessage(window.siyuan.languages.crossPageUse.replace("${}", updateHotkeyTip("⇧Click")), 9000);
         }
 
-        const panelContextElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="context"]');
+        const panelContextElement = protyle.breadcrumb?.element.parentElement.querySelector('[data-type="context"]');
         if (panelContextElement && !panelContextElement.classList.contains("ft__primary")) {
             // 悬浮窗需展开上下文后才能进行滚动 https://github.com/siyuan-note/siyuan/issues/2311
             return;

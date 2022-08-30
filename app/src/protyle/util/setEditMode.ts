@@ -9,7 +9,9 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         protyle.preview.element.classList.remove("fn__none");
         protyle.contentElement.classList.add("fn__none");
         protyle.scroll?.element.classList.add("fn__none");
-        protyle.breadcrumb.element.classList.add("fn__none");
+        if (protyle.options.render.breadcrumb) {
+            protyle.breadcrumb?.element.classList.add("fn__none");
+        }
         protyle.preview.render(protyle);
     } else if (type === "wysiwyg") {
         setPadding(protyle);
@@ -22,7 +24,9 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         if (protyle.options.render.scroll) {
             protyle.scroll?.element.classList.remove("fn__none");
         }
-        protyle.breadcrumb.element.classList.remove("fn__none");
+        if (protyle.options.render.breadcrumb) {
+            protyle.breadcrumb?.element.classList.remove("fn__none");
+        }
     }
     hideElements( ["gutter", "toolbar", "select", "hint", "util"], protyle);
 };

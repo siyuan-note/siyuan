@@ -7,7 +7,7 @@ let yDiff: number;
 
 export const handleTouchEnd = () => {
     if (window.siyuan.mobileEditor) {
-        window.siyuan.mobileEditor.protyle.breadcrumb.show();
+        window.siyuan.mobileEditor.protyle.breadcrumb?.show();
     }
 
     if (!clientX || !clientY || navigator.userAgent.indexOf("iPhone") === -1) {

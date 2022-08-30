@@ -19,7 +19,9 @@ export const initUI = (protyle: IProtyle) => {
         protyle.contentElement.appendChild(protyle.title.element);
     }
     protyle.contentElement.appendChild(protyle.wysiwyg.element);
-    scrollEvent(protyle, protyle.contentElement);
+    if (!protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
+        scrollEvent(protyle, protyle.contentElement);
+    }
     protyle.element.append(protyle.contentElement);
     protyle.element.appendChild(protyle.preview.element);
     if (protyle.upload) {
@@ -59,6 +61,9 @@ export const removeLoading = (protyle: IProtyle) => {
 };
 
 export const setPadding = (protyle: IProtyle) => {
+    if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
+        return;
+    }
     let min16 = 16;
     let min24 = 24;
     if (!isMobile()) {

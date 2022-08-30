@@ -78,6 +78,9 @@ export class WYSIWYG {
         if (window.siyuan.config.editor.displayBookmarkIcon) {
             this.element.classList.add("protyle-wysiwyg--attr");
         }
+        if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
+            return;
+        }
         this.bindEvent(protyle);
         keydown(protyle, this.element);
         dropEvent(protyle, this.element);
@@ -273,7 +276,9 @@ export class WYSIWYG {
             event.stopPropagation();
             event.preventDefault();
 
-            protyle.breadcrumb.hide();
+            if (protyle.options.render.breadcrumb) {
+                protyle.breadcrumb.hide();
+            }
             const range = getEditorRange(protyle.wysiwyg.element);
             let nodeElement = hasClosestBlock(range.startContainer);
             if (!nodeElement) {
@@ -727,7 +732,7 @@ export class WYSIWYG {
             } else if (event.clientX < mostLeft) {
                 x = mostLeft;
             }
-            const mostTop = rect.top + protyle.breadcrumb.element.parentElement.clientHeight;
+            const mostTop = rect.top + (protyle.options.render.breadcrumb?protyle.breadcrumb.element.parentElement.clientHeight:0);
 
             let mouseElement: Element;
             let moveCellElement: HTMLElement;
@@ -1873,7 +1878,9 @@ export class WYSIWYG {
             }
 
             // 面包屑定位
-            protyle.breadcrumb.render(protyle);
+            if (protyle.options.render.breadcrumb) {
+                protyle.breadcrumb.render(protyle);
+            }
         });
     }
 }

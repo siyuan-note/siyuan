@@ -6,7 +6,10 @@ import {escapeHtml} from "./escape";
 import {isMobile} from "./functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {renderAssetsPreview} from "../asset/renderAssets";
+import Protyle from "../protyle";
+import {onGet} from "../protyle/util/onGet";
 
+let historyEditor: Protyle
 const renderDoc = (element: HTMLElement, currentPage: number) => {
     const previousElement = element.querySelector('[data-type="docprevious"]');
     const nextElement = element.querySelector('[data-type="docnext"]');
@@ -24,9 +27,13 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     if (typeElement.value === "0") {
         opElement.removeAttribute("disabled")
         notebookElement.removeAttribute("disabled")
+        element.lastElementChild.lastElementChild.previousElementSibling.classList.add("fn__none");
+        element.lastElementChild.lastElementChild.classList.remove("fn__none");
     } else {
         opElement.setAttribute("disabled", "disabled")
         notebookElement.setAttribute("disabled", "disabled")
+        element.lastElementChild.lastElementChild.previousElementSibling.classList.remove("fn__none");
+        element.lastElementChild.lastElementChild.classList.add("fn__none");
     }
     fetchPost("/api/history/searchHistory", {
         notebook: notebookElement.value,
@@ -41,7 +48,8 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
             nextElement.setAttribute("disabled", "disabled");
         }
         if (response.data.histories.length === 0) {
-            element.lastElementChild.lastElementChild.innerHTML = "";
+            element.lastElementChild.lastElementChild.previousElementSibling.classList.add("fn__none");
+            element.lastElementChild.lastElementChild.classList.add("fn__none");
             element.lastElementChild.firstElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             return;
         }
@@ -65,12 +73,12 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
                 logsHTML += "</ul>";
                 if (index === 0) {
                     if (typeElement.value === "1") {
-                        element.lastElementChild.lastElementChild.innerHTML = renderAssetsPreview(item.items[0].path);
+                        element.lastElementChild.lastElementChild.previousElementSibling.innerHTML = renderAssetsPreview(item.items[0].path);
                     } else {
                         fetchPost("/api/history/getDocHistoryContent", {
                             historyPath: item.items[0].path
                         }, (contentResponse) => {
-                            element.lastElementChild.lastElementChild.innerHTML = contentResponse.data.content;
+                            onGet(contentResponse, historyEditor.protyle, [Constants.CB_GET_HISTORY]);
                         });
                     }
                 }
@@ -262,7 +270,8 @@ export const openHistory = () => {
                 <ul style="width:200px;overflow: auto;" class="b3-list b3-list--background">
                     <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
                 </ul>
-                <div class="fn__flex-1 history__text" readonly></div>
+                <div class="fn__flex-1 history__text"></div>
+                <div class="fn__flex-1 history__text"></div>
             </div>
         </div>
         <ul data-type="notebook" style="background-color: var(--b3-theme-background);border-radius: 0 0 4px 4px" class="fn__none b3-list b3-list--background">
@@ -310,6 +319,20 @@ export const openHistory = () => {
         renderDoc(firstPanelElement, 1);
     });
     renderDoc(firstPanelElement, 1);
+    historyEditor = new Protyle(firstPanelElement.lastElementChild.lastElementChild as HTMLElement, {
+        blockId: "",
+        action: [Constants.CB_GET_HISTORY],
+        render: {
+            background: false,
+            title: false,
+            gutter: false,
+            scroll: false,
+            breadcrumb: false,
+            breadcrumbDocName: false,
+            breadcrumbContext: false,
+        },
+        typewriterMode: false,
+    });
     const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
     const selectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
     selectElement.addEventListener("change", () => {
@@ -376,12 +399,12 @@ export const openHistory = () => {
             } else if (target.classList.contains("b3-list-item") && (type === "assets" || type === "doc")) {
                 const dataPath = target.getAttribute("data-path");
                 if (type === "assets") {
-                    firstPanelElement.lastElementChild.lastElementChild.innerHTML = renderAssetsPreview(dataPath);
+                    firstPanelElement.lastElementChild.lastElementChild.previousElementSibling.innerHTML = renderAssetsPreview(dataPath);
                 } else if (type === "doc") {
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath
                     }, (response) => {
-                        firstPanelElement.lastElementChild.lastElementChild.innerHTML = response.data.content;
+                        onGet(response, historyEditor.protyle, [Constants.CB_GET_HISTORY]);
                     });
                 }
                 let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement;

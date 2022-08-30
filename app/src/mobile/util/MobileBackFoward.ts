@@ -67,7 +67,7 @@ const focusStack = (backStack: IBackStack) => {
             enableProtyle(protyle);
         }
         protyle.contentElement.scrollTop = backStack.scrollTop;
-        window.siyuan.mobileEditor.protyle.breadcrumb.render(protyle);
+        window.siyuan.mobileEditor.protyle.breadcrumb?.render(protyle);
     });
 };
 

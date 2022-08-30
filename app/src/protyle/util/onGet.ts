@@ -172,6 +172,10 @@ const setHTML = (options: { content: string, action?: string[], unScroll?: boole
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);
     blockRender(protyle, protyle.wysiwyg.element);
+    if (options.action.includes(Constants.CB_GET_HISTORY)) {
+        disabledProtyle(protyle);
+        return;
+    }
     if (protyle.options.render.scroll) {
         protyle.scroll.update(protyle.block.blockCount, protyle);
     }
@@ -265,7 +269,9 @@ const setHTML = (options: { content: string, action?: string[], unScroll?: boole
     if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE)) {
         return;
     }
-    protyle.breadcrumb.render(protyle);
+    if (protyle.options.render.breadcrumb) {
+        protyle.breadcrumb.render(protyle);
+    }
 };
 
 /** 禁用编辑器 */

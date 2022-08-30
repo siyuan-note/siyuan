@@ -13,6 +13,7 @@ export class Options {
             title: false,
             gutter: true,
             scroll: false,
+            breadcrumb: true,
             breadcrumbDocName: false,
             breadcrumbContext: false
         },

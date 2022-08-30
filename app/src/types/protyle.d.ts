@@ -355,6 +355,7 @@ interface IOptions {
         title?: boolean
         gutter?: boolean
         scroll?: boolean
+        breadcrumb?: boolean
         breadcrumbDocName?: boolean
         breadcrumbContext?: boolean
     }

@@ -56,7 +56,7 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
         const keyCode = hotKeys.length === 3 ? hotKeys[2] : hotKeys[1];
         if ((hotKeys.length === 3 ? isCtrl(event) : !isCtrl(event)) && event.altKey && !event.shiftKey &&
             (
-                (/^[0-9]$/.test(keyCode) ? (event.code === "Digit" + keyCode || event.code === "Numpad" + keyCode)  : event.code === "Key" + keyCode) ||
+                (/^[0-9]$/.test(keyCode) ? (event.code === "Digit" + keyCode || event.code === "Numpad" + keyCode) : event.code === "Key" + keyCode) ||
                 event.code === keyCode ||
                 (event.code === "Period" && keyCode === ".") ||
                 (event.code === "BracketLeft" && keyCode === "[") || (event.code === "BracketRight" && keyCode === "]")
@@ -69,7 +69,8 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     // 是否匹配 ⇧⌘[] / ⌘[]
     const hasShift = hotKeys.length > 2 && (hotKeys[0] === "⇧");
     let key = (hasShift ? hotKeys[2] : hotKeys[1]);
-    if (hasShift && !/Mac/.test(navigator.platform)) {
+    if (hasShift // 更新 electron 后不需要判断 mac && !/Mac/.test(navigator.platform)
+    ) {
         if (key === "-") {
             key = "_";
         } else if (key === "=") {

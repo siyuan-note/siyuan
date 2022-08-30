@@ -208,7 +208,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             const tempElement = document.createElement("div");
             if (textHTML.startsWith(Constants.ZWSP)) {
                 // 剪切块内容后粘贴
-                tempElement.innerHTML = textHTML.substr(1);
+                // mac 复制后会带有 <meta charset="utf-8"> https://github.com/siyuan-note/siyuan/issues/5751
+                tempElement.innerHTML = textHTML.substr(1).replace('<meta charset="utf-8">', "");
                 let isBlock = false;
                 tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
                     e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
@@ -224,7 +225,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 filterClipboardHint(protyle, tempMd);
             } else if (textHTML.endsWith(Constants.ZWSP)) {
                 // 编辑器内部粘贴
-                tempElement.innerHTML = textHTML.substr(0, textHTML.length - 1);
+                tempElement.innerHTML = textHTML.substr(0, textHTML.length - 1).replace('<meta charset="utf-8">', "");
                 tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
                     const newId = Lute.NewNodeID();
                     e.setAttribute("data-node-id", newId);

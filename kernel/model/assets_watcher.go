@@ -84,7 +84,7 @@ func watchAssets() {
 				}
 
 				// 重新缓存资源文件，以便使用 /资源 搜索
-				cache.LoadAssets()
+				go cache.LoadAssets()
 			}
 		}
 	}()

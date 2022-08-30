@@ -231,6 +231,7 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 		return
 	}
 	IncSync()
+	util.PushMsg(Conf.Language(102), 3000)
 	return nil
 }
 
@@ -279,11 +280,11 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []*History
 	} else {
 		stmt += "1=1"
 	}
-	if "all" != op {
-		stmt += " AND op = '" + op + "'"
-	}
 
 	if HistoryTypeDoc == typ {
+		if "all" != op {
+			stmt += " AND op = '" + op + "'"
+		}
 		stmt += " AND path LIKE '%/" + box + "/%' AND path LIKE '%.sy'"
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"

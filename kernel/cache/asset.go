@@ -37,6 +37,8 @@ var Assets = map[string]*Asset{}
 var assetsLock = sync.Mutex{}
 
 func LoadAssets() {
+	defer logging.Recover()
+
 	start := time.Now()
 	assetsLock.Lock()
 	defer assetsLock.Unlock()

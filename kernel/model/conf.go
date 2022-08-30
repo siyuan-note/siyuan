@@ -502,7 +502,7 @@ func InitBoxes() {
 				}
 			}()
 
-			treenode.InitBlockTree()
+			treenode.InitBlockTree(false)
 			initialized = true
 		}
 	} else { // 大于 1 的话说明在同步阶段已经加载过了

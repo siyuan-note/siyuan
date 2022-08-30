@@ -480,6 +480,7 @@ func RefreshFileTree() {
 		util.PushErrMsg(fmt.Sprintf(Conf.Language(85), err), 5000)
 		return
 	}
+	treenode.InitBlockTree(true)
 
 	util.PushEndlessProgress(Conf.Language(35))
 	openedBoxes := Conf.GetOpenedBoxes()

@@ -47,6 +47,15 @@ type BlockTree struct {
 	HPath    string // 文档逻辑路径
 }
 
+func CountTrees() (ret int) {
+	roots := map[string]bool{}
+	for _, b := range blockTrees {
+		roots[b.RootID] = true
+	}
+	ret = len(roots)
+	return
+}
+
 func GetBlockTrees() map[string]*BlockTree {
 	return blockTrees
 }
@@ -218,11 +227,24 @@ func AutoFlushBlockTree() {
 	}
 }
 
-func InitBlockTree() {
+func InitBlockTree(force bool) {
 	start := time.Now()
 
 	if nil == blocktreeFileLock {
 		blocktreeFileLock = flock.New(util.BlockTreePath)
+	} else {
+		if force {
+			err := blocktreeFileLock.Unlock()
+			if nil != err {
+				logging.LogErrorf("unlock blocktree file failed: %s", err)
+			}
+			err = os.RemoveAll(util.BlockTreePath)
+			if nil != err {
+				logging.LogErrorf("remove blocktree file failed: %s", err)
+			}
+			blocktreeFileLock = flock.New(util.BlockTreePath)
+			return
+		}
 	}
 
 	var err error
@@ -247,6 +269,7 @@ func InitBlockTree() {
 	blockTreesLock.Lock()
 	if err = msgpack.Unmarshal(data, &blockTrees); nil != err {
 		logging.LogErrorf("unmarshal block tree failed: %s", err)
+		blocktreeFileLock.Unlock()
 		if err = os.RemoveAll(util.BlockTreePath); nil != err {
 			logging.LogErrorf("removed corrupted block tree failed: %s", err)
 		}

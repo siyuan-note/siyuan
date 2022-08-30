@@ -497,7 +497,7 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 	}
 
 	start := time.Now()
-	indexBeforeSync, err := indexRepoBeforeCloudSync(repo)
+	err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
 		syncDownloadErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -592,21 +592,24 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 
 	// 有数据变更，需要重建索引
 	var upserts, removes []string
+	var upsertTrees int
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
+		if strings.HasSuffix(file.Path, ".sy") {
+			upsertTrees++
+		}
 	}
 	for _, file := range mergeResult.Removes {
 		removes = append(removes, file.Path)
 	}
 
 	if boot && gulu.File.IsExist(util.BlockTreePath) {
-		treenode.InitBlockTree()
+		treenode.InitBlockTree(false)
 	}
 
 	cache.ClearDocsIAL() // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
 
-	fullReindex := 0.2 < float64(len(upserts))/float64(len(indexBeforeSync.Files))
-	if fullReindex { // 如果更新的文件比较多则全量重建索引
+	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764
 		RefreshFileTree()
 		return
 	}
@@ -626,10 +629,14 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 	return
 }
 
-func indexRepoBeforeCloudSync(repo *dejavu.Repo) (index *entity.Index, err error) {
+func needFullReindex(upsertTrees int) bool {
+	return 0.2 < float64(upsertTrees)/float64(treenode.CountTrees())
+}
+
+func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 	start := time.Now()
 	latest, _ := repo.Latest()
-	index, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
+	index, err := repo.Index("[Sync] Cloud sync", map[string]interface{}{
 		dejavu.CtxPushMsg: dejavu.CtxPushMsgToStatusBar,
 	})
 	if nil != err {

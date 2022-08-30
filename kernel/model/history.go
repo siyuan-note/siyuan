@@ -231,6 +231,7 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 		return
 	}
 	IncSync()
+	util.PushMsg(Conf.Language(102), 3000)
 	return nil
 }
 

@@ -202,35 +202,3 @@ func renderBlockMarkdownR0(id string, rendered *[]string) (ret []*ast.Node) {
 	}
 	return
 }
-
-func renderBlockMarkdown(node *ast.Node) string {
-	var nodes []*ast.Node
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if entering {
-			nodes = append(nodes, n)
-			if ast.NodeHeading == node.Type {
-				// 支持“标题块”引用
-				children := treenode.HeadingChildren(n)
-				nodes = append(nodes, children...)
-			}
-		}
-		return ast.WalkSkipChildren
-	})
-
-	root := &ast.Node{Type: ast.NodeDocument}
-	luteEngine := NewLute()
-	luteEngine.SetKramdownIAL(false)
-	luteEngine.SetSuperBlock(false)
-	tree := &parse.Tree{Root: root, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
-	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
-	renderer.Writer = &bytes.Buffer{}
-	renderer.Writer.Grow(4096)
-	renderer.NodeWriterStack = append(renderer.NodeWriterStack, renderer.Writer) // 因为有可能不是从 root 开始渲染，所以需要初始化
-	for _, node := range nodes {
-		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-			rendererFunc := renderer.RendererFuncs[n.Type]
-			return rendererFunc(n, entering)
-		})
-	}
-	return strings.TrimSpace(renderer.Writer.String())
-}

@@ -154,7 +154,8 @@ func GetDocHistoryContent(historyPath string) (content string, err error) {
 		os.RemoveAll(historyPath)
 		return
 	}
-	content = renderBlockMarkdown(historyTree.Root)
+
+	content = luteEngine.Tree2BlockDOM(historyTree, luteEngine.RenderOptions)
 	return
 }
 

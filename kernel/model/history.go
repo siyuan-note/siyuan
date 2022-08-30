@@ -550,6 +550,9 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 		}
 
 		title := tree.Root.IALAttr("title")
+		if "" == title {
+			title = "Untitled"
+		}
 		content := tree.Root.Content()
 		p := strings.TrimPrefix(doc, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])

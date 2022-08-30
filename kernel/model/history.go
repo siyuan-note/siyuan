@@ -606,20 +606,29 @@ func fromSQLHistories(sqlHistories []*sql.History) (ret []*History) {
 			tmpTime = unixSec
 		}
 		if tmpTime == unixSec {
-			items = append(items, &HistoryItem{
+			item := &HistoryItem{
 				Title: sqlHistory.Title,
 				Path:  filepath.Join(util.HistoryDir, sqlHistory.Path),
-			})
+			}
+			if HistoryTypeAsset == sqlHistory.Type {
+				item.Path = filepath.ToSlash(strings.TrimPrefix(item.Path, util.WorkspaceDir))
+			}
+			items = append(items, item)
 		} else {
 			ret = append(ret, &History{
 				HCreated: time.Unix(unixSec, 0).Format("2006-01-02 15:04:05"),
 				Items:    items,
 			})
-			items = []*HistoryItem{}
-			items = append(items, &HistoryItem{
+
+			item := &HistoryItem{
 				Title: sqlHistory.Title,
 				Path:  filepath.Join(util.HistoryDir, sqlHistory.Path),
-			})
+			}
+			if HistoryTypeAsset == sqlHistory.Type {
+				item.Path = filepath.ToSlash(strings.TrimPrefix(item.Path, util.WorkspaceDir))
+			}
+			items = []*HistoryItem{}
+			items = append(items, item)
 		}
 	}
 	if 0 < len(items) {

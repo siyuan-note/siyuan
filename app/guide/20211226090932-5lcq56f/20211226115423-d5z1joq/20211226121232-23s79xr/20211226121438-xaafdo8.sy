@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
-		"updated": "20220821170702"
+		"updated": "20220831004450"
 	},
 	"Children": [
 		{
@@ -259,6 +259,76 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20220831004246-flqtcf2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220831004246-flqtcf2",
+				"updated": "20220831004450"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：如果數據量較大，建議通過設置中的 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "導出 - Data"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 導出數據包，然後將該數據包通過手動拷貝或者其他方式發送到新設備上，並在新設備上 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "導入 - Data"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，最後再配置同步。"
 				}
 			]
 		},

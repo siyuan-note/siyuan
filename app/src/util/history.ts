@@ -222,7 +222,7 @@ export const openHistory = () => {
     const dialog = new Dialog({
         content: `<div class="fn__flex-column" style="height: 100%;">
     <div class="layout-tab-bar fn__flex" style="border-radius: 4px 4px 0 0">
-        <div data-type="doc" class="item item--focus"><span class="item__text">${window.siyuan.languages.dataHistory}</span></div>
+        <div data-type="doc" class="item item--focus"><span class="item__text">${window.siyuan.languages.fileHistory}</span></div>
         <div data-type="notebook" class="item"><span class="item__text">${window.siyuan.languages.removedNotebook}</span></div>
         <div data-type="repo" class="item"><span class="item__text">${window.siyuan.languages.dataSnapshot}</span></div>
     </div>

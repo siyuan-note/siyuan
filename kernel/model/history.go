@@ -141,7 +141,7 @@ func ClearWorkspaceHistory() (err error) {
 	return
 }
 
-func GetDocHistoryContent(historyPath, keyword string) (content string, isLargeDoc bool, err error) {
+func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content string, isLargeDoc bool, err error) {
 	if !gulu.File.IsExist(historyPath) {
 		return
 	}
@@ -160,6 +160,8 @@ func GetDocHistoryContent(historyPath, keyword string) (content string, isLargeD
 		os.RemoveAll(historyPath)
 		return
 	}
+	id = historyTree.Root.ID
+	rootID = historyTree.Root.ID
 
 	if !isLargeDoc {
 		renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}

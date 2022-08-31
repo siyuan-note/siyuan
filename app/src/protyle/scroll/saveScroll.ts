@@ -97,5 +97,7 @@ export const restoreScroll = (protyle: IProtyle, scrollAttr: IScrollAttr) => {
                 /// #endif
             }
         });
+    } else if (scrollAttr.scrollTop) {
+        protyle.contentElement.scrollTop = scrollAttr.scrollTop;
     }
 };

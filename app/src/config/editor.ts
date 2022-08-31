@@ -3,6 +3,7 @@ import {setInlineStyle} from "../util/assets";
 import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {setPadding} from "../protyle/ui/initUI";
+import {reloadProtyle} from "../protyle/util/reload";
 
 export const editor = {
     element: undefined as Element,
@@ -201,7 +202,7 @@ export const editor = {
     onSetEditor: (editor: IEditor) => {
         window.siyuan.config.editor = editor;
         getAllModels().editor.forEach((item) => {
-            item.editor.reload();
+            reloadProtyle(item.editor.protyle)
             setPadding(item.editor.protyle);
             if (window.siyuan.config.editor.fullWidth) {
                 item.editor.protyle.contentElement.setAttribute("data-fullwidth", "true");

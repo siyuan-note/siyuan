@@ -2,6 +2,7 @@ import {closePanel} from "../util/closePanel";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {genOptions} from "../../util/genOptions";
+import {reloadProtyle} from "../../protyle/util/reload";
 
 export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTMLElement) => {
     closePanel();
@@ -69,7 +70,7 @@ export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTML
             emoji: window.siyuan.config.editor.emoji
         }, (response) => {
             window.siyuan.config.editor = response.data;
-            window.siyuan.mobileEditor.reload();
+            reloadProtyle(window.siyuan.mobileEditor.protyle);
             setInlineStyle();
         });
     });

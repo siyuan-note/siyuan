@@ -3,11 +3,9 @@ import {fetchPost} from "../../util/fetch";
 import {writeText} from "../util/compatibility";
 import {focusByOffset, getSelectionOffset} from "../util/selection";
 import {fullscreen, netImg2LocalAssets} from "../breadcrumb/action";
-import {addLoading, setPadding} from "../ui/initUI";
-import {Constants} from "../../constants";
-import {onGet} from "../util/onGet";
+import {setPadding} from "../ui/initUI";
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
-import {saveScroll} from "../scroll/saveScroll";
+import {reloadProtyle} from "../util/reload";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
@@ -23,14 +21,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
     }
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.refresh.custom, event)) {
-        addLoading(protyle);
-        fetchPost("/api/filetree/getDoc", {
-            id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
-            mode: 0,
-            size: protyle.block.showAll ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
-        }, getResponse => {
-            onGet(getResponse, protyle, protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS], saveScroll(protyle, true), true);
-        });
+        reloadProtyle(protyle);
         event.preventDefault();
         event.stopPropagation();
         return true;

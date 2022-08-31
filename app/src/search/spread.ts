@@ -11,6 +11,7 @@ import {addLoading} from "../protyle/ui/initUI";
 import {getAllModels} from "../layout/getAll";
 import {showMessage} from "../dialog/message";
 import {focusByRange} from "../protyle/util/selection";
+import {reloadProtyle} from "../protyle/util/reload";
 
 let protyle: Protyle;
 export const openSearch = async (hotkey: string, key?: string, notebookId?: string, searchPath?: string) => {
@@ -536,7 +537,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             }
             getAllModels().editor.forEach(item => {
                 if (rootIds[0] === item.editor.protyle.block.rootID) {
-                    item.editor.reload();
+                    reloadProtyle(item.editor.protyle)
                 }
             });
             if (!currentList.nextElementSibling && searchPanelElement.children[0]) {

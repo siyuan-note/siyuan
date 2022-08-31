@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {Hint} from "./hint";
 import {setLute} from "./markdown/setLute";
 import {Preview} from "./preview";
-import {addLoading, initUI, setPadding} from "./ui/initUI";
+import {initUI, setPadding} from "./ui/initUI";
 import {Undo} from "./undo";
 import {Upload} from "./upload";
 import {Options} from "./util/Options";
@@ -24,6 +24,7 @@ import {setPanelFocus} from "../layout/util";
 import {Background} from "./header/Background";
 import {getDisplayName} from "../util/pathName";
 import {onGet} from "./util/onGet";
+import {reloadProtyle} from "./util/reload";
 
 class Protyle {
 
@@ -93,24 +94,22 @@ class Protyle {
                         case "heading2doc":
                         case "li2doc":
                             if (this.protyle.block.rootID === data.data.srcRootBlockID) {
-                                const scrollTop = this.protyle.contentElement.scrollTop;
-                                fetchPost("/api/filetree/getDoc", {
-                                    id: this.protyle.block.id,
-                                    size: Constants.SIZE_GET,
-                                }, getResponse => {
-                                    onGet(getResponse, this.protyle);
-                                    /// #if !MOBILE
-                                    if (data.cmd === "heading2doc") {
-                                        // 文档标题互转后，需更新大纲
-                                        updatePanelByEditor(this.protyle, false, false, true);
-                                    }
-                                    /// #endif
-                                    // 文档标题互转后，编辑区会跳转到开头 https://github.com/siyuan-note/siyuan/issues/2939
-                                    setTimeout(() => {
-                                        this.protyle.contentElement.scrollTop = scrollTop;
-                                        this.protyle.scroll.lastScrollTop = scrollTop - 1;
-                                    }, Constants.TIMEOUT_BLOCKLOAD);
-                                });
+                                if (this.protyle.block.showAll && data.cmd === "heading2doc") {
+                                    fetchPost("/api/filetree/getDoc", {
+                                        id: this.protyle.block.rootID,
+                                        size: Constants.SIZE_GET,
+                                    }, getResponse => {
+                                        onGet(getResponse, this.protyle);
+                                    })
+                                } else {
+                                    reloadProtyle(this.protyle);
+                                }
+                                /// #if !MOBILE
+                                if (data.cmd === "heading2doc") {
+                                    // 文档标题互转后，需更新大纲
+                                    updatePanelByEditor(this.protyle, false, false, true);
+                                }
+                                /// #endif
                             }
                             break;
                         case "rename":
@@ -204,23 +203,6 @@ class Protyle {
             });
             setPadding(this.protyle);
         }
-    }
-
-    public reload() {
-        if (window.siyuan.config.editor.displayBookmarkIcon) {
-            this.protyle.wysiwyg.element.classList.add("protyle-wysiwyg--attr");
-        } else {
-            this.protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--attr");
-        }
-        this.protyle.lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);
-        addLoading(this.protyle);
-        fetchPost("/api/filetree/getDoc", {
-            id: this.protyle.block.id,
-            mode: 0,
-            size: Constants.SIZE_GET,
-        }, getResponse => {
-            onGet(getResponse, this.protyle);
-        });
     }
 
     private init() {

@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226122707-8cr09co",
 		"title": "數據歷史",
-		"updated": "20220830230824"
+		"updated": "20220831210559"
 	},
 	"Children": [
 		{
@@ -226,7 +226,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135134-p6jpw7s",
-				"updated": "20220830230824"
+				"updated": "20220831210559"
 			},
 			"Children": [
 				{
@@ -238,7 +238,7 @@
 					},
 					"Properties": {
 						"id": "20220501135134-8h6nsrg",
-						"updated": "20220501135220"
+						"updated": "20220831210559"
 					},
 					"Children": [
 						{
@@ -246,12 +246,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135134-wmi0mal",
-								"updated": "20220501135220"
+								"updated": "20220831210559"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "每隔 10 分鐘會對這 10 分鐘內更新過的文檔生成歷史，間隔時間可通過 "
+									"Data": "每隔 10 分鐘會對這 10 分鐘內更新過的文檔生成歷史（間隔時間可通過 "
 								},
 								{
 									"Type": "NodeKbd",
@@ -311,7 +311,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 進行調整，歷史文件夾後綴為 "
+									"Data": " 進行調整），歷史文件夾後綴為 "
 								},
 								{
 									"Type": "NodeCodeSpan",
@@ -791,7 +791,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501134148-412jfs8",
-				"updated": "20220501134148"
+				"updated": "20220831210544"
 			},
 			"Children": [
 				{
@@ -931,7 +931,7 @@
 					},
 					"Properties": {
 						"id": "20220501134148-kkctqa9",
-						"updated": "20220501134148"
+						"updated": "20220831210544"
 					},
 					"Children": [
 						{
@@ -939,12 +939,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501134148-ryie7sn",
-								"updated": "20220501134148"
+								"updated": "20220831210544"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "資源文件刪除："
+									"Data": "資源文件清理："
 								},
 								{
 									"Type": "NodeCodeSpan",
@@ -955,7 +955,7 @@
 										},
 										{
 											"Type": "NodeCodeSpanContent",
-											"Data": "2022-05-01-095621-delete/assets/image-20220501091157-qccp87e.png"
+											"Data": "2022-05-01-095621-clean/assets/image-20220501091157-qccp87e.png"
 										},
 										{
 											"Type": "NodeCodeSpanCloseMarker"

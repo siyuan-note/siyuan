@@ -224,6 +224,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                         e.setAttribute("updated", newId.split("-")[0]);
                     }
                 });
+                // 从历史中复制后粘贴
+                tempElement.querySelectorAll('[spellcheck="false"][contenteditable="false"]').forEach((e) => {
+                    e.setAttribute("contenteditable", "true");
+                });
                 const tempInnerHTML = tempElement.innerHTML;
                 insertHTML(tempInnerHTML, protyle);
                 filterClipboardHint(protyle, tempInnerHTML);

@@ -697,7 +697,7 @@ export const exportMd = (id: string) => {
     }).element;
 };
 
-export const openMenu = (src: string, onlyMenu = false) => {
+export const openMenu = (src: string, onlyMenu: boolean, showAccelerator: boolean) => {
     const submenu = [];
     if (isLocalPath(src)) {
         if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(src)) &&
@@ -707,7 +707,7 @@ export const openMenu = (src: string, onlyMenu = false) => {
             /// #if !MOBILE
             submenu.push({
                 label: window.siyuan.languages.insertRight,
-                accelerator: "Click",
+                accelerator: showAccelerator ? "Click" : "",
                 click() {
                     openAsset(src.trim(), parseInt(getSearch("page", src)), "right");
                 }
@@ -716,7 +716,7 @@ export const openMenu = (src: string, onlyMenu = false) => {
             /// #if !BROWSER
             submenu.push({
                 label: window.siyuan.languages.useDefault,
-                accelerator: "⇧Click",
+                accelerator: showAccelerator ? "⇧Click" : "",
                 click() {
                     openBy(src, "app");
                 }
@@ -726,7 +726,7 @@ export const openMenu = (src: string, onlyMenu = false) => {
             /// #if !BROWSER
             submenu.push({
                 label: window.siyuan.languages.useDefault,
-                accelerator: "Click",
+                accelerator: showAccelerator ? "Click" : "",
                 click() {
                     openBy(src, "app");
                 }
@@ -736,7 +736,7 @@ export const openMenu = (src: string, onlyMenu = false) => {
         /// #if !BROWSER
         submenu.push({
             label: window.siyuan.languages.showInFolder,
-            accelerator: "⌘Click",
+            accelerator: showAccelerator ? "⌘Click" : "",
             click: () => {
                 openBy(src, "folder");
             }
@@ -746,7 +746,7 @@ export const openMenu = (src: string, onlyMenu = false) => {
         /// #if !BROWSER
         submenu.push({
             label: window.siyuan.languages.useDefault,
-            accelerator: "Click",
+            accelerator: showAccelerator ? "Click" : "",
             click: () => {
                 shell.openExternal(src).catch((e) => {
                     showMessage(e);
@@ -758,7 +758,7 @@ export const openMenu = (src: string, onlyMenu = false) => {
     /// #if BROWSER
     submenu.push({
         label: window.siyuan.languages.useBrowserView,
-        accelerator: "Click",
+        accelerator: showAccelerator ? "Click" : "",
         click: () => {
             openByMobile(src);
         }

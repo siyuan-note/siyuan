@@ -24,16 +24,19 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     const typeElement = element.querySelector('.b3-select[data-type="typeselect"]') as HTMLSelectElement;
     const notebookElement = element.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement;
     window.localStorage.setItem(Constants.LOCAL_HISTORYNOTEID, notebookElement.value);
+    const docElement = element.querySelector('.history__text[data-type="docPanel"]');
+    const assetElement = element.querySelector('.history__text[data-type="assetPanel"]');
+    const mdElement = element.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
+    docElement.classList.add("fn__none");
+    mdElement.classList.add("fn__none");
     if (typeElement.value === "0") {
         opElement.removeAttribute("disabled")
         notebookElement.removeAttribute("disabled")
-        element.lastElementChild.lastElementChild.previousElementSibling.classList.add("fn__none");
-        element.lastElementChild.lastElementChild.classList.remove("fn__none");
+        assetElement.classList.add("fn__none");
     } else {
         opElement.setAttribute("disabled", "disabled")
         notebookElement.setAttribute("disabled", "disabled")
-        element.lastElementChild.lastElementChild.previousElementSibling.classList.remove("fn__none");
-        element.lastElementChild.lastElementChild.classList.add("fn__none");
+        assetElement.classList.remove("fn__none");
     }
     fetchPost("/api/history/searchHistory", {
         notebook: notebookElement.value,
@@ -73,13 +76,21 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
                 logsHTML += "</ul>";
                 if (index === 0) {
                     if (typeElement.value === "1") {
-                        element.lastElementChild.lastElementChild.previousElementSibling.innerHTML = renderAssetsPreview(item.items[0].path);
+                        assetElement.innerHTML = renderAssetsPreview(item.items[0].path);
                     } else {
                         fetchPost("/api/history/getDocHistoryContent", {
                             historyPath: item.items[0].path,
                             k: inputElement.value
                         }, (contentResponse) => {
-                            onGet(contentResponse, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                            if (contentResponse.data.isLargeDoc) {
+                                mdElement.value = contentResponse.data.content;
+                                mdElement.classList.remove("fn__none")
+                                docElement.classList.add("fn__none")
+                            } else {
+                                mdElement.classList.add("fn__none")
+                                docElement.classList.remove("fn__none")
+                                onGet(contentResponse, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                            }
                         });
                     }
                 }
@@ -271,8 +282,9 @@ export const openHistory = () => {
                 <ul style="width:200px;overflow: auto;" class="b3-list b3-list--background">
                     <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
                 </ul>
-                <div class="fn__flex-1 history__text"></div>
-                <div class="fn__flex-1 history__text"></div>
+                <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
+                <textarea class="fn__flex-1 history__text fn__none" data-type="mdPanel"></textarea>
+                <div class="fn__flex-1 history__text fn__none" data-type="docPanel"></div>
             </div>
         </div>
         <ul data-type="notebook" style="background-color: var(--b3-theme-background);border-radius: 0 0 4px 4px" class="fn__none b3-list b3-list--background">
@@ -319,8 +331,11 @@ export const openHistory = () => {
     firstPanelElement.querySelector(".b3-text-field").addEventListener("compositionend", () => {
         renderDoc(firstPanelElement, 1);
     });
+    const docElement = firstPanelElement.querySelector('.history__text[data-type="docPanel"]') as HTMLElement;
+    const assetElement = firstPanelElement.querySelector('.history__text[data-type="assetPanel"]');
+    const mdElement = firstPanelElement.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
     renderDoc(firstPanelElement, 1);
-    historyEditor = new Protyle(firstPanelElement.lastElementChild.lastElementChild as HTMLElement, {
+    historyEditor = new Protyle(docElement, {
         blockId: "",
         action: [Constants.CB_GET_HISTORY],
         render: {
@@ -400,13 +415,21 @@ export const openHistory = () => {
             } else if (target.classList.contains("b3-list-item") && (type === "assets" || type === "doc")) {
                 const dataPath = target.getAttribute("data-path");
                 if (type === "assets") {
-                    firstPanelElement.lastElementChild.lastElementChild.previousElementSibling.innerHTML = renderAssetsPreview(dataPath);
+                    assetElement.innerHTML = renderAssetsPreview(dataPath);
                 } else if (type === "doc") {
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath,
                         k: (firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement).value
                     }, (response) => {
-                        onGet(response, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                        if (response.data.isLargeDoc) {
+                            mdElement.value = response.data.content;
+                            mdElement.classList.remove("fn__none")
+                            docElement.classList.add("fn__none")
+                        } else {
+                            mdElement.classList.add("fn__none")
+                            docElement.classList.remove("fn__none")
+                            onGet(response, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                        }
                     });
                 }
                 let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement;

@@ -76,7 +76,8 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
                         element.lastElementChild.lastElementChild.previousElementSibling.innerHTML = renderAssetsPreview(item.items[0].path);
                     } else {
                         fetchPost("/api/history/getDocHistoryContent", {
-                            historyPath: item.items[0].path
+                            historyPath: item.items[0].path,
+                            k: inputElement.value
                         }, (contentResponse) => {
                             onGet(contentResponse, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
                         });
@@ -402,7 +403,8 @@ export const openHistory = () => {
                     firstPanelElement.lastElementChild.lastElementChild.previousElementSibling.innerHTML = renderAssetsPreview(dataPath);
                 } else if (type === "doc") {
                     fetchPost("/api/history/getDocHistoryContent", {
-                        historyPath: dataPath
+                        historyPath: dataPath,
+                        k: (firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement).value
                     }, (response) => {
                         onGet(response, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
                     });

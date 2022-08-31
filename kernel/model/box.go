@@ -476,13 +476,13 @@ func ReindexTree(path string) (err error) {
 func RefreshFileTree() {
 	WaitForWritingFiles()
 
+	util.PushEndlessProgress(Conf.Language(35))
 	if err := sql.InitDatabase(true); nil != err {
 		util.PushErrMsg(fmt.Sprintf(Conf.Language(85), err), 5000)
 		return
 	}
 	treenode.InitBlockTree(true)
 
-	util.PushEndlessProgress(Conf.Language(35))
 	openedBoxes := Conf.GetOpenedBoxes()
 	for _, openedBox := range openedBoxes {
 		openedBox.Index(true)

@@ -116,7 +116,12 @@ func getDocHistoryContent(c *gin.Context) {
 	}
 
 	historyPath := arg["historyPath"].(string)
-	content, err := model.GetDocHistoryContent(historyPath)
+	k := arg["k"]
+	var keyword string
+	if nil != k {
+		keyword = k.(string)
+	}
+	content, isLargeDoc, err := model.GetDocHistoryContent(historyPath, keyword)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -124,7 +129,8 @@ func getDocHistoryContent(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"content": content,
+		"content":    content,
+		"isLargeDoc": isLargeDoc,
 	}
 }
 

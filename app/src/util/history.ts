@@ -78,7 +78,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
                         fetchPost("/api/history/getDocHistoryContent", {
                             historyPath: item.items[0].path
                         }, (contentResponse) => {
-                            onGet(contentResponse, historyEditor.protyle, [Constants.CB_GET_HISTORY]);
+                            onGet(contentResponse, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
                         });
                     }
                 }
@@ -404,7 +404,7 @@ export const openHistory = () => {
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath
                     }, (response) => {
-                        onGet(response, historyEditor.protyle, [Constants.CB_GET_HISTORY]);
+                        onGet(response, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
                     });
                 }
                 let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement;

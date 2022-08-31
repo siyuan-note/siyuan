@@ -77,9 +77,9 @@ func Boot() {
 	Resident = *resident
 	ReadOnly = *readOnly
 	AccessAuthCode = *accessAuthCode
-	Container = "std"
+	Container = ContainerStd
 	if isRunningInDockerContainer() {
-		Container = "docker"
+		Container = ContainerDocker
 	}
 
 	UserAgent = UserAgent + " " + Container
@@ -177,7 +177,7 @@ func initWorkspaceDir(workspaceArg string) {
 	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")
 	workspaceConf := filepath.Join(userHomeConfDir, "workspace.json")
 	if !gulu.File.IsExist(workspaceConf) {
-		IsNewbie = "std" == Container // 只有桌面端需要设置新手标识，前端自动挂载帮助文档
+		IsNewbie = ContainerStd == Container // 只有桌面端需要设置新手标识，前端自动挂载帮助文档
 		if err := os.MkdirAll(userHomeConfDir, 0755); nil != err && !os.IsExist(err) {
 			log.Printf("create user home conf folder [%s] failed: %s", userHomeConfDir, err)
 			os.Exit(ExitCodeCreateConfDirErr)
@@ -274,6 +274,13 @@ var (
 	Lang           = ""
 
 	Container string // docker, android, ios, std
+)
+
+const (
+	ContainerStd     = "std"     // 桌面端
+	ContainerDocker  = "docker"  // Docker 容器端
+	ContainerAndroid = "android" // Android 端
+	ContainerIOS     = "ios"     // iOS 端
 )
 
 func initPathDir() {

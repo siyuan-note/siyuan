@@ -82,7 +82,7 @@ func html2BlockDOM(c *gin.Context) {
 		n.Unlink()
 	}
 
-	if "std" == model.Conf.System.Container {
+	if util.ContainerStd == model.Conf.System.Container {
 		// 处理本地资源文件复制
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || ast.NodeLinkDest != n.Type {

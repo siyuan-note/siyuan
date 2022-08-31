@@ -125,7 +125,7 @@ func queryBlockIDByParentID(parentID string) (ret []string) {
 
 func QueryRecentUpdatedBlocks() (ret []*Block) {
 	sqlStmt := "SELECT * FROM blocks WHERE type = 'p' AND length > 1 ORDER BY updated DESC LIMIT 16"
-	if "ios" == util.Container || "android" == util.Container {
+	if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
 		sqlStmt = "SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC LIMIT 16"
 	}
 	rows, err := query(sqlStmt)

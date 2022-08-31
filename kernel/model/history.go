@@ -161,62 +161,67 @@ func GetDocHistoryContent(historyPath, keyword string) (content string, isLargeD
 		return
 	}
 
-	renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
-	keyword = strings.Join(strings.Split(keyword, " "), search.TermSep)
-	keywords := search.SplitKeyword(keyword)
+	if !isLargeDoc {
+		renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
+		keyword = strings.Join(strings.Split(keyword, " "), search.TermSep)
+		keywords := search.SplitKeyword(keyword)
 
-	var unlinks []*ast.Node
-	ast.Walk(historyTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
+		var unlinks []*ast.Node
+		ast.Walk(historyTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
 
-		if ast.NodeBlockRef == n.Type {
-			appendRefTextRenderResultForBlockRef(n)
-			return ast.WalkSkipChildren
-		}
+			if ast.NodeBlockRef == n.Type {
+				appendRefTextRenderResultForBlockRef(n)
+				return ast.WalkSkipChildren
+			}
 
-		if ast.NodeText == n.Type {
-			if 0 < len(keywords) {
-				// 搜索高亮
-				text := string(n.Tokens)
-				text = search.EncloseHighlighting(text, keywords, "<span data-type=\"search-mark\">", "</span>", false)
-				n.Tokens = gulu.Str.ToBytes(text)
-				if bytes.Contains(n.Tokens, []byte("search-mark")) {
-					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<span data-type=\"search-mark\">"), []byte("\\\\<span data-type=\"search-mark\">"))
-					linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
-					var children []*ast.Node
-					for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
-						children = append(children, c)
+			if ast.NodeText == n.Type {
+				if 0 < len(keywords) {
+					// 搜索高亮
+					text := string(n.Tokens)
+					text = search.EncloseHighlighting(text, keywords, "<span data-type=\"search-mark\">", "</span>", false)
+					n.Tokens = gulu.Str.ToBytes(text)
+					if bytes.Contains(n.Tokens, []byte("search-mark")) {
+						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<span data-type=\"search-mark\">"), []byte("\\\\<span data-type=\"search-mark\">"))
+						linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
+						var children []*ast.Node
+						for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+							children = append(children, c)
+						}
+						for _, c := range children {
+							n.InsertBefore(c)
+						}
+						unlinks = append(unlinks, n)
+						return ast.WalkContinue
 					}
-					for _, c := range children {
-						n.InsertBefore(c)
-					}
-					unlinks = append(unlinks, n)
-					return ast.WalkContinue
 				}
 			}
+			return ast.WalkContinue
+		})
+
+		for _, unlink := range unlinks {
+			unlink.Unlink()
 		}
-		return ast.WalkContinue
-	})
 
-	for _, unlink := range unlinks {
-		unlink.Unlink()
-	}
+		var appends []*ast.Node
+		for n := historyTree.Root.FirstChild; nil != n; n = n.Next {
+			appends = append(appends, n)
+		}
+		for _, n := range appends {
+			renderTree.Root.AppendChild(n)
+		}
 
-	var appends []*ast.Node
-	for n := historyTree.Root.FirstChild; nil != n; n = n.Next {
-		appends = append(appends, n)
-	}
-	for _, n := range appends {
-		renderTree.Root.AppendChild(n)
+		historyTree = renderTree
 	}
 
 	if isLargeDoc {
-		formatRenderer := render.NewFormatRenderer(renderTree, luteEngine.RenderOptions)
+		util.PushMsg(Conf.Language(36), 3000)
+		formatRenderer := render.NewFormatRenderer(historyTree, luteEngine.RenderOptions)
 		content = gulu.Str.FromBytes(formatRenderer.Render())
 	} else {
-		content = luteEngine.Tree2BlockDOM(renderTree, luteEngine.RenderOptions)
+		content = luteEngine.Tree2BlockDOM(historyTree, luteEngine.RenderOptions)
 	}
 	return
 }

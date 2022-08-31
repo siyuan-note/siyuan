@@ -810,7 +810,7 @@
     "33": "Permisos insuficientes para leer y escribir archivos o acceso a la red, por favor comprueba los permisos de la carpeta del espacio de trabajo y la configuración del software antivirus/firewall. Si has ejecutado SiYuan como administrador antes, por favor considera cambiar a un nuevo directorio de espacio de trabajo, y no lo ejecutes como administrador en el futuro (el directorio de espacio de trabajo actual puede que ya no sea accesible por los usuarios ordinarios)",
     "34": "Esta operación no es compatible con el modo de sólo lectura",
     "35": "Reconstruyendo el índice, por favor espere...",
-    "36": "TODO",
+    "36": "Hay demasiado contenido en el documento historico, para no afectar el rendimiento, se ha cambiado a visualizacion de texto sin formato",
     "37": "No incluyas espacios ni símbolos especiales en el nombre del directorio de sincronización con la nube",
     "38": "El número de palabras clave mencionadas [%d] son demasiados, actualmente solo admite hasta [512] palabras clave",
     "39": "Eliminando índice %s",

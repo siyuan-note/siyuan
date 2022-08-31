@@ -810,7 +810,7 @@
     "33": "Insufficient permissions to read and write files or access to the network, please check the permissions of the workspace folder and the settings of the anti-virus software/firewall. If you have run SiYuan as an administrator before, please consider switching to a new workspace directory, and do not run it as an administrator in the future (the current workspace directory may no longer be accessible by ordinary users)",
     "34": "This operation is not supported in read-only mode",
     "35": "Rebuilding index, please wait...",
-    "36": "TODO",
+    "36": "There is too much content in the historical document, in order not to affect performance, it has been switched to plain text display",
     "37": "Do not include spaces and special symbols in the name of the cloud sync directory",
     "38": "The number of mentioned keywords [%d] is too many, currently only supports up to [512] keywords",
     "39": "Deleting index %s",

@@ -491,8 +491,7 @@ func (conf *AppConf) Language(num int) (ret string) {
 
 func InitBoxes() {
 	initialized := false
-	blockCount := 0
-	if 1 > len(treenode.GetBlockTrees()) {
+	if 1 > treenode.CountBlocks() {
 		if gulu.File.IsExist(util.BlockTreePath) {
 			util.IncBootProgress(20, "Reading block trees...")
 			go func() {
@@ -523,14 +522,11 @@ func InitBoxes() {
 		treenode.SaveBlockTree()
 	}
 
-	blocktrees := treenode.GetBlockTrees()
-	blockCount = len(blocktrees)
-
 	var dbSize string
 	if dbFile, err := os.Stat(util.DBPath); nil == err {
 		dbSize = humanize.Bytes(uint64(dbFile.Size()))
 	}
-	logging.LogInfof("database size [%s], block count [%d]", dbSize, blockCount)
+	logging.LogInfof("database size [%s], tree/block count [%d/%d]", dbSize, treenode.CountTrees(), treenode.CountBlocks())
 }
 
 func IsSubscriber() bool {

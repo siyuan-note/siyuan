@@ -72,7 +72,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                     element.textContent = Lute.EscapeHTMLStr(inputElement.value);
                 } else {
                     fetchPost("/api/block/getRefText", {id: refBlockId}, (response) => {
-                        element.textContent = Lute.EscapeHTMLStr(response.data);
+                        element.innerHTML = response.data;
                     });
                 }
             });
@@ -141,7 +141,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             click() {
                 element.setAttribute("data-subtype", "d");
                 fetchPost("/api/block/getRefText", {id: refBlockId}, (response) => {
-                    element.innerHTML = Lute.EscapeHTMLStr(response.data);
+                    element.innerHTML = response.data;
                     nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                     updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
                 });
@@ -162,7 +162,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     submenu = submenu.concat([{
         label: window.siyuan.languages.text,
         click() {
-            element.outerHTML = `${element.textContent}<wbr>`;
+            element.outerHTML = `${element.innerHTML}<wbr>`;
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
             focusByWbr(nodeElement, protyle.toolbar.range);
@@ -179,7 +179,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     }, {
         label: window.siyuan.languages.text + " *",
         click() {
-            element.insertAdjacentText("beforebegin", element.textContent + " ");
+            element.insertAdjacentHTML("beforebegin", element.innerHTML + " ");
             element.setAttribute("data-subtype", "s");
             element.textContent = "*";
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
@@ -190,7 +190,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         label: window.siyuan.languages.link,
         icon: "iconLink",
         click() {
-            element.outerHTML = `<span data-type="a" data-href="siyuan://blocks/${element.getAttribute("data-id")}">${element.textContent}</span><wbr>`;
+            element.outerHTML = `<span data-type="a" data-href="siyuan://blocks/${element.getAttribute("data-id")}">${element.innerHTML}</span><wbr>`;
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
             focusByWbr(nodeElement, protyle.toolbar.range);

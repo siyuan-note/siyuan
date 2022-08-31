@@ -255,7 +255,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     protyle.wysiwyg.element.querySelectorAll('[data-type="block-ref"]').forEach(item => {
                         if (item.textContent === "") {
                             fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
-                                item.textContent = response.data;
+                                item.innerHTML = response.data;
                             });
                         }
                     });

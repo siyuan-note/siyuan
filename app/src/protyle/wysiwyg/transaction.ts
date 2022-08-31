@@ -659,7 +659,7 @@ const updateRef = (protyle: IProtyle, id: string, index = 0) => {
     protyle.wysiwyg.element.querySelectorAll(`[data-type="block-ref"][data-id="${id}"]`).forEach(item => {
         if (item.getAttribute("data-subtype") === "d") {
             fetchPost("/api/block/getRefText", {id: id}, (response) => {
-                item.textContent = response.data;
+                item.innerHTML = response.data;
                 const blockElement = hasClosestBlock(item);
                 if (blockElement) {
                     updateRef(protyle, blockElement.getAttribute("data-node-id"), index + 1);

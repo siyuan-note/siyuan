@@ -70,7 +70,7 @@ func Serve(fastMode bool) {
 	api.ServeAPI(ginServer)
 
 	var addr string
-	if model.Conf.System.NetworkServe || "docker" == util.Container {
+	if model.Conf.System.NetworkServe || util.ContainerDocker == util.Container {
 		addr = "0.0.0.0:" + util.ServerPort
 	} else {
 		addr = "127.0.0.1:" + util.ServerPort
@@ -227,7 +227,7 @@ func serveDebug(ginServer *gin.Engine) {
 
 func serveWebSocket(ginServer *gin.Engine) {
 	util.WebSocketServer.Config.MaxMessageSize = 1024 * 1024 * 8
-	if "docker" == util.Container { // Docker 容器运行时启用 WebSocket 传输压缩
+	if util.ContainerDocker == util.Container { // Docker 容器运行时启用 WebSocket 传输压缩
 		util.WebSocketServer.Config.EnableCompression = true
 		util.WebSocketServer.Config.CompressionLevel = 4
 	}

@@ -67,7 +67,7 @@ func RandomSleep(minMills, maxMills int) {
 }
 
 func GetDeviceID() string {
-	if "std" == Container {
+	if ContainerStd == Container {
 		machineID, err := machineid.ID()
 		if nil != err {
 			return gulu.Rand.String(12)

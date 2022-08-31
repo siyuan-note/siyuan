@@ -87,7 +87,7 @@ func IsIDPattern(str string) bool {
 var LocalIPs []string
 
 func GetLocalIPs() (ret []string) {
-	if "android" == Container {
+	if ContainerAndroid == Container {
 		// Android 上用不了 net.InterfaceAddrs() https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
 		LocalIPs = append(LocalIPs, "127.0.0.1")
 		LocalIPs = gulu.Str.RemoveDuplicatedElem(LocalIPs)

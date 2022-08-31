@@ -17,6 +17,7 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -30,10 +31,13 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
+	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -137,7 +141,7 @@ func ClearWorkspaceHistory() (err error) {
 	return
 }
 
-func GetDocHistoryContent(historyPath string) (content string, err error) {
+func GetDocHistoryContent(historyPath, keyword string) (content string, isLargeDoc bool, err error) {
 	if !gulu.File.IsExist(historyPath) {
 		return
 	}
@@ -147,6 +151,8 @@ func GetDocHistoryContent(historyPath string) (content string, err error) {
 		logging.LogErrorf("read file [%s] failed: %s", historyPath, err)
 		return
 	}
+	isLargeDoc = 1024*1024*1 <= len(data)
+
 	luteEngine := NewLute()
 	historyTree, err := parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if nil != err {
@@ -155,7 +161,63 @@ func GetDocHistoryContent(historyPath string) (content string, err error) {
 		return
 	}
 
-	content = luteEngine.Tree2BlockDOM(historyTree, luteEngine.RenderOptions)
+	renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
+	keyword = strings.Join(strings.Split(keyword, " "), search.TermSep)
+	keywords := search.SplitKeyword(keyword)
+
+	var unlinks []*ast.Node
+	ast.Walk(historyTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeBlockRef == n.Type {
+			appendRefTextRenderResultForBlockRef(n)
+			return ast.WalkSkipChildren
+		}
+
+		if ast.NodeText == n.Type {
+			if 0 < len(keywords) {
+				// 搜索高亮
+				text := string(n.Tokens)
+				text = search.EncloseHighlighting(text, keywords, "<span data-type=\"search-mark\">", "</span>", false)
+				n.Tokens = gulu.Str.ToBytes(text)
+				if bytes.Contains(n.Tokens, []byte("search-mark")) {
+					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<span data-type=\"search-mark\">"), []byte("\\\\<span data-type=\"search-mark\">"))
+					linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
+					var children []*ast.Node
+					for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+						children = append(children, c)
+					}
+					for _, c := range children {
+						n.InsertBefore(c)
+					}
+					unlinks = append(unlinks, n)
+					return ast.WalkContinue
+				}
+			}
+		}
+		return ast.WalkContinue
+	})
+
+	for _, unlink := range unlinks {
+		unlink.Unlink()
+	}
+
+	var appends []*ast.Node
+	for n := historyTree.Root.FirstChild; nil != n; n = n.Next {
+		appends = append(appends, n)
+	}
+	for _, n := range appends {
+		renderTree.Root.AppendChild(n)
+	}
+
+	if isLargeDoc {
+		formatRenderer := render.NewFormatRenderer(renderTree, luteEngine.RenderOptions)
+		content = gulu.Str.FromBytes(formatRenderer.Render())
+	} else {
+		content = luteEngine.Tree2BlockDOM(renderTree, luteEngine.RenderOptions)
+	}
 	return
 }
 

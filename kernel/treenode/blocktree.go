@@ -56,8 +56,8 @@ func CountTrees() (ret int) {
 	return
 }
 
-func GetBlockTrees() map[string]*BlockTree {
-	return blockTrees
+func CountBlocks() (ret int) {
+	return len(blockTrees)
 }
 
 func GetBlockTreeRootByPath(boxID, path string) *BlockTree {

@@ -264,7 +264,7 @@ export const openHistory = () => {
                 </select>
                 <span class="fn__space"></span>
                 <select data-type="opselect" class="b3-select" style="min-width: auto">
-                    <option value="all" selected>all</option>
+                    <option value="all" selected>${window.siyuan.languages.allOp}</option>
                     <option value="clean">clean</option>
                     <option value="update">update</option>
                     <option value="delete">delete</option>

@@ -1,3 +1,37 @@
+## v2.1.11 / 2022-08-31
+
+### 改进功能
+
+* [数据历史文档和资源文件支持分页和搜索](https://github.com/siyuan-note/siyuan/issues/4901)
+* [数据历史文档支持只读可视化预览](https://github.com/siyuan-note/siyuan/issues/5735)
+* [通过环境变量 `RUN_IN_CONTAINER` 判断是否在容器内启动](https://github.com/siyuan-note/siyuan/issues/5744)
+* [支持未激活的文档页签进行复制和分屏操作](https://github.com/siyuan-note/siyuan/issues/5745)
+* [为复制纯文本添加可配置的快捷键](https://github.com/siyuan-note/siyuan/issues/5748)
+* [Ctrl+Alt+0/⌥⌘0 将标题转换为文本](https://github.com/siyuan-note/siyuan/issues/5749)
+* [查找替换支持替换超链接地址](https://github.com/siyuan-note/siyuan/issues/5750)
+* [数据历史文档中支持操作类型过滤](https://github.com/siyuan-note/siyuan/issues/5754)
+* [改进同步后全量重建索引判断](https://github.com/siyuan-note/siyuan/issues/5764)
+* [移除图片、音频、视频和 iframe 菜单中打开的点击提示](https://github.com/siyuan-note/siyuan/issues/5774)
+
+### 修复缺陷
+
+* [链接中存在 HTML 标签渲染效果不一致](https://github.com/siyuan-note/siyuan/issues/5708)
+* [同步生成冲突文档报错](https://github.com/siyuan-note/siyuan/issues/5739)
+* [重复打开同样的页签](https://github.com/siyuan-note/siyuan/issues/5740)
+* [任务列表交互后无法通过任务框拖动](https://github.com/siyuan-note/siyuan/issues/5741)
+* [父文档名带有结尾空格导致子文档无法导出](https://github.com/siyuan-note/siyuan/issues/5742)
+* [在页签右侧或下侧打开功能失效](https://github.com/siyuan-note/siyuan/issues/5743)
+* [文档只有一个标题块时全选其行级内容后剪切刷新触发状态异常](https://github.com/siyuan-note/siyuan/issues/5746)
+* [模板渲染错误](https://github.com/siyuan-note/siyuan/issues/5747)
+* [macOS 端复制粘贴时未保留原格式](https://github.com/siyuan-note/siyuan/issues/5751)
+* [居左快捷键 Alt+L 处理挂件时是居中不是居左](https://github.com/siyuan-note/siyuan/issues/5753)
+* [HTML 块执行脚本导致白屏](https://github.com/siyuan-note/siyuan/issues/5762)
+* [禁止拖拽内容到文档标题框中](https://github.com/siyuan-note/siyuan/issues/5766)
+* [聚焦模式下拖拽列表项/标题到文档树后原文档错误](https://github.com/siyuan-note/siyuan/issues/5767)
+* [更新或删除文档后立即点击重建索引导致死锁](https://github.com/siyuan-note/siyuan/issues/5768)
+* [列表项中粘贴纯文本解析异常](https://github.com/siyuan-note/siyuan/issues/5770)
+* [移动端后退导致嵌入块错误](https://github.com/siyuan-note/siyuan/issues/5771)
+
 ## v2.1.10 / 2022-08-28
 
 ### 改进功能

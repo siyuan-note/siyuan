@@ -36,7 +36,7 @@ const focusStack = (backStack: IBackStack) => {
             id: backStack.id,
         }, (response) => {
             (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === "Untitled" ? "" : response.data.name;
-            protyle.background.render(response.data.ial, protyle.block.rootID);
+            protyle.background.render(response.data.ial);
             protyle.wysiwyg.renderCustom(response.data.ial);
         });
     }
@@ -56,7 +56,15 @@ const focusStack = (backStack: IBackStack) => {
         startID: startEndId[0],
         endID: startEndId[1],
     }, getResponse => {
+        protyle.block.parentID = getResponse.data.parentID;
+        protyle.block.parent2ID = getResponse.data.parent2ID;
+        protyle.block.rootID = getResponse.data.rootID;
         protyle.block.showAll = false;
+        protyle.block.mode = getResponse.data.mode;
+        protyle.block.blockCount = getResponse.data.blockCount;
+        protyle.block.id = getResponse.data.id;
+        protyle.block.action = backStack.callback;
+        protyle.wysiwyg.element.setAttribute("data-doc-type", getResponse.data.type);
         protyle.wysiwyg.element.innerHTML = getResponse.data.content;
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);

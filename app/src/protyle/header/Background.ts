@@ -82,7 +82,7 @@ export class Background {
                 const response = JSON.parse(responseText);
                 const style = `background-image:url("${response.data.succMap[Object.keys(response.data.succMap)[0]]}")`;
                 this.ial["title-img"] = style;
-                this.render(this.ial, protyle.block.rootID);
+                this.render(this.ial);
                 fetchPost("/api/attr/setBlockAttrs", {
                     id: protyle.block.rootID,
                     attrs: {"title-img": style}
@@ -118,7 +118,7 @@ export class Background {
                             attrs: {"title-img": style}
                         });
                     } else {
-                        this.render(this.ial, protyle.block.rootID);
+                        this.render(this.ial);
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -207,7 +207,7 @@ export class Background {
                     ];
                     const style = bgs[getRandom(0, bgs.length - 1)];
                     this.ial["title-img"] = style;
-                    this.render(this.ial, protyle.block.rootID);
+                    this.render(this.ial);
                     fetchPost("/api/attr/setBlockAttrs", {
                         id: protyle.block.rootID,
                         attrs: {"title-img": this.ial["title-img"]}
@@ -217,7 +217,7 @@ export class Background {
                     break;
                 } else if (type === "remove") {
                     delete this.ial["title-img"];
-                    this.render(this.ial, protyle.block.rootID);
+                    this.render(this.ial);
                     fetchPost("/api/attr/setBlockAttrs", {
                         id: protyle.block.rootID,
                         attrs: {"title-img": ""}
@@ -229,7 +229,7 @@ export class Background {
                     const emoji = getRandomEmoji();
                     if (emoji) {
                         this.ial.icon = emoji;
-                        this.render(this.ial, protyle.block.rootID);
+                        this.render(this.ial);
                         updateFileTreeEmoji(emoji, protyle.block.rootID);
                         updateOutlineEmoji(emoji);
                         fetchPost("/api/attr/setBlockAttrs", {
@@ -244,7 +244,7 @@ export class Background {
                     event.stopPropagation();
                     break;
                 } else if (type === "tag") {
-                    this.openTag();
+                    this.openTag(protyle);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -267,7 +267,7 @@ export class Background {
                     btnsElement[1].addEventListener("click", () => {
                         const style = `background-image:url(${dialog.element.querySelector("input").value});`;
                         this.ial["title-img"] = style;
-                        this.render(this.ial, protyle.block.rootID);
+                        this.render(this.ial);
                         fetchPost("/api/attr/setBlockAttrs", {
                             id: protyle.block.rootID,
                             attrs: {"title-img": this.ial["title-img"]}
@@ -297,7 +297,7 @@ export class Background {
                     } else {
                         this.ial.tags = tags.toString();
                     }
-                    this.render(this.ial, protyle.block.rootID);
+                    this.render(this.ial);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -307,12 +307,11 @@ export class Background {
         });
     }
 
-    public render(ial: IObject, id: string) {
+    public render(ial: IObject) {
         const img = ial["title-img"];
         const icon = ial.icon;
         const tags = ial.tags;
         this.ial = ial;
-        this.element.setAttribute("data-node-id", id);
         if (tags) {
             let html = "";
             tags.split(",").forEach((item, index) => {
@@ -360,7 +359,7 @@ export class Background {
         }
     }
 
-    private openTag() {
+    private openTag(protyle:IProtyle) {
         fetchPost("/api/search/searchTag", {
             k: "",
         }, (response) => {
@@ -384,9 +383,9 @@ export class Background {
                 if (event.key === "Enter") {
                     const currentElement = listElement.querySelector(".b3-list-item--focus");
                     if (currentElement) {
-                        this.addTags(currentElement.textContent);
+                        this.addTags(currentElement.textContent, protyle);
                     } else {
-                        this.addTags(inputElement.value);
+                        this.addTags(inputElement.value, protyle);
                     }
                     window.siyuan.menus.menu.remove();
                 } else if (event.key === "Escape") {
@@ -419,7 +418,7 @@ export class Background {
                 if (!listItemElement) {
                     return;
                 }
-                this.addTags(listItemElement.textContent);
+                this.addTags(listItemElement.textContent, protyle);
             });
             const rect = this.iconElement.nextElementSibling.getBoundingClientRect();
             window.siyuan.menus.menu.popup({x: rect.left, y: rect.top + rect.height});
@@ -435,19 +434,18 @@ export class Background {
         return tags;
     }
 
-    private addTags(tag: string) {
+    private addTags(tag: string, protyle:IProtyle) {
         window.siyuan.menus.menu.remove();
         const tags = this.getTags();
         if (tags.includes(tag)) {
             return;
         }
         tags.push(tag);
-        const id = this.element.getAttribute("data-node-id");
         fetchPost("/api/attr/setBlockAttrs", {
-            id,
+            id:protyle.block.rootID,
             attrs: {"tags": tags.toString()}
         });
         this.ial.tags = tags.toString();
-        this.render(this.ial, id);
+        this.render(this.ial);
     }
 }

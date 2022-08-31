@@ -332,7 +332,7 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
             return false;
         }
         setTitle(response.data.ial.title);
-        protyle.background.render(response.data.ial, protyle.block.rootID);
+        protyle.background.render(response.data.ial);
         protyle.wysiwyg.renderCustom(response.data.ial);
         this.editElement.setAttribute("data-render", "true");
         this.setTitle(response.data.ial.title);

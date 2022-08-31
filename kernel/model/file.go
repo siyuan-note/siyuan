@@ -1198,7 +1198,6 @@ func RemoveDoc(boxID, p string) (err error) {
 		return errors.New(fmt.Sprintf(Conf.Language(70), box.Name, absPath, err))
 	}
 
-	indexHistoryDir(filepath.Base(historyDir), NewLute())
 	copyDocAssetsToDataAssets(boxID, p)
 
 	rootID := tree.ID
@@ -1212,6 +1211,7 @@ func RemoveDoc(boxID, p string) (err error) {
 			return
 		}
 	}
+	indexHistoryDir(filepath.Base(historyDir), NewLute())
 
 	box.removeSort(rootID, p)
 	if err = box.Remove(p); nil != err {

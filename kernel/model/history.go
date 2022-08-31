@@ -217,7 +217,7 @@ func GetDocHistoryContent(historyPath, keyword string) (content string, isLargeD
 	}
 
 	if isLargeDoc {
-		util.PushMsg(Conf.Language(36), 3000)
+		util.PushMsg(Conf.Language(36), 5000)
 		formatRenderer := render.NewFormatRenderer(historyTree, luteEngine.RenderOptions)
 		content = gulu.Str.FromBytes(formatRenderer.Render())
 	} else {

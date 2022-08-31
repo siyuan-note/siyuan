@@ -67,10 +67,9 @@ export class Title {
             this.rename(protyle);
         });
         this.editElement.addEventListener("drop", (event: DragEvent) => {
-            if (event.dataTransfer.getData(Constants.SIYUAN_DROP_EDITOR)) {
-                event.stopPropagation();
-                event.preventDefault();
-            }
+            // https://ld246.com/article/1661911210429
+            event.stopPropagation();
+            event.preventDefault();
         });
         this.editElement.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.isComposing) {

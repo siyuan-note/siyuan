@@ -9,7 +9,7 @@ import {renderAssetsPreview} from "../asset/renderAssets";
 import Protyle from "../protyle";
 import {onGet} from "../protyle/util/onGet";
 
-let historyEditor: Protyle
+let historyEditor: Protyle;
 const renderDoc = (element: HTMLElement, currentPage: number) => {
     const previousElement = element.querySelector('[data-type="docprevious"]');
     const nextElement = element.querySelector('[data-type="docnext"]');
@@ -30,12 +30,12 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     docElement.classList.add("fn__none");
     mdElement.classList.add("fn__none");
     if (typeElement.value === "0") {
-        opElement.removeAttribute("disabled")
-        notebookElement.removeAttribute("disabled")
+        opElement.removeAttribute("disabled");
+        notebookElement.removeAttribute("disabled");
         assetElement.classList.add("fn__none");
     } else {
-        opElement.setAttribute("disabled", "disabled")
-        notebookElement.setAttribute("disabled", "disabled")
+        opElement.setAttribute("disabled", "disabled");
+        notebookElement.setAttribute("disabled", "disabled");
         assetElement.classList.remove("fn__none");
     }
     fetchPost("/api/history/searchHistory", {
@@ -84,11 +84,11 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
                         }, (contentResponse) => {
                             if (contentResponse.data.isLargeDoc) {
                                 mdElement.value = contentResponse.data.content;
-                                mdElement.classList.remove("fn__none")
-                                docElement.classList.add("fn__none")
+                                mdElement.classList.remove("fn__none");
+                                docElement.classList.add("fn__none");
                             } else {
-                                mdElement.classList.add("fn__none")
-                                docElement.classList.remove("fn__none")
+                                mdElement.classList.add("fn__none");
+                                docElement.classList.remove("fn__none");
                                 onGet(contentResponse, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
                             }
                         });
@@ -233,10 +233,10 @@ export const openHistory = () => {
     }
 
     const currentNotebookId = localStorage.getItem(Constants.LOCAL_HISTORYNOTEID);
-    let notebookSelectHTML = '';
+    let notebookSelectHTML = "";
     window.siyuan.notebooks.forEach((item) => {
         if (!item.closed) {
-            notebookSelectHTML += ` <option value="${item.id}"${item.id === currentNotebookId ? " selected" : ""}>${item.name}</option>`
+            notebookSelectHTML += ` <option value="${item.id}"${item.id === currentNotebookId ? " selected" : ""}>${item.name}</option>`;
         }
     });
     const dialog = new Dialog({
@@ -423,11 +423,11 @@ export const openHistory = () => {
                     }, (response) => {
                         if (response.data.isLargeDoc) {
                             mdElement.value = response.data.content;
-                            mdElement.classList.remove("fn__none")
-                            docElement.classList.add("fn__none")
+                            mdElement.classList.remove("fn__none");
+                            docElement.classList.add("fn__none");
                         } else {
-                            mdElement.classList.add("fn__none")
-                            docElement.classList.remove("fn__none")
+                            mdElement.classList.add("fn__none");
+                            docElement.classList.remove("fn__none");
                             onGet(response, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
                         }
                     });

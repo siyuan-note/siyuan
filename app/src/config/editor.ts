@@ -202,7 +202,7 @@ export const editor = {
     onSetEditor: (editor: IEditor) => {
         window.siyuan.config.editor = editor;
         getAllModels().editor.forEach((item) => {
-            reloadProtyle(item.editor.protyle)
+            reloadProtyle(item.editor.protyle);
             setPadding(item.editor.protyle);
             if (window.siyuan.config.editor.fullWidth) {
                 item.editor.protyle.contentElement.setAttribute("data-fullwidth", "true");

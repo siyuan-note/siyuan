@@ -537,7 +537,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             }
             getAllModels().editor.forEach(item => {
                 if (rootIds[0] === item.editor.protyle.block.rootID) {
-                    reloadProtyle(item.editor.protyle)
+                    reloadProtyle(item.editor.protyle);
                 }
             });
             if (!currentList.nextElementSibling && searchPanelElement.children[0]) {

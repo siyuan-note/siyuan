@@ -100,7 +100,7 @@ class Protyle {
                                         size: Constants.SIZE_GET,
                                     }, getResponse => {
                                         onGet(getResponse, this.protyle);
-                                    })
+                                    });
                                 } else {
                                     reloadProtyle(this.protyle);
                                 }

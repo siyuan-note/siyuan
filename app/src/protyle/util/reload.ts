@@ -19,4 +19,4 @@ export const reloadProtyle = (protyle:IProtyle) => {
     }, getResponse => {
         onGet(getResponse, protyle, protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS], saveScroll(protyle, true), true);
     });
-}
+};

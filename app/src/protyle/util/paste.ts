@@ -178,18 +178,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
             focusByWbr(protyle.wysiwyg.element, range);
         } else {
-            nodeElement.insertAdjacentHTML("afterend", code);
-            const codeElement = nodeElement.nextElementSibling as HTMLElement;
-            transaction(protyle, [{
-                action: "insert",
-                data: codeElement.outerHTML,
-                id: codeElement.getAttribute("data-node-id"),
-                previousID: id
-            }], [{
-                action: "delete",
-                id: codeElement.getAttribute("data-node-id")
-            }]);
-            highlightRender(codeElement);
+            insertHTML(code, protyle, true);
+            highlightRender(protyle.wysiwyg.element);
         }
     } else {
         let isHTML = false;

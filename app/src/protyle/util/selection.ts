@@ -507,7 +507,9 @@ export const focusSideBlock = (updateElement: Element) => {
     if (updateElement.getAttribute("data-node-id")) {
         let sideBlockElement;
         let collapse;
-        if (updateElement.nextElementSibling) {
+        if (updateElement.nextElementSibling &&
+            !updateElement.nextElementSibling.classList.contains("protyle-attr") // 用例 https://ld246.com/article/1661928364696
+        ) {
             collapse = true;
             sideBlockElement = getNextBlock(updateElement) as HTMLElement;
         } else if (updateElement.previousElementSibling) {

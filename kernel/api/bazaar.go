@@ -165,6 +165,15 @@ func getBazaarTemplate(c *gin.Context) {
 	}
 }
 
+func getInstalledTemplate(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = map[string]interface{}{
+		"packages": bazaar.InstalledTemplates(),
+	}
+}
+
 func installBazaarTemplate(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

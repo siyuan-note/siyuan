@@ -178,24 +178,13 @@ func InstalledThemes() (ret []*Theme) {
 		}
 		theme.README = gulu.Str.FromBytes(readme)
 
-		if !existThemes(ret, theme) {
-			ret = append(ret, theme)
-		}
+		ret = append(ret, theme)
 	}
 	return
 }
 
 func isBuiltInTheme(dirName string) bool {
 	return "daylight" == dirName || "midnight" == dirName
-}
-
-func existThemes(themes []*Theme, theme *Theme) bool {
-	for _, t := range themes {
-		if t.Name == theme.Name {
-			return true
-		}
-	}
-	return false
 }
 
 func InstallTheme(repoURL, repoHash, installPath string, systemID string) error {
@@ -214,26 +203,4 @@ func UninstallTheme(installPath string) error {
 	}
 	//logging.Logger.Infof("uninstalled theme [%s]", installPath)
 	return nil
-}
-
-func ThemeJSON(themeName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.ThemesPath, themeName, "theme.json")
-	if !gulu.File.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := os.ReadFile(p)
-	if nil != err {
-		logging.LogErrorf("read theme.json [%s] failed: %s", p, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		logging.LogErrorf("parse theme.json [%s] failed: %s", p, err)
-		return
-	}
-	if 5 > len(ret) {
-		logging.LogWarnf("invalid theme.json [%s]", p)
-		return nil, errors.New("invalid theme.json")
-	}
-	return
 }

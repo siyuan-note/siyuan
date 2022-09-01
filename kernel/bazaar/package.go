@@ -37,6 +37,50 @@ import (
 	"golang.org/x/text/transform"
 )
 
+func TemplateJSON(templateDirName string) (ret map[string]interface{}, err error) {
+	p := filepath.Join(util.ThemesPath, templateDirName, "template.json")
+	if !gulu.File.IsExist(p) {
+		err = os.ErrNotExist
+		return
+	}
+	data, err := os.ReadFile(p)
+	if nil != err {
+		logging.LogErrorf("read template.json [%s] failed: %s", p, err)
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("parse template.json [%s] failed: %s", p, err)
+		return
+	}
+	if 4 > len(ret) {
+		logging.LogWarnf("invalid template.json [%s]", p)
+		return nil, errors.New("invalid template.json")
+	}
+	return
+}
+
+func ThemeJSON(themeDirName string) (ret map[string]interface{}, err error) {
+	p := filepath.Join(util.ThemesPath, themeDirName, "theme.json")
+	if !gulu.File.IsExist(p) {
+		err = os.ErrNotExist
+		return
+	}
+	data, err := os.ReadFile(p)
+	if nil != err {
+		logging.LogErrorf("read theme.json [%s] failed: %s", p, err)
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("parse theme.json [%s] failed: %s", p, err)
+		return
+	}
+	if 5 > len(ret) {
+		logging.LogWarnf("invalid theme.json [%s]", p)
+		return nil, errors.New("invalid theme.json")
+	}
+	return
+}
+
 func GetPackageREADME(repoURL, repoHash string, systemID string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
 	data, err := downloadPackage(repoURLHash+"/README.md", false, systemID)

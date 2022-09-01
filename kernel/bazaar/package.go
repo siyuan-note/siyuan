@@ -62,6 +62,28 @@ type Package struct {
 	Downloads  int    `json:"downloads"`
 }
 
+func WidgetJSON(widgetDirName string) (ret map[string]interface{}, err error) {
+	p := filepath.Join(util.DataDir, widgetDirName, "widget.json")
+	if !gulu.File.IsExist(p) {
+		err = os.ErrNotExist
+		return
+	}
+	data, err := os.ReadFile(p)
+	if nil != err {
+		logging.LogErrorf("read widget.json [%s] failed: %s", p, err)
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("parse widget.json [%s] failed: %s", p, err)
+		return
+	}
+	if 4 > len(ret) {
+		logging.LogWarnf("invalid widget.json [%s]", p)
+		return nil, errors.New("invalid widget.json")
+	}
+	return
+}
+
 func IconJSON(iconDirName string) (ret map[string]interface{}, err error) {
 	p := filepath.Join(util.ThemesPath, iconDirName, "icon.json")
 	if !gulu.File.IsExist(p) {
@@ -85,7 +107,7 @@ func IconJSON(iconDirName string) (ret map[string]interface{}, err error) {
 }
 
 func TemplateJSON(templateDirName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.ThemesPath, templateDirName, "template.json")
+	p := filepath.Join(util.DataDir, templateDirName, "template.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
 		return
@@ -171,6 +193,20 @@ func isOutdatedIcon(fullURL, version string, bazaarIcons []*Icon) bool {
 
 	url := strings.TrimPrefix(fullURL, "https://github.com/")
 	for _, pkg := range bazaarIcons {
+		if url == pkg.URL && version != pkg.Version {
+			return true
+		}
+	}
+	return false
+}
+
+func isOutdatedWidget(fullURL, version string, bazaarWidgets []*Widget) bool {
+	if !strings.HasPrefix(fullURL, "https://github.com/") {
+		return false
+	}
+
+	url := strings.TrimPrefix(fullURL, "https://github.com/")
+	for _, pkg := range bazaarWidgets {
 		if url == pkg.URL && version != pkg.Version {
 			return true
 		}

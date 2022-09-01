@@ -19,10 +19,12 @@ package bazaar
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 
+	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -91,6 +93,56 @@ func Widgets() (widgets []*Widget) {
 	p.Release()
 
 	sort.Slice(widgets, func(i, j int) bool { return widgets[i].Updated > widgets[j].Updated })
+	return
+}
+
+func InstalledWidgets() (ret []*Icon) {
+	dir, err := os.Open(filepath.Join(util.DataDir, "widgets"))
+	if nil != err {
+		logging.LogWarnf("open widgets folder [%s] failed: %s", util.ThemesPath, err)
+		return
+	}
+	widgetDirs, err := dir.Readdir(-1)
+	if nil != err {
+		logging.LogWarnf("read widgets folder failed: %s", err)
+		return
+	}
+	dir.Close()
+
+	bazaarWidgets := Widgets()
+
+	for _, widgetDir := range widgetDirs {
+		if !widgetDir.IsDir() {
+			continue
+		}
+		dirName := widgetDir.Name()
+
+		widgetConf, parseErr := WidgetJSON(dirName)
+		if nil != parseErr || nil == widgetConf {
+			continue
+		}
+
+		icon := &Icon{}
+		icon.Name = widgetConf["name"].(string)
+		icon.Author = widgetConf["author"].(string)
+		icon.URL = widgetConf["url"].(string)
+		icon.Version = widgetConf["version"].(string)
+		icon.RepoURL = icon.URL
+		icon.PreviewURL = "/widgets/" + dirName + "/preview.png"
+		icon.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
+		icon.Updated = widgetDir.ModTime().Format("2006-01-02 15:04:05")
+		icon.Size = widgetDir.Size()
+		icon.HSize = humanize.Bytes(uint64(icon.Size))
+		icon.HUpdated = formatUpdated(icon.Updated)
+		readme, readErr := os.ReadFile(filepath.Join(util.DataDir, "widgets", dirName, "README.md"))
+		if nil != readErr {
+			logging.LogWarnf("read install icon README.md failed: %s", readErr)
+			continue
+		}
+		icon.README = gulu.Str.FromBytes(readme)
+		icon.Outdated = isOutdatedWidget(icon.URL, icon.Version, bazaarWidgets)
+		ret = append(ret, icon)
+	}
 	return
 }
 

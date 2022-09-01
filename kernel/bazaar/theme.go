@@ -33,29 +33,9 @@ import (
 )
 
 type Theme struct {
-	Author  string   `json:"author"`
-	URL     string   `json:"url"`
-	Version string   `json:"version"`
-	Modes   []string `json:"modes"`
+	Package
 
-	Name            string `json:"name"`
-	RepoURL         string `json:"repoURL"`
-	RepoHash        string `json:"repoHash"`
-	PreviewURL      string `json:"previewURL"`
-	PreviewURLThumb string `json:"previewURLThumb"`
-
-	README string `json:"readme"`
-
-	Installed  bool   `json:"installed"`
-	Outdated   bool   `json:"outdated"`
-	Current    bool   `json:"current"`
-	Updated    string `json:"updated"`
-	Stars      int    `json:"stars"`
-	OpenIssues int    `json:"openIssues"`
-	Size       int64  `json:"size"`
-	HSize      string `json:"hSize"`
-	HUpdated   string `json:"hUpdated"`
-	Downloads  int    `json:"downloads"`
+	Modes []string `json:"modes"`
 }
 
 func Themes() (ret []*Theme) {
@@ -130,10 +110,7 @@ func InstalledThemes() (ret []*Theme) {
 	}
 	dir.Close()
 
-	pkgIndex, err := getPkgIndex("themes")
-	if nil != err {
-		return
-	}
+	bazaarThemes := Themes()
 
 	for _, themeDir := range themeDirs {
 		if !themeDir.IsDir() {
@@ -168,7 +145,7 @@ func InstalledThemes() (ret []*Theme) {
 			continue
 		}
 		theme.README = gulu.Str.FromBytes(readme)
-		theme.Outdated = isOutdatedPkg(theme.URL, theme.Version, pkgIndex)
+		theme.Outdated = isOutdatedTheme(theme.URL, theme.Version, bazaarThemes)
 		ret = append(ret, theme)
 	}
 	return

@@ -19,10 +19,12 @@ package bazaar
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 
+	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -31,28 +33,7 @@ import (
 )
 
 type Icon struct {
-	Author  string `json:"author"`
-	URL     string `json:"url"`
-	Version string `json:"version"`
-
-	Name            string `json:"name"`
-	RepoURL         string `json:"repoURL"`
-	RepoHash        string `json:"repoHash"`
-	PreviewURL      string `json:"previewURL"`
-	PreviewURLThumb string `json:"previewURLThumb"`
-
-	README string `json:"readme"`
-
-	Installed  bool   `json:"installed"`
-	Outdated   bool   `json:"outdated"`
-	Current    bool   `json:"current"`
-	Updated    string `json:"updated"`
-	Stars      int    `json:"stars"`
-	OpenIssues int    `json:"openIssues"`
-	Size       int64  `json:"size"`
-	HSize      string `json:"hSize"`
-	HUpdated   string `json:"hUpdated"`
-	Downloads  int    `json:"downloads"`
+	Package
 }
 
 func Icons() (icons []*Icon) {
@@ -112,6 +93,63 @@ func Icons() (icons []*Icon) {
 
 	sort.Slice(icons, func(i, j int) bool { return icons[i].Updated > icons[j].Updated })
 	return
+}
+
+func InstalledIcons() (ret []*Icon) {
+	dir, err := os.Open(filepath.Join(util.DataDir, "icons"))
+	if nil != err {
+		logging.LogWarnf("open icons folder [%s] failed: %s", util.ThemesPath, err)
+		return
+	}
+	iconDirs, err := dir.Readdir(-1)
+	if nil != err {
+		logging.LogWarnf("read icons folder failed: %s", err)
+		return
+	}
+	dir.Close()
+
+	bazaarIcons := Icons()
+
+	for _, iconDir := range iconDirs {
+		if !iconDir.IsDir() {
+			continue
+		}
+		dirName := iconDir.Name()
+		if isBuiltInIcon(dirName) {
+			continue
+		}
+
+		iconConf, parseErr := IconJSON(dirName)
+		if nil != parseErr || nil == iconConf {
+			continue
+		}
+
+		icon := &Icon{}
+		icon.Name = iconConf["name"].(string)
+		icon.Author = iconConf["author"].(string)
+		icon.URL = iconConf["url"].(string)
+		icon.Version = iconConf["version"].(string)
+		icon.RepoURL = icon.URL
+		icon.PreviewURL = "/appearance/icons/" + dirName + "/preview.png"
+		icon.PreviewURLThumb = "/appearance/icons/" + dirName + "/preview.png"
+		icon.Updated = iconDir.ModTime().Format("2006-01-02 15:04:05")
+		icon.Size = iconDir.Size()
+		icon.HSize = humanize.Bytes(uint64(icon.Size))
+		icon.HUpdated = formatUpdated(icon.Updated)
+		readme, readErr := os.ReadFile(filepath.Join(util.DataDir, "icons", dirName, "README.md"))
+		if nil != readErr {
+			logging.LogWarnf("read install icon README.md failed: %s", readErr)
+			continue
+		}
+		icon.README = gulu.Str.FromBytes(readme)
+		icon.Outdated = isOutdatedIcon(icon.URL, icon.Version, bazaarIcons)
+		ret = append(ret, icon)
+	}
+	return
+}
+
+func isBuiltInIcon(dirName string) bool {
+	return "and" == dirName || "material" == dirName
 }
 
 func InstallIcon(repoURL, repoHash, installPath string, systemID string) error {

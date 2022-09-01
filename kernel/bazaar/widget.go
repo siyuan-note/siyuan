@@ -31,28 +31,7 @@ import (
 )
 
 type Widget struct {
-	Author  string `json:"author"`
-	URL     string `json:"url"`
-	Version string `json:"version"`
-
-	Name            string `json:"name"`
-	RepoURL         string `json:"repoURL"`
-	RepoHash        string `json:"repoHash"`
-	PreviewURL      string `json:"previewURL"`
-	PreviewURLThumb string `json:"previewURLThumb"`
-
-	README string `json:"readme"`
-
-	Installed  bool   `json:"installed"`
-	Outdated   bool   `json:"outdated"`
-	Current    bool   `json:"current"`
-	Updated    string `json:"updated"`
-	Stars      int    `json:"stars"`
-	OpenIssues int    `json:"openIssues"`
-	Size       int64  `json:"size"`
-	HSize      string `json:"hSize"`
-	HUpdated   string `json:"hUpdated"`
-	Downloads  int    `json:"downloads"`
+	Package
 }
 
 func Widgets() (widgets []*Widget) {

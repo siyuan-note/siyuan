@@ -37,6 +37,53 @@ import (
 	"golang.org/x/text/transform"
 )
 
+type Package struct {
+	Author  string `json:"author"`
+	URL     string `json:"url"`
+	Version string `json:"version"`
+
+	Name            string `json:"name"`
+	RepoURL         string `json:"repoURL"`
+	RepoHash        string `json:"repoHash"`
+	PreviewURL      string `json:"previewURL"`
+	PreviewURLThumb string `json:"previewURLThumb"`
+
+	README string `json:"readme"`
+
+	Installed  bool   `json:"installed"`
+	Outdated   bool   `json:"outdated"`
+	Current    bool   `json:"current"`
+	Updated    string `json:"updated"`
+	Stars      int    `json:"stars"`
+	OpenIssues int    `json:"openIssues"`
+	Size       int64  `json:"size"`
+	HSize      string `json:"hSize"`
+	HUpdated   string `json:"hUpdated"`
+	Downloads  int    `json:"downloads"`
+}
+
+func IconJSON(iconDirName string) (ret map[string]interface{}, err error) {
+	p := filepath.Join(util.ThemesPath, iconDirName, "icon.json")
+	if !gulu.File.IsExist(p) {
+		err = os.ErrNotExist
+		return
+	}
+	data, err := os.ReadFile(p)
+	if nil != err {
+		logging.LogErrorf("read icon.json [%s] failed: %s", p, err)
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("parse icon.json [%s] failed: %s", p, err)
+		return
+	}
+	if 4 > len(ret) {
+		logging.LogWarnf("invalid icon.json [%s]", p)
+		return nil, errors.New("invalid icon.json")
+	}
+	return
+}
+
 func TemplateJSON(templateDirName string) (ret map[string]interface{}, err error) {
 	p := filepath.Join(util.ThemesPath, templateDirName, "template.json")
 	if !gulu.File.IsExist(p) {
@@ -103,18 +150,42 @@ func getPkgIndex(pkgType string) (ret map[string]interface{}, err error) {
 	return
 }
 
-func isOutdatedPkg(fullURL, version string, pkgIndex map[string]interface{}) bool {
+func isOutdatedTheme(fullURL, version string, bazaarThemes []*Theme) bool {
 	if !strings.HasPrefix(fullURL, "https://github.com/") {
 		return false
 	}
 
 	url := strings.TrimPrefix(fullURL, "https://github.com/")
-	repos := pkgIndex["repos"].([]interface{})
-	for _, repo := range repos {
-		r := repo.(map[string]interface{})
-		repoURL := r["url"].(string)
-		repoVer := r["version"].(string)
-		if url == repoURL && version != repoVer {
+	for _, pkg := range bazaarThemes {
+		if url == pkg.URL && version != pkg.Version {
+			return true
+		}
+	}
+	return false
+}
+
+func isOutdatedIcon(fullURL, version string, bazaarIcons []*Icon) bool {
+	if !strings.HasPrefix(fullURL, "https://github.com/") {
+		return false
+	}
+
+	url := strings.TrimPrefix(fullURL, "https://github.com/")
+	for _, pkg := range bazaarIcons {
+		if url == pkg.URL && version != pkg.Version {
+			return true
+		}
+	}
+	return false
+}
+
+func isOutdatedTemplate(fullURL, version string, bazaarTemplates []*Template) bool {
+	if !strings.HasPrefix(fullURL, "https://github.com/") {
+		return false
+	}
+
+	url := strings.TrimPrefix(fullURL, "https://github.com/")
+	for _, pkg := range bazaarTemplates {
+		if url == pkg.URL && version != pkg.Version {
 			return true
 		}
 	}

@@ -107,6 +107,15 @@ func getBazaarIcon(c *gin.Context) {
 	}
 }
 
+func getInstalledIcon(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = map[string]interface{}{
+		"packages": bazaar.InstalledIcons(),
+	}
+}
+
 func installBazaarIcon(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

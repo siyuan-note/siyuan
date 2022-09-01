@@ -237,6 +237,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/bazaar/installBazaarWidget", model.CheckAuth, installBazaarWidget)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarWidget", model.CheckAuth, uninstallBazaarWidget)
 	ginServer.Handle("POST", "/api/bazaar/getBazaarIcon", model.CheckAuth, getBazaarIcon)
+	ginServer.Handle("POST", "/api/bazaar/getInstalledIcon", model.CheckAuth, getInstalledIcon)
 	ginServer.Handle("POST", "/api/bazaar/installBazaarIcon", model.CheckAuth, installBazaarIcon)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarIcon", model.CheckAuth, uninstallBazaarIcon)
 	ginServer.Handle("POST", "/api/bazaar/getBazaarTemplate", model.CheckAuth, getBazaarTemplate)

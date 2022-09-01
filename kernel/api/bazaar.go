@@ -21,6 +21,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -164,6 +165,15 @@ func getBazaarTemplate(c *gin.Context) {
 	}
 }
 
+func getInstalledTemplate(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = map[string]interface{}{
+		"packages": bazaar.InstalledTemplates(),
+	}
+}
+
 func installBazaarTemplate(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -218,6 +228,15 @@ func getBazaarTheme(c *gin.Context) {
 
 	ret.Data = map[string]interface{}{
 		"packages": model.BazaarThemes(),
+	}
+}
+
+func getInstalledTheme(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = map[string]interface{}{
+		"packages": bazaar.InstalledThemes(),
 	}
 }
 

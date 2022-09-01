@@ -606,6 +606,9 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 				logging.LogErrorf("parse html block [%s] failed: %s", n.Tokens, pErr)
 				return ast.WalkContinue
 			}
+			if 1 > len(htmlNodes) {
+				return ast.WalkContinue
+			}
 			if atom.Img == htmlNodes[0].DataAtom {
 				imgHtmlBlocks[n] = htmlNodes[0]
 			}

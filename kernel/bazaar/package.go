@@ -37,6 +37,90 @@ import (
 	"golang.org/x/text/transform"
 )
 
+func TemplateJSON(templateDirName string) (ret map[string]interface{}, err error) {
+	p := filepath.Join(util.ThemesPath, templateDirName, "template.json")
+	if !gulu.File.IsExist(p) {
+		err = os.ErrNotExist
+		return
+	}
+	data, err := os.ReadFile(p)
+	if nil != err {
+		logging.LogErrorf("read template.json [%s] failed: %s", p, err)
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("parse template.json [%s] failed: %s", p, err)
+		return
+	}
+	if 4 > len(ret) {
+		logging.LogWarnf("invalid template.json [%s]", p)
+		return nil, errors.New("invalid template.json")
+	}
+	return
+}
+
+func ThemeJSON(themeDirName string) (ret map[string]interface{}, err error) {
+	p := filepath.Join(util.ThemesPath, themeDirName, "theme.json")
+	if !gulu.File.IsExist(p) {
+		err = os.ErrNotExist
+		return
+	}
+	data, err := os.ReadFile(p)
+	if nil != err {
+		logging.LogErrorf("read theme.json [%s] failed: %s", p, err)
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("parse theme.json [%s] failed: %s", p, err)
+		return
+	}
+	if 5 > len(ret) {
+		logging.LogWarnf("invalid theme.json [%s]", p)
+		return nil, errors.New("invalid theme.json")
+	}
+	return
+}
+
+func getPkgIndex(pkgType string) (ret map[string]interface{}, err error) {
+	ret, err = util.GetRhyResult(false)
+	if nil != err {
+		return
+	}
+
+	bazaarHash := ret["bazaar"].(string)
+	ret = map[string]interface{}{}
+	request := httpclient.NewBrowserRequest()
+	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/" + pkgType + ".json"
+	resp, reqErr := request.SetResult(&ret).Get(u)
+	if nil != reqErr {
+		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
+		return
+	}
+	if 200 != resp.StatusCode {
+		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
+		return
+	}
+	return
+}
+
+func isOutdatedPkg(fullURL, version string, pkgIndex map[string]interface{}) bool {
+	if !strings.HasPrefix(fullURL, "https://github.com/") {
+		return false
+	}
+
+	url := strings.TrimPrefix(fullURL, "https://github.com/")
+	repos := pkgIndex["repos"].([]interface{})
+	for _, repo := range repos {
+		r := repo.(map[string]interface{})
+		repoURL := r["url"].(string)
+		repoVer := r["version"].(string)
+		if url == repoURL && version != repoVer {
+			return true
+		}
+	}
+	return false
+}
+
 func GetPackageREADME(repoURL, repoHash string, systemID string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
 	data, err := downloadPackage(repoURLHash+"/README.md", false, systemID)

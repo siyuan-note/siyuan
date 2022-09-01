@@ -19,10 +19,12 @@ package bazaar
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 
+	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -58,27 +60,13 @@ type Theme struct {
 
 func Themes() (ret []*Theme) {
 	ret = []*Theme{}
-	result, err := util.GetRhyResult(false)
+
+	pkgIndex, err := getPkgIndex("themes")
 	if nil != err {
 		return
 	}
-
 	bazaarIndex := getBazaarIndex()
-	bazaarHash := result["bazaar"].(string)
-	result = map[string]interface{}{}
-	request := httpclient.NewBrowserRequest()
-	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/themes.json"
-	resp, reqErr := request.SetResult(&result).Get(u)
-	if nil != reqErr {
-		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
-		return
-	}
-	if 200 != resp.StatusCode {
-		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
-		return
-	}
-
-	repos := result["repos"].([]interface{})
+	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
@@ -95,7 +83,7 @@ func Themes() (ret []*Theme) {
 			return
 		}
 		if 200 != innerResp.StatusCode {
-			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, resp.StatusCode)
+			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
 
@@ -127,6 +115,67 @@ func Themes() (ret []*Theme) {
 
 	sort.Slice(ret, func(i, j int) bool { return ret[i].Updated > ret[j].Updated })
 	return
+}
+
+func InstalledThemes() (ret []*Theme) {
+	dir, err := os.Open(util.ThemesPath)
+	if nil != err {
+		logging.LogWarnf("open appearance themes folder [%s] failed: %s", util.ThemesPath, err)
+		return
+	}
+	themeDirs, err := dir.Readdir(-1)
+	if nil != err {
+		logging.LogWarnf("read appearance themes folder failed: %s", err)
+		return
+	}
+	dir.Close()
+
+	pkgIndex, err := getPkgIndex("themes")
+	if nil != err {
+		return
+	}
+
+	for _, themeDir := range themeDirs {
+		if !themeDir.IsDir() {
+			continue
+		}
+		dirName := themeDir.Name()
+		if isBuiltInTheme(dirName) {
+			continue
+		}
+
+		themeConf, parseErr := ThemeJSON(dirName)
+		if nil != parseErr || nil == themeConf {
+			continue
+		}
+
+		theme := &Theme{}
+		theme.Name = themeConf["name"].(string)
+		theme.Author = themeConf["author"].(string)
+		theme.URL = themeConf["url"].(string)
+		theme.Version = themeConf["version"].(string)
+		theme.Modes = make([]string, 0, len(themeConf["modes"].([]interface{})))
+		theme.RepoURL = theme.URL
+		theme.PreviewURL = "/appearance/themes/" + dirName + "/preview.png"
+		theme.PreviewURLThumb = "/appearance/themes/" + dirName + "/preview.png"
+		theme.Updated = themeDir.ModTime().Format("2006-01-02 15:04:05")
+		theme.Size = themeDir.Size()
+		theme.HSize = humanize.Bytes(uint64(theme.Size))
+		theme.HUpdated = formatUpdated(theme.Updated)
+		readme, readErr := os.ReadFile(filepath.Join(util.ThemesPath, dirName, "README.md"))
+		if nil != readErr {
+			logging.LogWarnf("read install theme README.md failed: %s", readErr)
+			continue
+		}
+		theme.README = gulu.Str.FromBytes(readme)
+		theme.Outdated = isOutdatedPkg(theme.URL, theme.Version, pkgIndex)
+		ret = append(ret, theme)
+	}
+	return
+}
+
+func isBuiltInTheme(dirName string) bool {
+	return "daylight" == dirName || "midnight" == dirName
 }
 
 func InstallTheme(repoURL, repoHash, installPath string, systemID string) error {

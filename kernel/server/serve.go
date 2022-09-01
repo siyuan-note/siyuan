@@ -97,6 +97,10 @@ func serveEmojis(ginServer *gin.Engine) {
 	ginServer.Static("/emojis/", filepath.Join(util.DataDir, "emojis"))
 }
 
+func serveTemplates(ginServer *gin.Engine) {
+	ginServer.Static("/templates/", filepath.Join(util.DataDir, "templates"))
+}
+
 func serveAppearance(ginServer *gin.Engine) {
 	siyuan := ginServer.Group("", model.CheckAuth)
 

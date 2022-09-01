@@ -28,6 +28,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/fsnotify/fsnotify"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -115,8 +116,8 @@ func loadThemes() {
 			continue
 		}
 		name := themeDir.Name()
-		themeConf, err := themeJSON(name)
-		if nil != err || nil == themeConf {
+		themeConf, parseErr := bazaar.ThemeJSON(name)
+		if nil != parseErr || nil == themeConf {
 			continue
 		}
 
@@ -143,28 +144,6 @@ func loadThemes() {
 
 		go watchTheme(filepath.Join(util.ThemesPath, name))
 	}
-}
-
-func themeJSON(themeName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.ThemesPath, themeName, "theme.json")
-	if !gulu.File.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := os.ReadFile(p)
-	if nil != err {
-		logging.LogErrorf("read theme.json [%s] failed: %s", p, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		logging.LogErrorf("parse theme.json [%s] failed: %s", p, err)
-		return
-	}
-	if 5 > len(ret) {
-		logging.LogWarnf("invalid theme.json [%s]", p)
-		return nil, errors.New("invalid theme.json")
-	}
-	return
 }
 
 func iconJSON(iconName string) (ret map[string]interface{}, err error) {

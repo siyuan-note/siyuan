@@ -128,7 +128,7 @@ func BazaarThemes() (ret []*bazaar.Theme) {
 		for _, theme := range ret {
 			if installed == theme.Name {
 				theme.Installed = true
-				if themeConf, err := themeJSON(theme.Name); nil == err {
+				if themeConf, err := bazaar.ThemeJSON(theme.Name); nil == err {
 					theme.Outdated = theme.Version != themeConf["version"].(string)
 				}
 				theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight

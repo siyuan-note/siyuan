@@ -19,11 +19,13 @@ package bazaar
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -57,27 +59,13 @@ type Template struct {
 
 func Templates() (templates []*Template) {
 	templates = []*Template{}
-	result, err := util.GetRhyResult(false)
+
+	pkgIndex, err := getPkgIndex("templates")
 	if nil != err {
 		return
 	}
-
 	bazaarIndex := getBazaarIndex()
-	bazaarHash := result["bazaar"].(string)
-	result = map[string]interface{}{}
-	request := httpclient.NewBrowserRequest()
-	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/templates.json"
-	resp, reqErr := request.SetResult(&result).Get(u)
-	if nil != reqErr {
-		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
-		return
-	}
-	if 200 != resp.StatusCode {
-		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
-		return
-	}
-
-	repos := result["repos"].([]interface{})
+	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(2, func(arg interface{}) {
@@ -127,6 +115,53 @@ func Templates() (templates []*Template) {
 	templates = filterLegacyTemplates(templates)
 
 	sort.Slice(templates, func(i, j int) bool { return templates[i].Updated > templates[j].Updated })
+	return
+}
+
+func InstalledTemplates() (ret []*Template) {
+	dir, err := os.Open(filepath.Join(util.DataDir, "templates"))
+	if nil != err {
+		logging.LogWarnf("open templates folder [%s] failed: %s", util.ThemesPath, err)
+		return
+	}
+	templateDirs, err := dir.Readdir(-1)
+	if nil != err {
+		logging.LogWarnf("read templates folder failed: %s", err)
+		return
+	}
+	dir.Close()
+
+	for _, templateDir := range templateDirs {
+		if !templateDir.IsDir() {
+			continue
+		}
+		dirName := templateDir.Name()
+		templateConf, parseErr := TemplateJSON(dirName)
+		if nil != parseErr || nil == templateConf {
+			continue
+		}
+
+		template := &Template{}
+		template.Name = templateConf["name"].(string)
+		template.Author = templateConf["author"].(string)
+		template.URL = templateConf["url"].(string)
+		template.Version = templateConf["version"].(string)
+		template.RepoURL = template.URL
+		template.PreviewURL = "/templates/" + dirName + "/preview.png"
+		template.PreviewURLThumb = "/templates/" + dirName + "/preview.png"
+		template.Updated = templateDir.ModTime().Format("2006-01-02 15:04:05")
+		template.Size = templateDir.Size()
+		template.HSize = humanize.Bytes(uint64(template.Size))
+		template.HUpdated = formatUpdated(template.Updated)
+		readme, readErr := os.ReadFile(filepath.Join(util.DataDir, "templates", dirName, "README.md"))
+		if nil != readErr {
+			logging.LogWarnf("read install template README.md failed: %s", readErr)
+			continue
+		}
+		template.README = gulu.Str.FromBytes(readme)
+
+		ret = append(ret, template)
+	}
 	return
 }
 

@@ -17,6 +17,7 @@
 package model
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
@@ -540,6 +541,8 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 	logging.LogInfof("synced data repo [ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs]",
 		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)), elapsed.Seconds())
 
+	logSyncMergeResult(mergeResult)
+
 	if 0 < len(mergeResult.Conflicts) {
 		// 云端同步发生冲突时生成副本 https://github.com/siyuan-note/siyuan/issues/5687
 
@@ -627,6 +630,43 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 		}()
 	}
 	return
+}
+
+func logSyncMergeResult(mergeResult *dejavu.MergeResult) {
+	logging.LogInfof("sync merge result [conflicts=%d, upserts=%d, removes=%d]", len(mergeResult.Conflicts), len(mergeResult.Upserts), len(mergeResult.Removes))
+	if 0 < len(mergeResult.Conflicts) {
+		logBuilder := bytes.Buffer{}
+		for i, f := range mergeResult.Conflicts {
+			logBuilder.WriteString("  ")
+			logBuilder.WriteString(f.Path)
+			if i < len(mergeResult.Conflicts)-1 {
+				logBuilder.WriteString("\n")
+			}
+		}
+		logging.LogInfof("sync conflicts:\n%s", logBuilder.String())
+	}
+	if 0 < len(mergeResult.Upserts) {
+		logBuilder := bytes.Buffer{}
+		for i, f := range mergeResult.Upserts {
+			logBuilder.WriteString("  ")
+			logBuilder.WriteString(f.Path)
+			if i < len(mergeResult.Upserts)-1 {
+				logBuilder.WriteString("\n")
+			}
+		}
+		logging.LogInfof("sync merge upserts:\n%s", logBuilder.String())
+	}
+	if 0 < len(mergeResult.Removes) {
+		logBuilder := bytes.Buffer{}
+		for i, f := range mergeResult.Removes {
+			logBuilder.WriteString("  ")
+			logBuilder.WriteString(f.Path)
+			if i < len(mergeResult.Removes)-1 {
+				logBuilder.WriteString("\n")
+			}
+		}
+		logging.LogInfof("sync merge removes:\n%s", logBuilder.String())
+	}
 }
 
 func needFullReindex(upsertTrees int) bool {

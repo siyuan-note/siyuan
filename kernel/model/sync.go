@@ -138,8 +138,6 @@ func incReindex(upserts, removes []string) {
 		util.PushEndlessProgress(msg)
 	}
 
-	logging.LogDebugf("sync reindex [upserts=%d, removes=%d]", len(upserts), len(removes))
-
 	// 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
 	bootProgressPart := 10 / float64(len(removes))
 	for _, removeFile := range removes {

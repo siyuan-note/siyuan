@@ -69,6 +69,9 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
 	if boot {
 		util.IncBootProgress(3, "Syncing data from the cloud...")
 		BootSyncSucc = 0

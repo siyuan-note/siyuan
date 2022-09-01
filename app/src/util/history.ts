@@ -284,7 +284,7 @@ export const openHistory = () => {
                 </ul>
                 <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
                 <textarea class="fn__flex-1 history__text fn__none" data-type="mdPanel"></textarea>
-                <div class="fn__flex-1 history__text fn__none" data-type="docPanel"></div>
+                <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
             </div>
         </div>
         <ul data-type="notebook" style="background-color: var(--b3-theme-background);border-radius: 0 0 4px 4px" class="fn__none b3-list b3-list--background">

@@ -98,6 +98,7 @@ func Themes() (ret []*Theme) {
 }
 
 func InstalledThemes() (ret []*Theme) {
+	ret = []*Theme{}
 	dir, err := os.Open(util.ThemesPath)
 	if nil != err {
 		logging.LogWarnf("open appearance themes folder [%s] failed: %s", util.ThemesPath, err)

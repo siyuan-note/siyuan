@@ -96,7 +96,8 @@ func Widgets() (widgets []*Widget) {
 	return
 }
 
-func InstalledWidgets() (ret []*Icon) {
+func InstalledWidgets() (ret []*Widget) {
+	ret = []*Widget{}
 	dir, err := os.Open(filepath.Join(util.DataDir, "widgets"))
 	if nil != err {
 		logging.LogWarnf("open widgets folder [%s] failed: %s", util.ThemesPath, err)
@@ -122,26 +123,26 @@ func InstalledWidgets() (ret []*Icon) {
 			continue
 		}
 
-		icon := &Icon{}
-		icon.Name = widgetConf["name"].(string)
-		icon.Author = widgetConf["author"].(string)
-		icon.URL = widgetConf["url"].(string)
-		icon.Version = widgetConf["version"].(string)
-		icon.RepoURL = icon.URL
-		icon.PreviewURL = "/widgets/" + dirName + "/preview.png"
-		icon.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
-		icon.Updated = widgetDir.ModTime().Format("2006-01-02 15:04:05")
-		icon.Size = widgetDir.Size()
-		icon.HSize = humanize.Bytes(uint64(icon.Size))
-		icon.HUpdated = formatUpdated(icon.Updated)
+		widget := &Widget{}
+		widget.Name = widgetConf["name"].(string)
+		widget.Author = widgetConf["author"].(string)
+		widget.URL = widgetConf["url"].(string)
+		widget.Version = widgetConf["version"].(string)
+		widget.RepoURL = widget.URL
+		widget.PreviewURL = "/widgets/" + dirName + "/preview.png"
+		widget.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
+		widget.Updated = widgetDir.ModTime().Format("2006-01-02 15:04:05")
+		widget.Size = widgetDir.Size()
+		widget.HSize = humanize.Bytes(uint64(widget.Size))
+		widget.HUpdated = formatUpdated(widget.Updated)
 		readme, readErr := os.ReadFile(filepath.Join(util.DataDir, "widgets", dirName, "README.md"))
 		if nil != readErr {
-			logging.LogWarnf("read install icon README.md failed: %s", readErr)
+			logging.LogWarnf("read install widget README.md failed: %s", readErr)
 			continue
 		}
-		icon.README = gulu.Str.FromBytes(readme)
-		icon.Outdated = isOutdatedWidget(icon.URL, icon.Version, bazaarWidgets)
-		ret = append(ret, icon)
+		widget.README = gulu.Str.FromBytes(readme)
+		widget.Outdated = isOutdatedWidget(widget.URL, widget.Version, bazaarWidgets)
+		ret = append(ret, widget)
 	}
 	return
 }

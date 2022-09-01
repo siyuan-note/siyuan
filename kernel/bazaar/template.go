@@ -99,6 +99,7 @@ func Templates() (templates []*Template) {
 }
 
 func InstalledTemplates() (ret []*Template) {
+	ret = []*Template{}
 	dir, err := os.Open(filepath.Join(util.DataDir, "templates"))
 	if nil != err {
 		logging.LogWarnf("open templates folder [%s] failed: %s", util.ThemesPath, err)

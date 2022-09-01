@@ -124,6 +124,7 @@ func InstalledWidgets() (ret []*Widget) {
 		}
 
 		widget := &Widget{}
+		widget.Installed = true
 		widget.Name = widgetConf["name"].(string)
 		widget.Author = widgetConf["author"].(string)
 		widget.URL = widgetConf["url"].(string)

@@ -126,6 +126,7 @@ func InstalledTemplates() (ret []*Template) {
 		}
 
 		template := &Template{}
+		template.Installed = true
 		template.Name = templateConf["name"].(string)
 		template.Author = templateConf["author"].(string)
 		template.URL = templateConf["url"].(string)

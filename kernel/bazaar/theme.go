@@ -128,6 +128,7 @@ func InstalledThemes() (ret []*Theme) {
 		}
 
 		theme := &Theme{}
+		theme.Installed = true
 		theme.Name = themeConf["name"].(string)
 		theme.Author = themeConf["author"].(string)
 		theme.URL = themeConf["url"].(string)

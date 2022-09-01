@@ -126,6 +126,7 @@ func InstalledIcons() (ret []*Icon) {
 		}
 
 		icon := &Icon{}
+		icon.Installed = true
 		icon.Name = iconConf["name"].(string)
 		icon.Author = iconConf["author"].(string)
 		icon.URL = iconConf["url"].(string)

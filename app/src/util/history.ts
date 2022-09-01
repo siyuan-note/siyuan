@@ -278,8 +278,8 @@ export const openHistory = () => {
                 <span class="fn__space"></span>
                 <button data-type="rebuildIndex" class="b3-button b3-button--outline">${window.siyuan.languages.rebuildIndex}</button>
             </div>
-            <div class="fn__flex fn__flex-1">
-                <ul style="width:200px;overflow: auto;" class="b3-list b3-list--background">
+            <div class="fn__flex fn__flex-1"${isMobile() ? ' style="flex-direction: column;"' : ""}>
+                <ul style="${isMobile() ? "height: 30%" : "width:200px"};overflow: auto;" class="b3-list b3-list--background">
                     <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
                 </ul>
                 <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>

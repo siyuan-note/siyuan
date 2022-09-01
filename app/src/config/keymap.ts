@@ -11,8 +11,8 @@ export const keymap = {
         let html = "";
         Object.keys(keymap).forEach(key => {
             if (window.siyuan.languages[key]) {
-                html += `<li class="b3-list-item b3-list-item--hide-action" style="padding-left: ${left}px">
-    <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
+                html += `<li class="b3-list-item b3-list-item--hide-action" style="margin-left: ${left+7}px">
+    <span class="b3-list-item__text class220901_165404">${window.siyuan.languages[key]}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field" value="${updateHotkeyTip(keymap[key].custom)}">
     <span class="fn__space"></span>
@@ -47,6 +47,16 @@ export const keymap = {
     </button>
 </div>
 <div class="b3-label file-tree config-keymap" id="keymapList">
+<style>
+     span.class220901_165404:before {
+        content:"";
+        height: 100%;
+        top: 0;
+        position: absolute;
+        border-left: 1px solid ;
+        left: -6px;
+    }
+</style>
     <label class="b3-form__icon" style="display:block;">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
         <input id="keymapInput" class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">

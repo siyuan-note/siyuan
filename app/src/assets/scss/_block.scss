@@ -136,6 +136,10 @@
       cursor: not-allowed;
     }
 
+    &--show {
+      opacity: 1;
+    }
+
     svg {
       height: 14px;
       width: 14px;

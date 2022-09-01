@@ -127,7 +127,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if ast.NodeBlockRefID == n.Type {
 				newDefID := blockIDs[n.TokensStr()]
 				if "" != newDefID {
-					n.Tokens = gulu.Str.ToBytes(newDefID)
+					n.Tokens = []byte(newDefID)
 				} else {
 					logging.LogWarnf("not found def [" + n.TokensStr() + "]")
 				}
@@ -486,7 +486,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					} else {
 						name = existName
 					}
-					n.Tokens = gulu.Str.ToBytes("assets/" + name)
+					n.Tokens = []byte("assets/" + name)
 				}
 				return ast.WalkContinue
 			})
@@ -570,7 +570,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)
 					return ast.WalkContinue
 				}
-				n.Tokens = gulu.Str.ToBytes("assets/" + name)
+				n.Tokens = []byte("assets/" + name)
 			}
 			return ast.WalkContinue
 		})

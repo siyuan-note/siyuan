@@ -1,4 +1,5 @@
 {
+  "downloaded": "已下载",
   "allOp": "所有操作",
   "htmlBlockError": "以下 script 执行会影响界面显示，已经停止运行该脚本",
   "fileHistory": "文件历史",

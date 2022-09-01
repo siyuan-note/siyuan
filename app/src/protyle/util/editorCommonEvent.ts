@@ -607,13 +607,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         const targetElement = editorElement.querySelector(".dragover__bottom") || editorElement.querySelector(".dragover__top") || editorElement.querySelector(".dragover__left") || editorElement.querySelector(".dragover__right");
         const isBacklink = window.siyuan.dragElement?.getAttribute("data-treetype") === "backlink";
-        if (window.siyuan.dragElement && targetElement && (
+        if (window.siyuan.dragElement && (event.altKey || event.shiftKey) && isBacklink) {
+            focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
+            const sourceId = window.siyuan.dragElement.getAttribute("data-node-id");
+            if (event.altKey) {
+                fetchPost("/api/block/getRefText", {id: sourceId}, (response) => {
+                    insertHTML(`((${sourceId} '${response.data}'))`, protyle);
+                });
+            } else {
+                insertHTML(protyle.lute.SpinBlockDOM(`{{select * from blocks where id='${sourceId}'}}`), protyle);
+                blockRender(protyle, protyle.wysiwyg.element);
+            }
+        } else if (window.siyuan.dragElement && targetElement && (
             window.siyuan.dragElement.parentElement.classList.contains("protyle-gutters") ||
             isBacklink ||
             window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem")) {
-            // gutter 拖拽
+            // gutter 或反链面板拖拽
             const sourceId = window.siyuan.dragElement.getAttribute("data-node-id");
-
             let sourceElements: Element[] = [];
             if (isBacklink) {
                 let sourceElement = document.createElement("div");
@@ -739,7 +749,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     });
     let dragoverElement: Element;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
-        event.dataTransfer.dropEffect = "move";
+        // 设置了的话 drop 就无法监听 shift/control event.dataTransfer.dropEffect = "move";
         if (event.dataTransfer.types.includes("Files") && event.target.classList.contains("protyle-wysiwyg")) {
             // 文档底部拖拽文件需 preventDefault，否则无法触发 drop 事件 https://github.com/siyuan-note/siyuan/issues/2665
             event.preventDefault();
@@ -748,7 +758,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!window.siyuan.dragElement) {
             return;
         }
-        // 编辑器内文字拖拽或资源文件拖拽进入编辑器时不能运行 event.preventDefault()， 否则吴光标; 需放在 !window.siyuan.dragElement 之后
+        if ((event.shiftKey || event.altKey) && window.siyuan.dragElement.getAttribute("data-treetype") === "backlink") {
+            const targetElement = hasClosestBlock(event.target);
+            if (targetElement) {
+                targetElement.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
+            }
+            event.preventDefault();
+            return;
+        }
+        // 编辑器内文字拖拽或资源文件拖拽或按住 alt/shift 拖拽反链图标进入编辑器时不能运行 event.preventDefault()， 否则无光标; 需放在 !window.siyuan.dragElement 之后
         event.preventDefault();
         const targetElement = hasClosestBlock(event.target) as Element;
         if (!targetElement) {

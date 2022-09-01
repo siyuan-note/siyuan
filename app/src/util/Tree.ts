@@ -223,8 +223,7 @@ data-def-path="${item.defPath}">
             const liElement = hasClosestByTag(event.target, "LI");
             if (liElement) {
                 event.dataTransfer.setData("text/html", liElement.outerHTML);
-                // event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, liElement.parentElement);
-                event.dataTransfer.dropEffect = "move";
+                // 设置了的话 drop 就无法监听 alt event.dataTransfer.dropEffect = "move";
                 liElement.style.opacity = "0.1";
                 window.siyuan.dragElement = liElement;
             }

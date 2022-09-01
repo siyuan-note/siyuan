@@ -60,27 +60,13 @@ type Theme struct {
 
 func Themes() (ret []*Theme) {
 	ret = []*Theme{}
-	result, err := util.GetRhyResult(false)
+
+	pkgIndex, err := getPkgIndex("themes")
 	if nil != err {
 		return
 	}
-
 	bazaarIndex := getBazaarIndex()
-	bazaarHash := result["bazaar"].(string)
-	result = map[string]interface{}{}
-	request := httpclient.NewBrowserRequest()
-	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/themes.json"
-	resp, reqErr := request.SetResult(&result).Get(u)
-	if nil != reqErr {
-		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
-		return
-	}
-	if 200 != resp.StatusCode {
-		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
-		return
-	}
-
-	repos := result["repos"].([]interface{})
+	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
@@ -97,7 +83,7 @@ func Themes() (ret []*Theme) {
 			return
 		}
 		if 200 != innerResp.StatusCode {
-			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, resp.StatusCode)
+			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
 
@@ -144,6 +130,11 @@ func InstalledThemes() (ret []*Theme) {
 	}
 	dir.Close()
 
+	pkgIndex, err := getPkgIndex("themes")
+	if nil != err {
+		return
+	}
+
 	for _, themeDir := range themeDirs {
 		if !themeDir.IsDir() {
 			continue
@@ -177,7 +168,7 @@ func InstalledThemes() (ret []*Theme) {
 			continue
 		}
 		theme.README = gulu.Str.FromBytes(readme)
-
+		theme.Outdated = isOutdatedPkg(theme.URL, theme.Version, pkgIndex)
 		ret = append(ret, theme)
 	}
 	return

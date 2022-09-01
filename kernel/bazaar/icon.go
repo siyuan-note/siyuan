@@ -57,26 +57,13 @@ type Icon struct {
 
 func Icons() (icons []*Icon) {
 	icons = []*Icon{}
-	result, err := util.GetRhyResult(false)
-	if nil != err {
-		return
-	}
 
-	bazaarIndex := getBazaarIndex()
-	bazaarHash := result["bazaar"].(string)
-	result = map[string]interface{}{}
-	request := httpclient.NewBrowserRequest()
-	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/icons.json"
-	resp, err := request.SetResult(&result).Get(u)
+	pkgIndex, err := getPkgIndex("icons")
 	if nil != err {
-		logging.LogErrorf("get community stage index [%s] failed: %s", u, err)
 		return
 	}
-	if 200 != resp.StatusCode {
-		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
-		return
-	}
-	repos := result["repos"].([]interface{})
+	bazaarIndex := getBazaarIndex()
+	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(2, func(arg interface{}) {

@@ -57,27 +57,14 @@ type Widget struct {
 
 func Widgets() (widgets []*Widget) {
 	widgets = []*Widget{}
-	result, err := util.GetRhyResult(false)
+
+	pkgIndex, err := getPkgIndex("widgets")
 	if nil != err {
 		return
 	}
-
 	bazaarIndex := getBazaarIndex()
-	bazaarHash := result["bazaar"].(string)
-	result = map[string]interface{}{}
-	request := httpclient.NewBrowserRequest()
-	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/widgets.json"
-	resp, err := request.SetResult(&result).Get(u)
-	if nil != err {
-		logging.LogErrorf("get community stage index [%s] failed: %s", u, err)
-		return
-	}
-	if 200 != resp.StatusCode {
-		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
-		return
-	}
 
-	repos := result["repos"].([]interface{})
+	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {

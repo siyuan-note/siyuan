@@ -59,27 +59,13 @@ type Template struct {
 
 func Templates() (templates []*Template) {
 	templates = []*Template{}
-	result, err := util.GetRhyResult(false)
+
+	pkgIndex, err := getPkgIndex("templates")
 	if nil != err {
 		return
 	}
-
 	bazaarIndex := getBazaarIndex()
-	bazaarHash := result["bazaar"].(string)
-	result = map[string]interface{}{}
-	request := httpclient.NewBrowserRequest()
-	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/templates.json"
-	resp, reqErr := request.SetResult(&result).Get(u)
-	if nil != reqErr {
-		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
-		return
-	}
-	if 200 != resp.StatusCode {
-		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
-		return
-	}
-
-	repos := result["repos"].([]interface{})
+	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(2, func(arg interface{}) {

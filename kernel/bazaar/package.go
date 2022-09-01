@@ -81,6 +81,46 @@ func ThemeJSON(themeDirName string) (ret map[string]interface{}, err error) {
 	return
 }
 
+func getPkgIndex(pkgType string) (ret map[string]interface{}, err error) {
+	ret, err = util.GetRhyResult(false)
+	if nil != err {
+		return
+	}
+
+	bazaarHash := ret["bazaar"].(string)
+	ret = map[string]interface{}{}
+	request := httpclient.NewBrowserRequest()
+	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/" + pkgType + ".json"
+	resp, reqErr := request.SetResult(&ret).Get(u)
+	if nil != reqErr {
+		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
+		return
+	}
+	if 200 != resp.StatusCode {
+		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
+		return
+	}
+	return
+}
+
+func isOutdatedPkg(fullURL, version string, pkgIndex map[string]interface{}) bool {
+	if !strings.HasPrefix(fullURL, "https://github.com/") {
+		return false
+	}
+
+	url := strings.TrimPrefix(fullURL, "https://github.com/")
+	repos := pkgIndex["repos"].([]interface{})
+	for _, repo := range repos {
+		r := repo.(map[string]interface{})
+		repoURL := r["url"].(string)
+		repoVer := r["version"].(string)
+		if url == repoURL && version != repoVer {
+			return true
+		}
+	}
+	return false
+}
+
 func GetPackageREADME(repoURL, repoHash string, systemID string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
 	data, err := downloadPackage(repoURLHash+"/README.md", false, systemID)

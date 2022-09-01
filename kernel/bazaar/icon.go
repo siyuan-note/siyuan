@@ -24,7 +24,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -143,7 +142,8 @@ func InstalledIcons() (ret []*Icon) {
 			logging.LogWarnf("read install icon README.md failed: %s", readErr)
 			continue
 		}
-		icon.README = gulu.Str.FromBytes(readme)
+
+		icon.README, _ = renderREADME(icon.URL, readme)
 		icon.Outdated = isOutdatedIcon(icon.URL, icon.Version, bazaarIcons)
 		ret = append(ret, icon)
 	}

@@ -82,7 +82,7 @@ export class Background {
                 const response = JSON.parse(responseText);
                 const style = `background-image:url("${response.data.succMap[Object.keys(response.data.succMap)[0]]}")`;
                 this.ial["title-img"] = style;
-                this.render(this.ial);
+                this.render(this.ial, protyle.block.rootID);
                 fetchPost("/api/attr/setBlockAttrs", {
                     id: protyle.block.rootID,
                     attrs: {"title-img": style}
@@ -118,7 +118,7 @@ export class Background {
                             attrs: {"title-img": style}
                         });
                     } else {
-                        this.render(this.ial);
+                        this.render(this.ial, protyle.block.rootID);
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -207,7 +207,7 @@ export class Background {
                     ];
                     const style = bgs[getRandom(0, bgs.length - 1)];
                     this.ial["title-img"] = style;
-                    this.render(this.ial);
+                    this.render(this.ial, protyle.block.rootID);
                     fetchPost("/api/attr/setBlockAttrs", {
                         id: protyle.block.rootID,
                         attrs: {"title-img": this.ial["title-img"]}
@@ -217,7 +217,7 @@ export class Background {
                     break;
                 } else if (type === "remove") {
                     delete this.ial["title-img"];
-                    this.render(this.ial);
+                    this.render(this.ial, protyle.block.rootID);
                     fetchPost("/api/attr/setBlockAttrs", {
                         id: protyle.block.rootID,
                         attrs: {"title-img": ""}
@@ -229,7 +229,7 @@ export class Background {
                     const emoji = getRandomEmoji();
                     if (emoji) {
                         this.ial.icon = emoji;
-                        this.render(this.ial);
+                        this.render(this.ial, protyle.block.rootID);
                         updateFileTreeEmoji(emoji, protyle.block.rootID);
                         updateOutlineEmoji(emoji);
                         fetchPost("/api/attr/setBlockAttrs", {
@@ -267,7 +267,7 @@ export class Background {
                     btnsElement[1].addEventListener("click", () => {
                         const style = `background-image:url(${dialog.element.querySelector("input").value});`;
                         this.ial["title-img"] = style;
-                        this.render(this.ial);
+                        this.render(this.ial, protyle.block.rootID);
                         fetchPost("/api/attr/setBlockAttrs", {
                             id: protyle.block.rootID,
                             attrs: {"title-img": this.ial["title-img"]}
@@ -297,7 +297,7 @@ export class Background {
                     } else {
                         this.ial.tags = tags.toString();
                     }
-                    this.render(this.ial);
+                    this.render(this.ial, protyle.block.rootID);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -307,11 +307,13 @@ export class Background {
         });
     }
 
-    public render(ial: IObject) {
+    public render(ial: IObject, rootId: string) {
         const img = ial["title-img"];
         const icon = ial.icon;
         const tags = ial.tags;
         this.ial = ial;
+        // 为主题提供样式基础
+        this.element.setAttribute("data-node-id", rootId);
         if (tags) {
             let html = "";
             tags.split(",").forEach((item, index) => {
@@ -359,7 +361,7 @@ export class Background {
         }
     }
 
-    private openTag(protyle:IProtyle) {
+    private openTag(protyle: IProtyle) {
         fetchPost("/api/search/searchTag", {
             k: "",
         }, (response) => {
@@ -434,7 +436,7 @@ export class Background {
         return tags;
     }
 
-    private addTags(tag: string, protyle:IProtyle) {
+    private addTags(tag: string, protyle: IProtyle) {
         window.siyuan.menus.menu.remove();
         const tags = this.getTags();
         if (tags.includes(tag)) {
@@ -442,10 +444,10 @@ export class Background {
         }
         tags.push(tag);
         fetchPost("/api/attr/setBlockAttrs", {
-            id:protyle.block.rootID,
+            id: protyle.block.rootID,
             attrs: {"tags": tags.toString()}
         });
         this.ial.tags = tags.toString();
-        this.render(this.ial);
+        this.render(this.ial, protyle.block.rootID);
     }
 }

@@ -422,13 +422,13 @@ const updateFileEmoji = (unicode: string, id: string) => {
     /// #if MOBILE
     if (window.siyuan.mobileEditor.protyle.block.rootID === id) {
         window.siyuan.mobileEditor.protyle.background.ial.icon = unicode;
-        window.siyuan.mobileEditor.protyle.background.render(window.siyuan.mobileEditor.protyle.background.ial);
+        window.siyuan.mobileEditor.protyle.background.render(window.siyuan.mobileEditor.protyle.background.ial, window.siyuan.mobileEditor.protyle.block.rootID);
     }
     /// #else
     getAllModels().editor.find(item => {
         if (item.editor.protyle.block.rootID === id) {
             item.editor.protyle.background.ial.icon = unicode;
-            item.editor.protyle.background.render(item.editor.protyle.background.ial);
+            item.editor.protyle.background.render(item.editor.protyle.background.ial, item.editor.protyle.block.rootID);
             item.parent.setDocIcon(unicode);
             return true;
         }

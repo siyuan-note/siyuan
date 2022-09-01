@@ -96,7 +96,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
             // 页签没有打开
             protyle.title.render(protyle, response, renderTitle);
         } else if (protyle.options.render.background) {
-            protyle.background.render(response.data.ial);
+            protyle.background.render(response.data.ial, protyle.block.rootID);
             protyle.wysiwyg.renderCustom(response.data.ial);
         }
 

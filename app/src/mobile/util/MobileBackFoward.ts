@@ -36,7 +36,7 @@ const focusStack = (backStack: IBackStack) => {
             id: backStack.id,
         }, (response) => {
             (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === "Untitled" ? "" : response.data.name;
-            protyle.background.render(response.data.ial);
+            protyle.background.render(response.data.ial, protyle.block.rootID);
             protyle.wysiwyg.renderCustom(response.data.ial);
         });
     }

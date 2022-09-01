@@ -177,9 +177,8 @@ func isOutdatedTheme(fullURL, version string, bazaarThemes []*Theme) bool {
 		return false
 	}
 
-	url := strings.TrimPrefix(fullURL, "https://github.com/")
 	for _, pkg := range bazaarThemes {
-		if url == pkg.URL && version != pkg.Version {
+		if fullURL == pkg.URL && version != pkg.Version {
 			return true
 		}
 	}
@@ -191,9 +190,8 @@ func isOutdatedIcon(fullURL, version string, bazaarIcons []*Icon) bool {
 		return false
 	}
 
-	url := strings.TrimPrefix(fullURL, "https://github.com/")
 	for _, pkg := range bazaarIcons {
-		if url == pkg.URL && version != pkg.Version {
+		if fullURL == pkg.URL && version != pkg.Version {
 			return true
 		}
 	}
@@ -205,9 +203,8 @@ func isOutdatedWidget(fullURL, version string, bazaarWidgets []*Widget) bool {
 		return false
 	}
 
-	url := strings.TrimPrefix(fullURL, "https://github.com/")
 	for _, pkg := range bazaarWidgets {
-		if url == pkg.URL && version != pkg.Version {
+		if fullURL == pkg.URL && version != pkg.Version {
 			return true
 		}
 	}
@@ -219,9 +216,8 @@ func isOutdatedTemplate(fullURL, version string, bazaarTemplates []*Template) bo
 		return false
 	}
 
-	url := strings.TrimPrefix(fullURL, "https://github.com/")
 	for _, pkg := range bazaarTemplates {
-		if url == pkg.URL && version != pkg.Version {
+		if fullURL == pkg.URL && version != pkg.Version {
 			return true
 		}
 	}

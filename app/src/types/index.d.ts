@@ -451,6 +451,7 @@ declare interface IBlock {
     refs?: IBlock[];
     children?: IBlock[]
     length?: number
+    ial: IObject
 }
 
 declare interface IModels {

@@ -12,6 +12,7 @@ import {getAllModels} from "../layout/getAll";
 import {showMessage} from "../dialog/message";
 import {focusByRange} from "../protyle/util/selection";
 import {reloadProtyle} from "../protyle/util/reload";
+import {unicode2Emoji} from "../emoji";
 
 let protyle: Protyle;
 export const openSearch = async (hotkey: string, key?: string, notebookId?: string, searchPath?: string) => {
@@ -141,7 +142,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             <svg class="svg ft__on-surface" id="searchFilter" style="height: 19px;float: left"><use xlink:href="#iconSettings"></use></svg>
         </span>
     </div>
-    <div id="searchList" style="position:relative;height:calc(50% - 69px);overflow: auto" class="b3-list b3-list--background"></div>
+    <div id="searchList" style="position:relative;height:calc(50% - 69px);overflow: auto" class="b3-list b3-list--background search__list"></div>
     <div id="searchPreview" class="fn__flex-1 spread-search__preview"></div></div>
     <div id="searchFilterPanel" class="fn__none spread-search__filter">
         <label class="fn__flex">
@@ -692,7 +693,7 @@ const onSearch = (data: IBlock[], dialog: Dialog) => {
         const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
         resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${item.id}" data-root-id="${item.rootID}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
-<span class="b3-list-item__text">${item.content}</span>
+<span class="b3-list-item__text">${unicode2Emoji(item.ial.icon)}${item.ial.icon ? "&nbsp;" : ""}${item.content}</span>
 <span class="b3-list-item__meta b3-list-item__meta--ellipsis" title="${Lute.EscapeHTMLStr(title)}">${Lute.EscapeHTMLStr(title)}</span>
 </div>`;
     });

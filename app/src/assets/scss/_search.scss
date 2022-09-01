@@ -36,6 +36,13 @@
     top: 20px;
   }
 
+  &__list .custom-icon {
+    height: 16px;
+    width: 16px;
+    float: left;
+    margin-top: 6px;
+  }
+
   &__label {
     cursor: pointer;
     flex: 1;
@@ -60,7 +67,6 @@
     }
   }
 }
-
 
 .protyle-search {
   display: flex;

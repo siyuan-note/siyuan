@@ -234,6 +234,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/graph/getLocalGraph", model.CheckAuth, getLocalGraph)
 
 	ginServer.Handle("POST", "/api/bazaar/getBazaarWidget", model.CheckAuth, getBazaarWidget)
+	ginServer.Handle("POST", "/api/bazaar/getInstalledWidget", model.CheckAuth, getInstalledWidget)
 	ginServer.Handle("POST", "/api/bazaar/installBazaarWidget", model.CheckAuth, installBazaarWidget)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarWidget", model.CheckAuth, uninstallBazaarWidget)
 	ginServer.Handle("POST", "/api/bazaar/getBazaarIcon", model.CheckAuth, getBazaarIcon)

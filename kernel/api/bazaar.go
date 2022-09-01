@@ -51,6 +51,15 @@ func getBazaarWidget(c *gin.Context) {
 	}
 }
 
+func getInstalledWidget(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = map[string]interface{}{
+		"packages": bazaar.InstalledWidgets(),
+	}
+}
+
 func installBazaarWidget(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

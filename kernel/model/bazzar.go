@@ -28,7 +28,7 @@ import (
 )
 
 func GetPackageREADME(repoURL, repoHash string) (ret string) {
-	ret = bazaar.GetPackageREADME(repoURL, repoHash, IsSubscriber(), Conf.System.ID)
+	ret = bazaar.GetPackageREADME(repoURL, repoHash, Conf.System.ID)
 	return
 }
 
@@ -54,7 +54,7 @@ func InstallBazaarWidget(repoURL, repoHash, widgetName string) error {
 	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.DataDir, "widgets", widgetName)
-	err := bazaar.InstallWidget(repoURL, repoHash, installPath, IsSubscriber(), Conf.System.ID)
+	err := bazaar.InstallWidget(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(46), widgetName))
 	}
@@ -96,7 +96,7 @@ func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
 	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.IconsPath, iconName)
-	err := bazaar.InstallIcon(repoURL, repoHash, installPath, IsSubscriber(), Conf.System.ID)
+	err := bazaar.InstallIcon(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(46), iconName))
 	}
@@ -145,7 +145,7 @@ func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bo
 	closeThemeWatchers()
 
 	installPath := filepath.Join(util.ThemesPath, themeName)
-	err := bazaar.InstallTheme(repoURL, repoHash, installPath, IsSubscriber(), Conf.System.ID)
+	err := bazaar.InstallTheme(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(46), themeName))
 	}
@@ -202,7 +202,7 @@ func InstallBazaarTemplate(repoURL, repoHash, templateName string) error {
 	defer writingDataLock.Unlock()
 
 	installPath := filepath.Join(util.DataDir, "templates", templateName)
-	err := bazaar.InstallTemplate(repoURL, repoHash, installPath, IsSubscriber(), Conf.System.ID)
+	err := bazaar.InstallTemplate(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(46), templateName))
 	}

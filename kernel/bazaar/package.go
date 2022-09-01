@@ -37,9 +37,9 @@ import (
 	"golang.org/x/text/transform"
 )
 
-func GetPackageREADME(repoURL, repoHash string, chinaCDN bool, systemID string) (ret string) {
+func GetPackageREADME(repoURL, repoHash string, systemID string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash+"/README.md", chinaCDN, false, systemID)
+	data, err := downloadPackage(repoURLHash+"/README.md", false, systemID)
 	if nil != err {
 		ret = "Load bazaar package's README.md failed: " + err.Error()
 		return
@@ -75,14 +75,11 @@ func GetPackageREADME(repoURL, repoHash string, chinaCDN bool, systemID string) 
 	return
 }
 
-func downloadPackage(repoURLHash string, chinaCDN, pushProgress bool, systemID string) (data []byte, err error) {
+func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (data []byte, err error) {
 	// repoURLHash: https://github.com/88250/Comfortably-Numb@6286912c381ef3f83e455d06ba4d369c498238dc
 	pushID := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
 	repoURLHash = strings.TrimPrefix(repoURLHash, "https://github.com/")
-	u := util.BazaarOSSFileServer + "/package/" + repoURLHash
-	if chinaCDN {
-		u = util.BazaarOSSServer + "/package/" + repoURLHash
-	}
+	u := util.BazaarOSSServer + "/package/" + repoURLHash
 	buf := &bytes.Buffer{}
 	resp, err := httpclient.NewBrowserDownloadRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 		if pushProgress {

@@ -210,18 +210,22 @@ func ExportDocx(id, savePath string, removeAssets bool) (err error) {
 	}
 
 	tmpDir := filepath.Join(util.TempDir, "export", gulu.Rand.String(7))
+	if err = os.MkdirAll(tmpDir, 0755); nil != err {
+		return
+	}
 	defer os.Remove(tmpDir)
-	name, dom := ExportMarkdownHTML(id, tmpDir, true)
+	name, content := ExportMarkdownHTML(id, tmpDir, true)
+
 	tmpDocxPath := filepath.Join(tmpDir, name+".docx")
 	args := []string{ // pandoc -f html --resource-path=请从这里开始 请从这里开始\index.html -o test.docx
-		"-f", "html",
+		"-f", "html+tex_math_dollars",
 		"--resource-path", tmpDir,
 		"-o", tmpDocxPath,
 	}
 
 	pandoc := exec.Command(Conf.Export.PandocBin, args...)
 	util.CmdAttr(pandoc)
-	pandoc.Stdin = bytes.NewBufferString(dom)
+	pandoc.Stdin = bytes.NewBufferString(content)
 	output, err := pandoc.CombinedOutput()
 	if nil != err {
 		logging.LogErrorf("export docx failed: %s", gulu.Str.FromBytes(output))
@@ -323,7 +327,14 @@ func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
 		}
 		return ast.WalkContinue
 	})
-	dom = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+
+	if docx {
+		renderer := render.NewProtyleExportDocxRenderer(tree, luteEngine.RenderOptions)
+		output := renderer.Render()
+		dom = gulu.Str.FromBytes(output)
+	} else {
+		dom = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+	}
 	return
 }
 
@@ -964,6 +975,7 @@ func renderExportMdMathBlockContent(r *render.FormatRenderer, node *ast.Node, en
 func renderExportMdInlineMathContent(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {
 	if entering {
 		tokens := html.UnescapeHTML(node.Tokens)
+		tokens = gulu.Str.ToBytes("a" + gulu.Str.FromBytes(tokens) + "b")
 		r.Write(tokens)
 	}
 	return ast.WalkContinue

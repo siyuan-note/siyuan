@@ -30,6 +30,7 @@ export const bazaar = {
     <div data-type="template" class="item"><span class="item__text">${window.siyuan.languages.template}</span></div>
     <div data-type="icon" class="item"><span class="item__text">${window.siyuan.languages.icon}</span></div>
     <div data-type="widget" class="item"><span class="item__text">${window.siyuan.languages.widget}</span></div>
+    <div data-type="downloaded" class="item"><span class="item__text">${window.siyuan.languages.downloaded}</span></div>
 </div>
 <div class="fn__flex-1">
     <div data-type="theme" class="bazaarPanel" data-init="true">
@@ -112,6 +113,23 @@ export const bazaar = {
             ${loadingHTML}
         </div>
     </div>
+    <div class="fn__none bazaarPanel" data-type="downloaded">
+        <div class="fn__hr"></div>
+        <div class="fn__flex">
+            <div class="fn__space"></div>
+            <div class="fn__space"></div>
+            <button data-type="myTheme" class="b3-button">${window.siyuan.languages.theme}</button>
+            <div class="fn__space"></div>
+            <button data-type="myTemplate" class="b3-button b3-button--white">${window.siyuan.languages.template}</button>
+            <div class="fn__space"></div>
+            <button data-type="myIcon" class="b3-button b3-button--white">${window.siyuan.languages.icon}</button>
+            <div class="fn__space"></div>
+            <button data-type="myWidget" class="b3-button b3-button--white">${window.siyuan.languages.widget}</button>
+        </div>
+        <div id="configBazaarDownloaded">
+            ${loadingHTML}
+        </div>
+    </div>
 </div>
 <div id="configBazaarReadme" class="config-bazaar__readme"></div>
 </div>`;
@@ -151,16 +169,45 @@ export const bazaar = {
     </div>
 </div>`;
     },
+    _genMyHTML(item: IBazaarItem, bazaarType: TBazaarType) {
+        return `<div data-bazaar="${bazaarType}" data-type="downloaded" class="b3-card">
+    <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
+    <div class="b3-card__info fn__flex">
+        <span class="fn__flex-center fn__ellipsis">${item.name}</span>
+        <span class="fn__space"></span>
+        <span class="fn__flex-1"></span>
+        <svg class="svg fn__flex-center"><use xlink:href="#iconDownload"></use></svg>
+        <span class="fn__space"></span>
+        <span class="fn__flex-center">${item.downloads}</span>
+    </div>
+    <div class="b3-card__actions" data-url="${item.repoURL}">
+        <button class="b3-tooltips b3-tooltips__ne b3-button b3-button--text" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
+            <svg><use xlink:href="#iconTrashcan"></use></svg>
+        </button>
+        <div class="fn__flex-1"></div>
+        <span class="fn__space"></span>
+        <button data-type="install-t" aria-label="${window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw b3-button b3-button--text${item.outdated ? "" : " fn__none"}">
+            <svg><use xlink:href="#iconRefresh"></use></svg>
+        </button>
+        <span class="fn__space"></span>
+        <button class="b3-tooltips b3-tooltips__nw b3-button b3-button--text" data-type="uninstall" aria-label="${window.siyuan.languages.showInFolder}">
+            <svg><use xlink:href="#iconFolder"></use></svg>
+        </button>
+    </div>
+</div>`;
+    },
     data: {
         themes: [] as IBazaarItem[],
         templates: [] as IBazaarItem[],
         icons: [] as IBazaarItem[],
         widgets: [] as IBazaarItem[],
+        downloaded: [] as IBazaarItem[],
     },
     renderReadme(cardElement: HTMLElement, bazaarType: TBazaarType) {
+        const isDownloaded = cardElement.getAttribute("data-type") === "downloaded";
         const repoURL = cardElement.querySelector(".b3-card__actions").getAttribute("data-url");
         let data: IBazaarItem;
-        bazaar.data[bazaarType].find((item: IBazaarItem) => {
+        (isDownloaded ? bazaar.data.downloaded : bazaar.data[bazaarType]).find((item: IBazaarItem) => {
             if (item.repoURL === repoURL) {
                 data = item;
                 return true;
@@ -233,14 +280,20 @@ export const bazaar = {
         <img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;" src="/stage/loading-pure.svg">
     </div>
 </div>`;
-        fetchPost("/api/bazaar/getBazaarPackageREAME", {
-            repoURL: data.repoURL,
-            repoHash: data.repoHash,
-        }, response => {
+        if (isDownloaded) {
             const mdElement = readmeElement.querySelector(".item__readme");
-            mdElement.innerHTML = response.data.html;
+            mdElement.innerHTML = data.readme
             highlightRender(mdElement);
-        });
+        } else {
+            fetchPost("/api/bazaar/getBazaarPackageREAME", {
+                repoURL: data.repoURL,
+                repoHash: data.repoHash,
+            }, response => {
+                const mdElement = readmeElement.querySelector(".item__readme");
+                mdElement.innerHTML = response.data.html;
+                highlightRender(mdElement);
+            });
+        }
         readmeElement.style.right = "0";
     },
     bindEvent() {
@@ -252,7 +305,25 @@ export const bazaar = {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(bazaar.element)) {
                 const type = target.getAttribute("data-type");
-                if (type === "goBack") {
+                if (type === "myTheme" || type === "myTemplate" || type === "myIcon" || type === "myWidget") {
+                    target.parentElement.childNodes.forEach((item: HTMLElement) => {
+                        if (item.nodeType !== 3 && item.classList.contains("b3-button")) {
+                            item.classList.add("b3-button--outline");
+                        }
+                    })
+                    target.classList.remove("b3-button--outline");
+                    fetchPost(`/api/bazaar/getInstalled${type.replace("my", "")}`, {}, response => {
+                        let html = "";
+                        response.data.packages.forEach((item: IBazaarItem) => {
+                            html += this._genMyHTML(item, type.replace("my", "").toLowerCase() + "s" as TBazaarType);
+                        });
+                        bazaar.data.downloaded = response.data.packages;
+                        bazaar.element.querySelector("#configBazaarDownloaded").innerHTML = `<div class="b3-cards">${html}</div>`;
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goBack") {
                     const readmeElement = bazaar.element.querySelector("#configBazaarReadme") as HTMLElement;
                     readmeElement.style.right = "-100%";
                     event.preventDefault();
@@ -443,6 +514,15 @@ export const bazaar = {
                                     fetchPost("/api/bazaar/getBazaarWidget", {}, response => {
                                         bazaar.onBazaar(response, "widgets", false);
                                         bazaar.data.widgets = response.data.packages;
+                                    });
+                                } else if (type === "downloaded") {
+                                    fetchPost("/api/bazaar/getInstalledTheme", {}, response => {
+                                        let html = "";
+                                        response.data.packages.forEach((item: IBazaarItem) => {
+                                            html += this._genMyHTML(item, "themes");
+                                        });
+                                        bazaar.data.downloaded = response.data.packages;
+                                        bazaar.element.querySelector("#configBazaarDownloaded").innerHTML = `<div class="b3-cards">${html}</div>`;
                                     });
                                 }
                                 item.setAttribute("data-init", "true");

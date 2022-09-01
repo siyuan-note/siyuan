@@ -477,6 +477,7 @@ declare interface IMenu {
 }
 
 declare interface IBazaarItem {
+    readme: string
     stars: string
     author: string
     updated: string

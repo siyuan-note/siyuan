@@ -28,14 +28,14 @@ export class Editor extends Model {
         this.initProtyle(options);
     }
 
-    private initProtyle(options:  {
+    private initProtyle(options: {
         blockId: string,
         action?: string[]
         mode?: TEditorMode,
         scrollAttr?: IScrollAttr
     }) {
         this.editor = new Protyle(this.element, {
-            action: options.action,
+            action: options.action || [],
             blockId: options.blockId,
             mode: options.mode,
             render: {

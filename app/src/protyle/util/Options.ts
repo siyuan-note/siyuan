@@ -121,7 +121,7 @@ export class Options {
             filename: (name: string) => name.replace(/[\\/:*?"'<>|]/g, ""),
             linkToImgUrl: "",
             withCredentials: false,
-        },
+        }
     };
 
     constructor(options: IOptions) {

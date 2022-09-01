@@ -129,9 +129,9 @@ func Themes() (ret []*Theme) {
 	return
 }
 
-func InstallTheme(repoURL, repoHash, installPath string, chinaCDN bool, systemID string) error {
+func InstallTheme(repoURL, repoHash, installPath string, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, chinaCDN, true, systemID)
+	data, err := downloadPackage(repoURLHash, true, systemID)
 	if nil != err {
 		return err
 	}

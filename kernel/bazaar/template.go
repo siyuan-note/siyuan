@@ -130,9 +130,9 @@ func Templates() (templates []*Template) {
 	return
 }
 
-func InstallTemplate(repoURL, repoHash, installPath string, chinaCDN bool, systemID string) error {
+func InstallTemplate(repoURL, repoHash, installPath string, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, chinaCDN, true, systemID)
+	data, err := downloadPackage(repoURLHash, true, systemID)
 	if nil != err {
 		return err
 	}

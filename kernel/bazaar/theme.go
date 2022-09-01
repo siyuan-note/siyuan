@@ -24,7 +24,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -146,7 +145,7 @@ func InstalledThemes() (ret []*Theme) {
 			logging.LogWarnf("read install theme README.md failed: %s", readErr)
 			continue
 		}
-		theme.README = gulu.Str.FromBytes(readme)
+		theme.README, _ = renderREADME(theme.URL, readme)
 		theme.Outdated = isOutdatedTheme(theme.URL, theme.Version, bazaarThemes)
 		ret = append(ret, theme)
 	}

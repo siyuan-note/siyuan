@@ -244,16 +244,21 @@ func GetPackageREADME(repoURL, repoHash string, systemID string) (ret string) {
 		}
 	}
 
+	ret, err = renderREADME(repoURL, data)
+	return
+}
+
+func renderREADME(repoURL string, mdData []byte) (ret string, err error) {
 	luteEngine := lute.New()
 	luteEngine.SetSoftBreak2HardBreak(false)
 	luteEngine.SetCodeSyntaxHighlight(false)
 	linkBase := repoURL + "/blob/main/"
 	luteEngine.SetLinkBase(linkBase)
-	ret = luteEngine.Md2HTML(string(data))
+	ret = luteEngine.Md2HTML(string(mdData))
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(ret))
 	if nil != err {
 		logging.LogErrorf("parse HTML failed: %s", err)
-		return ret
+		return
 	}
 
 	doc.Find("a").Each(func(i int, selection *goquery.Selection) {

@@ -25,7 +25,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -143,7 +142,7 @@ func InstalledTemplates() (ret []*Template) {
 			logging.LogWarnf("read install template README.md failed: %s", readErr)
 			continue
 		}
-		template.README = gulu.Str.FromBytes(readme)
+		template.README, _ = renderREADME(template.URL, readme)
 		template.Outdated = isOutdatedTemplate(template.URL, template.Version, bazaarTemplates)
 		ret = append(ret, template)
 	}

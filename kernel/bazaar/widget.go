@@ -24,7 +24,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -141,7 +140,7 @@ func InstalledWidgets() (ret []*Widget) {
 			logging.LogWarnf("read install widget README.md failed: %s", readErr)
 			continue
 		}
-		widget.README = gulu.Str.FromBytes(readme)
+		widget.README, _ = renderREADME(widget.URL, readme)
 		widget.Outdated = isOutdatedWidget(widget.URL, widget.Version, bazaarWidgets)
 		ret = append(ret, widget)
 	}

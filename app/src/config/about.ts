@@ -171,13 +171,12 @@ export const about = {
         });
         const updateElement = about.element.querySelector("#checkUpdateBtn");
         updateElement.addEventListener("click", () => {
-            const svgElement = updateElement.firstElementChild;
-            if (svgElement) {
+            if (updateElement.firstElementChild.classList.contains("fn__rotate")) {
                 return;
             }
             updateElement.innerHTML = `<svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}`;
             fetchPost("/api/system/checkUpdate", {showMsg: true}, () => {
-                updateElement.innerHTML = `${window.siyuan.languages.checkUpdate}`;
+                updateElement.innerHTML = `<svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}`;
             });
         });
         /// #if !BROWSER

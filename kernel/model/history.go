@@ -174,6 +174,10 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 				return ast.WalkContinue
 			}
 
+			// 数据历史浏览时忽略内容块折叠状态 https://github.com/siyuan-note/siyuan/issues/5778
+			n.RemoveIALAttr("heading-fold")
+			n.RemoveIALAttr("fold")
+
 			if ast.NodeBlockRef == n.Type {
 				appendRefTextRenderResultForBlockRef(n)
 				return ast.WalkSkipChildren

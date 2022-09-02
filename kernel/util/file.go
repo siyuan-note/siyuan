@@ -124,7 +124,7 @@ func IsCorruptedSYData(data []byte) bool {
 func FilterUploadFileName(name string) string {
 	ret := FilterFileName(name)
 	ret = strings.ReplaceAll(ret, "~", "")
-	//ret = strings.ReplaceAll(ret, "_", "") // https://github.com/siyuan-note/siyuan/issues/3534
+	//ret = strings.ReplaceAll(ret, "_", "") // 插入资源文件时允许下划线 https://github.com/siyuan-note/siyuan/issues/3534
 	ret = strings.ReplaceAll(ret, "[", "")
 	ret = strings.ReplaceAll(ret, "]", "")
 	ret = strings.ReplaceAll(ret, "(", "")

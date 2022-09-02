@@ -46,10 +46,11 @@ type treeQueueOperation struct {
 	inQueueTime time.Time
 	action      string // upsert/delete/delete_id/rename
 
-	upsertTree                                                          *parse.Tree // upsert
-	removeTreeBox, removeTreePath                                       string      // delete
-	removeTreeIDBox, removeTreeID                                       string      // delete_id
-	renameTreeBox, renameTreeID, renameTreeOldHPath, renameTreeNewHPath string      // rename
+	upsertTree                    *parse.Tree // upsert
+	removeTreeBox, removeTreePath string      // delete
+	removeTreeIDBox, removeTreeID string      // delete_id
+	renameTree                    *parse.Tree // rename
+	renameTreeOldHPath            string      // rename
 }
 
 func AutoFlushTreeQueue() {
@@ -113,9 +114,9 @@ func flushTreeQueue() {
 			DeleteByRootID(tx, op.removeTreeID)
 			boxes.Add(op.removeTreeIDBox)
 		case "rename":
-			batchUpdateHPath(tx, op.renameTreeBox, op.renameTreeID, op.renameTreeOldHPath, op.renameTreeNewHPath)
-			updateRootContent(tx, path.Base(op.renameTreeNewHPath), op.renameTreeID)
-			boxes.Add(op.renameTreeBox)
+			batchUpdateHPath(tx, op.renameTree.Box, op.renameTree.ID, op.renameTreeOldHPath, op.renameTree.HPath)
+			updateRootContent(tx, path.Base(op.renameTree.HPath), op.renameTree.Root.IALAttr("updated"), op.renameTree.ID)
+			boxes.Add(op.renameTree.Box)
 		default:
 			logging.LogErrorf("unknown operation [%s]", op.action)
 		}
@@ -168,9 +169,13 @@ func RenameTreeQueue(tree *parse.Tree, oldHPath string) {
 	upsertTreeQueueLock.Lock()
 	defer upsertTreeQueueLock.Unlock()
 
-	newOp := &treeQueueOperation{renameTreeBox: tree.Box, renameTreeID: tree.ID, renameTreeOldHPath: oldHPath, renameTreeNewHPath: tree.HPath, inQueueTime: time.Now(), action: "rename"}
+	newOp := &treeQueueOperation{
+		renameTree:         tree,
+		renameTreeOldHPath: oldHPath,
+		inQueueTime:        time.Now(),
+		action:             "rename"}
 	for i, op := range operationQueue {
-		if "rename" == op.action && op.renameTreeID == tree.ID { // 相同树则覆盖
+		if "rename" == op.action && op.renameTree.ID == tree.ID { // 相同树则覆盖
 			operationQueue[i] = newOp
 			return
 		}

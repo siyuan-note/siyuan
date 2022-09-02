@@ -106,7 +106,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertRight,
         icon: "iconRight",
-        accelerator: "⌥Click",
+        accelerator: window.siyuan.config.keymap.editor.general.refBottom.custom + "/⌥Click",
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                 openFileById({

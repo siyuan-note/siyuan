@@ -195,13 +195,8 @@ export const bazaar = {
             response.data.packages.forEach((item: IBazaarItem) => {
                 html += `<div data-bazaar="${bazaarType}" data-type="${item.modes?.toString()}" data-downloaded="true" class="b3-card">
     <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
-    <div class="b3-card__info fn__flex">
-        <span class="fn__flex-center fn__ellipsis">${item.name}</span>
-        <span class="fn__space"></span>
-        <span class="fn__flex-1"></span>
-        <svg class="svg fn__flex-center"><use xlink:href="#iconDownload"></use></svg>
-        <span class="fn__space"></span>
-        <span class="fn__flex-center">${item.downloads}</span>
+    <div class="b3-card__info">
+        ${item.name}
     </div>
     <div class="b3-card__actions" data-url="${item.repoURL}" data-name="${item.name}" data-hash="${item.repoHash}">
         <div class="fn__flex-1"></div>
@@ -277,9 +272,9 @@ export const bazaar = {
     <div class="${(data.installed || isDownloaded) ? "fn__none" : ""}" data-type="${data.modes?.toString()}">
         <button class="b3-button" style="width: 168px" data-hash="${data.repoHash}" data-name="${data.name}" data-bazaar="${bazaarType}" data-url="${data.repoURL}" data-type="install">${window.siyuan.languages.download}</button>
     </div>
-    <div class="fn__hr--b"></div>
-    <div class="fn__hr--b"></div>
-    <div class="fn__flex" style="justify-content: center;">
+    <div class="fn__hr--b${isDownloaded ? " fn__none" : ""}"></div>
+    <div class="fn__hr--b${isDownloaded ? " fn__none" : ""}"></div>
+    <div class="fn__flex${isDownloaded ? " fn__none" : ""}" style="justify-content: center;">
         <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconGithub"></use></svg>
         <span class="fn__space"></span>
         <a href="${data.repoURL}" target="_blank" title="GitHub Repo">Repo</a>

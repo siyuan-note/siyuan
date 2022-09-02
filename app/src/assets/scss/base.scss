@@ -261,15 +261,6 @@ progressLoading: 400
 }
 
 .config {
-
-  &-keymap__item-name:before{
-    content:"";
-    height: 100%;
-    top: 0;
-    position: absolute;
-    border-left: 1px solid var(--b3-theme-background-light);
-    left: -21px;
-  }
   &-query {
     display: flex;
     flex-wrap: wrap;

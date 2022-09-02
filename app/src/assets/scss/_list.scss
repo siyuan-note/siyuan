@@ -18,6 +18,31 @@
     list-style: none;
   }
 
+  &--border {
+    ul {
+      margin-left: 34px;
+      position: relative;
+    }
+
+    & > ul ul:before {
+      content: "";
+      height: 100%;
+      top: 0;
+      position: absolute;
+      border-left: 1px solid var(--b3-theme-background-light);
+      left: -55px;
+    }
+
+    & > ul li:before {
+      content: "";
+      height: 100%;
+      top: 0;
+      position: absolute;
+      border-left: 1px solid var(--b3-theme-background-light);
+      left: -21px;
+    }
+  }
+
   &-item {
     line-height: 28px;
     padding: 1px 8px;

@@ -477,6 +477,9 @@ export const openBy = (url: string, type: "folder" | "app") => {
         address = url.replace("file://", "");
     }
     if (type === "app") {
+        // 拖入文件名包含 `)` 的文件以 `file://` 插入后链接解析错误 https://github.com/siyuan-note/siyuan/issues/5786
+        address = address.replace(/\\\)/g, ")")
+
         shell.openPath(address);
     } else if (type === "folder") {
         shell.showItemInFolder(address);

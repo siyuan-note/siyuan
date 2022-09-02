@@ -633,6 +633,10 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 }
 
 func logSyncMergeResult(mergeResult *dejavu.MergeResult) {
+	if 1 > len(mergeResult.Conflicts) && 1 > len(mergeResult.Upserts) && 1 > len(mergeResult.Removes) {
+		return
+	}
+
 	logging.LogInfof("sync merge result [conflicts=%d, upserts=%d, removes=%d]", len(mergeResult.Conflicts), len(mergeResult.Upserts), len(mergeResult.Removes))
 	if 0 < len(mergeResult.Conflicts) {
 		logBuilder := bytes.Buffer{}

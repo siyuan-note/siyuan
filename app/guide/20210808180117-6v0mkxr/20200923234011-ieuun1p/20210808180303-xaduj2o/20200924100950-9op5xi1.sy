@@ -5941,7 +5941,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "⇧⌘."
+											"Data": "⇧⌘>"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -9456,7 +9456,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "⇧⌘-"
+											"Data": "⇧⌘_"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"

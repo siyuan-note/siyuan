@@ -127,7 +127,7 @@ export abstract class Constants {
                 vLayout: {default: "", custom: ""},
                 refPopover: {default: "", custom: ""},
                 insertBottom: {default: "⌥⌘.", custom: "⌥⌘."},
-                refTab: {default: "⇧⌘.", custom: "⇧⌘."},
+                refTab: {default: "⇧⌘>", custom: "⇧⌘>"},
                 openBy: {default: "⌘.", custom: "⌘."},
                 insertRight: {default: "⌥.", custom: "⌥."},
                 attr: {default: "⌥⌘A", custom: "⌥⌘A"},
@@ -202,7 +202,7 @@ export abstract class Constants {
                 moveToLeft: {default: "⌥⌘L", custom: "⌥⌘L"},
                 moveToRight: {default: "⌥⌘R", custom: "⌥⌘R"},
                 "delete-row": {default: "⌘-", custom: "⌘-"},
-                "delete-column": {default: "⇧⌘-", custom: "⇧⌘-"}
+                "delete-column": {default: "⇧⌘_", custom: "⇧⌘_"}
             }
         }
     };

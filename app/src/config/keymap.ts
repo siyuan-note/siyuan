@@ -11,8 +11,8 @@ export const keymap = {
         let html = "";
         Object.keys(keymap).forEach(key => {
             if (window.siyuan.languages[key]) {
-                html += `<li class="b3-list-item b3-list-item--hide-action" style="padding-left: ${left}px">
-    <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
+                html += `<li class="b3-list-item b3-list-item--hide-action" style="margin-left: ${left+10}px">
+    <span class="b3-list-item__text config-keymap__item-name">${window.siyuan.languages[key]}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field" value="${updateHotkeyTip(keymap[key].custom)}">
     <span class="fn__space"></span>

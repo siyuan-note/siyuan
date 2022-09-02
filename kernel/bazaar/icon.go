@@ -137,7 +137,7 @@ func InstalledIcons() (ret []*Icon) {
 		icon.Size = iconDir.Size()
 		icon.HSize = humanize.Bytes(uint64(icon.Size))
 		icon.HUpdated = formatUpdated(icon.Updated)
-		readme, readErr := os.ReadFile(filepath.Join(util.DataDir, "icons", dirName, "README.md"))
+		readme, readErr := os.ReadFile(filepath.Join(util.AppearancePath, "icons", dirName, "README.md"))
 		if nil != readErr {
 			logging.LogWarnf("read install icon README.md failed: %s", readErr)
 			continue

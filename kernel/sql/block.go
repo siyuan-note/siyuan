@@ -18,6 +18,8 @@ package sql
 
 import (
 	"database/sql"
+
+	"github.com/siyuan-note/siyuan/kernel/cache"
 )
 
 type Block struct {
@@ -44,20 +46,21 @@ type Block struct {
 	Updated  string
 }
 
-func updateRootContent(tx *sql.Tx, content, id string) {
-	stmt := "UPDATE blocks SET content = ?, fcontent = ? WHERE id = ?"
-	if err := execStmtTx(tx, stmt, content, content, id); nil != err {
+func updateRootContent(tx *sql.Tx, content, updated, id string) {
+	stmt := "UPDATE blocks SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
+	if err := execStmtTx(tx, stmt, content, content, updated, id); nil != err {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET content = ?, fcontent = ? WHERE id = ?"
-	if err := execStmtTx(tx, stmt, content, content, id); nil != err {
+	stmt = "UPDATE blocks_fts SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
+	if err := execStmtTx(tx, stmt, content, content, updated, id); nil != err {
 		return
 	}
-	stmt = "UPDATE blocks_fts_case_insensitive SET content = ?, fcontent = ? WHERE id = ?"
-	if err := execStmtTx(tx, stmt, content, content, id); nil != err {
+	stmt = "UPDATE blocks_fts_case_insensitive SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
+	if err := execStmtTx(tx, stmt, content, content, updated, id); nil != err {
 		return
 	}
 	removeBlockCache(id)
+	cache.RemoveBlockIAL(id)
 }
 
 func InsertBlock(tx *sql.Tx, block *Block) (err error) {

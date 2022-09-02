@@ -22,7 +22,6 @@ import {blockRender} from "../markdown/blockRender";
 import {processRender} from "./processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {uploadLocalFiles} from "../upload";
-import {MenuItem} from "../../menus/Menu";
 import {insertHTML} from "./insertHTML";
 
 const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, direct: "col" | "row") => {
@@ -715,26 +714,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                 }
                 if (isAllFile) {
-                    window.siyuan.menus.menu.remove();
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        label: window.siyuan.languages.copyInsertAsAssets,
-                        icon: "iconUpload",
-                        click() {
-                            uploadLocalFiles(files, protyle);
-                        }
-                    }).element);
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        label: window.siyuan.languages.useFileProtoLink,
-                        icon: "iconLink",
-                        click() {
-                            let fileText = "";
-                            files.forEach((item) => {
-                                fileText += `[${path.basename(item)}](file://${item})\n`;
-                            });
-                            insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
-                        }
-                    }).element);
-                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                    if (event.altKey) {
+                        let fileText = "";
+                        files.forEach((item) => {
+                            fileText += `[${path.basename(item)}](file://${item})\n`;
+                        });
+                        insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
+                    } else {
+                        uploadLocalFiles(files, protyle);
+                    }
                 } else {
                     uploadLocalFiles(files, protyle);
                 }

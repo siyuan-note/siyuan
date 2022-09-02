@@ -5,7 +5,7 @@
 		"icon": "2328",
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
-		"updated": "20220902124426"
+		"updated": "20220902201113"
 	},
 	"Children": [
 		{
@@ -6039,7 +6039,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "⇧⌘>"
+											"Data": "⇧⌘\u003e"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -8897,8 +8897,9 @@
 				0
 			],
 			"Properties": {
+				"colgroup": "|",
 				"id": "20211226122652-n2r88dm",
-				"updated": "20211226012623"
+				"updated": "20220902195513"
 			},
 			"Children": [
 				{
@@ -9482,7 +9483,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "Ctrl+Shift+-"
+											"Data": "Ctrl+Shift+_"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -9637,12 +9638,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220619002039-klsrtup",
-				"updated": "20220619002057"
+				"updated": "20220902200055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "使用輔助鍵進行點擊"
+					"Data": "點擊/拖拽时使用輔助鍵"
 				}
 			]
 		},
@@ -9671,7 +9672,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20211226122652-ykdt6pc",
-				"updated": "20211228130841"
+				"updated": "20220902200150"
 			},
 			"Children": [
 				{
@@ -9725,8 +9726,20 @@
 							"Data": "td",
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "拖拽"
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "拖拽"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
 								}
 							]
 						}
@@ -10930,12 +10943,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220901210742-0cfjjd9",
-				"updated": "20220901210742"
+				"updated": "20220902200545"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "反向鏈接"
+					"Data": "反向鏈接圖標"
 				}
 			]
 		},
@@ -10949,7 +10962,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20220901210742-nhc2k8i",
-				"updated": "20220901210742"
+				"updated": "20220902200550"
 			},
 			"Children": [
 				{
@@ -11011,7 +11024,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "圖標拖拽"
+											"Data": "拖拽"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -11049,7 +11062,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "Alt+圖標拖拽"
+											"Data": "拖拽+Alt"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -11087,7 +11100,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "Shift+圖標拖拽"
+											"Data": "拖拽+Shift"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -11099,6 +11112,217 @@
 					]
 				}
 			]
+		},
+		{
+			"ID": "20220902195608-jh61ukq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220902195608-jh61ukq",
+				"updated": "20220902195635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上传资源文件"
+				}
+			]
+		},
+		{
+			"ID": "20220902195638-92scg94",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20220902195638-92scg94",
+				"updated": "20220902201113"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "名稱"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "操作"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "複製粘貼"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Ctrl+C"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "⌘C"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "複製為資源文件並插入"
+								},
+								{
+									"Type": "NodeBr",
+									"Data": "br"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "拖拽"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 file:// 絕對路徑並鏈接"
+								},
+								{
+									"Type": "NodeBr",
+									"Data": "br"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "拖拽+Alt"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220902195830-i3ncplk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220902195830-i3ncplk"
+			}
 		}
 	]
 }

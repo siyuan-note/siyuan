@@ -82,6 +82,7 @@ const promiseTransaction = () => {
                     if (!item.lastElementChild.classList.contains("protyle-attr")) {
                         item.lastElementChild.remove();
                     }
+                    removeUnfoldRepeatBlock(response.data[0].doOperations[0].retData, protyle);
                     item.insertAdjacentHTML("afterend", response.data[0].doOperations[0].retData);
                     if (doOperations[0].data === "remove") {
                         // https://github.com/siyuan-note/siyuan/issues/2188
@@ -216,6 +217,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         const scrollTop = protyle.contentElement.scrollTop;
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
             if (operation.retData) { // undo 的时候没有 retData
+                removeUnfoldRepeatBlock(operation.retData, protyle);
                 item.insertAdjacentHTML("afterend", operation.retData);
             }
             item.removeAttribute("fold");
@@ -558,6 +560,14 @@ export const turnsIntoOneTransaction = (options: { protyle: IProtyle, selectsEle
     focusBlock(options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.selectsElement[0].getAttribute("data-node-id")}"]`));
     hideElements(["gutter"], options.protyle);
 };
+
+const removeUnfoldRepeatBlock = (html:string, protyle:IProtyle) => {
+    const temp = document.createElement("template")
+    temp.innerHTML = html
+    Array.from(temp.content.children).forEach(item => {
+        protyle.wysiwyg.element.querySelector(`:scope > [data-node-id="${item.getAttribute("data-node-id")}"]`)?.remove()
+    })
+}
 
 export const turnsIntoTransaction = (options: {
     protyle: IProtyle,

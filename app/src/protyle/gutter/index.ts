@@ -759,7 +759,7 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.heading.heading1.custom,
                     protyle,
                     selectsElement: [nodeElement],
-                    level: 6,
+                    level: 1,
                     type: "Blocks2Hs",
                 }));
             }

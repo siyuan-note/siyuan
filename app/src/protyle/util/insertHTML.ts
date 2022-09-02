@@ -29,7 +29,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             }
         }
     }
-    if (tableElement) {
+    if (tableElement && !isBlock) {
         html = protyle.lute.BlockDOM2InlineBlockDOM(html);
     }
     let blockElement = hasClosestBlock(range.startContainer) as Element;

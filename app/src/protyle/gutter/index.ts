@@ -27,6 +27,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {enableProtyle} from "../util/onGet";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
+import {openFileById} from "../../editor/util";
 
 export class Gutter {
     public element: HTMLElement;
@@ -1180,7 +1181,17 @@ export class Gutter {
             accelerator: window.siyuan.config.keymap.general.enterBack.custom,
             label: window.siyuan.languages.enterBack,
             click() {
-                zoomOut(protyle, protyle.block.parent2ID, id);
+                if (!protyle.block.showAll) {
+                    const ids = protyle.path.split("/");
+                    if (ids.length > 2) {
+                        openFileById({
+                            id: ids[ids.length - 2],
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                        });
+                    }
+                } else {
+                    zoomOut(protyle, protyle.block.parent2ID, id);
+                }
             }
         }).element);
         if (!window.siyuan.config.readonly) {

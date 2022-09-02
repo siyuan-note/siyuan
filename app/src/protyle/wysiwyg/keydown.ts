@@ -408,7 +408,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey(window.siyuan.config.keymap.general.enterBack.custom, event)) {
-            zoomOut(protyle, protyle.block.parent2ID, nodeElement.getAttribute("data-node-id"));
+            if (!protyle.block.showAll) {
+                const ids = protyle.path.split("/");
+                if (ids.length > 2) {
+                    openFileById({
+                        id: ids[ids.length - 2],
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                    });
+                }
+            } else {
+                zoomOut(protyle, protyle.block.parent2ID, nodeElement.getAttribute("data-node-id"));
+            }
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -1639,7 +1649,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.preventDefault();
                 event.stopPropagation();
                 return true;
-            }else if (matchHotKey(window.siyuan.config.keymap.editor.general.refPopover.custom, event)) {
+            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.refPopover.custom, event)) {
                 // open popover
                 window.siyuan.blockPanels.push(new BlockPanel({
                     targetElement: refElement,

@@ -107,7 +107,7 @@ func IconJSON(iconDirName string) (ret map[string]interface{}, err error) {
 }
 
 func TemplateJSON(templateDirName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.DataDir, templateDirName, "template.json")
+	p := filepath.Join(util.DataDir, "templates", templateDirName, "template.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
 		return

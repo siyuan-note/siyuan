@@ -96,9 +96,9 @@ func Icons() (icons []*Icon) {
 
 func InstalledIcons() (ret []*Icon) {
 	ret = []*Icon{}
-	dir, err := os.Open(filepath.Join(util.DataDir, "icons"))
+	dir, err := os.Open(filepath.Join(util.AppearancePath, "icons"))
 	if nil != err {
-		logging.LogWarnf("open icons folder [%s] failed: %s", util.ThemesPath, err)
+		logging.LogWarnf("open icons folder failed: %s", err)
 		return
 	}
 	iconDirs, err := dir.Readdir(-1)

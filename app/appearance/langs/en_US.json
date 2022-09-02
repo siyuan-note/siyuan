@@ -112,7 +112,7 @@
   "docName": "Doc Name",
   "bootSyncFailed": "Failed to synchronize data at startup",
   "use": "Use",
-  "uninstallTip": "Currently in use, you need to switch before uninstalling",
+  "uninstallTip": "Currently in use, please switch it in [Settings - Appearance] before uninstalling",
   "safeQuit": "Quit the application",
   "anchor": "Anchor",
   "showMore": "Show More",

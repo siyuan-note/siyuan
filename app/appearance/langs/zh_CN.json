@@ -112,7 +112,7 @@
   "docName": "文档名",
   "bootSyncFailed": "启动时同步数据失败",
   "use": "使用",
-  "uninstallTip": "当前正在使用中，需切换后才能进行卸载",
+  "uninstallTip": "当前正在使用中，请在 [设置 - 外观] 中切换后再卸载",
   "safeQuit": "退出应用",
   "anchor": "锚文本",
   "showMore": "显示更多",

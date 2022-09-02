@@ -112,7 +112,7 @@
   "docName": "Nom du document",
   "bootSyncFailed": "Impossible de synchroniser les données au démarrage",
   "use": "Utiliser",
-  "uninstallTip": "Actuellement en cours d'utilisation, vous devez changer avant de désinstaller",
+  "uninstallTip": "Actuellement utilisé, veuillez le changer dans [Paramètres - Apparence] avant de désinstaller",
   "safeQuit": "Quitter l'application",
   "anchor": "ancre",
   "showMore": "Afficher plus",

@@ -717,13 +717,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (event.altKey) {
                         let fileText = "";
                         files.forEach((item) => {
-                            fileText += `[${path.basename(item)}](file://${item})\n`;
+                            // 拖入文件名包含 `)` 或 `]` 的文件以 `file://` 插入后链接解析错误 https://github.com/siyuan-note/siyuan/issues/5786
+                            fileText += `[${path.basename(item.replace(/\]/g, "\\]").replace(/\[/g, "\\["))}](file://${item.replace(/\)/g, "\\)").replace(/\(/g, "\\(")})\n`;
                         });
-
-                        // 拖入文件名包含 `)` 的文件以 `file://` 插入后链接解析错误 https://github.com/siyuan-note/siyuan/issues/5786
-                        fileText = fileText.replace(/\)/g, "\\)");
-                        fileText = fileText.substring(0, fileText.length - 3) + ")"
-
                         insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
                     } else {
                         uploadLocalFiles(files, protyle);

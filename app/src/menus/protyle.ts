@@ -719,7 +719,8 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             });
             inputElement.addEventListener("input", (event: KeyboardEvent) => {
                 if (!event.isComposing) {
-                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value) || "";
+                    // https://github.com/siyuan-note/siyuan/issues/4511
+                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value.replace(/\\]/g, "]").replace(/\\\[/g, "[")) || "";
                 }
             });
             inputElement.addEventListener("keydown", (event) => {

@@ -1684,7 +1684,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (localFiles.length > 0) {
                 let fileText = "";
                 localFiles.forEach((item) => {
-                    fileText += `[${path.basename(item)}](file://${item})\n`;
+                    fileText += `[${path.basename(item).replace(/\]/g, "\\]").replace(/\[/g, "\\[")}](file://${item.replace(/\\/g, "\\\\").replace(/\)/g, "\\)").replace(/\(/g, "\\(")})\n`;
                 });
                 insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
             } else {

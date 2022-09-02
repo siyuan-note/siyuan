@@ -5,7 +5,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20220824172918"
+		"updated": "20220902220108"
 	},
 	"Children": [
 		{
@@ -96,7 +96,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220824172815-ckivl7c",
-				"updated": "20220824172815"
+				"updated": "20220902220108"
 			},
 			"Children": [
 				{
@@ -108,7 +108,7 @@
 					},
 					"Properties": {
 						"id": "20220824172815-q1oeusj",
-						"updated": "20220824172815"
+						"updated": "20220902220108"
 					},
 					"Children": [
 						{
@@ -116,7 +116,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220824172815-fqyy0l6",
-								"updated": "20220824172815"
+								"updated": "20220902220108"
 							},
 							"Children": [
 								{
@@ -128,7 +128,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "Copy as a resource file and insert"
+											"Data": "Copy as an asset and insert"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -168,7 +168,7 @@
 					},
 					"Properties": {
 						"id": "20220824172815-0lsclx1",
-						"updated": "20220824172815"
+						"updated": "20220902220045"
 					},
 					"Children": [
 						{
@@ -176,7 +176,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220824172815-dqfasin",
-								"updated": "20220824172815"
+								"updated": "20220902220045"
 							},
 							"Children": [
 								{
@@ -214,6 +214,30 @@
 											"Type": "NodeKbdCloseMarker"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", or hold down "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Alt"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and drag in"
 								}
 							]
 						}

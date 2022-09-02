@@ -5,7 +5,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20220824172745"
+		"updated": "20220902215702"
 	},
 	"Children": [
 		{
@@ -96,7 +96,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220824172203-etwu4qu",
-				"updated": "20220824172531"
+				"updated": "20220902215702"
 			},
 			"Children": [
 				{
@@ -168,7 +168,7 @@
 					},
 					"Properties": {
 						"id": "20220824172403-agsj358",
-						"updated": "20220824172531"
+						"updated": "20220902215702"
 					},
 					"Children": [
 						{
@@ -176,7 +176,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220824172403-0fkrw8o",
-								"updated": "20220824172531"
+								"updated": "20220902215702"
 							},
 							"Children": [
 								{
@@ -214,6 +214,30 @@
 											"Type": "NodeKbdCloseMarker"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，或者按住 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Alt"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 后拖入"
 								}
 							]
 						}

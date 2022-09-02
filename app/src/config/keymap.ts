@@ -246,13 +246,26 @@ export const keymap = {
                                 this.value = "";
                             });
                         }
+                    } else if (event.key === "》") {
+                        keymapStr += ">";
+                    } else if (event.key === "《") {
+                        keymapStr += "<";
+                    } else if (event.key === "—") {
+                        keymapStr += "-";
                     } else {
                         keymapStr += event.key.length > 1 ? event.key : event.key.toUpperCase();
                     }
                 }
 
                 this.setAttribute("data-value", keymapStr);
-                this.value = updateHotkeyTip(keymapStr);
+                if (event.key === "—") {
+                    // Mac 中文下会添加"——"
+                    setTimeout(() => {
+                        this.value = updateHotkeyTip(keymapStr);
+                    });
+                } else {
+                    this.value = updateHotkeyTip(keymapStr);
+                }
                 clearTimeout(timeout);
                 timeout = window.setTimeout(() => {
                     const keys = this.getAttribute("data-key").split(Constants.ZWSP);

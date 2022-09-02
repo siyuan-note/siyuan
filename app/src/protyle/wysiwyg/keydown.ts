@@ -1591,40 +1591,60 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
         if (refElement) {
             const id = refElement.getAttribute("data-id");
-            if (matchHotKey(window.siyuan.config.keymap.editor.general.refPopover.custom, event)) {
-                // open popover
-                window.siyuan.blockPanels.push(new BlockPanel({
-                    targetElement: refElement,
-                    nodeIds: [id],
-                }));
+            if (matchHotKey(window.siyuan.config.keymap.editor.general.openBy.custom, event)) {
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openFileById({
+                        id,
+                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                        zoomIn: foldResponse.data
+                    });
+                });
                 event.preventDefault();
                 event.stopPropagation();
                 return true;
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.refTab.custom, event)) {
                 // 打开块引和编辑器中引用、反链、书签中点击事件需保持一致，都加载上下文
-                openFileById({
-                    id,
-                    keepCursor: true,
-                    action: [Constants.CB_GET_CONTEXT]
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openFileById({
+                        id,
+                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT],
+                        keepCursor: true,
+                        zoomIn: foldResponse.data
+                    });
                 });
                 event.preventDefault();
                 event.stopPropagation();
                 return true;
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.refRight.custom, event)) {
-                openFileById({
-                    id,
-                    position: "right",
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openFileById({
+                        id,
+                        position: "right",
+                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                        zoomIn: foldResponse.data
+                    });
                 });
                 event.preventDefault();
                 event.stopPropagation();
                 return true;
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.refBottom.custom, event)) {
-                openFileById({
-                    id,
-                    position: "bottom",
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.insertBottom.custom, event)) {
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openFileById({
+                        id,
+                        position: "bottom",
+                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                        zoomIn: foldResponse.data
+                    });
                 });
+                event.preventDefault();
+                event.stopPropagation();
+                return true;
+            }else if (matchHotKey(window.siyuan.config.keymap.editor.general.refPopover.custom, event)) {
+                // open popover
+                window.siyuan.blockPanels.push(new BlockPanel({
+                    targetElement: refElement,
+                    nodeIds: [id],
+                }));
                 event.preventDefault();
                 event.stopPropagation();
                 return true;

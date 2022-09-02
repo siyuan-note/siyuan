@@ -91,7 +91,20 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     /// #if !MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.openBy,
-        accelerator: "⌘Click",
+        accelerator: window.siyuan.config.keymap.editor.general.openBy.custom + "/Click",
+        click() {
+            fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
+                openFileById({
+                    id: refBlockId,
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                    zoomIn: foldResponse.data
+                });
+            });
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.refTab,
+        accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/⌘Click",
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                 openFileById({
@@ -106,7 +119,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertRight,
         icon: "iconRight",
-        accelerator: window.siyuan.config.keymap.editor.general.refBottom.custom + "/⌥Click",
+        accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/⌥Click",
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                 openFileById({
@@ -121,7 +134,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertBottom,
         icon: "iconDown",
-        accelerator: "⇧Click",
+        accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + "⇧Click",
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                 openFileById({

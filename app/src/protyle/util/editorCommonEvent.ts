@@ -718,7 +718,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         let fileText = "";
                         files.forEach((item) => {
                             // 拖入文件名包含 `)` 或 `]` 的文件以 `file://` 插入后链接解析错误 https://github.com/siyuan-note/siyuan/issues/5786
-                            fileText += `[${path.basename(item.replace(/\]/g, "\\]").replace(/\[/g, "\\["))}](file://${item.replace(/\)/g, "\\)").replace(/\(/g, "\\(")})\n`;
+                            fileText += `[${path.basename(item).replace(/\]/g, "\\]").replace(/\[/g, "\\[")}](file://${item.replace(/\\/g, "\\\\").replace(/\)/g, "\\)").replace(/\(/g, "\\(")})\n`;
                         });
                         insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
                     } else {

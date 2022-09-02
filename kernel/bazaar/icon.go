@@ -151,7 +151,7 @@ func InstalledIcons() (ret []*Icon) {
 }
 
 func isBuiltInIcon(dirName string) bool {
-	return "and" == dirName || "material" == dirName
+	return "ant" == dirName || "material" == dirName
 }
 
 func InstallIcon(repoURL, repoHash, installPath string, systemID string) error {

@@ -67,6 +67,7 @@ func Serve(fastMode bool) {
 	serveExport(ginServer)
 	serveWidgets(ginServer)
 	serveEmojis(ginServer)
+	serveTemplates(ginServer)
 	api.ServeAPI(ginServer)
 
 	var addr string

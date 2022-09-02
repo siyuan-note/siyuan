@@ -85,7 +85,7 @@ func WidgetJSON(widgetDirName string) (ret map[string]interface{}, err error) {
 }
 
 func IconJSON(iconDirName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.ThemesPath, iconDirName, "icon.json")
+	p := filepath.Join(util.ThemesPath, "icons", iconDirName, "icon.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
 		return

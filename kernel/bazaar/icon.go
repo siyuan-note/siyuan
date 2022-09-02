@@ -96,9 +96,9 @@ func Icons() (icons []*Icon) {
 
 func InstalledIcons() (ret []*Icon) {
 	ret = []*Icon{}
-	dir, err := os.Open(filepath.Join(util.DataDir, "icons"))
+	dir, err := os.Open(filepath.Join(util.AppearancePath, "icons"))
 	if nil != err {
-		logging.LogWarnf("open icons folder [%s] failed: %s", util.ThemesPath, err)
+		logging.LogWarnf("open icons folder failed: %s", err)
 		return
 	}
 	iconDirs, err := dir.Readdir(-1)
@@ -137,7 +137,7 @@ func InstalledIcons() (ret []*Icon) {
 		icon.Size = iconDir.Size()
 		icon.HSize = humanize.Bytes(uint64(icon.Size))
 		icon.HUpdated = formatUpdated(icon.Updated)
-		readme, readErr := os.ReadFile(filepath.Join(util.DataDir, "icons", dirName, "README.md"))
+		readme, readErr := os.ReadFile(filepath.Join(util.AppearancePath, "icons", dirName, "README.md"))
 		if nil != readErr {
 			logging.LogWarnf("read install icon README.md failed: %s", readErr)
 			continue
@@ -151,7 +151,7 @@ func InstalledIcons() (ret []*Icon) {
 }
 
 func isBuiltInIcon(dirName string) bool {
-	return "and" == dirName || "material" == dirName
+	return "ant" == dirName || "material" == dirName
 }
 
 func InstallIcon(repoURL, repoHash, installPath string, systemID string) error {

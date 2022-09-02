@@ -63,7 +63,7 @@ type Package struct {
 }
 
 func WidgetJSON(widgetDirName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.DataDir, widgetDirName, "widget.json")
+	p := filepath.Join(util.DataDir, "widgets", widgetDirName, "widget.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
 		return
@@ -85,7 +85,7 @@ func WidgetJSON(widgetDirName string) (ret map[string]interface{}, err error) {
 }
 
 func IconJSON(iconDirName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.ThemesPath, iconDirName, "icon.json")
+	p := filepath.Join(util.AppearancePath, "icons", iconDirName, "icon.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
 		return
@@ -107,7 +107,7 @@ func IconJSON(iconDirName string) (ret map[string]interface{}, err error) {
 }
 
 func TemplateJSON(templateDirName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.DataDir, templateDirName, "template.json")
+	p := filepath.Join(util.DataDir, "templates", templateDirName, "template.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
 		return

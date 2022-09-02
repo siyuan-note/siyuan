@@ -565,11 +565,14 @@ export const turnsIntoTransaction = (options: {
     nodeElement?: Element,
     type: string,
     level?: number | string,
-    isContinue?: boolean
+    isContinue?: boolean,
 }) => {
     let selectsElement: Element[] = options.selectsElement;
+    let range: Range
     // 通过快捷键触发
     if (options.nodeElement) {
+        range = getSelection().getRangeAt(0);
+        range.insertNode(document.createElement("wbr"))
         selectsElement = Array.from(options.protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
         if (selectsElement.length === 0) {
             selectsElement = [options.nodeElement];
@@ -648,7 +651,11 @@ export const turnsIntoTransaction = (options: {
     processRender(options.protyle.wysiwyg.element);
     highlightRender(options.protyle.wysiwyg.element);
     blockRender(options.protyle, options.protyle.wysiwyg.element);
-    focusBlock(options.protyle.wysiwyg.element.querySelector(`[data-node-id="${selectsElement[0].getAttribute("data-node-id")}"]`));
+    if (range) {
+        focusByWbr(options.protyle.wysiwyg.element, range);
+    } else {
+        focusBlock(options.protyle.wysiwyg.element.querySelector(`[data-node-id="${selectsElement[0].getAttribute("data-node-id")}"]`));
+    }
     hideElements(["gutter"], options.protyle);
 };
 

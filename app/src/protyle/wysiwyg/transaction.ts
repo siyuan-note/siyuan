@@ -562,12 +562,12 @@ export const turnsIntoOneTransaction = (options: { protyle: IProtyle, selectsEle
 };
 
 const removeUnfoldRepeatBlock = (html:string, protyle:IProtyle) => {
-    const temp = document.createElement("template")
-    temp.innerHTML = html
+    const temp = document.createElement("template");
+    temp.innerHTML = html;
     Array.from(temp.content.children).forEach(item => {
-        protyle.wysiwyg.element.querySelector(`:scope > [data-node-id="${item.getAttribute("data-node-id")}"]`)?.remove()
-    })
-}
+        protyle.wysiwyg.element.querySelector(`:scope > [data-node-id="${item.getAttribute("data-node-id")}"]`)?.remove();
+    });
+};
 
 export const turnsIntoTransaction = (options: {
     protyle: IProtyle,
@@ -578,11 +578,11 @@ export const turnsIntoTransaction = (options: {
     isContinue?: boolean,
 }) => {
     let selectsElement: Element[] = options.selectsElement;
-    let range: Range
+    let range: Range;
     // 通过快捷键触发
     if (options.nodeElement) {
         range = getSelection().getRangeAt(0);
-        range.insertNode(document.createElement("wbr"))
+        range.insertNode(document.createElement("wbr"));
         selectsElement = Array.from(options.protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
         if (selectsElement.length === 0) {
             selectsElement = [options.nodeElement];

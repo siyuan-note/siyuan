@@ -304,7 +304,7 @@ export const bazaar = {
 </div>`;
         if (isDownloaded) {
             const mdElement = readmeElement.querySelector(".item__readme");
-            mdElement.innerHTML = data.readme
+            mdElement.innerHTML = data.readme;
             highlightRender(mdElement);
         } else {
             fetchPost("/api/bazaar/getBazaarPackageREAME", {
@@ -340,7 +340,7 @@ export const bazaar = {
                             if (item.nodeType !== 3 && item.classList.contains("b3-button")) {
                                 item.classList.add("b3-button--outline");
                             }
-                        })
+                        });
                         target.classList.remove("b3-button--outline");
                         this._genMyHTML(type.replace("my", "").toLowerCase() + "s" as TBazaarType);
                     }

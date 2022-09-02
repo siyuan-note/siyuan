@@ -10,7 +10,7 @@ import {focusByWbr, getEditorRange} from "./selection";
 import {blockRender} from "../markdown/blockRender";
 import * as dayjs from "dayjs";
 import {highlightRender} from "../markdown/highlightRender";
-import {transaction, updateTransaction} from "../wysiwyg/transaction";
+import {updateTransaction} from "../wysiwyg/transaction";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isDynamicRef, isFileAnnotation} from "../../util/functions";
 import {insertHTML} from "./insertHTML";

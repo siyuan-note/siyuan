@@ -69,7 +69,7 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     // 是否匹配 ⇧⌘[] / ⌘[]
     const hasShift = hotKeys.length > 2 && (hotKeys[0] === "⇧");
     let key = (hasShift ? hotKeys[2] : hotKeys[1]);
-    let keyCode
+    let keyCode;
     // 更新 electron 后不需要判断 Mac，但 Mac 下中英文有区别，需使用 keyCode 辅助
     if (hasShift) {
         if (key === "-") {

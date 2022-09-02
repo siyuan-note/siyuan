@@ -85,7 +85,7 @@ func WidgetJSON(widgetDirName string) (ret map[string]interface{}, err error) {
 }
 
 func IconJSON(iconDirName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.AppearancePath, "icons", iconDirName, "icon.json")
+	p := filepath.Join(util.IconsPath, iconDirName, "icon.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
 		return
@@ -172,52 +172,56 @@ func getPkgIndex(pkgType string) (ret map[string]interface{}, err error) {
 	return
 }
 
-func isOutdatedTheme(fullURL, version string, bazaarThemes []*Theme) bool {
-	if !strings.HasPrefix(fullURL, "https://github.com/") {
+func isOutdatedTheme(theme *Theme, bazaarThemes []*Theme) bool {
+	if !strings.HasPrefix(theme.URL, "https://github.com/") {
 		return false
 	}
 
 	for _, pkg := range bazaarThemes {
-		if fullURL == pkg.URL && version != pkg.Version {
+		if theme.URL == pkg.URL && theme.Version != pkg.Version {
+			theme.RepoHash = pkg.RepoHash
 			return true
 		}
 	}
 	return false
 }
 
-func isOutdatedIcon(fullURL, version string, bazaarIcons []*Icon) bool {
-	if !strings.HasPrefix(fullURL, "https://github.com/") {
+func isOutdatedIcon(icon *Icon, bazaarIcons []*Icon) bool {
+	if !strings.HasPrefix(icon.URL, "https://github.com/") {
 		return false
 	}
 
 	for _, pkg := range bazaarIcons {
-		if fullURL == pkg.URL && version != pkg.Version {
+		if icon.URL == pkg.URL && icon.Version != pkg.Version {
+			icon.RepoHash = pkg.RepoHash
 			return true
 		}
 	}
 	return false
 }
 
-func isOutdatedWidget(fullURL, version string, bazaarWidgets []*Widget) bool {
-	if !strings.HasPrefix(fullURL, "https://github.com/") {
+func isOutdatedWidget(widget *Widget, bazaarWidgets []*Widget) bool {
+	if !strings.HasPrefix(widget.URL, "https://github.com/") {
 		return false
 	}
 
 	for _, pkg := range bazaarWidgets {
-		if fullURL == pkg.URL && version != pkg.Version {
+		if widget.URL == pkg.URL && widget.Version != pkg.Version {
+			widget.RepoHash = pkg.RepoHash
 			return true
 		}
 	}
 	return false
 }
 
-func isOutdatedTemplate(fullURL, version string, bazaarTemplates []*Template) bool {
-	if !strings.HasPrefix(fullURL, "https://github.com/") {
+func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
+	if !strings.HasPrefix(template.URL, "https://github.com/") {
 		return false
 	}
 
 	for _, pkg := range bazaarTemplates {
-		if fullURL == pkg.URL && version != pkg.Version {
+		if template.URL == pkg.URL && template.Version != pkg.Version {
+			template.RepoHash = pkg.RepoHash
 			return true
 		}
 	}

@@ -143,7 +143,7 @@ func InstalledTemplates() (ret []*Template) {
 			continue
 		}
 		template.README, _ = renderREADME(template.URL, readme)
-		template.Outdated = isOutdatedTemplate(template.URL, template.Version, bazaarTemplates)
+		template.Outdated = isOutdatedTemplate(template, bazaarTemplates)
 		ret = append(ret, template)
 	}
 	return

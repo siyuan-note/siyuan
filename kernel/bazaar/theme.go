@@ -146,7 +146,7 @@ func InstalledThemes() (ret []*Theme) {
 			continue
 		}
 		theme.README, _ = renderREADME(theme.URL, readme)
-		theme.Outdated = isOutdatedTheme(theme.URL, theme.Version, bazaarThemes)
+		theme.Outdated = isOutdatedTheme(theme, bazaarThemes)
 		ret = append(ret, theme)
 	}
 	return

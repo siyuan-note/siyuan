@@ -141,7 +141,7 @@ func InstalledWidgets() (ret []*Widget) {
 			continue
 		}
 		widget.README, _ = renderREADME(widget.URL, readme)
-		widget.Outdated = isOutdatedWidget(widget.URL, widget.Version, bazaarWidgets)
+		widget.Outdated = isOutdatedWidget(widget, bazaarWidgets)
 		ret = append(ret, widget)
 	}
 	return

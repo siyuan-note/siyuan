@@ -96,7 +96,7 @@ func Icons() (icons []*Icon) {
 
 func InstalledIcons() (ret []*Icon) {
 	ret = []*Icon{}
-	dir, err := os.Open(filepath.Join(util.AppearancePath, "icons"))
+	dir, err := os.Open(util.IconsPath)
 	if nil != err {
 		logging.LogWarnf("open icons folder failed: %s", err)
 		return
@@ -137,14 +137,14 @@ func InstalledIcons() (ret []*Icon) {
 		icon.Size = iconDir.Size()
 		icon.HSize = humanize.Bytes(uint64(icon.Size))
 		icon.HUpdated = formatUpdated(icon.Updated)
-		readme, readErr := os.ReadFile(filepath.Join(util.AppearancePath, "icons", dirName, "README.md"))
+		readme, readErr := os.ReadFile(filepath.Join(util.IconsPath, dirName, "README.md"))
 		if nil != readErr {
 			logging.LogWarnf("read install icon README.md failed: %s", readErr)
 			continue
 		}
 
 		icon.README, _ = renderREADME(icon.URL, readme)
-		icon.Outdated = isOutdatedIcon(icon.URL, icon.Version, bazaarIcons)
+		icon.Outdated = isOutdatedIcon(icon, bazaarIcons)
 		ret = append(ret, icon)
 	}
 	return

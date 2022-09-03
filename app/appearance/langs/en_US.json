@@ -96,6 +96,7 @@
   "releaseDate": "Release Date",
   "pkgSize": "Package size",
   "installSize": "Install Size",
+  "installDate": "Install Date",
   "optimizeTypography": "Optimize typography",
   "dragPosition": "Drag image to reposition",
   "exportPDF0": "Page Size",

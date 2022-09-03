@@ -60,6 +60,7 @@ type Package struct {
 	HSize        string `json:"hSize"`
 	InstallSize  int64  `json:"installSize"`
 	HInstallSize string `json:"hInstallSize"`
+	HInstallDate string `json:"hInstallDate"`
 	HUpdated     string `json:"hUpdated"`
 	Downloads    int    `json:"downloads"`
 }

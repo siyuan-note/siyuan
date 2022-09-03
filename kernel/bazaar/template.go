@@ -135,8 +135,12 @@ func InstalledTemplates() (ret []*Template) {
 		template.RepoURL = template.URL
 		template.PreviewURL = "/templates/" + dirName + "/preview.png"
 		template.PreviewURLThumb = "/templates/" + dirName + "/preview.png"
-		template.Updated = templateDir.ModTime().Format("2006-01-02 15:04:05")
-		template.HUpdated = formatUpdated(template.Updated)
+		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		if nil != statErr {
+			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			continue
+		}
+		template.HInstallDate = info.ModTime().Format("2006-01-02")
 		installSize, _ := util.SizeOfDirectory(installPath)
 		template.InstallSize = installSize
 		template.HInstallSize = humanize.Bytes(uint64(installSize))

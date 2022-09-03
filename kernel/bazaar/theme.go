@@ -138,8 +138,12 @@ func InstalledThemes() (ret []*Theme) {
 		theme.RepoURL = theme.URL
 		theme.PreviewURL = "/appearance/themes/" + dirName + "/preview.png"
 		theme.PreviewURLThumb = "/appearance/themes/" + dirName + "/preview.png"
-		theme.Updated = themeDir.ModTime().Format("2006-01-02 15:04:05")
-		theme.HUpdated = formatUpdated(theme.Updated)
+		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		if nil != statErr {
+			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			continue
+		}
+		theme.HInstallDate = info.ModTime().Format("2006-01-02")
 		installSize, _ := util.SizeOfDirectory(installPath)
 		theme.InstallSize = installSize
 		theme.HInstallSize = humanize.Bytes(uint64(installSize))

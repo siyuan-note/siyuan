@@ -135,8 +135,12 @@ func InstalledIcons() (ret []*Icon) {
 		icon.RepoURL = icon.URL
 		icon.PreviewURL = "/appearance/icons/" + dirName + "/preview.png"
 		icon.PreviewURLThumb = "/appearance/icons/" + dirName + "/preview.png"
-		icon.Updated = iconDir.ModTime().Format("2006-01-02 15:04:05")
-		icon.HUpdated = formatUpdated(icon.Updated)
+		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		if nil != statErr {
+			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			continue
+		}
+		icon.HInstallDate = info.ModTime().Format("2006-01-02")
 		installSize, _ := util.SizeOfDirectory(installPath)
 		icon.InstallSize = installSize
 		icon.HInstallSize = humanize.Bytes(uint64(installSize))

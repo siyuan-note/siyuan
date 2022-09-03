@@ -133,8 +133,12 @@ func InstalledWidgets() (ret []*Widget) {
 		widget.RepoURL = widget.URL
 		widget.PreviewURL = "/widgets/" + dirName + "/preview.png"
 		widget.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
-		widget.Updated = widgetDir.ModTime().Format("2006-01-02 15:04:05")
-		widget.HUpdated = formatUpdated(widget.Updated)
+		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		if nil != statErr {
+			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			continue
+		}
+		widget.HInstallDate = info.ModTime().Format("2006-01-02")
 		installSize, _ := util.SizeOfDirectory(installPath)
 		widget.InstallSize = installSize
 		widget.HInstallSize = humanize.Bytes(uint64(installSize))

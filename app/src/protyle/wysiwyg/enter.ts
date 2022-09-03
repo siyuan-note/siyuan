@@ -198,6 +198,16 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     }
     // https://github.com/siyuan-note/siyuan/issues/5471
     if (disableElement) {
+        if (blockElement.parentElement.classList.contains("li")) {
+            const oldHTML = blockElement.parentElement.parentElement.outerHTML;
+            const newElement = genListItemElement(blockElement.parentElement, 0, true);
+            blockElement.parentElement.insertAdjacentElement("afterend", newElement);
+            updateTransaction(protyle, blockElement.parentElement.parentElement.getAttribute("data-node-id"), blockElement.parentElement.parentElement.outerHTML, oldHTML);
+            focusByWbr(newElement, range);
+            removeEmptyNode(newElement);
+            scrollCenter(protyle);
+            return;
+        }
         if (blockElement.classList.contains("hr")) {
             insertEmptyBlock(protyle, "afterend");
             return;

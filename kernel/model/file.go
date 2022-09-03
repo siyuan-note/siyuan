@@ -421,7 +421,7 @@ func BlockWordCount(id string) (blockRuneCount, blockWordCount, rootBlockRuneCou
 	return
 }
 
-func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int) (blockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, err error) {
+func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int) (blockCount, childBlockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, err error) {
 	WaitForWritingFiles() // 写入数据时阻塞，避免获取到的数据不一致
 
 	inputIndex := index
@@ -529,6 +529,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 	}
 
 	blockCount = tree.DocBlockCount()
+	childBlockCount = treenode.CountBlockNodes(tree.Root)
 	if ast.NodeDocument == node.Type {
 		parentID = node.ID
 		parent2ID = parentID

@@ -634,7 +634,7 @@ func getDoc(c *gin.Context) {
 		size = 36
 	}
 
-	blockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, err := model.GetDoc(startID, endID, id, index, keyword, mode, size)
+	blockCount, childBlockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, err := model.GetDoc(startID, endID, id, index, keyword, mode, size)
 	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 2
 		ret.Data = id
@@ -652,17 +652,18 @@ func getDoc(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"id":         id,
-		"mode":       mode,
-		"parentID":   parentID,
-		"parent2ID":  parent2ID,
-		"rootID":     rootID,
-		"type":       typ,
-		"content":    content,
-		"blockCount": blockCount,
-		"eof":        eof,
-		"box":        boxID,
-		"path":       docPath,
+		"id":              id,
+		"mode":            mode,
+		"parentID":        parentID,
+		"parent2ID":       parent2ID,
+		"rootID":          rootID,
+		"type":            typ,
+		"content":         content,
+		"blockCount":      blockCount,
+		"childBlockCount": childBlockCount,
+		"eof":             eof,
+		"box":             boxID,
+		"path":            docPath,
 	}
 }
 

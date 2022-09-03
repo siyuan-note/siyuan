@@ -215,7 +215,7 @@ export const bazaar = {
 </div>`;
             });
             bazaar.data.downloaded = response.data.packages;
-            bazaar.element.querySelector("#configBazaarDownloaded").innerHTML = `<div class="b3-cards">${html}</div>`;
+            bazaar.element.querySelector("#configBazaarDownloaded").innerHTML = html ? `<div class="b3-cards">${html}</div>` : `<div class="fn__hr"></div><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
         });
     },
     data: {

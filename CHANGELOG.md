@@ -1,3 +1,38 @@
+## v2.1.12 / 2022-09-03
+
+### 改进功能
+
+* [反链面板块移动支持复制为引用或嵌入](https://github.com/siyuan-note/siyuan/issues/3294)
+* [导出为 .docx 时无法正常转换公式](https://github.com/siyuan-note/siyuan/issues/4062)
+* [超链接锚文本中 `\]` 符号渲染时未正确转义](https://github.com/siyuan-note/siyuan/issues/4511)
+* [集市支持已安装的包单独显示](https://github.com/siyuan-note/siyuan/issues/5678)
+* [为搜索结果列表中的文档块添加文档图标](https://github.com/siyuan-note/siyuan/issues/5755)
+* [改进移动端的数据历史界面](https://github.com/siyuan-note/siyuan/issues/5777)
+* [数据历史浏览时忽略内容块折叠状态](https://github.com/siyuan-note/siyuan/issues/5778)
+* [改进非订阅用户集市包下载速度](https://github.com/siyuan-note/siyuan/issues/5779)
+* [重新梳理打开引用的方式和快捷键](https://github.com/siyuan-note/siyuan/issues/5788)
+* [改进设置快捷键界面加入缩进竖线](https://github.com/siyuan-note/siyuan/pull/5789)
+* [文档重命名后变更文档更新时间](https://github.com/siyuan-note/siyuan/issues/5792)
+* [快捷键设置标题后光标应保持原有位置](https://github.com/siyuan-note/siyuan/issues/5793)
+* [聚焦到上层可按文档路径依次返回父文档](https://github.com/siyuan-note/siyuan/issues/5794)
+* [拖拽资源文件到编辑器中 `使用 file:// 绝对路径并链接` 功能修改为按住 Alt](https://github.com/siyuan-note/siyuan/issues/5795)
+* [移动端图表编辑框固定到顶部](https://github.com/siyuan-note/siyuan/issues/5799)
+* [列表中的图片后双击换行图片光标错误](https://github.com/siyuan-note/siyuan/issues/5801)
+* [点击大纲中父级为折叠的标题才进行聚焦](https://github.com/siyuan-note/siyuan/issues/5804)
+
+### 修复缺陷
+
+* [页签右键菜单分屏功能异常](https://github.com/siyuan-note/siyuan/issues/5775)
+* [检查系统更新失效](https://github.com/siyuan-note/siyuan/issues/5776)
+* [导入 Markdown 文件报错](https://github.com/siyuan-note/siyuan/issues/5781)
+* [块菜单转换一级标题变成六级标题](https://github.com/siyuan-note/siyuan/issues/5783)
+* [云端同步在系统休眠后唤醒会重复执行](https://github.com/siyuan-note/siyuan/issues/5784)
+* [折叠标题后编辑触发状态异常](https://github.com/siyuan-note/siyuan/issues/5785)
+* [拖入文件名包含 `)` 的文件以 `file://` 插入后链接解析错误](https://github.com/siyuan-note/siyuan/issues/5786)
+* [导出时 KaTex 宏无效](https://github.com/siyuan-note/siyuan/issues/5797)
+* [包含较大列表的文档加载不全](https://github.com/siyuan-note/siyuan/issues/5798)
+* [剪藏微信公众号文章丢失图片](https://github.com/siyuan-note/siyuan/issues/5800)
+
 ## v2.1.11 / 2022-08-31
 
 ### 改进功能

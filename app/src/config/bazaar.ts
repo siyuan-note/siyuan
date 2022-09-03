@@ -176,7 +176,7 @@ export const bazaar = {
         </span>
         <div class="fn__space${item.outdated ? "" : " fn__none"}"></div>
         <span data-type="install-t" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}" aria-label="${window.siyuan.languages.update}">
-            <svg><use xlink:href="#iconRefresh"></use></svg>
+            <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
         </span>
     </div>
 </div>`;
@@ -209,7 +209,7 @@ export const bazaar = {
         </span> 
         <span class="fn__space${item.outdated ? "" : " fn__none"}"></span>
         <span data-type="install-t" aria-label="${window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
-            <svg><use xlink:href="#iconRefresh"></use></svg>
+            <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
         </span>
     </div>
 </div>`;

@@ -26,8 +26,11 @@ import {isMobile} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {enableProtyle} from "../util/onGet";
 import {countBlockWord} from "../../layout/status";
-import {Constants} from "../../constants";
+/// #if !MOBILE
 import {openFileById} from "../../editor/util";
+/// #endif
+import {Constants} from "../../constants";
+import {openMobileFileById} from "../../mobile/editor";
 
 export class Gutter {
     public element: HTMLElement;
@@ -1184,10 +1187,14 @@ export class Gutter {
                 if (!protyle.block.showAll) {
                     const ids = protyle.path.split("/");
                     if (ids.length > 2) {
+                        /// #if MOBILE
+                        openMobileFileById(ids[ids.length - 2],[Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
+                        /// #else
                         openFileById({
                             id: ids[ids.length - 2],
                             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                         });
+                        /// #endif
                     }
                 } else {
                     zoomOut(protyle, protyle.block.parent2ID, id);

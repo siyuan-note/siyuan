@@ -661,7 +661,7 @@ export class Toolbar {
             pinData.styleH = textElement.style.height;
             pinData.styleW = textElement.style.width;
         } else {
-            this.subElement.style.width = "";
+            this.subElement.style.width = isMobile() ? "100vw" : "";
             this.subElement.style.padding = "0";
         }
         this.subElement.innerHTML = `<div ${(isPin && this.subElement.firstElementChild.getAttribute("data-drag") === "true") ? 'data-drag="true"' : ""} class="block__popover--move"><div class="block__icons block__icons--border fn__flex">
@@ -686,6 +686,10 @@ export class Toolbar {
 <textarea spellcheck="false" class="b3-text-field b3-text-field--text fn__block" placeholder="${placeholder}" style="width:${isMobile() ? "80vw" : Math.max(480, renderElement.clientWidth * 0.7) + "px"};max-height:50vh"></textarea></div>`;
         const autoHeight = () => {
             textElement.style.height = textElement.scrollHeight + "px";
+            if (isMobile()) {
+                setPosition(this.subElement, 0, 0);
+                return;
+            }
             if (this.subElement.firstElementChild.getAttribute("data-drag") === "true") {
                 if (textElement.getBoundingClientRect().bottom > window.innerHeight) {
                     this.subElement.style.top = window.innerHeight - this.subElement.clientHeight + "px";

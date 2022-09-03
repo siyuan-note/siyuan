@@ -5,7 +5,6 @@ import {fetchPost} from "../../util/fetch";
 export class Scroll {
     public element: HTMLElement;
     private inputElement: HTMLInputElement;
-    public blockSize: number;
     public lastScrollTop: number;
     public keepLazyLoad: boolean;
 
@@ -22,7 +21,7 @@ export class Scroll {
         this.lastScrollTop = 0;
         this.inputElement = divElement.firstElementChild as HTMLInputElement;
         this.inputElement.addEventListener("input", () => {
-            this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${this.blockSize}`);
+            this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
         });
         /// #if BROWSER
         this.inputElement.addEventListener("change", () => {
@@ -52,16 +51,15 @@ export class Scroll {
         });
     }
 
-    public update(blockSize: number, protyle: IProtyle) {
-        if (typeof blockSize === "number") {
-            this.blockSize = blockSize;
-            this.inputElement.setAttribute("max", this.blockSize.toString());
-            this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${this.blockSize}`);
+    public update(protyle: IProtyle) {
+        if (typeof protyle.block.blockCount === "number") {
+            this.inputElement.setAttribute("max", protyle.block.blockCount.toString());
+            this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
         }
         if (protyle.block.showAll) {
             this.element.classList.add("fn__none");
         } else {
-            if (blockSize > Constants.SIZE_GET) {
+            if (protyle.block.childBlockCount > Constants.SIZE_GET) {
                 this.element.classList.remove("fn__none");
             } else {
                 this.element.classList.add("fn__none");

@@ -70,6 +70,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     protyle.block.showAll = false;
     protyle.block.mode = data.data.mode;
     protyle.block.blockCount = data.data.blockCount;
+    protyle.block.childBlockCount = data.data.childBlockCount;
     protyle.block.action = action;
     if (!action.includes(Constants.CB_GET_UNCHANGEID)) {
         protyle.block.id = data.data.id;
@@ -177,7 +178,7 @@ const setHTML = (options: { content: string, action?: string[], unScroll?: boole
         return;
     }
     if (protyle.options.render.scroll) {
-        protyle.scroll.update(protyle.block.blockCount, protyle);
+        protyle.scroll.update(protyle);
     }
     if (options.action.includes(Constants.CB_GET_HL) && !options.unScroll) {
         preventScroll(protyle); // 搜索页签滚动会导致再次请求

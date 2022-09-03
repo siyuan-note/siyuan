@@ -1270,6 +1270,7 @@ func exportTree(tree *parse.Tree, wysiwyg bool) (ret *parse.Tree) {
 	}
 
 	unlinks = nil
+	var emptyParagraphs []*ast.Node
 	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -1278,6 +1279,13 @@ func exportTree(tree *parse.Tree, wysiwyg bool) (ret *parse.Tree) {
 		// 块折叠以后导出 HTML/PDF 固定展开 https://github.com/siyuan-note/siyuan/issues/4064
 		n.RemoveIALAttr("fold")
 		n.RemoveIALAttr("heading-fold")
+
+		if ast.NodeParagraph == n.Type {
+			if nil == n.FirstChild {
+				// 空的段落块需要补全文本展位，否则后续格式化后再解析树会语义不一致 https://github.com/siyuan-note/siyuan/issues/5806
+				emptyParagraphs = append(emptyParagraphs, n)
+			}
+		}
 
 		if ast.NodeWidget == n.Type {
 			// 挂件块导出 https://github.com/siyuan-note/siyuan/issues/3834
@@ -1308,6 +1316,9 @@ func exportTree(tree *parse.Tree, wysiwyg bool) (ret *parse.Tree) {
 	})
 	for _, n := range unlinks {
 		n.Unlink()
+	}
+	for _, emptyParagraph := range emptyParagraphs {
+		emptyParagraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(parse.Zwj)})
 	}
 	return ret
 }

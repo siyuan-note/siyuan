@@ -95,6 +95,7 @@
   "netImg2LocalAsset": "Convert network images to local images",
   "releaseDate": "Release Date",
   "pkgSize": "Package size",
+  "installSize": "Install Size",
   "optimizeTypography": "Optimize typography",
   "dragPosition": "Drag image to reposition",
   "exportPDF0": "Page Size",

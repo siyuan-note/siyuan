@@ -124,6 +124,8 @@ func InstalledIcons() (ret []*Icon) {
 			continue
 		}
 
+		installPath := filepath.Join(util.IconsPath, dirName)
+
 		icon := &Icon{}
 		icon.Installed = true
 		icon.Name = iconConf["name"].(string)
@@ -134,10 +136,11 @@ func InstalledIcons() (ret []*Icon) {
 		icon.PreviewURL = "/appearance/icons/" + dirName + "/preview.png"
 		icon.PreviewURLThumb = "/appearance/icons/" + dirName + "/preview.png"
 		icon.Updated = iconDir.ModTime().Format("2006-01-02 15:04:05")
-		icon.Size = iconDir.Size()
-		icon.HSize = humanize.Bytes(uint64(icon.Size))
 		icon.HUpdated = formatUpdated(icon.Updated)
-		readme, readErr := os.ReadFile(filepath.Join(util.IconsPath, dirName, "README.md"))
+		installSize, _ := util.SizeOfDirectory(installPath)
+		icon.InstallSize = installSize
+		icon.HInstallSize = humanize.Bytes(uint64(installSize))
+		readme, readErr := os.ReadFile(filepath.Join(installPath, "README.md"))
 		if nil != readErr {
 			logging.LogWarnf("read install icon README.md failed: %s", readErr)
 			continue

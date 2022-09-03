@@ -95,6 +95,7 @@
   "netImg2LocalAsset": "Convertir imágenes de red en imágenes locales",
   "releaseDate": "Fecha de lanzamiento",
   "pkgSize": "Tamaño del paquete",
+  "installSize": "Tamaño de instalación",
   "optimizeTypography": "Insertar un espacio entre el chino y el occidental",
   "dragPosition": "Arrastrar imagen para reposicionarla",
   "exportPDF0": "Tamaño de la página",

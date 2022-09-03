@@ -288,7 +288,7 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 		if fi, statErr := os.Stat(absAsset); nil != statErr {
 			logging.LogErrorf("stat file [%s] failed: %s", absAsset, statErr)
 			return statErr
-		} else if util.CloudSingleFileMaxSizeLimit/10 <= fi.Size() {
+		} else if 10*1024*1024 <= fi.Size() {
 			logging.LogWarnf("file [%s] larger than 10MB, ignore uploading it", absAsset)
 			continue
 		}

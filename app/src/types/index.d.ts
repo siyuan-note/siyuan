@@ -495,5 +495,6 @@ declare interface IBazaarItem {
     version: string
     modes: string[]
     hSize: string
+    hInstallSize: string
     hUpdated: string
 }

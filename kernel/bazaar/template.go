@@ -124,6 +124,8 @@ func InstalledTemplates() (ret []*Template) {
 			continue
 		}
 
+		installPath := filepath.Join(util.DataDir, "templates", dirName)
+
 		template := &Template{}
 		template.Installed = true
 		template.Name = templateConf["name"].(string)
@@ -134,10 +136,11 @@ func InstalledTemplates() (ret []*Template) {
 		template.PreviewURL = "/templates/" + dirName + "/preview.png"
 		template.PreviewURLThumb = "/templates/" + dirName + "/preview.png"
 		template.Updated = templateDir.ModTime().Format("2006-01-02 15:04:05")
-		template.Size = templateDir.Size()
-		template.HSize = humanize.Bytes(uint64(template.Size))
 		template.HUpdated = formatUpdated(template.Updated)
-		readme, readErr := os.ReadFile(filepath.Join(util.DataDir, "templates", dirName, "README.md"))
+		installSize, _ := util.SizeOfDirectory(installPath)
+		template.InstallSize = installSize
+		template.HInstallSize = humanize.Bytes(uint64(installSize))
+		readme, readErr := os.ReadFile(filepath.Join(installPath, "README.md"))
 		if nil != readErr {
 			logging.LogWarnf("read install template README.md failed: %s", readErr)
 			continue

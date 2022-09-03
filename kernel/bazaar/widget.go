@@ -122,6 +122,8 @@ func InstalledWidgets() (ret []*Widget) {
 			continue
 		}
 
+		installPath := filepath.Join(util.DataDir, "widgets", dirName)
+
 		widget := &Widget{}
 		widget.Installed = true
 		widget.Name = widgetConf["name"].(string)
@@ -132,10 +134,11 @@ func InstalledWidgets() (ret []*Widget) {
 		widget.PreviewURL = "/widgets/" + dirName + "/preview.png"
 		widget.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
 		widget.Updated = widgetDir.ModTime().Format("2006-01-02 15:04:05")
-		widget.Size = widgetDir.Size()
-		widget.HSize = humanize.Bytes(uint64(widget.Size))
 		widget.HUpdated = formatUpdated(widget.Updated)
-		readme, readErr := os.ReadFile(filepath.Join(util.DataDir, "widgets", dirName, "README.md"))
+		installSize, _ := util.SizeOfDirectory(installPath)
+		widget.InstallSize = installSize
+		widget.HInstallSize = humanize.Bytes(uint64(installSize))
+		readme, readErr := os.ReadFile(filepath.Join(installPath, "README.md"))
 		if nil != readErr {
 			logging.LogWarnf("read install widget README.md failed: %s", readErr)
 			continue

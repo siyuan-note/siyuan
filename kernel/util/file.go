@@ -190,23 +190,14 @@ func IsSubFolder(parent, sub string) bool {
 	return false
 }
 
-const CloudSingleFileMaxSizeLimit = 96 * 1000 * 1000
-
-func SizeOfDirectory(path string, includeBigFile bool) (int64, error) {
-	var size int64
-	err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
+func SizeOfDirectory(path string) (size int64, err error) {
+	err = filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
 		if nil != err {
 			return err
 		}
 		if !info.IsDir() {
 			s := info.Size()
-			if CloudSingleFileMaxSizeLimit < s {
-				if includeBigFile {
-					size += s
-				}
-			} else {
-				size += s
-			}
+			size += s
 		} else {
 			size += 4096
 		}
@@ -215,7 +206,7 @@ func SizeOfDirectory(path string, includeBigFile bool) (int64, error) {
 	if nil != err {
 		logging.LogErrorf("size of dir [%s] failed: %s", path, err)
 	}
-	return size, err
+	return
 }
 
 func IsReservedFilename(baseName string) bool {

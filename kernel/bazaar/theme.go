@@ -126,6 +126,8 @@ func InstalledThemes() (ret []*Theme) {
 			continue
 		}
 
+		installPath := filepath.Join(util.ThemesPath, dirName)
+
 		theme := &Theme{}
 		theme.Installed = true
 		theme.Name = themeConf["name"].(string)
@@ -137,10 +139,11 @@ func InstalledThemes() (ret []*Theme) {
 		theme.PreviewURL = "/appearance/themes/" + dirName + "/preview.png"
 		theme.PreviewURLThumb = "/appearance/themes/" + dirName + "/preview.png"
 		theme.Updated = themeDir.ModTime().Format("2006-01-02 15:04:05")
-		theme.Size = themeDir.Size()
-		theme.HSize = humanize.Bytes(uint64(theme.Size))
 		theme.HUpdated = formatUpdated(theme.Updated)
-		readme, readErr := os.ReadFile(filepath.Join(util.ThemesPath, dirName, "README.md"))
+		installSize, _ := util.SizeOfDirectory(installPath)
+		theme.InstallSize = installSize
+		theme.HInstallSize = humanize.Bytes(uint64(installSize))
+		readme, readErr := os.ReadFile(filepath.Join(installPath, "README.md"))
 		if nil != readErr {
 			logging.LogWarnf("read install theme README.md failed: %s", readErr)
 			continue

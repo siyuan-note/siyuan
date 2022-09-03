@@ -95,6 +95,7 @@
   "netImg2LocalAsset": "網絡圖片轉換為本地圖片",
   "releaseDate": "發布日期",
   "pkgSize": "包大小",
+  "installSize": "安裝大小",
   "optimizeTypography": "優化排版",
   "dragPosition": "拖動圖像重新定位",
   "exportPDF0": "頁面大小",

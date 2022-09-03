@@ -41,7 +41,7 @@ const (
 )
 
 func logBootInfo() {
-	s, _ := SizeOfDirectory(DataDir, true)
+	s, _ := SizeOfDirectory(DataDir)
 	dataDirSize := humanize.Bytes(uint64(s))
 
 	logging.LogInfof("kernel is booting:\n"+

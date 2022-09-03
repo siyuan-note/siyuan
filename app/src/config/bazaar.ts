@@ -266,7 +266,7 @@ export const bazaar = {
     <div class="fn__hr"></div>
     <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.releaseDate}<br>${data.hUpdated}</div>
     <div class="fn__hr"></div>
-    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.pkgSize}<br>${data.hSize}</div>
+    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${isDownloaded ? window.siyuan.languages.installSize : window.siyuan.languages.pkgSize}<br>${isDownloaded ? data.hInstallSize : data.hSize}</div>
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>
     <div class="${(data.installed || isDownloaded) ? "fn__none" : ""}" data-type="${data.modes?.toString()}">

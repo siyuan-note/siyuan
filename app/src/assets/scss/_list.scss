@@ -179,7 +179,16 @@
       border: 0;
       padding: 0;
       color: var(--b3-theme-on-background);
-      @include text-clamp(1)
+      @include text-clamp(1);
+
+      // 搜索列表中自定义图标
+      & > img,
+      & > .custom-icon {
+        height: 14px;
+        width: 14px;
+        float: left;
+        margin-top: 7px;
+      }
     }
 
     &__showall {

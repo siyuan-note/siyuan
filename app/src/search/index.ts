@@ -10,6 +10,7 @@ import {fetchPost} from "../util/fetch";
 import {onGet} from "../protyle/util/onGet";
 import {openFileById} from "../editor/util";
 import {addLoading} from "../protyle/ui/initUI";
+import {unicode2Emoji} from "../emoji";
 
 export class Search extends Model {
     public text: string;
@@ -277,7 +278,7 @@ export class Search extends Model {
             const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
             resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-url="${item.box}" data-path="${item.path}" data-node-id="${item.id}">
     <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
-    <span class="b3-list-item__text">${item.content}</span>
+    <span class="b3-list-item__text">${unicode2Emoji(item.ial.icon)}${item.ial.icon ? "&nbsp;" : ""}${item.content}</span>
     <span class="b3-list-item__meta b3-list-item__meta--ellipsis" title="${Lute.EscapeHTMLStr(title)}">${Lute.EscapeHTMLStr(title)}</span>
 </div>`;
         });

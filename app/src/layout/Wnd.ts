@@ -26,6 +26,8 @@ import {getAllModels} from "./getAll";
 import {countBlockWord} from "./status";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {Asset} from "../asset";
+import {newFile} from "../util/newFile";
+import {MenuItem} from "../menus/Menu";
 
 export class Wnd {
     public id: string;
@@ -45,7 +47,15 @@ export class Wnd {
             dragHTML = "";
         }
         this.element.innerHTML = `<div data-type="wnd" data-id="${this.id}" class="fn__flex-column fn__flex fn__flex-1">
-    <ul class="fn__flex layout-tab-bar"></ul>
+    <div class="fn__flex fn__none">
+        <ul class="fn__flex layout-tab-bar fn__flex-1"></ul>
+        <ul class="layout-tab-bar">
+            <li class="item item--readonly">
+                <span data-type="new" class="item__close" title="${window.siyuan.languages.newFile}"><svg style="height: 10px;width: 10px;padding: 3px"><use xlink:href="#iconAdd"></use></svg></span>
+                <span data-type="more" data-menu="true" class="item__close" title="${window.siyuan.languages.more}"><svg><use xlink:href="#iconDown"></use></svg></span>
+            </li>
+        </ul>
+    </div>
     <div class="layout-tab-container fn__flex-1">${dragHTML}</div>
 </div>`;
         this.headersElement = this.element.querySelector(".layout-tab-bar");
@@ -70,10 +80,16 @@ export class Wnd {
         this.headersElement.addEventListener("mousewheel", (event: WheelEvent) => {
             this.headersElement.scrollLeft = this.headersElement.scrollLeft + event.deltaY;
         }, {passive: true});
-        this.headersElement.addEventListener("click", (event) => {
+        this.headersElement.parentElement.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.headersElement)) {
-                if (target.tagName === "LI") {
+                if (target.classList.contains("item__close") && target.getAttribute("data-type") === "new") {
+                    newFile(undefined, undefined, true);
+                    break;
+                } else if (target.classList.contains("item__close") && target.getAttribute("data-type") === "more") {
+                    this.renderTabList(event);
+                    break;
+                } else if (target.tagName === "LI" && target.getAttribute("data-id")) {
                     this.switchTab(target, true);
                     break;
                 }
@@ -394,6 +410,7 @@ export class Wnd {
         this.children.splice(oldFocusIndex + 1, 0, tab);
 
         if (tab.headElement) {
+            this.headersElement.parentElement.classList.remove("fn__none");
             if (this.headersElement.childElementCount === 0) {
                 this.headersElement.append(tab.headElement);
             } else {
@@ -434,6 +451,23 @@ export class Wnd {
         } else if (this.children.length > window.siyuan.config.fileTree.maxOpenTabCount) {
             this.removeOverCounter(oldFocusIndex);
         }
+    }
+
+    private renderTabList(event: MouseEvent) {
+        window.siyuan.menus.menu.remove()
+        Array.from(this.headersElement.children).forEach((item: HTMLElement) => {
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: item.querySelector(".item__text").textContent,
+                click: () => {
+                    this.switchTab(item, true);
+                },
+                current: item.classList.contains("item--focus")
+            }).element);
+        })
+        window.siyuan.menus.menu.popup({
+            x: event.clientX,
+            y: event.clientY,
+        });
     }
 
     private removeOverCounter(oldFocusIndex?: number) {

@@ -118,11 +118,16 @@
         flex: 1;
         min-height: 30px;
 
-        &:not(:last-child) {
+        &:not(:last-child),
+        &:last-child:not(.item--focus):not(.item--readonly) {
           box-shadow: 2px -26px 0px 0px var(--b3-theme-surface), 1px -4px 1px 0px var(--b3-theme-on-surface-light);
         }
 
-        &:hover:not(.item--focus) {
+        &:last-child:not(.item--readonly) {
+          margin-right: 2px;
+        }
+
+        &:hover:not(.item--focus):not(.item--readonly) {
           background-color: var(--b3-list-hover);
           box-shadow: none;
           border-radius: 4px 4px 0 0;

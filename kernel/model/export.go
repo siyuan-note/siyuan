@@ -196,7 +196,7 @@ func exportData(exportFolder string) (err error) {
 
 func Preview(id string) string {
 	tree, _ := loadTreeByBlockID(id)
-	tree = exportTree(tree, false)
+	tree = exportTree(tree, false, false)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	md := treenode.FormatNode(tree.Root, luteEngine)
@@ -250,7 +250,7 @@ func ExportDocx(id, savePath string, removeAssets bool) (err error) {
 func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
 	tree, _ := loadTreeByBlockID(id)
 
-	tree = exportTree(tree, true)
+	tree = exportTree(tree, true, true)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
@@ -362,7 +362,7 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 		}
 	}
 
-	tree = exportTree(tree, true)
+	tree = exportTree(tree, true, true)
 	//if pdf { // TODO: 导出 PDF 时块引转换脚注使用书签跳转 https://github.com/siyuan-note/siyuan/issues/5761
 	//	var footnotesDefs []*ast.Node
 	//	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -590,7 +590,7 @@ func AddPDFOutline(id, p string) (err error) {
 
 func CopyStdMarkdown(id string) string {
 	tree, _ := loadTreeByBlockID(id)
-	tree = exportTree(tree, false)
+	tree = exportTree(tree, false, false)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
@@ -914,7 +914,7 @@ func ExportMarkdownContent(id string) (hPath, exportedMd string) {
 func exportMarkdownContent(id string) (hPath, exportedMd string) {
 	tree, _ := loadTreeByBlockID(id)
 	hPath = tree.HPath
-	tree = exportTree(tree, false)
+	tree = exportTree(tree, false, true)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
@@ -980,6 +980,65 @@ func renderExportMdInlineMathContent(r *render.FormatRenderer, node *ast.Node, e
 	return ast.WalkContinue
 }
 
+func processKaTexMacros(n *ast.Node) {
+	if ast.NodeInlineMathContent != n.Type && ast.NodeMathBlockContent != n.Type {
+		return
+	}
+
+	mathContent := n.Tokens
+	macros := map[string]string{}
+	if err := gulu.JSON.UnmarshalJSON([]byte(Conf.Editor.KaTexMacros), &macros); nil != err {
+		logging.LogWarnf("parse katex macros failed: %s", err)
+		return
+	}
+
+	var keys []string
+	for k, _ := range macros {
+		keys = append(keys, k)
+	}
+
+	useMacro := false
+	for k, _ := range macros {
+		if bytes.Contains(mathContent, []byte(k)) {
+			useMacro = true
+			break
+		}
+	}
+	if !useMacro {
+		return
+	}
+
+	usedMacros := extractUsedMacros(mathContent, macros)
+	newcommandBuf := bytes.Buffer{}
+	for _, usedMacro := range usedMacros {
+		expanded := resolveKaTexMacro(usedMacro, &macros, &keys)
+		newcommandBuf.WriteString("\\newcommand" + usedMacro + "{" + expanded + "}\n")
+	}
+	newcommandBuf.WriteString("\n")
+	mathContent = append(newcommandBuf.Bytes(), mathContent...)
+	n.Tokens = mathContent
+}
+
+func extractUsedMacros(mathContent []byte, macros map[string]string) (ret []string) {
+	for macro, _ := range macros {
+		if bytes.Contains(mathContent, []byte(macro)) {
+			ret = append(ret, macro)
+		}
+	}
+	return
+}
+
+func resolveKaTexMacro(macroName string, macros *map[string]string, keys *[]string) string {
+	v := (*macros)[macroName]
+	for _, k := range *keys {
+		if strings.Contains(v, k) {
+			v = strings.ReplaceAll(v, k, resolveKaTexMacro(k, macros, keys))
+			(*macros)[macroName] = v
+		}
+	}
+	return v
+}
+
 func renderExportMdParagraph(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {
 	if entering {
 		if r.Options.ChineseParagraphBeginningSpace && ast.NodeDocument == node.Parent.Type {
@@ -1034,7 +1093,7 @@ func withoutKramdownBlockIAL(r *render.FormatRenderer, node *ast.Node) bool {
 	return !r.Options.KramdownBlockIAL || 0 == len(node.KramdownIAL)
 }
 
-func exportTree(tree *parse.Tree, wysiwyg bool) (ret *parse.Tree) {
+func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret = tree
 	id := tree.Root.ID
@@ -1284,6 +1343,10 @@ func exportTree(tree *parse.Tree, wysiwyg bool) (ret *parse.Tree) {
 				// 空的段落块需要补全文本展位，否则后续格式化后再解析树会语义不一致 https://github.com/siyuan-note/siyuan/issues/5806
 				emptyParagraphs = append(emptyParagraphs, n)
 			}
+		}
+
+		if expandKaTexMacros && (ast.NodeInlineMathContent == n.Type || ast.NodeMathBlockContent == n.Type) {
+			processKaTexMacros(n)
 		}
 
 		if ast.NodeWidget == n.Type {

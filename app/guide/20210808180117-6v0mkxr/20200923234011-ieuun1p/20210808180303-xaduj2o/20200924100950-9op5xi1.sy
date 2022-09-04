@@ -6,7 +6,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20220902201039"
+		"updated": "20220904093759"
 	},
 	"Children": [
 		{
@@ -38,7 +38,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154101-qrojg1b",
-				"updated": "20220829213220"
+				"updated": "20220904093631"
 			},
 			"Children": [
 				{
@@ -813,6 +813,68 @@
 										{
 											"Type": "NodeText",
 											"Data": "⌥5"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Inbox"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Alt+6"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "⌥6"
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -2307,7 +2369,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-yozlufs",
-				"updated": "20220902124450"
+				"updated": "20220904093759"
 			},
 			"Children": [
 				{
@@ -2430,7 +2492,11 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Global search"
+									"Data": "Stick Search"
+								},
+								{
+									"Type": "NodeBr",
+									"Data": "br"
 								}
 							]
 						},
@@ -5593,7 +5659,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "Ctrl+["
+											"Data": "Alt+["
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -5613,7 +5679,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "⌘["
+											"Data": "⌥["
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -5635,7 +5701,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "Ctrl+["
+											"Data": "Alt+["
 										},
 										{
 											"Type": "NodeKbdCloseMarker"
@@ -5655,7 +5721,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": "⌘["
+											"Data": "⌥["
 										},
 										{
 											"Type": "NodeKbdCloseMarker"

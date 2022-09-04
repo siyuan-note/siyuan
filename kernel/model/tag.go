@@ -128,7 +128,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 	}
 
 	util.PushEndlessProgress(Conf.Language(110))
-	util.RandomSleep(1000, 2000)
+	util.RandomSleep(500, 1000)
 
 	tags := sql.QueryTagSpansByKeyword(oldLabel, 102400)
 	treeBlocks := map[string][]string{}

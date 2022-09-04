@@ -491,7 +491,7 @@
   "sync": "Sync",
   "syncNow": "Sync now",
   "cloudBook": "Cloud Notebook",
-  "payment": "Payment",
+  "paymentSum": "Cumulatively paid",
   "refresh": "Refresh",
   "accountManage": "Account Manage",
   "logout": "Logout",

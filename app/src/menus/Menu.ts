@@ -127,7 +127,12 @@ export class MenuItem {
                 window.siyuan.menus.menu.remove();
             });
         }
-        let html = `<svg class="b3-menu__icon${["HTML (SiYuan)", window.siyuan.languages.template].includes(options.label) ? " ft__error" : ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg><span class="b3-menu__label">${options.label}</span>`;
+        let html = `<span class="b3-menu__label">${options.label}</span>`;
+        if (options.iconHTML) {
+            html = options.iconHTML + html;
+        } else {
+            html = `<svg class="b3-menu__icon${["HTML (SiYuan)", window.siyuan.languages.template].includes(options.label) ? " ft__error" : ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;
+        }
         if (options.accelerator) {
             html += `<span class="b3-menu__accelerator">${updateHotkeyTip(options.accelerator)}</span>`;
         }

@@ -104,8 +104,14 @@
     align-self: center;
     height: 14px;
     width: 14px;
+    line-height: 14px;
     margin-right: 8px;
     color: var(--b3-theme-on-surface);
+
+    & > svg {
+      height: 14px;
+      width: 14px;
+    }
 
     &--arrow {
       margin: 0 0 0 8px;

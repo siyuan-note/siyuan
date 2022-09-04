@@ -456,8 +456,12 @@ export class Wnd {
     private renderTabList(event: MouseEvent) {
         window.siyuan.menus.menu.remove()
         Array.from(this.headersElement.children).forEach((item: HTMLElement) => {
+            const iconElement = item.querySelector(".item__icon")
+            const graphicElement = item.querySelector(".item__graphic")
             window.siyuan.menus.menu.append(new MenuItem({
                 label: item.querySelector(".item__text").textContent,
+                iconHTML: iconElement ? `<span class="b3-menu__icon">${iconElement.innerHTML}</span>` : "",
+                icon: graphicElement ? graphicElement.firstElementChild.getAttribute("xlink:href").substring(1) : "",
                 click: () => {
                     this.switchTab(item, true);
                 },

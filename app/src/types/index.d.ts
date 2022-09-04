@@ -472,6 +472,7 @@ declare interface IMenu {
     submenu?: IMenu[]
     disabled?: boolean
     icon?: string
+    iconHTML?: string
     current?: boolean
     bind?: (element: HTMLElement) => void
 }

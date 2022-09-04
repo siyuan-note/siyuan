@@ -5,7 +5,7 @@
 		"icon": "1f4c4",
 		"id": "20211226114339-dk0gtpr",
 		"title": "隱私政策和用戶協議",
-		"updated": "20220531181359"
+		"updated": "20220904095814"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220212225517-4qagezn",
-				"updated": "20220531180705"
+				"updated": "20220904095814"
 			},
 			"Children": [
 				{
@@ -67,7 +67,7 @@
 					},
 					"Properties": {
 						"id": "20220212225517-pvls0y0",
-						"updated": "20220531180705"
+						"updated": "20220904095814"
 					},
 					"Children": [
 						{
@@ -75,12 +75,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220212225517-vgg1nrb",
-								"updated": "20220531180705"
+								"updated": "20220904095814"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最新日期：2022 年 5 月 31 日"
+									"Data": "最新日期：2022 年 9 月 4 日"
 								}
 							]
 						}
@@ -3399,7 +3399,7 @@
 			},
 			"Properties": {
 				"id": "20220212225553-ud2rl66",
-				"updated": "20220526171944"
+				"updated": "20220904095758"
 			},
 			"Children": [
 				{
@@ -3768,149 +3768,46 @@
 					]
 				},
 				{
-					"ID": "20220212225609-irfvmvz",
-					"Type": "NodeList",
-					"ListData": {},
+					"ID": "20220904095758-ek15ziy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
 					"Properties": {
-						"id": "20220212225609-irfvmvz",
-						"updated": "20220212225609"
+						"id": "20220904095758-ek15ziy",
+						"updated": "20220904095758"
 					},
 					"Children": [
 						{
-							"ID": "20220212225609-5jwia5n",
-							"Type": "NodeListItem",
-							"ListData": {
-								"BulletChar": 42,
-								"Marker": "Kg=="
-							},
+							"ID": "20220904095758-e2wsj68",
+							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220212225609-5jwia5n",
-								"updated": "20220212225609"
+								"id": "20220904095758-e2wsj68",
+								"updated": "20220904095758"
 							},
 							"Children": [
 								{
-									"ID": "20220212225609-7z9vy2o",
-									"Type": "NodeParagraph",
-									"Properties": {
-										"id": "20220212225609-7z9vy2o",
-										"updated": "20220212225609"
-									},
+									"Type": "NodeStrong",
+									"Data": "strong",
 									"Children": [
 										{
-											"Type": "NodeStrong",
-											"Data": "strong",
-											"Children": [
-												{
-													"Type": "NodeStrongA6kOpenMarker",
-													"Data": "**"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "允許訪問網絡："
-												},
-												{
-													"Type": "NodeStrongA6kCloseMarker",
-													"Data": "**"
-												}
-											]
+											"Type": "NodeStrongA6kOpenMarker",
+											"Data": "**"
 										},
 										{
 											"Type": "NodeText",
-											"Data": "當您安裝應用時，我們會申請此權限。"
+											"Data": "允許訪問網絡："
+										},
+										{
+											"Type": "NodeStrongA6kCloseMarker",
+											"Data": "**"
 										}
 									]
-								}
-							]
-						},
-						{
-							"ID": "20220212225609-q1uwt2u",
-							"Type": "NodeListItem",
-							"ListData": {
-								"BulletChar": 42,
-								"Marker": "Kg=="
-							},
-							"Properties": {
-								"id": "20220212225609-q1uwt2u",
-								"updated": "20220212225609"
-							},
-							"Children": [
+								},
 								{
-									"ID": "20220212225609-x6zxnw5",
-									"Type": "NodeParagraph",
-									"Properties": {
-										"id": "20220212225609-x6zxnw5",
-										"updated": "20220212225609"
-									},
-									"Children": [
-										{
-											"Type": "NodeStrong",
-											"Data": "strong",
-											"Children": [
-												{
-													"Type": "NodeStrongA6kOpenMarker",
-													"Data": "**"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "允許常駐通知："
-												},
-												{
-													"Type": "NodeStrongA6kCloseMarker",
-													"Data": "**"
-												}
-											]
-										},
-										{
-											"Type": "NodeText",
-											"Data": "當您安裝應用，我們會申請此權限。"
-										}
-									]
-								}
-							]
-						},
-						{
-							"ID": "20220212225609-ips2ek8",
-							"Type": "NodeListItem",
-							"ListData": {
-								"BulletChar": 42,
-								"Marker": "Kg=="
-							},
-							"Properties": {
-								"id": "20220212225609-ips2ek8",
-								"updated": "20220212225609"
-							},
-							"Children": [
-								{
-									"ID": "20220212225609-i4aq0hw",
-									"Type": "NodeParagraph",
-									"Properties": {
-										"id": "20220212225609-i4aq0hw",
-										"updated": "20220212225609"
-									},
-									"Children": [
-										{
-											"Type": "NodeStrong",
-											"Data": "strong",
-											"Children": [
-												{
-													"Type": "NodeStrongA6kOpenMarker",
-													"Data": "**"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "允許拍照/訪問相冊："
-												},
-												{
-													"Type": "NodeStrongA6kCloseMarker",
-													"Data": "**"
-												}
-											]
-										},
-										{
-											"Type": "NodeText",
-											"Data": "當您希望添加照片時，我們會申請此權限。"
-										}
-									]
+									"Type": "NodeText",
+									"Data": "當您安裝應用時，我們會申請此權限。"
 								}
 							]
 						}

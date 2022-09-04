@@ -6,7 +6,7 @@
 		"id": "20200813163359-v04n73b",
 		"title": "隐私政策和用户协议",
 		"type": "doc",
-		"updated": "20220531181352"
+		"updated": "20220904093913"
 	},
 	"Children": [
 		{
@@ -30,7 +30,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220212224529-q784muc",
-				"updated": "20220531180717"
+				"updated": "20220904093913"
 			},
 			"Children": [
 				{
@@ -70,7 +70,7 @@
 					},
 					"Properties": {
 						"id": "20220212224529-q652whb",
-						"updated": "20220531180717"
+						"updated": "20220904093913"
 					},
 					"Children": [
 						{
@@ -78,12 +78,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220212224529-1embibu",
-								"updated": "20220531180717"
+								"updated": "20220904093913"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最新日期：2022 年 5 月 31 日"
+									"Data": "最新日期：2022 年 9 月 4 日"
 								}
 							]
 						}
@@ -3779,7 +3779,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220212224529-ycsnqo5",
-				"updated": "20220212224529"
+				"updated": "20220904093803"
 			},
 			"Children": [
 				{
@@ -3869,6 +3869,52 @@
 								{
 									"Type": "NodeText",
 									"Data": "当您安装应用，我们会申请此权限。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220904093737-xj216ur",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220904093737-xj216ur",
+						"updated": "20220904093803"
+					},
+					"Children": [
+						{
+							"ID": "20220904093737-mgfz3tm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220904093737-mgfz3tm",
+								"updated": "20220904093803"
+							},
+							"Children": [
+								{
+									"Type": "NodeStrong",
+									"Data": "strong",
+									"Children": [
+										{
+											"Type": "NodeStrongA6kOpenMarker",
+											"Data": "**"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "允许获取应用列表："
+										},
+										{
+											"Type": "NodeStrongA6kCloseMarker",
+											"Data": "**"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "当您安装应用时，我们会申请此权限。"
 								}
 							]
 						}

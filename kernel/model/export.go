@@ -975,7 +975,6 @@ func renderExportMdMathBlockContent(r *render.FormatRenderer, node *ast.Node, en
 func renderExportMdInlineMathContent(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {
 	if entering {
 		tokens := html.UnescapeHTML(node.Tokens)
-		tokens = gulu.Str.ToBytes("a" + gulu.Str.FromBytes(tokens) + "b")
 		r.Write(tokens)
 	}
 	return ast.WalkContinue

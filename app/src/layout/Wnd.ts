@@ -523,6 +523,11 @@ export class Wnd {
             }
             return;
         }
+        if (model instanceof Asset) {
+            if (model.pdfObject) {
+                model.pdfObject.pdfLoadingTask.destroy();
+            }
+        }
         model.send("closews", {});
     }
 

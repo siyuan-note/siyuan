@@ -5,7 +5,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20220902220108"
+		"updated": "20220905215835"
 	},
 	"Children": [
 		{
@@ -81,12 +81,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220824172815-s8znsau",
-				"updated": "20220824172918"
+				"updated": "20220905215835"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the editor, you can directly paste the copied picture or file in the system clipboard, or insert it by dragging and dropping the picture or file into the editor. There are two options when inserting:"
+					"Data": "In the editor, you can directly paste the copied picture or file in the system clipboard (not supported on Linux), or insert it by dragging and dropping the picture or file into the editor. There are two options when inserting:"
 				}
 			]
 		},

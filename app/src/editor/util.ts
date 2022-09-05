@@ -481,6 +481,10 @@ export const openBy = (url: string, type: "folder" | "app") => {
     if (type === "app") {
         shell.openPath(address);
     } else if (type === "folder") {
+        if ("windows" === window.siyuan.config.system.os) {
+            // Windows 端打开本地文件所在位置失效 https://github.com/siyuan-note/siyuan/issues/5808
+            address = address.replace(/\\\\/g, "\\");
+        }
         shell.showItemInFolder(address);
     }
     /// #endif

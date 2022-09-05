@@ -1,3 +1,31 @@
+## v2.1.13 / 2022-09-05
+
+### 改进功能
+
+* [为每个分屏添加页签下拉菜单](https://github.com/siyuan-note/siyuan/issues/5772)
+* [页签栏支持 `+` 创建](https://github.com/siyuan-note/siyuan/issues/5773)
+* [列表项以公式等不可直接编辑的块结尾后无法回车创建新列表项](https://github.com/siyuan-note/siyuan/issues/5796)
+* [改进集市已下载包的显示和更新](https://github.com/siyuan-note/siyuan/issues/5807)
+* [改进 `Ctrl+K` 超链接粘贴识别](https://github.com/siyuan-note/siyuan/issues/5817)
+* [公式导出时将宏定义使用 `\newcommand` 插入](https://github.com/siyuan-note/siyuan/issues/5818)
+* [Linux 端不再支持 `粘贴为纯文本` 时处理文件绝对路径](https://github.com/siyuan-note/siyuan/issues/5825)
+
+### 文档相关
+
+* [修改 Android 端隐私政策](https://github.com/siyuan-note/siyuan/issues/5810)
+* [修复帮助文档快捷键相关的错误描述](https://github.com/siyuan-note/siyuan/issues/5811)
+
+### 修复缺陷
+
+* [挂件移动或设置大小后属性丢失](https://github.com/siyuan-note/siyuan/issues/4885)
+* [列表项第一个子块为空时导出渲染错误](https://github.com/siyuan-note/siyuan/issues/5806)
+* [Windows 端打开本地文件所在位置失效](https://github.com/siyuan-note/siyuan/issues/5808)
+* [PDF 阅读器内存泄漏](https://github.com/siyuan-note/siyuan/issues/5809)
+* [标签名称存在包含关系时重命名标签会出现误修改](https://github.com/siyuan-note/siyuan/issues/5816)
+* [搜索结果中文档图标使用自定义图标时大小异常](https://github.com/siyuan-note/siyuan/issues/5819)
+* [行内公式导出被字母 a 和 b 包裹](https://github.com/siyuan-note/siyuan/issues/5820)
+* [标题块下方块反向链接计算问题](https://github.com/siyuan-note/siyuan/issues/5822)
+
 ## v2.1.12 / 2022-09-03
 
 ### 改进功能

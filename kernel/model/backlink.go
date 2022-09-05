@@ -238,7 +238,7 @@ func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID
 	}
 	paragraphParents := sql.GetBlocks(paragraphParentIDs)
 	for _, p := range paragraphParents {
-		if "i" == p.Type {
+		if "i" == p.Type || "h" == p.Type {
 			linkRefs = append(linkRefs, fromSQLBlock(p, keyword, beforeLen))
 			processedParagraphs.Add(p.ID)
 		}

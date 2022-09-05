@@ -25,6 +25,8 @@
 * [搜索结果中文档图标使用自定义图标时大小异常](https://github.com/siyuan-note/siyuan/issues/5819)
 * [行内公式导出被字母 a 和 b 包裹](https://github.com/siyuan-note/siyuan/issues/5820)
 * [标题块下方块反向链接计算问题](https://github.com/siyuan-note/siyuan/issues/5822)
+* [自动补全后 Ctrl+Z 行为不对 ](https://github.com/siyuan-note/siyuan/issues/5826)
+* [快捷键复制包含 `'` 的文档名为引用时无法识别](https://github.com/siyuan-note/siyuan/issues/5827)
 
 ## v2.1.12 / 2022-09-03
 

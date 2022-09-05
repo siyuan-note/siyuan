@@ -127,6 +127,7 @@ const splitSubMenu = (tab: Tab) => {
             click: () => {
                 const newWnd = tab.parent.split("lr");
                 newWnd.headersElement.append(tab.headElement);
+                newWnd.headersElement.parentElement.classList.remove("fn__none");
                 newWnd.moveTab(tab);
             }
         });
@@ -146,6 +147,7 @@ const splitSubMenu = (tab: Tab) => {
             click: () => {
                 const newWnd = tab.parent.split("tb");
                 newWnd.headersElement.append(tab.headElement);
+                newWnd.headersElement.parentElement.classList.remove("fn__none");
                 newWnd.moveTab(tab);
             }
         });

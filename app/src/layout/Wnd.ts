@@ -262,6 +262,7 @@ export class Wnd {
                     // split to bottom
                     const newWnd = targetWnd.split("tb");
                     newWnd.headersElement.append(oldTab.headElement);
+                    newWnd.headersElement.parentElement.classList.remove("fn__none");
                     newWnd.moveTab(oldTab);
 
                     if (dragElement.style.bottom === "50%" && newWnd.element.previousElementSibling && targetWnd.element.parentElement) {
@@ -272,6 +273,7 @@ export class Wnd {
                     // split to right
                     const newWnd = targetWnd.split("lr");
                     newWnd.headersElement.append(oldTab.headElement);
+                    newWnd.headersElement.parentElement.classList.remove("fn__none");
                     newWnd.moveTab(oldTab);
 
                     if (dragElement.style.right === "50%" && newWnd.element.previousElementSibling && targetWnd.element.parentElement) {
@@ -288,6 +290,7 @@ export class Wnd {
             }
             if (targetWnd) {
                 targetWnd.headersElement.append(oldTab.headElement);
+                targetWnd.headersElement.parentElement.classList.remove("fn__none");
                 targetWnd.moveTab(oldTab);
                 resizeTabs();
             }
@@ -304,7 +307,7 @@ export class Wnd {
     }
 
     public switchTab(target: HTMLElement, pushBack = false, update = true) {
-        setPanelFocus(this.headersElement.parentElement);
+        setPanelFocus(this.headersElement.parentElement.parentElement);
         let currentTab: Tab;
         this.children.forEach((item) => {
             if (target === item.headElement) {
@@ -552,7 +555,7 @@ export class Wnd {
                     } else {
                         editors.forEach(item => {
                             if (!item.element.classList.contains("fn__none")) {
-                                setPanelFocus(item.parent.parent.headersElement.parentElement);
+                                setPanelFocus(item.parent.parent.headersElement.parentElement.parentElement);
                                 updatePanelByEditor(item.editor.protyle, true, true);
                                 return;
                             }

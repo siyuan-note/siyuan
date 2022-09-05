@@ -904,6 +904,17 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		treenode.MoveFoldHeading(updatedNode, oldNode)
 	}
 
+	// 挂件移动或设置大小后属性丢失 https://github.com/siyuan-note/siyuan/issues/4885
+	// 这里需要把旧节点的属性复制到新节点上，避免属性丢失
+	oldIAL := parse.IAL2Map(oldNode.KramdownIAL)
+	newIAL := parse.IAL2Map(updatedNode.KramdownIAL)
+	for oldIALKey, oldIALVal := range oldIAL {
+		if strings.HasPrefix(oldIALKey, "custom-") {
+			newIAL[oldIALKey] = oldIALVal
+		}
+	}
+	updatedNode.KramdownIAL = parse.Map2IAL(newIAL)
+
 	cache.PutBlockIAL(updatedNode.ID, parse.IAL2Map(updatedNode.KramdownIAL))
 
 	// 替换为新节点

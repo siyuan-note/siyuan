@@ -26,6 +26,12 @@ func readFilePaths(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(200, ret)
 
-	paths, _ := clipboard.ReadFilePaths()
+	var paths []string
+	if !gulu.OS.IsLinux() {
+		paths, _ = clipboard.ReadFilePaths()
+	}
+	if 1 > len(paths) {
+		paths = []string{}
+	}
 	ret.Data = paths
 }

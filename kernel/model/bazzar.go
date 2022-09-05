@@ -49,6 +49,11 @@ func BazaarWidgets() (widgets []*bazaar.Widget) {
 	return
 }
 
+func InstalledWidgets() (widgets []*bazaar.Widget) {
+	widgets = bazaar.InstalledWidgets()
+	return
+}
+
 func InstallBazaarWidget(repoURL, repoHash, widgetName string) error {
 	writingDataLock.Lock()
 	defer writingDataLock.Unlock()
@@ -87,6 +92,14 @@ func BazaarIcons() (icons []*bazaar.Icon) {
 			}
 			icon.Current = icon.Name == Conf.Appearance.Icon
 		}
+	}
+	return
+}
+
+func InstalledIcons() (icons []*bazaar.Icon) {
+	icons = bazaar.InstalledIcons()
+	for _, icon := range icons {
+		icon.Current = icon.Name == Conf.Appearance.Icon
 	}
 	return
 }
@@ -134,6 +147,14 @@ func BazaarThemes() (ret []*bazaar.Theme) {
 				theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight
 			}
 		}
+	}
+	return
+}
+
+func InstalledThemes() (ret []*bazaar.Theme) {
+	ret = bazaar.InstalledThemes()
+	for _, theme := range ret {
+		theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight
 	}
 	return
 }
@@ -194,6 +215,11 @@ func BazaarTemplates() (templates []*bazaar.Template) {
 			}
 		}
 	}
+	return
+}
+
+func InstalledTemplates() (templates []*bazaar.Template) {
+	templates = bazaar.InstalledTemplates()
 	return
 }
 

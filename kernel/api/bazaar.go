@@ -21,7 +21,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -56,7 +55,7 @@ func getInstalledWidget(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	ret.Data = map[string]interface{}{
-		"packages": bazaar.InstalledWidgets(),
+		"packages": model.InstalledWidgets(),
 	}
 }
 
@@ -121,7 +120,7 @@ func getInstalledIcon(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	ret.Data = map[string]interface{}{
-		"packages": bazaar.InstalledIcons(),
+		"packages": model.InstalledIcons(),
 	}
 }
 
@@ -188,7 +187,7 @@ func getInstalledTemplate(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	ret.Data = map[string]interface{}{
-		"packages": bazaar.InstalledTemplates(),
+		"packages": model.InstalledTemplates(),
 	}
 }
 
@@ -254,7 +253,7 @@ func getInstalledTheme(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	ret.Data = map[string]interface{}{
-		"packages": bazaar.InstalledThemes(),
+		"packages": model.InstalledThemes(),
 	}
 }
 

@@ -8,6 +8,7 @@
 * [改进集市已下载包的显示和更新](https://github.com/siyuan-note/siyuan/issues/5807)
 * [改进 `Ctrl+K` 超链接粘贴识别](https://github.com/siyuan-note/siyuan/issues/5817)
 * [公式导出时将宏定义使用 `\newcommand` 插入](https://github.com/siyuan-note/siyuan/issues/5818)
+* [Linux 端不再支持 `粘贴为纯文本` 时处理文件绝对路径](https://github.com/siyuan-note/siyuan/issues/5825)
 
 ### 文档相关
 

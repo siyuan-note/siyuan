@@ -410,7 +410,6 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
         }
-        range.deleteContents();
         // 新建文件
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
             focusByRange(range);
@@ -440,6 +439,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 }
                 return;
             }
+            range.deleteContents();
             range.insertNode(document.createElement("wbr"));
             html = nodeElement.outerHTML;
             const tempElement = document.createElement("template");
@@ -478,24 +478,29 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 }
                 this.splitChar = value;
                 this.lastIndex = 0;
+                range.deleteContents();
                 const textNode = document.createTextNode(value);
                 range.insertNode(textNode);
                 range.setEnd(textNode, value.length);
                 range.collapse(false);
                 return;
             } else if (value === Constants.ZWSP) {
+                range.deleteContents();
                 protyle.toolbar.showTpl(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 1) {
+                range.deleteContents();
                 protyle.toolbar.showWidget(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 2) {
+                range.deleteContents();
                 protyle.toolbar.showAssets(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 3) {
+                range.deleteContents();
                 return;
             } else if (value === Constants.ZWSP + 4) {
                 const newSubDocId = Lute.NewNodeID();
@@ -517,21 +522,25 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 });
                 return;
             } else if (Constants.INLINE_TYPE.includes(value)) {
+                range.deleteContents();
                 focusByRange(range);
                 protyle.toolbar.range = range;
                 protyle.toolbar.setInlineMark(protyle, value, "add");
                 return;
             } else if (value === "emoji") {
+                range.deleteContents();
                 range.insertNode(document.createTextNode(":"));
                 range.collapse(false);
                 this.enableEmoji = true;
                 this.genEmojiHTML(protyle);
                 return;
             } else if (value.indexOf("style") > -1) {
+                range.deleteContents();
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else {
+                range.deleteContents();
                 let textContent = value;
                 if (value === "```") {
                     textContent = value + (localStorage.getItem(Constants.LOCAL_CODELANG) || "") + Lute.Caret + "\n```";

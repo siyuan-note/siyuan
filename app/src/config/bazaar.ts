@@ -155,9 +155,9 @@ export const bazaar = {
             showSwitch = true;
         }
 
-        return `<div data-bazaar="${bazaarType}" class="b3-card${hide ? " fn__none" : ""}" data-type="${type}" data-updated="${item.updated}">
+        return `<div data-bazaar="${bazaarType}" class="b3-card${hide ? " fn__none" : ""}${item.current ? " b3-card--current" : ""}" data-type="${type}" data-updated="${item.updated}">
     <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
-    <div class="b3-card__info fn__flex"${item.current ? " style='background-color:var(--b3-theme-primary-lightest)'" : ""}>
+    <div class="b3-card__info fn__flex">
         <span class="fn__flex-center fn__ellipsis">${item.name}</span>
         <span class="fn__space"></span>
         <span class="fn__flex-1"></span>
@@ -165,14 +165,14 @@ export const bazaar = {
         <span class="fn__space"></span>
         <span class="fn__flex-center">${item.downloads}</span>
     </div>
-    <div class="b3-card__actions"${item.current ? " style='background-color:var(--b3-theme-primary-lightest)'" : ""} data-name="${item.name}" data-url="${item.repoURL}" data-hash="${item.repoHash}">
+    <div class="b3-card__actions" data-name="${item.name}" data-url="${item.repoURL}" data-hash="${item.repoHash}">
         <div class="fn__flex-1"></div>
         <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.installed ? "" : " fn__none"}" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
         <div class="fn__space${!item.current && item.installed && showSwitch ? "" : " fn__none"}"></div>
         <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${!item.current && item.installed && showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
-            <svg><use xlink:href="#iconSettings"></use></svg>
+            <svg><use xlink:href="#iconSelect"></use></svg>
         </span>
         <div class="fn__space${item.outdated ? "" : " fn__none"}"></div>
         <span data-type="install-t" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}" aria-label="${window.siyuan.languages.update}">
@@ -192,8 +192,12 @@ export const bazaar = {
         }
         fetchPost(url, {}, response => {
             let html = "";
+            let showSwitch = false;
+            if (["icons", "themes"].includes(bazaarType)) {
+                showSwitch = true;
+            }
             response.data.packages.forEach((item: IBazaarItem) => {
-                html += `<div data-bazaar="${bazaarType}" data-type="${item.modes?.toString()}" data-downloaded="true" class="b3-card">
+                html += `<div data-bazaar="${bazaarType}" data-type="${item.modes?.toString()}" data-downloaded="true" class="b3-card${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
     <div class="b3-card__info">
         ${item.name}
@@ -206,7 +210,11 @@ export const bazaar = {
         <span class="fn__space${isBrowser() ? " fn__none" : ""}"></span>
         <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
-        </span> 
+        </span>
+        <span class="fn__space${!item.current && showSwitch ? "" : " fn__none"}"></span>
+        <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${!item.current && showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
+            <svg><use xlink:href="#iconSelect"></use></svg>
+        </span>
         <span class="fn__space${item.outdated ? "" : " fn__none"}"></span>
         <span data-type="install-t" aria-label="${window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
             <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
@@ -487,6 +495,19 @@ export const bazaar = {
                             closeButtonBehavior: window.siyuan.config.appearance.closeButtonBehavior,
                             nativeEmoji: window.siyuan.config.appearance.nativeEmoji,
                         }, response => {
+                            bazaar.element.querySelectorAll(`[data-name="${window.siyuan.config.appearance.icon}"]`).forEach(item => {
+                                item.parentElement.classList.remove("b3-card--current");
+                                const switchElement = item.querySelector('[data-type="switch"]')
+                                switchElement.classList.remove("fn__none");
+                                switchElement.previousElementSibling.classList.remove("fn__none");
+                            })
+                            appearance.onSetappearance(response.data);
+                            bazaar.element.querySelectorAll(`[data-name="${packageName}"]`).forEach(item => {
+                                item.parentElement.classList.add("b3-card--current");
+                                const switchElement = item.querySelector('[data-type="switch"]')
+                                switchElement.classList.add("fn__none");
+                                switchElement.previousElementSibling.classList.add("fn__none");
+                            })
                             appearance.onSetappearance(response.data);
                         });
                     } else if (bazaarType === "themes") {
@@ -511,7 +532,20 @@ export const bazaar = {
                                 window.siyuan.config.appearance.themeJS) {
                                 exportLayout(true);
                             } else {
+                                const oldTheme = window.siyuan.config.appearance.mode === 1 ? window.siyuan.config.appearance.themeDark : window.siyuan.config.appearance.themeLight;
+                                bazaar.element.querySelectorAll(`[data-name="${oldTheme}"]`).forEach(item => {
+                                    item.parentElement.classList.remove("b3-card--current");
+                                    const switchElement = item.querySelector('[data-type="switch"]')
+                                    switchElement.classList.remove("fn__none");
+                                    switchElement.previousElementSibling.classList.remove("fn__none");
+                                })
                                 appearance.onSetappearance(response.data);
+                                bazaar.element.querySelectorAll(`[data-name="${packageName}"]`).forEach(item => {
+                                    item.parentElement.classList.add("b3-card--current");
+                                    const switchElement = item.querySelector('[data-type="switch"]')
+                                    switchElement.classList.add("fn__none");
+                                    switchElement.previousElementSibling.classList.add("fn__none");
+                                })
                             }
                         });
                     }

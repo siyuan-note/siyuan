@@ -21,6 +21,11 @@
     margin: 8px;
   }
 
+  &--current .b3-card__info,
+  &--current .b3-card__actions {
+    background-color: var(--b3-theme-primary-lightest)
+  }
+
   &__img {
     height: 116px;
     width: 100%;

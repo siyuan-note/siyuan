@@ -144,7 +144,7 @@ Use NGINX reverse proxy to hide port 6806, please note:
 
 ### Insider Preview
 
-To get the latest Insider Preview, please send an email with your GitHub login name to 845765@qq.com, and we will invite you to join the SiYuan Insider Preview team, thanks.
+We release insider preview before major updates, please visit [https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider).
 
 ## 🏘️ Community
 

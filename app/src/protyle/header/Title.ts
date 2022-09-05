@@ -101,7 +101,7 @@ export class Title {
                 event.preventDefault();
                 event.stopPropagation();
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
-                writeText(`((${protyle.block.rootID} '${this.editElement.textContent}'))`);
+                writeText(`((${protyle.block.rootID} '${this.editElement.textContent.replace(/'/g, "&#39;")}'))`);
                 event.preventDefault();
                 event.stopPropagation();
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID.custom, event)) {

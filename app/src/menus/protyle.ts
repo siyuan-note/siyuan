@@ -1277,7 +1277,6 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
             const range = getSelection().getRangeAt(0);
             const blockElement = hasClosestBlock(range.startContainer);
             if (blockElement && blockElement.getBoundingClientRect().width === 0) {
-                getSelection().removeRange(range);
                 // https://github.com/siyuan-note/siyuan/issues/5833
                 focusBlock(nodeElement, undefined, false);
             }

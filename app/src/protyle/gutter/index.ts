@@ -1234,7 +1234,7 @@ export class Gutter {
 
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.fold,
-                accelerator: `${updateHotkeyTip("⌘↑")}/${updateHotkeyTip("⌥Click")}`,
+                accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}/${updateHotkeyTip("⌥Click")}`,
                 click() {
                     setFold(protyle, nodeElement);
                     focusBlock(nodeElement);

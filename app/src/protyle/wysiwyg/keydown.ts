@@ -249,7 +249,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!isCtrl(event) && !event.shiftKey && event.key !== "Backspace" && event.key !== "PageUp" && event.key !== "PageDown" && event.key.indexOf("Arrow") === -1) {
             protyle.toolbar.isNewEmptyInline = false;
         }
-        if (matchHotKey("⌘↑", event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
                 setFold(protyle, selectElements[0]);
@@ -270,7 +270,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return false;
         }
-        if (matchHotKey("⌘↓", event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
                 setFold(protyle, selectElements[0], true);

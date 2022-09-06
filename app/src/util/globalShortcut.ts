@@ -536,7 +536,7 @@ export const globalShortcut = () => {
         }
 
         // 面板折叠展开操作
-        if (matchHotKey("⌘↑", event) || matchHotKey("⌘↓", event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) || matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event)) {
             let activePanelElement = document.querySelector(".block__icons--active");
             if (!activePanelElement) {
                 Array.from(document.querySelectorAll(".layout__wnd--active .layout-tab-container > div")).forEach(item => {
@@ -547,11 +547,11 @@ export const globalShortcut = () => {
                 });
             }
             if (activePanelElement) {
-                if (matchHotKey("⌘↑", event)) {
+                if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event)) {
                     if (activePanelElement.querySelector('.block__icon[data-type="collapse"]')) {
                         activePanelElement.querySelector('.block__icon[data-type="collapse"]').dispatchEvent(new CustomEvent("click"));
                     }
-                } else if (matchHotKey("⌘↓", event)) {
+                } else if (matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event)) {
                     if (activePanelElement.querySelector('.block__icon[data-type="expand"]')) {
                         activePanelElement.querySelector('.block__icon[data-type="expand"]').dispatchEvent(new CustomEvent("click"));
                     }

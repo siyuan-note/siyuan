@@ -84,6 +84,7 @@ export class Wnd {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.headersElement)) {
                 if (target.classList.contains("item__close") && target.getAttribute("data-type") === "new") {
+                    setPanelFocus(this.headersElement.parentElement.parentElement);
                     newFile(undefined, undefined, true);
                     break;
                 } else if (target.classList.contains("item__close") && target.getAttribute("data-type") === "more") {
@@ -199,7 +200,7 @@ export class Wnd {
                 cloneTabElement.before(oldTab.headElement);
                 cloneTabElement.remove();
                 // 对象顺序
-                const newWnd = getInstanceById(it.parentElement.getAttribute("data-id")) as Wnd;
+                const newWnd = getInstanceById(it.parentElement.parentElement.getAttribute("data-id")) as Wnd;
                 newWnd.moveTab(oldTab, nextTabHeaderElement ? nextTabHeaderElement.getAttribute("data-id") : undefined);
                 resizeTabs();
                 return;

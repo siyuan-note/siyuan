@@ -985,7 +985,7 @@ func processKaTexMacros(n *ast.Node) {
 		return
 	}
 
-	mathContent := n.Tokens
+	mathContent := string(n.Tokens)
 	macros := map[string]string{}
 	if err := gulu.JSON.UnmarshalJSON([]byte(Conf.Editor.KaTexMacros), &macros); nil != err {
 		logging.LogWarnf("parse katex macros failed: %s", err)
@@ -993,13 +993,12 @@ func processKaTexMacros(n *ast.Node) {
 	}
 
 	var keys []string
-	for k, _ := range macros {
+	for k := range macros {
 		keys = append(keys, k)
 	}
-
 	useMacro := false
-	for k, _ := range macros {
-		if bytes.Contains(mathContent, []byte(k)) {
+	for k := range macros {
+		if strings.Contains(mathContent, k) {
 			useMacro = true
 			break
 		}
@@ -1007,36 +1006,84 @@ func processKaTexMacros(n *ast.Node) {
 	if !useMacro {
 		return
 	}
+	sort.Slice(keys, func(i, j int) bool { return len(keys[i]) > len(keys[j]) })
 
-	usedMacros := extractUsedMacros(mathContent, macros)
+	mathContent = escapeKaTexSupportedFunctions(mathContent)
+	usedMacros := extractUsedMacros(mathContent, &keys)
 	newcommandBuf := bytes.Buffer{}
+
 	for _, usedMacro := range usedMacros {
 		expanded := resolveKaTexMacro(usedMacro, &macros, &keys)
+		expanded = unescapeKaTexSupportedFunctions(expanded)
 		newcommandBuf.WriteString("\\newcommand" + usedMacro + "{" + expanded + "}\n")
 	}
 	newcommandBuf.WriteString("\n")
-	mathContent = append(newcommandBuf.Bytes(), mathContent...)
-	n.Tokens = mathContent
+	mathContent = newcommandBuf.String() + mathContent
+	n.Tokens = []byte(mathContent)
 }
 
-func extractUsedMacros(mathContent []byte, macros map[string]string) (ret []string) {
-	for macro, _ := range macros {
-		if bytes.Contains(mathContent, []byte(macro)) {
-			ret = append(ret, macro)
+func extractUsedMacros(mathContent string, macrosKeys *[]string) (ret []string) {
+Next:
+	for {
+		for _, k := range *macrosKeys {
+			if idx := strings.Index(mathContent, k); -1 < idx {
+				mathContent = strings.Replace(mathContent, k, "__@"+k[1:]+"@__", 1)
+				ret = append(ret, k)
+				goto Next
+			}
 		}
+		break
 	}
 	return
 }
 
+var katexSupportedFunctions = []string{ // https://katex.org/docs/supported.html
+
+	// Delimiters
+	"\\downarrow",
+}
+
+func init() {
+	sort.Slice(katexSupportedFunctions, func(i, j int) bool { return len(katexSupportedFunctions[i]) > len(katexSupportedFunctions[j]) })
+}
+
 func resolveKaTexMacro(macroName string, macros *map[string]string, keys *[]string) string {
 	v := (*macros)[macroName]
+	sort.Slice(*keys, func(i, j int) bool { return len((*keys)[i]) > len((*keys)[j]) })
 	for _, k := range *keys {
-		if strings.Contains(v, k) {
-			v = strings.ReplaceAll(v, k, resolveKaTexMacro(k, macros, keys))
+		escaped := escapeKaTexSupportedFunctions(v)
+		if strings.Contains(escaped, k) {
+			escaped = strings.ReplaceAll(escaped, k, resolveKaTexMacro(k, macros, keys))
+			v = unescapeKaTexSupportedFunctions(escaped)
 			(*macros)[macroName] = v
 		}
 	}
 	return v
+}
+
+func escapeKaTexSupportedFunctions(macroVal string) string {
+Next:
+	for {
+		for _, f := range katexSupportedFunctions {
+			if idx := strings.Index(macroVal, f); -1 < idx {
+				macroVal = strings.Replace(macroVal, f, "__@"+f[1:]+"@__", 1)
+				goto Next
+			}
+		}
+		break
+	}
+	return macroVal
+}
+
+func unescapeKaTexSupportedFunctions(macroVal string) string {
+	if !strings.Contains(macroVal, "__@") {
+		return macroVal
+	}
+
+	for _, f := range katexSupportedFunctions {
+		macroVal = strings.ReplaceAll(macroVal, "__@"+f[1:]+"@__", f)
+	}
+	return macroVal
 }
 
 func renderExportMdParagraph(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {

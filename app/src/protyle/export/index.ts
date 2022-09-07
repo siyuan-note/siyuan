@@ -1,7 +1,7 @@
-import {showMessage} from "../../dialog/message";
+import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {PrintToPDFOptions, SaveDialogReturnValue} from "electron";
+import {PrintToPDFOptions, OpenDialogReturnValue} from "electron";
 import {BrowserWindow, dialog} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
@@ -13,6 +13,7 @@ import {fetchPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {lockFile} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
+import {replaceLocalPath} from "../../editor/rename";
 
 export const saveExport = (option: { type: string, id: string }) => {
     /// #if !BROWSER
@@ -105,9 +106,38 @@ export const saveExport = (option: { type: string, id: string }) => {
                 pdfDialog.destroy();
             }
         });
-        return;
+    } else if (option.type === "word") {
+        const localData = localStorage.getItem(Constants.LOCAL_EXPORTWORD);
+        const wordDialog = new Dialog({
+            title: "Word " + window.siyuan.languages.config,
+            content: `<div class="b3-dialog__content">
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.exportPDF4}
+        </div>
+        <span class="fn__space"></span>
+        <input id="removeAssets" class="b3-switch" type="checkbox" ${localData === "true" ? "checked" : ""}>
+    </label>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+            width: "520px",
+        });
+        const btnsElement = wordDialog.element.querySelectorAll(".b3-button");
+        btnsElement[0].addEventListener("click", () => {
+            wordDialog.destroy();
+        });
+        btnsElement[1].addEventListener("click", () => {
+            const removeAssets = (wordDialog.element.querySelector("#removeAssets") as HTMLInputElement).checked;
+            localStorage.setItem(Constants.LOCAL_EXPORTWORD, removeAssets.toString());
+            getExportPath(option, undefined, removeAssets);
+            wordDialog.destroy();
+        });
+    } else {
+        getExportPath(option);
     }
-    getExportPath(option);
     /// #endif
 };
 
@@ -121,27 +151,48 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
             lockFile(response.data);
             return;
         }
-        dialog.showSaveDialog({
-            defaultPath: response.data.rootTitle,
-            properties: ["showOverwriteConfirmation"],
-        }).then((result: SaveDialogReturnValue) => {
+
+        let exportType = "HTML (SiYuan)";
+        switch (option.type) {
+            case "htmlmd":
+                exportType = "HTML (Markdown)";
+                break;
+            case "word":
+                exportType = "Word .docx";
+                break;
+            case "pdf":
+                exportType = "PDF";
+                break;
+        }
+
+        dialog.showOpenDialog({
+            title: window.siyuan.languages.export + " " + exportType,
+            properties: ["createDirectory", "openDirectory"],
+        }).then((result: OpenDialogReturnValue) => {
             if (!result.canceled) {
-                showMessage(window.siyuan.languages.exporting, -1);
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
                 let url = "/api/export/exportHTML";
                 if (option.type === "htmlmd") {
                     url = "/api/export/exportMdHTML";
                 } else if (option.type === "word") {
                     url = "/api/export/exportDocx";
                 }
+                const savePath = result.filePaths[0].endsWith(response.data.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(response.data.rootTitle));
                 fetchPost(url, {
                     id: option.id,
                     pdf: option.type === "pdf",
-                    savePath: result.filePath
+                    removeAssets,
+                    savePath
                 }, exportResponse => {
                     if (option.type === "word") {
-                        afterExport(result.filePath);
+                        if (exportResponse.code === 1) {
+                            showMessage(exportResponse.msg, undefined, "error");
+                            hideMessage(msgId);
+                            return;
+                        }
+                        afterExport(savePath, msgId);
                     } else {
-                        onExport(exportResponse, result.filePath, option.type, pdfOption, removeAssets);
+                        onExport(exportResponse, savePath, option.type, pdfOption, removeAssets, msgId);
                     }
                 });
             }
@@ -149,7 +200,7 @@ const getExportPath = (option: { type: string, id: string }, pdfOption?: PrintTo
     });
 };
 
-const onExport = (data: IWebSocketData, filePath: string, type: string, pdfOptions?: PrintToPDFOptions, removeAssets?: boolean) => {
+const onExport = (data: IWebSocketData, filePath: string, type: string, pdfOptions?: PrintToPDFOptions, removeAssets?: boolean, msgId?: string) => {
     let themeName = window.siyuan.config.appearance.themeLight;
     let mode = 0;
     if (["html", "htmlmd"].includes(type) && window.siyuan.config.appearance.mode === 1) {
@@ -270,6 +321,7 @@ pre code {
           codeLigatures: ${window.siyuan.config.editor.codeLigatures},
           plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
           codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
+          katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
         }
       },
       languages: {copy:"${window.siyuan.languages.copy}"}
@@ -318,7 +370,7 @@ pre code {
                             id: data.data.id,
                             path: pdfFilePath
                         }, () => {
-                            afterExport(pdfFilePath);
+                            afterExport(pdfFilePath, msgId);
                             if (removeAssets) {
                                 const removePromise = (dir: string) => {
                                     return new Promise(function (resolve) {
@@ -342,18 +394,18 @@ pre code {
                         });
                         win.destroy();
                     }).catch((error: string) => {
-                        showMessage("Export PDF error:" + error, 0);
+                        showMessage("Export PDF error:" + error, 0, "error", msgId);
                         win.destroy();
                     });
                 } catch (e) {
-                    showMessage("Export PDF error:" + e + ". Export HTML and use Chrome's printing function to convert to PDF", 0);
+                    showMessage("Export PDF error:" + e + ". Export HTML and use Chrome's printing function to convert to PDF", 0, "error", msgId);
                 }
             }, Math.min(timeout, 10000));
         });
     } else {
         const htmlPath = path.join(filePath, "index.html");
         fs.writeFileSync(htmlPath, html);
-        afterExport(htmlPath);
+        afterExport(htmlPath, msgId);
     }
 };
 /// #endif

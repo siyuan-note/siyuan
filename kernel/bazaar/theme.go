@@ -19,64 +19,33 @@ package bazaar
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
+	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type Theme struct {
-	Author  string   `json:"author"`
-	URL     string   `json:"url"`
-	Version string   `json:"version"`
-	Modes   []string `json:"modes"`
+	Package
 
-	Name            string `json:"name"`
-	RepoURL         string `json:"repoURL"`
-	RepoHash        string `json:"repoHash"`
-	PreviewURL      string `json:"previewURL"`
-	PreviewURLThumb string `json:"previewURLThumb"`
-
-	README string `json:"readme"`
-
-	Installed  bool   `json:"installed"`
-	Outdated   bool   `json:"outdated"`
-	Current    bool   `json:"current"`
-	Updated    string `json:"updated"`
-	Stars      int    `json:"stars"`
-	OpenIssues int    `json:"openIssues"`
-	Size       int64  `json:"size"`
-	HSize      string `json:"hSize"`
-	HUpdated   string `json:"hUpdated"`
-	Downloads  int    `json:"downloads"`
+	Modes []string `json:"modes"`
 }
 
-func Themes(proxyURL string) (ret []*Theme) {
+func Themes() (ret []*Theme) {
 	ret = []*Theme{}
-	result, err := util.GetRhyResult(false, proxyURL)
+
+	pkgIndex, err := getPkgIndex("themes")
 	if nil != err {
 		return
 	}
-
-	bazaarIndex := getBazaarIndex(proxyURL)
-	bazaarHash := result["bazaar"].(string)
-	result = map[string]interface{}{}
-	request := util.NewBrowserRequest(proxyURL)
-	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/themes.json"
-	resp, reqErr := request.SetResult(&result).Get(u)
-	if nil != reqErr {
-		util.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
-		return
-	}
-	if 200 != resp.StatusCode {
-		util.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
-		return
-	}
-
-	repos := result["repos"].([]interface{})
+	bazaarIndex := getBazaarIndex()
+	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
@@ -87,13 +56,13 @@ func Themes(proxyURL string) (ret []*Theme) {
 
 		theme := &Theme{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/theme.json"
-		innerResp, innerErr := util.NewBrowserRequest(proxyURL).SetResult(theme).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(theme).Get(innerU)
 		if nil != innerErr {
-			util.LogErrorf("get bazaar package [%s] failed: %s", innerU, innerErr)
+			logging.LogErrorf("get bazaar package [%s] failed: %s", innerU, innerErr)
 			return
 		}
 		if 200 != innerResp.StatusCode {
-			util.LogErrorf("get bazaar package [%s] failed: %d", innerU, resp.StatusCode)
+			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
 
@@ -127,9 +96,76 @@ func Themes(proxyURL string) (ret []*Theme) {
 	return
 }
 
-func InstallTheme(repoURL, repoHash, installPath, proxyURL string, chinaCDN bool, systemID string) error {
+func InstalledThemes() (ret []*Theme) {
+	ret = []*Theme{}
+	dir, err := os.Open(util.ThemesPath)
+	if nil != err {
+		logging.LogWarnf("open appearance themes folder [%s] failed: %s", util.ThemesPath, err)
+		return
+	}
+	themeDirs, err := dir.Readdir(-1)
+	if nil != err {
+		logging.LogWarnf("read appearance themes folder failed: %s", err)
+		return
+	}
+	dir.Close()
+
+	bazaarThemes := Themes()
+
+	for _, themeDir := range themeDirs {
+		if !themeDir.IsDir() {
+			continue
+		}
+		dirName := themeDir.Name()
+		if isBuiltInTheme(dirName) {
+			continue
+		}
+
+		themeConf, parseErr := ThemeJSON(dirName)
+		if nil != parseErr || nil == themeConf {
+			continue
+		}
+
+		installPath := filepath.Join(util.ThemesPath, dirName)
+
+		theme := &Theme{}
+		theme.Installed = true
+		theme.Name = themeConf["name"].(string)
+		theme.Author = themeConf["author"].(string)
+		theme.URL = themeConf["url"].(string)
+		theme.Version = themeConf["version"].(string)
+		theme.Modes = make([]string, 0, len(themeConf["modes"].([]interface{})))
+		theme.RepoURL = theme.URL
+		theme.PreviewURL = "/appearance/themes/" + dirName + "/preview.png"
+		theme.PreviewURLThumb = "/appearance/themes/" + dirName + "/preview.png"
+		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		if nil != statErr {
+			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			continue
+		}
+		theme.HInstallDate = info.ModTime().Format("2006-01-02")
+		installSize, _ := util.SizeOfDirectory(installPath)
+		theme.InstallSize = installSize
+		theme.HInstallSize = humanize.Bytes(uint64(installSize))
+		readme, readErr := os.ReadFile(filepath.Join(installPath, "README.md"))
+		if nil != readErr {
+			logging.LogWarnf("read install theme README.md failed: %s", readErr)
+			continue
+		}
+		theme.README, _ = renderREADME(theme.URL, readme)
+		theme.Outdated = isOutdatedTheme(theme, bazaarThemes)
+		ret = append(ret, theme)
+	}
+	return
+}
+
+func isBuiltInTheme(dirName string) bool {
+	return "daylight" == dirName || "midnight" == dirName
+}
+
+func InstallTheme(repoURL, repoHash, installPath string, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, proxyURL, chinaCDN, true, systemID)
+	data, err := downloadPackage(repoURLHash, true, systemID)
 	if nil != err {
 		return err
 	}
@@ -138,9 +174,9 @@ func InstallTheme(repoURL, repoHash, installPath, proxyURL string, chinaCDN bool
 
 func UninstallTheme(installPath string) error {
 	if err := os.RemoveAll(installPath); nil != err {
-		util.LogErrorf("remove theme [%s] failed: %s", installPath, err)
+		logging.LogErrorf("remove theme [%s] failed: %s", installPath, err)
 		return errors.New("remove community theme failed")
 	}
-	//util.Logger.Infof("uninstalled theme [%s]", installPath)
+	//logging.Logger.Infof("uninstalled theme [%s]", installPath)
 	return nil
 }

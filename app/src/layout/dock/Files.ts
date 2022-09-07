@@ -8,7 +8,7 @@ import {newFile} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
 import {MenuItem} from "../../menus/Menu";
 import {Editor} from "../../editor";
-import {hideMessage, showMessage} from "../../dialog/message";
+import {showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {newNotebook} from "../../util/mount";
@@ -67,9 +67,9 @@ export class Files extends Model {
         ${window.siyuan.languages.fileTree}
     </div>
     <span class="fn__flex-1 fn__space"></span>
-    <span data-type="focus" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.selectOpen1}"><svg><use xlink:href='#iconFocus'></use></svg></span>
+    <span data-type="focus" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.selectOpen1} ${updateHotkeyTip(window.siyuan.config.keymap.general.selectOpen1.custom)}"><svg><use xlink:href='#iconFocus'></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapseAll} ${updateHotkeyTip("⌘↑")}">
+    <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapse} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <div class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></div>
@@ -194,7 +194,7 @@ export class Files extends Model {
                         event.preventDefault();
                         event.stopPropagation();
                         if (target.parentElement.getAttribute("data-type") === "navigation-file") {
-                            openEmojiPanel(target.parentElement.getAttribute("data-node-id"), target, false);
+                            openEmojiPanel(target.parentElement.getAttribute("data-node-id"), target);
                         } else {
                             openEmojiPanel(target.parentElement.parentElement.getAttribute("data-url"), target, true);
                         }
@@ -217,7 +217,7 @@ export class Files extends Model {
                             }
                         }
                         if (type === "more-file") {
-                            initFileMenu(notebookId, pathString, target.parentElement.getAttribute("data-node-id"), target.parentElement.getAttribute("data-name")).popup({
+                            initFileMenu(notebookId, pathString, target.parentElement).popup({
                                 x: event.clientX,
                                 y: event.clientY
                             });
@@ -235,12 +235,12 @@ export class Files extends Model {
                                         openFileById({
                                             id: target.getAttribute("data-node-id"),
                                             position: "right",
-                                            action: [Constants.CB_GET_FOCUS]
+                                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                                         });
                                     } else {
                                         openFileById({
                                             id: target.getAttribute("data-node-id"),
-                                            action: [Constants.CB_GET_FOCUS]
+                                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                                         });
                                     }
                                 } else if (target.getAttribute("data-type") === "navigation-root") {
@@ -307,12 +307,15 @@ export class Files extends Model {
             }
             liElement.classList.remove("dragover__top", "dragover__bottom", "dragover");
             const sourceType = window.siyuan.dragElement.getAttribute("data-type");
-            if (["NodeListItem", "NodeHeading"].includes(sourceType)) {
-                // 编辑器情景菜单拖拽
-                liElement.classList.add("dragover");
+            if (window.siyuan.dragElement.parentElement?.classList.contains("protyle-gutters")) {
+                if (["NodeListItem", "NodeHeading"].includes(sourceType)) {
+                    // 编辑器情景菜单拖拽
+                    liElement.classList.add("dragover");
+                }
                 event.preventDefault();
                 return;
             }
+
             const targetType = liElement.getAttribute("data-type");
             if (sourceType === "navigation-root" && targetType !== "navigation-root") {
                 event.preventDefault();
@@ -384,7 +387,7 @@ export class Files extends Model {
                 return;
             }
             if (newElement.classList.contains("dragover")) {
-                fetchPost("/api/filetree/moveDoc", {
+                await fetchPost("/api/filetree/moveDoc", {
                     fromNotebook: fromURL,
                     toNotebook: toURL,
                     fromPath,
@@ -550,6 +553,10 @@ export class Files extends Model {
         if (targetElement) {
             targetElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
             targetElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
+            const emojiElement = targetElement.querySelector(".b3-list-item__icon");
+            if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FILE)) {
+                emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER);
+            }
             if (targetElement.nextElementSibling && targetElement.nextElementSibling.tagName === "UL") {
                 targetElement.nextElementSibling.remove();
             }
@@ -593,6 +600,10 @@ export class Files extends Model {
                     const iconElement = parentElement.querySelector("svg");
                     iconElement.classList.remove("b3-list-item__arrow--open");
                     iconElement.parentElement.classList.add("fn__hidden");
+                    const emojiElement = iconElement.parentElement.nextElementSibling;
+                    if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
+                        emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);
+                    }
                 }
                 targetElement.parentElement.remove();
             } else {
@@ -602,7 +613,6 @@ export class Files extends Model {
     }
 
     private onMount(data: { data: { box: INotebook, existed?: boolean }, callback?: string }) {
-        hideMessage();
         if (data.data.existed) {
             return;
         }
@@ -668,6 +678,10 @@ export class Files extends Model {
                 if (sourceElement.parentElement.previousElementSibling) {
                     sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__toggle").classList.add("fn__hidden");
                     sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
+                    const emojiElement = sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__icon");
+                    if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
+                        emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);
+                    }
                 }
                 sourceElement.parentElement.remove();
             } else {
@@ -678,6 +692,10 @@ export class Files extends Model {
         // 更新移动到的新文件夹
         if (newElement) {
             newElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
+            const emojiElement = newElement.querySelector(".b3-list-item__icon");
+            if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FILE)) {
+                emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER);
+            }
             const arrowElement = newElement.querySelector(".b3-list-item__arrow");
             if (arrowElement.classList.contains("b3-list-item__arrow--open")) {
                 arrowElement.classList.remove("b3-list-item__arrow--open");
@@ -832,7 +850,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     <span style="padding-left: ${(item.path.split("/").length - 1) * 16}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <span class="b3-list-item__icon b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE)}</span>
+    <span class="b3-list-item__icon b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER))}</span>
     <span class="b3-list-item__text">${getDisplayName(item.name, true, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>

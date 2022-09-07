@@ -13,6 +13,7 @@ export class Options {
             title: false,
             gutter: true,
             scroll: false,
+            breadcrumb: true,
             breadcrumbDocName: false,
             breadcrumbContext: false
         },
@@ -120,7 +121,7 @@ export class Options {
             filename: (name: string) => name.replace(/[\\/:*?"'<>|]/g, ""),
             linkToImgUrl: "",
             withCredentials: false,
-        },
+        }
     };
 
     constructor(options: IOptions) {

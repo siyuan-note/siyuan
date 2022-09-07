@@ -21,25 +21,51 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var ErrFailedToConnectCloudServer = errors.New("failed to connect cloud server")
 
+func StartFreeTrial() (err error) {
+	if nil == Conf.User {
+		return errors.New(Conf.Language(31))
+	}
+
+	requestResult := gulu.Ret.NewResult()
+	request := httpclient.NewCloudRequest()
+	_, err = request.
+		SetResult(requestResult).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		Post(util.AliyunServer + "/apis/siyuan/user/startFreeTrial")
+	if nil != err {
+		logging.LogErrorf("start free trial failed: %s", err)
+		return ErrFailedToConnectCloudServer
+	}
+	if 0 != requestResult.Code {
+		return errors.New(requestResult.Msg)
+	}
+	return
+}
+
 func DeactivateUser() (err error) {
 	requestResult := gulu.Ret.NewResult()
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest()
 	resp, err := request.
 		SetResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 		Post(util.AliyunServer + "/apis/siyuan/user/deactivate")
 	if nil != err {
-		util.LogErrorf("deactivate user failed: %s", err)
+		logging.LogErrorf("deactivate user failed: %s", err)
 		return ErrFailedToConnectCloudServer
 	}
 
@@ -49,7 +75,7 @@ func DeactivateUser() (err error) {
 	}
 
 	if 0 != requestResult.Code {
-		util.LogErrorf("deactivate user failed: %s", requestResult.Msg)
+		logging.LogErrorf("deactivate user failed: %s", requestResult.Msg)
 		return errors.New(requestResult.Msg)
 	}
 	return
@@ -58,14 +84,14 @@ func DeactivateUser() (err error) {
 func SetCloudBlockReminder(id, data string, timed int64) (err error) {
 	requestResult := gulu.Ret.NewResult()
 	payload := map[string]interface{}{"dataId": id, "data": data, "timed": timed}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest()
 	resp, err := request.
 		SetResult(requestResult).
 		SetBody(payload).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 		Post(util.AliyunServer + "/apis/siyuan/calendar/setBlockReminder")
 	if nil != err {
-		util.LogErrorf("set block reminder failed: %s", err)
+		logging.LogErrorf("set block reminder failed: %s", err)
 		return ErrFailedToConnectCloudServer
 	}
 
@@ -75,7 +101,7 @@ func SetCloudBlockReminder(id, data string, timed int64) (err error) {
 	}
 
 	if 0 != requestResult.Code {
-		util.LogErrorf("set block reminder failed: %s", requestResult.Msg)
+		logging.LogErrorf("set block reminder failed: %s", requestResult.Msg)
 		return errors.New(requestResult.Msg)
 	}
 	return
@@ -91,13 +117,13 @@ func LoadUploadToken() (err error) {
 	}
 
 	requestResult := gulu.Ret.NewResult()
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest()
 	resp, err := request.
 		SetResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 		Post(util.AliyunServer + "/apis/siyuan/upload/token")
 	if nil != err {
-		util.LogErrorf("get upload token failed: %s", err)
+		logging.LogErrorf("get upload token failed: %s", err)
 		return ErrFailedToConnectCloudServer
 	}
 
@@ -107,7 +133,7 @@ func LoadUploadToken() (err error) {
 	}
 
 	if 0 != requestResult.Code {
-		util.LogErrorf("get upload token failed: %s", requestResult.Msg)
+		logging.LogErrorf("get upload token failed: %s", requestResult.Msg)
 		return
 	}
 
@@ -118,7 +144,7 @@ func LoadUploadToken() (err error) {
 }
 
 var (
-	refreshUserTicker              = time.NewTicker(30 * time.Minute)
+	refreshUserTicker              = time.NewTicker(2 * time.Hour)
 	subscriptionExpirationReminded bool
 )
 
@@ -127,6 +153,8 @@ func AutoRefreshUser() {
 		if !subscriptionExpirationReminded {
 			subscriptionExpirationReminded = true
 			go func() {
+				defer logging.Recover()
+
 				if "ios" == util.Container {
 					return
 				}
@@ -137,8 +165,8 @@ func AutoRefreshUser() {
 						util.PushErrMsg(Conf.Language(128), 0)
 						return
 					}
-					remains := (expired - time.Now().Add(24*time.Hour*15).UnixMilli()) / 1000 / 60 / 60 / 24
-					if 0 <= remains && 15 > remains { // 15 后过期
+					remains := (expired - time.Now().UnixMilli()) / 1000 / 60 / 60 / 24
+					if 0 < remains && 15 > remains { // 15 后过期
 						time.Sleep(3 * time.Minute)
 						util.PushErrMsg(fmt.Sprintf(Conf.Language(127), remains), 0)
 						return
@@ -147,11 +175,66 @@ func AutoRefreshUser() {
 			}()
 		}
 
-		if nil != Conf.User {
-			time.Sleep(3 * time.Minute)
-			RefreshUser(Conf.User.UserToken)
-			subscriptionExpirationReminded = false
-		}
+		go func() {
+			defer logging.Recover()
+
+			if nil != Conf.User {
+				time.Sleep(2 * time.Minute)
+				if nil != Conf.User {
+					RefreshUser(Conf.User.UserToken)
+				}
+				subscriptionExpirationReminded = false
+			}
+		}()
+
+		go func() {
+			defer logging.Recover()
+
+			time.Sleep(1 * time.Minute)
+			announcementConf := filepath.Join(util.HomeDir, ".config", "siyuan", "announcement.json")
+			var existingAnnouncements, newAnnouncements []*Announcement
+			if gulu.File.IsExist(announcementConf) {
+				data, err := os.ReadFile(announcementConf)
+				if nil != err {
+					logging.LogErrorf("read announcement conf failed: %s", err)
+					return
+				}
+				if err = gulu.JSON.UnmarshalJSON(data, &existingAnnouncements); nil != err {
+					logging.LogErrorf("unmarshal announcement conf failed: %s", err)
+					os.Remove(announcementConf)
+					return
+				}
+			}
+
+			for _, announcement := range GetAnnouncements() {
+				var exist bool
+				for _, existingAnnouncement := range existingAnnouncements {
+					if announcement.Id == existingAnnouncement.Id {
+						exist = true
+						break
+					}
+				}
+				if !exist {
+					existingAnnouncements = append(existingAnnouncements, announcement)
+					newAnnouncements = append(newAnnouncements, announcement)
+				}
+			}
+
+			data, err := gulu.JSON.MarshalJSON(existingAnnouncements)
+			if nil != err {
+				logging.LogErrorf("marshal announcement conf failed: %s", err)
+				return
+			}
+			if err = os.WriteFile(announcementConf, data, 0644); nil != err {
+				logging.LogErrorf("write announcement conf failed: %s", err)
+				return
+			}
+
+			for _, newAnnouncement := range newAnnouncements {
+				util.PushMsg(fmt.Sprintf(Conf.Language(11), newAnnouncement.URL, newAnnouncement.Title), 0)
+			}
+		}()
+
 		<-refreshUserTicker.C
 	}
 }
@@ -169,7 +252,7 @@ func RefreshUser(token string) error {
 		var tokenExpireTime int64
 		tokenExpireTime, err := strconv.ParseInt(Conf.User.UserTokenExpireTime+"000", 10, 64)
 		if nil != err {
-			util.LogErrorf("convert token expire time [%s] failed: %s", Conf.User.UserTokenExpireTime, err)
+			logging.LogErrorf("convert token expire time [%s] failed: %s", Conf.User.UserTokenExpireTime, err)
 			return errors.New(Conf.Language(19))
 		}
 
@@ -191,7 +274,7 @@ Net:
 		var tokenExpireTime int64
 		tokenExpireTime, err = strconv.ParseInt(Conf.User.UserTokenExpireTime+"000", 10, 64)
 		if nil != err {
-			util.LogErrorf("convert token expire time [%s] failed: %s", Conf.User.UserTokenExpireTime, err)
+			logging.LogErrorf("convert token expire time [%s] failed: %s", Conf.User.UserTokenExpireTime, err)
 			return errors.New(Conf.Language(19))
 		}
 
@@ -207,7 +290,7 @@ Net:
 	Conf.Save()
 
 	if elapsed := time.Now().Sub(start).Milliseconds(); 3000 < elapsed {
-		util.LogInfof("get cloud user elapsed [%dms]", elapsed)
+		logging.LogInfof("get cloud user elapsed [%dms]", elapsed)
 	}
 	return nil
 }
@@ -228,7 +311,7 @@ func loadUserFromConf() *conf.User {
 
 func RemoveCloudShorthands(ids []string) (err error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest()
 	body := map[string]interface{}{
 		"ids": ids,
 	}
@@ -238,7 +321,7 @@ func RemoveCloudShorthands(ids []string) (err error) {
 		SetBody(body).
 		Post(util.AliyunServer + "/apis/siyuan/inbox/removeCloudShorthands")
 	if nil != err {
-		util.LogErrorf("remove cloud shorthands failed: %s", err)
+		logging.LogErrorf("remove cloud shorthands failed: %s", err)
 		err = ErrFailedToConnectCloudServer
 		return
 	}
@@ -250,7 +333,7 @@ func RemoveCloudShorthands(ids []string) (err error) {
 
 	code := result["code"].(float64)
 	if 0 != code {
-		util.LogErrorf("remove cloud shorthands failed: %s", result["msg"])
+		logging.LogErrorf("remove cloud shorthands failed: %s", result["msg"])
 		err = errors.New(result["msg"].(string))
 		return
 	}
@@ -259,13 +342,13 @@ func RemoveCloudShorthands(ids []string) (err error) {
 
 func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 	result = map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest()
 	resp, err := request.
 		SetResult(&result).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 		Post(util.AliyunServer + "/apis/siyuan/inbox/getCloudShorthands?p=" + strconv.Itoa(page))
 	if nil != err {
-		util.LogErrorf("get cloud shorthands failed: %s", err)
+		logging.LogErrorf("get cloud shorthands failed: %s", err)
 		err = ErrFailedToConnectCloudServer
 		return
 	}
@@ -277,7 +360,7 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 
 	code := result["code"].(float64)
 	if 0 != code {
-		util.LogErrorf("get cloud shorthands failed: %s", result["msg"])
+		logging.LogErrorf("get cloud shorthands failed: %s", result["msg"])
 		err = errors.New(result["msg"].(string))
 		return
 	}
@@ -296,13 +379,13 @@ var errInvalidUser = errors.New("invalid user")
 
 func getUser(token string) (*conf.User, error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest()
 	_, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"token": token}).
 		Post(util.AliyunServer + "/apis/siyuan/user")
 	if nil != err {
-		util.LogErrorf("get community user failed: %s", err)
+		logging.LogErrorf("get community user failed: %s", err)
 		return nil, errors.New(Conf.Language(18))
 	}
 
@@ -311,7 +394,7 @@ func getUser(token string) (*conf.User, error) {
 		if 255 == code {
 			return nil, errInvalidUser
 		}
-		util.LogErrorf("get community user failed: %s", result["msg"])
+		logging.LogErrorf("get community user failed: %s", result["msg"])
 		return nil, errors.New(Conf.Language(18))
 	}
 
@@ -319,22 +402,24 @@ func getUser(token string) (*conf.User, error) {
 	data := util.AESDecrypt(dataStr)
 	user := &conf.User{}
 	if err = gulu.JSON.UnmarshalJSON(data, &user); nil != err {
-		util.LogErrorf("get community user failed: %s", err)
+		logging.LogErrorf("get community user failed: %s", err)
 		return nil, errors.New(Conf.Language(18))
 	}
 	return user, nil
 }
 
 func UseActivationcode(code string) (err error) {
+	code = strings.TrimSpace(code)
+	code = gulu.Str.RemoveInvisible(code)
 	requestResult := gulu.Ret.NewResult()
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest()
 	_, err = request.
 		SetResult(requestResult).
 		SetBody(map[string]string{"data": code}).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 		Post(util.AliyunServer + "/apis/siyuan/useActivationcode")
 	if nil != err {
-		util.LogErrorf("check activation code failed: %s", err)
+		logging.LogErrorf("check activation code failed: %s", err)
 		return ErrFailedToConnectCloudServer
 	}
 	if 0 != requestResult.Code {
@@ -344,16 +429,18 @@ func UseActivationcode(code string) (err error) {
 }
 
 func CheckActivationcode(code string) (retCode int, msg string) {
+	code = strings.TrimSpace(code)
+	code = gulu.Str.RemoveInvisible(code)
 	retCode = 1
 	requestResult := gulu.Ret.NewResult()
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest()
 	_, err := request.
 		SetResult(requestResult).
 		SetBody(map[string]string{"data": code}).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 		Post(util.AliyunServer + "/apis/siyuan/checkActivationcode")
 	if nil != err {
-		util.LogErrorf("check activation code failed: %s", err)
+		logging.LogErrorf("check activation code failed: %s", err)
 		msg = ErrFailedToConnectCloudServer.Error()
 		return
 	}
@@ -366,13 +453,13 @@ func CheckActivationcode(code string) (retCode int, msg string) {
 
 func Login(userName, password, captcha string) (ret *gulu.Result, err error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest()
 	_, err = request.
 		SetResult(&result).
 		SetBody(map[string]string{"userName": userName, "userPassword": password, "captcha": captcha}).
 		Post(util.AliyunServer + "/apis/siyuan/login")
 	if nil != err {
-		util.LogErrorf("login failed: %s", err)
+		logging.LogErrorf("login failed: %s", err)
 		return nil, errors.New(Conf.Language(18))
 	}
 	ret = &gulu.Result{
@@ -392,14 +479,14 @@ func Login(userName, password, captcha string) (ret *gulu.Result, err error) {
 
 func Login2fa(token, code string) (map[string]interface{}, error) {
 	result := map[string]interface{}{}
-	request := util.NewCloudRequest(Conf.System.NetworkProxy.String())
+	request := httpclient.NewCloudRequest()
 	_, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"twofactorAuthCode": code}).
 		SetHeader("token", token).
 		Post(util.AliyunServer + "/apis/siyuan/login/2fa")
 	if nil != err {
-		util.LogErrorf("login 2fa failed: %s", err)
+		logging.LogErrorf("login 2fa failed: %s", err)
 		return nil, errors.New(Conf.Language(18))
 	}
 	return result, nil

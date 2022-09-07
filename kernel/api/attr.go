@@ -22,6 +22,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -56,9 +57,21 @@ func setBlockAttrs(c *gin.Context) {
 
 	id := arg["id"].(string)
 	attrs := arg["attrs"].(map[string]interface{})
+	if 1 == len(attrs) && "" != attrs["scroll"] && "dev" == util.Mode {
+		// 开发环境不记录用户指南滚动位置
+		b := treenode.GetBlockTree(id)
+		if nil != b && (model.IsUserGuide(b.BoxID)) {
+			attrs["scroll"] = ""
+		}
+	}
+
 	nameValues := map[string]string{}
 	for name, value := range attrs {
-		nameValues[name] = value.(string)
+		if nil == value { // API `setBlockAttrs` 中如果存在属性值设置为 `null` 时移除该属性 https://github.com/siyuan-note/siyuan/issues/5577
+			nameValues[name] = ""
+		} else {
+			nameValues[name] = value.(string)
+		}
 	}
 	err := model.SetBlockAttrs(id, nameValues)
 	if nil != err {

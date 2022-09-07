@@ -23,13 +23,15 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var assetsWatcher *fsnotify.Watcher
 
 func WatchAssets() {
-	if "android" == util.Container {
+	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
 		return
 	}
 
@@ -46,11 +48,13 @@ func watchAssets() {
 
 	var err error
 	if assetsWatcher, err = fsnotify.NewWatcher(); nil != err {
-		util.LogErrorf("add assets watcher for folder [%s] failed: %s", assetsDir, err)
+		logging.LogErrorf("add assets watcher for folder [%s] failed: %s", assetsDir, err)
 		return
 	}
 
 	go func() {
+		defer logging.Recover()
+
 		var (
 			timer     *time.Timer
 			lastEvent fsnotify.Event
@@ -71,21 +75,24 @@ func watchAssets() {
 				if !ok {
 					return
 				}
-				util.LogErrorf("watch assets failed: %s", err)
+				logging.LogErrorf("watch assets failed: %s", err)
 			case <-timer.C:
-				//util.LogInfof("assets changed: %s", lastEvent)
+				//logging.LogInfof("assets changed: %s", lastEvent)
 				if lastEvent.Op&fsnotify.Write == fsnotify.Write {
 					// 外部修改已有资源文件后纳入云端同步 https://github.com/siyuan-note/siyuan/issues/4694
-					IncWorkspaceDataVer()
+					IncSync()
 				}
+
+				// 重新缓存资源文件，以便使用 /资源 搜索
+				go cache.LoadAssets()
 			}
 		}
 	}()
 
 	if err = assetsWatcher.Add(assetsDir); err != nil {
-		util.LogErrorf("add assets watcher for folder [%s] failed: %s", assetsDir, err)
+		logging.LogErrorf("add assets watcher for folder [%s] failed: %s", assetsDir, err)
 	}
-	//util.LogInfof("added file watcher [%s]", assetsDir)
+	//logging.LogInfof("added file watcher [%s]", assetsDir)
 }
 
 func CloseWatchAssets() {

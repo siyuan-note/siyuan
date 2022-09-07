@@ -1,5 +1,5 @@
 import {openSearch} from "../search/spread";
-import {exportLayout, JSONToLayout, resizeTabs} from "../layout/util";
+import {exportLayout, JSONToLayout, resizeDrag, resizeTabs} from "../layout/util";
 import {hotKey2Electron, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -7,19 +7,21 @@ import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
-import {initToolbarMore} from "../menus/toolbar";
 import {globalShortcut} from "./globalShortcut";
 import {fetchPost} from "./fetch";
 import {mountHelp, newDailyNote} from "./mount";
 import {MenuItem} from "../menus/Menu";
 import {initAssets, loadAssets, setInlineStyle} from "./assets";
-import {showMessage} from "../dialog/message";
-import {needSubscribe} from "./needSubscribe";
 import {goBack, goForward} from "./backForward";
 import {getOpenNotebookCount} from "./pathName";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
+import {openSetting} from "../config";
+import {getSearch} from "./functions";
+import {openHistory} from "./history";
+import {initStatus} from "../layout/status";
+import {syncGuide} from "../sync/syncGuide";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -89,7 +91,7 @@ export const setProxy = () => {
     /// #endif
 };
 
-export const onGetConfig = () => {
+export const onGetConfig = (isStart: boolean) => {
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");
     const matchKeymap3 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.insert, "editor", "insert");
@@ -125,7 +127,7 @@ export const onGetConfig = () => {
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
         try {
-            JSONToLayout();
+            JSONToLayout(isStart);
         } catch (e) {
             fetchPost("/api/system/setUILayout", {layout: {}}, () => {
                 window.location.reload();
@@ -133,6 +135,7 @@ export const onGetConfig = () => {
         }
     });
     initBar();
+    initStatus();
     initWindow();
     appearance.onSetappearance(window.siyuan.config.appearance);
     initAssets();
@@ -142,6 +145,7 @@ export const onGetConfig = () => {
         window.clearTimeout(resizeTimeout);
         resizeTimeout = window.setTimeout(() => {
             resizeTabs();
+            resizeDrag();
         }, 200);
     });
 
@@ -162,25 +166,23 @@ const initBar = () => {
         <use xlink:href="#iconSearch"></use>
     </svg>
 </div>
-<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__s${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDock : window.siyuan.languages.hideDock}">
-    <svg>
-        <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconRestore" : "iconMax"}"></use>
-    </svg>
-</div>
-<div id="barThemeMode" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.appearance.mode === 1 ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.languages.darkMode}">
+<div id="barThemeMode" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.appearance.mode === 1 ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.config.appearance.mode === 1 ? window.siyuan.languages.themeLight : window.siyuan.languages.themeDark}">
     <svg>
         <use xlink:href="#iconMoon"></use>
     </svg>
 </div>
-<div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " F9")}">
+<div id="barHistory" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.dataHistory} ${updateHotkeyTip(window.siyuan.config.keymap.general.history.custom)}">
     <svg>
-        <use xlink:href="#iconRefresh"></use>
+        <use xlink:href="#iconVideo"></use>
     </svg>
 </div>
-<div data-menu="true" id="barMore" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.more}">
+<div id="barSetting" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.config} ${updateHotkeyTip(window.siyuan.config.keymap.general.config.custom)}">
     <svg>
-        <use xlink:href="#iconMore"></use>
+        <use xlink:href="#iconSettings"></use>
     </svg>
+</div>
+<div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom))}">
+    <svg><use xlink:href="#iconCloud"></use></svg>
 </div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
     <svg>
@@ -193,103 +195,92 @@ const initBar = () => {
     </svg>
 </button>
 <div class="fn__flex-1 fn__ellipsis" id="drag"><span class="fn__none">开发版，使用前请进行备份 Development version, please backup before use</span></div>
-<div class="fn__flex" style="top: -1px;z-index: 302;right: -1px;position: relative;" id="windowControls"></div>`;
-    document.getElementById("barBack").addEventListener("click", () => {
-        goBack();
-    });
-    document.getElementById("barForward").addEventListener("click", () => {
-        goForward();
-    });
-    document.getElementById("barMore").addEventListener("click", (event) => {
-        initToolbarMore().popup({x: event.clientX, y: event.clientY});
-    });
-    const baSyncElement = document.getElementById("barSync");
-    baSyncElement.addEventListener("click", () => {
-        if (needSubscribe()) {
-            return;
-        }
-        if (!window.siyuan.config.sync.enabled) {
-            showMessage(window.siyuan.languages._kernel[124]);
-            return;
-        }
-        if (baSyncElement.firstElementChild.classList.contains("fn__rotate")) {
-            return;
-        }
-        fetchPost("/api/sync/performSync", {});
-    });
-    const barThemeModeElement = document.getElementById("barThemeMode");
-    barThemeModeElement.addEventListener("click", () => {
-        if (barThemeModeElement.getAttribute("disabled")) {
-            return;
-        }
-        if (barThemeModeElement.classList.contains("toolbar__item--active")) {
-            barThemeModeElement.classList.remove("toolbar__item--active");
-        } else {
-            barThemeModeElement.classList.add("toolbar__item--active");
-        }
-        barThemeModeElement.setAttribute("disabled", "disabled");
-        fetchPost("/api/system/setAppearanceMode", {
-            mode: barThemeModeElement.classList.contains("toolbar__item--active") ? 1 : 0
-        }, response => {
-            if (window.siyuan.config.appearance.themeJS) {
-                exportLayout(true);
-                return;
-            }
-            window.siyuan.config.appearance = response.data.appearance;
-            barThemeModeElement.removeAttribute("disabled");
-            /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_CONFIG_THEME, response.data.mode === 1 ? "dark" : "light");
-            /// #endif
-            loadAssets(response.data.appearance);
-        });
-    });
-    const barDockElement = document.getElementById("barDock");
-    const useElement = document.querySelector("#barDock use");
-    barDockElement.addEventListener("click", () => {
-        const dockIsShow = useElement.getAttribute("xlink:href") === "#iconMax";
-        if (dockIsShow) {
-            useElement.setAttribute("xlink:href", "#iconRestore");
-            barDockElement.setAttribute("aria-label", window.siyuan.languages.showDock);
-        } else {
-            useElement.setAttribute("xlink:href", "#iconMax");
-            barDockElement.setAttribute("aria-label", window.siyuan.languages.hideDock);
-        }
-        document.querySelectorAll(".dock").forEach(item => {
-            if (dockIsShow) {
-                if (item.querySelector(".dock__item")) {
-                    item.classList.add("fn__none");
+<div class="fn__flex" style="top: -1px;z-index: 502;right: -1px;position: relative;" id="windowControls"></div>`;
+    document.querySelector(".toolbar").addEventListener("click", (event: MouseEvent) => {
+        let target = event.target as HTMLElement;
+        while (!target.classList.contains("toolbar")) {
+            if (target.id === "barBack") {
+                goBack();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barSync") {
+                syncGuide(target);
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barForward") {
+                goForward();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barHistory") {
+                openHistory();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barSetting") {
+                openSetting();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "toolbarVIP") {
+                const dialogSetting = openSetting();
+                dialogSetting.element.querySelector('.b3-tab-bar [data-name="account"]').dispatchEvent(new CustomEvent("click"));
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barSearch") {
+                openSearch(window.siyuan.config.keymap.general.globalSearch.custom);
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barThemeMode") {
+                if (target.getAttribute("disabled")) {
+                    return;
                 }
-            } else {
-                if (item.querySelector(".dock__item")) {
-                    item.classList.remove("fn__none");
+                if (target.classList.contains("toolbar__item--active")) {
+                    target.classList.remove("toolbar__item--active");
+                    target.setAttribute("aria-label", window.siyuan.languages.themeDark);
+                } else {
+                    target.classList.add("toolbar__item--active");
+                    target.setAttribute("aria-label", window.siyuan.languages.themeLight);
                 }
-            }
-        });
-        resizeTabs();
-    });
-    document.getElementById("barDailyNote").addEventListener("click", (event) => {
-        if (getOpenNotebookCount() < 2) {
-            newDailyNote();
-        } else {
-            window.siyuan.menus.menu.remove();
-            window.siyuan.notebooks.forEach(item => {
-                if (!item.closed) {
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        label: item.name,
-                        click: () => {
-                            fetchPost("/api/filetree/createDailyNote", {
-                                notebook: item.id
-                            });
-                            window.localStorage.setItem(Constants.LOCAL_DAILYNOTEID, item.id);
+                target.setAttribute("disabled", "disabled");
+                fetchPost("/api/system/setAppearanceMode", {
+                    mode: target.classList.contains("toolbar__item--active") ? 1 : 0
+                }, response => {
+                    if (window.siyuan.config.appearance.themeJS) {
+                        exportLayout(true);
+                        return;
+                    }
+                    window.siyuan.config.appearance = response.data.appearance;
+                    target.removeAttribute("disabled");
+                    /// #if !BROWSER
+                    ipcRenderer.send(Constants.SIYUAN_CONFIG_THEME, response.data.mode === 1 ? "dark" : "light");
+                    /// #endif
+                    loadAssets(response.data.appearance);
+                });
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barDailyNote") {
+                if (getOpenNotebookCount() < 2) {
+                    newDailyNote();
+                } else {
+                    window.siyuan.menus.menu.remove();
+                    window.siyuan.notebooks.forEach(item => {
+                        if (!item.closed) {
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                label: item.name,
+                                click: () => {
+                                    fetchPost("/api/filetree/createDailyNote", {
+                                        notebook: item.id
+                                    });
+                                    window.localStorage.setItem(Constants.LOCAL_DAILYNOTEID, item.id);
+                                }
+                            }).element);
                         }
-                    }).element);
+                    });
+                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
                 }
-            });
-            window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                event.stopPropagation();
+                break;
+            }
+            target = target.parentElement;
         }
-    });
-    document.getElementById("barSearch").addEventListener("click", () => {
-        openSearch(window.siyuan.config.keymap.general.globalSearch.custom);
     });
     setProxy();
 };
@@ -338,12 +329,13 @@ const initWindow = () => {
     const currentWindow = getCurrentWindow();
     currentWindow.on("focus", winOnFocus);
     ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
-        const params = url.split("?");
+        if (!/^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url)) {
+            return;
+        }
         openFileById({
             id: url.substr(16, 22),
-            hasContext: true,
-            action: [Constants.CB_GET_FOCUS],
-            zoomIn: params.length === 2 && params[1].startsWith("focus=1")
+            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+            zoomIn: getSearch("focus", url) === "1"
         });
     });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
@@ -381,7 +373,7 @@ const initWindow = () => {
     </svg>
 </div>
 <div aria-label="${window.siyuan.languages.max}" class="b3-tooltips b3-tooltips__sw toolbar__item toolbar__item--win" id="maxWindow">
-    <svg>
+    <svg style="height: 11px">
         <use xlink:href="#iconMax"></use>
     </svg>
 </div>

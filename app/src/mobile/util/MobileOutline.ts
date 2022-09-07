@@ -3,7 +3,6 @@ import {fetchPost} from "../../util/fetch";
 import {openMobileFileById} from "../editor";
 import {Constants} from "../../constants";
 import {getEventName} from "../../protyle/util/compatibility";
-import {focusBlock} from "../../protyle/util/selection";
 
 export class MobileOutline {
     private tree: Tree;
@@ -28,24 +27,13 @@ export class MobileOutline {
             data: null,
             click: (element: HTMLElement) => {
                 const id = element.getAttribute("data-node-id");
-                const targetElement = window.siyuan.mobileEditor.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
-                if (targetElement) {
-                    targetElement.scrollIntoView();
-                    focusBlock(targetElement);
-                    window.siyuan.backStack.push({
-                        id,
-                        scrollTop: window.siyuan.mobileEditor.protyle.contentElement.scrollTop,
-                        hasContext: true
-                    });
-                } else {
-                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                        openMobileFileById(id, !foldResponse.data, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID]);
-                    });
-                }
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openMobileFileById(id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
+                });
             }
         });
         this.element.firstElementChild.querySelector('[data-type="collapse"]').addEventListener(getEventName(), () => {
-            this.tree.collapseAll(true);
+            this.tree.collapseAll();
         });
         const expandElement = this.element.firstElementChild.querySelector('[data-type="expand"]');
         expandElement.addEventListener(getEventName(), () => {

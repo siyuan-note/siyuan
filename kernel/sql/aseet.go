@@ -20,12 +20,12 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -71,12 +71,11 @@ func docTitleImgAsset(root *ast.Node) *Asset {
 		}
 
 		var hash string
+		var err error
 		absPath := filepath.Join(util.DataDir, p)
-		if data, err := os.ReadFile(absPath); nil != err {
-			util.LogErrorf("read asset [%s] data failed: %s", absPath, err)
+		if hash, err = util.GetEtag(absPath); nil != err {
+			logging.LogErrorf("read asset [%s] data failed: %s", absPath, err)
 			hash = fmt.Sprintf("%x", sha256.Sum256([]byte(gulu.Rand.String(7))))
-		} else {
-			hash = fmt.Sprintf("%x", sha256.Sum256(data))
 		}
 		name, _ := util.LastID(p)
 		asset := &Asset{
@@ -95,29 +94,13 @@ func docTitleImgAsset(root *ast.Node) *Asset {
 	return nil
 }
 
-func QueryAssetsByName(name string) (ret []*Asset) {
-	ret = []*Asset{}
-	sqlStmt := "SELECT * FROM assets WHERE name LIKE ? GROUP BY id ORDER BY id DESC LIMIT 32"
-	rows, err := query(sqlStmt, "%"+name+"%")
-	if nil != err {
-		util.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		asset := scanAssetRows(rows)
-		ret = append(ret, asset)
-	}
-	return
-}
-
 func QueryAssetByHash(hash string) (ret *Asset) {
 	sqlStmt := "SELECT * FROM assets WHERE hash = ?"
 	row := queryRow(sqlStmt, hash)
 	var asset Asset
 	if err := row.Scan(&asset.ID, &asset.BlockID, &asset.RootID, &asset.Box, &asset.DocPath, &asset.Path, &asset.Name, &asset.Title, &asset.Hash); nil != err {
 		if sql.ErrNoRows != err {
-			util.LogErrorf("query scan field failed: %s", err)
+			logging.LogErrorf("query scan field failed: %s", err)
 		}
 		return
 	}
@@ -129,7 +112,7 @@ func QueryRootBlockAssets(rootID string) (ret []*Asset) {
 	sqlStmt := "SELECT * FROM assets WHERE root_id = ?"
 	rows, err := query(sqlStmt, rootID)
 	if nil != err {
-		util.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
+		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return
 	}
 	defer rows.Close()
@@ -143,7 +126,7 @@ func QueryRootBlockAssets(rootID string) (ret []*Asset) {
 func scanAssetRows(rows *sql.Rows) (ret *Asset) {
 	var asset Asset
 	if err := rows.Scan(&asset.ID, &asset.BlockID, &asset.RootID, &asset.Box, &asset.DocPath, &asset.Path, &asset.Name, &asset.Title, &asset.Hash); nil != err {
-		util.LogErrorf("query scan field failed: %s", err)
+		logging.LogErrorf("query scan field failed: %s", err)
 		return
 	}
 	ret = &asset

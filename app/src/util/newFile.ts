@@ -2,17 +2,20 @@ import {showMessage} from "../dialog/message";
 import {getAllModels} from "../layout/getAll";
 import {hasTopClosestByTag} from "../protyle/util/hasClosest";
 import {getDockByType} from "../layout/util";
+/// #if !MOBILE
 import {Files} from "../layout/dock/Files";
+import {openFileById} from "../editor/util";
+/// #endif
 import {fetchPost} from "./fetch";
 import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
-import {openFileById} from "../editor/util";
 import {Constants} from "../constants";
 
-export const newFile = (notebookId?: string, currentPath?: string, open?: boolean) => {
+export const newFile = (notebookId?: string, currentPath?: string, open?: boolean, paths?: string[]) => {
     if (getOpenNotebookCount() === 0) {
         showMessage(window.siyuan.languages.newFileTip);
         return;
     }
+    /// #if !MOBILE
     if (!notebookId) {
         getAllModels().editor.find((item) => {
             const currentElement = item.parent.headElement;
@@ -38,27 +41,35 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
                 }
             }
         }
-        if (!notebookId) {
-            window.siyuan.notebooks.find(item => {
-                if (!item.closed) {
-                    notebookId = item.id;
-                    currentPath = "/";
-                    return true;
-                }
-            });
-        }
+    }
+    /// #endif
+    if (!notebookId) {
+        window.siyuan.notebooks.find(item => {
+            if (!item.closed) {
+                notebookId = item.id;
+                currentPath = "/";
+                return true;
+            }
+        });
     }
     fetchPost("/api/filetree/getDocNameTemplate", {notebook: notebookId}, (data) => {
         const id = Lute.NewNodeID();
+        const newPath = pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy");
+        if (paths) {
+            paths[paths.indexOf(undefined)] = newPath;
+        }
         fetchPost("/api/filetree/createDoc", {
             notebook: notebookId,
-            path: pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy"),
-            title: data.data.name || window.siyuan.languages.untitled,
+            path: newPath,
+            title: data.data.name || "Untitled",
             md: "",
+            sorts: paths
         }, () => {
+            /// #if !MOBILE
             if (open) {
-                openFileById({id, hasContext: true, action: [Constants.CB_GET_HL]});
+                openFileById({id, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
             }
+            /// #endif
         });
     });
 };

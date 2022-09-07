@@ -1,4 +1,4 @@
-import {hideMessage, showMessage} from "../dialog/message";
+import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {focusByRange} from "../protyle/util/selection";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
@@ -6,12 +6,11 @@ import {removeEmbed} from "../protyle/wysiwyg/removeEmbed";
 import {insertHTML} from "../protyle/util/insertHTML";
 import {genEmptyBlock} from "../block/util";
 import {isMobile} from "../util/functions";
-import {getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
+import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
 import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 
 export const validateName = (name: string) => {
-    hideMessage();
     if (/\r\n|\r|\n|\u2028|\u2029|\t|\//.test(name)) {
         showMessage(window.siyuan.languages.fileNameRule);
         return false;
@@ -20,7 +19,11 @@ export const validateName = (name: string) => {
 };
 
 export const replaceFileName = (name: string) => {
-    return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|\//g, "").trim();
+    return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|\//g, "");
+};
+
+export const replaceLocalPath = (name: string) => {
+    return name.replace(/\\\\|\/|:|\*|\?|\\|'|<|>|\|/g, "");
 };
 
 export const rename = (options: {
@@ -86,6 +89,37 @@ export const rename = (options: {
     });
 };
 
+export const renameAsset = (assetPath: string) => {
+    const dialog = new Dialog({
+        title: window.siyuan.languages.rename,
+        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "80vw" : "520px",
+    });
+    const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
+    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    dialog.bindInput(inputElement, () => {
+        (btnsElement[1] as HTMLButtonElement).click();
+    });
+    const oldName = getAssetName(assetPath);
+    inputElement.value = oldName;
+    inputElement.focus();
+    inputElement.select();
+    btnsElement[0].addEventListener("click", () => {
+        dialog.destroy();
+    });
+    btnsElement[1].addEventListener("click", () => {
+        if (inputElement.value === oldName || !inputElement.value) {
+            dialog.destroy();
+            return false;
+        }
+        fetchPost("/api/asset/renameAsset", {oldPath: assetPath, newName: inputElement.value});
+    });
+};
+
 export const newFileContentBySelect = (protyle: IProtyle) => {
     if (getSelection().rangeCount === 0) {
         return;
@@ -131,7 +165,7 @@ export const newFileBySelect = (fileName: string, protyle: IProtyle) => {
     const id = Lute.NewNodeID();
     fetchPost("/api/filetree/createDoc", {
         notebook: protyle.notebookId,
-        path: pathPosix().join(getDisplayName(protyle.path, false, true), id+ ".sy"),
+        path: pathPosix().join(getDisplayName(protyle.path, false, true), id + ".sy"),
         title: fileName,
         md: ""
     }, () => {

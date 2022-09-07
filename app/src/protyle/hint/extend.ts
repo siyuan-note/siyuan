@@ -11,10 +11,11 @@ import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {getContenteditableElement, getTopAloneElement} from "../wysiwyg/getBlock";
 import {replaceFileName} from "../../editor/rename";
 import {transaction} from "../wysiwyg/transaction";
-import {getDisplayName} from "../../util/pathName";
+import {getAssetName, getDisplayName, pathPosix} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
 import {updateListOrder} from "../wysiwyg/list";
 import {escapeHtml} from "../../util/escape";
+import {zoomOut} from "../../menus/protyle";
 
 export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
@@ -36,7 +37,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
     }, {
         filter: ["文档", "子文档", "wendang", "wd", "ziwendang", "zwd", "xjwd"],
         value: Constants.ZWSP + 4,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newFile}</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newFile}</span><span class="b3-menu__accelerator">${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</span></div>`,
     }, {
         value: "",
         html: "separator",
@@ -297,7 +298,7 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
         if (response.data.newDoc) {
             const newFileName = Lute.UnEscapeHTMLStr(replaceFileName(response.data.k));
             dataList.push({
-                value: `((newFile "${newFileName}${Lute.Caret}"))`,
+                value: isQuick ? `((newFile "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))` : `((newFile '${newFileName}${Lute.Caret}'))`,
                 html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div>`,
             });
@@ -306,16 +307,16 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
             const iconName = getIconByType(item.type);
             let attrHTML = "";
             if (item.name) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconN"></use></svg>&nbsp;${item.name}</span><span class="fn__space"></span>`;
+                attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg>${item.name}</span><span class="fn__space"></span>`;
             }
             if (item.alias) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconA"></use></svg>&nbsp;${item.alias}</span><span class="fn__space"></span>`;
+                attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconA"></use></svg>${item.alias}</span><span class="fn__space"></span>`;
             }
             if (item.memo) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconM"></use></svg>&nbsp;${item.memo}</span>`;
+                attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconM"></use></svg>${item.memo}</span>`;
             }
             if (attrHTML) {
-                attrHTML = `<div class="fn__flex b3-list-item__meta" style="line-height: 1">${attrHTML}</div>`;
+                attrHTML = `<div class="fn__flex b3-list-item__meta b3-list-item__showall">${attrHTML}</div>`;
             }
             let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${item.name || item.refText}</span>`;
             if (isQuick) {
@@ -327,7 +328,7 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<div class="b3-list-item__meta">${item.hPath}</div>`,
+<div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div>`,
             });
         });
         if (isQuick) {
@@ -362,16 +363,16 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
             const iconName = getIconByType(item.type);
             let attrHTML = "";
             if (item.name) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconN"></use></svg>&nbsp;${item.name}</span><span class="fn__space"></span>`;
+                attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg>${item.name}</span><span class="fn__space"></span>`;
             }
             if (item.alias) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconA"></use></svg>&nbsp;${item.alias}</span><span class="fn__space"></span>`;
+                attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconA"></use></svg>${item.alias}</span><span class="fn__space"></span>`;
             }
             if (item.memo) {
-                attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconM"></use></svg>&nbsp;${item.memo}</span>`;
+                attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconM"></use></svg>${item.memo}</span>`;
             }
             if (attrHTML) {
-                attrHTML = `<div class="fn__flex b3-list-item__meta" style="line-height: 1">${attrHTML}</div>`;
+                attrHTML = `<div class="fn__flex b3-list-item__meta b3-list-item__showall">${attrHTML}</div>`;
             }
             dataList.push({
                 value: `{{select * from blocks where id='${item.id}'}}`,
@@ -379,7 +380,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<div class="b3-list-item__meta">${item.hPath}</div>`,
+<div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div>`,
             });
         });
         if (dataList.length === 0) {
@@ -424,8 +425,8 @@ export const hintRenderWidget = (value: string, protyle: IProtyle) => {
 
 export const hintRenderAssets = (value: string, protyle: IProtyle) => {
     focusByRange(protyle.toolbar.range);
-    const type = value.substring(value.lastIndexOf("."));
-    const filename = value.replace("assets/", "");
+    const type = pathPosix().extname(value).toLowerCase();
+    const filename = value.startsWith("assets/") ? getAssetName(value) : value;
     let fileMD = "";
     if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
         fileMD += `<audio controls="controls" src="${value}"></audio>`;
@@ -434,7 +435,7 @@ export const hintRenderAssets = (value: string, protyle: IProtyle) => {
     } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
         fileMD += `<video controls="controls" src="${value}"></video>`;
     } else {
-        fileMD += `[${filename}](${value})`;
+        fileMD += `[${value.startsWith("assets/") ? filename + type : value}](${value})`;
     }
     insertHTML(protyle.lute.SpinBlockDOM(fileMD), protyle);
     protyle.toolbar.subElement.classList.add("fn__none");
@@ -480,6 +481,10 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
                 data: item.outerHTML
             });
         });
+    } else if (protyle.block.showAll && parentElement.classList.contains("protyle-wysiwyg") && parentElement.childElementCount === 0) {
+        setTimeout(() => {
+            zoomOut(protyle, protyle.block.parent2ID, protyle.block.parent2ID);
+        }, Constants.TIMEOUT_INPUT * 2 + 100);
     } else if (parentElement.classList.contains("protyle-wysiwyg") && parentElement.innerHTML === "" &&
         !hasClosestByClassName(parentElement, "block__edit", true) &&
         protyle.block.id === protyle.block.rootID) {

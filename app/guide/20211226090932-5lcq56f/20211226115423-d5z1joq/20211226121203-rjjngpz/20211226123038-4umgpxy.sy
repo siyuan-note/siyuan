@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20220503122338"
+		"updated": "20220905215759"
 	},
 	"Children": [
 		{
@@ -27,12 +27,32 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123051-wvk5a7h",
-				"updated": "20211228132912"
+				"updated": "20220711121751"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "通過編輯器插入的附件會被認為是資料文件，預設放置在工作空間 data/assets 文件夾下。"
+					"Data": "通過編輯器插入的附件會被認為是資料文件，預設放置在 "
+				},
+				{
+					"Type": "NodeCodeSpan",
+					"Data": "code",
+					"Children": [
+						{
+							"Type": "NodeCodeSpanOpenMarker"
+						},
+						{
+							"Type": "NodeCodeSpanContent",
+							"Data": "工作空間/data/assets/"
+						},
+						{
+							"Type": "NodeCodeSpanCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文件夾下。"
 				}
 			]
 		},
@@ -42,12 +62,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-ddr3yub",
-				"updated": "20211226013452"
+				"updated": "20220824172704"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "插入圖片"
+					"Data": "插入圖片或文件"
 				}
 			]
 		},
@@ -56,26 +76,181 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123051-zdhnfws",
-				"updated": "20211228140810"
+				"updated": "20220905215759"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在編輯器中可以直接貼上系統剪貼簿中複製好的圖片，或者通過拖拽圖片文件到編輯器中也可以實作圖片插入。"
+					"Data": "在編輯器中可以直接粘貼系統剪切板中復制好的圖片或文件（Linux 端不支持），或者通過拖拽圖片或文件到編輯器中也可以實現插入。插入時有兩個選擇："
 				}
 			]
 		},
 		{
-			"ID": "20211226123051-yczpz86",
+			"ID": "20220824172728-jpp1e8c",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220824172728-jpp1e8c",
+				"updated": "20220902220120"
+			},
+			"Children": [
+				{
+					"ID": "20220824172728-wiu7i7u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220824172728-wiu7i7u",
+						"updated": "20220824172728"
+					},
+					"Children": [
+						{
+							"ID": "20220824172728-scx3qge",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220824172728-scx3qge",
+								"updated": "20220824172728"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "複製為資源文件並插入"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：將圖片或文件複製為資源文件並插入，快捷鍵 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Ctrl+V"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220824172728-deq7vh0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220824172728-deq7vh0",
+						"updated": "20220902220120"
+					},
+					"Children": [
+						{
+							"ID": "20220824172728-2gnv8ox",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220824172728-2gnv8ox",
+								"updated": "20220902220120"
+							},
+							"Children": [
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "使用 file:// 絕對路徑並鏈接"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：將圖片或文件以本地絕對路徑方式插入超鏈接，快捷鍵 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Ctrl+Shift+V"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，或者按住 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Alt"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 後拖入"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220824172728-jc3gsl1",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226123051-yczpz86",
-				"updated": "20211226013634"
+				"id": "20220824172728-jc3gsl1",
+				"updated": "20220824172728"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果排版時指定了圖片標題，則標題會被渲染在圖片下方作為圖注。"
+					"Data": "對於圖片，如果排版時指定了圖片標題，則標題會被渲染在圖片下方作為圖注。"
 				}
 			]
 		},
@@ -84,12 +259,15 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123051-2p8rbm4",
-				"updated": "20211226013452"
+				"updated": "20220824172748"
 			},
 			"Children": [
 				{
 					"Type": "NodeImage",
 					"Data": "span",
+					"Properties": {
+						"parent-style": "display: block;"
+					},
 					"Children": [
 						{
 							"Type": "NodeBang"
@@ -122,6 +300,10 @@
 							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeKramdownSpanIAL",
+					"Data": "{: parent-style=\"display: block;\"}"
 				}
 			]
 		},
@@ -222,7 +404,7 @@
 			},
 			"Properties": {
 				"id": "20211226123051-1qp7a9g",
-				"updated": "20211228104718"
+				"updated": "20220715092951"
 			},
 			"Children": [
 				{
@@ -236,7 +418,7 @@
 					},
 					"Properties": {
 						"id": "20211226123051-mmn60x5",
-						"updated": "20211228104716"
+						"updated": "20220715092951"
 					},
 					"Children": [
 						{
@@ -244,12 +426,45 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226123051-p8dr1dy",
-								"updated": "20211228104716"
+								"updated": "20220715092951"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用具體的資料文件，比如圖片或者文件"
+									"Data": "引用具體的資料文件，比如圖片或者文件。如果資料文件是 PDF 且做過"
+								},
+								{
+									"Type": "NodeBlockRef",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeBlockRefID",
+											"Data": "20211226122955-ganeraz"
+										},
+										{
+											"Type": "NodeBlockRefSpace"
+										},
+										{
+											"Type": "NodeBlockRefText",
+											"Data": "標註"
+										},
+										{
+											"Type": "NodeCloseParen"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，那麼無論它是否被引用都不會計入清理"
 								}
 							]
 						}
@@ -266,7 +481,7 @@
 					},
 					"Properties": {
 						"id": "20211226123051-0az1yw2",
-						"updated": "20211228104718"
+						"updated": "20220711121803"
 					},
 					"Children": [
 						{
@@ -274,7 +489,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226123051-heoyfe2",
-								"updated": "20211228104718"
+								"updated": "20220711121803"
 							},
 							"Children": [
 								{
@@ -316,6 +531,10 @@
 											"Type": "NodeCodeSpanCloseMarker"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。一個資料文件夾如果被引用，則下面所有資料文件無論是否被單獨引用，都會被算作已經引用"
 								}
 							]
 						}
@@ -324,25 +543,11 @@
 			]
 		},
 		{
-			"ID": "20211226123051-8ftluwy",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226123051-8ftluwy",
-				"updated": "20211228104725"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "第二種情況比較特殊：一個資料文件夾如果被引用，則下面所有資料文件無論是否被單獨引用，都會被算作已經引用。"
-				}
-			]
-		},
-		{
 			"ID": "20211226123051-tkps9jc",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123051-tkps9jc",
-				"updated": "20211228104732"
+				"updated": "20220711122031"
 			},
 			"Children": [
 				{
@@ -387,7 +592,15 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中可以一鍵清理未引用資料，如果需要找回被誤刪的文件，請通過"
+					"Data": " 中可以一鍵"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "清理未引用資料"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，如果需要找回被誤刪的文件，請通過"
 				},
 				{
 					"Type": "NodeBlockRef",
@@ -408,7 +621,7 @@
 						},
 						{
 							"Type": "NodeBlockRefText",
-							"Data": "回滾(rollback)"
+							"Data": "回滾（Rollback）"
 						},
 						{
 							"Type": "NodeCloseParen"
@@ -460,12 +673,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220503122338-a69glac",
-				"updated": "20220503122338"
+				"updated": "20220715092913"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "筆記本級資源文件"
+					"Data": "筆記本級資料文件"
 				}
 			]
 		},
@@ -474,12 +687,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220503122338-re7pyhf",
-				"updated": "20220503122338"
+				"updated": "20220715092933"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果需要默認將插入的資源文件放置在文檔同級 assets 文件夾下，則需要先手動創建名為 assets 的文件夾，這樣思源會優先選擇該 assets 文件夾來存放資源文件。"
+					"Data": "如果需要默認將插入的資料文件放置在文檔同級 assets 文件夾下，則需要先手動創建名為 assets 的文件夾，這樣思源會優先選擇該 assets 文件夾來存放資料文件。"
 				}
 			]
 		},
@@ -488,12 +701,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220503122338-gxfzjcm",
-				"updated": "20220503122338"
+				"updated": "20220715092934"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "建議盡量不要使用筆記本級資源文件，因為這會帶來一些副作用："
+					"Data": "建議盡量不要使用筆記本級資料文件，因為這會帶來一些副作用："
 				}
 			]
 		},
@@ -503,7 +716,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220503122338-jmr7c2k",
-				"updated": "20220503122338"
+				"updated": "20220715105038"
 			},
 			"Children": [
 				{
@@ -515,7 +728,7 @@
 					},
 					"Properties": {
 						"id": "20220503122338-4zg71qe",
-						"updated": "20220503122338"
+						"updated": "20220715092936"
 					},
 					"Children": [
 						{
@@ -523,12 +736,20 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220503122338-t6apzrh",
-								"updated": "20220503122338"
+								"updated": "20220715092936"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "刪除該筆記本時，為保證跨筆記本資源文件引用正常工作，該筆記本下的資源文件會被批量複製到全局 assets 中"
+									"Data": "刪除該筆記本時，為保證跨筆記本資料文件引用正常工作，該筆記本下的資料文件會被批量複製到全局 "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "assets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中"
 								}
 							]
 						}
@@ -543,7 +764,7 @@
 					},
 					"Properties": {
 						"id": "20220503122338-64cnjli",
-						"updated": "20220503122338"
+						"updated": "20220715092938"
 					},
 					"Children": [
 						{
@@ -551,12 +772,96 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220503122338-e5zlrvp",
-								"updated": "20220503122338"
+								"updated": "20220715092938"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "不支持在數據歷史中查看筆記本級資源文件歷史"
+									"Data": "不支持在"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "數據歷史"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中查看筆記本級資料文件歷史"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220715092849-nxblvyk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220715092849-nxblvyk",
+						"updated": "20220715092907"
+					},
+					"Children": [
+						{
+							"ID": "20220715092849-n45ydou",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220715092849-n45ydou",
+								"updated": "20220715092907"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持使用 "
+								},
+								{
+									"Type": "NodeCodeSpan",
+									"Data": "code",
+									"Children": [
+										{
+											"Type": "NodeCodeSpanOpenMarker"
+										},
+										{
+											"Type": "NodeCodeSpanContent",
+											"Data": "/資料"
+										},
+										{
+											"Type": "NodeCodeSpanCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 搜索"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220715105038-bwu5wmg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220715105038-bwu5wmg",
+						"updated": "20220715105038"
+					},
+					"Children": [
+						{
+							"ID": "20220715105038-mmy9v15",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220715105038-mmy9v15",
+								"updated": "20220715105038"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持重命名"
 								}
 							]
 						}

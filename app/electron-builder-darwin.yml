@@ -49,3 +49,5 @@ extraResources:
   - from: "appearance/themes/daylight"
     to: "appearance/themes/daylight"
     filter: "!**/{.DS_Store,custom.css}"
+  - from: "pandoc/pandoc-darwin-amd64.zip"
+    to: "pandoc.zip"

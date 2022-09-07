@@ -17,13 +17,15 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/html"
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -73,7 +75,7 @@ func checkBlockExist(c *gin.Context) {
 
 	id := arg["id"].(string)
 	b, err := model.GetBlock(id)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 2
 		ret.Data = id
 		return
@@ -92,6 +94,11 @@ func getDocInfo(c *gin.Context) {
 
 	id := arg["id"].(string)
 	info := model.GetDocInfo(id)
+	if nil == info {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
+		return
+	}
 	ret.Data = info
 }
 
@@ -101,6 +108,44 @@ func getRecentUpdatedBlocks(c *gin.Context) {
 
 	blocks := model.RecentUpdatedBlocks()
 	ret.Data = blocks
+}
+
+func getContentWordCount(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	content := arg["content"].(string)
+	runeCount, wordCount := model.ContentWordCount(content)
+	ret.Data = map[string]interface{}{
+		"runeCount": runeCount,
+		"wordCount": wordCount,
+	}
+}
+
+func getBlocksWordCount(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+	runeCount, wordCount := model.BlocksWordCount(ids)
+	ret.Data = map[string]interface{}{
+		"runeCount": runeCount,
+		"wordCount": wordCount,
+	}
 }
 
 func getBlockWordCount(c *gin.Context) {
@@ -221,13 +266,13 @@ func getBlockInfo(c *gin.Context) {
 
 	id := arg["id"].(string)
 	block, err := model.GetBlock(id)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 2
 		ret.Data = id
 		return
 	}
 	if nil == block {
-		ret.Code = 1
+		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
 		return
 	}
@@ -241,13 +286,13 @@ func getBlockInfo(c *gin.Context) {
 			break
 		}
 		if b, _ = model.GetBlock(parentID); nil == b {
-			util.LogErrorf("not found parent")
+			logging.LogErrorf("not found parent")
 			break
 		}
 	}
 
 	root, err := model.GetBlock(block.RootID)
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 2
 		ret.Data = id
 		return
@@ -278,5 +323,22 @@ func getBlockDOM(c *gin.Context) {
 	ret.Data = map[string]string{
 		"id":  id,
 		"dom": dom,
+	}
+}
+
+func getBlockKramdown(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	kramdown := model.GetBlockKramdown(id)
+	ret.Data = map[string]string{
+		"id":       id,
+		"kramdown": kramdown,
 	}
 }

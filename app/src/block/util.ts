@@ -1,10 +1,54 @@
-import {focusByWbr, getEditorRange} from "../protyle/util/selection";
-import {hasClosestBlock} from "../protyle/util/hasClosest";
-import {getTopAloneElement} from "../protyle/wysiwyg/getBlock";
+import {focusBlock, focusByWbr, getEditorRange} from "../protyle/util/selection";
+import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
+import {getNextBlock, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
 import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
 import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
 import {Constants} from "../constants";
+
+export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    let previousId = nodeElement.previousElementSibling ? nodeElement.previousElementSibling.getAttribute("data-node-id") : undefined;
+    nodeElement.classList.remove("protyle-wysiwyg--select");
+    const id = nodeElement.getAttribute("data-node-id");
+    const sbElement = genSBElement(nodeElement.getAttribute("data-sb-layout"), id, nodeElement.lastElementChild.outerHTML);
+    undoOperations.push({
+        action: "insert",
+        id,
+        data: sbElement.outerHTML,
+        previousID: nodeElement.previousElementSibling ? nodeElement.previousElementSibling.getAttribute("data-node-id") : undefined,
+        parentID: nodeElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+    });
+    Array.from(nodeElement.children).forEach((item, index) => {
+        if (index === nodeElement.childElementCount - 1) {
+            doOperations.push({
+                action: "delete",
+                id,
+            });
+            nodeElement.lastElementChild.remove();
+            nodeElement.outerHTML = nodeElement.innerHTML;
+            return;
+        }
+        doOperations.push({
+            action: "move",
+            id: item.getAttribute("data-node-id"),
+            previousID: previousId,
+            parentID: nodeElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+        });
+        undoOperations.push({
+            action: "move",
+            id: item.getAttribute("data-node-id"),
+            previousID: item.previousElementSibling ? item.previousElementSibling.getAttribute("data-node-id") : undefined,
+            parentID: id
+        });
+        previousId = item.getAttribute("data-node-id");
+    });
+
+    return {
+        doOperations, undoOperations, previousId
+    };
+};
 
 export const genSBElement = (layout: string, id?: string, attrHTML?: string) => {
     const sbElement = document.createElement("div");
@@ -14,6 +58,18 @@ export const genSBElement = (layout: string, id?: string, attrHTML?: string) => 
     sbElement.setAttribute("data-sb-layout", layout);
     sbElement.innerHTML = attrHTML || `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
     return sbElement;
+};
+
+export const jumpToParentNext = (protyle:IProtyle,nodeElement: Element) => {
+    const topElement = getTopAloneElement(nodeElement);
+    if (topElement) {
+        const topParentElement = hasClosestByClassName(topElement, "list") || hasClosestByClassName(topElement, "bq") || hasClosestByClassName(topElement, "sb") || topElement;
+        const nextElement = getNextBlock(topParentElement);
+        if (nextElement) {
+            focusBlock(nextElement);
+            scrollCenter(protyle, nextElement);
+        }
+    }
 };
 
 export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id?: string) => {
@@ -29,6 +85,9 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
             } else {
                 blockElement = selectElements[selectElements.length - 1];
             }
+            selectElements.forEach(item => {
+                item.classList.remove("protyle-wysiwyg--select");
+            });
         } else {
             blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
             blockElement = getTopAloneElement(blockElement);
@@ -54,7 +113,8 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
     const parentOldHTML = blockElement.parentElement.outerHTML;
     const newId = newElement.getAttribute("data-node-id");
     blockElement.insertAdjacentElement(position, newElement);
-    if (blockElement.getAttribute("data-type") === "NodeListItem" && blockElement.getAttribute("data-subtype") === "o") {
+    if (blockElement.getAttribute("data-type") === "NodeListItem" && blockElement.getAttribute("data-subtype") === "o" &&
+        !newElement.parentElement.classList.contains("protyle-wysiwyg")) {
         updateListOrder(newElement.parentElement, orderIndex);
         updateTransaction(protyle, newElement.parentElement.getAttribute("data-node-id"), newElement.parentElement.outerHTML, parentOldHTML);
     } else {

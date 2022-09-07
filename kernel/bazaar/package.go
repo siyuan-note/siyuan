@@ -30,14 +30,210 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/araddon/dateparse"
 	"github.com/imroc/req/v3"
+	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	textUnicode "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
 
-func GetPackageREADME(repoURL, repoHash, proxyURL string, chinaCDN bool, systemID string) (ret string) {
+type Package struct {
+	Author  string `json:"author"`
+	URL     string `json:"url"`
+	Version string `json:"version"`
+
+	Name            string `json:"name"`
+	RepoURL         string `json:"repoURL"`
+	RepoHash        string `json:"repoHash"`
+	PreviewURL      string `json:"previewURL"`
+	PreviewURLThumb string `json:"previewURLThumb"`
+
+	README string `json:"readme"`
+
+	Installed    bool   `json:"installed"`
+	Outdated     bool   `json:"outdated"`
+	Current      bool   `json:"current"`
+	Updated      string `json:"updated"`
+	Stars        int    `json:"stars"`
+	OpenIssues   int    `json:"openIssues"`
+	Size         int64  `json:"size"`
+	HSize        string `json:"hSize"`
+	InstallSize  int64  `json:"installSize"`
+	HInstallSize string `json:"hInstallSize"`
+	HInstallDate string `json:"hInstallDate"`
+	HUpdated     string `json:"hUpdated"`
+	Downloads    int    `json:"downloads"`
+}
+
+func WidgetJSON(widgetDirName string) (ret map[string]interface{}, err error) {
+	p := filepath.Join(util.DataDir, "widgets", widgetDirName, "widget.json")
+	if !gulu.File.IsExist(p) {
+		err = os.ErrNotExist
+		return
+	}
+	data, err := os.ReadFile(p)
+	if nil != err {
+		logging.LogErrorf("read widget.json [%s] failed: %s", p, err)
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("parse widget.json [%s] failed: %s", p, err)
+		return
+	}
+	if 4 > len(ret) {
+		logging.LogWarnf("invalid widget.json [%s]", p)
+		return nil, errors.New("invalid widget.json")
+	}
+	return
+}
+
+func IconJSON(iconDirName string) (ret map[string]interface{}, err error) {
+	p := filepath.Join(util.IconsPath, iconDirName, "icon.json")
+	if !gulu.File.IsExist(p) {
+		err = os.ErrNotExist
+		return
+	}
+	data, err := os.ReadFile(p)
+	if nil != err {
+		logging.LogErrorf("read icon.json [%s] failed: %s", p, err)
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("parse icon.json [%s] failed: %s", p, err)
+		return
+	}
+	if 4 > len(ret) {
+		logging.LogWarnf("invalid icon.json [%s]", p)
+		return nil, errors.New("invalid icon.json")
+	}
+	return
+}
+
+func TemplateJSON(templateDirName string) (ret map[string]interface{}, err error) {
+	p := filepath.Join(util.DataDir, "templates", templateDirName, "template.json")
+	if !gulu.File.IsExist(p) {
+		err = os.ErrNotExist
+		return
+	}
+	data, err := os.ReadFile(p)
+	if nil != err {
+		logging.LogErrorf("read template.json [%s] failed: %s", p, err)
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("parse template.json [%s] failed: %s", p, err)
+		return
+	}
+	if 4 > len(ret) {
+		logging.LogWarnf("invalid template.json [%s]", p)
+		return nil, errors.New("invalid template.json")
+	}
+	return
+}
+
+func ThemeJSON(themeDirName string) (ret map[string]interface{}, err error) {
+	p := filepath.Join(util.ThemesPath, themeDirName, "theme.json")
+	if !gulu.File.IsExist(p) {
+		err = os.ErrNotExist
+		return
+	}
+	data, err := os.ReadFile(p)
+	if nil != err {
+		logging.LogErrorf("read theme.json [%s] failed: %s", p, err)
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("parse theme.json [%s] failed: %s", p, err)
+		return
+	}
+	if 5 > len(ret) {
+		logging.LogWarnf("invalid theme.json [%s]", p)
+		return nil, errors.New("invalid theme.json")
+	}
+	return
+}
+
+func getPkgIndex(pkgType string) (ret map[string]interface{}, err error) {
+	ret, err = util.GetRhyResult(false)
+	if nil != err {
+		return
+	}
+
+	bazaarHash := ret["bazaar"].(string)
+	ret = map[string]interface{}{}
+	request := httpclient.NewBrowserRequest()
+	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/" + pkgType + ".json"
+	resp, reqErr := request.SetResult(&ret).Get(u)
+	if nil != reqErr {
+		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
+		return
+	}
+	if 200 != resp.StatusCode {
+		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
+		return
+	}
+	return
+}
+
+func isOutdatedTheme(theme *Theme, bazaarThemes []*Theme) bool {
+	if !strings.HasPrefix(theme.URL, "https://github.com/") {
+		return false
+	}
+
+	for _, pkg := range bazaarThemes {
+		if theme.URL == pkg.URL && theme.Name == pkg.Name && theme.Author == pkg.Author && theme.Version != pkg.Version {
+			theme.RepoHash = pkg.RepoHash
+			return true
+		}
+	}
+	return false
+}
+
+func isOutdatedIcon(icon *Icon, bazaarIcons []*Icon) bool {
+	if !strings.HasPrefix(icon.URL, "https://github.com/") {
+		return false
+	}
+
+	for _, pkg := range bazaarIcons {
+		if icon.URL == pkg.URL && icon.Name == pkg.Name && icon.Author == pkg.Author && icon.Version != pkg.Version {
+			icon.RepoHash = pkg.RepoHash
+			return true
+		}
+	}
+	return false
+}
+
+func isOutdatedWidget(widget *Widget, bazaarWidgets []*Widget) bool {
+	if !strings.HasPrefix(widget.URL, "https://github.com/") {
+		return false
+	}
+
+	for _, pkg := range bazaarWidgets {
+		if widget.URL == pkg.URL && widget.Name == pkg.Name && widget.Author == pkg.Author && widget.Version != pkg.Version {
+			widget.RepoHash = pkg.RepoHash
+			return true
+		}
+	}
+	return false
+}
+
+func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
+	if !strings.HasPrefix(template.URL, "https://github.com/") {
+		return false
+	}
+
+	for _, pkg := range bazaarTemplates {
+		if template.URL == pkg.URL && template.Name == pkg.Name && template.Author == pkg.Author && template.Version != pkg.Version {
+			template.RepoHash = pkg.RepoHash
+			return true
+		}
+	}
+	return false
+}
+
+func GetPackageREADME(repoURL, repoHash string, systemID string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash+"/README.md", proxyURL, chinaCDN, false, systemID)
+	data, err := downloadPackage(repoURLHash+"/README.md", false, systemID)
 	if nil != err {
 		ret = "Load bazaar package's README.md failed: " + err.Error()
 		return
@@ -51,16 +247,21 @@ func GetPackageREADME(repoURL, repoHash, proxyURL string, chinaCDN bool, systemI
 		}
 	}
 
+	ret, err = renderREADME(repoURL, data)
+	return
+}
+
+func renderREADME(repoURL string, mdData []byte) (ret string, err error) {
 	luteEngine := lute.New()
 	luteEngine.SetSoftBreak2HardBreak(false)
 	luteEngine.SetCodeSyntaxHighlight(false)
 	linkBase := repoURL + "/blob/main/"
 	luteEngine.SetLinkBase(linkBase)
-	ret = luteEngine.Md2HTML(string(data))
+	ret = luteEngine.Md2HTML(string(mdData))
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(ret))
 	if nil != err {
-		util.LogErrorf("parse HTML failed: %s", err)
-		return ret
+		logging.LogErrorf("parse HTML failed: %s", err)
+		return
 	}
 
 	doc.Find("a").Each(func(i int, selection *goquery.Selection) {
@@ -73,50 +274,47 @@ func GetPackageREADME(repoURL, repoHash, proxyURL string, chinaCDN bool, systemI
 	return
 }
 
-func downloadPackage(repoURLHash, proxyURL string, chinaCDN, pushProgress bool, systemID string) (data []byte, err error) {
+func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (data []byte, err error) {
 	// repoURLHash: https://github.com/88250/Comfortably-Numb@6286912c381ef3f83e455d06ba4d369c498238dc
 	pushID := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
 	repoURLHash = strings.TrimPrefix(repoURLHash, "https://github.com/")
-	u := util.BazaarOSSFileServer + "/package/" + repoURLHash
-	if chinaCDN {
-		u = util.BazaarOSSServer + "/package/" + repoURLHash
-	}
+	u := util.BazaarOSSServer + "/package/" + repoURLHash
 	buf := &bytes.Buffer{}
-	resp, err := util.NewBrowserDownloadRequest(proxyURL).SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+	resp, err := httpclient.NewBrowserDownloadRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 		if pushProgress {
 			util.PushDownloadProgress(pushID, float32(info.DownloadedSize)/float32(info.Response.ContentLength))
 		}
 	}).Get(u)
 	if nil != err {
 		u = util.BazaarOSSServer + "/package/" + repoURLHash
-		resp, err = util.NewBrowserDownloadRequest(proxyURL).SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+		resp, err = httpclient.NewBrowserDownloadRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 			if pushProgress {
 				util.PushDownloadProgress(pushID, float32(info.DownloadedSize)/float32(info.Response.ContentLength))
 			}
 		}).Get(u)
 		if nil != err {
-			util.LogErrorf("get bazaar package [%s] failed: %s", u, err)
+			logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
 			return nil, errors.New("get bazaar package failed")
 		}
 	}
 	if 200 != resp.StatusCode {
-		util.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)
+		logging.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)
 		return nil, errors.New("get bazaar package failed")
 	}
 	data = buf.Bytes()
 
-	go incPackageDownloads(repoURLHash, proxyURL, systemID)
+	go incPackageDownloads(repoURLHash, systemID)
 	return
 }
 
-func incPackageDownloads(repoURLHash, proxyURL, systemID string) {
+func incPackageDownloads(repoURLHash, systemID string) {
 	if strings.Contains(repoURLHash, ".md") {
 		return
 	}
 
 	repo := strings.Split(repoURLHash, "@")[0]
 	u := util.AliyunServer + "/apis/siyuan/bazaar/addBazaarPackageDownloadCount"
-	util.NewCloudRequest(proxyURL).SetBody(
+	httpclient.NewCloudRequest().SetBody(
 		map[string]interface{}{
 			"systemID": systemID,
 			"repo":     repo,
@@ -136,7 +334,7 @@ func installPackage(data []byte, installPath string) (err error) {
 
 	unzipPath := filepath.Join(dir, name)
 	if err = gulu.Zip.Unzip(tmp, unzipPath); nil != err {
-		util.LogErrorf("write file [%s] failed: %s", installPath, err)
+		logging.LogErrorf("write file [%s] failed: %s", installPath, err)
 		err = errors.New("write file failed")
 		return
 	}
@@ -181,7 +379,7 @@ var cachedBazaarIndex = map[string]*bazaarPackage{}
 var bazaarIndexCacheTime int64
 var bazaarIndexLock = sync.Mutex{}
 
-func getBazaarIndex(proxyURL string) map[string]*bazaarPackage {
+func getBazaarIndex() map[string]*bazaarPackage {
 	bazaarIndexLock.Lock()
 	defer bazaarIndexLock.Unlock()
 
@@ -190,15 +388,15 @@ func getBazaarIndex(proxyURL string) map[string]*bazaarPackage {
 		return cachedBazaarIndex
 	}
 
-	request := util.NewBrowserRequest(proxyURL)
+	request := httpclient.NewBrowserRequest()
 	u := util.BazaarStatServer + "/bazaar/index.json"
 	resp, reqErr := request.SetResult(&cachedBazaarIndex).Get(u)
 	if nil != reqErr {
-		util.LogErrorf("get bazaar index [%s] failed: %s", u, reqErr)
+		logging.LogErrorf("get bazaar index [%s] failed: %s", u, reqErr)
 		return cachedBazaarIndex
 	}
 	if 200 != resp.StatusCode {
-		util.LogErrorf("get bazaar index [%s] failed: %d", u, resp.StatusCode)
+		logging.LogErrorf("get bazaar index [%s] failed: %d", u, resp.StatusCode)
 		return cachedBazaarIndex
 	}
 	bazaarIndexCacheTime = now

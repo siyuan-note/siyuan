@@ -1,5 +1,4 @@
 import {isCtrl} from "./compatibility";
-import {Constants} from "../../constants";
 
 // 是否匹配 ⇧⌘[] / ⌘[] / ⌥[] / ⌥⌘[] / ⇧Tab / []
 export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
@@ -18,8 +17,9 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
         return false;
     }
 
-    const hotKeys = hotKey.replace("Enter", Constants.ZWSP).split("");
-    if (hotKey.endsWith("↑") || hotKey.endsWith("↓") || hotKey.endsWith("→") || hotKey.endsWith("←") || hotKey.endsWith("Enter") || hotKey.endsWith("⇥")) {
+    const hotKeys = hotKey.split("");
+    if (hotKey.endsWith("↑") || hotKey.endsWith("↓") || hotKey.endsWith("→") || hotKey.endsWith("←") ||
+        hotKey.endsWith("↩") || hotKey.endsWith("⇥") || hotKey.indexOf("F") > -1) {
         hotKeys.forEach((item, index) => {
             if (item === "↑") {
                 hotKeys[index] = "ArrowUp";
@@ -31,8 +31,14 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
                 hotKeys[index] = "ArrowRight";
             } else if (item === "⇥") {
                 hotKeys[index] = "Tab";
-            } else if (item === Constants.ZWSP) {
+            } else if (item === "↩") {
                 hotKeys[index] = "Enter";
+            } else if (item === "F") {
+                // F1-F12
+                hotKeys[index] = "F" + hotKeys.splice(index + 1, 1);
+                if (hotKeys[index + 1]) {
+                    hotKeys[index + 1] += hotKeys.splice(index + 1, 1);
+                }
             }
         });
     }
@@ -50,7 +56,8 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
         const keyCode = hotKeys.length === 3 ? hotKeys[2] : hotKeys[1];
         if ((hotKeys.length === 3 ? isCtrl(event) : !isCtrl(event)) && event.altKey && !event.shiftKey &&
             (
-                event.code === (/^[0-9]$/.test(keyCode) ? "Digit" : "Key") + keyCode || event.code === keyCode ||
+                (/^[0-9]$/.test(keyCode) ? (event.code === "Digit" + keyCode || event.code === "Numpad" + keyCode) : event.code === "Key" + keyCode) ||
+                event.code === keyCode ||
                 (event.code === "Period" && keyCode === ".") ||
                 (event.code === "BracketLeft" && keyCode === "[") || (event.code === "BracketRight" && keyCode === "]")
             )) {
@@ -62,16 +69,21 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     // 是否匹配 ⇧⌘[] / ⌘[]
     const hasShift = hotKeys.length > 2 && (hotKeys[0] === "⇧");
     let key = (hasShift ? hotKeys[2] : hotKeys[1]);
-    if (hasShift && !/Mac/.test(navigator.platform)) {
+    let keyCode;
+    // 更新 electron 后不需要判断 Mac，但 Mac 下中英文有区别，需使用 keyCode 辅助
+    if (hasShift) {
         if (key === "-") {
             key = "_";
+            keyCode = 189;
         } else if (key === "=") {
             key = "+";
+            keyCode = 187;
         } else if (key === ".") {
             key = ">";
+            keyCode = 190;
         }
     }
-    if (isCtrl(event) && event.key.toLowerCase() === key.toLowerCase() && !event.altKey
+    if (isCtrl(event) && (event.key.toLowerCase() === key.toLowerCase() || event.keyCode === keyCode) && !event.altKey
         && ((!hasShift && !event.shiftKey) || (hasShift && event.shiftKey))) {
         return true;
     }

@@ -8,6 +8,7 @@ declare const katex: {
     renderToString(math: string, option: {
         displayMode: boolean;
         output: string;
+        macros: IObject
     }): string;
 };
 
@@ -22,23 +23,29 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
     if (mathElements.length === 0) {
         return;
     }
-    addStyle(`${cdn}/js/katex/katex.min.css?v=0.15.3`, "protyleKatexStyle");
-    addScript(`${cdn}/js/katex/katex.min.js?v=0.15.3`, "protyleKatexScript").then(() => {
-        addScript(`${cdn}/js/katex/mhchem.min.js?v=0.15.3`, "protyleKatexMhchemScript").then(() => {
+    addStyle(`${cdn}/js/katex/katex.min.css?v=0.16.0`, "protyleKatexStyle");
+    addScript(`${cdn}/js/katex/katex.min.js?v=0.16.0`, "protyleKatexScript").then(() => {
+        addScript(`${cdn}/js/katex/mhchem.min.js?v=0.16.0`, "protyleKatexMhchemScript").then(() => {
             mathElements.forEach((mathElement: HTMLElement) => {
                 if (mathElement.getAttribute("data-render") === "true") {
                     return;
                 }
-                const math = Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content"));
                 mathElement.setAttribute("data-render", "true");
                 let renderElement = mathElement;
                 if (mathElement.tagName === "DIV") {
                     renderElement = mathElement.firstElementChild as HTMLElement;
                 }
+                let macros = {};
                 try {
-                    renderElement.innerHTML = katex.renderToString(math, {
+                    macros = JSON.parse(window.siyuan.config.editor.katexMacros || "{}");
+                } catch (e) {
+                    console.warn("KaTex macros is not JSON", e);
+                }
+                try {
+                    renderElement.innerHTML = katex.renderToString(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")), {
                         displayMode: mathElement.tagName === "DIV",
                         output: "html",
+                        macros
                     });
                     renderElement.classList.remove("ft__error");
                     const blockElement = hasClosestBlock(mathElement);
@@ -70,8 +77,9 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                                 // 光标无法移动到末尾 https://github.com/siyuan-note/siyuan/issues/2112
                                 mathElement.insertAdjacentText("afterend", "\n");
                             } else {
-                                // 光标在数学公式 _a 后，视觉上却在下个单元格中 https://ld246.com/article/1651595975481
-                                mathElement.insertAdjacentText("beforeend", Constants.ZWSP);
+                                // https://ld246.com/article/1651595975481，https://ld246.com/article/1658903123429
+                                // 随着浏览器的升级，从 beforeend 修改为 afterend
+                                mathElement.insertAdjacentText("afterend", Constants.ZWSP);
                             }
                         } else if (nextSibling && nextSibling.textContent !== "\n") {
                             // 数学公式后一个字符删除多 br https://ld246.com/article/1647157880974

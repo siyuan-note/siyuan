@@ -21,8 +21,10 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/ConradIrwin/font/sfnt"
 	"github.com/flopp/go-findfont"
+	"github.com/siyuan-note/logging"
 	ttc "golang.org/x/image/font/sfnt"
 	textUnicode "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
@@ -30,7 +32,7 @@ import (
 
 func GetSysFonts(currentLanguage string) (ret []string) {
 	fonts := loadFonts(currentLanguage)
-	ret = RemoveDuplicatedElem(fonts)
+	ret = gulu.Str.RemoveDuplicatedElem(fonts)
 	ret = removeUnusedFonts(ret)
 	sort.Strings(ret)
 	return
@@ -53,7 +55,7 @@ func loadFonts(currentLanguage string) (ret []string) {
 		if strings.HasSuffix(strings.ToLower(f), ".ttc") {
 			data, err := os.ReadFile(f)
 			if nil != err {
-				LogErrorf("read font file [%s] failed: %s", f, err)
+				logging.LogErrorf("read font file [%s] failed: %s", f, err)
 				continue
 			}
 			collection, err := ttc.ParseCollection(data)

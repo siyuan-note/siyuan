@@ -10,6 +10,7 @@
   min-width: 200px;
   height: 28px;
   font-size: 14px;
+  overflow: hidden;
 
   &:focus {
     box-shadow: 0 0 0 3px var(--b3-theme-primary-lighter);

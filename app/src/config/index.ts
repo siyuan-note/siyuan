@@ -20,7 +20,7 @@ export const openSetting = () => {
         }
     });
     if (exitDialog) {
-        return;
+        return exitDialog;
     }
     const height = Math.min(window.innerHeight * .9, Math.max(window.innerHeight * .7, 52 * 11));
     const dialog = new Dialog({
@@ -68,7 +68,7 @@ export const openSetting = () => {
             dialog.element.querySelector(".b3-tab-bar .b3-list-item.b3-list-item--focus").classList.remove("b3-list-item--focus");
             item.classList.add("b3-list-item--focus");
             containerElement.classList.remove("fn__none");
-            if (containerElement.innerHTML === "" || type === "repos") {
+            if (containerElement.innerHTML === "" || type === "repos" || type === "bazaar") {
                 switch (type) {
                     case "filetree":
                         containerElement.innerHTML = fileTree.genHTML();
@@ -103,7 +103,7 @@ export const openSetting = () => {
                     case "account":
                         containerElement.innerHTML = account.genHTML();
                         account.element = dialog.element.querySelector('.b3-tab-container[data-name="account"]');
-                        account.bindEvent();
+                        account.bindEvent(account.element);
                         break;
                     case "repos":
                         containerElement.innerHTML = repos.genHTML();
@@ -128,4 +128,5 @@ export const openSetting = () => {
     });
     editor.element = dialog.element.querySelector('.b3-tab-container[data-name="editor"]');
     editor.bindEvent();
+    return dialog;
 };

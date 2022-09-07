@@ -109,20 +109,28 @@
   background-color: var(--b3-theme-background);
   flex-shrink: 0;
   box-sizing: border-box;
+  min-height: 30px;
 
   &__bar {
-    flex-wrap: wrap;
     align-items: center;
+    flex-wrap: wrap;
     display: flex;
     transition: var(--b3-transition);
     margin-right: 8px;
-    max-height: 60px;
-    min-height: 30px;
     overflow: auto;
+    min-height: 30px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
     &--hide {
       opacity: 0;
       transition: 1s;
+    }
+
+    &--nowrap {
+      flex-wrap: nowrap;
     }
 
     .b3-tooltips {
@@ -140,7 +148,7 @@
   }
 
   &__text--ellipsis {
-    width: 23px;
+    max-width: 112px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -322,6 +330,7 @@
     display: flex;
     position: absolute;
     height: 80px;
+    transition: left .3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0ms;
 
     .protyle-icons {
       position: initial;
@@ -338,6 +347,7 @@
   margin: 34px 16px 0 24px;
   position: relative;
   font-size: 16px;
+  transition: margin .3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0ms;
 
   &:hover .protyle-title__icon {
     opacity: 1;
@@ -376,6 +386,7 @@
     font-weight: bold;
     line-height: 1.625;
     padding: 0 4px;
+    white-space: break-spaces;
 
     &:empty:after {
       content: attr(data-tip);
@@ -384,10 +395,6 @@
 
     &:focus {
       outline: none;
-    }
-
-    &--untitled {
-      color: var(--b3-theme-on-surface);
     }
   }
 }

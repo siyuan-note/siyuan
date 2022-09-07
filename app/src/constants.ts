@@ -36,6 +36,7 @@ export abstract class Constants {
     public static readonly SIZE_GET_MAX = 102400;
     public static readonly SIZE_UNDO = 64;
     public static readonly SIZE_TITLE = 512;
+    public static readonly SIZE_EDITOR_WIDTH = 760;
 
     // ws callback
     public static readonly CB_MOUNT_HELP = "cb-mount-help";
@@ -49,16 +50,21 @@ export abstract class Constants {
     public static readonly CB_GET_SETID = "cb-get-setid"; // 重置 blockid
     public static readonly CB_GET_ALL = "cb-get-all"; // 获取所有块
     public static readonly CB_GET_UNUNDO = "cb-get-unundo"; // 不需要记录历史
+    public static readonly CB_GET_SCROLL = "cb-get-scroll"; // 滚动到指定位置
+    public static readonly CB_GET_CONTEXT = "cb-get-context"; // 包含上下文
+    public static readonly CB_GET_HTML = "cb-get-html"; // 直接渲染，不需要再 /api/block/getDocInfo，否则搜索表格无法定位
+    public static readonly CB_GET_HISTORY = "cb-get-history"; // 历史渲染
 
     // localstorage
     public static readonly LOCAL_SEARCHEDATA = "local-searchedata";
     public static readonly LOCAL_SEARCHETABDATA = "local-searchetabdata";
-    public static readonly LOCAL_DOC = "local-doc";
+    public static readonly LOCAL_DOCINFO = "local-docinfo";
     public static readonly LOCAL_DAILYNOTEID = "local-dailynoteid";
     public static readonly LOCAL_HISTORYNOTEID = "local-historynoteid";
     public static readonly LOCAL_CODELANG = "local-codelang";
     public static readonly LOCAL_FONTSTYLES = "local-fontstyles";
     public static readonly LOCAL_EXPORTPDF = "local-exportpdf";
+    public static readonly LOCAL_EXPORTWORD = "local-exportword";
     public static readonly LOCAL_BAZAAR = "local-bazaar";
 
     // timeout
@@ -82,9 +88,10 @@ export abstract class Constants {
     };
 
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘S", "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⌘↑", "⌘↓", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧Enter", "Enter", "PageUp", "PageDown", "⌫", "⌦", "F9" 不可自定义
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {
+            syncNow: {default: "F9", custom: "F9"},
             enterBack: {default: "⌥←", custom: "⌥←"},
             enter: {default: "⌥→", custom: "⌥→"},
             goForward: {default: "⌘]", custom: "⌘]"},
@@ -109,15 +116,22 @@ export abstract class Constants {
             toggleWin: {default: "⌥M", custom: "⌥M"},
             lockScreen: {default: "⌥N", custom: "⌥N"},
             move: {default: "", custom: ""},
+            selectOpen1: {default: "", custom: ""},
         },
         editor: {
             general: {
+                copyPlainText: {default: "", custom: ""},
+                copyID: {default: "", custom: ""},
+                netImg2LocalAsset: {default: "", custom: ""},
                 hLayout: {default: "", custom: ""},
                 vLayout: {default: "", custom: ""},
-                refBottom: {default: "⇧>", custom: "⇧>"},
-                refRight: {default: "⌥.", custom: "⌥."},
-                refPopover: {default: "⌥⌘.", custom: "⌥⌘."},
-                refTab: {default: "⇧⌘.", custom: "⇧⌘."},
+                refPopover: {default: "", custom: ""},
+                expand: {default: "⌘↓", custom: "⌘↓"},
+                collapse: {default: "⌘↑", custom: "⌘↑"},
+                insertBottom: {default: "⌥⌘.", custom: "⌥⌘."},
+                refTab: {default: "⇧⌘>", custom: "⇧⌘>"},
+                openBy: {default: "⌘.", custom: "⌘."},
+                insertRight: {default: "⌥.", custom: "⌥."},
                 attr: {default: "⌥⌘A", custom: "⌥⌘A"},
                 refresh: {default: "F5", custom: "F5"},
                 copyBlockRef: {default: "⇧⌘C", custom: "⇧⌘C"},
@@ -142,6 +156,7 @@ export abstract class Constants {
                 preview: {default: "⌥⌘9", custom: "⌥⌘9"},
                 insertBefore: {default: "⇧⌘B", custom: "⇧⌘B"},
                 insertAfter: {default: "⇧⌘A", custom: "⇧⌘A"},
+                jumpToParentNext: {default: "⇧⌘N", custom: "⇧⌘N"},
                 moveToUp: {default: "⇧⌘↑", custom: "⇧⌘↑"},
                 moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"},
             },
@@ -166,6 +181,7 @@ export abstract class Constants {
                 code: {default: "⇧⌘K", custom: "⇧⌘K"},
             },
             heading: {
+                paragraph: {default: "⌥⌘0", custom: "⌥⌘0"},
                 heading1: {default: "⌥⌘1", custom: "⌥⌘1"},
                 heading2: {default: "⌥⌘2", custom: "⌥⌘2"},
                 heading3: {default: "⌥⌘3", custom: "⌥⌘3"},
@@ -176,7 +192,7 @@ export abstract class Constants {
             list: {
                 indent: {default: "⇥", custom: "⇥"},
                 outdent: {default: "⇧⇥", custom: "⇧⇥"},
-                checkToggle: {default: "⌘Enter", custom: "⌘Enter"},
+                checkToggle: {default: "⌘↩", custom: "⌘↩"},
             },
             table: {
                 insertRowAbove: {default: "⇧⌘T", custom: "⇧⌘T"},
@@ -188,7 +204,7 @@ export abstract class Constants {
                 moveToLeft: {default: "⌥⌘L", custom: "⌥⌘L"},
                 moveToRight: {default: "⌥⌘R", custom: "⌥⌘R"},
                 "delete-row": {default: "⌘-", custom: "⌘-"},
-                "delete-column": {default: "⇧⌘-", custom: "⇧⌘-"}
+                "delete-column": {default: "⇧⌘_", custom: "⇧⌘_"}
             }
         }
     };
@@ -287,7 +303,7 @@ export abstract class Constants {
                 hotkeyLangId: "outline",
             }, {
                 type: "inbox",
-                size: {width: 250, height: 0},
+                size: {width: 252, height: 0},
                 show: false,
                 icon: "iconInbox",
                 hotkeyLangId: "inbox",
@@ -338,6 +354,7 @@ export abstract class Constants {
 </svg>`;
     public static readonly SIYUAN_IMAGE_FILE: string = "1f4c4";
     public static readonly SIYUAN_IMAGE_NOTE: string = "1f5c3";
+    public static readonly SIYUAN_IMAGE_FOLDER: string = "1f4d1";
 
     // assets
     public static readonly SIYUAN_ASSETS_IMAGE: string[] = [".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg"];

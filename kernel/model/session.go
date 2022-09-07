@@ -23,7 +23,9 @@ import (
 	"github.com/88250/gulu"
 	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/steambap/captcha"
 )
 
 func LogoutAuth(c *gin.Context) {
@@ -44,7 +46,7 @@ func LogoutAuth(c *gin.Context) {
 	})
 	session.Clear()
 	if err := session.Save(); nil != err {
-		util.LogErrorf("saves session failed: " + err.Error())
+		logging.LogErrorf("saves session failed: " + err.Error())
 		ret.Code = -1
 		ret.Msg = "save session failed"
 	}
@@ -53,25 +55,90 @@ func LogoutAuth(c *gin.Context) {
 func LoginAuth(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
+
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
 		return
+	}
+
+	var inputCaptcha string
+	session := util.GetSession(c)
+	if util.NeedCaptcha() {
+		captchaArg := arg["captcha"]
+		if nil == captchaArg {
+			ret.Code = 1
+			ret.Msg = Conf.Language(21)
+			return
+		}
+		inputCaptcha = captchaArg.(string)
+		if "" == inputCaptcha {
+			ret.Code = 1
+			ret.Msg = Conf.Language(21)
+			return
+		}
+
+		if strings.ToLower(session.Captcha) != strings.ToLower(inputCaptcha) {
+			ret.Code = 1
+			ret.Msg = Conf.Language(22)
+			return
+		}
 	}
 
 	authCode := arg["authCode"].(string)
 	if Conf.AccessAuthCode != authCode {
 		ret.Code = -1
 		ret.Msg = Conf.Language(83)
+
+		util.WrongAuthCount++
+		session.Captcha = gulu.Rand.String(7)
+		if util.NeedCaptcha() {
+			ret.Code = 1 // 需要渲染验证码
+		}
+
+		if err := session.Save(c); nil != err {
+			logging.LogErrorf("save session failed: " + err.Error())
+			c.Status(500)
+			return
+		}
 		return
 	}
 
-	session := &util.SessionData{ID: gulu.Rand.Int(0, 1024), AccessAuthCode: authCode}
+	session.AccessAuthCode = authCode
+	util.WrongAuthCount = 0
+	session.Captcha = gulu.Rand.String(7)
 	if err := session.Save(c); nil != err {
-		util.LogErrorf("saves session failed: " + err.Error())
-		ret.Code = -1
-		ret.Msg = "save session failed"
+		logging.LogErrorf("save session failed: " + err.Error())
+		c.Status(500)
 		return
 	}
+}
+
+func GetCaptcha(c *gin.Context) {
+	img, err := captcha.New(100, 26, func(options *captcha.Options) {
+		options.CharPreset = "ABCDEFGHKLMNPQRSTUVWXYZ23456789"
+		options.Noise = 0.5
+		options.CurveNumber = 0
+	})
+	if nil != err {
+		logging.LogErrorf("generates captcha failed: " + err.Error())
+		c.Status(500)
+		return
+	}
+
+	session := util.GetSession(c)
+	session.Captcha = img.Text
+	if err = session.Save(c); nil != err {
+		logging.LogErrorf("save session failed: " + err.Error())
+		c.Status(500)
+		return
+	}
+
+	if err = img.WriteImage(c.Writer); nil != err {
+		logging.LogErrorf("writes captcha image failed: " + err.Error())
+		c.Status(500)
+		return
+	}
+	c.Status(200)
 }
 
 func CheckReadonly(c *gin.Context) {
@@ -87,7 +154,7 @@ func CheckReadonly(c *gin.Context) {
 }
 
 func CheckAuth(c *gin.Context) {
-	//util.LogInfof("check auth for [%s]", c.Request.RequestURI)
+	//logging.LogInfof("check auth for [%s]", c.Request.RequestURI)
 
 	// 放过 /appearance/
 	if strings.HasPrefix(c.Request.RequestURI, "/appearance/") ||
@@ -98,11 +165,16 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
-	// 放过来自本机的资源文件请求
-	if strings.HasPrefix(c.Request.RemoteAddr, "127.0.0.1") &&
-		(strings.HasPrefix(c.Request.RequestURI, "/assets/") || strings.HasPrefix(c.Request.RequestURI, "/history/assets/")) {
-		c.Next()
-		return
+	// 放过来自本机的某些请求
+	if strings.HasPrefix(c.Request.RemoteAddr, "127.0.0.1") {
+		if strings.HasPrefix(c.Request.RequestURI, "/assets/") || strings.HasPrefix(c.Request.RequestURI, "/history/assets/") {
+			c.Next()
+			return
+		}
+		if strings.HasPrefix(c.Request.RequestURI, "/api/system/exit") {
+			c.Next()
+			return
+		}
 	}
 
 	// 通过 Cookie
@@ -135,6 +207,12 @@ func CheckAuth(c *gin.Context) {
 	if session.AccessAuthCode != Conf.AccessAuthCode {
 		userAgentHeader := c.GetHeader("User-Agent")
 		if strings.HasPrefix(userAgentHeader, "SiYuan/") || strings.HasPrefix(userAgentHeader, "Mozilla/") {
+			if "GET" != c.Request.Method {
+				c.JSON(401, map[string]interface{}{"code": -1, "msg": Conf.Language(156)})
+				c.Abort()
+				return
+			}
+
 			c.Redirect(302, "/check-auth")
 			c.Abort()
 			return

@@ -25,7 +25,7 @@ export const newDailyNote = () => {
         return;
     }
     const localNotebookId = window.localStorage.getItem(Constants.LOCAL_DAILYNOTEID);
-    if (localNotebookId && getNotebookName(localNotebookId)) {
+    if (localNotebookId && getNotebookName(localNotebookId) && !isMobile()) {
         fetchPost("/api/filetree/createDailyNote", {
             notebook:localNotebookId
         });
@@ -48,6 +48,7 @@ export const newDailyNote = () => {
         });
         const btnsElement = dialog.element.querySelectorAll(".b3-button");
         const selectElement = dialog.element.querySelector(".b3-select") as HTMLSelectElement;
+        selectElement.value = localNotebookId;
         btnsElement[0].addEventListener("click", () => {
             dialog.destroy();
         });

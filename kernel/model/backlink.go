@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -51,7 +52,7 @@ func RefreshBacklink(id string) {
 		if nil == tree {
 			tree, err = loadTreeByBlockID(ref.RootID)
 			if nil != err {
-				util.LogErrorf("refresh tree refs failed: %s", err)
+				logging.LogErrorf("refresh tree refs failed: %s", err)
 				continue
 			}
 			trees[ref.RootID] = tree
@@ -150,7 +151,7 @@ OK:
 		if err = indexWriteJSONQueue(refTree); nil != err {
 			return "", err
 		}
-		IncWorkspaceDataVer()
+		IncSync()
 	}
 	sql.WaitForWritingDatabase()
 	return
@@ -169,6 +170,7 @@ func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID
 
 	var links []*Block
 	refs := sql.QueryRefsByDefID(id, true)
+	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
 	// 为了减少查询，组装好 IDs 后一次查出
 	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
@@ -236,7 +238,7 @@ func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID
 	}
 	paragraphParents := sql.GetBlocks(paragraphParentIDs)
 	for _, p := range paragraphParents {
-		if "i" == p.Type {
+		if "i" == p.Type || "h" == p.Type {
 			linkRefs = append(linkRefs, fromSQLBlock(p, keyword, beforeLen))
 			processedParagraphs.Add(p.ID)
 		}
@@ -265,6 +267,22 @@ func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID
 	mentions := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen)
 	mentionsCount = len(mentions)
 	mentionPaths = toFlatTree(mentions, 0, "backlink")
+	return
+}
+
+func removeDuplicatedRefs(refs []*sql.Ref) (ret []*sql.Ref) {
+	for _, ref := range refs {
+		contain := false
+		for _, r := range ret {
+			if ref.DefBlockID == r.DefBlockID && ref.BlockID == r.BlockID {
+				contain = true
+				break
+			}
+		}
+		if !contain {
+			ret = append(ret, ref)
+		}
+	}
 	return
 }
 
@@ -358,19 +376,23 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 			buf.WriteString(" OR ")
 		}
 	}
-	buf.WriteString(")'")
+	buf.WriteString(")")
 	if "" != keyword {
-		buf.WriteString(" AND MATCH '{content}:'")
-		buf.WriteString("\"" + keyword + "\"")
 		keyword = strings.ReplaceAll(keyword, "\"", "\"\"")
+		buf.WriteString(" AND (\"" + keyword + "\")")
 	}
+	buf.WriteString("'")
 	buf.WriteString(" AND root_id != '" + rootID + "'") // 不在定义块所在文档中搜索
 	buf.WriteString(" AND type IN ('d', 'h', 'p', 't')")
 	buf.WriteString(" ORDER BY id DESC LIMIT " + strconv.Itoa(Conf.Search.Limit))
 	query := buf.String()
 
 	sqlBlocks := sql.SelectBlocksRawStmt(query, Conf.Search.Limit)
-	blocks := fromSQLBlocks(&sqlBlocks, strings.Join(mentionKeywords, search.TermSep), beforeLen)
+	terms := mentionKeywords
+	if "" != keyword {
+		terms = append(terms, keyword)
+	}
+	blocks := fromSQLBlocks(&sqlBlocks, strings.Join(terms, search.TermSep), beforeLen)
 
 	// 排除链接文本 https://github.com/siyuan-note/siyuan/issues/1542
 	luteEngine := NewLute()

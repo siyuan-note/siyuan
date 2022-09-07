@@ -53,7 +53,21 @@ const focusStack = async (stack: IBackStack) => {
                     tab.addModel(editor);
                 }
             });
-            wnd.addTab(tab);
+            if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
+                let unUpdateTab: Tab;
+                // 不能 reverse, 找到也不能提前退出循环，否则 https://github.com/siyuan-note/siyuan/issues/3271
+                wnd.children.forEach((item) => {
+                    if (item.headElement && item.headElement.classList.contains("item--unupdate") && !item.headElement.classList.contains("item--pin")) {
+                        unUpdateTab = item;
+                    }
+                });
+                wnd.addTab(tab);
+                if (unUpdateTab) {
+                    wnd.removeTab(unUpdateTab.id);
+                }
+            } else {
+                wnd.addTab(tab);
+            }
             wnd.showHeading();
             // 页签关闭
             setTimeout(() => {
@@ -77,7 +91,7 @@ const focusStack = async (stack: IBackStack) => {
                             return true;
                         }
                     });
-                    focusByOffset(blockElement, stack.position.start, stack.position.end);
+                    focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
                     scrollCenter(protyle, blockElement);
                 }
             }, 500);
@@ -111,8 +125,8 @@ const focusStack = async (stack: IBackStack) => {
             return true;
         }
         if (blockElement && !stack.protyle.block.showAll) {
-            focusByOffset(blockElement, stack.position.start, stack.position.end);
-            scrollCenter(stack.protyle, blockElement);
+            focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
+            scrollCenter(stack.protyle, blockElement, true);
             return true;
         }
         // 缩放不一致
@@ -128,7 +142,7 @@ const focusStack = async (stack: IBackStack) => {
                     return true;
                 }
             });
-            focusByOffset(blockElement, stack.position.start, stack.position.end);
+            focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
             setTimeout(() => {
                 // 图片、视频等加载完成后再定位
                 scrollCenter(stack.protyle, blockElement, true);
@@ -163,7 +177,7 @@ const focusStack = async (stack: IBackStack) => {
                     return true;
                 }
             });
-            focusByOffset(blockElement, stack.position.start, stack.position.end);
+            focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
             setTimeout(() => {
                 scrollCenter(stack.protyle, blockElement);
             }, Constants.TIMEOUT_INPUT);
@@ -173,6 +187,9 @@ const focusStack = async (stack: IBackStack) => {
 };
 
 export const goBack = async () => {
+    if (document.querySelector("#barBack").classList.contains("toolbar__item--disabled")) {
+        return;
+    }
     if (window.siyuan.backStack.length === 0) {
         if (forwardStack.length > 0) {
             await focusStack(forwardStack[forwardStack.length - 1]);
@@ -202,6 +219,9 @@ export const goBack = async () => {
 };
 
 export const goForward = async () => {
+    if (document.querySelector("#barForward").classList.contains("toolbar__item--disabled")) {
+        return;
+    }
     if (forwardStack.length === 0) {
         if (window.siyuan.backStack.length > 0) {
             await focusStack(window.siyuan.backStack[window.siyuan.backStack.length - 1]);
@@ -234,7 +254,7 @@ export const pushBack = (protyle: IProtyle, range?: Range, blockElement?: Elemen
     if (!protyle.model) {
         return;
     }
-    if (!blockElement) {
+    if (!blockElement && range) {
         blockElement = hasClosestBlock(range.startContainer) as Element;
     }
     if (!blockElement) {

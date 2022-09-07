@@ -48,14 +48,14 @@ func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 	children := treenode.HeadingChildren(heading)
 	for _, child := range children {
 		childrenIDs = append(childrenIDs, child.ID)
-		child.RemoveIALAttr("fold")
+		child.SetIALAttr("fold", "1")
 		child.SetIALAttr("heading-fold", "1")
 	}
 	heading.SetIALAttr("fold", "1")
 	if err = tx.writeTree(tree); nil != err {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: headingID}
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 
 	cache.PutBlockIAL(headingID, parse.IAL2Map(heading.KramdownIAL))
 	for _, child := range children {
@@ -79,16 +79,17 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
 
-	children := treenode.FoldedHeadingChildren(heading)
+	children := treenode.HeadingChildren(heading)
 	for _, child := range children {
 		child.RemoveIALAttr("heading-fold")
 		child.RemoveIALAttr("fold")
 	}
 	heading.RemoveIALAttr("fold")
+	heading.RemoveIALAttr("heading-fold")
 	if err = tx.writeTree(tree); nil != err {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: headingID}
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 
 	cache.PutBlockIAL(headingID, parse.IAL2Map(heading.KramdownIAL))
 	for _, child := range children {
@@ -207,7 +208,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 
 	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	err = indexWriteJSONQueue(targetTree)
-	IncWorkspaceDataVer()
+	IncSync()
 	RefreshBacklink(srcTree.ID)
 	RefreshBacklink(targetTree.ID)
 	return
@@ -263,7 +264,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	}
 
 	// 折叠标题转换为文档时需要自动展开下方块 https://github.com/siyuan-note/siyuan/issues/2947
-	children := treenode.FoldedHeadingChildren(headingNode)
+	children := treenode.HeadingChildren(headingNode)
 	for _, child := range children {
 		child.RemoveIALAttr("heading-fold")
 		child.RemoveIALAttr("fold")
@@ -296,6 +297,9 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 
 	headingNode.Unlink()
 	srcTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+	if nil == srcTree.Root.FirstChild {
+		srcTree.Root.AppendChild(parse.NewParagraph())
+	}
 	if err = indexWriteJSONQueue(srcTree); nil != err {
 		return "", "", err
 	}
@@ -305,7 +309,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	if err = indexWriteJSONQueue(newTree); nil != err {
 		return "", "", err
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	RefreshBacklink(srcTree.ID)
 	RefreshBacklink(newTree.ID)
 	return

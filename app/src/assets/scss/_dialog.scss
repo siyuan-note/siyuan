@@ -8,7 +8,7 @@
   width: 100%;
   height: 100%;
   display: flex;
-  z-index: 203;
+  z-index: 305;
 
   &--open {
     .b3-dialog__scrim {
@@ -80,5 +80,28 @@
     right: -32px;
     height: 16px;
     width: 16px;
+  }
+
+  &--switch {
+    max-height: 70vh;
+    max-width: 520px;
+
+    .b3-list:last-child {
+      border-left: 1px solid var(--b3-border-color);
+      overflow: auto;
+      max-width: 360px;
+      min-width: 200px;
+    }
+
+    .dialog__path {
+      padding: 4px 8px;
+      border-top: 1px solid var(--b3-border-color);
+      color: var(--b3-theme-on-surface);
+      font-size: 12px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      line-height: 18px;
+    }
   }
 }

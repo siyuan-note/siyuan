@@ -1,13 +1,17 @@
 import {getEventName, isCtrl, updateHotkeyTip} from "../protyle/util/compatibility";
 import {setPosition} from "../util/setPosition";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {isMobile} from "../util/functions";
 
 export class Menu {
     public element: HTMLElement;
+    private wheelEvent: string;
 
     constructor() {
+        this.wheelEvent = "onwheel" in document.createElement("div") ? "wheel" : "mousewheel";
+
         this.element = document.getElementById("commonMenu");
-        this.element.addEventListener("mouseover", (event) => {
+        this.element.addEventListener(isMobile() ? getEventName() : "mouseover", (event) => {
             const target = event.target as Element;
             const itemElement = hasClosestByClassName(target, "b3-menu__item");
             if (!itemElement) {
@@ -30,24 +34,48 @@ export class Menu {
                 return;
             }
             itemElement.classList.add("b3-menu__item--show");
-            const rect = subMenuElement.getBoundingClientRect();
-            let style = "";
-            if (rect.right > window.innerWidth && (rect.left - this.element.clientWidth - rect.width > 0 ||
-                Math.abs(rect.left - this.element.clientWidth - rect.width) < (rect.right - window.innerWidth))) {
-                style = "left:auto;right:100%;";
-            }
-            if (rect.bottom > window.innerHeight) {
-                style += `top: auto;bottom:-5px;max-height:${Math.min(rect.top, window.innerHeight * 0.4)}px`;
-            }
-            if (style) {
-                subMenuElement.setAttribute("style", style);
-            }
+            this.showSubMenu(subMenuElement);
         });
     }
 
+    public showSubMenu(subMenuElement: Element) {
+        const rect = subMenuElement.getBoundingClientRect();
+        let style = "";
+        const leftPosition = rect.left - this.element.clientWidth - rect.width;
+        if (rect.right > window.innerWidth && (
+            leftPosition > 0 || Math.abs(leftPosition) < (rect.right - window.innerWidth))) {
+            if (leftPosition >= 0) {
+                style = "left:auto;right:100%;";
+            } else {
+                style = `z-index:1;mix-blend-mode: normal;left:-${this.element.style.left};`;
+            }
+        } else if (rect.right > window.innerWidth) {
+            style = `z-index:1;mix-blend-mode: normal;left:${window.innerWidth - rect.width - this.element.offsetLeft}px;`;
+        }
+        if (rect.bottom > window.innerHeight) {
+            style += `top: auto;bottom:-5px;max-height:${Math.min(rect.top, window.innerHeight * 0.4)}px`;
+        }
+        if (style) {
+            subMenuElement.setAttribute("style", style);
+        }
+    }
+
+    private preventDefault(event: KeyboardEvent) {
+        if (!hasClosestByClassName(event.target as Element, "b3-menu")) {
+            event.preventDefault();
+        }
+    }
+
     public remove() {
+        if (isMobile()) {
+            window.removeEventListener("touchmove", this.preventDefault, false);
+        } else {
+            window.removeEventListener(this.wheelEvent, this.preventDefault, false);
+        }
+
         this.element.innerHTML = "";
         this.element.classList.add("fn__none");
+        this.element.style.zIndex = "";
     }
 
     public append(element?: HTMLElement) {
@@ -57,9 +85,15 @@ export class Menu {
         this.element.append(element);
     }
 
-    public popup(options: { x: number, y: number }) {
+    public popup(options: { x: number, y: number, h?: number }, isLeft = false) {
+        if (isMobile()) {
+            window.addEventListener("touchmove", this.preventDefault, {passive: false});
+        } else {
+            window.addEventListener(this.wheelEvent, this.preventDefault, {passive: false});
+        }
+
         this.element.classList.remove("fn__none");
-        setPosition(this.element, options.x, options.y);
+        setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h);
     }
 }
 
@@ -77,7 +111,7 @@ export class MenuItem {
         }
         this.element.classList.add("b3-menu__item");
         if (options.current) {
-            this.element.classList.add("b3-menu__item--current");
+            this.element.classList.add("b3-menu__item--selected");
         }
         if (options.click) {
             this.element.addEventListener(getEventName(), (event) => {
@@ -93,7 +127,12 @@ export class MenuItem {
                 window.siyuan.menus.menu.remove();
             });
         }
-        let html = `<svg class="b3-menu__icon${["HTML (SiYuan)", window.siyuan.languages.template].includes(options.label) ? " ft__error" : ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg><span class="b3-menu__label">${options.label}</span>`;
+        let html = `<span class="b3-menu__label">${options.label}</span>`;
+        if (options.iconHTML) {
+            html = options.iconHTML + html;
+        } else {
+            html = `<svg class="b3-menu__icon${["HTML (SiYuan)", window.siyuan.languages.template].includes(options.label) ? " ft__error" : ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;
+        }
         if (options.accelerator) {
             html += `<span class="b3-menu__accelerator">${updateHotkeyTip(options.accelerator)}</span>`;
         }

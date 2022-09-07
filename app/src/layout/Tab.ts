@@ -44,17 +44,25 @@ export class Tab {
             this.headElement.addEventListener("mouseenter", (event) => {
                 event.stopPropagation();
                 event.preventDefault();
-                if (!(this.model as Editor).editor) {
-                    return;
-                }
-                fetchPost("/api/filetree/getFullHPathByID", {
-                    id: (this.model as Editor).editor.protyle.block.rootID
-                }, (response) => {
-                    if (!this.headElement.getAttribute("aria-label")) {
-                        showTooltip(escapeHtml(response.data), this.headElement);
+                let id = "";
+                if (this.model instanceof Editor && this.model.editor?.protyle?.block?.rootID) {
+                    id = (this.model as Editor).editor.protyle.block.rootID;
+                } else if (!this.model){
+                    const initData = JSON.parse(this.headElement.getAttribute("data-initdata")||"{}");
+                    if (initData) {
+                        id = initData.blockId;
                     }
-                    this.headElement.setAttribute("aria-label", escapeHtml(response.data));
-                });
+                }
+                if (id) {
+                    fetchPost("/api/filetree/getFullHPathByID", {
+                        id
+                    }, (response) => {
+                        if (!this.headElement.getAttribute("aria-label")) {
+                            showTooltip(escapeHtml(response.data), this.headElement);
+                        }
+                        this.headElement.setAttribute("aria-label", escapeHtml(response.data));
+                    });
+                }
             });
             this.headElement.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
                 window.getSelection().removeAllRanges();

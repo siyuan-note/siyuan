@@ -124,7 +124,6 @@ export class Inbox extends Model {
                                         }).element);
                                     }
                                 });
-                                window.siyuan.menus.menu.element.classList.remove("fn__none");
                                 window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
                                 break;
                             case "back":
@@ -147,7 +146,7 @@ ${data.shorthandTitle}
 <div class="fn__hr"></div>
 <a href="${data.shorthandURL}" target="_blank">${data.shorthandURL}</a>
 <div class="fn__hr"></div>
-<div class="b3-typography">
+<div class="b3-typography b3-typography--default">
 ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
 </div>`;
                             detailsElement.setAttribute("data-id", data.oId);
@@ -215,7 +214,6 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
                 });
             }
         }).element);
-        window.siyuan.menus.menu.element.classList.remove("fn__none");
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
     }
 
@@ -285,7 +283,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             refreshElement.classList.remove("fn__rotate");
             let html = "";
             if (response.data.data.shorthands.length === 0) {
-                html = '<ul class="b3-list b3-list--background"><li class="b3-list--empty  b3-typography">打开帮助文档搜索 <code>收集箱</code> 查看使用说明</li></ul>';
+                html = '<ul class="b3-list b3-list--background"><li class="b3-list--empty">打开帮助文档搜索 <b>收集箱</b> 查看使用说明</li></ul>';
             } else {
                 html = "<ul class=\"b3-list b3-list--background\">";
                 response.data.data.shorthands.forEach((item: IInbox) => {
@@ -295,7 +293,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
         <input class="fn__flex-center" type="checkbox"${this.selectIds.includes(item.oId) ? " checked" : ""}>
         <span class="fn__space"></span>
     </label>
-    <span class="b3-list-item__text">${item.shorthandTitle}</span>
+    <span class="b3-list-item__text" title="${item.shorthandTitle}${item.shorthandTitle === item.shorthandDesc ? "" : "\n" + item.shorthandDesc}">${item.shorthandTitle}</span>
     <span class="b3-list-item__meta">${item.hCreated}</span>
 </li>`;
                     this.data[item.oId] = item;

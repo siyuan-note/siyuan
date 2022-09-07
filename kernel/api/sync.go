@@ -25,24 +25,11 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getSyncDirection(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	cloudDirName := arg["name"].(string)
-	ret.Code, ret.Msg = model.GetSyncDirection(cloudDirName)
-}
-
 func getBootSync(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	if 1 == model.BootSyncSucc {
+	if model.Conf.Sync.Enabled && 1 == model.BootSyncSucc {
 		ret.Code = 1
 		ret.Msg = model.Conf.Language(17)
 		return
@@ -132,6 +119,25 @@ func setSyncEnable(c *gin.Context) {
 
 	enabled := arg["enabled"].(bool)
 	err := model.SetSyncEnable(enabled)
+	if nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+}
+
+func setSyncMode(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	mode := int(arg["mode"].(float64))
+	err := model.SetSyncMode(mode)
 	if nil != err {
 		ret.Code = 1
 		ret.Msg = err.Error()

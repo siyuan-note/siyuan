@@ -18,10 +18,14 @@ package util
 
 import (
 	"math/rand"
+	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/88250/gulu"
 	figure "github.com/common-nighthawk/go-figure"
+	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 )
 
 func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, lang string) {
@@ -30,24 +34,39 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	initMime()
 
 	HomeDir = filepath.Join(workspaceDir, "home")
+	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")
+	if !gulu.File.IsExist(userHomeConfDir) {
+		os.MkdirAll(userHomeConfDir, 0755)
+	}
 	WorkingDir = filepath.Join(appDir, "app")
 	WorkspaceDir = workspaceDir
 	ConfDir = filepath.Join(workspaceDir, "conf")
 	DataDir = filepath.Join(workspaceDir, "data")
+	HistoryDir = filepath.Join(workspaceDir, "history")
+	RepoDir = filepath.Join(WorkspaceDir, "repo")
 	TempDir = filepath.Join(workspaceDir, "temp")
+	osTmpDir := filepath.Join(TempDir, "os")
+	os.RemoveAll(osTmpDir)
+	os.MkdirAll(osTmpDir, 0755)
+	os.RemoveAll(filepath.Join(TempDir, "repo"))
+	os.Setenv("TMPDIR", osTmpDir)
 	DBPath = filepath.Join(TempDir, DBName)
+	HistoryDBPath = filepath.Join(TempDir, "history.db")
 	BlockTreePath = filepath.Join(TempDir, "blocktree.msgpack")
 	AndroidNativeLibDir = nativeLibDir
 	AndroidPrivateDataDir = privateDataDir
 	LogPath = filepath.Join(TempDir, "siyuan.log")
+	logging.SetLogPath(LogPath)
 	AppearancePath = filepath.Join(ConfDir, "appearance")
 	ThemesPath = filepath.Join(AppearancePath, "themes")
 	IconsPath = filepath.Join(AppearancePath, "icons")
 	Resident = true
 	Container = container
+	UserAgent = UserAgent + " " + Container
+	httpclient.SetUserAgent(UserAgent)
 	Lang = lang
 	initPathDir()
 	bootBanner := figure.NewFigure("SiYuan", "", true)
-	LogInfof("\n" + bootBanner.String())
+	logging.LogInfof("\n" + bootBanner.String())
 	logBootInfo()
 }

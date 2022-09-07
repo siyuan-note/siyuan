@@ -18,10 +18,8 @@ package sql
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"database/sql"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -35,11 +33,15 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/mattn/go-sqlite3"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-var db *sql.DB
+var (
+	db        *sql.DB
+	historyDB *sql.DB
+)
 
 func init() {
 	regex := func(re, s string) (bool, error) {
@@ -57,6 +59,10 @@ func init() {
 func InitDatabase(forceRebuild bool) (err error) {
 	util.IncBootProgress(2, "Initializing database...")
 
+	if forceRebuild {
+		WaitForWritingDatabase()
+	}
+
 	initDBConnection()
 
 	if !forceRebuild {
@@ -64,6 +70,7 @@ func InitDatabase(forceRebuild bool) (err error) {
 		if util.DatabaseVer == getDatabaseVer() {
 			return
 		}
+		logging.LogInfof("the database structure is changed, rebuilding database...")
 	}
 
 	// 不存在库或者版本不一致都会走到这里
@@ -71,7 +78,8 @@ func InitDatabase(forceRebuild bool) (err error) {
 	db.Close()
 	if gulu.File.IsExist(util.DBPath) {
 		if err = removeDatabaseFile(); nil != err {
-			util.LogErrorf("remove database file [%s] failed: %s", util.DBPath, err)
+			logging.LogErrorf("remove database file [%s] failed: %s", util.DBPath, err)
+			util.PushClearProgress()
 			return
 		}
 	}
@@ -82,7 +90,7 @@ func InitDatabase(forceRebuild bool) (err error) {
 	initDBConnection()
 	initDBTables()
 
-	util.LogInfof("reinitialized database [%s]", util.DBPath)
+	logging.LogInfof("reinitialized database [%s]", util.DBPath)
 	return
 }
 
@@ -90,56 +98,106 @@ func initDBTables() {
 	db.Exec("DROP TABLE stat")
 	_, err := db.Exec("CREATE TABLE stat (key, value)")
 	if nil != err {
-		util.LogFatalf("create table [stat] failed: %s", err)
+		logging.LogFatalf("create table [stat] failed: %s", err)
 	}
 	setDatabaseVer()
 
 	db.Exec("DROP TABLE blocks")
 	_, err = db.Exec("CREATE TABLE blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated)")
 	if nil != err {
-		util.LogFatalf("create table [blocks] failed: %s", err)
+		logging.LogFatalf("create table [blocks] failed: %s", err)
 	}
 
 	db.Exec("DROP TABLE blocks_fts")
 	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan\")")
 	if nil != err {
-		util.LogFatalf("create table [blocks_fts] failed: %s", err)
+		logging.LogFatalf("create table [blocks_fts] failed: %s", err)
 	}
 
 	db.Exec("DROP TABLE blocks_fts_case_insensitive")
 	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts_case_insensitive USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan case_insensitive\")")
 	if nil != err {
-		util.LogFatalf("create table [blocks_fts_case_insensitive] failed: %s", err)
+		logging.LogFatalf("create table [blocks_fts_case_insensitive] failed: %s", err)
 	}
 
 	db.Exec("DROP TABLE spans")
 	_, err = db.Exec("CREATE TABLE spans (id, block_id, root_id, box, path, content, markdown, type, ial)")
 	if nil != err {
-		util.LogFatalf("create table [spans] failed: %s", err)
+		logging.LogFatalf("create table [spans] failed: %s", err)
 	}
 
 	db.Exec("DROP TABLE assets")
 	_, err = db.Exec("CREATE TABLE assets (id, block_id, root_id, box, docpath, path, name, title, hash)")
 	if nil != err {
-		util.LogFatalf("create table [assets] failed: %s", err)
+		logging.LogFatalf("create table [assets] failed: %s", err)
 	}
 
 	db.Exec("DROP TABLE attributes")
 	_, err = db.Exec("CREATE TABLE attributes (id, name, value, type, block_id, root_id, box, path)")
 	if nil != err {
-		util.LogFatalf("create table [attributes] failed: %s", err)
+		logging.LogFatalf("create table [attributes] failed: %s", err)
 	}
 
 	db.Exec("DROP TABLE refs")
 	_, err = db.Exec("CREATE TABLE refs (id, def_block_id, def_block_parent_id, def_block_root_id, def_block_path, block_id, root_id, box, path, content, markdown, type)")
 	if nil != err {
-		util.LogFatalf("create table [refs] failed: %s", err)
+		logging.LogFatalf("create table [refs] failed: %s", err)
 	}
 
 	db.Exec("DROP TABLE file_annotation_refs")
 	_, err = db.Exec("CREATE TABLE file_annotation_refs (id, file_path, annotation_id, block_id, root_id, box, path, content, type)")
 	if nil != err {
-		util.LogFatalf("create table [refs] failed: %s", err)
+		logging.LogFatalf("create table [refs] failed: %s", err)
+	}
+}
+
+func InitHistoryDatabase(forceRebuild bool) {
+	initHistoryDBConnection()
+
+	if !forceRebuild && gulu.File.IsExist(util.HistoryDBPath) {
+		return
+	}
+
+	historyDB.Close()
+	if err := os.RemoveAll(util.HistoryDBPath); nil != err {
+		logging.LogErrorf("remove history database file [%s] failed: %s", util.HistoryDBPath, err)
+		return
+	}
+
+	initHistoryDBConnection()
+	initHistoryDBTables()
+}
+
+func initHistoryDBConnection() {
+	if nil != historyDB {
+		historyDB.Close()
+	}
+
+	dsn := util.HistoryDBPath + "?_journal_mode=OFF" +
+		"&_synchronous=OFF" +
+		"&_secure_delete=OFF" +
+		"&_cache_size=-20480" +
+		"&_page_size=8192" +
+		"&_busy_timeout=7000" +
+		"&_ignore_check_constraints=ON" +
+		"&_temp_store=MEMORY" +
+		"&_case_sensitive_like=OFF" +
+		"&_locking_mode=EXCLUSIVE"
+	var err error
+	historyDB, err = sql.Open("sqlite3_extended", dsn)
+	if nil != err {
+		logging.LogFatalf("create database failed: %s", err)
+	}
+	historyDB.SetMaxIdleConns(1)
+	historyDB.SetMaxOpenConns(1)
+	historyDB.SetConnMaxLifetime(365 * 24 * time.Hour)
+}
+
+func initHistoryDBTables() {
+	historyDB.Exec("DROP TABLE histories_fts_case_insensitive")
+	_, err := historyDB.Exec("CREATE VIRTUAL TABLE histories_fts_case_insensitive USING fts5(type UNINDEXED, op UNINDEXED, title, content, path UNINDEXED, created UNINDEXED, tokenize=\"siyuan case_insensitive\")")
+	if nil != err {
+		logging.LogFatalf("create table [histories_fts_case_insensitive] failed: %s", err)
 	}
 }
 
@@ -160,7 +218,7 @@ func IndexMode() {
 	var err error
 	db, err = sql.Open("sqlite3_extended", dsn)
 	if nil != err {
-		util.LogFatalf("create database failed: %s", err)
+		logging.LogFatalf("create database failed: %s", err)
 	}
 	db.SetMaxIdleConns(1)
 	db.SetMaxOpenConns(1)
@@ -187,7 +245,7 @@ func initDBConnection() {
 	var err error
 	db, err = sql.Open("sqlite3_extended", dsn)
 	if nil != err {
-		util.LogFatalf("create database failed: %s", err)
+		logging.LogFatalf("create database failed: %s", err)
 	}
 	db.SetMaxIdleConns(20)
 	db.SetMaxOpenConns(20)
@@ -507,6 +565,22 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		walkStatus = ast.WalkSkipChildren
 		return
 	case ast.NodeLinkDest:
+		text := n.TokensStr()
+		markdown := treenode.FormatNode(n.Parent, luteEngine)
+		parentBlock := treenode.ParentBlock(n)
+		span := &Span{
+			ID:       ast.NewNodeID(),
+			BlockID:  parentBlock.ID,
+			RootID:   rootID,
+			Box:      boxID,
+			Path:     p,
+			Content:  text,
+			Markdown: markdown,
+			Type:     treenode.TypeAbbr(n.Type.String()),
+			IAL:      treenode.IALStr(n),
+		}
+		spans = append(spans, span)
+
 		// assetsLinkDestsInTree
 
 		if !IsAssetLinkDest(n.Tokens) {
@@ -515,19 +589,19 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		}
 
 		dest := gulu.Str.FromBytes(n.Tokens)
-		parentBlock := treenode.ParentBlock(n)
+		parentBlock = treenode.ParentBlock(n)
 		var title string
 		if titleNode := n.Parent.ChildByType(ast.NodeLinkTitle); nil != titleNode {
 			title = gulu.Str.FromBytes(titleNode.Tokens)
 		}
 
 		var hash string
+		var hashErr error
 		if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
 			if !gulu.File.IsDir(lp) {
-				if data, err := os.ReadFile(lp); nil != err {
-					util.LogErrorf("read asset [%s] data failed: %s", lp, err)
-				} else {
-					hash = fmt.Sprintf("%x", sha256.Sum256(data))
+				hash, hashErr = util.GetEtag(lp)
+				if nil != hashErr {
+					logging.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
 				}
 			}
 		}
@@ -554,10 +628,9 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			spans = append(spans, tags...)
 		}
 	case ast.NodeInlineHTML, ast.NodeHTMLBlock, ast.NodeIFrame, ast.NodeWidget, ast.NodeAudio, ast.NodeVideo:
-		htmlRoot := &html.Node{Type: html.ElementNode}
-		nodes, err := html.ParseFragment(strings.NewReader(gulu.Str.FromBytes(n.Tokens)), htmlRoot)
+		nodes, err := html.ParseFragment(bytes.NewReader(n.Tokens), &html.Node{Type: html.ElementNode})
 		if nil != err {
-			util.LogErrorf("parse HTML failed: %s", err)
+			logging.LogErrorf("parse HTML failed: %s", err)
 			walkStatus = ast.WalkContinue
 			return
 		}
@@ -580,7 +653,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 
 		var src []byte
 		for _, attr := range nodes[0].Attr {
-			if "src" == attr.Key || "data-assets" == attr.Key {
+			if "src" == attr.Key || "data-assets" == attr.Key || "custom-data-assets" == attr.Key {
 				src = gulu.Str.ToBytes(attr.Val)
 				break
 			}
@@ -597,11 +670,11 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 
 		dest := string(src)
 		var hash string
+		var hashErr error
 		if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
-			if data, err := os.ReadFile(lp); nil != err {
-				util.LogErrorf("read asset [%s] data failed: %s", lp, err)
-			} else {
-				hash = fmt.Sprintf("%x", sha256.Sum256(data))
+			hash, hashErr = util.GetEtag(lp)
+			if nil != hashErr {
+				logging.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
 			}
 		}
 
@@ -1012,14 +1085,17 @@ func batchUpdateHPath(tx *sql.Tx, boxID, rootID, oldHPath, newHPath string) (err
 
 func CloseDatabase() {
 	if err := db.Close(); nil != err {
-		util.LogErrorf("close database failed: %s", err)
+		logging.LogErrorf("close database failed: %s", err)
+	}
+	if err := historyDB.Close(); nil != err {
+		logging.LogErrorf("close history database failed: %s", err)
 	}
 }
 
 func queryRow(query string, args ...interface{}) *sql.Row {
 	query = strings.TrimSpace(query)
 	if "" == query {
-		util.LogErrorf("statement is empty")
+		logging.LogErrorf("statement is empty")
 		return nil
 	}
 	return db.QueryRow(query, args...)
@@ -1035,7 +1111,17 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 
 func BeginTx() (tx *sql.Tx, err error) {
 	if tx, err = db.Begin(); nil != err {
-		util.LogErrorf("begin tx failed: %s\n  %s", err, util.ShortStack())
+		logging.LogErrorf("begin tx failed: %s\n  %s", err, logging.ShortStack())
+		if strings.Contains(err.Error(), "database is locked") {
+			os.Exit(util.ExitCodeReadOnlyDatabase)
+		}
+	}
+	return
+}
+
+func BeginHistoryTx() (tx *sql.Tx, err error) {
+	if tx, err = historyDB.Begin(); nil != err {
+		logging.LogErrorf("begin history tx failed: %s\n  %s", err, logging.ShortStack())
 		if strings.Contains(err.Error(), "database is locked") {
 			os.Exit(util.ExitCodeReadOnlyDatabase)
 		}
@@ -1045,19 +1131,19 @@ func BeginTx() (tx *sql.Tx, err error) {
 
 func CommitTx(tx *sql.Tx) (err error) {
 	if nil == tx {
-		util.LogErrorf("tx is nil")
+		logging.LogErrorf("tx is nil")
 		return errors.New("tx is nil")
 	}
 
 	if err = tx.Commit(); nil != err {
-		util.LogErrorf("commit tx failed: %s\n  %s", err, util.ShortStack())
+		logging.LogErrorf("commit tx failed: %s\n  %s", err, logging.ShortStack())
 	}
 	return
 }
 
 func RollbackTx(tx *sql.Tx) {
 	if err := tx.Rollback(); nil != err {
-		util.LogErrorf("rollback tx failed: %s\n  %s", err, util.ShortStack())
+		logging.LogErrorf("rollback tx failed: %s\n  %s", err, logging.ShortStack())
 	}
 }
 
@@ -1067,7 +1153,7 @@ func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []interface{}) (err er
 		return
 	}
 	if _, err = stmt.Exec(args...); nil != err {
-		util.LogErrorf("exec database stmt [%s] failed: %s", stmtSQL, err)
+		logging.LogErrorf("exec database stmt [%s] failed: %s", stmtSQL, err)
 		return
 	}
 	return
@@ -1079,9 +1165,9 @@ func execStmtTx(tx *sql.Tx, stmt string, args ...interface{}) (err error) {
 			tx.Rollback()
 			db.Close()
 			removeDatabaseFile()
-			util.LogFatalf("database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it", util.DBPath)
+			logging.LogFatalf("database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it", util.DBPath)
 		}
-		util.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, util.ShortStack())
+		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, logging.ShortStack())
 		return
 	}
 	return

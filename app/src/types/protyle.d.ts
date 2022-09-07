@@ -1,6 +1,7 @@
 declare const echarts: {
     init(element: HTMLElement, theme?: string, options?: { width: number }): IEChart;
     dispose(element: Element): void;
+    getInstanceById(id: string): { resize: () => void };
 };
 
 declare const hljs: {
@@ -132,6 +133,8 @@ declare class Lute {
 
     public static GetHeadingID(node: ILuteNode): string;
 
+    public static BlockDOM2Content(html: string): string;
+
     private constructor();
 
     public SetHeadingID(enable: boolean): void;
@@ -203,6 +206,8 @@ declare class Lute {
     public IsValidLinkDest(text: string): boolean;
 
     public BlockDOM2InlineBlockDOM(html: string): string;
+
+    public BlockDOM2HTML(html: string): string;
 }
 
 declare const webkitAudioContext: {
@@ -342,14 +347,15 @@ interface IOptions {
     action?: string[],
     mode?: TEditorMode,
     blockId: string
-    hasContext?: boolean
     key?: string
+    scrollAttr?: IScrollAttr
     defId?: string
     render?: {
         background?: boolean
         title?: boolean
         gutter?: boolean
         scroll?: boolean
+        breadcrumb?: boolean
         breadcrumbDocName?: boolean
         breadcrumbContext?: boolean
     }
@@ -383,12 +389,14 @@ interface IProtyle {
     id: string,
     block: {
         id?: string,
+        childBlockCount?: number,
         parentID?: string,
         parent2ID?: string,
         rootID?: string,
         showAll?: boolean
         mode?: number
         blockCount?: number
+        action?: string[]
     },
     disabled: boolean,
     selectElement?: HTMLElement,

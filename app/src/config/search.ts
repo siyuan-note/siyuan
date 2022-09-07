@@ -11,15 +11,16 @@ const getLang = (keys: string[]) => {
 export const initConfigSearch = (element: HTMLElement) => {
     const configIndex = [
         // 编辑器
-        getLang(["config",
-            "editor", "md2", "md3", "md12", "md16", "md27", "md28", "md29", "md30", "md31", "md32", "md33", "md34", "md39",
+        getLang(["config", "fullWidth",
+            "editor", "md2", "md3", "md12", "md16", "md27", "md28", "md29", "md30", "md31", "md32", "md33", "md34", "md39", "md40",
             "fontSizeTip", "fontSize", "font", "font1", "generateHistory", "generateHistoryInterval",
-            "historyRetentionDays", "historyRetentionDaysTip", "clearHistory"
+            "historyRetentionDays", "historyRetentionDaysTip", "clearHistory", "katexMacros", "katexMacrosTip"
         ]),
 
         // 文档树
-        getLang(["selectOpen", "fileTree", "fileTree2",
-            "fileTree5", "fileTree6", "fileTree7", "fileTree8", "fileTree12", "fileTree13", "fileTree15", "fileTree16", "fileTree17"]),
+        getLang(["selectOpen", "tabLimit", "fileTree", "fileTree2", "fileTree3", "fileTree4", "fileTree5",
+            "fileTree6", "fileTree7", "fileTree8", "fileTree9", "fileTree10", "fileTree12", "fileTree13", "fileTree15",
+            "fileTree16", "fileTree17"]),
 
         // 图片
         getLang(["assets", "clearUnused"]),
@@ -45,7 +46,7 @@ export const initConfigSearch = (element: HTMLElement) => {
             "doc", "headings", "list1", "listItem", "code", "math", "table", "quote", "superBlock", "paragraph"]),
 
         // 快捷键
-        getLang(["keymap"].concat(Object.keys(Constants.SIYUAN_KEYMAP.general))
+        getLang(["keymap", "keymapTip2"].concat(Object.keys(Constants.SIYUAN_KEYMAP.general))
             .concat(Object.keys(Constants.SIYUAN_KEYMAP.editor.general))
             .concat(Object.keys(Constants.SIYUAN_KEYMAP.editor.heading))
             .concat(Object.keys(Constants.SIYUAN_KEYMAP.editor.insert))
@@ -53,18 +54,17 @@ export const initConfigSearch = (element: HTMLElement) => {
             .concat(Object.keys(Constants.SIYUAN_KEYMAP.editor.table))),
 
         // 云端
-        getLang(["sync", "cloudSpace", "backup", "cdn", "total", "cloudBackup", "downloadRecover", "backupUpload",
-            "downloadCloud", "downloadCloudTip", "account3Tip", "updatePath", "cloudSync",
-            "changeE2EEPasswd", "e2eePasswdTip", "changeE2EEPasswdTip", "e2eePasswd", "setPasswd", "syncTip", "reposTip", "openSyncTip1", "openSyncTip2", "downloadRecover1", "backupUpload1", "deleteCloudBackup", "cloudSyncDir"]),
+        getLang(["sync", "cloudSpace", "backup", "cdn", "total", "cloudBackup", "updatePath", "cloudSync",
+            "syncTip", "reposTip", "openSyncTip1", "openSyncTip2", "cloudSyncDir"]),
 
         // 账号
         getLang(["accountTip", "accountName", "password", "captcha", "forgetPassword", "login", "register", "twoFactorCaptcha",
-            "account1", "account2", "account5", "account7", "networkProxy"]),
+            "account1", "account2", "account5", "networkProxy"]),
 
         // 关于
         getLang(["about", "about1", "about2", "about3", "about4", "about5", "about6", "about7", "about8",
             "about11", "about12", "about13", "about14", "about15", "about16",
-            "slogan", "currentVer", "checkUpdate", "updatePath"]),
+            "slogan", "currentVer", "checkUpdate", "updatePath", "snapshotPassword", "systemLog"]),
     ];
     const inputElement = element.querySelector(".b3-form__icon input") as HTMLInputElement;
     if (window.siyuan.config.system.container !== "ios") {

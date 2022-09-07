@@ -4,6 +4,7 @@ import {Constants} from "../../constants";
 import {destroy} from "../util/destroy";
 import {fetchPost} from "../../util/fetch";
 import {getEditorRange} from "../util/selection";
+import {pathPosix} from "../../util/pathName";
 
 export class Upload {
     public element: HTMLElement;
@@ -17,7 +18,6 @@ export class Upload {
 }
 
 const validateFile = (protyle: IProtyle, files: File[]) => {
-    hideMessage();
     const uploadFileList = [];
     let errorTip = "";
     let uploadingStr = "";
@@ -66,12 +66,12 @@ const validateFile = (protyle: IProtyle, files: File[]) => {
             uploadingStr += `<li>${filename} ${window.siyuan.languages.uploading}</li>`;
         }
     }
-
+    let msgId;
     if (errorTip !== "" || uploadingStr !== "") {
-        showMessage(`<ul>${errorTip}${uploadingStr}</ul>`);
+        msgId = showMessage(`<ul>${errorTip}${uploadingStr}</ul>`);
     }
 
-    return uploadFileList;
+    return {files: uploadFileList, msgId};
 };
 
 const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
@@ -94,26 +94,18 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
 
     if (errorTip) {
         showMessage(errorTip);
-    } else {
-        hideMessage();
     }
 
     let succFileText = "";
-    const keys =  Object.keys(response.data.succMap);
+    const keys = Object.keys(response.data.succMap);
     keys.forEach((key, index) => {
         const path = response.data.succMap[key];
-        const lastIndex = key.lastIndexOf(".");
-        let type = key.substr(lastIndex);
-        let filename = protyle.options.upload.filename(key.substr(0, lastIndex)) + type;
-        if (-1 === lastIndex) {
-            type = "";
-            filename = protyle.options.upload.filename(key);
-        }
-        type = type.toLowerCase();
+        const type = pathPosix().extname(key).toLowerCase();
+        const filename = protyle.options.upload.filename(key);
         if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
             succFileText += `<audio controls="controls" src="${path}"></audio>`;
         } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-            succFileText += `![${filename}](${path})`;
+            succFileText += `![${filename.substring(0, filename.length - type.length)}](${path})`;
         } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
             succFileText += `<video controls="controls" src="${path}"></video>`;
         } else {
@@ -133,11 +125,12 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
 };
 
 export const uploadLocalFiles = (files: string[], protyle: IProtyle) => {
-    showMessage(window.siyuan.languages.uploading, 0);
+    const msgId = showMessage(window.siyuan.languages.uploading, 0);
     fetchPost("/api/asset/insertLocalAssets", {
         assetPaths: files,
         id: protyle.block.rootID
     }, (response) => {
+        hideMessage(msgId);
         genUploadedLabel(JSON.stringify(response), protyle);
     });
 };
@@ -189,7 +182,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
     const editorElement = protyle.wysiwyg.element;
 
     const validateResult = validateFile(protyle, fileList);
-    if (validateResult.length === 0) {
+    if (validateResult.files.length === 0) {
         if (element) {
             element.value = "";
         }
@@ -203,8 +196,8 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         formData.append(key, extraData[key]);
     }
 
-    for (let i = 0, iMax = validateResult.length; i < iMax; i++) {
-        formData.append(protyle.options.upload.fieldName, validateResult[i]);
+    for (let i = 0, iMax = validateResult.files.length; i < iMax; i++) {
+        formData.append(protyle.options.upload.fieldName, validateResult.files[i]);
     }
     formData.append("id", protyle.block.rootID);
     const xhr = new XMLHttpRequest();
@@ -226,6 +219,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
                 return;
             }
             if (xhr.status === 200) {
+                hideMessage(validateResult.msgId);
                 if (protyle.options.upload.success) {
                     protyle.options.upload.success(editorElement, xhr.responseText);
                 } else if (successCB) {

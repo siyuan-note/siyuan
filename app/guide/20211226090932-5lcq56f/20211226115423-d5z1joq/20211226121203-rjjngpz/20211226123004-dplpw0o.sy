@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
-		"updated": "20211226123024"
+		"updated": "20220605170337"
 	},
 	"Children": [
 		{
@@ -373,7 +373,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226123024-pjvw31z",
-				"updated": "20211228141606"
+				"updated": "20220605170337"
 			},
 			"Children": [
 				{
@@ -532,14 +532,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226123024-jdmxqwy"
+						"id": "20211226123024-jdmxqwy",
+						"updated": "20220605170337"
 					},
 					"Children": [
 						{
 							"ID": "20211226123024-yfk0zfn",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226123024-yfk0zfn"
+								"id": "20211226123024-yfk0zfn",
+								"updated": "20220605170337"
 							},
 							"Children": [
 								{
@@ -560,7 +562,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：該變量用於插入但前文檔別名"
+									"Data": "：該變量用於插入當前文檔別名"
 								}
 							]
 						}

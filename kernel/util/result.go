@@ -16,7 +16,10 @@
 
 package util
 
-import "github.com/88250/gulu"
+import (
+	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
+)
 
 type PushMode int
 
@@ -64,7 +67,7 @@ func NewCmdResult(cmdName string, cmdId float64, pushMode, reloadPushMode PushMo
 func (r *Result) Bytes() []byte {
 	ret, err := gulu.JSON.MarshalJSON(r)
 	if nil != err {
-		LogErrorf("marshal result [%+v] failed [%s]", r, err)
+		logging.LogErrorf("marshal result [%+v] failed [%s]", r, err)
 	}
 	return ret
 }

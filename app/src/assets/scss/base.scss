@@ -29,15 +29,42 @@
 @import "viewer";
 
 /*
-z-index:
-ctrl+p 搜索: 199 // 需小于 .block__popover https://github.com/siyuan-note/siyuan/issues/3515
-.hint & .protyle-util: 200 // 需小于 .b3-dialog
-.block__popover: 201 // 需小于 .b3-dialog https://ld246.com/article/1637204682648
-.b3-dialog: 203 // 需小于 #windowControls
-#windowControls: 302
-.protyle-util: 303 // 需大于 .block__popover https://github.com/siyuan-note/siyuan/issues/3276
-.b3-menu: 304 // 需大于 .block__popover
-progressLoading: 400 // 需大于 .b3-dialog
+.status: 2
+
+// 需小于 .block__popover https://github.com/siyuan-note/siyuan/issues/3515
+ctrl+p 搜索: 199
+
+// 需小于 .block__popover
+.protyle-util: 200
+
+// 引用提示需小于 .block__popover
+.b3-menu: 201
+
+// 需小于 .b3-menu 悬浮窗点击更多
+// 需小于 .b3-dialog https://ld246.com/article/1637204682648
+.block__popover: 205
+.block__popover--top: 206
+
+// 需大于 .block__popover
+.b3-menu: 210
+
+// 需小于 .b3-dialog 关于中的锁屏密码设置
+.side-panel: 220
+
+// 需小于 #windowControls
+// 需大于 .protyle-util https://github.com/siyuan-note/siyuan/issues/5069
+.b3-dialog: 305
+
+// 历史中切换笔记本需临时大于 .b3-dialog https://github.com/siyuan-note/siyuan/issues/5107
+// 移动端排序和菜单需临时大于 .side-panel https://github.com/siyuan-note/siyuan/issues/5254
+.b3-menu: 310
+
+// 需大于 .b3-dialog
+progressLoading: 400
+
+#windowControls: 502
+
+.b3-snackbar: 503
 */
 
 .inbox {
@@ -205,6 +232,34 @@ progressLoading: 400 // 需大于 .b3-dialog
   }
 }
 
+.status {
+  background-color: var(--b3-theme-surface);
+  box-sizing: border-box;
+  height: 22px;
+  line-height: 22px;
+  z-index: 2;
+
+  &__msg {
+    font-size: 12px;
+    color: var(--b3-theme-on-surface);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  &__counter {
+    font-size: 12px;
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  #barDock {
+    .b3-menu__item:hover {
+      background-color: var(--b3-list-hover);
+    }
+  }
+}
+
 .config {
   &-query {
     display: flex;
@@ -329,7 +384,7 @@ progressLoading: 400 // 需大于 .b3-dialog
     }
   }
 
-  &-keymap .b3-text-field {
+  &-keymap li .b3-text-field {
     width: 124px;
     text-align: center;
   }
@@ -483,6 +538,6 @@ progressLoading: 400 // 需大于 .b3-dialog
 
   .b3-list-item__graphic.popover__block {
     align-self: flex-start;
-    margin-top: 4px;
+    margin-top: 7px;
   }
 }

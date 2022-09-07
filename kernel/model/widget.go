@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/siyuan-note/siyuan/kernel/search"
@@ -31,7 +32,7 @@ func SearchWidget(keyword string) (ret []*Block) {
 	widgets := filepath.Join(util.DataDir, "widgets")
 	dirs, err := os.ReadDir(widgets)
 	if nil != err {
-		util.LogErrorf("read dir [%s] failed: %s", widgets, err)
+		logging.LogErrorf("read dir [%s] failed: %s", widgets, err)
 		return
 	}
 

@@ -73,18 +73,39 @@ class PDFFindBar {
 
     this.highlightAll.addEventListener('click', () => {
       this.dispatchEvent('highlightallchange')
+      // NOTE: 以下三个相同 https://github.com/siyuan-note/siyuan/issues/5338
+      if (this.highlightAll.checked) {
+        this.highlightAll.parentElement.classList.remove("b3-button--outline")
+      } else {
+        this.highlightAll.parentElement.classList.add("b3-button--outline")
+      }
     })
 
     this.caseSensitive.addEventListener('click', () => {
       this.dispatchEvent('casesensitivitychange')
+      if (this.caseSensitive.checked) {
+        this.caseSensitive.parentElement.classList.remove("b3-button--outline")
+      } else {
+        this.caseSensitive.parentElement.classList.add("b3-button--outline")
+      }
     })
 
     this.entireWord.addEventListener('click', () => {
       this.dispatchEvent('entirewordchange')
+      if (this.entireWord.checked) {
+        this.entireWord.parentElement.classList.remove("b3-button--outline")
+      } else {
+        this.entireWord.parentElement.classList.add("b3-button--outline")
+      }
     })
 
     this.matchDiacritics.addEventListener('click', () => {
       this.dispatchEvent('diacriticmatchingchange')
+      if (this.matchDiacritics.checked) {
+        this.matchDiacritics.parentElement.classList.remove("b3-button--outline")
+      } else {
+        this.matchDiacritics.parentElement.classList.add("b3-button--outline")
+      }
     })
 
     this.eventBus._on('resize', this.#adjustWidth.bind(this))

@@ -27,6 +27,7 @@
     * [Append blocks](#Append-blocks)
     * [Update a block](#Update-a-block)
     * [Delete a block](#Delete-a-block)
+    * [Get a block kramdown](#Get-a-block-kramdown)
 * [Attributes](#Attributes)
     * [Set block attributes](#Set-block-attributes)
     * [Get block attributes](#Get-block-attributes)
@@ -35,10 +36,13 @@
 * [Templates](#Templates)
     * [Render a template](#Render-a-template)
 * [File](#File)
-    * [Get File](#Get-file)
-    * [Put File](#Put-file)
+    * [Get file](#Get-file)
+    * [Put file](#Put-file)
 * [Export](#Export)
     * [Export Markdown](#Export-Markdown)
+* [Notification](#Notification)
+    * [Push message](#Push-message)
+    * [Push error message](#Push-error-message)
 * [System](#System)
     * [Get boot progress](#Get-boot-progress)
     * [Get system version](#Get-system-version)
@@ -693,6 +697,31 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
+### Get a block kramdown
+
+* `/api/block/getBlockKramdown`
+* Parameters
+
+  ```json
+  {
+    "id": "20201225220954-dlgzk1o"
+  }
+  ```
+
+  * `id`: ID of the block to be got
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "id": "20201225220954-dlgzk1o",
+      "kramdown": "* {: id=\"20201225220954-e913snx\"}Create a new notebook, create a new document under the notebook\n  {: id=\"20210131161940-kfs31q6\"}\n* {: id=\"20201225220954-ygz217h\"}Enter <kbd>/</kbd> in the editor to trigger the function menu\n  {: id=\"20210131161940-eo0riwq\"}\n* {: id=\"20201225220954-875yybt\"}((20200924101200-gss5vee \"Navigate in the content block\")) and ((20200924100906-0u4zfq3 \"Window and tab\"))\n  {: id=\"20210131161940-b5uow2h\"}"
+    }
+  }
+  ```
+  
 ## Attributes
 
 ### Set block attributes
@@ -779,7 +808,29 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
 ### Render a template
 
-/api/template/render
+* `/api/template/render`
+* Parameters
+
+  ```json
+  {
+    "id": "20220724223548-j6g0o87",
+    "path": "F:\\SiYuan\\data\\templates\\foo.md"
+  }
+  ```
+  * `id`: The ID of the document where the rendering is called
+  * `path`: Template file absolute path
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "content": "<div data-node-id=\"20220729234848-dlgsah7\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20220729234840\"><div contenteditable=\"true\" spellcheck=\"false\">foo</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
+      "path": "F:\\SiYuan\\data\\templates\\foo.md"
+    }
+  }
+  ```
 
 ## File
 
@@ -845,6 +896,60 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
     * `hPath`: human-readable path
     * `content`: Markdown content
+
+## Notification
+
+### Push message
+
+* `/api/notification/pushMsg`
+* Parameters
+
+  ```json
+  {
+    "msg": "test",
+    "timeout": 7000
+  }
+  ```
+    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000
+      milliseconds
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+        "id": "62jtmqi"
+    }
+  }
+  ```
+    * `id`: Message ID
+
+### Push error message
+
+* `/api/notification/pushErrMsg`
+* Parameters
+
+  ```json
+  {
+    "msg": "test",
+    "timeout": 7000
+  }
+  ```
+    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000
+      milliseconds
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+        "id": "qc9znut"
+    }
+  }
+  ```
+    * `id`：Message ID
 
 ## System
 

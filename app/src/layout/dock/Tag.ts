@@ -7,7 +7,6 @@ import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
 import {MenuItem} from "../../menus/Menu";
 import {Dialog} from "../../dialog";
-import {isMobile} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
 
@@ -59,11 +58,11 @@ export class Tag extends Model {
     <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.expandAll} ${updateHotkeyTip("⌘↓")}">
+    <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.expand} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
         <svg><use xlink:href="#iconFullscreen"></use></svg>
     </span>
     <span class="fn__space"></span>
-    <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapseAll} ${updateHotkeyTip("⌘↑")}">
+    <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapse} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <span class="fn__space"></span>
@@ -94,7 +93,7 @@ export class Tag extends Model {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-                            width: isMobile() ? "80vw" : "520px",
+                            width: "520px",
                         });
                         const btnsElement = dialog.element.querySelectorAll(".b3-button");
                         btnsElement[0].addEventListener("click", () => {
@@ -107,9 +106,7 @@ export class Tag extends Model {
                         inputElement.focus();
                         inputElement.select();
                         btnsElement[1].addEventListener("click", () => {
-                            fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value}, () => {
-                                dialog.destroy();
-                            });
+                            fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value});
                         });
                     }
                 }).element);
@@ -118,9 +115,7 @@ export class Tag extends Model {
                     label: window.siyuan.languages.remove,
                     click: () => {
                         confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`, () => {
-                            fetchPost("/api/tag/removeTag", {label: labelName}, () => {
-                                this.update();
-                            });
+                            fetchPost("/api/tag/removeTag", {label: labelName});
                         });
                     },
                 }).element);

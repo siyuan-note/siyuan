@@ -29,7 +29,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             }
         }
     }
-    if (tableElement) {
+    if (tableElement && !isBlock) {
         html = protyle.lute.BlockDOM2InlineBlockDOM(html);
     }
     let blockElement = hasClosestBlock(range.startContainer) as Element;
@@ -45,16 +45,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         return;
     }
     let id = blockElement.getAttribute("data-node-id");
-    if (range.toString() === "") {
-        // 连续粘贴 PDF 标注不生效 https://github.com/siyuan-note/siyuan/issues/3018
-        const fileAnnoElement = hasClosestByAttribute(range.startContainer, "data-type", "file-annotation-ref");
-        if (fileAnnoElement) {
-            range.setEndAfter(fileAnnoElement);
-            range.collapse(false);
-        }
-    }
     range.insertNode(document.createElement("wbr"));
     let oldHTML = blockElement.outerHTML;
+    const undoOperation: IOperation[] = [];
+    const doOperation: IOperation[] = [];
     if (range.toString() !== "") {
         const inlineMathElement = hasClosestByAttribute(range.commonAncestorContainer, "data-type", "inline-math");
         if (inlineMathElement) {
@@ -67,6 +61,16 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             range.deleteContents();
         }
         range.insertNode(document.createElement("wbr"));
+        undoOperation.push({
+            action: "update",
+            id,
+            data: oldHTML
+        });
+        doOperation.push({
+            action: "update",
+            id,
+            data: blockElement.outerHTML
+        });
     }
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
@@ -84,9 +88,11 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             range.insertNode(tempElement.content.cloneNode(true));
             range.collapse(false);
             blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            if (editableElement && (editableElement.textContent.startsWith("```") || editableElement.textContent.startsWith("~~~") || editableElement.textContent.startsWith("···") ||
-                editableElement.textContent.indexOf("\n```") > -1 || editableElement.textContent.indexOf("\n~~~") > -1 || editableElement.textContent.indexOf("\n···") > -1)) {
-                if (editableElement.innerHTML.indexOf("\n") === -1 && editableElement.textContent.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+            // 使用 innerHTML,避免行内元素为代码块
+            const trimStartText = editableElement ? editableElement.innerHTML.trimStart() : "";
+            if (editableElement && (trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
+                trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1)) {
+                if (trimStartText.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
                     // ```test` 不处理
                 } else {
                     let replaceInnerHTML = editableElement.innerHTML.replace(/^(~|·|`){3,}/g, "```").replace(/\n(~|·|`){3,}/g, "\n```").trim();
@@ -122,8 +128,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             }
         }
     }
-    const undoOperation: IOperation[] = [];
-    const doOperation: IOperation[] = [];
     const cursorLiElement = hasClosestByClassName(blockElement, "li");
     // 列表项不能单独进行粘贴 https://ld246.com/article/1628681120576/comment/1628681209731#comments
     if (tempElement.content.children[0]?.getAttribute("data-type") === "NodeListItem") {
@@ -137,7 +141,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             tempElement.innerHTML = `<div${subType === "o" ? " data-marker=\"1.\"" : ""} data-subtype="${subType}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">${html}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
         }
     }
-    Array.from(tempElement.content.children).reverse().forEach(item => {
+    let lastElement: Element;
+    Array.from(tempElement.content.children).reverse().forEach((item) => {
         const addId = item.getAttribute("data-node-id");
         if (addId === id) {
             doOperation.push({
@@ -165,6 +170,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         if (!render) {
             blockElement.after(item);
         }
+        if (!lastElement) {
+            lastElement = item;
+        }
     });
     if (editableElement && editableElement.textContent === "") {
         doOperation.push({
@@ -178,11 +186,15 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             previousID: blockElement.previousElementSibling ? blockElement.previousElementSibling.getAttribute("data-node-id") : "",
             parentID: blockElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
         });
-        const nextElement = blockElement.nextElementSibling;
         blockElement.remove();
-        focusBlock(nextElement, undefined, false);
-    } else {
-        focusByWbr(protyle.wysiwyg.element, range);
+    }
+    if (lastElement) {
+        // https://github.com/siyuan-note/siyuan/issues/5591
+        focusBlock(lastElement, undefined, false);
+    }
+    const wbrElement = protyle.wysiwyg.element.querySelector("wbr");
+    if (wbrElement) {
+        wbrElement.remove();
     }
     transaction(protyle, doOperation, undoOperation);
 };

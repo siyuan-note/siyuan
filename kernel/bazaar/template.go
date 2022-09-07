@@ -19,6 +19,7 @@ package bazaar
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -26,56 +27,24 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
+	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type Template struct {
-	Author  string `json:"author"`
-	URL     string `json:"url"`
-	Version string `json:"version"`
-
-	Name            string `json:"name"`
-	RepoURL         string `json:"repoURL"`
-	RepoHash        string `json:"repoHash"`
-	PreviewURL      string `json:"previewURL"`
-	PreviewURLThumb string `json:"previewURLThumb"`
-
-	README string `json:"readme"`
-
-	Installed  bool   `json:"installed"`
-	Outdated   bool   `json:"outdated"`
-	Updated    string `json:"updated"`
-	Stars      int    `json:"stars"`
-	OpenIssues int    `json:"openIssues"`
-	Size       int64  `json:"size"`
-	HSize      string `json:"hSize"`
-	HUpdated   string `json:"hUpdated"`
-	Downloads  int    `json:"downloads"`
+	Package
 }
 
-func Templates(proxyURL string) (templates []*Template) {
+func Templates() (templates []*Template) {
 	templates = []*Template{}
-	result, err := util.GetRhyResult(false, proxyURL)
+
+	pkgIndex, err := getPkgIndex("templates")
 	if nil != err {
 		return
 	}
-
-	bazaarIndex := getBazaarIndex(proxyURL)
-	bazaarHash := result["bazaar"].(string)
-	result = map[string]interface{}{}
-	request := util.NewBrowserRequest(proxyURL)
-	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/templates.json"
-	resp, reqErr := request.SetResult(&result).Get(u)
-	if nil != reqErr {
-		util.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
-		return
-	}
-	if 200 != resp.StatusCode {
-		util.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
-		return
-	}
-
-	repos := result["repos"].([]interface{})
+	bazaarIndex := getBazaarIndex()
+	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(2, func(arg interface{}) {
@@ -86,13 +55,13 @@ func Templates(proxyURL string) (templates []*Template) {
 
 		template := &Template{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/template.json"
-		innerResp, innerErr := util.NewBrowserRequest(proxyURL).SetResult(template).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(template).Get(innerU)
 		if nil != innerErr {
-			util.LogErrorf("get community template [%s] failed: %s", repoURL, innerErr)
+			logging.LogErrorf("get community template [%s] failed: %s", repoURL, innerErr)
 			return
 		}
 		if 200 != innerResp.StatusCode {
-			util.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
+			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
 
@@ -128,9 +97,68 @@ func Templates(proxyURL string) (templates []*Template) {
 	return
 }
 
-func InstallTemplate(repoURL, repoHash, installPath, proxyURL string, chinaCDN bool, systemID string) error {
+func InstalledTemplates() (ret []*Template) {
+	ret = []*Template{}
+	dir, err := os.Open(filepath.Join(util.DataDir, "templates"))
+	if nil != err {
+		logging.LogWarnf("open templates folder [%s] failed: %s", util.ThemesPath, err)
+		return
+	}
+	templateDirs, err := dir.Readdir(-1)
+	if nil != err {
+		logging.LogWarnf("read templates folder failed: %s", err)
+		return
+	}
+	dir.Close()
+
+	bazaarTemplates := Templates()
+
+	for _, templateDir := range templateDirs {
+		if !templateDir.IsDir() {
+			continue
+		}
+		dirName := templateDir.Name()
+
+		templateConf, parseErr := TemplateJSON(dirName)
+		if nil != parseErr || nil == templateConf {
+			continue
+		}
+
+		installPath := filepath.Join(util.DataDir, "templates", dirName)
+
+		template := &Template{}
+		template.Installed = true
+		template.Name = templateConf["name"].(string)
+		template.Author = templateConf["author"].(string)
+		template.URL = templateConf["url"].(string)
+		template.Version = templateConf["version"].(string)
+		template.RepoURL = template.URL
+		template.PreviewURL = "/templates/" + dirName + "/preview.png"
+		template.PreviewURLThumb = "/templates/" + dirName + "/preview.png"
+		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		if nil != statErr {
+			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			continue
+		}
+		template.HInstallDate = info.ModTime().Format("2006-01-02")
+		installSize, _ := util.SizeOfDirectory(installPath)
+		template.InstallSize = installSize
+		template.HInstallSize = humanize.Bytes(uint64(installSize))
+		readme, readErr := os.ReadFile(filepath.Join(installPath, "README.md"))
+		if nil != readErr {
+			logging.LogWarnf("read install template README.md failed: %s", readErr)
+			continue
+		}
+		template.README, _ = renderREADME(template.URL, readme)
+		template.Outdated = isOutdatedTemplate(template, bazaarTemplates)
+		ret = append(ret, template)
+	}
+	return
+}
+
+func InstallTemplate(repoURL, repoHash, installPath string, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, proxyURL, chinaCDN, true, systemID)
+	data, err := downloadPackage(repoURLHash, true, systemID)
 	if nil != err {
 		return err
 	}
@@ -139,7 +167,7 @@ func InstallTemplate(repoURL, repoHash, installPath, proxyURL string, chinaCDN b
 
 func UninstallTemplate(installPath string) error {
 	if err := os.RemoveAll(installPath); nil != err {
-		util.LogErrorf("remove template [%s] failed: %s", installPath, err)
+		logging.LogErrorf("remove template [%s] failed: %s", installPath, err)
 		return errors.New("remove community template failed")
 	}
 	return nil
@@ -152,7 +180,7 @@ func filterLegacyTemplates(templates []*Template) (ret []*Template) {
 			updated := theme.Updated[:len("2006-01-02T15:04:05")]
 			t, err := time.Parse("2006-01-02T15:04:05", updated)
 			if nil != err {
-				util.LogErrorf("convert update time [%s] failed: %s", updated, err)
+				logging.LogErrorf("convert update time [%s] failed: %s", updated, err)
 				continue
 			}
 			if t.After(verTime) {

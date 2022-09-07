@@ -17,6 +17,7 @@
 package util
 
 import (
+	"bytes"
 	"flag"
 	"log"
 	"math/rand"
@@ -32,14 +33,15 @@ import (
 	"github.com/88250/gulu"
 	figure "github.com/common-nighthawk/go-figure"
 	goPS "github.com/mitchellh/go-ps"
+	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 )
 
-var Mode = "dev"
-
-//var Mode = "prod"
+// var Mode = "dev"
+var Mode = "prod"
 
 const (
-	Ver       = "2.0.13"
+	Ver       = "2.1.13"
 	IsInsider = false
 )
 
@@ -62,8 +64,8 @@ func Boot() {
 	readOnly := flag.Bool("readonly", false, "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
-	lang := flag.String("lang", "en_US", "zh_CN/zh_CHT/en_US/fr_FR")
-
+	lang := flag.String("lang", "", "zh_CN/zh_CHT/en_US/fr_FR/es_ES")
+	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
 
 	if "" != *wdPath {
@@ -72,18 +74,23 @@ func Boot() {
 	if "" != *lang {
 		Lang = *lang
 	}
+	Mode = *mode
 	Resident = *resident
 	ReadOnly = *readOnly
 	AccessAuthCode = *accessAuthCode
-	Container = "std"
+	Container = ContainerStd
 	if isRunningInDockerContainer() {
-		Container = "docker"
+		Container = ContainerDocker
 	}
+
+	UserAgent = UserAgent + " " + Container
+	httpclient.SetUserAgent(UserAgent)
 
 	initWorkspaceDir(*workspacePath)
 
 	SSL = *ssl
 	LogPath = filepath.Join(TempDir, "siyuan.log")
+	logging.SetLogPath(LogPath)
 	AppearancePath = filepath.Join(ConfDir, "appearance")
 	if "dev" == Mode {
 		ThemesPath = filepath.Join(WorkingDir, "appearance", "themes")
@@ -95,19 +102,24 @@ func Boot() {
 
 	initPathDir()
 	checkPort()
+	go initPandoc()
 
 	bootBanner := figure.NewColorFigure("SiYuan", "isometric3", "green", true)
-	LogInfof("\n" + bootBanner.String())
+	logging.LogInfof("\n" + bootBanner.String())
 	logBootInfo()
 
 	go cleanOld()
+}
+
+func setBootDetails(details string) {
+	bootDetails = "v" + Ver + " " + details
 }
 
 func SetBootDetails(details string) {
 	if 100 <= bootProgress {
 		return
 	}
-	bootDetails = details
+	setBootDetails(details)
 }
 
 func IncBootProgress(progress float64, details string) {
@@ -115,7 +127,7 @@ func IncBootProgress(progress float64, details string) {
 		return
 	}
 	bootProgress += progress
-	bootDetails = details
+	setBootDetails(details)
 }
 
 func IsBooted() bool {
@@ -131,27 +143,9 @@ func GetBootProgress() float64 {
 }
 
 func SetBooted() {
-	bootDetails = "Finishing boot..."
+	setBootDetails("Finishing boot...")
 	bootProgress = 100
-	LogInfof("kernel booted")
-}
-
-func GetHistoryDirNow(now, suffix string) (ret string, err error) {
-	ret = filepath.Join(WorkspaceDir, "history", now+"-"+suffix)
-	if err = os.MkdirAll(ret, 0755); nil != err {
-		LogErrorf("make history dir failed: %s", err)
-		return
-	}
-	return
-}
-
-func GetHistoryDir(suffix string) (ret string, err error) {
-	ret = filepath.Join(WorkspaceDir, "history", time.Now().Format("2006-01-02-150405")+"-"+suffix)
-	if err = os.MkdirAll(ret, 0755); nil != err {
-		LogErrorf("make history dir failed: %s", err)
-		return
-	}
-	return
+	logging.LogInfof("kernel booted")
 }
 
 var (
@@ -161,11 +155,15 @@ var (
 	WorkspaceDir   string        // 工作空间目录路径
 	ConfDir        string        // 配置目录路径
 	DataDir        string        // 数据目录路径
+	RepoDir        string        // 仓库目录路径
+	HistoryDir     string        // 数据历史目录路径
 	TempDir        string        // 临时目录路径
 	LogPath        string        // 配置目录下的日志文件 siyuan.log 路径
 	DBName         = "siyuan.db" // SQLite 数据库文件名
 	DBPath         string        // SQLite 数据库文件路径
+	HistoryDBPath  string        // SQLite 历史数据库文件路径
 	BlockTreePath  string        // 区块树文件路径
+	PandocBinPath  string        // Pandoc 可执行文件路径
 	AppearancePath string        // 配置目录下的外观目录 appearance/ 路径
 	ThemesPath     string        // 配置目录下的外观目录下的 themes/ 路径
 	IconsPath      string        // 配置目录下的外观目录下的 icons/ 路径
@@ -182,7 +180,7 @@ func initWorkspaceDir(workspaceArg string) {
 	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")
 	workspaceConf := filepath.Join(userHomeConfDir, "workspace.json")
 	if !gulu.File.IsExist(workspaceConf) {
-		IsNewbie = "std" == Container // 只有桌面端需要设置新手标识，前端自动挂载帮助文档
+		IsNewbie = ContainerStd == Container // 只有桌面端需要设置新手标识，前端自动挂载帮助文档
 		if err := os.MkdirAll(userHomeConfDir, 0755); nil != err && !os.IsExist(err) {
 			log.Printf("create user home conf folder [%s] failed: %s", userHomeConfDir, err)
 			os.Exit(ExitCodeCreateConfDirErr)
@@ -190,6 +188,13 @@ func initWorkspaceDir(workspaceArg string) {
 	}
 
 	defaultWorkspaceDir := filepath.Join(HomeDir, "Documents", "SiYuan")
+	if gulu.OS.IsWindows() {
+		// 改进 Windows 端默认工作空间路径 https://github.com/siyuan-note/siyuan/issues/5622
+		if userProfile := os.Getenv("USERPROFILE"); "" != userProfile {
+			defaultWorkspaceDir = filepath.Join(userProfile, "Documents", "SiYuan")
+		}
+	}
+
 	var workspacePaths []string
 	if !gulu.File.IsExist(workspaceConf) {
 		WorkspaceDir = defaultWorkspaceDir
@@ -248,8 +253,20 @@ func initWorkspaceDir(workspaceArg string) {
 
 	ConfDir = filepath.Join(WorkspaceDir, "conf")
 	DataDir = filepath.Join(WorkspaceDir, "data")
+	RepoDir = filepath.Join(WorkspaceDir, "repo")
+	HistoryDir = filepath.Join(WorkspaceDir, "history")
 	TempDir = filepath.Join(WorkspaceDir, "temp")
+	osTmpDir := filepath.Join(TempDir, "os")
+	os.RemoveAll(osTmpDir)
+	if err := os.MkdirAll(osTmpDir, 0755); nil != err {
+		log.Fatalf("create os tmp dir [%s] failed: %s", osTmpDir, err)
+	}
+	os.RemoveAll(filepath.Join(TempDir, "repo"))
+	os.Setenv("TMPDIR", osTmpDir)
+	os.Setenv("TEMP", osTmpDir)
+	os.Setenv("TMP", osTmpDir)
 	DBPath = filepath.Join(TempDir, DBName)
+	HistoryDBPath = filepath.Join(TempDir, "history.db")
 	BlockTreePath = filepath.Join(TempDir, "blocktree.msgpack")
 }
 
@@ -257,9 +274,16 @@ var (
 	Resident       bool
 	ReadOnly       bool
 	AccessAuthCode string
-	Lang           = "en_US"
+	Lang           = ""
 
 	Container string // docker, android, ios, std
+)
+
+const (
+	ContainerStd     = "std"     // 桌面端
+	ContainerDocker  = "docker"  // Docker 容器端
+	ContainerAndroid = "android" // Android 端
+	ContainerIOS     = "ios"     // iOS 端
 )
 
 func initPathDir() {
@@ -294,6 +318,7 @@ func initPathDir() {
 	}
 }
 
+// TODO: v2.2.0 移除
 func cleanOld() {
 	dirs, _ := os.ReadDir(WorkingDir)
 	for _, dir := range dirs {
@@ -310,33 +335,33 @@ func checkPort() {
 		return
 	}
 
-	LogInfof("port [%s] is opened, try to check version of running kernel", ServerPort)
+	logging.LogInfof("port [%s] is opened, try to check version of running kernel", ServerPort)
 	result := NewResult()
-	_, err := NewBrowserRequest("").
+	_, err := httpclient.NewBrowserRequest().
 		SetResult(result).
 		SetHeader("User-Agent", UserAgent).
 		Get("http://127.0.0.1:" + ServerPort + "/api/system/version")
 	if nil != err || 0 != result.Code {
-		LogErrorf("connect to port [%s] for checking running kernel failed", ServerPort)
+		logging.LogErrorf("connect to port [%s] for checking running kernel failed", ServerPort)
 		KillByPort(ServerPort)
 		return
 	}
 
 	if nil == result.Data {
-		LogErrorf("connect ot port [%s] for checking running kernel failed", ServerPort)
+		logging.LogErrorf("connect ot port [%s] for checking running kernel failed", ServerPort)
 		os.Exit(ExitCodeUnavailablePort)
 	}
 
 	runningVer := result.Data.(string)
 	if runningVer == Ver {
-		LogInfof("version of the running kernel is the same as this boot [%s], exit this boot", runningVer)
+		logging.LogInfof("version of the running kernel is the same as this boot [%s], exit this boot", runningVer)
 		os.Exit(ExitCodeOk)
 	}
 
-	LogInfof("found kernel [%s] is running, try to exit it", runningVer)
+	logging.LogInfof("found kernel [%s] is running, try to exit it", runningVer)
 	processes, err := goPS.Processes()
 	if nil != err {
-		LogErrorf("close kernel [%s] failed: %s", runningVer, err)
+		logging.LogErrorf("close kernel [%s] failed: %s", runningVer, err)
 		os.Exit(ExitCodeUnavailablePort)
 	}
 
@@ -348,7 +373,7 @@ func checkPort() {
 			if currentPid != kernelPid {
 				pid := strconv.Itoa(kernelPid)
 				Kill(pid)
-				LogInfof("killed kernel [name=%s, pid=%s, ver=%s], continue to boot", name, pid, runningVer)
+				logging.LogInfof("killed kernel [name=%s, pid=%s, ver=%s], continue to boot", name, pid, runningVer)
 			}
 		}
 	}
@@ -377,7 +402,7 @@ func KillByPort(port string) {
 			name = proc.Executable()
 		}
 		Kill(pid)
-		LogInfof("killed process [name=%s, pid=%s]", name, pid)
+		logging.LogInfof("killed process [name=%s, pid=%s]", name, pid)
 	}
 }
 
@@ -398,7 +423,7 @@ func PidByPort(port string) (ret string) {
 		CmdAttr(cmd)
 		data, err := cmd.CombinedOutput()
 		if nil != err {
-			LogErrorf("netstat failed: %s", err)
+			logging.LogErrorf("netstat failed: %s", err)
 			return
 		}
 		output := string(data)
@@ -418,7 +443,7 @@ func PidByPort(port string) (ret string) {
 	CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
 	if nil != err {
-		LogErrorf("lsof failed: %s", err)
+		logging.LogErrorf("lsof failed: %s", err)
 		return
 	}
 	output := string(data)
@@ -431,4 +456,77 @@ func PidByPort(port string) (ret string) {
 		}
 	}
 	return
+}
+
+func initPandoc() {
+	if ContainerStd != Container {
+		return
+	}
+
+	pandocDir := filepath.Join(TempDir, "pandoc")
+	if gulu.OS.IsWindows() {
+		PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc.exe")
+	} else if gulu.OS.IsDarwin() || gulu.OS.IsLinux() {
+		PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc")
+	}
+	pandocVer := getPandocVer(PandocBinPath)
+	if "" != pandocVer {
+		logging.LogInfof("pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
+		return
+	}
+
+	pandocZip := filepath.Join(WorkingDir, "pandoc.zip")
+	if "dev" == Mode {
+		if gulu.OS.IsWindows() {
+			pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-windows-amd64.zip")
+		} else if gulu.OS.IsDarwin() {
+			pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-darwin-amd64.zip")
+		} else if gulu.OS.IsLinux() {
+			pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-linux-amd64.zip")
+		}
+	}
+	if err := gulu.Zip.Unzip(pandocZip, pandocDir); nil != err {
+		logging.LogErrorf("unzip pandoc failed: %s", err)
+		return
+	}
+
+	if gulu.OS.IsDarwin() || gulu.OS.IsLinux() {
+		exec.Command("chmod", "+x", PandocBinPath).CombinedOutput()
+	}
+	pandocVer = getPandocVer(PandocBinPath)
+	logging.LogInfof("initialized pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
+}
+
+func getPandocVer(binPath string) (ret string) {
+	if "" == binPath {
+		return
+	}
+
+	cmd := exec.Command(binPath, "--version")
+	CmdAttr(cmd)
+	data, err := cmd.CombinedOutput()
+	if nil == err && strings.HasPrefix(string(data), "pandoc") {
+		parts := bytes.Split(data, []byte("\n"))
+		if 0 < len(parts) {
+			ret = strings.TrimPrefix(string(parts[0]), "pandoc")
+			ret = strings.ReplaceAll(ret, ".exe", "")
+			ret = strings.TrimSpace(ret)
+		}
+		return
+	}
+	return
+}
+
+func IsValidPandocBin(binPath string) bool {
+	if "" == binPath {
+		return false
+	}
+
+	cmd := exec.Command(binPath, "--version")
+	CmdAttr(cmd)
+	data, err := cmd.CombinedOutput()
+	if nil == err && strings.HasPrefix(string(data), "pandoc") {
+		return true
+	}
+	return false
 }

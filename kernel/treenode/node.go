@@ -25,7 +25,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
-	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/siyuan-note/logging"
 )
 
 func NodeStaticMdContent(node *ast.Node, luteEngine *lute.Lute) (md, content string) {
@@ -38,7 +38,7 @@ func FormatNode(node *ast.Node, luteEngine *lute.Lute) string {
 	markdown, err := lute.FormatNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	if nil != err {
 		root := TreeRoot(node)
-		util.LogFatalf("format node [%s] in tree [%s] failed: %s", node.ID, root.ID, err)
+		logging.LogFatalf("format node [%s] in tree [%s] failed: %s", node.ID, root.ID, err)
 	}
 	return markdown
 }
@@ -75,7 +75,15 @@ func NodeStaticContent(node *ast.Node) string {
 			buf.WriteString(GetDynamicBlockRefText(n))
 			lastSpace = false
 			return ast.WalkSkipChildren
-		case ast.NodeText, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
+		case ast.NodeLinkText:
+			buf.Write(n.Tokens)
+			buf.WriteByte(' ')
+		case ast.NodeLinkDest:
+			buf.Write(n.Tokens)
+			buf.WriteByte(' ')
+		case ast.NodeLinkTitle:
+			buf.Write(n.Tokens)
+		case ast.NodeText, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
 			buf.Write(n.Tokens)
 		case ast.NodeBackslash:
@@ -204,6 +212,7 @@ var typeAbbrMap = map[string]string{
 	// 行级元素
 	"NodeText":          "text",
 	"NodeLinkText":      "link_text",
+	"NodeLinkDest":      "link_dest",
 	"NodeTag":           "tag",
 	"NodeCodeSpan":      "code_span",
 	"NodeInlineMath":    "inline_math",

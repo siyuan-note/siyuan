@@ -19,63 +19,32 @@ package bazaar
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
+	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type Widget struct {
-	Author  string `json:"author"`
-	URL     string `json:"url"`
-	Version string `json:"version"`
-
-	Name            string `json:"name"`
-	RepoURL         string `json:"repoURL"`
-	RepoHash        string `json:"repoHash"`
-	PreviewURL      string `json:"previewURL"`
-	PreviewURLThumb string `json:"previewURLThumb"`
-
-	README string `json:"readme"`
-
-	Installed  bool   `json:"installed"`
-	Outdated   bool   `json:"outdated"`
-	Current    bool   `json:"current"`
-	Updated    string `json:"updated"`
-	Stars      int    `json:"stars"`
-	OpenIssues int    `json:"openIssues"`
-	Size       int64  `json:"size"`
-	HSize      string `json:"hSize"`
-	HUpdated   string `json:"hUpdated"`
-	Downloads  int    `json:"downloads"`
+	Package
 }
 
-func Widgets(proxyURL string) (widgets []*Widget) {
+func Widgets() (widgets []*Widget) {
 	widgets = []*Widget{}
-	result, err := util.GetRhyResult(false, proxyURL)
+
+	pkgIndex, err := getPkgIndex("widgets")
 	if nil != err {
 		return
 	}
+	bazaarIndex := getBazaarIndex()
 
-	bazaarIndex := getBazaarIndex(proxyURL)
-	bazaarHash := result["bazaar"].(string)
-	result = map[string]interface{}{}
-	request := util.NewBrowserRequest(proxyURL)
-	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/widgets.json"
-	resp, err := request.SetResult(&result).Get(u)
-	if nil != err {
-		util.LogErrorf("get community stage index [%s] failed: %s", u, err)
-		return
-	}
-	if 200 != resp.StatusCode {
-		util.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
-		return
-	}
-
-	repos := result["repos"].([]interface{})
+	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
@@ -86,13 +55,13 @@ func Widgets(proxyURL string) (widgets []*Widget) {
 
 		widget := &Widget{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/widget.json"
-		innerResp, innerErr := util.NewBrowserRequest(proxyURL).SetResult(widget).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(widget).Get(innerU)
 		if nil != innerErr {
-			util.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
+			logging.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
 			return
 		}
 		if 200 != innerResp.StatusCode {
-			util.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
+			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
 
@@ -126,9 +95,68 @@ func Widgets(proxyURL string) (widgets []*Widget) {
 	return
 }
 
-func InstallWidget(repoURL, repoHash, installPath, proxyURL string, chinaCDN bool, systemID string) error {
+func InstalledWidgets() (ret []*Widget) {
+	ret = []*Widget{}
+	dir, err := os.Open(filepath.Join(util.DataDir, "widgets"))
+	if nil != err {
+		logging.LogWarnf("open widgets folder [%s] failed: %s", util.ThemesPath, err)
+		return
+	}
+	widgetDirs, err := dir.Readdir(-1)
+	if nil != err {
+		logging.LogWarnf("read widgets folder failed: %s", err)
+		return
+	}
+	dir.Close()
+
+	bazaarWidgets := Widgets()
+
+	for _, widgetDir := range widgetDirs {
+		if !widgetDir.IsDir() {
+			continue
+		}
+		dirName := widgetDir.Name()
+
+		widgetConf, parseErr := WidgetJSON(dirName)
+		if nil != parseErr || nil == widgetConf {
+			continue
+		}
+
+		installPath := filepath.Join(util.DataDir, "widgets", dirName)
+
+		widget := &Widget{}
+		widget.Installed = true
+		widget.Name = widgetConf["name"].(string)
+		widget.Author = widgetConf["author"].(string)
+		widget.URL = widgetConf["url"].(string)
+		widget.Version = widgetConf["version"].(string)
+		widget.RepoURL = widget.URL
+		widget.PreviewURL = "/widgets/" + dirName + "/preview.png"
+		widget.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
+		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		if nil != statErr {
+			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			continue
+		}
+		widget.HInstallDate = info.ModTime().Format("2006-01-02")
+		installSize, _ := util.SizeOfDirectory(installPath)
+		widget.InstallSize = installSize
+		widget.HInstallSize = humanize.Bytes(uint64(installSize))
+		readme, readErr := os.ReadFile(filepath.Join(installPath, "README.md"))
+		if nil != readErr {
+			logging.LogWarnf("read install widget README.md failed: %s", readErr)
+			continue
+		}
+		widget.README, _ = renderREADME(widget.URL, readme)
+		widget.Outdated = isOutdatedWidget(widget, bazaarWidgets)
+		ret = append(ret, widget)
+	}
+	return
+}
+
+func InstallWidget(repoURL, repoHash, installPath string, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, proxyURL, chinaCDN, true, systemID)
+	data, err := downloadPackage(repoURLHash, true, systemID)
 	if nil != err {
 		return err
 	}
@@ -137,9 +165,9 @@ func InstallWidget(repoURL, repoHash, installPath, proxyURL string, chinaCDN boo
 
 func UninstallWidget(installPath string) error {
 	if err := os.RemoveAll(installPath); nil != err {
-		util.LogErrorf("remove widget [%s] failed: %s", installPath, err)
+		logging.LogErrorf("remove widget [%s] failed: %s", installPath, err)
 		return errors.New("remove community widget failed")
 	}
-	//util.Logger.Infof("uninstalled widget [%s]", installPath)
+	//logging.Logger.Infof("uninstalled widget [%s]", installPath)
 	return nil
 }

@@ -32,6 +32,8 @@ type Editor struct {
 	VirtualBlockRefExclude          string   `json:"virtualBlockRefExclude"`          // 虚拟引用关键字排除列表
 	BlockRefDynamicAnchorTextMaxLen int      `json:"blockRefDynamicAnchorTextMaxLen"` // 块引动态锚文本最大长度
 	PlantUMLServePath               string   `json:"plantUMLServePath"`               // PlantUML 伺服地址
+	FullWidth                       bool     `json:"fullWidth"`                       // 是否使用最大宽度
+	KaTexMacros                     string   `json:"katexMacros"`                     // KeTex 宏定义
 }
 
 func NewEditor() *Editor {
@@ -42,12 +44,14 @@ func NewEditor() *Editor {
 		CodeLineWrap:                    false,
 		CodeLigatures:                   false,
 		DisplayBookmarkIcon:             true,
-		DisplayNetImgMark:               false,
+		DisplayNetImgMark:               true,
 		GenerateHistoryInterval:         10,
 		HistoryRetentionDays:            30,
 		Emoji:                           []string{},
 		VirtualBlockRef:                 false,
-		BlockRefDynamicAnchorTextMaxLen: 64,
+		BlockRefDynamicAnchorTextMaxLen: 96,
 		PlantUMLServePath:               "https://www.plantuml.com/plantuml/svg/~1",
+		FullWidth:                       true,
+		KaTexMacros:                     "{}",
 	}
 }

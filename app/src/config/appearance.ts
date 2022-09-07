@@ -8,20 +8,10 @@ import * as Pickr from "@simonwep/pickr";
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {loadAssets} from "../util/assets";
+import {genOptions} from "../util/genOptions";
 
 export const appearance = {
     element: undefined as Element,
-    _genOptions(data: string[] | { label: string, name: string }[], key: string) {
-        let html = "";
-        data.forEach((item: string | { label: string, name: string }) => {
-            if (typeof item === "string") {
-                html += `<option value="${item}" ${key === item ? "selected" : ""}>${item}</option>`;
-            } else {
-                html += `<option value="${item.name}" ${key === item.name ? "selected" : ""}>${item.label}</option>`;
-            }
-        });
-        return html;
-    },
     genHTML: () => {
         return `<label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -48,7 +38,7 @@ export const appearance = {
         </div>
         <span class="fn__space"></span>
         <select class="b3-select fn__flex-center fn__size200" id="themeLight">
-          ${appearance._genOptions(window.siyuan.config.appearance.lightThemes, window.siyuan.config.appearance.themeLight)}
+          ${genOptions(window.siyuan.config.appearance.lightThemes, window.siyuan.config.appearance.themeLight)}
         </select>
     </div>
     <div class="fn__hr"></div>
@@ -58,7 +48,7 @@ export const appearance = {
         </div>
         <span class="fn__space"></span>
         <select class="b3-select fn__flex-center fn__size200" id="themeDark">
-           ${appearance._genOptions(window.siyuan.config.appearance.darkThemes, window.siyuan.config.appearance.themeDark)}
+           ${genOptions(window.siyuan.config.appearance.darkThemes, window.siyuan.config.appearance.themeDark)}
         </select>
     </div>
 </div>
@@ -73,7 +63,7 @@ export const appearance = {
     </div>
     <span class="fn__space"></span>
     <select class="b3-select fn__flex-center fn__size200" id="icon">
-        ${appearance._genOptions(window.siyuan.config.appearance.icons, window.siyuan.config.appearance.icon)}
+        ${genOptions(window.siyuan.config.appearance.icons, window.siyuan.config.appearance.icon)}
     </select>
 </label>
 <label class="b3-label fn__flex"><div class="fn__block">
@@ -85,7 +75,7 @@ export const appearance = {
         <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.appearance2}</div>
         <span class="fn__space"></span>
         <select id="codeBlockThemeLight" class="b3-select fn__size200">
-            ${appearance._genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE, window.siyuan.config.appearance.codeBlockThemeLight)}
+            ${genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE, window.siyuan.config.appearance.codeBlockThemeLight)}
         </select>
     </div>
     <div class="fn__hr"></div>
@@ -93,7 +83,7 @@ export const appearance = {
         <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.appearance3}</div>
         <span class="fn__space"></span>
         <select id="codeBlockThemeDark" class="b3-select fn__size200">
-            ${appearance._genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE, window.siyuan.config.appearance.codeBlockThemeDark)}
+            ${genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE, window.siyuan.config.appearance.codeBlockThemeDark)}
         </select>
     </div>
 </div></label>
@@ -103,7 +93,7 @@ export const appearance = {
         <div class="b3-label__text">${window.siyuan.languages.language1}</div>
     </div>
     <span class="fn__space"></span>
-    <select id="lang" class="b3-select fn__flex-center fn__size200">${appearance._genOptions(window.siyuan.config.langs, window.siyuan.config.appearance.lang)}</select>
+    <select id="lang" class="b3-select fn__flex-center fn__size200">${genOptions(window.siyuan.config.langs, window.siyuan.config.appearance.lang)}</select>
 </label>
 <div class="b3-label${isBrowser() ? " fn__none" : ""}">
     <div class="fn__block fn__flex">
@@ -146,6 +136,14 @@ export const appearance = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="nativeEmoji" type="checkbox"${window.siyuan.config.appearance.nativeEmoji ? " checked" : ""}>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.appearance16}
+        <div class="b3-label__text">${window.siyuan.languages.appearance17}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="hideStatusBar" type="checkbox"${window.siyuan.config.appearance.hideStatusBar ? " checked" : ""}>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -231,6 +229,7 @@ export const appearance = {
             customCSS: window.siyuan.config.appearance.customCSS,
             closeButtonBehavior: (appearance.element.querySelector("#closeButtonBehavior") as HTMLInputElement).checked ? 1 : 0,
             nativeEmoji: (appearance.element.querySelector("#nativeEmoji") as HTMLInputElement).checked,
+            hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
         }, response => {
             let needTip = false;
             if (modeNumber !== window.siyuan.config.appearance.mode || themeLight !== window.siyuan.config.appearance.themeLight ||
@@ -242,6 +241,11 @@ export const appearance = {
                 return;
             }
             appearance.onSetappearance(response.data);
+            if (response.data.hideStatusBar) {
+                document.getElementById("status").classList.add("fn__none");
+            } else {
+                document.getElementById("status").classList.remove("fn__none");
+            }
         });
     },
     bindEvent: () => {
@@ -344,10 +348,15 @@ export const appearance = {
         ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, data.closeButtonBehavior);
         /// #endif
         loadAssets(data);
-        if (data.mode === 1) {
-            document.getElementById("barThemeMode")?.classList.add("toolbar__item--active");
-        } else {
-            document.getElementById("barThemeMode")?.classList.remove("toolbar__item--active");
+        const modeElement = document.getElementById("barThemeMode");
+        if (modeElement) {
+            if (data.mode === 1) {
+                modeElement.classList.add("toolbar__item--active");
+                modeElement.setAttribute("aria-label", window.siyuan.languages.themeLight);
+            } else {
+                modeElement.classList.remove("toolbar__item--active");
+                modeElement.setAttribute("aria-label", window.siyuan.languages.themeDark);
+            }
         }
     }
 };

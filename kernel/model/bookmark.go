@@ -22,10 +22,59 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func RemoveBookmark(bookmark string) (err error) {
+	util.PushEndlessProgress(Conf.Language(116))
+
+	bookmarks := sql.QueryBookmarkBlocksByKeyword(bookmark)
+	treeBlocks := map[string][]string{}
+	for _, tag := range bookmarks {
+		if blocks, ok := treeBlocks[tag.RootID]; !ok {
+			treeBlocks[tag.RootID] = []string{tag.ID}
+		} else {
+			treeBlocks[tag.RootID] = append(blocks, tag.ID)
+		}
+	}
+
+	for treeID, blocks := range treeBlocks {
+		util.PushEndlessProgress("[" + treeID + "]")
+		tree, e := loadTreeByBlockID(treeID)
+		if nil != e {
+			util.PushClearProgress()
+			return e
+		}
+
+		for _, blockID := range blocks {
+			node := treenode.GetNodeInTree(tree, blockID)
+			if nil == node {
+				continue
+			}
+
+			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == bookmark {
+				node.RemoveIALAttr("bookmark")
+				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+			}
+		}
+
+		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), tree.Root.IALAttr("title")))
+		if err = writeJSONQueue(tree); nil != err {
+			util.ClearPushProgress(100)
+			return
+		}
+		util.RandomSleep(50, 150)
+	}
+
+	util.PushEndlessProgress(Conf.Language(113))
+	sql.WaitForWritingDatabase()
+	util.ReloadUI()
+	return
+}
 
 func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 	if treenode.ContainsMarker(newBookmark) {
@@ -69,6 +118,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == oldBookmark {
 				node.SetIALAttr("bookmark", newBookmark)
+				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 			}
 		}
 

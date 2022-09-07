@@ -2,13 +2,22 @@ import {getAllModels} from "../layout/getAll";
 import {setInlineStyle} from "../util/assets";
 import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {setPadding} from "../protyle/ui/initUI";
+import {reloadProtyle} from "../protyle/util/reload";
 
 export const editor = {
     element: undefined as Element,
     genHTML: () => {
         let fontFamilyHTML = "";
         fontFamilyHTML = '<select id="fontFamily" class="b3-select fn__flex-center fn__size200"></select>';
-        return `
+        return `<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.fullWidth}
+        <div class="b3-label__text">${window.siyuan.languages.fullWidthTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="fullWidth" type="checkbox"${window.siyuan.config.editor.fullWidth ? " checked" : ""}/>
+</label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.md12}
@@ -51,14 +60,6 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.md39}
-        <div class="b3-label__text b3-typography">${window.siyuan.languages.md40}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="plantUMLServePath" value="${window.siyuan.config.editor.plantUMLServePath}"/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
         ${window.siyuan.languages.md33}
         <div class="b3-label__text">${window.siyuan.languages.md34}</div>
     </div>
@@ -68,38 +69,18 @@ export const editor = {
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.md35}
-        <div class="b3-label__text b3-typography">${window.siyuan.languages.md36}</div>
+        <div class="b3-label__text">${window.siyuan.languages.md36}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="virtualBlockRefExclude" value="${window.siyuan.config.editor.virtualBlockRefExclude}" />
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.md29}
-        <div class="b3-label__text">${window.siyuan.languages.md30}</div>
+        ${window.siyuan.languages.md39}
+        <div class="b3-label__text">${window.siyuan.languages.md40}</div>
     </div>
     <span class="fn__space"></span>
-    <div class="b3-tooltips b3-tooltips__n fn__flex-center" aria-label="${window.siyuan.config.editor.codeTabSpaces}">   
-        <input class="b3-slider fn__size200" id="codeTabSpaces" max="8" min="0" step="2" type="range" value="${window.siyuan.config.editor.codeTabSpaces}">
-    </div>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.fontSize}
-        <div class="b3-label__text">${window.siyuan.languages.fontSizeTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <div class="b3-tooltips b3-tooltips__n fn__flex-center" aria-label="${window.siyuan.config.editor.fontSize}">   
-        <input class="b3-slider fn__size200" id="fontSize" max="72" min="9" step="1" type="range" value="${window.siyuan.config.editor.fontSize}">
-    </div>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.font}
-        <div class="b3-label__text b3-typography">${window.siyuan.languages.font1}</div>
-    </div>
-    <span class="fn__space"></span>
-    ${fontFamilyHTML}
+    <input class="b3-text-field fn__flex-center fn__size200" id="plantUMLServePath" value="${window.siyuan.config.editor.plantUMLServePath}"/>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -125,7 +106,41 @@ export const editor = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="historyRetentionDays" type="number" min="0" max="120" value="${window.siyuan.config.editor.historyRetentionDays}"/>
-</label>`;
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.font}
+        <div class="b3-label__text">${window.siyuan.languages.font1}</div>
+    </div>
+    <span class="fn__space"></span>
+    ${fontFamilyHTML}
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.fontSize}
+        <div class="b3-label__text">${window.siyuan.languages.fontSizeTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <div class="b3-tooltips b3-tooltips__n fn__flex-center" aria-label="${window.siyuan.config.editor.fontSize}">   
+        <input class="b3-slider fn__size200" id="fontSize" max="72" min="9" step="1" type="range" value="${window.siyuan.config.editor.fontSize}">
+    </div>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.md29}
+        <div class="b3-label__text">${window.siyuan.languages.md30}</div>
+    </div>
+    <span class="fn__space"></span>
+    <div class="b3-tooltips b3-tooltips__n fn__flex-center" aria-label="${window.siyuan.config.editor.codeTabSpaces}">   
+        <input class="b3-slider fn__size200" id="codeTabSpaces" max="8" min="0" step="2" type="range" value="${window.siyuan.config.editor.codeTabSpaces}">
+    </div>
+</label>
+<div class="b3-label">
+    ${window.siyuan.languages.katexMacros}
+    <div class="b3-label__text">${window.siyuan.languages.katexMacrosTip}</div>
+    <div class="fn__hr"></div>
+    <textarea class="b3-text-field fn__block" id="katexMacros">${window.siyuan.config.editor.katexMacros}</textarea>
+</div>`;
     },
     bindEvent: () => {
         const fontFamilyElement = editor.element.querySelector("#fontFamily") as HTMLSelectElement;
@@ -146,10 +161,12 @@ export const editor = {
 
         const setEditor = () => {
             fetchPost("/api/setting/setEditor", {
+                fullWidth: (editor.element.querySelector("#fullWidth") as HTMLInputElement).checked,
                 displayBookmarkIcon: (editor.element.querySelector("#displayBookmarkIcon") as HTMLInputElement).checked,
                 displayNetImgMark: (editor.element.querySelector("#displayNetImgMark") as HTMLInputElement).checked,
                 codeSyntaxHighlightLineNum: (editor.element.querySelector("#codeSyntaxHighlightLineNum") as HTMLInputElement).checked,
                 plantUMLServePath: (editor.element.querySelector("#plantUMLServePath") as HTMLInputElement).value,
+                katexMacros: (editor.element.querySelector("#katexMacros") as HTMLTextAreaElement).value,
                 codeLineWrap: (editor.element.querySelector("#codeLineWrap") as HTMLInputElement).checked,
                 virtualBlockRef: (editor.element.querySelector("#virtualBlockRef") as HTMLInputElement).checked,
                 virtualBlockRefExclude: (editor.element.querySelector("#virtualBlockRefExclude") as HTMLInputElement).value,
@@ -170,7 +187,7 @@ export const editor = {
                 setEditor();
             });
         });
-        editor.element.querySelectorAll("input.b3-text-field, input.b3-slider").forEach((item) => {
+        editor.element.querySelectorAll("textarea.b3-text-field, input.b3-text-field, input.b3-slider").forEach((item) => {
             item.addEventListener("blur", () => {
                 setEditor();
             });
@@ -185,7 +202,13 @@ export const editor = {
     onSetEditor: (editor: IEditor) => {
         window.siyuan.config.editor = editor;
         getAllModels().editor.forEach((item) => {
-            item.editor.reload();
+            reloadProtyle(item.editor.protyle);
+            setPadding(item.editor.protyle);
+            if (window.siyuan.config.editor.fullWidth) {
+                item.editor.protyle.contentElement.setAttribute("data-fullwidth", "true");
+            } else {
+                item.editor.protyle.contentElement.removeAttribute("data-fullwidth");
+            }
         });
         setInlineStyle();
     }

@@ -12,6 +12,7 @@ import {Backlinks} from "./Backlinks";
 import {Model} from "../Model";
 import {getDockByType, resizeTabs, setPanelFocus} from "../util";
 import {Inbox} from "./Inbox";
+import Protyle from "../../protyle";
 
 export class Dock {
     public element: HTMLElement;
@@ -40,7 +41,8 @@ export class Dock {
                 break;
         }
         this.element = document.getElementById("dock" + options.position);
-        this.element.innerHTML = '<div></div><div class="fn__flex-1"></div><div></div>';
+        const dockClass = (options.position === "Bottom" || options.position === "Top") ? ' class="fn__flex"' : "";
+        this.element.innerHTML = `<div${dockClass}></div><div class="fn__flex-1"></div><div${dockClass}></div>`;
         this.position = options.position;
         this.data = {};
         if (options.data.length === 0) {
@@ -119,6 +121,9 @@ export class Dock {
                 } else {
                     this.layout.element.style.height = "0px";
                 }
+                if (document.querySelector("body").classList.contains("body--win32")) {
+                    document.getElementById("drag").classList.remove("fn__hidden");
+                }
                 this.resizeElement.classList.add("fn__none");
             }
         } else {
@@ -127,11 +132,11 @@ export class Dock {
             });
             target.classList.add("dock__item--active");
             if (!target.getAttribute("data-id")) {
-                let editId = "";
+                let editor: Protyle;
                 const models = getAllModels();
                 models.editor.find((item) => {
                     if (item.parent.headElement.classList.contains("item--focus") && item.editor?.protyle?.path) {
-                        editId = item.editor.protyle.block.rootID;
+                        editor = item.editor;
                         return true;
                     }
                 });
@@ -161,11 +166,15 @@ export class Dock {
                     case "outline":
                         tab = new Tab({
                             callback(tab: Tab) {
-                                tab.addModel(new Outline({
+                                const outline = new Outline({
                                     type: "pin",
                                     tab,
-                                    blockId: editId,
-                                }));
+                                    blockId: editor?.protyle?.block?.rootID,
+                                });
+                                if (editor?.protyle?.title?.editElement) {
+                                    outline.updateDocTitle(editor.protyle?.background?.ial);
+                                }
+                                tab.addModel(outline);
                             }
                         });
                         break;
@@ -174,7 +183,7 @@ export class Dock {
                             callback(tab: Tab) {
                                 tab.addModel(new Graph({
                                     tab,
-                                    blockId: editId,
+                                    blockId: editor?.protyle?.block?.rootID,
                                     type: "pin"
                                 }));
                             }
@@ -196,7 +205,7 @@ export class Dock {
                                 tab.addModel(new Backlinks({
                                     type: "pin",
                                     tab,
-                                    blockId: editId,
+                                    blockId: editor?.protyle?.block?.rootID,
                                 }));
                             }
                         });
@@ -228,6 +237,10 @@ export class Dock {
                 this.layout.element.style.width = this.getMaxSize() + "px";
             } else {
                 this.layout.element.style.height = this.getMaxSize() + "px";
+            }
+            if ((type === "graph" || type === "globalGraph") &&
+                document.querySelector("body").classList.contains("body--win32") && this.layout.element.querySelector(".fullscreen")) {
+                document.getElementById("drag").classList.add("fn__hidden");
             }
             this.resizeElement.classList.remove("fn__none");
         }

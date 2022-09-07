@@ -2,12 +2,12 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {getRandom, isMobile} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {uploadFiles} from "../upload";
-import {hideMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
-import {getRandomEmoji, openEmojiPanel, unicode2Emoji, updateFileTreeEmoji} from "../../emoji";
+import {getRandomEmoji, openEmojiPanel, unicode2Emoji, updateFileTreeEmoji, updateOutlineEmoji} from "../../emoji";
 import {upDownHint} from "../../util/upDownHint";
-import {setPosition} from "../../util/setPosition";
+/// #if !MOBILE
 import {openGlobalSearch} from "../../search/util";
+/// #endif
 import {getEventName} from "../util/compatibility";
 import {Dialog} from "../../dialog";
 
@@ -80,13 +80,12 @@ export class Background {
             }
             uploadFiles(protyle, event.target.files, event.target, (responseText) => {
                 const response = JSON.parse(responseText);
-                const style = `background-image:url(${response.data.succMap[Object.keys(response.data.succMap)[0]]})`;
-                hideMessage();
-                this.ial["title-img"] = Lute.EscapeHTMLStr(style);
+                const style = `background-image:url("${response.data.succMap[Object.keys(response.data.succMap)[0]]}")`;
+                this.ial["title-img"] = style;
                 this.render(this.ial, protyle.block.rootID);
                 fetchPost("/api/attr/setBlockAttrs", {
                     id: protyle.block.rootID,
-                    attrs: {"title-img": Lute.EscapeHTMLStr(style)}
+                    attrs: {"title-img": style}
                 });
             });
         });
@@ -112,7 +111,7 @@ export class Background {
                     iconElements[1].classList.add("fn__none");
                     iconElements[2].classList.add("fn__none");
                     if (type === "confirm") {
-                        const style = Lute.EscapeHTMLStr(`background-image:url(${this.imgElement.getAttribute("src")});object-position:${this.imgElement.style.objectPosition}`);
+                        const style = `background-image:url("${this.imgElement.getAttribute("src")}");object-position:${this.imgElement.style.objectPosition}`;
                         this.ial["title-img"] = style;
                         fetchPost("/api/attr/setBlockAttrs", {
                             id: protyle.block.rootID,
@@ -207,7 +206,7 @@ export class Background {
                         "background-image:linear-gradient(-225deg, #231557 0%, #44107A 29%, #FF1361 67%, #FFF800 100%)"
                     ];
                     const style = bgs[getRandom(0, bgs.length - 1)];
-                    this.ial["title-img"] = Lute.EscapeHTMLStr(style);
+                    this.ial["title-img"] = style;
                     this.render(this.ial, protyle.block.rootID);
                     fetchPost("/api/attr/setBlockAttrs", {
                         id: protyle.block.rootID,
@@ -232,17 +231,20 @@ export class Background {
                         this.ial.icon = emoji;
                         this.render(this.ial, protyle.block.rootID);
                         updateFileTreeEmoji(emoji, protyle.block.rootID);
+                        updateOutlineEmoji(emoji);
                         fetchPost("/api/attr/setBlockAttrs", {
                             id: protyle.block.rootID,
                             attrs: {"icon": emoji}
                         });
-                        protyle.model.parent.setDocIcon(emoji);
+                        if (protyle.model) {
+                            protyle.model.parent.setDocIcon(emoji);
+                        }
                     }
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "tag") {
-                    this.openTag();
+                    this.openTag(protyle);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -264,7 +266,7 @@ export class Background {
                     });
                     btnsElement[1].addEventListener("click", () => {
                         const style = `background-image:url(${dialog.element.querySelector("input").value});`;
-                        this.ial["title-img"] = Lute.EscapeHTMLStr(style);
+                        this.ial["title-img"] = style;
                         this.render(this.ial, protyle.block.rootID);
                         fetchPost("/api/attr/setBlockAttrs", {
                             id: protyle.block.rootID,
@@ -277,9 +279,9 @@ export class Background {
                     event.stopPropagation();
                     break;
                 } else if (type === "open-search") {
-                    if (!isMobile()) {
-                        openGlobalSearch(`#${target.textContent}#`, !window.siyuan.ctrlIsPressed);
-                    }
+                    /// #if !MOBILE
+                    openGlobalSearch(`#${target.textContent}#`, !window.siyuan.ctrlIsPressed);
+                    /// #endif
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -305,12 +307,13 @@ export class Background {
         });
     }
 
-    public render(ial: IObject, id: string) {
+    public render(ial: IObject, rootId: string) {
         const img = ial["title-img"];
         const icon = ial.icon;
         const tags = ial.tags;
         this.ial = ial;
-        this.element.setAttribute("data-node-id", id);
+        // 为主题提供样式基础
+        this.element.setAttribute("data-node-id", rootId);
         if (tags) {
             let html = "";
             tags.split(",").forEach((item, index) => {
@@ -332,9 +335,9 @@ export class Background {
             this.imgElement.classList.remove("fn__none");
             // 历史数据解析：background-image: url(\"assets/沙发背景墙11-20220418171700-w6vilzt.jpeg\"); background-position: center -254px; background-size: cover; background-repeat: no-repeat; min-height: 30vh
             this.imgElement.setAttribute("style", Lute.UnEscapeHTMLStr(img));
-            const position = this.imgElement.style.backgroundPosition || this.imgElement.style.objectPosition;
-            const url = this.imgElement.style.backgroundImage?.replace(/^url\(["']?/, "").replace(/["']?\)$/, "");
             if (img.indexOf("url(") > -1) {
+                const position = this.imgElement.style.backgroundPosition || this.imgElement.style.objectPosition;
+                const url = this.imgElement.style.backgroundImage?.replace(/^url\(["']?/, "").replace(/["']?\)$/, "");
                 this.imgElement.removeAttribute("style");
                 this.imgElement.setAttribute("src", url);
                 this.imgElement.style.objectPosition = position;
@@ -358,7 +361,7 @@ export class Background {
         }
     }
 
-    private openTag() {
+    private openTag(protyle: IProtyle) {
         fetchPost("/api/search/searchTag", {
             k: "",
         }, (response) => {
@@ -382,9 +385,9 @@ export class Background {
                 if (event.key === "Enter") {
                     const currentElement = listElement.querySelector(".b3-list-item--focus");
                     if (currentElement) {
-                        this.addTags(currentElement.textContent);
+                        this.addTags(currentElement.textContent, protyle);
                     } else {
-                        this.addTags(inputElement.value);
+                        this.addTags(inputElement.value, protyle);
                     }
                     window.siyuan.menus.menu.remove();
                 } else if (event.key === "Escape") {
@@ -417,11 +420,10 @@ export class Background {
                 if (!listItemElement) {
                     return;
                 }
-                this.addTags(listItemElement.textContent);
+                this.addTags(listItemElement.textContent, protyle);
             });
-            window.siyuan.menus.menu.element.classList.remove("fn__none");
             const rect = this.iconElement.nextElementSibling.getBoundingClientRect();
-            setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + rect.height);
+            window.siyuan.menus.menu.popup({x: rect.left, y: rect.top + rect.height});
             inputElement.focus();
         });
     }
@@ -434,19 +436,18 @@ export class Background {
         return tags;
     }
 
-    private addTags(tag: string) {
+    private addTags(tag: string, protyle: IProtyle) {
         window.siyuan.menus.menu.remove();
         const tags = this.getTags();
         if (tags.includes(tag)) {
             return;
         }
         tags.push(tag);
-        const id = this.element.getAttribute("data-node-id");
         fetchPost("/api/attr/setBlockAttrs", {
-            id,
+            id: protyle.block.rootID,
             attrs: {"tags": tags.toString()}
         });
         this.ial.tags = tags.toString();
-        this.render(this.ial, id);
+        this.render(this.ial, protyle.block.rootID);
     }
 }

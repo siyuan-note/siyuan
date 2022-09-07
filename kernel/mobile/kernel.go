@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -47,6 +48,7 @@ func StartKernel(container, appDir, workspaceDir, nativeLibDir, privateDataDir, 
 	go func() {
 		model.InitAppearance()
 		sql.InitDatabase(false)
+		sql.InitHistoryDatabase(false)
 		sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
 
 		model.SyncData(true, false, false)
@@ -61,6 +63,7 @@ func StartKernel(container, appDir, workspaceDir, nativeLibDir, privateDataDir, 
 		go model.AutoFlushTx()
 		go sql.AutoFlushTreeQueue()
 		go treenode.AutoFlushBlockTree()
+		go cache.LoadAssets()
 	}()
 }
 

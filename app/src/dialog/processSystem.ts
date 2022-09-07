@@ -3,17 +3,17 @@ import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
 import {ipcRenderer} from "electron";
+import {exportLayout} from "../layout/util";
 /// #endif
 import {showMessage} from "./message";
 import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
-import {exportLayout} from "../layout/util";
 
 export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>
 <div class="b3-dialog__container">
     <div class="b3-dialog__header" onselectstart="return false;">🔒 ${window.siyuan.languages.lockFile0} <small>v${Constants.SIYUAN_VERSION}</small></div>
-    <div class="b3-dialog__content b3-typography">
+    <div class="b3-dialog__content">
         <p>${window.siyuan.languages.lockFile1}</p>
         <p>${window.siyuan.languages.lockFile2}</p>
     </div>
@@ -34,11 +34,11 @@ export const lockFile = (id: string) => {
         /// #if !MOBILE
         getAllModels().editor.find((item) => {
             if (item.editor.protyle.block.rootID === id) {
-                item.parent.parent.removeTab(item.parent.id);
-                logElement.remove();
+                item.parent.parent.removeTab(item.parent.id, false, false);
                 return true;
             }
         });
+        logElement.remove();
         /// #endif
     });
     logElement.querySelector(".b3-button--text").addEventListener("click", () => {
@@ -58,7 +58,7 @@ export const kernelError = () => {
     const html = `<div class="b3-dialog__scrim"></div>
 <div class="b3-dialog__container">
     <div class="b3-dialog__header" onselectstart="return false;">💔 ${window.siyuan.languages.kernelFault0} <small>v${Constants.SIYUAN_VERSION}</small></div>
-    <div class="b3-dialog__content b3-typography">
+    <div class="b3-dialog__content">
         <p>${window.siyuan.languages.kernelFault1}</p>
         <p>${window.siyuan.languages.kernelFault2}</p>
         ${iosReStart}
@@ -84,8 +84,8 @@ export const kernelError = () => {
 export const exitSiYuan = () => {
     fetchPost("/api/system/exit", {force: false}, (response) => {
         if (response.code === 1) {
-            showMessage(response.msg, response.data.closeTimeout, "error");
-            const buttonElement = document.querySelector("#message button");
+            const msgId = showMessage(response.msg, response.data.closeTimeout, "error");
+            const buttonElement = document.querySelector(`#message [data-id="${msgId}"] button`);
             if (buttonElement) {
                 buttonElement.addEventListener("click", () => {
                     fetchPost("/api/system/exit", {force: true}, () => {
@@ -134,14 +134,32 @@ export const transactionError = (data: { code: number, data: string }) => {
     });
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
+        /// #if MOBILE
+        exitSiYuan();
+        /// #else
         exportLayout(false, () => {
             exitSiYuan();
         });
+        /// #endif
     });
     btnsElement[1].addEventListener("click", () => {
-        dialog.destroy();
         fetchPost("/api/filetree/refreshFiletree", {});
     });
+};
+
+let progressStatusTimeoutId: number;
+export const progressStatus = (data: IWebSocketData) => {
+    if (isMobile()) {
+        clearTimeout(progressStatusTimeoutId);
+        const statusElement = document.querySelector("#status");
+        statusElement.innerHTML = data.msg;
+        statusElement.classList.remove("status--hide");
+        progressStatusTimeoutId = window.setTimeout(() => {
+            statusElement.classList.add("status--hide");
+        }, 6000);
+        return;
+    }
+    document.querySelector("#status .status__msg").innerHTML = data.msg;
 };
 
 export const progressLoading = (data: IWebSocketData) => {
@@ -213,11 +231,11 @@ export const setTitle = (title: string) => {
         const versionTitle = title + " v" + Constants.SIYUAN_VERSION;
         document.title = versionTitle;
         dragElement.textContent = versionTitle;
-        dragElement.setAttribute("title", versionTitle)
+        dragElement.setAttribute("title", versionTitle);
     } else {
         document.title = title + " - " + window.siyuan.languages.siyuanNote + " v" + Constants.SIYUAN_VERSION;
         dragElement.textContent = title;
-        dragElement.setAttribute("title", title)
+        dragElement.setAttribute("title", title);
     }
 };
 

@@ -1,35 +1,36 @@
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
-import {newFile} from "../util/newFile";
 import {getDockByType} from "../layout/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile} from "../util/functions";
-import {getDisplayName, isLocalPath, movePathTo} from "../util/pathName";
+import {isLocalPath, movePathTo, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {saveExport} from "../protyle/export";
-import {writeText} from "../protyle/util/compatibility";
+import {openByMobile, writeText} from "../protyle/util/compatibility";
 import {fetchPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
-import {getAllModels} from "../layout/getAll";
 import {focusBlock, focusByRange, getEditorRange} from "../protyle/util/selection";
-import {setPosition} from "../util/setPosition";
 import {updateTransaction} from "../protyle/wysiwyg/transaction";
+/// #if !MOBILE
+import {getAllModels} from "../layout/getAll";
 import {Bookmark} from "../layout/dock/Bookmark";
-import {rename} from "../editor/rename";
 import {openAsset, openBy} from "../editor/util";
+/// #endif
+import {rename} from "../editor/rename";
 import {matchHotKey} from "../protyle/util/hotKey";
 import * as dayjs from "dayjs";
 import {Constants} from "../constants";
+import {deleteFile} from "../editor/deleteFile";
 
 const bindAttrInput = (inputElement: HTMLInputElement, confirmElement: Element) => {
     inputElement.addEventListener("keydown", (event) => {
         if (event.isComposing) {
             return;
         }
-        if (matchHotKey("⌘Enter", event)) {
+        if (matchHotKey("⌘↩", event)) {
             confirmElement.dispatchEvent(new CustomEvent("click"));
             event.stopPropagation();
             event.preventDefault();
@@ -264,8 +265,8 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                             }).element);
                         });
                     }
-                    window.siyuan.menus.menu.element.classList.remove("fn__none");
-                    setPosition(window.siyuan.menus.menu.element, event.clientX, event.clientY + 16);
+                    window.siyuan.menus.menu.element.style.zIndex = "310";
+                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
                 });
                 break;
         }
@@ -314,6 +315,7 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
         if (errorTip) {
             showMessage(errorTip.substr(0, errorTip.length - 2) + " " + window.siyuan.languages.invalid);
         }
+        /// #if !MOBILE
         getAllModels().editor.forEach(item => {
             if (item.editor.protyle.block.rootID === id) {
                 const refElement = item.editor.protyle.title.element.querySelector(".protyle-attr--refcount");
@@ -324,13 +326,16 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                 item.editor.protyle.wysiwyg.renderCustom(attrsResult);
             }
         });
+        /// #endif
         fetchPost("/api/attr/resetBlockAttrs", {id, attrs: attrsResult}, () => {
+            /// #if !MOBILE
             if (attrsResult.bookmark !== attrs.bookmark) {
                 const bookmark = getDockByType("bookmark").data.bookmark;
                 if (bookmark instanceof Bookmark) {
                     bookmark.update();
                 }
             }
+            /// #endif
         });
         dialog.destroy();
     });
@@ -459,8 +464,8 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                                 }).element);
                             });
                         }
-                        window.siyuan.menus.menu.element.classList.remove("fn__none");
-                        setPosition(window.siyuan.menus.menu.element, event.clientX, event.clientY + 16);
+                        window.siyuan.menus.menu.element.style.zIndex = "310";
+                        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
                     });
                     break;
             }
@@ -504,7 +509,8 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                     const escapeHTML = Lute.EscapeHTMLStr(item.value);
                     nodeElement.setAttribute(name, escapeHTML);
                     if (name === "bookmark") {
-                        if (escapeHTML !== response.data.bookmark && !isMobile()) {
+                        /// #if !MOBILE
+                        if (escapeHTML !== response.data.bookmark) {
                             const bookmark = getDockByType("bookmark").data.bookmark;
                             if (bookmark instanceof Bookmark) {
                                 setTimeout(() => {
@@ -512,6 +518,7 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                                 }, 219);
                             }
                         }
+                        /// #endif
                         nodeAttrHTML += `<div class="protyle-attr--bookmark">${escapeHTML}</div>`;
                     } else if (name === "name") {
                         nodeAttrHTML += `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${escapeHTML}</div>`;
@@ -596,7 +603,8 @@ export const copySubMenu = (id: string, name: string, accelerator = true, focusE
                 });
             }
         }, {
-            label: window.siyuan.languages.copy + " ID",
+            label: window.siyuan.languages.copyID,
+            accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
             click: () => {
                 writeText(id);
                 if (focusElement) {
@@ -612,67 +620,52 @@ export const exportMd = (id: string) => {
         label: window.siyuan.languages.export,
         type: "submenu",
         icon: "iconUpload",
-        submenu: [
-            {
-                label: window.siyuan.languages.template,
-                icon: "iconMarkdown",
-                click: () => {
-                    fetchPost("/api/template/docSaveAsTemplate", {
-                        id,
-                        overwrite: false
-                    }, response => {
-                        if (response.code === 1) {
-                            // 重名
-                            confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
-                                fetchPost("/api/template/docSaveAsTemplate", {
-                                    id,
-                                    overwrite: true
-                                });
+        submenu: [{
+            label: window.siyuan.languages.template,
+            icon: "iconMarkdown",
+            click: () => {
+                fetchPost("/api/template/docSaveAsTemplate", {
+                    id,
+                    overwrite: false
+                }, response => {
+                    if (response.code === 1) {
+                        // 重名
+                        confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
+                            fetchPost("/api/template/docSaveAsTemplate", {
+                                id,
+                                overwrite: true
                             });
-                            return;
-                        }
-                        showMessage(window.siyuan.languages.exportTplSucc);
-                    });
-                }
-            },
-            {
-                label: "Markdown",
-                icon: "iconMarkdown",
-                click: () => {
-                    showMessage(window.siyuan.languages.exporting, -1);
-                    fetchPost("/api/export/exportMd", {
-                        id,
-                    }, response => {
-                        hideMessage();
-                        if (window.siyuan.config.system.container === "ios") {
-                            window.location.href = response.data.zip;
-                        } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                            window.JSAndroid.openExternal(response.data.zip);
-                        } else {
-                            window.open(response.data.zip);
-                        }
-                    });
-                }
-            },
-            {
-                label: "SiYuan .sy.zip",
-                icon: "iconSiYuan",
-                click: () => {
-                    showMessage(window.siyuan.languages.exporting, -1);
-                    fetchPost("/api/export/exportSY", {
-                        id,
-                    }, response => {
-                        hideMessage();
-                        if (window.siyuan.config.system.container === "ios") {
-                            window.location.href = response.data.zip;
-                        } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                            window.JSAndroid.openExternal(response.data.zip);
-                        } else {
-                            window.open(response.data.zip);
-                        }
-                    });
-                }
-            },
+                        });
+                        return;
+                    }
+                    showMessage(window.siyuan.languages.exportTplSucc);
+                });
+            }
+        }, {
+            label: "Markdown",
+            icon: "iconMarkdown",
+            click: () => {
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                fetchPost("/api/export/exportMd", {
+                    id,
+                }, response => {
+                    hideMessage(msgId);
+                    openByMobile(response.data.zip);
+                });
+            }
+        }, {
+            label: "SiYuan .sy.zip",
+            icon: "iconSiYuan",
+            click: () => {
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                fetchPost("/api/export/exportSY", {
+                    id,
+                }, response => {
+                    hideMessage(msgId);
+                    openByMobile(response.data.zip);
+                });
+            }
+        },
             /// #if !BROWSER
             {
                 label: "PDF",
@@ -704,43 +697,73 @@ export const exportMd = (id: string) => {
     }).element;
 };
 
-export const openMenu = (src: string, onlyMenu = false) => {
+export const openMenu = (src: string, onlyMenu: boolean, showAccelerator: boolean) => {
     const submenu = [];
     if (isLocalPath(src)) {
-        submenu.push({
-            label: window.siyuan.languages.openInNewTab,
-            click() {
-                openAsset(src.trim(), parseInt(getSearch("page", src)));
-            }
-        });
+        if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(src)) &&
+            (!src.endsWith(".pdf") ||
+                (src.endsWith(".pdf") && !src.startsWith("file://")))
+        ) {
+            /// #if !MOBILE
+            submenu.push({
+                label: window.siyuan.languages.insertRight,
+                accelerator: showAccelerator ? "Click" : "",
+                click() {
+                    openAsset(src.trim(), parseInt(getSearch("page", src)), "right");
+                }
+            });
+            /// #endif
+            /// #if !BROWSER
+            submenu.push({
+                label: window.siyuan.languages.useDefault,
+                accelerator: showAccelerator ? "⇧Click" : "",
+                click() {
+                    openBy(src, "app");
+                }
+            });
+            /// #endif
+        } else {
+            /// #if !BROWSER
+            submenu.push({
+                label: window.siyuan.languages.useDefault,
+                accelerator: showAccelerator ? "Click" : "",
+                click() {
+                    openBy(src, "app");
+                }
+            });
+            /// #endif
+        }
         /// #if !BROWSER
         submenu.push({
-            label: window.siyuan.languages.useDefault,
-            click() {
-                openBy(src, "app");
-            }
-        });
-        submenu.push({
             label: window.siyuan.languages.showInFolder,
+            accelerator: showAccelerator ? "⌘Click" : "",
             click: () => {
                 openBy(src, "folder");
             }
         });
         /// #endif
     } else {
+        /// #if !BROWSER
         submenu.push({
-            label: window.siyuan.languages.useBrowserView,
+            label: window.siyuan.languages.useDefault,
+            accelerator: showAccelerator ? "Click" : "",
             click: () => {
-                /// #if !BROWSER
                 shell.openExternal(src).catch((e) => {
-                    console.log("openExternal error:" + e);
+                    showMessage(e);
                 });
-                /// #else
-                window.open(src);
-                /// #endif
             }
         });
+        /// #endif
     }
+    /// #if BROWSER
+    submenu.push({
+        label: window.siyuan.languages.useBrowserView,
+        accelerator: showAccelerator ? "Click" : "",
+        click: () => {
+            openByMobile(src);
+        }
+    });
+    /// #endif
     if (onlyMenu) {
         return submenu;
     }
@@ -750,36 +773,13 @@ export const openMenu = (src: string, onlyMenu = false) => {
     }).element);
 };
 
-export const newFileMenu = (notebookId?: string, path?: string, open?: boolean) => {
-    return new MenuItem({
-        icon: "iconFile",
-        label: window.siyuan.languages.newFile,
-        click: () => {
-            newFile(notebookId, path, open);
-        }
-    }).element;
-};
-
 export const deleteMenu = (notebookId: string, name: string, pathString: string) => {
     return new MenuItem({
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         accelerator: "⌦",
         click: () => {
-            fetchPost("/api/block/getDocInfo", {
-                id: getDisplayName(pathString, true, true)
-            }, (response) => {
-                let tip = `${window.siyuan.languages.confirmDelete} <b>${name}</b>?`;
-                if (response.data.subFileCount > 0) {
-                    tip = `${window.siyuan.languages.confirmDelete} <b>${name}</b> ${window.siyuan.languages.andSubFile.replace("x", response.data.subFileCount)}?`;
-                }
-                confirmDialog(window.siyuan.languages.delete, tip, () => {
-                    fetchPost("/api/filetree/removeDoc", {
-                        notebook: notebookId,
-                        path: pathString
-                    });
-                });
-            });
+            deleteFile(notebookId, pathString, name);
         }
     }).element;
 };

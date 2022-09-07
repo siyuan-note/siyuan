@@ -27,15 +27,16 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func CreateBox(name string) (id string, err error) {
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	id = ast.NewNodeID()
 	boxLocalPath := filepath.Join(util.DataDir, id)
@@ -48,14 +49,14 @@ func CreateBox(name string) (id string, err error) {
 	boxConf := box.GetConf()
 	boxConf.Name = name
 	box.SaveConf(boxConf)
-	IncWorkspaceDataVer()
+	IncSync()
 	return
 }
 
 func RenameBox(boxID, name string) (err error) {
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	box := Conf.Box(boxID)
 	if nil == box {
@@ -66,14 +67,14 @@ func RenameBox(boxID, name string) (err error) {
 	boxConf.Name = name
 	box.Name = name
 	box.SaveConf(boxConf)
-	IncWorkspaceDataVer()
+	IncSync()
 	return
 }
 
 func RemoveBox(boxID string) (err error) {
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	if util.IsReservedFilename(boxID) {
 		return errors.New(fmt.Sprintf("can not remove [%s] caused by it is a reserved file", boxID))
@@ -87,18 +88,18 @@ func RemoveBox(boxID string) (err error) {
 		return errors.New(fmt.Sprintf("can not remove [%s] caused by it is not a dir", boxID))
 	}
 
-	filesys.ReleaseFileLocks(localPath)
-	if !isUserGuide(boxID) {
+	filelock.ReleaseFileLocks(localPath)
+	if !IsUserGuide(boxID) {
 		var historyDir string
-		historyDir, err = util.GetHistoryDir("delete")
+		historyDir, err = GetHistoryDir(HistoryOpDelete)
 		if nil != err {
-			util.LogErrorf("get history dir failed: %s", err)
+			logging.LogErrorf("get history dir failed: %s", err)
 			return
 		}
 		p := strings.TrimPrefix(localPath, util.DataDir)
 		historyPath := filepath.Join(historyDir, p)
 		if err = gulu.File.Copy(localPath, historyPath); nil != err {
-			util.LogErrorf("gen sync history failed: %s", err)
+			logging.LogErrorf("gen sync history failed: %s", err)
 			return
 		}
 
@@ -109,14 +110,14 @@ func RemoveBox(boxID string) (err error) {
 	if err = os.RemoveAll(localPath); nil != err {
 		return
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return
 }
 
 func Unmount(boxID string) {
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	unmount0(boxID)
 	evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast, 0)
@@ -141,13 +142,13 @@ func unmount0(boxID string) {
 
 func Mount(boxID string) (alreadyMount bool, err error) {
 	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	localPath := filepath.Join(util.DataDir, boxID)
 
 	var reMountGuide bool
-	if isUserGuide(boxID) {
+	if IsUserGuide(boxID) {
 		// 重新挂载帮助文档
 
 		guideBox := Conf.Box(boxID)
@@ -178,7 +179,11 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 
 		go func() {
 			time.Sleep(time.Second * 5)
-			util.PushErrMsg(Conf.Language(52), 9000)
+			util.PushErrMsg(Conf.Language(52), 30000)
+
+			// 每次打开帮助文档时自动检查版本更新并提醒 https://github.com/siyuan-note/siyuan/issues/5057
+			time.Sleep(time.Second * 10)
+			CheckUpdate(true)
 		}()
 	}
 
@@ -209,6 +214,6 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	return false, nil
 }
 
-func isUserGuide(boxID string) bool {
+func IsUserGuide(boxID string) bool {
 	return "20210808180117-czj9bvb" == boxID || "20210808180117-6v0mkxr" == boxID || "20211226090932-5lcq56f" == boxID
 }

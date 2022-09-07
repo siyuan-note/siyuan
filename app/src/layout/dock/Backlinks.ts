@@ -85,11 +85,11 @@ export class Backlinks extends Model {
         <svg><use xlink:href="#iconAlignCenter"></use></svg>
     </span>
     <span class="fn__space"></span>
-    <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.expandAll} ${updateHotkeyTip("⌘↓")}">
+    <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.expand} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
         <svg><use xlink:href="#iconFullscreen"></use></svg>
     </span>
     <span class="fn__space"></span>
-    <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapseAll} ${updateHotkeyTip("⌘↑")}">
+    <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapse} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <span class="${this.type === "local" ? "fn__none " : ""}fn__space"></span>
@@ -108,11 +108,11 @@ export class Backlinks extends Model {
         <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}" />
     </label>
     <span class="fn__space"></span>
-    <span data-type="mExpand" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.expandAll}">
+    <span data-type="mExpand" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.expand}">
         <svg><use xlink:href="#iconFullscreen"></use></svg>
     </span>
     <span class="fn__space"></span>
-    <span data-type="mCollapse" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.collapseAll}">
+    <span data-type="mCollapse" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.collapse}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <span class="fn__space"></span>
@@ -129,6 +129,14 @@ export class Backlinks extends Model {
                     this.searchBacklinks();
                 }
             });
+            item.addEventListener("input", (event: KeyboardEvent) => {
+                const inputElement = event.target as HTMLInputElement;
+                if (inputElement.value === "") {
+                    inputElement.classList.remove("search__input--block");
+                } else {
+                    inputElement.classList.add("search__input--block");
+                }
+            });
         });
 
         this.tree = new Tree({
@@ -137,31 +145,28 @@ export class Backlinks extends Model {
             click(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
-                    hasContext: true,
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
             ctrlClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
-                    hasContext: true,
                     keepCursor: true,
+                    action: [Constants.CB_GET_CONTEXT]
                 });
             },
             altClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "right",
-                    hasContext: true,
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
             shiftClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
-                    hasContext: true,
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             }
         });
@@ -176,7 +181,7 @@ export class Backlinks extends Model {
                     }
                     window.siyuan.menus.menu.remove();
                     window.siyuan.menus.menu.append(new MenuItem({
-                        label:  window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToStaticRef,
+                        label: window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToStaticRef,
                         click: () => {
                             this.turnToRef(element, false);
                         }
@@ -191,32 +196,29 @@ export class Backlinks extends Model {
                 } else {
                     openFileById({
                         id: element.getAttribute("data-node-id"),
-                        hasContext: true,
-                        action: [Constants.CB_GET_FOCUS]
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                     });
                 }
             },
             ctrlClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
-                    hasContext: true,
                     keepCursor: true,
+                    action: [Constants.CB_GET_CONTEXT]
                 });
             },
             altClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "right",
-                    hasContext: true,
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
             shiftClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
-                    hasContext: true,
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
             blockExtHTML: `<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`
@@ -265,20 +267,24 @@ export class Backlinks extends Model {
                         case "layout":
                             if (this.mTree.element.style.flex) {
                                 if (this.mTree.element.style.height === "0px") {
+                                    this.tree.element.classList.remove("fn__none");
                                     this.mTree.element.removeAttribute("style");
                                     target.setAttribute("aria-label", window.siyuan.languages.up);
                                     target.querySelector("use").setAttribute("xlink:href", "#iconUp");
                                 } else {
+                                    this.tree.element.classList.remove("fn__none");
                                     this.mTree.element.removeAttribute("style");
                                     target.setAttribute("aria-label", window.siyuan.languages.down);
                                     target.querySelector("use").setAttribute("xlink:href", "#iconDown");
                                 }
                             } else {
                                 if (target.getAttribute("aria-label") === window.siyuan.languages.down) {
+                                    this.tree.element.classList.remove("fn__none");
                                     this.mTree.element.setAttribute("style", "flex:none;height:0px");
                                     target.setAttribute("aria-label", window.siyuan.languages.up);
                                     target.querySelector("use").setAttribute("xlink:href", "#iconUp");
                                 } else {
+                                    this.tree.element.classList.add("fn__none");
                                     this.mTree.element.setAttribute("style", `flex:none;height:${this.element.clientHeight - this.tree.element.previousElementSibling.clientHeight * 2}px`);
                                     target.setAttribute("aria-label", window.siyuan.languages.down);
                                     target.querySelector("use").setAttribute("xlink:href", "#iconDown");
@@ -356,10 +362,21 @@ export class Backlinks extends Model {
     }
 
     public render(data: { box: string, backlinks: IBlockTree[], backmentions: IBlockTree[], linkRefsCount: number, mentionsCount: number, k: string, mk: string }) {
+        if (!data) {
+            data = {
+                box: "",
+                backlinks: [],
+                backmentions: [],
+                linkRefsCount: 0,
+                mentionsCount: 0,
+                k: "",
+                mk: ""
+            };
+        }
         this.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
         this.notebookId = data.box;
-        this.inputsElement[0].value = data.k || "";
-        this.inputsElement[1].value = data.mk || "";
+        this.inputsElement[0].value = data.k;
+        this.inputsElement[1].value = data.mk;
 
         this.tree.updateData(data.backlinks);
         this.mTree.updateData(data.backmentions);
@@ -384,16 +401,19 @@ export class Backlinks extends Model {
             return;
         }
         if (data.mentionsCount === 0) {
+            this.tree.element.classList.remove("fn__none");
             this.mTree.element.setAttribute("style", "flex:none;height:0px");
             layoutElement.setAttribute("aria-label", window.siyuan.languages.up);
             layoutElement.querySelector("use").setAttribute("xlink:href", "#iconUp");
             return;
         }
         if (data.linkRefsCount === 0) {
+            this.tree.element.classList.add("fn__none");
             this.mTree.element.setAttribute("style", `flex:none;height:${this.element.clientHeight - this.tree.element.previousElementSibling.clientHeight * 2}px`);
             layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
             layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
         } else {
+            this.tree.element.classList.remove("fn__none");
             this.mTree.element.removeAttribute("style");
             layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
             layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");

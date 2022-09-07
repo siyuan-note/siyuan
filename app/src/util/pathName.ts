@@ -6,6 +6,7 @@ import {isMobile} from "./functions";
 import {focusByRange} from "../protyle/util/selection";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {unicode2Emoji} from "../emoji";
+import {Constants} from "../constants";
 
 export const addBaseURL = () => {
     let baseURLElement = document.getElementById("baseURL");
@@ -28,7 +29,14 @@ export const getDisplayName = (filePath: string, basename = true, removeSY = fal
     return name;
 };
 
+export const getAssetName = (assetPath: string) => {
+    return assetPath.substring(7, assetPath.length - pathPosix().extname(assetPath).length - 23);
+};
+
 export const isLocalPath = (link: string) => {
+    if (!link) {
+        return false;
+    }
     return link.startsWith("assets/") || link.startsWith("file://");
 };
 
@@ -93,12 +101,12 @@ export const movePathTo = async (notebookId: string, path: string, focus = true)
             k: inputElement.value
         }, (data) => {
             let fileHTML = "";
-            data.data.forEach((item: { boxIcon:string, box: string, hPath: string, path: string }) => {
+            data.data.forEach((item: { boxIcon: string, box: string, hPath: string, path: string }) => {
                 if (item.path === pathPosix().dirname(path) + "/" || item.path === path) {
                     return;
                 }
                 fileHTML += `<li class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}">
-    ${item.boxIcon ? ('<span class="b3-list-item__icon">' + unicode2Emoji(item.boxIcon) + "</span>") : ""}
+    <span class="b3-list-item__icon">${unicode2Emoji(item.boxIcon || Constants.SIYUAN_IMAGE_NOTE)}</span>
     <span class="b3-list-item__showall">${escapeHtml(item.hPath)}</span>
 </li>`;
             });

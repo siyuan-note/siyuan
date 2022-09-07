@@ -18,6 +18,31 @@
     list-style: none;
   }
 
+  &--border {
+    ul {
+      margin-left: 34px;
+      position: relative;
+    }
+
+    & > ul ul:before {
+      content: "";
+      height: 100%;
+      top: 0;
+      position: absolute;
+      border-left: 1px solid var(--b3-theme-background-light);
+      left: -55px;
+    }
+
+    & > ul li:before {
+      content: "";
+      height: 100%;
+      top: 0;
+      position: absolute;
+      border-left: 1px solid var(--b3-theme-background-light);
+      left: -21px;
+    }
+  }
+
   &-item {
     line-height: 28px;
     padding: 1px 8px;
@@ -30,7 +55,6 @@
     border: 0;
     color: var(--b3-theme-on-background);
     margin-top: 0 !important;
-    transition: var(--b3-transition);
 
     &[draggable="true"]:active {
       cursor: grabbing;
@@ -64,8 +88,8 @@
         display: none;
       }
 
-      &:hover .b3-list-item__action,
-      &:hover .fn__space {
+      &:hover > .b3-list-item__action,
+      &:hover > .fn__space {
         display: flex;
       }
     }
@@ -111,12 +135,30 @@
       }
     }
 
+    &__hinticon {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+      color: var(--b3-theme-on-background);
+      align-self: center;
+      flex-shrink: 0;
+      margin-right: 4px;
+    }
+
     &__graphic {
       margin-right: 4px;
       padding: 0 2px;
       flex-shrink: 0;
       height: 14px;
       width: 12px;
+      line-height: 14px;
+      font-size: 12px;
+
+      // doc icon in the bookmark panel
+      svg {
+        width: 12px;
+        height: 14px;
+      }
     }
 
     &__arrow {
@@ -137,7 +179,16 @@
       border: 0;
       padding: 0;
       color: var(--b3-theme-on-background);
-      @include text-clamp(1)
+      @include text-clamp(1);
+
+      // 搜索列表中自定义图标
+      & > img,
+      & > .custom-icon {
+        height: 14px;
+        width: 14px;
+        float: left;
+        margin-top: 7px;
+      }
     }
 
     &__showall {

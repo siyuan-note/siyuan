@@ -5,6 +5,7 @@ export const isMobile = () => {
 export const getRandom = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min; //含最大值，含最小值
 };
+
 export const getSearch = (key: string, link = window.location.search) => {
     if (link.indexOf("?") === -1) {
         return "";

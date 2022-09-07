@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/vmihailenco/msgpack/v5"
 )
@@ -46,8 +47,17 @@ type BlockTree struct {
 	HPath    string // 文档逻辑路径
 }
 
-func GetBlockTrees() map[string]*BlockTree {
-	return blockTrees
+func CountTrees() (ret int) {
+	roots := map[string]bool{}
+	for _, b := range blockTrees {
+		roots[b.RootID] = true
+	}
+	ret = len(roots)
+	return
+}
+
+func CountBlocks() (ret int) {
+	return len(blockTrees)
 }
 
 func GetBlockTreeRootByPath(boxID, path string) *BlockTree {
@@ -217,36 +227,51 @@ func AutoFlushBlockTree() {
 	}
 }
 
-func ReadBlockTree() (err error) {
+func InitBlockTree(force bool) {
 	start := time.Now()
 
 	if nil == blocktreeFileLock {
 		blocktreeFileLock = flock.New(util.BlockTreePath)
+	} else {
+		if force {
+			err := blocktreeFileLock.Unlock()
+			if nil != err {
+				logging.LogErrorf("unlock blocktree file failed: %s", err)
+			}
+			err = os.RemoveAll(util.BlockTreePath)
+			if nil != err {
+				logging.LogErrorf("remove blocktree file failed: %s", err)
+			}
+			blocktreeFileLock = flock.New(util.BlockTreePath)
+			return
+		}
 	}
 
+	var err error
 	if err = blocktreeFileLock.Lock(); nil != err {
-		util.LogErrorf("read block tree failed: %s", err)
+		logging.LogErrorf("read block tree failed: %s", err)
 		os.Exit(util.ExitCodeBlockTreeErr)
 		return
 	}
 
 	fh := blocktreeFileLock.Fh()
 	if _, err = fh.Seek(0, io.SeekStart); nil != err {
-		util.LogErrorf("read block tree failed: %s", err)
+		logging.LogErrorf("read block tree failed: %s", err)
 		os.Exit(util.ExitCodeBlockTreeErr)
 		return
 	}
 	data, err := io.ReadAll(fh)
 	if nil != err {
-		util.LogErrorf("read block tree failed: %s", err)
+		logging.LogErrorf("read block tree failed: %s", err)
 		os.Exit(util.ExitCodeBlockTreeErr)
 		return
 	}
 	blockTreesLock.Lock()
 	if err = msgpack.Unmarshal(data, &blockTrees); nil != err {
-		util.LogErrorf("unmarshal block tree failed: %s", err)
+		logging.LogErrorf("unmarshal block tree failed: %s", err)
+		blocktreeFileLock.Unlock()
 		if err = os.RemoveAll(util.BlockTreePath); nil != err {
-			util.LogErrorf("removed corrupted block tree failed: %s", err)
+			logging.LogErrorf("removed corrupted block tree failed: %s", err)
 		}
 		os.Exit(util.ExitCodeBlockTreeErr)
 		return
@@ -254,7 +279,7 @@ func ReadBlockTree() (err error) {
 	blockTreesLock.Unlock()
 	debug.FreeOSMemory()
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
-		util.LogWarnf("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), util.BlockTreePath, elapsed)
+		logging.LogWarnf("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), util.BlockTreePath, elapsed)
 	}
 	return
 }
@@ -267,7 +292,7 @@ func SaveBlockTree() {
 	}
 
 	if err := blocktreeFileLock.Lock(); nil != err {
-		util.LogErrorf("read block tree failed: %s", err)
+		logging.LogErrorf("read block tree failed: %s", err)
 		os.Exit(util.ExitCodeBlockTreeErr)
 		return
 	}
@@ -275,7 +300,7 @@ func SaveBlockTree() {
 	blockTreesLock.Lock()
 	data, err := msgpack.Marshal(blockTrees)
 	if nil != err {
-		util.LogErrorf("marshal block tree failed: %s", err)
+		logging.LogErrorf("marshal block tree failed: %s", err)
 		os.Exit(util.ExitCodeBlockTreeErr)
 		return
 	}
@@ -283,19 +308,19 @@ func SaveBlockTree() {
 
 	fh := blocktreeFileLock.Fh()
 	if err = gulu.File.WriteFileSaferByHandle(fh, data); nil != err {
-		util.LogErrorf("write block tree failed: %s", err)
+		logging.LogErrorf("write block tree failed: %s", err)
 		os.Exit(util.ExitCodeBlockTreeErr)
 		return
 	}
 	debug.FreeOSMemory()
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
-		util.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), util.BlockTreePath, elapsed)
+		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), util.BlockTreePath, elapsed)
 	}
 }
 
 func CloseBlockTree() {
 	SaveBlockTree()
 	if err := blocktreeFileLock.Unlock(); nil != err {
-		util.LogErrorf("close block tree failed: %s", err)
+		logging.LogErrorf("close block tree failed: %s", err)
 	}
 }

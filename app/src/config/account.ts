@@ -4,6 +4,9 @@ import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 import {repos} from "./repos";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {needSubscribe} from "../util/needSubscribe";
+import {syncGuide} from "../sync/syncGuide";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 export const account = {
     element: undefined as Element,
@@ -15,21 +18,26 @@ export const account = {
 <div class="fn__hr--b"></div>
 <a class="b3-button b3-button--outline" style="min-width: 214px" href="https://ld246.com/subscribe/siyuan" target="_blank">
     <span>
-        <span class="fn__hr"></span>
+        <div class="fn__hr"></div>
         <span class="ft__smaller">${window.siyuan.languages.account4}</span>
-        <span class="fn__hr"></span>
+        <div class="fn__hr--small"></div>
         <big class="ft__secondary">${window.siyuan.languages.priceAnnual}</big>
         <span class="ft__on-background">/${window.siyuan.languages.year}</span>
-        <span class="fn__hr"></span>
+        <div class="fn__hr--small"></div>
         <span class="ft__smaller ft__on-surface">${window.siyuan.languages.account1}</span>
-        <span class="fn__hr"></span>
+        <div class="fn__hr"></div>
     </span>
 </a>
 <div class="fn__hr--b"></div>
-<div>${window.siyuan.languages.account2}</div>
-<div>${window.siyuan.languages.account8}</div>
-<div>${window.siyuan.languages.account5}</div>
+${window.siyuan.languages.account8}
+<div class="fn__hr"></div>
+${window.siyuan.languages.account2}
 <div><a href="https://b3log.org/siyuan/pricing.html" target="_blank">${window.siyuan.languages.account7}</a></div>
+<div class="fn__hr--b"></div>
+<span class="b3-chip b3-chip--primary fn__pointer${(window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === 2) ? " fn__none" : ""}" id="trialSub">
+    <svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>
+    ${window.siyuan.languages.freeSub}
+</span>
 <div class="fn__hr--b"></div>`;
         if (window.siyuan.user) {
             let userTitlesHTML = "";
@@ -45,14 +53,22 @@ export const account = {
 <div class="b3-form__icon fn__block">
    <svg class="ft__secondary b3-form__icon-icon"><use xlink:href="#iconVIP"></use></svg>
    <input class="b3-text-field fn__block b3-form__icon-input" style="padding-right: 44px;" placeholder="${window.siyuan.languages.activationCodePlaceholder}">
-   <button id="activationCode" class="b3-button b3-button--cancel" style="position: absolute;right: 0;top: 1px;">${window.siyuan.languages.confirm}</button>
+   <button id="activationCode" class="b3-button b3-button--white" style="position: absolute;right: 1px;top: 1px;height: 25px;">${window.siyuan.languages.confirm}</button>
 </div>`;
             if (window.siyuan.user.userSiYuanProExpireTime === -1) {
                 activeSubscriptionHTML = "";
                 subscriptionHTML = `<div class="b3-chip b3-chip--secondary">${Constants.SIYUAN_IMAGE_VIP}${window.siyuan.languages.account12}</div>`;
             } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
-                subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div><div class="fn__hr"></div>
-<div class="ft__on-surface ft__smaller">${window.siyuan.languages.account6} ${Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24)} ${window.siyuan.languages.day}</div>`;
+                if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
+                    subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
+<div class="fn__hr"></div>
+<div class="ft__on-surface ft__smaller">${window.siyuan.languages.account6} ${Math.max(0, Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24))} ${window.siyuan.languages.day} ${window.siyuan.languages.clickMeToRenew}</div>
+<div class="fn__hr"></div>
+${window.siyuan.languages.account8}`;
+                } else {
+                    subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div><div class="fn__hr"></div>
+<div class="ft__on-surface ft__smaller">${window.siyuan.languages.account6} ${Math.max(0, Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24))} ${window.siyuan.languages.day} ${window.siyuan.languages.clickMeToRenew}</div>`;
+                }
             }
             return `<div class="fn__flex config-account">
 <div class="config-account__center">
@@ -96,7 +112,7 @@ export const account = {
     <div class="fn__flex-1 fn__hr"></div>
     <div class="fn__flex fn__block" style="line-height: 1.625">
         <div class="fn__flex-1"></div>
-        <span class="ft__on-surface">${window.siyuan.languages.payment}</span>
+        <span class="ft__on-surface">${window.siyuan.languages.paymentSum}</span>
         <span class="fn__space"></span>
         <span>${window.siyuan.user.userPaymentSum} RMB</span>
     </div>
@@ -153,11 +169,19 @@ export const account = {
 </div>
 </div>`;
     },
-    bindEvent: () => {
-        const agreeLoginElement = account.element.querySelector("#agreeLogin") as HTMLInputElement;
-        const userNameElement = account.element.querySelector("#userName") as HTMLInputElement;
+    bindEvent: (element: Element) => {
+        const trialSubElement = element.querySelector("#trialSub");
+        if (trialSubElement) {
+            trialSubElement.addEventListener("click", () => {
+                fetchPost("/api/account/startFreeTrial", {}, () => {
+                    element.querySelector("#refresh").dispatchEvent(new Event("click"));
+                });
+            });
+        }
+        const agreeLoginElement = element.querySelector("#agreeLogin") as HTMLInputElement;
+        const userNameElement = element.querySelector("#userName") as HTMLInputElement;
         if (!userNameElement) {
-            const refreshElement = account.element.querySelector("#refresh");
+            const refreshElement = element.querySelector("#refresh");
             refreshElement.addEventListener("click", () => {
                 const svgElement = refreshElement.firstElementChild;
                 if (svgElement.classList.contains("fn__rotate")) {
@@ -168,27 +192,27 @@ export const account = {
                     token: window.siyuan.user.userToken,
                 }, response => {
                     window.siyuan.user = response.data;
-                    account.element.innerHTML = account.genHTML();
-                    account.bindEvent();
+                    element.innerHTML = account.genHTML();
+                    account.bindEvent(element);
                     showMessage(window.siyuan.languages.refreshUser, 3000);
                     account.onSetaccount();
                 });
             });
-            account.element.querySelector("#logout").addEventListener("click", () => {
+            element.querySelector("#logout").addEventListener("click", () => {
                 fetchPost("/api/setting/logoutCloudUser", {}, () => {
                     fetchPost("/api/setting/getCloudUser", {}, response => {
                         window.siyuan.user = response.data;
-                        account.element.innerHTML = account.genHTML();
-                        account.bindEvent();
+                        element.innerHTML = account.genHTML();
+                        account.bindEvent(element);
                         account.onSetaccount();
                     });
                 });
             });
-            account.element.querySelectorAll("input[type='checkbox']").forEach(item => {
+            element.querySelectorAll("input[type='checkbox']").forEach(item => {
                 item.addEventListener("change", () => {
                     fetchPost("/api/setting/setAccount", {
-                        displayTitle: (account.element.querySelector("#displayTitle") as HTMLInputElement).checked,
-                        displayVIP: (account.element.querySelector("#displayVIP") as HTMLInputElement).checked,
+                        displayTitle: (element.querySelector("#displayTitle") as HTMLInputElement).checked,
+                        displayVIP: (element.querySelector("#displayVIP") as HTMLInputElement).checked,
                     }, (response) => {
                         window.siyuan.config.account.displayTitle = response.data.displayTitle;
                         window.siyuan.config.account.displayVIP = response.data.displayVIP;
@@ -196,9 +220,13 @@ export const account = {
                     });
                 });
             });
-            const activationCodeElement = account.element.querySelector("#activationCode");
+            const activationCodeElement = element.querySelector("#activationCode");
             activationCodeElement.addEventListener("click", () => {
-                fetchPost("/api/account/checkActivationcode", {data: (activationCodeElement.previousElementSibling as HTMLInputElement).value}, (response) => {
+                const activationCodeInput = (activationCodeElement.previousElementSibling as HTMLInputElement);
+                fetchPost("/api/account/checkActivationcode", {data: activationCodeInput.value}, (response) => {
+                    if (0 !== response.code) {
+                        activationCodeInput.value = "";
+                    }
                     confirmDialog(window.siyuan.languages.activationCode, response.msg, () => {
                         if (response.code === 0) {
                             fetchPost("/api/account/useActivationcode", {data: (activationCodeElement.previousElementSibling as HTMLInputElement).value}, () => {
@@ -211,12 +239,12 @@ export const account = {
             return;
         }
 
-        const userPasswordElement = account.element.querySelector("#userPassword") as HTMLInputElement;
-        const captchaImgElement = account.element.querySelector("#captchaImg") as HTMLInputElement;
-        const captchaElement = account.element.querySelector("#captcha") as HTMLInputElement;
-        const twofactorAuthCodeElement = account.element.querySelector("#twofactorAuthCode") as HTMLInputElement;
-        const loginBtnElement = account.element.querySelector("#login") as HTMLButtonElement;
-        const login2BtnElement = account.element.querySelector("#login2") as HTMLButtonElement;
+        const userPasswordElement = element.querySelector("#userPassword") as HTMLInputElement;
+        const captchaImgElement = element.querySelector("#captchaImg") as HTMLInputElement;
+        const captchaElement = element.querySelector("#captcha") as HTMLInputElement;
+        const twofactorAuthCodeElement = element.querySelector("#twofactorAuthCode") as HTMLInputElement;
+        const loginBtnElement = element.querySelector("#login") as HTMLButtonElement;
+        const login2BtnElement = element.querySelector("#login2") as HTMLButtonElement;
         agreeLoginElement.addEventListener("click", () => {
             if (agreeLoginElement.checked) {
                 loginBtnElement.removeAttribute("disabled");
@@ -278,8 +306,9 @@ export const account = {
                 userPassword: md5(userPasswordElement.value),
                 captcha: captchaElement.value.replace(/(^\s*)|(\s*$)/g, ""),
             }, (data) => {
+                let messageId;
                 if (data.code === 1) {
-                    showMessage(data.msg);
+                    messageId = showMessage(data.msg);
                     if (data.data.needCaptcha) {
                         // 验证码
                         needCaptcha = data.data.needCaptcha;
@@ -293,20 +322,17 @@ export const account = {
                 }
                 if (data.code === 10) {
                     // 两步验证
-                    account.element.querySelector("#form1").classList.add("fn__none");
-                    account.element.querySelector("#form2").classList.remove("fn__none");
+                    element.querySelector("#form1").classList.add("fn__none");
+                    element.querySelector("#form2").classList.remove("fn__none");
                     twofactorAuthCodeElement.focus();
                     token = data.data.token;
                     return;
                 }
-                hideMessage();
+                hideMessage(messageId);
                 fetchPost("/api/setting/getCloudUser", {
                     token: data.data.token,
                 }, response => {
-                    window.siyuan.user = response.data;
-                    account.element.innerHTML = account.genHTML();
-                    account.bindEvent();
-                    account.onSetaccount();
+                    account._afterLogin(response, element);
                 });
             });
         });
@@ -319,22 +345,51 @@ export const account = {
                 fetchPost("/api/setting/getCloudUser", {
                     token: response.data.token,
                 }, userResponse => {
-                    window.siyuan.user = userResponse.data;
-                    account.element.innerHTML = account.genHTML();
-                    account.bindEvent();
-                    account.onSetaccount();
+                    account._afterLogin(userResponse, element);
                 });
             });
         });
     },
+    _afterLogin(userResponse: IWebSocketData, element: Element) {
+        window.siyuan.user = userResponse.data;
+        if (element.classList.contains("account") && !needSubscribe("")) {
+            const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
+            if (dialogElement) {
+                window.siyuan.dialogs.find((item) => {
+                    if (item.element.isSameNode(dialogElement)) {
+                        item.destroy();
+                        return true;
+                    }
+                });
+                syncGuide();
+                return;
+            }
+        }
+        element.innerHTML = account.genHTML();
+        account.bindEvent(element);
+        account.onSetaccount();
+    },
     onSetaccount() {
+        if (repos.element) {
+            repos.element.innerHTML = "";
+        }
+        if (window.siyuan.config.system.container === "ios") {
+            return;
+        }
         let html = "";
         if (window.siyuan.config.account.displayVIP && window.siyuan.user) {
             if (window.siyuan.user.userSiYuanProExpireTime === -1) {
                 html = `<div class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.account12}">${Constants.SIYUAN_IMAGE_VIP}</div>`;
             } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
-                html = `<div class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.account10}"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg></div>`;
+                if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
+                    html = `<div class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.account3}"><svg><use xlink:href="#iconVIP"></use></svg></div>`;
+                } else {
+                    html = `<div class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.account10}"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg></div>`;
+                }
             }
+        }
+        if (!window.siyuan.user || (window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === -1)) {
+            html = `<div class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.freeSub}"><svg class="ft__error"><use xlink:href="#iconVIP"></use></svg></div>`;
         }
         if (window.siyuan.config.account.displayTitle && window.siyuan.user) {
             window.siyuan.user.userTitles.forEach(item => {
@@ -342,8 +397,5 @@ export const account = {
             });
         }
         document.getElementById("toolbarVIP").innerHTML = html;
-        if (repos.element) {
-            repos.element.innerHTML = "";
-        }
     }
 };

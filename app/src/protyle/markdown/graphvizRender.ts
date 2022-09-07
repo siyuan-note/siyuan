@@ -20,15 +20,13 @@ export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
     }
     addScript(`${cdn}/js/graphviz/viz.js?v=0.0.0`, "protyleGraphVizScript").then(() => {
         graphvizElements.forEach((e: HTMLDivElement) => {
-            const text = Lute.UnEscapeHTMLStr(e.getAttribute("data-content"));
-            if (e.getAttribute("data-render") === "true" || text === "") {
+            if (e.getAttribute("data-render") === "true") {
                 return;
             }
             if (!e.firstElementChild.classList.contains("protyle-icons")) {
                 e.insertAdjacentHTML("afterbegin", '<div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div>');
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
-
             try {
                 const blob = new Blob([`importScripts('${(document.getElementById("protyleGraphVizScript") as HTMLScriptElement).src.replace("viz.js", "full.render.js")}');`],
                     {type: "application/javascript"});
@@ -36,7 +34,7 @@ export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
                 const blobUrl = url.createObjectURL(blob);
                 const worker = new Worker(blobUrl);
                 new Viz({worker})
-                    .renderSVGElement(text).then((result: HTMLElement) => {
+                    .renderSVGElement(Lute.UnEscapeHTMLStr(e.getAttribute("data-content"))).then((result: HTMLElement) => {
                     renderElement.innerHTML = result.outerHTML;
                     renderElement.classList.remove("ft__error");
                     renderElement.setAttribute("contenteditable", "false");
@@ -48,9 +46,8 @@ export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
                     renderElement.classList.add("ft__error");
                 });
             } catch (e) {
-                console.error("graphviz error", e);
+                console.error("Graphviz error", e);
             }
-
             e.setAttribute("data-render", "true");
         });
     });

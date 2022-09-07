@@ -88,14 +88,15 @@ func Outline(rootID string) (ret []*Path, err error) {
 		for _, b := range children {
 			resetDepth(b, 0)
 			ret = append(ret, &Path{
-				ID:      b.ID,
-				Box:     b.Box,
-				Name:    b.Content,
-				Type:    b.Type,
-				SubType: b.SubType,
-				Blocks:  b.Children,
-				Depth:   0,
-				Count:   b.Count,
+				ID:       b.ID,
+				Box:      b.Box,
+				Name:     b.Content,
+				NodeType: b.Type,
+				Type:     "outline",
+				SubType:  b.SubType,
+				Blocks:   b.Children,
+				Depth:    0,
+				Count:    b.Count,
 			})
 		}
 	}

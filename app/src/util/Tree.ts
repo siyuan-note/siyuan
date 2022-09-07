@@ -1,12 +1,15 @@
 import {getIconByType} from "../editor/getIcon";
-import {hasClosestByTag} from "../protyle/util/hasClosest";
+import {hasClosestByMatchTag, hasClosestByTag} from "../protyle/util/hasClosest";
 import {isMobile} from "./functions";
 import {mathRender} from "../protyle/markdown/mathRender";
+import {unicode2Emoji} from "../emoji";
+import {Constants} from "../constants";
 
 export class Tree {
     public element: HTMLElement;
     private data: IBlockTree[];
     private blockExtHTML: string;
+    private topExtHTML: string;
 
     private click: (element: HTMLElement, event: MouseEvent) => void;
 
@@ -19,6 +22,7 @@ export class Tree {
         element: HTMLElement,
         data: IBlockTree[],
         blockExtHTML?: string,
+        topExtHTML?: string,
         click?(element: HTMLElement, event: MouseEvent): void
         ctrlClick?(element: HTMLElement): void
         altClick?(element: HTMLElement): void
@@ -32,6 +36,7 @@ export class Tree {
         this.rightClick = options.rightClick;
         this.element = options.element;
         this.blockExtHTML = options.blockExtHTML;
+        this.topExtHTML = options.topExtHTML;
         this.updateData(options.data);
         this.bindEvent();
     }
@@ -56,8 +61,8 @@ export class Tree {
                 iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconTags"></use></svg>';
             } else if (item.type === "backlink") {
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
-            } else if (item.type === "NodeHeading") {
-                iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`
+            } else if (item.type === "outline") {
+                iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             }
             let countHTML = "";
             if (item.count) {
@@ -71,11 +76,12 @@ data-type="${item.nodeType}"
 data-subtype="${item.subType}" 
 ${item.label ? "data-label='" + item.label + "'" : ""}>
     <span style="padding-left: ${item.depth * 16}px" class="b3-list-item__toggle">
-        <svg data-id="${item.full || (item.name + item.depth)}" class="b3-list-item__arrow ${((item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0)) ? "b3-list-item__arrow--open" : "fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
+        <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow ${((item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0)) ? "b3-list-item__arrow--open" : "fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
-    <span class="b3-list-item__text">${item.name}</span>
+    <span class="b3-list-item__text"${item.type === "outline" ? ' title="' + Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.name)) + '"' : ""}>${item.name}</span>
     ${countHTML}
+    ${this.topExtHTML || ""}
 </li>`;
             if (item.children && item.children.length > 0) {
                 html += this.genHTML(item.children) + "</ul>";
@@ -92,10 +98,19 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
         data.forEach((item: IBlock & {
             subType: string;
             count: string;
+            ial?: {
+                icon: string
+            }
         }) => {
             let countHTML = "";
             if (item.count) {
                 countHTML = `<span class="counter">${item.count}</span>`;
+            }
+            let iconHTML;
+            if (item.type === "NodeDocument") {
+                iconHTML = `<span data-defids='["${item.defID}"]' class="b3-list-item__graphic popover__block" data-id="${item.id}">${unicode2Emoji(item.ial.icon || Constants.SIYUAN_IMAGE_FILE)}</span>`;
+            } else {
+                iconHTML = `<svg data-defids='["${item.defID}"]' class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
             }
             html += `<li ${type === "backlink" ? 'draggable="true"' : ""} 
 class="b3-list-item ${isMobile() ? "" : "b3-list-item--hide-action"}"  
@@ -109,8 +124,8 @@ data-def-path="${item.defPath}">
     <span style="padding-left: ${item.depth * 16}px" class="b3-list-item__toggle">
         <svg data-id="${item.id}" class="b3-list-item__arrow${item.children ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <svg data-defids='["${item.defID}"]' class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>
-    <span class="b3-list-item__text">${item.content}</span>
+    ${iconHTML}
+    <span class="b3-list-item__text" ${type === "outline" ? ' title="' + Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
     ${countHTML}
     ${this.blockExtHTML || ""}
 </li>`;
@@ -173,8 +188,16 @@ data-def-path="${item.defPath}">
                     event.preventDefault();
                     break;
                 }
-
-                if (target.tagName === "LI") {
+                if (target.classList.contains("b3-list-item__action") && this.click) {
+                    // 移动端书签父节点删除按钮
+                    const liElement = hasClosestByMatchTag(target, "LI");
+                    if (liElement) {
+                        this.click(liElement, event);
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.tagName === "LI") {
                     this.setCurrent(target);
                     if (target.getAttribute("data-node-id") || target.getAttribute("data-treetype") === "tag") {
                         if (this.ctrlClick && window.siyuan.ctrlIsPressed) {
@@ -200,8 +223,7 @@ data-def-path="${item.defPath}">
             const liElement = hasClosestByTag(event.target, "LI");
             if (liElement) {
                 event.dataTransfer.setData("text/html", liElement.outerHTML);
-                // event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, liElement.parentElement);
-                event.dataTransfer.dropEffect = "move";
+                // 设置了的话 drop 就无法监听 alt event.dataTransfer.dropEffect = "move";
                 liElement.style.opacity = "0.1";
                 window.siyuan.dragElement = liElement;
             }
@@ -226,22 +248,14 @@ data-def-path="${item.defPath}">
         });
     }
 
-    public collapseAll(isFirst = false) {
+    public collapseAll() {
         this.element.querySelectorAll("ul").forEach(item => {
             if (!item.classList.contains("b3-list")) {
-                if (isFirst && item.parentElement.classList.contains("b3-list")) {
-                    // 第一层级不进行缩放
-                } else {
-                    item.classList.add("fn__none");
-                }
+                item.classList.add("fn__none");
             }
         });
         this.element.querySelectorAll(".b3-list-item__arrow").forEach(item => {
-            if (isFirst && item.parentElement.parentElement.parentElement.classList.contains("b3-list")) {
-                // 第一层级不进行缩放
-            } else {
-                item.classList.remove("b3-list-item__arrow--open");
-            }
+            item.classList.remove("b3-list-item__arrow--open");
         });
     }
 

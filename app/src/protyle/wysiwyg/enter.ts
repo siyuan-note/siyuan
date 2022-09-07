@@ -1,5 +1,5 @@
-import {genEmptyElement} from "../../block/util";
-import {getSelectionOffset, focusByWbr} from "../util/selection";
+import {genEmptyElement, insertEmptyBlock} from "../../block/util";
+import {getSelectionOffset, focusByWbr, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement,
     getTopEmptyElement,
@@ -8,10 +8,9 @@ import {
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
-import {genListItemElement, listOutdent, updateListOrder} from "./list";
+import {breakList, genListItemElement, listOutdent, updateListOrder} from "./list";
 import {hasClosestByMatchTag} from "../util/hasClosest";
 import {highlightRender} from "../markdown/highlightRender";
-import {setPosition} from "../../util/setPosition";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
 
@@ -21,12 +20,17 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
     const editableElement = getContenteditableElement(blockElement);
     if (// \n 是因为 https://github.com/siyuan-note/siyuan/issues/3846
         ["", "\n"].includes(editableElement.textContent) &&
-        listItemElement.nextElementSibling?.classList.contains("protyle-attr") &&
         blockElement.previousElementSibling.classList.contains("protyle-action") &&
         !blockElement.querySelector("img") // https://ld246.com/article/1651820644238
     ) {
-        listOutdent(protyle, [blockElement.parentElement], range);
-        return true;
+        if (listItemElement.nextElementSibling?.classList.contains("protyle-attr")) {
+            listOutdent(protyle, [blockElement.parentElement], range);
+            return true;
+        } else if (!listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
+            // 打断列表
+            breakList(protyle, blockElement, range);
+            return true;
+        }
     }
 
     const position = getSelectionOffset(editableElement, protyle.wysiwyg.element, range);
@@ -126,7 +130,12 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         removeEmptyNode(newElement);
         return true;
     }
-
+    if ((range.toString() === "" || range.toString() === Constants.ZWSP) && range.startContainer.nodeType === 3 && range.startContainer.textContent === Constants.ZWSP && range.startOffset === 0) {
+        // 图片后的零宽空格前回车 https://github.com/siyuan-note/siyuan/issues/5690
+        // 列表中的图片后双击换行图片光标错误 https://ld246.com/article/1660987186727/comment/1662181221732?r=Vanessa#comments
+        range.setStart(range.startContainer, 1);
+        range.collapse(false);
+    }
     range.insertNode(document.createElement("wbr"));
     const listItemHTML = listItemElement.outerHTML;
     const html = listItemElement.parentElement.outerHTML;
@@ -180,14 +189,33 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
 };
 
 export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
-    if (isNotEditBlock(blockElement)) {
-        if (blockElement.classList.contains("render-node")) {
+    const disableElement = isNotEditBlock(blockElement);
+    if (!disableElement && blockElement.classList.contains("protyle-wysiwyg--select")) {
+        setLastNodeRange(getContenteditableElement(blockElement), range, false);
+        range.collapse(false);
+        blockElement.classList.remove("protyle-wysiwyg--select");
+        return;
+    }
+    // https://github.com/siyuan-note/siyuan/issues/5471
+    if (disableElement) {
+        if (blockElement.parentElement.classList.contains("li")) {
+            const oldHTML = blockElement.parentElement.parentElement.outerHTML;
+            const newElement = genListItemElement(blockElement.parentElement, 0, true);
+            blockElement.parentElement.insertAdjacentElement("afterend", newElement);
+            updateTransaction(protyle, blockElement.parentElement.parentElement.getAttribute("data-node-id"), blockElement.parentElement.parentElement.outerHTML, oldHTML);
+            focusByWbr(newElement, range);
+            removeEmptyNode(newElement);
+            scrollCenter(protyle);
+            return;
+        }
+        if (blockElement.classList.contains("hr")) {
+            insertEmptyBlock(protyle, "afterend");
+            return;
+        }
+        if (blockElement.classList.contains("protyle-wysiwyg--select") && blockElement.classList.contains("render-node")) {
             protyle.toolbar.showRender(protyle, blockElement);
         } else {
-            protyle.gutter.renderMenu(protyle, blockElement);
-            window.siyuan.menus.menu.element.classList.remove("fn__none");
-            const rect = blockElement.getBoundingClientRect();
-            setPosition(window.siyuan.menus.menu.element, rect.left - window.siyuan.menus.menu.element.clientWidth, rect.top);
+            insertEmptyBlock(protyle, "afterend");
         }
         return;
     }
@@ -197,9 +225,10 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         item.classList.remove("img--select");
     });
     // 代码块
-    if (editableElement.textContent.startsWith("```") || editableElement.textContent.startsWith("···") || editableElement.textContent.startsWith("~~~") ||
-        editableElement.textContent.indexOf("\n```") > -1 || editableElement.textContent.indexOf("\n~~~") > -1 || editableElement.textContent.indexOf("\n···") > -1) {
-        if (editableElement.innerHTML.indexOf("\n") === -1 && editableElement.textContent.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+    const trimStartText = editableElement.innerHTML.trimStart();
+    if (trimStartText.startsWith("```") || trimStartText.startsWith("···") || trimStartText.startsWith("~~~") ||
+        trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1) {
+        if (trimStartText.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else {
             const oldHTML = blockElement.outerHTML;
@@ -256,7 +285,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         }
         range.extractContents();
         const types = protyle.toolbar.getCurrentType(range);
-        if (types.length > 0 && range.startContainer.nodeType !== 3) {
+        if (types.includes("inline-code") && range.startContainer.nodeType !== 3) {
             // https://github.com/siyuan-note/siyuan/issues/4169
             const brElement = document.createElement("br");
             (range.startContainer as HTMLElement).after(brElement);
@@ -339,6 +368,10 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         blockElement.insertAdjacentElement("beforebegin", newElement);
         removeEmptyNode(newElement);
         return true;
+    }
+    if (range.toString() === "" && range.startContainer.nodeType === 3 && range.startContainer.textContent === Constants.ZWSP && range.startOffset === 0) {
+        // 图片后的零宽空格前回车 https://github.com/siyuan-note/siyuan/issues/5690
+        range.setStart(range.startContainer, 1);
     }
     range.insertNode(document.createElement("wbr"));
     const html = blockElement.outerHTML;

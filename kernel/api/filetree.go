@@ -17,6 +17,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"path"
@@ -26,10 +27,29 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func reindexTree(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	path := arg["path"].(string)
+	err := model.ReindexTree(path)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+}
 
 func refreshFiletree(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -200,6 +220,9 @@ func getFullHPathByID(c *gin.Context) {
 	if !ok {
 		return
 	}
+	if nil == arg["id"] {
+		return
+	}
 
 	id := arg["id"].(string)
 	hPath, err := model.GetFullHPathByID(id)
@@ -303,7 +326,7 @@ func duplicateDoc(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	err := model.DuplicateDoc(id)
+	newTree, err := model.DuplicateDoc(id)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -323,6 +346,13 @@ func duplicateDoc(c *gin.Context) {
 	}
 
 	pushCreate(box, p, tree.Root.ID, arg)
+
+	ret.Data = map[string]interface{}{
+		"id":       newTree.Root.ID,
+		"notebook": notebook,
+		"path":     newTree.Path,
+		"hPath":    newTree.HPath,
+	}
 }
 
 func createDoc(c *gin.Context) {
@@ -338,8 +368,15 @@ func createDoc(c *gin.Context) {
 	p := arg["path"].(string)
 	title := arg["title"].(string)
 	md := arg["md"].(string)
+	sortsArg := arg["sorts"]
+	var sorts []string
+	if nil != sortsArg {
+		for _, sort := range sortsArg.([]interface{}) {
+			sorts = append(sorts, sort.(string))
+		}
+	}
 
-	err := model.CreateDocByMd(notebook, p, title, md)
+	err := model.CreateDocByMd(notebook, p, title, md, sorts)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -587,9 +624,18 @@ func getDoc(c *gin.Context) {
 	if nil != s {
 		size = int(s.(float64))
 	}
+	startID := ""
+	endID := ""
+	startIDArg := arg["startID"]
+	endIDArg := arg["endID"]
+	if nil != startIDArg && nil != endIDArg {
+		startID = startIDArg.(string)
+		endID = endIDArg.(string)
+		size = 36
+	}
 
-	blockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, err := model.GetDoc(id, index, keyword, mode, size)
-	if filesys.ErrUnableLockFile == err {
+	blockCount, childBlockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, err := model.GetDoc(startID, endID, id, index, keyword, mode, size)
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 2
 		ret.Data = id
 		return
@@ -606,17 +652,18 @@ func getDoc(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"id":         id,
-		"mode":       mode,
-		"parentID":   parentID,
-		"parent2ID":  parent2ID,
-		"rootID":     rootID,
-		"type":       typ,
-		"content":    content,
-		"blockCount": blockCount,
-		"eof":        eof,
-		"box":        boxID,
-		"path":       docPath,
+		"id":              id,
+		"mode":            mode,
+		"parentID":        parentID,
+		"parent2ID":       parent2ID,
+		"rootID":          rootID,
+		"type":            typ,
+		"content":         content,
+		"blockCount":      blockCount,
+		"childBlockCount": childBlockCount,
+		"eof":             eof,
+		"box":             boxID,
+		"path":            docPath,
 	}
 }
 

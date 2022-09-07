@@ -1,0 +1,473 @@
+{
+	"ID": "20220628204420-ui79vkt",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20220628204420-ui79vkt",
+		"title": "優化排版",
+		"updated": "20220630211154"
+	},
+	"Children": [
+		{
+			"ID": "20220628215506-jnvjuaa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220628215506-jnvjuaa",
+				"updated": "20220628215506"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20220628215506-karsxdt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628215506-karsxdt",
+				"updated": "20220628215506"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "為了快速記錄內容，我們時常會忽略一些排版細節，比如行內代碼前後或者加粗前後缺少空格、中文和西文之間缺少空格。"
+				}
+			]
+		},
+		{
+			"ID": "20220628215506-7m1gd1c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628215506-7m1gd1c",
+				"updated": "20220628215506"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "這樣會導致內容排版看上去不夠精緻，以後瀏覽該內容時也有一定視覺干擾。當然，這只是我們的感觸，也許這並不是問題，甚至本來就需要這樣緊湊排版。"
+				}
+			]
+		},
+		{
+			"ID": "20220628215506-9htzcqy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220628215506-9htzcqy",
+				"updated": "20220628215506"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20220628215506-xbslfaz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628215506-xbslfaz",
+				"updated": "20220628215506"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在編輯器右上角 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "..."
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 菜單中選擇 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "優化排版"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，處理完成後文檔中的如下元素前後會被自動插入一個空格："
+				}
+			]
+		},
+		{
+			"ID": "20220628215506-srlvfe0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220628215506-srlvfe0",
+				"updated": "20220628215506"
+			},
+			"Children": [
+				{
+					"ID": "20220628215506-tfhl45j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220628215506-tfhl45j",
+						"updated": "20220628215506"
+					},
+					"Children": [
+						{
+							"ID": "20220628215506-c6atyjn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220628215506-c6atyjn",
+								"updated": "20220628215506"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "行內代碼"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220628215506-258fpgt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220628215506-258fpgt",
+						"updated": "20220628215506"
+					},
+					"Children": [
+						{
+							"ID": "20220628215506-3twrnze",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220628215506-3twrnze",
+								"updated": "20220628215506"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "行內公式"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220630211154-d216i5j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220630211154-d216i5j",
+				"updated": "20220630211154"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "另外，如下元素中的中西文間也會自動插入一個空格："
+				}
+			]
+		},
+		{
+			"ID": "20220630211154-7y2zlnx",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220630211154-7y2zlnx",
+				"updated": "20220630211154"
+			},
+			"Children": [
+				{
+					"ID": "20220630211154-yr6rvir",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-yr6rvir",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-8ptzt3a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-8ptzt3a",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "標籤"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211154-gjt0dpy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-gjt0dpy",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-p32qfcb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-p32qfcb",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "高亮"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211154-t1yonyq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-t1yonyq",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-h54yp04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-h54yp04",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "刪除線"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211154-o3way3q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-o3way3q",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-bysdnhn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-bysdnhn",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "超鏈接錨文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211154-53u3pwi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-53u3pwi",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-dyus91j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-dyus91j",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "普通文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211154-ciwaquv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-ciwaquv",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-la9aicz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-la9aicz",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "強調"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211154-uvdbsdb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211154-uvdbsdb",
+						"updated": "20220630211154"
+					},
+					"Children": [
+						{
+							"ID": "20220630211154-of2mnn3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211154-of2mnn3",
+								"updated": "20220630211154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加粗"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220628215506-9zzliru",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220628215506-9zzliru",
+				"updated": "20220628215506"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動備份"
+				}
+			]
+		},
+		{
+			"ID": "20220628215506-ciqq3oq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628215506-ciqq3oq",
+				"updated": "20220628215521"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在實際執行優化排版之前，思源會自動備份一次原有的文檔，這樣如果優化結果不滿意也能夠通過"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20211226122707-8cr09co"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "數據歷史"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "進行回滾。"
+				}
+			]
+		}
+	]
+}

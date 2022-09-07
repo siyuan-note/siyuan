@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -65,7 +66,7 @@ func createDocsByHPath(boxID, hPath, content string) (id string, err error) {
 			if isNotLast {
 				dirPath := filepath.Join(util.DataDir, boxID, pathBuilder.String())
 				if err = os.MkdirAll(dirPath, 0755); nil != err {
-					util.LogErrorf("mkdir [%s] failed: %s", dirPath, err)
+					logging.LogErrorf("mkdir [%s] failed: %s", dirPath, err)
 					return
 				}
 			}
@@ -153,6 +154,11 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 			if "NodeListItem" == c.Type {
 				tree, _ := loadTreeByBlockID(c.RootID)
 				li := treenode.GetNodeInTree(tree, c.ID)
+				if nil == li || nil == li.FirstChild {
+					// 反链面板拖拽到文档以后可能会出现这种情况 https://github.com/siyuan-note/siyuan/issues/5363
+					continue
+				}
+
 				var first *sql.Block
 				if 3 != li.ListData.Typ {
 					first = sql.GetBlock(li.FirstChild.ID)
@@ -250,6 +256,10 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 			} else if "NodeHeading" == c.Type {
 				tree, _ := loadTreeByBlockID(c.RootID)
 				h := treenode.GetNodeInTree(tree, c.ID)
+				if nil == h {
+					continue
+				}
+
 				name := sql.GetBlock(h.ID).Content
 				parentPos := 0
 				if "" != keyword {

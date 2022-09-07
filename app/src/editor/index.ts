@@ -14,8 +14,8 @@ export class Editor extends Model {
         tab: Tab,
         blockId: string,
         mode?: TEditorMode,
-        hasContext?: boolean
-        action?: string[]
+        action?: string[],
+        scrollAttr?: IScrollAttr
     }) {
         super({
             id: options.tab.id,
@@ -28,25 +28,24 @@ export class Editor extends Model {
         this.initProtyle(options);
     }
 
-    private initProtyle(options:  {
+    private initProtyle(options: {
         blockId: string,
-        hasContext?: boolean
         action?: string[]
         mode?: TEditorMode,
+        scrollAttr?: IScrollAttr
     }) {
         this.editor = new Protyle(this.element, {
-            action: options.action,
+            action: options.action || [],
             blockId: options.blockId,
             mode: options.mode,
-            hasContext: options.hasContext,
             render: {
                 title: true,
                 background: true,
                 scroll: true,
             },
+            scrollAttr: options.scrollAttr,
             typewriterMode: true,
             after: (editor) => {
-                editor.protyle.model = this;
                 if (window.siyuan.config.readonly) {
                     disabledProtyle(editor.protyle);
                 }
@@ -63,5 +62,7 @@ export class Editor extends Model {
                 }
             },
         });
+        // 需在 after 回调之前，否则不会聚焦 https://github.com/siyuan-note/siyuan/issues/5303
+        this.editor.protyle.model = this;
     }
 }

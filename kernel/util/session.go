@@ -22,10 +22,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var WrongAuthCount int
+
+func NeedCaptcha() bool {
+	return 3 < WrongAuthCount
+}
+
 // SessionData represents the session.
 type SessionData struct {
-	ID             int
 	AccessAuthCode string
+	Captcha        string
 }
 
 // Save saves the current session of the specified context.

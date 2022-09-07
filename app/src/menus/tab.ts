@@ -3,21 +3,19 @@ import {MenuItem} from "./Menu";
 import {Editor} from "../editor";
 import {copyTab} from "../layout/util";
 import {copySubMenu} from "./commonMenuItem";
-import {Model} from "../layout/Model";
 
-const closeMenu = (model: Model) => {
-    const currentTab = model.parent;
+const closeMenu = (tab: Tab) => {
     const allTabs: Tab[] = [];
     const unmodifiedTabs: Tab[] = [];
     const leftTabs: Tab[] = [];
     const rightTabs: Tab[] = [];
     let midIndex = -1;
-    currentTab.parent.children.forEach((item, index) => {
+    tab.parent.children.forEach((item: Tab, index: number) => {
         const editor = item.model as Editor;
-        if (editor.editor?.protyle && !editor.editor?.protyle.updated) {
+        if (!editor || (editor.editor?.protyle && !editor.editor?.protyle.updated)) {
             unmodifiedTabs.push(item);
         }
-        if (item.id === currentTab.id) {
+        if (item.id === tab.id) {
             midIndex = index;
         }
         if (midIndex === -1) {
@@ -33,7 +31,7 @@ const closeMenu = (model: Model) => {
         label: window.siyuan.languages.close,
         accelerator: window.siyuan.config.keymap.general.closeTab.custom,
         click: () => {
-            currentTab.parent.removeTab(currentTab.id);
+            tab.parent.removeTab(tab.id);
         }
     }).element);
     if (allTabs.length > 1) {
@@ -41,12 +39,12 @@ const closeMenu = (model: Model) => {
             label: window.siyuan.languages.closeOthers,
             click: async () => {
                 for (let index = 0; index < allTabs.length; index++) {
-                    if (allTabs[index].id !== currentTab.id && !allTabs[index].headElement.classList.contains("item--pin")) {
+                    if (allTabs[index].id !== tab.id && !allTabs[index].headElement.classList.contains("item--pin")) {
                         await allTabs[index].parent.removeTab(allTabs[index].id, true);
                     }
                 }
-                if (!currentTab.headElement.parentElement.querySelector(".item--focus")) {
-                    currentTab.parent.switchTab(currentTab.headElement, true);
+                if (!tab.headElement.parentElement.querySelector(".item--focus")) {
+                    tab.parent.switchTab(tab.headElement, true);
                 }
             }
         }).element);
@@ -72,8 +70,8 @@ const closeMenu = (model: Model) => {
                             await leftTabs[index].parent.removeTab(leftTabs[index].id);
                         }
                     }
-                    if (!currentTab.headElement.parentElement.querySelector(".item--focus")) {
-                        currentTab.parent.switchTab(currentTab.headElement, true);
+                    if (!tab.headElement.parentElement.querySelector(".item--focus")) {
+                        tab.parent.switchTab(tab.headElement, true);
                     }
                 }
             }).element);
@@ -87,8 +85,8 @@ const closeMenu = (model: Model) => {
                             await rightTabs[index].parent.removeTab(rightTabs[index].id);
                         }
                     }
-                    if (!currentTab.headElement.parentElement.querySelector(".item--focus")) {
-                        currentTab.parent.switchTab(currentTab.headElement, true);
+                    if (!tab.headElement.parentElement.querySelector(".item--focus")) {
+                        tab.parent.switchTab(tab.headElement, true);
                     }
                 }
             }).element);
@@ -102,8 +100,8 @@ const closeMenu = (model: Model) => {
                             await unmodifiedTabs[index].parent.removeTab(unmodifiedTabs[index].id);
                         }
                     }
-                    if (currentTab.headElement.parentElement && !currentTab.headElement.parentElement.querySelector(".item--focus")) {
-                        currentTab.parent.switchTab(currentTab.headElement, true);
+                    if (tab.headElement.parentElement && !tab.headElement.parentElement.querySelector(".item--focus")) {
+                        tab.parent.switchTab(tab.headElement, true);
                     } else if (allTabs[0].headElement.parentElement) {
                         allTabs[0].parent.switchTab(allTabs[0].headElement, true);
                     }
@@ -111,28 +109,26 @@ const closeMenu = (model: Model) => {
             }).element);
         }
     }
-
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
 };
 
-const splitSubMenu = (model: Model) => {
+const splitSubMenu = (tab: Tab) => {
     const subMenus: IMenu[] = [{
         icon: "iconSplitLR",
         label: window.siyuan.languages.splitLR,
         click: () => {
-            const currentTab = model.parent;
-            currentTab.parent.split("lr").addTab(copyTab(currentTab));
+            tab.parent.split("lr").addTab(copyTab(tab));
         }
     }];
-    const currentTab = model.parent;
-    if (currentTab.parent.children.length > 1) {
+    if (tab.parent.children.length > 1) {
         subMenus.push({
             icon: "iconRight",
             label: window.siyuan.languages.splitMoveR,
             click: () => {
-                const newWnd = currentTab.parent.split("lr");
-                newWnd.headersElement.append(currentTab.headElement);
-                newWnd.moveTab(currentTab);
+                const newWnd = tab.parent.split("lr");
+                newWnd.headersElement.append(tab.headElement);
+                newWnd.headersElement.parentElement.classList.remove("fn__none");
+                newWnd.moveTab(tab);
             }
         });
     }
@@ -140,46 +136,57 @@ const splitSubMenu = (model: Model) => {
         icon: "iconSplitTB",
         label: window.siyuan.languages.splitTB,
         click: () => {
-            const currentTab = model.parent;
-            currentTab.parent.split("tb").addTab(copyTab(currentTab));
+            tab.parent.split("tb").addTab(copyTab(tab));
         }
     });
 
-    if (currentTab.parent.children.length > 1) {
+    if (tab.parent.children.length > 1) {
         subMenus.push({
             icon: "iconDown",
             label: window.siyuan.languages.splitMoveB,
             click: () => {
-                const newWnd = currentTab.parent.split("tb");
-                newWnd.headersElement.append(currentTab.headElement);
-                newWnd.moveTab(currentTab);
+                const newWnd = tab.parent.split("tb");
+                newWnd.headersElement.append(tab.headElement);
+                newWnd.headersElement.parentElement.classList.remove("fn__none");
+                newWnd.moveTab(tab);
             }
         });
     }
     return subMenus;
 };
 
-export const initTabMenu = (type: string, model: Model) => {
+export const initTabMenu = (tab: Tab) => {
     window.siyuan.menus.menu.remove();
-    closeMenu(model);
+    closeMenu(tab);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.split,
-        submenu: splitSubMenu(model)
+        submenu: splitSubMenu(tab)
     }).element);
-    if (model instanceof Editor) {
+    const model = tab.model;
+    let rootId;
+    if ((model && model instanceof Editor)) {
+        rootId = model.editor.protyle.block.rootID;
+    } else {
+        const initData = tab.headElement.getAttribute("data-initdata");
+        if (initData) {
+            const initDataObj = JSON.parse(initData);
+            rootId = initDataObj.rootId || initDataObj.blockId;
+        }
+    }
+    if (rootId) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             type: "submenu",
-            submenu: copySubMenu(model.editor.protyle.block.rootID, "", false)
+            submenu: copySubMenu(rootId, "", false)
         }).element);
     }
-    if (model.parent.headElement.classList.contains("item--pin")) {
+    if (tab.headElement.classList.contains("item--pin")) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.unpin,
             icon: "iconPin",
             click: () => {
-                model.parent.unpin();
+                tab.unpin();
             }
         }).element);
     } else {
@@ -187,7 +194,7 @@ export const initTabMenu = (type: string, model: Model) => {
             label: window.siyuan.languages.pin,
             icon: "iconPin",
             click: () => {
-                model.parent.pin();
+                tab.pin();
             }
         }).element);
     }

@@ -14,6 +14,8 @@ import {MobileFiles} from "./MobileFiles";
 import {MobileOutline} from "./MobileOutline";
 import {hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {MobileBacklinks} from "./MobileBacklinks";
+import {MobileBookmarks} from "./MobileBookmarks";
+import {MobileTags} from "./MobileTags";
 
 export const initFramework = () => {
     setInlineStyle();
@@ -21,6 +23,8 @@ export const initFramework = () => {
     const sidebarElement = document.getElementById("sidebar");
     let outline: MobileOutline;
     let backlink: MobileBacklinks;
+    let bookmark: MobileBookmarks;
+    let tag: MobileTags;
     sidebarElement.querySelector(".toolbar--border").addEventListener(getEventName(), (event: Event & { target: Element }) => {
         const svgElement = hasTopClosestByTag(event.target, "svg");
         if (!svgElement || svgElement.classList.contains("toolbar__icon--active")) {
@@ -42,6 +46,18 @@ export const initFramework = () => {
                     } else {
                         backlink.update();
                     }
+                } else if (type === "sidebar-bookmark-tab") {
+                    if (!backlink) {
+                        bookmark = new MobileBookmarks();
+                    } else {
+                        backlink.update();
+                    }
+                } else if (type === "sidebar-tag-tab") {
+                    if (!backlink) {
+                        tag = new MobileTags();
+                    } else {
+                        tag.update();
+                    }
                 }
                 svgElement.classList.add("toolbar__icon--active");
                 sidebarElement.lastElementChild.querySelector(`[data-type="${itemType.replace("-tab", "")}"]`).classList.remove("fn__none");
@@ -60,6 +76,10 @@ export const initFramework = () => {
             outline.update();
         } else if (type === "sidebar-backlink-tab") {
             backlink.update();
+        } else if (type === "sidebar-bookmark-tab") {
+            bookmark.update();
+        } else if (type === "sidebar-tag-tab") {
+            tag.update();
         }
     });
     document.getElementById("toolbarMore").addEventListener(getEventName(), () => {
@@ -91,14 +111,14 @@ export const initFramework = () => {
     });
     initEditorName();
     if (getOpenNotebookCount() > 0) {
-        const id = window.localStorage.getItem(Constants.LOCAL_DOC) || "";
-        fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
+        const localDoc = JSON.parse(window.localStorage.getItem(Constants.LOCAL_DOCINFO) || '{"id": ""}');
+        fetchPost("/api/block/checkBlockExist", {id: localDoc.id}, existResponse => {
             if (existResponse.data) {
-                openMobileFileById(id);
+                openMobileFileById(localDoc.id, localDoc.action);
             } else {
                 fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                     if (response.data.length !== 0) {
-                        openMobileFileById(response.data[0].id);
+                        openMobileFileById(response.data[0].id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                     } else {
                         setEmpty();
                     }
@@ -115,6 +135,7 @@ export const initFramework = () => {
 
 const initEditorName = () => {
     const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
+    inputElement.setAttribute("placeholder", window.siyuan.languages._kernel[16]);
     inputElement.addEventListener("blur", () => {
         if (window.siyuan.config.readonly || document.querySelector("#toolbarEdit use").getAttribute("xlink:href") === "#iconEdit") {
             return;

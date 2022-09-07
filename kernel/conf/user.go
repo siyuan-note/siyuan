@@ -30,6 +30,7 @@ type User struct {
 	UserToken                    string       `json:"userToken"`
 	UserTokenExpireTime          string       `json:"userTokenExpireTime"`
 	UserSiYuanRepoSize           float64      `json:"userSiYuanRepoSize"`
+	UserSiYuanAssetSize          float64      `json:"userSiYuanAssetSize"`
 	UserTrafficUpload            float64      `json:"userTrafficUpload"`
 	UserTrafficDownload          float64      `json:"userTrafficDownload"`
 	UserTrafficTime              float64      `json:"userTrafficTime"`

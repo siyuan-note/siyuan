@@ -7,7 +7,9 @@ import {
     focusSideBlock,
     getEditorRange,
     getSelectionOffset,
-    getSelectionPosition, setFirstNodeRange, setLastNodeRange
+    getSelectionPosition,
+    setFirstNodeRange,
+    setLastNodeRange
 } from "../util/selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByMatchTag} from "../util/hasClosest";
 import {Link} from "./Link";
@@ -18,11 +20,7 @@ import {mathRender} from "../markdown/mathRender";
 import {getEventName} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../markdown/highlightRender";
-import {
-    getContenteditableElement,
-    hasNextSibling,
-    hasPreviousSibling
-} from "../wysiwyg/getBlock";
+import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {processRender} from "../util/processCode";
 import {BlockRef} from "./BlockRef";
 import {hintMoveBlock, hintRef, hintRenderAssets, hintRenderTemplate, hintRenderWidget} from "../hint/extend";
@@ -39,6 +37,11 @@ import {matchHotKey} from "../util/hotKey";
 import {unicode2Emoji} from "../../emoji";
 import {escapeHtml} from "../../util/escape";
 import {hideElements} from "../ui/hideElements";
+import {linkMenu} from "../../menus/protyle";
+import {renderAssetsPreview} from "../../asset/renderAssets";
+import {electronUndo} from "../undo";
+import {previewTemplate} from "./util";
+import {showMessage} from "../../dialog/message";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -71,6 +74,24 @@ export class Toolbar {
             this.element.classList.add("fn__none");
             return;
         }
+        // https://github.com/siyuan-note/siyuan/issues/5157
+        let hasImg = true;
+        let noText = true;
+        Array.from(range.cloneContents().childNodes).find(item => {
+            if (item.nodeType !== 1) {
+                if (item.textContent.length > 0) {
+                    noText = false;
+                    return true;
+                }
+            } else if (!(item as HTMLElement).classList.contains("img")) {
+                hasImg = false;
+                return true;
+            }
+        });
+        if (hasImg && noText) {
+            this.element.classList.add("fn__none");
+            return;
+        }
         // shift+方向键或三击选中，不同的块 https://github.com/siyuan-note/siyuan/issues/3891
         const startElement = hasClosestBlock(range.startContainer);
         const endElement = hasClosestBlock(range.endContainer);
@@ -97,7 +118,9 @@ export class Toolbar {
         }
         const rangePosition = getSelectionPosition(nodeElement, range);
         this.element.classList.remove("fn__none");
-        setPosition(this.element, rangePosition.left - 52, rangePosition.top - this.toolbarHeight - 4);
+        const y = rangePosition.top - this.toolbarHeight - 4;
+        this.element.setAttribute("data-inity", y + Constants.ZWSP + protyle.contentElement.scrollTop.toString());
+        setPosition(this.element, rangePosition.left - 52, y);
         this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
             item.classList.remove("protyle-toolbar__item--current");
         });
@@ -181,7 +204,7 @@ export class Toolbar {
             } else if (startType === "block-ref" || endType === "block-ref") {
                 types.push("blockRef");
             } else if (startType === "file-annotation-ref" || endType === "file-annotation-ref") {
-                types.push("blockRef");
+                types.push("fileAnnotationRef");
             } else if (startType === "inline-math") {
                 types.push("inline-math");
             }
@@ -252,13 +275,14 @@ export class Toolbar {
         const types = this.getCurrentType();
         if (action === "add" && types.length > 0 && types.includes(type) && !focusAdd) {
             if (type === "link") {
-                this.showLink(protyle, this.range.startContainer.parentElement);
+                this.element.classList.add("fn__none");
+                linkMenu(protyle, this.range.startContainer.parentElement);
             }
             return;
         }
         // 对已有字体样式的文字再次添加字体样式
-        if (focusAdd && action === "add" && types.includes("bold") &&
-            this.range.toString() === this.range.commonAncestorContainer.textContent) {
+        if (focusAdd && action === "add" && types.includes("bold") && this.range.startContainer.nodeType === 3 &&
+            this.range.startContainer.parentNode.isSameNode(this.range.endContainer.parentNode)) {
             return;
         }
         let startElement = this.range.startContainer as Element;
@@ -312,7 +336,7 @@ export class Toolbar {
         }
         if (types.length > 0 && types.includes("link") && action === "range") {
             // 链接快捷键不应取消，应该显示链接信息
-            this.showLink(protyle, this.range.startContainer.parentElement);
+            linkMenu(protyle, this.range.startContainer.parentElement);
             return;
         }
         const wbrElement = document.createElement("wbr");
@@ -491,7 +515,7 @@ export class Toolbar {
                         console.log(e);
                     }
                     if (needShowLink) {
-                        this.showLink(protyle, newElement as HTMLElement, focusText);
+                        linkMenu(protyle, newElement as HTMLElement, focusText);
                     }
                 }
             }
@@ -505,161 +529,6 @@ export class Toolbar {
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
         wbrElement.remove();
-    }
-
-    public showLink(protyle: IProtyle, linkElement: HTMLElement, focusText = false) {
-        const nodeElement = hasClosestBlock(linkElement);
-        if (!nodeElement) {
-            return;
-        }
-        const id = nodeElement.getAttribute("data-node-id");
-        this.subElement.style.width = isMobile() ? "80vw" : Math.min(480, window.innerWidth) + "px";
-        this.subElement.style.padding = "";
-        this.subElement.innerHTML = `<div class="b3-form__space--small">
-<label class="fn__flex">
-    <span class="ft__on-surface fn__flex-center" style="width: 72px">${window.siyuan.languages.link}</span>
-    <div class="fn__space"></div>
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.link}" />
-</label>
-<div class="fn__hr"></div>
-<label class="fn__flex">
-    <span class="ft__on-surface fn__flex-center" style="width: 72px">${window.siyuan.languages.anchor}</span>
-    <div class="fn__space"></div>
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.anchor}" />
-</label>
-<div class="fn__hr"></div>
-<label class="fn__flex">
-    <span class="ft__on-surface fn__flex-center" style="width: 72px">${window.siyuan.languages.title}</span>
-    <div class="fn__space"></div>
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}" />
-</label>
-<div class="fn__hr"></div>
-<div class="fn__hr"></div>
-<div class="fn__flex"><span class="fn__flex-1"></span>
-    <button class="b3-button b3-button--outline${linkElement.getAttribute("data-href")?.startsWith("siyuan://blocks/") ? "" : " fn__none"}">${window.siyuan.languages.turnInto} ${window.siyuan.languages.blockRef}</button>
-    <span class="fn__space"></span>
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.remove}</button>
-</div></div>`;
-        let preventChange = false;
-        let oldHTML = nodeElement.outerHTML;
-        this.subElement.querySelector(".b3-button--outline").addEventListener(getEventName(), (event) => {
-            preventChange = true;
-            linkElement.setAttribute("data-subtype", "s");
-            linkElement.setAttribute("data-type", "block-ref");
-            linkElement.setAttribute("data-id", linkElement.getAttribute("data-href")?.replace("siyuan://blocks/", ""));
-            linkElement.removeAttribute("data-href");
-            linkElement.removeAttribute("data-title");
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-            protyle.toolbar.range.selectNode(linkElement);
-            protyle.toolbar.range.collapse(false);
-            focusByRange(protyle.toolbar.range);
-            this.subElement.classList.add("fn__none");
-            event.stopPropagation();
-        });
-        this.subElement.querySelector(".b3-button--cancel").addEventListener(getEventName(), (event) => {
-            preventChange = true;
-            this.setInlineMark(protyle, "link", "remove");
-            this.subElement.classList.add("fn__none");
-            event.stopPropagation();
-        });
-        const titleElements = this.subElement.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
-        titleElements[0].value = linkElement.getAttribute("data-href") || "";
-        titleElements[1].value = linkElement.textContent.replace(Constants.ZWSP, "");
-        titleElements[2].value = Lute.UnEscapeHTMLStr(linkElement.getAttribute("data-title") || "");
-        const updateChange = (event: KeyboardEvent) => {
-            this.isNewEmptyInline = false;
-            event.stopPropagation();
-            if (event.isComposing) {
-                return;
-            }
-            window.setTimeout(() => {
-                if (preventChange) {
-                    return;
-                }
-                if (titleElements[1].value === "" || titleElements[0].value === "") {
-                    if (this.subElement.classList.contains("fn__none")) {
-                        this.setInlineMark(protyle, "link", "remove");
-                    }
-                    return;
-                }
-                linkElement.innerHTML = Lute.EscapeHTMLStr(titleElements[1].value);
-                if (titleElements[2].value) {
-                    linkElement.setAttribute("data-title", Lute.EscapeHTMLStr(titleElements[2].value));
-                } else {
-                    linkElement.removeAttribute("data-title");
-                }
-                linkElement.setAttribute("data-href", titleElements[0].value);
-                if (nodeElement.outerHTML !== oldHTML) {
-                    nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                    updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-                    oldHTML = nodeElement.outerHTML;
-                }
-                if (this.subElement.classList.contains("fn__none")) {
-                    this.range.setEnd(linkElement.lastChild, linkElement.lastChild.textContent.length);
-                    this.range.collapse(false);
-                    focusByRange(this.range);
-                }
-            }, Constants.TIMEOUT_SEARCH);
-        };
-        const hideSubElement = (event: KeyboardEvent) => {
-            if ((event.key === "Enter" || event.key === "Escape") && !event.isComposing) {
-                event.stopPropagation();
-                event.preventDefault();
-                this.subElement.classList.add("fn__none");
-            }
-        };
-        titleElements[0].addEventListener("keydown", (event: KeyboardEvent) => {
-            hideSubElement(event);
-        });
-        titleElements[1].addEventListener("keydown", (event: KeyboardEvent) => {
-            hideSubElement(event);
-        });
-        titleElements[2].addEventListener("keydown", (event: KeyboardEvent) => {
-            hideSubElement(event);
-        });
-        titleElements[0].addEventListener("blur", (event: KeyboardEvent) => {
-            updateChange(event);
-        });
-        titleElements[1].addEventListener("blur", (event: KeyboardEvent) => {
-            updateChange(event);
-        });
-        titleElements[1].addEventListener("compositionend", () => {
-            linkElement.innerHTML = Lute.EscapeHTMLStr(titleElements[1].value) || "";
-        });
-        titleElements[1].addEventListener("input", (event: KeyboardEvent) => {
-            if (!event.isComposing) {
-                linkElement.innerHTML = Lute.EscapeHTMLStr(titleElements[1].value) || "";
-            }
-        });
-        titleElements[2].addEventListener("blur", (event: KeyboardEvent) => {
-            updateChange(event);
-        });
-        titleElements[2].addEventListener("compositionend", () => {
-            if (titleElements[2].value) {
-                linkElement.setAttribute("data-title", Lute.EscapeHTMLStr(titleElements[2].value) || "");
-            } else {
-                linkElement.removeAttribute("data-title");
-            }
-        });
-        titleElements[2].addEventListener("input", (event: KeyboardEvent) => {
-            if (!event.isComposing) {
-                if (titleElements[2].value) {
-                    linkElement.setAttribute("data-title", Lute.EscapeHTMLStr(titleElements[2].value) || "");
-                } else {
-                    linkElement.removeAttribute("data-title");
-                }
-            }
-        });
-        this.subElement.classList.remove("fn__none");
-        const nodeRect = linkElement.getBoundingClientRect();
-        setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height + 4);
-        this.element.classList.add("fn__none");
-        if (focusText || protyle.lute.IsValidLinkDest(titleElements[0].value)) {
-            titleElements[1].select();
-        } else {
-            titleElements[0].select();
-        }
     }
 
     public showFileAnnotationRef(protyle: IProtyle, refElement: HTMLElement) {
@@ -746,7 +615,7 @@ export class Toolbar {
         }
         const id = nodeElement.getAttribute("data-node-id");
         const type = renderElement.getAttribute("data-type");
-        let html = nodeElement.outerHTML;
+        let html = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
         let title = "HTML";
         let placeholder = "";
         switch (renderElement.getAttribute("data-subtype")) {
@@ -785,14 +654,14 @@ export class Toolbar {
         if (type === "NodeBlockQueryEmbed") {
             title = window.siyuan.languages.blockEmbed;
         }
-        const isPin = this.subElement.querySelector('[data-type="pin"]')?.classList.contains("ft__primary");
+        const isPin = this.subElement.querySelector('[data-type="pin"]')?.classList.contains("block__icon--active");
         const pinData: IObject = {};
         if (isPin) {
             const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
             pinData.styleH = textElement.style.height;
             pinData.styleW = textElement.style.width;
         } else {
-            this.subElement.style.width = "";
+            this.subElement.style.width = isMobile() ? "100vw" : "";
             this.subElement.style.padding = "0";
         }
         this.subElement.innerHTML = `<div ${(isPin && this.subElement.firstElementChild.getAttribute("data-drag") === "true") ? 'data-drag="true"' : ""} class="block__popover--move"><div class="block__icons block__icons--border fn__flex">
@@ -802,7 +671,7 @@ export class Toolbar {
         <input type="checkbox" class="b3-switch">
         <span class="fn__space"></span>
     </label>
-    <button data-type="refresh" class="block__icon b3-tooltips b3-tooltips__nw${(isPin && !this.subElement.querySelector('[data-type="refresh"]').classList.contains("ft__primary")) ? "" : " ft__primary"}${type === "NodeBlockQueryEmbed" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
+    <button data-type="refresh" class="block__icon b3-tooltips b3-tooltips__nw${(isPin && !this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) ? "" : " block__icon--active"}${type === "NodeBlockQueryEmbed" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="before" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages["insert-before"]}"><svg><use xlink:href="#iconBefore"></use></svg></button>
     <span class="fn__space"></span>
@@ -810,13 +679,17 @@ export class Toolbar {
     <span class="fn__space"></span>
     <button data-type="copy" class="block__icon b3-tooltips b3-tooltips__nw${isBrowser() ? " fn__none" : ""}" aria-label="${window.siyuan.languages.copy} PNG"><svg><use xlink:href="#iconCopy"></use></svg></button>
     <span class="fn__space"></span>
-    <button data-type="pin" class="block__icon b3-tooltips b3-tooltips__nw${isPin ? " ft__primary" : ""}" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
+    <button data-type="pin" class="block__icon b3-tooltips b3-tooltips__nw${isPin ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="close" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.close}"><svg style="width: 10px"><use xlink:href="#iconClose"></use></svg></button>
 </div>
-<textarea spellcheck="false" class="b3-text-field b3-text-field--text fn__block" placeholder="${placeholder}" style="width:${isMobile() ? "80vw" : Math.max(480, renderElement.clientWidth * 0.7) + "px"};max-height:50vh"></textarea></div>`;
+<textarea spellcheck="false" class="b3-text-field b3-text-field--text fn__block" placeholder="${placeholder}" style="width:${isMobile() ? "100vw" : Math.max(480, renderElement.clientWidth * 0.7) + "px"};max-height:50vh"></textarea></div>`;
         const autoHeight = () => {
             textElement.style.height = textElement.scrollHeight + "px";
+            if (isMobile()) {
+                setPosition(this.subElement, 0, 0);
+                return;
+            }
             if (this.subElement.firstElementChild.getAttribute("data-drag") === "true") {
                 if (textElement.getBoundingClientRect().bottom > window.innerHeight) {
                     this.subElement.style.top = window.innerHeight - this.subElement.clientHeight + "px";
@@ -833,23 +706,42 @@ export class Toolbar {
                 setPosition(this.subElement, nodeRect.right, nodeRect.bottom);
             }
         };
-        this.subElement.querySelector(".block__icons").addEventListener("click", (event: MouseEvent) => {
+        const headerElement = this.subElement.querySelector(".block__icons");
+        headerElement.addEventListener("click", (event: MouseEvent) => {
             const target = event.target as HTMLElement;
             const btnElement = hasClosestByClassName(target, "b3-tooltips");
             if (!btnElement) {
+                if (event.detail === 2) {
+                    const pingElement = headerElement.querySelector('[data-type="pin"]');
+                    if (pingElement.classList.contains("block__icon--active")) {
+                        pingElement.classList.remove("block__icon--active");
+                        pingElement.setAttribute("aria-label", window.siyuan.languages.pin);
+                    } else {
+                        pingElement.classList.add("block__icon--active");
+                        pingElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
                 return;
             }
             event.stopPropagation();
             switch (btnElement.getAttribute("data-type")) {
                 case "close":
                     this.subElement.classList.add("fn__none");
-                    this.subElement.querySelector('[data-type="pin"]').classList.remove("ft__primary");
+                    this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");
                     break;
                 case "pin":
-                    btnElement.classList.toggle("ft__primary");
+                    if (btnElement.classList.contains("block__icon--active")) {
+                        btnElement.classList.remove("block__icon--active");
+                        btnElement.setAttribute("aria-label", window.siyuan.languages.pin);
+                    } else {
+                        btnElement.classList.add("block__icon--active");
+                        btnElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+                    }
                     break;
                 case "refresh":
-                    btnElement.classList.toggle("ft__primary");
+                    btnElement.classList.toggle("block__icon--active");
                     break;
                 case "before":
                     insertEmptyBlock(protyle, "beforebegin", id);
@@ -877,42 +769,35 @@ export class Toolbar {
                     break;
             }
         });
-        this.subElement.querySelector(".block__icons").addEventListener("mousedown", (event: MouseEvent) => {
+        headerElement.addEventListener("mousedown", (event: MouseEvent) => {
             if (hasClosestByClassName(event.target as HTMLElement, "block__icon")) {
                 return;
             }
             const documentSelf = document;
             this.subElement.style.userSelect = "none";
-            const dragBgElement = documentSelf.querySelector("#dragBg");
-            dragBgElement.classList.remove("fn__none");
             const x = event.clientX - parseInt(this.subElement.style.left);
             const y = event.clientY - parseInt(this.subElement.style.top);
-            setTimeout(() => {
-                // windows 需等待 dragBgElement 显示后才可以进行 move https://github.com/siyuan-note/siyuan/issues/2950
-                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                    let positionX = moveEvent.clientX - x;
-                    let positionY = moveEvent.clientY - y;
-                    if (positionX > window.innerWidth - this.subElement.clientWidth) {
-                        positionX = window.innerWidth - this.subElement.clientWidth;
-                    }
-                    if (positionY > window.innerHeight - this.subElement.clientHeight) {
-                        positionY = window.innerHeight - this.subElement.clientHeight;
-                    }
-                    this.subElement.style.left = Math.max(positionX, 0) + "px";
-                    this.subElement.style.top = Math.max(positionY, Constants.SIZE_TOOLBAR_HEIGHT) + "px";
-                    this.subElement.firstElementChild.setAttribute("data-drag", "true");
-                };
-
-                documentSelf.onmouseup = () => {
-                    this.subElement.style.userSelect = "auto";
-                    documentSelf.onmousemove = null;
-                    documentSelf.onmouseup = null;
-                    documentSelf.ondragstart = null;
-                    documentSelf.onselectstart = null;
-                    documentSelf.onselect = null;
-                    dragBgElement.classList.add("fn__none");
-                };
-            });
+            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                let positionX = moveEvent.clientX - x;
+                let positionY = moveEvent.clientY - y;
+                if (positionX > window.innerWidth - this.subElement.clientWidth) {
+                    positionX = window.innerWidth - this.subElement.clientWidth;
+                }
+                if (positionY > window.innerHeight - this.subElement.clientHeight) {
+                    positionY = window.innerHeight - this.subElement.clientHeight;
+                }
+                this.subElement.style.left = Math.max(positionX, 0) + "px";
+                this.subElement.style.top = Math.max(positionY, Constants.SIZE_TOOLBAR_HEIGHT) + "px";
+                this.subElement.firstElementChild.setAttribute("data-drag", "true");
+            };
+            documentSelf.onmouseup = () => {
+                this.subElement.style.userSelect = "auto";
+                documentSelf.onmousemove = null;
+                documentSelf.onmouseup = null;
+                documentSelf.ondragstart = null;
+                documentSelf.onselectstart = null;
+                documentSelf.onselect = null;
+            };
             return;
         });
         const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
@@ -935,6 +820,7 @@ export class Toolbar {
             });
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-content") || "");
         }
+
         textElement.addEventListener("input", (event) => {
             if (!renderElement.parentElement) {
                 return;
@@ -942,7 +828,7 @@ export class Toolbar {
             if (textElement.clientHeight !== textElement.scrollHeight) {
                 autoHeight();
             }
-            if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("ft__primary")) {
+            if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) {
                 return;
             }
             const target = event.target as HTMLTextAreaElement;
@@ -962,8 +848,8 @@ export class Toolbar {
             if (!renderElement.parentElement) {
                 return;
             }
-            if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("ft__primary")) {
-                const target = event.target as HTMLTextAreaElement;
+            const target = event.target as HTMLTextAreaElement;
+            if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) {
                 if (type === "NodeHTMLBlock") {
                     renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
                 } else {
@@ -985,18 +871,32 @@ export class Toolbar {
                 renderElement.setAttribute("data-content", renderElement.getAttribute("data-content").replace(/\n/g, ""));
             }
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
-            html = nodeElement.outerHTML;
+            const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
+            // HTML 块中包含多个 <pre> 时只能保存第一个 https://github.com/siyuan-note/siyuan/issues/5732
+            if (type === "NodeHTMLBlock") {
+                const tempElement = document.createElement("template");
+                tempElement.innerHTML = newHTML;
+                if (tempElement.content.childElementCount > 1) {
+                    showMessage(window.siyuan.languages.htmlBlockTip);
+                }
+            }
+            updateTransaction(protyle, id, newHTML, html);
+            html = newHTML;
             event.stopPropagation();
         });
         textElement.addEventListener("keydown", (event: KeyboardEvent) => {
             event.stopPropagation();
+            // 阻止 ctrl+m 缩小窗口 https://github.com/siyuan-note/siyuan/issues/5541
+            if (matchHotKey(window.siyuan.config.keymap.editor.insert["inline-math"].custom, event)) {
+                event.preventDefault();
+                return;
+            }
             if (event.isComposing) {
                 return;
             }
-            if (event.key === "Escape" || matchHotKey("⌘Enter", event)) {
+            if (event.key === "Escape" || matchHotKey("⌘↩", event)) {
                 this.subElement.classList.add("fn__none");
-                this.subElement.querySelector('[data-type="pin"]').classList.remove("ft__primary");
+                this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");
                 if (renderElement.tagName === "SPAN") {
                     const range = getEditorRange(renderElement);
                     range.setStartAfter(renderElement);
@@ -1006,10 +906,11 @@ export class Toolbar {
                     focusSideBlock(renderElement);
                 }
             } else if (event.key === "Tab") {
-                const start = textElement.selectionStart;
-                textElement.value = textElement.value.substring(0, start) + "\t" + textElement.value.substring(textElement.selectionEnd);
-                textElement.selectionStart = textElement.selectionEnd = start + 1;
+                // https://github.com/siyuan-note/siyuan/issues/5270
+                document.execCommand("insertText", false, "\t");
                 event.preventDefault();
+            } else if (electronUndo(event)) {
+                return;
             }
         });
 
@@ -1054,7 +955,7 @@ export class Toolbar {
                 languageElement.textContent = this.subElement.querySelector(".b3-list-item--focus").textContent;
                 localStorage.setItem(Constants.LOCAL_CODELANG, languageElement.textContent);
                 const editElement = getContenteditableElement(nodeElement);
-                const lineNumber = nodeElement.getAttribute("linenumber")
+                const lineNumber = nodeElement.getAttribute("linenumber");
                 if (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum)) {
                     editElement.classList.add("protyle-linenumber");
                 } else {
@@ -1120,7 +1021,7 @@ export class Toolbar {
             const nodeElement = hasClosestBlock(languageElement);
             if (nodeElement) {
                 const editElement = getContenteditableElement(nodeElement);
-                const lineNumber = nodeElement.getAttribute("linenumber")
+                const lineNumber = nodeElement.getAttribute("linenumber");
                 if (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum)) {
                     editElement.classList.add("protyle-linenumber");
                 } else {
@@ -1152,21 +1053,48 @@ export class Toolbar {
             response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
                 html += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
             });
+            if (html === "") {
+                html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+            }
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
-            this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
-<div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
+            this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
+<div class="fn__flex-column" style="min-width: 260px;max-width: 100vw">
+    <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
+</div>
+<div style="width: 520px;${isMobile() ? "display:none" : ""};overflow: auto;"></div>
 </div>`;
-
+            const listElement = this.subElement.querySelector(".b3-list");
+            const previewElement = this.subElement.firstElementChild.lastElementChild;
+            previewTemplate(listElement.firstElementChild.getAttribute("data-value"), previewElement, protyle.block.parentID);
+            listElement.addEventListener("mouseover", (event) => {
+                const target = event.target as HTMLElement;
+                const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
+                if (!hoverItemElement) {
+                    return;
+                }
+                previewTemplate(hoverItemElement.getAttribute("data-value"), previewElement, protyle.block.parentID);
+            });
             const inputElement = this.subElement.querySelector("input");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 event.stopPropagation();
                 if (event.isComposing) {
                     return;
                 }
-                upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
+                const isEmpty = !this.subElement.querySelector(".b3-list-item");
+                if (!isEmpty) {
+                    const currentElement = upDownHint(listElement, event);
+                    if (currentElement) {
+                        previewTemplate(currentElement.getAttribute("data-value"), previewElement, protyle.block.parentID);
+                    }
+                }
                 if (event.key === "Enter") {
-                    hintRenderTemplate(decodeURIComponent(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, nodeElement);
+                    if (!isEmpty) {
+                        hintRenderTemplate(decodeURIComponent(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, nodeElement);
+                    } else {
+                        focusByRange(this.range);
+                    }
                     this.subElement.classList.add("fn__none");
                     event.preventDefault();
                 } else if (event.key === "Escape") {
@@ -1183,11 +1111,17 @@ export class Toolbar {
                     response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
                         searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
                     });
-                    this.subElement.firstElementChild.lastElementChild.innerHTML = searchHTML;
+                    listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                    previewTemplate(response.data.blocks[0]?.path, previewElement, protyle.block.parentID);
                 });
             });
             this.subElement.lastElementChild.addEventListener("click", (event) => {
                 const target = event.target as HTMLElement;
+                if (target.classList.contains("b3-list--empty")) {
+                    this.subElement.classList.add("fn__none");
+                    focusByRange(this.range);
+                    return;
+                }
                 const listElement = hasClosestByClassName(target, "b3-list-item");
                 if (!listElement) {
                     return;
@@ -1268,23 +1202,54 @@ export class Toolbar {
         }, (response) => {
             let html = "";
             response.data.forEach((item: { hName: string, path: string }, index: number) => {
-                html += `<di data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</di>`;
+                html += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</div>`;
             });
+            if (html === "") {
+                html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+            }
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
-            this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
-<div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
+            this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
+<div class="fn__flex-column" style="min-width: 260px;max-width: 100vw">
+    <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
+</div>
+<div style="width: 260px;display: ${isMobile() ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
 </div>`;
-
+            const listElement = this.subElement.querySelector(".b3-list");
+            listElement.addEventListener("mouseover", (event) => {
+                const target = event.target as HTMLElement;
+                const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
+                if (!hoverItemElement) {
+                    return;
+                }
+                previewElement.innerHTML = renderAssetsPreview(hoverItemElement.getAttribute("data-value"));
+            });
+            const previewElement = this.subElement.firstElementChild.lastElementChild;
+            previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
             const inputElement = this.subElement.querySelector("input");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 event.stopPropagation();
                 if (event.isComposing) {
                     return;
                 }
-                upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
+                const isEmpty = !this.subElement.querySelector(".b3-list-item");
+                if (!isEmpty) {
+                    const currentElement = upDownHint(listElement, event);
+                    if (currentElement) {
+                        previewElement.innerHTML = renderAssetsPreview(currentElement.getAttribute("data-value"));
+                    }
+                }
+
                 if (event.key === "Enter") {
-                    hintRenderAssets(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"), protyle);
+                    if (!isEmpty) {
+                        hintRenderAssets(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"), protyle);
+                    } else {
+                        focusByRange(this.range);
+                    }
+                    this.subElement.classList.add("fn__none");
+                    // 空行处插入 mp3 会多一个空的 mp3 块
+                    event.preventDefault();
                 } else if (event.key === "Escape") {
                     this.subElement.classList.add("fn__none");
                     focusByRange(this.range);
@@ -1299,16 +1264,22 @@ export class Toolbar {
                     response.data.forEach((item: { path: string, hName: string }, index: number) => {
                         searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</div>`;
                     });
-                    this.subElement.firstElementChild.lastElementChild.innerHTML = searchHTML;
+                    listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                    previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
                 });
             });
             this.subElement.lastElementChild.addEventListener("click", (event) => {
                 const target = event.target as HTMLElement;
-                const listElement = hasClosestByClassName(target, "b3-list-item");
-                if (!listElement) {
+                if (target.classList.contains("b3-list--empty")) {
+                    this.subElement.classList.add("fn__none");
+                    focusByRange(this.range);
                     return;
                 }
-                hintRenderAssets(listElement.getAttribute("data-value"), protyle);
+                const listItemElement = hasClosestByClassName(target, "b3-list-item");
+                if (!listItemElement) {
+                    return;
+                }
+                hintRenderAssets(listItemElement.getAttribute("data-value"), protyle);
             });
             const rangePosition = getSelectionPosition(nodeElement, range);
             this.subElement.classList.remove("fn__none");

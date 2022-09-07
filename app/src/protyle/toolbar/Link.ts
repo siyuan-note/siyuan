@@ -1,4 +1,3 @@
-import {getEventName} from "../util/compatibility";
 import {ToolbarItem} from "./ToolbarItem";
 
 export class Link extends ToolbarItem {
@@ -6,8 +5,10 @@ export class Link extends ToolbarItem {
 
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
         super(protyle, menuItem);
-        this.element.addEventListener(getEventName(), (event: MouseEvent & { changedTouches: MouseEvent[] }) => {
+        // 不能用 getEventName，否则会导致光标位置变动到点击的文档中
+        this.element.addEventListener("click", (event: MouseEvent & { changedTouches: MouseEvent[] }) => {
             protyle.toolbar.setInlineMark(protyle, "link", "add");
+            protyle.toolbar.element.classList.add("fn__none");
             event.stopPropagation();
         });
     }

@@ -4,7 +4,7 @@
   box-shadow: var(--b3-dialog-shadow);
   background-color: var(--b3-menu-background);
   padding: 4px 0;
-  z-index: 304;
+  z-index: 210;
 
   &__item {
     padding: 0 16px 0 8px;
@@ -70,6 +70,10 @@
       }
     }
 
+    &--selected {
+      color: var(--b3-theme-primary);
+    }
+
     &--current {
       background-color: var(--b3-list-hover);
     }
@@ -100,8 +104,17 @@
     align-self: center;
     height: 14px;
     width: 14px;
+    line-height: 14px;
     margin-right: 8px;
     color: var(--b3-theme-on-surface);
+
+    // 分屏下拉的页签列表
+    & > svg,
+    & > img {
+      float: left;
+      height: 14px;
+      width: 14px;
+    }
 
     &--arrow {
       margin: 0 0 0 8px;

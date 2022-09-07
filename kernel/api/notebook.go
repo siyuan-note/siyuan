@@ -155,7 +155,8 @@ func openNotebook(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
-	util.PushMsg(model.Conf.Language(45), 1000*60*15)
+	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
+	defer util.PushClearMsg(msgId)
 	existed, err := model.Mount(notebook)
 	if nil != err {
 		ret.Code = -1

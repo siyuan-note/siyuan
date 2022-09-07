@@ -8,7 +8,6 @@ import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {Dialog} from "../../dialog";
-import {isMobile} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
 
@@ -62,11 +61,11 @@ export class Bookmark extends Model {
     <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.expandAll} ${updateHotkeyTip("⌘↓")}">
+    <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.expand} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
         <svg><use xlink:href="#iconFullscreen"></use></svg>
     </span>
     <span class="fn__space"></span>
-    <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapseAll} ${updateHotkeyTip("⌘↑")}">
+    <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapse} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <span class="fn__space"></span>
@@ -77,15 +76,18 @@ export class Bookmark extends Model {
             element: this.element.lastElementChild as HTMLElement,
             data: null,
             click(element: HTMLElement) {
-                openFileById({
-                    id: element.getAttribute("data-node-id"),
-                    hasContext: true,
-                    action: [Constants.CB_GET_FOCUS]
+                const id = element.getAttribute("data-node-id");
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openFileById({
+                        id,
+                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                    });
                 });
             },
             rightClick: (element: HTMLElement, event: MouseEvent) => {
                 window.siyuan.menus.menu.remove();
-                if (!element.getAttribute("data-node-id")) {
+                const id = element.getAttribute("data-node-id");
+                if (!id) {
                     window.siyuan.menus.menu.append(new MenuItem({
                         label: window.siyuan.languages.rename,
                         click: () => {
@@ -97,7 +99,7 @@ export class Bookmark extends Model {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-                                width: isMobile() ? "80vw" : "520px",
+                                width: "520px",
                             });
                             const btnsElement = dialog.element.querySelectorAll(".b3-button");
                             btnsElement[0].addEventListener("click", () => {
@@ -120,13 +122,14 @@ export class Bookmark extends Model {
                             });
                         }
                     }).element);
-                } else {
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        icon: "iconTrashcan",
-                        label: window.siyuan.languages.remove,
-                        click: () => {
-                            confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(element.parentElement.previousElementSibling.querySelector(".b3-list-item__text").textContent)}</b>?`, () => {
-                                const id = element.getAttribute("data-node-id");
+                }
+                window.siyuan.menus.menu.append(new MenuItem({
+                    icon: "iconTrashcan",
+                    label: window.siyuan.languages.remove,
+                    click: () => {
+                        const bookmark = (id ? element.parentElement.previousElementSibling : element).querySelector(".b3-list-item__text").textContent;
+                        confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(bookmark)}</b>?`, () => {
+                            if (id) {
                                 fetchPost("/api/attr/setBlockAttrs", {id, attrs: {bookmark: ""}}, () => {
                                     this.update();
                                 });
@@ -137,33 +140,33 @@ export class Bookmark extends Model {
                                         bookmarkElement.remove();
                                     }
                                 });
-                            });
-                        }
-                    }).element);
-                }
+                            } else {
+                                fetchPost("/api/bookmark/removeBookmark", {bookmark});
+                            }
+                        });
+                    }
+                }).element);
                 window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
             },
             ctrlClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
-                    hasContext: true,
                     keepCursor: true,
+                    action: [Constants.CB_GET_CONTEXT]
                 });
             },
             altClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "right",
-                    hasContext: true,
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
             shiftClick(element: HTMLElement) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
-                    hasContext: true,
-                    action: [Constants.CB_GET_FOCUS]
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             }
         });

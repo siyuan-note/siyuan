@@ -22,25 +22,25 @@ export const onGetnotebookconf = (data: {
 <div class="b3-label">
     ${window.siyuan.languages.fileTree12}
     <div class="fn__hr"></div>
-    <div class="b3-label__text b3-typography">${window.siyuan.languages.fileTree13}</div>
+    <div class="b3-label__text">${window.siyuan.languages.fileTree13}</div>
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__flex-center fn__block" id="createDocNameTemplate" value="">
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.fileTree5}
     <div class="fn__hr"></div>
-    <div class="b3-label__text b3-typography">${window.siyuan.languages.fileTree6}</div>
+    <div class="b3-label__text">${window.siyuan.languages.fileTree6}</div>
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__flex-center fn__block" id="refCreateSavePath" value="${window.siyuan.config.fileTree.refCreateSavePath}">
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.fileTree11}
     <div class="fn__hr"></div>
-    <div class="b3-label__text b3-typography">${window.siyuan.languages.fileTree14}</div>
+    <div class="b3-label__text">${window.siyuan.languages.fileTree14}</div>
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__flex-center fn__block" id="dailyNoteSavePath" value="">
     <div class="fn__hr"></div>
-    <div class="b3-label__text b3-typography">${window.siyuan.languages.fileTree15}</div>
+    <div class="b3-label__text">${window.siyuan.languages.fileTree15}</div>
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__flex-center fn__block" id="dailyNoteTemplatePath" value="${data.conf.dailyNoteTemplatePath}">
 </div></div>`;

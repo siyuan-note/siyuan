@@ -24,6 +24,8 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/logging"
 )
 
 func IsEmptyDir(p string) bool {
@@ -38,24 +40,6 @@ func IsEmptyDir(p string) bool {
 	return 1 > len(files)
 }
 
-func IsValidJSON(p string) bool {
-	if !gulu.File.IsExist(p) {
-		return false
-	}
-	data, err := os.ReadFile(p)
-	if nil != err {
-		LogErrorf("read json file [%s] failed: %s", p, err)
-		return false
-	}
-
-	json := map[string]interface{}{}
-	if err = gulu.JSON.UnmarshalJSON(data, &json); nil != err {
-		LogErrorf("parse json file [%s] failed: %s", p, err)
-		return false
-	}
-	return true
-}
-
 func RemoveID(name string) string {
 	ext := path.Ext(name)
 	name = strings.TrimSuffix(name, ext)
@@ -63,6 +47,23 @@ func RemoveID(name string) string {
 		name = name[:len(name)-23]
 	}
 	return name + ext
+}
+
+func AssetName(name string) string {
+	_, id := LastID(name)
+	ext := path.Ext(name)
+	name = name[0 : len(name)-len(ext)]
+	if !IsIDPattern(id) {
+		id = ast.NewNodeID()
+		name = name + "-" + id + ext
+	} else {
+		if !IsIDPattern(name) {
+			name = name[:len(name)-len(id)-1] + "-" + id + ext
+		} else {
+			name = name + ext
+		}
+	}
+	return name
 }
 
 func LastID(p string) (name, id string) {
@@ -79,7 +80,7 @@ func LatestTmpFile(p string) string {
 	dir, base := filepath.Split(p)
 	files, err := os.ReadDir(dir)
 	if nil != err {
-		LogErrorf("read dir [%s] failed: %s", dir, err)
+		logging.LogErrorf("read dir [%s] failed: %s", dir, err)
 		return ""
 	}
 
@@ -100,12 +101,12 @@ func LatestTmpFile(p string) string {
 	sort.Slice(tmps, func(i, j int) bool {
 		info1, err := tmps[i].Info()
 		if nil != err {
-			LogErrorf("read file info [%s] failed: %s", tmps[i].Name(), err)
+			logging.LogErrorf("read file info [%s] failed: %s", tmps[i].Name(), err)
 			return false
 		}
 		info2, err := tmps[j].Info()
 		if nil != err {
-			LogErrorf("read file info [%s] failed: %s", tmps[j].Name(), err)
+			logging.LogErrorf("read file info [%s] failed: %s", tmps[j].Name(), err)
 			return false
 		}
 		return info1.ModTime().After(info2.ModTime())
@@ -123,7 +124,7 @@ func IsCorruptedSYData(data []byte) bool {
 func FilterUploadFileName(name string) string {
 	ret := FilterFileName(name)
 	ret = strings.ReplaceAll(ret, "~", "")
-	//ret = strings.ReplaceAll(ret, "_", "") // https://github.com/siyuan-note/siyuan/issues/3534
+	//ret = strings.ReplaceAll(ret, "_", "") // 插入资源文件时允许下划线 https://github.com/siyuan-note/siyuan/issues/3534
 	ret = strings.ReplaceAll(ret, "[", "")
 	ret = strings.ReplaceAll(ret, "]", "")
 	ret = strings.ReplaceAll(ret, "(", "")
@@ -141,9 +142,12 @@ func FilterUploadFileName(name string) string {
 }
 
 func FilterFilePath(p string) (ret string) {
-	ret = strings.ReplaceAll(p, "/", "__@sep__")
-	ret = FilterFileName(ret)
-	ret = strings.ReplaceAll(ret, "__@sep__", "/")
+	parts := strings.Split(p, "/")
+	var filteredParts []string
+	for _, part := range parts {
+		filteredParts = append(filteredParts, FilterFileName(part))
+	}
+	ret = strings.Join(filteredParts, "/")
 	return
 }
 
@@ -158,6 +162,7 @@ func FilterFileName(name string) string {
 	name = strings.ReplaceAll(name, "<", "")
 	name = strings.ReplaceAll(name, ">", "")
 	name = strings.ReplaceAll(name, "|", "")
+	name = strings.TrimSpace(name)
 	return name
 }
 
@@ -185,32 +190,23 @@ func IsSubFolder(parent, sub string) bool {
 	return false
 }
 
-const CloudSingleFileMaxSizeLimit = 96 * 1000 * 1000
-
-func SizeOfDirectory(path string, includeBigFile bool) (int64, error) {
-	var size int64
-	err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
+func SizeOfDirectory(path string) (size int64, err error) {
+	err = filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
 		if nil != err {
 			return err
 		}
 		if !info.IsDir() {
 			s := info.Size()
-			if CloudSingleFileMaxSizeLimit < s {
-				if includeBigFile {
-					size += s
-				}
-			} else {
-				size += s
-			}
+			size += s
 		} else {
 			size += 4096
 		}
 		return nil
 	})
 	if nil != err {
-		LogErrorf("size of dir [%s] failed: %s", path, err)
+		logging.LogErrorf("size of dir [%s] failed: %s", path, err)
 	}
-	return size, err
+	return
 }
 
 func IsReservedFilename(baseName string) bool {

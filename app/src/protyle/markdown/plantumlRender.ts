@@ -18,8 +18,7 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
     }
     addScript(`${cdn}/js/plantuml/plantuml-encoder.min.js?v=0.0.0`, "protylePlantumlScript").then(() => {
         plantumlElements.forEach((e: HTMLDivElement) => {
-            const text = Lute.UnEscapeHTMLStr(e.getAttribute("data-content"));
-            if (!text) {
+            if (e.getAttribute("data-render") === "true") {
                 return;
             }
             if (!e.firstElementChild.classList.contains("protyle-icons")) {
@@ -27,8 +26,9 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
             try {
-                renderElement.innerHTML = `<img src=${window.siyuan.config.editor.plantUMLServePath}${plantumlEncoder.encode(text)}">`;
+                renderElement.innerHTML = `<img src=${window.siyuan.config.editor.plantUMLServePath}${plantumlEncoder.encode(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")))}">`;
                 renderElement.classList.remove("ft__error");
+                e.setAttribute("data-render", "true");
             } catch (error) {
                 renderElement.classList.add("ft__error");
                 renderElement.innerHTML = `plantuml render error: <br>${error}`;

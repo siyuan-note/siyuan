@@ -32,8 +32,9 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/facette/natsort"
+	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -65,7 +66,7 @@ func ListNotebooks() (ret []*Box, err error) {
 	ret = []*Box{}
 	dirs, err := os.ReadDir(util.DataDir)
 	if nil != err {
-		util.LogErrorf("read dir [%s] failed: %s", util.DataDir, err)
+		logging.LogErrorf("read dir [%s] failed: %s", util.DataDir, err)
 		return ret, err
 	}
 	for _, dir := range dirs {
@@ -84,21 +85,21 @@ func ListNotebooks() (ret []*Box, err error) {
 		boxConf := conf.NewBoxConf()
 		boxConfPath := filepath.Join(util.DataDir, dir.Name(), ".siyuan", "conf.json")
 		if !gulu.File.IsExist(boxConfPath) {
-			if isUserGuide(dir.Name()) {
-				filesys.ReleaseAllFileLocks()
+			if IsUserGuide(dir.Name()) {
+				filelock.ReleaseAllFileLocks()
 				os.RemoveAll(filepath.Join(util.DataDir, dir.Name()))
-				util.LogWarnf("not found user guid box conf [%s], removed it", boxConfPath)
+				logging.LogWarnf("not found user guid box conf [%s], removed it", boxConfPath)
 				continue
 			}
-			util.LogWarnf("not found box conf [%s], recreate it", boxConfPath)
+			logging.LogWarnf("not found box conf [%s], recreate it", boxConfPath)
 		} else {
-			data, readErr := filesys.NoLockFileRead(boxConfPath)
+			data, readErr := filelock.NoLockFileRead(boxConfPath)
 			if nil != readErr {
-				util.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
+				logging.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
 				continue
 			}
 			if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
-				util.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
+				logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
 				continue
 			}
 		}
@@ -152,14 +153,14 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 		return
 	}
 
-	data, err := filesys.LockFileRead(confPath)
+	data, err := filelock.NoLockFileRead(confPath)
 	if nil != err {
-		util.LogErrorf("read box conf [%s] failed: %s", confPath, err)
+		logging.LogErrorf("read box conf [%s] failed: %s", confPath, err)
 		return
 	}
 
 	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
-		util.LogErrorf("parse box conf [%s] failed: %s", confPath, err)
+		logging.LogErrorf("parse box conf [%s] failed: %s", confPath, err)
 		return
 	}
 	return
@@ -169,11 +170,11 @@ func (box *Box) SaveConf(conf *conf.BoxConf) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	newData, err := gulu.JSON.MarshalIndentJSON(conf, "", "  ")
 	if nil != err {
-		util.LogErrorf("marshal box conf [%s] failed: %s", confPath, err)
+		logging.LogErrorf("marshal box conf [%s] failed: %s", confPath, err)
 		return
 	}
 
-	oldData, err := filesys.NoLockFileRead(confPath)
+	oldData, err := filelock.NoLockFileRead(confPath)
 	if nil != err {
 		box.saveConf0(newData)
 		return
@@ -189,10 +190,10 @@ func (box *Box) SaveConf(conf *conf.BoxConf) {
 func (box *Box) saveConf0(data []byte) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); nil != err {
-		util.LogErrorf("save box conf [%s] failed: %s", confPath, err)
+		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
-	if err := filesys.LockFileWrite(confPath, data); nil != err {
-		util.LogErrorf("save box conf [%s] failed: %s", confPath, err)
+	if err := filelock.NoLockFileWrite(confPath, data); nil != err {
+		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
 }
 
@@ -238,7 +239,7 @@ func (box *Box) Stat(p string) (ret *FileInfo) {
 	info, err := os.Stat(absPath)
 	if nil != err {
 		if !os.IsNotExist(err) {
-			util.LogErrorf("stat [%s] failed: %s", absPath, err)
+			logging.LogErrorf("stat [%s] failed: %s", absPath, err)
 		}
 		return
 	}
@@ -258,20 +259,20 @@ func (box *Box) Exist(p string) bool {
 func (box *Box) Mkdir(path string) error {
 	if err := os.Mkdir(filepath.Join(util.DataDir, box.ID, path), 0755); nil != err {
 		msg := fmt.Sprintf(Conf.Language(6), box.Name, path, err)
-		util.LogErrorf("mkdir [path=%s] in box [%s] failed: %s", path, box.ID, err)
+		logging.LogErrorf("mkdir [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return nil
 }
 
 func (box *Box) MkdirAll(path string) error {
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, path), 0755); nil != err {
 		msg := fmt.Sprintf(Conf.Language(6), box.Name, path, err)
-		util.LogErrorf("mkdir all [path=%s] in box [%s] failed: %s", path, box.ID, err)
+		logging.LogErrorf("mkdir all [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return nil
 }
 
@@ -279,10 +280,10 @@ func (box *Box) Move(oldPath, newPath string) error {
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	fromPath := filepath.Join(boxLocalPath, oldPath)
 	toPath := filepath.Join(boxLocalPath, newPath)
-	filesys.ReleaseFileLocks(fromPath)
+	filelock.ReleaseFileLocks(fromPath)
 	if err := os.Rename(fromPath, toPath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(5), box.Name, fromPath, err)
-		util.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, box.Name, err)
+		logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, box.Name, err)
 		return errors.New(msg)
 	}
 
@@ -292,20 +293,20 @@ func (box *Box) Move(oldPath, newPath string) error {
 			os.Remove(fromDir)
 		}
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return nil
 }
 
 func (box *Box) Remove(path string) error {
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	filePath := filepath.Join(boxLocalPath, path)
-	filesys.ReleaseFileLocks(filePath)
+	filelock.ReleaseFileLocks(filePath)
 	if err := os.RemoveAll(filePath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(7), box.Name, path, err)
-		util.LogErrorf("remove [path=%s] in box [%s] failed: %s", path, box.ID, err)
+		logging.LogErrorf("remove [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	return nil
 }
 
@@ -317,7 +318,7 @@ func (box *Box) Unindex() {
 	sql.RemoveBoxHash(tx, box.ID)
 	sql.DeleteByBoxTx(tx, box.ID)
 	sql.CommitTx(tx)
-	filesys.ReleaseFileLocks(filepath.Join(util.DataDir, box.ID))
+	filelock.ReleaseFileLocks(filepath.Join(util.DataDir, box.ID))
 	treenode.RemoveBlockTreesByBoxID(box.ID)
 }
 
@@ -347,30 +348,6 @@ func (box *Box) listFiles(files, ret *[]*FileInfo) {
 
 func isSkipFile(filename string) bool {
 	return strings.HasPrefix(filename, ".") || "node_modules" == filename || "dist" == filename || "target" == filename
-}
-
-func checkUploadBackup() (err error) {
-	if !IsSubscriber() {
-		if "ios" == util.Container {
-			return errors.New(Conf.Language(122))
-		}
-		return errors.New(Conf.Language(29))
-	}
-
-	backupDir := Conf.Backup.GetSaveDir()
-	backupSize, err := util.SizeOfDirectory(backupDir, false)
-	if nil != err {
-		return
-	}
-
-	cloudAvailableBackupSize, err := getCloudAvailableBackupSize()
-	if nil != err {
-		return
-	}
-	if cloudAvailableBackupSize < backupSize {
-		return errors.New(fmt.Sprintf(Conf.Language(43), byteCountSI(int64(Conf.User.UserSiYuanRepoSize))))
-	}
-	return nil
 }
 
 func (box *Box) renameSubTrees(tree *parse.Tree) {
@@ -472,20 +449,40 @@ func parseKTree(kramdown []byte) (ret *parse.Tree) {
 	return
 }
 
-func RefreshFileTree() {
-	WaitForWritingFiles()
-	syncLock.Lock()
-	defer syncLock.Unlock()
-	refreshFileTree()
-}
+func ReindexTree(path string) (err error) {
+	if !strings.HasPrefix(path, "/data/") {
+		return errors.New("path must start with /data/")
+	}
 
-func refreshFileTree() {
-	if err := sql.InitDatabase(true); nil != err {
-		util.PushErrMsg(Conf.Language(85), 5000)
+	part := strings.TrimPrefix(path, "/data/")
+	idx := strings.Index(part, "/")
+	if 0 > idx {
+		return errors.New("parse box failed")
+	}
+	box := part[:idx]
+
+	p := strings.TrimPrefix(path, "/data/"+box)
+	tree, err := LoadTree(box, p)
+	if nil != err {
 		return
 	}
 
+	treenode.ReindexBlockTree(tree)
+	sql.UpsertTreeQueue(tree)
+	sql.WaitForWritingDatabase()
+	return
+}
+
+func RefreshFileTree() {
+	WaitForWritingFiles()
+
 	util.PushEndlessProgress(Conf.Language(35))
+	if err := sql.InitDatabase(true); nil != err {
+		util.PushErrMsg(fmt.Sprintf(Conf.Language(85), err), 5000)
+		return
+	}
+	treenode.InitBlockTree(true)
+
 	openedBoxes := Conf.GetOpenedBoxes()
 	for _, openedBox := range openedBoxes {
 		openedBox.Index(true)
@@ -533,5 +530,5 @@ func LockFileByBlockID(id string) (locked bool, filePath string) {
 	if !gulu.File.IsExist(p) {
 		return true, ""
 	}
-	return nil == filesys.LockFile(p), p
+	return nil == filelock.LockFile(p), p
 }

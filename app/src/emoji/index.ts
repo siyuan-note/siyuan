@@ -1,12 +1,12 @@
 import {getRandom, isMobile} from "../util/functions";
-import {setPosition} from "../util/setPosition";
 import {fetchPost} from "../util/fetch";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
-import {getDockByType} from "../layout/util";
 import {Files} from "../layout/dock/Files";
+/// #if !MOBILE
+import {getDockByType} from "../layout/util";
 import {getAllModels} from "../layout/getAll";
-import {getEventName} from "../protyle/util/compatibility";
+/// #endif
 import {setNoteBook} from "../util/pathName";
 
 export const getRandomEmoji = () => {
@@ -38,7 +38,7 @@ export const unicode2Emoji = (unicode: string, assic = false) => {
     return emoji;
 };
 
-export const lazyLoadEmoji = (element: HTMLElement) => {
+export const lazyLoadEmoji = (element: HTMLElement, assic = false) => {
     const emojiIntersectionObserver = new IntersectionObserver((entries) => {
         entries.forEach((entrie: IntersectionObserverEntry & { target: HTMLImageElement }) => {
             const index = entrie.target.getAttribute("data-index");
@@ -46,7 +46,7 @@ export const lazyLoadEmoji = (element: HTMLElement) => {
                 let html = "";
                 window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
                     html += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
-${unicode2Emoji(emoji.unicode)}</button>`;
+${unicode2Emoji(emoji.unicode, assic)}</button>`;
                 });
                 entrie.target.innerHTML = html;
                 entrie.target.removeAttribute("data-index");
@@ -58,7 +58,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
     });
 };
 
-export const filterEmoji = (key = "", max?: number) => {
+export const filterEmoji = (key = "", max?: number, assic = false) => {
     let html = "";
     const recentEmojis: {
         unicode: string,
@@ -88,18 +88,18 @@ export const filterEmoji = (key = "", max?: number) => {
         category.items.forEach(emoji => {
             if (key) {
                 if (window.siyuan.config.editor.emoji.includes(emoji.unicode) &&
-                    (unicode2Emoji(emoji.unicode) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
+                    (unicode2Emoji(emoji.unicode, true) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
                     recentEmojis.push(emoji);
                 }
                 if (max && maxCount > max) {
                     return;
                 }
-                if (unicode2Emoji(emoji.unicode) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1) {
+                if (unicode2Emoji(emoji.unicode, true) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1) {
                     if (category.id === "custom") {
                         customStore.push(emoji);
                     } else {
                         keyHTML += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
-${unicode2Emoji(emoji.unicode)}</button>`;
+${unicode2Emoji(emoji.unicode, assic)}</button>`;
                     }
                     maxCount++;
                 }
@@ -109,7 +109,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 }
                 if (index < 2) {
                     html += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
-${unicode2Emoji(emoji.unicode)}</button>`;
+${unicode2Emoji(emoji.unicode, assic)}</button>`;
                 }
             }
         });
@@ -134,18 +134,18 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             return 0;
         }).forEach(item => {
             html += `<button data-unicode="${item.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? item.description_zh_cn : item.description}">
-${unicode2Emoji(item.unicode)}</button>`;
+${unicode2Emoji(item.unicode, assic)}</button>`;
         });
         html = html + keyHTML + "</div>";
     }
     let recentHTML = "";
     if (recentEmojis.length > 0) {
         recentHTML = `<div class="emojis__title" data-type="0">${window.siyuan.languages.recentEmoji}</div><div class="emojis__content">`;
-        window.siyuan.config.editor.emoji.forEach(key => {
-            const emoji = recentEmojis.filter((item) => item.unicode === key);
+        window.siyuan.config.editor.emoji.forEach(emojiUnicode => {
+            const emoji = recentEmojis.filter((item) => item.unicode === emojiUnicode);
             if (emoji[0]) {
                 recentHTML += `<button data-unicode="${emoji[0].unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji[0].description_zh_cn : emoji[0].description}">
-${unicode2Emoji(emoji[0].unicode)}
+${unicode2Emoji(emoji[0].unicode, assic)}
 </button>`;
             }
         });
@@ -198,10 +198,8 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
 </div>
 </div>`;
     window.siyuan.menus.menu.element.firstElementChild.querySelector(".emojis__item").classList.add("emojis__item--current");
-    window.siyuan.menus.menu.element.classList.remove("fn__none");
     const rect = target.getBoundingClientRect();
-    setPosition(window.siyuan.menus.menu.element, rect.left, rect.top + rect.height);
-
+    window.siyuan.menus.menu.popup({x: rect.left, y: rect.top + rect.height});
     const inputElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
     const emojisContentElement = window.siyuan.menus.menu.element.querySelector(".emojis__panel");
     inputElement.addEventListener("compositionend", () => {
@@ -240,8 +238,6 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
         if (event.key.indexOf("Arrow") === -1 && event.key !== "Enter") {
             return;
         }
-        event.preventDefault();
-        event.stopPropagation();
         const currentElement = window.siyuan.menus.menu.element.firstElementChild.querySelector(".emojis__item--current");
         if (!currentElement) {
             return;
@@ -266,8 +262,11 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
                     addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id);
                     updateFileEmoji(unicode, id);
+                    updateOutlineEmoji(unicode);
                 });
             }
+            event.preventDefault();
+            event.stopPropagation();
             return;
         }
         let newCurrentElement: HTMLElement;
@@ -275,17 +274,25 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
             if (currentElement.previousElementSibling) {
                 currentElement.classList.remove("emojis__item--current");
                 newCurrentElement = currentElement.previousElementSibling as HTMLElement;
+                event.preventDefault();
+                event.stopPropagation();
             } else if (currentElement.parentElement.previousElementSibling?.previousElementSibling) {
                 currentElement.classList.remove("emojis__item--current");
                 newCurrentElement = currentElement.parentElement.previousElementSibling.previousElementSibling.lastElementChild as HTMLElement;
+                event.preventDefault();
+                event.stopPropagation();
             }
         } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
             if (currentElement.nextElementSibling) {
                 currentElement.classList.remove("emojis__item--current");
                 newCurrentElement = currentElement.nextElementSibling as HTMLElement;
+                event.preventDefault();
+                event.stopPropagation();
             } else if (currentElement.parentElement.nextElementSibling?.nextElementSibling) {
                 currentElement.classList.remove("emojis__item--current");
                 newCurrentElement = currentElement.parentElement.nextElementSibling.nextElementSibling.firstElementChild as HTMLElement;
+                event.preventDefault();
+                event.stopPropagation();
             }
         }
         if (newCurrentElement) {
@@ -302,7 +309,8 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
         inputElement.focus();
     }
     lazyLoadEmoji(window.siyuan.menus.menu.element);
-    window.siyuan.menus.menu.element.firstElementChild.addEventListener(getEventName(), (event) => {
+    // 不能使用 getEventName 否则 https://github.com/siyuan-note/siyuan/issues/5472
+    window.siyuan.menus.menu.element.firstElementChild.addEventListener("click", (event) => {
         const eventTarget = event.target as HTMLElement;
         const typeElement = hasClosestByClassName(eventTarget, "emojis__type");
         if (typeElement) {
@@ -344,6 +352,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     window.siyuan.menus.menu.remove();
                     updateFileTreeEmoji("", id);
                     updateFileEmoji("", id);
+                    updateOutlineEmoji("");
                 });
             }
             return;
@@ -373,6 +382,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id);
                     updateFileEmoji(unicode, id);
+                    updateOutlineEmoji(unicode);
                 });
             }
             return;
@@ -380,24 +390,28 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
     });
 };
 
+export const updateOutlineEmoji = (unicode: string) => {
+    /// #if !MOBILE
+    getAllModels().outline.forEach(model => {
+        model.headerElement.nextElementSibling.firstElementChild.innerHTML = unicode2Emoji(unicode || Constants.SIYUAN_IMAGE_FILE);
+    });
+    /// #endif
+};
+
 export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFile") => {
     let emojiElement;
-    if (isMobile()) {
-        if (icon === "iconFile") {
-            emojiElement = document.querySelector(`#fileTree [data-node-id="${id}"] .b3-list-item__icon`);
-        } else {
-            emojiElement = document.querySelector(`#fileTree [data-node-id="${id}"] .b3-list-item__icon`) || document.querySelector(`#fileTree [data-url="${id}"] .b3-list-item__icon`);
-        }
+    /// #if MOBILE
+    emojiElement = document.querySelector(`#sidebar [data-type="sidebar-file"] [data-node-id="${id}"] .b3-list-item__icon`);
+    /// #else
+    const files = getDockByType("file").data.file as Files;
+    if (icon === "iconFile") {
+        emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`);
     } else {
-        const files = getDockByType("file").data.file as Files;
-        if (icon === "iconFile") {
-            emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`);
-        } else {
-            emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`) || files.element.querySelector(`[data-url="${id}"] .b3-list-item__icon`) || files.closeElement.querySelector(`[data-url="${id}"] .b3-list-item__icon`);
-        }
+        emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`) || files.element.querySelector(`[data-url="${id}"] .b3-list-item__icon`) || files.closeElement.querySelector(`[data-url="${id}"] .b3-list-item__icon`);
     }
+    /// #endif
     if (emojiElement) {
-        emojiElement.innerHTML = unicode2Emoji(unicode || (icon === "iconFile" ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_NOTE));
+        emojiElement.innerHTML = unicode2Emoji(unicode || (icon === "iconFile" ? (emojiElement.previousElementSibling.classList.contains("fn__hidden") ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER) : Constants.SIYUAN_IMAGE_NOTE));
     }
     if (icon !== "iconFile") {
         setNoteBook();
@@ -405,19 +419,19 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
 };
 
 const updateFileEmoji = (unicode: string, id: string) => {
-    if (isMobile()) {
-        if (window.siyuan.mobileEditor.protyle.block.rootID === id) {
-            window.siyuan.mobileEditor.protyle.background.ial.icon = unicode;
-            window.siyuan.mobileEditor.protyle.background.render(window.siyuan.mobileEditor.protyle.background.ial, id);
-        }
-    } else {
-        getAllModels().editor.find(item => {
-            if (item.editor.protyle.block.rootID === id) {
-                item.editor.protyle.background.ial.icon = unicode;
-                item.editor.protyle.background.render(item.editor.protyle.background.ial, id);
-                item.parent.setDocIcon(unicode);
-                return true;
-            }
-        });
+    /// #if MOBILE
+    if (window.siyuan.mobileEditor.protyle.block.rootID === id) {
+        window.siyuan.mobileEditor.protyle.background.ial.icon = unicode;
+        window.siyuan.mobileEditor.protyle.background.render(window.siyuan.mobileEditor.protyle.background.ial, window.siyuan.mobileEditor.protyle.block.rootID);
     }
+    /// #else
+    getAllModels().editor.find(item => {
+        if (item.editor.protyle.block.rootID === id) {
+            item.editor.protyle.background.ial.icon = unicode;
+            item.editor.protyle.background.render(item.editor.protyle.background.ial, item.editor.protyle.block.rootID);
+            item.parent.setDocIcon(unicode);
+            return true;
+        }
+    });
+    /// #endif
 };

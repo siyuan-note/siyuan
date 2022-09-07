@@ -16,6 +16,7 @@ interface Window {
         openExternal(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
+        writeImageClipboard(uri: string): void
     }
 
     goBack(): void
@@ -46,8 +47,8 @@ interface IPdfAnno {
 
 interface IBackStack {
     id: string,
+    endId?: string,
     scrollTop?: number,
-    hasContext?: boolean,
     callback?: string[],
     position?: { start: number, end: number }
     protyle?: IProtyle,
@@ -97,6 +98,9 @@ interface ISiyuan {
         userNickname: string
         userPaymentSum: string
         userSiYuanProExpireTime: number // -1 终身会员；0 普通用户；> 0 过期时间
+        userSiYuanSubscriptionPlan: number // 0 年付订阅/终生；1 教育优惠；2 订阅试用
+        userSiYuanSubscriptionType: number // 0 年付；1 终生；2 月付
+        userSiYuanSubscriptionStatus: number // -1：未订阅，0：订阅可用，1：订阅封禁，2：订阅过期
         userToken: string
         userTitles: { name: string, icon: string, desc: string }[]
     },
@@ -123,8 +127,18 @@ interface ISiyuan {
     dialogs: import("../dialog").Dialog[],
 }
 
+interface IScrollAttr {
+    startId: string,
+    endId: string
+    scrollTop: number,
+    focusId?: string,
+    focusStart?: number
+    focusEnd?: number
+    zoomInId?: string
+}
+
 interface IOperation {
-    action: TOperation,
+    action: TOperation, // move， delete 不需要传 data
     id: string,
     data?: string,
     parentID?: string
@@ -142,6 +156,20 @@ declare interface IDockTab {
     show: boolean
     icon: string
     hotkeyLangId: string
+}
+
+declare interface IOpenFileOptions {
+    assetPath?: string, // asset 必填
+    fileName?: string, // file 必填
+    rootIcon?: string, // 文档图标
+    id?: string,  // file 必填
+    rootID?: string, // file 必填
+    position?: string, // file 或者 asset，打开位置
+    page?: number | string, // asset
+    mode?: TEditorMode // file
+    action?: string[]
+    keepCursor?: boolean // file，是否跳转到新 tab 上
+    zoomIn?: boolean // 是否缩放
 }
 
 declare interface ILayoutOptions {
@@ -174,6 +202,8 @@ declare interface IExport {
 }
 
 declare interface IEditor {
+    katexMacros: string;
+    fullWidth: boolean;
     fontSize: number;
     generateHistoryInterval: number;
     historyRetentionDays: number;
@@ -202,6 +232,7 @@ declare interface IWebSocketData {
 }
 
 declare interface IAppearance {
+    hideStatusBar: boolean,
     nativeEmoji: boolean,
     customCSS: boolean,
     themeJS: boolean,
@@ -221,12 +252,15 @@ declare interface IAppearance {
 }
 
 declare interface IFileTree {
+    closeTabsOnStart: boolean
     alwaysSelectOpenedFile: boolean
     openFilesUseCurrentTab: boolean
+    removeDocWithoutConfirm: boolean
     allowCreateDeeper: boolean
     refCreateSavePath: string
     createDocNameTemplate: string
     sort: number
+    maxOpenTabCount: number
     maxListCount: number
 }
 
@@ -236,10 +270,12 @@ declare interface IAccount {
 }
 
 declare interface IConfig {
-    e2eePasswd: string
-    e2eePasswdMode: number
+    repo: {
+        key: string
+    },
     sync: {
         enabled: boolean
+        mode: number
         synced: number
         stat: string
         interval: number
@@ -386,7 +422,6 @@ declare interface IBlockTree {
     nodeType: string,
     subType: string,
     name: string,
-    full: string,
     type: string,
     depth: number,
     url?: string,
@@ -416,6 +451,7 @@ declare interface IBlock {
     refs?: IBlock[];
     children?: IBlock[]
     length?: number
+    ial: IObject
 }
 
 declare interface IModels {
@@ -436,11 +472,13 @@ declare interface IMenu {
     submenu?: IMenu[]
     disabled?: boolean
     icon?: string
+    iconHTML?: string
     current?: boolean
     bind?: (element: HTMLElement) => void
 }
 
 declare interface IBazaarItem {
+    readme: string
     stars: string
     author: string
     updated: string
@@ -458,5 +496,7 @@ declare interface IBazaarItem {
     version: string
     modes: string[]
     hSize: string
+    hInstallSize: string
+    hInstallDate: string
     hUpdated: string
 }

@@ -16,28 +16,18 @@
 
 package conf
 
-import (
-	"path/filepath"
-
-	"github.com/siyuan-note/siyuan/kernel/util"
-)
-
 type Sync struct {
-	CloudName  string `json:"cloudName"`  // 云端同步目录名称
-	Enabled    bool   `json:"enabled"`    // 是否开启同步
-	Uploaded   int64  `json:"uploaded"`   // 最近上传时间
-	Downloaded int64  `json:"downloaded"` // 最近下载时间
-	Synced     int64  `json:"synced"`     // 最近同步时间
-	Stat       string `json:"stat"`       // 最近同步统计信息
+	CloudName string `json:"cloudName"` // 云端同步目录名称
+	Enabled   bool   `json:"enabled"`   // 是否开启同步
+	Mode      int    `json:"mode"`      // 同步模式，0：未设置（为兼容已有配置，initConf 函数中会转换为 1），1：自动，2：手动 https://github.com/siyuan-note/siyuan/issues/5089
+	Synced    int64  `json:"synced"`    // 最近同步时间
+	Stat      string `json:"stat"`      // 最近同步统计信息
 }
 
 func NewSync() *Sync {
 	return &Sync{
 		CloudName: "main",
-		Enabled:   true,
+		Enabled:   false,
+		Mode:      1,
 	}
-}
-
-func (s *Sync) GetSaveDir() string {
-	return filepath.Join(util.WorkspaceDir, "sync")
 }

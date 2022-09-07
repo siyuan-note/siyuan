@@ -1,16 +1,17 @@
 import {hotKey2Electron, isCtrl, isMac, updateHotkeyTip} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
-import {hideMessage, showMessage} from "../dialog/message";
+import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {ipcRenderer} from "electron";
+import {exportLayout} from "../layout/util";
 
 export const keymap = {
     element: undefined as Element,
-    _genItem(keymap: Record<string, IKeymapItem>, left: number, keys: string) {
+    _genItem(keymap: Record<string, IKeymapItem>, keys: string) {
         let html = "";
         Object.keys(keymap).forEach(key => {
             if (window.siyuan.languages[key]) {
-                html += `<li class="b3-list-item b3-list-item--hide-action" style="padding-left: ${left}px">
+                html += `<li class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field" value="${updateHotkeyTip(keymap[key].custom)}">
@@ -31,69 +32,83 @@ export const keymap = {
         return `<div class="fn__flex b3-label">
     <span class="fn__flex-center">${window.siyuan.languages.keymapTip}</span>
     <span class="fn__flex-1"></span>
+    <button id="keymapRefreshBtn" class="b3-button b3-button--outline fn__flex-center fn__size200">
+        <svg><use xlink:href="#iconRefresh"></use></svg>
+        ${window.siyuan.languages.refresh}
+    </button>
+</div>
+<div class="fn__flex b3-label">
+    <span class="fn__flex-center">${window.siyuan.languages.keymapTip2}</span>
+    <span class="fn__flex-1"></span>
+    <span class="fn__space"></span>
     <button id="keymapResetBtn" class="b3-button b3-button--outline fn__flex-center fn__size200">
         <svg><use xlink:href="#iconUndo"></use></svg>
         ${window.siyuan.languages.reset}
     </button>
 </div>
 <div class="b3-label file-tree config-keymap" id="keymapList">
-    <ul class="b3-list b3-list--background">
-        <li class="b3-list-item toggle" style="padding-left: 0">
-            <span class="b3-list-item__toggle" style="padding-left: 8px"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
+    <label class="b3-form__icon" style="display:block;">
+        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+        <input id="keymapInput" class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">
+    </label>
+    <div class="fn__hr"></div>
+    <ul class="b3-list b3-list--border b3-list--background">
+        <li class="b3-list-item toggle">
+            <span class="b3-list-item__toggle"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
             <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.general}</span>
         </li>
-        <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.general, 24, "general")}</ul>
+        <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.general, "general")}</ul>
     </ul>
-    <ul class="b3-list b3-list--background">
-        <li class="b3-list-item toggle" style="padding-left: 0">
-            <span class="b3-list-item__toggle" style="padding-left: 8px">
+    <ul class="b3-list b3-list--border b3-list--background">
+        <li class="b3-list-item toggle">
+            <span class="b3-list-item__toggle">
                 <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
             </span>
             <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.editor}</span>
         </li>
         <ul>
-            <li class="b3-list-item toggle" style="padding-left: 0">
-                <span class="b3-list-item__toggle" style="padding-left: 24px">
+            <li class="b3-list-item toggle">
+                <span class="b3-list-item__toggle">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.general}</span>
             </li>
-            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.general, 40, "editor" + Constants.ZWSP + "general")}</ul>
-            <li class="b3-list-item toggle" style="padding-left: 0">
-                <span class="b3-list-item__toggle" style="padding-left: 24px">
+            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.general, "editor" + Constants.ZWSP + "general")}</ul>
+            <li class="b3-list-item toggle">
+                <span class="b3-list-item__toggle">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.insert}</span>
             </li>
-            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.insert, 40, "editor" + Constants.ZWSP + "insert")}</ul>
-            <li class="b3-list-item toggle" style="padding-left: 0">
-                <span class="b3-list-item__toggle" style="padding-left: 24px">
+            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.insert, "editor" + Constants.ZWSP + "insert")}</ul>
+            <li class="b3-list-item toggle">
+                <span class="b3-list-item__toggle">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.headings}</span>
             </li>
-            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.heading, 40, "editor" + Constants.ZWSP + "heading")}</ul>
-            <li class="b3-list-item toggle" style="padding-left: 0">
-                <span class="b3-list-item__toggle" style="padding-left: 24px">
+            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.heading, "editor" + Constants.ZWSP + "heading")}</ul>
+            <li class="b3-list-item toggle">
+                <span class="b3-list-item__toggle">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.list1}</span>
             </li>
-            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.list, 40, "editor" + Constants.ZWSP + "list")}</ul>
-            <li class="b3-list-item toggle" style="padding-left: 0">
-                <span class="b3-list-item__toggle" style="padding-left: 24px">
+            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.list, "editor" + Constants.ZWSP + "list")}</ul>
+            <li class="b3-list-item toggle">
+                <span class="b3-list-item__toggle">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.table}</span>
             </li>
-            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.table, 40, "editor" + Constants.ZWSP + "table")}</ul>
+            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.table, "editor" + Constants.ZWSP + "table")}</ul>
         </ul>
     </ul>
 </div>`;
     },
     _setkeymap() {
         const data: IKeymap = Object.assign({}, Constants.SIYUAN_KEYMAP);
-        keymap.element.querySelectorAll("input").forEach((item) => {
+        keymap.element.querySelectorAll("ul input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
             if (keys[0] === "general") {
                 data[keys[0]][keys[1]].custom = item.getAttribute("data-value");
@@ -110,7 +125,30 @@ export const keymap = {
             /// #endif
         });
     },
+    _search(value: string) {
+        keymap.element.querySelectorAll("#keymapList .b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
+            if (item.textContent.toLowerCase().indexOf(value.toLowerCase()) > -1 || value === "") {
+                item.parentElement.classList.remove("fn__none");
+                item.parentElement.parentElement.classList.remove("fn__none");
+            } else {
+                item.parentElement.classList.add("fn__none");
+            }
+        });
+    },
     bindEvent() {
+        keymap.element.querySelector("#keymapRefreshBtn").addEventListener("click", () => {
+            exportLayout(true);
+        });
+        const searchElement = keymap.element.querySelector("#keymapInput") as HTMLInputElement;
+        this.element.addEventListener("compositionend", () => {
+            keymap._search(searchElement.value);
+        });
+        searchElement.addEventListener("input", (event: InputEvent) => {
+            if (event.isComposing) {
+                return;
+            }
+            keymap._search(searchElement.value);
+        });
         keymap.element.querySelector("#keymapResetBtn").addEventListener("click", () => {
             window.siyuan.config.keymap = Constants.SIYUAN_KEYMAP;
             fetchPost("/api/setting/setKeymap", {
@@ -156,11 +194,10 @@ export const keymap = {
             }
         });
         let timeout: number;
-        keymapListElement.querySelectorAll("input").forEach(item => {
-            item.addEventListener("keydown", function (event) {
+        keymapListElement.querySelectorAll("ul input").forEach(item => {
+            item.addEventListener("keydown", function (event: KeyboardEvent) {
                 event.stopPropagation();
                 event.preventDefault();
-                hideMessage();
                 let keymapStr = "";
                 if (event.ctrlKey && !event.metaKey && isMac()) {
                     keymapStr += "⌃";
@@ -192,9 +229,13 @@ export const keymap = {
                         keymapStr += "⌫";
                     } else if (event.key === "Delete") {
                         keymapStr += "⌦";
+                    } else if (event.key === "Enter") {
+                        keymapStr += "↩";
                     } else if (event.altKey) {
                         const codeKey = event.code.substr(event.code.length - 1, 1).toUpperCase();
                         if (event.key === "Enter") {
+                            keymapStr += "↩";
+                        } else if (event.key.startsWith("F") && event.key.length > 1) {
                             keymapStr += event.key;
                         } else if (event.code === "Period") {
                             keymapStr += ".";
@@ -205,13 +246,26 @@ export const keymap = {
                                 this.value = "";
                             });
                         }
+                    } else if (event.key === "》") {
+                        keymapStr += ">";
+                    } else if (event.key === "《") {
+                        keymapStr += "<";
+                    } else if (event.key === "—") {
+                        keymapStr += "-";
                     } else {
                         keymapStr += event.key.length > 1 ? event.key : event.key.toUpperCase();
                     }
                 }
 
                 this.setAttribute("data-value", keymapStr);
-                this.value = updateHotkeyTip(keymapStr);
+                if (event.key === "—") {
+                    // Mac 中文下会添加"——"
+                    setTimeout(() => {
+                        this.value = updateHotkeyTip(keymapStr);
+                    });
+                } else {
+                    this.value = updateHotkeyTip(keymapStr);
+                }
                 clearTimeout(timeout);
                 timeout = window.setTimeout(() => {
                     const keys = this.getAttribute("data-key").split(Constants.ZWSP);
@@ -227,11 +281,11 @@ export const keymap = {
                     }
 
                     if (["⌘", "⇧", "⌥", "⌃"].includes(keymapStr.substr(keymapStr.length - 1, 1)) ||
-                        ["⌘S", "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⌘↑", "⌘↓", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧Enter", "Enter", "PageUp", "PageDown", "⌫", "⌦", "F9"].includes(keymapStr)) {
+                        ["⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦"].includes(keymapStr)) {
                         showMessage(tip + "] " + window.siyuan.languages.invalid);
                         return;
                     }
-                    const hasConflict = Array.from(keymap.element.querySelectorAll("input")).find(inputItem => {
+                    const hasConflict = Array.from(keymap.element.querySelectorAll("ul input")).find(inputItem => {
                         if (!inputItem.isSameNode(this) && inputItem.getAttribute("data-value") === keymapStr) {
                             const inputValueList = inputItem.getAttribute("data-key").split(Constants.ZWSP);
                             if (inputValueList[1] === "list") {

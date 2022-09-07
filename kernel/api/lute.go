@@ -25,8 +25,8 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/88250/protyle"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -69,7 +69,7 @@ func html2BlockDOM(c *gin.Context) {
 		}
 
 		if ast.NodeListItem == n.Type && nil == n.FirstChild {
-			newNode := protyle.NewParagraph()
+			newNode := parse.NewParagraph()
 			n.AppendChild(newNode)
 			n.SetIALAttr("updated", util.TimeFromID(newNode.ID))
 			return ast.WalkSkipChildren
@@ -82,7 +82,7 @@ func html2BlockDOM(c *gin.Context) {
 		n.Unlink()
 	}
 
-	if "std" == model.Conf.System.Container {
+	if util.ContainerStd == model.Conf.System.Container {
 		// 处理本地资源文件复制
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || ast.NodeLinkDest != n.Type {
@@ -112,7 +112,7 @@ func html2BlockDOM(c *gin.Context) {
 			name = name + "-" + ast.NewNodeID() + ext
 			targetPath := filepath.Join(util.DataDir, "assets", name)
 			if err = gulu.File.CopyFile(localPath, targetPath); nil != err {
-				util.LogErrorf("copy asset from [%s] to [%s] failed: %s", localPath, targetPath, err)
+				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", localPath, targetPath, err)
 				return ast.WalkStop
 			}
 			n.Tokens = gulu.Str.ToBytes("assets/" + name)

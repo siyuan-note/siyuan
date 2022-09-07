@@ -18,9 +18,7 @@ package model
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -32,13 +30,16 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
+	"github.com/Xuanwo/go-locale"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/getsentry/sentry-go"
+	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/text/language"
 )
 
 var Conf *AppConf
@@ -61,15 +62,13 @@ type AppConf struct {
 	ReadOnly       bool             `json:"readonly"`       // 是否是只读
 	LocalIPs       []string         `json:"localIPs"`       // 本地 IP 列表
 	AccessAuthCode string           `json:"accessAuthCode"` // 访问授权码
-	E2EEPasswd     string           `json:"e2eePasswd"`     // 端到端加密密码，用于备份和同步
-	E2EEPasswdMode int              `json:"e2eePasswdMode"` // 端到端加密密码生成方式，0：自动，1：自定义
 	System         *conf.System     `json:"system"`         // 系统
 	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键
-	Backup         *conf.Backup     `json:"backup"`         // 备份配置
 	Sync           *conf.Sync       `json:"sync"`           // 同步配置
 	Search         *conf.Search     `json:"search"`         // 搜索配置
 	Stat           *conf.Stat       `json:"stat"`           // 统计
 	Api            *conf.API        `json:"api"`            // API
+	Repo           *conf.Repo       `json:"repo"`           // 数据仓库
 	Newbie         bool             `json:"newbie"`         // 是否是安装后第一次启动
 }
 
@@ -79,20 +78,51 @@ func InitConf() {
 	windowStateConf := filepath.Join(util.ConfDir, "windowState.json")
 	if !gulu.File.IsExist(windowStateConf) {
 		if err := gulu.File.WriteFileSafer(windowStateConf, []byte("{}"), 0644); nil != err {
-			util.LogErrorf("create [windowState.json] failed: %s", err)
+			logging.LogErrorf("create [windowState.json] failed: %s", err)
 		}
 	}
 
-	Conf = &AppConf{LogLevel: "debug", Lang: util.Lang}
+	Conf = &AppConf{LogLevel: "debug"}
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	if gulu.File.IsExist(confPath) {
 		data, err := os.ReadFile(confPath)
 		if nil != err {
-			util.LogErrorf("load conf [%s] failed: %s", confPath, err)
+			logging.LogErrorf("load conf [%s] failed: %s", confPath, err)
 		}
 		err = gulu.JSON.UnmarshalJSON(data, Conf)
 		if err != nil {
-			util.LogErrorf("parse conf [%s] failed: %s", confPath, err)
+			logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
+		}
+	}
+
+	if "" != util.Lang {
+		Conf.Lang = util.Lang
+		logging.LogInfof("initialized the specified language [%s]", util.Lang)
+	} else {
+		if "" == Conf.Lang {
+			// 未指定外观语言时使用系统语言
+
+			if userLang, err := locale.Detect(); nil == err {
+				var supportLangs []language.Tag
+				for lang := range langs {
+					if tag, err := language.Parse(lang); nil == err {
+						supportLangs = append(supportLangs, tag)
+					} else {
+						logging.LogErrorf("load language [%s] failed: %s", lang, err)
+					}
+				}
+				matcher := language.NewMatcher(supportLangs)
+				lang, _, _ := matcher.Match(userLang)
+				base, _ := lang.Base()
+				region, _ := lang.Region()
+				util.Lang = base.String() + "_" + region.String()
+				Conf.Lang = util.Lang
+				logging.LogInfof("initialized language [%s] based on device locale", Conf.Lang)
+			} else {
+				logging.LogDebugf("check device locale failed [%s], using default language [en_US]", err)
+				util.Lang = "en_US"
+				Conf.Lang = util.Lang
+			}
 		}
 	}
 
@@ -129,6 +159,12 @@ func InitConf() {
 	if 1 > Conf.FileTree.MaxListCount {
 		Conf.FileTree.MaxListCount = 512
 	}
+	if 1 > Conf.FileTree.MaxOpenTabCount {
+		Conf.FileTree.MaxOpenTabCount = 8
+	}
+	if 32 < Conf.FileTree.MaxOpenTabCount {
+		Conf.FileTree.MaxOpenTabCount = 32
+	}
 	if nil == Conf.Tag {
 		Conf.Tag = conf.NewTag()
 	}
@@ -151,6 +187,9 @@ func InitConf() {
 		// 废弃导出选项引用块转换为原始块和引述块 https://github.com/siyuan-note/siyuan/issues/3155
 		Conf.Export.BlockRefMode = 4 // 改为脚注
 	}
+	if "" == Conf.Export.PandocBin {
+		Conf.Export.PandocBin = util.PandocBinPath
+	}
 	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
 		Conf.Editor.FontSize = 16
 	}
@@ -170,9 +209,6 @@ func InitConf() {
 	if nil == Conf.System.NetworkProxy {
 		Conf.System.NetworkProxy = &conf.NetworkProxy{}
 	}
-	if "" != Conf.System.NetworkProxy.Scheme {
-		util.LogInfof("using network proxy [%s]", Conf.System.NetworkProxy.String())
-	}
 	if "" == Conf.System.ID {
 		Conf.System.ID = util.GetDeviceID()
 	}
@@ -186,7 +222,6 @@ func InitConf() {
 	Conf.System.WorkspaceDir = util.WorkspaceDir
 	Conf.System.DataDir = util.DataDir
 	Conf.System.Container = util.Container
-	util.UserAgent = util.UserAgent + " " + util.Container
 	Conf.System.OS = runtime.GOOS
 	Conf.Newbie = util.IsNewbie
 
@@ -197,26 +232,19 @@ func InitConf() {
 		Conf.Account = conf.NewAccount()
 	}
 
-	if nil == Conf.Backup {
-		Conf.Backup = conf.NewBackup()
-	}
-	if !gulu.File.IsExist(Conf.Backup.GetSaveDir()) {
-		if err := os.MkdirAll(Conf.Backup.GetSaveDir(), 0755); nil != err {
-			util.LogErrorf("create backup dir [%s] failed: %s", Conf.Backup.GetSaveDir(), err)
-		}
-	}
-
 	if nil == Conf.Sync {
 		Conf.Sync = conf.NewSync()
 	}
-	if !gulu.File.IsExist(Conf.Sync.GetSaveDir()) {
-		if err := os.MkdirAll(Conf.Sync.GetSaveDir(), 0755); nil != err {
-			util.LogErrorf("create sync dir [%s] failed: %s", Conf.Sync.GetSaveDir(), err)
-		}
+	if 0 == Conf.Sync.Mode {
+		Conf.Sync.Mode = 1
 	}
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()
+	}
+
+	if nil == Conf.Repo {
+		Conf.Repo = conf.NewRepo()
 	}
 
 	if 1440 < Conf.Editor.GenerateHistoryInterval {
@@ -239,24 +267,21 @@ func InitConf() {
 		Conf.AccessAuthCode = util.AccessAuthCode
 	}
 
-	Conf.E2EEPasswdMode = 0
-	if !isBuiltInE2EEPasswd() {
-		Conf.E2EEPasswdMode = 1
-	}
-
 	Conf.LocalIPs = util.GetLocalIPs()
 
 	Conf.Save()
-	util.SetLogLevel(Conf.LogLevel)
+	logging.SetLogLevel(Conf.LogLevel)
 
 	if Conf.System.UploadErrLog {
-		util.LogInfof("user has enabled [Automatically upload error messages and diagnostic data]")
+		logging.LogInfof("user has enabled [Automatically upload error messages and diagnostic data]")
 		sentry.Init(sentry.ClientOptions{
 			Dsn:         "https://bdff135f14654ae58a054adeceb2c308@o1173696.ingest.sentry.io/6269178",
 			Release:     util.Ver,
 			Environment: util.Mode,
 		})
 	}
+
+	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
 }
 
 var langs = map[string]map[int]string{}
@@ -266,25 +291,25 @@ func initLang() {
 	p := filepath.Join(util.WorkingDir, "appearance", "langs")
 	dir, err := os.Open(p)
 	if nil != err {
-		util.LogFatalf("open language configuration folder [%s] failed: %s", p, err)
+		logging.LogFatalf("open language configuration folder [%s] failed: %s", p, err)
 	}
 	defer dir.Close()
 
 	langNames, err := dir.Readdirnames(-1)
 	if nil != err {
-		util.LogFatalf("list language configuration folder [%s] failed: %s", p, err)
+		logging.LogFatalf("list language configuration folder [%s] failed: %s", p, err)
 	}
 
 	for _, langName := range langNames {
 		jsonPath := filepath.Join(p, langName)
 		data, err := os.ReadFile(jsonPath)
 		if nil != err {
-			util.LogErrorf("read language configuration [%s] failed: %s", jsonPath, err)
+			logging.LogErrorf("read language configuration [%s] failed: %s", jsonPath, err)
 			continue
 		}
 		langMap := map[string]interface{}{}
 		if err := gulu.JSON.UnmarshalJSON(data, &langMap); nil != err {
-			util.LogErrorf("parse language configuration failed [%s] failed: %s", jsonPath, err)
+			logging.LogErrorf("parse language configuration failed [%s] failed: %s", jsonPath, err)
 			continue
 		}
 
@@ -294,7 +319,7 @@ func initLang() {
 		for k, v := range kernelLangs {
 			num, err := strconv.Atoi(k)
 			if nil != err {
-				util.LogErrorf("parse language configuration [%s] item [%d] failed [%s] failed: %s", p, num, err)
+				logging.LogErrorf("parse language configuration [%s] item [%d] failed [%s] failed: %s", p, num, err)
 				continue
 			}
 			kernelMap[num] = v.(string)
@@ -345,7 +370,7 @@ func Close(force bool) (err error) {
 	sql.CloseDatabase()
 	util.WebSocketServer.Close()
 	clearWorkspaceTemp()
-	util.LogInfof("exited kernel")
+	logging.LogInfof("exited kernel")
 	go func() {
 		time.Sleep(500 * time.Millisecond)
 		os.Exit(util.ExitCodeOk)
@@ -378,7 +403,7 @@ func (conf *AppConf) Save() {
 
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")
-	oldData, err := filesys.NoLockFileRead(confPath)
+	oldData, err := filelock.NoLockFileRead(confPath)
 	if nil != err {
 		conf.save0(newData)
 		return
@@ -393,8 +418,8 @@ func (conf *AppConf) Save() {
 
 func (conf *AppConf) save0(data []byte) {
 	confPath := filepath.Join(util.ConfDir, "conf.json")
-	if err := filesys.LockFileWrite(confPath, data); nil != err {
-		util.LogFatalf("write conf [%s] failed: %s", confPath, err)
+	if err := filelock.NoLockFileWrite(confPath, data); nil != err {
+		logging.LogFatalf("write conf [%s] failed: %s", confPath, err)
 	}
 }
 
@@ -458,29 +483,29 @@ func (conf *AppConf) GetClosedBoxes() (ret []*Box) {
 	return
 }
 
-func (conf *AppConf) Language(num int) string {
-	return langs[conf.Lang][num]
+func (conf *AppConf) Language(num int) (ret string) {
+	ret = langs[conf.Lang][num]
+	if "" != ret {
+		return
+	}
+	ret = langs["en_US"][num]
+	return
 }
 
 func InitBoxes() {
 	initialized := false
-	blockCount := 0
-	if 1 > len(treenode.GetBlockTrees()) {
+	if 1 > treenode.CountBlocks() {
 		if gulu.File.IsExist(util.BlockTreePath) {
-			util.IncBootProgress(30, "Reading block trees...")
+			util.IncBootProgress(20, "Reading block trees...")
 			go func() {
 				for i := 0; i < 40; i++ {
-					util.RandomSleep(100, 200)
+					util.RandomSleep(50, 100)
 					util.IncBootProgress(1, "Reading block trees...")
 				}
 			}()
-			if err := treenode.ReadBlockTree(); nil == err {
-				initialized = true
-			} else {
-				if err = os.RemoveAll(util.BlockTreePath); nil != err {
-					util.LogErrorf("remove block tree [%s] failed: %s", util.BlockTreePath, err)
-				}
-			}
+
+			treenode.InitBlockTree(false)
+			initialized = true
 		}
 	} else { // 大于 1 的话说明在同步阶段已经加载过了
 		initialized = true
@@ -488,8 +513,9 @@ func InitBoxes() {
 
 	for _, box := range Conf.GetOpenedBoxes() {
 		box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
+
 		if !initialized {
-			box.BootIndex()
+			box.Index(true)
 		}
 
 		ListDocTree(box.ID, "/", Conf.FileTree.Sort) // 缓存根一级的文档树展开
@@ -499,63 +525,45 @@ func InitBoxes() {
 		treenode.SaveBlockTree()
 	}
 
-	blocktrees := treenode.GetBlockTrees()
-	blockCount = len(blocktrees)
-
 	var dbSize string
 	if dbFile, err := os.Stat(util.DBPath); nil == err {
 		dbSize = humanize.Bytes(uint64(dbFile.Size()))
 	}
-	util.LogInfof("database size [%s], block count [%d]", dbSize, blockCount)
+	logging.LogInfof("database size [%s], tree/block count [%d/%d]", dbSize, treenode.CountTrees(), treenode.CountBlocks())
 }
 
 func IsSubscriber() bool {
 	return nil != Conf.User && (-1 == Conf.User.UserSiYuanProExpireTime || 0 < Conf.User.UserSiYuanProExpireTime) && 0 == Conf.User.UserSiYuanSubscriptionStatus
 }
 
-func isBuiltInE2EEPasswd() bool {
-	if nil == Conf || nil == Conf.User || "" == Conf.E2EEPasswd {
-		return true
-	}
-
-	pwd := GetBuiltInE2EEPasswd()
-	return Conf.E2EEPasswd == util.AESEncrypt(pwd)
-}
-
-func GetBuiltInE2EEPasswd() (ret string) {
-	part1 := Conf.User.UserId[:7]
-	part2 := Conf.User.UserId[7:]
-	ret = part2 + part1
-	ret = fmt.Sprintf("%x", sha256.Sum256([]byte(ret)))[:7]
-	return
-}
-
 func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))
+	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
+	os.RemoveAll(filepath.Join(util.TempDir, "os"))
 
 	tmps, err := filepath.Glob(filepath.Join(util.TempDir, "*.tmp"))
 	if nil != err {
-		util.LogErrorf("glob temp files failed: %s", err)
+		logging.LogErrorf("glob temp files failed: %s", err)
 	}
 	for _, tmp := range tmps {
 		if err = os.RemoveAll(tmp); nil != err {
-			util.LogErrorf("remove temp file [%s] failed: %s", tmp, err)
+			logging.LogErrorf("remove temp file [%s] failed: %s", tmp, err)
 		} else {
-			util.LogInfof("removed temp file [%s]", tmp)
+			logging.LogInfof("removed temp file [%s]", tmp)
 		}
 	}
 
 	tmps, err = filepath.Glob(filepath.Join(util.DataDir, ".siyuan", "*.tmp"))
 	if nil != err {
-		util.LogErrorf("glob temp files failed: %s", err)
+		logging.LogErrorf("glob temp files failed: %s", err)
 	}
 	for _, tmp := range tmps {
 		if err = os.RemoveAll(tmp); nil != err {
-			util.LogErrorf("remove temp file [%s] failed: %s", tmp, err)
+			logging.LogErrorf("remove temp file [%s] failed: %s", tmp, err)
 		} else {
-			util.LogInfof("removed temp file [%s]", tmp)
+			logging.LogInfof("removed temp file [%s]", tmp)
 		}
 	}
 }

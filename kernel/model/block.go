@@ -64,7 +64,6 @@ type Path struct {
 	ID       string   `json:"id"`       // 块 ID
 	Box      string   `json:"box"`      // 块 Box
 	Name     string   `json:"name"`     // 当前路径
-	Full     string   `json:"full"`     // 全路径
 	Type     string   `json:"type"`     // "path"
 	NodeType string   `json:"nodeType"` // 节点类型
 	SubType  string   `json:"subType"`  // 节点子类型
@@ -98,6 +97,23 @@ func GetBlockDOM(id string) (ret string) {
 	node := treenode.GetNodeInTree(tree, id)
 	luteEngine := NewLute()
 	ret = lute.RenderNodeBlockDOM(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
+	return
+}
+
+func GetBlockKramdown(id string) (ret string) {
+	if "" == id {
+		return
+	}
+
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+
+	addBlockIALNodes(tree, false)
+	node := treenode.GetNodeInTree(tree, id)
+	luteEngine := NewLute()
+	ret, _ = lute.FormatNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	return
 }
 
@@ -143,7 +159,7 @@ func getBlockRendered(id string, headingMode int) (ret *Block) {
 
 		if ast.NodeHeading == n.Type {
 			if "1" == n.IALAttr("fold") {
-				children := treenode.FoldedHeadingChildren(n)
+				children := treenode.HeadingChildren(n)
 				for _, c := range children {
 					unlinks = append(unlinks, c)
 				}

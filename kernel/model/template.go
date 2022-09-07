@@ -31,8 +31,8 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/88250/protyle"
 	"github.com/araddon/dateparse"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 
@@ -59,6 +59,8 @@ func RenderCreateDocNameTemplate(nameTemplate string) (ret string, err error) {
 }
 
 func SearchTemplate(keyword string) (ret []*Block) {
+	ret = []*Block{}
+
 	templates := filepath.Join(util.DataDir, "templates")
 	k := strings.ToLower(keyword)
 	filepath.Walk(templates, func(path string, info fs.FileInfo, err error) error {
@@ -95,37 +97,7 @@ func DocSaveAsTemplate(id string, overwrite bool) (code int, err error) {
 		return
 	}
 
-	var blocks []*ast.Node
-	// 添加 block ial，后面格式化渲染需要
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() {
-			return ast.WalkContinue
-		}
-
-		if ast.NodeBlockQueryEmbed == n.Type {
-			if script := n.ChildByType(ast.NodeBlockQueryEmbedScript); nil != script {
-				script.Tokens = bytes.ReplaceAll(script.Tokens, []byte("\n"), []byte(" "))
-			}
-		} else if ast.NodeHTMLBlock == n.Type {
-			n.Tokens = bytes.TrimSpace(n.Tokens)
-			// 使用 <div> 包裹，否则后续解析模板时会识别为行级 HTML https://github.com/siyuan-note/siyuan/issues/4244
-			if !bytes.HasPrefix(n.Tokens, []byte("<div>")) {
-				n.Tokens = append([]byte("<div>\n"), n.Tokens...)
-			}
-			if !bytes.HasSuffix(n.Tokens, []byte("</div>")) {
-				n.Tokens = append(n.Tokens, []byte("\n</div>")...)
-			}
-		}
-
-		n.RemoveIALAttr("updated")
-		if 0 < len(n.KramdownIAL) {
-			blocks = append(blocks, n)
-		}
-		return ast.WalkContinue
-	})
-	for _, block := range blocks {
-		block.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(block.KramdownIAL)})
-	}
+	addBlockIALNodes(tree, true)
 
 	luteEngine := NewLute()
 	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
@@ -197,7 +169,7 @@ func renderTemplate(p, id string) (string, error) {
 		now := time.Now()
 		ret, err := dateparse.ParseIn(dateStr, now.Location())
 		if nil != err {
-			util.LogWarnf("parse date [%s] failed [%s], return current time instead", dateStr, err)
+			logging.LogWarnf("parse date [%s] failed [%s], return current time instead", dateStr, err)
 			return now
 		}
 		return ret
@@ -218,7 +190,7 @@ func renderTemplate(p, id string) (string, error) {
 	tree = parseKTree(md)
 	if nil == tree {
 		msg := fmt.Sprintf("parse tree [%s] failed", p)
-		util.LogErrorf(msg)
+		logging.LogErrorf(msg)
 		return "", errors.New(msg)
 	}
 
@@ -244,7 +216,7 @@ func renderTemplate(p, id string) (string, error) {
 		return ast.WalkContinue
 	})
 	for _, n := range nodesNeedAppendChild {
-		n.AppendChild(protyle.NewParagraph())
+		n.AppendChild(parse.NewParagraph())
 	}
 
 	// 折叠标题导出为模板后使用会出现内容重复 https://github.com/siyuan-note/siyuan/issues/4488
@@ -286,4 +258,39 @@ func appendRefTextRenderResultForBlockRef(blockRef *ast.Node) {
 		text = gulu.Str.SubStr(text, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
 	}
 	blockRef.AppendChild(&ast.Node{Type: ast.NodeBlockRefDynamicText, Tokens: gulu.Str.ToBytes(text)})
+}
+
+func addBlockIALNodes(tree *parse.Tree, removeUpdated bool) {
+	var blocks []*ast.Node
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeBlockQueryEmbed == n.Type {
+			if script := n.ChildByType(ast.NodeBlockQueryEmbedScript); nil != script {
+				script.Tokens = bytes.ReplaceAll(script.Tokens, []byte("\n"), []byte(" "))
+			}
+		} else if ast.NodeHTMLBlock == n.Type {
+			n.Tokens = bytes.TrimSpace(n.Tokens)
+			// 使用 <div> 包裹，否则后续解析时会识别为行级 HTML https://github.com/siyuan-note/siyuan/issues/4244
+			if !bytes.HasPrefix(n.Tokens, []byte("<div>")) {
+				n.Tokens = append([]byte("<div>\n"), n.Tokens...)
+			}
+			if !bytes.HasSuffix(n.Tokens, []byte("</div>")) {
+				n.Tokens = append(n.Tokens, []byte("\n</div>")...)
+			}
+		}
+
+		if removeUpdated {
+			n.RemoveIALAttr("updated")
+		}
+		if 0 < len(n.KramdownIAL) {
+			blocks = append(blocks, n)
+		}
+		return ast.WalkContinue
+	})
+	for _, block := range blocks {
+		block.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(block.KramdownIAL)})
+	}
 }

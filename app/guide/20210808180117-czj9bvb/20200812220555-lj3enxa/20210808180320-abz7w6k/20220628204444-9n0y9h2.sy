@@ -1,0 +1,522 @@
+{
+	"ID": "20220628204444-9n0y9h2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20220628204444-9n0y9h2",
+		"title": "优化排版",
+		"updated": "20220630211109"
+	},
+	"Children": [
+		{
+			"ID": "20220628204444-yil2u2m",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220628204444-yil2u2m",
+				"updated": "20220628204604"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "概述",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20220628204604-qom7yyl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628204604-qom7yyl",
+				"updated": "20220628205230"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "为了快速记录内容，我们时常会忽略一些排版细节，比如行内代码前后或者加粗前后缺少空格、中文和西文之间缺少空格。",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20220628205215-z3whiwr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628205215-z3whiwr",
+				"updated": "20220628215004"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "这样会导致内容排版看上去不够精致，以后浏览该内容时也有一定视觉干扰。当然，这只是我们的感触，也许这并不是问题，甚至本来就需要这样紧凑排版。"
+				}
+			]
+		},
+		{
+			"ID": "20220628205558-6krkd89",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220628205558-6krkd89",
+				"updated": "20220628205611"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "使用方式",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20220628205611-ikc5gy0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628205611-ikc5gy0",
+				"updated": "20220628205851"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在编辑器右上角 ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeKbd",
+					"Properties": {
+						"id": ""
+					},
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker",
+							"Properties": {
+								"id": ""
+							}
+						},
+						{
+							"Type": "NodeText",
+							"Data": "...",
+							"Properties": {
+								"id": ""
+							}
+						},
+						{
+							"Type": "NodeKbdCloseMarker",
+							"Properties": {
+								"id": ""
+							}
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 菜单中选择 ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeKbd",
+					"Properties": {
+						"id": ""
+					},
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker",
+							"Properties": {
+								"id": ""
+							}
+						},
+						{
+							"Type": "NodeText",
+							"Data": "优化排版",
+							"Properties": {
+								"id": ""
+							}
+						},
+						{
+							"Type": "NodeKbdCloseMarker",
+							"Properties": {
+								"id": ""
+							}
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，处理完成后文档中的如下元素前后会被自动插入一个空格：",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20220628205832-odovge3",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220628205832-odovge3",
+				"updated": "20220628210303"
+			},
+			"Children": [
+				{
+					"ID": "20220628205833-kmfuhsp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220628205833-kmfuhsp",
+						"updated": "20220628205833"
+					},
+					"Children": [
+						{
+							"ID": "20220628205833-iu4yxrq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220628205833-iu4yxrq",
+								"updated": "20220628205855"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "行内代码"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220628205855-jp2ks1q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220628205855-jp2ks1q",
+						"updated": "20220628210128"
+					},
+					"Children": [
+						{
+							"ID": "20220628205855-1gfuu51",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220628205855-1gfuu51",
+								"updated": "20220628210245"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "行内公式"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220628210000-ives8vm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628210000-ives8vm",
+				"updated": "20220630211006"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "另外，如下元素中的中西文间也会自动插入一个空格："
+				}
+			]
+		},
+		{
+			"ID": "20220630211006-svizyw7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220630211006-svizyw7",
+				"updated": "20220630211109"
+			},
+			"Children": [
+				{
+					"ID": "20220630211007-dsx48yk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211007-dsx48yk",
+						"updated": "20220630211007"
+					},
+					"Children": [
+						{
+							"ID": "20220630211007-26zt41e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211007-26zt41e",
+								"updated": "20220630211032"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "标签"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211033-fnlmuvi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211033-fnlmuvi"
+					},
+					"Children": [
+						{
+							"ID": "20220630211033-b7xfx2z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211033-b7xfx2z",
+								"updated": "20220630211037"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "高亮"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211037-mntb5y9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211037-mntb5y9"
+					},
+					"Children": [
+						{
+							"ID": "20220630211037-lftq994",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211037-lftq994",
+								"updated": "20220630211045"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "删除线"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211045-4ve578l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211045-4ve578l"
+					},
+					"Children": [
+						{
+							"ID": "20220630211045-58vch5e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211045-58vch5e",
+								"updated": "20220630211054"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "超链接锚文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211054-5om39qm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211054-5om39qm"
+					},
+					"Children": [
+						{
+							"ID": "20220630211054-tx41ceb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211054-tx41ceb",
+								"updated": "20220630211101"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "普通文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211101-1txhfqw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211101-1txhfqw"
+					},
+					"Children": [
+						{
+							"ID": "20220630211101-zcj15cy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211101-zcj15cy",
+								"updated": "20220630211108"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "强调"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211108-356v085",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211108-356v085",
+						"updated": "20220630211109"
+					},
+					"Children": [
+						{
+							"ID": "20220630211108-wlwci62",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211108-wlwci62",
+								"updated": "20220630211109"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加粗"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220628210321-x8cf0vr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220628210321-x8cf0vr",
+				"updated": "20220628210344"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自动备份"
+				}
+			]
+		},
+		{
+			"ID": "20220628210345-fsoqtka",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628210345-fsoqtka",
+				"updated": "20220628214153"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在实际执行优化排版之前，思源会自动备份一次原有的文档，这样如果优化结果不满意也能够通过"
+				},
+				{
+					"Type": "NodeBlockRef",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeBlockRefID",
+							"Data": "20210615211733-v6rzowm"
+						},
+						{
+							"Type": "NodeBlockRefSpace"
+						},
+						{
+							"Type": "NodeBlockRefText",
+							"Data": "数据历史"
+						},
+						{
+							"Type": "NodeCloseParen"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "进行回滚。"
+				}
+			]
+		}
+	]
+}

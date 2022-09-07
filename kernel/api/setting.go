@@ -87,6 +87,10 @@ func setEditor(c *gin.Context) {
 		editor.PlantUMLServePath = "https://www.plantuml.com/plantuml/svg/~1"
 	}
 
+	if "" == editor.KaTexMacros {
+		editor.KaTexMacros = "{}"
+	}
+
 	model.Conf.Editor = editor
 	model.Conf.Save()
 
@@ -123,10 +127,8 @@ func setExport(c *gin.Context) {
 
 	if "" != export.PandocBin {
 		if !util.IsValidPandocBin(export.PandocBin) {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf(model.Conf.Language(117), export.PandocBin)
-			ret.Data = map[string]interface{}{"closeTimeout": 5000}
-			return
+			util.PushErrMsg(fmt.Sprintf(model.Conf.Language(117), export.PandocBin), 5000)
+			export.PandocBin = util.PandocBinPath
 		}
 	}
 
@@ -152,7 +154,7 @@ func setFiletree(c *gin.Context) {
 		return
 	}
 
-	fileTree := &conf.FileTree{}
+	fileTree := conf.NewFileTree()
 	if err = gulu.JSON.UnmarshalJSON(param, fileTree); nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -166,6 +168,12 @@ func setFiletree(c *gin.Context) {
 		}
 	}
 
+	if 1 > fileTree.MaxOpenTabCount {
+		fileTree.MaxOpenTabCount = 8
+	}
+	if 32 < fileTree.MaxOpenTabCount {
+		fileTree.MaxOpenTabCount = 32
+	}
 	model.Conf.FileTree = fileTree
 	model.Conf.Save()
 

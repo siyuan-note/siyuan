@@ -13,7 +13,7 @@ import {Bookmark} from "./dock/Bookmark";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {Backlinks} from "./dock/Backlinks";
 import {Tag} from "./dock/Tag";
-import {getAllModels} from "./getAll";
+import {getAllModels, getAllTabs} from "./getAll";
 import {Asset} from "../asset";
 import {Search} from "../search";
 import {Dock} from "./dock";
@@ -22,9 +22,9 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "../util/fetch";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
-import {updatePanelByEditor} from "../editor/util";
 import {Constants} from "../constants";
 import {openSearch} from "../search/spread";
+import {saveScroll} from "../protyle/scroll/saveScroll";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("block__icons--active") || element.classList.contains("layout__wnd--active")) {
@@ -115,10 +115,11 @@ const dockToJSON = (dock: Dock) => {
         return data;
     };
     const data0 = subDockToJSON(0);
-    if (data0.length > 0) {
+    const data2 = subDockToJSON(1);
+    if (data0.length > 0 || data2.length > 0) {
+        // https://github.com/siyuan-note/siyuan/issues/5641
         json.push(data0);
     }
-    const data2 = subDockToJSON(1);
     if (data2.length > 0) {
         json.push(data2);
     }
@@ -131,7 +132,7 @@ export const exportLayout = (reload: boolean, cb?: () => void) => {
         return;
     }
     const layoutJSON: any = {
-        hideDock: useElement.getAttribute("xlink:href") !== "#iconMax",
+        hideDock: useElement.getAttribute("xlink:href") === "#iconDock",
         layout: {},
         top: dockToJSON(window.siyuan.layout.topDock),
         bottom: dockToJSON(window.siyuan.layout.bottomDock),
@@ -206,12 +207,7 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
         }
         (layout as Wnd).addTab(child);
     } else if (json.instance === "Editor" && json.blockId) {
-        (layout as Tab).addModel(new Editor({
-            tab: (layout as Tab),
-            blockId: json.blockId,
-            mode: json.mode,
-            action: [json.action]
-        }));
+        (layout as Tab).headElement.setAttribute("data-initdata", JSON.stringify(json));
     } else if (json.instance === "Asset") {
         (layout as Tab).addModel(new Asset({
             tab: (layout as Tab),
@@ -245,7 +241,7 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
         }));
     } else if (json.instance === "Tag") {
         (layout as Tab).addModel(new Tag((layout as Tab)));
-    } else if (json.instance === "search") {
+    } else if (json.instance === "Search") {
         (layout as Tab).addModel(new Search({
             tab: (layout as Tab),
             text: json.text
@@ -269,17 +265,17 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
     }
 };
 
-export const JSONToLayout = () => {
+export const JSONToLayout = (isStart: boolean) => {
     JSONToCenter(window.siyuan.config.uiLayout.layout);
     JSONToDock(window.siyuan.config.uiLayout);
-    setTimeout(() => {
-        getAllModels().editor.find(item => {
-            if (item.headElement.classList.contains("item--focus")) {
-                updatePanelByEditor(item.editor.protyle, false, false);
-                return true;
+    // 启动时不打开页签，需要移除没有钉住的页签
+    if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
+        getAllTabs().forEach(item => {
+            if (item.headElement && !item.headElement.classList.contains("item--pin")) {
+                item.parent.removeTab(item.id);
             }
         });
-    }, 520);
+    }
 };
 
 export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
@@ -326,9 +322,11 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         json.instance = "Tab";
     } else if (layout instanceof Editor) {
         json.blockId = layout.editor.protyle.block.id;
+        json.rootId = layout.editor.protyle.block.rootID;
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
         json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : "";
         json.instance = "Editor";
+        json.scrollAttr = saveScroll(layout.editor.protyle, true);
     } else if (layout instanceof Asset) {
         json.path = layout.path;
         json.instance = "Asset";
@@ -353,7 +351,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
     } else if (layout instanceof Tag) {
         json.instance = "Tag";
     } else if (layout instanceof Search) {
-        json.instance = "search";
+        json.instance = "Search";
         json.text = layout.text;
     }
 
@@ -389,8 +387,26 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
             });
         }
     } else if (layout instanceof Tab) {
-        json.children = {};
-        layoutToJSON(layout.model, json.children);
+        if (layout.model) {
+            json.children = {};
+            layoutToJSON(layout.model, json.children);
+        } else if (layout.headElement) {
+            // 当前页签没有激活时编辑器没有初始化
+            json.children = JSON.parse(layout.headElement.getAttribute("data-initdata") || "{}");
+        } else {
+            // 关闭所有页签
+            json.children = {};
+        }
+    }
+};
+
+export const resizeDrag = () => {
+    const dragElement = document.getElementById("drag");
+    const right = dragElement.getBoundingClientRect().left - document.querySelector("#windowControls").clientWidth;
+    if (right < dragElement.clientWidth) {
+        dragElement.style.paddingRight = right + "px";
+    } else {
+        dragElement.style.paddingRight = "";
     }
 };
 
@@ -400,8 +416,16 @@ export const resizeTabs = () => {
         if (item.editor && item.editor.protyle && item.element.parentElement) {
             hideElements(["gutter"], item.editor.protyle);
             setTimeout(() => {
-                // .layout .fn__flex-shrink {transition: width .3s ease;} 时需要再次计算 padding
+                // .layout .fn__flex-shrink {width .15s cubic-bezier(0, 0, .2, 1) 0ms} 时需要再次计算 padding
                 setPadding(item.editor.protyle);
+                if (typeof echarts !== "undefined") {
+                    item.editor.protyle.wysiwyg.element.querySelectorAll('[data-subtype="echarts"], [data-subtype="mindmap"]').forEach((chartItem: HTMLElement) => {
+                        const chartInstance = echarts.getInstanceById(chartItem.firstElementChild.nextElementSibling.getAttribute("_echarts_instance_"));
+                        if (chartInstance) {
+                            chartInstance.resize();
+                        }
+                    });
+                }
             }, 200);
         }
     });
@@ -417,7 +441,8 @@ export const copyTab = (tab: Tab) => {
             if (tab.model instanceof Editor) {
                 model = new Editor({
                     tab: newTab,
-                    blockId: tab.model.editor.protyle.block.rootID
+                    blockId: tab.model.editor.protyle.block.rootID,
+                    scrollAttr: saveScroll(tab.model.editor.protyle, true)
                 });
             } else if (tab.model instanceof Asset) {
                 model = new Asset({
@@ -456,6 +481,15 @@ export const copyTab = (tab: Tab) => {
                 model = new Search({
                     tab: newTab,
                     text: tab.model.text
+                });
+            } else if (!tab.model && tab.headElement) {
+                const initData = JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}");
+                model = new Editor({
+                    tab: newTab,
+                    blockId: initData.rootId || initData.blockId,
+                    mode: initData.mode,
+                    action: typeof initData.action === "string" ? [initData.action] : initData.action,
+                    scrollAttr: initData.scrollAttr,
                 });
             }
             newTab.addModel(model);

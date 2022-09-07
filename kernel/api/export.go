@@ -90,6 +90,22 @@ func exportMd(c *gin.Context) {
 	}
 }
 
+func exportNotebookSY(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	zipPath := model.ExportNotebookSY(id)
+	ret.Data = map[string]interface{}{
+		"zip": zipPath,
+	}
+}
+
 func exportSY(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -135,9 +151,10 @@ func exportDocx(c *gin.Context) {
 
 	id := arg["id"].(string)
 	savePath := arg["savePath"].(string)
-	err := model.ExportDocx(id, savePath)
+	removeAssets := arg["removeAssets"].(bool)
+	err := model.ExportDocx(id, savePath, removeAssets)
 	if nil != err {
-		ret.Code = -1
+		ret.Code = 1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
 		return

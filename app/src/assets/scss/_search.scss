@@ -11,6 +11,7 @@
       line-height: 32px;
       border-radius: 0;
       padding: 8px 8px 8px 48px !important;
+      box-shadow: none;
     }
 
     .b3-form__icon-icon {
@@ -23,6 +24,7 @@
       overflow: auto;
       top: 48px;
       position: absolute;
+      left: 8px;
     }
   }
 
@@ -50,14 +52,14 @@
       padding-right: 0;
       border-radius: 2px;
 
-      &:focus {
+      &:focus,
+      &.search__input--block {
         width: 100%;
         border-color: var(--b3-theme-primary);
       }
     }
   }
 }
-
 
 .protyle-search {
   display: flex;

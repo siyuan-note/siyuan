@@ -3,16 +3,23 @@ import {setEditor} from "./util/setEmpty";
 import {closePanel} from "./util/closePanel";
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
-import {showMessage} from "../dialog/message";
 import {disabledProtyle, enableProtyle, onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
 import {focusBlock} from "../protyle/util/selection";
 import {scrollCenter} from "../util/highlightById";
 import {lockFile} from "../dialog/processSystem";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
+import {setEditMode} from "../protyle/util/setEditMode";
+import {hideElements} from "../protyle/ui/hideElements";
+import {pushBack} from "./util/MobileBackFoward";
 
-export const openMobileFileById = (id: string, hasContext?: boolean, action = [Constants.CB_GET_HL], pushStack = true) => {
+export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) => {
+    window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({id, action}));
     if (window.siyuan.mobileEditor) {
+        hideElements(["toolbar", "hint", "util"], window.siyuan.mobileEditor.protyle);
+        if (window.siyuan.mobileEditor.protyle.contentElement.classList.contains("fn__none")) {
+            setEditMode(window.siyuan.mobileEditor.protyle, "wysiwyg");
+        }
         let blockElement;
         Array.from(window.siyuan.mobileEditor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
             if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
@@ -21,14 +28,7 @@ export const openMobileFileById = (id: string, hasContext?: boolean, action = [C
             }
         });
         if (blockElement) {
-            // https://github.com/siyuan-note/siyuan/issues/4327
-            if (pushStack) {
-                window.siyuan.backStack.push({
-                    id,
-                    scrollTop: window.siyuan.mobileEditor.protyle.contentElement.scrollTop,
-                    hasContext
-                });
-            }
+            pushBack();
             focusBlock(blockElement);
             scrollCenter(window.siyuan.mobileEditor.protyle, blockElement, true);
             closePanel();
@@ -42,26 +42,22 @@ export const openMobileFileById = (id: string, hasContext?: boolean, action = [C
             lockFile(data.data);
             return;
         }
-        if (data.code === 1) {
-            showMessage(data.msg);
-            return;
-        }
         if (window.siyuan.mobileEditor) {
+            pushBack();
             addLoading(window.siyuan.mobileEditor.protyle);
             fetchPost("/api/filetree/getDoc", {
                 id,
                 size: action.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
-                mode: hasContext ? 3 : 0,
+                mode: action.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
             }, getResponse => {
                 onGet(getResponse, window.siyuan.mobileEditor.protyle, action);
-                window.siyuan.mobileEditor.protyle.breadcrumb.render(window.siyuan.mobileEditor.protyle);
+                window.siyuan.mobileEditor.protyle.breadcrumb?.render(window.siyuan.mobileEditor.protyle);
             });
             window.siyuan.mobileEditor.protyle.undo.clear();
         } else {
             window.siyuan.mobileEditor = new Protyle(document.getElementById("editor"), {
                 blockId: id,
                 action,
-                hasContext: hasContext,
                 render: {
                     background: true,
                     gutter: true,
@@ -80,17 +76,8 @@ export const openMobileFileById = (id: string, hasContext?: boolean, action = [C
                 }
             });
         }
-        (document.getElementById("toolbarName") as HTMLInputElement).value = data.data.rootTitle;
+        (document.getElementById("toolbarName") as HTMLInputElement).value = data.data.rootTitle === "Untitled" ? "" : data.data.rootTitle;
         setEditor();
         closePanel();
-        window.localStorage.setItem(Constants.LOCAL_DOC, id);
-        if (pushStack) {
-            window.siyuan.backStack.push({
-                id,
-                scrollTop: window.siyuan.mobileEditor.protyle.contentElement.scrollTop,
-                callback: [Constants.CB_GET_HL],
-                hasContext
-            });
-        }
     });
 };

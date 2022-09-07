@@ -1,6 +1,6 @@
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {fetchPost} from "../../util/fetch";
 import {focusBlock, focusByRange, focusByWbr, focusSideBlock, getEditorRange} from "../util/selection";
-import {getContenteditableElement, getTopAloneElement} from "./getBlock";
+import {getTopAloneElement} from "./getBlock";
 import {Constants} from "../../constants";
 import {blockRender} from "../markdown/blockRender";
 import {processRender} from "../util/processCode";
@@ -10,7 +10,9 @@ import {lockFile} from "../../dialog/processSystem";
 import {setFold} from "../../menus/protyle";
 import {addLoading} from "../ui/initUI";
 import {onGet} from "../util/onGet";
+/// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
+/// #endif
 import {removeFoldHeading} from "../util/heading";
 import {genEmptyElement, genSBElement} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
@@ -80,6 +82,7 @@ const promiseTransaction = () => {
                     if (!item.lastElementChild.classList.contains("protyle-attr")) {
                         item.lastElementChild.remove();
                     }
+                    removeUnfoldRepeatBlock(response.data[0].doOperations[0].retData, protyle);
                     item.insertAdjacentHTML("afterend", response.data[0].doOperations[0].retData);
                     if (doOperations[0].data === "remove") {
                         // https://github.com/siyuan-note/siyuan/issues/2188
@@ -179,7 +182,7 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
     }
-}
+};
 
 export const promiseTransactions = () => {
     window.siyuan.transactionsTimeout = window.setInterval(() => {
@@ -214,6 +217,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         const scrollTop = protyle.contentElement.scrollTop;
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
             if (operation.retData) { // undo 的时候没有 retData
+                removeUnfoldRepeatBlock(operation.retData, protyle);
                 item.insertAdjacentHTML("afterend", operation.retData);
             }
             item.removeAttribute("fold");
@@ -311,6 +315,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                 endOffset: range.endOffset,
             };
         }
+        /// #if !MOBILE
         if (!updateElement) {
             // 打开两个相同的文档 A、A1，从 A 拖拽块 B 到 A1，在后续 ws 处理中，无法获取到拖拽出去的 B
             getAllModels().editor.forEach(editor => {
@@ -320,6 +325,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                 }
             });
         }
+        /// #endif
         if (operation.previousID) {
             let beforeElement: Element;
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).find(item => {
@@ -377,7 +383,12 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         if (operation.previousID) {
             let beforeElement: Element;
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).find(item => {
-                if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+                const embedElement = hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed");
+                if (embedElement) {
+                    // https://github.com/siyuan-note/siyuan/issues/5524
+                    embedElement.removeAttribute("data-render");
+                    blockRender(protyle, embedElement);
+                } else {
                     beforeElement = item;
                     return true;
                 }
@@ -460,7 +471,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
     }
 };
 
-export const turnsIntoTransaction = (options: { protyle: IProtyle, selectsElement: Element[], type: string, level?: string }) => {
+export const turnsIntoOneTransaction = (options: { protyle: IProtyle, selectsElement: Element[], type: string, level?: string }) => {
     let parentElement: Element;
     const id = Lute.NewNodeID();
     if (options.type === "BlocksMergeSuperBlock") {
@@ -490,7 +501,7 @@ export const turnsIntoTransaction = (options: { protyle: IProtyle, selectsElemen
             } else if (options.type === "Blocks2OLs") {
                 html += `<div data-marker="${index + 1}." data-subtype="o" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div class="protyle-action protyle-action--order" contenteditable="false" draggable="true">${index + 1}.</div><div class="protyle-attr" contenteditable="false"></div></div>`;
             } else {
-                html += `<div data-marker="*" data-subtype="t" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div class="protyle-action protyle-action--task"><svg><use xlink:href="#iconUncheck"></use></svg></div><div class="protyle-attr" contenteditable="false"></div></div>`;
+                html += `<div data-marker="*" data-subtype="t" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#iconUncheck"></use></svg></div><div class="protyle-attr" contenteditable="false"></div></div>`;
             }
         });
         parentElement.innerHTML = html + '<div class="protyle-attr" contenteditable="false"></div>';
@@ -550,110 +561,112 @@ export const turnsIntoTransaction = (options: { protyle: IProtyle, selectsElemen
     hideElements(["gutter"], options.protyle);
 };
 
-export const turnIntoTransaction = async (options: { protyle: IProtyle, nodeElement: Element, id: string, type: string, level?: number }) => {
-    if (!options.nodeElement.querySelector("wbr")) {
-        getContenteditableElement(options.nodeElement)?.insertAdjacentHTML("afterbegin", "<wbr>");
-    }
-    if (options.type === "HLevel" && options.nodeElement.getAttribute("data-type") === "NodeHeading" &&
-        options.nodeElement.getAttribute("fold") === "1") {
-        setFold(options.protyle, options.nodeElement);
-    }
-    if (options.type === "CancelList" || options.type === "CancelBlockquote") {
-        for await(const item of options.nodeElement.querySelectorAll('[data-type="NodeHeading"][fold="1"]')) {
-            const itemId = item.getAttribute("data-node-id");
-            item.removeAttribute("fold");
-            const response = await fetchSyncPost("/api/transactions", {
-                session: options.protyle.id,
-                app: Constants.SIYUAN_APPID,
-                transactions: [{
-                    doOperations: [{
-                        action: "unfoldHeading",
-                        id: itemId,
-                    }],
-                    undoOperations: [{
-                        action: "foldHeading",
-                        id: itemId
-                    }],
-                }]
-            });
-            options.protyle.undo.add([{
-                action: "unfoldHeading",
-                id: itemId,
-            }], [{
-                action: "foldHeading",
-                id: itemId
-            }]);
-            item.insertAdjacentHTML("afterend", response.data[0].doOperations[0].retData);
-        }
-    }
-    const oldHTML = options.nodeElement.outerHTML;
-    const previousId = options.nodeElement.previousElementSibling?.getAttribute("data-node-id");
-    const parentId = options.nodeElement.parentElement.getAttribute("data-node-id") || options.protyle.block.parentID;
-    // @ts-ignore
-    const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
-    options.nodeElement.outerHTML = newHTML;
-    if (options.type === "CancelList" || options.type === "CancelBlockquote") {
-        const tempElement = document.createElement("template");
-        tempElement.innerHTML = newHTML;
-        const doOperations: IOperation[] = [{
-            action: "delete",
-            id: options.id
-        }];
-        const undoOperations: IOperation[] = [];
-        let tempPreviousId = previousId;
-        Array.from(tempElement.content.children).forEach((item) => {
-            const tempId = item.getAttribute("data-node-id");
-            doOperations.push({
-                action: "insert",
-                data: item.outerHTML,
-                id: tempId,
-                previousID: tempPreviousId,
-                parentID: parentId
-            });
-            undoOperations.push({
-                action: "delete",
-                id: tempId
-            });
-            tempPreviousId = tempId;
-        });
-        undoOperations.push({
-            action: "insert",
-            data: oldHTML,
-            id: options.id,
-            previousID: previousId,
-            parentID: parentId
-        });
-        transaction(options.protyle, doOperations, undoOperations);
-    } else {
-        updateTransaction(options.protyle, options.id, newHTML, oldHTML);
-    }
-    focusByWbr(options.protyle.wysiwyg.element, getEditorRange(options.protyle.wysiwyg.element));
-    options.protyle.wysiwyg.element.querySelectorAll('[data-type="block-ref"]').forEach(item => {
-        if (item.textContent === "") {
-            fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
-                item.textContent = response.data;
-            });
-        }
+const removeUnfoldRepeatBlock = (html:string, protyle:IProtyle) => {
+    const temp = document.createElement("template");
+    temp.innerHTML = html;
+    Array.from(temp.content.children).forEach(item => {
+        protyle.wysiwyg.element.querySelector(`:scope > [data-node-id="${item.getAttribute("data-node-id")}"]`)?.remove();
     });
-    blockRender(options.protyle, options.protyle.wysiwyg.element);
-    processRender(options.protyle.wysiwyg.element);
-    highlightRender(options.protyle.wysiwyg.element);
 };
 
-export const phTransaction = (protyle: IProtyle, range: Range, nodeElement: HTMLElement, level: number) => {
-    const id = nodeElement.getAttribute("data-node-id");
-    const nodeType = nodeElement.getAttribute("data-type");
-    range.insertNode(document.createElement("wbr"));
-    if (nodeType === "NodeHeading") {
-        const subType = parseInt(nodeElement.getAttribute("data-subtype").substr(1));
-        if (subType === level) {
-            turnIntoTransaction({protyle, nodeElement, id, type: "H2P"});
-        } else {
-            turnIntoTransaction({protyle, nodeElement, id, type: "HLevel", level});
+export const turnsIntoTransaction = (options: {
+    protyle: IProtyle,
+    selectsElement?: Element[],
+    nodeElement?: Element,
+    type: string,
+    level?: number | string,
+    isContinue?: boolean,
+}) => {
+    let selectsElement: Element[] = options.selectsElement;
+    let range: Range;
+    // 通过快捷键触发
+    if (options.nodeElement) {
+        range = getSelection().getRangeAt(0);
+        range.insertNode(document.createElement("wbr"));
+        selectsElement = Array.from(options.protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+        if (selectsElement.length === 0) {
+            selectsElement = [options.nodeElement];
         }
-    } else if (nodeType === "NodeParagraph") {
-        turnIntoTransaction({protyle, nodeElement, id, type: "P2H", level});
+        let isContinue = false;
+        let hasEmbedBlock = false;
+        let isList = false;
+        selectsElement.find((item, index) => {
+            if (item.classList.contains("li")) {
+                isList = true;
+                return true;
+            }
+            if (item.classList.contains("bq") || item.classList.contains("sb") || item.classList.contains("p")) {
+                hasEmbedBlock = true;
+            }
+            if (item.nextElementSibling && selectsElement[index + 1] &&
+                item.nextElementSibling.isSameNode(selectsElement[index + 1])) {
+                isContinue = true;
+            } else if (index !== selectsElement.length - 1) {
+                isContinue = false;
+                return true;
+            }
+        });
+        if (isList || (hasEmbedBlock && options.type === "Blocks2Ps")) {
+            return;
+        }
+        if (selectsElement.length === 1 && options.type === "Blocks2Hs" &&
+            selectsElement[0].getAttribute("data-type") === "NodeHeading" &&
+            options.level === parseInt(selectsElement[0].getAttribute("data-subtype").substr(1))) {
+            // 快捷键同级转换，消除标题
+            options.type = "Blocks2Ps";
+        }
+        options.isContinue = isContinue;
     }
+
+    let html = "";
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    selectsElement.forEach((item, index) => {
+        if ((options.type === "Blocks2Ps" || options.type === "Blocks2Hs") &&
+            item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+            setFold(options.protyle, item);
+        }
+        item.classList.remove("protyle-wysiwyg--select");
+        html += item.outerHTML;
+        const id = item.getAttribute("data-node-id");
+        undoOperations.push({
+            action: "update",
+            id,
+            data: item.outerHTML
+        });
+
+        if ((options.type === "Blocks2Ps" || options.type === "Blocks2Hs") && !options.isContinue) {
+            // @ts-ignore
+            item.outerHTML = options.protyle.lute[options.type](item.outerHTML, options.level);
+        } else {
+            if (index === selectsElement.length - 1) {
+                const tempElement = document.createElement("div");
+                // @ts-ignore
+                tempElement.innerHTML = options.protyle.lute[options.type](html, options.level);
+                item.outerHTML = tempElement.innerHTML;
+            } else {
+                item.remove();
+            }
+        }
+    });
+    undoOperations.forEach(item => {
+        const nodeElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${item.id}"]`);
+        doOperations.push({
+            action: "update",
+            id: item.id,
+            data: nodeElement.outerHTML
+        });
+    });
+    transaction(options.protyle, doOperations, undoOperations);
+    processRender(options.protyle.wysiwyg.element);
+    highlightRender(options.protyle.wysiwyg.element);
+    blockRender(options.protyle, options.protyle.wysiwyg.element);
+    if (range) {
+        focusByWbr(options.protyle.wysiwyg.element, range);
+    } else {
+        focusBlock(options.protyle.wysiwyg.element.querySelector(`[data-node-id="${selectsElement[0].getAttribute("data-node-id")}"]`));
+    }
+    hideElements(["gutter"], options.protyle);
 };
 
 const updateRef = (protyle: IProtyle, id: string, index = 0) => {
@@ -663,7 +676,7 @@ const updateRef = (protyle: IProtyle, id: string, index = 0) => {
     protyle.wysiwyg.element.querySelectorAll(`[data-type="block-ref"][data-id="${id}"]`).forEach(item => {
         if (item.getAttribute("data-subtype") === "d") {
             fetchPost("/api/block/getRefText", {id: id}, (response) => {
-                item.textContent = response.data;
+                item.innerHTML = response.data;
                 const blockElement = hasClosestBlock(item);
                 if (blockElement) {
                     updateRef(protyle, blockElement.getAttribute("data-node-id"), index + 1);
@@ -723,4 +736,25 @@ export const updateTransaction = (protyle: IProtyle, id: string, newHTML: string
         data: html,
         action: "update"
     }]);
+};
+
+export const updateBatchTransaction = (nodeElements: Element[], protyle: IProtyle, cb: (e: HTMLElement) => void) => {
+    const operations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    nodeElements.forEach((element) => {
+        const id = element.getAttribute("data-node-id");
+        element.classList.remove("protyle-wysiwyg--select");
+        undoOperations.push({
+            action: "update",
+            id,
+            data: element.outerHTML
+        });
+        cb(element as HTMLElement);
+        operations.push({
+            action: "update",
+            id,
+            data: element.outerHTML
+        });
+    });
+    transaction(protyle, operations, undoOperations);
 };

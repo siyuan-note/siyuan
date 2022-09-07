@@ -26,7 +26,7 @@ import (
 
 func MarkText(text string, keyword string, beforeLen int, caseSensitive bool) (pos int, marked string) {
 	if "" == keyword {
-		return -1, text
+		return -1, html.EscapeString(text)
 	}
 	text = html.EscapeString(text)
 	keywords := SplitKeyword(keyword)
@@ -53,7 +53,11 @@ func MarkText(text string, keyword string, beforeLen int, caseSensitive bool) (p
 	return
 }
 
-const TermSep = "__term@sep__"
+const (
+	TermSep         = "__term@sep__"
+	SearchMarkLeft  = "__@mark__"
+	SearchMarkRight = "__mark@__"
+)
 
 func SplitKeyword(keyword string) (keywords []string) {
 	keyword = strings.TrimSpace(keyword)

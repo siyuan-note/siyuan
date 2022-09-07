@@ -1,14 +1,14 @@
 import {Constants} from "../../constants";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByMatchTag} from "../util/hasClosest";
 import {
+    focusBlock,
     focusByRange,
     focusByWbr,
-    focusSideBlock,
     getEditorRange,
     getSelectionOffset,
     getSelectionPosition
 } from "../util/selection";
-import {hintEmbed, hintRef} from "./extend";
+import {hintEmbed, hintRef, hintSlash} from "./extend";
 import {getSavePath} from "../../util/newFile";
 import {upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
@@ -25,10 +25,12 @@ import {addEmoji, filterEmoji, lazyLoadEmoji, unicode2Emoji} from "../../emoji";
 import {escapeHtml} from "../../util/escape";
 import {blockRender} from "../markdown/blockRender";
 import {uploadFiles} from "../upload";
+/// #if !MOBILE
 import {openFileById} from "../../editor/util";
-import {isMobile} from "../../util/functions";
+/// #endif
 import {openMobileFileById} from "../../mobile/editor";
 import {getIconByType} from "../../editor/getIcon";
+import {processRender} from "../util/processCode";
 
 export class Hint {
     public timeId: number;
@@ -42,7 +44,7 @@ export class Hint {
         this.element = document.createElement("div");
         this.element.setAttribute("data-close", "false");
         // height 402 根据 .emojis max-height+8 得来
-        this.element.setAttribute("style", `overflow:auto;z-index:200;max-height:402px;width:${Math.max(protyle.element.clientWidth / 2, 320)}px;box-sizing: border-box;`);
+        this.element.setAttribute("style", `z-index: 201;overflow:auto;max-height:402px;width:${Math.max(protyle.element.clientWidth / 2, 320)}px;box-sizing: border-box;`);
         this.element.className = "b3-menu b3-list b3-list--background fn__none";
         this.element.addEventListener("click", (event) => {
             const eventTarget = event.target as HTMLElement;
@@ -76,7 +78,7 @@ export class Hint {
                         let html = "";
                         window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
                             html += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
-${unicode2Emoji(emoji.unicode)}</button>`;
+${unicode2Emoji(emoji.unicode, true)}</button>`;
                         });
                         titleElement.nextElementSibling.innerHTML = html;
                         titleElement.nextElementSibling.removeAttribute("data-index");
@@ -145,17 +147,20 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             }
             return;
         }
+        // https://github.com/siyuan-note/siyuan/issues/5083
+        if (this.splitChar === "/" || this.splitChar === "、") {
+            clearTimeout(this.timeId);
+            if (this.enableSlash) {
+                this.genHTML(hintSlash(key, protyle), protyle);
+            }
+            return;
+        }
+
         protyle.options.hint.extend.forEach((item) => {
             if (item.key === this.splitChar) {
                 clearTimeout(this.timeId);
                 this.timeId = window.setTimeout(() => {
-                    if (this.splitChar === "/" || this.splitChar === "、") {
-                        if (this.enableSlash) {
-                            this.genHTML(item.hint(key, protyle), protyle);
-                        }
-                    } else {
-                        this.genHTML(item.hint(key, protyle), protyle);
-                    }
+                    this.genHTML(item.hint(key, protyle), protyle);
                 }, protyle.options.hint.delay);
             }
         });
@@ -168,7 +173,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
         } else {
-            this.element.insertAdjacentHTML("beforeend", "<div class=\"fn__loading\"><img width=\"64px\" src=\"/stage/loading-pure.svg\"></div>");
+            this.element.insertAdjacentHTML("beforeend", '<div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div>');
         }
     }
 
@@ -193,7 +198,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             // https://github.com/siyuan-note/siyuan/issues/1229 提示时，新建文件不应默认选中
             let focusClass = "";
             if (i === 0) {
-                if (hintData.value.startsWith("((newFile ") && hintData.value.endsWith(`${Lute.Caret}"))`) && data.length > 1) {
+                if (hintData.value.startsWith("((newFile ") && hintData.value.endsWith(`${Lute.Caret}'))`) && data.length > 1) {
                     focusClass = "";
                 } else {
                     focusClass = " b3-list-item--focus";
@@ -276,7 +281,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
     }
 
     private genSearchHTML(protyle: IProtyle, searchElement: HTMLInputElement, nodeElement: false | HTMLElement, oldValue: string) {
-        this.element.lastElementChild.innerHTML = "<div class=\"ft__center\"><img style=\"height:32px;width:32px;\" src=\"/stage/loading-pure.svg\"></div>";
+        this.element.lastElementChild.innerHTML = '<div class="ft__center"><img style="height:32px;width:32px;" src="/stage/loading-pure.svg"></div>';
         fetchPost("/api/search/searchRefBlock", {
             k: searchElement.value,
             id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
@@ -285,29 +290,31 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         }, (response) => {
             let searchHTML = "";
             if (response.data.newDoc) {
-                searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent('((newFile "' + oldValue + Lute.Caret + '"))')}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+                const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.data.k}${Lute.Caret}'))`;
+                searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div></button>`;
             }
             response.data.blocks.forEach((item: IBlock, index: number) => {
                 const iconName = getIconByType(item.type);
                 let attrHTML = "";
                 if (item.name) {
-                    attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconN"></use></svg>&nbsp;${item.name}</span><span class="fn__space"></span>`;
+                    attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg>${item.name}</span><span class="fn__space"></span>`;
                 }
                 if (item.alias) {
-                    attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconA"></use></svg>&nbsp;${item.alias}</span><span class="fn__space"></span>`;
+                    attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconA"></use></svg>${item.alias}</span><span class="fn__space"></span>`;
                 }
                 if (item.memo) {
-                    attrHTML += `<span class="fn__flex"><svg class="fn__flex-center svg--small svg ft__on-background"><use xlink:href="#iconM"></use></svg>&nbsp;${item.memo}</span>`;
+                    attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconM"></use></svg>${item.memo}</span>`;
                 }
                 if (attrHTML) {
-                    attrHTML = `<div class="fn__flex b3-list-item__meta" style="line-height: 1">${attrHTML}</div>`;
+                    attrHTML = `<div class="fn__flex b3-list-item__meta b3-list-item__showall">${attrHTML}</div>`;
                 }
-                searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent('<span data-type="block-ref" data-id="' + item.id + '" data-subtype="s">' + oldValue + "</span>")}">${attrHTML}<div class="b3-list-item__first">
+                const blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
+                searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">${attrHTML}<div class="b3-list-item__first">
     <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<div class="b3-list-item__meta">${item.hPath}</div></button>`;
+<div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div></button>`;
             });
             if (searchHTML === "") {
                 searchHTML = `<button class="b3-list-item b3-list-item--two fn__block" data-value="">${window.siyuan.languages.emptyContent}</button>`;
@@ -322,7 +329,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         }
         const panelElement = this.element.querySelector(".emojis__panel");
         if (panelElement) {
-            panelElement.innerHTML = filterEmoji(value, 256);
+            panelElement.innerHTML = filterEmoji(value, 256, true);
             if (value) {
                 panelElement.nextElementSibling.classList.add("fn__none");
             } else {
@@ -330,21 +337,21 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             }
         } else {
             this.element.innerHTML = `<div class="emojis" style="height: auto;">
-<div class="emojis__panel">${filterEmoji(value, 256)}</div>
+<div class="emojis__panel">${filterEmoji(value, 256, true)}</div>
 <div class="fn__flex${value ? " fn__none" : ""}">
-    <div data-type="0" class="emojis__type" aria-label="${window.siyuan.languages.recentEmoji}">${unicode2Emoji("2b50")}</div>
-    <div data-type="1" class="emojis__type" aria-label="${window.siyuan.emojis[0][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f527")}</div>
-    <div data-type="2" class="emojis__type" aria-label="${window.siyuan.emojis[1][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f60d")}</div>
-    <div data-type="3" class="emojis__type" aria-label="${window.siyuan.emojis[2][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f433")}</div>
-    <div data-type="4" class="emojis__type" aria-label="${window.siyuan.emojis[3][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f96a")}</div>
-    <div data-type="5" class="emojis__type" aria-label="${window.siyuan.emojis[4][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f3a8")}</div>
-    <div data-type="6" class="emojis__type" aria-label="${window.siyuan.emojis[5][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f3dd")}</div>
-    <div data-type="7" class="emojis__type" aria-label="${window.siyuan.emojis[6][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f52e")}</div>
-    <div data-type="8" class="emojis__type" aria-label="${window.siyuan.emojis[7][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("267e")}</div>
-    <div data-type="9" class="emojis__type" aria-label="${window.siyuan.emojis[8][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f6a9")}</div>
+    <div data-type="0" class="emojis__type" aria-label="${window.siyuan.languages.recentEmoji}">${unicode2Emoji("2b50", true)}</div>
+    <div data-type="1" class="emojis__type" aria-label="${window.siyuan.emojis[0][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f527", true)}</div>
+    <div data-type="2" class="emojis__type" aria-label="${window.siyuan.emojis[1][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f60d", true)}</div>
+    <div data-type="3" class="emojis__type" aria-label="${window.siyuan.emojis[2][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f433", true)}</div>
+    <div data-type="4" class="emojis__type" aria-label="${window.siyuan.emojis[3][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f96a", true)}</div>
+    <div data-type="5" class="emojis__type" aria-label="${window.siyuan.emojis[4][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f3a8", true)}</div>
+    <div data-type="6" class="emojis__type" aria-label="${window.siyuan.emojis[5][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f3dd", true)}</div>
+    <div data-type="7" class="emojis__type" aria-label="${window.siyuan.emojis[6][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f52e", true)}</div>
+    <div data-type="8" class="emojis__type" aria-label="${window.siyuan.emojis[7][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("267e", true)}</div>
+    <div data-type="9" class="emojis__type" aria-label="${window.siyuan.emojis[8][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f6a9", true)}</div>
 </div>
 </div>`;
-            lazyLoadEmoji(this.element);
+            lazyLoadEmoji(this.element, true);
         }
         const firstEmojiElement = this.element.querySelector(".emojis__item");
         if (firstEmojiElement) {
@@ -403,18 +410,22 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
         }
-        range.deleteContents();
         // 新建文件
-        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}"))`)) {
+        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
             focusByRange(range);
-            const fileName = value.substring(11, value.length - 4);
+            const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`);
+            const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
             getSavePath(protyle.path, protyle.notebookId, (pathString) => {
                 fetchPost("/api/filetree/createDocWithMd", {
                     notebook: protyle.notebookId,
-                    path: pathPosix().join(pathString, fileName),
+                    path: pathPosix().join(pathString, realFileName),
                     markdown: ""
                 }, response => {
-                    insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(fileName)}</span>`), protyle);
+                    let blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(realFileName)}</span>`;
+                    if (fileNames.length === 2) {
+                        blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="s">${escapeHtml(fileNames[0])}</span>`;
+                    }
+                    insertHTML(genEmptyBlock(false, false, blockRefHTML), protyle);
                 });
             });
             return;
@@ -428,6 +439,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 }
                 return;
             }
+            range.deleteContents();
             range.insertNode(document.createElement("wbr"));
             html = nodeElement.outerHTML;
             const tempElement = document.createElement("template");
@@ -466,60 +478,69 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 }
                 this.splitChar = value;
                 this.lastIndex = 0;
+                range.deleteContents();
                 const textNode = document.createTextNode(value);
                 range.insertNode(textNode);
                 range.setEnd(textNode, value.length);
                 range.collapse(false);
                 return;
             } else if (value === Constants.ZWSP) {
+                range.deleteContents();
                 protyle.toolbar.showTpl(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 1) {
+                range.deleteContents();
                 protyle.toolbar.showWidget(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 2) {
+                range.deleteContents();
                 protyle.toolbar.showAssets(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 3) {
+                range.deleteContents();
                 return;
             } else if (value === Constants.ZWSP + 4) {
                 const newSubDocId = Lute.NewNodeID();
                 fetchPost("/api/filetree/createDoc", {
                     notebook: protyle.notebookId,
                     path: pathPosix().join(getDisplayName(protyle.path, false, true), newSubDocId + ".sy"),
-                    title: window.siyuan.languages.untitled,
+                    title: "Untitled",
                     md: ""
                 }, () => {
-                    insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">${escapeHtml(window.siyuan.languages.untitled)}</span>`), protyle);
-                    if (isMobile()) {
-                        openMobileFileById(newSubDocId, true);
-                    } else {
-                        openFileById({
-                            id: newSubDocId,
-                            hasContext: true,
-                            action: [Constants.CB_GET_HL]
-                        });
-                    }
+                    insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">Untitled</span>`), protyle);
+                    /// #if MOBILE
+                    openMobileFileById(newSubDocId, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                    /// #else
+                    openFileById({
+                        id: newSubDocId,
+                        action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]
+                    });
+                    /// #endif
                 });
                 return;
             } else if (Constants.INLINE_TYPE.includes(value)) {
+                range.deleteContents();
+                focusByRange(range);
                 protyle.toolbar.range = range;
                 protyle.toolbar.setInlineMark(protyle, value, "add");
                 return;
             } else if (value === "emoji") {
+                range.deleteContents();
                 range.insertNode(document.createTextNode(":"));
                 range.collapse(false);
                 this.enableEmoji = true;
                 this.genEmojiHTML(protyle);
                 return;
             } else if (value.indexOf("style") > -1) {
+                range.deleteContents();
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else {
+                range.deleteContents();
                 let textContent = value;
                 if (value === "```") {
                     textContent = value + (localStorage.getItem(Constants.LOCAL_CODELANG) || "") + Lute.Caret + "\n```";
@@ -585,17 +606,22 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 }
                 if (value === "<div>" || value === "$$" || (value.indexOf("```") > -1 && value.length > 3)) {
                     protyle.toolbar.showRender(protyle, nodeElement);
+                    processRender(nodeElement);
                 } else if (value.startsWith("```")) {
                     highlightRender(nodeElement);
                 } else if (value.startsWith("<iframe") || value.startsWith("<video") || value.startsWith("<audio")) {
                     protyle.gutter.renderMenu(protyle, nodeElement);
-                    window.siyuan.menus.menu.element.classList.remove("fn__none");
                     const rect = nodeElement.getBoundingClientRect();
-                    setPosition(window.siyuan.menus.menu.element, rect.left - window.siyuan.menus.menu.element.clientWidth, rect.top);
-                    window.siyuan.menus.menu.element.querySelector('[data-id="assetSubMenu"]').classList.add("b3-menu__item--show");
+                    window.siyuan.menus.menu.popup({
+                        x: rect.left,
+                        y: rect.top
+                    }, true);
+                    const itemElement = window.siyuan.menus.menu.element.querySelector('[data-id="assetSubMenu"]');
+                    itemElement.classList.add("b3-menu__item--show");
+                    window.siyuan.menus.menu.showSubMenu(itemElement.querySelector(".b3-menu__submenu"));
                     window.siyuan.menus.menu.element.querySelectorAll("input")[0].focus();
                 } else if (value === "---") {
-                    focusSideBlock(nodeElement);
+                    focusBlock(nodeElement);
                 } else {
                     focusByWbr(nodeElement, range);
                 }

@@ -21,6 +21,8 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
+
+	"github.com/siyuan-note/logging"
 )
 
 var SK = []byte("696D897C9AA0611B")
@@ -30,13 +32,13 @@ func AESEncrypt(str string) string {
 	buf.Grow(4096)
 	_, err := hex.NewEncoder(buf).Write([]byte(str))
 	if nil != err {
-		LogErrorf("encrypt failed: %s", err)
+		logging.LogErrorf("encrypt failed: %s", err)
 		return ""
 	}
 	data := buf.Bytes()
 	block, err := aes.NewCipher(SK)
 	if nil != err {
-		LogErrorf("encrypt failed: %s", err)
+		logging.LogErrorf("encrypt failed: %s", err)
 		return ""
 	}
 	cbc := cipher.NewCBCEncrypter(block, []byte("RandomInitVector"))
@@ -56,7 +58,7 @@ func pkcs5Padding(ciphertext []byte, blockSize int) []byte {
 func AESDecrypt(cryptStr string) []byte {
 	crypt, err := hex.DecodeString(cryptStr)
 	if nil != err {
-		LogErrorf("decrypt failed: %s", err)
+		logging.LogErrorf("decrypt failed: %s", err)
 		return nil
 	}
 

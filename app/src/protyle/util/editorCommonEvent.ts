@@ -1,8 +1,8 @@
-import {focusBlock, focusByWbr, focusByRange} from "./selection";
+import {focusBlock, focusByRange, focusByWbr} from "./selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {Constants} from "../../constants";
 import {paste} from "./paste";
-import {genEmptyElement, genSBElement} from "../../block/util";
+import {cancelSB, genEmptyElement, genSBElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {getTopAloneElement} from "../wysiwyg/getBlock";
 import {updateListOrder} from "../wysiwyg/list";
@@ -10,14 +10,19 @@ import {hideElements} from "../ui/hideElements";
 import {mathRender} from "../markdown/mathRender";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "./onGet";
+/// #if !MOBILE
 import {getInstanceById} from "../../layout/util";
-import {Editor} from "../../editor";
 import {Tab} from "../../layout/Tab";
-import {blockRender} from "../markdown/blockRender";
 import {getAllModels} from "../../layout/getAll";
+import {updatePanelByEditor} from "../../editor/util";
+/// #endif
+import * as path from "path";
+import {Editor} from "../../editor";
+import {blockRender} from "../markdown/blockRender";
 import {processRender} from "./processCode";
 import {highlightRender} from "../markdown/highlightRender";
-import {updatePanelByEditor} from "../../editor/util";
+import {uploadLocalFiles} from "../upload";
+import {insertHTML} from "./insertHTML";
 
 const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, direct: "col" | "row") => {
     const isSameDoc = protyle.element.contains(sourceElements[0]);
@@ -164,7 +169,8 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
             if (item.classList.contains("protyle-attr")) {
                 return;
             }
-            undoOperations.push({
+            // 撤销更新不能位于最后，否则又更新为最新结果 https://github.com/siyuan-note/siyuan/issues/5725
+            undoOperations.splice(0, 0, {
                 action: "update",
                 id: item.getAttribute("data-node-id"),
                 data: item.outerHTML
@@ -205,30 +211,13 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
         oldSourceParentElement = topSourceElement.parentElement;
         topSourceElement.remove();
     }
-    if (oldSourceParentElement && (oldSourceParentElement.classList.contains("bq") || oldSourceParentElement.classList.contains("sb")) && oldSourceParentElement.childElementCount === 1) {
-        // 拖拽后，bq 为空
-        const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
-        if (protyleElement) {
-            const editor = getInstanceById(protyleElement.getAttribute("data-id")) as Tab;
-            if (editor && editor.model instanceof Editor) {
-                const newId = Lute.NewNodeID();
-                const newElement = genEmptyElement(false, false, newId);
-                doOperations.splice(0, 0, {
-                    action: "insert",
-                    id: newId,
-                    data: newElement.outerHTML,
-                    parentID: oldSourceParentElement.getAttribute("data-node-id")
-                });
-                undoOperations.splice(0, 0, {
-                    action: "delete",
-                    id: newId,
-                });
-                if (isSameDoc) {
-                    oldSourceParentElement.insertAdjacentElement("afterbegin", newElement);
-                }
-            }
-        }
+    if (oldSourceParentElement && oldSourceParentElement.classList.contains("sb") && oldSourceParentElement.childElementCount === 2) {
+        // 拖拽后，sb 只剩下一个元素
+        const sbData = cancelSB(protyle, oldSourceParentElement);
+        doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
+        undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
     } else if (oldSourceParentElement && oldSourceParentElement.classList.contains("protyle-wysiwyg") && oldSourceParentElement.innerHTML === "") {
+        /// #if !MOBILE
         // 拖拽后，根文档原内容为空，且不为悬浮窗
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
         if (protyleElement && !protyleElement.classList.contains("block__edit")) {
@@ -247,6 +236,7 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
                 });
             }
         }
+        /// #endif
     }
     if (isSameDoc) {
         transaction(protyle, doOperations, undoOperations);
@@ -499,30 +489,13 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
             }
         }
     }
-    if (oldSourceParentElement && (oldSourceParentElement.classList.contains("bq") || oldSourceParentElement.classList.contains("sb")) && oldSourceParentElement.childElementCount === 1) {
-        // 拖拽后，bq 为空
-        const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
-        if (protyleElement) {
-            const editor = getInstanceById(protyleElement.getAttribute("data-id")) as Tab;
-            if (editor && editor.model instanceof Editor) {
-                const newId = Lute.NewNodeID();
-                const newElement = genEmptyElement(false, false, newId);
-                doOperations.splice(0, 0, {
-                    action: "insert",
-                    id: newId,
-                    data: newElement.outerHTML,
-                    parentID: oldSourceParentElement.getAttribute("data-node-id")
-                });
-                undoOperations.splice(0, 0, {
-                    action: "delete",
-                    id: newId,
-                });
-                if (isSameDoc) {
-                    oldSourceParentElement.insertAdjacentElement("afterbegin", newElement);
-                }
-            }
-        }
+    if (oldSourceParentElement && oldSourceParentElement.classList.contains("sb") && oldSourceParentElement.childElementCount === 2) {
+        // 拖拽后，sb 只剩下一个元素
+        const sbData = cancelSB(protyle, oldSourceParentElement);
+        doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
+        undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
     } else if (oldSourceParentElement && oldSourceParentElement.classList.contains("protyle-wysiwyg") && oldSourceParentElement.childElementCount === 0) {
+        /// #if !MOBILE
         // 拖拽后，根文档原内容为空，且不为悬浮窗
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
         if (protyleElement && !protyleElement.classList.contains("block__edit")) {
@@ -541,6 +514,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                 });
             }
         }
+        /// #endif
     }
     if (isSameDoc) {
         transaction(protyle, doOperations, undoOperations);
@@ -560,7 +534,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         if (target.classList && target.classList.contains("protyle-action")) {
-            window.siyuan.dragElement = target.parentElement;
+            if (hasClosestByClassName(target, "protyle-wysiwyg__embed")) {
+                window.siyuan.dragElement = undefined;
+                event.preventDefault();
+            } else {
+                window.siyuan.dragElement = target.parentElement;
+            }
             return;
         }
         // 选中编辑器中的文字进行拖拽
@@ -615,19 +594,35 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 transaction(protyle, doOperations, undoOperations);
                 mathRender(protyle.wysiwyg.element);
-                focusByWbr(protyle.wysiwyg.element, range);
+                if (targetElement.classList.contains("code-block")) {
+                    highlightRender(protyle.wysiwyg.element);
+                } else {
+                    focusByWbr(protyle.wysiwyg.element, range);
+                }
+                // 拖拽后无法使用快捷键
+                protyle.selectElement.classList.add("fn__none");
             });
             return;
         }
         const targetElement = editorElement.querySelector(".dragover__bottom") || editorElement.querySelector(".dragover__top") || editorElement.querySelector(".dragover__left") || editorElement.querySelector(".dragover__right");
         const isBacklink = window.siyuan.dragElement?.getAttribute("data-treetype") === "backlink";
-        if (window.siyuan.dragElement && targetElement && (
+        if (window.siyuan.dragElement && (event.altKey || event.shiftKey) && isBacklink) {
+            focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
+            const sourceId = window.siyuan.dragElement.getAttribute("data-node-id");
+            if (event.altKey) {
+                fetchPost("/api/block/getRefText", {id: sourceId}, (response) => {
+                    insertHTML(`((${sourceId} '${response.data}'))`, protyle);
+                });
+            } else {
+                insertHTML(protyle.lute.SpinBlockDOM(`{{select * from blocks where id='${sourceId}'}}`), protyle);
+                blockRender(protyle, protyle.wysiwyg.element);
+            }
+        } else if (window.siyuan.dragElement && targetElement && (
             window.siyuan.dragElement.parentElement.classList.contains("protyle-gutters") ||
             isBacklink ||
             window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem")) {
-            // gutter 拖拽
+            // gutter 或反链面板拖拽
             const sourceId = window.siyuan.dragElement.getAttribute("data-node-id");
-
             let sourceElements: Element[] = [];
             if (isBacklink) {
                 let sourceElement = document.createElement("div");
@@ -667,6 +662,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__bottom"));
                 }
             }
+            /// #if !MOBILE
             if (isBacklink) {
                 setTimeout(() => {
                     // 等待 drag transaction
@@ -675,6 +671,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     });
                 }, 200);
             }
+            /// #endif
         } else if (window.siyuan.dragElement && window.siyuan.dragElement.getAttribute("data-type") === "navigation-file" && targetElement) {
             // 文件树拖拽
             fetchPost("/api/filetree/doc2Heading", {
@@ -692,8 +689,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     size: Constants.SIZE_GET,
                 }, getResponse => {
                     onGet(getResponse, protyle);
+                    /// #if !MOBILE
                     // 文档标题互转后，需更新大纲
                     updatePanelByEditor(protyle, false, false, true);
+                    /// #endif
                     // 文档标题互转后，编辑区会跳转到开头 https://github.com/siyuan-note/siyuan/issues/2939
                     setTimeout(() => {
                         protyle.contentElement.scrollTop = scrollTop;
@@ -705,7 +704,32 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
             focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
-            paste(protyle, event);
+            if (event.dataTransfer.types[0] === "Files") {
+                const files: string[] = [];
+                let isAllFile = true;
+                for (let i = 0; i < event.dataTransfer.files.length; i++) {
+                    files.push(event.dataTransfer.files[i].path);
+                    if (event.dataTransfer.files[i].type === "") {
+                        isAllFile = false;
+                    }
+                }
+                if (isAllFile) {
+                    if (event.altKey) {
+                        let fileText = "";
+                        files.forEach((item) => {
+                            // 拖入文件名包含 `)` 或 `]` 的文件以 `file://` 插入后链接解析错误 https://github.com/siyuan-note/siyuan/issues/5786
+                            fileText += `[${path.basename(item).replace(/\]/g, "\\]").replace(/\[/g, "\\[")}](file://${item.replace(/\\/g, "\\\\").replace(/\)/g, "\\)").replace(/\(/g, "\\(")})\n`;
+                        });
+                        insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
+                    } else {
+                        uploadLocalFiles(files, protyle);
+                    }
+                } else {
+                    uploadLocalFiles(files, protyle);
+                }
+            } else {
+                paste(protyle, event);
+            }
         }
         if (window.siyuan.dragElement) {
             window.siyuan.dragElement.style.opacity = "";
@@ -714,7 +738,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     });
     let dragoverElement: Element;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
-        event.dataTransfer.dropEffect = "move";
+        // 设置了的话 drop 就无法监听 shift/control event.dataTransfer.dropEffect = "move";
         if (event.dataTransfer.types.includes("Files") && event.target.classList.contains("protyle-wysiwyg")) {
             // 文档底部拖拽文件需 preventDefault，否则无法触发 drop 事件 https://github.com/siyuan-note/siyuan/issues/2665
             event.preventDefault();
@@ -723,7 +747,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!window.siyuan.dragElement) {
             return;
         }
-        // 编辑器内文字拖拽或资源文件拖拽进入编辑器时不能运行 event.preventDefault()， 否则吴光标; 需放在 !window.siyuan.dragElement 之后
+        if ((event.shiftKey || event.altKey) && window.siyuan.dragElement.getAttribute("data-treetype") === "backlink") {
+            const targetElement = hasClosestBlock(event.target);
+            if (targetElement) {
+                targetElement.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
+            }
+            event.preventDefault();
+            return;
+        }
+        // 编辑器内文字拖拽或资源文件拖拽或按住 alt/shift 拖拽反链图标进入编辑器时不能运行 event.preventDefault()， 否则无光标; 需放在 !window.siyuan.dragElement 之后
         event.preventDefault();
         const targetElement = hasClosestBlock(event.target) as Element;
         if (!targetElement) {

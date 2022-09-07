@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -38,7 +39,7 @@ func getEmojiConf(c *gin.Context) {
 	builtConfPath := filepath.Join(util.AppearancePath, "emojis", "conf.json")
 	data, err := os.ReadFile(builtConfPath)
 	if nil != err {
-		util.LogErrorf("read emojis conf.json failed: %s", err)
+		logging.LogErrorf("read emojis conf.json failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -46,7 +47,7 @@ func getEmojiConf(c *gin.Context) {
 
 	var conf []map[string]interface{}
 	if err = gulu.JSON.UnmarshalJSON(data, &conf); nil != err {
-		util.LogErrorf("unmarshal emojis conf.json failed: %s", err)
+		logging.LogErrorf("unmarshal emojis conf.json failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -64,7 +65,7 @@ func getEmojiConf(c *gin.Context) {
 		model.CustomEmojis = sync.Map{}
 		customEmojis, err := os.ReadDir(customConfDir)
 		if nil != err {
-			util.LogErrorf("read custom emojis failed: %s", err)
+			logging.LogErrorf("read custom emojis failed: %s", err)
 		} else {
 			for _, customEmoji := range customEmojis {
 				name := customEmoji.Name()
@@ -76,7 +77,7 @@ func getEmojiConf(c *gin.Context) {
 					// 子级
 					subCustomEmojis, err := os.ReadDir(filepath.Join(customConfDir, name))
 					if nil != err {
-						util.LogErrorf("read custom emojis failed: %s", err)
+						logging.LogErrorf("read custom emojis failed: %s", err)
 						continue
 					}
 
@@ -130,11 +131,29 @@ func checkUpdate(c *gin.Context) {
 	model.CheckUpdate(showMsg)
 }
 
+func exportLog(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	zipPath := model.ExportSystemLog()
+	ret.Data = map[string]interface{}{
+		"zip": zipPath,
+	}
+}
+
+var start = true // 是否是启动
 func getConf(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	ret.Data = model.Conf
+	ret.Data = map[string]interface{}{
+		"conf":  model.Conf,
+		"start": start,
+	}
+
+	if start {
+		start = false
+	}
 }
 
 func setUILayout(c *gin.Context) {
@@ -293,78 +312,6 @@ func setNetworkProxy(c *gin.Context) {
 
 	util.PushMsg(model.Conf.Language(42), 1000*15)
 	time.Sleep(time.Second * 3)
-}
-
-func setE2EEPasswd(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var passwd string
-	mode := int(arg["mode"].(float64))
-	if 0 == mode { // 使用内建的密码生成
-		passwd = model.GetBuiltInE2EEPasswd()
-	} else { // 使用自定义密码
-		passwd = arg["e2eePasswd"].(string)
-		passwd = strings.TrimSpace(passwd)
-	}
-
-	if "" == passwd {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(39)
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
-		return
-	}
-
-	newPasswd := util.AESEncrypt(passwd)
-	if model.Conf.E2EEPasswd == newPasswd {
-		util.PushMsg(model.Conf.Language(92), 3000)
-		return
-	}
-
-	util.PushMsg(model.Conf.Language(102), 60*1000)
-	if err := os.RemoveAll(model.Conf.Backup.GetSaveDir()); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	if err := os.MkdirAll(model.Conf.Backup.GetSaveDir(), 0755); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	if err := os.RemoveAll(model.Conf.Sync.GetSaveDir()); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	if err := os.MkdirAll(model.Conf.Sync.GetSaveDir(), 0755); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	if err := os.RemoveAll(filepath.Join(util.WorkspaceDir, "incremental")); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	if err := os.MkdirAll(filepath.Join(util.WorkspaceDir, "incremental"), 0755); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	time.Sleep(1 * time.Second)
-	model.Conf.E2EEPasswd = newPasswd
-	model.Conf.E2EEPasswdMode = mode
-	model.Conf.Save()
-	util.PushMsg(model.Conf.Language(92), 3000)
-	time.Sleep(1 * time.Second)
-	model.SyncData(false, false, true)
-
 }
 
 func addUIProcess(c *gin.Context) {

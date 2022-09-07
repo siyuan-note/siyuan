@@ -1,4 +1,4 @@
-import {getEventName, writeText} from "../util/compatibility";
+import {getEventName, openByMobile, writeText} from "../util/compatibility";
 import {hasClosestByTag} from "../util/hasClosest";
 import {focusByRange} from "../util/selection";
 import {showMessage} from "../../dialog/message";
@@ -10,12 +10,14 @@ import {getSearch, isMobile} from "../../util/functions";
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
+/// #if !MOBILE
+import {openAsset, openBy} from "../../editor/util";
+/// #endif
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {speechRender} from "../markdown/speechRender";
 import {mediaRender} from "../markdown/mediaRender";
-import {openAsset, openBy} from "../../editor/util";
 
 export class Preview {
     public element: HTMLElement;
@@ -35,17 +37,24 @@ export class Preview {
         previewElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             if (event.target.tagName === "A") {
                 const linkAddress = event.target.getAttribute("href");
+                if (linkAddress.startsWith("#")) {
+                    // 导出预览模式点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5700
+                    // 对于超链接锚点不做任何处理
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
+
                 if (isMobile()) {
-                    if (window.JSAndroid) {
-                        window.JSAndroid.openExternal(linkAddress);
-                        event.stopPropagation();
-                        event.preventDefault();
-                    }
+                    openByMobile(linkAddress);
+                    event.stopPropagation();
+                    event.preventDefault();
                     return;
                 }
                 event.stopPropagation();
                 event.preventDefault();
                 if (isLocalPath(linkAddress)) {
+                    /// #if !MOBILE
                     if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress.split("?page")[0])))) {
                         openAsset(linkAddress.split("?page")[0], parseInt(getSearch("page", linkAddress)));
                     } else {
@@ -53,10 +62,11 @@ export class Preview {
                         openBy(linkAddress, "folder");
                         /// #endif
                     }
+                    /// #endif
                 } else {
                     /// #if !BROWSER
                     shell.openExternal(linkAddress).catch((e) => {
-                        console.log("openExternal error:" + e);
+                        showMessage(e);
                     });
                     /// #else
                     window.open(linkAddress);

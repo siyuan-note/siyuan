@@ -19,6 +19,7 @@
 package main
 
 import (
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -33,6 +34,7 @@ func main() {
 	go server.Serve(false)
 	model.InitAppearance()
 	sql.InitDatabase(false)
+	sql.InitHistoryDatabase(false)
 	sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
 
 	model.SyncData(true, false, false)
@@ -48,6 +50,7 @@ func main() {
 	go model.AutoFlushTx()
 	go sql.AutoFlushTreeQueue()
 	go treenode.AutoFlushBlockTree()
+	go cache.LoadAssets()
 	model.WatchAssets()
 	model.HandleSignal()
 }

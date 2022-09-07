@@ -4,7 +4,7 @@
 	"Properties": {
 		"id": "20211226121503-k3jma6m",
 		"title": "存儲空間",
-		"updated": "20211226121514"
+		"updated": "20220708103705"
 	},
 	"Children": [
 		{
@@ -12,7 +12,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226121514-9r4k5e3",
-				"updated": "20211226005932"
+				"updated": "20220703223401"
 			},
 			"Children": [
 				{
@@ -37,7 +37,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，分為三個部分："
+					"Data": "，分為以下部分："
 				}
 			]
 		},
@@ -47,7 +47,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121514-hmpy0lc",
-				"updated": "20211228141330"
+				"updated": "20220708103705"
 			},
 			"Children": [
 				{
@@ -79,23 +79,23 @@
 					]
 				},
 				{
-					"ID": "20211226121514-oxrrbse",
+					"ID": "20220708103641-gmrskka",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226121514-oxrrbse",
-						"updated": "20211228141330"
+						"id": "20220708103641-gmrskka",
+						"updated": "20220708103705"
 					},
 					"Children": [
 						{
-							"ID": "20211226121514-s9iqfeb",
+							"ID": "20220708103641-7wgcstg",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226121514-s9iqfeb",
-								"updated": "20211228141330"
+								"id": "20220708103641-7wgcstg",
+								"updated": "20220708103705"
 							},
 							"Children": [
 								{
@@ -128,7 +128,135 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "資料文件：提供給複製到公眾號、知乎和語雀等使用，HTTPS CDN"
+									"Data": "資料文件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：提供給複製到公眾號、知乎和語雀等使用，HTTPS CDN"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211227210109-0f92zh2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211227210109-0f92zh2",
+				"title": "端到端加密",
+				"updated": "20220708102204"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "端到端加密"
+				}
+			]
+		},
+		{
+			"ID": "20220703223050-c15s118",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220703223050-c15s118"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "數據同步通過端到端加密傳輸，雲端不保存任何明文數據。"
+				}
+			]
+		},
+		{
+			"ID": "20220703223050-mrhujtt",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220703223050-mrhujtt",
+				"updated": "20220703223050"
+			},
+			"Children": [
+				{
+					"ID": "20220703223050-bc8yax3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223050-bc8yax3",
+						"updated": "20220703223050"
+					},
+					"Children": [
+						{
+							"ID": "20220703223050-hb3id1r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223050-hb3id1r",
+								"updated": "20220703223050"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "密鑰僅存儲在本地，不會上傳到雲端"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220703223050-r6ah4qz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223050-r6ah4qz",
+						"updated": "20220703223050"
+					},
+					"Children": [
+						{
+							"ID": "20220703223050-z2k2sr1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223050-z2k2sr1",
+								"updated": "20220703223050"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密和解密過程完全在本地設備上進行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220703223050-cwpobbf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223050-cwpobbf",
+						"updated": "20220703223050"
+					},
+					"Children": [
+						{
+							"ID": "20220703223050-3ot9kpq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223050-3ot9kpq",
+								"updated": "20220703223050"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密算法為業界公認安全的 AES GCM"
 								}
 							]
 						}

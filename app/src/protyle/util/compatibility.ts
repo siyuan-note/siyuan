@@ -1,5 +1,28 @@
+export const openByMobile = (uri:string) => {
+    if (!uri) {
+        return;
+    }
+    if (window.siyuan.config.system.container === "ios") {
+        window.location.href = uri;
+    } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
+        window.JSAndroid.openExternal(uri);
+    } else {
+        window.open(uri);
+    }
+};
+
 export const writeText = async (text: string) => {
     try {
+        // navigator.clipboard.writeText 抛出异常不进入 catch，这里需要先处理移动端复制
+        if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
+            window.JSAndroid.writeClipboard(text);
+            return;
+        }
+        if ("ios" === window.siyuan.config.system.container && window.webkit?.messageHandlers) {
+            window.webkit.messageHandlers.setClipboard.postMessage(text);
+            return;
+        }
+
         navigator.clipboard.writeText(text);
     } catch (e) {
         if (window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) {
@@ -64,7 +87,8 @@ export const updateHotkeyTip = (hotkey: string) => {
     }
     hotkey = hotkey.replace("⌘", "Ctrl").replace("⇧", "Shift")
         .replace("⌥", "Alt").replace("⇥", "Tab")
-        .replace("⌫", "Backspace").replace("⌦", "Delete");
+        .replace("⌫", "Backspace").replace("⌦", "Delete")
+        .replace("↩", "Enter");
     if (hotkey.indexOf("Shift") > -1) {
         hotkey = hotkey.replace(";", ":").replace("=", "+").replace("-", "_").replace(".", ">");
     }

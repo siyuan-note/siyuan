@@ -17,13 +17,15 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -47,6 +49,13 @@ func performTransactions(c *gin.Context) {
 		return
 	}
 
+	if !util.IsBooted() {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(74), int(util.GetBootProgress()))
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
 	var transactions []*model.Transaction
 	if err = gulu.JSON.UnmarshalJSON(data, &transactions); nil != err {
 		ret.Code = -1
@@ -64,25 +73,19 @@ func performTransactions(c *gin.Context) {
 		err = model.PerformTransactions(&transactions)
 	}
 
-	if filesys.ErrUnableLockFile == err {
+	if errors.Is(err, filelock.ErrUnableLockFile) {
 		ret.Code = 1
-		return
-	}
-	if model.ErrNotFullyBoot == err {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf(model.Conf.Language(74), int(util.GetBootProgress()))
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
 	}
 	if nil != err {
 		tx, txErr := sql.BeginTx()
 		if nil != txErr {
-			util.LogFatalf("transaction failed: %s", txErr)
+			logging.LogFatalf("transaction failed: %s", txErr)
 			return
 		}
 		sql.ClearBoxHash(tx)
 		sql.CommitTx(tx)
-		util.LogFatalf("transaction failed: %s", err)
+		logging.LogFatalf("transaction failed: %s", err)
 		return
 	}
 

@@ -3,8 +3,8 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20210721160238-yvhbh0h",
-		"title": "Assets Serving",
-		"updated": "20220408193053"
+		"title": "Assets hosting",
+		"updated": "20220708103450"
 	},
 	"Children": [
 		{
@@ -12,12 +12,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210721160254-thunmzr",
-				"updated": "20210721160328"
+				"updated": "20220708103429"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan provides cloud assets serving, which is mainly used to copy documents and asset files to platforms such as WeChat MP, Zhihu and Yuque. The editors of these platforms will automatically pull resource files to their platforms when pasting."
+					"Data": "SiYuan provides cloud assets hosting, which is mainly used to copy documents and asset files to platforms such as WeChat MP, Zhihu and Yuque. The editors of these platforms will automatically pull resource files to their platforms when pasting."
 				}
 			]
 		},
@@ -300,12 +300,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220407085720-uruuriu",
-				"updated": "20220408193053"
+				"updated": "20220708103445"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If you need to delete the files in the cloud assets serving, please go to "
+					"Data": "If you need to delete the files in the cloud assets hosting, please go to "
 				},
 				{
 					"Type": "NodeLink",

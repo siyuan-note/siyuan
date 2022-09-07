@@ -128,7 +128,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 	}
 
 	util.PushEndlessProgress(Conf.Language(110))
-	util.RandomSleep(1000, 2000)
+	util.RandomSleep(500, 1000)
 
 	tags := sql.QueryTagSpansByKeyword(oldLabel, 102400)
 	treeBlocks := map[string][]string{}
@@ -157,17 +157,14 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 			if ast.NodeDocument == node.Type {
 				if docTagsVal := node.IALAttr("tags"); strings.Contains(docTagsVal, oldLabel) {
 					docTags := strings.Split(docTagsVal, ",")
-					if gulu.Str.Contains(newLabel, docTags) {
-						continue
-					}
 					var tmp []string
-					for i, docTag := range docTags {
-						if !strings.Contains(docTag, oldLabel) {
+					for _, docTag := range docTags {
+						if docTag != oldLabel {
 							tmp = append(tmp, docTag)
 							continue
 						}
-						if newTag := strings.ReplaceAll(docTags[i], oldLabel, newLabel); !gulu.Str.Contains(newTag, tmp) {
-							tmp = append(tmp, newTag)
+						if !gulu.Str.Contains(newLabel, tmp) {
+							tmp = append(tmp, newLabel)
 						}
 					}
 					node.SetIALAttr("tags", strings.Join(tmp, ","))
@@ -179,7 +176,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 			for _, nodeTag := range nodeTags {
 				nodeLabels := nodeTag.ChildrenByType(ast.NodeText)
 				for _, nodeLabel := range nodeLabels {
-					if bytes.Contains(nodeLabel.Tokens, []byte(oldLabel)) {
+					if bytes.Equal(nodeLabel.Tokens, []byte(oldLabel)) {
 						nodeLabel.Tokens = bytes.ReplaceAll(nodeLabel.Tokens, []byte(oldLabel), []byte(newLabel))
 					}
 				}

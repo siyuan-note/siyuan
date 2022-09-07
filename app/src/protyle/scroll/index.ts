@@ -5,8 +5,8 @@ import {fetchPost} from "../../util/fetch";
 export class Scroll {
     public element: HTMLElement;
     private inputElement: HTMLInputElement;
-    public blockSize: number;
     public lastScrollTop: number;
+    public keepLazyLoad: boolean;
 
     constructor(protyle: IProtyle) {
         const divElement = document.createElement("div");
@@ -14,13 +14,14 @@ export class Scroll {
         divElement.className = "fn__none protyle-scroll b3-tooltips b3-tooltips__s";
         divElement.setAttribute("aria-label", "Blocks 1/1");
         this.element = divElement;
+        this.keepLazyLoad =  false;
         if (!protyle.options.render.scroll) {
             this.element.classList.add("fn__none");
         }
         this.lastScrollTop = 0;
         this.inputElement = divElement.firstElementChild as HTMLInputElement;
         this.inputElement.addEventListener("input", () => {
-            this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${this.blockSize}`);
+            this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
         });
         /// #if BROWSER
         this.inputElement.addEventListener("change", () => {
@@ -50,16 +51,15 @@ export class Scroll {
         });
     }
 
-    public update(blockSize: number, protyle: IProtyle) {
-        if (typeof blockSize === "number") {
-            this.blockSize = blockSize;
-            this.inputElement.setAttribute("max", this.blockSize.toString());
-            this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${this.blockSize}`);
+    public update(protyle: IProtyle) {
+        if (typeof protyle.block.blockCount === "number") {
+            this.inputElement.setAttribute("max", protyle.block.blockCount.toString());
+            this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
         }
         if (protyle.block.showAll) {
             this.element.classList.add("fn__none");
         } else {
-            if (blockSize > Constants.SIZE_GET) {
+            if (protyle.block.childBlockCount > Constants.SIZE_GET) {
                 this.element.classList.remove("fn__none");
             } else {
                 this.element.classList.add("fn__none");

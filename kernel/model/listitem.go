@@ -21,7 +21,6 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/88250/protyle"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -73,7 +72,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 		children = append(children, c)
 	}
 	if 1 > len(children) {
-		newNode := protyle.NewParagraph()
+		newNode := parse.NewParagraph()
 		children = append(children, newNode)
 	}
 
@@ -95,7 +94,9 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 		srcLiParent.Unlink()
 	}
 	srcTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-
+	if nil == srcTree.Root.FirstChild {
+		srcTree.Root.AppendChild(parse.NewParagraph())
+	}
 	if err = indexWriteJSONQueue(srcTree); nil != err {
 		return "", "", err
 	}
@@ -105,7 +106,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 	if err = indexWriteJSONQueue(newTree); nil != err {
 		return "", "", err
 	}
-	IncWorkspaceDataVer()
+	IncSync()
 	RefreshBacklink(srcTree.ID)
 	RefreshBacklink(newTree.ID)
 	return

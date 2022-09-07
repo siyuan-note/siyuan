@@ -4,9 +4,30 @@ import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {showMessage} from "../../dialog/message";
 import {updateHotkeyTip} from "../util/compatibility";
+import {isMobile} from "../../util/functions";
 
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
+    let elementRect = element.getBoundingClientRect();
     element.addEventListener("scroll", () => {
+        if (!protyle.toolbar.element.classList.contains("fn__none")) {
+            const initY = protyle.toolbar.element.getAttribute("data-inity").split(Constants.ZWSP);
+            const top = parseInt(initY[0]) + (parseInt(initY[1]) - element.scrollTop);
+            if (elementRect.width === 0) {
+                elementRect = element.getBoundingClientRect();
+            }
+            const toolbarHeight = 29;
+            if (top < elementRect.top - toolbarHeight || top > elementRect.bottom - toolbarHeight) {
+                protyle.toolbar.element.style.display = "none";
+            } else {
+                protyle.toolbar.element.style.top = top + "px";
+                protyle.toolbar.element.style.display = "";
+            }
+        }
+
+        if (!protyle.element.classList.contains("block__edit") && !isMobile()) {
+            protyle.contentElement.setAttribute("data-scrolltop", element.scrollTop.toString());
+        }
+
         if (!window.siyuan.dragElement) { // https://ld246.com/article/1649638389841
             hideElements(["gutter"], protyle);
         }
@@ -14,7 +35,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             showMessage(window.siyuan.languages.crossPageUse.replace("${}", updateHotkeyTip("⇧Click")), 9000);
         }
 
-        const panelContextElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="context"]');
+        const panelContextElement = protyle.breadcrumb?.element.parentElement.querySelector('[data-type="context"]');
         if (panelContextElement && !panelContextElement.classList.contains("ft__primary")) {
             // 悬浮窗需展开上下文后才能进行滚动 https://github.com/siyuan-note/siyuan/issues/2311
             return;
@@ -24,8 +45,9 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         }
         if (protyle.scroll.lastScrollTop - element.scrollTop > 0) {
             // up
-            if (element.scrollTop < element.clientHeight / 2 &&
+            if (element.scrollTop < element.clientHeight &&
                 protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "true") {
+                protyle.contentElement.style.overflow = "hidden";
                 protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
                 fetchPost("/api/filetree/getDoc", {
                     id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
@@ -33,6 +55,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                     k: protyle.options.key || "",
                     size: Constants.SIZE_GET,
                 }, getResponse => {
+                    protyle.contentElement.style.overflow = "";
                     onGet(getResponse, protyle, [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID]);
                 });
             }
@@ -50,5 +73,9 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             });
         }
         protyle.scroll.lastScrollTop = Math.max(element.scrollTop, 0);
+    }, {
+        capture: false,
+        passive: true,
+        once: false
     });
 };

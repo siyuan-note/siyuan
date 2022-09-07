@@ -2,8 +2,10 @@ import {Constants} from "../constants";
 import {addScript} from "../protyle/util/addScript";
 import {addStyle} from "../protyle/util/addStyle";
 import {setCodeTheme} from "../protyle/ui/setCodeTheme";
-import {isMobile} from "./functions";
+/// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
+/// #endif
+import {isMobile} from "./functions";
 
 export const loadAssets = (data: IAppearance) => {
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
@@ -33,11 +35,11 @@ export const loadAssets = (data: IAppearance) => {
     } else if (styleElement) {
         styleElement.remove();
     }
-    if (!isMobile()) {
-        getAllModels().graph.forEach(item => {
-            item.searchGraph(false);
-        });
-    }
+    /// #if !MOBILE
+    getAllModels().graph.forEach(item => {
+        item.searchGraph(false);
+    });
+    /// #endif
     setCodeTheme();
 
     const themeScriptElement = document.getElementById("themeScript");
@@ -98,7 +100,7 @@ export const setInlineStyle = (set = true) => {
 .protyle-wysiwyg .h5 img.emoji, .b3-typography h5 img.emoji {width:${Math.floor(window.siyuan.config.editor.fontSize * 1.13 * 1.25)}px}
 .protyle-wysiwyg .h6 img.emoji, .b3-typography h6 img.emoji {width:${Math.floor(window.siyuan.config.editor.fontSize * 1.25)}px}`;
     if (window.siyuan.config.editor.fontFamily) {
-        style += `.b3-typography, .protyle-wysiwyg, .protyle-title, .protyle-title__input{font-family: "${window.siyuan.config.editor.fontFamily}", "quote", "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols" !important;}`;
+        style += `.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title, .protyle-title__input{font-family: "${window.siyuan.config.editor.fontFamily}", "quote", "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols" !important;}`;
     }
     if (set) {
         document.getElementById("editorFontSize").innerHTML = style;

@@ -9,10 +9,18 @@ import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
 import {fetchGet, fetchPost} from "./util/fetch";
 import {addBaseURL, setNoteBook} from "./util/pathName";
-import {repos} from "./config/repos";
 import {openFileById} from "./editor/util";
-import {bootSync, downloadProgress, progressLoading, setTitle, transactionError} from "./dialog/processSystem";
+import {
+    bootSync,
+    downloadProgress,
+    progressLoading,
+    progressStatus,
+    setTitle,
+    transactionError
+} from "./dialog/processSystem";
 import {promiseTransactions} from "./protyle/wysiwyg/transaction";
+import {initMessage} from "./dialog/message";
+import {resizeDrag} from "./layout/util";
 
 class App {
     constructor() {
@@ -37,6 +45,9 @@ class App {
                             case"progress":
                                 progressLoading(data);
                                 break;
+                            case"statusbar":
+                                progressStatus(data);
+                                break;
                             case"downloadProgress":
                                 downloadProgress(data.data);
                                 break;
@@ -45,13 +56,9 @@ class App {
                                 break;
                             case"syncing":
                                 if (data.code === 0) {
-                                    document.querySelector("#barSync svg").classList.add("fn__rotate");
                                     document.querySelector("#barSync").classList.add("toolbar__item--active");
-                                    repos.element?.querySelector('[data-type="sync"] svg')?.classList.add("fn__rotate");
                                 } else {
-                                    document.querySelector("#barSync svg").classList.remove("fn__rotate");
                                     document.querySelector("#barSync").classList.remove("toolbar__item--active");
-                                    repos.element?.querySelector('[data-type="sync"] svg')?.classList.remove("fn__rotate");
                                 }
                                 document.querySelector("#barSync").setAttribute("aria-label", data.msg);
                                 break;
@@ -72,21 +79,17 @@ class App {
             menus: new Menus()
         };
         fetchPost("/api/system/getConf", {}, response => {
-            window.siyuan.config = response.data;
+            window.siyuan.config = response.data.conf;
             fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                 window.siyuan.languages = lauguages;
                 bootSync();
                 fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                     window.siyuan.user = userResponse.data;
-                    onGetConfig();
+                    onGetConfig(response.data.start);
                     account.onSetaccount();
-                    const dragElement = document.getElementById("drag");
-                    if ("windows" !== window.siyuan.config.system.os && "linux" !== window.siyuan.config.system.os) {
-                        dragElement.style.paddingRight = dragElement.getBoundingClientRect().left + "px";
-                    } else {
-                        dragElement.style.paddingRight = (dragElement.getBoundingClientRect().left - document.querySelector("#windowControls").clientWidth) + "px";
-                    }
+                    resizeDrag();
                     setTitle(window.siyuan.languages.siyuanNote);
+                    initMessage();
                 });
             });
         });

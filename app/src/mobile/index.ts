@@ -11,9 +11,10 @@ import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {initAssets, loadAssets} from "../util/assets";
-import {openMobileFileById} from "./editor";
 import {promiseTransactions} from "../protyle/wysiwyg/transaction";
 import {bootSync} from "../dialog/processSystem";
+import {initMessage} from "../dialog/message";
+import {goBack} from "./util/MobileBackFoward";
 
 class App {
     constructor() {
@@ -42,13 +43,13 @@ class App {
             }
         });
         fetchPost("/api/system/getConf", {}, confResponse => {
-            confResponse.data.keymap = Constants.SIYUAN_KEYMAP;
-            window.siyuan.config = confResponse.data;
+            confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
+            window.siyuan.config = confResponse.data.conf;
             fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                 window.siyuan.languages = lauguages;
                 document.title = window.siyuan.languages.siyuanNote;
                 bootSync();
-                loadAssets(confResponse.data.appearance);
+                loadAssets(confResponse.data.conf.appearance);
                 initAssets();
                 fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                     window.siyuan.emojis = emojiResponse.data as IEmoji[];
@@ -58,13 +59,14 @@ class App {
                     } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
                         window.JSAndroid.changeStatusBarColor(getComputedStyle(document.body).getPropertyValue("--b3-theme-background"), window.siyuan.config.appearance.mode);
                     }
+                    initMessage();
                 });
             });
             if (navigator.userAgent.indexOf("iPhone") > -1) {
                 document.addEventListener("touchstart", handleTouchStart, false);
                 document.addEventListener("touchmove", handleTouchMove, false);
-                document.addEventListener("touchend", handleTouchEnd, false);
             }
+            document.addEventListener("touchend", handleTouchEnd, false);
         });
         setNoteBook();
         promiseTransactions();
@@ -73,20 +75,4 @@ class App {
 
 new App();
 
-let previousBackStack: IBackStack;
-window.goBack = () => {
-    if (window.JSAndroid && window.siyuan.backStack.length < 2) {
-        window.JSAndroid.returnDesktop();
-        return;
-    }
-    previousBackStack = window.siyuan.backStack.pop();
-    const item = window.siyuan.backStack[window.siyuan.backStack.length - 1];
-    openMobileFileById(item.id, item.hasContext, item.callback, false);
-    setTimeout(() => {
-        window.siyuan.mobileEditor.protyle.contentElement.scrollTo({
-            top: previousBackStack?.scrollTop || 0,
-            behavior: "smooth"
-        });
-        previousBackStack = item;
-    }, 300);
-};
+window.goBack = goBack;

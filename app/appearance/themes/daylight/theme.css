@@ -148,7 +148,8 @@
 /* PDF */
 .textLayer,
 .pdf__resize {
-    mix-blend-mode: darken;
+    /* dark 蓝色、紫色背景显示不清楚，文档位于 https://github.com/siyuan-note/siyuan/issues/5351 */
+    mix-blend-mode: multiply;
 }
 
 .b3-typography div.hljs, .protyle-wysiwyg div.hljs {

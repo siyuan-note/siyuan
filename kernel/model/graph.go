@@ -25,9 +25,9 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type GraphNode struct {
@@ -164,7 +164,6 @@ func BuildGraph(query string) (boxID string, nodes []*GraphNode, links []*GraphL
 		// 文档块关联
 		rootBlock := getBlockIn(treeBlocks, root.ID)
 		if nil == rootBlock {
-			//util.LogWarnf("root block is nil [rootID=%s], tree blocks [len=%d], just skip it", root.ID, len(treeBlocks))
 			continue
 		}
 
@@ -191,9 +190,10 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 		return
 	}
 
-	nodeSize := Conf.Graph.Local.NodeSize
-	if "" != p {
-		nodeSize = Conf.Graph.Global.NodeSize
+	isGlobal := "" == p
+	nodeSize := Conf.Graph.Global.NodeSize
+	if !isGlobal {
+		nodeSize = Conf.Graph.Local.NodeSize
 	}
 
 	// 构造标签节点
@@ -215,12 +215,22 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 	// 连接标签和块
 	for _, block := range *blocks {
 		for _, tagSpan := range tagSpans {
-			if block.ID == tagSpan.BlockID {
-				*links = append(*links, &GraphLink{
-					From:  tagSpan.Content,
-					To:    block.ID,
-					Color: &GraphLinkColor{Color: style["--b3-graph-tag-line"]},
-				})
+			if isGlobal { // 全局关系图将标签链接到文档块上
+				if block.RootID == tagSpan.RootID { // 局部关系图将标签链接到子块上
+					*links = append(*links, &GraphLink{
+						From:  tagSpan.Content,
+						To:    block.RootID,
+						Color: &GraphLinkColor{Color: style["--b3-graph-tag-line"]},
+					})
+				}
+			} else {
+				if block.ID == tagSpan.BlockID { // 局部关系图将标签链接到子块上
+					*links = append(*links, &GraphLink{
+						From:  tagSpan.Content,
+						To:    block.ID,
+						Color: &GraphLinkColor{Color: style["--b3-graph-tag-line"]},
+					})
+				}
 			}
 		}
 	}
@@ -451,7 +461,7 @@ func pruneUnref(nodes *[]*GraphNode, links *[]*GraphLink) {
 		}
 
 		if maxBlocks < len(tmpNodes) {
-			util.LogWarnf("exceeded the maximum number of render nodes [%d]", maxBlocks)
+			logging.LogWarnf("exceeded the maximum number of render nodes [%d]", maxBlocks)
 			break
 		}
 	}

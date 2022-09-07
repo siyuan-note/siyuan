@@ -17,6 +17,7 @@
 package util
 
 import (
+	"os"
 	"reflect"
 	"runtime"
 	"sync"
@@ -25,6 +26,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/denisbrodbeck/machineid"
 	"github.com/dustin/go-humanize"
+	"github.com/siyuan-note/logging"
 )
 
 const DatabaseVer = "20220501" // 修改表结构的话需要修改这里
@@ -39,10 +41,10 @@ const (
 )
 
 func logBootInfo() {
-	s, _ := SizeOfDirectory(DataDir, true)
+	s, _ := SizeOfDirectory(DataDir)
 	dataDirSize := humanize.Bytes(uint64(s))
 
-	LogInfof("kernel is booting:\n"+
+	logging.LogInfof("kernel is booting:\n"+
 		"    * ver [%s]\n"+
 		"    * arch [%s]\n"+
 		"    * runtime mode [%s]\n"+
@@ -65,7 +67,7 @@ func RandomSleep(minMills, maxMills int) {
 }
 
 func GetDeviceID() string {
-	if "std" == Container {
+	if ContainerStd == Container {
 		machineID, err := machineid.ID()
 		if nil != err {
 			return gulu.Rand.String(12)
@@ -73,4 +75,17 @@ func GetDeviceID() string {
 		return machineID
 	}
 	return gulu.Rand.String(12)
+}
+
+func SetNetworkProxy(proxyURL string) {
+	if err := os.Setenv("HTTPS_PROXY", proxyURL); nil != err {
+		logging.LogErrorf("set env [HTTPS_PROXY] failed: %s", err)
+	}
+	if err := os.Setenv("HTTP_PROXY", proxyURL); nil != err {
+		logging.LogErrorf("set env [HTTP_PROXY] failed: %s", err)
+	}
+
+	if "" != proxyURL {
+		logging.LogInfof("use network proxy [%s]", proxyURL)
+	}
 }

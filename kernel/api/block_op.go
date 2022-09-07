@@ -22,7 +22,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
-	"github.com/88250/protyle"
+	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -294,7 +294,7 @@ func dataBlockDOM(data string, luteEngine *lute.Lute) (ret string) {
 	ret = luteEngine.Md2BlockDOM(data)
 	if "" == ret {
 		// 使用 API 插入空字符串出现错误 https://github.com/siyuan-note/siyuan/issues/3931
-		blankParagraph := protyle.NewParagraph()
+		blankParagraph := parse.NewParagraph()
 		ret = lute.RenderNodeBlockDOM(blankParagraph, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	}
 	return

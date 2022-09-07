@@ -27,6 +27,7 @@
     * [插入后置子块](#插入后置子块)
     * [更新块](#更新块)
     * [删除块](#删除块)
+    * [获取块 kramdown 源码](#获取块-kramdown-源码)
 * [属性](#属性)
     * [设置块属性](#设置块属性)
     * [获取块属性](#获取块属性)
@@ -34,11 +35,14 @@
     * [执行 SQL 查询](#执行-SQL-查询)
 * [模板](#模板)
     * [渲染模板](#渲染模板)
-* [导出](#导出)
-    * [导出 Markdown 文本](#导出-markdown-文本)
 * [文件](#文件)
     * [获取文件](#获取文件)
     * [写入文件](#写入文件)
+* [导出](#导出)
+    * [导出 Markdown 文本](#导出-markdown-文本)
+* [通知](#通知)
+    * [推送消息](#推送消息)
+    * [推送报错消息](#推送报错消息)
 * [系统](#系统)
     * [获取启动进度](#获取启动进度)
     * [获取系统版本](#获取系统版本)
@@ -688,6 +692,31 @@
   }
   ```
 
+### 获取块 kramdown 源码
+
+* `/api/block/getBlockKramdown`
+* 参数
+
+  ```json
+  {
+    "id": "20201225220955-l154bn4"
+  }
+  ```
+
+    * `id`：待获取块的 ID
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "id": "20201225220955-l154bn4",
+      "kramdown": "* {: id=\"20201225220955-2nn1mns\"}新建笔记本，在笔记本下新建文档\n  {: id=\"20210131155408-3t627wc\"}\n* {: id=\"20201225220955-uwhqnug\"}在编辑器中输入 <kbd>/</kbd> 触发功能菜单\n  {: id=\"20210131155408-btnfw88\"}\n* {: id=\"20201225220955-04ymi2j\"}((20200813131152-0wk5akh \"在内容块中遨游\"))、((20200822191536-rm6hwid \"窗口和页签\"))\n  {: id=\"20210131155408-hh1z442\"}"
+    }
+  }
+  ```
+
 ## 属性
 
 ### 设置块属性
@@ -774,7 +803,29 @@
 
 ### 渲染模板
 
-/api/template/render
+* `/api/template/render`
+* 参数
+
+  ```json
+  {
+    "id": "20220724223548-j6g0o87",
+    "path": "F:\\SiYuan\\data\\templates\\foo.md"
+  }
+  ```
+    * `id`：调用渲染所在的文档 ID
+    * `path`：模板文件绝对路径
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "content": "<div data-node-id=\"20220729234848-dlgsah7\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20220729234840\"><div contenteditable=\"true\" spellcheck=\"false\">foo</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
+      "path": "F:\\SiYuan\\data\\templates\\foo.md"
+    }
+  }
+  ```
 
 ## 文件
 
@@ -799,7 +850,7 @@
 * 参数为 HTTP Multipart 表单
 
     * `path`：工作空间路径下的文件路径
-    * `isDir`：是否为创建文件夹，为 `true` 时仅创建文件夹，忽略 `file` 
+    * `isDir`：是否为创建文件夹，为 `true` 时仅创建文件夹，忽略 `file`
     * `modTime`：最近访问和修改时间，Unix time
     * `file`：上传的文件
 * 返回值
@@ -841,6 +892,58 @@
 
     * `hPath`：人类可读的路径
     * `content`：Markdown 内容
+
+## 通知
+
+### 推送消息
+
+* `/api/notification/pushMsg`
+* 参数
+
+  ```json
+  {
+    "msg": "test",
+    "timeout": 7000
+  }
+  ```
+    * `timeout`：消息持续显示时间，单位为毫秒。可以不传入该字段，默认为 7000 毫秒
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+        "id": "62jtmqi"
+    }
+  }
+  ```
+    * `id`：消息 ID
+
+### 推送报错消息
+
+* `/api/notification/pushErrMsg`
+* 参数
+
+  ```json
+  {
+    "msg": "test",
+    "timeout": 7000
+  }
+  ```
+    * `timeout`：消息持续显示时间，单位为毫秒。可以不传入该字段，默认为 7000 毫秒
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+        "id": "qc9znut"
+    }
+  }
+  ```
+    * `id`：消息 ID
 
 ## 系统
 

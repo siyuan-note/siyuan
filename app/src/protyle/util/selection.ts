@@ -1,5 +1,12 @@
-import {getContenteditableElement, getNextBlock, getPreviousBlock, hasPreviousSibling} from "../wysiwyg/getBlock";
+import {
+    getContenteditableElement,
+    getNextBlock,
+    getPreviousBlock,
+    hasPreviousSibling,
+    isNotEditBlock
+} from "../wysiwyg/getBlock";
 import {hasClosestByMatchTag} from "./hasClosest";
+import {countBlockWord, countSelectWord} from "../../layout/status";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -26,15 +33,51 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                     range.setStart(cellElement.firstChild, 0);
                     range.setEndAfter(cellElement.lastChild);
                     protyle.toolbar.render(protyle, range);
+                    countSelectWord(range);
                     return true;
                 }
             }
         } else {
             position = getSelectionOffset(editElement, nodeElement, range);
             if (position.start !== 0 || position.end !== editElement.textContent.length) {
-                range.setStart(editElement.firstChild, 0);
-                range.setEndAfter(editElement.lastChild);
+                // 全选后 rang 不对 https://ld246.com/article/1654848722251
+                let firstChild = editElement.firstChild;
+                while (firstChild) {
+                    if (firstChild.nodeType === 3) {
+                        if (firstChild.textContent !== "") {
+                            range.setStart(firstChild, 0);
+                            break;
+                        }
+                        firstChild = firstChild.nextSibling;
+                    } else {
+                        if ((firstChild as HTMLElement).classList.contains("render-node") ||
+                            (firstChild as HTMLElement).classList.contains("img")) {
+                            range.setStartBefore(firstChild);
+                            break;
+                        }
+                        firstChild = firstChild.firstChild;
+                    }
+                }
+                let lastChild = editElement.lastChild as HTMLElement;
+                while (lastChild) {
+                    if (lastChild.nodeType === 3) {
+                        if (lastChild.textContent !== "") {
+                            range.setEnd(lastChild, lastChild.textContent.length);
+                            break;
+                        }
+                        lastChild = lastChild.previousSibling as HTMLElement;
+                    } else {
+                        if (lastChild.classList.contains("render-node") ||
+                            lastChild.classList.contains("img") ||
+                            lastChild.tagName === "BR") {
+                            range.setEndAfter(lastChild);
+                            break;
+                        }
+                        lastChild = lastChild.lastChild as HTMLElement;
+                    }
+                }
                 protyle.toolbar.render(protyle, range);
+                countSelectWord(range);
                 return true;
             }
         }
@@ -47,16 +90,19 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
     selectElements.forEach(item => {
         item.classList.remove("protyle-wysiwyg--select");
     });
+    const ids: string [] = [];
     Array.from(protyle.wysiwyg.element.children).forEach(item => {
         item.classList.add("protyle-wysiwyg--select");
+        ids.push(item.getAttribute("data-node-id"));
     });
+    countBlockWord(ids);
 };
 
 export const getEditorRange = (element: Element) => {
     let range: Range;
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
-        if (element.isEqualNode(range.startContainer) || element.contains(range.startContainer)) {
+        if (element.isSameNode(range.startContainer) || element.contains(range.startContainer)) {
             return range;
         }
     }
@@ -240,9 +286,16 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
     return range;
 };
 
-export const focusByOffset = (container: Node, start: number, end: number) => {
+export const focusByOffset = (container: Element, start: number, end: number) => {
     if (!container) {
-        return;
+        return false;
+    }
+    // 空块无法 focus
+    const editElement = getContenteditableElement(container);
+    if (editElement) {
+        container = editElement;
+    } else if (isNotEditBlock(container)) {
+        return focusBlock(container);
     }
     let startNode;
     searchNode(container, container.firstChild, node => {
@@ -302,6 +355,7 @@ export const focusByOffset = (container: Node, start: number, end: number) => {
         }
     }
     focusByRange(range);
+    return range;
 };
 
 export const focusByWbr = (element: Element, range: Range) => {
@@ -341,7 +395,7 @@ export const focusByWbr = (element: Element, range: Range) => {
             } else if (wbrPreviousSibling.nodeType !== 3 && (wbrPreviousSibling as HTMLElement).classList.contains("img")) {
                 // <img><wbr>, 删除图片后的唯一的一个字符
                 range.setStartAfter(wbrPreviousSibling);
-            }  else {
+            } else {
                 // <span class="hljs-function"><span class="hljs-keyword">fun</span></span>
                 range.setStartBefore(wbrElement);
             }
@@ -376,11 +430,25 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
         if (type === "NodeThematicBreak") {
             range.selectNodeContents(element.firstElementChild);
             setRange = true;
-        } else if (type === "NodeBlockQueryEmbed" && element.lastElementChild.previousElementSibling) {
-            range.selectNodeContents(element.lastElementChild.previousElementSibling);
+        } else if (type === "NodeBlockQueryEmbed") {
+            if (element.lastElementChild.previousElementSibling?.firstChild) {
+                range.selectNodeContents(element.lastElementChild.previousElementSibling.firstChild);
+                range.collapse(true);
+            } else {
+                // https://github.com/siyuan-note/siyuan/issues/5267
+                range.selectNodeContents(element);
+                range.collapse(true);
+            }
             setRange = true;
-        } else if (["NodeMathBlock", "NodeHTMLBlock"].includes(type) && element.lastElementChild.previousElementSibling?.lastElementChild) {
-            range.selectNodeContents(element.lastElementChild.previousElementSibling.lastElementChild);
+        } else if (["NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
+            if (element.lastElementChild.previousElementSibling?.lastElementChild?.firstChild) {
+                // https://ld246.com/article/1655714737572
+                range.selectNodeContents(element.lastElementChild.previousElementSibling.lastElementChild.firstChild);
+                range.collapse(true);
+            } else if (element.lastElementChild.previousElementSibling) {
+                range.selectNodeContents(element.lastElementChild.previousElementSibling);
+                range.collapse(true);
+            }
             setRange = true;
         } else if (type === "NodeIFrame" || type === "NodeWidget") {
             range.setStart(element, 0);
@@ -393,6 +461,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             setRange = true;
         } else if (type === "NodeCodeBlock") {
             range.selectNodeContents(element);
+            range.collapse(true);
             setRange = true;
         }
         if (setRange) {
@@ -438,7 +507,9 @@ export const focusSideBlock = (updateElement: Element) => {
     if (updateElement.getAttribute("data-node-id")) {
         let sideBlockElement;
         let collapse;
-        if (updateElement.nextElementSibling) {
+        if (updateElement.nextElementSibling &&
+            !updateElement.nextElementSibling.classList.contains("protyle-attr") // 用例 https://ld246.com/article/1661928364696
+        ) {
             collapse = true;
             sideBlockElement = getNextBlock(updateElement) as HTMLElement;
         } else if (updateElement.previousElementSibling) {
@@ -448,20 +519,7 @@ export const focusSideBlock = (updateElement: Element) => {
         if (!sideBlockElement) {
             sideBlockElement = updateElement;
         }
-        const cursorElement = getContenteditableElement(sideBlockElement);
-        if (cursorElement) {
-            const range = getEditorRange(cursorElement);
-            range.selectNodeContents(cursorElement);
-            range.collapse(collapse);
-            focusByRange(range);
-        } else {
-            const mathElement = updateElement.querySelector(".katex-display");
-            if (mathElement) {
-                const range = mathElement.nextElementSibling.ownerDocument.createRange();
-                range.setStart(mathElement.nextElementSibling.firstChild, 0);
-                focusByRange(range);
-            }
-        }
+        focusBlock(sideBlockElement, undefined, collapse);
         return;
     }
     const range = getEditorRange(updateElement);

@@ -1,8 +1,7 @@
 FROM node:16 as NODE_BUILD
 WORKDIR /go/src/github.com/siyuan-note/siyuan/
 ADD . /go/src/github.com/siyuan-note/siyuan/
-RUN rm /go/src/github.com/siyuan-note/siyuan/app/package-lock.json
-RUN cd app && npm install --legacy-peer-deps && npm run build
+RUN cd app && npm install -g pnpm && pnpm install && pnpm run build
 
 FROM golang:alpine as GO_BUILD
 WORKDIR /go/src/github.com/siyuan-note/siyuan/

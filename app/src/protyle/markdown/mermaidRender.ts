@@ -18,12 +18,9 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
     if (mermaidElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=0.0.0`, "protyleMermaidScript").then(() => {
+    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=9.1.1`, "protyleMermaidScript").then(() => {
         const config: any = {
-            // https://github.com/siyuan-note/siyuan/issues/3587
-            // graph LR
-            // id1["<iframe src=javascript:alert('xss')></iframe>"]
-            // securityLevel: "loose", 如上会 xss
+            securityLevel: "loose", // 升级后无 https://github.com/siyuan-note/siyuan/issues/3587，可使用该选项
             altFontFamily: "sans-serif",
             fontFamily: "sans-serif",
             startOnLoad: false,
@@ -142,16 +139,15 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
 
 const initMermaid = (mermaidElements: Element[]) => {
     mermaidElements.forEach((item) => {
+        if (item.getAttribute("data-render") === "true") {
+            return;
+        }
         if (!item.firstElementChild.classList.contains("protyle-icons")) {
             item.insertAdjacentHTML("afterbegin", '<div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div>');
         }
         const renderElement = item.firstElementChild.nextElementSibling as HTMLElement;
-        const text = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
-        if (item.getAttribute("data-render") === "true" || text.trim() === "") {
-            return;
-        }
         renderElement.removeAttribute("data-processed");
-        renderElement.textContent = text;
+        renderElement.textContent = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
         mermaid.init(undefined, renderElement);
         item.setAttribute("data-render", "true");
         renderElement.setAttribute("contenteditable", "false");

@@ -50,6 +50,15 @@ func getBazaarWidget(c *gin.Context) {
 	}
 }
 
+func getInstalledWidget(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = map[string]interface{}{
+		"packages": model.InstalledWidgets(),
+	}
+}
+
 func installBazaarWidget(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -103,6 +112,15 @@ func getBazaarIcon(c *gin.Context) {
 
 	ret.Data = map[string]interface{}{
 		"packages": model.BazaarIcons(),
+	}
+}
+
+func getInstalledIcon(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = map[string]interface{}{
+		"packages": model.InstalledIcons(),
 	}
 }
 
@@ -164,6 +182,15 @@ func getBazaarTemplate(c *gin.Context) {
 	}
 }
 
+func getInstalledTemplate(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = map[string]interface{}{
+		"packages": model.InstalledTemplates(),
+	}
+}
+
 func installBazaarTemplate(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -218,6 +245,15 @@ func getBazaarTheme(c *gin.Context) {
 
 	ret.Data = map[string]interface{}{
 		"packages": model.BazaarThemes(),
+	}
+}
+
+func getInstalledTheme(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = map[string]interface{}{
+		"packages": model.InstalledThemes(),
 	}
 }
 

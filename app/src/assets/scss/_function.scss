@@ -99,6 +99,18 @@
       top: 48px;
     }
   }
+
+  &__code {
+      padding: 0.2em 0.4em;
+      margin: 0;
+      font-size: 85%;
+      border-radius: 3px;
+      font-family: var(--b3-font-family-code);
+      word-break: break-word;
+      background-size: 20px 20px;
+      white-space: pre-wrap;
+      background-color: var(--b3-protyle-code-background);
+  }
 }
 
 .ft {
@@ -146,9 +158,30 @@
     color: var(--b3-theme-on-background);
   }
 
-  &__asset {
+  &__repo {
     background-color: var(--b3-theme-background);
-    padding: 16px;
-    border-radius: 0 0 4px 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+
+    .b3-chip--secondary {
+      padding: 0 8px;
+      font-size: 12px;
+      line-height: 16px;
+      margin-right: 8px;
+    }
+  }
+
+  &__repoheader {
+    padding: 8px 16px;
+    flex-wrap: wrap;
+
+    .block__icon {
+      opacity: 1;
+      z-index: 1;
+    }
   }
 }

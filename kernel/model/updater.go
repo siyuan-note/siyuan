@@ -35,6 +35,8 @@ import (
 var checkDownloadInstallPkgLock = sync.Mutex{}
 
 func checkDownloadInstallPkg() {
+	defer logging.Recover()
+
 	if !Conf.System.DownloadInstallPkg {
 		return
 	}

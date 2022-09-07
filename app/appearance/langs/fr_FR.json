@@ -836,7 +836,7 @@
     "58": "Une fois l'index reconstruit, l'interface sera automatiquement rafraîchie ultérieurement...",
     "59": "Échec de la définition de la liste des ignores de synchronisation",
     "60": "Échec de la récupération du paquet de mise à jour : %s",
-    "61": "TODO",
+    "61": "Le package d'installation de la nouvelle version est prêt, voulez-vous quitter maintenant et commencer l'installation de la nouvelle version ?",
     "62": "TODO",
     "63": "Récupération, veuillez patienter...",
     "64": "Il y a [%d] fichiers au total, l'indexation prendra un certain temps, veuillez patienter...",

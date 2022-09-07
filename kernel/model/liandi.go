@@ -238,6 +238,9 @@ func AutoRefreshCheck() {
 		go func() {
 			defer logging.Recover()
 			checkDownloadInstallPkg()
+			if isExistUpdateInstallPkg() {
+				util.PushMsg(Conf.Language(61), 0)
+			}
 		}()
 
 		<-refreshCheckTicker.C

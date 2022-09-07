@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"sync"
@@ -32,6 +33,18 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func isExistUpdateInstallPkg() bool {
+	downloadPkgURL, checksum, err := getUpdatePkg()
+	if nil != err {
+		return false
+	}
+
+	pkg := path.Base(downloadPkgURL)
+	savePath := filepath.Join(util.TempDir, "install", pkg)
+	localChecksum, _ := sha256Hash(savePath)
+	return checksum == localChecksum
+}
 
 var checkDownloadInstallPkgLock = sync.Mutex{}
 
@@ -49,6 +62,15 @@ func checkDownloadInstallPkg() {
 	checkDownloadInstallPkgLock.Lock()
 	defer checkDownloadInstallPkgLock.Unlock()
 
+	downloadPkgURL, checksum, err := getUpdatePkg()
+	if nil != err {
+		return
+	}
+
+	downloadInstallPkg(downloadPkgURL, checksum)
+}
+
+func getUpdatePkg() (downloadPkgURL, checksum string, err error) {
 	result, err := util.GetRhyResult(false)
 	if nil != err {
 		return
@@ -56,9 +78,10 @@ func checkDownloadInstallPkg() {
 
 	installPkgSite := result["installPkg"].(string)
 	ver := result["ver"].(string)
-	if ver == util.Ver {
-		return
-	}
+	// TODO: v2.1.14 桌面端自动下载更新安装包 https://github.com/siyuan-note/siyuan/issues/5837
+	//if ver == util.Ver {
+	//	return
+	//}
 
 	var suffix string
 	if gulu.OS.IsWindows() {
@@ -77,16 +100,15 @@ func checkDownloadInstallPkg() {
 		suffix = "linux.AppImage"
 	}
 	pkg := "siyuan-" + ver + "-" + suffix
-	installPkg := "siyuan/" + pkg
-	downloadPkgURL := installPkgSite + installPkg
-	localPkgPath := filepath.Join(util.TempDir, "install", pkg)
+	downloadPkgURL = installPkgSite + "siyuan/" + pkg
 	checksums := result["checksums"].(map[string]interface{})
-	checksum := checksums[pkg].(string)
-
-	downloadInstallPkg(downloadPkgURL, checksum, localPkgPath)
+	checksum = checksums[pkg].(string)
+	return
 }
 
-func downloadInstallPkg(pkgURL, checksum, savePath string) {
+func downloadInstallPkg(pkgURL, checksum string) {
+	pkg := path.Base(pkgURL)
+	savePath := filepath.Join(util.TempDir, "install", pkg)
 	if gulu.File.IsExist(savePath) {
 		localChecksum, _ := sha256Hash(savePath)
 		if localChecksum == checksum {

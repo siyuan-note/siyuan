@@ -497,17 +497,17 @@ export const bazaar = {
                         }, response => {
                             bazaar.element.querySelectorAll(`[data-name="${window.siyuan.config.appearance.icon}"]`).forEach(item => {
                                 item.parentElement.classList.remove("b3-card--current");
-                                const switchElement = item.querySelector('[data-type="switch"]')
+                                const switchElement = item.querySelector('[data-type="switch"]');
                                 switchElement.classList.remove("fn__none");
                                 switchElement.previousElementSibling.classList.remove("fn__none");
-                            })
+                            });
                             appearance.onSetappearance(response.data);
                             bazaar.element.querySelectorAll(`[data-name="${packageName}"]`).forEach(item => {
                                 item.parentElement.classList.add("b3-card--current");
-                                const switchElement = item.querySelector('[data-type="switch"]')
+                                const switchElement = item.querySelector('[data-type="switch"]');
                                 switchElement.classList.add("fn__none");
                                 switchElement.previousElementSibling.classList.add("fn__none");
-                            })
+                            });
                             appearance.onSetappearance(response.data);
                         });
                     } else if (bazaarType === "themes") {
@@ -535,17 +535,17 @@ export const bazaar = {
                                 const oldTheme = window.siyuan.config.appearance.mode === 1 ? window.siyuan.config.appearance.themeDark : window.siyuan.config.appearance.themeLight;
                                 bazaar.element.querySelectorAll(`[data-name="${oldTheme}"]`).forEach(item => {
                                     item.parentElement.classList.remove("b3-card--current");
-                                    const switchElement = item.querySelector('[data-type="switch"]')
+                                    const switchElement = item.querySelector('[data-type="switch"]');
                                     switchElement.classList.remove("fn__none");
                                     switchElement.previousElementSibling.classList.remove("fn__none");
-                                })
+                                });
                                 appearance.onSetappearance(response.data);
                                 bazaar.element.querySelectorAll(`[data-name="${packageName}"]`).forEach(item => {
                                     item.parentElement.classList.add("b3-card--current");
-                                    const switchElement = item.querySelector('[data-type="switch"]')
+                                    const switchElement = item.querySelector('[data-type="switch"]');
                                     switchElement.classList.add("fn__none");
                                     switchElement.previousElementSibling.classList.add("fn__none");
-                                })
+                                });
                             }
                         });
                     }

@@ -181,7 +181,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
                 doOperation.splice(index, 1);
                 return true;
             }
-        })
+        });
         doOperation.push({
             action: "delete",
             id

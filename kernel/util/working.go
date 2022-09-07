@@ -471,7 +471,7 @@ func initPandoc() {
 	}
 	pandocVer := getPandocVer(PandocBinPath)
 	if "" != pandocVer {
-		logging.LogInfof("pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
+		logging.LogInfof("built-in pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
 		return
 	}
 
@@ -494,7 +494,7 @@ func initPandoc() {
 		exec.Command("chmod", "+x", PandocBinPath).CombinedOutput()
 	}
 	pandocVer = getPandocVer(PandocBinPath)
-	logging.LogInfof("initialized pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
+	logging.LogInfof("initialized built-in pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
 }
 
 func getPandocVer(binPath string) (ret string) {

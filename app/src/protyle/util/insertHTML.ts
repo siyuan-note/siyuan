@@ -175,9 +175,23 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         }
     });
     if (editableElement && editableElement.textContent === "") {
+        // 选中当前块所有内容粘贴再撤销会导致异常 https://ld246.com/article/1662542137636
+        doOperation.find((item, index) => {
+            if (item.id === id) {
+                doOperation.splice(index, 1);
+                return true;
+            }
+        })
         doOperation.push({
             action: "delete",
             id
+        });
+        // 选中当前块所有内容粘贴再撤销会导致异常 https://ld246.com/article/1662542137636
+        undoOperation.find((item, index) => {
+            if (item.id === id && item.action === "update") {
+                undoOperation.splice(index, 1);
+                return true;
+            }
         });
         undoOperation.push({
             action: "insert",

@@ -180,6 +180,12 @@ func isOutdatedTheme(theme *Theme, bazaarThemes []*Theme) bool {
 		return false
 	}
 
+	repo := strings.TrimPrefix(theme.URL, "https://github.com/")
+	parts := strings.Split(repo, "/")
+	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
+		return false
+	}
+
 	for _, pkg := range bazaarThemes {
 		if theme.URL == pkg.URL && theme.Name == pkg.Name && theme.Author == pkg.Author && theme.Version != pkg.Version {
 			theme.RepoHash = pkg.RepoHash
@@ -191,6 +197,12 @@ func isOutdatedTheme(theme *Theme, bazaarThemes []*Theme) bool {
 
 func isOutdatedIcon(icon *Icon, bazaarIcons []*Icon) bool {
 	if !strings.HasPrefix(icon.URL, "https://github.com/") {
+		return false
+	}
+
+	repo := strings.TrimPrefix(icon.URL, "https://github.com/")
+	parts := strings.Split(repo, "/")
+	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
 		return false
 	}
 
@@ -208,6 +220,12 @@ func isOutdatedWidget(widget *Widget, bazaarWidgets []*Widget) bool {
 		return false
 	}
 
+	repo := strings.TrimPrefix(widget.URL, "https://github.com/")
+	parts := strings.Split(repo, "/")
+	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
+		return false
+	}
+
 	for _, pkg := range bazaarWidgets {
 		if widget.URL == pkg.URL && widget.Name == pkg.Name && widget.Author == pkg.Author && widget.Version != pkg.Version {
 			widget.RepoHash = pkg.RepoHash
@@ -219,6 +237,12 @@ func isOutdatedWidget(widget *Widget, bazaarWidgets []*Widget) bool {
 
 func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
 	if !strings.HasPrefix(template.URL, "https://github.com/") {
+		return false
+	}
+
+	repo := strings.TrimPrefix(template.URL, "https://github.com/")
+	parts := strings.Split(repo, "/")
+	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
 		return false
 	}
 

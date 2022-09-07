@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/imroc/req/v3"
@@ -93,9 +94,10 @@ func downloadInstallPkg(pkgURL, checksum, savePath string) {
 		}
 	}
 
-	client := req.C()
+	logging.LogInfof("downloading install package [%s]", pkgURL)
+	client := req.C().SetTimeout(60 * time.Minute)
 	callback := func(info req.DownloadInfo) {
-		logging.LogDebugf("downloading install package from [%s] %.2f%%", pkgURL, float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
+		//logging.LogDebugf("downloading install package [%s %.2f%%]", pkgURL, float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
 	}
 	resp, err := client.R().SetOutputFile(savePath).SetDownloadCallback(callback).Get(pkgURL)
 	if nil != err {

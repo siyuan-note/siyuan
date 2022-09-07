@@ -62,3 +62,5 @@ extraResources:
   - from: "appearance/themes/daylight"
     to: "appearance/themes/daylight"
     filter: "!**/{.DS_Store,custom.css}"
+  - from: "pandoc/pandoc-windows-386.zip"
+    to: "pandoc.zip"

@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"net"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 
@@ -134,18 +133,4 @@ func IsRelativePath(dest string) bool {
 func TimeFromID(id string) (ret string) {
 	ret = id[:14]
 	return
-}
-
-func IsValidPandocBin(binPath string) bool {
-	if "" == binPath {
-		return false
-	}
-
-	cmd := exec.Command(binPath, "--version")
-	CmdAttr(cmd)
-	data, err := cmd.CombinedOutput()
-	if nil == err && strings.HasPrefix(string(data), "pandoc") {
-		return true
-	}
-	return false
 }

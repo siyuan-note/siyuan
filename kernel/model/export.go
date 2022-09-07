@@ -985,7 +985,7 @@ func processKaTexMacros(n *ast.Node) {
 		return
 	}
 
-	mathContent := n.Tokens
+	mathContent := string(n.Tokens)
 	macros := map[string]string{}
 	if err := gulu.JSON.UnmarshalJSON([]byte(Conf.Editor.KaTexMacros), &macros); nil != err {
 		logging.LogWarnf("parse katex macros failed: %s", err)
@@ -993,13 +993,12 @@ func processKaTexMacros(n *ast.Node) {
 	}
 
 	var keys []string
-	for k, _ := range macros {
+	for k := range macros {
 		keys = append(keys, k)
 	}
-
 	useMacro := false
-	for k, _ := range macros {
-		if bytes.Contains(mathContent, []byte(k)) {
+	for k := range macros {
+		if strings.Contains(mathContent, k) {
 			useMacro = true
 			break
 		}
@@ -1007,36 +1006,17 @@ func processKaTexMacros(n *ast.Node) {
 	if !useMacro {
 		return
 	}
+	sort.Slice(keys, func(i, j int) bool { return len(keys[i]) > len(keys[j]) })
 
-	usedMacros := extractUsedMacros(mathContent, macros)
-	newcommandBuf := bytes.Buffer{}
+	mathContent = escapeKaTexSupportedFunctions(mathContent)
+	usedMacros := extractUsedMacros(mathContent, &keys)
 	for _, usedMacro := range usedMacros {
 		expanded := resolveKaTexMacro(usedMacro, &macros, &keys)
-		newcommandBuf.WriteString("\\newcommand" + usedMacro + "{" + expanded + "}\n")
+		expanded = unescapeKaTexSupportedFunctions(expanded)
+		mathContent = strings.ReplaceAll(mathContent, usedMacro, expanded)
 	}
-	newcommandBuf.WriteString("\n")
-	mathContent = append(newcommandBuf.Bytes(), mathContent...)
-	n.Tokens = mathContent
-}
-
-func extractUsedMacros(mathContent []byte, macros map[string]string) (ret []string) {
-	for macro, _ := range macros {
-		if bytes.Contains(mathContent, []byte(macro)) {
-			ret = append(ret, macro)
-		}
-	}
-	return
-}
-
-func resolveKaTexMacro(macroName string, macros *map[string]string, keys *[]string) string {
-	v := (*macros)[macroName]
-	for _, k := range *keys {
-		if strings.Contains(v, k) {
-			v = strings.ReplaceAll(v, k, resolveKaTexMacro(k, macros, keys))
-			(*macros)[macroName] = v
-		}
-	}
-	return v
+	mathContent = unescapeKaTexSupportedFunctions(mathContent)
+	n.Tokens = []byte(mathContent)
 }
 
 func renderExportMdParagraph(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {

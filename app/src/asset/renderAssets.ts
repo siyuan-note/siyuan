@@ -19,21 +19,24 @@ export const renderAssetsPreview = (pathString: string) => {
 };
 
 export const pdfResize = () => {
-    getAllModels().asset.find(item => {
-        const pdfInstance = item.pdfObject
-        const {pdfDocument, pdfViewer} = pdfInstance
-        if (!pdfDocument) {
-            return
+    getAllModels().asset.forEach(item => {
+        const pdfInstance = item.pdfObject;
+        if (!pdfInstance) {
+            return;
         }
-        const currentScaleValue = pdfViewer.currentScaleValue
+        const {pdfDocument, pdfViewer} = pdfInstance;
+        if (!pdfDocument) {
+            return;
+        }
+        const currentScaleValue = pdfViewer.currentScaleValue;
         if (
-            currentScaleValue === 'auto' ||
-            currentScaleValue === 'page-fit' ||
-            currentScaleValue === 'page-width'
+            currentScaleValue === "auto" ||
+            currentScaleValue === "page-fit" ||
+            currentScaleValue === "page-width"
         ) {
             // Note: the scale is constant for 'page-actual'.
-            pdfViewer.currentScaleValue = currentScaleValue
+            pdfViewer.currentScaleValue = currentScaleValue;
         }
-        pdfViewer.update()
-    })
-}
+        pdfViewer.update();
+    });
+};

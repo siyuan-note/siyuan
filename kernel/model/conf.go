@@ -187,6 +187,9 @@ func InitConf() {
 		// 废弃导出选项引用块转换为原始块和引述块 https://github.com/siyuan-note/siyuan/issues/3155
 		Conf.Export.BlockRefMode = 4 // 改为脚注
 	}
+	if "" == Conf.Export.PandocBin {
+		Conf.Export.PandocBin = util.PandocBinPath
+	}
 	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
 		Conf.Editor.FontSize = 16
 	}

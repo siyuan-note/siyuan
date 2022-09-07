@@ -134,7 +134,9 @@ func InstalledThemes() (ret []*Theme) {
 		theme.Author = themeConf["author"].(string)
 		theme.URL = themeConf["url"].(string)
 		theme.Version = themeConf["version"].(string)
-		theme.Modes = make([]string, 0, len(themeConf["modes"].([]interface{})))
+		for _, mode := range themeConf["modes"].([]interface{}) {
+			theme.Modes = append(theme.Modes, mode.(string))
+		}
 		theme.RepoURL = theme.URL
 		theme.PreviewURL = "/appearance/themes/" + dirName + "/preview.png"
 		theme.PreviewURLThumb = "/appearance/themes/" + dirName + "/preview.png"

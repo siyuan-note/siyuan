@@ -237,6 +237,8 @@ func AutoRefreshCheck() {
 
 		go func() {
 			defer logging.Recover()
+
+			time.Sleep(3 * time.Minute)
 			checkDownloadInstallPkg()
 			if isExistUpdateInstallPkg() {
 				util.PushMsg(Conf.Language(61), 0)

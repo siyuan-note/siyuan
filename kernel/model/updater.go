@@ -95,7 +95,7 @@ func downloadInstallPkg(pkgURL, checksum, savePath string) {
 
 	client := req.C()
 	callback := func(info req.DownloadInfo) {
-		logging.LogInfof("downloading install package from [%s] %.2f%%", pkgURL, float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
+		logging.LogDebugf("downloading install package from [%s] %.2f%%", pkgURL, float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
 	}
 	resp, err := client.R().SetOutputFile(savePath).SetDownloadCallback(callback).Get(pkgURL)
 	if nil != err {
@@ -106,11 +106,12 @@ func downloadInstallPkg(pkgURL, checksum, savePath string) {
 		logging.LogErrorf("download install package [%s] failed [sc=%d]", pkgURL, resp.StatusCode)
 		return
 	}
-	logging.LogInfof("downloaded install package [%s] to [%s]", pkgURL, savePath)
 	localChecksum, _ := sha256Hash(savePath)
 	if checksum != localChecksum {
 		logging.LogErrorf("verify checksum failed, download install package [%s] checksum [%s] not equal to downloaded [%s] checksum [%s]", pkgURL, checksum, savePath, localChecksum)
+		return
 	}
+	logging.LogInfof("downloaded install package [%s] to [%s]", pkgURL, savePath)
 }
 
 func sha256Hash(filename string) (ret string, err error) {

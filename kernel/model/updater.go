@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 
 	"github.com/88250/gulu"
 	"github.com/imroc/req/v3"
@@ -31,10 +32,19 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+var checkDownloadInstallPkgLock = sync.Mutex{}
+
 func checkDownloadInstallPkg() {
 	if !Conf.System.DownloadInstallPkg {
 		return
 	}
+
+	if util.IsMutexLocked(&checkDownloadInstallPkgLock) {
+		return
+	}
+
+	checkDownloadInstallPkgLock.Lock()
+	defer checkDownloadInstallPkgLock.Unlock()
 
 	result, err := util.GetRhyResult(false)
 	if nil != err {

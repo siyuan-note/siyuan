@@ -125,6 +125,14 @@ export const about = {
         <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
     </button>
 </div>
+<div class="fn__flex b3-label${isBrowser() ? " fn__none" : ""}">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.autoDownloadUpdatePkg}
+        <div class="b3-label__text">${window.siyuan.languages.autoDownloadUpdatePkgTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <input class="b3-switch fn__flex-center" id="downloadInstallPkg" type="checkbox"${window.siyuan.config.system.downloadInstallPkg ? " checked" : ""}>
+</div>
 <div class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.systemLog}
@@ -337,6 +345,12 @@ export const about = {
                 exportLayout(false, () => {
                     exitSiYuan();
                 });
+            });
+        });
+        const downloadInstallPkgElement = about.element.querySelector("#downloadInstallPkg") as HTMLInputElement;
+        downloadInstallPkgElement.addEventListener("change", () => {
+            fetchPost("/api/system/setDownloadInstallPkg", {downloadInstallPkg: downloadInstallPkgElement.checked}, () => {
+                window.siyuan.config.system.downloadInstallPkg = downloadInstallPkgElement.checked
             });
         });
         about.element.querySelector("#aboutConfim").addEventListener("click", () => {

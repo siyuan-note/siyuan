@@ -36,14 +36,16 @@ type System struct {
 	NetworkServe bool          `json:"networkServe"`
 	NetworkProxy *NetworkProxy `json:"networkProxy"`
 
-	UploadErrLog bool `json:"uploadErrLog"`
+	UploadErrLog       bool `json:"uploadErrLog"`
+	DownloadInstallPkg bool `json:"downloadInstallPkg"`
 }
 
 func NewSystem() *System {
 	return &System{
-		ID:            util.GetDeviceID(),
-		KernelVersion: util.Ver,
-		NetworkProxy:  &NetworkProxy{},
+		ID:                 util.GetDeviceID(),
+		KernelVersion:      util.Ver,
+		NetworkProxy:       &NetworkProxy{},
+		DownloadInstallPkg: true,
 	}
 }
 

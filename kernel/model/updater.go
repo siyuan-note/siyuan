@@ -17,16 +17,111 @@
 package model
 
 import (
+	"bufio"
+	"crypto/sha256"
 	"fmt"
-	"sync"
+	"io"
+	"os"
+	"path/filepath"
+	"runtime"
 
+	"github.com/88250/gulu"
+	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-var (
-	checkUpdateLock = &sync.Mutex{}
-)
+func checkDownloadInstallPkg() {
+	if !Conf.System.DownloadInstallPkg {
+		return
+	}
+
+	result, err := util.GetRhyResult(false)
+	if nil != err {
+		return
+	}
+
+	installPkgSite := result["installPkg"].(string)
+	ver := result["ver"].(string)
+	if ver == util.Ver {
+		return
+	}
+
+	var suffix string
+	if gulu.OS.IsWindows() {
+		if "386" == runtime.GOARCH {
+			suffix = "win32.exe"
+		} else {
+			suffix = "win.exe"
+		}
+	} else if gulu.OS.IsDarwin() {
+		if "arm64" == runtime.GOARCH {
+			suffix = "mac-arm64.dmg"
+		} else {
+			suffix = "mac.dmg"
+		}
+	} else if gulu.OS.IsLinux() {
+		suffix = "linux.AppImage"
+	}
+	pkg := "siyuan-" + ver + "-" + suffix
+	installPkg := "siyuan/" + pkg
+	downloadPkgURL := installPkgSite + installPkg
+	localPkgPath := filepath.Join(util.TempDir, "install", pkg)
+	checksums := result["checksums"].(map[string]interface{})
+	checksum := checksums[pkg].(string)
+
+	downloadInstallPkg(downloadPkgURL, checksum, localPkgPath)
+}
+
+func downloadInstallPkg(pkgURL, checksum, savePath string) {
+	if gulu.File.IsExist(savePath) {
+		localChecksum, _ := sha256Hash(savePath)
+		if localChecksum == checksum {
+			return
+		}
+	}
+
+	client := req.C()
+	callback := func(info req.DownloadInfo) {
+		logging.LogInfof("downloading install package from [%s] %.2f%%", pkgURL, float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
+	}
+	resp, err := client.R().SetOutputFile(savePath).SetDownloadCallback(callback).Get(pkgURL)
+	if nil != err {
+		logging.LogErrorf("download install package failed: %s", err)
+		return
+	}
+	if 200 != resp.StatusCode {
+		logging.LogErrorf("download install package [%s] failed [sc=%d]", pkgURL, resp.StatusCode)
+		return
+	}
+	logging.LogInfof("downloaded install package [%s] to [%s]", pkgURL, savePath)
+	localChecksum, _ := sha256Hash(savePath)
+	if checksum != localChecksum {
+		logging.LogErrorf("verify checksum failed, download install package [%s] checksum [%s] not equal to downloaded [%s] checksum [%s]", pkgURL, checksum, savePath, localChecksum)
+	}
+}
+
+func sha256Hash(filename string) (ret string, err error) {
+	file, err := os.Open(filename)
+	if nil != err {
+		return
+	}
+	defer file.Close()
+
+	hash := sha256.New()
+	reader := bufio.NewReader(file)
+	buf := make([]byte, 1024*1024*4)
+	for {
+		switch n, readErr := reader.Read(buf); readErr {
+		case nil:
+			hash.Write(buf[:n])
+		case io.EOF:
+			return fmt.Sprintf("%x", hash.Sum(nil)), nil
+		default:
+			return "", err
+		}
+	}
+}
 
 type Announcement struct {
 	Id    string `json:"id"`
@@ -57,9 +152,6 @@ func CheckUpdate(showMsg bool) {
 	if !showMsg {
 		return
 	}
-
-	checkUpdateLock.Lock()
-	defer checkUpdateLock.Unlock()
 
 	result, err := util.GetRhyResult(showMsg)
 	if nil != err {

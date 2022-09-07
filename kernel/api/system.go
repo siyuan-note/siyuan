@@ -291,6 +291,20 @@ func setUploadErrLog(c *gin.Context) {
 	time.Sleep(time.Second * 3)
 }
 
+func setDownloadInstallPkg(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	downloadInstallPkg := arg["downloadInstallPkg"].(bool)
+	model.Conf.System.DownloadInstallPkg = downloadInstallPkg
+	model.Conf.Save()
+}
+
 func setNetworkProxy(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

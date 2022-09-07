@@ -1,4 +1,6 @@
 {
+  "autoDownloadUpdatePkg": "自动下载更新安装包",
+  "autoDownloadUpdatePkgTip": "开启后会每隔两小时自动检查版本更新，如果有更新版本则自动下载安装包并提示安装",
   "downloaded": "已下载",
   "allOp": "所有操作",
   "htmlBlockError": "以下 script 执行会影响界面显示，已经停止运行该脚本",

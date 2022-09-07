@@ -304,6 +304,7 @@ declare interface IConfig {
         xanadu: boolean
         udanax: boolean
         uploadErrLog: boolean
+        downloadInstallPkg: boolean
         networkServe: boolean
         useExistingDB: boolean
     }

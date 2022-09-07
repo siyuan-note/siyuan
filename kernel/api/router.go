@@ -40,6 +40,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setAccessAuthCode", model.CheckAuth, setAccessAuthCode)
 	ginServer.Handle("POST", "/api/system/setNetworkServe", model.CheckAuth, setNetworkServe)
 	ginServer.Handle("POST", "/api/system/setUploadErrLog", model.CheckAuth, setUploadErrLog)
+	ginServer.Handle("POST", "/api/system/setDownloadInstallPkg", model.CheckAuth, setDownloadInstallPkg)
 	ginServer.Handle("POST", "/api/system/setNetworkProxy", model.CheckAuth, setNetworkProxy)
 	ginServer.Handle("POST", "/api/system/setWorkspaceDir", model.CheckAuth, setWorkspaceDir)
 	ginServer.Handle("POST", "/api/system/listWorkspaceDirs", model.CheckAuth, listWorkspaceDirs)

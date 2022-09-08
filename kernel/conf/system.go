@@ -21,11 +21,12 @@ import (
 )
 
 type System struct {
-	ID            string `json:"id"`
-	KernelVersion string `json:"kernelVersion"`
-	OS            string `json:"os"`
-	Container     string `json:"container"` // docker, android, ios, std
-	IsInsider     bool   `json:"isInsider"`
+	ID               string `json:"id"`
+	KernelVersion    string `json:"kernelVersion"`
+	OS               string `json:"os"`
+	Container        string `json:"container"` // docker, android, ios, std
+	IsMicrosoftStore bool   `json:"isMicrosoftStore"`
+	IsInsider        bool   `json:"isInsider"`
 
 	HomeDir      string `json:"homeDir"`
 	WorkspaceDir string `json:"workspaceDir"`

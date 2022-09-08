@@ -125,7 +125,7 @@ export const about = {
         <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
     </button>
 </div>
-<div class="fn__flex b3-label${isBrowser() ? " fn__none" : ""}">
+<div class="fn__flex b3-label${isBrowser() || window.siyuan.config.system.isMicrosoftStore ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.autoDownloadUpdatePkg}
         <div class="b3-label__text">${window.siyuan.languages.autoDownloadUpdatePkgTip}</div>

@@ -222,6 +222,7 @@ func InitConf() {
 	Conf.System.WorkspaceDir = util.WorkspaceDir
 	Conf.System.DataDir = util.DataDir
 	Conf.System.Container = util.Container
+	Conf.System.IsMicrosoftStore = util.ISMicrosoftStore
 	Conf.System.OS = runtime.GOOS
 	Conf.Newbie = util.IsNewbie
 
@@ -375,7 +376,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	//})
 
 	newVerInstallPkgPath := ""
-	if Conf.System.DownloadInstallPkg && 0 == execInstallPkg {
+	if Conf.System.DownloadInstallPkg && !util.ISMicrosoftStore && 0 == execInstallPkg {
 		newVerInstallPkgPath = GetNewVerInstallPkgPath()
 		if "" != newVerInstallPkgPath {
 			exitCode = 2

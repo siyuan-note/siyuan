@@ -35,7 +35,7 @@ import (
 )
 
 func GetNewVerInstallPkgPath() string {
-	if !Conf.System.DownloadInstallPkg {
+	if !Conf.System.DownloadInstallPkg || util.ISMicrosoftStore {
 		return ""
 	}
 
@@ -58,7 +58,7 @@ var checkDownloadInstallPkgLock = sync.Mutex{}
 func checkDownloadInstallPkg() {
 	defer logging.Recover()
 
-	if !Conf.System.DownloadInstallPkg {
+	if !Conf.System.DownloadInstallPkg || util.ISMicrosoftStore {
 		return
 	}
 

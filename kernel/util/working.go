@@ -83,6 +83,9 @@ func Boot() {
 		Container = ContainerDocker
 	}
 
+	msStoreFilePath := filepath.Join(WorkingDir, "ms-store")
+	ISMicrosoftStore = gulu.File.IsExist(msStoreFilePath)
+
 	UserAgent = UserAgent + " " + Container
 	httpclient.SetUserAgent(UserAgent)
 
@@ -276,7 +279,8 @@ var (
 	AccessAuthCode string
 	Lang           = ""
 
-	Container string // docker, android, ios, std
+	Container        string // docker, android, ios, std
+	ISMicrosoftStore bool   // 桌面端是否是微软商店版
 )
 
 const (

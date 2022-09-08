@@ -299,6 +299,7 @@ declare interface IConfig {
         confDir: string
         dataDir: string
         container: "std" | "android" | "docker" | "ios"
+        isMicrosoftStore: boolean
         os: "windows" | "linux" | "darwin"
         homeDir: string
         xanadu: boolean

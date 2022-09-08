@@ -223,6 +223,9 @@ func InitConf() {
 	Conf.System.DataDir = util.DataDir
 	Conf.System.Container = util.Container
 	Conf.System.IsMicrosoftStore = util.ISMicrosoftStore
+	if util.ISMicrosoftStore {
+		logging.LogInfof("using Microsoft Store edition")
+	}
 	Conf.System.OS = runtime.GOOS
 	Conf.Newbie = util.IsNewbie
 

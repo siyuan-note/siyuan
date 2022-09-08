@@ -3,6 +3,10 @@
 @import "typography";
 @import "wysiwyg";
 @import "function";
+@import "button";
+@import "select";
+@import "switch";
+@import "slider";
 
 .protyle-wysiwyg a {
   color: var(--b3-protyle-inline-link-color);

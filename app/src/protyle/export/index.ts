@@ -15,6 +15,7 @@ import {lockFile} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
 import {replaceLocalPath} from "../../editor/rename";
 
+
 export const saveExport = (option: { type: string, id: string }) => {
     /// #if !BROWSER
     if (option.type === "pdf") {
@@ -61,6 +62,12 @@ export const saveExport = (option: { type: string, id: string }) => {
 };
 
 /// #if !BROWSER
+const destroyWin = (win: Electron.BrowserWindow) => {
+    setTimeout(() => {
+        win.destroy();
+    }, 1000);
+};
+
 const renderPDF = (id: string) => {
     const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_EXPORTPDF) || JSON.stringify({
         printBackground: true,
@@ -73,7 +80,8 @@ const renderPDF = (id: string) => {
     const servePath = window.location.protocol + "//" + window.location.host;
     const win = new BrowserWindow({
         show: true,
-        width: 1024, // 860
+        width: 1032,
+        resizable: false,
         webPreferences: {
             contextIsolation: false,
             nodeIntegration: true,
@@ -130,16 +138,19 @@ const renderPDF = (id: string) => {
                                     };
                                     removePromise(path.join(filePath, "assets"));
                                 }
-                                win.destroy();
                             });
                         });
+                        destroyWin(win)
                     }).catch((error: string) => {
                         showMessage("Export PDF error:" + error, 0, "error", msgId);
-                        win.destroy();
+                        destroyWin(win)
                     });
                 } catch (e) {
                     showMessage("Export PDF error:" + e + ". Export HTML and use Chrome's printing function to convert to PDF", 0, "error", msgId);
+                    destroyWin(win)
                 }
+            } else {
+                destroyWin(win)
             }
         })
     })
@@ -207,6 +218,29 @@ const renderPDF = (id: string) => {
     <link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>
     <title>${response.data.name} - ${window.siyuan.languages.siyuanNote}  v${Constants.SIYUAN_VERSION}</title>
     <style>
+          body {
+            margin: 0;
+          }
+          
+          #action {
+                width: 200px;
+                background: var(--b3-theme-background-light);
+                padding: 8px 16px;
+                position: fixed;
+                right: 0;
+                top: 0;
+                overflow: auto;
+                bottom: 0;
+         }
+         
+         #preview {
+                max-width: 800px;
+                margin: 0 auto;
+                position: absolute;
+                right: 232px;
+                left: 0;
+         }
+         
         ::-webkit-scrollbar {
           width: 0px;
           height: 0px;
@@ -221,61 +255,71 @@ const renderPDF = (id: string) => {
             padding: 34px ${pdfMargin}in 16px;
             width: ${pdfWidth}in
         }
+        .b3-label {
+            border-bottom: 1px solid var(--b3-border-color);
+            display: block;
+            color: var(--b3-theme-on-surface);
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
         ${setInlineStyle(false)}
     </style>
 </head>
 <body>
-<div class="fn__flex">
-    <div class="protyle-wysiwyg protyle-wysiwyg--attr fn__flex-1" style="max-width: 800px;margin: 0 auto;" id="preview">${response.data.content.replace(/<iframe /g, "<no-iframe ")}</div>
-    <div style="width: 200px" id="action">
-        <label class="fn__flex b3-label">
-            <div class="fn__flex-1">
-                ${window.siyuan.languages.exportPDF0}
-            </div>
-            <span class="fn__space"></span>
-            <select class="b3-select" id="pageSize">
-                <option ${localData.pageSize === "A3" ? "selected" : ""} value="A3">A3</option>
-                <option ${localData.pageSize === "A4" ? "selected" : ""} value="A4">A4</option>
-                <option ${localData.pageSize === "A5" ? "selected" : ""} value="A5">A5</option>
-                <option ${localData.pageSize === "Legal" ? "selected" : ""} value="Legal">Legal</option>
-                <option ${localData.pageSize === "Letter" ? "selected" : ""} value="Letter">Letter</option>
-                <option ${localData.pageSize === "Tabloid" ? "selected" : ""} value="Tabloid">Tabloid</option>
-            </select>
-        </label>
-        <label class="fn__flex b3-label">
-            <div class="fn__flex-1">
-                ${window.siyuan.languages.exportPDF2}
-            </div>
-            <span class="fn__space"></span>
-            <select class="b3-select" id="marginsType">
-                <option ${localData.marginsType === 0 ? "selected" : ""} value="0">Default</option>
-                <option ${localData.marginsType === 1 ? "selected" : ""} value="1">None</option>
-                <option ${localData.marginsType === 2 ? "selected" : ""} value="2">Minimal</option>
-            </select>
-        </label>
-        <label class="fn__flex b3-label">
-            <div class="fn__flex-1">
-                ${window.siyuan.languages.exportPDF3}
-            </div>
-            <span class="fn__space"></span>
-            <input value="${localData.scaleFactor}" id="scaleFactor" step="1" class="b3-slider" type="range" min="0" max="100">
-        </label>
-        <label class="fn__flex b3-label">
-            <div class="fn__flex-1">
-                ${window.siyuan.languages.exportPDF1}
-            </div>
-            <span class="fn__space"></span>
-          <input id="landscape" class="b3-switch" type="checkbox" ${localData.landscape ? "checked" : ""}>
-        </label>
-        <label class="fn__flex b3-label">
-            <div class="fn__flex-1">
-                ${window.siyuan.languages.exportPDF4}
-            </div>
-            <span class="fn__space"></span>
-            <input id="removeAssets" class="b3-switch" type="checkbox" ${localData.removeAssets ? "checked" : ""}>
-        </label>
-        <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
-        <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+<div class="protyle-wysiwyg protyle-wysiwyg--attr" id="preview">${response.data.content.replace(/<iframe /g, "<no-iframe ")}</div>
+<div id="action">
+    <h2 class="b3-label">${window.siyuan.languages.config}</h2>
+    <label class="b3-label">
+        <div>
+            ${window.siyuan.languages.exportPDF0}
+        </div>
+        <span class="fn__hr"></span>
+        <select class="b3-select" id="pageSize">
+            <option ${localData.pageSize === "A3" ? "selected" : ""} value="A3">A3</option>
+            <option ${localData.pageSize === "A4" ? "selected" : ""} value="A4">A4</option>
+            <option ${localData.pageSize === "A5" ? "selected" : ""} value="A5">A5</option>
+            <option ${localData.pageSize === "Legal" ? "selected" : ""} value="Legal">Legal</option>
+            <option ${localData.pageSize === "Letter" ? "selected" : ""} value="Letter">Letter</option>
+            <option ${localData.pageSize === "Tabloid" ? "selected" : ""} value="Tabloid">Tabloid</option>
+        </select>
+    </label>
+    <label class="b3-label">
+        <div>
+            ${window.siyuan.languages.exportPDF2}
+        </div>
+        <span class="fn__hr"></span>
+        <select class="b3-select" id="marginsType">
+            <option ${localData.marginsType === 0 ? "selected" : ""} value="0">Default</option>
+            <option ${localData.marginsType === 1 ? "selected" : ""} value="1">None</option>
+            <option ${localData.marginsType === 2 ? "selected" : ""} value="2">Minimal</option>
+        </select>
+    </label>
+    <label class="b3-label">
+        <div>
+            ${window.siyuan.languages.exportPDF3}
+        </div>
+        <span class="fn__hr"></span>
+        <input style="width: 192px" value="${localData.scaleFactor}" id="scaleFactor" step="1" class="b3-slider" type="range" min="0" max="100">
+    </label>
+    <label class="b3-label">
+        <div>
+            ${window.siyuan.languages.exportPDF1}
+        </div>
+        <span class="fn__hr"></span>
+      <input id="landscape" class="b3-switch" type="checkbox" ${localData.landscape ? "checked" : ""}>
+    </label>
+    <label class="b3-label">
+        <div>
+            ${window.siyuan.languages.exportPDF4}
+        </div>
+        <span class="fn__hr"></span>
+        <input id="removeAssets" class="b3-switch" type="checkbox" ${localData.removeAssets ? "checked" : ""}>
+    </label>
+    <div class="fn__flex">
+      <div class="fn__flex-1"></div>
+      <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
+      <div class="fn__space"></div>
+      <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
 <script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>

@@ -8,6 +8,7 @@ import {exportLayout} from "../layout/util";
 import {showMessage} from "./message";
 import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
+import {confirmDialog} from "./confirmDialog";
 
 export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>
@@ -101,18 +102,27 @@ export const exitSiYuan = () => {
                 });
             }
         } else if (response.code === 2) { // 提示新安装包
-            const msgId = showMessage(response.msg, response.data.closeTimeout, "info");
-            const buttonElement = document.querySelector(`#message [data-id="${msgId}"] button`);
-            if (buttonElement) {
-                buttonElement.addEventListener("click", () => {
-                    fetchPost("/api/system/exit", {force: true}, () => {
-                        /// #if !BROWSER
-                        ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);
-                        ipcRenderer.send(Constants.SIYUAN_QUIT);
-                        /// #endif
-                    });
+            confirmDialog(window.siyuan.languages.tip, response.msg, () => {
+                fetchPost("/api/system/exit", {
+                    force: true,
+                    execInstallPkg: 2 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
+                }, () => {
+                    /// #if !BROWSER
+                    ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);
+                    ipcRenderer.send(Constants.SIYUAN_QUIT);
+                    /// #endif
                 });
-            }
+            }, () => {
+                fetchPost("/api/system/exit", {
+                    force: true,
+                    execInstallPkg: 1 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
+                }, () => {
+                    /// #if !BROWSER
+                    ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);
+                    ipcRenderer.send(Constants.SIYUAN_QUIT);
+                    /// #endif
+                });
+            })
         } else { // 正常退出
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);

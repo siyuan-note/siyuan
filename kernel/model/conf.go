@@ -379,16 +379,16 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	//})
 
 	newVerInstallPkgPath := ""
-	if Conf.System.DownloadInstallPkg && !util.ISMicrosoftStore && 0 == execInstallPkg {
+	if Conf.System.DownloadInstallPkg && !util.ISMicrosoftStore {
 		newVerInstallPkgPath = GetNewVerInstallPkgPath()
-		if "" != newVerInstallPkgPath {
+		if "" != newVerInstallPkgPath && 0 == execInstallPkg {
 			exitCode = 2
 			return
 		}
 	}
 
 	if 2 == execInstallPkg && "" != newVerInstallPkgPath { // 执行新版本安装
-		logging.LogInfof("install new version [%s]", newVerInstallPkgPath)
+		logging.LogInfof("installing the new version [%s]", newVerInstallPkgPath)
 		cmd := exec.Command(newVerInstallPkgPath)
 		util.CmdAttr(cmd)
 		data, cmdErr := cmd.CombinedOutput()

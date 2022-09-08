@@ -362,7 +362,7 @@ func exit(c *gin.Context) {
 		ret.Msg = model.Conf.Language(96) + "<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">" + model.Conf.Language(97) + "</button>"
 		ret.Data = map[string]interface{}{"closeTimeout": 0}
 	case 2: // 提示新安装包
-		ret.Msg = model.Conf.Language(61) + "<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">" + model.Conf.Language(68) + "</button><button class=\"b3-button b3-button--white\">" + model.Conf.Language(62) + "</button>"
+		ret.Msg = model.Conf.Language(61)
 		ret.Data = map[string]interface{}{"closeTimeout": 0}
 	}
 }

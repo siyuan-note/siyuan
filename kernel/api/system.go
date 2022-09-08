@@ -348,7 +348,7 @@ func exit(c *gin.Context) {
 		force = forceArg.(bool)
 	}
 
-	execInstallPkgArg := arg["execInstallPkgArg"] // 0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
+	execInstallPkgArg := arg["execInstallPkg"] // 0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
 	execInstallPkg := 0
 	if nil != execInstallPkgArg {
 		execInstallPkg = int(execInstallPkgArg.(float64))

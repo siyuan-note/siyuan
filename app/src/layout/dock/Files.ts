@@ -162,7 +162,7 @@ export class Files extends Model {
                     window.siyuan.menus.menu.remove();
                     break;
                 } else if (type === "focus") {
-                    const element = document.querySelector(".layout__wnd--active > .layout-tab-bar > .item--focus") ||
+                    const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
                         document.querySelector(".layout-tab-bar > .item--focus");
                     if (element) {
                         const tab = getInstanceById(element.getAttribute("data-id")) as Tab;

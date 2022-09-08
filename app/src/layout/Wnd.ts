@@ -742,6 +742,10 @@ export class Wnd {
                             previous.element.style.height = (previous.element.clientHeight + element.clientHeight) + "px";
                         }
                     }
+                    // https://github.com/siyuan-note/siyuan/issues/5844
+                    if (layout.children.length > 2 && index === 0) {
+                        layout.children[1].resize = undefined;
+                    }
                 }
                 layout.children.splice(index, 1);
                 return true;

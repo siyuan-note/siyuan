@@ -383,7 +383,7 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 	//	}
 	//}
 
-	name = path.Base(tree.Path)
+	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
 	if "" != savePath {

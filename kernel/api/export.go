@@ -180,6 +180,24 @@ func exportMdHTML(c *gin.Context) {
 	}
 }
 
+func exportPreviewHTML(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	name, content := model.ExportHTML(id, "", true)
+	ret.Data = map[string]interface{}{
+		"id":      id,
+		"name":    name,
+		"content": content,
+	}
+}
+
 func exportHTML(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

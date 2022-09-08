@@ -14,9 +14,9 @@ specifiers:
   blueimp-md5: ^2.19.0
   clean-webpack-plugin: ^4.0.0
   css-loader: ^6.7.1
-  dayjs: ^1.11.3
-  electron: 20.1.0
-  electron-builder: ^23.3.1
+  dayjs: ^1.11.5
+  electron: 20.1.2
+  electron-builder: ^23.3.3
   electron-fetch: ^1.7.4
   encoding: ^0.1.13
   eslint: ^8.19.0
@@ -39,7 +39,7 @@ specifiers:
   webpack-cli: ^4.10.0
 
 dependencies:
-  '@electron/remote': 2.0.8_electron@20.1.0
+  '@electron/remote': 2.0.8_electron@20.1.2
   electron-fetch: 1.7.4
   pnpm: 7.9.3
 
@@ -56,9 +56,9 @@ devDependencies:
   blueimp-md5: 2.19.0
   clean-webpack-plugin: 4.0.0_webpack@5.73.0
   css-loader: 6.7.1_webpack@5.73.0
-  dayjs: 1.11.3
-  electron: 20.1.0
-  electron-builder: 23.3.1
+  dayjs: 1.11.5
+  electron: 20.1.2
+  electron-builder: 23.3.3
   encoding: 0.1.13
   eslint: 8.19.0
   file-loader: 6.2.0_webpack@5.73.0
@@ -1274,12 +1274,12 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@electron/remote/2.0.8_electron@20.1.0:
+  /@electron/remote/2.0.8_electron@20.1.2:
     resolution: {integrity: sha512-P10v3+iFCIvEPeYzTWWGwwHmqWnjoh8RYnbtZAb3RlQefy4guagzIwcWtfftABIfm6JJTNQf4WPSKWZOpLmHXw==}
     peerDependencies:
       electron: '>= 13.0.0'
     dependencies:
-      electron: 20.1.0
+      electron: 20.1.2
     dev: false
 
   /@electron/universal/1.2.1:
@@ -1902,23 +1902,23 @@ packages:
     resolution: {integrity: sha512-xwdG0FJPQMe0M0UA4Tz0zEB8rBJTRA5a476ZawAqiBkMv16GRK5xpXThOjMaEOFnZ6zabejjG4J3da0SXG63KA==}
     dev: true
 
-  /app-builder-lib/23.3.1:
-    resolution: {integrity: sha512-mi4DG3m32cMJ5CtO9iYk41gBvGWLzJjQsaQgGOd4ZhmIuKyj8M/0rT1g0s/0qD4Tw8jsa//NXMXCC7vpGIfkTg==}
+  /app-builder-lib/23.3.3:
+    resolution: {integrity: sha512-m0+M53+HYMzqKxwNQZT143K7WwXEGUy9LY31l8dJphXx2P/FQod615mVbxHyqbDCG4J5bHdWm21qZ0e2DVY6CQ==}
     engines: {node: '>=14.0.0'}
     dependencies:
+      7zip-bin: 5.1.1
       '@develar/schema-utils': 2.6.5
       '@electron/universal': 1.2.1
       '@malept/flatpak-bundler': 0.4.0
-      7zip-bin: 5.1.1
       async-exit-hook: 2.0.1
       bluebird-lst: 1.0.9
-      builder-util: 23.3.0
+      builder-util: 23.3.3
       builder-util-runtime: 9.0.3
       chromium-pickle-js: 0.2.0
       debug: 4.3.4
       ejs: 3.1.8
       electron-osx-sign: 0.6.0
-      electron-publish: 23.3.0
+      electron-publish: 23.3.3
       form-data: 4.0.0
       fs-extra: 10.1.0
       hosted-git-info: 4.1.0
@@ -2190,12 +2190,12 @@ packages:
       - supports-color
     dev: true
 
-  /builder-util/23.3.0:
-    resolution: {integrity: sha512-m7RRd21N2yrnuGFd+ZqOY0ryeqWmBslDKmGDVz0wETqoEEqpiJsF3CGlsb6MRN2EQKDubvE5e+lBf8ATt06fnA==}
+  /builder-util/23.3.3:
+    resolution: {integrity: sha512-MJZlUiq2PY5hjYv9+XNaoYdsITqvLgRDoHSFg/4nzpInbNxNjLQOolL04Zsyp+hgfcbFvMC4h0KkR1CMPHLWbA==}
     dependencies:
+      7zip-bin: 5.1.1
       '@types/debug': 4.1.7
       '@types/fs-extra': 9.0.13
-      7zip-bin: 5.1.1
       app-builder-bin: 4.0.0
       bluebird-lst: 1.0.9
       builder-util-runtime: 9.0.3
@@ -2553,8 +2553,8 @@ packages:
     hasBin: true
     dev: true
 
-  /dayjs/1.11.3:
-    resolution: {integrity: sha512-xxwlswWOlGhzgQ4TKzASQkUhqERI3egRNqgV4ScR8wlANA/A9tZ7miXa44vTTKEq5l7vWoL5G57bG3zA+Kow0A==}
+  /dayjs/1.11.5:
+    resolution: {integrity: sha512-CAdX5Q3YW3Gclyo5Vpqkgpj8fSdLQcRuzfX6mC6Phy0nfJ0eGYOeS7m4mt2plDWLAtA4TqTakvbboHvUxfe4iA==}
     dev: true
 
   /debug/2.6.9:
@@ -2643,11 +2643,11 @@ packages:
       path-type: 4.0.0
     dev: true
 
-  /dmg-builder/23.3.1:
-    resolution: {integrity: sha512-YH9KtqBUqn4xzT8W/4I12CBOJXXleHeCQ1UyUvrhNu50ujY/U7XJ4ZZCaKvU2sJesDJqWgY9rqxaZaWVKAi9KQ==}
+  /dmg-builder/23.3.3:
+    resolution: {integrity: sha512-ECwAjt+ZWyOvddrkDx1xRD6IVUCZb5SV6vSMHZd+Va3G2sUXHrnglR1cGDKRF4oYRQm8SYVrpLZKbi8npyDcAQ==}
     dependencies:
-      app-builder-lib: 23.3.1
-      builder-util: 23.3.0
+      app-builder-lib: 23.3.3
+      builder-util: 23.3.3
       builder-util-runtime: 9.0.3
       fs-extra: 10.1.0
       iconv-lite: 0.6.3
@@ -2754,17 +2754,17 @@ packages:
       jake: 10.8.5
     dev: true
 
-  /electron-builder/23.3.1:
-    resolution: {integrity: sha512-NYM3iHuX7NyXvbZ+7BKDET54mXnB2oqshuZpe0QbDtbDp6UjoXAulO5g6YXtWA6OspdaTHio+BFpe7A88l1sHg==}
+  /electron-builder/23.3.3:
+    resolution: {integrity: sha512-mFYYdhoFPKevP6y5uaaF3dusmB2OtQ/HnwwpyOePeU7QDS0SEIAUokQsHUanAiJAZcBqtY7iyLBgX18QybdFFw==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
       '@types/yargs': 17.0.10
-      app-builder-lib: 23.3.1
-      builder-util: 23.3.0
+      app-builder-lib: 23.3.3
+      builder-util: 23.3.3
       builder-util-runtime: 9.0.3
       chalk: 4.1.2
-      dmg-builder: 23.3.1
+      dmg-builder: 23.3.3
       fs-extra: 10.1.0
       is-ci: 3.0.1
       lazy-val: 1.0.5
@@ -2785,6 +2785,7 @@ packages:
   /electron-osx-sign/0.6.0:
     resolution: {integrity: sha512-+hiIEb2Xxk6eDKJ2FFlpofCnemCbjbT5jz+BKGpVBrRNT3kWTGs4DfNX6IzGwgi33hUcXF+kFs9JW+r6Wc1LRg==}
     engines: {node: '>=4.0.0'}
+    deprecated: Please use @electron/osx-sign moving forward. Be aware the API is slightly different
     hasBin: true
     dependencies:
       bluebird: 3.7.2
@@ -2797,11 +2798,11 @@ packages:
       - supports-color
     dev: true
 
-  /electron-publish/23.3.0:
-    resolution: {integrity: sha512-HTKOeRUDebSD/l6grAi5thWb/f80OggL1z4aI0no7Fa4SGWpl4rvqlMBtY2d/EjsAAosbk3x+Jeyyp5Th57Wpw==}
+  /electron-publish/23.3.3:
+    resolution: {integrity: sha512-1dX17eE5xVXedTxjC+gjsP74oC0+sIHgqysp0ryTlF9+yfQUyXjBk6kcK+zhtBA2SsHMSglDtM+JPxDD/WpPTQ==}
     dependencies:
       '@types/fs-extra': 9.0.13
-      builder-util: 23.3.0
+      builder-util: 23.3.3
       builder-util-runtime: 9.0.3
       chalk: 4.1.2
       fs-extra: 10.1.0
@@ -2815,8 +2816,8 @@ packages:
     resolution: {integrity: sha512-YoVeFrGd/7ROjz4R9uPoND1K/hSRC/xADy9639ZmIZeJSaBnKdYx3I6LMPsY7CXLpK7JFgKQVzeZ/dk2br6Eaw==}
     dev: true
 
-  /electron/20.1.0:
-    resolution: {integrity: sha512-gzl6fdZe5g0qmzCC6Ejxa1Oa8eqUSxs4+QLtrM7SyEVp+mEPJAOoDe0xD8ayRQqeXTBxLK1LFrKtc4c98iufsg==}
+  /electron/20.1.2:
+    resolution: {integrity: sha512-Yz2GAUqgXNr3+7vI+xL3qoCBUw4nVX+MeF/+HNL80y67ZrhMFUbJFirw7Tm6/Kx8r6TBPz0/D3aleeySWFUmzw==}
     engines: {node: '>= 10.17.0'}
     hasBin: true
     requiresBuild: true

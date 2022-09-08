@@ -240,7 +240,7 @@ func AutoRefreshCheck() {
 
 			time.Sleep(3 * time.Minute)
 			checkDownloadInstallPkg()
-			if isExistUpdateInstallPkg() {
+			if "" != GetNewVerInstallPkgPath() {
 				util.PushMsg(Conf.Language(61), 0)
 			}
 		}()

@@ -18,8 +18,8 @@ package model
 
 import (
 	"bytes"
-	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -345,7 +345,15 @@ func loadLangs() (ret []*conf.Lang) {
 
 var exitLock = sync.Mutex{}
 
-func Close(force bool) (err error) {
+// Close 退出内核进程.
+//
+// force：是否不执行同步过程而直接退出
+// execInstallPkg：是否执行新版本安装包
+//
+//	0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
+//	1：执行安装
+//	2：不执行安装
+func Close(force bool, execInstallPkg int) (exitCode int) {
 	exitLock.Lock()
 	defer exitLock.Unlock()
 
@@ -355,7 +363,7 @@ func Close(force bool) (err error) {
 	if !force {
 		SyncData(false, true, false)
 		if 0 != ExitSyncSucc {
-			err = errors.New(Conf.Language(96))
+			exitCode = 1
 			return
 		}
 	}
@@ -366,13 +374,35 @@ func Close(force bool) (err error) {
 	//	return true
 	//})
 
+	newVerInstallPkgPath := ""
+	if Conf.System.DownloadInstallPkg && 0 == execInstallPkg {
+		newVerInstallPkgPath = GetNewVerInstallPkgPath()
+		if "" != newVerInstallPkgPath {
+			exitCode = 2
+			return
+		}
+	}
+
+	if 2 == execInstallPkg && "" != newVerInstallPkgPath { // 执行新版本安装
+		logging.LogInfof("install new version [%s]", newVerInstallPkgPath)
+		cmd := exec.Command(newVerInstallPkgPath)
+		util.CmdAttr(cmd)
+		data, cmdErr := cmd.CombinedOutput()
+		if nil != cmdErr {
+			logging.LogErrorf("exec install new version failed: %s", cmdErr)
+			return
+		}
+		logging.LogDebugf("exec install new version output [%s]", data)
+	}
+
 	Conf.Close()
 	sql.CloseDatabase()
-	util.WebSocketServer.Close()
 	clearWorkspaceTemp()
-	logging.LogInfof("exited kernel")
+
 	go func() {
 		time.Sleep(500 * time.Millisecond)
+		logging.LogInfof("exited kernel")
+		util.WebSocketServer.Close()
 		os.Exit(util.ExitCodeOk)
 	}()
 	return

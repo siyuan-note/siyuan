@@ -34,16 +34,23 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func isExistUpdateInstallPkg() bool {
+func GetNewVerInstallPkgPath() string {
+	if !Conf.System.DownloadInstallPkg {
+		return ""
+	}
+
 	downloadPkgURL, checksum, err := getUpdatePkg()
 	if nil != err {
-		return false
+		return ""
 	}
 
 	pkg := path.Base(downloadPkgURL)
-	savePath := filepath.Join(util.TempDir, "install", pkg)
-	localChecksum, _ := sha256Hash(savePath)
-	return checksum == localChecksum
+	ret := filepath.Join(util.TempDir, "install", pkg)
+	localChecksum, _ := sha256Hash(ret)
+	if checksum != localChecksum {
+		return ""
+	}
+	return ret
 }
 
 var checkDownloadInstallPkgLock = sync.Mutex{}

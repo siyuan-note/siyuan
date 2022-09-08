@@ -1086,10 +1086,13 @@ func batchUpdateHPath(tx *sql.Tx, boxID, rootID, oldHPath, newHPath string) (err
 func CloseDatabase() {
 	if err := db.Close(); nil != err {
 		logging.LogErrorf("close database failed: %s", err)
+		return
 	}
 	if err := historyDB.Close(); nil != err {
 		logging.LogErrorf("close history database failed: %s", err)
+		return
 	}
+	logging.LogInfof("closed database")
 }
 
 func queryRow(query string, args ...interface{}) *sql.Row {

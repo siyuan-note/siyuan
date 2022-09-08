@@ -83,7 +83,7 @@ export const kernelError = () => {
 
 export const exitSiYuan = () => {
     fetchPost("/api/system/exit", {force: false}, (response) => {
-        if (response.code === 1) {
+        if (response.code === 1) { // 同步执行失败
             const msgId = showMessage(response.msg, response.data.closeTimeout, "error");
             const buttonElement = document.querySelector(`#message [data-id="${msgId}"] button`);
             if (buttonElement) {
@@ -100,7 +100,20 @@ export const exitSiYuan = () => {
                     });
                 });
             }
-        } else {
+        } else if (response.code === 2) { // 提示新安装包
+            const msgId = showMessage(response.msg, response.data.closeTimeout, "info");
+            const buttonElement = document.querySelector(`#message [data-id="${msgId}"] button`);
+            if (buttonElement) {
+                buttonElement.addEventListener("click", () => {
+                    fetchPost("/api/system/exit", {force: true}, () => {
+                        /// #if !BROWSER
+                        ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);
+                        ipcRenderer.send(Constants.SIYUAN_QUIT);
+                        /// #endif
+                    });
+                });
+            }
+        } else { // 正常退出
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);
             ipcRenderer.send(Constants.SIYUAN_QUIT);

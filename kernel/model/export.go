@@ -1288,7 +1288,8 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 	if Conf.Export.AddTitle {
 		if root, _ := getBlock(id); nil != root {
 			title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1}
-			title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(root.Content)})
+			content := html.UnescapeString(root.Content)
+			title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(content)})
 			ret.Root.PrependChild(title)
 		}
 	}

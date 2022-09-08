@@ -84,8 +84,10 @@ try {
   }
 } catch (e) {
   console.error(e)
-  require('electron').dialog.showErrorBox('创建配置目录失败 Failed to create config directory',
-    '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
+  require('electron').
+    dialog.
+    showErrorBox('创建配置目录失败 Failed to create config directory',
+      '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
   app.exit()
 }
 
@@ -186,7 +188,8 @@ const boot = () => {
   })
 
   require('@electron/remote/main').enable(mainWindow.webContents)
-  mainWindow.webContents.userAgent = 'SiYuan/' + appVer + ' https://b3log.org/siyuan Electron'
+  mainWindow.webContents.userAgent = 'SiYuan/' + appVer +
+    ' https://b3log.org/siyuan Electron'
 
   // 发起互联网服务请求时绕过安全策略 https://github.com/siyuan-note/siyuan/issues/5516
   mainWindow.webContents.session.webRequest.onBeforeSendHeaders(
@@ -347,6 +350,12 @@ const boot = () => {
     if ('win32' === process.platform) {
       tray.destroy()
     }
+  })
+  ipcMain.on('siyuan-export-pdf', (event, data) => {
+    mainWindow.webContents.send('siyuan-export-pdf', data)
+  })
+  ipcMain.on('siyuan-export-close', (event, data) => {
+    mainWindow.webContents.send('siyuan-export-close', data)
   })
   ipcMain.on('siyuan-quit', () => {
     try {
@@ -520,11 +529,13 @@ const initKernel = (initData) => {
               '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=6806 numberofports=1\nnet start winnat</code></pre></div>')
             break
           case 22:
-            showErrorWindow('⚠️ 创建配置目录失败 Failed to create config directory',
+            showErrorWindow(
+              '⚠️ 创建配置目录失败 Failed to create config directory',
               `<div>思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。</div><div>SiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.</div>`)
             break
           case 23:
-            showErrorWindow('⚠️ 无法读写块树文件 Failed to access blocktree file',
+            showErrorWindow(
+              '⚠️ 无法读写块树文件 Failed to access blocktree file',
               `<div>块树文件正在被其他程序锁定或者已经损坏，请删除 工作空间/temp/ 文件夹后重启</div><div>The block tree file is being locked by another program or is damaged, please delete the workspace/temp/ folder and restart.</div>`)
             break
           case 0:

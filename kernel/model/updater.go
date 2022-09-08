@@ -40,7 +40,7 @@ func GetNewVerInstallPkgPath() string {
 	}
 
 	downloadPkgURL, checksum, err := getUpdatePkg()
-	if nil != err {
+	if nil != err || "" == downloadPkgURL || "" == checksum {
 		return ""
 	}
 
@@ -85,10 +85,9 @@ func getUpdatePkg() (downloadPkgURL, checksum string, err error) {
 
 	installPkgSite := result["installPkg"].(string)
 	ver := result["ver"].(string)
-	// TODO: v2.1.14 桌面端自动下载更新安装包 https://github.com/siyuan-note/siyuan/issues/5837
-	//if ver == util.Ver {
-	//	return
-	//}
+	if ver == util.Ver {
+		return
+	}
 
 	var suffix string
 	if gulu.OS.IsWindows() {

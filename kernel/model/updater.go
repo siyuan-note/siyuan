@@ -219,7 +219,7 @@ func CheckUpdate(showMsg bool) {
 }
 
 func skipNewVerInstallPkg() bool {
-	if !gulu.OS.IsWindows() {
+	if !gulu.OS.IsWindows() && !gulu.OS.IsDarwin() && !gulu.OS.IsLinux() {
 		return true
 	}
 	if util.ISMicrosoftStore {

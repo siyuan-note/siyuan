@@ -35,7 +35,7 @@ import (
 )
 
 func GetNewVerInstallPkgPath() string {
-	if !Conf.System.DownloadInstallPkg || util.ISMicrosoftStore {
+	if skipNewVerInstallPkg() {
 		return ""
 	}
 
@@ -58,7 +58,7 @@ var checkDownloadInstallPkgLock = sync.Mutex{}
 func checkDownloadInstallPkg() {
 	defer logging.Recover()
 
-	if !Conf.System.DownloadInstallPkg || util.ISMicrosoftStore {
+	if skipNewVerInstallPkg() {
 		return
 	}
 
@@ -216,4 +216,17 @@ func CheckUpdate(showMsg bool) {
 	if showMsg {
 		util.PushMsg(msg, timeout)
 	}
+}
+
+func skipNewVerInstallPkg() bool {
+	if !gulu.OS.IsWindows() {
+		return true
+	}
+	if util.ISMicrosoftStore {
+		return true
+	}
+	if !Conf.System.DownloadInstallPkg {
+		return true
+	}
+	return false
 }

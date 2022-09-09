@@ -378,25 +378,27 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	//	return true
 	//})
 
-	newVerInstallPkgPath := ""
-	if Conf.System.DownloadInstallPkg && !util.ISMicrosoftStore {
-		newVerInstallPkgPath = GetNewVerInstallPkgPath()
-		if "" != newVerInstallPkgPath && 0 == execInstallPkg {
-			exitCode = 2
-			return
+	if !skipNewVerInstallPkg() {
+		newVerInstallPkgPath := ""
+		if Conf.System.DownloadInstallPkg && !util.ISMicrosoftStore {
+			newVerInstallPkgPath = GetNewVerInstallPkgPath()
+			if "" != newVerInstallPkgPath && 0 == execInstallPkg {
+				exitCode = 2
+				return
+			}
 		}
-	}
 
-	if 2 == execInstallPkg && "" != newVerInstallPkgPath { // 执行新版本安装
-		logging.LogInfof("installing the new version [%s]", newVerInstallPkgPath)
-		cmd := exec.Command(newVerInstallPkgPath)
-		util.CmdAttr(cmd)
-		data, cmdErr := cmd.CombinedOutput()
-		if nil != cmdErr {
-			logging.LogErrorf("exec install new version failed: %s", cmdErr)
-			return
+		if 2 == execInstallPkg && "" != newVerInstallPkgPath { // 执行新版本安装
+			logging.LogInfof("installing the new version [%s]", newVerInstallPkgPath)
+			cmd := exec.Command(newVerInstallPkgPath)
+			util.CmdAttr(cmd)
+			data, cmdErr := cmd.CombinedOutput()
+			if nil != cmdErr {
+				logging.LogErrorf("exec install new version failed: %s", cmdErr)
+				return
+			}
+			logging.LogDebugf("exec install new version output [%s]", data)
 		}
-		logging.LogDebugf("exec install new version output [%s]", data)
 	}
 
 	Conf.Close()

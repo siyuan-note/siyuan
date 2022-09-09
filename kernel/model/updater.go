@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -33,6 +34,25 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func execNewVerInstallPkg(newVerInstallPkgPath string) {
+	logging.LogInfof("installing the new version [%s]", newVerInstallPkgPath)
+	var cmd *exec.Cmd
+	if gulu.OS.IsWindows() {
+		cmd = exec.Command(newVerInstallPkgPath)
+	} else if gulu.OS.IsDarwin() {
+		cmd = exec.Command("open", newVerInstallPkgPath)
+	} else if gulu.OS.IsLinux() {
+		cmd = exec.Command("sh", "-c", newVerInstallPkgPath)
+	}
+	util.CmdAttr(cmd)
+	data, cmdErr := cmd.CombinedOutput()
+	if nil != cmdErr {
+		logging.LogErrorf("exec install new version failed: %s", cmdErr)
+		return
+	}
+	logging.LogInfof("installed new version output [%s]", data)
+}
 
 func GetNewVerInstallPkgPath() string {
 	if skipNewVerInstallPkg() {

@@ -380,7 +380,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	if !skipNewVerInstallPkg() {
 		newVerInstallPkgPath := ""
 		if Conf.System.DownloadInstallPkg && !util.ISMicrosoftStore {
-			newVerInstallPkgPath = GetNewVerInstallPkgPath()
+			newVerInstallPkgPath = getNewVerInstallPkgPath()
 			if "" != newVerInstallPkgPath && 0 == execInstallPkg {
 				exitCode = 2
 				return
@@ -388,7 +388,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 		}
 
 		if 2 == execInstallPkg && "" != newVerInstallPkgPath { // 执行新版本安装
-			execNewVerInstallPkg(newVerInstallPkgPath)
+			go execNewVerInstallPkg(newVerInstallPkgPath)
 		}
 	}
 

@@ -54,7 +54,7 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 	logging.LogInfof("installed new version output [%s]", data)
 }
 
-func GetNewVerInstallPkgPath() string {
+func getNewVerInstallPkgPath() string {
 	if skipNewVerInstallPkg() {
 		return ""
 	}

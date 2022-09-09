@@ -1,6 +1,8 @@
 import {Constants} from "../constants";
-import {pathPosix} from "../util/pathName";
+/// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
+/// #endif
+import {pathPosix} from "../util/pathName";
 
 export const renderAssetsPreview = (pathString: string) => {
     if (!pathString) {
@@ -19,6 +21,7 @@ export const renderAssetsPreview = (pathString: string) => {
 };
 
 export const pdfResize = () => {
+    /// #if !MOBILE
     getAllModels().asset.forEach(item => {
         const pdfInstance = item.pdfObject;
         if (!pdfInstance) {
@@ -39,4 +42,5 @@ export const pdfResize = () => {
         }
         pdfViewer.update();
     });
+    /// #endif
 };

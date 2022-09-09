@@ -82,6 +82,8 @@ const renderPDF = (id: string) => {
         show: true,
         width: 1032,
         resizable: false,
+        frame: 'darwin' === window.siyuan.config.system.os,
+        titleBarStyle: 'hidden',
         webPreferences: {
             contextIsolation: false,
             nodeIntegration: true,

@@ -75,16 +75,23 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
     return id;
 };
 
-export const hideMessage = (id: string) => {
+export const hideMessage = (id?: string) => {
     const messagesElement = document.getElementById("message").firstElementChild;
-    const messageElement = messagesElement.querySelector(`[data-id="${id}"]`);
-    if (messageElement) {
-        messageElement.classList.add("b3-snackbar--hide");
-        setTimeout(() => {
-            messageElement.remove();
-        }, Constants.TIMEOUT_INPUT);
-    }
-    if (messagesElement.childElementCount < 2) {
+    if (id) {
+        const messageElement = messagesElement.querySelector(`[data-id="${id}"]`);
+        if (messageElement) {
+            messageElement.classList.add("b3-snackbar--hide");
+            setTimeout(() => {
+                messageElement.remove();
+            }, Constants.TIMEOUT_INPUT);
+        }
+        if (messagesElement.childElementCount < 2) {
+            messagesElement.parentElement.classList.remove("b3-snackbars--show");
+        }
+    } else {
         messagesElement.parentElement.classList.remove("b3-snackbars--show");
+        setTimeout(() => {
+            messagesElement.innerHTML = "";
+        }, Constants.TIMEOUT_INPUT);
     }
 };

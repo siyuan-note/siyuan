@@ -5,7 +5,7 @@ import {getAllModels} from "../layout/getAll";
 import {ipcRenderer} from "electron";
 import {exportLayout} from "../layout/util";
 /// #endif
-import {showMessage} from "./message";
+import {hideMessage, showMessage} from "./message";
 import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
@@ -102,6 +102,7 @@ export const exitSiYuan = () => {
                 });
             }
         } else if (response.code === 2) { // 提示新安装包
+            hideMessage();
             confirmDialog(window.siyuan.languages.tip, response.msg, () => {
                 fetchPost("/api/system/exit", {
                     force: true,

@@ -6,7 +6,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20220820000523"
+		"updated": "20220909101124"
 	},
 	"Children": [
 		{
@@ -1140,6 +1140,360 @@
 				{
 					"Type": "NodeText",
 					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20220909100946-x94gyft",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220909100946-x94gyft",
+				"updated": "20220909100946"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to upgrade to a new version?"
+				}
+			]
+		},
+		{
+			"ID": "20220909100946-nieof3y",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220909100946-nieof3y",
+				"updated": "20220909101032"
+			},
+			"Children": [
+				{
+					"ID": "20220909100946-zpelmha",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220909100946-zpelmha",
+						"updated": "20220909100946"
+					},
+					"Children": [
+						{
+							"ID": "20220909100946-8qnhzi2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220909100946-8qnhzi2",
+								"updated": "20220909100946"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If installed via app store, please update via app store"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220909100946-ej9yi4j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220909100946-ej9yi4j",
+						"updated": "20220909101032"
+					},
+					"Children": [
+						{
+							"ID": "20220909100946-n3d5619",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220909100946-n3d5619",
+								"updated": "20220909101032"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If it is installed through the installation package on the desktop, you can open the option of "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Settings"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "About"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "Automatically download update installation package"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", so that SiYuan will automatically download The latest version of the installation package and prompts to install"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220909100946-kw38sog",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220909100946-kw38sog",
+						"updated": "20220909100946"
+					},
+					"Children": [
+						{
+							"ID": "20220909100946-3n9cy34",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220909100946-3n9cy34",
+								"updated": "20220909100946"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If it is installed by manual installation package, please download the installation package again to install"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220909100946-9eyc3uh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220909100946-9eyc3uh",
+				"updated": "20220909101124"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Check update"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Settings"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "About"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Current Version"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", or by following "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "GitHub Releases"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https ://github.com/siyuan-note/siyuan/releases"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "SiYuan Announcement"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://ld246.com/tag/siyuan-announcement"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to get the new version."
+				}
+			]
+		},
+		{
+			"ID": "20220909100946-k0d6ska",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220909100946-k0d6ska",
+				"updated": "20220909100946"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "Note"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": ": Do not place the workspace in the installation directory, because the updated version will clear all files in the installation directory"
 				}
 			]
 		},

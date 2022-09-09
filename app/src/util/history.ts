@@ -64,8 +64,8 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
 </li>`;
             if (item.items.length > 0) {
                 logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
-                item.items.forEach((docItem, docIndex) => {
-                    logsHTML += `<li title="${escapeHtml(docItem.title)}" data-type="${typeElement.value === "1" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action${(index === 0 && docIndex === 0) ? " b3-list-item--focus" : ""}" style="padding-left: 32px">
+                item.items.forEach((docItem) => {
+                    logsHTML += `<li title="${escapeHtml(docItem.title)}" data-type="${typeElement.value === "1" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 32px">
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
@@ -74,26 +74,6 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
 </li>`;
                 });
                 logsHTML += "</ul>";
-                if (index === 0) {
-                    if (typeElement.value === "1") {
-                        assetElement.innerHTML = renderAssetsPreview(item.items[0].path);
-                    } else {
-                        fetchPost("/api/history/getDocHistoryContent", {
-                            historyPath: item.items[0].path,
-                            k: inputElement.value
-                        }, (contentResponse) => {
-                            if (contentResponse.data.isLargeDoc) {
-                                mdElement.value = contentResponse.data.content;
-                                mdElement.classList.remove("fn__none");
-                                docElement.classList.add("fn__none");
-                            } else {
-                                mdElement.classList.add("fn__none");
-                                docElement.classList.remove("fn__none");
-                                onGet(contentResponse, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
-                            }
-                        });
-                    }
-                }
             }
         });
         element.lastElementChild.firstElementChild.innerHTML = logsHTML;

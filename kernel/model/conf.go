@@ -390,7 +390,14 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 
 		if 2 == execInstallPkg && "" != newVerInstallPkgPath { // 执行新版本安装
 			logging.LogInfof("installing the new version [%s]", newVerInstallPkgPath)
-			cmd := exec.Command(newVerInstallPkgPath)
+			var cmd *exec.Cmd
+			if gulu.OS.IsWindows() {
+				cmd = exec.Command(newVerInstallPkgPath)
+			} else if gulu.OS.IsDarwin() {
+				cmd = exec.Command("open", newVerInstallPkgPath)
+			} else if gulu.OS.IsLinux() {
+				cmd = exec.Command("sh", "-c", newVerInstallPkgPath)
+			}
 			util.CmdAttr(cmd)
 			data, cmdErr := cmd.CombinedOutput()
 			if nil != cmdErr {

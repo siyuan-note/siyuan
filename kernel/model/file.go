@@ -137,12 +137,7 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 
 	data, err := filelock.NoLockFileRead(filePath)
 	if util.IsCorruptedSYData(data) {
-		filelock.UnlockFile(filePath)
-		if removeErr := os.RemoveAll(filePath); nil == removeErr {
-			logging.LogInfof("removed corrupted data file [path=%s, length=%d]", filePath, len(data))
-		} else {
-			logging.LogWarnf("remove corrupted data file [path=%s, length=%d] failed: %s", filePath, len(data), removeErr)
-		}
+		box.moveCorruptedData(filePath)
 		return nil
 	}
 	if nil != err {
@@ -152,10 +147,26 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 	ret = readDocIAL(data)
 	if nil == ret {
 		logging.LogWarnf("tree [%s] is corrupted", filePath)
+		box.moveCorruptedData(filePath)
 		return nil
 	}
 	cache.PutDocIAL(p, ret)
 	return ret
+}
+
+func (box *Box) moveCorruptedData(filePath string) {
+	filelock.UnlockFile(filePath)
+	base := filepath.Base(filePath)
+	to := filepath.Join(util.WorkspaceDir, "corrupted", time.Now().Format("2006-01-02-150405"), box.ID, base)
+	if copyErr := gulu.File.CopyFile(filePath, to); nil != copyErr {
+		logging.LogErrorf("copy corrupted data file [%s] failed: %s", filePath, copyErr)
+		return
+	}
+	if removeErr := os.RemoveAll(filePath); nil != removeErr {
+		logging.LogErrorf("remove corrupted data file [%s] failed: %s", filePath, removeErr)
+		return
+	}
+	logging.LogWarnf("moved corrupted data file [%s] to [%s]", filePath, to)
 }
 
 func readDocIAL(data []byte) (ret map[string]string) {
@@ -165,7 +176,12 @@ func readDocIAL(data []byte) (ret map[string]string) {
 		return nil
 	}
 
-	props := doc["Properties"].(map[string]interface{})
+	propsArg := doc["Properties"]
+	if nil == propsArg {
+		return nil
+	}
+
+	props := propsArg.(map[string]interface{})
 	ret = map[string]string{}
 	for k, v := range props {
 		ret[k] = v.(string)

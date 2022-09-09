@@ -92,8 +92,8 @@ func ListNotebooks() (ret []*Box, err error) {
 				continue
 			}
 			to := filepath.Join(util.WorkspaceDir, "corrupted", time.Now().Format("2006-01-02-150405"), dir.Name())
-			if renameErr := gulu.File.CopyDir(boxDirPath, to); nil != renameErr {
-				logging.LogErrorf("copy corrupted box [%s] failed: %s", boxDirPath, renameErr)
+			if copyErr := gulu.File.CopyDir(boxDirPath, to); nil != copyErr {
+				logging.LogErrorf("copy corrupted box [%s] failed: %s", boxDirPath, copyErr)
 				continue
 			}
 			if removeErr := os.RemoveAll(boxDirPath); nil != removeErr {

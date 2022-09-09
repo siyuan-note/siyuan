@@ -837,7 +837,7 @@
     "59": " Falló la configuración de sincronización de la lista de ignorados",
     "60": "Fallo al obtener el paquete de actualización: %s",
     "61": "⬆️ El paquete de instalación de la nueva versión está listo, ¿quieres salir ahora y comenzar a instalar la nueva versión?",
-    "62": "TODO",
+    "62": "⬆️ El paquete de instalación de la nueva versión está listo. Al salir, se le preguntará si desea instalar la nueva versión",
     "63": "Recuperando, por favor espere...",
     "64": "Hay [%d] archivos en total, tardará un tiempo en indexarse, por favor espere...",
     "65": "Exportando datos...",

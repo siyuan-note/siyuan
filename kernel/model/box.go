@@ -83,15 +83,25 @@ func ListNotebooks() (ret []*Box, err error) {
 		}
 
 		boxConf := conf.NewBoxConf()
-		boxConfPath := filepath.Join(util.DataDir, dir.Name(), ".siyuan", "conf.json")
+		boxDirPath := filepath.Join(util.DataDir, dir.Name())
+		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
 		if !gulu.File.IsExist(boxConfPath) {
+			filelock.ReleaseAllFileLocks()
 			if IsUserGuide(dir.Name()) {
-				filelock.ReleaseAllFileLocks()
-				os.RemoveAll(filepath.Join(util.DataDir, dir.Name()))
-				logging.LogWarnf("not found user guid box conf [%s], removed it", boxConfPath)
+				os.RemoveAll(boxDirPath)
 				continue
 			}
-			logging.LogWarnf("not found box conf [%s], recreate it", boxConfPath)
+			to := filepath.Join(util.WorkspaceDir, "corrupted", time.Now().Format("2006-01-02-150405"), dir.Name())
+			if renameErr := gulu.File.CopyDir(boxDirPath, to); nil != renameErr {
+				logging.LogErrorf("copy corrupted box [%s] failed: %s", boxDirPath, renameErr)
+				continue
+			}
+			if removeErr := os.RemoveAll(boxDirPath); nil != removeErr {
+				logging.LogErrorf("remove corrupted box [%s] failed: %s", boxDirPath, removeErr)
+				continue
+			}
+			logging.LogWarnf("moved corrupted box [%s] to [%s]", boxDirPath, to)
+			continue
 		} else {
 			data, readErr := filelock.NoLockFileRead(boxConfPath)
 			if nil != readErr {

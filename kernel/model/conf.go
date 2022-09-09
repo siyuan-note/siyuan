@@ -360,6 +360,8 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	exitLock.Lock()
 	defer exitLock.Unlock()
 
+	logging.LogInfof("exiting kernel [force=%v, execInstallPkg=%d]", force, execInstallPkg)
+
 	treenode.CloseBlockTree()
 	util.PushMsg(Conf.Language(95), 10000*60)
 	WaitForWritingFiles()
@@ -378,17 +380,15 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	//})
 
 	if !skipNewVerInstallPkg() {
-		newVerInstallPkgPath := ""
-		if Conf.System.DownloadInstallPkg && !util.ISMicrosoftStore {
-			newVerInstallPkgPath = getNewVerInstallPkgPath()
-			if "" != newVerInstallPkgPath && 0 == execInstallPkg {
+		newVerInstallPkgPath := getNewVerInstallPkgPath()
+		if "" != newVerInstallPkgPath {
+			if 0 == execInstallPkg { // 新版本安装包已经准备就绪
 				exitCode = 2
+				logging.LogInfof("the new version install pkg is ready [%s], waiting for the user's next instruction", newVerInstallPkgPath)
 				return
+			} else if 2 == execInstallPkg { // 执行新版本安装
+				go execNewVerInstallPkg(newVerInstallPkgPath)
 			}
-		}
-
-		if 2 == execInstallPkg && "" != newVerInstallPkgPath { // 执行新版本安装
-			go execNewVerInstallPkg(newVerInstallPkgPath)
 		}
 	}
 

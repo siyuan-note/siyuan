@@ -82,8 +82,8 @@ const renderPDF = (id: string) => {
         show: true,
         width: 1032,
         resizable: false,
-        frame: 'darwin' === window.siyuan.config.system.os,
-        titleBarStyle: 'hidden',
+        frame: "darwin" === window.siyuan.config.system.os,
+        titleBarStyle: "hidden",
         webPreferences: {
             contextIsolation: false,
             nodeIntegration: true,
@@ -142,20 +142,20 @@ const renderPDF = (id: string) => {
                                 }
                             });
                         });
-                        destroyWin(win)
+                        destroyWin(win);
                     }).catch((error: string) => {
                         showMessage("Export PDF error:" + error, 0, "error", msgId);
-                        destroyWin(win)
+                        destroyWin(win);
                     });
                 } catch (e) {
                     showMessage("Export PDF error:" + e + ". Export HTML and use Chrome's printing function to convert to PDF", 0, "error", msgId);
-                    destroyWin(win)
+                    destroyWin(win);
                 }
             } else {
-                destroyWin(win)
+                destroyWin(win);
             }
-        })
-    })
+        });
+    });
     fetchPost("/api/export/exportPreviewHTML", {
         id,
     }, response => {
@@ -386,8 +386,8 @@ const renderPDF = (id: string) => {
     });
 </script></body></html>`;
         win.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent(html));
-    })
-}
+    });
+};
 
 const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean) => {
     fetchPost("/api/block/getBlockInfo", {

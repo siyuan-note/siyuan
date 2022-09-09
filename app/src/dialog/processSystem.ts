@@ -122,7 +122,7 @@ export const exitSiYuan = () => {
                     ipcRenderer.send(Constants.SIYUAN_QUIT);
                     /// #endif
                 });
-            })
+            });
         } else { // 正常退出
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);

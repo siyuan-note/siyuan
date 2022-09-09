@@ -350,7 +350,7 @@ export const about = {
         const downloadInstallPkgElement = about.element.querySelector("#downloadInstallPkg") as HTMLInputElement;
         downloadInstallPkgElement.addEventListener("change", () => {
             fetchPost("/api/system/setDownloadInstallPkg", {downloadInstallPkg: downloadInstallPkgElement.checked}, () => {
-                window.siyuan.config.system.downloadInstallPkg = downloadInstallPkgElement.checked
+                window.siyuan.config.system.downloadInstallPkg = downloadInstallPkgElement.checked;
             });
         });
         about.element.querySelector("#aboutConfim").addEventListener("click", () => {

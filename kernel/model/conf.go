@@ -593,4 +593,6 @@ func clearWorkspaceTemp() {
 			logging.LogInfof("removed temp file [%s]", tmp)
 		}
 	}
+
+	logging.LogInfof("cleared workspace temp")
 }

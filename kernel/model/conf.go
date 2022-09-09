@@ -353,9 +353,9 @@ var exitLock = sync.Mutex{}
 // force：是否不执行同步过程而直接退出
 // execInstallPkg：是否执行新版本安装包
 //
-//	0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
-//	1：执行安装
-//	2：不执行安装
+//		0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
+//	 1：不执行新版本安装
+//	 2：执行新版本安装
 func Close(force bool, execInstallPkg int) (exitCode int) {
 	exitLock.Lock()
 	defer exitLock.Unlock()

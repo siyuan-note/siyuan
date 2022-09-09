@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
@@ -106,8 +105,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		return errors.New(fmt.Sprintf(Conf.Language(15), id))
 	}
 
-	luteEngine := NewLute()
-	oldDom := lute.RenderNodeBlockDOM(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
+	oldAttrs := parse.IAL2Map(node.KramdownIAL)
 
 	for name, _ := range nameValues {
 		for i := 0; i < len(name); i++ {
@@ -131,21 +129,17 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	IncSync()
 	cache.PutBlockIAL(id, parse.IAL2Map(node.KramdownIAL))
 
-	dom := lute.RenderNodeBlockDOM(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
-	if oldDom == dom {
-		return
-	}
-	doOp := &Operation{Action: "update", Data: dom, ID: id}
-	undoOp := &Operation{Action: "update", Data: oldDom, ID: id}
+	newAttrs := parse.IAL2Map(node.KramdownIAL)
+	doOp := &Operation{Action: "updateAttrs", Data: map[string]interface{}{"old": oldAttrs, "new": newAttrs}, ID: id}
 	trans := []*Transaction{{
 		DoOperations:   []*Operation{doOp},
-		UndoOperations: []*Operation{undoOp},
+		UndoOperations: []*Operation{},
 	}}
-	pushBroadcastTransactions(trans)
+	pushBroadcastAttrTransactions(trans)
 	return
 }
 
-func pushBroadcastTransactions(transactions []*Transaction) {
+func pushBroadcastAttrTransactions(transactions []*Transaction) {
 	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast, util.PushModeBroadcast)
 	evt.Data = transactions
 	util.PushEvent(evt)

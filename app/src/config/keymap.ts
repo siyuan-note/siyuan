@@ -202,10 +202,11 @@ export const keymap = {
                 if (event.ctrlKey && !event.metaKey && isMac()) {
                     keymapStr += "⌃";
                 }
+                if (event.altKey) {
+                    keymapStr += "⌥";
+                }
                 if (event.shiftKey) {
                     keymapStr += "⇧";
-                } else if (event.altKey) {
-                    keymapStr += "⌥";
                 }
                 if (isCtrl(event)) {
                     keymapStr += "⌘";

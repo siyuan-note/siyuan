@@ -1,6 +1,6 @@
 import {isCtrl} from "./compatibility";
 
-// 是否匹配 ⇧⌘[] / ⌘[] / ⌥[] / ⌥⌘[] / ⇧Tab / []
+// 是否匹配 ⇧⌘[] / ⌘[] / ⌥[] / ⌥⌘[] / ⌥⇧[] / ⌥⇧⌘[] / ⇧Tab / []
 export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     if (hotKey === "") {
         return false;

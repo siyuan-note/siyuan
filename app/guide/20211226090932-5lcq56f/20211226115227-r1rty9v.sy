@@ -5,7 +5,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20220820000508"
+		"updated": "20220909100912"
 	},
 	"Children": [
 		{
@@ -1136,6 +1136,360 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20220909100912-0495w3d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220909100912-0495w3d",
+				"updated": "20220909100912"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如何升級到新版本？"
+				}
+			]
+		},
+		{
+			"ID": "20220909100912-n6wkkil",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220909100912-n6wkkil",
+				"updated": "20220909100912"
+			},
+			"Children": [
+				{
+					"ID": "20220909100912-1o9qnn7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220909100912-1o9qnn7",
+						"updated": "20220909100912"
+					},
+					"Children": [
+						{
+							"ID": "20220909100912-ctmcg6t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220909100912-ctmcg6t",
+								"updated": "20220909100912"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果是通過應用商店安裝的，請通過應用商店更新"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220909100912-hslsskw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220909100912-hslsskw",
+						"updated": "20220909100912"
+					},
+					"Children": [
+						{
+							"ID": "20220909100912-59zjygn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220909100912-59zjygn",
+								"updated": "20220909100912"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果是桌面端通過安裝包安裝的，可打開 "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "設置"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "關於"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeKbd",
+									"Data": "kbd",
+									"Children": [
+										{
+											"Type": "NodeKbdOpenMarker"
+										},
+										{
+											"Type": "NodeText",
+											"Data": "自動下載更新安裝包"
+										},
+										{
+											"Type": "NodeKbdCloseMarker"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 選項，這樣思源會自動下載最新版安裝包並提示安裝"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220909100912-245jk59",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220909100912-245jk59",
+						"updated": "20220909100912"
+					},
+					"Children": [
+						{
+							"ID": "20220909100912-4n5hoac",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220909100912-4n5hoac",
+								"updated": "20220909100912"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果是通過手動安裝包安裝的，請再次下載安裝包安裝"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220909100912-rvyxrtl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220909100912-rvyxrtl",
+				"updated": "20220909100912"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "設置"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "關於"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "當前版本"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中 "
+				},
+				{
+					"Type": "NodeKbd",
+					"Data": "kbd",
+					"Children": [
+						{
+							"Type": "NodeKbdOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "檢查更新"
+						},
+						{
+							"Type": "NodeKbdCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，也可以通過關注 "
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "GitHub Releases"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://github.com/siyuan-note/siyuan/releases"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或者"
+				},
+				{
+					"Type": "NodeLink",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "思源筆記公告"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "https://ld246.com/tag/siyuan-announcement"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "來獲取新版本。"
+				}
+			]
+		},
+		{
+			"ID": "20220909100912-ng52828",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220909100912-ng52828",
+				"updated": "20220909100912"
+			},
+			"Children": [
+				{
+					"Type": "NodeTag",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeTagOpenMarker"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "注意"
+						},
+						{
+							"Type": "NodeTagCloseMarker"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：切勿將工作空間放置於安裝目錄下，因為更新版本會清空安裝目錄下的所有文件"
 				}
 			]
 		},

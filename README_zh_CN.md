@@ -197,6 +197,16 @@
 
 更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
 
+### 如何升级到新版本？
+
+* 如果是通过应用商店安装的，请通过应用商店更新
+* 如果是桌面端通过安装包安装的，可打开 <kbd>设置</kbd> - <kbd>关于</kbd> - <kbd>自动下载更新安装包</kbd> 选项，这样思源会自动下载最新版安装包并提示安装
+* 如果是通过手动安装包安装的，请再次下载安装包安装
+
+可在 <kbd>设置</kbd> - <kbd>关于</kbd> - <kbd>当前版本</kbd> 中 <kbd>检查更新</kbd>，也可以通过关注 [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) 或者[思源笔记公告](https://ld246.com/tag/siyuan-announcement)来获取新版本。
+
+**注意**：切勿将工作空间放置于安装目录下，因为更新版本会清空安装目录下的所有文件
+
 ### 删除文档有什么注意事项吗？
 
 文档被删除后不会出现在操作系统回收站中，而是直接删除，删除时思源会生成编辑历史。

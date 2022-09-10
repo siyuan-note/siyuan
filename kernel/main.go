@@ -46,7 +46,7 @@ func main() {
 	go model.HookResident()
 	util.SetBooted()
 	util.ClearPushProgress(100)
-	go model.AutoRefreshUser()
+	go model.AutoRefreshCheck()
 	go model.AutoFlushTx()
 	go sql.AutoFlushTreeQueue()
 	go treenode.AutoFlushBlockTree()

@@ -59,7 +59,7 @@ func StartKernel(container, appDir, workspaceDir, nativeLibDir, privateDataDir, 
 		go model.AutoStat()
 		util.SetBooted()
 		util.ClearPushProgress(100)
-		go model.AutoRefreshUser()
+		go model.AutoRefreshCheck()
 		go model.AutoFlushTx()
 		go sql.AutoFlushTreeQueue()
 		go treenode.AutoFlushBlockTree()

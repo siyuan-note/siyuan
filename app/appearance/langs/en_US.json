@@ -1,4 +1,6 @@
 {
+  "autoDownloadUpdatePkg": "Automatically download update installation package",
+  "autoDownloadUpdatePkgTip": "After enabling, it will automatically check the version update every two hours. If there is an updated version, it will automatically download the installation package and prompt for installation",
   "downloaded": "Downloaded",
   "allOp": "All operations",
   "htmlBlockError": "The execution of the following script will affect the interface display, and the script has stopped running",
@@ -834,8 +836,8 @@
     "58": "After the index is rebuilt, the interface will be automatically refreshed later...",
     "59": "Failed to set sync ignore list",
     "60": "Failed to get the update package: %s",
-    "61": "TODO",
-    "62": "TODO",
+    "61": "⬆️ The new version installation package is ready, do you want to install the new version now?",
+    "62": "⬆️ The new version installation package is ready. When exiting, you will be asked whether to install the new version",
     "63": "Recovering, please wait...",
     "64": "There are [%d] files in total, it will take some time to index, please wait...",
     "65": "Exporting data...",

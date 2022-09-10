@@ -41,7 +41,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "2.1.13"
+	Ver       = "2.1.14"
 	IsInsider = false
 )
 
@@ -82,6 +82,9 @@ func Boot() {
 	if isRunningInDockerContainer() {
 		Container = ContainerDocker
 	}
+
+	msStoreFilePath := filepath.Join(WorkingDir, "ms-store")
+	ISMicrosoftStore = gulu.File.IsExist(msStoreFilePath)
 
 	UserAgent = UserAgent + " " + Container
 	httpclient.SetUserAgent(UserAgent)
@@ -276,7 +279,8 @@ var (
 	AccessAuthCode string
 	Lang           = ""
 
-	Container string // docker, android, ios, std
+	Container        string // docker, android, ios, std
+	ISMicrosoftStore bool   // 桌面端是否是微软商店版
 )
 
 const (
@@ -471,7 +475,7 @@ func initPandoc() {
 	}
 	pandocVer := getPandocVer(PandocBinPath)
 	if "" != pandocVer {
-		logging.LogInfof("pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
+		logging.LogInfof("built-in pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
 		return
 	}
 
@@ -494,7 +498,7 @@ func initPandoc() {
 		exec.Command("chmod", "+x", PandocBinPath).CombinedOutput()
 	}
 	pandocVer = getPandocVer(PandocBinPath)
-	logging.LogInfof("initialized pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
+	logging.LogInfof("initialized built-in pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
 }
 
 func getPandocVer(binPath string) (ret string) {

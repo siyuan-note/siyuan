@@ -64,7 +64,8 @@ export const initConfigSearch = (element: HTMLElement) => {
         // 关于
         getLang(["about", "about1", "about2", "about3", "about4", "about5", "about6", "about7", "about8",
             "about11", "about12", "about13", "about14", "about15", "about16",
-            "slogan", "currentVer", "checkUpdate", "updatePath", "snapshotPassword", "systemLog"]),
+            "slogan", "currentVer", "checkUpdate", "updatePath", "snapshotPassword", "systemLog",
+            "autoDownloadUpdatePkg"]),
     ];
     const inputElement = element.querySelector(".b3-form__icon input") as HTMLInputElement;
     if (window.siyuan.config.system.container !== "ios") {

@@ -4,7 +4,15 @@ type TDockType = "file" | "outline" | "bookmark" | "tag" | "graph" | "globalGrap
 type TDockPosition = "Left" | "Right" | "Top" | "Bottom"
 type TWS = "main" | "filetree" | "protyle"
 type TEditorMode = "preview" | "wysiwyg"
-type TOperation = "insert" | "update" | "delete" | "move" | "foldHeading" | "unfoldHeading" | "setAttrs" | "append"
+type TOperation = "insert"
+    | "update"
+    | "delete"
+    | "move"
+    | "foldHeading"
+    | "unfoldHeading"
+    | "setAttrs"
+    | "updateAttrs"
+    | "append"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes"
 declare module "blueimp-md5"
 
@@ -140,7 +148,7 @@ interface IScrollAttr {
 interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id: string,
-    data?: string,
+    data?: string, // updateAttr 时为  { old: IObject, new: IObject }
     parentID?: string
     previousID?: string
     retData?: any
@@ -299,11 +307,13 @@ declare interface IConfig {
         confDir: string
         dataDir: string
         container: "std" | "android" | "docker" | "ios"
+        isMicrosoftStore: boolean
         os: "windows" | "linux" | "darwin"
         homeDir: string
         xanadu: boolean
         udanax: boolean
         uploadErrLog: boolean
+        downloadInstallPkg: boolean
         networkServe: boolean
         useExistingDB: boolean
     }

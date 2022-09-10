@@ -458,10 +458,10 @@ export class Wnd {
     }
 
     private renderTabList(event: MouseEvent) {
-        window.siyuan.menus.menu.remove()
+        window.siyuan.menus.menu.remove();
         Array.from(this.headersElement.children).forEach((item: HTMLElement) => {
-            const iconElement = item.querySelector(".item__icon")
-            const graphicElement = item.querySelector(".item__graphic")
+            const iconElement = item.querySelector(".item__icon");
+            const graphicElement = item.querySelector(".item__graphic");
             window.siyuan.menus.menu.append(new MenuItem({
                 label: item.querySelector(".item__text").textContent,
                 iconHTML: iconElement ? `<span class="b3-menu__icon">${iconElement.innerHTML}</span>` : "",
@@ -471,7 +471,7 @@ export class Wnd {
                 },
                 current: item.classList.contains("item--focus")
             }).element);
-        })
+        });
         window.siyuan.menus.menu.popup({
             x: event.clientX,
             y: event.clientY,
@@ -741,6 +741,10 @@ export class Wnd {
                         } else {
                             previous.element.style.height = (previous.element.clientHeight + element.clientHeight) + "px";
                         }
+                    }
+                    // https://github.com/siyuan-note/siyuan/issues/5844
+                    if (layout.children.length > 2 && index === 0) {
+                        layout.children[1].resize = undefined;
                     }
                 }
                 layout.children.splice(index, 1);

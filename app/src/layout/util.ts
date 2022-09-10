@@ -25,6 +25,7 @@ import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {Constants} from "../constants";
 import {openSearch} from "../search/spread";
 import {saveScroll} from "../protyle/scroll/saveScroll";
+import {pdfResize} from "../asset/renderAssets";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("block__icons--active") || element.classList.contains("layout__wnd--active")) {
@@ -429,6 +430,7 @@ export const resizeTabs = () => {
             }, 200);
         }
     });
+    pdfResize();
 };
 
 export const copyTab = (tab: Tab) => {

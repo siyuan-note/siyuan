@@ -105,6 +105,8 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		return errors.New(fmt.Sprintf(Conf.Language(15), id))
 	}
 
+	oldAttrs := parse.IAL2Map(node.KramdownIAL)
+
 	for name, _ := range nameValues {
 		for i := 0; i < len(name); i++ {
 			if !lex.IsASCIILetterNumHyphen(name[i]) {
@@ -126,7 +128,21 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	}
 	IncSync()
 	cache.PutBlockIAL(id, parse.IAL2Map(node.KramdownIAL))
+
+	newAttrs := parse.IAL2Map(node.KramdownIAL)
+	doOp := &Operation{Action: "updateAttrs", Data: map[string]interface{}{"old": oldAttrs, "new": newAttrs}, ID: id}
+	trans := []*Transaction{{
+		DoOperations:   []*Operation{doOp},
+		UndoOperations: []*Operation{},
+	}}
+	pushBroadcastAttrTransactions(trans)
 	return
+}
+
+func pushBroadcastAttrTransactions(transactions []*Transaction) {
+	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast, util.PushModeBroadcast)
+	evt.Data = transactions
+	util.PushEvent(evt)
 }
 
 func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {

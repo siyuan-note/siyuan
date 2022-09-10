@@ -349,7 +349,7 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
 };
 
 export const isCurrentEditor = (blockId: string) => {
-    const activeElement = document.querySelector(".layout__wnd--active > .layout-tab-bar > .item--focus");
+    const activeElement = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus");
     if (activeElement) {
         const tab = getInstanceById(activeElement.getAttribute("data-id"));
         if (tab instanceof Tab && tab.model instanceof Editor) {

@@ -1,4 +1,6 @@
 {
+  "autoDownloadUpdatePkg": "Télécharger automatiquement le package d'installation de la mise à jour",
+  "autoDownloadUpdatePkgTip": "Après l'ouverture, il vérifiera automatiquement la mise à jour de la version toutes les deux heures. S'il existe une version mise à jour, il téléchargera automatiquement le package d'installation et demandera l'installation",
   "downloaded": "Téléchargé",
   "allOp": "Toutes les opérations",
   "htmlBlockError": "L'exécution du script suivant affectera l'affichage de l'interface et le script a cessé de s'exécuter",
@@ -834,8 +836,8 @@
     "58": "Une fois l'index reconstruit, l'interface sera automatiquement rafraîchie ultérieurement...",
     "59": "Échec de la définition de la liste des ignores de synchronisation",
     "60": "Échec de la récupération du paquet de mise à jour : %s",
-    "61": "TODO",
-    "62": "TODO",
+    "61": "⬆️ Le package d'installation de la nouvelle version est prêt, voulez-vous installer la nouvelle version maintenant ?",
+    "62": "⬆️ Le package d'installation de la nouvelle version est prêt. En quittant, il vous sera demandé si vous souhaitez installer la nouvelle version",
     "63": "Récupération, veuillez patienter...",
     "64": "Il y a [%d] fichiers au total, l'indexation prendra un certain temps, veuillez patienter...",
     "65": "Exportation des données...",

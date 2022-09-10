@@ -809,7 +809,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.general.selectOpen1.custom, event)) {
         event.preventDefault();
         event.stopPropagation();
-        const element = document.querySelector(".layout__wnd--active > .layout-tab-bar > .item--focus") ||
+        const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
             document.querySelector(".layout-tab-bar > .item--focus");
         if (element) {
             const tab = getInstanceById(element.getAttribute("data-id")) as Tab;

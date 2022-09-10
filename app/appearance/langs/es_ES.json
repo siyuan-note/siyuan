@@ -1,4 +1,6 @@
 {
+  "autoDownloadUpdatePkg": "Descargar automáticamente el paquete de instalación de actualizaciones",
+  "autoDownloadUpdatePkgTip": "Después de abrir, verificará automáticamente la actualización de la versión cada dos horas. Si hay una versión actualizada, descargará automáticamente el paquete de instalación y solicitará la instalación",
   "downloaded": "Descargado",
   "allOp": "Todas las operaciones",
   "htmlBlockError": "La ejecución del siguiente script afectará la visualización de la interfaz y el script ha dejado de ejecutarse",
@@ -834,8 +836,8 @@
     "58": "Después de reconstruir el índice, la interfaz se actualizará automáticamente más tarde...",
     "59": " Falló la configuración de sincronización de la lista de ignorados",
     "60": "Fallo al obtener el paquete de actualización: %s",
-    "61": "TODO",
-    "62": "TODO",
+    "61": "⬆️ El paquete de instalación de la nueva versión está listo, ¿quieres instalar la nueva versión ahora?",
+    "62": "⬆️ El paquete de instalación de la nueva versión está listo. Al salir, se le preguntará si desea instalar la nueva versión",
     "63": "Recuperando, por favor espere...",
     "64": "Hay [%d] archivos en total, tardará un tiempo en indexarse, por favor espere...",
     "65": "Exportando datos...",

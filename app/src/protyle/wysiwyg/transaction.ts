@@ -303,6 +303,34 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         updateRef(protyle, operation.id);
         return;
     }
+    if (operation.action === "updateAttrs") { // 调用接口才推送
+        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
+            const data = operation.data as any
+            Object.keys(data.old).forEach(key => {
+                item.removeAttribute(key)
+            })
+            let nodeAttrHTML = ""
+            Object.keys(data.new).forEach(key => {
+                item.setAttribute(key, data.new[key]);
+                const escapeHTML = data.new[key]
+                if (key === "bookmark") {
+                    nodeAttrHTML += `<div class="protyle-attr--bookmark">${escapeHTML}</div>`;
+                } else if (key === "name") {
+                    nodeAttrHTML += `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${escapeHTML}</div>`;
+                } else if (key === "alias") {
+                    nodeAttrHTML += `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${escapeHTML}</div>`;
+                } else if (key === "memo") {
+                    nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
+                }
+            })
+            const refElement = item.lastElementChild.querySelector(".protyle-attr--refcount");
+            if (refElement) {
+                nodeAttrHTML += refElement.outerHTML;
+            }
+            item.lastElementChild.innerHTML = nodeAttrHTML + Constants.ZWSP;
+        });
+        return;
+    }
     if (operation.action === "move") {
         let cloneRange;
         let range;
@@ -561,7 +589,7 @@ export const turnsIntoOneTransaction = (options: { protyle: IProtyle, selectsEle
     hideElements(["gutter"], options.protyle);
 };
 
-const removeUnfoldRepeatBlock = (html:string, protyle:IProtyle) => {
+const removeUnfoldRepeatBlock = (html: string, protyle: IProtyle) => {
     const temp = document.createElement("template");
     temp.innerHTML = html;
     Array.from(temp.content.children).forEach(item => {

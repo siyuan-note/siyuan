@@ -5,9 +5,10 @@ import {getAllModels} from "../layout/getAll";
 import {ipcRenderer} from "electron";
 import {exportLayout} from "../layout/util";
 /// #endif
-import {showMessage} from "./message";
+import {hideMessage, showMessage} from "./message";
 import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
+import {confirmDialog} from "./confirmDialog";
 
 export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>
@@ -83,7 +84,7 @@ export const kernelError = () => {
 
 export const exitSiYuan = () => {
     fetchPost("/api/system/exit", {force: false}, (response) => {
-        if (response.code === 1) {
+        if (response.code === 1) { // 同步执行失败
             const msgId = showMessage(response.msg, response.data.closeTimeout, "error");
             const buttonElement = document.querySelector(`#message [data-id="${msgId}"] button`);
             if (buttonElement) {
@@ -100,7 +101,30 @@ export const exitSiYuan = () => {
                     });
                 });
             }
-        } else {
+        } else if (response.code === 2) { // 提示新安装包
+            hideMessage();
+            confirmDialog(window.siyuan.languages.tip, response.msg, () => {
+                fetchPost("/api/system/exit", {
+                    force: true,
+                    execInstallPkg: 2 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
+                }, () => {
+                    /// #if !BROWSER
+                    ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);
+                    ipcRenderer.send(Constants.SIYUAN_QUIT);
+                    /// #endif
+                });
+            }, () => {
+                fetchPost("/api/system/exit", {
+                    force: true,
+                    execInstallPkg: 1 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
+                }, () => {
+                    /// #if !BROWSER
+                    ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);
+                    ipcRenderer.send(Constants.SIYUAN_QUIT);
+                    /// #endif
+                });
+            });
+        } else { // 正常退出
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);
             ipcRenderer.send(Constants.SIYUAN_QUIT);

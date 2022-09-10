@@ -34,7 +34,7 @@ func HookResident() {
 	for range time.Tick(time.Second * 30) {
 		if 0 == util.CountSessions() {
 			logging.LogInfof("no active session, exit kernel process now")
-			Close(false)
+			Close(false, 1)
 		}
 	}
 }
@@ -44,5 +44,5 @@ func HandleSignal() {
 	signal.Notify(c, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
 	s := <-c
 	logging.LogInfof("received os signal [%s], exit kernel process now", s)
-	Close(false)
+	Close(false, 1)
 }

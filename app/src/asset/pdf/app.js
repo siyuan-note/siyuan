@@ -79,7 +79,6 @@ import { ViewHistory } from './view_history.js'
 import { Constants } from '../../constants'
 import { GenericExternalServices } from './genericcom'
 import { getPdfInstance, hlPDFRect } from '../anno'
-import { getAllModels } from '../../layout/getAll'
 
 const DISABLE_AUTO_FETCH_LOADING_BAR_TIMEOUT = 5000 // ms
 const FORCE_PAGES_LOADED_TIMEOUT = 10000 // ms
@@ -1772,7 +1771,6 @@ class PDFViewerApplication {
     _boundEvents.beforePrint = this.beforePrint.bind(this)
     _boundEvents.afterPrint = this.afterPrint.bind(this)
 
-    eventBus._on('resize', webViewerResize)
     eventBus._on('hashchange', webViewerHashchange)
     eventBus._on('beforeprint', _boundEvents.beforePrint)
     eventBus._on('afterprint', _boundEvents.afterPrint)
@@ -1868,7 +1866,6 @@ class PDFViewerApplication {
   unbindEvents () {
     const {eventBus, _boundEvents} = this
 
-    eventBus._off('resize', webViewerResize)
     eventBus._off('hashchange', webViewerHashchange)
     eventBus._off('beforeprint', _boundEvents.beforePrint)
     eventBus._off('afterprint', _boundEvents.afterPrint)
@@ -2355,26 +2352,6 @@ function webViewerSpreadModeChanged (evt) {
       // Unable to write to storage.
     })
   }
-}
-
-function webViewerResize () {
-  getAllModels().asset.find(item => {
-    const pdfInstance = item.pdfObject
-    const {pdfDocument, pdfViewer} = pdfInstance
-    if (!pdfDocument) {
-      return
-    }
-    const currentScaleValue = pdfViewer.currentScaleValue
-    if (
-      currentScaleValue === 'auto' ||
-      currentScaleValue === 'page-fit' ||
-      currentScaleValue === 'page-width'
-    ) {
-      // Note: the scale is constant for 'page-actual'.
-      pdfViewer.currentScaleValue = currentScaleValue
-    }
-    pdfViewer.update()
-  })
 }
 
 function webViewerHashchange (evt) {

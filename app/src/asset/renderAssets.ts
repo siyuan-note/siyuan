@@ -1,4 +1,7 @@
 import {Constants} from "../constants";
+/// #if !MOBILE
+import {getAllModels} from "../layout/getAll";
+/// #endif
 import {pathPosix} from "../util/pathName";
 
 export const renderAssetsPreview = (pathString: string) => {
@@ -15,4 +18,29 @@ export const renderAssetsPreview = (pathString: string) => {
     } else {
         return pathString;
     }
+};
+
+export const pdfResize = () => {
+    /// #if !MOBILE
+    getAllModels().asset.forEach(item => {
+        const pdfInstance = item.pdfObject;
+        if (!pdfInstance) {
+            return;
+        }
+        const {pdfDocument, pdfViewer} = pdfInstance;
+        if (!pdfDocument) {
+            return;
+        }
+        const currentScaleValue = pdfViewer.currentScaleValue;
+        if (
+            currentScaleValue === "auto" ||
+            currentScaleValue === "page-fit" ||
+            currentScaleValue === "page-width"
+        ) {
+            // Note: the scale is constant for 'page-actual'.
+            pdfViewer.currentScaleValue = currentScaleValue;
+        }
+        pdfViewer.update();
+    });
+    /// #endif
 };

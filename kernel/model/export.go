@@ -383,29 +383,31 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 	//	}
 	//}
 
-	name = path.Base(tree.Path)
+	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
-	if err := os.MkdirAll(savePath, 0755); nil != err {
-		logging.LogErrorf("mkdir [%s] failed: %s", savePath, err)
-		return
-	}
-
-	assets := assetsLinkDestsInTree(tree)
-	for _, asset := range assets {
-		srcAbsPath, err := GetAssetAbsPath(asset)
-		if nil != err {
-			logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
-			continue
+	if "" != savePath {
+		if err := os.MkdirAll(savePath, 0755); nil != err {
+			logging.LogErrorf("mkdir [%s] failed: %s", savePath, err)
+			return
 		}
-		targetAbsPath := filepath.Join(savePath, asset)
-		if err = gulu.File.Copy(srcAbsPath, targetAbsPath); nil != err {
-			logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
+
+		assets := assetsLinkDestsInTree(tree)
+		for _, asset := range assets {
+			srcAbsPath, err := GetAssetAbsPath(asset)
+			if nil != err {
+				logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
+				continue
+			}
+			targetAbsPath := filepath.Join(savePath, asset)
+			if err = gulu.File.Copy(srcAbsPath, targetAbsPath); nil != err {
+				logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
+			}
 		}
 	}
 
 	luteEngine := NewLute()
-	if !pdf { // 导出 HTML 需要复制静态资源
+	if !pdf && "" != savePath { // 导出 HTML 需要复制静态资源
 		srcs := []string{"stage/build/export", "stage/build/fonts", "stage/protyle"}
 		for _, src := range srcs {
 			from := filepath.Join(util.WorkingDir, src)
@@ -1286,7 +1288,8 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 	if Conf.Export.AddTitle {
 		if root, _ := getBlock(id); nil != root {
 			title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1}
-			title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(root.Content)})
+			content := html.UnescapeString(root.Content)
+			title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(content)})
 			ret.Root.PrependChild(title)
 		}
 	}

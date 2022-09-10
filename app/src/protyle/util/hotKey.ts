@@ -1,6 +1,6 @@
 import {isCtrl} from "./compatibility";
 
-// 是否匹配 ⇧⌘[] / ⌘[] / ⌥[] / ⌥⌘[] / ⇧Tab / []
+// 是否匹配 ⇧⌘[] / ⌘[] / ⌥[] / ⌥⌘[] / ⌥⇧[] / ⌥⇧⌘[] / ⇧Tab / []
 export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     if (hotKey === "") {
         return false;
@@ -52,15 +52,24 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     }
 
     if (hotKey.startsWith("⌥")) {
+        let keyCode = hotKeys.length === 3 ? hotKeys[2] : hotKeys[1];
+        if (hotKeys.length === 4) {
+            keyCode = hotKeys[3];
+        }
+        const isMatchKey = (/^[0-9]$/.test(keyCode) ? (event.code === "Digit" + keyCode || event.code === "Numpad" + keyCode) : event.code === "Key" + keyCode) ||
+            event.code === keyCode ||
+            (event.code === "Period" && keyCode === ".") ||
+            (event.code === "BracketLeft" && keyCode === "[") || (event.code === "BracketRight" && keyCode === "]");
         // 是否匹配 ⌥[] / ⌥⌘[]
-        const keyCode = hotKeys.length === 3 ? hotKeys[2] : hotKeys[1];
-        if ((hotKeys.length === 3 ? isCtrl(event) : !isCtrl(event)) && event.altKey && !event.shiftKey &&
-            (
-                (/^[0-9]$/.test(keyCode) ? (event.code === "Digit" + keyCode || event.code === "Numpad" + keyCode) : event.code === "Key" + keyCode) ||
-                event.code === keyCode ||
-                (event.code === "Period" && keyCode === ".") ||
-                (event.code === "BracketLeft" && keyCode === "[") || (event.code === "BracketRight" && keyCode === "]")
-            )) {
+        if ((hotKeys.length === 3 ? isCtrl(event) : !isCtrl(event)) && event.altKey && !event.shiftKey && isMatchKey) {
+            return true;
+        }
+        // ⌥⇧⌘[]
+        if (hotKey.startsWith("⌥⇧⌘") && hotKeys.length === 4 && event.altKey && event.shiftKey && isCtrl(event) && isMatchKey) {
+            return true;
+        }
+        // ⌥⇧[]
+        if (hotKey.startsWith("⌥⇧") && hotKeys.length === 3 && event.altKey && event.shiftKey && !isCtrl(event) && isMatchKey) {
             return true;
         }
         return false;

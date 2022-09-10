@@ -1,3 +1,36 @@
+## v2.1.14 / 2022-09-09
+
+### 改进功能
+
+* [PDF 自动缩放、适合页面、适合页宽只有切换时有效](https://github.com/siyuan-note/siyuan/issues/5489)
+* [导出 PDF 预览并提升导出速度](https://github.com/siyuan-note/siyuan/issues/5500)
+* [移动端支持题头图位置调整](https://github.com/siyuan-note/siyuan/issues/5713)
+* [公式导出时展开宏定义](https://github.com/siyuan-note/siyuan/issues/5831)
+* [支持自定义 Ctrl+↑↓](https://github.com/siyuan-note/siyuan/issues/5832)
+* [桌面端内置 Pandoc 可执行文件](https://github.com/siyuan-note/siyuan/issues/5835)
+* [快捷键组合支持 `Shift+Alt` 与 `Shift+Alt+Ctrl`](https://github.com/siyuan-note/siyuan/issues/5836)
+* [桌面端自动下载更新安装包](https://github.com/siyuan-note/siyuan/issues/5837)
+* [集市已下载包在配置文件不正确的情况下不应该显示更新按钮](https://github.com/siyuan-note/siyuan/issues/5838)
+* [GitHub Releases 下载安装包加入校验和](https://github.com/siyuan-note/siyuan/issues/5840)
+* [打开数据历史时不自动打开预览](https://github.com/siyuan-note/siyuan/issues/5845)
+* [调用 API `setBlockAttrs` 后推送 Transaction](https://github.com/siyuan-note/siyuan/issues/5847)
+* [云端同步时自动删除空文件夹](https://github.com/siyuan-note/siyuan/issues/5849)
+* [改进已经损坏的数据处理](https://github.com/siyuan-note/siyuan/issues/5853)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/5843)
+
+### 修复缺陷
+
+* [Android 端打包错误](https://github.com/siyuan-note/siyuan/issues/5829)
+* [页签拖拽分屏问题](https://github.com/siyuan-note/siyuan/issues/5830)
+* [在列表项中非第一个子块中使用快捷键折叠光标会消失](https://github.com/siyuan-note/siyuan/issues/5833)
+* [行内标签内容为空时没有清除](https://github.com/siyuan-note/siyuan/issues/5834)
+* [标题复制粘贴撤销后触发状态异常](https://github.com/siyuan-note/siyuan/issues/5839)
+* [自定义属性更改与删除异常](https://github.com/siyuan-note/siyuan/issues/5841)
+* [文档大纲页签移动后刷新界面布局丢失](https://github.com/siyuan-note/siyuan/issues/5844)
+
 ## v2.1.13 / 2022-09-05
 
 ### 改进功能

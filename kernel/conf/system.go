@@ -21,11 +21,12 @@ import (
 )
 
 type System struct {
-	ID            string `json:"id"`
-	KernelVersion string `json:"kernelVersion"`
-	OS            string `json:"os"`
-	Container     string `json:"container"` // docker, android, ios, std
-	IsInsider     bool   `json:"isInsider"`
+	ID               string `json:"id"`
+	KernelVersion    string `json:"kernelVersion"`
+	OS               string `json:"os"`
+	Container        string `json:"container"` // docker, android, ios, std
+	IsMicrosoftStore bool   `json:"isMicrosoftStore"`
+	IsInsider        bool   `json:"isInsider"`
 
 	HomeDir      string `json:"homeDir"`
 	WorkspaceDir string `json:"workspaceDir"`
@@ -36,14 +37,16 @@ type System struct {
 	NetworkServe bool          `json:"networkServe"`
 	NetworkProxy *NetworkProxy `json:"networkProxy"`
 
-	UploadErrLog bool `json:"uploadErrLog"`
+	UploadErrLog       bool `json:"uploadErrLog"`
+	DownloadInstallPkg bool `json:"downloadInstallPkg"`
 }
 
 func NewSystem() *System {
 	return &System{
-		ID:            util.GetDeviceID(),
-		KernelVersion: util.Ver,
-		NetworkProxy:  &NetworkProxy{},
+		ID:                 util.GetDeviceID(),
+		KernelVersion:      util.Ver,
+		NetworkProxy:       &NetworkProxy{},
+		DownloadInstallPkg: false,
 	}
 }
 

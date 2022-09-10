@@ -1,7 +1,7 @@
 import {isMobile} from "../util/functions";
 import {Dialog} from "./index";
 
-export const confirmDialog = (title: string, text: string, confirm?: () => void) => {
+export const confirmDialog = (title: string, text: string, confirm?: () => void, cancel?: () => void) => {
     const dialog = new Dialog({
         title,
         content: `<div class="b3-dialog__content">${text}</div>
@@ -13,6 +13,9 @@ export const confirmDialog = (title: string, text: string, confirm?: () => void)
     });
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
+        if (cancel) {
+            cancel();
+        }
         dialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {

@@ -180,8 +180,14 @@ func isOutdatedTheme(theme *Theme, bazaarThemes []*Theme) bool {
 		return false
 	}
 
+	repo := strings.TrimPrefix(theme.URL, "https://github.com/")
+	parts := strings.Split(repo, "/")
+	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
+		return false
+	}
+
 	for _, pkg := range bazaarThemes {
-		if theme.URL == pkg.URL && theme.Name == pkg.Name && theme.Author == pkg.Author && theme.Version != pkg.Version {
+		if theme.URL == pkg.URL && theme.Name == pkg.Name && theme.Author == pkg.Author && theme.Version < pkg.Version {
 			theme.RepoHash = pkg.RepoHash
 			return true
 		}
@@ -194,8 +200,14 @@ func isOutdatedIcon(icon *Icon, bazaarIcons []*Icon) bool {
 		return false
 	}
 
+	repo := strings.TrimPrefix(icon.URL, "https://github.com/")
+	parts := strings.Split(repo, "/")
+	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
+		return false
+	}
+
 	for _, pkg := range bazaarIcons {
-		if icon.URL == pkg.URL && icon.Name == pkg.Name && icon.Author == pkg.Author && icon.Version != pkg.Version {
+		if icon.URL == pkg.URL && icon.Name == pkg.Name && icon.Author == pkg.Author && icon.Version < pkg.Version {
 			icon.RepoHash = pkg.RepoHash
 			return true
 		}
@@ -208,8 +220,14 @@ func isOutdatedWidget(widget *Widget, bazaarWidgets []*Widget) bool {
 		return false
 	}
 
+	repo := strings.TrimPrefix(widget.URL, "https://github.com/")
+	parts := strings.Split(repo, "/")
+	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
+		return false
+	}
+
 	for _, pkg := range bazaarWidgets {
-		if widget.URL == pkg.URL && widget.Name == pkg.Name && widget.Author == pkg.Author && widget.Version != pkg.Version {
+		if widget.URL == pkg.URL && widget.Name == pkg.Name && widget.Author == pkg.Author && widget.Version < pkg.Version {
 			widget.RepoHash = pkg.RepoHash
 			return true
 		}
@@ -222,8 +240,14 @@ func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
 		return false
 	}
 
+	repo := strings.TrimPrefix(template.URL, "https://github.com/")
+	parts := strings.Split(repo, "/")
+	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
+		return false
+	}
+
 	for _, pkg := range bazaarTemplates {
-		if template.URL == pkg.URL && template.Name == pkg.Name && template.Author == pkg.Author && template.Version != pkg.Version {
+		if template.URL == pkg.URL && template.Name == pkg.Name && template.Author == pkg.Author && template.Version < pkg.Version {
 			template.RepoHash = pkg.RepoHash
 			return true
 		}

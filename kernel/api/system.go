@@ -291,6 +291,20 @@ func setUploadErrLog(c *gin.Context) {
 	time.Sleep(time.Second * 3)
 }
 
+func setDownloadInstallPkg(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	downloadInstallPkg := arg["downloadInstallPkg"].(bool)
+	model.Conf.System.DownloadInstallPkg = downloadInstallPkg
+	model.Conf.Save()
+}
+
 func setNetworkProxy(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -334,11 +348,21 @@ func exit(c *gin.Context) {
 		force = forceArg.(bool)
 	}
 
-	err := model.Close(force)
-	if nil != err {
-		ret.Code = 1
-		ret.Msg = err.Error() + "<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">" + model.Conf.Language(97) + "</button>"
+	execInstallPkgArg := arg["execInstallPkg"] // 0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
+	execInstallPkg := 0
+	if nil != execInstallPkgArg {
+		execInstallPkg = int(execInstallPkgArg.(float64))
+	}
+
+	exitCode := model.Close(force, execInstallPkg)
+	ret.Code = exitCode
+	switch exitCode {
+	case 0:
+	case 1: // 同步执行失败
+		ret.Msg = model.Conf.Language(96) + "<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">" + model.Conf.Language(97) + "</button>"
 		ret.Data = map[string]interface{}{"closeTimeout": 0}
-		return
+	case 2: // 提示新安装包
+		ret.Msg = model.Conf.Language(61)
+		ret.Data = map[string]interface{}{"closeTimeout": 0}
 	}
 }

@@ -18,7 +18,6 @@ package model
 
 import (
 	"bytes"
-	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -222,6 +221,10 @@ func InitConf() {
 	Conf.System.WorkspaceDir = util.WorkspaceDir
 	Conf.System.DataDir = util.DataDir
 	Conf.System.Container = util.Container
+	Conf.System.IsMicrosoftStore = util.ISMicrosoftStore
+	if util.ISMicrosoftStore {
+		logging.LogInfof("using Microsoft Store edition")
+	}
 	Conf.System.OS = runtime.GOOS
 	Conf.Newbie = util.IsNewbie
 
@@ -345,9 +348,19 @@ func loadLangs() (ret []*conf.Lang) {
 
 var exitLock = sync.Mutex{}
 
-func Close(force bool) (err error) {
+// Close 退出内核进程.
+//
+// force：是否不执行同步过程而直接退出
+// execInstallPkg：是否执行新版本安装包
+//
+//		0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
+//	 1：不执行新版本安装
+//	 2：执行新版本安装
+func Close(force bool, execInstallPkg int) (exitCode int) {
 	exitLock.Lock()
 	defer exitLock.Unlock()
+
+	logging.LogInfof("exiting kernel [force=%v, execInstallPkg=%d]", force, execInstallPkg)
 
 	treenode.CloseBlockTree()
 	util.PushMsg(Conf.Language(95), 10000*60)
@@ -355,7 +368,7 @@ func Close(force bool) (err error) {
 	if !force {
 		SyncData(false, true, false)
 		if 0 != ExitSyncSucc {
-			err = errors.New(Conf.Language(96))
+			exitCode = 1
 			return
 		}
 	}
@@ -366,13 +379,27 @@ func Close(force bool) (err error) {
 	//	return true
 	//})
 
+	if !skipNewVerInstallPkg() {
+		newVerInstallPkgPath := getNewVerInstallPkgPath()
+		if "" != newVerInstallPkgPath {
+			if 0 == execInstallPkg { // 新版本安装包已经准备就绪
+				exitCode = 2
+				logging.LogInfof("the new version install pkg is ready [%s], waiting for the user's next instruction", newVerInstallPkgPath)
+				return
+			} else if 2 == execInstallPkg { // 执行新版本安装
+				go execNewVerInstallPkg(newVerInstallPkgPath)
+			}
+		}
+	}
+
 	Conf.Close()
 	sql.CloseDatabase()
-	util.WebSocketServer.Close()
 	clearWorkspaceTemp()
-	logging.LogInfof("exited kernel")
+
 	go func() {
 		time.Sleep(500 * time.Millisecond)
+		logging.LogInfof("exited kernel")
+		util.WebSocketServer.Close()
 		os.Exit(util.ExitCodeOk)
 	}()
 	return
@@ -566,4 +593,6 @@ func clearWorkspaceTemp() {
 			logging.LogInfof("removed temp file [%s]", tmp)
 		}
 	}
+
+	logging.LogInfof("cleared workspace temp")
 }

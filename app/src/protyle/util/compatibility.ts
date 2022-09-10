@@ -1,4 +1,4 @@
-export const openByMobile = (uri:string) => {
+export const openByMobile = (uri: string) => {
     if (!uri) {
         return;
     }
@@ -76,23 +76,39 @@ export const updateHotkeyTip = (hotkey: string) => {
     if (/Mac/.test(navigator.platform) || navigator.platform === "iPhone") {
         return hotkey;
     }
-    if (hotkey.startsWith("⌘")) {
-        hotkey = hotkey.replace("⌘", "⌘+");
-    } else if (hotkey.startsWith("⌥") && hotkey.substr(1, 1) !== "⌘") {
-        hotkey = hotkey.replace("⌥", "⌥+");
-    } else if (hotkey.startsWith("⇧⌘") || hotkey.startsWith("⌥⌘")) {
-        hotkey = hotkey.replace("⇧⌘", "⌘+⇧+").replace("⌥⌘", "⌘+⌥+");
-    } else if (hotkey.startsWith("⇧")) {
-        hotkey = hotkey.replace("⇧", "⇧+");
+
+    const KEY_MAP = new Map(Object.entries({
+        "⌘": "Ctrl",
+        "⇧": "Shift",
+        "⌥": "Alt",
+        "⇥": "Tab",
+        "⌫": "Backspace",
+        "⌦": "Delete",
+        "↩": "Enter",
+    }));
+    const SHIFT_KEY_MAP = new Map(Object.entries({
+        ";": ":",
+        "=": "+",
+        "-": "_",
+        ".": ">",
+    }));
+
+    let keys = [];
+
+    if (hotkey.indexOf("⌘") > -1) keys.push(KEY_MAP.get("⌘"));
+    if (hotkey.indexOf("⇧") > -1) keys.push(KEY_MAP.get("⇧"));
+    if (hotkey.indexOf("⌥") > -1) keys.push(KEY_MAP.get("⌥"));
+
+    const lastKey = hotkey.charAt(hotkey.length - 1);
+    if ("⌘⇧⌥".indexOf(lastKey) < 0) {
+        keys.push(
+            KEY_MAP.get(lastKey)
+            || (hotkey.indexOf("⇧") > -1 && SHIFT_KEY_MAP.get(lastKey))
+            || lastKey
+        );
     }
-    hotkey = hotkey.replace("⌘", "Ctrl").replace("⇧", "Shift")
-        .replace("⌥", "Alt").replace("⇥", "Tab")
-        .replace("⌫", "Backspace").replace("⌦", "Delete")
-        .replace("↩", "Enter");
-    if (hotkey.indexOf("Shift") > -1) {
-        hotkey = hotkey.replace(";", ":").replace("=", "+").replace("-", "_").replace(".", ">");
-    }
-    return hotkey;
+
+    return keys.join("+");
 };
 
 export const hotKey2Electron = (key: string) => {

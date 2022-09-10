@@ -12,7 +12,7 @@ import {hintEmbed, hintRef, hintSlash} from "./extend";
 import {getSavePath} from "../../util/newFile";
 import {upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
-import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {genEmptyBlock} from "../../block/util";
 import {insertHTML} from "../util/insertHTML";
@@ -486,16 +486,19 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 return;
             } else if (value === Constants.ZWSP) {
                 range.deleteContents();
+                this.fixImageCursor(range);
                 protyle.toolbar.showTpl(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 1) {
                 range.deleteContents();
+                this.fixImageCursor(range);
                 protyle.toolbar.showWidget(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 2) {
                 range.deleteContents();
+                this.fixImageCursor(range);
                 protyle.toolbar.showAssets(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
@@ -536,11 +539,15 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 return;
             } else if (value.indexOf("style") > -1) {
                 range.deleteContents();
+                this.fixImageCursor(range);
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else {
                 range.deleteContents();
+                if (value !== "![]()") {
+                    this.fixImageCursor(range);
+                }
                 let textContent = value;
                 if (value === "```") {
                     textContent = value + (localStorage.getItem(Constants.LOCAL_CODELANG) || "") + Lute.Caret + "\n```";
@@ -714,6 +721,16 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             return true;
         }
         return false;
+    }
+
+    private fixImageCursor(range: Range) {
+        const previous = hasPreviousSibling(range.startContainer);
+        if (previous && previous.nodeType !== 3 && (previous as HTMLElement).classList.contains("img")) {
+            if (!hasNextSibling(previous)) {
+                range.insertNode(document.createTextNode(Constants.ZWSP))
+                range.collapse(false);
+            }
+        }
     }
 
     private getKey(currentLineValue: string, extend: IHintExtend[]) {

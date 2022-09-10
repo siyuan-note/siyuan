@@ -93,7 +93,7 @@ export const updateHotkeyTip = (hotkey: string) => {
         ".": ">",
     }));
 
-    let keys = [];
+    const keys = [];
 
     if (hotkey.indexOf("⌘") > -1) keys.push(KEY_MAP.get("⌘"));
     if (hotkey.indexOf("⇧") > -1) keys.push(KEY_MAP.get("⇧"));

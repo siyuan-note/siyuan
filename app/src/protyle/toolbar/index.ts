@@ -134,30 +134,30 @@ export class Toolbar {
     }
 
     public getCurrentType(range = this.range) {
-        const types: string[] = [];
+        let types: string[] = [];
         let startElement = range.startContainer as HTMLElement;
         if (startElement.nodeType === 3) {
             startElement = startElement.parentElement;
-            if (startElement.getAttribute("data-type") === "virtual-block-ref" && !["DIV", "TD", "TH"].includes(startElement.parentElement.tagName)) {
-                startElement = startElement.parentElement;
-            }
         } else if (startElement.childElementCount > 0 && startElement.childNodes[range.startOffset]?.nodeType !== 3) {
             startElement = startElement.childNodes[range.startOffset] as HTMLElement;
         }
         if (!startElement || startElement.nodeType === 3) {
             return [];
         }
+        if (!["DIV", "TD", "TH"].includes(startElement.tagName)) {
+            types = startElement.getAttribute("data-type").split(" ");
+        }
         let endElement = range.endContainer as HTMLElement;
         if (endElement.nodeType === 3) {
             endElement = endElement.parentElement;
-            if (endElement.getAttribute("data-type") === "virtual-block-ref" && !["DIV", "TD", "TH"].includes(endElement.parentElement.tagName)) {
-                endElement = endElement.parentElement;
-            }
         } else if (endElement.childElementCount > 0 && endElement.childNodes[range.endOffset]?.nodeType !== 3) {
             endElement = endElement.childNodes[range.endOffset] as HTMLElement;
         }
         if (!endElement || endElement.nodeType === 3) {
             return [];
+        }
+        if (!["DIV", "TD", "TH"].includes(endElement.tagName)) {
+            types = types.concat(endElement.getAttribute("data-type").split(" "));
         }
         if (range.startOffset === range.startContainer.textContent.length) {
             const nextSibling = hasNextSibling(range.startContainer as Element);
@@ -170,77 +170,41 @@ export class Toolbar {
                 types.push("inline-math");
             }
         }
-        if (startElement.tagName === "STRONG" || endElement.tagName === "STRONG") {
-            types.push("bold");
-        }
-        if (startElement.tagName === "EM" || endElement.tagName === "EM") {
-            types.push("italic");
-        }
-        if (startElement.tagName === "U" || endElement.tagName === "U") {
-            types.push("underline");
-        }
-        if (startElement.tagName === "S" || endElement.tagName === "S") {
-            types.push("strike");
-        }
-        if (startElement.tagName === "MARK" || endElement.tagName === "MARK") {
-            types.push("mark");
-        }
-        if (startElement.tagName === "SUP" || endElement.tagName === "SUP") {
-            types.push("sup");
-        }
-        if (startElement.tagName === "SUB" || endElement.tagName === "SUB") {
-            types.push("sub");
-        }
-        if (startElement.tagName === "KBD" || endElement.tagName === "KBD") {
-            types.push("kbd");
-        }
-        if (startElement.tagName === "SPAN" || endElement.tagName === "SPAN") {
-            const startType = startElement.getAttribute("data-type");
-            const endType = endElement.getAttribute("data-type");
-            if (startType === "tag" || endType === "tag") {
-                types.push("tag");
-            } else if (startType === "a" || endType === "a") {
-                types.push("link");
-            } else if (startType === "block-ref" || endType === "block-ref") {
-                types.push("blockRef");
-            } else if (startType === "file-annotation-ref" || endType === "file-annotation-ref") {
-                types.push("fileAnnotationRef");
-            } else if (startType === "inline-math") {
-                types.push("inline-math");
+        range.cloneContents().childNodes.forEach((item:HTMLElement) => {
+            if (item.nodeType !== 3) {
+                types = types.concat(item.getAttribute("data--type").split(" "));
             }
-        }
-        if (startElement.tagName === "CODE" || endElement.tagName === "CODE") {
-            types.push("inline-code");
-        }
+        });
+        types = [...new Set(types)];
         return types;
     }
 
     private genItem(protyle: IProtyle, menuItem: IMenuItem) {
         let menuItemObj;
         switch (menuItem.name) {
-            case "bold":
-            case "italic":
-            case "strike":
-            case "inline-code":
+            case "strong":
+            case "em":
+            case "s":
+            case "code":
             case "mark":
             case "tag":
-            case "underline":
+            case "u":
             case "sup":
             case "sub":
             case "kbd":
             case "inline-math":
                 menuItemObj = new ToolbarItem(protyle, menuItem);
                 break;
-            case "blockRef":
+            case "block-ref":
                 menuItemObj = new BlockRef(protyle, menuItem);
                 break;
             case "|":
                 menuItemObj = new Divider();
                 break;
-            case "font":
+            case "text":
                 menuItemObj = new Font(protyle, menuItem);
                 break;
-            case "link":
+            case "a":
                 menuItemObj = new Link(protyle, menuItem);
                 break;
         }
@@ -267,7 +231,54 @@ export class Toolbar {
         });
     }
 
-    public async setInlineMark(protyle: IProtyle, type: string, action: "remove" | "add" | "range" | "toolbar", focusAdd = false) {
+    public setInlineMark(protyle: IProtyle, type: string, action: "remove" | "add" | "range" | "toolbar", focusAdd = false) {
+        const nodeElement = hasClosestBlock(this.range.startContainer);
+        if (!nodeElement) {
+            return;
+        }
+        const wbrElement = document.createElement("wbr");
+        const html = nodeElement.outerHTML;
+
+        if (this.range.startOffset === 0 && !hasPreviousSibling(this.range.startContainer)) {
+            this.range.setStartBefore(this.range.startContainer.parentElement)
+        }
+        if (this.range.endOffset === this.range.endContainer.textContent.length && !hasNextSibling(this.range.endContainer)) {
+            this.range.setEndAfter(this.range.endContainer.parentElement)
+        }
+        const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
+        const contents = this.range.extractContents();
+        this.range.insertNode(wbrElement);
+        const newNodes: Node[] = [];
+        contents.childNodes.forEach((item: HTMLElement) => {
+            if (item.nodeType === 3) {
+                if (item.textContent !== "") {
+                    const inlineElement = document.createElement("span");
+                    inlineElement.setAttribute("data-type", type);
+                    inlineElement.appendChild(item);
+                    newNodes.push(inlineElement);
+                }
+            } else {
+                const types = (item.getAttribute("data-type") || "").split(" ");
+                types.push(type);
+                item.setAttribute("data-type", types.join(" "));
+                newNodes.push(item);
+            }
+        });
+        newNodes.forEach((item, index) => {
+            this.range.insertNode(item);
+            if (index === 0) {
+                this.range.setStart(item.firstChild, 0);
+            }
+            if (index === newNodes.length - 1) {
+                this.range.setEnd(item.lastChild, item.lastChild.textContent.length);
+            }
+        });
+        nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+        wbrElement.remove();
+    }
+
+    public async setInlineMark1(protyle: IProtyle, type: string, action: "remove" | "add" | "range" | "toolbar", focusAdd = false) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement) {
             return;
@@ -281,7 +292,7 @@ export class Toolbar {
             return;
         }
         // 对已有字体样式的文字再次添加字体样式
-        if (focusAdd && action === "add" && types.includes("bold") && this.range.startContainer.nodeType === 3 &&
+        if (focusAdd && action === "add" && types.includes("text") && this.range.startContainer.nodeType === 3 &&
             this.range.startContainer.parentNode.isSameNode(this.range.endContainer.parentNode)) {
             return;
         }

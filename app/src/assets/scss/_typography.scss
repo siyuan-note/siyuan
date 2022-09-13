@@ -52,7 +52,8 @@
     color: var(--b3-protyle-inline-s-color);
   }
 
-  strong {
+  strong,
+  span[data-type~="strong"] {
     color: var(--b3-protyle-inline-strong-color);
   }
 

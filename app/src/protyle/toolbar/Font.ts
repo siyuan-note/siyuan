@@ -120,7 +120,7 @@ export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
             color = fontStyles[1];
         }
     }
-    protyle.toolbar.setInlineMark(protyle, "bold", "add", true);
+    protyle.toolbar.setInlineMark(protyle, "text", "add", true);
     const range = protyle.toolbar.range;
     const fontElement = hasClosestByMatchTag(range.startContainer, "STRONG");
     if (!fontElement) {

@@ -268,6 +268,7 @@ interface IUpload {
 interface IMenuItem {
     /** 唯一标示 */
     name: string;
+    lang?: string;
     /** svg 图标 */
     icon?: string;
     /** 提示 */

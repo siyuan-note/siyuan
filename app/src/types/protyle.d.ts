@@ -137,6 +137,8 @@ declare class Lute {
 
     private constructor();
 
+    public SetTextMark(enable: boolean): void;
+
     public SetHeadingID(enable: boolean): void;
 
     public SetProtyleMarkNetImg(enable: boolean): void;

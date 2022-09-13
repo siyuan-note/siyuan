@@ -22,9 +22,12 @@ import (
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
+	"github.com/88250/lute/util"
 	"github.com/siyuan-note/logging"
 )
 
@@ -324,4 +327,14 @@ func GetDynamicBlockRefText(blockRef *ast.Node) string {
 		return refText.Text()
 	}
 	return "ref resolve failed"
+}
+
+func IsChartCodeBlockCode(code *ast.Node) bool {
+	if nil == code.Previous || ast.NodeCodeBlockFenceInfoMarker != code.Previous.Type || 1 > len(code.Previous.CodeBlockInfo) {
+		return false
+	}
+
+	language := util.BytesToStr(code.Previous.CodeBlockInfo)
+	language = strings.ReplaceAll(language, editor.Caret, "")
+	return render.NoHighlight(language)
 }

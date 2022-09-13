@@ -173,6 +173,10 @@
       font-weight: bold;
     }
 
+    span[data-type~="em"] {
+      font-style: italic;
+    }
+
     span[data-type="tag"] {
       border-bottom: 1px solid var(--b3-protyle-inline-tag-color);
       color: var(--b3-protyle-inline-tag-color);

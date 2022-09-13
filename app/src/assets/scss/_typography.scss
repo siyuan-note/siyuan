@@ -44,7 +44,8 @@
     vertical-align: bottom;
   }
 
-  em {
+  em,
+  span[data-type~="em"] {
     color: var(--b3-protyle-inline-em-color);
   }
 
@@ -157,7 +158,8 @@
     box-shadow: inset 0 -1px 0 var(--b3-border-color);
   }
 
-  u {
+  u,
+  span[data-type~="u"] {
     text-decoration: none;
     border-bottom: 1px solid var(--b3-theme-on-background);
   }

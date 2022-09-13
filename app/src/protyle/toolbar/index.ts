@@ -30,7 +30,7 @@ import {clipboard, nativeImage, NativeImage} from "electron";
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {fetchPost} from "../../util/fetch";
-import {isBrowser, isMobile} from "../../util/functions";
+import {isArrayEqual, isBrowser, isMobile} from "../../util/functions";
 import * as dayjs from "dayjs";
 import {insertEmptyBlock} from "../../block/util";
 import {matchHotKey} from "../util/hotKey";
@@ -170,7 +170,7 @@ export class Toolbar {
                 types.push("inline-math");
             }
         }
-        range.cloneContents().childNodes.forEach((item:HTMLElement) => {
+        range.cloneContents().childNodes.forEach((item: HTMLElement) => {
             if (item.nodeType !== 3) {
                 types = types.concat(item.getAttribute("data-type").split(" "));
             }
@@ -236,43 +236,154 @@ export class Toolbar {
         if (!nodeElement) {
             return;
         }
-        const wbrElement = document.createElement("wbr");
-        const html = nodeElement.outerHTML;
-
-        if (this.range.startOffset === 0 && !hasPreviousSibling(this.range.startContainer)) {
-            this.range.setStartBefore(this.range.startContainer.parentElement)
+        let previousElement: Element
+        let nextElement: Element
+        let previousIndex: number
+        let nextIndex: number
+        const previousSibling = hasPreviousSibling(this.range.startContainer)
+        if (!["DIV", "TD", "TH"].includes(this.range.startContainer.parentElement.tagName)) {
+            if (this.range.startOffset === 0 && !previousSibling) {
+                previousElement = this.range.startContainer.parentElement.previousSibling as Element
+                this.range.setStartBefore(this.range.startContainer.parentElement)
+            } else {
+                previousElement = this.range.startContainer.parentElement
+            }
+        } else if (previousSibling && previousSibling.nodeType !== 3 && this.range.startOffset === 0) {
+            // **aaa**bbb 选中 bbb 加粗
+            previousElement = previousSibling as Element
         }
-        if (this.range.endOffset === this.range.endContainer.textContent.length && !hasNextSibling(this.range.endContainer)) {
-            this.range.setEndAfter(this.range.endContainer.parentElement)
+        const nextSibling = hasNextSibling(this.range.endContainer)
+        if (!["DIV", "TD", "TH"].includes(this.range.endContainer.parentElement.tagName)) {
+            if (this.range.endOffset === this.range.endContainer.textContent.length && !nextSibling) {
+                nextElement = this.range.endContainer.parentElement.nextSibling as Element
+                this.range.setEndAfter(this.range.endContainer.parentElement)
+            } else {
+                nextElement = this.range.endContainer.parentElement
+            }
+        } else if (nextSibling && nextSibling.nodeType !== 3 && this.range.endOffset === this.range.endContainer.textContent.length) {
+            // aaa**bbb** 选中 aaa 加粗
+            nextElement = nextSibling as Element
+        }
+        const wbrElement = document.createElement("wbr");
+        this.range.insertNode(wbrElement);
+        const html = nodeElement.outerHTML;
+        const contents = this.range.extractContents();
+        // 合并 node
+        for (let i = 0; i < contents.childNodes.length; i++) {
+            if (contents.childNodes[i].nodeType === 3) {
+                if (contents.childNodes[i].textContent === "") {
+                    contents.childNodes[i].remove();
+                    i--;
+                } else if (contents.childNodes[i + 1] && contents.childNodes[i + 1].nodeType === 3) {
+                    contents.childNodes[i].textContent = contents.childNodes[i].textContent + contents.childNodes[i + 1].textContent;
+                    contents.childNodes[i + 1].remove();
+                    i--;
+                }
+            } else if (contents.childNodes[i].nodeType !== 3 && (contents.childNodes[i] as HTMLElement).tagName === "WBR") {
+                contents.childNodes[i].remove();
+                i--;
+            }
         }
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
-        const contents = this.range.extractContents();
-        this.range.insertNode(wbrElement);
         const newNodes: Node[] = [];
-        contents.childNodes.forEach((item: HTMLElement) => {
-            if (item.nodeType === 3) {
-                if (item.textContent !== "") {
-                    const inlineElement = document.createElement("span");
-                    inlineElement.setAttribute("data-type", type);
-                    inlineElement.appendChild(item);
-                    newNodes.push(inlineElement);
+        if (action === "remove" || actionBtn?.classList.contains("protyle-toolbar__item--current")) {
+            let removeIndex = 0
+            contents.childNodes.forEach((item: HTMLElement, index) => {
+                if (item.tagName === "WBR") {
+                    return;
                 }
-            } else {
-                const types = (item.getAttribute("data-type") || "").split(" ");
-                types.push(type);
-                item.setAttribute("data-type", types.join(" "));
-                newNodes.push(item);
-            }
-        });
-        newNodes.forEach((item, index) => {
+                if (item.nodeType !== 3) {
+                    const types = item.getAttribute("data-type").split(" ");
+                    types.find((itemType, index) => {
+                        if (type === itemType) {
+                            types.splice(index, 1);
+                            return true
+                        }
+                    })
+
+                    if (types.length === 0) {
+                        newNodes.push(document.createTextNode(item.textContent));
+                    } else {
+                        if (removeIndex === 0 && previousElement && previousElement.nodeType !== 3 && isArrayEqual(types, previousElement.getAttribute("data-type").split(" "))) {
+                            previousIndex = previousElement.textContent.length;
+                            previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
+                        } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 && isArrayEqual(types, nextElement.getAttribute("data-type").split(" "))) {
+                            nextIndex = item.textContent.length;
+                            nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
+                        } else {
+                            item.setAttribute("data-type", types.join(" "));
+                            newNodes.push(item);
+                        }
+                    }
+                } else {
+                    newNodes.push(item);
+                }
+                removeIndex++
+            });
+        } else {
+            let addIndex = 0
+            contents.childNodes.forEach((item: HTMLElement, index) => {
+                if (item.nodeType === 3) {
+                    if (addIndex === 0 && previousElement && previousElement.nodeType !== 3 && type === previousElement.getAttribute("data-type")) {
+                        previousIndex = previousElement.textContent.length;
+                        previousElement.innerHTML = previousElement.innerHTML + item.textContent;
+                    } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 && type === nextElement.getAttribute("data-type")) {
+                        nextIndex = item.textContent.length;
+                        nextElement.innerHTML = item.textContent + nextElement.innerHTML;
+                    } else {
+                        const inlineElement = document.createElement("span");
+                        inlineElement.setAttribute("data-type", type);
+                        inlineElement.textContent = item.textContent;
+                        newNodes.push(inlineElement);
+                    }
+                    addIndex++;
+                } else {
+                    let types = (item.getAttribute("data-type") || "").split(" ");
+                    types.push(type);
+                    types = [...new Set(types)]
+                    if (addIndex === 0 && previousElement && previousElement.nodeType !== 3 && isArrayEqual(types, previousElement.getAttribute("data-type").split(" "))) {
+                        previousIndex = previousElement.textContent.length;
+                        previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
+                    } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 && isArrayEqual(types, nextElement.getAttribute("data-type").split(" "))) {
+                        nextIndex = item.textContent.length;
+                        nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
+                    } else {
+                        item.setAttribute("data-type", types.join(" "));
+                        newNodes.push(item);
+                    }
+                    addIndex++;
+                }
+            });
+        }
+        newNodes.forEach((item) => {
             this.range.insertNode(item);
-            if (index === 0) {
-                this.range.setStart(item.firstChild, 0);
-            }
-            if (index === newNodes.length - 1) {
-                this.range.setEnd(item.lastChild, item.lastChild.textContent.length);
-            }
+            this.range.collapse(false);
         });
+        if (previousIndex) {
+            this.range.setStart(previousElement.firstChild, previousIndex);
+        } else if (newNodes.length > 0) {
+            if (newNodes[0].firstChild) {
+                this.range.setStart(newNodes[0].firstChild, 0);
+            } else {
+                this.range.setStart(newNodes[0], 0);
+            }
+        } else {
+            // aaa**bbb** 选中 aaa 加粗
+            this.range.setStart(nextElement.firstChild, 0);
+        }
+        if (nextIndex) {
+            this.range.setEnd(nextElement.lastChild, nextIndex);
+        } else if (newNodes.length > 0) {
+            const lastNewNode = newNodes[newNodes.length - 1]
+            if (lastNewNode.lastChild) {
+                this.range.setEnd(lastNewNode.lastChild, lastNewNode.lastChild.textContent.length);
+            } else {
+                this.range.setEnd(lastNewNode, lastNewNode.textContent.length);
+            }
+        } else {
+            // **aaa**bbb 选中 bbb 加粗
+            this.range.setEnd(previousElement.firstChild, previousElement.firstChild.textContent.length);
+        }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
         wbrElement.remove();

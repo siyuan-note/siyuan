@@ -172,7 +172,7 @@ export class Toolbar {
         }
         range.cloneContents().childNodes.forEach((item:HTMLElement) => {
             if (item.nodeType !== 3) {
-                types = types.concat(item.getAttribute("data--type").split(" "));
+                types = types.concat(item.getAttribute("data-type").split(" "));
             }
         });
         types = [...new Set(types)];

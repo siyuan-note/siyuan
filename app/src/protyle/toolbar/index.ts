@@ -287,6 +287,7 @@ export class Toolbar {
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
         if (action === "remove" || actionBtn?.classList.contains("protyle-toolbar__item--current")) {
+            actionBtn.classList.remove("protyle-toolbar__item--current");
             let removeIndex = 0
             contents.childNodes.forEach((item: HTMLElement, index) => {
                 if (item.tagName === "WBR") {
@@ -321,6 +322,7 @@ export class Toolbar {
                 removeIndex++
             });
         } else {
+            this.element.querySelector(`[data-type="${type}"]`).classList.add("protyle-toolbar__item--current");
             let addIndex = 0
             contents.childNodes.forEach((item: HTMLElement, index) => {
                 if (item.nodeType === 3) {

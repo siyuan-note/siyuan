@@ -49,7 +49,8 @@
     color: var(--b3-protyle-inline-em-color);
   }
 
-  s {
+  s,
+  span[data-type~="s"] {
     color: var(--b3-protyle-inline-s-color);
   }
 
@@ -58,7 +59,8 @@
     color: var(--b3-protyle-inline-strong-color);
   }
 
-  mark {
+  mark,
+  span[data-type~="mark"] {
     background-color: var(--b3-protyle-inline-mark-background);
     color: var(--b3-protyle-inline-mark-color);
 
@@ -146,7 +148,8 @@
     }
   }
 
-  kbd {
+  kbd,
+  span[data-type~="kbd"] {
     padding: 2px 4px;
     font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace;
     line-height: 1;
@@ -206,7 +209,8 @@
     }
   }
 
-  code:not(.hljs) {
+  code:not(.hljs),
+  span[data-type~="code"] {
     @extend .fn__code;
   }
 

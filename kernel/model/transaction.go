@@ -29,8 +29,8 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
-	util2 "github.com/88250/lute/util"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -423,7 +423,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
 
-	data := strings.ReplaceAll(operation.Data.(string), util2.FrontEndCaret, "")
+	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	luteEngine := NewLute()
 	subTree := luteEngine.BlockDOM2Tree(data)
 	insertedNode := subTree.Root.FirstChild
@@ -511,7 +511,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
 
-	data := strings.ReplaceAll(operation.Data.(string), util2.FrontEndCaret, "")
+	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	luteEngine := NewLute()
 	subTree := luteEngine.BlockDOM2Tree(data)
 	insertedNode := subTree.Root.FirstChild
@@ -720,7 +720,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
 
-	data := strings.ReplaceAll(operation.Data.(string), util2.FrontEndCaret, "")
+	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	luteEngine := NewLute()
 	subTree := luteEngine.BlockDOM2Tree(data)
 
@@ -853,7 +853,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
-	data := strings.ReplaceAll(operation.Data.(string), util2.FrontEndCaret, "")
+	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	if "" == data {
 		logging.LogErrorf("update data is nil")
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}

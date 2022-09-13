@@ -32,6 +32,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
@@ -1363,7 +1364,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 		n.Unlink()
 	}
 	for _, emptyParagraph := range emptyParagraphs {
-		emptyParagraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(parse.Zwj)})
+		emptyParagraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(editor.Zwj)})
 	}
 	return ret
 }

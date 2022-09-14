@@ -400,7 +400,7 @@ func resolveRefContent0(node *ast.Node, anchors *map[string]string, depth *int, 
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			buf.Write(n.Tokens)
 		case ast.NodeTextMark:
-			buf.WriteString(n.TextMarkTextContent)
+			buf.WriteString(n.Content())
 		case ast.NodeBlockRef:
 			if anchor := n.ChildByType(ast.NodeBlockRefText); nil != anchor {
 				buf.WriteString(anchor.Text())
@@ -550,7 +550,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		case ast.NodeCodeSpan:
 			text = n.ChildByType(ast.NodeCodeSpanContent).TokensStr()
 		case ast.NodeTextMark:
-			text = n.TextMarkTextContent
+			text = n.Content()
 			typ = typ + " " + n.TextMarkType
 		}
 

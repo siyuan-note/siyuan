@@ -655,7 +655,7 @@ func GetContainerText(container *ast.Node) string {
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			buf.Write(n.Tokens)
 		case ast.NodeTextMark:
-			buf.WriteString(n.TextMarkTextContent)
+			buf.WriteString(n.Content())
 		case ast.NodeBlockRef:
 			if anchor := n.ChildByType(ast.NodeBlockRefText); nil != anchor {
 				buf.WriteString(anchor.Text())

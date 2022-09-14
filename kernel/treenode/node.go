@@ -90,7 +90,7 @@ func NodeStaticContent(node *ast.Node) string {
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
 			buf.Write(n.Tokens)
 		case ast.NodeTextMark:
-			buf.WriteString(n.TextMarkTextContent)
+			buf.WriteString(n.Content())
 		case ast.NodeBackslash:
 			buf.WriteByte(lex.ItemBackslash)
 		case ast.NodeBackslashContent:

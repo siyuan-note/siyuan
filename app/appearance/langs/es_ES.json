@@ -843,7 +843,7 @@
     "65": "Exportando datos...",
     "66": "Archivo de datos [%s] creado",
     "67": "Cargado en %s, descargado en %s",
-    "68": "TODO",
+    "68": "La capacidad máxima de almacenamiento del espacio en la nube [%s] ha excedido el período de prueba y la carga de datos no puede continuar. Después de la suscripción, la capacidad de almacenamiento en la nube se actualizará a 8GB",
     "69": "Descarga completada",
     "70": "Error en la copia del cuaderno [%s] del archivo [%s]: %s",
     "71": "Fallo en la inserción del archivo de activos, por favor reabra el documento",

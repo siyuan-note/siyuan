@@ -521,6 +521,9 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
+				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			}
 		}
 		Conf.Sync.Stat = msg
 		util.PushStatusBar(msg)

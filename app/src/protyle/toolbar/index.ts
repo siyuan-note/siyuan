@@ -237,33 +237,33 @@ export class Toolbar {
             return;
         }
         const rangeTypes = this.getCurrentType();
-        let previousElement: Element
-        let nextElement: Element
-        let previousIndex: number
-        let nextIndex: number
-        const previousSibling = hasPreviousSibling(this.range.startContainer)
+        let previousElement: Element;
+        let nextElement: Element;
+        let previousIndex: number;
+        let nextIndex: number;
+        const previousSibling = hasPreviousSibling(this.range.startContainer);
         if (!["DIV", "TD", "TH"].includes(this.range.startContainer.parentElement.tagName)) {
             if (this.range.startOffset === 0 && !previousSibling) {
-                previousElement = this.range.startContainer.parentElement.previousSibling as Element
-                this.range.setStartBefore(this.range.startContainer.parentElement)
+                previousElement = this.range.startContainer.parentElement.previousSibling as Element;
+                this.range.setStartBefore(this.range.startContainer.parentElement);
             } else {
-                previousElement = this.range.startContainer.parentElement
+                previousElement = this.range.startContainer.parentElement;
             }
         } else if (previousSibling && previousSibling.nodeType !== 3 && this.range.startOffset === 0) {
             // **aaa**bbb 选中 bbb 加粗
-            previousElement = previousSibling as Element
+            previousElement = previousSibling as Element;
         }
-        const nextSibling = hasNextSibling(this.range.endContainer)
+        const nextSibling = hasNextSibling(this.range.endContainer);
         if (!["DIV", "TD", "TH"].includes(this.range.endContainer.parentElement.tagName)) {
             if (this.range.endOffset === this.range.endContainer.textContent.length && !nextSibling) {
-                nextElement = this.range.endContainer.parentElement.nextSibling as Element
-                this.range.setEndAfter(this.range.endContainer.parentElement)
+                nextElement = this.range.endContainer.parentElement.nextSibling as Element;
+                this.range.setEndAfter(this.range.endContainer.parentElement);
             } else {
-                nextElement = this.range.endContainer.parentElement
+                nextElement = this.range.endContainer.parentElement;
             }
         } else if (nextSibling && nextSibling.nodeType !== 3 && this.range.endOffset === this.range.endContainer.textContent.length) {
             // aaa**bbb** 选中 aaa 加粗
-            nextElement = nextSibling as Element
+            nextElement = nextSibling as Element;
         }
         const wbrElement = document.createElement("wbr");
         this.range.insertNode(wbrElement);
@@ -298,9 +298,9 @@ export class Toolbar {
                     types.find((itemType, index) => {
                         if (type === itemType) {
                             types.splice(index, 1);
-                            return true
+                            return true;
                         }
-                    })
+                    });
                     if (types.length === 0) {
                         newNodes.push(document.createTextNode(item.textContent));
                     } else {
@@ -340,7 +340,7 @@ export class Toolbar {
                 } else {
                     let types = (item.getAttribute("data-type") || "").split(" ");
                     types.push(type);
-                    types = [...new Set(types)]
+                    types = [...new Set(types)];
                     if (index === 0 && previousElement && previousElement.nodeType !== 3 && isArrayEqual(types, previousElement.getAttribute("data-type").split(" "))) {
                         previousIndex = previousElement.textContent.length;
                         previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
@@ -373,7 +373,7 @@ export class Toolbar {
         if (nextIndex) {
             this.range.setEnd(nextElement.lastChild, nextIndex);
         } else if (newNodes.length > 0) {
-            const lastNewNode = newNodes[newNodes.length - 1]
+            const lastNewNode = newNodes[newNodes.length - 1];
             if (lastNewNode.lastChild) {
                 this.range.setEnd(lastNewNode.lastChild, lastNewNode.lastChild.textContent.length);
             } else {

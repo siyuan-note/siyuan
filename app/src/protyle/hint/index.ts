@@ -727,7 +727,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         const previous = hasPreviousSibling(range.startContainer);
         if (previous && previous.nodeType !== 3 && (previous as HTMLElement).classList.contains("img")) {
             if (!hasNextSibling(previous)) {
-                range.insertNode(document.createTextNode(Constants.ZWSP))
+                range.insertNode(document.createTextNode(Constants.ZWSP));
                 range.collapse(false);
             }
         }

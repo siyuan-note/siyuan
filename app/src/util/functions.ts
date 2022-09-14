@@ -4,7 +4,7 @@ export const isMobile = () => {
 
 export const isArrayEqual = (arr1: string[], arr2: string[]) => {
     return arr1.length === arr2.length && arr1.every((item) => arr2.includes(item));
-}
+};
 
 export const getRandom = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min; //含最大值，含最小值

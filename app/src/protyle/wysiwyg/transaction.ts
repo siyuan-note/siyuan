@@ -305,14 +305,14 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
     }
     if (operation.action === "updateAttrs") { // 调用接口才推送
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
-            const data = operation.data as any
+            const data = operation.data as any;
             Object.keys(data.old).forEach(key => {
-                item.removeAttribute(key)
-            })
-            let nodeAttrHTML = ""
+                item.removeAttribute(key);
+            });
+            let nodeAttrHTML = "";
             Object.keys(data.new).forEach(key => {
                 item.setAttribute(key, data.new[key]);
-                const escapeHTML = data.new[key]
+                const escapeHTML = data.new[key];
                 if (key === "bookmark") {
                     nodeAttrHTML += `<div class="protyle-attr--bookmark">${escapeHTML}</div>`;
                 } else if (key === "name") {
@@ -322,7 +322,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                 } else if (key === "memo") {
                     nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
                 }
-            })
+            });
             const refElement = item.lastElementChild.querySelector(".protyle-attr--refcount");
             if (refElement) {
                 nodeAttrHTML += refElement.outerHTML;

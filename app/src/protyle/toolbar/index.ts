@@ -126,7 +126,7 @@ export class Toolbar {
         });
         const types = this.getCurrentType();
         types.forEach(item => {
-            if (item === "blockRef") {
+            if (item === "block-ref" || item === "text") {
                 return;
             }
             this.element.querySelector(`[data-type="${item}"]`).classList.add("protyle-toolbar__item--current");
@@ -600,15 +600,15 @@ export class Toolbar {
                     newElement = document.createElement("span");
                     newElement.setAttribute("data-type", "a");
                     break;
-                case "blockRef":
-                    if (refText === "") {
-                        wbrElement.remove();
-                        return;
-                    }
-                    this.range.insertNode(refNode);
-                    this.range.selectNodeContents(refNode);
-                    hintRef(refText, protyle, true);
-                    break;
+                // case "blockRef":
+                //     if (refText === "") {
+                //         wbrElement.remove();
+                //         return;
+                //     }
+                //     this.range.insertNode(refNode);
+                //     this.range.selectNodeContents(refNode);
+                //     hintRef(refText, protyle, true);
+                //     break;
                 case "inline-math":
                     newElement = document.createElement("span");
                     newElement.className = "render-node";

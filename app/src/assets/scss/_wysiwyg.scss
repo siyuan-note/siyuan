@@ -239,8 +239,8 @@
       background-color: var(--b3-protyle-inline-mark-background);
     }
 
-    span[data-type="block-ref"],
-    span[data-type="file-annotation-ref"] {
+    span[data-type~="block-ref"],
+    span[data-type~="file-annotation-ref"] {
       color: var(--b3-protyle-inline-blockref-color);
       opacity: .86;
       transition: var(--b3-transition);
@@ -573,10 +573,10 @@
 
 // 导出 html 不需要编辑样式
 .protyle-wysiwyg[contenteditable="true"] {
-  span[data-type="inline-math"],
-  span[data-type="tag"],
-  span[data-type="block-ref"],
-  span[data-type="file-annotation-ref"],
+  span[data-type~="inline-math"],
+  span[data-type~="tag"],
+  span[data-type~="block-ref"],
+  span[data-type~="file-annotation-ref"],
   .protyle-action__language,
   .img > span:nth-child(2),
   .li > .protyle-action,
@@ -584,12 +584,12 @@
     cursor: pointer;
   }
 
-  span[data-type="tag"]:hover {
+  span[data-type~="tag"]:hover {
     background-color: var(--b3-border-color);
   }
 
-  span[data-type="block-ref"]:hover,
-  span[data-type="file-annotation-ref"]:hover {
+  span[data-type~="block-ref"]:hover,
+  span[data-type~="file-annotation-ref"]:hover {
     opacity: 1;
   }
 

@@ -439,9 +439,9 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 }
                 return;
             }
-            range.deleteContents();
             range.insertNode(document.createElement("wbr"));
             html = nodeElement.outerHTML;
+            range.deleteContents();
             const tempElement = document.createElement("template");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             range.insertNode(tempElement.content.cloneNode(true));

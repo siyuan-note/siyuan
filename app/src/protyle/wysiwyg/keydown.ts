@@ -413,7 +413,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const ids = protyle.path.split("/");
                 if (ids.length > 2) {
                     /// #if MOBILE
-                    openMobileFileById(ids[ids.length - 2],[Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
+                    openMobileFileById(ids[ids.length - 2], [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
                     /// #else
                     openFileById({
                         id: ids[ids.length - 2],
@@ -520,14 +520,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             const inlineElement = hasClosestByAttribute(range.startContainer, "data-type", null);
             if (inlineElement) {
-                const type = inlineElement.getAttribute("data-type");
-                if (type === "block-ref") {
+                const types = inlineElement.getAttribute("data-type").split(" ");
+                if (types.includes("block-ref")) {
                     refMenu(protyle, inlineElement);
                     return;
-                } else if (type === "file-annotation-ref") {
+                } else if (types.includes("file-annotation-ref")) {
                     protyle.toolbar.showFileAnnotationRef(protyle, inlineElement);
                     return;
-                } else if (type === "a") {
+                } else if (types.includes("a")) {
                     linkMenu(protyle, inlineElement);
                     return;
                 }
@@ -1185,8 +1185,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 if (matchHotKey(menuItem.hotkey, event)) {
                     protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
-                    if (menuItem.name === "text") {
-                        protyle.toolbar.element.querySelector('[data-type="text"]').dispatchEvent(new CustomEvent(getEventName()));
+                    if (menuItem.name === "text" || menuItem.name === "block-ref") {
+                        protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(new CustomEvent(getEventName()));
                     } else {
                         protyle.toolbar.setInlineMark(protyle, menuItem.name, "range");
                     }

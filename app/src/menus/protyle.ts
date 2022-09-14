@@ -794,7 +794,10 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             icon: "iconGraph",
             click() {
                 linkElement.setAttribute("data-subtype", "s");
-                linkElement.setAttribute("data-type", "block-ref");
+                const types = linkElement.getAttribute("data-type").split(" ");
+                types.push("block-ref");
+                types.splice(types.indexOf("a"), 1);
+                linkElement.setAttribute("data-type", types.join(" "));
                 linkElement.setAttribute("data-id", linkAddress?.replace("siyuan://blocks/", ""));
                 linkElement.removeAttribute("data-href");
                 linkElement.removeAttribute("data-title");

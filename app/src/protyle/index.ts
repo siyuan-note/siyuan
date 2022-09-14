@@ -129,7 +129,7 @@ class Protyle {
                                 }
                             }
                             // update ref
-                            this.protyle.wysiwyg.element.querySelectorAll(`[data-type="block-ref"][data-id="${data.data.id}"]`).forEach(item => {
+                            this.protyle.wysiwyg.element.querySelectorAll(`[data-type="~block-ref"][data-id="${data.data.id}"]`).forEach(item => {
                                 if (item.getAttribute("data-subtype") === "d") {
                                     item.textContent = data.data.title;
                                 }

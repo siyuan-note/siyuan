@@ -1068,8 +1068,8 @@ export class WYSIWYG {
                 return false;
             }
             protyle.toolbar.range = getEditorRange(protyle.element);
-            const type = target.getAttribute("data-type");
-            if (type === "block-ref") {
+            const types = target.getAttribute("data-type").split(" ");
+            if (types.includes("block-ref")) {
                 refMenu(protyle, target);
                 // 阻止 popover
                 target.setAttribute("prevent-popover", "true");
@@ -1078,11 +1078,11 @@ export class WYSIWYG {
                 }, 620);
                 return false;
             }
-            if (type === "file-annotation-ref") {
+            if (types.includes("file-annotation-ref")) {
                 protyle.toolbar.showFileAnnotationRef(protyle, target);
                 return false;
             }
-            if (type === "a") {
+            if (types.includes("a")) {
                 linkMenu(protyle, target);
                 if (target.getAttribute("data-href")?.startsWith("siyuan://blocks")) {
                     // 阻止 popover

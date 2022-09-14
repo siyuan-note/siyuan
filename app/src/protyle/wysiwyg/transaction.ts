@@ -132,7 +132,7 @@ const promiseTransaction = () => {
                     }
                 });
                 // 更新引用块
-                protyle.wysiwyg.element.querySelectorAll(`[data-type="block-ref"][data-id="${operation.id}"]`).forEach(item => {
+                protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${operation.id}"]`).forEach(item => {
                     if (item.getAttribute("data-subtype") === "d") {
                         item.textContent = "block not found";
                     }
@@ -265,7 +265,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
             }
         });
         // 更新 ws 引用块
-        protyle.wysiwyg.element.querySelectorAll(`[data-type="block-ref"][data-id="${operation.id}"]`).forEach(item => {
+        protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${operation.id}"]`).forEach(item => {
             if (item.getAttribute("data-subtype") === "d") {
                 item.textContent = "block not found";
             }
@@ -701,7 +701,7 @@ const updateRef = (protyle: IProtyle, id: string, index = 0) => {
     if (index > 6) {
         return;
     }
-    protyle.wysiwyg.element.querySelectorAll(`[data-type="block-ref"][data-id="${id}"]`).forEach(item => {
+    protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${id}"]`).forEach(item => {
         if (item.getAttribute("data-subtype") === "d") {
             fetchPost("/api/block/getRefText", {id: id}, (response) => {
                 item.innerHTML = response.data;

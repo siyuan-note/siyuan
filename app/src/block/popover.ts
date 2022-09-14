@@ -132,7 +132,7 @@ export const initBlockPopover = () => {
                     ids = [dataId];
                 }
                 defIds = JSON.parse(popoverTargetElement.getAttribute("data-defids") || "[]");
-            } else if (popoverTargetElement.getAttribute("data-type") === "virtual-block-ref") {
+            } else if (popoverTargetElement.getAttribute("data-type").indexOf("virtual-block-ref") > -1) {
                 const nodeElement = hasClosestBlock(popoverTargetElement);
                 if (nodeElement) {
                     const postResponse = await fetchSyncPost("/api/block/getBlockDefIDsByRefText", {

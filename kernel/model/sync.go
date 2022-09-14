@@ -345,7 +345,7 @@ func formatErrorMsg(err error) string {
 		msg = Conf.Language(24)
 	} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") {
 		msg = Conf.Language(24)
-	} else if strings.Contains(msgLowerCase, "connection was") || strings.Contains(msgLowerCase, "reset by peer") {
+	} else if strings.Contains(msgLowerCase, "connection was") || strings.Contains(msgLowerCase, "reset by peer") || strings.Contains(msgLowerCase, "refused") || strings.Contains(msgLowerCase, "socket") {
 		msg = Conf.Language(28)
 	} else if strings.Contains(msgLowerCase, "cloud object not found") {
 		msg = Conf.Language(129)

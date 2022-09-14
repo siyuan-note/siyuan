@@ -1,5 +1,5 @@
 import {Divider} from "./Divider";
-import {Font} from "./Font";
+import {Font, setFontStyle} from "./Font";
 import {ToolbarItem} from "./ToolbarItem";
 import {
     focusByRange,
@@ -231,7 +231,7 @@ export class Toolbar {
         });
     }
 
-    private hasSameStyle(currentElement: HTMLElement, sideElement: HTMLElement, textObj?: { color?: string, type?: string }) {
+    private hasSameStyle(currentElement: HTMLElement, sideElement: HTMLElement, textObj: ITextOption) {
         if (!textObj) {
             return true;
         }
@@ -277,7 +277,7 @@ export class Toolbar {
         }
     }
 
-    public setInlineMark(protyle: IProtyle, type: string, action: "remove" | "add" | "range" | "toolbar", textObj?: { color?: string, type?: string }) {
+    public setInlineMark(protyle: IProtyle, type: string, action: "remove" | "add" | "range" | "toolbar", textObj?: ITextOption) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement) {
             return;
@@ -334,7 +334,7 @@ export class Toolbar {
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
         if (action === "remove" || actionBtn?.classList.contains("protyle-toolbar__item--current") ||
-            (action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type))) {
+            (action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && (!textObj || textObj.type === "remove"))) {
             // 移除
             if (actionBtn) {
                 actionBtn.classList.remove("protyle-toolbar__item--current");
@@ -351,6 +351,13 @@ export class Toolbar {
                     if (types.length === 0) {
                         newNodes.push(document.createTextNode(item.textContent));
                     } else {
+                        if (textObj && textObj.type === "remove") {
+                            item.style.color = "";
+                            item.style.webkitTextFillColor = "";
+                            item.style.webkitTextStroke = "";
+                            item.style.textShadow = "";
+                            item.style.backgroundColor = "";
+                        }
                         if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
                             isArrayEqual(types, previousElement.getAttribute("data-type").split(" ")) &&
                             this.hasSameStyle(item, previousElement, textObj)) {
@@ -391,6 +398,7 @@ export class Toolbar {
                         const inlineElement = document.createElement("span");
                         inlineElement.setAttribute("data-type", type);
                         inlineElement.textContent = item.textContent;
+                        setFontStyle(inlineElement, textObj);
                         newNodes.push(inlineElement);
                     }
                 } else {
@@ -409,6 +417,7 @@ export class Toolbar {
                         nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
                     } else {
                         item.setAttribute("data-type", types.join(" "));
+                        setFontStyle(item, textObj);
                         newNodes.push(item);
                     }
                 }

@@ -30,6 +30,11 @@ interface Window {
     goBack(): void
 }
 
+interface ITextOption {
+    color: string,
+    type: string
+}
+
 interface IInbox {
     oId: string
     shorthandContent: string

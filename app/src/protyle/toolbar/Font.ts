@@ -120,57 +120,25 @@ export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
             color = fontStyles[1];
         }
     }
-    protyle.toolbar.setInlineMark(protyle, "text", "add", {type, color});
-    const range = protyle.toolbar.range;
-    const textElement = hasClosestByMatchTag(range.startContainer, "SPAN");
-    if (!textElement) {
-        return;
-    }
-    const nodeElement = hasClosestBlock(textElement);
-    if (!nodeElement) {
-        return;
-    }
-    textElement.insertAdjacentHTML("beforeend", "<wbr>");
-    const html = nodeElement.outerHTML;
-
-
-    if (type === "remove") {
-        textElement.style.color = "";
-        textElement.style.webkitTextFillColor = "";
-        textElement.style.webkitTextStroke = "";
-        textElement.style.textShadow = "";
-        textElement.style.backgroundColor = "";
-        const textNode = document.createTextNode(textElement.textContent);
-        textElement.parentElement.replaceChild(textNode, textElement);
-        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-        const wbrElement = nodeElement.querySelector("wbr");
-        if (wbrElement) {
-            wbrElement.remove();
-        }
-        range.setStart(textNode, 0);
-        range.setEnd(textNode, textNode.textContent.length);
-        focusByRange(range);
-        return;
-    }
-
-    switch (type) {
-        case "color":
-            textElement.style.color = color;
-            break;
-        case "backgroundColor":
-            textElement.style.backgroundColor = color;
-            break;
-        case "style2":
-            textElement.style.webkitTextStroke = "0.2px var(--b3-theme-on-background)";
-            textElement.style.webkitTextFillColor = "transparent";
-            break;
-        case "style4":
-            textElement.style.textShadow = "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)";
-            break;
-    }
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-    const wbrElement = nodeElement.querySelector("wbr");
-    if (wbrElement) {
-        wbrElement.remove();
-    }
+    protyle.toolbar.setInlineMark(protyle, "text", "range", {type, color});
 };
+
+export const setFontStyle = (textElement:HTMLElement, textOption:ITextOption) => {
+    if (textOption) {
+        switch (textOption.type) {
+            case "color":
+                textElement.style.color = textOption.color;
+                break;
+            case "backgroundColor":
+                textElement.style.backgroundColor = textOption.color;
+                break;
+            case "style2":
+                textElement.style.webkitTextStroke = "0.2px var(--b3-theme-on-background)";
+                textElement.style.webkitTextFillColor = "transparent";
+                break;
+            case "style4":
+                textElement.style.textShadow = "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)";
+                break;
+        }
+    }
+}

@@ -246,7 +246,7 @@
       transition: var(--b3-transition);
     }
 
-    span[data-type="file-annotation-ref"]:before {
+    span[data-type~="file-annotation-ref"]:before {
       content: "🔖 ";
     }
 

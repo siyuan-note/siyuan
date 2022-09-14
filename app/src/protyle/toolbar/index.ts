@@ -126,7 +126,7 @@ export class Toolbar {
         });
         const types = this.getCurrentType();
         types.forEach(item => {
-            if (item === "block-ref" || item === "text") {
+            if (item === "block-ref" || item === "text" || item === "file-annotation-ref") {
                 return;
             }
             this.element.querySelector(`[data-type="${item}"]`).classList.add("protyle-toolbar__item--current");
@@ -725,9 +725,7 @@ export class Toolbar {
             focusByWbr(nodeElement, this.range);
         });
         const anchorElement = this.subElement.querySelector('[data-type="anchor"]') as HTMLInputElement;
-        if (refElement.getAttribute("data-subtype") === "s") {
-            anchorElement.value = refElement.textContent;
-        }
+        anchorElement.value = refElement.textContent;
         anchorElement.addEventListener("change", (event) => {
             refElement.after(document.createElement("wbr"));
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));

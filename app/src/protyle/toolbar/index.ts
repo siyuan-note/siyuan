@@ -231,45 +231,91 @@ export class Toolbar {
         });
     }
 
-    public setInlineMark(protyle: IProtyle, type: string, action: "remove" | "add" | "range" | "toolbar", textObj?: {color?: string, type?:string}) {
+    private hasSameStyle(currentElement: HTMLElement, sideElement: HTMLElement, textObj?: { color?: string, type?: string }) {
+        if (!textObj) {
+            return true;
+        }
+        let color = "";
+        let webkitTextFillColor = ""
+        let webkitTextStroke = ""
+        let textShadow = ""
+        let backgroundColor = ""
+        if (currentElement.nodeType !== 3) {
+            color = currentElement.style.color;
+            webkitTextFillColor = currentElement.style.webkitTextFillColor;
+            webkitTextStroke = currentElement.style.webkitTextStroke;
+            textShadow = currentElement.style.textShadow;
+            backgroundColor = currentElement.style.backgroundColor;
+        }
+        if (textObj.type === "color") {
+            return textObj.color === sideElement.style.color &&
+                webkitTextFillColor === sideElement.style.webkitTextFillColor &&
+                webkitTextStroke === sideElement.style.webkitTextStroke &&
+                textShadow === sideElement.style.textShadow &&
+                backgroundColor === sideElement.style.backgroundColor
+        }
+        if (textObj.type === "backgroundColor") {
+            return color === sideElement.style.color &&
+                webkitTextFillColor === sideElement.style.webkitTextFillColor &&
+                webkitTextStroke === sideElement.style.webkitTextStroke &&
+                textShadow === sideElement.style.textShadow &&
+                textObj.color === sideElement.style.backgroundColor
+        }
+        if (textObj.type === "style2") {
+            return color === sideElement.style.color &&
+                "transparent" === sideElement.style.webkitTextFillColor &&
+                "0.2px var(--b3-theme-on-background)" === sideElement.style.webkitTextStroke &&
+                textShadow === sideElement.style.textShadow &&
+                backgroundColor === sideElement.style.backgroundColor
+        }
+        if (textObj.type === "style4") {
+            return color === sideElement.style.color &&
+                webkitTextFillColor === sideElement.style.webkitTextFillColor &&
+                webkitTextStroke === sideElement.style.webkitTextStroke &&
+                "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)" === sideElement.style.textShadow &&
+                backgroundColor === sideElement.style.backgroundColor
+        }
+    }
+
+    public setInlineMark(protyle: IProtyle, type: string, action: "remove" | "add" | "range" | "toolbar", textObj?: { color?: string, type?: string }) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement) {
             return;
         }
         const rangeTypes = this.getCurrentType();
-        let previousElement: Element;
-        let nextElement: Element;
+        let previousElement: HTMLElement;
+        let nextElement: HTMLElement;
         let previousIndex: number;
         let nextIndex: number;
         const previousSibling = hasPreviousSibling(this.range.startContainer);
         if (!["DIV", "TD", "TH"].includes(this.range.startContainer.parentElement.tagName)) {
             if (this.range.startOffset === 0 && !previousSibling) {
-                previousElement = this.range.startContainer.parentElement.previousSibling as Element;
+                previousElement = this.range.startContainer.parentElement.previousSibling as HTMLElement;
                 this.range.setStartBefore(this.range.startContainer.parentElement);
             } else {
                 previousElement = this.range.startContainer.parentElement;
             }
         } else if (previousSibling && previousSibling.nodeType !== 3 && this.range.startOffset === 0) {
             // **aaa**bbb 选中 bbb 加粗
-            previousElement = previousSibling as Element;
+            previousElement = previousSibling as HTMLElement;
         }
         const nextSibling = hasNextSibling(this.range.endContainer);
         if (!["DIV", "TD", "TH"].includes(this.range.endContainer.parentElement.tagName)) {
             if (this.range.endOffset === this.range.endContainer.textContent.length && !nextSibling) {
-                nextElement = this.range.endContainer.parentElement.nextSibling as Element;
+                nextElement = this.range.endContainer.parentElement.nextSibling as HTMLElement;
                 this.range.setEndAfter(this.range.endContainer.parentElement);
             } else {
                 nextElement = this.range.endContainer.parentElement;
             }
         } else if (nextSibling && nextSibling.nodeType !== 3 && this.range.endOffset === this.range.endContainer.textContent.length) {
             // aaa**bbb** 选中 aaa 加粗
-            nextElement = nextSibling as Element;
+            nextElement = nextSibling as HTMLElement;
         }
         const wbrElement = document.createElement("wbr");
         this.range.insertNode(wbrElement);
         const html = nodeElement.outerHTML;
         const contents = this.range.extractContents();
-        // 合并 node
+        // 合并多个 text 为一个 text
         for (let i = 0; i < contents.childNodes.length; i++) {
             if (contents.childNodes[i].nodeType === 3) {
                 if (contents.childNodes[i].textContent === "") {
@@ -289,6 +335,7 @@ export class Toolbar {
         const newNodes: Node[] = [];
         if (action === "remove" || actionBtn?.classList.contains("protyle-toolbar__item--current") ||
             (action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type))) {
+            // 移除
             if (actionBtn) {
                 actionBtn.classList.remove("protyle-toolbar__item--current");
             }
@@ -304,10 +351,14 @@ export class Toolbar {
                     if (types.length === 0) {
                         newNodes.push(document.createTextNode(item.textContent));
                     } else {
-                        if (index === 0 && previousElement && previousElement.nodeType !== 3 && isArrayEqual(types, previousElement.getAttribute("data-type").split(" "))) {
+                        if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
+                            isArrayEqual(types, previousElement.getAttribute("data-type").split(" ")) &&
+                            this.hasSameStyle(item, previousElement, textObj)) {
                             previousIndex = previousElement.textContent.length;
                             previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
-                        } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 && isArrayEqual(types, nextElement.getAttribute("data-type").split(" "))) {
+                        } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
+                            isArrayEqual(types, nextElement.getAttribute("data-type").split(" ")) &&
+                            this.hasSameStyle(item, nextElement, textObj)) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
                         } else {
@@ -320,15 +371,20 @@ export class Toolbar {
                 }
             });
         } else {
+            // 添加
             if (!this.element.classList.contains("fn__none") && type !== "text") {
                 this.element.querySelector(`[data-type="${type}"]`).classList.add("protyle-toolbar__item--current");
             }
             contents.childNodes.forEach((item: HTMLElement, index) => {
                 if (item.nodeType === 3) {
-                    if (index === 0 && previousElement && previousElement.nodeType !== 3 && type === previousElement.getAttribute("data-type")) {
+                    if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
+                        type === previousElement.getAttribute("data-type") &&
+                        this.hasSameStyle(item, previousElement, textObj)) {
                         previousIndex = previousElement.textContent.length;
                         previousElement.innerHTML = previousElement.innerHTML + item.textContent;
-                    } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 && type === nextElement.getAttribute("data-type")) {
+                    } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
+                        type === nextElement.getAttribute("data-type") &&
+                        this.hasSameStyle(item, nextElement, textObj)) {
                         nextIndex = item.textContent.length;
                         nextElement.innerHTML = item.textContent + nextElement.innerHTML;
                     } else {
@@ -341,10 +397,14 @@ export class Toolbar {
                     let types = (item.getAttribute("data-type") || "").split(" ");
                     types.push(type);
                     types = [...new Set(types)];
-                    if (index === 0 && previousElement && previousElement.nodeType !== 3 && isArrayEqual(types, previousElement.getAttribute("data-type").split(" "))) {
+                    if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
+                        isArrayEqual(types, previousElement.getAttribute("data-type").split(" ")) &&
+                        this.hasSameStyle(item, previousElement, textObj)) {
                         previousIndex = previousElement.textContent.length;
                         previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
-                    } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 && isArrayEqual(types, nextElement.getAttribute("data-type").split(" "))) {
+                    } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
+                        isArrayEqual(types, nextElement.getAttribute("data-type").split(" ")) &&
+                        this.hasSameStyle(item, nextElement, textObj)) {
                         nextIndex = item.textContent.length;
                         nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
                     } else {

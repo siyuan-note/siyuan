@@ -168,7 +168,6 @@ export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
             textElement.style.textShadow = "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)";
             break;
     }
-    textElement.setAttribute("style", textElement.getAttribute("style").replace(" background-clip", " -webkit-background-clip"));
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
     const wbrElement = nodeElement.querySelector("wbr");
     if (wbrElement) {

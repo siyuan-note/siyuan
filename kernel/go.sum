@@ -19,8 +19,8 @@ github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5 h1:8HdZozCsXS
 github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/88250/gulu v1.2.3-0.20220909041418-fdfa4d7380bf h1:q+iiBuKjdvUKj5dQQHCRs+g9oChTWkZmm7r1FMvtkfI=
 github.com/88250/gulu v1.2.3-0.20220909041418-fdfa4d7380bf/go.mod h1:I1qBzsksFL2ciGSuqDE7R3XW4BUMrfDgOvSXEk7FsAI=
-github.com/88250/lute v1.7.5-0.20220913172545-b1d7f2231ec9 h1:MZzkCt80ARMKBEo74Ps/VcvvlVErsUu6lBVBqupNfWA=
-github.com/88250/lute v1.7.5-0.20220913172545-b1d7f2231ec9/go.mod h1:cEoBGi0zArPqAsp0MdG9SKinvH/xxZZWXU7sRx8vHSA=
+github.com/88250/lute v1.7.5-0.20220914033628-cdff00d59d4b h1:NlIeWlATxeeMFqsFBjH2TDuirEEhdjSpOOfhoRQbBQk=
+github.com/88250/lute v1.7.5-0.20220914033628-cdff00d59d4b/go.mod h1:cEoBGi0zArPqAsp0MdG9SKinvH/xxZZWXU7sRx8vHSA=
 github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1 h1:9Cb+iN639vUI2OcIBc+4oGwml9/0J6bL6dWNb8Al+1s=
 github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1/go.mod h1:jH6MMPr8G7AMzaVmWHXZQiB1DKO3giWbcWZ7UoJ1teI=
 github.com/88250/pdfcpu v0.3.13 h1:touMWMZkCGalMIbEg9bxYp7rETM+zwb9hXjwhqi4I7Q=

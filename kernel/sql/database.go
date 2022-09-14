@@ -399,6 +399,8 @@ func resolveRefContent0(node *ast.Node, anchors *map[string]string, depth *int, 
 		case ast.NodeText, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			buf.Write(n.Tokens)
+		case ast.NodeTextMark:
+			buf.WriteString(n.TextMarkTextContent)
 		case ast.NodeBlockRef:
 			if anchor := n.ChildByType(ast.NodeBlockRefText); nil != anchor {
 				buf.WriteString(anchor.Text())
@@ -537,7 +539,8 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		spans = append(spans, span)
 		walkStatus = ast.WalkContinue
 		return
-	case ast.NodeTag, ast.NodeInlineMath, ast.NodeCodeSpan, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline:
+	case ast.NodeTag, ast.NodeInlineMath, ast.NodeCodeSpan, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline, ast.NodeTextMark:
+		typ := treenode.TypeAbbr(n.Type.String())
 		var text string
 		switch n.Type {
 		case ast.NodeTag, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline:
@@ -546,6 +549,9 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			text = n.ChildByType(ast.NodeInlineMathContent).TokensStr()
 		case ast.NodeCodeSpan:
 			text = n.ChildByType(ast.NodeCodeSpanContent).TokensStr()
+		case ast.NodeTextMark:
+			text = n.TextMarkTextContent
+			typ = typ + " " + n.TextMarkType
 		}
 
 		markdown := treenode.FormatNode(n, luteEngine)
@@ -558,7 +564,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			Path:     p,
 			Content:  text,
 			Markdown: markdown,
-			Type:     treenode.TypeAbbr(n.Type.String()),
+			Type:     typ,
 			IAL:      treenode.IALStr(n),
 		}
 		spans = append(spans, span)
@@ -1202,7 +1208,7 @@ func nSort(n *ast.Node) int {
 	case ast.NodeSuperBlock:
 		return 30
 	// 以下为行级元素
-	case ast.NodeText:
+	case ast.NodeText, ast.NodeTextMark:
 		return 200
 	case ast.NodeTag:
 		return 205

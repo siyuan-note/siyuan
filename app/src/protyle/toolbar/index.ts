@@ -1,5 +1,5 @@
 import {Divider} from "./Divider";
-import {Font, setFontStyle} from "./Font";
+import {Font, hasSameTextStyle, setFontStyle} from "./Font";
 import {ToolbarItem} from "./ToolbarItem";
 import {
     focusByRange,
@@ -231,49 +231,25 @@ export class Toolbar {
         });
     }
 
-    private hasSameStyle(currentElement: HTMLElement, sideElement: HTMLElement, textObj: ITextOption) {
-        if (!textObj) {
-            return true;
+    // 合并多个 text 为一个 text
+    private mergeNode(nodes: NodeListOf<ChildNode>) {
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].nodeType !== 3 && (nodes[i] as HTMLElement).tagName === "WBR") {
+                nodes[i].remove();
+                i--;
+            }
         }
-        let color = "";
-        let webkitTextFillColor = ""
-        let webkitTextStroke = ""
-        let textShadow = ""
-        let backgroundColor = ""
-        if (currentElement.nodeType !== 3) {
-            color = currentElement.style.color;
-            webkitTextFillColor = currentElement.style.webkitTextFillColor;
-            webkitTextStroke = currentElement.style.webkitTextStroke;
-            textShadow = currentElement.style.textShadow;
-            backgroundColor = currentElement.style.backgroundColor;
-        }
-        if (textObj.type === "color") {
-            return textObj.color === sideElement.style.color &&
-                webkitTextFillColor === sideElement.style.webkitTextFillColor &&
-                webkitTextStroke === sideElement.style.webkitTextStroke &&
-                textShadow === sideElement.style.textShadow &&
-                backgroundColor === sideElement.style.backgroundColor
-        }
-        if (textObj.type === "backgroundColor") {
-            return color === sideElement.style.color &&
-                webkitTextFillColor === sideElement.style.webkitTextFillColor &&
-                webkitTextStroke === sideElement.style.webkitTextStroke &&
-                textShadow === sideElement.style.textShadow &&
-                textObj.color === sideElement.style.backgroundColor
-        }
-        if (textObj.type === "style2") {
-            return color === sideElement.style.color &&
-                "transparent" === sideElement.style.webkitTextFillColor &&
-                "0.2px var(--b3-theme-on-background)" === sideElement.style.webkitTextStroke &&
-                textShadow === sideElement.style.textShadow &&
-                backgroundColor === sideElement.style.backgroundColor
-        }
-        if (textObj.type === "style4") {
-            return color === sideElement.style.color &&
-                webkitTextFillColor === sideElement.style.webkitTextFillColor &&
-                webkitTextStroke === sideElement.style.webkitTextStroke &&
-                "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)" === sideElement.style.textShadow &&
-                backgroundColor === sideElement.style.backgroundColor
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].nodeType === 3) {
+                if (nodes[i].textContent === "") {
+                    nodes[i].remove();
+                    i--;
+                } else if (nodes[i + 1] && nodes[i + 1].nodeType === 3) {
+                    nodes[i].textContent = nodes[i].textContent + nodes[i + 1].textContent;
+                    nodes[i + 1].remove();
+                    i--;
+                }
+            }
         }
     }
 
@@ -315,22 +291,7 @@ export class Toolbar {
         this.range.insertNode(wbrElement);
         const html = nodeElement.outerHTML;
         const contents = this.range.extractContents();
-        // 合并多个 text 为一个 text
-        for (let i = 0; i < contents.childNodes.length; i++) {
-            if (contents.childNodes[i].nodeType === 3) {
-                if (contents.childNodes[i].textContent === "") {
-                    contents.childNodes[i].remove();
-                    i--;
-                } else if (contents.childNodes[i + 1] && contents.childNodes[i + 1].nodeType === 3) {
-                    contents.childNodes[i].textContent = contents.childNodes[i].textContent + contents.childNodes[i + 1].textContent;
-                    contents.childNodes[i + 1].remove();
-                    i--;
-                }
-            } else if (contents.childNodes[i].nodeType !== 3 && (contents.childNodes[i] as HTMLElement).tagName === "WBR") {
-                contents.childNodes[i].remove();
-                i--;
-            }
-        }
+        this.mergeNode(contents.childNodes);
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
         if (action === "remove" || actionBtn?.classList.contains("protyle-toolbar__item--current") ||
@@ -360,12 +321,12 @@ export class Toolbar {
                         }
                         if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
                             isArrayEqual(types, previousElement.getAttribute("data-type").split(" ")) &&
-                            this.hasSameStyle(item, previousElement, textObj)) {
+                            hasSameTextStyle(item, previousElement, textObj)) {
                             previousIndex = previousElement.textContent.length;
                             previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
                         } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
                             isArrayEqual(types, nextElement.getAttribute("data-type").split(" ")) &&
-                            this.hasSameStyle(item, nextElement, textObj)) {
+                            hasSameTextStyle(item, nextElement, textObj)) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
                         } else {
@@ -386,12 +347,12 @@ export class Toolbar {
                 if (item.nodeType === 3) {
                     if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
                         type === previousElement.getAttribute("data-type") &&
-                        this.hasSameStyle(item, previousElement, textObj)) {
+                        hasSameTextStyle(item, previousElement, textObj)) {
                         previousIndex = previousElement.textContent.length;
                         previousElement.innerHTML = previousElement.innerHTML + item.textContent;
                     } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
                         type === nextElement.getAttribute("data-type") &&
-                        this.hasSameStyle(item, nextElement, textObj)) {
+                        hasSameTextStyle(item, nextElement, textObj)) {
                         nextIndex = item.textContent.length;
                         nextElement.innerHTML = item.textContent + nextElement.innerHTML;
                     } else {
@@ -407,12 +368,12 @@ export class Toolbar {
                     types = [...new Set(types)];
                     if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
                         isArrayEqual(types, previousElement.getAttribute("data-type").split(" ")) &&
-                        this.hasSameStyle(item, previousElement, textObj)) {
+                        hasSameTextStyle(item, previousElement, textObj)) {
                         previousIndex = previousElement.textContent.length;
                         previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
                     } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
                         isArrayEqual(types, nextElement.getAttribute("data-type").split(" ")) &&
-                        this.hasSameStyle(item, nextElement, textObj)) {
+                        hasSameTextStyle(item, nextElement, textObj)) {
                         nextIndex = item.textContent.length;
                         nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
                     } else {
@@ -427,6 +388,12 @@ export class Toolbar {
             this.range.insertNode(item);
             this.range.collapse(false);
         });
+        if (previousElement) {
+            this.mergeNode(previousElement.childNodes);
+        }
+        if (nextElement) {
+            this.mergeNode(nextElement.childNodes);
+        }
         if (previousIndex) {
             this.range.setStart(previousElement.firstChild, previousIndex);
         } else if (newNodes.length > 0) {
@@ -450,6 +417,7 @@ export class Toolbar {
             }
         } else {
             // **aaa**bbb 选中 bbb 加粗
+            // 需进行 mergeNode ，否用 alt+x 为相同颜色 aaabbb 中的 bbb 再次赋值后无法选中
             this.range.setEnd(previousElement.firstChild, previousElement.firstChild.textContent.length);
         }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));

@@ -1185,8 +1185,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 if (matchHotKey(menuItem.hotkey, event)) {
                     protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
-                    if (menuItem.name === "font") {
-                        protyle.toolbar.element.querySelector('[data-type="font"]').dispatchEvent(new CustomEvent(getEventName()));
+                    if (menuItem.name === "text") {
+                        protyle.toolbar.element.querySelector('[data-type="text"]').dispatchEvent(new CustomEvent(getEventName()));
                     } else {
                         protyle.toolbar.setInlineMark(protyle, menuItem.name, "range");
                     }

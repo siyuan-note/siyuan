@@ -231,7 +231,7 @@ export class Toolbar {
         });
     }
 
-    public setInlineMark(protyle: IProtyle, type: string, action: "remove" | "add" | "range" | "toolbar", focusAdd = false) {
+    public setInlineMark(protyle: IProtyle, type: string, action: "remove" | "add" | "range" | "toolbar", textObj?: {color?: string, type?:string}) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement) {
             return;
@@ -292,11 +292,7 @@ export class Toolbar {
             if (actionBtn) {
                 actionBtn.classList.remove("protyle-toolbar__item--current");
             }
-            let removeIndex = 0
             contents.childNodes.forEach((item: HTMLElement, index) => {
-                if (item.tagName === "WBR") {
-                    return;
-                }
                 if (item.nodeType !== 3) {
                     const types = item.getAttribute("data-type").split(" ");
                     types.find((itemType, index) => {
@@ -305,11 +301,10 @@ export class Toolbar {
                             return true
                         }
                     })
-
                     if (types.length === 0) {
                         newNodes.push(document.createTextNode(item.textContent));
                     } else {
-                        if (removeIndex === 0 && previousElement && previousElement.nodeType !== 3 && isArrayEqual(types, previousElement.getAttribute("data-type").split(" "))) {
+                        if (index === 0 && previousElement && previousElement.nodeType !== 3 && isArrayEqual(types, previousElement.getAttribute("data-type").split(" "))) {
                             previousIndex = previousElement.textContent.length;
                             previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
                         } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 && isArrayEqual(types, nextElement.getAttribute("data-type").split(" "))) {
@@ -323,16 +318,14 @@ export class Toolbar {
                 } else {
                     newNodes.push(item);
                 }
-                removeIndex++
             });
         } else {
-            if (!this.element.classList.contains("fn__none")) {
+            if (!this.element.classList.contains("fn__none") && type !== "text") {
                 this.element.querySelector(`[data-type="${type}"]`).classList.add("protyle-toolbar__item--current");
             }
-            let addIndex = 0
             contents.childNodes.forEach((item: HTMLElement, index) => {
                 if (item.nodeType === 3) {
-                    if (addIndex === 0 && previousElement && previousElement.nodeType !== 3 && type === previousElement.getAttribute("data-type")) {
+                    if (index === 0 && previousElement && previousElement.nodeType !== 3 && type === previousElement.getAttribute("data-type")) {
                         previousIndex = previousElement.textContent.length;
                         previousElement.innerHTML = previousElement.innerHTML + item.textContent;
                     } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 && type === nextElement.getAttribute("data-type")) {
@@ -344,12 +337,11 @@ export class Toolbar {
                         inlineElement.textContent = item.textContent;
                         newNodes.push(inlineElement);
                     }
-                    addIndex++;
                 } else {
                     let types = (item.getAttribute("data-type") || "").split(" ");
                     types.push(type);
                     types = [...new Set(types)]
-                    if (addIndex === 0 && previousElement && previousElement.nodeType !== 3 && isArrayEqual(types, previousElement.getAttribute("data-type").split(" "))) {
+                    if (index === 0 && previousElement && previousElement.nodeType !== 3 && isArrayEqual(types, previousElement.getAttribute("data-type").split(" "))) {
                         previousIndex = previousElement.textContent.length;
                         previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
                     } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 && isArrayEqual(types, nextElement.getAttribute("data-type").split(" "))) {
@@ -359,7 +351,6 @@ export class Toolbar {
                         item.setAttribute("data-type", types.join(" "));
                         newNodes.push(item);
                     }
-                    addIndex++;
                 }
             });
         }
@@ -411,10 +402,10 @@ export class Toolbar {
             return;
         }
         // 对已有字体样式的文字再次添加字体样式
-        if (focusAdd && action === "add" && types.includes("text") && this.range.startContainer.nodeType === 3 &&
-            this.range.startContainer.parentNode.isSameNode(this.range.endContainer.parentNode)) {
-            return;
-        }
+        // if (focusAdd && action === "add" && types.includes("text") && this.range.startContainer.nodeType === 3 &&
+        //     this.range.startContainer.parentNode.isSameNode(this.range.endContainer.parentNode)) {
+        //     return;
+        // }
         let startElement = this.range.startContainer as Element;
         if (this.range.startContainer.nodeType === 3) {
             startElement = this.range.startContainer.parentElement;

@@ -120,26 +120,28 @@ export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
             color = fontStyles[1];
         }
     }
-    protyle.toolbar.setInlineMark(protyle, "text", "add", true);
+    protyle.toolbar.setInlineMark(protyle, "text", "add", {type, color});
     const range = protyle.toolbar.range;
-    const fontElement = hasClosestByMatchTag(range.startContainer, "STRONG");
-    if (!fontElement) {
+    const textElement = hasClosestByMatchTag(range.startContainer, "SPAN");
+    if (!textElement) {
         return;
     }
-    const nodeElement = hasClosestBlock(fontElement);
+    const nodeElement = hasClosestBlock(textElement);
     if (!nodeElement) {
         return;
     }
-    fontElement.insertAdjacentHTML("beforeend", "<wbr>");
+    textElement.insertAdjacentHTML("beforeend", "<wbr>");
     const html = nodeElement.outerHTML;
+
+
     if (type === "remove") {
-        fontElement.style.color = "";
-        fontElement.style.webkitTextFillColor = "";
-        fontElement.style.webkitTextStroke = "";
-        fontElement.style.textShadow = "";
-        fontElement.style.backgroundColor = "";
-        const textNode = document.createTextNode(fontElement.textContent);
-        fontElement.parentElement.replaceChild(textNode, fontElement);
+        textElement.style.color = "";
+        textElement.style.webkitTextFillColor = "";
+        textElement.style.webkitTextStroke = "";
+        textElement.style.textShadow = "";
+        textElement.style.backgroundColor = "";
+        const textNode = document.createTextNode(textElement.textContent);
+        textElement.parentElement.replaceChild(textNode, textElement);
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
         const wbrElement = nodeElement.querySelector("wbr");
         if (wbrElement) {
@@ -153,20 +155,20 @@ export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
 
     switch (type) {
         case "color":
-            fontElement.style.color = color;
+            textElement.style.color = color;
             break;
         case "backgroundColor":
-            fontElement.style.backgroundColor = color;
+            textElement.style.backgroundColor = color;
             break;
         case "style2":
-            fontElement.style.webkitTextStroke = "0.2px var(--b3-theme-on-background)";
-            fontElement.style.webkitTextFillColor = "transparent";
+            textElement.style.webkitTextStroke = "0.2px var(--b3-theme-on-background)";
+            textElement.style.webkitTextFillColor = "transparent";
             break;
         case "style4":
-            fontElement.style.textShadow = "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)";
+            textElement.style.textShadow = "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)";
             break;
     }
-    fontElement.setAttribute("style", fontElement.getAttribute("style").replace(" background-clip", " -webkit-background-clip"));
+    textElement.setAttribute("style", textElement.getAttribute("style").replace(" background-clip", " -webkit-background-clip"));
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
     const wbrElement = nodeElement.querySelector("wbr");
     if (wbrElement) {

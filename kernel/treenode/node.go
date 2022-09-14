@@ -89,6 +89,8 @@ func NodeStaticContent(node *ast.Node) string {
 		case ast.NodeText, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
 			buf.Write(n.Tokens)
+		case ast.NodeTextMark:
+			buf.WriteString(n.TextMarkTextContent)
 		case ast.NodeBackslash:
 			buf.WriteByte(lex.ItemBackslash)
 		case ast.NodeBackslashContent:
@@ -228,6 +230,7 @@ var typeAbbrMap = map[string]string{
 	"NodeSub":           "sub",
 	"NodeKbd":           "kbd",
 	"NodeUnderline":     "underline",
+	"NodeTextMark":      "textmark",
 }
 
 var abbrTypeMap = map[string]string{}

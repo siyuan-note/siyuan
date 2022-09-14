@@ -58,6 +58,9 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 		if ast.NodeImage == n.Type {
 			linkDest := n.ChildByType(ast.NodeLinkDest)
 			dest := linkDest.Tokens
+			if 1 > len(dest) { // 双击打开图片不对 https://github.com/siyuan-note/siyuan/issues/5876
+				return ast.WalkContinue
+			}
 			ret = append(ret, gulu.Str.FromBytes(dest))
 		}
 		return ast.WalkContinue

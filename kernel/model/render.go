@@ -104,7 +104,7 @@ func renderBlockText(node *ast.Node) (ret string) {
 
 func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
-	blockRenderer := render.NewBlockRenderer(tree, luteEngine.RenderOptions)
+	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
 	for _, n := range nodes {
 		ast.Walk(n, func(node *ast.Node, entering bool) ast.WalkStatus {
 			rendererFunc := blockRenderer.RendererFuncs[node.Type]

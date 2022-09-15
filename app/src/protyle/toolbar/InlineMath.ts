@@ -20,13 +20,6 @@ export class InlineMath extends ToolbarItem {
             if (!nodeElement) {
                 return;
             }
-
-            const inlineMathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math");
-            if (inlineMathElement) {
-                mathRender(inlineMathElement);
-                return;
-            }
-
             if (!["DIV", "TD", "TH"].includes(range.startContainer.parentElement.tagName) && range.startOffset === 0 && !hasPreviousSibling(range.startContainer)) {
                 range.setStartBefore(range.startContainer.parentElement);
             }
@@ -38,14 +31,18 @@ export class InlineMath extends ToolbarItem {
             const html = nodeElement.outerHTML;
 
             const newElement = document.createElement("span");
+            const rangeString = range.toString();
             newElement.className = "render-node";
             newElement.setAttribute("contenteditable", "false");
             newElement.setAttribute("data-type", "inline-math");
             newElement.setAttribute("data-subtype", "math");
-            newElement.setAttribute("data-content", range.toString());
+            newElement.setAttribute("data-content", rangeString.trim());
             range.extractContents();
             range.insertNode(newElement);
             mathRender(newElement);
+            if (rangeString.trim() === "") {
+                protyle.toolbar.showRender(protyle, newElement);
+            }
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
             wbrElement.remove();

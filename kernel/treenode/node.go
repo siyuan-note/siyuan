@@ -33,6 +33,8 @@ import (
 
 // NestedInlines2FlattedSpans 将嵌套的行级节点转换为平铺的文本标记节点。
 func NestedInlines2FlattedSpans(tree *parse.Tree) {
+	defer logging.Recover()
+
 	var tags []string
 	var unlinks []*ast.Node
 	var span *ast.Node

@@ -1433,6 +1433,7 @@ func createDoc(boxID, p, title, dom string) (err error) {
 	tree.HPath = hPath
 	tree.ID = id
 	tree.Root.ID = id
+	tree.Root.Spec = "1"
 	updated := util.TimeFromID(id)
 	tree.Root.KramdownIAL = [][]string{{"id", id}, {"title", html.EscapeAttrVal(title)}, {"updated", updated}}
 	if nil == tree.Root.FirstChild {

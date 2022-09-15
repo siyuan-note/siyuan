@@ -144,6 +144,10 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	// 写回 .sy
 	for _, tree := range trees {
 		syPath := filepath.Join(unzipRootPath, tree.Path)
+		if "" == tree.Root.Spec {
+			treenode.NestedInlines2FlattedSpans(tree)
+			tree.Root.Spec = "1"
+		}
 		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
 		data := renderer.Render()
 
@@ -451,6 +455,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			tree.Path = targetPath
 			targetPaths[curRelPath] = targetPath
 			tree.HPath = hPath
+			tree.Root.Spec = "1"
 			treenode.NestedInlines2FlattedSpans(tree)
 
 			docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))

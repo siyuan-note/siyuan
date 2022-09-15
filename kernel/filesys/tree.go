@@ -103,6 +103,10 @@ func WriteTree(tree *parse.Tree) (err error) {
 		treenode.ReindexBlockTree(tree)
 	}
 
+	if "" == tree.Root.Spec {
+		treenode.NestedInlines2FlattedSpans(tree)
+		tree.Root.Spec = "1"
+	}
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
 	output := renderer.Render()
 
@@ -181,6 +185,11 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 
 	ret.Box = boxID
 	ret.Path = p
+	if "" == ret.Root.Spec {
+		treenode.NestedInlines2FlattedSpans(ret)
+		ret.Root.Spec = "1"
+		needFix = true
+	}
 	if needFix {
 		renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions)
 		output := renderer.Render()

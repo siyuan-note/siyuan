@@ -199,6 +199,10 @@ func GetAnnouncements() (ret []*Announcement) {
 		return
 	}
 
+	if nil == result["announcement"] {
+		return
+	}
+
 	announcements := result["announcement"].([]interface{})
 	for _, announcement := range announcements {
 		ann := announcement.(map[string]interface{})

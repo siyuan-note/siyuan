@@ -95,6 +95,7 @@ func NestedInlines2FlattedSpans(tree *parse.Tree) {
 					}
 				}
 			} else {
+				span.KramdownIAL = n.Parent.KramdownIAL
 				n.Parent.InsertBefore(span)
 			}
 		}

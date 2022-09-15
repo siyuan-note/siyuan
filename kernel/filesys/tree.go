@@ -103,10 +103,11 @@ func WriteTree(tree *parse.Tree) (err error) {
 		treenode.ReindexBlockTree(tree)
 	}
 
+	filePath := filepath.Join(util.DataDir, tree.Box, tree.Path)
 	if oldSpec := tree.Root.Spec; "" == oldSpec {
 		treenode.NestedInlines2FlattedSpans(tree)
 		tree.Root.Spec = "1"
-		logging.LogInfof("migrated tree [%s] from spec [%s] to [%s]", tree.Root.ID, oldSpec, tree.Root.Spec)
+		logging.LogInfof("migrated tree [%s] from spec [%s] to [%s]", filePath, oldSpec, tree.Root.Spec)
 	}
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
 	output := renderer.Render()
@@ -119,7 +120,6 @@ func WriteTree(tree *parse.Tree) (err error) {
 	}
 	output = buf.Bytes()
 
-	filePath := filepath.Join(util.DataDir, tree.Box, tree.Path)
 	if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
 		return
 	}
@@ -186,11 +186,13 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 
 	ret.Box = boxID
 	ret.Path = p
+
+	filePath := filepath.Join(util.DataDir, ret.Box, ret.Path)
 	if oldSpec := ret.Root.Spec; "" == oldSpec {
 		treenode.NestedInlines2FlattedSpans(ret)
 		ret.Root.Spec = "1"
 		needFix = true
-		logging.LogInfof("migrated tree [%s] from spec [%s] to [%s]", ret.Root.ID, oldSpec, ret.Root.Spec)
+		logging.LogInfof("migrated tree [%s] from spec [%s] to [%s]", filePath, oldSpec, ret.Root.Spec)
 	}
 	if needFix {
 		renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions)
@@ -203,7 +205,6 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		}
 		output = buf.Bytes()
 
-		filePath := filepath.Join(util.DataDir, ret.Box, ret.Path)
 		if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
 			return
 		}

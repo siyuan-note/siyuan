@@ -152,7 +152,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         selectNode.firstChild.remove();
     }
     // https://github.com/siyuan-note/siyuan/issues/3850
-    if (editableElement?.lastElementChild?.getAttribute("data-type") === "inline-math" &&
+    if (editableElement?.lastElementChild?.getAttribute("data-type").indexOf("inline-math") > -1 &&
         !hasNextSibling(editableElement?.lastElementChild)) {
         editableElement.insertAdjacentText("beforeend", "\n");
     }
@@ -390,7 +390,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         selectNode.firstChild.remove();
     }
     // https://github.com/siyuan-note/siyuan/issues/3850
-    if (editableElement?.lastElementChild?.getAttribute("data-type") === "inline-math" &&
+    if (editableElement?.lastElementChild?.getAttribute("data-type").indexOf("inline-math") > -1 &&
         !hasNextSibling(editableElement?.lastElementChild)) {
         editableElement.insertAdjacentText("beforeend", "\n");
     }

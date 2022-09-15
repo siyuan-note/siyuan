@@ -535,11 +535,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             // https://github.com/siyuan-note/siyuan/issues/5185
             if (range.startOffset === 0 && range.startContainer.nodeType === 3) {
                 const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
-                if (previousSibling && previousSibling.nodeType !== 3 && previousSibling.getAttribute("data-type") === "inline-math") {
+                if (previousSibling && previousSibling.nodeType !== 3 && previousSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
                     protyle.toolbar.showRender(protyle, previousSibling);
                     return;
                 } else if (!previousSibling && range.startContainer.parentElement.previousSibling.isSameNode(range.startContainer.parentElement.previousElementSibling) &&
-                    range.startContainer.parentElement.previousElementSibling.getAttribute("data-type") === "inline-math") {
+                    range.startContainer.parentElement.previousElementSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
                     protyle.toolbar.showRender(protyle, range.startContainer.parentElement.previousElementSibling);
                     return;
                 }
@@ -1185,7 +1185,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 if (matchHotKey(menuItem.hotkey, event)) {
                     protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
-                    if (["text", "a", "block-ref"].includes(menuItem.name)) {
+                    if (["text", "a", "block-ref", "inline-math"].includes(menuItem.name)) {
                         protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(new CustomEvent("block-ref" === menuItem.name ? getEventName() : "click"));
                     } else {
                         protyle.toolbar.setInlineMark(protyle, menuItem.name, "range");

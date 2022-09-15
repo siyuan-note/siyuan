@@ -41,6 +41,7 @@ import {renderAssetsPreview} from "../../asset/renderAssets";
 import {electronUndo} from "../undo";
 import {previewTemplate} from "./util";
 import {showMessage} from "../../dialog/message";
+import {InlineMath} from "./InlineMath";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -125,7 +126,7 @@ export class Toolbar {
         });
         const types = this.getCurrentType();
         types.forEach(item => {
-            if (["a", "block-ref", "text", "file-annotation-ref"].includes(item)) {
+            if (["a", "block-ref", "text", "file-annotation-ref", "inline-math"].includes(item)) {
                 return;
             }
             this.element.querySelector(`[data-type="${item}"]`).classList.add("protyle-toolbar__item--current");
@@ -163,15 +164,15 @@ export class Toolbar {
             types = types.concat((endElement.getAttribute("data-type") || "").split(" "));
         }
         // if (range.startOffset === range.startContainer.textContent.length) {
-            // const nextSibling = hasNextSibling(range.startContainer) as Element;
-            // if (nextSibling && nextSibling.nodeType !== 3) {
-            //     types = types.concat((nextSibling.getAttribute("data-type") || "").split(" "));
-            // }
+        // const nextSibling = hasNextSibling(range.startContainer) as Element;
+        // if (nextSibling && nextSibling.nodeType !== 3) {
+        //     types = types.concat((nextSibling.getAttribute("data-type") || "").split(" "));
+        // }
         // } else if (range.endOffset === 0) {
         //     const previousSibling = hasPreviousSibling(range.startContainer) as Element;
-            // if (previousSibling && previousSibling.nodeType !== 3) {
-            //     types = types.concat((previousSibling.getAttribute("data-type") || "").split(" "));
-            // }
+        // if (previousSibling && previousSibling.nodeType !== 3) {
+        //     types = types.concat((previousSibling.getAttribute("data-type") || "").split(" "));
+        // }
         // }
         range.cloneContents().childNodes.forEach((item: HTMLElement) => {
             if (item.nodeType !== 3) {
@@ -195,11 +196,13 @@ export class Toolbar {
             case "sup":
             case "sub":
             case "kbd":
-            case "inline-math":
                 menuItemObj = new ToolbarItem(protyle, menuItem);
                 break;
             case "block-ref":
                 menuItemObj = new BlockRef(protyle, menuItem);
+                break;
+            case "inline-math":
+                menuItemObj = new InlineMath(protyle, menuItem);
                 break;
             case "|":
                 menuItemObj = new Divider();
@@ -488,12 +491,12 @@ export class Toolbar {
         //     return;
         // }
         let startElement = this.range.startContainer as Element;
-        if (this.range.startContainer.nodeType === 3) {
-            startElement = this.range.startContainer.parentElement;
-            if (startElement.getAttribute("data-type") === "virtual-block-ref" && !["DIV", "TD", "TH"].includes(startElement.parentElement.tagName)) {
-                startElement = startElement.parentElement;
-            }
-        }
+        // if (this.range.startContainer.nodeType === 3) {
+        //     startElement = this.range.startContainer.parentElement;
+        //     if (startElement.getAttribute("data-type") === "virtual-block-ref" && !["DIV", "TD", "TH"].includes(startElement.parentElement.tagName)) {
+        //         startElement = startElement.parentElement;
+        //     }
+        // }
 
         // table 选中处理
         const tableElement = hasClosestByAttribute(startElement, "data-type", "NodeTable");
@@ -523,19 +526,19 @@ export class Toolbar {
             }
         }
 
-        if (this.range.toString() === "" && action === "range" && getSelectionOffset(startElement, protyle.wysiwyg.element).end === startElement.textContent.length &&
-            this.range.startContainer.nodeType === 3 && !this.range.startContainer.parentElement.getAttribute("contenteditable") &&
-            types.length > 0) {
-            // 跳出行内元素
-            const textNode = document.createTextNode(Constants.ZWSP);
-            this.range.startContainer.parentElement.after(textNode);
-            this.range.selectNodeContents(textNode);
-            this.range.collapse(false);
-            if (types.includes(type)) {
-                // 如果不是同一种行内元素，需进行后续的渲染操作
-                return;
-            }
-        }
+        // if (this.range.toString() === "" && action === "range" && getSelectionOffset(startElement, protyle.wysiwyg.element).end === startElement.textContent.length &&
+        //     this.range.startContainer.nodeType === 3 && !this.range.startContainer.parentElement.getAttribute("contenteditable") &&
+        //     types.length > 0) {
+        //     // 跳出行内元素
+        //     const textNode = document.createTextNode(Constants.ZWSP);
+        //     this.range.startContainer.parentElement.after(textNode);
+        //     this.range.selectNodeContents(textNode);
+        //     this.range.collapse(false);
+        //     if (types.includes(type)) {
+        //         // 如果不是同一种行内元素，需进行后续的渲染操作
+        //         return;
+        //     }
+        // }
         // if (types.length > 0 && types.includes("link") && action === "range") {
         //     // 链接快捷键不应取消，应该显示链接信息
         //     linkMenu(protyle, this.range.startContainer.parentElement);
@@ -653,15 +656,15 @@ export class Toolbar {
                 //     this.range.selectNodeContents(refNode);
                 //     hintRef(refText, protyle, true);
                 //     break;
-                case "inline-math":
-                    newElement = document.createElement("span");
-                    newElement.className = "render-node";
-                    newElement.setAttribute("contenteditable", "false");
-                    newElement.setAttribute("data-type", "inline-math");
-                    newElement.setAttribute("data-subtype", "math");
-                    newElement.setAttribute("data-content", startText + selectContents.textContent + endText);
-                    mathRender(newElement);
-                    break;
+                // case "inline-math":
+                //     newElement = document.createElement("span");
+                //     newElement.className = "render-node";
+                //     newElement.setAttribute("contenteditable", "false");
+                //     newElement.setAttribute("data-type", "inline-math");
+                //     newElement.setAttribute("data-subtype", "math");
+                //     newElement.setAttribute("data-content", startText + selectContents.textContent + endText);
+                //     mathRender(newElement);
+                //     break;
             }
             // if (newElement) {
             //     this.range.insertNode(newElement);

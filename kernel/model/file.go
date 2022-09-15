@@ -614,7 +614,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 		}
 	}
 
-	subTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
+	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 	keyword = strings.Join(strings.Split(keyword, " "), search.TermSep)
 	keywords := search.SplitKeyword(keyword)
 
@@ -727,6 +727,8 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 
 		subTree.Root.AppendChild(n)
 	}
+
+	treenode.NestedInlines2FlattedSpans(subTree)
 
 	luteEngine.RenderOptions.NodeIndexStart = index
 	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions)

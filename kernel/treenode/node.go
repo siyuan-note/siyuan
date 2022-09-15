@@ -31,6 +31,95 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
+// NestedInlines2FlattedSpans 将嵌套的行级节点转换为平铺的文本标记节点。
+func NestedInlines2FlattedSpans(tree *parse.Tree) {
+	var tags []string
+	var unlinks []*ast.Node
+	var span *ast.Node
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		switch n.Type {
+		case ast.NodeCodeSpan:
+			processNestedNode(n, "code", &tags, &unlinks, entering)
+		case ast.NodeTag:
+			processNestedNode(n, "tag", &tags, &unlinks, entering)
+		case ast.NodeInlineMath:
+			processNestedNode(n, "inline-math", &tags, &unlinks, entering)
+		case ast.NodeEmphasis:
+			processNestedNode(n, "em", &tags, &unlinks, entering)
+		case ast.NodeStrong:
+			processNestedNode(n, "strong", &tags, &unlinks, entering)
+		case ast.NodeStrikethrough:
+			processNestedNode(n, "s", &tags, &unlinks, entering)
+		case ast.NodeMark:
+			processNestedNode(n, "mark", &tags, &unlinks, entering)
+		case ast.NodeUnderline:
+			processNestedNode(n, "u", &tags, &unlinks, entering)
+		case ast.NodeSub:
+			processNestedNode(n, "sub", &tags, &unlinks, entering)
+		case ast.NodeSup:
+			processNestedNode(n, "sup", &tags, &unlinks, entering)
+		case ast.NodeKbd:
+			processNestedNode(n, "kbd", &tags, &unlinks, entering)
+		case ast.NodeLink:
+			processNestedNode(n, "a", &tags, &unlinks, entering)
+		case ast.NodeText, ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeLinkText:
+			if 1 > len(tags) {
+				return ast.WalkContinue
+			}
+
+			if entering {
+				span = &ast.Node{Type: ast.NodeTextMark, TextMarkType: strings.Join(tags, " "), TextMarkTextContent: string(n.Tokens)}
+				if ast.NodeInlineMathContent == n.Type {
+					span.TextMarkTextContent = ""
+					span.TextMarkInlineMathContent = string(n.Tokens)
+				}
+				if ast.NodeLinkText == n.Type && !n.ParentIs(ast.NodeImage) {
+					var link *ast.Node
+					for p := n.Parent; nil != p; p = p.Parent {
+						if ast.NodeLink == p.Type {
+							link = p
+							break
+						}
+					}
+					if nil != link {
+						dest := link.ChildByType(ast.NodeLinkDest)
+						if nil != dest {
+							span.TextMarkAHref = string(dest.Tokens)
+						}
+						title := link.ChildByType(ast.NodeLinkTitle)
+						if nil != title {
+							span.TextMarkATitle = string(title.Tokens)
+						}
+					}
+				}
+			} else {
+				n.Parent.InsertBefore(span)
+			}
+		}
+		return ast.WalkContinue
+	})
+
+	for _, n := range unlinks {
+		n.Unlink()
+	}
+}
+
+func processNestedNode(n *ast.Node, tag string, tags *[]string, unlinks *[]*ast.Node, entering bool) {
+	if entering {
+		*tags = append(*tags, tag)
+	} else {
+		*tags = (*tags)[:len(*tags)-1]
+		*unlinks = append(*unlinks, n)
+		for c := n.FirstChild; nil != c; {
+			next := c.Next
+			if ast.NodeTextMark == c.Type {
+				n.InsertBefore(c)
+			}
+			c = next
+		}
+	}
+}
+
 func NodeStaticMdContent(node *ast.Node, luteEngine *lute.Lute) (md, content string) {
 	md = FormatNode(node, luteEngine)
 	content = NodeStaticContent(node)

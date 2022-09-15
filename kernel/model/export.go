@@ -34,7 +34,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
-	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/88250/pdfcpu/pkg/api"
@@ -921,66 +920,9 @@ func exportMarkdownContent(id string) (hPath, exportedMd string) {
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
-	exportedMd = formatExportMd(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
+	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions)
+	exportedMd = gulu.Str.FromBytes(renderer.Render())
 	return
-}
-
-func formatExportMd(node *ast.Node, parseOptions *parse.Options, renderOptions *render.Options) string {
-	root := &ast.Node{Type: ast.NodeDocument}
-	tree := &parse.Tree{Root: root, Context: &parse.Context{ParseOption: parseOptions}}
-	renderer := render.NewFormatRenderer(tree, renderOptions)
-	renderer.Writer = &bytes.Buffer{}
-	renderer.Writer.Grow(4096)
-	renderer.NodeWriterStack = append(renderer.NodeWriterStack, renderer.Writer)
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		switch n.Type {
-		case ast.NodeParagraph: // 段落需要单独处理。导出为 Markdown 时段落开头空两格不生效 https://github.com/siyuan-note/siyuan/issues/3167
-			return renderExportMdParagraph(renderer, n, entering)
-		case ast.NodeMathBlockContent:
-			return renderExportMdMathBlockContent(renderer, n, entering)
-		case ast.NodeInlineMathContent:
-			return renderExportMdInlineMathContent(renderer, n, entering)
-		case ast.NodeCodeBlockCode:
-			return renderExportMdCodeBlockCode(renderer, n, entering)
-		default:
-			rendererFunc := renderer.RendererFuncs[n.Type]
-			return rendererFunc(n, entering)
-		}
-	})
-	return gulu.Str.FromBytes(renderer.Writer.Bytes())
-}
-
-func renderExportMdCodeBlockCode(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {
-	if entering {
-		tokens := node.Tokens
-		info := node.Parent.ChildByType(ast.NodeCodeBlockFenceInfoMarker)
-		if nil != info &&
-			bytes.Contains(info.CodeBlockInfo, []byte("flowchart")) ||
-			bytes.Contains(info.CodeBlockInfo, []byte("mermaid")) ||
-			bytes.Contains(info.CodeBlockInfo, []byte("graphviz")) ||
-			bytes.Contains(info.CodeBlockInfo, []byte("plantuml")) {
-			tokens = html.UnescapeHTML(tokens)
-		}
-		r.Write(tokens)
-	}
-	return ast.WalkContinue
-}
-
-func renderExportMdMathBlockContent(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {
-	if entering {
-		tokens := html.UnescapeHTML(node.Tokens)
-		r.Write(tokens)
-		r.WriteByte(lex.ItemNewline)
-	}
-	return ast.WalkContinue
-}
-
-func renderExportMdInlineMathContent(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {
-	if entering {
-		tokens := html.UnescapeHTML(node.Tokens)
-		r.Write(tokens)
-	}
-	return ast.WalkContinue
 }
 
 func processKaTexMacros(n *ast.Node) {
@@ -1020,60 +962,6 @@ func processKaTexMacros(n *ast.Node) {
 	}
 	mathContent = unescapeKaTexSupportedFunctions(mathContent)
 	n.Tokens = []byte(mathContent)
-}
-
-func renderExportMdParagraph(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {
-	if entering {
-		if r.Options.ChineseParagraphBeginningSpace && ast.NodeDocument == node.Parent.Type {
-			r.WriteString("　　")
-		}
-	} else {
-		if !r.Options.KeepParagraphBeginningSpace && nil != node.FirstChild {
-			node.FirstChild.Tokens = bytes.TrimSpace(node.FirstChild.Tokens)
-		}
-
-		if node.ParentIs(ast.NodeTableCell) {
-			if nil != node.Next && ast.NodeText != node.Next.Type {
-				r.WriteString("<br /><br />")
-			}
-			return ast.WalkContinue
-		}
-
-		if withoutKramdownBlockIAL(r, node) {
-			r.Newline()
-		}
-
-		inTightList := false
-		lastListItemLastPara := false
-		if parent := node.Parent; nil != parent {
-			if ast.NodeListItem == parent.Type { // ListItem.Paragraph
-				listItem := parent
-				if nil != listItem.Parent && nil != listItem.Parent.ListData {
-					// 必须通过列表（而非列表项）上的紧凑标识判断，因为在设置该标识时仅设置了 List.Tight
-					// 设置紧凑标识的具体实现可参考函数 List.Finalize()
-					inTightList = listItem.Parent.ListData.Tight
-
-					if nextItem := listItem.Next; nil == nextItem {
-						nextPara := node.Next
-						lastListItemLastPara = nil == nextPara
-					}
-				} else {
-					inTightList = true
-				}
-			}
-		}
-
-		if !inTightList || (lastListItemLastPara) {
-			if withoutKramdownBlockIAL(r, node) {
-				r.WriteByte(lex.ItemNewline)
-			}
-		}
-	}
-	return ast.WalkContinue
-}
-
-func withoutKramdownBlockIAL(r *render.FormatRenderer, node *ast.Node) bool {
-	return !r.Options.KramdownBlockIAL || 0 == len(node.KramdownIAL)
 }
 
 func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.Tree) {

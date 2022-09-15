@@ -614,7 +614,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 		}
 	}
 
-	subTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
+	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 	keyword = strings.Join(strings.Split(keyword, " "), search.TermSep)
 	keywords := search.SplitKeyword(keyword)
 
@@ -1433,6 +1433,7 @@ func createDoc(boxID, p, title, dom string) (err error) {
 	tree.HPath = hPath
 	tree.ID = id
 	tree.Root.ID = id
+	tree.Root.Spec = "1"
 	updated := util.TimeFromID(id)
 	tree.Root.KramdownIAL = [][]string{{"id", id}, {"title", html.EscapeAttrVal(title)}, {"updated", updated}}
 	if nil == tree.Root.FirstChild {

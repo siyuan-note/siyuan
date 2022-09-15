@@ -48,6 +48,9 @@ export const initBlockPopover = () => {
             }
             let popoverTargetElement = hasClosestByAttribute(event.target, "data-type", "block-ref") as HTMLElement ||
                 hasClosestByAttribute(event.target, "data-type", "virtual-block-ref") as HTMLElement;
+            if (popoverTargetElement && popoverTargetElement.classList.contains("protyle-toolbar")) {
+                popoverTargetElement = undefined;
+            }
             if (!popoverTargetElement) {
                 popoverTargetElement = hasClosestByClassName(event.target, "popover__block") as HTMLElement;
             }
@@ -103,6 +106,9 @@ export const initBlockPopover = () => {
             }
             let popoverTargetElement = hasClosestByAttribute(event.target, "data-type", "block-ref") as HTMLElement ||
                 hasClosestByAttribute(event.target, "data-type", "virtual-block-ref") as HTMLElement;
+            if (popoverTargetElement && popoverTargetElement.classList.contains("protyle-toolbar")) {
+                popoverTargetElement = undefined;
+            }
             if (!popoverTargetElement) {
                 popoverTargetElement = hasClosestByClassName(event.target, "popover__block") as HTMLElement;
             }

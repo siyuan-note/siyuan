@@ -181,7 +181,7 @@ export class WYSIWYG {
         /// #endif
     }
 
-    private bindCommonEvent (protyle: IProtyle) {
+    private bindCommonEvent(protyle: IProtyle) {
         this.element.addEventListener("copy", (event: ClipboardEvent & { target: HTMLElement }) => {
             // https://github.com/siyuan-note/siyuan/issues/4600
             if (event.target.tagName === "PROTYLE-HTML") {
@@ -395,7 +395,7 @@ export class WYSIWYG {
             } else if (event.clientX < mostLeft) {
                 x = mostLeft;
             }
-            const mostTop = rect.top + (protyle.options.render.breadcrumb?protyle.breadcrumb.element.parentElement.clientHeight:0);
+            const mostTop = rect.top + (protyle.options.render.breadcrumb ? protyle.breadcrumb.element.parentElement.clientHeight : 0);
 
             let mouseElement: Element;
             let moveCellElement: HTMLElement;
@@ -1068,7 +1068,7 @@ export class WYSIWYG {
                 return false;
             }
             protyle.toolbar.range = getEditorRange(protyle.element);
-            const types = target.getAttribute("data-type").split(" ");
+            const types = (target.getAttribute("data-type") || "").split(" ");
             if (types.includes("block-ref")) {
                 refMenu(protyle, target);
                 // 阻止 popover

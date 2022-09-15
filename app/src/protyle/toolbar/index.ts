@@ -145,7 +145,7 @@ export class Toolbar {
             return [];
         }
         if (!["DIV", "TD", "TH"].includes(startElement.tagName)) {
-            types = startElement.getAttribute("data-type").split(" ");
+            types = (startElement.getAttribute("data-type") || "").split(" ");
         }
         let endElement = range.endContainer as HTMLElement;
         if (endElement.nodeType === 3) {
@@ -157,17 +157,17 @@ export class Toolbar {
             return [];
         }
         if (!["DIV", "TD", "TH"].includes(endElement.tagName)) {
-            types = types.concat(endElement.getAttribute("data-type").split(" "));
+            types = types.concat((endElement.getAttribute("data-type") || "").split(" "));
         }
         if (range.startOffset === range.startContainer.textContent.length) {
-            const nextSibling = hasNextSibling(range.startContainer as Element);
-            if (nextSibling && nextSibling.nodeType !== 3 && (nextSibling as Element).getAttribute("data-type") === "inline-math") {
-                types.push("inline-math");
+            const nextSibling = hasNextSibling(range.startContainer) as Element;
+            if (nextSibling && nextSibling.nodeType !== 3) {
+                types = types.concat((nextSibling.getAttribute("data-type") || "").split(" "));
             }
         } else if (range.endOffset === 0) {
-            const previousSibling = hasPreviousSibling(range.startContainer as Element);
-            if (previousSibling && previousSibling.nodeType !== 3 && (previousSibling as Element).getAttribute("data-type") === "inline-math") {
-                types.push("inline-math");
+            const previousSibling = hasPreviousSibling(range.startContainer) as Element;
+            if (previousSibling && previousSibling.nodeType !== 3) {
+                types = types.concat((previousSibling.getAttribute("data-type") || "").split(" "));
             }
         }
         range.cloneContents().childNodes.forEach((item: HTMLElement) => {
@@ -259,6 +259,15 @@ export class Toolbar {
             return;
         }
         const rangeTypes = this.getCurrentType();
+        const selectText = this.range.toString();
+        // 没选中时，相同 type 的文字中不进行操作
+        if (selectText === "" && rangeTypes.includes(type) && this.range.startContainer.nodeType === 3) {
+            const currentNode = hasNextSibling(this.range.startContainer) as Element;
+            if (this.range.startOffset !== 0 && this.range.startContainer.parentElement.tagName === "SPAN" &&
+                (currentNode || (!currentNode && this.range.startOffset < this.range.startContainer.textContent.length))) {
+                return;
+            }
+        }
         let previousElement: HTMLElement;
         let nextElement: HTMLElement;
         let previousIndex: number;
@@ -293,9 +302,11 @@ export class Toolbar {
         const contents = this.range.extractContents();
         this.mergeNode(contents.childNodes);
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
-        const newNodes: Node[] = [];
-        if (actionBtn?.classList.contains("protyle-toolbar__item--current") ||
-            (action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && (!textObj || textObj.type === "remove"))) {
+        let newNodes: Node[] = [];
+        if (selectText !== "" && (
+            actionBtn?.classList.contains("protyle-toolbar__item--current") ||
+            (action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && (!textObj || textObj.type === "remove"))
+        )) {
             // 移除
             if (actionBtn) {
                 actionBtn.classList.remove("protyle-toolbar__item--current");
@@ -343,46 +354,53 @@ export class Toolbar {
             if (!this.element.classList.contains("fn__none") && type !== "text") {
                 this.element.querySelector(`[data-type="${type}"]`).classList.add("protyle-toolbar__item--current");
             }
-            contents.childNodes.forEach((item: HTMLElement, index) => {
-                if (item.nodeType === 3) {
-                    if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
-                        type === previousElement.getAttribute("data-type") &&
-                        hasSameTextStyle(item, previousElement, textObj)) {
-                        previousIndex = previousElement.textContent.length;
-                        previousElement.innerHTML = previousElement.innerHTML + item.textContent;
-                    } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
-                        type === nextElement.getAttribute("data-type") &&
-                        hasSameTextStyle(item, nextElement, textObj)) {
-                        nextIndex = item.textContent.length;
-                        nextElement.innerHTML = item.textContent + nextElement.innerHTML;
+            if (selectText === "") {
+                const inlineElement = document.createElement("span");
+                inlineElement.setAttribute("data-type", type);
+                inlineElement.textContent = Constants.ZWSP;
+                newNodes = [inlineElement];
+            } else {
+                contents.childNodes.forEach((item: HTMLElement, index) => {
+                    if (item.nodeType === 3) {
+                        if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
+                            type === previousElement.getAttribute("data-type") &&
+                            hasSameTextStyle(item, previousElement, textObj)) {
+                            previousIndex = previousElement.textContent.length;
+                            previousElement.innerHTML = previousElement.innerHTML + item.textContent;
+                        } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
+                            type === nextElement.getAttribute("data-type") &&
+                            hasSameTextStyle(item, nextElement, textObj)) {
+                            nextIndex = item.textContent.length;
+                            nextElement.innerHTML = item.textContent + nextElement.innerHTML;
+                        } else {
+                            const inlineElement = document.createElement("span");
+                            inlineElement.setAttribute("data-type", type);
+                            inlineElement.textContent = item.textContent;
+                            setFontStyle(inlineElement, textObj);
+                            newNodes.push(inlineElement);
+                        }
                     } else {
-                        const inlineElement = document.createElement("span");
-                        inlineElement.setAttribute("data-type", type);
-                        inlineElement.textContent = item.textContent;
-                        setFontStyle(inlineElement, textObj);
-                        newNodes.push(inlineElement);
+                        let types = (item.getAttribute("data-type") || "").split(" ");
+                        types.push(type);
+                        types = [...new Set(types)];
+                        if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
+                            isArrayEqual(types, previousElement.getAttribute("data-type").split(" ")) &&
+                            hasSameTextStyle(item, previousElement, textObj)) {
+                            previousIndex = previousElement.textContent.length;
+                            previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
+                        } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
+                            isArrayEqual(types, nextElement.getAttribute("data-type").split(" ")) &&
+                            hasSameTextStyle(item, nextElement, textObj)) {
+                            nextIndex = item.textContent.length;
+                            nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
+                        } else {
+                            item.setAttribute("data-type", types.join(" "));
+                            setFontStyle(item, textObj);
+                            newNodes.push(item);
+                        }
                     }
-                } else {
-                    let types = (item.getAttribute("data-type") || "").split(" ");
-                    types.push(type);
-                    types = [...new Set(types)];
-                    if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
-                        isArrayEqual(types, previousElement.getAttribute("data-type").split(" ")) &&
-                        hasSameTextStyle(item, previousElement, textObj)) {
-                        previousIndex = previousElement.textContent.length;
-                        previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
-                    } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
-                        isArrayEqual(types, nextElement.getAttribute("data-type").split(" ")) &&
-                        hasSameTextStyle(item, nextElement, textObj)) {
-                        nextIndex = item.textContent.length;
-                        nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
-                    } else {
-                        item.setAttribute("data-type", types.join(" "));
-                        setFontStyle(item, textObj);
-                        newNodes.push(item);
-                    }
-                }
-            });
+                });
+            }
         }
         newNodes.forEach((item) => {
             this.range.insertNode(item);
@@ -402,7 +420,7 @@ export class Toolbar {
             } else {
                 this.range.setStart(newNodes[0], 0);
             }
-        } else {
+        } else if (nextElement) {
             // aaa**bbb** 选中 aaa 加粗
             this.range.setStart(nextElement.firstChild, 0);
         }
@@ -415,7 +433,7 @@ export class Toolbar {
             } else {
                 this.range.setEnd(lastNewNode, lastNewNode.textContent.length);
             }
-        } else {
+        } else if (previousElement) {
             // **aaa**bbb 选中 bbb 加粗
             // 需进行 mergeNode ，否用 alt+x 为相同颜色 aaabbb 中的 bbb 再次赋值后无法选中
             this.range.setEnd(previousElement.firstChild, previousElement.firstChild.textContent.length);

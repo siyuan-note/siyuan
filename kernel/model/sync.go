@@ -63,6 +63,9 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
+
 	if util.IsMutexLocked(&syncLock) {
 		logging.LogWarnf("sync is in progress")
 		planSyncAfter(30 * time.Second)

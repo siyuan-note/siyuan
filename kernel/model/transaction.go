@@ -110,9 +110,12 @@ func AutoFlushTx() {
 	}
 }
 
+var txLock = sync.Mutex{}
+
 func flushTx() {
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
+	txLock.Lock()
+	defer txLock.Unlock()
+
 	defer logging.Recover()
 
 	currentTx = mergeTx()

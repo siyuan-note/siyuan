@@ -34,6 +34,9 @@ import (
 )
 
 func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]interface{}, err error) {
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
+
 	succMap = map[string]interface{}{}
 
 	bt := treenode.GetBlockTree(id)
@@ -100,6 +103,9 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 func Upload(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(200, ret)
+
+	writingDataLock.Lock()
+	defer writingDataLock.Unlock()
 
 	form, err := c.MultipartForm()
 	if nil != err {

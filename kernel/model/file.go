@@ -918,9 +918,12 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 }
 
 func writeJSONQueue(tree *parse.Tree) (err error) {
+	writingDataLock.Lock()
 	if err = filesys.WriteTree(tree); nil != err {
+		writingDataLock.Unlock()
 		return
 	}
+	writingDataLock.Unlock()
 	sql.UpsertTreeQueue(tree)
 	return
 }
@@ -931,9 +934,12 @@ func indexWriteJSONQueue(tree *parse.Tree) (err error) {
 }
 
 func renameWriteJSONQueue(tree *parse.Tree, oldHPath string) (err error) {
+	writingDataLock.Unlock()
 	if err = filesys.WriteTree(tree); nil != err {
+		writingDataLock.Unlock()
 		return
 	}
+	writingDataLock.Unlock()
 	sql.RenameTreeQueue(tree, oldHPath)
 	treenode.ReindexBlockTree(tree)
 	return

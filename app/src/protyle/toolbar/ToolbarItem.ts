@@ -12,7 +12,7 @@ export class ToolbarItem {
         this.element.setAttribute("data-type", menuItem.name);
         this.element.setAttribute("aria-label", tip + hotkey);
         this.element.innerHTML = `<svg><use xlink:href="#${menuItem.icon}"></use></svg>`;
-        if (menuItem.name === "text" || menuItem.name === "block-ref" || menuItem.name === "a") {
+        if (["text", "a", "block-ref"].includes(menuItem.name)) {
             return;
         }
         this.element.addEventListener(getEventName(), (event) => {

@@ -126,7 +126,7 @@ export class Toolbar {
         });
         const types = this.getCurrentType();
         types.forEach(item => {
-            if (item === "block-ref" || item === "text" || item === "file-annotation-ref") {
+            if (["a", "block-ref", "text", "file-annotation-ref"].includes(item)) {
                 return;
             }
             this.element.querySelector(`[data-type="${item}"]`).classList.add("protyle-toolbar__item--current");
@@ -253,7 +253,7 @@ export class Toolbar {
         }
     }
 
-    public setInlineMark(protyle: IProtyle, type: string, action: "remove" | "add" | "range" | "toolbar", textObj?: ITextOption) {
+    public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar", textObj?: ITextOption) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement) {
             return;
@@ -294,7 +294,7 @@ export class Toolbar {
         this.mergeNode(contents.childNodes);
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
-        if (action === "remove" || actionBtn?.classList.contains("protyle-toolbar__item--current") ||
+        if (actionBtn?.classList.contains("protyle-toolbar__item--current") ||
             (action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && (!textObj || textObj.type === "remove"))) {
             // 移除
             if (actionBtn) {
@@ -431,13 +431,13 @@ export class Toolbar {
             return;
         }
         const types = this.getCurrentType();
-        if (action === "add" && types.length > 0 && types.includes(type) && !focusAdd) {
-            if (type === "link") {
-                this.element.classList.add("fn__none");
-                linkMenu(protyle, this.range.startContainer.parentElement);
-            }
-            return;
-        }
+        // if (action === "add" && types.length > 0 && types.includes(type) && !focusAdd) {
+        //     if (type === "link") {
+        //         this.element.classList.add("fn__none");
+        //         linkMenu(protyle, this.range.startContainer.parentElement);
+        //     }
+        //     return;
+        // }
         // 对已有字体样式的文字再次添加字体样式
         // if (focusAdd && action === "add" && types.includes("text") && this.range.startContainer.nodeType === 3 &&
         //     this.range.startContainer.parentNode.isSameNode(this.range.endContainer.parentNode)) {
@@ -492,11 +492,11 @@ export class Toolbar {
                 return;
             }
         }
-        if (types.length > 0 && types.includes("link") && action === "range") {
-            // 链接快捷键不应取消，应该显示链接信息
-            linkMenu(protyle, this.range.startContainer.parentElement);
-            return;
-        }
+        // if (types.length > 0 && types.includes("link") && action === "range") {
+        //     // 链接快捷键不应取消，应该显示链接信息
+        //     linkMenu(protyle, this.range.startContainer.parentElement);
+        //     return;
+        // }
         const wbrElement = document.createElement("wbr");
         this.range.insertNode(wbrElement);
         this.range.setStartAfter(wbrElement);
@@ -540,22 +540,22 @@ export class Toolbar {
                 this.range.insertNode(textNode);
                 this.range.selectNodeContents(textNode);
             } else {
-                newNodes.forEach((item, index) => {
-                    this.range.insertNode(item);
-                    if (index !== newNodes.length - 1) {
-                        this.range.collapse(false);
-                    } else {
-                        this.range.setEnd(item, item.textContent.length);
-                    }
-                });
-                if (newNodes.length > 0) {
-                    this.range.setStart(newNodes[0], 0);
-                }
+                // newNodes.forEach((item, index) => {
+                //     this.range.insertNode(item);
+                //     if (index !== newNodes.length - 1) {
+                //         this.range.collapse(false);
+                //     } else {
+                //         this.range.setEnd(item, item.textContent.length);
+                //     }
+                // });
+                // if (newNodes.length > 0) {
+                //     this.range.setStart(newNodes[0], 0);
+                // }
             }
-            focusByRange(this.range);
-            this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
-                item.classList.remove("protyle-toolbar__item--current");
-            });
+            // focusByRange(this.range);
+            // this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
+            //     item.classList.remove("protyle-toolbar__item--current");
+            // });
         } else {
             if (newNodes.length === 0) {
                 newNodes.push(document.createTextNode(Constants.ZWSP));
@@ -565,41 +565,41 @@ export class Toolbar {
             const refText = startText + selectContents.textContent + endText;
             const refNode = document.createTextNode(refText);
             switch (type) {
-                case "bold":
-                    newElement = document.createElement("strong");
-                    break;
-                case "underline":
-                    newElement = document.createElement("u");
-                    break;
-                case "italic":
-                    newElement = document.createElement("em");
-                    break;
-                case "strike":
-                    newElement = document.createElement("s");
-                    break;
-                case "inline-code":
-                    newElement = document.createElement("code");
-                    break;
-                case "mark":
-                    newElement = document.createElement("mark");
-                    break;
-                case "sup":
-                    newElement = document.createElement("sup");
-                    break;
-                case "sub":
-                    newElement = document.createElement("sub");
-                    break;
-                case "kbd":
-                    newElement = document.createElement("kbd");
-                    break;
-                case "tag":
-                    newElement = document.createElement("span");
-                    newElement.setAttribute("data-type", "tag");
-                    break;
-                case "link":
-                    newElement = document.createElement("span");
-                    newElement.setAttribute("data-type", "a");
-                    break;
+                // case "bold":
+                //     newElement = document.createElement("strong");
+                //     break;
+                // case "underline":
+                //     newElement = document.createElement("u");
+                //     break;
+                // case "italic":
+                //     newElement = document.createElement("em");
+                //     break;
+                // case "strike":
+                //     newElement = document.createElement("s");
+                //     break;
+                // case "inline-code":
+                //     newElement = document.createElement("code");
+                //     break;
+                // case "mark":
+                //     newElement = document.createElement("mark");
+                //     break;
+                // case "sup":
+                //     newElement = document.createElement("sup");
+                //     break;
+                // case "sub":
+                //     newElement = document.createElement("sub");
+                //     break;
+                // case "kbd":
+                //     newElement = document.createElement("kbd");
+                //     break;
+                // case "tag":
+                //     newElement = document.createElement("span");
+                //     newElement.setAttribute("data-type", "tag");
+                //     break;
+                // case "link":
+                //     newElement = document.createElement("span");
+                //     newElement.setAttribute("data-type", "a");
+                //     break;
                 // case "blockRef":
                 //     if (refText === "") {
                 //         wbrElement.remove();
@@ -619,9 +619,9 @@ export class Toolbar {
                     mathRender(newElement);
                     break;
             }
-            if (newElement) {
-                this.range.insertNode(newElement);
-            }
+            // if (newElement) {
+            //     this.range.insertNode(newElement);
+            // }
             if (type === "inline-math") {
                 this.range.setStartAfter(newElement);
                 this.range.collapse(true);
@@ -653,40 +653,40 @@ export class Toolbar {
                     this.range.setEnd(newElement.lastChild, newElement.lastChild.textContent.length);
                     focusByRange(this.range);
                 }
-                if (type === "link") {
-                    let needShowLink = true;
-                    let focusText = false;
-                    try {
-                        const clipText = await navigator.clipboard.readText();
-                        // 选中链接时需忽略剪切板内容 https://ld246.com/article/1643035329737
-                        if (protyle.lute.IsValidLinkDest(this.range.toString().trim())) {
-                            (newElement as HTMLElement).setAttribute("data-href", this.range.toString().trim());
-                            needShowLink = false;
-                        } else if (protyle.lute.IsValidLinkDest(clipText)) {
-                            (newElement as HTMLElement).setAttribute("data-href", clipText);
-                            if (newElement.textContent.replace(Constants.ZWSP, "") !== "") {
-                                needShowLink = false;
-                            }
-                            focusText = true;
-                        }
-                    } catch (e) {
-                        console.log(e);
-                    }
-                    if (needShowLink) {
-                        linkMenu(protyle, newElement as HTMLElement, focusText);
-                    }
-                }
+                // if (type === "link") {
+                //     let needShowLink = true;
+                //     let focusText = false;
+                //     try {
+                //         const clipText = await navigator.clipboard.readText();
+                //         // 选中链接时需忽略剪切板内容 https://ld246.com/article/1643035329737
+                //         if (protyle.lute.IsValidLinkDest(this.range.toString().trim())) {
+                //             (newElement as HTMLElement).setAttribute("data-href", this.range.toString().trim());
+                //             needShowLink = false;
+                //         } else if (protyle.lute.IsValidLinkDest(clipText)) {
+                //             (newElement as HTMLElement).setAttribute("data-href", clipText);
+                //             if (newElement.textContent.replace(Constants.ZWSP, "") !== "") {
+                //                 needShowLink = false;
+                //             }
+                //             focusText = true;
+                //         }
+                //     } catch (e) {
+                //         console.log(e);
+                //     }
+                //     if (needShowLink) {
+                //         linkMenu(protyle, newElement as HTMLElement, focusText);
+                //     }
+                // }
             }
-            if (actionBtn) {
-                this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
-                    item.classList.remove("protyle-toolbar__item--current");
-                });
-                actionBtn.classList.add("protyle-toolbar__item--current");
-            }
+            // if (actionBtn) {
+            //     this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
+            //         item.classList.remove("protyle-toolbar__item--current");
+            //     });
+            //     actionBtn.classList.add("protyle-toolbar__item--current");
+            // }
         }
-        nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-        wbrElement.remove();
+        // nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+        // updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+        // wbrElement.remove();
     }
 
     public showFileAnnotationRef(protyle: IProtyle, refElement: HTMLElement) {

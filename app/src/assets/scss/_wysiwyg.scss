@@ -203,7 +203,7 @@
       transition: var(--b3-transition);
     }
 
-    span[data-type="a"] {
+    span[data-type~="a"] {
       color: var(--b3-protyle-inline-link-color);
       cursor: pointer;
       transition: var(--b3-transition);

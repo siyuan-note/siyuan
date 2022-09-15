@@ -25,7 +25,7 @@ export const initBlockPopover = () => {
                     tip += " " + title;
                 }
             }
-            if (tip && !tip.startsWith("siyuan://blocks")) {
+            if (tip && !tip.startsWith("siyuan://blocks") && !aElement.classList.contains("b3-tooltips")) {
                 showTooltip(tip, aElement);
                 event.stopPropagation();
                 return;
@@ -141,7 +141,7 @@ export const initBlockPopover = () => {
                     });
                     ids = postResponse.data;
                 }
-            } else if (popoverTargetElement.getAttribute("data-type") === "a") {
+            } else if (popoverTargetElement.getAttribute("data-type").split(" ").includes("a")) {
                 // 以思源协议开头的链接
                 ids = [popoverTargetElement.getAttribute("data-href").substr(16, 22)];
             } else {

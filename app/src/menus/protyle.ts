@@ -41,6 +41,7 @@ import {hasNextSibling} from "../protyle/wysiwyg/getBlock";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
 import {exportAsset} from "./util";
+import {removeLink} from "../protyle/toolbar/Link";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -685,7 +686,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     event.preventDefault();
                     event.stopPropagation();
                     if (linkElement.textContent === "" || linkElement.textContent === Constants.ZWSP) {
-                        protyle.toolbar.setInlineMark(protyle, "link", "remove");
+                        removeLink(linkElement, protyle.toolbar.range)
                     } else {
                         protyle.toolbar.range.selectNodeContents(linkElement);
                         protyle.toolbar.range.collapse(false);
@@ -728,7 +729,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     event.preventDefault();
                     event.stopPropagation();
                     if (!inputElement.value) {
-                        protyle.toolbar.setInlineMark(protyle, "link", "remove");
+                        removeLink(linkElement, protyle.toolbar.range)
                     } else {
                         protyle.toolbar.range.selectNodeContents(linkElement);
                         protyle.toolbar.range.collapse(false);
@@ -768,7 +769,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     event.preventDefault();
                     event.stopPropagation();
                     if (linkElement.textContent === "" || linkElement.textContent === Constants.ZWSP) {
-                        protyle.toolbar.setInlineMark(protyle, "link", "remove");
+                        removeLink(linkElement, protyle.toolbar.range)
                     } else {
                         protyle.toolbar.range.selectNodeContents(linkElement);
                         protyle.toolbar.range.collapse(false);
@@ -813,7 +814,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
         icon: "iconRefresh",
         click() {
-            protyle.toolbar.setInlineMark(protyle, "link", "remove");
+            removeLink(linkElement, protyle.toolbar.range);
         }
     }).element);
     if (linkAddress?.startsWith("assets/")) {

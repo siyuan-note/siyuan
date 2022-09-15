@@ -528,7 +528,8 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 range.deleteContents();
                 focusByRange(range);
                 protyle.toolbar.range = range;
-                protyle.toolbar.setInlineMark(protyle, value, "add");
+                // TODO
+                // protyle.toolbar.setInlineMark(protyle, value, "hint");
                 return;
             } else if (value === "emoji") {
                 range.deleteContents();

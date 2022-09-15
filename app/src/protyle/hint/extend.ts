@@ -109,7 +109,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: "emoji",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconEmoji"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.emoji}</span><span class="b3-menu__accelerator">:</span></div>`,
     }, {
-        filter: ["链接", "lianjie", "lj", "link"],
+        filter: ["链接", "lianjie", "lj", "link", "a"],
         value: "a",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconLink"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.link}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.link.custom))}</span></div>`,
     }, {

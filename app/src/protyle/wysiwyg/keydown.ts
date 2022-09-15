@@ -1185,8 +1185,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 if (matchHotKey(menuItem.hotkey, event)) {
                     protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
-                    if (menuItem.name === "text" || menuItem.name === "block-ref") {
-                        protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(new CustomEvent(getEventName()));
+                    if (["text", "a", "block-ref"].includes(menuItem.name)) {
+                        protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(new CustomEvent("block-ref" === menuItem.name ? getEventName() : "click"));
                     } else {
                         protyle.toolbar.setInlineMark(protyle, menuItem.name, "range");
                     }

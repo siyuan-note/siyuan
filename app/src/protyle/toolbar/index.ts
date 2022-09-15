@@ -23,7 +23,7 @@ import {highlightRender} from "../markdown/highlightRender";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {processRender} from "../util/processCode";
 import {BlockRef} from "./BlockRef";
-import {hintMoveBlock, hintRef, hintRenderAssets, hintRenderTemplate, hintRenderWidget} from "../hint/extend";
+import {hintMoveBlock, hintRenderAssets, hintRenderTemplate, hintRenderWidget} from "../hint/extend";
 import {blockRender} from "../markdown/blockRender";
 /// #if !BROWSER
 import {clipboard, nativeImage, NativeImage} from "electron";
@@ -37,7 +37,6 @@ import {matchHotKey} from "../util/hotKey";
 import {unicode2Emoji} from "../../emoji";
 import {escapeHtml} from "../../util/escape";
 import {hideElements} from "../ui/hideElements";
-import {linkMenu} from "../../menus/protyle";
 import {renderAssetsPreview} from "../../asset/renderAssets";
 import {electronUndo} from "../undo";
 import {previewTemplate} from "./util";
@@ -145,7 +144,11 @@ export class Toolbar {
             return [];
         }
         if (!["DIV", "TD", "TH"].includes(startElement.tagName)) {
-            types = (startElement.getAttribute("data-type") || "").split(" ");
+            if (range.startContainer.textContent.length === range.startOffset && !hasNextSibling(range.startContainer)) {
+                // 光标在 span 结尾不算 type，否则如在粗体后 ctrl+b 就无法继续使用粗体了
+            } else {
+                types = (startElement.getAttribute("data-type") || "").split(" ");
+            }
         }
         let endElement = range.endContainer as HTMLElement;
         if (endElement.nodeType === 3) {
@@ -156,20 +159,20 @@ export class Toolbar {
         if (!endElement || endElement.nodeType === 3) {
             return [];
         }
-        if (!["DIV", "TD", "TH"].includes(endElement.tagName)) {
+        if (!["DIV", "TD", "TH"].includes(endElement.tagName) && !startElement.isSameNode(endElement)) {
             types = types.concat((endElement.getAttribute("data-type") || "").split(" "));
         }
-        if (range.startOffset === range.startContainer.textContent.length) {
-            const nextSibling = hasNextSibling(range.startContainer) as Element;
-            if (nextSibling && nextSibling.nodeType !== 3) {
-                types = types.concat((nextSibling.getAttribute("data-type") || "").split(" "));
-            }
-        } else if (range.endOffset === 0) {
-            const previousSibling = hasPreviousSibling(range.startContainer) as Element;
-            if (previousSibling && previousSibling.nodeType !== 3) {
-                types = types.concat((previousSibling.getAttribute("data-type") || "").split(" "));
-            }
-        }
+        // if (range.startOffset === range.startContainer.textContent.length) {
+            // const nextSibling = hasNextSibling(range.startContainer) as Element;
+            // if (nextSibling && nextSibling.nodeType !== 3) {
+            //     types = types.concat((nextSibling.getAttribute("data-type") || "").split(" "));
+            // }
+        // } else if (range.endOffset === 0) {
+        //     const previousSibling = hasPreviousSibling(range.startContainer) as Element;
+            // if (previousSibling && previousSibling.nodeType !== 3) {
+            //     types = types.concat((previousSibling.getAttribute("data-type") || "").split(" "));
+            // }
+        // }
         range.cloneContents().childNodes.forEach((item: HTMLElement) => {
             if (item.nodeType !== 3) {
                 types = types.concat(item.getAttribute("data-type").split(" "));
@@ -260,14 +263,6 @@ export class Toolbar {
         }
         const rangeTypes = this.getCurrentType();
         const selectText = this.range.toString();
-        // 没选中时，相同 type 的文字中不进行操作
-        if (selectText === "" && rangeTypes.includes(type) && this.range.startContainer.nodeType === 3) {
-            const currentNode = hasNextSibling(this.range.startContainer) as Element;
-            if (this.range.startOffset !== 0 && this.range.startContainer.parentElement.tagName === "SPAN" &&
-                (currentNode || (!currentNode && this.range.startOffset < this.range.startContainer.textContent.length))) {
-                return;
-            }
-        }
         let previousElement: HTMLElement;
         let nextElement: HTMLElement;
         let previousIndex: number;
@@ -303,13 +298,28 @@ export class Toolbar {
         this.mergeNode(contents.childNodes);
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
         let newNodes: Node[] = [];
-        if (selectText !== "" && (
-            actionBtn?.classList.contains("protyle-toolbar__item--current") ||
-            (action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && (!textObj || textObj.type === "remove"))
+        if (actionBtn?.classList.contains("protyle-toolbar__item--current") || (
+            action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && (!textObj || textObj.type === "remove")
         )) {
             // 移除
             if (actionBtn) {
                 actionBtn.classList.remove("protyle-toolbar__item--current");
+            }
+            if (contents.childNodes.length === 0) {
+                rangeTypes.find((itemType, index) => {
+                    if (type === itemType) {
+                        rangeTypes.splice(index, 1);
+                        return true;
+                    }
+                });
+                if (rangeTypes.length === 0) {
+                    newNodes.push(document.createTextNode(Constants.ZWSP));
+                } else {
+                    const inlineElement = document.createElement("span");
+                    inlineElement.setAttribute("data-type", rangeTypes.join(" "));
+                    inlineElement.textContent = Constants.ZWSP;
+                    newNodes.push(inlineElement);
+                }
             }
             contents.childNodes.forEach((item: HTMLElement, index) => {
                 if (item.nodeType !== 3) {
@@ -356,9 +366,10 @@ export class Toolbar {
             }
             if (selectText === "") {
                 const inlineElement = document.createElement("span");
-                inlineElement.setAttribute("data-type", type);
+                rangeTypes.push(type)
+                inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));
                 inlineElement.textContent = Constants.ZWSP;
-                newNodes = [inlineElement];
+                newNodes.push(inlineElement);
             } else {
                 contents.childNodes.forEach((item: HTMLElement, index) => {
                     if (item.nodeType === 3) {
@@ -401,6 +412,21 @@ export class Toolbar {
                     }
                 });
             }
+        }
+        if (this.range.startContainer.nodeType !== 3 && (this.range.startContainer as HTMLElement).tagName === "SPAN" &&
+            this.range.startContainer.isSameNode(this.range.endContainer)) {
+            // 切割元素
+            const startContainer = this.range.startContainer as HTMLElement;
+            const afterElement = document.createElement("span");
+            const dataset = startContainer.dataset;
+            Object.keys(dataset).forEach(key => {
+                afterElement.setAttribute("data-" + key, dataset[key]);
+            });
+            this.range.setEnd(startContainer.lastChild, startContainer.lastChild.textContent.length);
+            afterElement.append(this.range.extractContents());
+            startContainer.after(afterElement);
+            this.range.setStartBefore(afterElement);
+            this.range.collapse(true);
         }
         newNodes.forEach((item) => {
             this.range.insertNode(item);

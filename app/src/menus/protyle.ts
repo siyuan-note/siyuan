@@ -686,7 +686,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     event.preventDefault();
                     event.stopPropagation();
                     if (linkElement.textContent === "" || linkElement.textContent === Constants.ZWSP) {
-                        removeLink(linkElement, protyle.toolbar.range)
+                        removeLink(linkElement, protyle.toolbar.range);
                     } else {
                         protyle.toolbar.range.selectNodeContents(linkElement);
                         protyle.toolbar.range.collapse(false);
@@ -729,7 +729,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     event.preventDefault();
                     event.stopPropagation();
                     if (!inputElement.value) {
-                        removeLink(linkElement, protyle.toolbar.range)
+                        removeLink(linkElement, protyle.toolbar.range);
                     } else {
                         protyle.toolbar.range.selectNodeContents(linkElement);
                         protyle.toolbar.range.collapse(false);
@@ -769,7 +769,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                     event.preventDefault();
                     event.stopPropagation();
                     if (linkElement.textContent === "" || linkElement.textContent === Constants.ZWSP) {
-                        removeLink(linkElement, protyle.toolbar.range)
+                        removeLink(linkElement, protyle.toolbar.range);
                     } else {
                         protyle.toolbar.range.selectNodeContents(linkElement);
                         protyle.toolbar.range.collapse(false);

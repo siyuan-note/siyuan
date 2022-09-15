@@ -17,12 +17,12 @@ export class Link extends ToolbarItem {
             protyle.toolbar.element.classList.add("fn__none");
             event.stopPropagation();
 
-            const range = protyle.toolbar.range
+            const range = protyle.toolbar.range;
             const nodeElement = hasClosestBlock(range.startContainer);
             if (!nodeElement) {
                 return;
             }
-            const aElement = hasClosestByAttribute(range.startContainer, "data-type", "a")
+            const aElement = hasClosestByAttribute(range.startContainer, "data-type", "a");
             if (aElement) {
                 linkMenu(protyle, aElement);
                 return;
@@ -38,9 +38,9 @@ export class Link extends ToolbarItem {
             range.insertNode(wbrElement);
             const html = nodeElement.outerHTML;
 
-            const newElement = document.createElement("span")
-            newElement.setAttribute("data-type", "a")
-            const rangeString = range.toString()
+            const newElement = document.createElement("span");
+            newElement.setAttribute("data-type", "a");
+            const rangeString = range.toString();
             newElement.textContent = rangeString;
             range.extractContents();
             range.insertNode(newElement);
@@ -73,9 +73,9 @@ export class Link extends ToolbarItem {
 }
 
 export const removeLink = (linkElement: HTMLElement, range: Range) => {
-    const types = linkElement.getAttribute("data-type").split(" ")
+    const types = linkElement.getAttribute("data-type").split(" ");
     if (types.length === 1) {
-        const linkParentElement = linkElement.parentElement
+        const linkParentElement = linkElement.parentElement;
         linkElement.outerHTML = linkElement.innerHTML + "<wbr>";
         focusByWbr(linkParentElement, range);
     } else {
@@ -86,9 +86,9 @@ export const removeLink = (linkElement: HTMLElement, range: Range) => {
             }
         });
         linkElement.setAttribute("data-type", types.join(" "));
-        linkElement.removeAttribute("data-href")
+        linkElement.removeAttribute("data-href");
         range.selectNodeContents(linkElement);
         range.collapse(false);
         focusByRange(range);
     }
-}
+};

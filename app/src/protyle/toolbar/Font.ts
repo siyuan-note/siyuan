@@ -1,9 +1,7 @@
 import {getEventName, updateHotkeyTip} from "../util/compatibility";
 import {ToolbarItem} from "./ToolbarItem";
-import {hasClosestBlock, hasClosestByMatchTag} from "../util/hasClosest";
-import {updateTransaction} from "../wysiwyg/transaction";
 import {setPosition} from "../../util/setPosition";
-import {getSelectionPosition, focusByRange} from "../util/selection";
+import {getSelectionPosition} from "../util/selection";
 import {Constants} from "../../constants";
 
 export class Font extends ToolbarItem {
@@ -141,17 +139,17 @@ export const setFontStyle = (textElement:HTMLElement, textOption:ITextOption) =>
                 break;
         }
     }
-}
+};
 
 export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLElement, textObj: ITextOption) => {
     if (!textObj) {
         return true;
     }
     let color = "";
-    let webkitTextFillColor = ""
-    let webkitTextStroke = ""
-    let textShadow = ""
-    let backgroundColor = ""
+    let webkitTextFillColor = "";
+    let webkitTextStroke = "";
+    let textShadow = "";
+    let backgroundColor = "";
     if (currentElement.nodeType !== 3) {
         color = currentElement.style.color;
         webkitTextFillColor = currentElement.style.webkitTextFillColor;
@@ -164,27 +162,27 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             webkitTextFillColor === sideElement.style.webkitTextFillColor &&
             webkitTextStroke === sideElement.style.webkitTextStroke &&
             textShadow === sideElement.style.textShadow &&
-            backgroundColor === sideElement.style.backgroundColor
+            backgroundColor === sideElement.style.backgroundColor;
     }
     if (textObj.type === "backgroundColor") {
         return color === sideElement.style.color &&
             webkitTextFillColor === sideElement.style.webkitTextFillColor &&
             webkitTextStroke === sideElement.style.webkitTextStroke &&
             textShadow === sideElement.style.textShadow &&
-            textObj.color === sideElement.style.backgroundColor
+            textObj.color === sideElement.style.backgroundColor;
     }
     if (textObj.type === "style2") {
         return color === sideElement.style.color &&
             "transparent" === sideElement.style.webkitTextFillColor &&
             "0.2px var(--b3-theme-on-background)" === sideElement.style.webkitTextStroke &&
             textShadow === sideElement.style.textShadow &&
-            backgroundColor === sideElement.style.backgroundColor
+            backgroundColor === sideElement.style.backgroundColor;
     }
     if (textObj.type === "style4") {
         return color === sideElement.style.color &&
             webkitTextFillColor === sideElement.style.webkitTextFillColor &&
             webkitTextStroke === sideElement.style.webkitTextStroke &&
             "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)" === sideElement.style.textShadow &&
-            backgroundColor === sideElement.style.backgroundColor
+            backgroundColor === sideElement.style.backgroundColor;
     }
-}
+};

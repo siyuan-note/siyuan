@@ -69,7 +69,7 @@ export const kernelError = () => {
     if (logElement) {
         logElement.innerHTML = html;
     } else {
-        document.body.insertAdjacentHTML("beforeend", `<div id="errorLog" class="b3-dialog b3-dialog--open">${html}</div>`);
+        document.body.insertAdjacentHTML("beforeend", `<div id="errorLog" style="width: ${isMobile() ? "80vw" : "520px"}" class="b3-dialog b3-dialog--open">${html}</div>`);
         logElement = document.getElementById("errorLog");
     }
 

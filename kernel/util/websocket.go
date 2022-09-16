@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/melody"
+	"github.com/olahol/melody"
 )
 
 var (

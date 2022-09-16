@@ -8,7 +8,6 @@ require (
 	github.com/88250/flock v0.8.2
 	github.com/88250/gulu v1.2.3-0.20220909041418-fdfa4d7380bf
 	github.com/88250/lute v1.7.5-0.20220915150247-57676b7312e1
-	github.com/88250/melody v0.0.0-20201115062536-c0b3394adcd1
 	github.com/88250/pdfcpu v0.3.13
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732
@@ -34,6 +33,7 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/user_agent v0.5.3
+	github.com/olahol/melody v1.1.0
 	github.com/panjf2000/ants/v2 v2.5.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/qiniu/go-sdk/v7 v7.13.0
@@ -47,7 +47,7 @@ require (
 	github.com/steambap/captcha v1.4.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
-	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539
+	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69
 	golang.org/x/mobile v0.0.0-20220722155234-aaac322e2105
 	golang.org/x/text v0.3.7
 )
@@ -112,11 +112,11 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
-	golang.org/x/exp v0.0.0-20220907003533-145caa8ea1d0 // indirect
+	golang.org/x/exp v0.0.0-20220915210609-840b3808d824 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
-	golang.org/x/net v0.0.0-20220907135653-1e95f45603a7 // indirect
+	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
 	golang.org/x/sync v0.0.0-20220907140024-f12130a52804 // indirect
-	golang.org/x/sys v0.0.0-20220908164124-27713097b956 // indirect
+	golang.org/x/sys v0.0.0-20220915200043-7b5979e65e41 // indirect
 	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
@@ -132,5 +132,4 @@ replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20
 //replace github.com/88250/enumfonts => D:\88250\enumfonts
 //replace github.com/88250/pdfcpu => D:\88250\pdfcpu
 //replace github.com/88250/gulu => D:\88250\gulu
-//replace github.com/88250/melody => D:\88250\melody
 //replace github.com/mattn/go-sqlite3 => D:\88250\go-sqlite3

@@ -26,12 +26,12 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/melody"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/user_agent"
+	"github.com/olahol/melody"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/api"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
@@ -232,10 +232,6 @@ func serveDebug(ginServer *gin.Engine) {
 
 func serveWebSocket(ginServer *gin.Engine) {
 	util.WebSocketServer.Config.MaxMessageSize = 1024 * 1024 * 8
-	if util.ContainerDocker == util.Container { // Docker 容器运行时启用 WebSocket 传输压缩
-		util.WebSocketServer.Config.EnableCompression = true
-		util.WebSocketServer.Config.CompressionLevel = 4
-	}
 
 	ginServer.GET("/ws", func(c *gin.Context) {
 		if err := util.WebSocketServer.HandleRequest(c.Writer, c.Request); nil != err {

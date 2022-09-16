@@ -19,8 +19,8 @@ github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5 h1:8HdZozCsXS
 github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/88250/gulu v1.2.3-0.20220909041418-fdfa4d7380bf h1:q+iiBuKjdvUKj5dQQHCRs+g9oChTWkZmm7r1FMvtkfI=
 github.com/88250/gulu v1.2.3-0.20220909041418-fdfa4d7380bf/go.mod h1:I1qBzsksFL2ciGSuqDE7R3XW4BUMrfDgOvSXEk7FsAI=
-github.com/88250/lute v1.7.5-0.20220915150247-57676b7312e1 h1:7ZtyePWOCVrW5EpUE7NXFBGKhLhAn7SjkIm8LXw1Kqs=
-github.com/88250/lute v1.7.5-0.20220915150247-57676b7312e1/go.mod h1:cEoBGi0zArPqAsp0MdG9SKinvH/xxZZWXU7sRx8vHSA=
+github.com/88250/lute v1.7.5-0.20220916024833-cf60435b2b33 h1:I16AH1C+7b0k/Yzr/BLmOyTYFOta+jpWKstgQ0F8P9M=
+github.com/88250/lute v1.7.5-0.20220916024833-cf60435b2b33/go.mod h1:cEoBGi0zArPqAsp0MdG9SKinvH/xxZZWXU7sRx8vHSA=
 github.com/88250/pdfcpu v0.3.13 h1:touMWMZkCGalMIbEg9bxYp7rETM+zwb9hXjwhqi4I7Q=
 github.com/88250/pdfcpu v0.3.13/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=
@@ -348,12 +348,12 @@ github.com/shurcooL/reactions v0.0.0-20181006231557-f2e0b4ca5b82/go.mod h1:TCR1l
 github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/shurcooL/users v0.0.0-20180125191416-49c67e49c537/go.mod h1:QJTqeLYEDaXHZDBsXlPCDqdhQuJkuw4NOtaxYe3xii4=
 github.com/shurcooL/webdavfs v0.0.0-20170829043945-18c3829fa133/go.mod h1:hKmq5kWdCj2z2KEozexVbfEZIWiTjhE0+UjmZgPqehw=
-github.com/siyuan-note/dejavu v0.0.0-20220909042242-acde27589097 h1:jCev7f50UVfE0Gt/J26q+0gjcEDjTvYQGDPU93/UGpA=
-github.com/siyuan-note/dejavu v0.0.0-20220909042242-acde27589097/go.mod h1:5dVd4OEze7ZKm9ol698ILwBFsK6vOXb1GOn/iGYRDBI=
+github.com/siyuan-note/dejavu v0.0.0-20220916030034-b12760230ed4 h1:bKKUoKMgGfR6uLksVqGrmGyj5q4/nzQHKlzQePZjZJ4=
+github.com/siyuan-note/dejavu v0.0.0-20220916030034-b12760230ed4/go.mod h1:ou8LG8G+7bjjDB4t+pbMdUik6HmOLyKEM+4LMzbS/d4=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
-github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f h1:JMobMNZ7AqaKKyEK+WeWFhix/2TDQXgPZDajU00IybU=
-github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f/go.mod h1:Sqo4FYX5lAXu7gWkbEdJF0e6P57tNNVV4WDKYDctokI=
+github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da h1:/jNhl7LC+9BhkWvNxuJDdsNfA/2wvfuj9mqWx4CbV90=
+github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da/go.mod h1:Sqo4FYX5lAXu7gWkbEdJF0e6P57tNNVV4WDKYDctokI=
 github.com/siyuan-note/filelock v0.0.0-20220720144616-011221f7e128 h1:p90RgCJ0BFRY60wOFQ+XHAgI6ey3sUWbqHcQ7T3KWfQ=
 github.com/siyuan-note/filelock v0.0.0-20220720144616-011221f7e128/go.mod h1:NeC98UUl+U62YScI0qWIjzrK+L4Z6WsBL5bueShjBKs=
 github.com/siyuan-note/httpclient v0.0.0-20220906125021-bb9ddffaea0e h1:iSjaFQk9v8FEMaKMiS9yg8eqxz4jtKC3oKEd6NLN1aA=

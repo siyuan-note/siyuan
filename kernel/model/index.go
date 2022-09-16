@@ -146,7 +146,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 
 	bootProgressPart = 20.0 / float64(boxLen) / float64(treeCount)
 
-	context := map[string]interface{}{sql.CtxPushMsg: sql.CtxPushMsgToStatusBarAndProgress}
+	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress}
 	i = 0
 	// 块级行级入库，缓存块
 	// 这里不能并行插入，因为 SQLite 不支持
@@ -196,7 +196,7 @@ func IndexRefs() {
 	util.SetBootDetails("Resolving refs...")
 	util.PushEndlessProgress(Conf.Language(54))
 
-	context := map[string]interface{}{sql.CtxPushMsg: sql.CtxPushMsgToStatusBarAndProgress}
+	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress}
 	// 解析并更新引用块
 	util.SetBootDetails("Resolving ref block content...")
 	refUnresolvedBlocks := sql.GetRefUnresolvedBlocks() // TODO: v2.2.0 以后移除
@@ -357,14 +357,14 @@ func isLegacyDynamicBlockRef(blockRef *ast.Node) bool {
 }
 
 func init() {
-	eventbus.Subscribe(sql.EvtSQLInsertBlocks, func(context map[string]interface{}, blockCount int, hash string) {
+	eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]interface{}, blockCount int, hash string) {
 		msg := fmt.Sprintf(Conf.Language(89), blockCount, hash)
 		util.SetBootDetails(msg)
-		contextPushMsg(context, msg)
+		util.ContextPushMsg(context, msg)
 	})
-	eventbus.Subscribe(sql.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, blockCount int, hash string) {
+	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, blockCount int, hash string) {
 		msg := fmt.Sprintf(Conf.Language(90), blockCount, hash)
 		util.SetBootDetails(msg)
-		contextPushMsg(context, msg)
+		util.ContextPushMsg(context, msg)
 	})
 }

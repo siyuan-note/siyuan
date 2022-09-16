@@ -7,7 +7,7 @@ require (
 	github.com/88250/css v0.1.2
 	github.com/88250/flock v0.8.2
 	github.com/88250/gulu v1.2.3-0.20220909041418-fdfa4d7380bf
-	github.com/88250/lute v1.7.5-0.20220915150247-57676b7312e1
+	github.com/88250/lute v1.7.5-0.20220916024833-cf60435b2b33
 	github.com/88250/pdfcpu v0.3.13
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732
@@ -38,9 +38,9 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20220909042242-acde27589097
+	github.com/siyuan-note/dejavu v0.0.0-20220916030034-b12760230ed4
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
-	github.com/siyuan-note/eventbus v0.0.0-20220624162334-ca7c06dc771f
+	github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da
 	github.com/siyuan-note/filelock v0.0.0-20220720144616-011221f7e128
 	github.com/siyuan-note/httpclient v0.0.0-20220906125021-bb9ddffaea0e
 	github.com/siyuan-note/logging v0.0.0-20220717040626-f796b05ee520

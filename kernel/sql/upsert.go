@@ -128,7 +128,7 @@ func insertBlocks0(tx *sql.Tx, bulk []*Block, context map[string]interface{}) (e
 	}
 	hashBuf.WriteString("blocks")
 	evtHash := fmt.Sprintf("%x", sha256.Sum256(hashBuf.Bytes()))[:7]
-	eventbus.Publish(EvtSQLInsertBlocks, context, len(bulk), evtHash)
+	eventbus.Publish(eventbus.EvtSQLInsertBlocks, context, len(bulk), evtHash)
 
 	stmt = fmt.Sprintf(BlocksFTSInsert, strings.Join(valueStrings, ","))
 	if err = prepareExecInsertTx(tx, stmt, valueArgs); nil != err {
@@ -143,7 +143,7 @@ func insertBlocks0(tx *sql.Tx, bulk []*Block, context map[string]interface{}) (e
 	}
 	hashBuf.WriteString("fts")
 	evtHash = fmt.Sprintf("%x", sha256.Sum256(hashBuf.Bytes()))[:7]
-	eventbus.Publish(EvtSQLInsertBlocksFTS, context, len(bulk), evtHash)
+	eventbus.Publish(eventbus.EvtSQLInsertBlocksFTS, context, len(bulk), evtHash)
 	return
 }
 

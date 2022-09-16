@@ -1,7 +1,7 @@
 import {ToolbarItem} from "./ToolbarItem";
 import * as dayjs from "dayjs";
 import {updateTransaction} from "../wysiwyg/transaction";
-import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
+import {hasClosestBlock} from "../util/hasClosest";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {focusByRange, focusByWbr} from "../util/selection";
 import {mathRender} from "../markdown/mathRender";

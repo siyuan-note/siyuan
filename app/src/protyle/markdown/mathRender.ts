@@ -66,15 +66,15 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                         }
                     } else {
                         if (blockElement && mathElement.getBoundingClientRect().width > blockElement.clientWidth) {
-                            mathElement.style.maxWidth = "100%"
-                            mathElement.style.overflowX = "auto"
-                            mathElement.style.overflowY = "hidden"
-                            mathElement.style.display = "inline-block"
+                            mathElement.style.maxWidth = "100%";
+                            mathElement.style.overflowX = "auto";
+                            mathElement.style.overflowY = "hidden";
+                            mathElement.style.display = "inline-block";
                         } else {
-                            mathElement.style.maxWidth = ""
-                            mathElement.style.overflowX = ""
-                            mathElement.style.overflowY = ""
-                            mathElement.style.display = ""
+                            mathElement.style.maxWidth = "";
+                            mathElement.style.overflowX = "";
+                            mathElement.style.overflowY = "";
+                            mathElement.style.display = "";
                         }
                         const nextSibling = hasNextSibling(mathElement);
                         if (!nextSibling) {

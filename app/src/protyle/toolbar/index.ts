@@ -6,7 +6,6 @@ import {
     focusByWbr,
     focusSideBlock,
     getEditorRange,
-    getSelectionOffset,
     getSelectionPosition,
     setFirstNodeRange,
     setLastNodeRange
@@ -16,7 +15,6 @@ import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
-import {mathRender} from "../markdown/mathRender";
 import {getEventName} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../markdown/highlightRender";
@@ -386,7 +384,7 @@ export class Toolbar {
             }
             if (selectText === "") {
                 const inlineElement = document.createElement("span");
-                rangeTypes.push(type)
+                rangeTypes.push(type);
                 inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));
                 inlineElement.textContent = Constants.ZWSP;
                 newNodes.push(inlineElement);
@@ -424,7 +422,7 @@ export class Toolbar {
                             hasSameTextStyle(item, nextElement, textObj)) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
-                        } else if (item.tagName !== 'BR') {
+                        } else if (item.tagName !== "BR") {
                             item.setAttribute("data-type", types.join(" "));
                             setFontStyle(item, textObj);
                             newNodes.push(item);

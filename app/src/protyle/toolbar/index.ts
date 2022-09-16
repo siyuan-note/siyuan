@@ -438,20 +438,35 @@ export class Toolbar {
             // 切割元素
             const startContainer = this.range.startContainer as HTMLElement;
             const afterElement = document.createElement("span");
-            const dataset = startContainer.dataset;
-            Object.keys(dataset).forEach(key => {
-                afterElement.setAttribute("data-" + key, dataset[key]);
-            });
+            const attributes = startContainer.attributes;
+            for (let i = 0; i < attributes.length; i++) {
+                afterElement.setAttribute(attributes[i].name, attributes[i].value);
+            }
             this.range.setEnd(startContainer.lastChild, startContainer.lastChild.textContent.length);
             afterElement.append(this.range.extractContents());
             startContainer.after(afterElement);
             this.range.setStartBefore(afterElement);
             this.range.collapse(true);
         }
-        newNodes.forEach((item) => {
-            this.range.insertNode(item);
-            this.range.collapse(false);
-        });
+        for (let i = 0; i < newNodes.length; i++) {
+            const currentNewNode = newNodes[i] as HTMLElement
+            const nextNewNode = newNodes[i + 1] as HTMLElement
+            if (currentNewNode.nodeType !== 3 && nextNewNode && nextNewNode.nodeType !== 3 &&
+                isArrayEqual(nextNewNode.getAttribute("data-type").split(" "), currentNewNode.getAttribute("data-type").split(" ")) &&
+                currentNewNode.style.color === nextNewNode.style.color &&
+                currentNewNode.style.webkitTextFillColor === nextNewNode.style.webkitTextFillColor &&
+                currentNewNode.style.webkitTextStroke === nextNewNode.style.webkitTextStroke &&
+                currentNewNode.style.textShadow === nextNewNode.style.textShadow &&
+                currentNewNode.style.backgroundColor === nextNewNode.style.backgroundColor) {
+                // 合并相同的 node
+                nextNewNode.innerHTML = currentNewNode.innerHTML + nextNewNode.innerHTML;
+                newNodes.splice(i, 1);
+                i--;
+            } else {
+                this.range.insertNode(newNodes[i]);
+                this.range.collapse(false);
+            }
+        }
         if (previousElement) {
             this.mergeNode(previousElement.childNodes);
         }

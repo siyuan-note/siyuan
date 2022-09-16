@@ -236,6 +236,16 @@ export class WYSIWYG {
                     html = tempElement.innerHTML;
                 } else if (selectImgElement) {
                     html = selectImgElement.outerHTML;
+                } else if (selectTypes.length > 0 && range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN" &&
+                range.startContainer.parentElement.isSameNode(range.endContainer.parentElement)) {
+                    // 复制粗体等字体中的一部分
+                    const attributes = range.startContainer.parentElement.attributes
+                    const spanElement = document.createElement("span");
+                    for (let i = 0; i < attributes.length; i++) {
+                        spanElement.setAttribute(attributes[i].name, attributes[i].value);
+                    }
+                    spanElement.textContent = range.toString()
+                    html = spanElement.outerHTML;
                 } else {
                     tempElement.append(range.cloneContents());
                     const inlineMathElement = hasClosestByAttribute(range.commonAncestorContainer, "data-type", "inline-math");

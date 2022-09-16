@@ -1141,10 +1141,11 @@ export class WYSIWYG {
             }
         });
 
-        let mousewheelTime = 0;
+        let preventGetTopHTML = false;
         this.element.addEventListener("mousewheel", (event: WheelEvent) => {
             // https://ld246.com/article/1648865235549
-            if (event.timeStamp - mousewheelTime > 6000 &&
+            // 不能使用上一版本的 timeStamp，否则一直滚动将导致间隔不够 https://ld246.com/article/1662852664926
+            if (!preventGetTopHTML &&
                 event.deltaY < 0 && !protyle.scroll.element.classList.contains("fn__none") &&
                 protyle.contentElement.clientHeight === protyle.contentElement.scrollHeight &&
                 protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "true") {
@@ -1154,11 +1155,11 @@ export class WYSIWYG {
                     k: protyle.options.key || "",
                     size: Constants.SIZE_GET,
                 }, getResponse => {
+                    preventGetTopHTML = false;
                     onGet(getResponse, protyle, [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID]);
                 });
-                mousewheelTime = 0;
+                preventGetTopHTML = true;
             }
-            mousewheelTime = event.timeStamp;
             if (event.deltaX === 0) {
                 return;
             }

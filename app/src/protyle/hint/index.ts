@@ -128,7 +128,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         const key = this.getKey(currentLineValue, protyle.options.hint.extend);
 
         if (typeof key === "undefined" ||
-            (   // 除emoji 提示外，其余在 tag/inline math/inline-code 内移动不进行提示
+            (   // 除 emoji 提示外，其余在 tag/inline math/inline-code 内移动不进行提示
                 this.splitChar !== ":" &&
                 (protyle.toolbar.getCurrentType(range).length > 0 || hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock"))
             )

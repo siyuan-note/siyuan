@@ -218,7 +218,7 @@ export class WYSIWYG {
                 const tempElement = document.createElement("div");
                 // https://github.com/siyuan-note/siyuan/issues/5540
                 const selectTypes = protyle.toolbar.getCurrentType(range);
-                if ((selectTypes.length === 1 || range.startContainer.parentElement.parentElement.getAttribute("data-type") === "NodeHeading") &&
+                if ((selectTypes.length > 0 || range.startContainer.parentElement.parentElement.getAttribute("data-type") === "NodeHeading") &&
                     (
                         (range.startContainer.nodeType === 3 && range.startContainer.parentElement.textContent === range.toString()) ||
                         (range.startContainer.nodeType !== 3 && range.startContainer.textContent === range.toString())

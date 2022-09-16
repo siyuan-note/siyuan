@@ -237,7 +237,7 @@ export class WYSIWYG {
                 } else if (selectImgElement) {
                     html = selectImgElement.outerHTML;
                 } else if (selectTypes.length > 0 && range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN" &&
-                range.startContainer.parentElement.isSameNode(range.endContainer.parentElement)) {
+                    range.startContainer.parentElement.isSameNode(range.endContainer.parentElement)) {
                     // 复制粗体等字体中的一部分
                     const attributes = range.startContainer.parentElement.attributes
                     const spanElement = document.createElement("span");
@@ -1771,8 +1771,15 @@ export class WYSIWYG {
                     } else {
                         shiftStartElement = startElement;
                     }
-                    let startTop = startElement.getBoundingClientRect().top;
-                    let endTop = endElement.getBoundingClientRect().top;
+                    const startRect = startElement.getBoundingClientRect();
+                    const endRect = endElement.getBoundingClientRect();
+                    let startTop = startRect.top;
+                    let endTop = endRect.top;
+                    if (startTop === endTop) {
+                        // 横排 https://ld246.com/article/1663036247544
+                        startTop = startRect.right;
+                        endTop = endRect.right;
+                    }
                     if (startTop > endTop) {
                         const tempElement = endElement;
                         endElement = startElement;
@@ -1787,11 +1794,13 @@ export class WYSIWYG {
                     let hasJump = false;
                     while (currentElement) {
                         if (currentElement && !currentElement.classList.contains("protyle-attr")) {
-                            if (currentElement.getBoundingClientRect().top <= endTop) {
+                            const currentRect = currentElement.getBoundingClientRect()
+                            if (startRect.top === endRect.top ? (currentRect.right <= endTop) : (currentRect.top <= endTop)) {
                                 if (hasJump) {
                                     // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
                                     if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
-                                        if (currentElement.nextElementSibling.getBoundingClientRect().top <= endTop) {
+                                        const currentNextRect = currentElement.nextElementSibling.getBoundingClientRect()
+                                        if (startRect.top === endRect.top ? (currentNextRect.right <= endTop) : (currentNextRect.top <= endTop)) {
                                             selectElements = [currentElement];
                                             currentElement = currentElement.nextElementSibling as HTMLElement;
                                             hasJump = false;

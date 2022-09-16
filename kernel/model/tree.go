@@ -90,7 +90,11 @@ func resetTree(tree *parse.Tree, titleSuffix string) {
 			return ast.WalkContinue
 		}
 		if "1" != refIDs[defID] {
-			n.Tokens = []byte(refIDs[defID])
+			if ast.NodeBlockRefID == n.Type {
+				n.Tokens = []byte(refIDs[defID])
+			} else if ast.NodeTextMark == n.Type {
+				n.TextMarkBlockRefID = refIDs[defID]
+			}
 		}
 		return ast.WalkContinue
 	})

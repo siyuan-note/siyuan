@@ -1083,6 +1083,11 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 			if n.IsTextMarkType("inline-math") {
 				n.TextMarkInlineMathContent = strings.TrimSpace(n.TextMarkInlineMathContent)
 				return ast.WalkContinue
+			} else if n.IsTextMarkType("file-annotation-ref") {
+				refID := n.TextMarkFileAnnotationRefID
+				status := processFileAnnotationRef(refID, n)
+				unlinks = append(unlinks, n)
+				return status
 			}
 		case ast.NodeFileAnnotationRef:
 			refIDNode := n.ChildByType(ast.NodeFileAnnotationRefID)
@@ -1090,53 +1095,9 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 				return ast.WalkSkipChildren
 			}
 			refID := refIDNode.TokensStr()
-			p := refID[:strings.LastIndex(refID, "/")]
-			absPath, err := GetAssetAbsPath(p)
-			if nil != err {
-				logging.LogWarnf("get assets abs path by rel path [%s] failed: %s", p, err)
-				return ast.WalkSkipChildren
-			}
-			sya := absPath + ".sya"
-			syaData, err := os.ReadFile(sya)
-			if nil != err {
-				logging.LogErrorf("read file [%s] failed: %s", sya, err)
-				return ast.WalkSkipChildren
-			}
-			syaJSON := map[string]interface{}{}
-			if err = gulu.JSON.UnmarshalJSON(syaData, &syaJSON); nil != err {
-				logging.LogErrorf("unmarshal file [%s] failed: %s", sya, err)
-				return ast.WalkSkipChildren
-			}
-			annotationID := refID[strings.LastIndex(refID, "/")+1:]
-			annotationData := syaJSON[annotationID]
-			if nil == annotationData {
-				logging.LogErrorf("not found annotation [%s] in .sya", annotationID)
-				return ast.WalkSkipChildren
-			}
-			pages := annotationData.(map[string]interface{})["pages"].([]interface{})
-			page := int(pages[0].(map[string]interface{})["index"].(float64)) + 1
-			pageStr := strconv.Itoa(page)
-			refTextNode := n.ChildByType(ast.NodeFileAnnotationRefText)
-			if nil == refTextNode {
-				return ast.WalkSkipChildren
-			}
-			refText := refTextNode.TokensStr()
-			ext := filepath.Ext(p)
-			file := p[7:len(p)-23-len(ext)] + ext
-			fileAnnotationRefLink := &ast.Node{Type: ast.NodeLink}
-			fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
-			if 0 == Conf.Export.FileAnnotationRefMode {
-				fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(file + " - p" + pageStr + " - " + refText)})
-			} else {
-				fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(refText)})
-			}
-			fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
-			fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-			fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(p + "?p=" + pageStr)})
-			fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
-			n.InsertBefore(fileAnnotationRefLink)
+			status := processFileAnnotationRef(refID, n)
 			unlinks = append(unlinks, n)
-			return ast.WalkSkipChildren
+			return status
 		}
 
 		if !treenode.IsBlockRef(n) {
@@ -1497,4 +1458,59 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
 		}
 		return ast.WalkContinue
 	})
+}
+
+func processFileAnnotationRef(refID string, n *ast.Node) ast.WalkStatus {
+	p := refID[:strings.LastIndex(refID, "/")]
+	absPath, err := GetAssetAbsPath(p)
+	if nil != err {
+		logging.LogWarnf("get assets abs path by rel path [%s] failed: %s", p, err)
+		return ast.WalkSkipChildren
+	}
+	sya := absPath + ".sya"
+	syaData, err := os.ReadFile(sya)
+	if nil != err {
+		logging.LogErrorf("read file [%s] failed: %s", sya, err)
+		return ast.WalkSkipChildren
+	}
+	syaJSON := map[string]interface{}{}
+	if err = gulu.JSON.UnmarshalJSON(syaData, &syaJSON); nil != err {
+		logging.LogErrorf("unmarshal file [%s] failed: %s", sya, err)
+		return ast.WalkSkipChildren
+	}
+	annotationID := refID[strings.LastIndex(refID, "/")+1:]
+	annotationData := syaJSON[annotationID]
+	if nil == annotationData {
+		logging.LogErrorf("not found annotation [%s] in .sya", annotationID)
+		return ast.WalkSkipChildren
+	}
+	pages := annotationData.(map[string]interface{})["pages"].([]interface{})
+	page := int(pages[0].(map[string]interface{})["index"].(float64)) + 1
+	pageStr := strconv.Itoa(page)
+
+	var refText string
+	if ast.NodeTextMark == n.Type {
+		refText = n.TextMarkTextContent
+	} else {
+		refTextNode := n.ChildByType(ast.NodeFileAnnotationRefText)
+		if nil == refTextNode {
+			return ast.WalkSkipChildren
+		}
+		refText = refTextNode.TokensStr()
+	}
+	ext := filepath.Ext(p)
+	file := p[7:len(p)-23-len(ext)] + ext
+	fileAnnotationRefLink := &ast.Node{Type: ast.NodeLink}
+	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
+	if 0 == Conf.Export.FileAnnotationRefMode {
+		fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(file + " - p" + pageStr + " - " + refText)})
+	} else {
+		fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(refText)})
+	}
+	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
+	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
+	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(p + "?p=" + pageStr)})
+	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+	n.InsertBefore(fileAnnotationRefLink)
+	return ast.WalkSkipChildren
 }

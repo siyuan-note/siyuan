@@ -1,7 +1,7 @@
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {OpenDialogReturnValue, ipcRenderer} from "electron";
+import {ipcRenderer, OpenDialogReturnValue} from "electron";
 import {BrowserWindow, dialog} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
@@ -63,9 +63,7 @@ export const saveExport = (option: { type: string, id: string }) => {
 
 /// #if !BROWSER
 const destroyWin = (win: Electron.BrowserWindow) => {
-    setTimeout(() => {
-        win.destroy();
-    }, 1000);
+    win.destroy();
 };
 
 const renderPDF = (id: string) => {
@@ -99,7 +97,12 @@ const renderPDF = (id: string) => {
             title: window.siyuan.languages.export + " PDF",
             properties: ["createDirectory", "openDirectory"],
         }).then((result: OpenDialogReturnValue) => {
-            if (!result.canceled) {
+            if (result.canceled) {
+                destroyWin(win);
+                return;
+            }
+
+            setTimeout(() => {
                 const msgId = showMessage(window.siyuan.languages.exporting, -1);
                 const filePath = result.filePaths[0].endsWith(ipcData.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle));
                 localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {removeAssets: ipcData.removeAssets})));
@@ -113,6 +116,7 @@ const renderPDF = (id: string) => {
                         }, () => {
                             const pdfFilePath = path.join(filePath, path.basename(filePath) + ".pdf");
                             fs.writeFileSync(pdfFilePath, pdfData);
+                            destroyWin(win);
                             fetchPost("/api/export/addPDFOutline", {
                                 id: ipcData.rootId,
                                 path: pdfFilePath
@@ -142,18 +146,15 @@ const renderPDF = (id: string) => {
                                 }
                             });
                         });
-                        destroyWin(win);
                     }).catch((error: string) => {
                         showMessage("Export PDF error:" + error, 0, "error", msgId);
                         destroyWin(win);
                     });
                 } catch (e) {
-                    showMessage("Export PDF error:" + e + ". Export HTML and use Chrome's printing function to convert to PDF", 0, "error", msgId);
+                    showMessage("Export PDF failed: " + e, 0, "error", msgId);
                     destroyWin(win);
                 }
-            } else {
-                destroyWin(win);
-            }
+            }, 200);
         });
     });
     fetchPost("/api/export/exportPreviewHTML", {

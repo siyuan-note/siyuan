@@ -195,6 +195,9 @@ func SearchAssetsByName(keyword string) (ret []*cache.Asset) {
 
 func GetAssetAbsPath(relativePath string) (absPath string, err error) {
 	relativePath = strings.TrimSpace(relativePath)
+	if strings.Contains(relativePath, "?") {
+		relativePath = relativePath[:strings.Index(relativePath, "?")]
+	}
 	notebooks, err := ListNotebooks()
 	if nil != err {
 		err = errors.New(Conf.Language(0))

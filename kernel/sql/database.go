@@ -252,7 +252,10 @@ func initDBConnection() {
 	db.SetConnMaxLifetime(365 * 24 * time.Hour)
 }
 
+var caseSensitive bool
+
 func SetCaseSensitive(b bool) {
+	caseSensitive = b
 	if b {
 		db.Exec("PRAGMA case_sensitive_like = ON;")
 	} else {

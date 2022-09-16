@@ -134,8 +134,6 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         <span class="fn__space"></span>
         <button id="includeChildCheck" class="b3-button b3-button--small${(notebookId && localData.idPath && !localData.idPath.endsWith(".sy")) ? "" : " b3-button--cancel"}">${window.siyuan.languages.includeChildDoc}</button>
         <span class="fn__space"></span>
-        <button id="searchCaseCheck" class="b3-button b3-button--small${window.siyuan.config.search.caseSensitive ? "" : " b3-button--cancel"}">${window.siyuan.languages.searchCaseSensitive}</button>
-        <span class="fn__space"></span>
         <button id="searchSyntaxCheck" class="b3-button b3-button--small${localData.querySyntax ? "" : " b3-button--cancel"}">${window.siyuan.languages.querySyntax}</button>
         <span class="fn__space"></span>
         <span aria-label="${window.siyuan.languages.type}" class="b3-tooltips b3-tooltips__nw">
@@ -305,14 +303,6 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         localData.querySyntax = !searchSyntaxElement.classList.contains("b3-button--cancel");
         inputEvent();
         localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(localData));
-    });
-    const searchCaseElement = dialog.element.querySelector("#searchCaseCheck");
-    searchCaseElement.addEventListener("click", () => {
-        searchCaseElement.classList.toggle("b3-button--cancel");
-        fetchPost("/api/setting/setSearchCaseSensitive", {caseSensitive: !searchCaseElement.classList.contains("b3-button--cancel")}, () => {
-            inputEvent();
-            window.siyuan.config.search.caseSensitive = !searchCaseElement.classList.contains("b3-button--cancel");
-        });
     });
     const searchPanelElement = dialog.element.querySelector("#searchList");
     const searchInputElement = dialog.element.querySelector("#searchInput") as HTMLInputElement;

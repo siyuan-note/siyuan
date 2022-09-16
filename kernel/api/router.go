@@ -228,7 +228,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/setting/getCustomCSS", model.CheckAuth, getCustomCSS)
 	ginServer.Handle("POST", "/api/setting/setCustomCSS", model.CheckAuth, setCustomCSS)
 	ginServer.Handle("POST", "/api/setting/setEmoji", model.CheckAuth, setEmoji)
-	ginServer.Handle("POST", "/api/setting/setSearchCaseSensitive", model.CheckAuth, setSearchCaseSensitive)
 
 	ginServer.Handle("POST", "/api/graph/resetGraph", model.CheckAuth, resetGraph)
 	ginServer.Handle("POST", "/api/graph/resetLocalGraph", model.CheckAuth, resetLocalGraph)

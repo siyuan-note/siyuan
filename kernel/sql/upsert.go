@@ -124,9 +124,12 @@ func insertBlocks0(tx *sql.Tx, bulk []*Block) (err error) {
 	if err = prepareExecInsertTx(tx, stmt, valueArgs); nil != err {
 		return
 	}
-	stmt = fmt.Sprintf(BlocksFTSCaseInsensitiveInsert, strings.Join(valueStrings, ","))
-	if err = prepareExecInsertTx(tx, stmt, valueArgs); nil != err {
-		return
+
+	if !caseSensitive {
+		stmt = fmt.Sprintf(BlocksFTSCaseInsensitiveInsert, strings.Join(valueStrings, ","))
+		if err = prepareExecInsertTx(tx, stmt, valueArgs); nil != err {
+			return
+		}
 	}
 	return
 }

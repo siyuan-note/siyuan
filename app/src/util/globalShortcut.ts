@@ -563,7 +563,7 @@ export const globalShortcut = () => {
         }
 
         // close tab
-        if (matchHotKey(window.siyuan.config.keymap.general.closeTab.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.general.closeTab.custom, event) && !event.repeat) {
             event.preventDefault();
             event.stopPropagation();
             let activeTabElement = document.querySelector(".block__icons--active");

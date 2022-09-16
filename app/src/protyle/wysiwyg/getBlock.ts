@@ -94,7 +94,8 @@ export const getTopEmptyElement = (element: Element) => {
     while (topElement.parentElement && !topElement.parentElement.classList.contains("protyle-wysiwyg")) {
         if (!topElement.parentElement.getAttribute("data-node-id")) {
             topElement = topElement.parentElement;
-        } else if (topElement.parentElement.textContent !== "" || topElement.previousElementSibling?.getAttribute("data-node-id")) {
+        } else if (getContenteditableElement(topElement.parentElement).textContent !== "" ||
+            topElement.previousElementSibling?.getAttribute("data-node-id")) {
             break;
         } else {
             topElement = topElement.parentElement;

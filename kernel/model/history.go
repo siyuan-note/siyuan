@@ -266,7 +266,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	}
 	writingDataLock.Unlock()
 
-	RefreshFileTree()
+	FullReindex()
 	IncSync()
 	return nil
 }
@@ -321,7 +321,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 		return
 	}
 
-	RefreshFileTree()
+	FullReindex()
 	IncSync()
 	return nil
 }

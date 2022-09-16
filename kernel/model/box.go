@@ -483,10 +483,10 @@ func ReindexTree(path string) (err error) {
 	return
 }
 
-func RefreshFileTree() {
+func FullReindex() {
+	util.PushEndlessProgress(Conf.Language(35))
 	WaitForWritingFiles()
 
-	util.PushEndlessProgress(Conf.Language(35))
 	if err := sql.InitDatabase(true); nil != err {
 		util.PushErrMsg(fmt.Sprintf(Conf.Language(85), err), 5000)
 		return

@@ -309,11 +309,22 @@ export class Toolbar {
             // aaa**bbb** 选中 aaa 加粗
             nextElement = nextSibling as HTMLElement;
         }
-        const wbrElement = document.createElement("wbr");
-        this.range.insertNode(wbrElement);
+        this.range.insertNode(document.createElement("wbr"));
         const html = nodeElement.outerHTML;
         const contents = this.range.extractContents();
         this.mergeNode(contents.childNodes);
+        // 选择 span 中的一部分需进行包裹
+        if (previousElement && nextElement && previousElement.isSameNode(nextElement) && contents.firstChild.nodeType === 3) {
+            const attributes = previousElement.attributes;
+            contents.childNodes.forEach(item => {
+                const spanElement = document.createElement("span");
+                for (let i = 0; i < attributes.length; i++) {
+                    spanElement.setAttribute(attributes[i].name, attributes[i].value);
+                }
+                spanElement.innerHTML = item.textContent;
+                item.replaceWith(spanElement);
+            })
+        }
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
         if (actionBtn?.classList.contains("protyle-toolbar__item--current") || (
@@ -506,7 +517,10 @@ export class Toolbar {
         }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-        wbrElement.remove();
+        const wbrElement = nodeElement.querySelector("wbr")
+        if (wbrElement) {
+            wbrElement.remove();
+        }
     }
 
     public showFileAnnotationRef(protyle: IProtyle, refElement: HTMLElement) {

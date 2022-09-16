@@ -926,11 +926,24 @@ func exportMarkdownContent(id string) (hPath, exportedMd string) {
 }
 
 func processKaTexMacros(n *ast.Node) {
-	if ast.NodeInlineMathContent != n.Type && ast.NodeMathBlockContent != n.Type {
+	if ast.NodeInlineMathContent != n.Type && ast.NodeMathBlockContent != n.Type && ast.NodeTextMark != n.Type {
+		return
+	}
+	if ast.NodeTextMark == n.Type && !n.IsTextMarkType("inline-math") {
 		return
 	}
 
-	mathContent := string(n.Tokens)
+	var mathContent string
+	if ast.NodeTextMark == n.Type {
+		mathContent = n.TextMarkInlineMathContent
+	} else {
+		mathContent = string(n.Tokens)
+	}
+	mathContent = strings.TrimSpace(mathContent)
+	if "" == mathContent {
+		return
+	}
+
 	macros := map[string]string{}
 	if err := gulu.JSON.UnmarshalJSON([]byte(Conf.Editor.KaTexMacros), &macros); nil != err {
 		logging.LogWarnf("parse katex macros failed: %s", err)
@@ -961,7 +974,11 @@ func processKaTexMacros(n *ast.Node) {
 		mathContent = strings.ReplaceAll(mathContent, usedMacro, expanded)
 	}
 	mathContent = unescapeKaTexSupportedFunctions(mathContent)
-	n.Tokens = []byte(mathContent)
+	if ast.NodeTextMark == n.Type {
+		n.TextMarkInlineMathContent = mathContent
+	} else {
+		n.Tokens = []byte(mathContent)
+	}
 }
 
 func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.Tree) {
@@ -1062,6 +1079,11 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 		case ast.NodeInlineMathContent, ast.NodeMathBlockContent:
 			n.Tokens = bytes.TrimSpace(n.Tokens) // 导出 Markdown 时去除公式内容中的首尾空格 https://github.com/siyuan-note/siyuan/issues/4666
 			return ast.WalkContinue
+		case ast.NodeTextMark:
+			if n.IsTextMarkType("inline-math") {
+				n.TextMarkInlineMathContent = strings.TrimSpace(n.TextMarkInlineMathContent)
+				return ast.WalkContinue
+			}
 		case ast.NodeFileAnnotationRef:
 			refIDNode := n.ChildByType(ast.NodeFileAnnotationRefID)
 			if nil == refIDNode {
@@ -1211,7 +1233,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 			}
 		}
 
-		if expandKaTexMacros && (ast.NodeInlineMathContent == n.Type || ast.NodeMathBlockContent == n.Type) {
+		if expandKaTexMacros && (ast.NodeInlineMathContent == n.Type || ast.NodeMathBlockContent == n.Type || (ast.NodeTextMark == n.Type && n.IsTextMarkType("inline-math"))) {
 			processKaTexMacros(n)
 		}
 

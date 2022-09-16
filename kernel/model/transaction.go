@@ -883,6 +883,12 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 				// 剔除空白的行级公式
 				unlinks = append(unlinks, n)
 			}
+		} else if ast.NodeTextMark == n.Type {
+			if n.IsTextMarkType("inline-math") {
+				if "" == strings.TrimSpace(n.TextMarkInlineMathContent) {
+					unlinks = append(unlinks, n)
+				}
+			}
 		} else if ast.NodeBlockRef == n.Type {
 			sql.CacheRef(subTree, n)
 		} else if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {

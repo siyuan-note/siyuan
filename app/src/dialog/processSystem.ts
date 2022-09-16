@@ -61,6 +61,7 @@ export const kernelError = () => {
     <div class="b3-dialog__header" onselectstart="return false;">💔 ${window.siyuan.languages.kernelFault0} <small>v${Constants.SIYUAN_VERSION}</small></div>
     <div class="b3-dialog__content">
         <p>${window.siyuan.languages.kernelFault1}</p>
+        <div class="fn__hr"></div>
         <p>${window.siyuan.languages.kernelFault2}</p>
         ${iosReStart}
     </div>

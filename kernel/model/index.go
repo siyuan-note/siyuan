@@ -31,6 +31,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -145,6 +146,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 
 	bootProgressPart = 20.0 / float64(boxLen) / float64(treeCount)
 
+	context := map[string]interface{}{sql.CtxPushMsg: sql.CtxPushMsgToStatusBarAndProgress}
 	i = 0
 	// 块级行级入库，缓存块
 	// 这里不能并行插入，因为 SQLite 不支持
@@ -164,7 +166,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 		if nil != err {
 			continue
 		}
-		if err = sql.InsertBlocksSpans(tx, tree); nil != err {
+		if err = sql.InsertBlocksSpans(tx, tree, context); nil != err {
 			sql.RollbackTx(tx)
 			continue
 		}
@@ -194,6 +196,7 @@ func IndexRefs() {
 	util.SetBootDetails("Resolving refs...")
 	util.PushEndlessProgress(Conf.Language(54))
 
+	context := map[string]interface{}{sql.CtxPushMsg: sql.CtxPushMsgToStatusBarAndProgress}
 	// 解析并更新引用块
 	util.SetBootDetails("Resolving ref block content...")
 	refUnresolvedBlocks := sql.GetRefUnresolvedBlocks() // TODO: v2.2.0 以后移除
@@ -234,7 +237,7 @@ func IndexRefs() {
 			if nil != err {
 				return
 			}
-			sql.InsertBlock(tx, refBlock)
+			sql.InsertBlock(tx, refBlock, context)
 			sql.CommitTx(tx)
 			if 1 < i && 0 == i%64 {
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(53), i, len(refUnresolvedBlocks)-i))
@@ -351,4 +354,17 @@ func legacyDynamicRefTreeToStatic(tree *parse.Tree) {
 
 func isLegacyDynamicBlockRef(blockRef *ast.Node) bool {
 	return nil == blockRef.ChildByType(ast.NodeBlockRefText) && nil == blockRef.ChildByType(ast.NodeBlockRefDynamicText)
+}
+
+func init() {
+	eventbus.Subscribe(sql.EvtSQLInsertBlocks, func(context map[string]interface{}, blockCount int, hash string) {
+		msg := fmt.Sprintf(Conf.Language(89), blockCount, hash)
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(sql.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, blockCount int, hash string) {
+		msg := fmt.Sprintf(Conf.Language(90), blockCount, hash)
+		util.SetBootDetails(msg)
+		contextPushMsg(context, msg)
+	})
 }

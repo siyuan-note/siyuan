@@ -36,7 +36,7 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
         }
     }).catch((e) => {
         console.warn("fetch post error", e);
-        if (url === "/api/transactions" && e.message === "Failed to fetch") {
+        if (url === "/api/transactions" && (e.message === "Failed to fetch" || e.message === "Unexpected end of JSON input")) {
             kernelError();
             return;
         }

@@ -6,7 +6,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/css v0.1.2
 	github.com/88250/flock v0.8.2
-	github.com/88250/gulu v1.2.3-0.20220909041418-fdfa4d7380bf
+	github.com/88250/gulu v1.2.3-0.20220916075322-eb117059d70a
 	github.com/88250/lute v1.7.5-0.20220916031248-441b66b72883
 	github.com/88250/pdfcpu v0.3.13
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
@@ -38,7 +38,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20220916030034-b12760230ed4
+	github.com/siyuan-note/dejavu v0.0.0-20220916075732-b2e0f1313c75
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da
 	github.com/siyuan-note/filelock v0.0.0-20220720144616-011221f7e128

@@ -133,7 +133,7 @@ export class Toolbar {
         });
     }
 
-    public getCurrentType(range = this.range) {
+    public getCurrentType(range = this.range, useEndType = true) {
         let types: string[] = [];
         let startElement = range.startContainer as HTMLElement;
         if (startElement.nodeType === 3) {
@@ -145,7 +145,7 @@ export class Toolbar {
             return [];
         }
         if (!["DIV", "TD", "TH", "TR"].includes(startElement.tagName)) {
-            if (range.startContainer.textContent.length === range.startOffset && !hasNextSibling(range.startContainer)) {
+            if (!useEndType && range.startContainer.textContent.length === range.startOffset && !hasNextSibling(range.startContainer)) {
                 // 光标在 span 结尾不算 type，否则如在粗体后 ctrl+b 就无法继续使用粗体了
             } else {
                 types = (startElement.getAttribute("data-type") || "").split(" ");
@@ -253,7 +253,7 @@ export class Toolbar {
         if (!nodeElement) {
             return;
         }
-        const rangeTypes = this.getCurrentType();
+        const rangeTypes = this.getCurrentType(this.range, false);
         const selectText = this.range.toString();
 
         // table 选中处理

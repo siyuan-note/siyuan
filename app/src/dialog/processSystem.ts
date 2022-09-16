@@ -57,7 +57,7 @@ export const kernelError = () => {
         iosReStart = `<div class="fn__hr"></div><div class="fn__flex"><div class="fn__flex-1"></div><button class="b3-button">${window.siyuan.languages.retry}</button></div>`;
     }
     const html = `<div class="b3-dialog__scrim"></div>
-<div class="b3-dialog__container">
+<div class="b3-dialog__container" style="width: ${isMobile() ? "80vw" : "520px"}">
     <div class="b3-dialog__header" onselectstart="return false;">💔 ${window.siyuan.languages.kernelFault0} <small>v${Constants.SIYUAN_VERSION}</small></div>
     <div class="b3-dialog__content">
         <p>${window.siyuan.languages.kernelFault1}</p>
@@ -69,7 +69,7 @@ export const kernelError = () => {
     if (logElement) {
         logElement.innerHTML = html;
     } else {
-        document.body.insertAdjacentHTML("beforeend", `<div id="errorLog" style="width: ${isMobile() ? "80vw" : "520px"}" class="b3-dialog b3-dialog--open">${html}</div>`);
+        document.body.insertAdjacentHTML("beforeend", `<div id="errorLog" class="b3-dialog b3-dialog--open">${html}</div>`);
         logElement = document.getElementById("errorLog");
     }
 

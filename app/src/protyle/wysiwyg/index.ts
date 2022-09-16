@@ -1211,21 +1211,6 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
-            const range = getEditorRange(this.element);
-            // https://github.com/siyuan-note/siyuan/issues/3257
-            if (range.toString() === "" && range.startContainer.nodeType === 3 && !protyle.toolbar.isNewEmptyInline &&
-                // https://github.com/siyuan-note/siyuan/issues/4118
-                range.startOffset >= range.startContainer.textContent.length &&
-                protyle.toolbar.getCurrentType(range).length > 0) {
-                // 粗体等行内元素粘贴
-                if (!hasNextSibling(range.startContainer)) {
-                    range.setEndAfter(range.startContainer.parentElement);
-                    range.collapse(false);
-                } else if (!hasPreviousSibling(range.startContainer)) {
-                    range.setStartBefore(range.startContainer.parentElement);
-                    range.collapse(true);
-                }
-            }
             paste(protyle, event);
         });
 

@@ -87,6 +87,20 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             if (tempElement.content.firstChild.nodeType !== 3 && tempElement.content.firstElementChild.classList.contains("p")) {
                 tempElement.innerHTML = tempElement.content.firstElementChild.firstElementChild.innerHTML.trim();
             }
+            // 粘贴带样式的行内元素到另一个行内元素中需进行切割
+            const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement: range.startContainer as HTMLElement;
+            if (spanElement.tagName === "SPAN" && spanElement.isSameNode( range.endContainer.nodeType === 3 ? range.endContainer.parentElement: range.endContainer)) {
+                const afterElement = document.createElement("span");
+                const attributes = spanElement.attributes;
+                for (let i = 0; i < attributes.length; i++) {
+                    afterElement.setAttribute(attributes[i].name, attributes[i].value);
+                }
+                range.setEnd(spanElement.lastChild, spanElement.lastChild.textContent.length);
+                afterElement.append(range.extractContents());
+                spanElement.after(afterElement);
+                range.setStartBefore(afterElement);
+                range.collapse(true);
+            }
             range.insertNode(tempElement.content.cloneNode(true));
             range.collapse(false);
             blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));

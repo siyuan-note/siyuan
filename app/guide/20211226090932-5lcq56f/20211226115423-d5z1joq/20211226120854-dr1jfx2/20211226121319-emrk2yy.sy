@@ -6,7 +6,7 @@
 		"id": "20211226121319-emrk2yy",
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
-		"updated": "20220909095422"
+		"updated": "20220916195925"
 	},
 	"Children": [
 		{
@@ -15,12 +15,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-i45akvs",
-				"updated": "20211226122008"
+				"updated": "20220916195925"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "行内元素"
+					"Data": "行級元素"
 				}
 			]
 		},
@@ -30,7 +30,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226122008-1e014nh",
-				"updated": "20220521234434"
+				"updated": "20220916195740"
 			},
 			"Children": [
 				{
@@ -54,33 +54,11 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20211226115423-d5z1joq"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "請從這裡開始"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226115423-d5z1joq",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "請從這裡開始"
 								}
 							]
 						}
@@ -111,6 +89,97 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://ld246.com",
 									"TextMarkTextContent": "超級連結"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220916195409-g57vfyf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220916195409-g57vfyf",
+						"updated": "20211226122008"
+					},
+					"Children": [
+						{
+							"ID": "20220916195414-a5jqqzy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220916195414-a5jqqzy",
+								"updated": "20220916195414"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "圖片"
+								}
+							]
+						},
+						{
+							"ID": "20211226122008-pei037e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226122008-pei037e",
+								"updated": "20220916195424"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可通過複制貼上或拖拽來上傳圖片；上傳後的圖片可通過拖拽進行大小調整。"
+								}
+							]
+						},
+						{
+							"ID": "20211226122008-poajwbi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226122008-poajwbi",
+								"updated": "20210604222204"
+							},
+							"Children": [
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Properties": {
+										"style": "display: block;"
+									},
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/siyuan-128-20210604092205-djd749a.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeKramdownSpanIAL",
+									"Data": "{: style=\"display: block;\"}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "\n"
 								}
 							]
 						}
@@ -390,7 +459,7 @@
 					},
 					"Properties": {
 						"id": "20211226122008-dwvi51s",
-						"updated": "20211226122008"
+						"updated": "20220916195740"
 					},
 					"Children": [
 						{
@@ -398,13 +467,13 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226122008-f8vr0tu",
-								"updated": "20211226122008"
+								"updated": "20220916195740"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "行內代碼"
+									"TextMarkTextContent": "行級代碼"
 								}
 							]
 						}
@@ -745,84 +814,6 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-s3rfg01",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226122008-s3rfg01",
-				"updated": "20211226122008"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "圖片"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-pei037e",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226122008-pei037e",
-				"updated": "20211226002011"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "可通過複制貼上或拖拽來上傳圖片；上傳後的圖片可通過拖拽進行大小調整。"
-				}
-			]
-		},
-		{
-			"ID": "20211226122008-poajwbi",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226122008-poajwbi",
-				"updated": "20210604222204"
-			},
-			"Children": [
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Properties": {
-						"style": "display: block;"
-					},
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/siyuan-128-20210604092205-djd749a.png"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeKramdownSpanIAL",
-					"Data": "{: style=\"display: block;\"}"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "\n"
 				}
 			]
 		},

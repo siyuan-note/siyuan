@@ -6,7 +6,7 @@
 		"icon": "2328",
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
-		"updated": "20220904093830"
+		"updated": "20220916195834"
 	},
 	"Children": [
 		{
@@ -1645,7 +1645,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-pb50zx4",
-				"updated": "20220904093734"
+				"updated": "20220916195834"
 			},
 			"Children": [
 				{
@@ -4048,7 +4048,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "光標在行內元素中喚起對應的功能菜單，否則喚起塊菜單"
+									"Data": "光標在行級元素中喚起對應的功能菜單，否則喚起塊菜單"
 								},
 								{
 									"Type": "NodeBr",
@@ -4133,7 +4133,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Shift+\u003e"
+									"TextMarkTextContent": "Ctrl+Shift+\u0026gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -4142,7 +4142,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧⌘\u003e"
+									"TextMarkTextContent": "⇧⌘\u0026gt;"
 								}
 							]
 						},
@@ -4289,7 +4289,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置-\u003e快捷鍵"
+									"TextMarkTextContent": "設置-\u0026gt;快捷鍵"
 								},
 								{
 									"Type": "NodeText",
@@ -4334,7 +4334,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置-\u003e快捷鍵"
+									"TextMarkTextContent": "設置-\u0026gt;快捷鍵"
 								},
 								{
 									"Type": "NodeText",
@@ -4379,7 +4379,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置-\u003e快捷鍵"
+									"TextMarkTextContent": "設置-\u0026gt;快捷鍵"
 								},
 								{
 									"Type": "NodeText",
@@ -4424,7 +4424,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置-\u003e快捷鍵"
+									"TextMarkTextContent": "設置-\u0026gt;快捷鍵"
 								},
 								{
 									"Type": "NodeText",
@@ -4469,7 +4469,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置-\u003e快捷鍵"
+									"TextMarkTextContent": "設置-\u0026gt;快捷鍵"
 								},
 								{
 									"Type": "NodeText",
@@ -4514,7 +4514,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置-\u003e快捷鍵"
+									"TextMarkTextContent": "設置-\u0026gt;快捷鍵"
 								},
 								{
 									"Type": "NodeText",
@@ -4552,7 +4552,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-v6as45b",
-				"updated": "20220518105130"
+				"updated": "20220916195647"
 			},
 			"Children": [
 				{
@@ -4975,7 +4975,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+'"
+									"TextMarkTextContent": "Ctrl+\u0026apos;"
 								},
 								{
 									"Type": "NodeText",
@@ -4984,7 +4984,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘'"
+									"TextMarkTextContent": "⌘\u0026apos;"
 								}
 							]
 						},
@@ -5044,7 +5044,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "行內數學公式"
+									"Data": "行級數學公式"
 								}
 							]
 						},
@@ -5277,7 +5277,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "\u003e"
+									"TextMarkTextContent": "\u0026gt;"
 								}
 							]
 						},

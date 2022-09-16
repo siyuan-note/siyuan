@@ -124,12 +124,17 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if !entering {
 				return ast.WalkContinue
 			}
-			if ast.NodeBlockRefID == n.Type {
-				newDefID := blockIDs[n.TokensStr()]
+			if treenode.IsBlockRef(n) {
+				defID, _, _ := treenode.GetBlockRef(n)
+				newDefID := blockIDs[defID]
 				if "" != newDefID {
-					n.Tokens = []byte(newDefID)
-				} else {
-					logging.LogWarnf("not found def [" + n.TokensStr() + "]")
+					if ast.NodeBlockRef == n.Type {
+						if id := n.ChildByType(ast.NodeBlockRefID); nil != id {
+							id.Tokens = []byte(newDefID)
+						}
+					} else {
+						n.TextMarkBlockRefID = newDefID
+					}
 				}
 			} else if ast.NodeBlockQueryEmbedScript == n.Type {
 				for oldID, newID := range blockIDs {
@@ -291,7 +296,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	IncSync()
-	RefreshFileTree()
+	FullReindex()
 	return
 }
 
@@ -338,7 +343,7 @@ func ImportData(zipPath string) (err error) {
 	}
 
 	IncSync()
-	RefreshFileTree()
+	FullReindex()
 	return
 }
 
@@ -513,7 +518,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		}
 
 		IncSync()
-		RefreshFileTree()
+		FullReindex()
 	} else { // 导入单个文件
 		fileName := filepath.Base(localPath)
 		if !strings.HasSuffix(fileName, ".md") && !strings.HasSuffix(fileName, ".markdown") {

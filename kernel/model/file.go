@@ -637,7 +637,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 				}
 			}
 
-			if ast.NodeBlockRef == n.Type {
+			if treenode.IsBlockRef(n) {
 				appendRefTextRenderResultForBlockRef(n)
 				return ast.WalkSkipChildren
 			}

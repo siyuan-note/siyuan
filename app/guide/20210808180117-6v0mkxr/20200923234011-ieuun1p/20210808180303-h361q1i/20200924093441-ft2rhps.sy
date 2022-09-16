@@ -7,7 +7,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20220909095340"
+		"updated": "20220916200115"
 	},
 	"Children": [
 		{
@@ -31,7 +31,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091509-8csaq4j",
-				"updated": "20220521234603"
+				"updated": "20220916200115"
 			},
 			"Children": [
 				{
@@ -55,33 +55,11 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20200923234011-ieuun1p"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "Please Start Here"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200923234011-ieuun1p",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Please Start Here"
 								}
 							]
 						}
@@ -112,6 +90,92 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://ld246.com",
 									"TextMarkTextContent": "Hyperlink"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220916200111-8pnrqr2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220916200111-8pnrqr2",
+						"updated": "20220916200115"
+					},
+					"Children": [
+						{
+							"ID": "20220916200111-4swvak0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220916200111-4swvak0",
+								"updated": "20220916200114"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Picture"
+								}
+							]
+						},
+						{
+							"ID": "20210604225055-4pq8g38",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210604225055-4pq8g38",
+								"updated": "20210604225153"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Support direct copy and paste or drag and upload. After uploading, you can adjust the size by dragging the sidebar."
+								}
+							]
+						},
+						{
+							"ID": "20220916200115-rstez65",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220916200115-rstez65"
+							},
+							"Children": [
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Properties": {
+										"style": "display: block;"
+									},
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/siyuan-128-20210604092437-7iqzf90.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeKramdownSpanIAL",
+									"Data": "{: style=\"display: block;\"}"
 								},
 								{
 									"Type": "NodeText",
@@ -432,6 +496,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "inline-math",
 									"TextMarkInlineMathContent": "a^2 + b^2 = \\color{red}c^2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "\n"
 								}
 							]
 						}
@@ -739,80 +807,6 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-xzmngg2",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210104091509-xzmngg2",
-				"updated": "20210415200914"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Pictures"
-				}
-			]
-		},
-		{
-			"ID": "20210604225055-4pq8g38",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210604225055-4pq8g38",
-				"updated": "20210604225153"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Support direct copy and paste or drag and upload. After uploading, you can adjust the size by dragging the sidebar."
-				}
-			]
-		},
-		{
-			"ID": "20210604225041-9i92rk2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210604225041-9i92rk2",
-				"updated": "20210604225041"
-			},
-			"Children": [
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Properties": {
-						"style": "display: block;"
-					},
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/siyuan-128-20210604092437-7iqzf90.png"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "\n"
 				}
 			]
 		},

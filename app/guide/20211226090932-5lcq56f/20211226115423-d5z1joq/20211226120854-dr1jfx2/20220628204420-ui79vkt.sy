@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20220628204420-ui79vkt",
 		"title": "優化排版",
-		"updated": "20220630211154"
+		"updated": "20220916195825"
 	},
 	"Children": [
 		{
@@ -28,12 +28,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220628215506-karsxdt",
-				"updated": "20220628215506"
+				"updated": "20220916195825"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "為了快速記錄內容，我們時常會忽略一些排版細節，比如行內代碼前後或者加粗前後缺少空格、中文和西文之間缺少空格。"
+					"Data": "為了快速記錄內容，我們時常會忽略一些排版細節，比如行級代碼前後或者加粗前後缺少空格、中文和西文之間缺少空格。"
 				}
 			]
 		},
@@ -104,7 +104,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220628215506-srlvfe0",
-				"updated": "20220628215506"
+				"updated": "20220916195816"
 			},
 			"Children": [
 				{
@@ -116,7 +116,7 @@
 					},
 					"Properties": {
 						"id": "20220628215506-tfhl45j",
-						"updated": "20220628215506"
+						"updated": "20220916195816"
 					},
 					"Children": [
 						{
@@ -124,12 +124,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220628215506-c6atyjn",
-								"updated": "20220628215506"
+								"updated": "20220916195816"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "行內代碼"
+									"Data": "行級代碼"
 								}
 							]
 						}
@@ -144,7 +144,7 @@
 					},
 					"Properties": {
 						"id": "20220628215506-258fpgt",
-						"updated": "20220628215506"
+						"updated": "20220916195814"
 					},
 					"Children": [
 						{
@@ -152,12 +152,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220628215506-3twrnze",
-								"updated": "20220628215506"
+								"updated": "20220916195814"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "行內公式"
+									"Data": "行級公式"
 								}
 							]
 						}

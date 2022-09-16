@@ -269,7 +269,7 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 			return ast.WalkContinue
 		}
 
-		if ast.NodeBlockRefID == n.Type {
+		if treenode.IsBlockRef(n) {
 			ref := buildRef(tree, n)
 			refs = append(refs, ref)
 		} else if ast.NodeFileAnnotationRefID == n.Type {
@@ -306,9 +306,9 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 	return
 }
 
-func buildRef(tree *parse.Tree, refIDNode *ast.Node) *Ref {
-	markdown := treenode.FormatNode(refIDNode.Parent, luteEngine)
-	defBlockID := refIDNode.TokensStr()
+func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
+	markdown := treenode.FormatNode(refNode, luteEngine)
+	defBlockID, text, _ := treenode.GetBlockRef(refNode)
 	var defBlockParentID, defBlockRootID, defBlockPath string
 	defBlock := treenode.GetBlockTree(defBlockID)
 	if nil != defBlock {
@@ -316,8 +316,7 @@ func buildRef(tree *parse.Tree, refIDNode *ast.Node) *Ref {
 		defBlockRootID = defBlock.RootID
 		defBlockPath = defBlock.Path
 	}
-	text := treenode.GetDynamicBlockRefText(refIDNode.Parent)
-	parentBlock := treenode.ParentBlock(refIDNode)
+	parentBlock := treenode.ParentBlock(refNode)
 	return &Ref{
 		ID:               ast.NewNodeID(),
 		DefBlockID:       defBlockID,
@@ -330,7 +329,7 @@ func buildRef(tree *parse.Tree, refIDNode *ast.Node) *Ref {
 		Path:             tree.Path,
 		Content:          text,
 		Markdown:         markdown,
-		Type:             treenode.TypeAbbr(refIDNode.Type.String()),
+		Type:             treenode.TypeAbbr(refNode.Type.String()),
 	}
 }
 

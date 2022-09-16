@@ -31,6 +31,50 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
+func GetBlockRef(n *ast.Node) (blockRefID, blockRefText, blockRefSubtype string) {
+	if !IsBlockRef(n) {
+		return
+	}
+	if ast.NodeBlockRef == n.Type {
+		id := n.ChildByType(ast.NodeBlockRefID)
+		if nil == id {
+			return
+		}
+		blockRefID = id.TokensStr()
+		text := n.ChildByType(ast.NodeBlockRefText)
+		if nil != text {
+			blockRefText = text.Text()
+			blockRefSubtype = "s"
+			return
+		}
+		text = n.ChildByType(ast.NodeBlockRefDynamicText)
+		if nil != text {
+			blockRefText = text.Text()
+			blockRefSubtype = "d"
+			return
+		}
+	}
+	if ast.NodeTextMark == n.Type {
+		blockRefID = n.TextMarkBlockRefID
+		blockRefText = n.TextMarkTextContent
+		blockRefSubtype = n.TextMarkBlockRefSubtype
+	}
+	return
+}
+
+func IsBlockRef(n *ast.Node) bool {
+	if nil == n {
+		return false
+	}
+	if ast.NodeBlockRef == n.Type {
+		return true
+	}
+	if ast.NodeTextMark == n.Type {
+		return n.IsTextMarkType("block-ref")
+	}
+	return false
+}
+
 // NestedInlines2FlattedSpans 将嵌套的行级节点转换为平铺的文本标记节点。
 func NestedInlines2FlattedSpans(tree *parse.Tree) {
 	defer logging.Recover()
@@ -391,25 +435,31 @@ func GetLegacyDynamicBlockRefDefIDs(node *ast.Node) (ret []string) {
 }
 
 func SetDynamicBlockRefText(blockRef *ast.Node, refText string) {
-	if nil == blockRef {
+	if !IsBlockRef(blockRef) {
 		return
 	}
 
-	idNode := blockRef.ChildByType(ast.NodeBlockRefID)
-	if nil == idNode {
+	if ast.NodeBlockRef == blockRef.Type {
+		idNode := blockRef.ChildByType(ast.NodeBlockRefID)
+		if nil == idNode {
+			return
+		}
+
+		var spacesRefTexts []*ast.Node // 可能会有多个空格，或者遗留错误插入的锚文本节点，这里做一次订正
+		for n := idNode.Next; ast.NodeCloseParen != n.Type; n = n.Next {
+			spacesRefTexts = append(spacesRefTexts, n)
+		}
+		for _, toRemove := range spacesRefTexts {
+			toRemove.Unlink()
+		}
+		refText = strings.TrimSpace(refText)
+		idNode.InsertAfter(&ast.Node{Type: ast.NodeBlockRefDynamicText, Tokens: []byte(refText)})
+		idNode.InsertAfter(&ast.Node{Type: ast.NodeBlockRefSpace})
 		return
 	}
 
-	var spacesRefTexts []*ast.Node // 可能会有多个空格，或者遗留错误插入的锚文本节点，这里做一次订正
-	for n := idNode.Next; ast.NodeCloseParen != n.Type; n = n.Next {
-		spacesRefTexts = append(spacesRefTexts, n)
-	}
-	for _, toRemove := range spacesRefTexts {
-		toRemove.Unlink()
-	}
-	refText = strings.TrimSpace(refText)
-	idNode.InsertAfter(&ast.Node{Type: ast.NodeBlockRefDynamicText, Tokens: []byte(refText)})
-	idNode.InsertAfter(&ast.Node{Type: ast.NodeBlockRefSpace})
+	blockRef.TextMarkBlockRefSubtype = "d"
+	blockRef.TextMarkTextContent = refText
 }
 
 func GetDynamicBlockRefText(blockRef *ast.Node) string {

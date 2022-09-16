@@ -178,7 +178,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 			n.RemoveIALAttr("heading-fold")
 			n.RemoveIALAttr("fold")
 
-			if ast.NodeBlockRef == n.Type {
+			if treenode.IsBlockRef(n) {
 				appendRefTextRenderResultForBlockRef(n)
 				return ast.WalkSkipChildren
 			}
@@ -266,7 +266,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	}
 	writingDataLock.Unlock()
 
-	RefreshFileTree()
+	FullReindex()
 	IncSync()
 	return nil
 }
@@ -321,7 +321,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 		return
 	}
 
-	RefreshFileTree()
+	FullReindex()
 	IncSync()
 	return nil
 }

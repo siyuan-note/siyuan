@@ -213,7 +213,7 @@ func setSearch(c *gin.Context) {
 	model.Conf.Save()
 	sql.SetCaseSensitive(s.CaseSensitive)
 	if s.CaseSensitive != oldCaseSensitive {
-		model.RefreshFileTree()
+		model.FullReindex()
 	}
 	sql.ClearVirtualRefKeywords()
 	ret.Data = s

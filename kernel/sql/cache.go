@@ -112,8 +112,8 @@ func GetRefsCacheByDefID(defID string) (ret []*Ref) {
 
 var defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute) // [defBlockID]map[refBlockID]*Ref
 
-func CacheRef(tree *parse.Tree, refIDNode *ast.Node) {
-	ref := buildRef(tree, refIDNode)
+func CacheRef(tree *parse.Tree, refNode *ast.Node) {
+	ref := buildRef(tree, refNode)
 	putRefCache(ref)
 }
 

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20220628204444-9n0y9h2",
 		"title": "优化排版",
-		"updated": "20220630211109"
+		"updated": "20220916195228"
 	},
 	"Children": [
 		{
@@ -38,15 +38,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220628204604-qom7yyl",
-				"updated": "20220628205230"
+				"updated": "20220916195228"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "为了快速记录内容，我们时常会忽略一些排版细节，比如行内代码前后或者加粗前后缺少空格、中文和西文之间缺少空格。",
-					"Properties": {
-						"id": ""
-					}
+					"Data": "为了快速记录内容，我们时常会忽略一些排版细节，比如"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "search-mark",
+					"TextMarkTextContent": "行"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "级代码前后或者加粗前后缺少空格、中文和西文之间缺少空格。"
 				}
 			]
 		},
@@ -142,7 +148,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220628205832-odovge3",
-				"updated": "20220628210303"
+				"updated": "20220916195220"
 			},
 			"Children": [
 				{
@@ -154,7 +160,7 @@
 					},
 					"Properties": {
 						"id": "20220628205833-kmfuhsp",
-						"updated": "20220628205833"
+						"updated": "20220916195218"
 					},
 					"Children": [
 						{
@@ -162,12 +168,17 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220628205833-iu4yxrq",
-								"updated": "20220628205855"
+								"updated": "20220916195218"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "search-mark",
+									"TextMarkTextContent": "行"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "行内代码"
+									"Data": "级代码"
 								}
 							]
 						}
@@ -182,7 +193,7 @@
 					},
 					"Properties": {
 						"id": "20220628205855-jp2ks1q",
-						"updated": "20220628210128"
+						"updated": "20220916195220"
 					},
 					"Children": [
 						{
@@ -190,12 +201,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220628205855-1gfuu51",
-								"updated": "20220628210245"
+								"updated": "20220916195220"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "行内公式"
+									"Data": "行级公式"
 								}
 							]
 						}

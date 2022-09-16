@@ -1,5 +1,6 @@
 {
 	"ID": "20200924095938-a9p5450",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20200924095938-a9p5450",
@@ -61,60 +62,27 @@
 									"Data": "Go to "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Settings"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Appearance"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Appearance"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " and enable "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Customize the current theme"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Customize the current theme"
 								}
 							]
 						}
@@ -143,80 +111,36 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Settings"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Appearance"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Appearance"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Themes"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Themes"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Open the theme folder"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Open the theme folder"
 								}
 							]
 						}
@@ -249,20 +173,9 @@
 									"Data": "Modify the "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "custom.css"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "custom.css"
 								},
 								{
 									"Type": "NodeText",
@@ -385,76 +298,36 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Settings"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Appearance"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Appearance"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Theme"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Theme"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Open the theme folder"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Open the theme folder"
 								}
 							]
 						}
@@ -522,57 +395,27 @@
 									"Data": "Restart, select the desired theme in "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Settings"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Appearance"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Appearance"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Theme"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Theme"
 								}
 							]
 						}
@@ -640,76 +483,36 @@
 									"Data": "In "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Settings"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Appearance"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Appearance"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Theme"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Theme"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Bazaar"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Bazaar"
 								},
 								{
 									"Type": "NodeText",
@@ -830,22 +633,9 @@
 									"Data": "Give your subject a nice name, such as "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "alice"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alice"
 								}
 							]
 						}
@@ -877,76 +667,36 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Settings"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Appearance"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Appearance"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Theme"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Theme"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Open theme folder"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Open theme folder"
 								}
 							]
 						}
@@ -981,88 +731,36 @@
 									"Data": "Create a new folder "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "alice"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alice"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " in the opened folder, and create new "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "theme.css"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.css"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " and "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "theme.json"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.json"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " files in "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "alice"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alice"
 								},
 								{
 									"Type": "NodeSoftBreak",
@@ -1073,22 +771,9 @@
 									"Data": "The "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "theme.json"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.json"
 								},
 								{
 									"Type": "NodeText",
@@ -1141,66 +826,27 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "modes"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "modes"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " is the appearance mode, divided into "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "dark"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "dark"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " and "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "light"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "light"
 								},
 								{
 									"Type": "NodeText",
@@ -1239,22 +885,9 @@
 									"Data": "Open the "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "theme.css"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.css"
 								},
 								{
 									"Type": "NodeText",
@@ -1294,57 +927,27 @@
 									"Data": "Restart, select the installed theme in "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Settings"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Appearance"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Appearance"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Theme"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Theme"
 								}
 							]
 						}
@@ -1402,30 +1005,10 @@
 									"Data": "Familiar with "
 								},
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "CSS"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://developer.mozilla.org/en-US/docs/Web/CSS"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://developer.mozilla.org/en-US/docs/Web/CSS",
+									"TextMarkTextContent": "CSS"
 								},
 								{
 									"Type": "NodeText",
@@ -1459,20 +1042,9 @@
 									"Data": "Modify the color scheme in "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": ":root{...}"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ":root{...}"
 								},
 								{
 									"Type": "NodeText",
@@ -1561,20 +1133,9 @@
 									"Data": "Copy and paste the modified content into "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "theme.css"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.css"
 								},
 								{
 									"Type": "NodeText",
@@ -1608,60 +1169,27 @@
 									"Data": "Check the "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "Disable cache"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Disable cache"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " in "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "Network"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Network"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " and run "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "window.location.reload()"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "window.location.reload()"
 								},
 								{
 									"Type": "NodeText",
@@ -1716,50 +1244,19 @@
 					"Data": "In addition to modifying the style through theme.css, if theme.js exists in the theme folder, it will be automatically loaded when rendering the interface, so that some function-related customizations can be achieved through JavaScript code. "
 				},
 				{
-					"Type": "NodeTag",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeTagOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "Note"
-						},
-						{
-							"Type": "NodeTagCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
 				},
 				{
 					"Type": "NodeText",
 					"Data": ": Do not modify the editor DOM, the blocks in the editor should pass the "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Block API"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/siyuan-note/siyuan/blob/master/API.md#Blocks"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/API.md#Blocks",
+					"TextMarkTextContent": "Block API"
 				},
 				{
 					"Type": "NodeText",
@@ -1795,30 +1292,10 @@
 					"Data": "Please make sure that the root path of your theme repository contains at least the following files before listing ("
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "repo example"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/88250/Comfortably-Numb"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/88250/Comfortably-Numb",
+					"TextMarkTextContent": "repo example"
 				},
 				{
 					"Type": "NodeText",
@@ -1956,66 +1433,20 @@
 					"Data": "After confirmation, please "
 				},
 				{
-					"Type": "NodeLink",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "create a pull request"
-						},
-						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
-						},
-						{
-							"Type": "NodeOpenParen",
-							"Data": "("
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request"
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request",
+					"TextMarkTextContent": "create a pull request"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " to the "
 				},
 				{
-					"Type": "NodeLink",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Community Bazaar"
-						},
-						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
-						},
-						{
-							"Type": "NodeOpenParen",
-							"Data": "("
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/siyuan-note/bazaar"
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
+					"TextMarkTextContent": "Community Bazaar"
 				},
 				{
 					"Type": "NodeText",
@@ -2072,22 +1503,9 @@
 					"Data": "Among them, "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "commithash"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "commithash"
 				},
 				{
 					"Type": "NodeText",

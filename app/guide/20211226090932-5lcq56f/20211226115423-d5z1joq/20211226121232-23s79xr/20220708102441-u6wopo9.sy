@@ -1,5 +1,6 @@
 {
 	"ID": "20220708102441-u6wopo9",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20220708102441-u6wopo9",
@@ -181,60 +182,27 @@
 									"Data": "打開 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "數據歷史"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "數據歷史"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "數據快照"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "數據快照"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " 頁簽，選擇需要備份的快照點擊 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "標記快照"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "標記快照"
 								}
 							]
 						}
@@ -267,40 +235,18 @@
 									"Data": "篩選下拉列表中選擇 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "本地標記的快照"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "本地標記的快照"
 								},
 								{
 									"Type": "NodeText",
 									"Data": "，選擇需要上傳的快照點擊 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "上傳"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "上傳"
 								}
 							]
 						}
@@ -333,20 +279,9 @@
 									"Data": "上傳完成以後，篩選下拉列表中選擇 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "雲端標記的快照"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "雲端標記的快照"
 								},
 								{
 									"Type": "NodeText",

@@ -1,5 +1,6 @@
 {
 	"ID": "20211226121332-irgblss",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226121332-irgblss",
@@ -74,40 +75,18 @@
 									"Data": "文檔右上角 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "..."
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "..."
 								},
 								{
 									"Type": "NodeText",
 									"Data": " 更多菜單中選擇 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "上傳資料檔到雲端"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "上傳資料檔到雲端"
 								}
 							]
 						}
@@ -134,40 +113,18 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "模式切換"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "模式切換"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " 中選擇 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "導出預覽"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "導出預覽"
 								}
 							]
 						}
@@ -198,60 +155,27 @@
 									"Data": "點擊 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "複製到公眾號"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "複製到公眾號"
 								},
 								{
 									"Type": "NodeText",
 									"Data": "、"
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "複製到知乎"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "複製到知乎"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " 或 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "複製到語雀"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "複製到語雀"
 								}
 							]
 						}
@@ -300,30 +224,10 @@
 					"Data": "如果需要刪除雲端圖床中的資源文件，請到 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "鏈滴 - 設置 - 文件 - 筆記端"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://ld246.com/settings/file?type=3"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/settings/file?type=3",
+					"TextMarkTextContent": "鏈滴 - 設置 - 文件 - 筆記端"
 				},
 				{
 					"Type": "NodeText",
@@ -341,20 +245,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeTag",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeTagOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "注意"
-						},
-						{
-							"Type": "NodeTagCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
 				}
 			]
 		},

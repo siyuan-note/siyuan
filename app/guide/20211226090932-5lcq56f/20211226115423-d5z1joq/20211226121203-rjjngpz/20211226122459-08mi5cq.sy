@@ -1,5 +1,6 @@
 {
 	"ID": "20211226122459-08mi5cq",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226122459-08mi5cq",
@@ -70,20 +71,9 @@
 									"Data": "鏡像名稱 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "b3log/siyuan"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "b3log/siyuan"
 								}
 							]
 						}
@@ -110,30 +100,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "鏡像地址"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://hub.docker.com/r/b3log/siyuan"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://hub.docker.com/r/b3log/siyuan",
+									"TextMarkTextContent": "鏡像地址"
 								}
 							]
 						}
@@ -169,20 +139,9 @@
 					"Data": "整體程式位於 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "/opt/siyuan/"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/opt/siyuan/"
 				},
 				{
 					"Type": "NodeText",
@@ -339,40 +298,18 @@
 					"Data": "構建 Docker 鏡像時設置了入口："
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "ENTRYPOINT [ \"/opt/siyuan/kernel\" ]"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ENTRYPOINT [ \"/opt/siyuan/kernel\" ]"
 				},
 				{
 					"Type": "NodeText",
 					"Data": "，使用 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "docker run b3log/siyuan"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run b3log/siyuan"
 				},
 				{
 					"Type": "NodeText",
@@ -408,40 +345,18 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "--workspace"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " 指定工作空間文件夾路徑，在宿主機上通過 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "-v"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-v"
 								},
 								{
 									"Type": "NodeText",
@@ -499,20 +414,9 @@
 					"Data": "。下面是一條啟動指令示例："
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "docker run -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
 				}
 			]
 		},
@@ -544,20 +448,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "workspace_dir_host"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace_dir_host"
 								},
 								{
 									"Type": "NodeText",
@@ -586,40 +479,18 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "workspace_dir_container"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace_dir_container"
 								},
 								{
 									"Type": "NodeText",
 									"Data": "：容器內工作空間文件夾路徑，和後面 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "--workspace"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace"
 								},
 								{
 									"Type": "NodeText",
@@ -644,80 +515,36 @@
 					"Data": "為了簡化，建議將 workspace 文件夾路徑在宿主機和容器上配置為一致的，比如將 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "workspace_dir_host"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace_dir_host"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 和 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "workspace_dir_container"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace_dir_container"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 都配置為 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "/siyuan/workspace"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/siyuan/workspace"
 				},
 				{
 					"Type": "NodeText",
 					"Data": "，對應的啟動指令示例："
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
 				},
 				{
 					"Type": "NodeText",
@@ -753,60 +580,27 @@
 					"Data": "鏡像中是使用預設創建的普通用戶 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "siyuan"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan"
 				},
 				{
 					"Type": "NodeText",
 					"Data": "（uid 1000/gid 1000）來啟動kernel程式的，所以在宿主機創建工作空間文件夾時請註意設置該文件夾所屬用戶組："
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "chown -R 1000:1000 /siyuan/workspace"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "chown -R 1000:1000 /siyuan/workspace"
 				},
 				{
 					"Type": "NodeText",
 					"Data": "，在啟動容器時需要帶參數 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "-u 1000:1000"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-u 1000:1000"
 				},
 				{
 					"Type": "NodeText",
@@ -877,20 +671,9 @@
 									"Data": "配置 WebSocket 反代 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "/ws"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/ws"
 								}
 							]
 						}

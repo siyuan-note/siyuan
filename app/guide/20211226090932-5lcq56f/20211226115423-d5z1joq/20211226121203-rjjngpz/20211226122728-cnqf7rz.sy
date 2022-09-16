@@ -1,5 +1,6 @@
 {
 	"ID": "20211226122728-cnqf7rz",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226122728-cnqf7rz",
@@ -35,20 +36,9 @@
 					"Data": "如果你需要在其他地方（比如瀏覽器或者支援超連結跳轉的軟體）打開思源桌面端應用程式，可以使用 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "siyuan://"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://"
 				},
 				{
 					"Type": "NodeText",
@@ -80,20 +70,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "siyuan://blocks/{id}"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://blocks/{id}"
 				},
 				{
 					"Type": "NodeText",
@@ -114,40 +93,18 @@
 					"Data": "加入查詢字符串參數 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "focus=1"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "focus=1"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " （"
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "siyuan://blocks/{id}?focus=1"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://blocks/{id}?focus=1"
 				},
 				{
 					"Type": "NodeText",
@@ -204,20 +161,9 @@
 									"Data": "在 Windows 和 macOS 上啟動後會自動向系統申請註冊 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "siyuan://"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan://"
 								},
 								{
 									"Type": "NodeText",
@@ -285,20 +231,9 @@
 													"Data": "創建或者找到 "
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "siyuan.desktop"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "siyuan.desktop"
 												},
 												{
 													"Type": "NodeText",
@@ -333,20 +268,9 @@
 															},
 															"Children": [
 																{
-																	"Type": "NodeCodeSpan",
-																	"Data": "code",
-																	"Children": [
-																		{
-																			"Type": "NodeCodeSpanOpenMarker"
-																		},
-																		{
-																			"Type": "NodeCodeSpanContent",
-																			"Data": "MimeType=MimeType=x-scheme-handler/siyuan;"
-																		},
-																		{
-																			"Type": "NodeCodeSpanCloseMarker"
-																		}
-																	]
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "MimeType=MimeType=x-scheme-handler/siyuan;"
 																}
 															]
 														}
@@ -371,60 +295,27 @@
 															},
 															"Children": [
 																{
-																	"Type": "NodeCodeSpan",
-																	"Data": "code",
-																	"Children": [
-																		{
-																			"Type": "NodeCodeSpanOpenMarker"
-																		},
-																		{
-																			"Type": "NodeCodeSpanContent",
-																			"Data": "Exec"
-																		},
-																		{
-																			"Type": "NodeCodeSpanCloseMarker"
-																		}
-																	]
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "Exec"
 																},
 																{
 																	"Type": "NodeText",
 																	"Data": " 末尾加入 "
 																},
 																{
-																	"Type": "NodeCodeSpan",
-																	"Data": "code",
-																	"Children": [
-																		{
-																			"Type": "NodeCodeSpanOpenMarker"
-																		},
-																		{
-																			"Type": "NodeCodeSpanContent",
-																			"Data": "%u"
-																		},
-																		{
-																			"Type": "NodeCodeSpanCloseMarker"
-																		}
-																	]
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "%u"
 																},
 																{
 																	"Type": "NodeText",
 																	"Data": "，即 "
 																},
 																{
-																	"Type": "NodeCodeSpan",
-																	"Data": "code",
-																	"Children": [
-																		{
-																			"Type": "NodeCodeSpanOpenMarker"
-																		},
-																		{
-																			"Type": "NodeCodeSpanContent",
-																			"Data": "Exec=可執行文件路徑 %u"
-																		},
-																		{
-																			"Type": "NodeCodeSpanCloseMarker"
-																		}
-																	]
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "Exec=可執行文件路徑 %u"
 																}
 															]
 														}
@@ -498,30 +389,10 @@
 													"Data": "更多細節可參考 "
 												},
 												{
-													"Type": "NodeLink",
-													"Data": "span",
-													"Children": [
-														{
-															"Type": "NodeOpenBracket"
-														},
-														{
-															"Type": "NodeLinkText",
-															"Data": "xdg-utils"
-														},
-														{
-															"Type": "NodeCloseBracket"
-														},
-														{
-															"Type": "NodeOpenParen"
-														},
-														{
-															"Type": "NodeLinkDest",
-															"Data": "https://www.freedesktop.org/wiki/Software/xdg-utils/"
-														},
-														{
-															"Type": "NodeCloseParen"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://www.freedesktop.org/wiki/Software/xdg-utils/",
+													"TextMarkTextContent": "xdg-utils"
 												},
 												{
 													"Type": "NodeText",

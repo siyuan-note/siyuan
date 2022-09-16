@@ -1,5 +1,6 @@
 {
 	"ID": "20210824202056-udkf7wg",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20210824202056-udkf7wg",
@@ -35,20 +36,9 @@
 					"Data": "The widget is a static webpage served by SiYuan Kernel. It accesses data through API and renders it through "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "\u003ciframe\u003e"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u003ciframe\u003e"
 				},
 				{
 					"Type": "NodeText",
@@ -249,60 +239,20 @@
 					"Data": "After confirmation, please "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "create a pull request"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request",
+					"TextMarkTextContent": "create a pull request"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " to the "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Community Bazaar"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/siyuan-note/bazaar"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
+					"TextMarkTextContent": "Community Bazaar"
 				},
 				{
 					"Type": "NodeText",
@@ -354,20 +304,9 @@
 					"Data": "Among them, "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "commithash"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "commithash"
 				},
 				{
 					"Type": "NodeText",

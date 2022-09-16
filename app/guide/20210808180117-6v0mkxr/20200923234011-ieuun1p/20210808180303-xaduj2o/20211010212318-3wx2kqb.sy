@@ -1,5 +1,6 @@
 {
 	"ID": "20211010212318-3wx2kqb",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211010212318-3wx2kqb",
@@ -64,60 +65,27 @@
 					"Data": "Open the "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "Settings"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " - "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "Editor"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " - "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "Virtual Reference"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Virtual Reference"
 				},
 				{
 					"Type": "NodeText",

@@ -1,5 +1,6 @@
 {
 	"ID": "20201222093044-rx4zjoy",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20201222093044-rx4zjoy",
@@ -21,22 +22,9 @@
 					"Data": "## "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "blocks"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "blocks"
 				},
 				{
 					"Type": "NodeText",
@@ -475,20 +463,9 @@
 							"Data": "td",
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "fcontent"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "fcontent"
 								},
 								{
 									"Type": "NodeText",
@@ -634,20 +611,9 @@
 									"Data": "内联属性列表，形如 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "{: name=\"value\"}"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "{: name=\"value\"}"
 								}
 							]
 						}
@@ -796,80 +762,36 @@
 									"Data": "如果不指定 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "LIMIT"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "LIMIT"
 								},
 								{
 									"Type": "NodeText",
 									"Data": "，则最多只返回前 64 条结果，可以在 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "设置"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "搜索"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "搜索"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "搜索结果显示数"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "搜索结果显示数"
 								},
 								{
 									"Type": "NodeText",
@@ -903,22 +825,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "sort"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "sort"
 								},
 								{
 									"Type": "NodeText",
@@ -958,20 +867,9 @@
 													"Data": "文档块："
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "0"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "0"
 												}
 											]
 										}
@@ -1000,20 +898,9 @@
 													"Data": "标题块："
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "5"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "5"
 												}
 											]
 										}
@@ -1044,20 +931,9 @@
 													"Data": "段落块："
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "10"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "10"
 												}
 											]
 										}
@@ -1088,20 +964,9 @@
 													"Data": "代码块："
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "10"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "10"
 												}
 											]
 										}
@@ -1132,20 +997,9 @@
 													"Data": "数学公式块："
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "10"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "10"
 												}
 											]
 										}
@@ -1176,20 +1030,9 @@
 													"Data": "表格块："
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "10"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "10"
 												}
 											]
 										}
@@ -1220,20 +1063,9 @@
 													"Data": "HTML 块："
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "10"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "10"
 												}
 											]
 										}
@@ -1264,20 +1096,9 @@
 													"Data": "列表块："
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "20"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "20"
 												}
 											]
 										}
@@ -1308,20 +1129,9 @@
 													"Data": "列表项块："
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "20"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "20"
 												}
 											]
 										}
@@ -1352,20 +1162,9 @@
 													"Data": "引述块："
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "20"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "20"
 												}
 											]
 										}
@@ -1396,20 +1195,9 @@
 													"Data": "超级块："
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "30"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "30"
 												}
 											]
 										}

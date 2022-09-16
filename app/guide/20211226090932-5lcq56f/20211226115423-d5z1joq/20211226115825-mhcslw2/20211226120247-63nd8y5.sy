@@ -1,5 +1,6 @@
 {
 	"ID": "20211226120247-63nd8y5",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226120247-63nd8y5",
@@ -35,40 +36,18 @@
 					"Data": "輸入 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "(("
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 後將觸發內容塊引用搜索，繼續輸入作為搜索關鍵字，在搜索結果中使用上下鍵選定後回車就可以完成內容塊的引用了。建立好內容塊引用後，鼠標懸浮在錨文本上後將彈出預覽浮層，展現被引用的內容塊（定義塊）。"
 				},
 				{
-					"Type": "NodeTag",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeTagOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "內容塊/引用"
-						},
-						{
-							"Type": "NodeTagCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "內容塊/引用"
 				}
 			]
 		},
@@ -384,80 +363,36 @@
 									"Data": "動態錨文本：跟隨定義塊內容變化，最大長度可在 "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "設置"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "編輯器"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "編輯器"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " - "
 								},
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "塊引動態錨文本最大長度"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "塊引動態錨文本最大長度"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " 中設置，最長支持 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "5120"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "5120"
 								},
 								{
 									"Type": "NodeText",
@@ -606,40 +541,18 @@
 					"Data": "除了使用 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "(("
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 觸發引用搜索外，也可以直接使用語法 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "((id \"錨文本\"))"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "((id \"錨文本\"))"
 				},
 				{
 					"Type": "NodeText",
@@ -681,20 +594,9 @@
 									"Data": "使用 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "\""
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\""
 								},
 								{
 									"Type": "NodeText",
@@ -729,20 +631,9 @@
 									"Data": "使用 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "'"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "'"
 								},
 								{
 									"Type": "NodeText",
@@ -767,20 +658,9 @@
 					"Data": "直接使用語法的主要場景是通過外部工具或者 API 建立引用，大部分情況下我們主要還是直接使用 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "(("
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
 				},
 				{
 					"Type": "NodeText",

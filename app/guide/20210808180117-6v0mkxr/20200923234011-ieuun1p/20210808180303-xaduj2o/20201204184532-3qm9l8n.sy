@@ -1,5 +1,6 @@
 {
 	"ID": "20201204184532-3qm9l8n",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20201204184532-3qm9l8n",
@@ -40,20 +41,9 @@
 					"Data": "The template snippet is used to quickly insert the previously set text content at the cursor caret position, and it supports variables. Template snippets use "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": ".md"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".md"
 				},
 				{
 					"Type": "NodeText",
@@ -92,77 +82,28 @@
 					"Data": "The template is implemented using "
 				},
 				{
-					"Type": "NodeLink",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "The Go Programming Language text template"
-						},
-						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
-						},
-						{
-							"Type": "NodeOpenParen",
-							"Data": "("
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://golang.org/pkg/text/template/"
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://golang.org/pkg/text/template/",
+					"TextMarkTextContent": "The Go Programming Language text template"
 				},
 				{
 					"Type": "NodeText",
 					"Data": ". If you have an understanding of this, you can implement some program logic in it, such as comparison logic , Iterative logic, etc. In addition, to avoid syntax conflicts, template syntax uses "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": ".action{action}"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{action}"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " (instead of "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "{{action}}"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{action}}"
 				},
 				{
 					"Type": "NodeText",
@@ -183,88 +124,29 @@
 					"Data": "We have built-in variables and functions to enrich the template through the open source project "
 				},
 				{
-					"Type": "NodeLink",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Sprig"
-						},
-						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
-						},
-						{
-							"Type": "NodeOpenParen",
-							"Data": "("
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/Masterminds/sprig"
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/Masterminds/sprig",
+					"TextMarkTextContent": "Sprig"
 				},
 				{
 					"Type": "NodeText",
 					"Data": ". For example, you can use "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": ".action{now | date \"2006-01-02 15:04:05\"}"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{now | date \"2006-01-02 15:04:05\"}"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " to render the current time. For more usage, please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Sprig Function Documentation"
-						},
-						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
-						},
-						{
-							"Type": "NodeOpenParen",
-							"Data": "("
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "http://masterminds.github.io/sprig/"
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "http://masterminds.github.io/sprig/",
+					"TextMarkTextContent": "Sprig Function Documentation"
 				},
 				{
 					"Type": "NodeText",
@@ -285,98 +167,37 @@
 					"Data": "There is a detail about the date and time formatting. "
 				},
 				{
-					"Type": "NodeTag",
-					"Children": [
-						{
-							"Type": "NodeTagOpenMarker",
-							"Data": "#"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "Note"
-						},
-						{
-							"Type": "NodeTagCloseMarker",
-							"Data": "#"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
 				},
 				{
 					"Type": "NodeText",
 					"Data": ": The formatting of the Go programming language is quite special: Instead of using "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "yyyy-MM-dd HH:mm:ss"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "yyyy-MM-dd HH:mm:ss"
 				},
 				{
 					"Type": "NodeText",
 					"Data": ", use "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "2006-01-02 15:04: 05"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "2006-01-02 15:04: 05"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " This fixed time format ("
 				},
 				{
-					"Type": "NodeLink",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "related discussions on Stack Overflow"
-						},
-						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
-						},
-						{
-							"Type": "NodeOpenParen",
-							"Data": "("
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://stackoverflow.com/questions/20530327/origin-of-mon-jan-2-150405-mst-2006-in-golang"
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://stackoverflow.com/questions/20530327/origin-of-mon-jan-2-150405-mst-2006-in-golang",
+					"TextMarkTextContent": "related discussions on Stack Overflow"
 				},
 				{
 					"Type": "NodeText",
@@ -426,40 +247,18 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "title"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "title"
 								},
 								{
 									"Type": "NodeText",
 									"Data": ": Use this variable to insert the current document name. For example, if the template content is "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "# .action{.title}"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "# .action{.title}"
 								},
 								{
 									"Type": "NodeText",
@@ -489,20 +288,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "id"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "id"
 								},
 								{
 									"Type": "NodeText",
@@ -532,20 +320,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "name"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "name"
 								},
 								{
 									"Type": "NodeText",
@@ -575,20 +352,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "alias"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alias"
 								},
 								{
 									"Type": "NodeText",
@@ -618,40 +384,18 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "queryBlocks"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "queryBlocks"
 								},
 								{
 									"Type": "NodeText",
 									"Data": ": This function is used to query the database, and the return value is a list of blocks,  and the parameter is a SQL statement: "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": ".action{sql \"SELECT * FROM blocks LIMIT 7\"}"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{sql \"SELECT * FROM blocks LIMIT 7\"}"
 								}
 							]
 						}
@@ -677,40 +421,18 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "querySpans"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "querySpans"
 								},
 								{
 									"Type": "NodeText",
 									"Data": ": This function is used to query the database, and the return value is a list of spans,  and the parameter is a SQL statement: "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": ".action{sql \"SELECT * FROM spans LIMIT 7\"}"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{sql \"SELECT * FROM spans LIMIT 7\"}"
 								}
 							]
 						}
@@ -737,40 +459,18 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "parseTime"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "parseTime"
 								},
 								{
 									"Type": "NodeText",
 									"Data": ": This function is used to parse a string in time format into a "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "time.Time"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "time.Time"
 								},
 								{
 									"Type": "NodeText",
@@ -791,40 +491,18 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "queryBlocks"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "queryBlocks"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " and "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "querySpans"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "querySpans"
 				},
 				{
 					"Type": "NodeText",
@@ -893,22 +571,9 @@
 					"Data": "At the cursor caret position, select the template via "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "/"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
 				},
 				{
 					"Type": "NodeText",
@@ -979,44 +644,18 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "$before"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$before"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " and "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "$after"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$after"
 				},
 				{
 					"Type": "NodeText",
@@ -1055,30 +694,10 @@
 					"Data": "Please make sure that the root path of your template repository contains at least the following files before listing ("
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "repo example"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/88250/November-Rain"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/88250/November-Rain",
+					"TextMarkTextContent": "repo example"
 				},
 				{
 					"Type": "NodeText",
@@ -1190,66 +809,20 @@
 					"Data": "After confirmation, please "
 				},
 				{
-					"Type": "NodeLink",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "create a pull request"
-						},
-						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
-						},
-						{
-							"Type": "NodeOpenParen",
-							"Data": "("
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request"
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request",
+					"TextMarkTextContent": "create a pull request"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " to the "
 				},
 				{
-					"Type": "NodeLink",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Community Bazaar"
-						},
-						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
-						},
-						{
-							"Type": "NodeOpenParen",
-							"Data": "("
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/siyuan-note/bazaar"
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
+					"TextMarkTextContent": "Community Bazaar"
 				},
 				{
 					"Type": "NodeText",
@@ -1306,22 +879,9 @@
 					"Data": "Among them, "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "commithash"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "commithash"
 				},
 				{
 					"Type": "NodeText",

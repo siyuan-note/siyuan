@@ -1,5 +1,6 @@
 {
 	"ID": "20200910201551-h4twhas",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20200910201551-h4twhas",
@@ -65,38 +66,18 @@
 					"Data": "所有收藏过的内容块会在书签页签（ "
 				},
 				{
-					"Type": "NodeKbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "Alt 3"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt 3"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " / "
 				},
 				{
-					"Type": "NodeKbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "⌘ 3"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘ 3"
 				},
 				{
 					"Type": "NodeText",
@@ -134,44 +115,18 @@
 					"Data": "标签用于在内容块中对该块进行标记。语法是通过一前一后两个 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "#"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 将标签标识包裹起来，像这样 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "#标签#"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#标签#"
 				},
 				{
 					"Type": "NodeText",
@@ -191,44 +146,18 @@
 					"Data": "标签支持层级，这样可以更方便地对内容块进行分类整理。不同层级之间使用 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "/"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 分隔，像这样 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "#A/B/C#"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#A/B/C#"
 				},
 				{
 					"Type": "NodeText",
@@ -248,38 +177,18 @@
 					"Data": "所有打过标签的内容块会在标签页签（"
 				},
 				{
-					"Type": "NodeKbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "Alt 4"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt 4"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " / "
 				},
 				{
-					"Type": "NodeKbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "⌘ 4"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘ 4"
 				},
 				{
 					"Type": "NodeText",

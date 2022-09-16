@@ -1,5 +1,6 @@
 {
 	"ID": "20201227194925-7ipoiv6",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20201227194925-7ipoiv6",
@@ -21,30 +22,10 @@
 					"Data": "请浏览 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "API 文档"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md",
+					"TextMarkTextContent": "API 文档"
 				},
 				{
 					"Type": "NodeText",

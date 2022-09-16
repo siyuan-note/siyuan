@@ -1,5 +1,6 @@
 {
 	"ID": "20220628204444-9n0y9h2",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20220628204444-9n0y9h2",
@@ -104,31 +105,12 @@
 					}
 				},
 				{
-					"Type": "NodeKbd",
+					"Type": "NodeTextMark",
 					"Properties": {
 						"id": ""
 					},
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker",
-							"Properties": {
-								"id": ""
-							}
-						},
-						{
-							"Type": "NodeText",
-							"Data": "...",
-							"Properties": {
-								"id": ""
-							}
-						},
-						{
-							"Type": "NodeKbdCloseMarker",
-							"Properties": {
-								"id": ""
-							}
-						}
-					]
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "..."
 				},
 				{
 					"Type": "NodeText",
@@ -138,31 +120,12 @@
 					}
 				},
 				{
-					"Type": "NodeKbd",
+					"Type": "NodeTextMark",
 					"Properties": {
 						"id": ""
 					},
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker",
-							"Properties": {
-								"id": ""
-							}
-						},
-						{
-							"Type": "NodeText",
-							"Data": "优化排版",
-							"Properties": {
-								"id": ""
-							}
-						},
-						{
-							"Type": "NodeKbdCloseMarker",
-							"Properties": {
-								"id": ""
-							}
-						}
-					]
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "优化排版"
 				},
 				{
 					"Type": "NodeText",

@@ -1,5 +1,6 @@
 {
 	"ID": "20211226123302-akitvb1",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226123302-akitvb1",
@@ -64,40 +65,18 @@
 					"Data": "導入時如果遇到形如 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "![foo](images/bar.png)"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "![foo](images/bar.png)"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 的圖片語法（本地相對路徑），則思源會將 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "images/bar.png"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "images/bar.png"
 				},
 				{
 					"Type": "NodeText",
@@ -137,40 +116,18 @@
 					"Data": "。但是如果是 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": ".images/bar.png"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".images/bar.png"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 則不會轉換，因為 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "."
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "."
 				},
 				{
 					"Type": "NodeText",
@@ -206,80 +163,36 @@
 					"Data": "在桌面端 "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "設置 "
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置 "
 				},
 				{
 					"Type": "NodeText",
 					"Data": "- "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "導出"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "導出"
 				},
 				{
 					"Type": "NodeText",
 					"Data": "、移動端右側欄 "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "關於"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "關於"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 中可以進行數據導入和導出。這裡的導出會將 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "工作空間/data/"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空間/data/"
 				},
 				{
 					"Type": "NodeText",
@@ -296,40 +209,18 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "導入 Data"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "導入 Data"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 功能僅支持處理以上步驟導出的 Data 壓縮包。導入按壓縮包中的文件路徑複製到當前 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "工作空間/data/"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空間/data/"
 				},
 				{
 					"Type": "NodeText",
@@ -441,20 +332,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeTag",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeTagOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "注意"
-						},
-						{
-							"Type": "NodeTagCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
 				},
 				{
 					"Type": "NodeText",
@@ -505,20 +385,9 @@
 					"Data": "選擇內容後使用複制快捷鍵 "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "Ctrl+C"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+C"
 				},
 				{
 					"Type": "NodeText",
@@ -539,60 +408,27 @@
 					"Data": "如果你需要復制 HTML 內容，請在編輯器頁簽右上角的 "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "..."
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "..."
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 菜單中的 "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "模式切換"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "模式切換"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 切換到 "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "導出預覽"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "導出預覽"
 				},
 				{
 					"Type": "NodeText",
@@ -628,60 +464,27 @@
 					"Data": "在文檔樹上選擇文檔後右鍵選擇 "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "導出"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "導出"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 或者編輯器頁簽右上角的 "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "..."
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "..."
 				},
 				{
 					"Type": "NodeText",
 					"Data": " 菜單中選擇 "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "導出"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "導出"
 				},
 				{
 					"Type": "NodeText",
@@ -817,40 +620,18 @@
 					"Data": "在 "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "設置"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " - "
 				},
 				{
-					"Type": "NodeKbd",
-					"Data": "kbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "導出"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "導出"
 				},
 				{
 					"Type": "NodeText",

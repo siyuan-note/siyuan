@@ -1,5 +1,6 @@
 {
 	"ID": "20201004194026-s8h2cog",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20201004194026-s8h2cog",
@@ -38,33 +39,10 @@
 					"Data": "SiYuan Desktop is an standalone application packaged based on "
 				},
 				{
-					"Type": "NodeLink",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Electron"
-						},
-						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
-						},
-						{
-							"Type": "NodeOpenParen",
-							"Data": "("
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://www.electronjs.org"
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://www.electronjs.org",
+					"TextMarkTextContent": "Electron"
 				},
 				{
 					"Type": "NodeText",
@@ -160,22 +138,9 @@
 					"Data": "After visiting "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "http://127.0.0.1:6806/"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "http://127.0.0.1:6806/"
 				},
 				{
 					"Type": "NodeText",
@@ -195,22 +160,9 @@
 					"Data": "If you need to use it in a local area network, just replace "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "127.0.0.1"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "127.0.0.1"
 				},
 				{
 					"Type": "NodeText",
@@ -307,33 +259,10 @@
 					"Data": "Before embarking on these two solutions, please start with understanding "
 				},
 				{
-					"Type": "NodeLink",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "SiYuan Technical Architecture"
-						},
-						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
-						},
-						{
-							"Type": "NodeOpenParen",
-							"Data": "("
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://ld246.com/article/1619868273581#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84"
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/article/1619868273581#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84",
+					"TextMarkTextContent": "SiYuan Technical Architecture"
 				},
 				{
 					"Type": "NodeText",
@@ -372,38 +301,18 @@
 					"Data": "In "
 				},
 				{
-					"Type": "NodeKbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "Settings"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " - "
 				},
 				{
-					"Type": "NodeKbd",
-					"Children": [
-						{
-							"Type": "NodeKbdOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "About"
-						},
-						{
-							"Type": "NodeKbdCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "About"
 				},
 				{
 					"Type": "NodeText",

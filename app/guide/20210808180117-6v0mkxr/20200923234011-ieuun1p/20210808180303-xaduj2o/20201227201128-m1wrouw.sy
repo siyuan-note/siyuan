@@ -1,5 +1,6 @@
 {
 	"ID": "20201227201128-m1wrouw",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20201227201128-m1wrouw",
@@ -71,20 +72,9 @@
 									"Data": "Image name "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "b3log/siyuan"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "b3log/siyuan"
 								}
 							]
 						}
@@ -111,30 +101,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "Image URL"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://hub.docker.com/r/b3log/siyuan"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://hub.docker.com/r/b3log/siyuan",
+									"TextMarkTextContent": "Image URL"
 								}
 							]
 						}
@@ -172,22 +142,9 @@
 					"Data": "The overall program is located under "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "/opt/siyuan/"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/opt/siyuan/"
 				},
 				{
 					"Type": "NodeText",
@@ -362,44 +319,18 @@
 					"Data": "The entry point is set when building the Docker image: "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "ENTRYPOINT [\"/opt/siyuan/kernel\" ]"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ENTRYPOINT [\"/opt/siyuan/kernel\" ]"
 				},
 				{
 					"Type": "NodeText",
 					"Data": ", use "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "docker run b3log/siyuan"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run b3log/siyuan"
 				},
 				{
 					"Type": "NodeText",
@@ -437,40 +368,18 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "--workspace"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace"
 								},
 								{
 									"Type": "NodeText",
 									"Data": " specifies the workspace folder path, mounted to the container via "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "-v"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-v"
 								},
 								{
 									"Type": "NodeText",
@@ -528,20 +437,9 @@
 					"Data": ". The following is an example of a startup command: "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "docker run -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
 				}
 			]
 		},
@@ -583,22 +481,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "workspace_dir_host"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace_dir_host"
 								},
 								{
 									"Type": "NodeText",
@@ -632,44 +517,18 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "workspace_dir_container"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace_dir_container"
 								},
 								{
 									"Type": "NodeText",
 									"Data": ": The path of the workspace folder in the container, which is the same as specified in "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"CodeMarkerLen": 1,
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker",
-											"Data": "`"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "--workspace"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker",
-											"Data": "`"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace"
 								}
 							]
 						}
@@ -690,80 +549,36 @@
 					"Data": "To simplify, it is recommended to configure the workspace folder path to be consistent on the host and container, such as: "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "workspace_dir_host"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace_dir_host"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " and "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "workspace_dir_container"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace_dir_container"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " are configured as "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "/siyuan/workspace"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/siyuan/workspace"
 				},
 				{
 					"Type": "NodeText",
 					"Data": ", the corresponding startup commands is: "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
 				},
 				{
 					"Type": "NodeText",
@@ -799,60 +614,27 @@
 					"Data": "In the image, the normal user "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "siyuan"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " (uid 1000/gid 1000) created by default is used to start the kernel process. Therefore, when the host creates a workspace folder, please pay attention to setting the user group of the folder:  "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "chown -R 1000:1000 /siyuan/workspace"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "chown -R 1000:1000 /siyuan/workspace"
 				},
 				{
 					"Type": "NodeText",
 					"Data": ". The parameter "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "-u 1000:1000"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-u 1000:1000"
 				},
 				{
 					"Type": "NodeText",
@@ -923,20 +705,9 @@
 									"Data": "Configure WebSocket reverse proxy "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "/ws"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/ws"
 								}
 							]
 						}

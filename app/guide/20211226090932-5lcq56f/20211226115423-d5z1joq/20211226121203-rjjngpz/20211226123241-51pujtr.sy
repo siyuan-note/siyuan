@@ -1,5 +1,6 @@
 {
 	"ID": "20211226123241-51pujtr",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226123241-51pujtr",
@@ -113,30 +114,10 @@
 									"Data": "如果需要將剪藏內容中包含的圖片拉取到本地，可使用"
 								},
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "思源 Chome 擴充"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://ld246.com/article/1629423901669"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1629423901669",
+									"TextMarkTextContent": "思源 Chome 擴充"
 								}
 							]
 						}

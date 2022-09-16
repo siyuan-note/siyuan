@@ -1,5 +1,6 @@
 {
 	"ID": "20200813163359-v04n73b",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f4c4",
@@ -100,44 +101,18 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "SiYuan（思源笔记）"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "SiYuan（思源笔记）"
 				},
 				{
 					"Type": "NodeText",
 					"Data": "是云南链滴科技有限公司（以下简称“我们”）通过合法拥有并运营的、包括且不限于思源笔记桌面端软件、移动端应用、"
 				},
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "思源笔记云端服务"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "思源笔记云端服务"
 				},
 				{
 					"Type": "NodeText",
@@ -158,22 +133,9 @@
 					"Data": "我们深知个人隐私信息对您的重要性，所以"
 				},
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "我们在此承诺保护使用我们的产品和服务的用户的个人信息及隐私安全"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "我们在此承诺保护使用我们的产品和服务的用户的个人信息及隐私安全"
 				},
 				{
 					"Type": "NodeText",
@@ -469,22 +431,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "如果您不使用思源笔记本云端服务，我们不会收集和获得您的个人信息"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "如果您不使用思源笔记本云端服务，我们不会收集和获得您的个人信息"
 				},
 				{
 					"Type": "NodeText",
@@ -824,44 +773,18 @@
 									"Data": "设备信息：我们可能会根据您在软件安装及使用中授予的具体权限，接收并记录您所使用的设备相关信息（例如 "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "IMEI、MAC、Serial、SIM 卡 IMSI 识别码、设备机型、操作系统及版本、客户端版本、设备分辨率、包名、设备设置、进程及软件列表、唯一设备标识符、软硬件特征"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "IMEI、MAC、Serial、SIM 卡 IMSI 识别码、设备机型、操作系统及版本、客户端版本、设备分辨率、包名、设备设置、进程及软件列表、唯一设备标识符、软硬件特征"
 								},
 								{
 									"Type": "NodeText",
 									"Data": "信息）、设备所在位置相关信息（"
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "例如 IP 地址、GPS 位置以及能够提供相关个人信息的 WLAN 接入点、蓝牙和基站传感器"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "例如 IP 地址、GPS 位置以及能够提供相关个人信息的 WLAN 接入点、蓝牙和基站传感器"
 								},
 								{
 									"Type": "NodeText",
@@ -911,22 +834,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "我们可能从管理方、第三方合作伙伴获取您授权共享的相关个人信息。例如，我们可能从第三方获取您授权共享的账户个人信息（头像、昵称、登录时间）并在您同意本《隐私政策》后将您的第三方账户与您的思源笔记云端服务账户绑定，使您可以通过第三方账户直接登录并使用我们的产品和服务。"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "我们可能从管理方、第三方合作伙伴获取您授权共享的相关个人信息。例如，我们可能从第三方获取您授权共享的账户个人信息（头像、昵称、登录时间）并在您同意本《隐私政策》后将您的第三方账户与您的思源笔记云端服务账户绑定，使您可以通过第三方账户直接登录并使用我们的产品和服务。"
 				},
 				{
 					"Type": "NodeText",
@@ -1055,22 +965,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "为提高您使用我们及合作伙伴提供服务的安全性，保护您或其他用户或公众的人身财产安全免遭侵害，更好地预防钓鱼网站、欺诈、网络漏洞、计算机病毒、网络攻击、网络侵入等安全风险，更准确地识别违反法律法规或 思源 服务相关协议规则的情况，我们可能会收集、使用或整合您的账户信息、交易信息、设备信息、日志信息以及我们关联公司、合作伙伴取得您授权或依据法律共享的个人信息，来综合判断您账户及交易风险、进行身份验证、检测及防范安全事件，并依法采取必要的记录、审计、分析、处置措施。"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "为提高您使用我们及合作伙伴提供服务的安全性，保护您或其他用户或公众的人身财产安全免遭侵害，更好地预防钓鱼网站、欺诈、网络漏洞、计算机病毒、网络攻击、网络侵入等安全风险，更准确地识别违反法律法规或 思源 服务相关协议规则的情况，我们可能会收集、使用或整合您的账户信息、交易信息、设备信息、日志信息以及我们关联公司、合作伙伴取得您授权或依据法律共享的个人信息，来综合判断您账户及交易风险、进行身份验证、检测及防范安全事件，并依法采取必要的记录、审计、分析、处置措施。"
 				}
 			]
 		},
@@ -1112,22 +1009,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "您了解并同意，在收集您的个人信息后，我们将通过技术手段对数据进行去标识化处理，去标识化处理的个人信息将无法识别您的身份，在此情况下我们有权使用已经去标识化的个人信息，对用户数据库进行分析并予以商业化的利用。"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "您了解并同意，在收集您的个人信息后，我们将通过技术手段对数据进行去标识化处理，去标识化处理的个人信息将无法识别您的身份，在此情况下我们有权使用已经去标识化的个人信息，对用户数据库进行分析并予以商业化的利用。"
 				}
 			]
 		},
@@ -1155,30 +1039,19 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "请您注意，如果我们要将您的个人信息用于本《隐私政策》中未载明的其他用途或额外收集未"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "提及"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "的其他个人信息，我们会另行事先请您同意（确认同意的方式：如勾选、弹窗、站内信、邮件、短信等方式）。一旦您同意，该等额外用途将视为本《隐私政策》的一部分，该等额外个人信息也将适用本《隐私政策》。"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "请您注意，如果我们要将您的个人信息用于本《隐私政策》中未载明的其他用途或额外收集未"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "提及"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "的其他个人信息，我们会另行事先请您同意（确认同意的方式：如勾选、弹窗、站内信、邮件、短信等方式）。一旦您同意，该等额外用途将视为本《隐私政策》的一部分，该等额外个人信息也将适用本《隐私政策》。"
 				}
 			]
 		},
@@ -2955,22 +2828,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "请您理解，由于技术的限制以及风险防范的局限，即便我们已经尽量加强安全措施，也无法始终保证个人信息百分之百的安全。您需要了解，您接入思源笔记云端服务所用的系统和通讯网络，有可能因我们可控范围外的情况而发生问题。"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "请您理解，由于技术的限制以及风险防范的局限，即便我们已经尽量加强安全措施，也无法始终保证个人信息百分之百的安全。您需要了解，您接入思源笔记云端服务所用的系统和通讯网络，有可能因我们可控范围外的情况而发生问题。"
 				}
 			]
 		},
@@ -3313,20 +3173,9 @@
 					"Data": "如您需要注销账户，请登录链滴，进入 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "设置 - 账号"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "设置 - 账号"
 				},
 				{
 					"Type": "NodeText",
@@ -3596,30 +3445,10 @@
 							"Data": "SDK 官网："
 						},
 						{
-							"Type": "NodeLink",
-							"Data": "span",
-							"Children": [
-								{
-									"Type": "NodeOpenBracket"
-								},
-								{
-									"Type": "NodeLinkText",
-									"Data": "https://open.weixin.qq.com (opens new window)"
-								},
-								{
-									"Type": "NodeCloseBracket"
-								},
-								{
-									"Type": "NodeOpenParen"
-								},
-								{
-									"Type": "NodeLinkDest",
-									"Data": "https://open.weixin.qq.com/"
-								},
-								{
-									"Type": "NodeCloseParen"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "a",
+							"TextMarkAHref": "https://open.weixin.qq.com/",
+							"TextMarkTextContent": "https://open.weixin.qq.com (opens new window)"
 						}
 					]
 				},
@@ -3648,48 +3477,15 @@
 							"Data": "收集的个人信息类型/字段：设备标识信息\n"
 						},
 						{
-							"Type": "NodeLink",
-							"Data": "span",
-							"Children": [
-								{
-									"Type": "NodeOpenBracket"
-								},
-								{
-									"Type": "NodeLinkText",
-									"Data": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl "
-								},
-								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "(opens new window)"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
-								},
-								{
-									"Type": "NodeCloseBracket"
-								},
-								{
-									"Type": "NodeOpenParen"
-								},
-								{
-									"Type": "NodeLinkDest",
-									"Data": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl"
-								},
-								{
-									"Type": "NodeCloseParen"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "a",
+							"TextMarkAHref": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl",
+							"TextMarkTextContent": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "a strong",
+							"TextMarkTextContent": "(opens new window)"
 						}
 					]
 				}
@@ -3747,25 +3543,12 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
+					"Type": "NodeTextMark",
 					"Properties": {
 						"style": "background-color: var(--b3-theme-background); font-family: var(--b3-font-family);"
 					},
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "Android 应用会申请的权限允许访问网络："
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "Android 应用会申请的权限允许访问网络："
 				},
 				{
 					"Type": "NodeKramdownSpanIAL",
@@ -3803,22 +3586,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "允许访问网络："
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "允许访问网络："
 								},
 								{
 									"Type": "NodeText",
@@ -3849,22 +3619,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "允许常驻通知："
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "允许常驻通知："
 								},
 								{
 									"Type": "NodeText",
@@ -3895,22 +3652,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "允许获取应用列表："
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "允许获取应用列表："
 								},
 								{
 									"Type": "NodeText",
@@ -3940,22 +3684,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "允许拍照/访问相册："
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "允许拍照/访问相册："
 								},
 								{
 									"Type": "NodeText",
@@ -3976,22 +3707,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "iOS 应用内会申请的权限"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "iOS 应用内会申请的权限"
 				}
 			]
 		},
@@ -4025,22 +3743,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "允许访问网络："
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "允许访问网络："
 								},
 								{
 									"Type": "NodeText",
@@ -4071,22 +3776,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "允许访问系统相册："
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "允许访问系统相册："
 								},
 								{
 									"Type": "NodeText",
@@ -4293,30 +3985,10 @@
 					"Data": "思源笔记使用 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "AGPLv3 开源协议"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/siyuan-note/siyuan/blob/master/LICENSE"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/LICENSE",
+					"TextMarkTextContent": "AGPLv3 开源协议"
 				},
 				{
 					"Type": "NodeText",
@@ -4349,30 +4021,10 @@
 							"Data": "// This program is free software: you can redistribute it and/or modify\n// it under the terms of the GNU Affero General Public License as published by\n// the Free Software Foundation, either version 3 of the License, or\n// (at your option) any later version.\n//\n// This program is distributed in the hope that it will be useful,\n// but WITHOUT ANY WARRANTY; without even the implied warranty of\n// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n// GNU Affero General Public License for more details.\n//\n// You should have received a copy of the GNU Affero General Public License\n// along with this program.  If not, see "
 						},
 						{
-							"Type": "NodeLink",
-							"Data": "span",
-							"Children": [
-								{
-									"Type": "NodeOpenBracket"
-								},
-								{
-									"Type": "NodeLinkText",
-									"Data": "https://www.gnu.org/licenses/"
-								},
-								{
-									"Type": "NodeCloseBracket"
-								},
-								{
-									"Type": "NodeOpenParen"
-								},
-								{
-									"Type": "NodeLinkDest",
-									"Data": "https://www.gnu.org/licenses/"
-								},
-								{
-									"Type": "NodeCloseParen"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "a",
+							"TextMarkAHref": "https://www.gnu.org/licenses/",
+							"TextMarkTextContent": "https://www.gnu.org/licenses/"
 						},
 						{
 							"Type": "NodeText",

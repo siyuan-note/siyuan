@@ -264,8 +264,6 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/atotto/clipboard](https://github.com/atotto/clipboard) `BSD-3-Clause License`
 * [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
 * [https://github.com/gofrs/flock](https://github.com/gofrs/flock) `BSD-3-Clause License`
-* [https://github.com/88250/gulu](https://github.com/88250/gulu) `Mulan PSL v2`
-* [https://github.com/88250/lute](https://github.com/88250/lute) `Mulan PSL v2`
 * [https://github.com/olahol/melody](https://github.com/olahol/melody) `BSD-2-Clause License`
 * [https://github.com/pdfcpu/pdfcpu](https://github.com/pdfcpu/pdfcpu) `Apache-2.0 License`
 * [https://github.com/blastrain/vitess-sqlparser](https://github.com/blastrain/vitess-sqlparser) `Apache-2.0 License`
@@ -296,16 +294,12 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/patrickmn/go-cache](https://github.com/patrickmn/go-cache) `MIT License`
 * [https://github.com/radovskyb/watcher](https://github.com/radovskyb/watcher) `BSD-3-Clause License`
 * [https://github.com/sabhiram/go-gitignore](https://github.com/sabhiram/go-gitignore) `MIT License`
-* [https://github.com/siyuan-note/dejavu](https://github.com/siyuan-note/dejavu) `Mulan PSL v2`
-* [https://github.com/siyuan-note/encryption](https://github.com/siyuan-note/encryption) `Mulan PSL v2`
-* [https://github.com/siyuan-note/filelock](https://github.com/siyuan-note/filelock) `Mulan PSL v2`
-* [https://github.com/siyuan-note/httpclient](https://github.com/siyuan-note/httpclient) `Mulan PSL v2`
 * [https://github.com/steambap/captcha](https://github.com/steambap/captcha) `MIT License`
 * [https://github.com/vmihailenco/msgpack](https://github.com/vmihailenco/msgpack) `BSD-2-Clause License`
 * [https://github.com/xrash/smetrics](https://github.com/xrash/smetrics) `MIT License`
+* [https://github.com/jgm/pandoc](https://github.com/jgm/pandoc) `GPL-2.0 License`
 * [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`
 * [https://github.com/electron/electron](https://github.com/electron/electron) `MIT License`
-* [https://github.com/Vanessa219/vditor](https://github.com/Vanessa219/vditor) `MIT License`
 * [https://github.com/visjs/vis-network](https://github.com/visjs/vis-network) `Apache-2.0 License`
 * [https://github.com/mozilla/pdf.js](https://github.com/mozilla/pdf.js) `Apache-2.0 License`
 * [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`

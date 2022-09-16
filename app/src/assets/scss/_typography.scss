@@ -44,19 +44,46 @@
     vertical-align: bottom;
   }
 
+  span[data-type~="sup"],
+  span[data-type~="sub"] {
+    position: relative;
+    font-size: 75%;
+    line-height: 0;
+    vertical-align: baseline;
+  }
+
+  span[data-type~="sup"] {
+    top: -0.5em;
+  }
+
+  span[data-type~="sub"] {
+    bottom: -0.25em;
+  }
+
   em,
   span[data-type~="em"] {
+    font-style: italic;
     color: var(--b3-protyle-inline-em-color);
   }
 
   s,
   span[data-type~="s"] {
     color: var(--b3-protyle-inline-s-color);
+    text-decoration: line-through;
   }
 
   strong,
   span[data-type~="strong"] {
+    font-weight: bold;
     color: var(--b3-protyle-inline-strong-color);
+  }
+
+  span[data-type~="inline-math"] {
+    user-select: text;
+    display: inline;
+    // https://github.com/siyuan-note/siyuan/issues/3081 test $\begin{bmatrix}   a & b \\c & d \\   e & f\end{bmatrix}$ test
+    // https://ld246.com/article/1626937851892 <u>test $\mu_p$ test</u>
+    // https://ld246.com/article/1636204769623  test $\rightarrow$ test
   }
 
   mark,

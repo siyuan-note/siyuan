@@ -144,7 +144,7 @@ export class Toolbar {
         if (!startElement || startElement.nodeType === 3) {
             return [];
         }
-        if (!["DIV", "TD", "TH"].includes(startElement.tagName)) {
+        if (!["DIV", "TD", "TH", "TR"].includes(startElement.tagName)) {
             if (range.startContainer.textContent.length === range.startOffset && !hasNextSibling(range.startContainer)) {
                 // 光标在 span 结尾不算 type，否则如在粗体后 ctrl+b 就无法继续使用粗体了
             } else {
@@ -160,7 +160,7 @@ export class Toolbar {
         if (!endElement || endElement.nodeType === 3) {
             return [];
         }
-        if (!["DIV", "TD", "TH"].includes(endElement.tagName) && !startElement.isSameNode(endElement)) {
+        if (!["DIV", "TD", "TH", "TR"].includes(endElement.tagName) && !startElement.isSameNode(endElement)) {
             types = types.concat((endElement.getAttribute("data-type") || "").split(" "));
         }
         // if (range.startOffset === range.startContainer.textContent.length) {
@@ -176,10 +176,16 @@ export class Toolbar {
         // }
         range.cloneContents().childNodes.forEach((item: HTMLElement) => {
             if (item.nodeType !== 3) {
-                types = types.concat(item.getAttribute("data-type").split(" "));
+                types = types.concat((item.getAttribute("data-type") || "").split(" "));
             }
         });
         types = [...new Set(types)];
+        types.find((item, index) => {
+            if (item === "") {
+                types.splice(index, 1);
+                return true;
+            }
+        });
         return types;
     }
 
@@ -220,23 +226,6 @@ export class Toolbar {
         return menuItemObj.element;
     }
 
-    private pushNode(newNodes: Node[], element: Element | DocumentFragment) {
-        element.childNodes.forEach((item: Element) => {
-            if (item.nodeType !== 3 && (
-                (item.getAttribute("data-type") === "inline-math" && item.textContent !== "") ||
-                item.tagName === "BR" || item.getAttribute("data-type") === "backslash"
-            )) {
-                // 软换行、数学公式、转移符不能消失
-                newNodes.push(item.cloneNode(true));
-            } else {
-                if (item.textContent === "") {
-                    return;
-                }
-                newNodes.push(document.createTextNode(item.textContent));
-            }
-        });
-    }
-
     // 合并多个 text 为一个 text
     private mergeNode(nodes: NodeListOf<ChildNode>) {
         for (let i = 0; i < nodes.length; i++) {
@@ -266,12 +255,40 @@ export class Toolbar {
         }
         const rangeTypes = this.getCurrentType();
         const selectText = this.range.toString();
+
+        // table 选中处理
+        const tableElement = hasClosestByAttribute(this.range.startContainer, "data-type", "NodeTable");
+        if (selectText !== "" && tableElement && this.range.commonAncestorContainer.nodeType !== 3) {
+            const parentTag = (this.range.commonAncestorContainer as Element).tagName;
+            if (parentTag !== "TH" && parentTag !== "TD") {
+                const startCellElement = hasClosestByMatchTag(this.range.startContainer, "TD") || hasClosestByMatchTag(this.range.startContainer, "TH");
+                const endCellElement = hasClosestByMatchTag(this.range.endContainer, "TD") || hasClosestByMatchTag(this.range.endContainer, "TH");
+                if (!startCellElement && !endCellElement) {
+                    const cellElement = tableElement.querySelector("th") || tableElement.querySelector("td");
+                    this.range.setStartBefore(cellElement.firstChild);
+                    this.range.setEndAfter(cellElement.lastChild);
+                } else if (startCellElement &&
+                    // 不能包含自身元素，否则对 cell 中的部分文字两次高亮后就会选中整个 cell。 https://github.com/siyuan-note/siyuan/issues/3649 第二点
+                    !startCellElement.contains(this.range.endContainer)) {
+                    const cloneRange = this.range.cloneRange();
+                    this.range.setEndAfter(startCellElement.lastChild);
+                    if (this.range.toString() === "" && endCellElement) {
+                        this.range.setEnd(cloneRange.endContainer, cloneRange.endOffset);
+                        this.range.setStartBefore(endCellElement.lastChild);
+                    }
+                    if (this.range.toString() === "") {
+                        return;
+                    }
+                }
+            }
+        }
+
         let previousElement: HTMLElement;
         let nextElement: HTMLElement;
         let previousIndex: number;
         let nextIndex: number;
         const previousSibling = hasPreviousSibling(this.range.startContainer);
-        if (!["DIV", "TD", "TH"].includes(this.range.startContainer.parentElement.tagName)) {
+        if (!["DIV", "TD", "TH", "TR"].includes(this.range.startContainer.parentElement.tagName)) {
             if (this.range.startOffset === 0 && !previousSibling) {
                 previousElement = this.range.startContainer.parentElement.previousSibling as HTMLElement;
                 this.range.setStartBefore(this.range.startContainer.parentElement);
@@ -283,7 +300,7 @@ export class Toolbar {
             previousElement = previousSibling as HTMLElement;
         }
         const nextSibling = hasNextSibling(this.range.endContainer);
-        if (!["DIV", "TD", "TH"].includes(this.range.endContainer.parentElement.tagName)) {
+        if (!["DIV", "TD", "TH", "TR"].includes(this.range.endContainer.parentElement.tagName)) {
             if (this.range.endOffset === this.range.endContainer.textContent.length && !nextSibling) {
                 nextElement = this.range.endContainer.parentElement.nextSibling as HTMLElement;
                 this.range.setEndAfter(this.range.endContainer.parentElement);
@@ -300,7 +317,7 @@ export class Toolbar {
         const contents = this.range.extractContents();
         this.mergeNode(contents.childNodes);
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
-        let newNodes: Node[] = [];
+        const newNodes: Node[] = [];
         if (actionBtn?.classList.contains("protyle-toolbar__item--current") || (
             action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && (!textObj || textObj.type === "remove")
         )) {
@@ -325,7 +342,7 @@ export class Toolbar {
                 }
             }
             contents.childNodes.forEach((item: HTMLElement, index) => {
-                if (item.nodeType !== 3) {
+                if (item.nodeType !== 3 && item.tagName !== "BR") {
                     const types = item.getAttribute("data-type").split(" ");
                     types.find((itemType, index) => {
                         if (type === itemType) {
@@ -407,9 +424,11 @@ export class Toolbar {
                             hasSameTextStyle(item, nextElement, textObj)) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
-                        } else {
+                        } else if (item.tagName !== 'BR') {
                             item.setAttribute("data-type", types.join(" "));
                             setFontStyle(item, textObj);
+                            newNodes.push(item);
+                        } else {
                             newNodes.push(item);
                         }
                     }
@@ -446,8 +465,10 @@ export class Toolbar {
         } else if (newNodes.length > 0) {
             if (newNodes[0].firstChild) {
                 this.range.setStart(newNodes[0].firstChild, 0);
-            } else {
+            } else if (newNodes[0].nodeType === 3) {
                 this.range.setStart(newNodes[0], 0);
+            } else {
+                this.range.setStartBefore(newNodes[0]);
             }
         } else if (nextElement) {
             // aaa**bbb** 选中 aaa 加粗
@@ -459,8 +480,11 @@ export class Toolbar {
             const lastNewNode = newNodes[newNodes.length - 1];
             if (lastNewNode.lastChild) {
                 this.range.setEnd(lastNewNode.lastChild, lastNewNode.lastChild.textContent.length);
-            } else {
+            } else if (lastNewNode.nodeType === 3) {
                 this.range.setEnd(lastNewNode, lastNewNode.textContent.length);
+            } else {
+                // eg: 表格中有3行时，选中第二行三级，多次加粗会增加换行
+                this.range.setEndAfter(lastNewNode);
             }
         } else if (previousElement) {
             // **aaa**bbb 选中 bbb 加粗
@@ -470,270 +494,6 @@ export class Toolbar {
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
         wbrElement.remove();
-    }
-
-    public async setInlineMark1(protyle: IProtyle, type: string, action: "remove" | "add" | "range" | "toolbar", focusAdd = false) {
-        const nodeElement = hasClosestBlock(this.range.startContainer);
-        if (!nodeElement) {
-            return;
-        }
-        const types = this.getCurrentType();
-        // if (action === "add" && types.length > 0 && types.includes(type) && !focusAdd) {
-        //     if (type === "link") {
-        //         this.element.classList.add("fn__none");
-        //         linkMenu(protyle, this.range.startContainer.parentElement);
-        //     }
-        //     return;
-        // }
-        // 对已有字体样式的文字再次添加字体样式
-        // if (focusAdd && action === "add" && types.includes("text") && this.range.startContainer.nodeType === 3 &&
-        //     this.range.startContainer.parentNode.isSameNode(this.range.endContainer.parentNode)) {
-        //     return;
-        // }
-        let startElement = this.range.startContainer as Element;
-        // if (this.range.startContainer.nodeType === 3) {
-        //     startElement = this.range.startContainer.parentElement;
-        //     if (startElement.getAttribute("data-type") === "virtual-block-ref" && !["DIV", "TD", "TH"].includes(startElement.parentElement.tagName)) {
-        //         startElement = startElement.parentElement;
-        //     }
-        // }
-
-        // table 选中处理
-        const tableElement = hasClosestByAttribute(startElement, "data-type", "NodeTable");
-        if (this.range.toString() !== "" && tableElement && this.range.commonAncestorContainer.nodeType !== 3) {
-            const parentTag = (this.range.commonAncestorContainer as Element).tagName;
-            if (parentTag !== "TH" && parentTag !== "TD") {
-                const startCellElement = hasClosestByMatchTag(startElement, "TD") || hasClosestByMatchTag(startElement, "TH");
-                const endCellElement = hasClosestByMatchTag(this.range.endContainer, "TD") || hasClosestByMatchTag(this.range.endContainer, "TH");
-                if (!startCellElement && !endCellElement) {
-                    const cellElement = tableElement.querySelector("th") || tableElement.querySelector("td");
-                    this.range.setStartBefore(cellElement.firstChild);
-                    this.range.setEndAfter(cellElement.lastChild);
-                    startElement = cellElement;
-                } else if (startCellElement &&
-                    // 不能包含自身元素，否则对 cell 中的部分文字两次高亮后就会选中整个 cell。 https://github.com/siyuan-note/siyuan/issues/3649 第二点
-                    !startCellElement.contains(this.range.endContainer)) {
-                    const cloneRange = this.range.cloneRange();
-                    this.range.setEndAfter(startCellElement.lastChild);
-                    if (this.range.toString() === "" && endCellElement) {
-                        this.range.setEnd(cloneRange.endContainer, cloneRange.endOffset);
-                        this.range.setStartBefore(endCellElement.lastChild);
-                    }
-                    if (this.range.toString() === "") {
-                        return;
-                    }
-                }
-            }
-        }
-
-        // if (this.range.toString() === "" && action === "range" && getSelectionOffset(startElement, protyle.wysiwyg.element).end === startElement.textContent.length &&
-        //     this.range.startContainer.nodeType === 3 && !this.range.startContainer.parentElement.getAttribute("contenteditable") &&
-        //     types.length > 0) {
-        //     // 跳出行内元素
-        //     const textNode = document.createTextNode(Constants.ZWSP);
-        //     this.range.startContainer.parentElement.after(textNode);
-        //     this.range.selectNodeContents(textNode);
-        //     this.range.collapse(false);
-        //     if (types.includes(type)) {
-        //         // 如果不是同一种行内元素，需进行后续的渲染操作
-        //         return;
-        //     }
-        // }
-        // if (types.length > 0 && types.includes("link") && action === "range") {
-        //     // 链接快捷键不应取消，应该显示链接信息
-        //     linkMenu(protyle, this.range.startContainer.parentElement);
-        //     return;
-        // }
-        const wbrElement = document.createElement("wbr");
-        this.range.insertNode(wbrElement);
-        this.range.setStartAfter(wbrElement);
-        const html = nodeElement.outerHTML;
-        const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
-        // 光标前标签移除
-        const newNodes: Node[] = [];
-        let startText = "";
-        if (!["DIV", "TD", "TH"].includes(startElement.tagName)) {
-            startText = startElement.textContent;
-            this.pushNode(newNodes, startElement);
-            startElement.remove();
-        }
-        // 光标后标签移除
-        let endText = "";
-        let endClone;
-        if (!this.range.startContainer.isSameNode(this.range.endContainer)) {
-            let endElement = this.range.endContainer as HTMLElement;
-            if (this.range.endContainer.nodeType === 3) {
-                endElement = this.range.endContainer.parentElement;
-            }
-            if (endElement.getAttribute("data-type") === "virtual-block-ref" && !["DIV", "TD", "TH"].includes(endElement.parentElement.tagName)) {
-                endElement = endElement.parentElement;
-            }
-            if (!["DIV", "TD", "TH"].includes(endElement.tagName)) {
-                endClone = endElement;
-            }
-        }
-        const selectContents = this.range.extractContents();
-        this.pushNode(newNodes, selectContents);
-        if (endClone) {
-            endText = endClone.textContent;
-            this.pushNode(newNodes, endClone);
-            endClone.remove();
-        }
-        if ((action === "toolbar" && actionBtn.classList.contains("protyle-toolbar__item--current")) ||
-            action === "remove" || (action === "range" && types.length > 0 && types.includes(type))) {
-            // 移除
-            if (type === "inline-math" && newNodes.length === 1) {
-                const textNode = document.createTextNode(newNodes[0].textContent);
-                this.range.insertNode(textNode);
-                this.range.selectNodeContents(textNode);
-            } else {
-                // newNodes.forEach((item, index) => {
-                //     this.range.insertNode(item);
-                //     if (index !== newNodes.length - 1) {
-                //         this.range.collapse(false);
-                //     } else {
-                //         this.range.setEnd(item, item.textContent.length);
-                //     }
-                // });
-                // if (newNodes.length > 0) {
-                //     this.range.setStart(newNodes[0], 0);
-                // }
-            }
-            // focusByRange(this.range);
-            // this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
-            //     item.classList.remove("protyle-toolbar__item--current");
-            // });
-        } else {
-            if (newNodes.length === 0) {
-                newNodes.push(document.createTextNode(Constants.ZWSP));
-            }
-            // 添加
-            let newElement: Element;
-            const refText = startText + selectContents.textContent + endText;
-            const refNode = document.createTextNode(refText);
-            switch (type) {
-                // case "bold":
-                //     newElement = document.createElement("strong");
-                //     break;
-                // case "underline":
-                //     newElement = document.createElement("u");
-                //     break;
-                // case "italic":
-                //     newElement = document.createElement("em");
-                //     break;
-                // case "strike":
-                //     newElement = document.createElement("s");
-                //     break;
-                // case "inline-code":
-                //     newElement = document.createElement("code");
-                //     break;
-                // case "mark":
-                //     newElement = document.createElement("mark");
-                //     break;
-                // case "sup":
-                //     newElement = document.createElement("sup");
-                //     break;
-                // case "sub":
-                //     newElement = document.createElement("sub");
-                //     break;
-                // case "kbd":
-                //     newElement = document.createElement("kbd");
-                //     break;
-                // case "tag":
-                //     newElement = document.createElement("span");
-                //     newElement.setAttribute("data-type", "tag");
-                //     break;
-                // case "link":
-                //     newElement = document.createElement("span");
-                //     newElement.setAttribute("data-type", "a");
-                //     break;
-                // case "blockRef":
-                //     if (refText === "") {
-                //         wbrElement.remove();
-                //         return;
-                //     }
-                //     this.range.insertNode(refNode);
-                //     this.range.selectNodeContents(refNode);
-                //     hintRef(refText, protyle, true);
-                //     break;
-                // case "inline-math":
-                //     newElement = document.createElement("span");
-                //     newElement.className = "render-node";
-                //     newElement.setAttribute("contenteditable", "false");
-                //     newElement.setAttribute("data-type", "inline-math");
-                //     newElement.setAttribute("data-subtype", "math");
-                //     newElement.setAttribute("data-content", startText + selectContents.textContent + endText);
-                //     mathRender(newElement);
-                //     break;
-            }
-            // if (newElement) {
-            //     this.range.insertNode(newElement);
-            // }
-            if (type === "inline-math") {
-                this.range.setStartAfter(newElement);
-                this.range.collapse(true);
-                if (startText + selectContents.textContent + endText === "") {
-                    this.showRender(protyle, newElement as HTMLElement);
-                } else {
-                    focusByRange(this.range);
-                }
-                this.element.classList.add("fn__none");
-            } else if (type !== "blockRef") {
-                newNodes.forEach(item => {
-                    newElement.append(item);
-                });
-                if (newElement.textContent === Constants.ZWSP) {
-                    this.isNewEmptyInline = true;
-                    this.range.setStart(newElement.firstChild, 1);
-                    this.range.collapse(true);
-                } else {
-                    if (!hasPreviousSibling(newElement)) {
-                        // 列表内斜体后的最后一个字符无法选中 https://ld246.com/article/1629787455575
-                        const nextSibling = hasNextSibling(newElement);
-                        if (nextSibling && nextSibling.nodeType === 3) {
-                            const textContent = nextSibling.textContent;
-                            nextSibling.textContent = "";
-                            nextSibling.textContent = textContent;
-                        }
-                    }
-                    this.range.setStart(newElement.firstChild, 0);
-                    this.range.setEnd(newElement.lastChild, newElement.lastChild.textContent.length);
-                    focusByRange(this.range);
-                }
-                // if (type === "link") {
-                //     let needShowLink = true;
-                //     let focusText = false;
-                //     try {
-                //         const clipText = await navigator.clipboard.readText();
-                //         // 选中链接时需忽略剪切板内容 https://ld246.com/article/1643035329737
-                //         if (protyle.lute.IsValidLinkDest(this.range.toString().trim())) {
-                //             (newElement as HTMLElement).setAttribute("data-href", this.range.toString().trim());
-                //             needShowLink = false;
-                //         } else if (protyle.lute.IsValidLinkDest(clipText)) {
-                //             (newElement as HTMLElement).setAttribute("data-href", clipText);
-                //             if (newElement.textContent.replace(Constants.ZWSP, "") !== "") {
-                //                 needShowLink = false;
-                //             }
-                //             focusText = true;
-                //         }
-                //     } catch (e) {
-                //         console.log(e);
-                //     }
-                //     if (needShowLink) {
-                //         linkMenu(protyle, newElement as HTMLElement, focusText);
-                //     }
-                // }
-            }
-            // if (actionBtn) {
-            //     this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
-            //         item.classList.remove("protyle-toolbar__item--current");
-            //     });
-            //     actionBtn.classList.add("protyle-toolbar__item--current");
-            // }
-        }
-        // nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-        // updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-        // wbrElement.remove();
     }
 
     public showFileAnnotationRef(protyle: IProtyle, refElement: HTMLElement) {

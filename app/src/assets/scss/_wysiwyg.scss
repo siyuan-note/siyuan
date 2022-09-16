@@ -169,35 +169,7 @@
       }
     }
 
-    span[data-type~="strong"] {
-      font-weight: bold;
-    }
-
-    span[data-type~="em"] {
-      font-style: italic;
-    }
-
-    span[data-type~="sup"],
-    span[data-type~="sub"] {
-      position: relative;
-      font-size: 75%;
-      line-height: 0;
-      vertical-align: baseline;
-    }
-
-    span[data-type~="sup"] {
-      top: -0.5em;
-    }
-
-    span[data-type~="sub"] {
-      bottom: -0.25em;
-    }
-
-    span[data-type~="s"] {
-      text-decoration: line-through;
-    }
-
-    span[data-type="tag"] {
+    span[data-type~="tag"] {
       border-bottom: 1px solid var(--b3-protyle-inline-tag-color);
       color: var(--b3-protyle-inline-tag-color);
       transition: var(--b3-transition);
@@ -211,14 +183,6 @@
       &:hover {
         border-bottom: 1px solid var(--b3-protyle-inline-link-color);
       }
-    }
-
-    span[data-type~="inline-math"] {
-      user-select: text;
-      display: inline;
-      // https://github.com/siyuan-note/siyuan/issues/3081 test $\begin{bmatrix}   a & b \\c & d \\   e & f\end{bmatrix}$ test
-      // https://ld246.com/article/1626937851892 <u>test $\mu_p$ test</u>
-      // https://ld246.com/article/1636204769623  test $\rightarrow$ test
     }
 
     span[data-type="search-mark"] {

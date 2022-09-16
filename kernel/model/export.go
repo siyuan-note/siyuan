@@ -1117,27 +1117,22 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 			return ast.WalkSkipChildren
 		}
 
-		if ast.NodeBlockRef != n.Type {
+		if !treenode.IsBlockRef(n) {
 			return ast.WalkContinue
 		}
 
 		// 处理引用节点
 
-		var linkText string
-		id := n.ChildByType(ast.NodeBlockRefID).TokensStr()
-		if anchor := n.ChildByType(ast.NodeBlockRefText); nil != anchor {
-			linkText = anchor.Text()
-		} else if anchor = n.ChildByType(ast.NodeBlockRefDynamicText); nil != anchor {
-			linkText = anchor.Text()
-		} else {
-			linkText = sql.GetRefText(id)
+		defID, linkText, _ := treenode.GetBlockRef(n)
+		if "" == linkText {
+			linkText = sql.GetRefText(defID)
 		}
 		if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(linkText) {
 			linkText = gulu.Str.SubStr(linkText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
 		}
 		linkText = Conf.Export.BlockRefTextLeft + linkText + Conf.Export.BlockRefTextRight
 
-		defTree, _ := loadTreeByBlockID(id)
+		defTree, _ := loadTreeByBlockID(defID)
 		if nil == defTree {
 			return ast.WalkContinue
 		}
@@ -1150,13 +1145,12 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(linkText)})
 			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
 			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte("siyuan://blocks/" + id)})
+			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte("siyuan://blocks/" + defID)})
 			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 			n.InsertBefore(blockRefLink)
 		case 3: // 仅锚文本
 			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})
 		case 4: // 脚注
-			defID := n.ChildByType(ast.NodeBlockRefID).TokensStr()
 			refFoot := getRefAsFootnotes(defID, &refFootnotes)
 			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})
@@ -1295,8 +1289,8 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string) (footn
 					return ast.WalkContinue
 				}
 
-				if ast.NodeBlockRef == n.Type {
-					defID := n.ChildByType(ast.NodeBlockRefID).TokensStr()
+				if treenode.IsBlockRef(n) {
+					defID, _, _ := treenode.GetBlockRef(n)
 					if f := getRefAsFootnotes(defID, refFootnotes); nil != f {
 						n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(Conf.Export.BlockRefTextLeft + f.refAnchorText + Conf.Export.BlockRefTextRight)})
 						n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + f.refNum), FootnotesRefId: f.refNum, FootnotesRefLabel: []byte("^" + f.refNum)})
@@ -1412,8 +1406,8 @@ func collectFootnotesDefs0(node *ast.Node, refFootnotes *[]*refAsFootnotes, tree
 			return ast.WalkContinue
 		}
 
-		if ast.NodeBlockRef == n.Type {
-			defID := n.ChildByType(ast.NodeBlockRefID).TokensStr()
+		if treenode.IsBlockRef(n) {
+			defID, _, _ := treenode.GetBlockRef(n)
 			if nil == getRefAsFootnotes(defID, refFootnotes) {
 				anchorText := sql.GetRefText(defID)
 				if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(anchorText) {
@@ -1463,12 +1457,11 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeBlockRef == n.Type {
-			defIDNode := n.ChildByType(ast.NodeBlockRefID)
-			if nil == defIDNode {
-				return ast.WalkSkipChildren
+		if treenode.IsBlockRef(n) {
+			defID, _, _ := treenode.GetBlockRef(n)
+			if "" == defID {
+				return ast.WalkContinue
 			}
-			defID := defIDNode.TokensStr()
 			defBlock := treenode.GetBlockTree(defID)
 			if nil == defBlock {
 				return ast.WalkSkipChildren

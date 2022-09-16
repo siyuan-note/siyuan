@@ -237,23 +237,18 @@ func renderTemplate(p, id string) (string, error) {
 }
 
 func appendRefTextRenderResultForBlockRef(blockRef *ast.Node) {
-	if ast.NodeBlockRef != blockRef.Type {
+	if !treenode.IsBlockRef(blockRef) {
 		return
 	}
 
-	refText := blockRef.ChildByType(ast.NodeBlockRefText)
-	if nil != refText {
-		return
-	}
-	refText = blockRef.ChildByType(ast.NodeBlockRefDynamicText)
-	if nil != refText {
+	refID, text, _ := treenode.GetBlockRef(blockRef)
+	if "" != text {
 		return
 	}
 
 	// 动态解析渲染 ((id)) 的锚文本
 	// 现行版本已经不存在该语法情况，这里保留是为了迁移历史数据
-	refID := blockRef.ChildByType(ast.NodeBlockRefID)
-	text := sql.GetRefText(refID.TokensStr())
+	text = sql.GetRefText(refID)
 	if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(text) {
 		text = gulu.Str.SubStr(text, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
 	}

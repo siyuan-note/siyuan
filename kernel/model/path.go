@@ -183,7 +183,7 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 
 				unfold := true
 				for liFirstBlockSpan := li.FirstChild.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
-					if ast.NodeBlockRef == liFirstBlockSpan.Type {
+					if treenode.IsBlockRef(liFirstBlockSpan) {
 						continue
 					}
 					if "" != strings.TrimSpace(liFirstBlockSpan.Text()) {
@@ -278,7 +278,7 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 
 				unfold := true
 				for headingFirstSpan := h.FirstChild; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
-					if ast.NodeBlockRef == headingFirstSpan.Type {
+					if treenode.IsBlockRef(headingFirstSpan) {
 						continue
 					}
 					if "" != strings.TrimSpace(headingFirstSpan.Text()) {

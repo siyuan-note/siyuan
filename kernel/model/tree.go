@@ -52,10 +52,14 @@ func resetTree(tree *parse.Tree, titleSuffix string) {
 	// 收集所有引用
 	refIDs := map[string]string{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeBlockRefID != n.Type {
+		if !entering || !treenode.IsBlockRef(n) {
 			return ast.WalkContinue
 		}
-		refIDs[n.TokensStr()] = "1"
+		defID, _, _ := treenode.GetBlockRef(n)
+		if "" == defID {
+			return ast.WalkContinue
+		}
+		refIDs[defID] = "1"
 		return ast.WalkContinue
 	})
 
@@ -78,11 +82,15 @@ func resetTree(tree *parse.Tree, titleSuffix string) {
 
 	// 重置内部引用
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeBlockRefID != n.Type {
+		if !entering || !treenode.IsBlockRef(n) {
 			return ast.WalkContinue
 		}
-		if "1" != refIDs[n.TokensStr()] {
-			n.Tokens = []byte(refIDs[n.TokensStr()])
+		defID, _, _ := treenode.GetBlockRef(n)
+		if "" == defID {
+			return ast.WalkContinue
+		}
+		if "1" != refIDs[defID] {
+			n.Tokens = []byte(refIDs[defID])
 		}
 		return ast.WalkContinue
 	})

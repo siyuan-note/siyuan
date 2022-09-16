@@ -883,7 +883,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 				// 剔除空白的行级公式
 				unlinks = append(unlinks, n)
 			}
-		} else if ast.NodeBlockRefID == n.Type {
+		} else if ast.NodeBlockRef == n.Type {
+			sql.CacheRef(subTree, n)
+		} else if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {
 			sql.CacheRef(subTree, n)
 		}
 		return ast.WalkContinue
@@ -1098,27 +1100,28 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 		if !entering {
 			return ast.WalkContinue
 		}
-		if ast.NodeBlockRef == n.Type && nil != n.ChildByType(ast.NodeBlockRefDynamicText) {
-			defIDNode := n.ChildByType(ast.NodeBlockRefID)
-			if nil == defIDNode {
-				return ast.WalkSkipChildren
-			}
-			defID := defIDNode.TokensStr()
-			defNode := changedDefNodes[defID]
-			if nil == defNode {
-				return ast.WalkSkipChildren
-			}
-			if ast.NodeDocument != defNode.Type && defNode.IsContainerBlock() {
-				defNode = treenode.FirstLeafBlock(defNode)
-			}
-			defContent := renderBlockText(defNode)
-			if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(defContent) {
-				defContent = gulu.Str.SubStr(defContent, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
-			}
-			treenode.SetDynamicBlockRefText(n, defContent)
-			changed = true
+		if !treenode.IsBlockRef(n) {
+			return ast.WalkContinue
+		}
+
+		defID, _, subtype := treenode.GetBlockRef(n)
+		if "s" == subtype || "" == defID {
+			return ast.WalkContinue
+		}
+
+		defNode := changedDefNodes[defID]
+		if nil == defNode {
 			return ast.WalkSkipChildren
 		}
+		if ast.NodeDocument != defNode.Type && defNode.IsContainerBlock() {
+			defNode = treenode.FirstLeafBlock(defNode)
+		}
+		defContent := renderBlockText(defNode)
+		if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(defContent) {
+			defContent = gulu.Str.SubStr(defContent, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
+		}
+		treenode.SetDynamicBlockRefText(n, defContent)
+		changed = true
 		return ast.WalkContinue
 	})
 	return

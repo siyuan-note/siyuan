@@ -202,7 +202,7 @@ func (box *Box) saveConf0(data []byte) {
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); nil != err {
 		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
-	if err := filelock.NoLockFileWrite(confPath, data); nil != err {
+	if err := util.WriteFileSafer(confPath, data); nil != err {
 		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
 }
@@ -291,6 +291,9 @@ func (box *Box) Move(oldPath, newPath string) error {
 	fromPath := filepath.Join(boxLocalPath, oldPath)
 	toPath := filepath.Join(boxLocalPath, newPath)
 	filelock.ReleaseFileLocks(fromPath)
+
+	util.LockWriteFile()
+	defer util.UnlockWriteFile()
 	if err := os.Rename(fromPath, toPath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(5), box.Name, fromPath, err)
 		logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, box.Name, err)
@@ -310,8 +313,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 func (box *Box) Remove(path string) error {
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	filePath := filepath.Join(boxLocalPath, path)
-	filelock.ReleaseFileLocks(filePath)
-	if err := os.RemoveAll(filePath); nil != err {
+	if err := util.RemoveAll(filePath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(7), box.Name, path, err)
 		logging.LogErrorf("remove [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)

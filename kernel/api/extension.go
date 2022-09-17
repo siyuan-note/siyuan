@@ -106,7 +106,7 @@ func extensionCopy(c *gin.Context) {
 		}
 		fName = fName + "-" + ast.NewNodeID() + ext
 		writePath := filepath.Join(assets, fName)
-		if err = gulu.File.WriteFileSafer(writePath, data, 0644); nil != err {
+		if err = util.WriteFileSafer(writePath, data); nil != err {
 			ret.Code = -1
 			ret.Msg = err.Error()
 			break

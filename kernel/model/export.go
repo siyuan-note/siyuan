@@ -125,8 +125,6 @@ func ExportDataInFolder(exportFolder string) (err error) {
 	defer util.ClearPushProgress(100)
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
 
 	exportFolder = filepath.Join(exportFolder, util.CurrentTimeSecondsStr())
 	err = exportData(exportFolder)
@@ -141,8 +139,6 @@ func ExportData() (zipPath string) {
 	defer util.ClearPushProgress(100)
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
 
 	baseFolderName := "data-" + util.CurrentTimeSecondsStr()
 	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName)
@@ -161,6 +157,9 @@ func exportData(exportFolder string) (err error) {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
 	}
+
+	util.LockWriteFile()
+	defer util.UnlockWriteFile()
 
 	err = filelock.ReleaseAllFileLocks()
 	if nil != err {

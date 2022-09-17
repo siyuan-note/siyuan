@@ -63,8 +63,8 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
+	util.LockWriteFile()
+	defer util.UnlockWriteFile()
 
 	if util.IsMutexLocked(&syncLock) {
 		logging.LogWarnf("sync is in progress")

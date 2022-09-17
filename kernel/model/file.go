@@ -918,12 +918,9 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 }
 
 func writeJSONQueue(tree *parse.Tree) (err error) {
-	writingDataLock.Lock()
 	if err = filesys.WriteTree(tree); nil != err {
-		writingDataLock.Unlock()
 		return
 	}
-	writingDataLock.Unlock()
 	sql.UpsertTreeQueue(tree)
 	return
 }
@@ -934,12 +931,9 @@ func indexWriteJSONQueue(tree *parse.Tree) (err error) {
 }
 
 func renameWriteJSONQueue(tree *parse.Tree, oldHPath string) (err error) {
-	writingDataLock.Lock()
 	if err = filesys.WriteTree(tree); nil != err {
-		writingDataLock.Unlock()
 		return
 	}
-	writingDataLock.Unlock()
 	sql.RenameTreeQueue(tree, oldHPath)
 	treenode.ReindexBlockTree(tree)
 	return
@@ -1071,9 +1065,6 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 	}
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	tree, err := LoadTree(fromBoxID, fromPath)
 	if nil != err {
 		err = ErrBlockNotFound
@@ -1199,9 +1190,6 @@ func RemoveDoc(boxID, p string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	tree, err := LoadTree(boxID, p)
 	if nil != err {
 		return
@@ -1215,8 +1203,7 @@ func RemoveDoc(boxID, p string) (err error) {
 
 	historyPath := filepath.Join(historyDir, boxID, p)
 	absPath := filepath.Join(util.DataDir, boxID, p)
-	filelock.ReleaseFileLocks(absPath)
-	if err = gulu.File.Copy(absPath, historyPath); nil != err {
+	if err = util.Copy(absPath, historyPath); nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(70), box.Name, absPath, err))
 	}
 
@@ -1547,8 +1534,8 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	}
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
+	util.LockWriteFile()
+	defer util.UnlockWriteFile()
 
 	box := Conf.Box(boxID)
 	sortIDs := map[string]int{}

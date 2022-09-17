@@ -141,9 +141,7 @@ func NetImg2LocalAssets(rootID string) (err error) {
 				name = util.FilterFileName(name)
 				name = "net-img-" + name + "-" + ast.NewNodeID() + ext
 				writePath := filepath.Join(util.DataDir, "assets", name)
-				writingDataLock.Lock()
-				defer writingDataLock.Unlock()
-				if err = gulu.File.WriteFileSafer(writePath, data, 0644); nil != err {
+				if err = util.WriteFileSafer(writePath, data); nil != err {
 					logging.LogErrorf("write downloaded net img [%s] to local assets [%s] failed: %s", u, writePath, err)
 					return ast.WalkSkipChildren
 				}
@@ -385,7 +383,7 @@ func saveWorkspaceAssets(assets []string) {
 		logging.LogErrorf("create assets conf failed: %s", err)
 		return
 	}
-	if err = gulu.File.WriteFileSafer(confPath, data, 0644); nil != err {
+	if err = util.WriteFileSafer(confPath, data); nil != err {
 		logging.LogErrorf("write assets conf failed: %s", err)
 		return
 	}
@@ -480,7 +478,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 
 	newName = util.AssetName(newName) + filepath.Ext(oldPath)
 	newPath := "assets/" + newName
-	if err = gulu.File.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
+	if err = util.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
 		logging.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
 		return
 	}

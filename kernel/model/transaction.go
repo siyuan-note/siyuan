@@ -40,8 +40,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-var writingDataLock = sync.Mutex{}
-
 func IsFoldHeading(transactions *[]*Transaction) bool {
 	if 1 == len(*transactions) && 1 == len((*transactions)[0].DoOperations) {
 		if op := (*transactions)[0].DoOperations[0]; "foldHeading" == op.Action {

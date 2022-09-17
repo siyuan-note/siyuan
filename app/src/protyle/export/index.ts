@@ -240,7 +240,7 @@ const renderPDF = (id: string) => {
                 right: 232px;
                 left: 0;
          }
-        body.exporting::-webkit-scrollbar {
+        .exporting::-webkit-scrollbar {
           width: 0;
           height: 0;
         }
@@ -250,6 +250,8 @@ const renderPDF = (id: string) => {
             white-space: pre-wrap !important;
         }
         .protyle-wysiwyg {
+            height: 100%;
+            overflow: auto;
             box-sizing: border-box;
             padding: 34px ${pdfMargin}in 16px;
             width: ${pdfWidth}in
@@ -394,7 +396,7 @@ const renderPDF = (id: string) => {
           rootTitle: "{tpl.name}"
         })
         actionElement.remove();
-        document.querySelector("body").classList.add("exporting");
+        previewElement.classList.add("exporting");
     });
 </script></body></html>`;
     win.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent(`<!DOCTYPE html><html>

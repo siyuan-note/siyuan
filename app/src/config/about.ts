@@ -108,9 +108,15 @@ export const about = {
         <div class="b3-label__text">${window.siyuan.languages.visitAnnouncements}</div>
     </div>
     <div class="fn__space"></div>
-    <button id="checkUpdateBtn" class="b3-button b3-button--outline fn__size200 fn__flex-center">
-        <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
-    </button>
+    <div class="fn__flex-center fn__size200">
+        <button id="checkUpdateBtn" class="b3-button b3-button--outline fn__size200">
+            <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
+        </button>
+        <div class="fn__hr${isBrowser() ? "" : " fn__none"}"></div>
+        <button id="menuSafeQuit" class="b3-button b3-button--outline fn__size200${isBrowser() ? "" : " fn__none"}">
+            <svg><use xlink:href="#iconQuit"></use></svg>${window.siyuan.languages.safeQuit}
+        </button>
+    </div>
 </div>
 <div class="fn__flex b3-label${isBrowser() ? " fn__none" : ""}">
     <div class="fn__flex-1">
@@ -176,6 +182,9 @@ export const about = {
             fetchPost("/api/system/exportLog", {}, (response) => {
                 openByMobile(response.data.zip);
             });
+        });
+        about.element.querySelector("#menuSafeQuit").addEventListener("click", () => {
+            exitSiYuan();
         });
         const updateElement = about.element.querySelector("#checkUpdateBtn");
         updateElement.addEventListener("click", () => {

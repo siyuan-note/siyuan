@@ -416,17 +416,21 @@ const renderPDF = (id: string) => {
         <div style="margin: 8px 0;height: 8px;border-radius: 4px;overflow: hidden;background-color:#fff;"><div style="background-color: var(--b3-theme-primary);height: 8px;background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);animation: stripMove 450ms linear infinite;background-size: 50px 50px;"></div></div>
     </div>
 </body></html>`));
-    fetchPost("/api/export/exportPreviewHTML", {
-        id,
-        tpl: html
-    }, response => {
-        if (response.code === 1) {
-            document.getElementById("message").firstElementChild.innerHTML === "";
-            showMessage(response.msg, undefined, "error");
-            destroyWin(win);
-            return;
+    win.webContents.on("did-finish-load", () => {
+        if (win.webContents.getURL().startsWith("data:text/html;charset=UTF-8,")) {
+            fetchPost("/api/export/exportPreviewHTML", {
+                id,
+                tpl: html
+            }, response => {
+                if (response.code === 1) {
+                    document.getElementById("message").firstElementChild.innerHTML === "";
+                    showMessage(response.msg, undefined, "error");
+                    destroyWin(win);
+                    return;
+                }
+                win.loadURL(response.data.url);
+            });
         }
-        win.loadURL(response.data.url);
     });
 };
 

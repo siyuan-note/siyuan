@@ -114,10 +114,10 @@ func NestedInlines2FlattedSpans(tree *parse.Tree) {
 			}
 
 			if entering {
-				span = &ast.Node{Type: ast.NodeTextMark, TextMarkType: strings.Join(tags, " "), TextMarkTextContent: string(n.Tokens)}
+				span = &ast.Node{Type: ast.NodeTextMark, TextMarkType: strings.Join(tags, " "), TextMarkTextContent: string(html.EscapeHTML(n.Tokens))}
 				if ast.NodeInlineMathContent == n.Type {
 					span.TextMarkTextContent = ""
-					span.TextMarkInlineMathContent = string(n.Tokens)
+					span.TextMarkInlineMathContent = string(html.EscapeHTML(n.Tokens))
 				}
 				if ast.NodeLinkText == n.Type && !n.ParentIs(ast.NodeImage) {
 					var link *ast.Node

@@ -1534,8 +1534,8 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	}
 
 	WaitForWritingFiles()
-	util.WritingFileLock.Lock()
-	defer util.WritingFileLock.Unlock()
+	util.LockWriteFile()
+	defer util.UnlockWriteFile()
 
 	box := Conf.Box(boxID)
 	sortIDs := map[string]int{}

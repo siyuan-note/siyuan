@@ -202,7 +202,7 @@ func (box *Box) saveConf0(data []byte) {
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); nil != err {
 		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
-	if err := filelock.NoLockFileWrite(confPath, data); nil != err {
+	if err := util.WriteFileSafer(confPath, data); nil != err {
 		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
 }
@@ -292,8 +292,8 @@ func (box *Box) Move(oldPath, newPath string) error {
 	toPath := filepath.Join(boxLocalPath, newPath)
 	filelock.ReleaseFileLocks(fromPath)
 
-	util.WritingFileLock.Lock()
-	defer util.WritingFileLock.Unlock()
+	util.LockWriteFile()
+	defer util.UnlockWriteFile()
 	if err := os.Rename(fromPath, toPath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(5), box.Name, fromPath, err)
 		logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, box.Name, err)

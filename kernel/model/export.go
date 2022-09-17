@@ -158,8 +158,8 @@ func exportData(exportFolder string) (err error) {
 		return
 	}
 
-	util.WritingFileLock.Lock()
-	defer util.WritingFileLock.Unlock()
+	util.LockWriteFile()
+	defer util.UnlockWriteFile()
 
 	err = filelock.ReleaseAllFileLocks()
 	if nil != err {

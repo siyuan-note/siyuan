@@ -238,7 +238,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	util.WritingFileLock.Lock()
+	util.LockWriteFile()
 
 	srcPath := historyPath
 	var destPath string
@@ -249,22 +249,22 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	workingDoc := treenode.GetBlockTree(id)
 	if nil != workingDoc {
 		if err = os.RemoveAll(filepath.Join(util.DataDir, boxID, workingDoc.Path)); nil != err {
-			util.WritingFileLock.Unlock()
+			util.UnlockWriteFile()
 			return
 		}
 	}
 
 	destPath, err = getRollbackDockPath(boxID, historyPath)
 	if nil != err {
-		util.WritingFileLock.Unlock()
+		util.UnlockWriteFile()
 		return
 	}
 
 	if err = gulu.File.Copy(srcPath, destPath); nil != err {
-		util.WritingFileLock.Unlock()
+		util.UnlockWriteFile()
 		return
 	}
-	util.WritingFileLock.Unlock()
+	util.UnlockWriteFile()
 
 	FullReindex()
 	IncSync()

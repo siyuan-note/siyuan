@@ -31,11 +31,28 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-var WritingFileLock = sync.Mutex{}
+var writingFileLock = sync.Mutex{}
+
+func LockWriteFile() {
+	if IsMutexLocked(&writingFileLock) {
+		logging.LogWarnf("write file is locked")
+		return
+	}
+
+	writingFileLock.Lock()
+}
+
+func UnlockWriteFile() {
+	if !IsMutexLocked(&writingFileLock) {
+		logging.LogWarnf("write file is not locked")
+		return
+	}
+	writingFileLock.Unlock()
+}
 
 func WriteFileSaferByReader(writePath string, reader io.Reader) (err error) {
-	WritingFileLock.Lock()
-	defer WritingFileLock.Unlock()
+	writingFileLock.Lock()
+	defer writingFileLock.Unlock()
 
 	if err = gulu.File.WriteFileSaferByReader(writePath, reader, 0644); nil != err {
 		logging.LogErrorf("write file [%s] failed: %s", writePath, err)
@@ -45,8 +62,8 @@ func WriteFileSaferByReader(writePath string, reader io.Reader) (err error) {
 }
 
 func WriteFileSafer(writePath string, data []byte) (err error) {
-	WritingFileLock.Lock()
-	defer WritingFileLock.Unlock()
+	writingFileLock.Lock()
+	defer writingFileLock.Unlock()
 
 	if err = gulu.File.WriteFileSafer(writePath, data, 0644); nil != err {
 		logging.LogErrorf("write file [%s] failed: %s", writePath, err)
@@ -56,8 +73,8 @@ func WriteFileSafer(writePath string, data []byte) (err error) {
 }
 
 func Copy(source, dest string) (err error) {
-	WritingFileLock.Lock()
-	defer WritingFileLock.Unlock()
+	writingFileLock.Lock()
+	defer writingFileLock.Unlock()
 
 	filelock.ReleaseFileLocks(source)
 	if err = gulu.File.Copy(source, dest); nil != err {
@@ -68,8 +85,8 @@ func Copy(source, dest string) (err error) {
 }
 
 func RemoveAll(p string) (err error) {
-	WritingFileLock.Lock()
-	defer WritingFileLock.Unlock()
+	writingFileLock.Lock()
+	defer writingFileLock.Unlock()
 
 	filelock.ReleaseFileLocks(p)
 	if err = os.RemoveAll(p); nil != err {

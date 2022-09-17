@@ -478,7 +478,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 
 	newName = util.AssetName(newName) + filepath.Ext(oldPath)
 	newPath := "assets/" + newName
-	if err = gulu.File.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
+	if err = util.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
 		logging.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
 		return
 	}

@@ -35,8 +35,6 @@ import (
 
 func CreateBox(name string) (id string, err error) {
 	WaitForWritingFiles()
-	util.WritingFileLock.Lock()
-	defer util.WritingFileLock.Unlock()
 
 	id = ast.NewNodeID()
 	boxLocalPath := filepath.Join(util.DataDir, id)
@@ -55,8 +53,8 @@ func CreateBox(name string) (id string, err error) {
 
 func RenameBox(boxID, name string) (err error) {
 	WaitForWritingFiles()
-	util.WritingFileLock.Lock()
-	defer util.WritingFileLock.Unlock()
+	util.LockWriteFile()
+	defer util.UnlockWriteFile()
 
 	box := Conf.Box(boxID)
 	if nil == box {
@@ -73,8 +71,6 @@ func RenameBox(boxID, name string) (err error) {
 
 func RemoveBox(boxID string) (err error) {
 	WaitForWritingFiles()
-	util.WritingFileLock.Lock()
-	defer util.WritingFileLock.Unlock()
 
 	if util.IsReservedFilename(boxID) {
 		return errors.New(fmt.Sprintf("can not remove [%s] caused by it is a reserved file", boxID))
@@ -116,8 +112,6 @@ func RemoveBox(boxID string) (err error) {
 
 func Unmount(boxID string) {
 	WaitForWritingFiles()
-	util.WritingFileLock.Lock()
-	defer util.WritingFileLock.Unlock()
 
 	unmount0(boxID)
 	evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast, 0)
@@ -142,8 +136,6 @@ func unmount0(boxID string) {
 
 func Mount(boxID string) (alreadyMount bool, err error) {
 	WaitForWritingFiles()
-	util.WritingFileLock.Lock()
-	defer util.WritingFileLock.Unlock()
 
 	localPath := filepath.Join(util.DataDir, boxID)
 

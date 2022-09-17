@@ -221,8 +221,8 @@ func CheckoutRepo(id string) (err error) {
 	}
 
 	util.PushEndlessProgress(Conf.Language(63))
-	util.WritingFileLock.Lock()
-	defer util.WritingFileLock.Unlock()
+	util.LockWriteFile()
+	defer util.UnlockWriteFile()
 	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
 	filelock.ReleaseAllFileLocks()

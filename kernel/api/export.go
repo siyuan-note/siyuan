@@ -195,6 +195,8 @@ func exportPreviewHTML(c *gin.Context) {
 	id := arg["id"].(string)
 	tpl := arg["tpl"].(string)
 	name, content := model.ExportHTML(id, "", true)
+	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
+	content = strings.ReplaceAll(content, "http://127.0.0.1:"+util.ServerPort+"/#", "#")
 	tpl = strings.ReplaceAll(tpl, "{tpl.name}", name)
 	tpl = strings.ReplaceAll(tpl, "{tpl.content}", content)
 	tmpName := gulu.Rand.String(7)
@@ -213,7 +215,7 @@ func exportPreviewHTML(c *gin.Context) {
 		return
 	}
 
-	url := path.Join("http://127.0.0.1:6806", "export", "preview", tmpName)
+	url := path.Join("http://127.0.0.1:"+util.ServerPort, "export", "preview", tmpName)
 	ret.Data = map[string]interface{}{
 		"id":   id,
 		"name": name,

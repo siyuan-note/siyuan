@@ -265,7 +265,6 @@ const renderPDF = (id: string) => {
     </style>
 </head>
 <body>
-<div class="protyle-wysiwyg protyle-wysiwyg--attr" id="preview">{tpl.content}</div>
 <div id="action">
     <h2 class="b3-label">${window.siyuan.languages.config}</h2>
     <label class="b3-label">
@@ -321,6 +320,7 @@ const renderPDF = (id: string) => {
       <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
+<div class="protyle-wysiwyg protyle-wysiwyg--attr" id="preview">{tpl.content}</div>
 <script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    

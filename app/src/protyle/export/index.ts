@@ -348,28 +348,30 @@ const renderPDF = (id: string) => {
     Protyle.mindmapRender(previewElement, "${servePath}/stage/protyle");
     Protyle.abcRender(previewElement, "${servePath}/stage/protyle");
     Protyle.plantumlRender(previewElement, "${servePath}/stage/protyle");
-    previewElement.querySelectorAll(".protyle-action__copy").forEach((item) => {
-      item.addEventListener("click", (event) => {
-            navigator.clipboard.writeText(item.parentElement.nextElementSibling.textContent.trimEnd());
-            event.preventDefault();
-            event.stopPropagation();
-      })
-    });
     previewElement.querySelectorAll("table").forEach(item => {
         if (item.clientWidth > item.parentElement.clientWidth) {
             item.style.zoom = item.parentElement.clientWidth / item.clientWidth;
         }
     })
      previewElement.addEventListener("click", (event) => {
-        if (event.target.tagName === "A") {
-            const linkAddress = event.target.getAttribute("href");
-            if (linkAddress.startsWith("#")) {
-                // 导出预览模式点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5700
-                previewElement.querySelector(linkAddress).scrollIntoView();
-                event.stopPropagation();
+        let target = event.target;
+        while (target && !target.isEqualNode(previewElement)) {
+            if (target.tagName === "A") {
+                const linkAddress = target.getAttribute("href");
+                if (linkAddress.startsWith("#")) {
+                    // 导出预览模式点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5700
+                    previewElement.querySelector(linkAddress).scrollIntoView();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
+            } else if (target.classList.contains("protyle-action__copy")) {
+                navigator.clipboard.writeText(item.parentElement.nextElementSibling.textContent.trimEnd());
                 event.preventDefault();
-                return;
+                event.stopPropagation();
+                break;
             }
+            target = target.parentElement;
         }
     });
     const actionElement = document.getElementById('action');
@@ -399,7 +401,7 @@ const renderPDF = (id: string) => {
         tpl: html
     }, response => {
         if (response.code === 1) {
-            hideMessage();
+            document.getElementById("message").firstElementChild.innerHTML === "";
             showMessage(response.msg, undefined, "error");
             destroyWin(win);
             return;

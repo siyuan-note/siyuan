@@ -383,7 +383,7 @@ func saveWorkspaceAssets(assets []string) {
 		logging.LogErrorf("create assets conf failed: %s", err)
 		return
 	}
-	if err = gulu.File.WriteFileSafer(confPath, data, 0644); nil != err {
+	if err = util.WriteFileSafer(confPath, data); nil != err {
 		logging.LogErrorf("write assets conf failed: %s", err)
 		return
 	}

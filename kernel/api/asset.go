@@ -85,7 +85,7 @@ func setFileAnnotation(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	if err := gulu.File.WriteFileSafer(writePath, []byte(data), 0644); nil != err {
+	if err := util.WriteFileSafer(writePath, []byte(data)); nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

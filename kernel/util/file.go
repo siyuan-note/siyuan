@@ -17,6 +17,7 @@
 package util
 
 import (
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -31,6 +32,17 @@ import (
 )
 
 var WritingFileLock = sync.Mutex{}
+
+func WriteFileSaferByReader(writePath string, reader io.Reader) (err error) {
+	WritingFileLock.Lock()
+	defer WritingFileLock.Unlock()
+
+	if err = gulu.File.WriteFileSaferByReader(writePath, reader, 0644); nil != err {
+		logging.LogErrorf("write file [%s] failed: %s", writePath, err)
+		return
+	}
+	return
+}
 
 func WriteFileSafer(writePath string, data []byte) (err error) {
 	WritingFileLock.Lock()

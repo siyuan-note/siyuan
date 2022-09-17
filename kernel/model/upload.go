@@ -34,9 +34,6 @@ import (
 )
 
 func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]interface{}, err error) {
-	util.WritingFileLock.Lock()
-	defer util.WritingFileLock.Unlock()
-
 	succMap = map[string]interface{}{}
 
 	bt := treenode.GetBlockTree(id)
@@ -88,7 +85,7 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 				f.Close()
 				return
 			}
-			if err = gulu.File.WriteFileSaferByReader(writePath, f, 0644); nil != err {
+			if err = util.WriteFileSaferByReader(writePath, f); nil != err {
 				f.Close()
 				return
 			}
@@ -103,9 +100,6 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 func Upload(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(200, ret)
-
-	util.WritingFileLock.Lock()
-	defer util.WritingFileLock.Unlock()
 
 	form, err := c.MultipartForm()
 	if nil != err {
@@ -174,7 +168,7 @@ func Upload(c *gin.Context) {
 				f.Close()
 				break
 			}
-			if err = gulu.File.WriteFileSaferByReader(writePath, f, 0644); nil != err {
+			if err = util.WriteFileSaferByReader(writePath, f); nil != err {
 				errFiles = append(errFiles, fName)
 				ret.Msg = err.Error()
 				f.Close()

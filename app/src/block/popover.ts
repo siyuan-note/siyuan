@@ -138,7 +138,7 @@ export const initBlockPopover = () => {
                     ids = [dataId];
                 }
                 defIds = JSON.parse(popoverTargetElement.getAttribute("data-defids") || "[]");
-            } else if (popoverTargetElement.getAttribute("data-type").indexOf("virtual-block-ref") > -1) {
+            } else if (popoverTargetElement.getAttribute("data-type")?.indexOf("virtual-block-ref") > -1) {
                 const nodeElement = hasClosestBlock(popoverTargetElement);
                 if (nodeElement) {
                     const postResponse = await fetchSyncPost("/api/block/getBlockDefIDsByRefText", {
@@ -147,7 +147,7 @@ export const initBlockPopover = () => {
                     });
                     ids = postResponse.data;
                 }
-            } else if (popoverTargetElement.getAttribute("data-type").split(" ").includes("a")) {
+            } else if (popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a")) {
                 // 以思源协议开头的链接
                 ids = [popoverTargetElement.getAttribute("data-href").substr(16, 22)];
             } else {

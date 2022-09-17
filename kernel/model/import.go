@@ -351,8 +351,6 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
 
 	var baseHPath, baseTargetPath, boxLocalPath string
 	if "/" == toPath {
@@ -503,6 +501,8 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			})
 
 			reassignIDUpdated(tree)
+			writingDataLock.Lock()
+			defer writingDataLock.Unlock()
 			if err = filesys.WriteTree(tree); nil != err {
 				return io.EOF
 			}

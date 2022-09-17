@@ -141,6 +141,8 @@ func NetImg2LocalAssets(rootID string) (err error) {
 				name = util.FilterFileName(name)
 				name = "net-img-" + name + "-" + ast.NewNodeID() + ext
 				writePath := filepath.Join(util.DataDir, "assets", name)
+				writingDataLock.Lock()
+				defer writingDataLock.Unlock()
 				if err = gulu.File.WriteFileSafer(writePath, data, 0644); nil != err {
 					logging.LogErrorf("write downloaded net img [%s] to local assets [%s] failed: %s", u, writePath, err)
 					return ast.WalkSkipChildren

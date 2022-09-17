@@ -26,7 +26,6 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -38,6 +37,8 @@ func AutoSpace(rootID string) (err error) {
 
 	util.PushEndlessProgress(Conf.Language(116))
 	defer util.ClearPushProgress(100)
+
+	WaitForWritingFiles()
 
 	generateFormatHistory(tree)
 	luteEngine := NewLute()
@@ -76,7 +77,7 @@ func AutoSpace(rootID string) (err error) {
 	if nil != err {
 		return
 	}
-	sql.WaitForWritingDatabase()
+	util.RandomSleep(500, 700)
 	return
 }
 

@@ -934,7 +934,7 @@ func indexWriteJSONQueue(tree *parse.Tree) (err error) {
 }
 
 func renameWriteJSONQueue(tree *parse.Tree, oldHPath string) (err error) {
-	writingDataLock.Unlock()
+	writingDataLock.Lock()
 	if err = filesys.WriteTree(tree); nil != err {
 		writingDataLock.Unlock()
 		return

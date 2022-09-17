@@ -452,6 +452,7 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 
 	luteEngine.SetFootnotes(true)
 	luteEngine.RenderOptions.ProtyleContenteditable = false
+	luteEngine.SetProtyleMarkNetImg(false)
 	renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions)
 	dom = gulu.Str.FromBytes(renderer.Render())
 	return

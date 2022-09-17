@@ -663,7 +663,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
 
 export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText = false) => {
     window.siyuan.menus.menu.remove();
-    protyle.toolbar.isNewEmptyInline = false;
     const nodeElement = hasClosestBlock(linkElement);
     if (!nodeElement) {
         return;

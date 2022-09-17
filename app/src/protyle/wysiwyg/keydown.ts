@@ -231,13 +231,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
 
-        if (range.toString() !== "") {
-            // 选中后继续输入 https://ld246.com/article/1626710391372
-            if (protyle.toolbar.getCurrentType(range).length > 0) {
-                protyle.toolbar.isNewEmptyInline = true;
-            }
-        }
-
         // 仅处理以下快捷键操作
         if (event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" && event.key.indexOf("Arrow") === -1 &&
             !isCtrl(event) && event.key !== "Escape" && !event.shiftKey && !event.altKey && !/^F\d{1,2}$/.test(event.key) &&
@@ -245,9 +238,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             hideElements(["select"], protyle);
             return false;
-        }
-        if (!isCtrl(event) && !event.shiftKey && event.key !== "Backspace" && event.key !== "PageUp" && event.key !== "PageDown" && event.key.indexOf("Arrow") === -1) {
-            protyle.toolbar.isNewEmptyInline = false;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
@@ -562,7 +552,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // 上下左右光标移动
         if (!event.altKey && !event.shiftKey && !isCtrl(event) && !event.isComposing && (event.key.indexOf("Arrow") > -1)) {
-            protyle.toolbar.isNewEmptyInline = false;
             protyle.hint.enableEmoji = false;
             // 需使用 editabled，否则代码块会把语言字数算入
             const nodeEditableElement = getContenteditableElement(nodeElement) || nodeElement;

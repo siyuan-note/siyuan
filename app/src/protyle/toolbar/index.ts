@@ -45,7 +45,6 @@ export class Toolbar {
     public element: HTMLElement;
     public subElement: HTMLElement;
     public range: Range;
-    public isNewEmptyInline: boolean;
     private toolbarHeight: number;
 
     constructor(protyle: IProtyle) {
@@ -62,7 +61,6 @@ export class Toolbar {
             const itemElement = this.genItem(protyle, menuItem);
             this.element.appendChild(itemElement);
         });
-        this.isNewEmptyInline = false;
     }
 
     public render(protyle: IProtyle, range: Range, event?: KeyboardEvent) {
@@ -131,7 +129,7 @@ export class Toolbar {
         });
     }
 
-    public getCurrentType(range = this.range, useEndType = true) {
+    public getCurrentType(range = this.range) {
         let types: string[] = [];
         let startElement = range.startContainer as HTMLElement;
         if (startElement.nodeType === 3) {
@@ -143,11 +141,7 @@ export class Toolbar {
             return [];
         }
         if (!["DIV", "TD", "TH", "TR"].includes(startElement.tagName)) {
-            if (!useEndType && range.startContainer.textContent.length === range.startOffset && !hasNextSibling(range.startContainer)) {
-                // 光标在 span 结尾不算 type，否则如在粗体后 ctrl+b 就无法继续使用粗体了
-            } else {
-                types = (startElement.getAttribute("data-type") || "").split(" ");
-            }
+            types = (startElement.getAttribute("data-type") || "").split(" ");
         }
         let endElement = range.endContainer as HTMLElement;
         if (endElement.nodeType === 3) {
@@ -161,17 +155,6 @@ export class Toolbar {
         if (!["DIV", "TD", "TH", "TR"].includes(endElement.tagName) && !startElement.isSameNode(endElement)) {
             types = types.concat((endElement.getAttribute("data-type") || "").split(" "));
         }
-        // if (range.startOffset === range.startContainer.textContent.length) {
-        // const nextSibling = hasNextSibling(range.startContainer) as Element;
-        // if (nextSibling && nextSibling.nodeType !== 3) {
-        //     types = types.concat((nextSibling.getAttribute("data-type") || "").split(" "));
-        // }
-        // } else if (range.endOffset === 0) {
-        //     const previousSibling = hasPreviousSibling(range.startContainer) as Element;
-        // if (previousSibling && previousSibling.nodeType !== 3) {
-        //     types = types.concat((previousSibling.getAttribute("data-type") || "").split(" "));
-        // }
-        // }
         range.cloneContents().childNodes.forEach((item: HTMLElement) => {
             if (item.nodeType !== 3) {
                 types = types.concat((item.getAttribute("data-type") || "").split(" "));
@@ -251,7 +234,7 @@ export class Toolbar {
         if (!nodeElement) {
             return;
         }
-        const rangeTypes = this.getCurrentType(this.range, false);
+        const rangeTypes = this.getCurrentType(this.range);
         const selectText = this.range.toString();
 
         // table 选中处理
@@ -314,7 +297,7 @@ export class Toolbar {
         const contents = this.range.extractContents();
         this.mergeNode(contents.childNodes);
         // 选择 span 中的一部分需进行包裹
-        if (previousElement && nextElement && previousElement.isSameNode(nextElement) && contents.firstChild.nodeType === 3) {
+        if (previousElement && nextElement && previousElement.isSameNode(nextElement) && contents.firstChild?.nodeType === 3) {
             const attributes = previousElement.attributes;
             contents.childNodes.forEach(item => {
                 const spanElement = document.createElement("span");
@@ -327,6 +310,7 @@ export class Toolbar {
         }
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
+
         if (actionBtn?.classList.contains("protyle-toolbar__item--current") || (
             action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && (!textObj || textObj.type === "remove")
         )) {
@@ -360,6 +344,9 @@ export class Toolbar {
                         }
                     });
                     if (types.length === 0) {
+                        if (item.textContent === "") {
+                            item.textContent = Constants.ZWSP;
+                        }
                         newNodes.push(document.createTextNode(item.textContent));
                     } else {
                         if (textObj && textObj.type === "remove") {
@@ -380,11 +367,17 @@ export class Toolbar {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
                         } else {
+                            if (item.textContent === "") {
+                                item.textContent = Constants.ZWSP;
+                            }
                             item.setAttribute("data-type", types.join(" "));
                             newNodes.push(item);
                         }
                     }
                 } else {
+                    if (item.textContent === "") {
+                        item.textContent = Constants.ZWSP;
+                    }
                     newNodes.push(item);
                 }
             });

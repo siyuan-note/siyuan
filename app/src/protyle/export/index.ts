@@ -360,6 +360,18 @@ const renderPDF = (id: string) => {
             item.style.zoom = item.parentElement.clientWidth / item.clientWidth;
         }
     })
+     previewElement.addEventListener("click", (event) => {
+        if (event.target.tagName === "A") {
+            const linkAddress = event.target.getAttribute("href");
+            if (linkAddress.startsWith("#")) {
+                // 导出预览模式点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5700
+                previewElement.querySelector(linkAddress).scrollIntoView();
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+        }
+    });
     const actionElement = document.getElementById('action');
     actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
         const {ipcRenderer}  = require("electron");
@@ -386,6 +398,12 @@ const renderPDF = (id: string) => {
         id,
         tpl: html
     }, response => {
+        if (response.code === 1) {
+            hideMessage();
+            showMessage(response.msg, undefined, "error");
+            destroyWin(win);
+            return;
+        }
         win.loadURL(response.data.url);
     });
 };

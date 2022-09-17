@@ -39,7 +39,7 @@ export class Preview {
                 const linkAddress = event.target.getAttribute("href");
                 if (linkAddress.startsWith("#")) {
                     // 导出预览模式点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5700
-                    // 对于超链接锚点不做任何处理
+                    previewElement.querySelector(linkAddress).scrollIntoView();
                     event.stopPropagation();
                     event.preventDefault();
                     return;

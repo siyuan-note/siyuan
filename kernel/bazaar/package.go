@@ -374,7 +374,7 @@ func installPackage(data []byte, installPath string) (err error) {
 		}
 	}
 	srcPath := filepath.Join(unzipPath, dir)
-	if err = gulu.File.Copy(srcPath, installPath); nil != err {
+	if err = util.Copy(srcPath, installPath); nil != err {
 		return
 	}
 	return

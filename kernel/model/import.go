@@ -267,8 +267,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		os.RemoveAll(assets)
 	}
 
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
+	util.WritingFileLock.Lock()
+	defer util.WritingFileLock.Unlock()
 
 	filelock.ReleaseAllFileLocks()
 
@@ -331,8 +331,8 @@ func ImportData(zipPath string) (err error) {
 		return errors.New("invalid data.zip")
 	}
 
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
+	util.WritingFileLock.Lock()
+	defer util.WritingFileLock.Unlock()
 
 	filelock.ReleaseAllFileLocks()
 	tmpDataPath := filepath.Join(unzipPath, dirs[0].Name())
@@ -501,8 +501,6 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			})
 
 			reassignIDUpdated(tree)
-			writingDataLock.Lock()
-			defer writingDataLock.Unlock()
 			if err = filesys.WriteTree(tree); nil != err {
 				return io.EOF
 			}

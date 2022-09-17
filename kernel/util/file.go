@@ -22,11 +22,50 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 )
+
+var WritingFileLock = sync.Mutex{}
+
+func WriteFileSafer(writePath string, data []byte) (err error) {
+	WritingFileLock.Lock()
+	defer WritingFileLock.Unlock()
+
+	if err = gulu.File.WriteFileSafer(writePath, data, 0644); nil != err {
+		logging.LogErrorf("write file [%s] failed: %s", writePath, err)
+		return
+	}
+	return
+}
+
+func Copy(source, dest string) (err error) {
+	WritingFileLock.Lock()
+	defer WritingFileLock.Unlock()
+
+	filelock.ReleaseFileLocks(source)
+	if err = gulu.File.Copy(source, dest); nil != err {
+		logging.LogErrorf("copy [%s] to [%s] failed: %s", source, dest, err)
+		return
+	}
+	return
+}
+
+func RemoveAll(p string) (err error) {
+	WritingFileLock.Lock()
+	defer WritingFileLock.Unlock()
+
+	filelock.ReleaseFileLocks(p)
+	if err = os.RemoveAll(p); nil != err {
+		logging.LogErrorf("remove all [%s] failed: %s", p, err)
+		return
+	}
+	return
+}
 
 func IsEmptyDir(p string) bool {
 	if !gulu.File.IsDir(p) {

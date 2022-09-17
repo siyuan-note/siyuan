@@ -34,8 +34,8 @@ import (
 )
 
 func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]interface{}, err error) {
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
+	util.WritingFileLock.Lock()
+	defer util.WritingFileLock.Unlock()
 
 	succMap = map[string]interface{}{}
 
@@ -104,8 +104,8 @@ func Upload(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(200, ret)
 
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
+	util.WritingFileLock.Lock()
+	defer util.WritingFileLock.Unlock()
 
 	form, err := c.MultipartForm()
 	if nil != err {

@@ -123,6 +123,7 @@ func WriteTree(tree *parse.Tree) (err error) {
 	if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
 		return
 	}
+
 	if err = filelock.LockFileWrite(filePath, output); nil != err {
 		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 		logging.LogErrorf(msg)

@@ -18,7 +18,10 @@ package api
 
 import (
 	"net/http"
+	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -190,11 +193,31 @@ func exportPreviewHTML(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	tpl := arg["tpl"].(string)
 	name, content := model.ExportHTML(id, "", true)
+	tpl = strings.ReplaceAll(tpl, "{tpl.name}", name)
+	tpl = strings.ReplaceAll(tpl, "{tpl.content}", content)
+	tmpName := gulu.Rand.String(7)
+	tmpDir := filepath.Join(util.TempDir, "export", "preview")
+	if err := os.MkdirAll(tmpDir, 0755); nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+	tmpPath := filepath.Join(tmpDir, tmpName)
+	if err := os.WriteFile(tmpPath, []byte(tpl), 0644); nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	url := path.Join("http://127.0.0.1:6806", "export", "preview", tmpName)
 	ret.Data = map[string]interface{}{
-		"id":      id,
-		"name":    name,
-		"content": content,
+		"id":   id,
+		"name": name,
+		"url":  url,
 	}
 }
 

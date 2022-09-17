@@ -104,6 +104,7 @@ export class WYSIWYG {
         });
     }
 
+    // text block-ref file-annotation-ref a 结尾处打字应为普通文本
     private escapeInline(protyle: IProtyle, range: Range, event: InputEvent) {
         if (!event.data) {
             return;
@@ -111,17 +112,14 @@ export class WYSIWYG {
         const inputData = event.data;
         protyle.toolbar.range = range;
         const inlineElement = range.startContainer.parentElement;
-        let outElement = inlineElement;
-        if (!["DIV", "TD", "TH"].includes(inlineElement.tagName) && !["DIV", "TD", "TH"].includes(inlineElement.parentElement.tagName) && !hasNextSibling(inlineElement)) {
-            // 表格行内公式之前无法插入文字 https://github.com/siyuan-note/siyuan/issues/3908
-            // 引用外面加粗体且引用后无文字 https://github.com/siyuan-note/siyuan/issues/3103
-            outElement = inlineElement.parentElement;
-        }
+        const currentTypes =  protyle.toolbar.getCurrentType()
         if (// 表格行内公式之前无法插入文字 https://github.com/siyuan-note/siyuan/issues/3908
-            !["DIV", "TD", "TH"].includes(inlineElement.tagName) &&
-            range.toString() === "" && range.startContainer.nodeType === 3 && protyle.toolbar.getCurrentType().length > 0 &&
-            inlineElement.textContent.replace(Constants.ZWSP, "").length >= inputData.length && // 为空的时候需要等于
-            !protyle.toolbar.isNewEmptyInline) {
+            inlineElement.tagName==="SPAN" &&
+            range.toString() === "" && range.startContainer.nodeType === 3 &&
+            (currentTypes.includes("text") || currentTypes.includes("block-ref")|| currentTypes.includes("file-annotation-ref")|| currentTypes.includes("a")) &&
+            !hasNextSibling(range.startContainer) && range.startContainer.textContent.length === range.startOffset &&
+            inlineElement.textContent.replace(Constants.ZWSP, "").length >= inputData.length  // 为空的时候需要等于
+        ) {
             const position = getSelectionOffset(inlineElement, protyle.wysiwyg.element, range);
             let dataLength = inputData.length;
             if (inputData === "<" || inputData === ">") {
@@ -134,13 +132,13 @@ export class WYSIWYG {
                 // 使用 inlineElement.textContent **$a$b** 中数学公式消失
                 inlineElement.innerHTML = html.substr(0, html.length - dataLength);
                 const textNode = document.createTextNode(inputData);
-                outElement.after(textNode);
+                inlineElement.after(textNode);
                 range.selectNodeContents(textNode);
                 range.collapse(false);
             } else if (position.start === inputData.length) {
                 inlineElement.innerHTML = html.substr(dataLength);
                 const textNode = document.createTextNode(inputData);
-                outElement.before(textNode);
+                inlineElement.before(textNode);
                 range.selectNodeContents(textNode);
                 range.collapse(false);
             }
@@ -1753,7 +1751,6 @@ export class WYSIWYG {
                 /// #endif
             }, isMobile() ? 520 : 0); // Android 双击慢了出不来
 
-            protyle.toolbar.isNewEmptyInline = false;
             protyle.hint.enableEmoji = false;
             if (window.siyuan.shiftIsPressed) {
                 event.preventDefault();

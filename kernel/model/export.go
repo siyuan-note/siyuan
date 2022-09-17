@@ -452,6 +452,7 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 
 	luteEngine.SetFootnotes(true)
 	luteEngine.RenderOptions.ProtyleContenteditable = false
+	luteEngine.SetProtyleMarkNetImg(false)
 	renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions)
 	dom = gulu.Str.FromBytes(renderer.Render())
 	return
@@ -1139,6 +1140,10 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})
 		}
 		unlinks = append(unlinks, n)
+		if nil != n.Next && ast.NodeKramdownSpanIAL == n.Next.Type {
+			// 引用加排版标记（比如颜色）重叠时丢弃后面的排版属性节点
+			unlinks = append(unlinks, n.Next)
+		}
 		return ast.WalkSkipChildren
 	})
 	for _, n := range unlinks {

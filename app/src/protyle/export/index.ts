@@ -408,11 +408,12 @@ const renderPDF = (id: string) => {
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>
 </head>
-<body
-    <div id="loading" class="b3-dialog b3-dialog--open">
-        <div class="b3-dialog__scrim" style="background-color: #212224"></div>
-        <img style="position: absolute;width: 36vh;" src="${servePath}/stage/icon.png">
+<body>
+    <div class="b3-dialog__scrim" style="opacity: 1"></div>
+    <div style="position: fixed;top: 45vh;width: 70vw;left: 15vw;color:#fff;z-index:400;">
+        <div style="margin: 8px 0;height: 8px;border-radius: 4px;overflow: hidden;background-color:#fff;"><div style="background-color: var(--b3-theme-primary);height: 8px;background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);animation: stripMove 450ms linear infinite;background-size: 50px 50px;"></div></div>
     </div>
 </body></html>`));
     fetchPost("/api/export/exportPreviewHTML", {

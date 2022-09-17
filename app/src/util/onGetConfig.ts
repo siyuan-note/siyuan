@@ -148,7 +148,6 @@ export const onGetConfig = (isStart: boolean) => {
             resizeDrag();
         }, 200);
     });
-
     if (window.siyuan.config.newbie) {
         mountHelp();
     }

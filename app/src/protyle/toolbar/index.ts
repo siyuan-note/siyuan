@@ -124,7 +124,7 @@ export class Toolbar {
         });
         const types = this.getCurrentType();
         types.forEach(item => {
-            if (["a", "block-ref", "text", "file-annotation-ref", "inline-math"].includes(item)) {
+            if (["a", "block-ref", "text", "file-annotation-ref", "inline-math", ""].includes(item)) {
                 return;
             }
             this.element.querySelector(`[data-type="${item}"]`).classList.add("protyle-toolbar__item--current");

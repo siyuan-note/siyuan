@@ -78,7 +78,7 @@ export const getNoContainerElement = (element: Element) => {
 };
 
 export const getContenteditableElement = (element: Element) => {
-    if (!element || element.getAttribute("contenteditable") === "true") {
+    if (!element || (element.getAttribute("contenteditable") === "true") && !element.classList.contains("protyle-wysiwyg")) {
         return element;
     }
     return element.querySelector('[contenteditable="true"]');

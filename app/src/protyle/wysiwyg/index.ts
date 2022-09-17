@@ -1727,7 +1727,7 @@ export class WYSIWYG {
                         const emptyEditElement = getContenteditableElement(emptyElement) as HTMLInputElement;
                         range.selectNodeContents(emptyEditElement);
                         range.collapse(true);
-                        emptyEditElement.focus();
+                        focusByRange(range)
                     } else if (lastEditElement) {
                         range.selectNodeContents(lastEditElement);
                         range.collapse(false);
@@ -1745,6 +1745,10 @@ export class WYSIWYG {
                 }
                 if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
                     countSelectWord(newRange);
+                }
+                if (getSelection().rangeCount === 0) {
+                    // https://github.com/siyuan-note/siyuan/issues/5901
+                    focusByRange(newRange)
                 }
                 /// #if !MOBILE
                 pushBack(protyle, newRange);

@@ -116,6 +116,9 @@ export const getEditorRange = (element: Element) => {
         targetElement = getContenteditableElement(element);
         if (!targetElement) {
             targetElement = element;
+        } else if (targetElement.tagName === "TABLE") {
+            // 文档中开头为表格，获取错误 https://ld246.com/article/1663408335459?r=88250
+            targetElement = targetElement.querySelector("th") || element.querySelector("td");
         }
     }
     range = targetElement.ownerDocument.createRange();

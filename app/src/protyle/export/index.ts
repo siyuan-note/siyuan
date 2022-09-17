@@ -239,10 +239,9 @@ const renderPDF = (id: string) => {
                 right: 232px;
                 left: 0;
          }
-         
-        ::-webkit-scrollbar {
-          width: 0px;
-          height: 0px;
+        body.exporting::-webkit-scrollbar {
+          width: 0;
+          height: 0;
         }
         pre code {
             max-height: none !important;
@@ -366,7 +365,7 @@ const renderPDF = (id: string) => {
                     return;
                 }
             } else if (target.classList.contains("protyle-action__copy")) {
-                navigator.clipboard.writeText(item.parentElement.nextElementSibling.textContent.trimEnd());
+                navigator.clipboard.writeText(target.parentElement.nextElementSibling.textContent.trimEnd());
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -391,9 +390,10 @@ const renderPDF = (id: string) => {
           },
           removeAssets: actionElement.querySelector("#removeAssets").checked,
           rootId: "${id}",
-          rootTitle: "{tpl.data.name}"
+          rootTitle: "{tpl.name}"
         })
         actionElement.remove();
+        document.querySelector("body").classList.add("exporting");
     });
 </script></body></html>`;
     fetchPost("/api/export/exportPreviewHTML", {

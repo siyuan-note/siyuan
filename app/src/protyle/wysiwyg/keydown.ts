@@ -514,6 +514,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (types.includes("block-ref")) {
                     refMenu(protyle, inlineElement);
                     return;
+                } else if (types.includes("inline-memo")) {
+                    protyle.toolbar.showRender(protyle, inlineElement);
+                    return;
                 } else if (types.includes("file-annotation-ref")) {
                     protyle.toolbar.showFileAnnotationRef(protyle, inlineElement);
                     return;
@@ -1180,7 +1183,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 if (matchHotKey(menuItem.hotkey, event)) {
                     protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
-                    if (["text", "a", "block-ref", "inline-math"].includes(menuItem.name)) {
+                    if (["text", "a", "block-ref", "inline-math", "inline-memo"].includes(menuItem.name)) {
                         protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(new CustomEvent("block-ref" === menuItem.name ? getEventName() : "click"));
                     } else {
                         protyle.toolbar.setInlineMark(protyle, menuItem.name, "range");

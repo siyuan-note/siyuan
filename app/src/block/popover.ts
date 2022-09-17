@@ -11,9 +11,10 @@ export const initBlockPopover = () => {
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
             hasClosestByClassName(event.target, "emojis__item") ||
-            hasClosestByClassName(event.target, "emojis__type");
+            hasClosestByClassName(event.target, "emojis__type") ||
+            hasClosestByAttribute(event.target, "data-type", "inline-memo");
         if (aElement) {
-            let tip = aElement.getAttribute("aria-label");
+            let tip = aElement.getAttribute("aria-label") || aElement.getAttribute("data-inline-memo-content");
             // 折叠块标文案替换
             if (hasClosestByAttribute(event.target, "data-type", "fold", true)) {
                 tip = window.siyuan.languages.fold;

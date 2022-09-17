@@ -171,6 +171,7 @@ export abstract class Constants {
                 sub: {default: "⌘J", custom: "⌘J"},
                 bold: {default: "⌘B", custom: "⌘B"},
                 "inline-math": {default: "⌘M", custom: "⌘M"},
+                memo: {default: "⌥⌘M", custom: "⌥⌘M"},
                 underline: {default: "⌘U", custom: "⌘U"},
                 italic: {default: "⌘I", custom: "⌘I"},
                 mark: {default: "⌘E", custom: "⌘E"},
@@ -397,7 +398,7 @@ export abstract class Constants {
         "lightfair", "magula", "mono-blue", "nnfx-light", "paraiso-light", "purebasic", "qtcreator-light", "routeros", "school-book",
         "stackoverflow-light", "tokyo-night-light", "vs", "xcode", "default"];
     public static readonly ZWSP: string = "\u200b";
-    public static readonly INLINE_TYPE: string[] = ["block-ref", "kbd", "text", "file-annotation-ref", "a", "strong", "em", "u", "s", "mark", "sup", "sub", "tag", "code", "inline-math"];
+    public static readonly INLINE_TYPE: string[] = ["block-ref", "kbd", "text", "file-annotation-ref", "a", "strong", "em", "u", "s", "mark", "sup", "sub", "tag", "code", "inline-math", "inline-memo"];
     public static readonly BLOCK_HINT_KEYS: string[] = ["((", "[[", "（（", "【【"];
     public static readonly BLOCK_HINT_CLOSE_KEYS: IObject = {"((": "))", "[[": "]]", "（（": "））", "【【": "】】"};
     public static readonly CODE_LANGUAGES: string[] = [

@@ -91,6 +91,7 @@ export class Options {
             "code",
             "inline-math",
             "|",
+            "inline-memo",
             "text",
         ] : [
             "block-ref",
@@ -110,6 +111,7 @@ export class Options {
             "code",
             "inline-math",
             "|",
+            "inline-memo",
             "text",
         ],
         typewriterMode: false,
@@ -221,6 +223,12 @@ export class Options {
             lang: "inline-math",
             hotkey: window.siyuan.config.keymap.editor.insert["inline-math"].custom,
             icon: "iconMath",
+            tipPosition: "n",
+        }, {
+            name: "inline-memo",
+            lang: "memo",
+            hotkey: window.siyuan.config.keymap.editor.insert.memo.custom,
+            icon: "iconM",
             tipPosition: "n",
         }, {
             name: "text",

@@ -1,11 +1,10 @@
 import {ToolbarItem} from "./ToolbarItem";
 import * as dayjs from "dayjs";
 import {updateTransaction} from "../wysiwyg/transaction";
-import {hasClosestBlock} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
-import {mathRender} from "../markdown/mathRender";
 
-export class InlineMath extends ToolbarItem {
+export class InlineMemo extends ToolbarItem {
     public element: HTMLElement;
 
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
@@ -19,6 +18,16 @@ export class InlineMath extends ToolbarItem {
             if (!nodeElement) {
                 return;
             }
+            const memoElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-memo");
+            if (memoElement) {
+                protyle.toolbar.showRender(protyle, memoElement);
+                return;
+            }
+
+            if (range.toString() === "") {
+                return;
+            }
+
             if (!["DIV", "TD", "TH"].includes(range.startContainer.parentElement.tagName) && range.startOffset === 0 && !hasPreviousSibling(range.startContainer)) {
                 range.setStartBefore(range.startContainer.parentElement);
             }
@@ -30,18 +39,11 @@ export class InlineMath extends ToolbarItem {
             const html = nodeElement.outerHTML;
 
             const newElement = document.createElement("span");
-            const rangeString = range.toString();
-            newElement.className = "render-node";
-            newElement.setAttribute("contenteditable", "false");
-            newElement.setAttribute("data-type", "inline-math");
-            newElement.setAttribute("data-subtype", "math");
-            newElement.setAttribute("data-content", rangeString.trim());
+            newElement.innerHTML = range.toString();
+            newElement.setAttribute("data-type", "inline-memo");
             range.extractContents();
             range.insertNode(newElement);
-            mathRender(newElement);
-            if (rangeString.trim() === "") {
-                protyle.toolbar.showRender(protyle, newElement);
-            }
+            protyle.toolbar.showRender(protyle, newElement);
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
             wbrElement.remove();

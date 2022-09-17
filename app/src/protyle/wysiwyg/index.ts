@@ -116,7 +116,7 @@ export class WYSIWYG {
         if (// 表格行内公式之前无法插入文字 https://github.com/siyuan-note/siyuan/issues/3908
             inlineElement.tagName==="SPAN" &&
             range.toString() === "" && range.startContainer.nodeType === 3 &&
-            (currentTypes.includes("text") || currentTypes.includes("block-ref")|| currentTypes.includes("file-annotation-ref")|| currentTypes.includes("a")) &&
+            (currentTypes.includes("inline-memo") || currentTypes.includes("text") || currentTypes.includes("block-ref")|| currentTypes.includes("file-annotation-ref")|| currentTypes.includes("a")) &&
             !hasNextSibling(range.startContainer) && range.startContainer.textContent.length === range.startOffset &&
             inlineElement.textContent.replace(Constants.ZWSP, "").length >= inputData.length  // 为空的时候需要等于
         ) {
@@ -1088,6 +1088,10 @@ export class WYSIWYG {
             }
             if (types.includes("file-annotation-ref")) {
                 protyle.toolbar.showFileAnnotationRef(protyle, target);
+                return false;
+            }
+            if (types.includes("inline-memo")) {
+                protyle.toolbar.showRender(protyle, target);
                 return false;
             }
             if (types.includes("a")) {

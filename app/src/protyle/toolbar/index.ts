@@ -40,6 +40,7 @@ import {electronUndo} from "../undo";
 import {previewTemplate} from "./util";
 import {showMessage} from "../../dialog/message";
 import {InlineMath} from "./InlineMath";
+import {InlineMemo} from "./InlineMemo";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -122,7 +123,7 @@ export class Toolbar {
         });
         const types = this.getCurrentType();
         types.forEach(item => {
-            if (["a", "block-ref", "text", "file-annotation-ref", "inline-math", ""].includes(item)) {
+            if (["a", "block-ref", "text", "file-annotation-ref", "inline-math", "inline-memo", ""].includes(item)) {
                 return;
             }
             this.element.querySelector(`[data-type="${item}"]`).classList.add("protyle-toolbar__item--current");
@@ -190,6 +191,9 @@ export class Toolbar {
                 break;
             case "inline-math":
                 menuItemObj = new InlineMath(protyle, menuItem);
+                break;
+            case "inline-memo":
+                menuItemObj = new InlineMemo(protyle, menuItem);
                 break;
             case "|":
                 menuItemObj = new Divider();
@@ -636,6 +640,8 @@ export class Toolbar {
         }
         if (type === "NodeBlockQueryEmbed") {
             title = window.siyuan.languages.blockEmbed;
+        } else if (type === "inline-memo") {
+            title = window.siyuan.languages.memo;
         }
         const isPin = this.subElement.querySelector('[data-type="pin"]')?.classList.contains("block__icon--active");
         const pinData: IObject = {};
@@ -660,7 +666,7 @@ export class Toolbar {
     <span class="fn__space"></span>
     <button data-type="after" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages["insert-after"]}"><svg><use xlink:href="#iconAfter"></use></svg></button>
     <span class="fn__space"></span>
-    <button data-type="copy" class="block__icon b3-tooltips b3-tooltips__nw${isBrowser() ? " fn__none" : ""}" aria-label="${window.siyuan.languages.copy} PNG"><svg><use xlink:href="#iconCopy"></use></svg></button>
+    <button data-type="copy" class="block__icon b3-tooltips b3-tooltips__nw${(isBrowser() || type === "inline-memo") ? " fn__none" : ""}" aria-label="${window.siyuan.languages.copy} PNG"><svg><use xlink:href="#iconCopy"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="pin" class="block__icon b3-tooltips b3-tooltips__nw${isPin ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
     <span class="fn__space"></span>
@@ -680,7 +686,7 @@ export class Toolbar {
                 return;
             }
             if (this.subElement.clientHeight <= window.innerHeight - nodeRect.bottom || this.subElement.clientHeight <= nodeRect.top) {
-                if (type === "inline-math") {
+                if (type === "inline-math" || type === "inline-memo") {
                     setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height);
                 } else {
                     setPosition(this.subElement, nodeRect.left + (nodeRect.width - this.subElement.clientWidth) / 2, nodeRect.bottom, nodeRect.height);
@@ -786,6 +792,8 @@ export class Toolbar {
         const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
         if (type === "NodeHTMLBlock") {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.querySelector("protyle-html").getAttribute("data-content") || "");
+        } else if (type === "inline-memo") {
+            textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-inline-memo-content") || "");
         } else {
             const switchElement = this.subElement.querySelector(".b3-switch") as HTMLInputElement;
             if (nodeElement.getAttribute("custom-heading-mode") === "1") {
@@ -817,6 +825,8 @@ export class Toolbar {
             const target = event.target as HTMLTextAreaElement;
             if (type === "NodeHTMLBlock") {
                 renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
+            } else if (type === "inline-memo") {
+                renderElement.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
             } else {
                 renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
                 renderElement.removeAttribute("data-render");
@@ -835,6 +845,8 @@ export class Toolbar {
             if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) {
                 if (type === "NodeHTMLBlock") {
                     renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
+                } else if (type === "inline-memo") {
+                    renderElement.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
                 } else {
                     renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
                     renderElement.removeAttribute("data-render");

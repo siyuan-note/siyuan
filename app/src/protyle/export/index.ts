@@ -80,6 +80,7 @@ const renderPDF = (id: string) => {
         width: 1032,
         resizable: false,
         frame: "darwin" === window.siyuan.config.system.os,
+        icon: `${servePath}/stage/icon-large.png`,
         titleBarStyle: "hidden",
         webPreferences: {
             contextIsolation: false,
@@ -396,6 +397,22 @@ const renderPDF = (id: string) => {
         document.querySelector("body").classList.add("exporting");
     });
 </script></body></html>`;
+    win.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent(`<!DOCTYPE html><html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
+</head>
+<body
+    <div id="loading" class="b3-dialog b3-dialog--open">
+        <div class="b3-dialog__scrim" style="background-color: #212224"></div>
+        <img style="position: absolute;width: 36vh;" src="${servePath}/stage/icon.png">
+    </div>
+</body></html>`));
     fetchPost("/api/export/exportPreviewHTML", {
         id,
         tpl: html

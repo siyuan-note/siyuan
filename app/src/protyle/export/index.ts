@@ -15,7 +15,6 @@ import {lockFile} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
 import {replaceLocalPath} from "../../editor/rename";
 
-
 export const saveExport = (option: { type: string, id: string }) => {
     /// #if !BROWSER
     if (option.type === "pdf") {
@@ -157,59 +156,56 @@ const renderPDF = (id: string) => {
             }, 200);
         });
     });
-    fetchPost("/api/export/exportPreviewHTML", {
-        id,
-    }, response => {
-        let pdfWidth = "";
-        if (localData.pageSize === "A3") {
-            if (localData.landscape) {
-                pdfWidth = "16.5";
-            } else {
-                pdfWidth = "11.7";
-            }
-        } else if (localData.pageSize === "A4") {
-            if (localData.landscape) {
-                pdfWidth = "11.7";
-            } else {
-                pdfWidth = "8.8";
-            }
-        } else if (localData.pageSize === "A5") {
-            if (localData.landscape) {
-                pdfWidth = "8.3";
-            } else {
-                pdfWidth = "5.8";
-            }
-        } else if (localData.pageSize === "Legal") {
-            if (localData.landscape) {
-                pdfWidth = "14";
-            } else {
-                pdfWidth = "8.5";
-            }
-        } else if (localData.pageSize === "Letter") {
-            if (localData.landscape) {
-                pdfWidth = "11";
-            } else {
-                pdfWidth = "8.5";
-            }
-        } else if (localData.pageSize === "Tabloid") {
-            if (localData.landscape) {
-                pdfWidth = "17";
-            } else {
-                pdfWidth = "11";
-            }
+    let pdfWidth = "";
+    if (localData.pageSize === "A3") {
+        if (localData.landscape) {
+            pdfWidth = "16.5";
+        } else {
+            pdfWidth = "11.7";
         }
-        let pdfMargin = "0.66";
+    } else if (localData.pageSize === "A4") {
+        if (localData.landscape) {
+            pdfWidth = "11.7";
+        } else {
+            pdfWidth = "8.8";
+        }
+    } else if (localData.pageSize === "A5") {
+        if (localData.landscape) {
+            pdfWidth = "8.3";
+        } else {
+            pdfWidth = "5.8";
+        }
+    } else if (localData.pageSize === "Legal") {
+        if (localData.landscape) {
+            pdfWidth = "14";
+        } else {
+            pdfWidth = "8.5";
+        }
+    } else if (localData.pageSize === "Letter") {
+        if (localData.landscape) {
+            pdfWidth = "11";
+        } else {
+            pdfWidth = "8.5";
+        }
+    } else if (localData.pageSize === "Tabloid") {
+        if (localData.landscape) {
+            pdfWidth = "17";
+        } else {
+            pdfWidth = "11";
+        }
+    }
+    let pdfMargin = "0.66";
+    if (localData.landscape) {
+        pdfMargin = "1.69";
+    }
+    if (localData.marginsType !== 0) {
         if (localData.landscape) {
             pdfMargin = "1.69";
+        } else {
+            pdfMargin = "0.3";
         }
-        if (localData.marginsType !== 0) {
-            if (localData.landscape) {
-                pdfMargin = "1.69";
-            } else {
-                pdfMargin = "0.3";
-            }
-        }
-        const html = `<!DOCTYPE html><html>
+    }
+    const html = `<!DOCTYPE html><html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -219,7 +215,7 @@ const renderPDF = (id: string) => {
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
     <link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>
-    <title>${response.data.name} - ${window.siyuan.languages.siyuanNote}  v${Constants.SIYUAN_VERSION}</title>
+    <title>{tpl.name} - ${window.siyuan.languages.siyuanNote}  v${Constants.SIYUAN_VERSION}</title>
     <style>
           body {
             margin: 0;
@@ -269,7 +265,7 @@ const renderPDF = (id: string) => {
     </style>
 </head>
 <body>
-<div class="protyle-wysiwyg protyle-wysiwyg--attr" id="preview">${response.data.content.replace(/<iframe /g, "<no-iframe ")}</div>
+<div class="protyle-wysiwyg protyle-wysiwyg--attr" id="preview">{tpl.content}</div>
 <div id="action">
     <h2 class="b3-label">${window.siyuan.languages.config}</h2>
     <label class="b3-label">
@@ -381,12 +377,16 @@ const renderPDF = (id: string) => {
           },
           removeAssets: actionElement.querySelector("#removeAssets").checked,
           rootId: "${id}",
-          rootTitle: "${response.data.name}"
+          rootTitle: "{tpl.data.name}"
         })
         actionElement.remove();
     });
 </script></body></html>`;
-        win.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent(html));
+    fetchPost("/api/export/exportPreviewHTML", {
+        id,
+        tpl: html
+    }, response => {
+        win.loadURL(response.data.url);
     });
 };
 

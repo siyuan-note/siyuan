@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -85,7 +86,7 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 				f.Close()
 				return
 			}
-			if err = util.WriteFileSaferByReader(writePath, f); nil != err {
+			if err = filesys.WriteFileSaferByReader(writePath, f); nil != err {
 				f.Close()
 				return
 			}
@@ -168,7 +169,7 @@ func Upload(c *gin.Context) {
 				f.Close()
 				break
 			}
-			if err = util.WriteFileSaferByReader(writePath, f); nil != err {
+			if err = filesys.WriteFileSaferByReader(writePath, f); nil != err {
 				errFiles = append(errFiles, fName)
 				ret.Msg = err.Error()
 				f.Close()

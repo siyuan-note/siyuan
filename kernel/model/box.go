@@ -35,6 +35,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -202,7 +203,7 @@ func (box *Box) saveConf0(data []byte) {
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); nil != err {
 		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
-	if err := util.WriteFileSafer(confPath, data); nil != err {
+	if err := filesys.WriteFileSafer(confPath, data); nil != err {
 		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
 }
@@ -292,8 +293,8 @@ func (box *Box) Move(oldPath, newPath string) error {
 	toPath := filepath.Join(boxLocalPath, newPath)
 	filelock.ReleaseFileLocks(fromPath)
 
-	util.LockWriteFile()
-	defer util.UnlockWriteFile()
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 	if err := os.Rename(fromPath, toPath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(5), box.Name, fromPath, err)
 		logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, box.Name, err)
@@ -313,7 +314,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 func (box *Box) Remove(path string) error {
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	filePath := filepath.Join(boxLocalPath, path)
-	if err := util.RemoveAll(filePath); nil != err {
+	if err := filesys.RemoveAll(filePath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(7), box.Name, path, err)
 		logging.LogErrorf("remove [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)

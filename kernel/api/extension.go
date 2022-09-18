@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -106,7 +107,7 @@ func extensionCopy(c *gin.Context) {
 		}
 		fName = fName + "-" + ast.NewNodeID() + ext
 		writePath := filepath.Join(assets, fName)
-		if err = util.WriteFileSafer(writePath, data); nil != err {
+		if err = filesys.WriteFileSafer(writePath, data); nil != err {
 			ret.Code = -1
 			ret.Msg = err.Error()
 			break

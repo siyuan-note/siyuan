@@ -32,6 +32,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -63,8 +64,8 @@ func SyncData(boot, exit, byHand bool) {
 		return
 	}
 
-	util.LockWriteFile()
-	defer util.UnlockWriteFile()
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 
 	if util.IsMutexLocked(&syncLock) {
 		logging.LogWarnf("sync is in progress")

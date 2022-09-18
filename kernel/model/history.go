@@ -37,6 +37,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -238,7 +239,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	util.LockWriteFile()
+	filesys.LockWriteFile()
 
 	srcPath := historyPath
 	var destPath string
@@ -249,22 +250,22 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	workingDoc := treenode.GetBlockTree(id)
 	if nil != workingDoc {
 		if err = os.RemoveAll(filepath.Join(util.DataDir, boxID, workingDoc.Path)); nil != err {
-			util.UnlockWriteFile()
+			filesys.UnlockWriteFile()
 			return
 		}
 	}
 
 	destPath, err = getRollbackDockPath(boxID, historyPath)
 	if nil != err {
-		util.UnlockWriteFile()
+		filesys.UnlockWriteFile()
 		return
 	}
 
 	if err = gulu.File.Copy(srcPath, destPath); nil != err {
-		util.UnlockWriteFile()
+		filesys.UnlockWriteFile()
 		return
 	}
-	util.UnlockWriteFile()
+	filesys.UnlockWriteFile()
 
 	FullReindex()
 	IncSync()

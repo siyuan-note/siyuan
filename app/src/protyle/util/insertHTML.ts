@@ -54,7 +54,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         if (inlineMathElement) {
             // 表格内选中数学公式 https://ld246.com/article/1631708573504
             inlineMathElement.remove();
-        } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.getAttribute("data-type").indexOf("block-ref")>-1) {
+        } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.getAttribute("data-type")?.indexOf("block-ref")>-1) {
             // ref 选中处理 https://ld246.com/article/1629214377537
             range.startContainer.parentElement.remove();
             // 选中 ref**bbb** 后 alt+[

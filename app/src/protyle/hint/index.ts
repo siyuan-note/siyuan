@@ -442,11 +442,18 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             range.insertNode(document.createElement("wbr"));
             html = nodeElement.outerHTML;
             range.deleteContents();
-            const tempElement = document.createElement("template");
+            let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
-            range.insertNode(tempElement.content.cloneNode(true));
+            tempElement = tempElement.firstChild as HTMLDivElement;
+            range.insertNode(tempElement);
+            range.setStart(tempElement.firstChild, 0);
+            range.setEnd(tempElement.lastChild, tempElement.lastChild.textContent.length);
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
-            focusByWbr(nodeElement, range);
+            const wbrElement = nodeElement.querySelector("wbr");
+            if (wbrElement) {
+                wbrElement.remove();
+            }
+            focusByRange(range);
             return;
         } else if (this.splitChar === ":") {
             addEmoji(value);

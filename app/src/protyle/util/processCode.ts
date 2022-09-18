@@ -46,7 +46,7 @@ export const processPasteCode = (html: string, text: string) => {
 
 export const processRender = (previewPanel: Element) => {
     const language = previewPanel.getAttribute("data-subtype");
-    if (!language) {
+    if (!["abc", "plantuml", "mermaid", "flowchart", "echarts", "mindmap", "graphviz", "math"].includes(language)) {
         abcRender(previewPanel);
         plantumlRender(previewPanel);
         mermaidRender(previewPanel);

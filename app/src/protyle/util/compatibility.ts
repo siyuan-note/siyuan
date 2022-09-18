@@ -99,7 +99,8 @@ export const updateHotkeyTip = (hotkey: string) => {
     if (hotkey.indexOf("⇧") > -1) keys.push(KEY_MAP.get("⇧"));
     if (hotkey.indexOf("⌥") > -1) keys.push(KEY_MAP.get("⌥"));
 
-    const lastKey = hotkey.charAt(hotkey.length - 1);
+    // 不能去最后一个，需匹配 F2
+    const lastKey = hotkey.replace(/⌘|⇧|⌥/g, "");
     if ("⌘⇧⌥".indexOf(lastKey) < 0) {
         keys.push(
             KEY_MAP.get(lastKey)

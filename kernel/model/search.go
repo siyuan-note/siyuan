@@ -175,6 +175,12 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 				if strings.Contains(n.TextMarkInlineMemoContent, keyword) {
 					n.TextMarkInlineMemoContent = strings.ReplaceAll(n.TextMarkInlineMemoContent, keyword, replacement)
 				}
+				if strings.Contains(n.TextMarkATitle, keyword) {
+					n.TextMarkATitle = strings.ReplaceAll(n.TextMarkATitle, keyword, replacement)
+				}
+				if strings.Contains(n.TextMarkAHref, keyword) {
+					n.TextMarkAHref = strings.ReplaceAll(n.TextMarkAHref, keyword, replacement)
+				}
 			}
 			return ast.WalkContinue
 		})

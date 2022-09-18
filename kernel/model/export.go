@@ -42,6 +42,7 @@ import (
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -158,8 +159,8 @@ func exportData(exportFolder string) (err error) {
 		return
 	}
 
-	util.LockWriteFile()
-	defer util.UnlockWriteFile()
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 
 	err = filelock.ReleaseAllFileLocks()
 	if nil != err {

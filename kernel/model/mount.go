@@ -29,13 +29,12 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func CreateBox(name string) (id string, err error) {
-	WaitForWritingFiles()
-
 	id = ast.NewNodeID()
 	boxLocalPath := filepath.Join(util.DataDir, id)
 	err = os.MkdirAll(boxLocalPath, 0755)
@@ -52,10 +51,6 @@ func CreateBox(name string) (id string, err error) {
 }
 
 func RenameBox(boxID, name string) (err error) {
-	WaitForWritingFiles()
-	util.LockWriteFile()
-	defer util.UnlockWriteFile()
-
 	box := Conf.Box(boxID)
 	if nil == box {
 		return errors.New(Conf.Language(0))
@@ -103,7 +98,7 @@ func RemoveBox(boxID string) (err error) {
 	}
 
 	unmount0(boxID)
-	if err = os.RemoveAll(localPath); nil != err {
+	if err = filesys.RemoveAll(localPath); nil != err {
 		return
 	}
 	IncSync()

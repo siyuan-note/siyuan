@@ -259,7 +259,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	for _, assets := range assetsDirs {
 		if gulu.File.IsDir(assets) {
 			dataAssets := filepath.Join(util.DataDir, "assets")
-			if err = util.Copy(assets, dataAssets); nil != err {
+			if err = filesys.Copy(assets, dataAssets); nil != err {
 				logging.LogErrorf("copy assets from [%s] to [%s] failed: %s", assets, dataAssets, err)
 				return
 			}
@@ -267,8 +267,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		os.RemoveAll(assets)
 	}
 
-	util.LockWriteFile()
-	defer util.UnlockWriteFile()
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 
 	filelock.ReleaseAllFileLocks()
 
@@ -331,8 +331,8 @@ func ImportData(zipPath string) (err error) {
 		return errors.New("invalid data.zip")
 	}
 
-	util.LockWriteFile()
-	defer util.UnlockWriteFile()
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 
 	filelock.ReleaseAllFileLocks()
 	tmpDataPath := filepath.Join(unzipPath, dirs[0].Name())

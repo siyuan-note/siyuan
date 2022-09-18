@@ -1203,7 +1203,7 @@ func RemoveDoc(boxID, p string) (err error) {
 
 	historyPath := filepath.Join(historyDir, boxID, p)
 	absPath := filepath.Join(util.DataDir, boxID, p)
-	if err = util.Copy(absPath, historyPath); nil != err {
+	if err = filesys.Copy(absPath, historyPath); nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(70), box.Name, absPath, err))
 	}
 
@@ -1534,8 +1534,8 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	}
 
 	WaitForWritingFiles()
-	util.LockWriteFile()
-	defer util.UnlockWriteFile()
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 
 	box := Conf.Box(boxID)
 	sortIDs := map[string]int{}

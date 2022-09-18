@@ -310,7 +310,7 @@ export class Toolbar {
                 }
                 spanElement.innerHTML = item.textContent;
                 item.replaceWith(spanElement);
-            })
+            });
         }
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
@@ -457,8 +457,8 @@ export class Toolbar {
             this.range.collapse(true);
         }
         for (let i = 0; i < newNodes.length; i++) {
-            const currentNewNode = newNodes[i] as HTMLElement
-            const nextNewNode = newNodes[i + 1] as HTMLElement
+            const currentNewNode = newNodes[i] as HTMLElement;
+            const nextNewNode = newNodes[i + 1] as HTMLElement;
             if (currentNewNode.nodeType !== 3 && nextNewNode && nextNewNode.nodeType !== 3 &&
                 isArrayEqual(nextNewNode.getAttribute("data-type").split(" "), currentNewNode.getAttribute("data-type").split(" ")) &&
                 currentNewNode.style.color === nextNewNode.style.color &&
@@ -514,7 +514,7 @@ export class Toolbar {
         }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-        const wbrElement = nodeElement.querySelector("wbr")
+        const wbrElement = nodeElement.querySelector("wbr");
         if (wbrElement) {
             wbrElement.remove();
         }

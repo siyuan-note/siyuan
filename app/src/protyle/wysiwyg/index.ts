@@ -28,7 +28,7 @@ import {
     getLastBlock, getNextBlock,
     getPreviousHeading,
     getTopAloneElement,
-    hasNextSibling, hasPreviousSibling,
+    hasNextSibling,
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
@@ -112,7 +112,7 @@ export class WYSIWYG {
         const inputData = event.data;
         protyle.toolbar.range = range;
         const inlineElement = range.startContainer.parentElement;
-        const currentTypes =  protyle.toolbar.getCurrentType()
+        const currentTypes =  protyle.toolbar.getCurrentType();
         if (// 表格行内公式之前无法插入文字 https://github.com/siyuan-note/siyuan/issues/3908
             inlineElement.tagName==="SPAN" &&
             range.toString() === "" && range.startContainer.nodeType === 3 &&
@@ -237,12 +237,12 @@ export class WYSIWYG {
                 } else if (selectTypes.length > 0 && range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN" &&
                     range.startContainer.parentElement.isSameNode(range.endContainer.parentElement)) {
                     // 复制粗体等字体中的一部分
-                    const attributes = range.startContainer.parentElement.attributes
+                    const attributes = range.startContainer.parentElement.attributes;
                     const spanElement = document.createElement("span");
                     for (let i = 0; i < attributes.length; i++) {
                         spanElement.setAttribute(attributes[i].name, attributes[i].value);
                     }
-                    spanElement.textContent = range.toString()
+                    spanElement.textContent = range.toString();
                     html = spanElement.outerHTML;
                 } else {
                     tempElement.append(range.cloneContents());
@@ -1731,7 +1731,7 @@ export class WYSIWYG {
                         const emptyEditElement = getContenteditableElement(emptyElement) as HTMLInputElement;
                         range.selectNodeContents(emptyEditElement);
                         range.collapse(true);
-                        focusByRange(range)
+                        focusByRange(range);
                     } else if (lastEditElement) {
                         range.selectNodeContents(lastEditElement);
                         range.collapse(false);
@@ -1752,7 +1752,7 @@ export class WYSIWYG {
                 }
                 if (getSelection().rangeCount === 0) {
                     // https://github.com/siyuan-note/siyuan/issues/5901
-                    focusByRange(newRange)
+                    focusByRange(newRange);
                 }
                 /// #if !MOBILE
                 pushBack(protyle, newRange);
@@ -1800,12 +1800,12 @@ export class WYSIWYG {
                     let hasJump = false;
                     while (currentElement) {
                         if (currentElement && !currentElement.classList.contains("protyle-attr")) {
-                            const currentRect = currentElement.getBoundingClientRect()
+                            const currentRect = currentElement.getBoundingClientRect();
                             if (startRect.top === endRect.top ? (currentRect.right <= endTop) : (currentRect.top <= endTop)) {
                                 if (hasJump) {
                                     // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
                                     if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
-                                        const currentNextRect = currentElement.nextElementSibling.getBoundingClientRect()
+                                        const currentNextRect = currentElement.nextElementSibling.getBoundingClientRect();
                                         if (startRect.top === endRect.top ? (currentNextRect.right <= endTop) : (currentNextRect.top <= endTop)) {
                                             selectElements = [currentElement];
                                             currentElement = currentElement.nextElementSibling as HTMLElement;

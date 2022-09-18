@@ -80,7 +80,7 @@ const renderPDF = (id: string) => {
         width: 1032,
         resizable: false,
         frame: "darwin" === window.siyuan.config.system.os,
-        icon: path.join(window.siyuan.config.system.appDir, 'stage', 'icon-large.png'),
+        icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
         titleBarStyle: "hidden",
         webPreferences: {
             contextIsolation: false,

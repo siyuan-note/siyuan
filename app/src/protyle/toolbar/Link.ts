@@ -67,6 +67,8 @@ export class Link extends ToolbarItem {
             }
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+            range.setStartAfter(newElement);
+            range.collapse(true);
             wbrElement.remove();
         });
     }

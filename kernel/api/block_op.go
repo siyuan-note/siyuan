@@ -215,9 +215,8 @@ func updateBlock(c *gin.Context) {
 			DoOperations: ops,
 		})
 	} else {
-		if "NodeListItem" == block.Type {
+		if "NodeListItem" == block.Type && ast.NodeList == tree.Root.FirstChild.Type {
 			// 使用 API `api/block/updateBlock` 更新列表项时渲染错误 https://github.com/siyuan-note/siyuan/issues/4658
-
 			tree.Root.AppendChild(tree.Root.FirstChild.FirstChild) // 将列表下的第一个列表项移到文档结尾，移动以后根下面直接挂列表项，渲染器可以正常工作
 			tree.Root.FirstChild.Unlink()                          // 删除列表
 			tree.Root.FirstChild.Unlink()                          // 继续删除列表 IAL

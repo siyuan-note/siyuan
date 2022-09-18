@@ -166,8 +166,10 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))
 				}
 			case ast.NodeTextMark:
-				if strings.Contains(n.TextMarkTextContent, keyword) {
+				if strings.Contains(n.TextMarkTextContent, keyword) || strings.Contains(n.TextMarkInlineMathContent, keyword) || strings.Contains(n.TextMarkInlineMemoContent, keyword) {
 					n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+					n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, keyword, replacement)
+					n.TextMarkInlineMemoContent = strings.ReplaceAll(n.TextMarkInlineMemoContent, keyword, replacement)
 				}
 			}
 			return ast.WalkContinue

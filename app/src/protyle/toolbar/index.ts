@@ -234,6 +234,10 @@ export class Toolbar {
     }
 
     public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar", textObj?: ITextOption) {
+        if (["text", "a", "block-ref", "inline-math", "inline-memo"].includes(type)) {
+            protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("block-ref" === type ? getEventName() : "click"));
+            return;
+        }
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement) {
             return;

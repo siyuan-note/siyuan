@@ -112,11 +112,12 @@ export class WYSIWYG {
         const inputData = event.data;
         protyle.toolbar.range = range;
         const inlineElement = range.startContainer.parentElement;
-        const currentTypes =  protyle.toolbar.getCurrentType();
+        const currentTypes = protyle.toolbar.getCurrentType();
         if (// 表格行内公式之前无法插入文字 https://github.com/siyuan-note/siyuan/issues/3908
-            inlineElement.tagName==="SPAN" &&
+            inlineElement.tagName === "SPAN" &&
+            inlineElement.textContent.replace(Constants.ZWSP, "") !== inputData &&
             range.toString() === "" && range.startContainer.nodeType === 3 &&
-            (currentTypes.includes("inline-memo") || currentTypes.includes("text") || currentTypes.includes("block-ref")|| currentTypes.includes("file-annotation-ref")|| currentTypes.includes("a")) &&
+            (currentTypes.includes("inline-memo") || currentTypes.includes("text") || currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") || currentTypes.includes("a")) &&
             !hasNextSibling(range.startContainer) && range.startContainer.textContent.length === range.startOffset &&
             inlineElement.textContent.replace(Constants.ZWSP, "").length >= inputData.length  // 为空的时候需要等于
         ) {

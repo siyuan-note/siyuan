@@ -446,14 +446,10 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstChild as HTMLDivElement;
             range.insertNode(tempElement);
-            range.setStart(tempElement.firstChild, 0);
-            range.setEnd(tempElement.lastChild, tempElement.lastChild.textContent.length);
+            range.setStartAfter(tempElement);
+            range.collapse(true);
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
-            const wbrElement = nodeElement.querySelector("wbr");
-            if (wbrElement) {
-                wbrElement.remove();
-            }
-            focusByRange(range);
+            focusByWbr(nodeElement, range);
             return;
         } else if (this.splitChar === ":") {
             addEmoji(value);

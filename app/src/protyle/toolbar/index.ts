@@ -507,6 +507,10 @@ export class Toolbar {
                 this.range.setEnd(lastNewNode.lastChild, lastNewNode.lastChild.textContent.length);
             } else if (lastNewNode.nodeType === 3) {
                 this.range.setEnd(lastNewNode, lastNewNode.textContent.length);
+                if (lastNewNode.textContent === Constants.ZWSP) {
+                    // https://github.com/siyuan-note/insider/issues/1056
+                    this.range.collapse(false);
+                }
             } else {
                 // eg: 表格中有3行时，选中第二行三级，多次加粗会增加换行
                 this.range.setEndAfter(lastNewNode);

@@ -295,14 +295,24 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const start = getSelectionOffset(nodeElement, editorElement, range).start;
                 if (start !== 0) {
                     const editElement = getContenteditableElement(nodeElement);
-                    const firstIndex = editElement.textContent.indexOf("\n");
-                    if (firstIndex === -1 || start < firstIndex || start === editElement.textContent.replace("\n", " ").indexOf("\n")) {
-                        setFirstNodeRange(editElement, range);
-                        event.stopPropagation();
-                        event.preventDefault();
-                        return;
+                    if (editElement.tagName === "TABLE") {
+                        const cellElement = hasClosestByMatchTag(range.startContainer, "TH") || hasClosestByMatchTag(range.startContainer, "TD") || editElement.querySelector("th, td")
+                        if (getSelectionOffset(cellElement, cellElement, range).start !== 0) {
+                            setFirstNodeRange(cellElement, range);
+                            event.stopPropagation();
+                            event.preventDefault();
+                            return;
+                        }
                     } else {
-                        return;
+                        const firstIndex = editElement.textContent.indexOf("\n");
+                        if (firstIndex === -1 || start <= firstIndex || start === editElement.textContent.replace("\n", " ").indexOf("\n")) {
+                            setFirstNodeRange(editElement, range);
+                            event.stopPropagation();
+                            event.preventDefault();
+                            return;
+                        } else {
+                            return;
+                        }
                     }
                 }
             }

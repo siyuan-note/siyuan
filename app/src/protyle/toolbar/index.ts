@@ -437,7 +437,7 @@ export class Toolbar {
                         } else if (type === "sup" && types.includes("sub")) {
                             types.find((item, index) => {
                                 if (item === "sub") {
-                                    types.splice(index, 1)
+                                    types.splice(index, 1);
                                     if (!this.element.classList.contains("fn__none")) {
                                         this.element.querySelector(`[data-type="sub"]`).classList.remove("protyle-toolbar__item--current");
                                     }

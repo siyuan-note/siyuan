@@ -58,7 +58,6 @@ import {BlockPanel} from "../../block/Panel";
 import * as dayjs from "dayjs";
 import {highlightRender} from "../markdown/highlightRender";
 import {countBlockWord} from "../../layout/status";
-import {insertHTML} from "../util/insertHTML";
 import {openMobileFileById} from "../../mobile/editor";
 import {pasteAsPlainText} from "../util/paste";
 
@@ -296,7 +295,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (start !== 0) {
                     const editElement = getContenteditableElement(nodeElement);
                     if (editElement.tagName === "TABLE") {
-                        const cellElement = hasClosestByMatchTag(range.startContainer, "TH") || hasClosestByMatchTag(range.startContainer, "TD") || editElement.querySelector("th, td")
+                        const cellElement = hasClosestByMatchTag(range.startContainer, "TH") || hasClosestByMatchTag(range.startContainer, "TD") || editElement.querySelector("th, td");
                         if (getSelectionOffset(cellElement, cellElement, range).start !== 0) {
                             setFirstNodeRange(cellElement, range);
                             event.stopPropagation();

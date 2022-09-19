@@ -427,23 +427,23 @@ export class Toolbar {
                         if (type === "sub" && types.includes("sup")) {
                             types.find((item, index) => {
                                 if (item === "sup") {
-                                    types.splice(index, 1)
+                                    types.splice(index, 1);
                                     if (!this.element.classList.contains("fn__none")) {
-                                        this.element.querySelector(`[data-type="sup"]`).classList.remove("protyle-toolbar__item--current");
+                                        this.element.querySelector("[data-type=\"sup\"]").classList.remove("protyle-toolbar__item--current");
                                     }
                                     return true;
                                 }
-                            })
+                            });
                         } else if (type === "sup" && types.includes("sub")) {
                             types.find((item, index) => {
                                 if (item === "sub") {
                                     types.splice(index, 1);
                                     if (!this.element.classList.contains("fn__none")) {
-                                        this.element.querySelector(`[data-type="sub"]`).classList.remove("protyle-toolbar__item--current");
+                                        this.element.querySelector("[data-type=\"sub\"]").classList.remove("protyle-toolbar__item--current");
                                     }
                                     return true;
                                 }
-                            })
+                            });
                         }
                         types = [...new Set(types)];
                         if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
@@ -635,7 +635,7 @@ export class Toolbar {
         let html = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
         let title = "HTML";
         let placeholder = "";
-        const isInlineMemo = type && type.split(" ").includes("inline-memo")
+        const isInlineMemo = type && type.split(" ").includes("inline-memo");
         switch (renderElement.getAttribute("data-subtype")) {
             case "abc":
                 title = window.siyuan.languages.staff;
@@ -888,11 +888,11 @@ export class Toolbar {
                 if (!target.value) {
                     // https://github.com/siyuan-note/insider/issues/1046
                     if (type.replace("inline-memo", "") === "") {
-                        renderElement.outerHTML = renderElement.innerHTML + "<wbr>"
+                        renderElement.outerHTML = renderElement.innerHTML + "<wbr>";
                         focusByWbr(nodeElement, this.range);
                     } else {
-                        renderElement.setAttribute("data-type", type.replace("inline-memo", ""))
-                        renderElement.removeAttribute("data-inline-memo-content")
+                        renderElement.setAttribute("data-type", type.replace("inline-memo", ""));
+                        renderElement.removeAttribute("data-inline-memo-content");
                     }
                 } else {
                     renderElement.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
@@ -935,10 +935,12 @@ export class Toolbar {
                 this.subElement.classList.add("fn__none");
                 this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");
                 if (renderElement.tagName === "SPAN") {
-                    const range = getEditorRange(renderElement);
-                    range.setStartAfter(renderElement);
-                    range.collapse(true);
-                    focusByRange(range);
+                    if (type === "inline-memo" && !textElement.value) {
+                        renderElement.outerHTML = renderElement.innerHTML + "<wbr>";
+                        focusByWbr(nodeElement, this.range);
+                    } else {
+                        focusByRange(this.range);
+                    }
                 } else {
                     focusSideBlock(renderElement);
                 }

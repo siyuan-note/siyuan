@@ -27,10 +27,6 @@ import {pasteAsPlainText, pasteText} from "../protyle/util/paste";
 /// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
 /// #endif
-/// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
-import {clipboard} from "electron";
-/// #endif
 import {isMobile} from "../util/functions";
 import {removeFoldHeading} from "../protyle/util/heading";
 import {lineNumberRender} from "../protyle/markdown/highlightRender";
@@ -344,7 +340,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         accelerator: window.siyuan.config.keymap.editor.general.pasteAsPlainText.custom,
         click() {
             focusByRange(getEditorRange(nodeElement));
-            pasteAsPlainText(protyle)
+            pasteAsPlainText(protyle);
         }
     }).element);
     /// #endif

@@ -2358,7 +2358,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u003cdiv\u003e\u003c/div\u003e"
+									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
 								},
 								{
 									"Type": "NodeText",

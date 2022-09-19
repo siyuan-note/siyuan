@@ -601,7 +601,7 @@ func CopyStdMarkdown(id string) string {
 		// 订阅用户使用云端图床服务
 		luteEngine.RenderOptions.LinkBase = "https://assets.b3logfile.com/siyuan/" + Conf.User.UserId + "/"
 	}
-	return treenode.FormatNode(tree.Root, luteEngine)
+	return treenode.ExportNodeStdMd(tree.Root, luteEngine)
 }
 
 func ExportMarkdown(id string) (name, zipPath string) {

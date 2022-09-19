@@ -168,7 +168,7 @@ func processNestedNode(n *ast.Node, tag string, tags *[]string, unlinks *[]*ast.
 }
 
 func NodeStaticMdContent(node *ast.Node, luteEngine *lute.Lute) (md, content string) {
-	md = FormatNode(node, luteEngine)
+	md = ExportNodeStdMd(node, luteEngine)
 	content = NodeStaticContent(node)
 	return
 }
@@ -178,6 +178,15 @@ func FormatNode(node *ast.Node, luteEngine *lute.Lute) string {
 	if nil != err {
 		root := TreeRoot(node)
 		logging.LogFatalf("format node [%s] in tree [%s] failed: %s", node.ID, root.ID, err)
+	}
+	return markdown
+}
+
+func ExportNodeStdMd(node *ast.Node, luteEngine *lute.Lute) string {
+	markdown, err := lute.ProtyleExportMdNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
+	if nil != err {
+		root := TreeRoot(node)
+		logging.LogFatalf("export markdown for node [%s] in tree [%s] failed: %s", node.ID, root.ID, err)
 	}
 	return markdown
 }

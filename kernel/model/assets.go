@@ -685,7 +685,8 @@ func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		// 修改以下代码时需要同时修改 database 构造行级元素实现，增加必要的类型
 		if !entering || (ast.NodeLinkDest != n.Type && ast.NodeHTMLBlock != n.Type && ast.NodeInlineHTML != n.Type &&
-			ast.NodeIFrame != n.Type && ast.NodeWidget != n.Type && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type) {
+			ast.NodeIFrame != n.Type && ast.NodeWidget != n.Type && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type &&
+			!n.IsTextMarkType("a")) {
 			return ast.WalkContinue
 		}
 
@@ -695,6 +696,13 @@ func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 			}
 
 			dest := strings.TrimSpace(string(n.Tokens))
+			ret = append(ret, dest)
+		} else if n.IsTextMarkType("a") {
+			if !isRelativePath(gulu.Str.ToBytes(n.TextMarkAHref)) {
+				return ast.WalkContinue
+			}
+
+			dest := strings.TrimSpace(n.TextMarkAHref)
 			ret = append(ret, dest)
 		} else {
 			if ast.NodeWidget == n.Type {

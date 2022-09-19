@@ -312,7 +312,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u003cimg\u003e"
+					"TextMarkTextContent": "\u0026lt;img\u0026gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -321,7 +321,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u003ciframe\u003e"
+					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
 				},
 				{
 					"Type": "NodeText",

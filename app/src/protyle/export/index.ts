@@ -360,7 +360,7 @@ const renderPDF = (id: string) => {
                 if (response.code === 1) {
                     document.getElementById("message").firstElementChild.innerHTML === "";
                     showMessage(response.msg, undefined, "error");
-                    window.siyuan.printWin.destroy()
+                    window.siyuan.printWin.destroy();
                     return;
                 }
                 window.siyuan.printWin.loadURL(response.data.url);

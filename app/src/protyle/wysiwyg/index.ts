@@ -12,7 +12,7 @@ import {
     focusByWbr,
     focusSideBlock,
     getEditorRange,
-    getSelectionOffset,
+    getSelectionOffset, setLastNodeRange,
 } from "../util/selection";
 import {Constants} from "../../constants";
 import {getSearch, isMobile} from "../../util/functions";
@@ -841,6 +841,21 @@ export class WYSIWYG {
                     if (range.toString() === "" ||
                         window.siyuan.shiftIsPressed  // https://ld246.com/article/1650096678723
                     ) {
+                        if (event.detail === 3) {
+                            // table 前或最后一个 cell 三击状态不对
+                            let cursorElement = hasClosestBlock(range.startContainer) as Element;
+                            if (cursorElement) {
+                                if (cursorElement.nextElementSibling?.classList.contains("table")) {
+                                    setLastNodeRange(getContenteditableElement(cursorElement), range, false)
+                                } else if (cursorElement.classList.contains("table")) {
+                                    const cellElements = cursorElement.querySelectorAll("th, td");
+                                    cursorElement = cellElements[cellElements.length - 1];
+                                    if (cursorElement.contains(range.startContainer)) {
+                                        setLastNodeRange(cursorElement, range, false)
+                                    }
+                                }
+                            }
+                        }
                         return;
                     }
                     if (selectElement.length > 0) {

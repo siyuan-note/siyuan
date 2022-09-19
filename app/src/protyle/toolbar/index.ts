@@ -423,6 +423,28 @@ export class Toolbar {
                     } else {
                         let types = (item.getAttribute("data-type") || "").split(" ");
                         types.push(type);
+                        // 上标和下标不能同时存在 https://github.com/siyuan-note/insider/issues/1049
+                        if (type === "sub" && types.includes("sup")) {
+                            types.find((item, index) => {
+                                if (item === "sup") {
+                                    types.splice(index, 1)
+                                    if (!this.element.classList.contains("fn__none")) {
+                                        this.element.querySelector(`[data-type="sup"]`).classList.remove("protyle-toolbar__item--current");
+                                    }
+                                    return true;
+                                }
+                            })
+                        } else if (type === "sup" && types.includes("sub")) {
+                            types.find((item, index) => {
+                                if (item === "sub") {
+                                    types.splice(index, 1)
+                                    if (!this.element.classList.contains("fn__none")) {
+                                        this.element.querySelector(`[data-type="sub"]`).classList.remove("protyle-toolbar__item--current");
+                                    }
+                                    return true;
+                                }
+                            })
+                        }
                         types = [...new Set(types)];
                         if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
                             isArrayEqual(types, previousElement.getAttribute("data-type").split(" ")) &&
@@ -508,7 +530,7 @@ export class Toolbar {
             } else if (lastNewNode.nodeType === 3) {
                 this.range.setEnd(lastNewNode, lastNewNode.textContent.length);
                 if (lastNewNode.textContent === Constants.ZWSP) {
-                    // https://github.com/siyuan-note/insider/issues/1056
+                    // 粗体后取消粗体光标不存在 https://github.com/siyuan-note/insider/issues/1056
                     this.range.collapse(false);
                 }
             } else {

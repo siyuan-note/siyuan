@@ -4,6 +4,7 @@ import {updateTransaction} from "../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {fixTableRange} from "../util/selection";
+import {isArrayEqual} from "../../util/functions";
 
 export class InlineMemo extends ToolbarItem {
     public element: HTMLElement;
@@ -41,12 +42,47 @@ export class InlineMemo extends ToolbarItem {
             range.insertNode(wbrElement);
             const html = nodeElement.outerHTML;
 
-            const newElement = document.createElement("span");
-            newElement.innerHTML = range.toString();
-            newElement.setAttribute("data-type", "inline-memo");
-            range.extractContents();
-            range.insertNode(newElement);
-            protyle.toolbar.showRender(protyle, newElement);
+            const newNodes: Element[] = [];
+            const contents = range.extractContents();
+            contents.childNodes.forEach((item: HTMLElement) => {
+                if (item.nodeType === 3) {
+                    const inlineElement = document.createElement("span");
+                    inlineElement.setAttribute("data-type", "inline-memo");
+                    inlineElement.textContent = item.textContent;
+                    newNodes.push(inlineElement);
+                } else {
+                    let types = (item.getAttribute("data-type") || "").split(" ");
+                    types.push("inline-memo");
+                    types = [...new Set(types)];
+                    if (item.tagName !== "BR" && item.tagName !== "WBR") {
+                        item.setAttribute("data-type", types.join(" "));
+                        newNodes.push(item);
+                    } else if (item.tagName !== "WBR") {
+                        newNodes.push(item);
+                    }
+                }
+            });
+            for (let i = 0; i < newNodes.length; i++) {
+                const currentNewNode = newNodes[i] as HTMLElement;
+                const nextNewNode = newNodes[i + 1] as HTMLElement;
+                if (currentNewNode.nodeType !== 3 && nextNewNode && nextNewNode.nodeType !== 3 &&
+                    isArrayEqual(nextNewNode.getAttribute("data-type").split(" "), currentNewNode.getAttribute("data-type").split(" ")) &&
+                    currentNewNode.style.color === nextNewNode.style.color &&
+                    currentNewNode.style.webkitTextFillColor === nextNewNode.style.webkitTextFillColor &&
+                    currentNewNode.style.webkitTextStroke === nextNewNode.style.webkitTextStroke &&
+                    currentNewNode.style.textShadow === nextNewNode.style.textShadow &&
+                    currentNewNode.style.backgroundColor === nextNewNode.style.backgroundColor) {
+                    // 合并相同的 node
+                    nextNewNode.innerHTML = currentNewNode.innerHTML + nextNewNode.innerHTML;
+                    newNodes.splice(i, 1);
+                    i--;
+                } else {
+                    range.insertNode(newNodes[i]);
+                    range.collapse(false);
+                }
+            }
+            range.setStart(newNodes[0].firstChild, 0);
+            protyle.toolbar.showRender(protyle, newNodes[0], newNodes);
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
             wbrElement.remove();

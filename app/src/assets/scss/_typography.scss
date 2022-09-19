@@ -97,6 +97,28 @@
     }
   }
 
+  kbd,
+  span[data-type~="kbd"] {
+    padding: 2px 4px;
+    font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    line-height: 1;
+    color: var(--b3-theme-on-surface);
+    vertical-align: middle;
+    background-color: var(--b3-theme-surface);
+    border: solid 1px var(--b3-border-color);
+    border-radius: 3px;
+    box-shadow: inset 0 -1px 0 var(--b3-border-color);
+  }
+
+  u {
+    text-decoration: none;
+  }
+
+  u,
+  span[data-type~="u"] {
+    border-bottom: 1px solid var(--b3-theme-on-background);
+  }
+
   span[data-type~="inline-memo"] {
     background-color: var(--b3-card-info-background);
     border-bottom: 2px solid var(--b3-card-info-color);
@@ -178,28 +200,6 @@
     &:focus {
       outline: none;
     }
-  }
-
-  kbd,
-  span[data-type~="kbd"] {
-    padding: 2px 4px;
-    font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace;
-    line-height: 1;
-    color: var(--b3-theme-on-surface);
-    vertical-align: middle;
-    background-color: var(--b3-theme-surface);
-    border: solid 1px var(--b3-border-color);
-    border-radius: 3px;
-    box-shadow: inset 0 -1px 0 var(--b3-border-color);
-  }
-
-  u {
-    text-decoration: none;
-  }
-
-  u,
-  span[data-type~="u"] {
-    border-bottom: 1px solid var(--b3-theme-on-background);
   }
 
   table {

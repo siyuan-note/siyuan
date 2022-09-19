@@ -599,7 +599,7 @@ export class Toolbar {
         anchorElement.select();
     }
 
-    public showRender(protyle: IProtyle, renderElement: Element) {
+    public showRender(protyle: IProtyle, renderElement: Element, updateElements?: Element[]) {
         const nodeElement = hasClosestBlock(renderElement);
         if (!nodeElement) {
             return;
@@ -859,18 +859,33 @@ export class Toolbar {
                 }
             }
             if (isInlineMemo) {
-                if (!target.value) {
-                    // https://github.com/siyuan-note/insider/issues/1046
-                    if (type.replace("inline-memo", "") === "") {
-                        renderElement.outerHTML = renderElement.innerHTML + "<wbr>";
-                        focusByWbr(nodeElement, this.range);
-                    } else {
-                        renderElement.setAttribute("data-type", type.replace("inline-memo", ""));
-                        renderElement.removeAttribute("data-inline-memo-content");
-                    }
+                let inlineMemoElements
+                if (updateElements) {
+                    inlineMemoElements = updateElements
                 } else {
-                    renderElement.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
+                    inlineMemoElements = [renderElement]
                 }
+                inlineMemoElements.forEach((item, index) => {
+                    if (!target.value) {
+                        // https://github.com/siyuan-note/insider/issues/1046
+                        const currentTypes = item.getAttribute("data-type").split(" ")
+                        if (currentTypes.length === 1 && currentTypes[0] === "inline-memo") {
+                            item.outerHTML = item.innerHTML + (index === inlineMemoElements.length - 1 ? "<wbr>" : "");
+                            focusByWbr(nodeElement, this.range);
+                        } else {
+                            currentTypes.find((typeItem, index) => {
+                                if (typeItem === "inline-memo") {
+                                    currentTypes.splice(index, 1)
+                                    return true
+                                }
+                            })
+                            item.setAttribute("data-type", currentTypes.join(" "));
+                            item.removeAttribute("data-inline-memo-content");
+                        }
+                    } else {
+                        item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
+                    }
+                })
             } else if (type === "NodeBlockQueryEmbed") {
                 blockRender(protyle, renderElement);
             }
@@ -893,6 +908,9 @@ export class Toolbar {
             }
             updateTransaction(protyle, id, newHTML, html);
             html = newHTML;
+            if (isInlineMemo && !target.value) {
+                this.subElement.classList.add("fn__none");
+            }
             event.stopPropagation();
         });
         textElement.addEventListener("keydown", (event: KeyboardEvent) => {

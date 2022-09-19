@@ -1759,7 +1759,6 @@ export class WYSIWYG {
                 pushBack(protyle, newRange);
                 /// #endif
             }, isMobile() ? 520 : 0); // Android 双击慢了出不来
-
             protyle.hint.enableEmoji = false;
             if (window.siyuan.shiftIsPressed) {
                 event.preventDefault();

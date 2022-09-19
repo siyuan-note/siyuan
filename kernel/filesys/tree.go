@@ -105,7 +105,7 @@ func WriteTree(tree *parse.Tree) (err error) {
 
 	filePath := filepath.Join(util.DataDir, tree.Box, tree.Path)
 	if oldSpec := tree.Root.Spec; "" == oldSpec {
-		treenode.NestedInlines2FlattedSpans(tree)
+		luteEngine.NestedInlines2FlattedSpans(tree)
 		tree.Root.Spec = "1"
 		logging.LogInfof("migrated tree [%s] from spec [%s] to [%s]", filePath, oldSpec, tree.Root.Spec)
 	}
@@ -190,7 +190,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 
 	filePath := filepath.Join(util.DataDir, ret.Box, ret.Path)
 	if oldSpec := ret.Root.Spec; "" == oldSpec {
-		treenode.NestedInlines2FlattedSpans(ret)
+		luteEngine.NestedInlines2FlattedSpans(ret)
 		ret.Root.Spec = "1"
 		needFix = true
 		logging.LogInfof("migrated tree [%s] from spec [%s] to [%s]", filePath, oldSpec, ret.Root.Spec)

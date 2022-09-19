@@ -150,7 +150,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	for _, tree := range trees {
 		syPath := filepath.Join(unzipRootPath, tree.Path)
 		if "" == tree.Root.Spec {
-			treenode.NestedInlines2FlattedSpans(tree)
+			luteEngine.NestedInlines2FlattedSpans(tree)
 			tree.Root.Spec = "1"
 		}
 		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
@@ -367,6 +367,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	}
 	boxLocalPath = filepath.Join(util.DataDir, boxID)
 
+	luteEngine := NewLute()
 	if gulu.File.IsDir(localPath) {
 		// 收集所有资源文件
 		assets := map[string]string{}
@@ -459,7 +460,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			targetPaths[curRelPath] = targetPath
 			tree.HPath = hPath
 			tree.Root.Spec = "1"
-			treenode.NestedInlines2FlattedSpans(tree)
+			luteEngine.NestedInlines2FlattedSpans(tree)
 
 			docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 			assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
@@ -547,7 +548,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		tree.Box = boxID
 		tree.Path = targetPath
 		tree.HPath = path.Join(baseHPath, title)
-		treenode.NestedInlines2FlattedSpans(tree)
+		luteEngine.NestedInlines2FlattedSpans(tree)
 
 		docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 		assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)

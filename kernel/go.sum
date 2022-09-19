@@ -27,6 +27,8 @@ github.com/88250/lute v1.7.5-0.20220919015919-e05391a106b3 h1:F78DnfTxvC2ugvvt17
 github.com/88250/lute v1.7.5-0.20220919015919-e05391a106b3/go.mod h1:cEoBGi0zArPqAsp0MdG9SKinvH/xxZZWXU7sRx8vHSA=
 github.com/88250/lute v1.7.5-0.20220919023317-f20f5cef5f56 h1:I3kvJm2iO9VhFTGChKaOASrRgMmnVhGgYrsUE0gXHyY=
 github.com/88250/lute v1.7.5-0.20220919023317-f20f5cef5f56/go.mod h1:cEoBGi0zArPqAsp0MdG9SKinvH/xxZZWXU7sRx8vHSA=
+github.com/88250/lute v1.7.5-0.20220919070155-de3fd729795b h1:dTuGmFlpbZ7SmdnkrBa9onRJBB68EUI2ARnVe4FveTM=
+github.com/88250/lute v1.7.5-0.20220919070155-de3fd729795b/go.mod h1:cEoBGi0zArPqAsp0MdG9SKinvH/xxZZWXU7sRx8vHSA=
 github.com/88250/pdfcpu v0.3.13 h1:touMWMZkCGalMIbEg9bxYp7rETM+zwb9hXjwhqi4I7Q=
 github.com/88250/pdfcpu v0.3.13/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=

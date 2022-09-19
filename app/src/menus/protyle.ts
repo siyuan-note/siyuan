@@ -510,7 +510,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         accelerator: "⌘C",
         icon: "iconCopy",
         click() {
-            writeText(protyle.lute.BlockDOM2Md(assetElement.outerHTML));
+            writeText(protyle.lute.BlockDOM2StdMd(assetElement.outerHTML));
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
@@ -548,7 +548,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         accelerator: "⌘X",
         label: window.siyuan.languages.cut,
         click() {
-            writeText(protyle.lute.BlockDOM2Md(assetElement.outerHTML));
+            writeText(protyle.lute.BlockDOM2StdMd(assetElement.outerHTML));
             (assetElement as HTMLElement).outerHTML = "<wbr>";
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, id, nodeElement.outerHTML, html);

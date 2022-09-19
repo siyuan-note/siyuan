@@ -609,6 +609,7 @@ export class Toolbar {
         let html = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
         let title = "HTML";
         let placeholder = "";
+        const isInlineMemo = type && type.split(" ").includes("inline-memo")
         switch (renderElement.getAttribute("data-subtype")) {
             case "abc":
                 title = window.siyuan.languages.staff;
@@ -644,7 +645,7 @@ export class Toolbar {
         }
         if (type === "NodeBlockQueryEmbed") {
             title = window.siyuan.languages.blockEmbed;
-        } else if (type === "inline-memo") {
+        } else if (isInlineMemo) {
             title = window.siyuan.languages.memo;
         }
         const isPin = this.subElement.querySelector('[data-type="pin"]')?.classList.contains("block__icon--active");
@@ -670,7 +671,7 @@ export class Toolbar {
     <span class="fn__space"></span>
     <button data-type="after" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages["insert-after"]}"><svg><use xlink:href="#iconAfter"></use></svg></button>
     <span class="fn__space"></span>
-    <button data-type="copy" class="block__icon b3-tooltips b3-tooltips__nw${(isBrowser() || type === "inline-memo") ? " fn__none" : ""}" aria-label="${window.siyuan.languages.copy} PNG"><svg><use xlink:href="#iconCopy"></use></svg></button>
+    <button data-type="copy" class="block__icon b3-tooltips b3-tooltips__nw${(isBrowser() || isInlineMemo) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.copy} PNG"><svg><use xlink:href="#iconCopy"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="pin" class="block__icon b3-tooltips b3-tooltips__nw${isPin ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
     <span class="fn__space"></span>
@@ -690,7 +691,7 @@ export class Toolbar {
                 return;
             }
             if (this.subElement.clientHeight <= window.innerHeight - nodeRect.bottom || this.subElement.clientHeight <= nodeRect.top) {
-                if (type === "inline-math" || type === "inline-memo") {
+                if (type === "inline-math" || isInlineMemo) {
                     setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height);
                 } else {
                     setPosition(this.subElement, nodeRect.left + (nodeRect.width - this.subElement.clientWidth) / 2, nodeRect.bottom, nodeRect.height);
@@ -796,7 +797,7 @@ export class Toolbar {
         const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
         if (type === "NodeHTMLBlock") {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.querySelector("protyle-html").getAttribute("data-content") || "");
-        } else if (type === "inline-memo") {
+        } else if (isInlineMemo) {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-inline-memo-content") || "");
         } else {
             const switchElement = this.subElement.querySelector(".b3-switch") as HTMLInputElement;
@@ -829,7 +830,7 @@ export class Toolbar {
             const target = event.target as HTMLTextAreaElement;
             if (type === "NodeHTMLBlock") {
                 renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
-            } else if (type === "inline-memo") {
+            } else if (isInlineMemo) {
                 renderElement.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
             } else {
                 renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
@@ -849,8 +850,6 @@ export class Toolbar {
             if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) {
                 if (type === "NodeHTMLBlock") {
                     renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
-                } else if (type === "inline-memo") {
-                    renderElement.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
                 } else {
                     renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
                     renderElement.removeAttribute("data-render");
@@ -859,7 +858,20 @@ export class Toolbar {
                     processRender(renderElement);
                 }
             }
-            if (type === "NodeBlockQueryEmbed") {
+            if (isInlineMemo) {
+                if (!target.value) {
+                    // https://github.com/siyuan-note/insider/issues/1046
+                    if (type.replace("inline-memo", "") === "") {
+                        renderElement.outerHTML = renderElement.innerHTML + "<wbr>"
+                        focusByWbr(nodeElement, this.range);
+                    } else {
+                        renderElement.setAttribute("data-type", type.replace("inline-memo", ""))
+                        renderElement.removeAttribute("data-inline-memo-content")
+                    }
+                } else {
+                    renderElement.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
+                }
+            }else if (type === "NodeBlockQueryEmbed") {
                 blockRender(protyle, renderElement);
             }
             if (this.range) {

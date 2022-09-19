@@ -143,8 +143,13 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         if (blockElement.classList.contains("table")) {
             scrollLeft = getContenteditableElement(blockElement).scrollLeft;
         }
-        // 使用 md 闭合后继续输入应为普通文本
-        blockElement.outerHTML = html.replace("</span><wbr>", "</span>" + Constants.ZWSP + "<wbr>");
+        if (/<span data-type="backslash"><span>\\<\/span>.<\/span><wbr>/.test(html)) {
+            // 转义不需要添加 zwsp
+            blockElement.outerHTML = html;
+        } else {
+            // 使用 md 闭合后继续输入应为普通文本
+            blockElement.outerHTML = html.replace("</span><wbr>", "</span>" + Constants.ZWSP + "<wbr>");
+        }
         blockElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
         Array.from(tempElement.content.children).forEach((item, index) => {
             const tempId = item.getAttribute("data-node-id");

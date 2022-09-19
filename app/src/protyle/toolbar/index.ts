@@ -871,7 +871,7 @@ export class Toolbar {
                 } else {
                     renderElement.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
                 }
-            }else if (type === "NodeBlockQueryEmbed") {
+            } else if (type === "NodeBlockQueryEmbed") {
                 blockRender(protyle, renderElement);
             }
             if (this.range) {

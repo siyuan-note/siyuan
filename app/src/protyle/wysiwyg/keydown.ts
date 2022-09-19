@@ -41,11 +41,6 @@ import {listIndent, listOutdent, updateListOrder} from "./list";
 import {newFileBySelect, newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {isLocalPath} from "../../util/pathName";
-/// #if !BROWSER
-import {clipboard} from "electron";
-import {getCurrentWindow} from "@electron/remote";
-import * as path from "path";
-/// #endif
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 import {commonHotkey} from "./commonHotkey";
@@ -56,7 +51,7 @@ import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {preventScroll} from "../scroll/preventScroll";
 import {bindMenuKeydown} from "../../menus/Menu";
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {scrollCenter} from "../../util/highlightById";
 import {BlockPanel} from "../../block/Panel";
@@ -65,9 +60,10 @@ import {highlightRender} from "../markdown/highlightRender";
 import {countBlockWord} from "../../layout/status";
 import {insertHTML} from "../util/insertHTML";
 import {openMobileFileById} from "../../mobile/editor";
+import {pasteAsPlainText} from "../util/paste";
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
-    editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
+    editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
         if (event.target.localName === "protyle-html") {
             event.stopPropagation();
             return;
@@ -1667,32 +1663,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.returnValue = false;
             event.preventDefault();
             event.stopPropagation();
-            let localFiles: string[] = [];
-            if ("darwin" === window.siyuan.config.system.os) {
-                const xmlString = clipboard.read("NSFilenamesPboardType");
-                const domParser = new DOMParser();
-                const xmlDom = domParser.parseFromString(xmlString, "application/xml");
-                Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
-                    localFiles.push(item.childNodes[0].nodeValue);
-                });
-            } else {
-                const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
-                if (xmlString.data.length > 0) {
-                    localFiles = xmlString.data;
-                }
-            }
-            if (localFiles.length > 0) {
-                let fileText = "";
-                localFiles.forEach((item) => {
-                    fileText += `[${path.basename(item).replace(/\]/g, "\\]").replace(/\[/g, "\\[")}](file://${item.replace(/\\/g, "\\\\").replace(/\)/g, "\\)").replace(/\(/g, "\\(")})\n`;
-                });
-                insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
-            } else {
-                writeText(clipboard.readText());
-                setTimeout(() => {
-                    getCurrentWindow().webContents.pasteAndMatchStyle();
-                }, 100);
-            }
+            pasteAsPlainText(protyle);
             return;
         }
 

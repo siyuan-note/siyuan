@@ -7,7 +7,7 @@ import {focusBlock, getEditorRange, focusByWbr} from "./selection";
 import {mathRender} from "../markdown/mathRender";
 import {Constants} from "../../constants";
 
-export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => {
+export const insertHTML = (html: string, protyle: IProtyle, isBlock = false, splitSpan = true) => {
     if (html === "") {
         return;
     }
@@ -89,7 +89,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
             }
             // 粘贴带样式的行内元素到另一个行内元素中需进行切割
             const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement: range.startContainer as HTMLElement;
-            if (spanElement.tagName === "SPAN" && spanElement.isSameNode( range.endContainer.nodeType === 3 ? range.endContainer.parentElement: range.endContainer)) {
+            if (splitSpan && spanElement.tagName === "SPAN" && spanElement.isSameNode( range.endContainer.nodeType === 3 ? range.endContainer.parentElement: range.endContainer)) {
                 const afterElement = document.createElement("span");
                 const attributes = spanElement.attributes;
                 for (let i = 0; i < attributes.length; i++) {

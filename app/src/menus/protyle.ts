@@ -23,7 +23,7 @@ import {writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
-import {pasteText} from "../protyle/util/paste";
+import {pasteAsPlainText, pasteText} from "../protyle/util/paste";
 /// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
 /// #endif
@@ -338,16 +338,13 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             }
         }
     }).element);
-    /// #if !BROWSER
+    /// #if !BROWSER && !MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.pasteAsPlainText,
         accelerator: window.siyuan.config.keymap.editor.general.pasteAsPlainText.custom,
         click() {
             focusByRange(getEditorRange(nodeElement));
-            writeText(clipboard.readText());
-            setTimeout(() => {
-                getCurrentWindow().webContents.pasteAndMatchStyle();
-            }, 100);
+            pasteAsPlainText(protyle)
         }
     }).element);
     /// #endif

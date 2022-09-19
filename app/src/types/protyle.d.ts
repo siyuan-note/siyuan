@@ -137,6 +137,10 @@ declare class Lute {
 
     private constructor();
 
+    public BlockDOM2Content(text: string): string;
+
+    public InlineMd2BlockDOM(text: string): string;
+
     public SetTextMark(enable: boolean): void;
 
     public SetHeadingID(enable: boolean): void;

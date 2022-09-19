@@ -4,6 +4,7 @@ import {processPasteCode, processRender} from "./processCode";
 import {writeText} from "./compatibility";
 /// #if !BROWSER
 import {clipboard} from "electron";
+import * as path from "path";
 /// #endif
 import {hasClosestBlock} from "./hasClosest";
 import {focusByWbr, getEditorRange} from "./selection";
@@ -29,6 +30,34 @@ const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
         protyle.hint.render(protyle);
     }
 };
+
+export const pasteAsPlainText = async (protyle:IProtyle) => {
+    /// #if !BROWSER && !MOBILE
+    let localFiles: string[] = [];
+    if ("darwin" === window.siyuan.config.system.os) {
+        const xmlString = clipboard.read("NSFilenamesPboardType");
+        const domParser = new DOMParser();
+        const xmlDom = domParser.parseFromString(xmlString, "application/xml");
+        Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
+            localFiles.push(item.childNodes[0].nodeValue);
+        });
+    } else {
+        const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
+        if (xmlString.data.length > 0) {
+            localFiles = xmlString.data;
+        }
+    }
+    if (localFiles.length > 0) {
+        let fileText = "";
+        localFiles.forEach((item) => {
+            fileText += `[${path.basename(item).replace(/\]/g, "\\]").replace(/\[/g, "\\[")}](file://${item.replace(/\\/g, "\\\\").replace(/\)/g, "\\)").replace(/\(/g, "\\(")})\n`;
+        });
+        insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
+    } else {
+        insertHTML(protyle.lute.BlockDOM2Content(protyle.lute.InlineMd2BlockDOM(clipboard.readText())), protyle, false, false);
+    }
+    /// #endif
+}
 
 export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element) => {
     const range = getEditorRange(protyle.wysiwyg.element);

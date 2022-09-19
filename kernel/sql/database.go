@@ -307,7 +307,7 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 }
 
 func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
-	markdown := treenode.FormatNode(refNode, luteEngine)
+	markdown := treenode.ExportNodeStdMd(refNode, luteEngine)
 	defBlockID, text, _ := treenode.GetBlockRef(refNode)
 	var defBlockParentID, defBlockRootID, defBlockPath string
 	defBlock := treenode.GetBlockTree(defBlockID)
@@ -525,7 +525,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 	switch n.Type {
 	case ast.NodeLinkText:
 		text := n.Text()
-		markdown := treenode.FormatNode(n.Parent, luteEngine)
+		markdown := treenode.ExportNodeStdMd(n.Parent, luteEngine)
 		parentBlock := treenode.ParentBlock(n)
 		span := &Span{
 			ID:       ast.NewNodeID(),
@@ -556,7 +556,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			typ = typ + " " + n.TextMarkType
 		}
 
-		markdown := treenode.FormatNode(n, luteEngine)
+		markdown := treenode.ExportNodeStdMd(n, luteEngine)
 		parentBlock := treenode.ParentBlock(n)
 		span := &Span{
 			ID:       ast.NewNodeID(),
@@ -574,7 +574,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		return
 	case ast.NodeLinkDest:
 		text := n.TokensStr()
-		markdown := treenode.FormatNode(n.Parent, luteEngine)
+		markdown := treenode.ExportNodeStdMd(n.Parent, luteEngine)
 		parentBlock := treenode.ParentBlock(n)
 		span := &Span{
 			ID:       ast.NewNodeID(),

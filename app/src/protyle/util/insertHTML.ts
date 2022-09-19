@@ -1,4 +1,4 @@
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByMatchTag} from "./hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import * as dayjs from "dayjs";
 import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";

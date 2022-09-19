@@ -846,12 +846,12 @@ export class WYSIWYG {
                             let cursorElement = hasClosestBlock(range.startContainer) as Element;
                             if (cursorElement) {
                                 if (cursorElement.nextElementSibling?.classList.contains("table")) {
-                                    setLastNodeRange(getContenteditableElement(cursorElement), range, false)
+                                    setLastNodeRange(getContenteditableElement(cursorElement), range, false);
                                 } else if (cursorElement.classList.contains("table")) {
                                     const cellElements = cursorElement.querySelectorAll("th, td");
                                     cursorElement = cellElements[cellElements.length - 1];
                                     if (cursorElement.contains(range.startContainer)) {
-                                        setLastNodeRange(cursorElement, range, false)
+                                        setLastNodeRange(cursorElement, range, false);
                                     }
                                 }
                             }

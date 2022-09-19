@@ -11,7 +11,7 @@ import {
     setFirstNodeRange,
     setLastNodeRange
 } from "../util/selection";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByMatchTag} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {updateTransaction} from "../wysiwyg/transaction";
@@ -859,33 +859,33 @@ export class Toolbar {
                 }
             }
             if (isInlineMemo) {
-                let inlineMemoElements
+                let inlineMemoElements;
                 if (updateElements) {
-                    inlineMemoElements = updateElements
+                    inlineMemoElements = updateElements;
                 } else {
-                    inlineMemoElements = [renderElement]
+                    inlineMemoElements = [renderElement];
                 }
                 inlineMemoElements.forEach((item, index) => {
                     if (!target.value) {
                         // https://github.com/siyuan-note/insider/issues/1046
-                        const currentTypes = item.getAttribute("data-type").split(" ")
+                        const currentTypes = item.getAttribute("data-type").split(" ");
                         if (currentTypes.length === 1 && currentTypes[0] === "inline-memo") {
                             item.outerHTML = item.innerHTML + (index === inlineMemoElements.length - 1 ? "<wbr>" : "");
                             focusByWbr(nodeElement, this.range);
                         } else {
                             currentTypes.find((typeItem, index) => {
                                 if (typeItem === "inline-memo") {
-                                    currentTypes.splice(index, 1)
-                                    return true
+                                    currentTypes.splice(index, 1);
+                                    return true;
                                 }
-                            })
+                            });
                             item.setAttribute("data-type", currentTypes.join(" "));
                             item.removeAttribute("data-inline-memo-content");
                         }
                     } else {
                         item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
                     }
-                })
+                });
             } else if (type === "NodeBlockQueryEmbed") {
                 blockRender(protyle, renderElement);
             }

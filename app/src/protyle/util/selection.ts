@@ -45,7 +45,7 @@ export const fixTableRange = (range:Range) => {
             }
         }
     }
-}
+};
 
 export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range) => {
     const editElement = getContenteditableElement(nodeElement);

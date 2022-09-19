@@ -84,7 +84,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 		docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
 		cache.PutDocIAL(p, docIAL)
 
-		util.IncBootProgress(bootProgressPart, "Parsing tree "+util.ShortPathForBootingDisplay(tree.Path))
+		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
 		treeSize += file.size
 		treeCount++
 		// 缓存文档标题，后面做 Path -> HPath 路径映射时需要
@@ -161,7 +161,7 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 			continue
 		}
 
-		util.IncBootProgress(bootProgressPart, "Indexing tree "+util.ShortPathForBootingDisplay(tree.Path))
+		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(93), util.ShortPathForBootingDisplay(tree.Path)))
 		tx, err := sql.BeginTx()
 		if nil != err {
 			continue

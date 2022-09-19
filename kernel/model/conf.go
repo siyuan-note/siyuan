@@ -523,11 +523,11 @@ func InitBoxes() {
 	initialized := false
 	if 1 > treenode.CountBlocks() {
 		if gulu.File.IsExist(util.BlockTreePath) {
-			util.IncBootProgress(20, "Reading block trees...")
+			util.IncBootProgress(20, Conf.Language(91))
 			go func() {
 				for i := 0; i < 40; i++ {
 					util.RandomSleep(50, 100)
-					util.IncBootProgress(1, "Reading block trees...")
+					util.IncBootProgress(1, Conf.Language(91))
 				}
 			}()
 

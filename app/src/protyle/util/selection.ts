@@ -5,7 +5,7 @@ import {
     hasPreviousSibling,
     isNotEditBlock
 } from "../wysiwyg/getBlock";
-import {hasClosestByMatchTag} from "./hasClosest";
+import {hasClosestByAttribute, hasClosestByMatchTag} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
@@ -20,6 +20,32 @@ const selectIsEditor = (editor: Element, range?: Range) => {
 
     return editor.isEqualNode(container) || editor.contains(container);
 };
+
+// table 选中处理
+export const fixTableRange = (range:Range) => {
+    const tableElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeTable");
+    if (range.toString() !== "" && tableElement && range.commonAncestorContainer.nodeType !== 3) {
+        const parentTag = (range.commonAncestorContainer as Element).tagName;
+        if (parentTag !== "TH" && parentTag !== "TD") {
+            const startCellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
+            const endCellElement = hasClosestByMatchTag(range.endContainer, "TD") || hasClosestByMatchTag(range.endContainer, "TH");
+            if (!startCellElement && !endCellElement) {
+                const cellElement = tableElement.querySelector("th") || tableElement.querySelector("td");
+                range.setStart(cellElement.firstChild, 0);
+                range.setEnd(cellElement.lastChild, cellElement.lastChild.textContent.length);
+            } else if (startCellElement &&
+                // 不能包含自身元素，否则对 cell 中的部分文字两次高亮后就会选中整个 cell。 https://github.com/siyuan-note/siyuan/issues/3649 第二点
+                !startCellElement.contains(range.endContainer)) {
+                const cloneRange = range.cloneRange();
+                range.setEnd(startCellElement.lastChild, startCellElement.lastChild.textContent.length);
+                if (range.toString() === "" && endCellElement) {
+                    range.setStart(endCellElement.firstChild, 0);
+                    range.setEnd(cloneRange.endContainer, cloneRange.endOffset);
+                }
+            }
+        }
+    }
+}
 
 export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range) => {
     const editElement = getContenteditableElement(nodeElement);

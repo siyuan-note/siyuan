@@ -225,7 +225,7 @@ export class WYSIWYG {
                     if (range.startContainer.parentElement.parentElement.getAttribute("data-type") === "NodeHeading") {
                         // 复制标题 https://github.com/siyuan-note/insider/issues/297
                         tempElement.append(range.startContainer.parentElement.parentElement.cloneNode(true));
-                    } else if (!["DIV", "TD", "TH"].includes(range.startContainer.parentElement.tagName)) {
+                    } else if (!["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
                         // 复制行内元素 https://github.com/siyuan-note/insider/issues/191
                         tempElement.append(range.startContainer.parentElement.cloneNode(true));
                     } else {
@@ -986,7 +986,7 @@ export class WYSIWYG {
                     transaction(protyle, doOperations, undoOperations);
                 } else if (range.toString() !== "" && startContainer.isSameNode(range.endContainer) && range.startContainer.nodeType === 3
                     && range.endOffset === range.endContainer.textContent.length && range.startOffset === 0 &&
-                    !["DIV", "TD", "TH"].includes(range.startContainer.parentElement.tagName)) {
+                    !["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
                     // 选中整个内联元素
                     tempElement.append(range.startContainer.parentElement);
                 } else if (selectImgElement) {

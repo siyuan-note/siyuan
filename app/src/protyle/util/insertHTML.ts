@@ -3,7 +3,7 @@ import * as dayjs from "dayjs";
 import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
-import {focusBlock, getEditorRange, focusByWbr} from "./selection";
+import {focusBlock, getEditorRange, focusByWbr, fixTableRange} from "./selection";
 import {mathRender} from "../markdown/mathRender";
 import {Constants} from "../../constants";
 
@@ -12,24 +12,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false, spl
         return;
     }
     const range = getEditorRange(protyle.wysiwyg.element);
-    // table 选中处理 https://ld246.com/article/1624269001599
-    const tableElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeTable");
-    if (range.toString() !== "" && tableElement && range.commonAncestorContainer.nodeType !== 3) {
-        const parentTag = (range.commonAncestorContainer as Element).tagName;
-        if (parentTag !== "TH" && parentTag !== "TD") {
-            let cellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
-            if (!cellElement) {
-                cellElement = tableElement.querySelector("th") || tableElement.querySelector("td");
-                range.setStartBefore(cellElement.firstChild);
-            }
-            if (cellElement.lastChild) {
-                range.setEndAfter(cellElement.lastChild);
-            } else {
-                range.collapse(true);
-            }
-        }
-    }
-    if (tableElement && !isBlock) {
+    fixTableRange(range);
+    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeTable") && !isBlock) {
         html = protyle.lute.BlockDOM2InlineBlockDOM(html);
     }
     let blockElement = hasClosestBlock(range.startContainer) as Element;

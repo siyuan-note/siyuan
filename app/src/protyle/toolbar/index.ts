@@ -2,6 +2,7 @@ import {Divider} from "./Divider";
 import {Font, hasSameTextStyle, setFontStyle} from "./Font";
 import {ToolbarItem} from "./ToolbarItem";
 import {
+    fixTableRange,
     focusByRange,
     focusByWbr,
     focusSideBlock,
@@ -244,34 +245,7 @@ export class Toolbar {
         }
         const rangeTypes = this.getCurrentType(this.range);
         const selectText = this.range.toString();
-
-        // table 选中处理
-        const tableElement = hasClosestByAttribute(this.range.startContainer, "data-type", "NodeTable");
-        if (selectText !== "" && tableElement && this.range.commonAncestorContainer.nodeType !== 3) {
-            const parentTag = (this.range.commonAncestorContainer as Element).tagName;
-            if (parentTag !== "TH" && parentTag !== "TD") {
-                const startCellElement = hasClosestByMatchTag(this.range.startContainer, "TD") || hasClosestByMatchTag(this.range.startContainer, "TH");
-                const endCellElement = hasClosestByMatchTag(this.range.endContainer, "TD") || hasClosestByMatchTag(this.range.endContainer, "TH");
-                if (!startCellElement && !endCellElement) {
-                    const cellElement = tableElement.querySelector("th") || tableElement.querySelector("td");
-                    this.range.setStartBefore(cellElement.firstChild);
-                    this.range.setEndAfter(cellElement.lastChild);
-                } else if (startCellElement &&
-                    // 不能包含自身元素，否则对 cell 中的部分文字两次高亮后就会选中整个 cell。 https://github.com/siyuan-note/siyuan/issues/3649 第二点
-                    !startCellElement.contains(this.range.endContainer)) {
-                    const cloneRange = this.range.cloneRange();
-                    this.range.setEndAfter(startCellElement.lastChild);
-                    if (this.range.toString() === "" && endCellElement) {
-                        this.range.setEnd(cloneRange.endContainer, cloneRange.endOffset);
-                        this.range.setStartBefore(endCellElement.lastChild);
-                    }
-                    if (this.range.toString() === "") {
-                        return;
-                    }
-                }
-            }
-        }
-
+        fixTableRange(this.range);
         let previousElement: HTMLElement;
         let nextElement: HTMLElement;
         let previousIndex: number;

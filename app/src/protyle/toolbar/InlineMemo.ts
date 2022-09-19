@@ -3,6 +3,7 @@ import * as dayjs from "dayjs";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
+import {fixTableRange} from "../util/selection";
 
 export class InlineMemo extends ToolbarItem {
     public element: HTMLElement;
@@ -28,10 +29,12 @@ export class InlineMemo extends ToolbarItem {
                 return;
             }
 
-            if (!["DIV", "TD", "TH"].includes(range.startContainer.parentElement.tagName) && range.startOffset === 0 && !hasPreviousSibling(range.startContainer)) {
+            fixTableRange(range);
+
+            if (!["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName) && range.startOffset === 0 && !hasPreviousSibling(range.startContainer)) {
                 range.setStartBefore(range.startContainer.parentElement);
             }
-            if (!["DIV", "TD", "TH"].includes(range.endContainer.parentElement.tagName) && range.endOffset === range.endContainer.textContent.length && !hasNextSibling(range.endContainer)) {
+            if (!["DIV", "TD", "TH", "TR"].includes(range.endContainer.parentElement.tagName) && range.endOffset === range.endContainer.textContent.length && !hasNextSibling(range.endContainer)) {
                 range.setEndAfter(range.endContainer.parentElement);
             }
             const wbrElement = document.createElement("wbr");

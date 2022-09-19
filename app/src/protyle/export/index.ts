@@ -1,7 +1,7 @@
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {ipcRenderer, OpenDialogReturnValue} from "electron";
+import {OpenDialogReturnValue} from "electron";
 import {BrowserWindow, dialog} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
@@ -61,10 +61,6 @@ export const saveExport = (option: { type: string, id: string }) => {
 };
 
 /// #if !BROWSER
-const destroyWin = (win: Electron.BrowserWindow) => {
-    win.destroy();
-};
-
 const renderPDF = (id: string) => {
     const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_EXPORTPDF) || JSON.stringify({
         printBackground: true,
@@ -75,7 +71,7 @@ const renderPDF = (id: string) => {
         removeAssets: true,
     }));
     const servePath = window.location.protocol + "//" + window.location.host;
-    const win = new BrowserWindow({
+    window.siyuan.printWin = new BrowserWindow({
         show: true,
         width: 1032,
         resizable: false,
@@ -88,74 +84,6 @@ const renderPDF = (id: string) => {
             webviewTag: true,
             webSecurity: false,
         },
-    });
-    ipcRenderer.on(Constants.SIYUAN_EXPORT_CLOSE, () => {
-        win.destroy();
-    });
-    ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, (e, ipcData) => {
-        dialog.showOpenDialog({
-            title: window.siyuan.languages.export + " PDF",
-            properties: ["createDirectory", "openDirectory"],
-        }).then((result: OpenDialogReturnValue) => {
-            if (result.canceled) {
-                destroyWin(win);
-                return;
-            }
-
-            setTimeout(() => {
-                const msgId = showMessage(window.siyuan.languages.exporting, -1);
-                const filePath = result.filePaths[0].endsWith(ipcData.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle));
-                localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {removeAssets: ipcData.removeAssets})));
-                try {
-                    win.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {
-                        fetchPost("/api/export/exportHTML", {
-                            id: ipcData.rootId,
-                            pdf: true,
-                            removeAssets: ipcData.removeAssets,
-                            savePath: filePath
-                        }, () => {
-                            const pdfFilePath = path.join(filePath, path.basename(filePath) + ".pdf");
-                            fs.writeFileSync(pdfFilePath, pdfData);
-                            destroyWin(win);
-                            fetchPost("/api/export/addPDFOutline", {
-                                id: ipcData.rootId,
-                                path: pdfFilePath
-                            }, () => {
-                                afterExport(pdfFilePath, msgId);
-                                if (ipcData.removeAssets) {
-                                    const removePromise = (dir: string) => {
-                                        return new Promise(function (resolve) {
-                                            //先读文件夹
-                                            fs.stat(dir, function (err, stat) {
-                                                if (stat) {
-                                                    if (stat.isDirectory()) {
-                                                        fs.readdir(dir, function (err, files) {
-                                                            files = files.map(file => path.join(dir, file)); // a/b  a/m
-                                                            Promise.all(files.map(file => removePromise(file))).then(function () {
-                                                                fs.rmdir(dir, resolve);
-                                                            });
-                                                        });
-                                                    } else {
-                                                        fs.unlink(dir, resolve);
-                                                    }
-                                                }
-                                            });
-                                        });
-                                    };
-                                    removePromise(path.join(filePath, "assets"));
-                                }
-                            });
-                        });
-                    }).catch((error: string) => {
-                        showMessage("Export PDF error:" + error, 0, "error", msgId);
-                        destroyWin(win);
-                    });
-                } catch (e) {
-                    showMessage("Export PDF failed: " + e, 0, "error", msgId);
-                    destroyWin(win);
-                }
-            }, 200);
-        });
     });
     let pdfWidth = "";
     if (localData.pageSize === "A3") {
@@ -218,50 +146,57 @@ const renderPDF = (id: string) => {
     <link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>
     <title>${window.siyuan.languages.export} PDF - {tpl.name}</title>
     <style>
-          body {
-            margin: 0;
-          }
-          
-          #action {
-                width: 200px;
-                background: var(--b3-theme-background-light);
-                padding: 8px 16px;
-                position: fixed;
-                right: 0;
-                top: 0;
-                overflow: auto;
-                bottom: 0;
-         }
-         
-         #preview {
-                max-width: 800px;
-                margin: 0 auto;
-                position: absolute;
-                right: 232px;
-                left: 0;
-         }
+        body {
+          margin: 0;
+        }
+        
+        #action {
+          width: 200px;
+          background: var(--b3-theme-background-light);
+          padding: 8px 16px;
+          position: fixed;
+          right: 0;
+          top: 0;
+          overflow: auto;
+          bottom: 0;
+        }
+        
+        #preview {
+          max-width: 800px;
+          margin: 0 auto;
+          position: absolute;
+          right: 232px;
+          left: 0;
+        }
+        
+        #preview.exporting {
+          position: inherit;
+          max-width: none;
+        }
+        
         .exporting::-webkit-scrollbar {
           width: 0;
           height: 0;
         }
         pre code {
-            max-height: none !important;
-            word-break: break-all !important;
-            white-space: pre-wrap !important;
+          max-height: none !important;
+          word-break: break-all !important;
+          white-space: pre-wrap !important;
         }
         .protyle-wysiwyg {
-            height: 100%;
-            overflow: auto;
-            box-sizing: border-box;
-            padding: 34px ${pdfMargin}in 16px;
-            width: ${pdfWidth}in
+          height: 100%;
+          overflow: auto;
+          box-sizing: border-box;
+          padding: 34px ${pdfMargin}in 16px;
+          width: ${pdfWidth}in
         }
+        
         .b3-label {
-            border-bottom: 1px solid var(--b3-border-color);
-            display: block;
-            color: var(--b3-theme-on-surface);
-            padding-bottom: 16px;
-            margin-bottom: 16px;
+          border-bottom: 1px solid var(--b3-border-color);
+          display: block;
+          color: var(--b3-theme-on-surface);
+          padding-bottom: 16px;
+          margin-bottom: 16px;
         }
         ${setInlineStyle(false)}
     </style>
@@ -399,7 +334,7 @@ const renderPDF = (id: string) => {
         previewElement.classList.add("exporting");
     });
 </script></body></html>`;
-    win.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent(`<!DOCTYPE html><html>
+    window.siyuan.printWin.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent(`<!DOCTYPE html><html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -416,8 +351,8 @@ const renderPDF = (id: string) => {
         <div style="margin: 8px 0;height: 8px;border-radius: 4px;overflow: hidden;background-color:#fff;"><div style="background-color: var(--b3-theme-primary);height: 8px;background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);animation: stripMove 450ms linear infinite;background-size: 50px 50px;"></div></div>
     </div>
 </body></html>`));
-    win.webContents.on("did-finish-load", () => {
-        if (win.webContents.getURL().startsWith("data:text/html;charset=UTF-8,")) {
+    window.siyuan.printWin.webContents.on("did-finish-load", () => {
+        if (window.siyuan.printWin.webContents.getURL().startsWith("data:text/html;charset=UTF-8,")) {
             fetchPost("/api/export/exportPreviewHTML", {
                 id,
                 tpl: html
@@ -425,10 +360,10 @@ const renderPDF = (id: string) => {
                 if (response.code === 1) {
                     document.getElementById("message").firstElementChild.innerHTML === "";
                     showMessage(response.msg, undefined, "error");
-                    destroyWin(win);
+                    window.siyuan.printWin.destroy()
                     return;
                 }
-                win.loadURL(response.data.url);
+                window.siyuan.printWin.loadURL(response.data.url);
             });
         }
     });

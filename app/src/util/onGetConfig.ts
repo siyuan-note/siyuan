@@ -2,8 +2,12 @@ import {openSearch} from "../search/spread";
 import {exportLayout, JSONToLayout, resizeDrag, resizeTabs} from "../layout/util";
 import {hotKey2Electron, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
-import {ipcRenderer} from "electron";
 import {getCurrentWindow} from "@electron/remote";
+import {ipcRenderer, OpenDialogReturnValue} from "electron";
+import {dialog} from "@electron/remote";
+import * as fs from "fs";
+import * as path from "path";
+import {afterExport} from "../protyle/export/util";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
@@ -22,6 +26,8 @@ import {getSearch} from "./functions";
 import {openHistory} from "./history";
 import {initStatus} from "../layout/status";
 import {syncGuide} from "../sync/syncGuide";
+import {showMessage} from "../dialog/message";
+import {replaceLocalPath} from "../editor/rename";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -339,6 +345,74 @@ const initWindow = () => {
     });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
         winOnClose(currentWindow, close);
+    });
+    ipcRenderer.on(Constants.SIYUAN_EXPORT_CLOSE, () => {
+        window.siyuan.printWin.destroy();
+    });
+    ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, (e, ipcData) => {
+        dialog.showOpenDialog({
+            title: window.siyuan.languages.export + " PDF",
+            properties: ["createDirectory", "openDirectory"],
+        }).then((result: OpenDialogReturnValue) => {
+            if (result.canceled) {
+                window.siyuan.printWin.destroy();
+                return;
+            }
+
+            setTimeout(() => {
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                const filePath = result.filePaths[0].endsWith(ipcData.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle));
+                localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {removeAssets: ipcData.removeAssets})));
+                try {
+                    window.siyuan.printWin.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {
+                        fetchPost("/api/export/exportHTML", {
+                            id: ipcData.rootId,
+                            pdf: true,
+                            removeAssets: ipcData.removeAssets,
+                            savePath: filePath
+                        }, () => {
+                            const pdfFilePath = path.join(filePath, path.basename(filePath) + ".pdf");
+                            fs.writeFileSync(pdfFilePath, pdfData);
+                            window.siyuan.printWin.destroy();
+                            fetchPost("/api/export/addPDFOutline", {
+                                id: ipcData.rootId,
+                                path: pdfFilePath
+                            }, () => {
+                                afterExport(pdfFilePath, msgId);
+                                if (ipcData.removeAssets) {
+                                    const removePromise = (dir: string) => {
+                                        return new Promise(function (resolve) {
+                                            //先读文件夹
+                                            fs.stat(dir, function (err, stat) {
+                                                if (stat) {
+                                                    if (stat.isDirectory()) {
+                                                        fs.readdir(dir, function (err, files) {
+                                                            files = files.map(file => path.join(dir, file)); // a/b  a/m
+                                                            Promise.all(files.map(file => removePromise(file))).then(function () {
+                                                                fs.rmdir(dir, resolve);
+                                                            });
+                                                        });
+                                                    } else {
+                                                        fs.unlink(dir, resolve);
+                                                    }
+                                                }
+                                            });
+                                        });
+                                    };
+                                    removePromise(path.join(filePath, "assets"));
+                                }
+                            });
+                        });
+                    }).catch((error: string) => {
+                        showMessage("Export PDF error:" + error, 0, "error", msgId);
+                        window.siyuan.printWin.destroy();
+                    });
+                } catch (e) {
+                    showMessage("Export PDF failed: " + e, 0, "error", msgId);
+                    window.siyuan.printWin.destroy();
+                }
+            }, 200);
+        });
     });
     window.addEventListener("beforeunload", () => {
         currentWindow.off("focus", winOnFocus);

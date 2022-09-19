@@ -89,6 +89,7 @@ interface INotebook {
 }
 
 interface ISiyuan {
+    printWin?: import("electron").BrowserWindow
     transactionsTimeout?: number,
     transactions?: {
         protyle: IProtyle,

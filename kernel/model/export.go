@@ -394,6 +394,10 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 
 		assets := assetsLinkDestsInTree(tree)
 		for _, asset := range assets {
+			if strings.Contains(asset, "?") {
+				asset = asset[:strings.LastIndex(asset, "?")]
+			}
+
 			srcAbsPath, err := GetAssetAbsPath(asset)
 			if nil != err {
 				logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
@@ -552,6 +556,9 @@ func AddPDFOutline(id, p string) (err error) {
 			cur, ok := stack.Peek()
 			if !ok {
 				bm := bms[h.ID]
+				if nil == bm {
+					break L
+				}
 				bm.Level = h.HeadingLevel
 				stack.Push(bm)
 				topBms = append(topBms, bm)

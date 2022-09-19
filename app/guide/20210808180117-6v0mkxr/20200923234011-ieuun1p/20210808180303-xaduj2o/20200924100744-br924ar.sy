@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20220905215835"
+		"updated": "20220920003954"
 	},
 	"Children": [
 		{
@@ -271,34 +271,16 @@
 			]
 		},
 		{
-			"ID": "20210115224203-he7ycn9",
+			"ID": "20220920003905-soehefi",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210115224203-he7ycn9",
-				"updated": "20210503095907"
+				"id": "20220920003905-soehefi",
+				"updated": "20220920003954"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "\"Reference\" refers to the link "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "[foo](bar)"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " through Markdown, the image syntax "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "![foo](bar)"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " or the attribute "
+					"Data": "A \"Reference\" refers to a link to a asset file via a hyperlink, an inserted image, or the "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -307,7 +289,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " of HTML tags (such as "
+					"Data": " attribute of an HTML tag (such as "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -325,7 +307,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ") link the asset files. There are two situations:"
+					"Data": "). There are two cases here:"
 				}
 			]
 		},

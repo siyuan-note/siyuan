@@ -820,7 +820,7 @@ func tagFromNode(node *ast.Node) (ret string) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeTag == n.Type {
+		if ast.NodeTag == n.Type || n.IsTextMarkType("tag") {
 			tagBuilder.WriteString("#")
 			tagBuilder.WriteString(n.Text())
 			tagBuilder.WriteString("# ")

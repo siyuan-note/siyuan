@@ -1096,6 +1096,12 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 				status := processFileAnnotationRef(refID, n)
 				unlinks = append(unlinks, n)
 				return status
+			} else if n.IsTextMarkType("tag") {
+				if !wysiwyg {
+					n.Type = ast.NodeText
+					n.Tokens = []byte(Conf.Export.TagOpenMarker + n.TextMarkTextContent + Conf.Export.TagCloseMarker)
+					return ast.WalkContinue
+				}
 			}
 		case ast.NodeFileAnnotationRef:
 			refIDNode := n.ChildByType(ast.NodeFileAnnotationRefID)

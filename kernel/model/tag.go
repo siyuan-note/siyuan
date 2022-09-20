@@ -91,6 +91,14 @@ func RemoveTag(label string) (err error) {
 					}
 				}
 			}
+			nodeTags = node.ChildrenByType(ast.NodeTextMark)
+			for _, nodeTag := range nodeTags {
+				if nodeTag.IsTextMarkType("tag") {
+					if label == nodeTag.TextMarkTextContent {
+						unlinks = append(unlinks, nodeTag)
+					}
+				}
+			}
 		}
 		for _, n := range unlinks {
 			n.Unlink()
@@ -178,6 +186,14 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 				for _, nodeLabel := range nodeLabels {
 					if bytes.Equal(nodeLabel.Tokens, []byte(oldLabel)) {
 						nodeLabel.Tokens = bytes.ReplaceAll(nodeLabel.Tokens, []byte(oldLabel), []byte(newLabel))
+					}
+				}
+			}
+			nodeTags = node.ChildrenByType(ast.NodeTextMark)
+			for _, nodeTag := range nodeTags {
+				if nodeTag.IsTextMarkType("tag") {
+					if oldLabel == nodeTag.TextMarkTextContent {
+						nodeTag.TextMarkTextContent = strings.ReplaceAll(nodeTag.TextMarkTextContent, oldLabel, newLabel)
 					}
 				}
 			}

@@ -81,7 +81,7 @@ func SelectSpansRawStmt(stmt string, limit int) (ret []*Span) {
 }
 
 func QueryTagSpansByKeyword(keyword string, limit int) (ret []*Span) {
-	stmt := "SELECT * FROM spans WHERE type = 'tag' AND content LIKE '%" + keyword + "%'"
+	stmt := "SELECT * FROM spans WHERE type LIKE '%tag%' AND content LIKE '%" + keyword + "%'"
 	stmt += " LIMIT " + strconv.Itoa(limit)
 	rows, err := query(stmt)
 	if nil != err {
@@ -97,7 +97,7 @@ func QueryTagSpansByKeyword(keyword string, limit int) (ret []*Span) {
 }
 
 func QueryTagSpans(p string, limit int) (ret []*Span) {
-	stmt := "SELECT * FROM spans WHERE type = 'tag'"
+	stmt := "SELECT * FROM spans WHERE type LIKE '%tag%'"
 	if "" != p {
 		stmt += " AND path = '" + p + "'"
 	}

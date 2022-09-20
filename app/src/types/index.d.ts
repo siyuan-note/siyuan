@@ -484,6 +484,7 @@ declare interface IMenu {
     click?: (element: HTMLElement) => void,
     type?: "separator" | "submenu" | "readonly",
     accelerator?: string,
+    action?: string,
     id?: string,
     submenu?: IMenu[]
     disabled?: boolean

@@ -28,6 +28,7 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {Asset} from "../asset";
 import {newFile} from "../util/newFile";
 import {MenuItem} from "../menus/Menu";
+import {escapeHtml} from "../util/escape";
 
 export class Wnd {
     public id: string;
@@ -463,11 +464,26 @@ export class Wnd {
             const iconElement = item.querySelector(".item__icon");
             const graphicElement = item.querySelector(".item__graphic");
             window.siyuan.menus.menu.append(new MenuItem({
-                label: item.querySelector(".item__text").textContent,
+                label: escapeHtml(item.querySelector(".item__text").textContent),
+                action: "iconClose",
                 iconHTML: iconElement ? `<span class="b3-menu__icon">${iconElement.innerHTML}</span>` : "",
                 icon: graphicElement ? graphicElement.firstElementChild.getAttribute("xlink:href").substring(1) : "",
-                click: () => {
-                    this.switchTab(item, true);
+                bind: (element) => {
+                    element.addEventListener("click", (event) => {
+                        if (hasClosestByTag(event.target as Element, "svg")) {
+                            this.removeTab(item.getAttribute("data-id"));
+                            if (element.previousElementSibling || element.nextElementSibling) {
+                                element.remove();
+                            } else {
+                                window.siyuan.menus.menu.remove();
+                            }
+                        } else {
+                            this.switchTab(item, true);
+                            window.siyuan.menus.menu.remove();
+                        }
+                        event.preventDefault()
+                        event.stopPropagation();
+                    });
                 },
                 current: item.classList.contains("item--focus")
             }).element);

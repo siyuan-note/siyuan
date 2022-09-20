@@ -76,6 +76,10 @@
 
     &--current {
       background-color: var(--b3-list-hover);
+
+      .b3-menu__action {
+        opacity: 1;
+      }
     }
 
     &--readonly {
@@ -92,6 +96,22 @@
     &--disabled {
       opacity: .54;
       cursor: not-allowed;
+    }
+  }
+
+  &__action {
+    opacity: 0;
+    color: var(--b3-theme-on-surface);
+    width: 8px;
+    height: 8px;
+    align-self: center;
+    margin-left: 8px;
+    padding: 4px;
+    border-radius: 8px;
+
+    &:hover {
+      color: var(--b3-theme-on-background);
+      background: var(--b3-theme-background-light);
     }
   }
 

@@ -16,6 +16,7 @@ import {genEmptyElement} from "../../block/util";
 import {updateListOrder} from "../wysiwyg/list";
 import {escapeHtml} from "../../util/escape";
 import {zoomOut} from "../../menus/protyle";
+import {hideElements} from "../ui/hideElements";
 
 export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
@@ -413,14 +414,14 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
-        protyle.toolbar.subElement.classList.add("fn__none");
+        hideElements(["util"], protyle);
     });
 };
 
 export const hintRenderWidget = (value: string, protyle: IProtyle) => {
     focusByRange(protyle.toolbar.range);
     insertHTML(protyle.lute.SpinBlockDOM(`<iframe src="/widgets/${value}" data-subtype="widget" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`), protyle, true);
-    protyle.toolbar.subElement.classList.add("fn__none");
+    hideElements(["util"], protyle);
 };
 
 export const hintRenderAssets = (value: string, protyle: IProtyle) => {
@@ -438,7 +439,7 @@ export const hintRenderAssets = (value: string, protyle: IProtyle) => {
         fileMD += `[${value.startsWith("assets/") ? filename + type : value}](${value})`;
     }
     insertHTML(protyle.lute.SpinBlockDOM(fileMD), protyle);
-    protyle.toolbar.subElement.classList.add("fn__none");
+    hideElements(["util"], protyle);
 };
 
 export const hintMoveBlock = (pathString: string, sourceElements: Element[], protyle: IProtyle) => {
@@ -505,5 +506,5 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
 
     // 跨文档不支持撤销
     transaction(protyle, doOperations);
-    protyle.toolbar.subElement.classList.add("fn__none");
+    hideElements(["util"], protyle);
 };

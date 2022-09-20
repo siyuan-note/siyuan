@@ -38,10 +38,7 @@ export class InlineMemo extends ToolbarItem {
             if (!["DIV", "TD", "TH", "TR"].includes(range.endContainer.parentElement.tagName) && range.endOffset === range.endContainer.textContent.length && !hasNextSibling(range.endContainer)) {
                 range.setEndAfter(range.endContainer.parentElement);
             }
-            const wbrElement = document.createElement("wbr");
-            range.insertNode(wbrElement);
-            const html = nodeElement.outerHTML;
-
+            const oldHTML = nodeElement.outerHTML;
             const newNodes: Element[] = [];
             const contents = range.extractContents();
             contents.childNodes.forEach((item: HTMLElement) => {
@@ -82,10 +79,7 @@ export class InlineMemo extends ToolbarItem {
                 }
             }
             range.setStart(newNodes[0].firstChild, 0);
-            protyle.toolbar.showRender(protyle, newNodes[0], newNodes);
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-            wbrElement.remove();
+            protyle.toolbar.showRender(protyle, newNodes[0], newNodes, oldHTML);
         });
     }
 }

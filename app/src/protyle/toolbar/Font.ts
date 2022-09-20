@@ -16,6 +16,7 @@ export class Font extends ToolbarItem {
             protyle.toolbar.subElement.style.padding = "";
             protyle.toolbar.subElement.append(fontMenu(protyle));
             protyle.toolbar.subElement.classList.remove("fn__none");
+            protyle.toolbar.subElementCloseCB = undefined;
             const position = getSelectionPosition(protyle.wysiwyg.element, protyle.toolbar.range);
             setPosition(protyle.toolbar.subElement, position.left, position.top + 18, 26);
         });

@@ -46,6 +46,7 @@ import {InlineMemo} from "./InlineMemo";
 export class Toolbar {
     public element: HTMLElement;
     public subElement: HTMLElement;
+    public subElementCloseCB: () => void;
     public range: Range;
     private toolbarHeight: number;
 
@@ -593,23 +594,24 @@ export class Toolbar {
             }
         });
         this.subElement.classList.remove("fn__none");
+        this.subElementCloseCB = undefined;
         const nodeRect = refElement.getBoundingClientRect();
         setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height + 4);
         this.element.classList.add("fn__none");
         anchorElement.select();
     }
 
-    public showRender(protyle: IProtyle, renderElement: Element, updateElements?: Element[]) {
+    public showRender(protyle: IProtyle, renderElement: Element, updateElements?: Element[], oldHTML?: string) {
         const nodeElement = hasClosestBlock(renderElement);
         if (!nodeElement) {
             return;
         }
         const id = nodeElement.getAttribute("data-node-id");
-        const type = renderElement.getAttribute("data-type");
-        let html = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
+        const types = (renderElement.getAttribute("data-type") || "").split(" ");
+        const html = oldHTML || protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
         let title = "HTML";
         let placeholder = "";
-        const isInlineMemo = type && type.split(" ").includes("inline-memo");
+        const isInlineMemo = types.includes("inline-memo");
         switch (renderElement.getAttribute("data-subtype")) {
             case "abc":
                 title = window.siyuan.languages.staff;
@@ -636,14 +638,14 @@ export class Toolbar {
                 title = "UML";
                 break;
             case "math":
-                if (type === "NodeMathBlock") {
+                if (types.includes("NodeMathBlock")) {
                     title = window.siyuan.languages.math;
                 } else {
                     title = window.siyuan.languages["inline-math"];
                 }
                 break;
         }
-        if (type === "NodeBlockQueryEmbed") {
+        if (types.includes("NodeBlockQueryEmbed")) {
             title = window.siyuan.languages.blockEmbed;
         } else if (isInlineMemo) {
             title = window.siyuan.languages.memo;
@@ -661,11 +663,11 @@ export class Toolbar {
         this.subElement.innerHTML = `<div ${(isPin && this.subElement.firstElementChild.getAttribute("data-drag") === "true") ? 'data-drag="true"' : ""} class="block__popover--move"><div class="block__icons block__icons--border fn__flex">
     ${title}
     <span class="fn__flex-1"></span>
-    <label aria-label="${window.siyuan.languages.hideHeadingBelowBlocks}" style="overflow:inherit;" class="b3-tooltips b3-tooltips__nw${type !== "NodeBlockQueryEmbed" ? " fn__none" : ""}">
+    <label aria-label="${window.siyuan.languages.hideHeadingBelowBlocks}" style="overflow:inherit;" class="b3-tooltips b3-tooltips__nw${!types.includes("NodeBlockQueryEmbed") ? " fn__none" : ""}">
         <input type="checkbox" class="b3-switch">
         <span class="fn__space"></span>
     </label>
-    <button data-type="refresh" class="block__icon b3-tooltips b3-tooltips__nw${(isPin && !this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) ? "" : " block__icon--active"}${type === "NodeBlockQueryEmbed" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
+    <button data-type="refresh" class="block__icon b3-tooltips b3-tooltips__nw${(isPin && !this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) ? "" : " block__icon--active"}${types.includes("NodeBlockQueryEmbed") ? " fn__none" : ""}" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="before" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages["insert-before"]}"><svg><use xlink:href="#iconBefore"></use></svg></button>
     <span class="fn__space"></span>
@@ -691,7 +693,7 @@ export class Toolbar {
                 return;
             }
             if (this.subElement.clientHeight <= window.innerHeight - nodeRect.bottom || this.subElement.clientHeight <= nodeRect.top) {
-                if (type === "inline-math" || isInlineMemo) {
+                if (types.includes("inline-math") || isInlineMemo) {
                     setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height);
                 } else {
                     setPosition(this.subElement, nodeRect.left + (nodeRect.width - this.subElement.clientWidth) / 2, nodeRect.bottom, nodeRect.height);
@@ -795,7 +797,7 @@ export class Toolbar {
             return;
         });
         const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
-        if (type === "NodeHTMLBlock") {
+        if (types.includes("NodeHTMLBlock")) {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.querySelector("protyle-html").getAttribute("data-content") || "");
         } else if (isInlineMemo) {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-inline-memo-content") || "");
@@ -827,89 +829,24 @@ export class Toolbar {
             if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) {
                 return;
             }
-            const target = event.target as HTMLTextAreaElement;
-            if (type === "NodeHTMLBlock") {
-                renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
+            if (types.includes("NodeHTMLBlock")) {
+                renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
             } else if (isInlineMemo) {
-                renderElement.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
-            } else {
-                renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
-                renderElement.removeAttribute("data-render");
-            }
-            if (!["NodeBlockQueryEmbed", "NodeHTMLBlock"].includes(type)) {
-                processRender(renderElement);
-            }
-
-            event.stopPropagation();
-        });
-        textElement.addEventListener("change", (event) => {
-            if (!renderElement.parentElement) {
-                return;
-            }
-            const target = event.target as HTMLTextAreaElement;
-            if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) {
-                if (type === "NodeHTMLBlock") {
-                    renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
-                } else {
-                    renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(target.value));
-                    renderElement.removeAttribute("data-render");
-                }
-                if (!["NodeBlockQueryEmbed", "NodeHTMLBlock"].includes(type)) {
-                    processRender(renderElement);
-                }
-            }
-            if (isInlineMemo) {
                 let inlineMemoElements;
                 if (updateElements) {
                     inlineMemoElements = updateElements;
                 } else {
                     inlineMemoElements = [renderElement];
                 }
-                inlineMemoElements.forEach((item, index) => {
-                    if (!target.value) {
-                        // https://github.com/siyuan-note/insider/issues/1046
-                        const currentTypes = item.getAttribute("data-type").split(" ");
-                        if (currentTypes.length === 1 && currentTypes[0] === "inline-memo") {
-                            item.outerHTML = item.innerHTML + (index === inlineMemoElements.length - 1 ? "<wbr>" : "");
-                            focusByWbr(nodeElement, this.range);
-                        } else {
-                            currentTypes.find((typeItem, index) => {
-                                if (typeItem === "inline-memo") {
-                                    currentTypes.splice(index, 1);
-                                    return true;
-                                }
-                            });
-                            item.setAttribute("data-type", currentTypes.join(" "));
-                            item.removeAttribute("data-inline-memo-content");
-                        }
-                    } else {
-                        item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(target.value));
-                    }
+                inlineMemoElements.forEach((item) => {
+                    item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value));
                 });
-            } else if (type === "NodeBlockQueryEmbed") {
-                blockRender(protyle, renderElement);
+            } else {
+                renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
+                renderElement.removeAttribute("data-render");
             }
-            if (this.range) {
-                focusByRange(this.range);
-            }
-            if (type === "inline-math") {
-                // 行内数学公式不允许换行 https://github.com/siyuan-note/siyuan/issues/2187
-                renderElement.setAttribute("data-content", renderElement.getAttribute("data-content").replace(/\n/g, ""));
-            }
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
-            // HTML 块中包含多个 <pre> 时只能保存第一个 https://github.com/siyuan-note/siyuan/issues/5732
-            if (type === "NodeHTMLBlock") {
-                const tempElement = document.createElement("template");
-                tempElement.innerHTML = newHTML;
-                if (tempElement.content.childElementCount > 1) {
-                    showMessage(window.siyuan.languages.htmlBlockTip);
-                }
-            }
-            updateTransaction(protyle, id, newHTML, html);
-            html = newHTML;
-            if (isInlineMemo && !target.value) {
-                this.subElement.classList.add("fn__none");
+            if (!types.includes("NodeBlockQueryEmbed") || !types.includes("NodeHTMLBlock") || !isInlineMemo) {
+                processRender(renderElement);
             }
             event.stopPropagation();
         });
@@ -924,18 +861,8 @@ export class Toolbar {
                 return;
             }
             if (event.key === "Escape" || matchHotKey("⌘↩", event)) {
-                this.subElement.classList.add("fn__none");
                 this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");
-                if (renderElement.tagName === "SPAN") {
-                    if (type === "inline-memo" && !textElement.value) {
-                        renderElement.outerHTML = renderElement.innerHTML + "<wbr>";
-                        focusByWbr(nodeElement, this.range);
-                    } else {
-                        focusByRange(this.range);
-                    }
-                } else {
-                    focusSideBlock(renderElement);
-                }
+                hideElements(["util"], protyle);
             } else if (event.key === "Tab") {
                 // https://github.com/siyuan-note/siyuan/issues/5270
                 document.execCommand("insertText", false, "\t");
@@ -944,8 +871,71 @@ export class Toolbar {
                 return;
             }
         });
-
         this.subElement.classList.remove("fn__none");
+        this.subElementCloseCB = () => {
+            if (!renderElement.parentElement) {
+                return;
+            }
+            if (types.includes("NodeHTMLBlock")) {
+                renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
+            } else if (isInlineMemo) {
+                let inlineMemoElements;
+                if (updateElements) {
+                    inlineMemoElements = updateElements;
+                } else {
+                    inlineMemoElements = [renderElement];
+                }
+                inlineMemoElements.forEach((item, index) => {
+                    if (!textElement.value) {
+                        // https://github.com/siyuan-note/insider/issues/1046
+                        const currentTypes = item.getAttribute("data-type").split(" ");
+                        if (currentTypes.length === 1 && currentTypes[0] === "inline-memo") {
+                            item.outerHTML = item.innerHTML;
+                        } else {
+                            currentTypes.find((typeItem, index) => {
+                                if (typeItem === "inline-memo") {
+                                    currentTypes.splice(index, 1);
+                                    return true;
+                                }
+                            });
+                            item.setAttribute("data-type", currentTypes.join(" "));
+                            item.removeAttribute("data-inline-memo-content");
+                        }
+                    } else {
+                        item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value));
+                    }
+                });
+            } else {
+                renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
+                renderElement.removeAttribute("data-render");
+                if (types.includes("NodeBlockQueryEmbed")) {
+                    blockRender(protyle, renderElement);
+                } else {
+                    processRender(renderElement);
+                }
+            }
+
+            if (renderElement.tagName === "SPAN") {
+                focusByRange(this.range);
+            } else {
+                focusSideBlock(renderElement);
+            }
+            if (types.includes("inline-math")) {
+                // 行内数学公式不允许换行 https://github.com/siyuan-note/siyuan/issues/2187
+                renderElement.setAttribute("data-content", renderElement.getAttribute("data-content").replace(/\n/g, ""));
+            }
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
+            // HTML 块中包含多个 <pre> 时只能保存第一个 https://github.com/siyuan-note/siyuan/issues/5732
+            if (types.includes("NodeHTMLBlock")) {
+                const tempElement = document.createElement("template");
+                tempElement.innerHTML = newHTML;
+                if (tempElement.content.childElementCount > 1) {
+                    showMessage(window.siyuan.languages.htmlBlockTip);
+                }
+            }
+            updateTransaction(protyle, id, newHTML, html);
+        }
         const nodeRect = renderElement.getBoundingClientRect();
         this.element.classList.add("fn__none");
         if (isPin) {
@@ -1069,6 +1059,7 @@ export class Toolbar {
             }
         });
         this.subElement.classList.remove("fn__none");
+        this.subElementCloseCB = undefined;
         const nodeRect = languageElement.getBoundingClientRect();
         setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height);
         this.element.classList.add("fn__none");
@@ -1161,6 +1152,7 @@ export class Toolbar {
             });
             const rangePosition = getSelectionPosition(nodeElement, range);
             this.subElement.classList.remove("fn__none");
+            this.subElementCloseCB = undefined;
             setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
             this.element.classList.add("fn__none");
             inputElement.select();
@@ -1220,6 +1212,7 @@ export class Toolbar {
             });
             const rangePosition = getSelectionPosition(nodeElement, range);
             this.subElement.classList.remove("fn__none");
+            this.subElementCloseCB = undefined;
             setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
             this.element.classList.add("fn__none");
             inputElement.select();
@@ -1314,6 +1307,7 @@ export class Toolbar {
             });
             const rangePosition = getSelectionPosition(nodeElement, range);
             this.subElement.classList.remove("fn__none");
+            this.subElementCloseCB = undefined;
             setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
             this.element.classList.add("fn__none");
             inputElement.select();
@@ -1384,6 +1378,7 @@ export class Toolbar {
             });
             const rangePosition = getSelectionPosition(nodeElements[0], range);
             this.subElement.classList.remove("fn__none");
+            this.subElementCloseCB = undefined;
             setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
             this.element.classList.add("fn__none");
             inputElement.select();

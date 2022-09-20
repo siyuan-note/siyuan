@@ -133,6 +133,10 @@ func getUpdatePkg() (downloadPkgURL, checksum string, err error) {
 }
 
 func downloadInstallPkg(pkgURL, checksum string) {
+	if "" == pkgURL || "" == checksum {
+		return
+	}
+
 	pkg := path.Base(pkgURL)
 	savePath := filepath.Join(util.TempDir, "install", pkg)
 	if gulu.File.IsExist(savePath) {

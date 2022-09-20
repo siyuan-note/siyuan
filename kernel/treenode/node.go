@@ -143,7 +143,13 @@ func NodeStaticContent(node *ast.Node) string {
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
 			buf.Write(n.Tokens)
 		case ast.NodeTextMark:
+			if n.IsTextMarkType("tag") {
+				buf.WriteByte('#')
+			}
 			buf.WriteString(n.Content())
+			if n.IsTextMarkType("tag") {
+				buf.WriteByte('#')
+			}
 		case ast.NodeBackslash:
 			buf.WriteByte(lex.ItemBackslash)
 		case ast.NodeBackslashContent:

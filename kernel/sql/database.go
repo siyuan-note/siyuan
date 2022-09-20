@@ -402,7 +402,13 @@ func resolveRefContent0(node *ast.Node, anchors *map[string]string, depth *int, 
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			buf.Write(n.Tokens)
 		case ast.NodeTextMark:
+			if n.IsTextMarkType("tag") {
+				buf.WriteByte('#')
+			}
 			buf.WriteString(n.Content())
+			if n.IsTextMarkType("tag") {
+				buf.WriteByte('#')
+			}
 		case ast.NodeBlockRef:
 			if anchor := n.ChildByType(ast.NodeBlockRefText); nil != anchor {
 				buf.WriteString(anchor.Text())

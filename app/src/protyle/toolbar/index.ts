@@ -724,8 +724,8 @@ export class Toolbar {
             event.stopPropagation();
             switch (btnElement.getAttribute("data-type")) {
                 case "close":
-                    this.subElement.classList.add("fn__none");
                     this.subElement.querySelector('[data-type="pin"]').classList.remove("block__icon--active");
+                    hideElements(["util"], protyle);
                     break;
                 case "pin":
                     if (btnElement.classList.contains("block__icon--active")) {

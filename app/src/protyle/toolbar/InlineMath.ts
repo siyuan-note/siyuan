@@ -4,7 +4,7 @@ import {updateTransaction} from "../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {mathRender} from "../markdown/mathRender";
-import {fixTableRange} from "../util/selection";
+import {fixTableRange, focusByRange} from "../util/selection";
 
 export class InlineMath extends ToolbarItem {
     public element: HTMLElement;
@@ -50,11 +50,15 @@ export class InlineMath extends ToolbarItem {
             range.insertNode(newElement);
             mathRender(newElement);
             if (rangeString.trim() === "") {
-                protyle.toolbar.showRender(protyle, newElement);
+                protyle.toolbar.showRender(protyle, newElement, undefined, html);
+            } else {
+                range.setStartAfter(newElement);
+                range.collapse(true);
+                focusByRange(range)
+                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+                wbrElement.remove();
             }
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-            wbrElement.remove();
         });
     }
 }

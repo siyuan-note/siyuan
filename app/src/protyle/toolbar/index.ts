@@ -876,7 +876,7 @@ export class Toolbar {
             if (!renderElement.parentElement) {
                 return;
             }
-            let inlineMemoLastNode: Element;
+            let inlineLastNode: Element;
             if (types.includes("NodeHTMLBlock")) {
                 renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
             } else if (isInlineMemo) {
@@ -903,12 +903,22 @@ export class Toolbar {
                             item.removeAttribute("data-inline-memo-content");
                         }
                         if (index === inlineMemoElements.length - 1) {
-                            inlineMemoLastNode = item;
+                            inlineLastNode = item;
                         }
                     } else {
                         item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value));
                     }
                 });
+            } else if (types.includes("inline-math")) {
+                // 行内数学公式不允许换行 https://github.com/siyuan-note/siyuan/issues/2187
+                if (textElement.value) {
+                    renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value.replace(/\n/g, "")));
+                    renderElement.removeAttribute("data-render");
+                    processRender(renderElement);
+                } else {
+                    inlineLastNode = renderElement;
+                    renderElement.outerHTML = "<wbr>"
+                }
             } else {
                 renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
                 renderElement.removeAttribute("data-render");
@@ -919,10 +929,11 @@ export class Toolbar {
                 }
             }
 
+            // 光标定位
             if (renderElement.tagName === "SPAN") {
-                if (inlineMemoLastNode) {
-                    if (inlineMemoLastNode.parentElement) {
-                        this.range.setStartAfter(inlineMemoLastNode);
+                if (inlineLastNode) {
+                    if (inlineLastNode.parentElement) {
+                        this.range.setStartAfter(inlineLastNode);
                         this.range.collapse(true);
                         focusByRange(this.range);
                     } else {
@@ -936,10 +947,7 @@ export class Toolbar {
             } else {
                 focusSideBlock(renderElement);
             }
-            if (types.includes("inline-math")) {
-                // 行内数学公式不允许换行 https://github.com/siyuan-note/siyuan/issues/2187
-                renderElement.setAttribute("data-content", renderElement.getAttribute("data-content").replace(/\n/g, ""));
-            }
+
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
             // HTML 块中包含多个 <pre> 时只能保存第一个 https://github.com/siyuan-note/siyuan/issues/5732

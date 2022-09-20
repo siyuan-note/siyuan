@@ -531,7 +531,7 @@ export class Toolbar {
             return;
         }
         const id = nodeElement.getAttribute("data-node-id");
-        let html = nodeElement.outerHTML;
+        const html = nodeElement.outerHTML;
         this.subElement.style.width = isMobile() ? "80vw" : Math.min(480, window.innerWidth) + "px";
         this.subElement.style.padding = "";
         this.subElement.innerHTML = `<div class="b3-form__space--small">
@@ -552,28 +552,14 @@ export class Toolbar {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.remove}</button>
 </div></div>`;
         this.subElement.querySelector(".b3-button--cancel").addEventListener(getEventName(), () => {
-            refElement.insertAdjacentHTML("afterend", "<wbr>");
-            const oldHTML = nodeElement.outerHTML;
-            refElement.outerHTML = refElement.textContent;
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-            this.subElement.classList.add("fn__none");
-            focusByWbr(nodeElement, this.range);
+            refElement.outerHTML = refElement.textContent + "<wbr>";
+            hideElements(["util"], protyle)
         });
         const anchorElement = this.subElement.querySelector('[data-type="anchor"]') as HTMLInputElement;
         anchorElement.value = refElement.textContent;
-        anchorElement.addEventListener("change", (event) => {
-            refElement.after(document.createElement("wbr"));
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
-            html = nodeElement.outerHTML;
-            nodeElement.querySelector("wbr").remove();
-            event.stopPropagation();
-        });
         anchorElement.addEventListener("input", (event) => {
-            const target = event.target as HTMLInputElement;
-            if (target.value) {
-                refElement.innerHTML = Lute.EscapeHTMLStr(target.value);
+            if (anchorElement.value) {
+                refElement.innerHTML = Lute.EscapeHTMLStr(anchorElement.value);
             } else {
                 refElement.innerHTML = "*";
             }
@@ -585,16 +571,27 @@ export class Toolbar {
                 return;
             }
             if (event.key === "Enter" || event.key === "Escape") {
-                this.subElement.classList.add("fn__none");
-                this.range.setStart(refElement.firstChild, 0);
-                this.range.setEnd(refElement.lastChild, refElement.lastChild.textContent.length);
-                focusByRange(this.range);
+                hideElements(["util"], protyle)
                 event.preventDefault();
                 event.stopPropagation();
             }
         });
         this.subElement.classList.remove("fn__none");
-        this.subElementCloseCB = undefined;
+        this.subElementCloseCB = () => {
+            if (refElement.parentElement) {
+                if (anchorElement.value) {
+                    refElement.innerHTML = Lute.EscapeHTMLStr(anchorElement.value);
+                } else {
+                    refElement.innerHTML = "*";
+                }
+                this.range.setStartAfter(refElement)
+                focusByRange(this.range);
+            } else {
+                focusByWbr(nodeElement, this.range);
+            }
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+        };
         const nodeRect = refElement.getBoundingClientRect();
         setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height + 4);
         this.element.classList.add("fn__none");

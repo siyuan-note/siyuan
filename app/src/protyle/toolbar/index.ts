@@ -876,6 +876,7 @@ export class Toolbar {
             if (!renderElement.parentElement) {
                 return;
             }
+            let inlineMemoLastNode: Element;
             if (types.includes("NodeHTMLBlock")) {
                 renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
             } else if (isInlineMemo) {
@@ -890,7 +891,7 @@ export class Toolbar {
                         // https://github.com/siyuan-note/insider/issues/1046
                         const currentTypes = item.getAttribute("data-type").split(" ");
                         if (currentTypes.length === 1 && currentTypes[0] === "inline-memo") {
-                            item.outerHTML = item.innerHTML;
+                            item.outerHTML = item.innerHTML + (index === inlineMemoElements.length - 1 ? "<wbr>" : "");
                         } else {
                             currentTypes.find((typeItem, index) => {
                                 if (typeItem === "inline-memo") {
@@ -900,6 +901,9 @@ export class Toolbar {
                             });
                             item.setAttribute("data-type", currentTypes.join(" "));
                             item.removeAttribute("data-inline-memo-content");
+                        }
+                        if (index === inlineMemoElements.length - 1) {
+                            inlineMemoLastNode = item;
                         }
                     } else {
                         item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value));
@@ -916,7 +920,19 @@ export class Toolbar {
             }
 
             if (renderElement.tagName === "SPAN") {
-                focusByRange(this.range);
+                if (inlineMemoLastNode) {
+                    if (inlineMemoLastNode.parentElement) {
+                        this.range.setStartAfter(inlineMemoLastNode);
+                        this.range.collapse(true);
+                        focusByRange(this.range);
+                    } else {
+                        focusByWbr(nodeElement, this.range)
+                    }
+                } else if (renderElement.parentElement) {
+                    this.range.setStartAfter(renderElement);
+                    this.range.collapse(true);
+                    focusByRange(this.range);
+                }
             } else {
                 focusSideBlock(renderElement);
             }

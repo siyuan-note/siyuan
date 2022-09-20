@@ -43,15 +43,17 @@ export class InlineMemo extends ToolbarItem {
             const contents = range.extractContents();
             contents.childNodes.forEach((item: HTMLElement) => {
                 if (item.nodeType === 3) {
-                    const inlineElement = document.createElement("span");
-                    inlineElement.setAttribute("data-type", "inline-memo");
-                    inlineElement.textContent = item.textContent;
-                    newNodes.push(inlineElement);
+                    if (item.textContent) {
+                        const inlineElement = document.createElement("span");
+                        inlineElement.setAttribute("data-type", "inline-memo");
+                        inlineElement.textContent = item.textContent;
+                        newNodes.push(inlineElement);
+                    }
                 } else {
                     let types = (item.getAttribute("data-type") || "").split(" ");
                     types.push("inline-memo");
                     types = [...new Set(types)];
-                    if (item.tagName !== "BR" && item.tagName !== "WBR") {
+                    if (item.tagName !== "BR" && item.tagName !== "WBR" && !types.includes("inline-math")) {
                         item.setAttribute("data-type", types.join(" "));
                         newNodes.push(item);
                     } else if (item.tagName !== "WBR") {
@@ -76,10 +78,17 @@ export class InlineMemo extends ToolbarItem {
                 } else {
                     range.insertNode(newNodes[i]);
                     range.collapse(false);
+                    // 数学公式不允许备注
+                    if (currentNewNode.nodeType !== 3 && (currentNewNode.getAttribute("data-type") || "").indexOf("inline-math") > -1) {
+                        newNodes.splice(i, 1);
+                        i--;
+                    }
                 }
             }
-            range.setStart(newNodes[0].firstChild, 0);
-            protyle.toolbar.showRender(protyle, newNodes[0], newNodes, oldHTML);
+            if (newNodes[0]) {
+                range.setStart(newNodes[0].firstChild, 0);
+                protyle.toolbar.showRender(protyle, newNodes[0], newNodes, oldHTML);
+            }
         });
     }
 }

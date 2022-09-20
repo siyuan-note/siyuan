@@ -1,7 +1,7 @@
 import {ToolbarItem} from "./ToolbarItem";
 import * as dayjs from "dayjs";
 import {updateTransaction} from "../wysiwyg/transaction";
-import {hasClosestBlock} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {mathRender} from "../markdown/mathRender";
 import {fixTableRange} from "../util/selection";
@@ -18,6 +18,14 @@ export class InlineMath extends ToolbarItem {
             const range = protyle.toolbar.range;
             const nodeElement = hasClosestBlock(range.startContainer);
             if (!nodeElement) {
+                return;
+            }
+            let mathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math") as Element;
+            if (!mathElement && range.startContainer.nodeType !== 3) {
+                mathElement = (range.startContainer as HTMLElement).querySelector('[data-type="inline-math"]');
+            }
+            if (mathElement) {
+                protyle.toolbar.showRender(protyle, mathElement);
                 return;
             }
             fixTableRange(range);

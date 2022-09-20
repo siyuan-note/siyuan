@@ -758,7 +758,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         return;
                     }
                     // 代码块中空行 ⌘+Del 异常 https://ld246.com/article/1663166544901
-                    if (nodeElement.classList.contains("code-block") && range.startContainer.nodeType === 3 && range.startContainer.textContent.substring(range.startOffset - 1, range.startOffset) === "\n") {
+                    if (nodeElement.classList.contains("code-block") && isCtrl(event) &&
+                        range.startContainer.nodeType === 3 && range.startContainer.textContent.substring(range.startOffset - 1, range.startOffset) === "\n") {
                         event.stopPropagation();
                         event.preventDefault();
                         return;

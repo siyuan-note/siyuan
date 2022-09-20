@@ -358,60 +358,58 @@ const initWindow = () => {
                 window.siyuan.printWin.destroy();
                 return;
             }
-
-            setTimeout(() => {
-                const msgId = showMessage(window.siyuan.languages.exporting, -1);
-                const filePath = result.filePaths[0].endsWith(ipcData.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle));
-                localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {removeAssets: ipcData.removeAssets})));
-                try {
-                    window.siyuan.printWin.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {
-                        fetchPost("/api/export/exportHTML", {
-                            id: ipcData.rootId,
-                            pdf: true,
-                            removeAssets: ipcData.removeAssets,
-                            savePath: filePath
-                        }, () => {
-                            const pdfFilePath = path.join(filePath, path.basename(filePath) + ".pdf");
-                            fs.writeFileSync(pdfFilePath, pdfData);
-                            window.siyuan.printWin.destroy();
-                            fetchPost("/api/export/addPDFOutline", {
-                                id: ipcData.rootId,
-                                path: pdfFilePath
-                            }, () => {
-                                afterExport(pdfFilePath, msgId);
-                                if (ipcData.removeAssets) {
-                                    const removePromise = (dir: string) => {
-                                        return new Promise(function (resolve) {
-                                            //先读文件夹
-                                            fs.stat(dir, function (err, stat) {
-                                                if (stat) {
-                                                    if (stat.isDirectory()) {
-                                                        fs.readdir(dir, function (err, files) {
-                                                            files = files.map(file => path.join(dir, file)); // a/b  a/m
-                                                            Promise.all(files.map(file => removePromise(file))).then(function () {
-                                                                fs.rmdir(dir, resolve);
-                                                            });
-                                                        });
-                                                    } else {
-                                                        fs.unlink(dir, resolve);
-                                                    }
-                                                }
-                                            });
-                                        });
-                                    };
-                                    removePromise(path.join(filePath, "assets"));
-                                }
-                            });
-                        });
-                    }).catch((error: string) => {
-                        showMessage("Export PDF error:" + error, 0, "error", msgId);
+            const msgId = showMessage(window.siyuan.languages.exporting, -1);
+            const filePath = result.filePaths[0].endsWith(ipcData.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle));
+            localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {removeAssets: ipcData.removeAssets})));
+            try {
+                window.siyuan.printWin.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {
+                    fetchPost("/api/export/exportHTML", {
+                        id: ipcData.rootId,
+                        pdf: true,
+                        removeAssets: ipcData.removeAssets,
+                        savePath: filePath
+                    }, () => {
+                        const pdfFilePath = path.join(filePath, path.basename(filePath) + ".pdf");
+                        fs.writeFileSync(pdfFilePath, pdfData);
                         window.siyuan.printWin.destroy();
+                        fetchPost("/api/export/addPDFOutline", {
+                            id: ipcData.rootId,
+                            path: pdfFilePath
+                        }, () => {
+                            afterExport(pdfFilePath, msgId);
+                            if (ipcData.removeAssets) {
+                                const removePromise = (dir: string) => {
+                                    return new Promise(function (resolve) {
+                                        //先读文件夹
+                                        fs.stat(dir, function (err, stat) {
+                                            if (stat) {
+                                                if (stat.isDirectory()) {
+                                                    fs.readdir(dir, function (err, files) {
+                                                        files = files.map(file => path.join(dir, file)); // a/b  a/m
+                                                        Promise.all(files.map(file => removePromise(file))).then(function () {
+                                                            fs.rmdir(dir, resolve);
+                                                        });
+                                                    });
+                                                } else {
+                                                    fs.unlink(dir, resolve);
+                                                }
+                                            }
+                                        });
+                                    });
+                                };
+                                removePromise(path.join(filePath, "assets"));
+                            }
+                        });
                     });
-                } catch (e) {
-                    showMessage("Export PDF failed: " + e, 0, "error", msgId);
+                }).catch((error: string) => {
+                    showMessage("Export PDF error:" + error, 0, "error", msgId);
                     window.siyuan.printWin.destroy();
-                }
-            }, 200);
+                });
+            } catch (e) {
+                showMessage("Export PDF failed: " + e, 0, "error", msgId);
+                window.siyuan.printWin.destroy();
+            }
+            window.siyuan.printWin.hide();
         });
     });
     window.addEventListener("beforeunload", () => {

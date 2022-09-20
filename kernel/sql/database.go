@@ -529,9 +529,9 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 	boxLocalPath := filepath.Join(util.DataDir, boxID)
 	docDirLocalPath := filepath.Join(boxLocalPath, p)
 	switch n.Type {
-	case ast.NodeLinkText:
+	case ast.NodeImage:
 		text := n.Text()
-		markdown := treenode.ExportNodeStdMd(n.Parent, luteEngine)
+		markdown := treenode.ExportNodeStdMd(n, luteEngine)
 		parentBlock := treenode.ParentBlock(n)
 		span := &Span{
 			ID:       ast.NewNodeID(),
@@ -545,7 +545,48 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			IAL:      treenode.IALStr(n),
 		}
 		spans = append(spans, span)
-		walkStatus = ast.WalkContinue
+		walkStatus = ast.WalkSkipChildren
+
+		destNode := n.ChildByType(ast.NodeLinkDest)
+		if nil == destNode {
+			return
+		}
+
+		// assetsLinkDestsInTree
+
+		if !IsAssetLinkDest(destNode.Tokens) {
+			return
+		}
+
+		dest := gulu.Str.FromBytes(destNode.Tokens)
+		var title string
+		if titleNode := n.ChildByType(ast.NodeLinkTitle); nil != titleNode {
+			title = gulu.Str.FromBytes(titleNode.Tokens)
+		}
+
+		var hash string
+		var hashErr error
+		if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
+			if !gulu.File.IsDir(lp) {
+				hash, hashErr = util.GetEtag(lp)
+				if nil != hashErr {
+					logging.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
+				}
+			}
+		}
+		name, _ := util.LastID(dest)
+		asset := &Asset{
+			ID:      ast.NewNodeID(),
+			BlockID: parentBlock.ID,
+			RootID:  rootID,
+			Box:     boxID,
+			DocPath: p,
+			Path:    dest,
+			Name:    name,
+			Title:   title,
+			Hash:    hash,
+		}
+		assets = append(assets, asset)
 		return
 	case ast.NodeTag, ast.NodeInlineMath, ast.NodeCodeSpan, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline, ast.NodeTextMark:
 		typ := treenode.TypeAbbr(n.Type.String())
@@ -576,62 +617,6 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			IAL:      treenode.IALStr(n),
 		}
 		spans = append(spans, span)
-		walkStatus = ast.WalkSkipChildren
-		return
-	case ast.NodeLinkDest:
-		text := n.TokensStr()
-		markdown := treenode.ExportNodeStdMd(n.Parent, luteEngine)
-		parentBlock := treenode.ParentBlock(n)
-		span := &Span{
-			ID:       ast.NewNodeID(),
-			BlockID:  parentBlock.ID,
-			RootID:   rootID,
-			Box:      boxID,
-			Path:     p,
-			Content:  text,
-			Markdown: markdown,
-			Type:     treenode.TypeAbbr(n.Type.String()),
-			IAL:      treenode.IALStr(n),
-		}
-		spans = append(spans, span)
-
-		// assetsLinkDestsInTree
-
-		if !IsAssetLinkDest(n.Tokens) {
-			walkStatus = ast.WalkContinue
-			return
-		}
-
-		dest := gulu.Str.FromBytes(n.Tokens)
-		parentBlock = treenode.ParentBlock(n)
-		var title string
-		if titleNode := n.Parent.ChildByType(ast.NodeLinkTitle); nil != titleNode {
-			title = gulu.Str.FromBytes(titleNode.Tokens)
-		}
-
-		var hash string
-		var hashErr error
-		if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
-			if !gulu.File.IsDir(lp) {
-				hash, hashErr = util.GetEtag(lp)
-				if nil != hashErr {
-					logging.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
-				}
-			}
-		}
-		name, _ := util.LastID(dest)
-		asset := &Asset{
-			ID:      ast.NewNodeID(),
-			BlockID: parentBlock.ID,
-			RootID:  rootID,
-			Box:     boxID,
-			DocPath: p,
-			Path:    dest,
-			Name:    name,
-			Title:   title,
-			Hash:    hash,
-		}
-		assets = append(assets, asset)
 		walkStatus = ast.WalkSkipChildren
 		return
 	case ast.NodeDocument:

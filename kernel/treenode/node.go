@@ -275,6 +275,7 @@ var typeAbbrMap = map[string]string{
 	"NodeAudio":            "audio",
 	// 行级元素
 	"NodeText":          "text",
+	"NodeImage":         "img",
 	"NodeLinkText":      "link_text",
 	"NodeLinkDest":      "link_dest",
 	"NodeTag":           "tag",

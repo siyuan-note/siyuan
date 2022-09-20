@@ -90,7 +90,7 @@ func checkDownloadInstallPkg() {
 	defer checkDownloadInstallPkgLock.Unlock()
 
 	downloadPkgURL, checksum, err := getUpdatePkg()
-	if nil != err {
+	if nil != err || "" == downloadPkgURL || "" == checksum {
 		return
 	}
 

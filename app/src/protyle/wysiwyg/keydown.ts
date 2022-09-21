@@ -537,7 +537,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (previousSibling && previousSibling.nodeType !== 3 && previousSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
                     protyle.toolbar.showRender(protyle, previousSibling);
                     return;
-                } else if (!previousSibling && range.startContainer.parentElement.previousSibling.isSameNode(range.startContainer.parentElement.previousElementSibling) &&
+                } else if (!previousSibling &&
+                    range.startContainer.parentElement.previousSibling && range.startContainer.parentElement.previousSibling.isSameNode(range.startContainer.parentElement.previousElementSibling) &&
                     range.startContainer.parentElement.previousElementSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
                     protyle.toolbar.showRender(protyle, range.startContainer.parentElement.previousElementSibling);
                     return;

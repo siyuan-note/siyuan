@@ -23,6 +23,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/template"
 	"time"
@@ -88,6 +89,7 @@ func SearchTemplate(keyword string) (ret []*Block) {
 		}
 		return nil
 	})
+	sort.Slice(ret, func(i, j int) bool { return util.PinYinCompare(filepath.Base(ret[i].Path), filepath.Base(ret[j].Path)) })
 	return
 }
 

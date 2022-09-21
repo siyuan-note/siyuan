@@ -66,6 +66,7 @@ export class InlineMemo extends ToolbarItem {
                 const nextNewNode = newNodes[i + 1] as HTMLElement;
                 if (currentNewNode.nodeType !== 3 && nextNewNode && nextNewNode.nodeType !== 3 &&
                     isArrayEqual(nextNewNode.getAttribute("data-type").split(" "), currentNewNode.getAttribute("data-type").split(" ")) &&
+                    currentNewNode.style.fontSize === nextNewNode.style.fontSize &&
                     currentNewNode.style.color === nextNewNode.style.color &&
                     currentNewNode.style.webkitTextFillColor === nextNewNode.style.webkitTextFillColor &&
                     currentNewNode.style.webkitTextStroke === nextNewNode.style.webkitTextStroke &&

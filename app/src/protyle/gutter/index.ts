@@ -1358,17 +1358,16 @@ export class Gutter {
 </div>`,
             click: () => {
                 this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                    e.style.textShadow = "";
                     e.style.color = "";
-                    e.style.webkitBackgroundClip = "";
-                    e.style.backgroundImage = "";
                     e.style.webkitTextFillColor = "";
                     e.style.webkitTextStroke = "";
                     e.style.textShadow = "";
                     e.style.backgroundColor = "";
+                    e.style.fontSize = "";
                 });
             }
         });
+        // TODO 字体大小
         return styles;
     }
 

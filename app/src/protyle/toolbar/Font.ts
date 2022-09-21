@@ -122,11 +122,14 @@ export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
     protyle.toolbar.setInlineMark(protyle, "text", "range", {type, color});
 };
 
-export const setFontStyle = (textElement:HTMLElement, textOption:ITextOption) => {
+export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) => {
     if (textOption) {
         switch (textOption.type) {
             case "color":
                 textElement.style.color = textOption.color;
+                break;
+            case "fontSize":
+                textElement.style.fontSize = textOption.color;
                 break;
             case "backgroundColor":
                 textElement.style.backgroundColor = textOption.color;
@@ -151,18 +154,21 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
     let webkitTextStroke = "";
     let textShadow = "";
     let backgroundColor = "";
+    let fontSize = "";
     if (currentElement.nodeType !== 3) {
         color = currentElement.style.color;
         webkitTextFillColor = currentElement.style.webkitTextFillColor;
         webkitTextStroke = currentElement.style.webkitTextStroke;
         textShadow = currentElement.style.textShadow;
         backgroundColor = currentElement.style.backgroundColor;
+        fontSize = currentElement.style.fontSize;
     }
     if (textObj.type === "color") {
         return textObj.color === sideElement.style.color &&
             webkitTextFillColor === sideElement.style.webkitTextFillColor &&
             webkitTextStroke === sideElement.style.webkitTextStroke &&
             textShadow === sideElement.style.textShadow &&
+            fontSize === sideElement.style.fontSize &&
             backgroundColor === sideElement.style.backgroundColor;
     }
     if (textObj.type === "backgroundColor") {
@@ -170,6 +176,7 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             webkitTextFillColor === sideElement.style.webkitTextFillColor &&
             webkitTextStroke === sideElement.style.webkitTextStroke &&
             textShadow === sideElement.style.textShadow &&
+            fontSize === sideElement.style.fontSize &&
             textObj.color === sideElement.style.backgroundColor;
     }
     if (textObj.type === "style2") {
@@ -177,13 +184,23 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             "transparent" === sideElement.style.webkitTextFillColor &&
             "0.2px var(--b3-theme-on-background)" === sideElement.style.webkitTextStroke &&
             textShadow === sideElement.style.textShadow &&
+            fontSize === sideElement.style.fontSize &&
             backgroundColor === sideElement.style.backgroundColor;
     }
     if (textObj.type === "style4") {
         return color === sideElement.style.color &&
             webkitTextFillColor === sideElement.style.webkitTextFillColor &&
             webkitTextStroke === sideElement.style.webkitTextStroke &&
+            fontSize === sideElement.style.fontSize &&
             "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)" === sideElement.style.textShadow &&
+            backgroundColor === sideElement.style.backgroundColor;
+    }
+    if (textObj.type === "fontSize") {
+        return color === sideElement.style.color &&
+            webkitTextFillColor === sideElement.style.webkitTextFillColor &&
+            webkitTextStroke === sideElement.style.webkitTextStroke &&
+            textShadow === sideElement.style.textShadow &&
+            textObj.color === sideElement.style.fontSize &&
             backgroundColor === sideElement.style.backgroundColor;
     }
 };

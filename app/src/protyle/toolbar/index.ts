@@ -184,6 +184,7 @@ export class Toolbar {
             case "tag":
             case "u":
             case "sup":
+            case "clear":
             case "sub":
             case "kbd":
                 menuItemObj = new ToolbarItem(protyle, menuItem);
@@ -294,11 +295,15 @@ export class Toolbar {
         const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
 
-        if (actionBtn?.classList.contains("protyle-toolbar__item--current") || (
-            action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && (!textObj || textObj.type === "remove")
+        if (type === "clear" || actionBtn?.classList.contains("protyle-toolbar__item--current") || (
+            action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && !textObj
         )) {
             // 移除
-            if (actionBtn) {
+            if (type === "clear") {
+                this.element.querySelectorAll('[data-type="em"],[data-type="u"],[data-type="s"],[data-type="mark"],[data-type="sup"],[data-type="sub"],[data-type="strong"]').forEach(item => {
+                    item.classList.remove("protyle-toolbar__item--current");
+                });
+            } else if (actionBtn) {
                 actionBtn.classList.remove("protyle-toolbar__item--current");
             }
             if (contents.childNodes.length === 0) {
@@ -320,24 +325,34 @@ export class Toolbar {
             contents.childNodes.forEach((item: HTMLElement, index) => {
                 if (item.nodeType !== 3 && item.tagName !== "BR") {
                     const types = item.getAttribute("data-type").split(" ");
-                    types.find((itemType, index) => {
-                        if (type === itemType) {
-                            types.splice(index, 1);
-                            return true;
+                    if (type === "clear") {
+                        for (let i = 0; i < types.length; i++) {
+                            if (["strong", "em", "u", "s", "mark", "sup", "sub"].includes(types[i])) {
+                                types.splice(i, 1);
+                                i--;
+                            }
                         }
-                    });
+                    } else {
+                        types.find((itemType, typeIndex) => {
+                            if (type === itemType) {
+                                types.splice(typeIndex, 1);
+                                return true;
+                            }
+                        });
+                    }
                     if (types.length === 0) {
                         if (item.textContent === "") {
                             item.textContent = Constants.ZWSP;
                         }
                         newNodes.push(document.createTextNode(item.textContent));
                     } else {
-                        if (textObj && textObj.type === "remove") {
+                        if (type === "clear") {
                             item.style.color = "";
                             item.style.webkitTextFillColor = "";
                             item.style.webkitTextStroke = "";
                             item.style.textShadow = "";
                             item.style.backgroundColor = "";
+                            item.style.fontSize = "";
                         }
                         if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
                             isArrayEqual(types, previousElement.getAttribute("data-type").split(" ")) &&
@@ -350,17 +365,11 @@ export class Toolbar {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
                         } else {
-                            if (item.textContent === "") {
-                                item.textContent = Constants.ZWSP;
-                            }
                             item.setAttribute("data-type", types.join(" "));
                             newNodes.push(item);
                         }
                     }
                 } else {
-                    if (item.textContent === "") {
-                        item.textContent = Constants.ZWSP;
-                    }
                     newNodes.push(item);
                 }
             });
@@ -466,6 +475,7 @@ export class Toolbar {
                 currentNewNode.style.webkitTextFillColor === nextNewNode.style.webkitTextFillColor &&
                 currentNewNode.style.webkitTextStroke === nextNewNode.style.webkitTextStroke &&
                 currentNewNode.style.textShadow === nextNewNode.style.textShadow &&
+                currentNewNode.style.fontSize === nextNewNode.style.fontSize &&
                 currentNewNode.style.backgroundColor === nextNewNode.style.backgroundColor) {
                 // 合并相同的 node
                 nextNewNode.innerHTML = currentNewNode.innerHTML + nextNewNode.innerHTML;

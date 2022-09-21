@@ -514,6 +514,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey("⌘/", event)) {
             event.stopPropagation();
             event.preventDefault();
+            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+            if (selectElements.length > 0) {
+                if (selectElements.length === 1) {
+                    protyle.gutter.renderMenu(protyle, selectElements[0]);
+                } else {
+                    protyle.gutter.renderMultipleMenu(protyle, Array.from(selectElements));
+                }
+                const rect = nodeElement.getBoundingClientRect();
+                window.siyuan.menus.menu.popup({x: rect.left, y: rect.top}, true);
+                return;
+            }
             const inlineElement = hasClosestByAttribute(range.startContainer, "data-type", null);
             if (inlineElement) {
                 const types = inlineElement.getAttribute("data-type").split(" ");
@@ -544,14 +555,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return;
                 }
             }
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            let actionElement = nodeElement;
-            if (selectElements.length > 0) {
-                actionElement = selectElements[0] as HTMLElement;
-            }
-            protyle.gutter.renderMenu(protyle, actionElement);
-            const rect = nodeElement.getBoundingClientRect();
-            window.siyuan.menus.menu.popup({x: rect.left, y: rect.top}, true);
             return;
         }
 

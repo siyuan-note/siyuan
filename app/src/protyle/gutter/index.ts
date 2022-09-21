@@ -375,7 +375,7 @@ export class Gutter {
         };
     }
 
-    private renderMultipleMenu(protyle: IProtyle, selectsElement: Element[]) {
+    public renderMultipleMenu(protyle: IProtyle, selectsElement: Element[]) {
         let isList = false;
         let isContinue = false;
         let hasEmbedBlock = false;

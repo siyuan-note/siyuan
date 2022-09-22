@@ -28,7 +28,7 @@ import {
     getLastBlock, getNextBlock,
     getPreviousHeading,
     getTopAloneElement,
-    hasNextSibling,
+    hasNextSibling, hasPreviousSibling,
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
@@ -113,6 +113,22 @@ export class WYSIWYG {
         protyle.toolbar.range = range;
         const inlineElement = range.startContainer.parentElement;
         const currentTypes = protyle.toolbar.getCurrentType();
+
+        let dataLength = inputData.length;
+        if (inputData === "<" || inputData === ">") {
+            // 使用 inlineElement.innerHTML 会出现 https://ld246.com/article/1627185027423 中的第2个问题
+            dataLength = 4;
+        }
+        if (currentTypes.length > 0 && range.toString() === "" && range.startOffset === inputData.length && inlineElement.tagName === "SPAN" &&
+            !hasPreviousSibling(range.startContainer) && !hasPreviousSibling(inlineElement)) {
+            const html = inlineElement.innerHTML.replace(Constants.ZWSP, "");
+            inlineElement.innerHTML = html.substr(dataLength);
+            const textNode = document.createTextNode(inputData);
+            inlineElement.before(textNode);
+            range.selectNodeContents(textNode);
+            range.collapse(false);
+            return;
+        }
         if (// 表格行内公式之前无法插入文字 https://github.com/siyuan-note/siyuan/issues/3908
             inlineElement.tagName === "SPAN" &&
             inlineElement.textContent.replace(Constants.ZWSP, "") !== inputData &&
@@ -122,11 +138,6 @@ export class WYSIWYG {
             inlineElement.textContent.replace(Constants.ZWSP, "").length >= inputData.length  // 为空的时候需要等于
         ) {
             const position = getSelectionOffset(inlineElement, protyle.wysiwyg.element, range);
-            let dataLength = inputData.length;
-            if (inputData === "<" || inputData === ">") {
-                // 使用 inlineElement.innerHTML 会出现 https://ld246.com/article/1627185027423 中的第2个问题
-                dataLength = 4;
-            }
             // ctrl+k 会产生 ZWSP，需要移除
             const html = inlineElement.innerHTML.replace(Constants.ZWSP, "");
             if (position.start === inlineElement.textContent.length) {

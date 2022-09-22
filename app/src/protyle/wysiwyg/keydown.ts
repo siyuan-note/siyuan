@@ -234,7 +234,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             hideElements(["select"], protyle);
             return false;
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) && !event.repeat) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
                 setFold(protyle, selectElements[0]);
@@ -255,7 +255,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return false;
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event)) {
+
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event) && !event.repeat) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
                 setFold(protyle, selectElements[0], true);

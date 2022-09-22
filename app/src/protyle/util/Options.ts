@@ -89,8 +89,8 @@ export class Options {
             "|",
             "code",
             "tag",
-            "inline-memo",
             "inline-math",
+            "inline-memo",
         ] : [
             "block-ref",
             "a",
@@ -108,8 +108,8 @@ export class Options {
             "code",
             "kbd",
             "tag",
-            "inline-memo",
             "inline-math",
+            "inline-memo",
         ],
         typewriterMode: false,
         upload: {

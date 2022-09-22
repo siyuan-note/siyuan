@@ -1,3 +1,60 @@
+## v2.2.0 / 2022-09-22
+
+### 引入特性
+
+* [支持行级备注](https://github.com/siyuan-note/siyuan/issues/174)
+* [行级元素支持多重样式类型](https://github.com/siyuan-note/siyuan/issues/2911)
+* [支持设置行级文本字体大小](https://github.com/siyuan-note/siyuan/issues/5914)
+
+### 改进功能
+
+* [改进行级元素解析](https://github.com/siyuan-note/siyuan/issues/5787)
+* [图片后插入代码块图片后的光标错误](https://github.com/siyuan-note/siyuan/issues/5861)
+* [改进 `Ctrl+K` 超链接粘贴识别](https://github.com/siyuan-note/siyuan/issues/5865)
+* [优化排版时键盘元素前后自动空格](https://github.com/siyuan-note/siyuan/issues/5873)
+* [内核接口返回非 200 状态码时报错提示用户](https://github.com/siyuan-note/siyuan/issues/5881)
+* [细化云端同步锁提升稳定性](https://github.com/siyuan-note/siyuan/issues/5887)
+* [搜索区分大小写根据配置项单独建立索引](https://github.com/siyuan-note/siyuan/issues/5889)
+* [重建索引细节进度推送展现](https://github.com/siyuan-note/siyuan/issues/5890)
+* [以 Docker 容器运行时不再进行 WebSocket 传输压缩](https://github.com/siyuan-note/siyuan/issues/5892)
+* [长按关闭页签快捷键不应连续快速关闭页签](https://github.com/siyuan-note/siyuan/issues/5896)
+* [平板端提供退出应用方式](https://github.com/siyuan-note/siyuan/issues/5898)
+* [改进 `优化排版` 性能](https://github.com/siyuan-note/siyuan/issues/5900)
+* [初始化界面加入不支持第三方同步盘的警告提示文案](https://github.com/siyuan-note/siyuan/issues/5902)
+* [搜索替换支持块引锚文本](https://github.com/siyuan-note/siyuan/issues/5903)
+* [暗黑模式下 mermaid 通过 `%%{}%%` 设置的参数没有效果](https://github.com/siyuan-note/siyuan/issues/5905)
+* [被 `\` 转义的标记符在大纲显示](https://github.com/siyuan-note/siyuan/issues/5911)
+* [下拉页签提供关闭功能](https://github.com/siyuan-note/siyuan/issues/5913)
+* [`/模板` 搜索按名称自然升序排序](https://github.com/siyuan-note/siyuan/issues/5916)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/5904)
+
+### 移除功能
+
+* [不再支持使用 Markdown 标记符嵌套行级元素](https://github.com/siyuan-note/siyuan/issues/5869)
+* [不再支持通过 HTML `<kbd>` 和 `<u>` 输入键盘和下划线元素](https://github.com/siyuan-note/siyuan/issues/5877)
+
+### 修复缺陷
+
+* [导出 PDF 的 SVG 图片链接无法正常显示](https://github.com/siyuan-note/siyuan/issues/5757)
+* [使用 API `/api/block/updateBlock` 更新列表块时无法渲染行内公式](https://github.com/siyuan-note/siyuan/issues/5814)
+* [快捷键设置输入框回显异常](https://github.com/siyuan-note/siyuan/issues/5857)
+* [PDF 导出时路径选择报错](https://github.com/siyuan-note/siyuan/issues/5862)
+* [块滚动条最后一个块后向上滚动失效](https://github.com/siyuan-note/siyuan/issues/5863)
+* [使用 API `setBlockAttrs` 设置文档块属性后未变更文档 DOM 属性](https://github.com/siyuan-note/siyuan/issues/5866)
+* [导出较大的 PDF 预览白屏](https://github.com/siyuan-note/siyuan/issues/5875)
+* [双击打开图片不对](https://github.com/siyuan-note/siyuan/issues/5876)
+* [网络代理设置 HTTPS 协议后显示不正确](https://github.com/siyuan-note/siyuan/issues/5880)
+* [空的引述块中回车报错](https://github.com/siyuan-note/siyuan/issues/5882)
+* [自定义表情搜索报错](https://github.com/siyuan-note/siyuan/issues/5883)
+* [macOS 端代码块中空行处使用 `⌘+Del` 删除异常](https://github.com/siyuan-note/siyuan/issues/5884)
+* [云端同步创建数据快照报错 `invalid argument`](https://github.com/siyuan-note/siyuan/issues/5893)
+* [导出 PDF 预览时点击块引转换后的脚注跳转不正确](https://github.com/siyuan-note/siyuan/issues/5894)
+* [横向排版 Shift+Click 从右向左无效](https://github.com/siyuan-note/siyuan/issues/5895)
+* [表格四周点击导致光标消失](https://github.com/siyuan-note/siyuan/issues/5901)
+
 ## v2.1.14 / 2022-09-09
 
 ### 改进功能

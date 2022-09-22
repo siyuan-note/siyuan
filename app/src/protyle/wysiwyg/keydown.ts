@@ -514,47 +514,49 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey("⌘/", event)) {
             event.stopPropagation();
             event.preventDefault();
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
-                if (selectElements.length === 1) {
-                    protyle.gutter.renderMenu(protyle, selectElements[0]);
-                } else {
-                    protyle.gutter.renderMultipleMenu(protyle, Array.from(selectElements));
+            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                const inlineElement = hasClosestByAttribute(range.startContainer, "data-type", null);
+                if (inlineElement) {
+                    const types = inlineElement.getAttribute("data-type").split(" ");
+                    if (types.includes("block-ref")) {
+                        refMenu(protyle, inlineElement);
+                        return;
+                    } else if (types.includes("inline-memo")) {
+                        protyle.toolbar.showRender(protyle, inlineElement);
+                        return;
+                    } else if (types.includes("file-annotation-ref")) {
+                        protyle.toolbar.showFileAnnotationRef(protyle, inlineElement);
+                        return;
+                    } else if (types.includes("a")) {
+                        linkMenu(protyle, inlineElement);
+                        return;
+                    }
                 }
-                const rect = nodeElement.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.left, y: rect.top}, true);
-                return;
-            }
-            const inlineElement = hasClosestByAttribute(range.startContainer, "data-type", null);
-            if (inlineElement) {
-                const types = inlineElement.getAttribute("data-type").split(" ");
-                if (types.includes("block-ref")) {
-                    refMenu(protyle, inlineElement);
-                    return;
-                } else if (types.includes("inline-memo")) {
-                    protyle.toolbar.showRender(protyle, inlineElement);
-                    return;
-                } else if (types.includes("file-annotation-ref")) {
-                    protyle.toolbar.showFileAnnotationRef(protyle, inlineElement);
-                    return;
-                } else if (types.includes("a")) {
-                    linkMenu(protyle, inlineElement);
-                    return;
+
+                // https://github.com/siyuan-note/siyuan/issues/5185
+                if (range.startOffset === 0 && range.startContainer.nodeType === 3) {
+                    const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
+                    if (previousSibling && previousSibling.nodeType !== 3 && previousSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
+                        protyle.toolbar.showRender(protyle, previousSibling);
+                        return;
+                    } else if (!previousSibling &&
+                        range.startContainer.parentElement.previousSibling && range.startContainer.parentElement.previousSibling.isSameNode(range.startContainer.parentElement.previousElementSibling) &&
+                        range.startContainer.parentElement.previousElementSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
+                        protyle.toolbar.showRender(protyle, range.startContainer.parentElement.previousElementSibling);
+                        return;
+                    }
                 }
+
+                selectElements.push(nodeElement);
             }
-            // https://github.com/siyuan-note/siyuan/issues/5185
-            if (range.startOffset === 0 && range.startContainer.nodeType === 3) {
-                const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
-                if (previousSibling && previousSibling.nodeType !== 3 && previousSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
-                    protyle.toolbar.showRender(protyle, previousSibling);
-                    return;
-                } else if (!previousSibling &&
-                    range.startContainer.parentElement.previousSibling && range.startContainer.parentElement.previousSibling.isSameNode(range.startContainer.parentElement.previousElementSibling) &&
-                    range.startContainer.parentElement.previousElementSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
-                    protyle.toolbar.showRender(protyle, range.startContainer.parentElement.previousElementSibling);
-                    return;
-                }
+            if (selectElements.length === 1) {
+                protyle.gutter.renderMenu(protyle, selectElements[0]);
+            } else {
+                protyle.gutter.renderMultipleMenu(protyle, selectElements);
             }
+            const rect = nodeElement.getBoundingClientRect();
+            window.siyuan.menus.menu.popup({x: rect.left, y: rect.top}, true);
             return;
         }
 

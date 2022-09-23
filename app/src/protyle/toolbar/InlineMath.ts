@@ -54,7 +54,7 @@ export class InlineMath extends ToolbarItem {
             } else {
                 range.setStartAfter(newElement);
                 range.collapse(true);
-                focusByRange(range)
+                focusByRange(range);
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
                 wbrElement.remove();

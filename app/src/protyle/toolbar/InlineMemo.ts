@@ -1,6 +1,4 @@
 import {ToolbarItem} from "./ToolbarItem";
-import * as dayjs from "dayjs";
-import {updateTransaction} from "../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {fixTableRange} from "../util/selection";

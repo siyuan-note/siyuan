@@ -297,7 +297,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         turnsIntoTransaction({
             protyle: protyle,
             selectsElement: [blockElement],
-            type: 'Blocks2Ps',
+            type: "Blocks2Ps",
         });
         return;
     }

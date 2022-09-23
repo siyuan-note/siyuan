@@ -91,8 +91,8 @@ export class Title {
                 event.preventDefault();
                 event.stopPropagation();
             } else if (event.key === "Enter") {
-                const newId = Lute.NewNodeID()
-                const newElement = genEmptyElement(false, true, newId)
+                const newId = Lute.NewNodeID();
+                const newElement = genEmptyElement(false, true, newId);
                 protyle.wysiwyg.element.insertAdjacentElement("afterbegin", newElement);
                 focusByWbr(newElement, protyle.toolbar.range || getEditorRange(newElement));
                 transaction(protyle, [{

@@ -563,7 +563,7 @@ export class Toolbar {
 </div></div>`;
         this.subElement.querySelector(".b3-button--cancel").addEventListener(getEventName(), () => {
             refElement.outerHTML = refElement.textContent + "<wbr>";
-            hideElements(["util"], protyle)
+            hideElements(["util"], protyle);
         });
         const anchorElement = this.subElement.querySelector('[data-type="anchor"]') as HTMLInputElement;
         anchorElement.value = refElement.textContent;
@@ -581,7 +581,7 @@ export class Toolbar {
                 return;
             }
             if (event.key === "Enter" || event.key === "Escape") {
-                hideElements(["util"], protyle)
+                hideElements(["util"], protyle);
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -594,7 +594,7 @@ export class Toolbar {
                 } else {
                     refElement.innerHTML = "*";
                 }
-                this.range.setStartAfter(refElement)
+                this.range.setStartAfter(refElement);
                 focusByRange(this.range);
             } else {
                 focusByWbr(nodeElement, this.range);
@@ -924,7 +924,7 @@ export class Toolbar {
                     processRender(renderElement);
                 } else {
                     inlineLastNode = renderElement;
-                    renderElement.outerHTML = "<wbr>"
+                    renderElement.outerHTML = "<wbr>";
                 }
             } else {
                 renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
@@ -944,7 +944,7 @@ export class Toolbar {
                         this.range.collapse(true);
                         focusByRange(this.range);
                     } else {
-                        focusByWbr(nodeElement, this.range)
+                        focusByWbr(nodeElement, this.range);
                     }
                 } else if (renderElement.parentElement) {
                     this.range.setStartAfter(renderElement);
@@ -966,7 +966,7 @@ export class Toolbar {
                 }
             }
             updateTransaction(protyle, id, newHTML, html);
-        }
+        };
         const nodeRect = renderElement.getBoundingClientRect();
         this.element.classList.add("fn__none");
         if (isPin) {

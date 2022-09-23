@@ -117,7 +117,7 @@ export const fontMenu = (protyle: IProtyle) => {
     });
     element.querySelector("select").addEventListener("change", function (event: Event) {
         fontEvent(protyle, "fontSize", (event.target as HTMLSelectElement).value);
-    })
+    });
     return element;
 };
 

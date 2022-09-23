@@ -481,7 +481,7 @@ export class Wnd {
                             this.switchTab(item, true);
                             window.siyuan.menus.menu.remove();
                         }
-                        event.preventDefault()
+                        event.preventDefault();
                         event.stopPropagation();
                     });
                 },

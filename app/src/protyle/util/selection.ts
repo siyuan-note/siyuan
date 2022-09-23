@@ -522,8 +522,8 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             }
         }
         // 需要定位到第一个 child https://github.com/siyuan-note/siyuan/issues/5930
-        const range = setFirstNodeRange(cursorElement, getEditorRange(cursorElement))
-        focusByRange(range)
+        const range = setFirstNodeRange(cursorElement, getEditorRange(cursorElement));
+        focusByRange(range);
         return range;
     } else if (parentElement) {
         parentElement.focus();

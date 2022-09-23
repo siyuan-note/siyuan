@@ -1265,11 +1265,15 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string) (footn
 			continue
 		}
 		defNode := treenode.GetNodeInTree(t, foot.defID)
+		docID := strings.TrimSuffix(path.Base(defNode.Path), ".sy")
 		var nodes []*ast.Node
 		if ast.NodeHeading == defNode.Type {
 			nodes = append(nodes, defNode)
-			children := treenode.HeadingChildren(defNode)
-			nodes = append(nodes, children...)
+			if rootID != docID {
+				// 同文档块引转脚注缩略定义考虑容器块和标题块 https://github.com/siyuan-note/siyuan/issues/5917
+				children := treenode.HeadingChildren(defNode)
+				nodes = append(nodes, children...)
+			}
 		} else if ast.NodeDocument == defNode.Type {
 			docTitle := &ast.Node{ID: defNode.ID, Type: ast.NodeHeading, HeadingLevel: 1}
 			docTitle.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(defNode.IALAttr("title"))})
@@ -1345,7 +1349,8 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string) (footn
 				}
 
 				docID := strings.TrimSuffix(path.Base(n.Path), ".sy")
-				if rootID == docID { // 在同一个文档的话缩略显示 https://github.com/siyuan-note/siyuan/issues/3299
+				if rootID == docID {
+					// 同文档块引转脚注缩略定义 https://github.com/siyuan-note/siyuan/issues/3299
 					if text := sql.GetRefText(n.ID); 64 < utf8.RuneCountInString(text) {
 						var unlinkChildren []*ast.Node
 						for c := n.FirstChild; nil != c; c = c.Next {

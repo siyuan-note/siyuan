@@ -161,6 +161,8 @@ declare class Lute {
 
     public SetKramdownIAL(enable: boolean): void;
 
+    public BlockDOM2Md(html: string): string;
+
     public BlockDOM2StdMd(html: string): string;
 
     public SetGitConflict(enable: boolean): void;

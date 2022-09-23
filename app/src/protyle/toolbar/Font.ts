@@ -70,6 +70,11 @@ export const fontMenu = (protyle: IProtyle) => {
         });
         lastColorHTML += "</div>";
     }
+    const textElement = protyle.toolbar.range.cloneContents().querySelector('[data-type~="text"]') as HTMLElement;
+    let fontSize = "16px";
+    if (textElement) {
+        fontSize = textElement.style.fontSize;
+    }
     element.innerHTML = `${lastColorHTML}<div style="margin: 4px 0 2px">${window.siyuan.languages.colorFont}</div>
 <div class="fn__flex">
     ${colorHTML}
@@ -86,18 +91,18 @@ export const fontMenu = (protyle: IProtyle) => {
 <div style="margin: 4px 0 2px">${window.siyuan.languages.fontSize}</div>
 <div class="fn__flex">
     <select class="b3-select">
-        <option value="12px">12px</option>
-        <option value="13px">13px</option>
-        <option value="14px">14px</option>
-        <option value="15px">15px</option>
-        <option selected value="16px">16px</option>
-        <option value="19px">19px</option>
-        <option value="22px">22px</option>
-        <option value="24px">24px</option>
-        <option value="29px">29px</option>
-        <option value="32px">32px</option>
-        <option value="40px">40px</option>
-        <option value="48px">48px</option>
+        <option ${fontSize === "12px" ? "selected" : ""} value="12px">12px</option>
+        <option ${fontSize === "13px" ? "selected" : ""} value="13px">13px</option>
+        <option ${fontSize === "14px" ? "selected" : ""} value="14px">14px</option>
+        <option ${fontSize === "15px" ? "selected" : ""} value="15px">15px</option>
+        <option ${fontSize === "16px" ? "selected" : ""} value="16px">16px</option>
+        <option ${fontSize === "19px" ? "selected" : ""} value="19px">19px</option>
+        <option ${fontSize === "22px" ? "selected" : ""} value="22px">22px</option>
+        <option ${fontSize === "24px" ? "selected" : ""} value="24px">24px</option>
+        <option ${fontSize === "29px" ? "selected" : ""} value="29px">29px</option>
+        <option ${fontSize === "32px" ? "selected" : ""} value="32px">32px</option>
+        <option ${fontSize === "40px" ? "selected" : ""} value="40px">40px</option>
+        <option ${fontSize === "48px" ? "selected" : ""} value="48px">48px</option>
     </select>
 </div>`;
     element.addEventListener(getEventName(), function (event: Event) {

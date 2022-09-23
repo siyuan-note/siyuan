@@ -104,7 +104,7 @@ export const fontMenu = (protyle: IProtyle) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(element)) {
             if (target.tagName === "BUTTON") {
-                fontEvent(protyle, target.getAttribute("data-type"), target.style.backgroundColor);
+                fontEvent(protyle, target.getAttribute("data-type"), target.style.backgroundColor || target.textContent);
                 break;
             }
             target = target.parentElement;

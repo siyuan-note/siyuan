@@ -52,16 +52,19 @@ export const fontMenu = (protyle: IProtyle) => {
             const lastFontStatus = item.split(Constants.ZWSP);
             switch (lastFontStatus[0]) {
                 case "color":
-                    lastColorHTML += `<button class="b3-color__square" data-type="color" style="background-color:${lastFontStatus[1]}"></button>`;
+                    lastColorHTML += `<button class="b3-color__square" data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]}"></button>`;
                     break;
                 case "backgroundColor":
-                    lastColorHTML += `<button class="b3-color__square" data-type="backgroundColor" style="background-color:${lastFontStatus[1]}"></button>`;
+                    lastColorHTML += `<button class="b3-color__square" data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]}"></button>`;
                     break;
                 case "style2":
-                    lastColorHTML += `<button data-type="style2" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>`;
+                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>`;
                     break;
                 case "style4":
-                    lastColorHTML += `<button data-type="style4" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)">${window.siyuan.languages.shadow}</button>`;
+                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)">${window.siyuan.languages.shadow}</button>`;
+                    break;
+                case "fontSize":
+                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style">${lastFontStatus[1]}</button>`;
                     break;
             }
         });

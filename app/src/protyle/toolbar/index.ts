@@ -237,7 +237,7 @@ export class Toolbar {
     }
 
     public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar", textObj?: ITextOption) {
-        if (["a", "block-ref", "inline-math", "inline-memo"].includes(type)) {
+        if (["a", "block-ref", "inline-math", "inline-memo"].includes(type) || (type === "text" && !textObj)) {
             protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("block-ref" === type ? getEventName() : "click"));
             return;
         }

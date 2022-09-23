@@ -49,7 +49,7 @@ export const keymap = {
 <div class="b3-label file-tree config-keymap" id="keymapList">
     <label class="b3-form__icon" style="display:block;">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-        <input id="keymapInput" class="b3-form__icon-input b3-text-field " style="width:80%;" placeholder="${window.siyuan.languages.search}"><input id="searchByKey" class="b3-text-field " style="width:20%;" spellcheck="false" placeholder="按键搜索">
+        <input id="keymapInput" class="b3-form__icon-input b3-text-field " style="width:80%;" placeholder="${window.siyuan.languages.search}"><input id="searchByKey" class="b3-text-field " style="width:20%;" spellcheck="false" placeholder="${window.siyuan.languages.keySearch}">
     </label>
     <div class="fn__hr"></div>
     <ul class="b3-list b3-list--border b3-list--background">

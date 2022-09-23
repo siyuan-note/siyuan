@@ -1,4 +1,5 @@
 {
+  "keySearch": "快捷键搜索",
   "autoDownloadUpdatePkg": "自动下载更新安装包",
   "autoDownloadUpdatePkgTip": "开启后会每隔两小时自动检查版本更新，如果有更新版本则自动下载安装包并提示安装",
   "downloaded": "已下载",

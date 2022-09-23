@@ -258,7 +258,15 @@ export class Preview {
     private processZHTable(element: HTMLElement) {
         element.querySelectorAll("table").forEach(item => {
             const headElement = item.querySelector("thead");
-            item.querySelector("tbody").insertAdjacentElement("afterbegin", headElement.firstElementChild);
+            if (!headElement) {
+                return;
+            }
+            const tbodyElement = item.querySelector("tbody");
+            if (tbodyElement) {
+                tbodyElement.insertAdjacentElement("afterbegin", headElement.firstElementChild);
+            } else {
+                item.innerHTML = `<tbody>${headElement.innerHTML}</tbody>`;
+            }
             headElement.remove();
         });
     }

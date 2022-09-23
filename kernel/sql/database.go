@@ -300,6 +300,34 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 				Type:         treenode.TypeAbbr(n.Type.String()),
 			}
 			fileAnnotationRefs = append(fileAnnotationRefs, ref)
+		} else if ast.NodeTextMark == n.Type && n.IsTextMarkType("file-annotation-ref") {
+			pathID := n.TextMarkFileAnnotationRefID
+			idx := strings.LastIndex(pathID, "/")
+			if -1 == idx {
+				return ast.WalkContinue
+			}
+
+			filePath := pathID[:idx]
+			annotationID := pathID[idx+1:]
+
+			anchor := n.TextMarkTextContent
+			text := filePath
+			if "" != anchor {
+				text = anchor
+			}
+			parentBlock := treenode.ParentBlock(n)
+			ref := &FileAnnotationRef{
+				ID:           ast.NewNodeID(),
+				FilePath:     filePath,
+				AnnotationID: annotationID,
+				BlockID:      parentBlock.ID,
+				RootID:       tree.ID,
+				Box:          tree.Box,
+				Path:         tree.Path,
+				Content:      text,
+				Type:         treenode.TypeAbbr(n.Type.String()),
+			}
+			fileAnnotationRefs = append(fileAnnotationRefs, ref)
 		}
 		return ast.WalkContinue
 	})

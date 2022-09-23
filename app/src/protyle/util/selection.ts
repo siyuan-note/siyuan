@@ -22,7 +22,7 @@ const selectIsEditor = (editor: Element, range?: Range) => {
 };
 
 // table 选中处理
-export const fixTableRange = (range:Range) => {
+export const fixTableRange = (range: Range) => {
     const tableElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeTable");
     if (range.toString() !== "" && tableElement && range.commonAncestorContainer.nodeType !== 3) {
         const parentTag = (range.commonAncestorContainer as Element).tagName;
@@ -521,10 +521,9 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
                 cursorElement = cellElements[cellElements.length - 1];
             }
         }
-        const range = getEditorRange(cursorElement);
-        range.selectNodeContents(cursorElement);
-        range.collapse(toStart);
-        focusByRange(range);
+        // 需要定位到第一个 child https://github.com/siyuan-note/siyuan/issues/5930
+        const range = setFirstNodeRange(cursorElement, getEditorRange(cursorElement))
+        focusByRange(range)
         return range;
     } else if (parentElement) {
         parentElement.focus();

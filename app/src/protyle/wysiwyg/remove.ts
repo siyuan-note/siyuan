@@ -7,7 +7,7 @@ import {
     getTopAloneElement,
     getTopEmptyElement, hasNextSibling
 } from "./getBlock";
-import {transaction, updateTransaction} from "./transaction";
+import {transaction, turnsIntoTransaction, updateTransaction} from "./transaction";
 import {cancelSB, genEmptyElement} from "../../block/util";
 import {listOutdent, updateListOrder} from "./list";
 import {setFold, zoomOut} from "../../menus/protyle";
@@ -294,16 +294,11 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         return;
     }
     if (blockElement.getAttribute("data-type") === "NodeHeading") {
-        const id = blockElement.getAttribute("data-node-id");
-        const newEmptyElement = genEmptyElement(false, false, id);
-        if (blockElement.getAttribute("fold") === "1") {
-            setFold(protyle, blockElement);
-        }
-        getContenteditableElement(newEmptyElement).innerHTML = "<wbr>" + getContenteditableElement(blockElement).textContent;
-        const html = blockElement.outerHTML;
-        blockElement.parentElement.replaceChild(newEmptyElement, blockElement);
-        updateTransaction(protyle, id, newEmptyElement.outerHTML, html);
-        focusByWbr(newEmptyElement, range);
+        turnsIntoTransaction({
+            protyle: protyle,
+            selectsElement: [blockElement],
+            type: 'Blocks2Ps',
+        });
         return;
     }
     if (!blockElement.previousElementSibling && blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {

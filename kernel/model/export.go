@@ -196,7 +196,7 @@ func exportData(exportFolder string) (err error) {
 
 func Preview(id string) string {
 	tree, _ := loadTreeByBlockID(id)
-	tree = exportTree(tree, false, false)
+	tree = exportTree(tree, false, false, false)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	md := treenode.FormatNode(tree.Root, luteEngine)
@@ -250,7 +250,7 @@ func ExportDocx(id, savePath string, removeAssets bool) (err error) {
 func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
 	tree, _ := loadTreeByBlockID(id)
 
-	tree = exportTree(tree, true, true)
+	tree = exportTree(tree, true, true, false)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
@@ -338,7 +338,7 @@ func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
 	return
 }
 
-func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
+func ExportHTML(id, savePath string, pdf, keepFold bool) (name, dom string) {
 	tree, _ := loadTreeByBlockID(id)
 	var headings []*ast.Node
 	if pdf { // 导出 PDF 需要标记目录书签
@@ -362,7 +362,7 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 		}
 	}
 
-	tree = exportTree(tree, true, true)
+	tree = exportTree(tree, true, true, keepFold)
 	//if pdf { // TODO: 导出 PDF 时块引转换脚注使用书签跳转 https://github.com/siyuan-note/siyuan/issues/5761
 	//	var footnotesDefs []*ast.Node
 	//	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -600,7 +600,7 @@ func AddPDFOutline(id, p string) (err error) {
 
 func CopyStdMarkdown(id string) string {
 	tree, _ := loadTreeByBlockID(id)
-	tree = exportTree(tree, false, false)
+	tree = exportTree(tree, false, false, false)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
@@ -967,7 +967,7 @@ func ExportMarkdownContent(id string) (hPath, exportedMd string) {
 func exportMarkdownContent(id string) (hPath, exportedMd string) {
 	tree, _ := loadTreeByBlockID(id)
 	hPath = tree.HPath
-	tree = exportTree(tree, false, true)
+	tree = exportTree(tree, false, true, false)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
@@ -1032,7 +1032,7 @@ func processKaTexMacros(n *ast.Node) {
 	}
 }
 
-func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.Tree) {
+func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret = tree
 	id := tree.Root.ID
@@ -1244,9 +1244,12 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 			return ast.WalkContinue
 		}
 
-		// 块折叠以后导出 HTML/PDF 固定展开 https://github.com/siyuan-note/siyuan/issues/4064
-		n.RemoveIALAttr("fold")
-		n.RemoveIALAttr("heading-fold")
+		// 支持按照现有折叠状态导出 PDF https://github.com/siyuan-note/siyuan/issues/5941
+		if !keepFold {
+			// 块折叠以后导出 HTML/PDF 固定展开 https://github.com/siyuan-note/siyuan/issues/4064
+			n.RemoveIALAttr("fold")
+			n.RemoveIALAttr("heading-fold")
+		}
 
 		if ast.NodeParagraph == n.Type {
 			if nil == n.FirstChild {

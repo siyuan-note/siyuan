@@ -1249,6 +1249,11 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 			// 块折叠以后导出 HTML/PDF 固定展开 https://github.com/siyuan-note/siyuan/issues/4064
 			n.RemoveIALAttr("fold")
 			n.RemoveIALAttr("heading-fold")
+		} else {
+			if "1" == n.IALAttr("heading-fold") {
+				unlinks = append(unlinks, n)
+				return ast.WalkContinue
+			}
 		}
 
 		if ast.NodeParagraph == n.Type {

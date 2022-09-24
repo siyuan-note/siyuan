@@ -69,6 +69,7 @@ const renderPDF = (id: string) => {
         scaleFactor: 100,
         pageSize: "A4",
         removeAssets: true,
+        keepFold: false,
     }));
     const servePath = window.location.protocol + "//" + window.location.host;
     window.siyuan.printWin = new BrowserWindow({
@@ -144,7 +145,7 @@ const renderPDF = (id: string) => {
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
     <link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>
-    <title>${window.siyuan.languages.export} PDF - {tpl.name}</title>
+    <title>${window.siyuan.languages.export} PDF</title>
     <style>
         body {
           margin: 0;
@@ -153,7 +154,7 @@ const renderPDF = (id: string) => {
         #action {
           width: 200px;
           background: var(--b3-theme-background-light);
-          padding: 8px 16px;
+          padding: 16px;
           position: fixed;
           right: 0;
           top: 0;
@@ -203,7 +204,6 @@ const renderPDF = (id: string) => {
 </head>
 <body>
 <div id="action">
-    <h2 class="b3-label">${window.siyuan.languages.config}</h2>
     <label class="b3-label">
         <div>
             ${window.siyuan.languages.exportPDF0}
@@ -250,6 +250,13 @@ const renderPDF = (id: string) => {
         <span class="fn__hr"></span>
         <input id="removeAssets" class="b3-switch" type="checkbox" ${localData.removeAssets ? "checked" : ""}>
     </label>
+    <label class="b3-label">
+        <div>
+            ${window.siyuan.languages.exportPDF5}
+        </div>
+        <span class="fn__hr"></span>
+        <input id="keepFold" class="b3-switch" type="checkbox" ${localData.keepFold ? "checked" : ""}>
+    </label>
     <div class="fn__flex">
       <div class="fn__flex-1"></div>
       <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
@@ -257,116 +264,124 @@ const renderPDF = (id: string) => {
       <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
-<div class="protyle-wysiwyg protyle-wysiwyg--attr" id="preview">{tpl.content}</div>
+<div class="protyle-wysiwyg protyle-wysiwyg--attr" id="preview">
+    <div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>
+</div>
 <script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
-    window.siyuan = {
-      config: {
-        appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
-        editor: { 
-          codeLineWrap: true,
-          codeLigatures: ${window.siyuan.config.editor.codeLigatures},
-          plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
-          codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
-          katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
+    const fetchPost = (url, data, cb) => {
+        fetch("${servePath}" + url, {
+            method: "POST",
+            body: JSON.stringify(data)
+        }).then((response) => {
+            return response.json();
+        }).then((response) => {
+            cb(response);
+        })
+    }
+    const renderPreview = (previewElement, html) => {
+        previewElement.innerHTML = html;
+        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.mathRender(previewElement, "${servePath}/stage/protyle", true);
+        Protyle.mermaidRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.flowchartRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.graphvizRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.chartRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.mindmapRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.abcRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.plantumlRender(previewElement, "${servePath}/stage/protyle");
+        previewElement.querySelectorAll("table").forEach(item => {
+            if (item.clientWidth > item.parentElement.clientWidth) {
+                item.style.zoom = item.parentElement.clientWidth / item.clientWidth;
+            }
+        })
+    }
+    fetchPost("/api/export/exportPreviewHTML", {
+        id: "${id}",
+        keepFold: ${localData.keepFold},
+    }, response => {
+        if (response.code === 1) {
+            alert(response.msg)
+            return;
         }
-      },
-      languages: {copy:"${window.siyuan.languages.copy}"}
-    };
-    const previewElement = document.getElementById('preview');
-    Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.mathRender(previewElement, "${servePath}/stage/protyle", true);
-    Protyle.mermaidRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.flowchartRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.graphvizRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.chartRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.mindmapRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.abcRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.plantumlRender(previewElement, "${servePath}/stage/protyle");
-    previewElement.querySelectorAll("table").forEach(item => {
-        if (item.clientWidth > item.parentElement.clientWidth) {
-            item.style.zoom = item.parentElement.clientWidth / item.clientWidth;
-        }
-    })
-     previewElement.addEventListener("click", (event) => {
-        let target = event.target;
-        while (target && !target.isEqualNode(previewElement)) {
-            if (target.tagName === "A") {
-                const linkAddress = target.getAttribute("href");
-                if (linkAddress.startsWith("#")) {
-                    // 导出预览模式点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5700
-                    previewElement.querySelector(linkAddress).scrollIntoView();
-                    event.stopPropagation();
+        document.title = '${window.siyuan.languages.export} PDF - ' + response.data.name
+        window.siyuan = {
+          config: {
+            appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
+            editor: { 
+              codeLineWrap: true,
+              codeLigatures: ${window.siyuan.config.editor.codeLigatures},
+              plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
+              codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
+              katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
+            }
+          },
+          languages: {copy:"${window.siyuan.languages.copy}"}
+        };
+        const previewElement = document.getElementById('preview');
+        renderPreview(previewElement, response.data.content);
+        previewElement.addEventListener("click", (event) => {
+            let target = event.target;
+            while (target && !target.isEqualNode(previewElement)) {
+                if (target.tagName === "A") {
+                    const linkAddress = target.getAttribute("href");
+                    if (linkAddress.startsWith("#")) {
+                        // 导出预览模式点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5700
+                        previewElement.querySelector(linkAddress).scrollIntoView();
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
+                    }
+                } else if (target.classList.contains("protyle-action__copy")) {
+                    navigator.clipboard.writeText(target.parentElement.nextElementSibling.textContent.trimEnd());
                     event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                }
+                target = target.parentElement;
+            }
+        });
+        const actionElement = document.getElementById('action');
+        const keepFoldElement = actionElement.querySelector('#keepFold');
+        keepFoldElement.addEventListener('change', () => {
+            previewElement.innerHTML = '<div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>'
+            fetchPost("/api/export/exportPreviewHTML", {
+                id: "${id}",
+                keepFold: keepFoldElement.checked,
+            }, response2 => {
+                if (response2.code === 1) {
+                    alert(response2.msg)
                     return;
                 }
-            } else if (target.classList.contains("protyle-action__copy")) {
-                navigator.clipboard.writeText(target.parentElement.nextElementSibling.textContent.trimEnd());
-                event.preventDefault();
-                event.stopPropagation();
-                break;
-            }
-            target = target.parentElement;
-        }
-    });
-    const actionElement = document.getElementById('action');
-    actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
-        const {ipcRenderer}  = require("electron");
-        ipcRenderer.send("${Constants.SIYUAN_EXPORT_CLOSE}")
-    });
-    actionElement.querySelector('.b3-button--text').addEventListener('click', () => {
-        const {ipcRenderer}  = require("electron");
-        ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", {
-          pdfOptions:{
-            printBackground: true,
-            landscape: actionElement.querySelector("#landscape").checked,
-            marginsType: parseInt(actionElement.querySelector("#marginsType").value),
-            scaleFactor: parseInt(actionElement.querySelector("#scaleFactor").value),
-            pageSize: actionElement.querySelector("#pageSize").value,
-          },
-          removeAssets: actionElement.querySelector("#removeAssets").checked,
-          rootId: "${id}",
-          rootTitle: "{tpl.name}"
+                renderPreview(previewElement, response2.data.content);
+            })
         })
-        actionElement.remove();
-        previewElement.classList.add("exporting");
+        actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
+            const {ipcRenderer}  = require("electron");
+            ipcRenderer.send("${Constants.SIYUAN_EXPORT_CLOSE}")
+        });
+        actionElement.querySelector('.b3-button--text').addEventListener('click', () => {
+            const {ipcRenderer}  = require("electron");
+            ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", {
+              pdfOptions:{
+                printBackground: true,
+                landscape: actionElement.querySelector("#landscape").checked,
+                marginsType: parseInt(actionElement.querySelector("#marginsType").value),
+                scaleFactor: parseInt(actionElement.querySelector("#scaleFactor").value),
+                pageSize: actionElement.querySelector("#pageSize").value,
+              },
+              removeAssets: actionElement.querySelector("#removeAssets").checked,
+              rootId: "${id}",
+              rootTitle: response.data.name,
+            })
+            actionElement.remove();
+            previewElement.classList.add("exporting");
+        });
     });
 </script></body></html>`;
-    window.siyuan.printWin.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent(`<!DOCTYPE html><html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes"/>
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
-    <link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>
-</head>
-<body>
-    <div class="b3-dialog__scrim" style="opacity: 1"></div>
-    <div style="position: fixed;top: 45vh;width: 70vw;left: 15vw;color:#fff;z-index:400;">
-        <div style="margin: 8px 0;height: 8px;border-radius: 4px;overflow: hidden;background-color:#fff;"><div style="background-color: var(--b3-theme-primary);height: 8px;background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);animation: stripMove 450ms linear infinite;background-size: 50px 50px;"></div></div>
-    </div>
-</body></html>`));
-    window.siyuan.printWin.webContents.on("did-finish-load", () => {
-        if (window.siyuan.printWin.webContents.getURL().startsWith("data:text/html;charset=UTF-8,")) {
-            fetchPost("/api/export/exportPreviewHTML", {
-                id,
-                tpl: html
-            }, response => {
-                if (response.code === 1) {
-                    document.getElementById("message").firstElementChild.innerHTML === "";
-                    showMessage(response.msg, undefined, "error");
-                    window.siyuan.printWin.destroy();
-                    return;
-                }
-                window.siyuan.printWin.loadURL(response.data.url);
-            });
-        }
-    });
+    window.siyuan.printWin.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent(html));
 };
 
 const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean) => {

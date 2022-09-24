@@ -1,4 +1,5 @@
 {
+  "clear": "Effacer",
   "autoDownloadUpdatePkg": "Télécharger automatiquement le package d'installation de la mise à jour",
   "autoDownloadUpdatePkgTip": "Après l'ouverture, il vérifiera automatiquement la mise à jour de la version toutes les deux heures. S'il existe une version mise à jour, il téléchargera automatiquement le package d'installation et demandera l'installation",
   "downloaded": "Téléchargé",

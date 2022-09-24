@@ -295,10 +295,6 @@ export class BlockPanel {
             setPosition(this.element, targetRect.left, targetRect.top + targetRect.height + 4, targetRect.height + 12, 8);
         }
 
-        const maxHeight = (window.innerHeight - this.element.getBoundingClientRect().top - 8) + "px";
-        this.element.style.maxHeight = maxHeight;
-        if (this.nodeIds.length > 1) {
-            this.element.style.height = maxHeight;
-        }
+        this.element.style.maxHeight = (window.innerHeight - this.element.getBoundingClientRect().top - 8) + "px";
     }
 }

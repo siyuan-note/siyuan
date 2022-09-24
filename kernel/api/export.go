@@ -18,9 +18,7 @@ package api
 
 import (
 	"net/http"
-	"os"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -193,7 +191,6 @@ func exportPreviewHTML(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	tpl := arg["tpl"].(string)
 	keepFold := false
 	if arg["keepFold"] != nil {
 		keepFold = arg["keepFold"].(bool)
@@ -201,29 +198,11 @@ func exportPreviewHTML(c *gin.Context) {
 	name, content := model.ExportHTML(id, "", true, keepFold)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://127.0.0.1:"+util.ServerPort+"/#", "#")
-	tpl = strings.ReplaceAll(tpl, "{tpl.name}", name)
-	tpl = strings.ReplaceAll(tpl, "{tpl.content}", content)
-	tmpName := gulu.Rand.String(7)
-	tmpDir := filepath.Join(util.TempDir, "export", "preview")
-	if err := os.MkdirAll(tmpDir, 0755); nil != err {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
-		return
-	}
-	tmpPath := filepath.Join(tmpDir, tmpName)
-	if err := os.WriteFile(tmpPath, []byte(tpl), 0644); nil != err {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
-		return
-	}
 
-	url := path.Join("http://127.0.0.1:"+util.ServerPort, "export", "preview", tmpName)
 	ret.Data = map[string]interface{}{
-		"id":   id,
-		"name": name,
-		"url":  url,
+		"id":      id,
+		"name":    name,
+		"content": content,
 	}
 }
 

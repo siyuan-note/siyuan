@@ -194,7 +194,7 @@ func exportPreviewHTML(c *gin.Context) {
 
 	id := arg["id"].(string)
 	tpl := arg["tpl"].(string)
-	name, content := model.ExportHTML(id, "", true)
+	name, content := model.ExportHTML(id, "", true, false)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://127.0.0.1:"+util.ServerPort+"/#", "#")
 	tpl = strings.ReplaceAll(tpl, "{tpl.name}", name)
@@ -235,7 +235,11 @@ func exportHTML(c *gin.Context) {
 	id := arg["id"].(string)
 	pdf := arg["pdf"].(bool)
 	savePath := arg["savePath"].(string)
-	name, content := model.ExportHTML(id, savePath, pdf)
+	keepFold := false
+	if arg["keepFold"] != nil {
+		keepFold = arg["keepFold"].(bool)
+	}
+	name, content := model.ExportHTML(id, savePath, pdf, keepFold)
 	ret.Data = map[string]interface{}{
 		"id":      id,
 		"name":    name,

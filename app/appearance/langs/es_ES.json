@@ -107,6 +107,7 @@
   "exportPDF2": "Márgenes de la página",
   "exportPDF3": "Escala de la página",
   "exportPDF4": "Eliminar directorio de activos",
+  "exportPDF5": "Mantener doblado",
   "upload": "Subir",
   "reminderTip": "La hora del recordatorio no puede ser inferior a la hora actual",
   "wechatTip": "El bloque de contenido se enviará a la nube en texto claro, y se empujará a través del mensaje de plantilla de WeChat MP cuando caduque",

@@ -362,7 +362,7 @@ export const keymap = {
             } else if (event.key === "—") {
                 keymapStr += "-";
             } else {
-                keymapStr += event.key === "Unidentified" ? "" : event.key.length > 1 ? event.key : event.key.toUpperCase();
+                keymapStr += event.key === "Unidentified" ? "" : (event.key.length > 1 ? event.key : event.key.toUpperCase());
             }
         }
 

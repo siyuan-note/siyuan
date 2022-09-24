@@ -137,10 +137,10 @@ export const keymap = {
     },
     _search(value: string, keymapString: string) {
         keymap.element.querySelectorAll("#keymapList .b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
-            const liElement = item.parentElement
+            const liElement = item.parentElement;
             let matchedKeymap = false;
             if (keymapString === "" || (item.nextElementSibling.nextElementSibling as HTMLInputElement).value.indexOf(updateHotkeyTip(keymapString)) > -1) {
-                matchedKeymap = true
+                matchedKeymap = true;
             }
             if ((item.textContent.toLowerCase().indexOf(value.toLowerCase()) > -1 || value === "") && matchedKeymap) {
                 liElement.classList.remove("fn__none");
@@ -150,14 +150,14 @@ export const keymap = {
                 liElement.classList.add("fn__none");
             }
             if (!liElement.nextElementSibling) {
-                const toggleElement = liElement.parentElement.previousElementSibling
-                const toggleIconElement = toggleElement.querySelector(".b3-list-item__arrow")
+                const toggleElement = liElement.parentElement.previousElementSibling;
+                const toggleIconElement = toggleElement.querySelector(".b3-list-item__arrow");
                 if (value === "" && keymapString === "") {
                     // 复原折叠状态
                     if (toggleIconElement.classList.contains("b3-list-item__arrow--open")) {
-                        liElement.parentElement.classList.remove("fn__none")
+                        liElement.parentElement.classList.remove("fn__none");
                     } else {
-                        liElement.parentElement.classList.add("fn__none")
+                        liElement.parentElement.classList.add("fn__none");
                     }
                 }
                 // 隐藏没有子项的快捷键项目
@@ -169,13 +169,13 @@ export const keymap = {
             }
         });
         // 编辑器中三级菜单单独处理
-        const editorKeymapElement = keymap.element.querySelector("#keymapList").lastElementChild
+        const editorKeymapElement = keymap.element.querySelector("#keymapList").lastElementChild;
         if (value === "" && keymapString === "") {
             // 复原折叠状态
             if (editorKeymapElement.querySelector(".b3-list-item__arrow").classList.contains("b3-list-item__arrow--open")) {
-                editorKeymapElement.lastElementChild.classList.remove("fn__none")
+                editorKeymapElement.lastElementChild.classList.remove("fn__none");
             } else {
-                editorKeymapElement.lastElementChild.classList.add("fn__none")
+                editorKeymapElement.lastElementChild.classList.add("fn__none");
             }
         }
         // 隐藏没有子项的快捷键项目
@@ -207,7 +207,7 @@ export const keymap = {
             keymap._search(searchElement.value, keymapStr);
         });
         keymap.element.querySelector("#clearSearchBtn").addEventListener("click", () => {
-            searchElement.value = ""
+            searchElement.value = "";
             searchKeymapElement.value = "";
             keymap._search("", "");
         });

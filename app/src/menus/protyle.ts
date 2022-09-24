@@ -807,6 +807,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         icon: "iconRefresh",
         click() {
             removeLink(linkElement, protyle.toolbar.range);
+            updateTransaction(protyle, id, nodeElement.outerHTML, html);
         }
     }).element);
     if (linkAddress?.startsWith("assets/")) {

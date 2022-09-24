@@ -896,6 +896,49 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		}
 	}
 
+	// 导出自定义排序
+	sortPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
+	fullSortIDs := map[string]int{}
+	sortIDs := map[string]int{}
+	var sortData []byte
+	var sortErr error
+	if gulu.File.IsExist(sortPath) {
+		sortData, sortErr = filelock.NoLockFileRead(sortPath)
+		if nil != sortErr {
+			logging.LogErrorf("read sort conf failed: %s", sortErr)
+		}
+
+		if sortErr = gulu.JSON.UnmarshalJSON(sortData, &fullSortIDs); nil != sortErr {
+			logging.LogErrorf("unmarshal sort conf failed: %s", sortErr)
+		}
+
+		if 0 < len(fullSortIDs) {
+			for _, tree := range trees {
+				if v, ok := fullSortIDs[tree.ID]; ok {
+					sortIDs[tree.ID] = v
+				}
+			}
+		}
+
+		if 0 < len(sortIDs) {
+			sortData, sortErr = gulu.JSON.MarshalJSON(sortIDs)
+			if nil != sortErr {
+				logging.LogErrorf("marshal sort conf failed: %s", sortErr)
+			}
+			if 0 < len(sortData) {
+				confDir := filepath.Join(exportFolder, ".siyuan")
+				if mkdirErr := os.MkdirAll(confDir, 0755); nil != mkdirErr {
+					logging.LogErrorf("create export conf folder [%s] failed: %s", confDir, mkdirErr)
+				} else {
+					sortPath = filepath.Join(confDir, "sort.json")
+					if writeErr := os.WriteFile(sortPath, sortData, 0644); nil != writeErr {
+						logging.LogErrorf("write sort conf failed: %s", writeErr)
+					}
+				}
+			}
+		}
+	}
+
 	zipPath = exportFolder + ".sy.zip"
 	zip, err := gulu.Zip.Create(zipPath)
 	if nil != err {

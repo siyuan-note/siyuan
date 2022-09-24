@@ -49,7 +49,7 @@ export const keymap = {
 <div class="b3-label file-tree config-keymap" id="keymapList">
     <label class="b3-form__icon" style="display:block;">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-        <input id="keymapInput" class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">
+        <input id="keymapInput" class="b3-form__icon-input b3-text-field " style="width:80%;" placeholder="${window.siyuan.languages.search}"><input id="searchByKey" class="b3-text-field " style="width:20%;" spellcheck="false" placeholder="${window.siyuan.languages.keySearch}">
     </label>
     <div class="fn__hr"></div>
     <ul class="b3-list b3-list--border b3-list--background">
@@ -125,6 +125,54 @@ export const keymap = {
             /// #endif
         });
     },
+    _hiddenKeylist() {
+        /*隐藏没有子项的快捷键项目*/
+
+        let level1KeyElements: Element[] = []
+
+        level1KeyElements=level1KeyElements.concat(Array.from(keymap.element.querySelectorAll("#keymapList > ul:nth-of-type(1) > li.toggle")))
+        level1KeyElements=level1KeyElements.concat(Array.from(keymap.element.querySelectorAll("#keymapList > ul:nth-of-type(2) > li.toggle:nth-of-type(1)")))
+        // console.log(level1KeyElements)
+
+        let level2KeyElements: Element[] = []
+        level2KeyElements=level2KeyElements.concat(Array.from(keymap.element.querySelectorAll("#keymapList > ul:nth-of-type(2) > ul:nth-of-type(1) > li.toggle")))
+        // console.log(level2KeyElements)
+
+        let allLevelKeyElements=[]
+        allLevelKeyElements.push(level1KeyElements)
+        allLevelKeyElements.push(level2KeyElements)
+
+        let currentLevelElements: Element[] = []
+
+        for (let level = 2; level >0; level--) {
+            currentLevelElements=allLevelKeyElements[level-1]
+            currentLevelElements.forEach(item => {
+                //item是li.toggle
+
+                let element = item.querySelector(".b3-list-item__text");
+                //检查子项是否全部隐藏
+                if (item.nextElementSibling && item.nextElementSibling.tagName === "UL") {
+                    //没有被隐藏的子项
+                    let res = item.nextElementSibling.querySelectorAll("li:not(.fn__none)")
+                    if (res.length == 0) {
+                        //隐藏父项
+                        item.classList.add("fn__none")
+                        item.nextElementSibling.classList.add("fn__none");
+                        item.firstElementChild.firstElementChild.classList.remove("b3-list-item__arrow--open");
+                        // console.log(level + " 当前元素 " + element.innerHTML + " 隐藏")
+                    } else {
+                        //显示
+                        item.classList.remove("fn__none")
+                        item.nextElementSibling.classList.remove("fn__none");
+                        item.firstElementChild.firstElementChild.classList.add("b3-list-item__arrow--open");
+                        // console.log(level+" 当前元素 " + element.innerHTML + " 显示")
+                    }
+                }
+
+            });
+
+        }
+    },
     _search(value: string) {
         keymap.element.querySelectorAll("#keymapList .b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
             if (item.textContent.toLowerCase().indexOf(value.toLowerCase()) > -1 || value === "") {
@@ -134,6 +182,7 @@ export const keymap = {
                 item.parentElement.classList.add("fn__none");
             }
         });
+        keymap._hiddenKeylist()
     },
     bindEvent() {
         keymap.element.querySelector("#keymapRefreshBtn").addEventListener("click", () => {
@@ -193,6 +242,111 @@ export const keymap = {
                 target = target.parentElement;
             }
         });
+        let searchByKeyTimeout: number;
+        const searchByKeyElement = keymap.element.querySelector("#searchByKey") as HTMLInputElement;
+        searchByKeyElement.addEventListener("keydown", function (event: KeyboardEvent) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            let keymapStr = "";
+            if (event.ctrlKey && !event.metaKey && isMac()) {
+                keymapStr += "⌃";
+            }
+            if (event.altKey) {
+                keymapStr += "⌥";
+            }
+            if (event.shiftKey) {
+                keymapStr += "⇧";
+            }
+            if (isCtrl(event)) {
+                keymapStr += "⌘";
+            }
+            if (event.key !== "Shift" && event.key !== "Alt" && event.key !== "Meta" && event.key !== "Control") {
+                if (event.key === "ArrowUp") {
+                    keymapStr += "↑";
+                } else if (event.key === "ArrowDown") {
+                    keymapStr += "↓";
+                } else if (event.key === "ArrowLeft") {
+                    keymapStr += "←";
+                } else if (event.key === "ArrowRight") {
+                    keymapStr += "→";
+                } else if (event.key === "Tab") {
+                    keymapStr += "⇥";
+                } else if (event.code === "BracketLeft") {
+                    keymapStr += "[";
+                } else if (event.code === "BracketRight") {
+                    keymapStr += "]";
+                } else if (event.key === "Backspace") {
+                    keymapStr += "⌫";
+                } else if (event.key === "Delete") {
+                    keymapStr += "⌦";
+                } else if (event.key === "Enter") {
+                    keymapStr += "↩";
+                } else if (event.altKey) {
+                    const codeKey = event.code.substr(event.code.length - 1, 1).toUpperCase();
+                    if (event.key === "Enter") {
+                        keymapStr += "↩";
+                    } else if (event.key.startsWith("F") && event.key.length > 1) {
+                        keymapStr += event.key;
+                    } else if (event.code === "Period") {
+                        keymapStr += ".";
+                    } else if (codeKey !== "I" && codeKey !== "E" && codeKey !== "N" && codeKey !== "U") {
+                        keymapStr += codeKey;
+                    } else if (event.which === 229) {
+                        setTimeout(() => {
+                            this.value = "";
+                        });
+                    }
+                } else if (event.key === "》") {
+                    keymapStr += ">";
+                } else if (event.key === "《") {
+                    keymapStr += "<";
+                } else if (event.key === "—") {
+                    keymapStr += "-";
+                } else {
+                    keymapStr += event.key.length > 1 ? event.key : event.key.toUpperCase();
+                }
+            }
+
+            this.setAttribute("data-value", keymapStr);
+            if (event.key === "—") {
+                // Mac 中文下会添加"——"
+                setTimeout(() => {
+                    this.value = updateHotkeyTip(keymapStr);
+                });
+            } else {
+                this.value = updateHotkeyTip(keymapStr);
+            }
+            //空格退格清空
+            if(this.value.trim()==="" || this.value.trim()==="Backspace"){
+                this.value=""
+                keymapStr=""
+            }
+            clearTimeout(searchByKeyTimeout);
+            searchByKeyTimeout = window.setTimeout(() => {
+
+                //无效快捷键,要么是单个修饰键,要么是系统保留快捷键
+                // if (["⌘", "⇧", "⌥", "⌃"].includes(keymapStr.substr(keymapStr.length - 1, 1)) ||
+                //     ["⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦"].includes(keymapStr)) {
+                //     showMessage(this.value + " " + window.siyuan.languages.invalid);
+                //     return;
+                // }
+
+                keymap.element.querySelectorAll("#keymapList .b3-list-item--hide-action > input[data-key]").forEach(item => {
+                    let data_value=item.getAttribute("data-value")
+                    if (keymapStr.trim() === "" || data_value === keymapStr ) {
+                        item.parentElement.classList.remove("fn__none");
+                        item.parentElement.parentElement.classList.remove("fn__none");
+                    } else {
+                        item.parentElement.classList.add("fn__none");
+                    }
+                });
+
+                keymap._hiddenKeylist()
+
+            }, 0)
+        });
+
         let timeout: number;
         keymapListElement.querySelectorAll("ul input").forEach(item => {
             item.addEventListener("keydown", function (event: KeyboardEvent) {

@@ -1,4 +1,5 @@
 {
+  "keySearch": "shortcut search",
   "autoDownloadUpdatePkg": "Automatically download update installation package",
   "autoDownloadUpdatePkgTip": "After enabling, it will automatically check the version update every two hours. If there is an updated version, it will automatically download the installation package and prompt for installation",
   "downloaded": "Downloaded",

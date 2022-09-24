@@ -411,13 +411,16 @@ export const resizeDrag = () => {
     }
 };
 
+let resizeTimeout: number;
 export const resizeTabs = () => {
-    const models = getAllModels();
-    models.editor.forEach((item) => {
-        if (item.editor && item.editor.protyle && item.element.parentElement) {
-            hideElements(["gutter"], item.editor.protyle);
-            setTimeout(() => {
-                // .layout .fn__flex-shrink {width .15s cubic-bezier(0, 0, .2, 1) 0ms} 时需要再次计算 padding
+    clearTimeout(resizeTimeout);
+    //  .layout .fn__flex-shrink {width .15s cubic-bezier(0, 0, .2, 1) 0ms} 时需要再次计算 padding
+    // PDF 避免分屏多次调用后，页码跳转到1 https://github.com/siyuan-note/siyuan/issues/5646
+    resizeTimeout = window.setTimeout(() => {
+        const models = getAllModels();
+        models.editor.forEach((item) => {
+            if (item.editor && item.editor.protyle && item.element.parentElement) {
+                hideElements(["gutter"], item.editor.protyle);
                 setPadding(item.editor.protyle);
                 if (typeof echarts !== "undefined") {
                     item.editor.protyle.wysiwyg.element.querySelectorAll('[data-subtype="echarts"], [data-subtype="mindmap"]').forEach((chartItem: HTMLElement) => {
@@ -427,10 +430,10 @@ export const resizeTabs = () => {
                         }
                     });
                 }
-            }, 200);
-        }
-    });
-    pdfResize();
+            }
+        });
+        pdfResize();
+    }, 200);
 };
 
 export const copyTab = (tab: Tab) => {

@@ -14,7 +14,7 @@ export const keymap = {
                 html += `<li class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
     <span class="fn__space fn__flex-1"></span>
-    <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field" value="${updateHotkeyTip(keymap[key].custom)}">
+    <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field" value="${updateHotkeyTip(keymap[key].custom)}" spellcheck="false">
     <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>

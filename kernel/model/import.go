@@ -174,6 +174,51 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 	}
 
+	// 合并 sort.json
+	fullSortIDs := map[string]int{}
+	sortIDs := map[string]int{}
+	var sortData []byte
+	var sortErr error
+	sortPath := filepath.Join(unzipRootPath, ".siyuan", "sort.json")
+	if gulu.File.IsExist(sortPath) {
+		sortData, sortErr = filelock.NoLockFileRead(sortPath)
+		if nil != sortErr {
+			logging.LogErrorf("read import sort conf failed: %s", sortErr)
+		}
+
+		if sortErr = gulu.JSON.UnmarshalJSON(sortData, &sortIDs); nil != sortErr {
+			logging.LogErrorf("unmarshal sort conf failed: %s", sortErr)
+		}
+
+		sortPath = filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
+		if gulu.File.IsExist(sortPath) {
+			sortData, sortErr = filelock.NoLockFileRead(sortPath)
+			if nil != sortErr {
+				logging.LogErrorf("read box sort conf failed: %s", sortErr)
+			}
+
+			if sortErr = gulu.JSON.UnmarshalJSON(sortData, &fullSortIDs); nil != sortErr {
+				logging.LogErrorf("unmarshal box sort conf failed: %s", sortErr)
+			}
+		}
+
+		for oldID, sort := range sortIDs {
+			if newID := blockIDs[oldID]; "" != newID {
+				fullSortIDs[newID] = sort
+			}
+		}
+
+		sortData, sortErr = gulu.JSON.MarshalJSON(fullSortIDs)
+		if nil != sortErr {
+			logging.LogErrorf("marshal box sort conf failed: %s", sortErr)
+		} else {
+			sortErr = filelock.NoLockFileWrite(sortPath, sortData)
+			if nil != sortErr {
+				logging.LogErrorf("write box sort conf failed: %s", sortErr)
+			}
+		}
+	}
+
 	// 重命名文件路径
 	renamePaths := map[string]string{}
 	filepath.Walk(unzipRootPath, func(path string, info fs.FileInfo, err error) error {

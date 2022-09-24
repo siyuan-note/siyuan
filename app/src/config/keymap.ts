@@ -14,7 +14,7 @@ export const keymap = {
                 html += `<li class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
     <span class="fn__space fn__flex-1"></span>
-    <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field" value="${updateHotkeyTip(keymap[key].custom)}">
+    <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field" value="${updateHotkeyTip(keymap[key].custom)}" spellcheck="false">
     <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
@@ -53,7 +53,7 @@ export const keymap = {
         <div class="fn__space"></div>
         <label class="b3-form__icon">
             <svg class="b3-form__icon-icon"><use xlink:href="#iconKeymap"></use></svg>
-            <input id="searchByKey" class="b3-form__icon-input b3-text-field" placeholder="${window.siyuan.languages.keymap}">
+            <input id="searchByKey" class="b3-form__icon-input b3-text-field" spellcheck="false" placeholder="${window.siyuan.languages.keymap}">
         </label>
         <div class="fn__space"></div>
         <button id="clearSearchBtn" class="b3-button b3-button--outline fn__flex-center fn__size200">
@@ -362,7 +362,7 @@ export const keymap = {
             } else if (event.key === "—") {
                 keymapStr += "-";
             } else {
-                keymapStr += event.key.length > 1 ? event.key : event.key.toUpperCase();
+                keymapStr += event.key === "Unidentified" ? "" : event.key.length > 1 ? event.key : event.key.toUpperCase();
             }
         }
 

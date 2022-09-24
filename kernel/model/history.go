@@ -179,11 +179,6 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 			n.RemoveIALAttr("heading-fold")
 			n.RemoveIALAttr("fold")
 
-			if treenode.IsBlockRef(n) {
-				appendRefTextRenderResultForBlockRef(n)
-				return ast.WalkSkipChildren
-			}
-
 			if ast.NodeText == n.Type {
 				if 0 < len(keywords) {
 					// 搜索高亮

@@ -213,8 +213,6 @@ func renderTemplate(p, id string) (string, error) {
 			(ast.NodeBlockquote == n.Type && nil != n.FirstChild && nil != n.FirstChild.Next && ast.NodeKramdownBlockIAL == n.FirstChild.Next.Type) {
 			nodesNeedAppendChild = append(nodesNeedAppendChild, n)
 		}
-
-		appendRefTextRenderResultForBlockRef(n)
 		return ast.WalkContinue
 	})
 	for _, n := range nodesNeedAppendChild {

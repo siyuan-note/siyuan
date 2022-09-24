@@ -637,11 +637,6 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 				}
 			}
 
-			if treenode.IsBlockRef(n) {
-				appendRefTextRenderResultForBlockRef(n)
-				return ast.WalkSkipChildren
-			}
-
 			// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
 			if ast.NodeCodeBlockCode == n.Type && 0 < len(keywords) && !treenode.IsChartCodeBlockCode(n) {
 				text := string(n.Tokens)

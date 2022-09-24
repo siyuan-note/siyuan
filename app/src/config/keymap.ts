@@ -139,7 +139,7 @@ export const keymap = {
         keymap.element.querySelectorAll("#keymapList .b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
             const liElement = item.parentElement
             let matchedKeymap = false;
-            if (keymapString === "" || keymapString === (item.nextElementSibling.nextElementSibling as HTMLInputElement).value) {
+            if (keymapString === "" || (item.nextElementSibling.nextElementSibling as HTMLInputElement).value.indexOf(updateHotkeyTip(keymapString)) > -1) {
                 matchedKeymap = true
             }
             if ((item.textContent.toLowerCase().indexOf(value.toLowerCase()) > -1 || value === "") && matchedKeymap) {

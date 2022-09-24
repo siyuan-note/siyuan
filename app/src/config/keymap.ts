@@ -53,7 +53,7 @@ export const keymap = {
         <div class="fn__space"></div>
         <label class="b3-form__icon">
             <svg class="b3-form__icon-icon"><use xlink:href="#iconKeymap"></use></svg>
-            <input id="searchByKey" class="b3-form__icon-input b3-text-field" placeholder="${window.siyuan.languages.keymap}">
+            <input id="searchByKey" class="b3-form__icon-input b3-text-field" spellcheck="false" placeholder="${window.siyuan.languages.keymap}">
         </label>
         <div class="fn__space"></div>
         <button id="clearSearchBtn" class="b3-button b3-button--outline fn__flex-center fn__size200">

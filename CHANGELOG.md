@@ -32,6 +32,7 @@
 * [虚拟引用不应该保留编辑状态](https://github.com/siyuan-note/siyuan/issues/5940)
 * [链接转化为文本后没有保存](https://github.com/siyuan-note/siyuan/issues/5943)
 * [Markdown 转义嵌套解析问题](https://github.com/siyuan-note/siyuan/issues/5947)
+* [快捷键识别不正确](https://github.com/siyuan-note/siyuan/issues/5949)
 
 ## v2.2.0 / 2022-09-22
 

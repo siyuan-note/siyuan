@@ -17,7 +17,7 @@
 package conf
 
 type Appearance struct {
-	Mode                int      `json:"mode"`                // 模式：0：明亮，1：暗黑，2：随日出日落自动切换
+	Mode                int      `json:"mode"`                // 模式：0：明亮，1：暗黑，2：跟随系统
 	DarkThemes          []string `json:"darkThemes"`          // 暗黑模式外观主题列表
 	LightThemes         []string `json:"lightThemes"`         // 明亮模式外观主题列表
 	ThemeDark           string   `json:"themeDark"`           // 选择的暗黑模式外观主题

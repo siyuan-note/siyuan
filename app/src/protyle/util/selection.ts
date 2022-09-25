@@ -303,15 +303,19 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
     if (!editElement) {
         return range;
     }
-    let firstChild = editElement.firstChild;
-    while (firstChild && firstChild.nodeType !== 3) {
-        firstChild = firstChild.firstChild;
+    let firstChild = editElement.firstChild as HTMLElement;
+    while (firstChild && firstChild.nodeType !== 3 && !firstChild.classList.contains("render-node")) {
+        firstChild = firstChild.firstChild as HTMLElement;
     }
     if (!firstChild) {
         range.selectNodeContents(editElement);
         return range;
     }
-    range.setStart(firstChild, 0);
+    if (firstChild.classList.contains("render-node")) {
+        range.setStartBefore(firstChild);
+    } else {
+        range.setStart(firstChild, 0);
+    }
     return range;
 };
 

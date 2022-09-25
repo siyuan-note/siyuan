@@ -570,6 +570,25 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
 
+	// 退出时自动删除超过 30 天的安装包 https://github.com/siyuan-note/siyuan/issues/5957
+	install := filepath.Join(util.TempDir, "install")
+	if gulu.File.IsDir(install) {
+		monthAgo := time.Now().Add(-time.Hour * 24 * 30)
+		entries, err := os.ReadDir(install)
+		if nil != err {
+			logging.LogErrorf("read dir [%s] failed: %s", install, err)
+		} else {
+			for _, entry := range entries {
+				info, _ := entry.Info()
+				if nil != info && !info.IsDir() && info.ModTime().Before(monthAgo) {
+					if err = os.RemoveAll(filepath.Join(install, entry.Name())); nil != err {
+						logging.LogErrorf("remove old install pkg [%s] failed: %s", filepath.Join(install, entry.Name()), err)
+					}
+				}
+			}
+		}
+	}
+
 	tmps, err := filepath.Glob(filepath.Join(util.TempDir, "*.tmp"))
 	if nil != err {
 		logging.LogErrorf("glob temp files failed: %s", err)

@@ -281,6 +281,10 @@ func installBazaarTheme(c *gin.Context) {
 		return
 	}
 
+	// 安装集市主题后不跟随系统切换外观模式
+	model.Conf.Appearance.ModeOS = false
+	model.Conf.Save()
+
 	util.PushMsg(model.Conf.Language(69), 3000)
 	ret.Data = map[string]interface{}{
 		"packages":   model.BazaarThemes(),

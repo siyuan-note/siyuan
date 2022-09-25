@@ -311,7 +311,7 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
         range.selectNodeContents(editElement);
         return range;
     }
-    if (firstChild.classList.contains("render-node")) {
+    if (firstChild.nodeType !== 3 && firstChild.classList.contains("render-node")) {
         range.setStartBefore(firstChild);
     } else {
         range.setStart(firstChild, 0);

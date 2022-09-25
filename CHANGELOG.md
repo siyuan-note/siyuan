@@ -1,3 +1,38 @@
+## v2.2.1 / 2022-09-25
+
+### 改进功能
+
+* [PDF 页签分屏后会跳转到开始位置](https://github.com/siyuan-note/siyuan/issues/5646)
+* [修改属性时更新 `updated` 字段](https://github.com/siyuan-note/siyuan/issues/5815)
+* [文档标题输入框回车新建块](https://github.com/siyuan-note/siyuan/issues/5870)
+* [同文档块引转脚注缩略定义考虑标题块](https://github.com/siyuan-note/siyuan/issues/5917)
+* [Lute 实例提供 `BlockDOM2Md` 函数](https://github.com/siyuan-note/siyuan/issues/5922)
+* [`Ctrl+↑` 长按仅执行一次](https://github.com/siyuan-note/siyuan/issues/5923)
+* [以行级元素开头在起始位置输入的文字应为普通文本](https://github.com/siyuan-note/siyuan/issues/5924)
+* [识别选中内容字体的大小](https://github.com/siyuan-note/siyuan/issues/5932)
+* [标题开头 `Backspace` 不应该转换为纯文本](https://github.com/siyuan-note/siyuan/issues/5935)
+* [改进快捷键搜索](https://github.com/siyuan-note/siyuan/pull/5938)
+* [导出导入 .sy.zip 保持自定义排序](https://github.com/siyuan-note/siyuan/issues/5939)
+* [导出 PDF 支持保留折叠状态](https://github.com/siyuan-note/siyuan/issues/5941)
+* [快捷键搜索屏蔽 autohotkey 发送的无效信息](https://github.com/siyuan-note/siyuan/pull/5942)
+* [引用计数浮窗大小不应根据引用数位置不同而变化](https://github.com/siyuan-note/siyuan/issues/5944)
+* [引述块中输入行公式块后无法跳出](https://github.com/siyuan-note/siyuan/issues/5948)
+
+### 修复缺陷
+
+* [块引用在数据库所有表中对应的 `markdown` 字段均没有标识符](https://github.com/siyuan-note/siyuan/issues/5920)
+* [超链接嵌套图片情况下数据迁移导致未引用资源文件](https://github.com/siyuan-note/siyuan/issues/5926)
+* [搜索代码内容转义问题](https://github.com/siyuan-note/siyuan/issues/5927)
+* [搜索打开遇到引用后 `⌘.` 无法打开引用](https://github.com/siyuan-note/siyuan/issues/5930)
+* [导出预览复制到知乎报错](https://github.com/siyuan-note/siyuan/issues/5931)
+* [预览虚拟引用报错](https://github.com/siyuan-note/siyuan/issues/5933)
+* [PDF 标注预览失效](https://github.com/siyuan-note/siyuan/issues/5934)
+* [`⌥⌘X/Ctrl+Alt+X` 无效且最近使用过中没显示字号](https://github.com/siyuan-note/siyuan/issues/5936)
+* [粘贴 `<span>` 解析器报错](https://github.com/siyuan-note/siyuan/issues/5937)
+* [虚拟引用不应该保留编辑状态](https://github.com/siyuan-note/siyuan/issues/5940)
+* [链接转化为文本后没有保存](https://github.com/siyuan-note/siyuan/issues/5943)
+* [Markdown 转义嵌套解析问题](https://github.com/siyuan-note/siyuan/issues/5947)
+
 ## v2.2.0 / 2022-09-22
 
 ### 引入特性

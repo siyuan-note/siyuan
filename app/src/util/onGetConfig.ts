@@ -143,7 +143,7 @@ export const onGetConfig = (isStart: boolean) => {
     initBar();
     initStatus();
     initWindow();
-    appearance.onSetappearance(window.siyuan.config.appearance);
+    appearance.onSetappearance(window.siyuan.config.appearance, false);
     initAssets();
     setInlineStyle();
     let resizeTimeout = 0;
@@ -169,11 +169,6 @@ const initBar = () => {
 <div id="barSearch" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
     <svg>
         <use xlink:href="#iconSearch"></use>
-    </svg>
-</div>
-<div id="barThemeMode" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.appearance.mode === 1 ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.config.appearance.mode === 1 ? window.siyuan.languages.themeLight : window.siyuan.languages.themeDark}">
-    <svg>
-        <use xlink:href="#iconMoon"></use>
     </svg>
 </div>
 <div id="barHistory" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.dataHistory} ${updateHotkeyTip(window.siyuan.config.keymap.general.history.custom)}">
@@ -231,34 +226,6 @@ const initBar = () => {
                 break;
             } else if (target.id === "barSearch") {
                 openSearch(window.siyuan.config.keymap.general.globalSearch.custom);
-                event.stopPropagation();
-                break;
-            } else if (target.id === "barThemeMode") {
-                if (target.getAttribute("disabled")) {
-                    return;
-                }
-                if (target.classList.contains("toolbar__item--active")) {
-                    target.classList.remove("toolbar__item--active");
-                    target.setAttribute("aria-label", window.siyuan.languages.themeDark);
-                } else {
-                    target.classList.add("toolbar__item--active");
-                    target.setAttribute("aria-label", window.siyuan.languages.themeLight);
-                }
-                target.setAttribute("disabled", "disabled");
-                fetchPost("/api/system/setAppearanceMode", {
-                    mode: target.classList.contains("toolbar__item--active") ? 1 : 0
-                }, response => {
-                    if (window.siyuan.config.appearance.themeJS) {
-                        exportLayout(true);
-                        return;
-                    }
-                    window.siyuan.config.appearance = response.data.appearance;
-                    target.removeAttribute("disabled");
-                    /// #if !BROWSER
-                    ipcRenderer.send(Constants.SIYUAN_CONFIG_THEME, response.data.mode === 1 ? "dark" : "light");
-                    /// #endif
-                    loadAssets(response.data.appearance);
-                });
                 event.stopPropagation();
                 break;
             } else if (target.id === "barDailyNote") {
@@ -341,6 +308,39 @@ const initWindow = () => {
             id: url.substr(16, 22),
             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
             zoomIn: getSearch("focus", url) === "1"
+        });
+    });
+    ipcRenderer.on(Constants.SIYUAN_UPDATE_THEME, (event, data) => {
+        if (data.init) {
+            if ((window.siyuan.config.appearance.mode === 0 && data.theme === "light") ||
+                (window.siyuan.config.appearance.mode === 1 && data.theme === "dark")) {
+                loadAssets(window.siyuan.config.appearance);
+            } else {
+                fetchPost("/api/system/setAppearanceMode", {
+                    mode: data.theme === "light" ? 0 : 1
+                }, response => {
+                    window.siyuan.config.appearance = response.data.appearance;
+                    loadAssets(response.data.appearance);
+                });
+            }
+            return;
+        }
+        if (!window.siyuan.config.appearance.modeOS) {
+            return;
+        }
+        if ((window.siyuan.config.appearance.mode === 0 && data.theme === "light") ||
+            (window.siyuan.config.appearance.mode === 1 && data.theme === "dark")) {
+            return;
+        }
+        fetchPost("/api/system/setAppearanceMode", {
+            mode: data.theme === "light" ? 0 : 1
+        }, response => {
+            if (window.siyuan.config.appearance.themeJS) {
+                exportLayout(true);
+                return;
+            }
+            window.siyuan.config.appearance = response.data.appearance;
+            loadAssets(response.data.appearance);
         });
     });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {

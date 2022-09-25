@@ -20,9 +20,9 @@ export const appearance = {
     </div>
     <span class="fn__space"></span>
     <select class="b3-select fn__flex-center fn__size200" id="mode">
-      <option value="0" ${window.siyuan.config.appearance.mode === 0 ? "selected" : ""}>${window.siyuan.languages.themeLight}</option>
-      <option value="1" ${window.siyuan.config.appearance.mode === 1 ? "selected" : ""}>${window.siyuan.languages.themeDark}</option>
-      <!--option value="dark" ${window.siyuan.config.appearance.mode === 2 ? "selected" : ""}>${window.siyuan.languages.appearance7}</option-->
+      <option value="0" ${(window.siyuan.config.appearance.mode === 0 && !window.siyuan.config.appearance.modeOS) ? "selected" : ""}>${window.siyuan.languages.themeLight}</option>
+      <option value="1" ${(window.siyuan.config.appearance.mode === 1 && !window.siyuan.config.appearance.modeOS) ? "selected" : ""}>${window.siyuan.languages.themeDark}</option>
+      <option value="2" ${window.siyuan.config.appearance.modeOS ? "selected" : ""}>${window.siyuan.languages.appearance7}</option>
     </select>
 </label>
 <div class="b3-label">
@@ -211,13 +211,14 @@ export const appearance = {
             css
         });
     },
-    _send: (mode?: number) => {
+    _send: () => {
         const themeLight = (appearance.element.querySelector("#themeLight") as HTMLSelectElement).value;
         const themeDark = (appearance.element.querySelector("#themeDark") as HTMLSelectElement).value;
-        const modeNumber = typeof mode === "number" ? mode : parseInt((appearance.element.querySelector("#mode") as HTMLSelectElement).value);
+        const modeElementValue = parseInt((appearance.element.querySelector("#mode") as HTMLSelectElement).value)
         fetchPost("/api/setting/setAppearance", {
             icon: (appearance.element.querySelector("#icon") as HTMLSelectElement).value,
-            mode: modeNumber,
+            mode: modeElementValue === 2 ? window.siyuan.config.appearance.mode : modeElementValue,
+            modeOS: modeElementValue === 2,
             codeBlockThemeDark: (appearance.element.querySelector("#codeBlockThemeDark") as HTMLSelectElement).value,
             codeBlockThemeLight: (appearance.element.querySelector("#codeBlockThemeLight") as HTMLSelectElement).value,
             themeDark,
@@ -231,12 +232,9 @@ export const appearance = {
             nativeEmoji: (appearance.element.querySelector("#nativeEmoji") as HTMLInputElement).checked,
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
         }, response => {
-            let needTip = false;
-            if (modeNumber !== window.siyuan.config.appearance.mode || themeLight !== window.siyuan.config.appearance.themeLight ||
-                themeDark !== window.siyuan.config.appearance.themeDark) {
-                needTip = true;
-            }
-            if (window.siyuan.config.appearance.themeJS && needTip) {
+            if ((window.siyuan.config.appearance.themeJS && !response.data.modeOS && response.data.mode !== window.siyuan.config.appearance.mode) ||
+                (response.data.modeOS && !window.siyuan.config.appearance.modeOS)
+            ) {
                 exportLayout(true);
                 return;
             }
@@ -294,13 +292,7 @@ export const appearance = {
         /// #endif
         appearance.element.querySelectorAll("select").forEach(item => {
             item.addEventListener("change", () => {
-                let mode;
-                if (item.id === "themeLight") {
-                    mode = 0;
-                } else if (item.id === "themeDark") {
-                    mode = 1;
-                }
-                appearance._send(mode);
+                appearance._send();
             });
         });
         appearance.element.querySelectorAll(".b3-switch").forEach((item) => {
@@ -309,7 +301,7 @@ export const appearance = {
             });
         });
     },
-    onSetappearance(data: IAppearance) {
+    onSetappearance(data: IAppearance, needLoadAsset = true) {
         if (data.lang !== window.siyuan.config.appearance.lang || data.nativeEmoji !== window.siyuan.config.appearance.nativeEmoji) {
             exportLayout(true);
             return;
@@ -317,10 +309,13 @@ export const appearance = {
         window.siyuan.config.appearance = data;
         if (appearance.element) {
             const theme = data.mode === 0 ? data.themeLight : data.themeDark;
-            const modeElement = appearance.element.querySelector("#mode");
+            const modeElement = appearance.element.querySelector("#mode") as HTMLSelectElement;
             if (modeElement) {
-                modeElement.innerHTML = `<option value="0" ${data.mode === 0 ? "selected" : ""}>${window.siyuan.languages.themeLight}</option>
-<option value="1" ${data.mode === 1 ? "selected" : ""}>${window.siyuan.languages.themeDark}</option>`;
+                if (data.modeOS) {
+                    modeElement.value = "2";
+                } else {
+                    modeElement.value = data.mode === 0 ? "0" : "1";
+                }
                 appearance.element.querySelector("#appearanceCustomName").textContent = theme;
             }
             const themeLightElement = appearance.element.querySelector("#themeLight") as HTMLSelectElement;
@@ -344,19 +339,11 @@ export const appearance = {
             }
         }
         /// #if !BROWSER
-        ipcRenderer.send(Constants.SIYUAN_CONFIG_THEME, data.mode === 1 ? "dark" : "light");
+        ipcRenderer.send(Constants.SIYUAN_CONFIG_THEME, data.modeOS ? "system" : (data.mode === 1 ? "dark" : "light"));
         ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, data.closeButtonBehavior);
         /// #endif
-        loadAssets(data);
-        const modeElement = document.getElementById("barThemeMode");
-        if (modeElement) {
-            if (data.mode === 1) {
-                modeElement.classList.add("toolbar__item--active");
-                modeElement.setAttribute("aria-label", window.siyuan.languages.themeLight);
-            } else {
-                modeElement.classList.remove("toolbar__item--active");
-                modeElement.setAttribute("aria-label", window.siyuan.languages.themeDark);
-            }
+        if (needLoadAsset) {
+            loadAssets(data);
         }
     }
 };

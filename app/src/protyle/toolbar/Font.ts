@@ -3,6 +3,7 @@ import {ToolbarItem} from "./ToolbarItem";
 import {setPosition} from "../../util/setPosition";
 import {getSelectionPosition} from "../util/selection";
 import {Constants} from "../../constants";
+import {hasClosestByAttribute} from "../util/hasClosest";
 
 export class Font extends ToolbarItem {
     public element: HTMLElement;
@@ -70,8 +71,11 @@ export const fontMenu = (protyle: IProtyle) => {
         });
         lastColorHTML += "</div>";
     }
-    const textElement = protyle.toolbar.range.cloneContents().querySelector('[data-type~="text"]') as HTMLElement;
+    let textElement = protyle.toolbar.range.cloneContents().querySelector('[data-type~="text"]') as HTMLElement;
     let fontSize = "16px";
+    if (!textElement) {
+        textElement = hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "text") as HTMLElement;
+    }
     if (textElement) {
         fontSize = textElement.style.fontSize;
     }

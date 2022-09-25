@@ -330,42 +330,29 @@ export const keymap = {
                 keymapStr += "→";
             } else if (event.key === "Tab") {
                 keymapStr += "⇥";
-            } else if (event.code === "BracketLeft") {
-                keymapStr += "[";
-            } else if (event.code === "BracketRight") {
-                keymapStr += "]";
             } else if (event.key === "Backspace") {
                 keymapStr += "⌫";
             } else if (event.key === "Delete") {
                 keymapStr += "⌦";
             } else if (event.key === "Enter") {
                 keymapStr += "↩";
-            } else if (event.altKey) {
-                const codeKey = event.code.substr(event.code.length - 1, 1).toUpperCase();
-                if (event.key === "Enter") {
-                    keymapStr += "↩";
-                } else if (event.key.startsWith("F") && event.key.length > 1) {
-                    keymapStr += event.key;
-                } else if (event.code === "Period") {
-                    keymapStr += ".";
-                } else if (codeKey !== "I" && codeKey !== "E" && codeKey !== "N" && codeKey !== "U") {
-                    keymapStr += codeKey;
-                } else if (event.which === 229) {
-                    setTimeout(() => {
-                        it.value = "";
-                    });
+            } else if (Constants.KEYCODE[event.keyCode]) {
+                if (event.shiftKey) {
+                    keymapStr += Constants.KEYCODE[event.keyCode][1];
+                } else {
+                    keymapStr += Constants.KEYCODE[event.keyCode][0];
                 }
-            } else if (event.key === "》") {
-                keymapStr += ">";
-            } else if (event.key === "《") {
-                keymapStr += "<";
-            } else if (event.key === "—") {
-                keymapStr += "-";
+            } else if (event.code.startsWith("Digit") || event.code.startsWith("Key") || event.code.startsWith("Numpad")) {
+                const codeKey = event.code.substring(event.code.length - 1).toUpperCase();
+                if (!event.altKey ||
+                    (event.altKey && !["I", "E", "N", "U"].includes(codeKey))   // Mac 编辑器中 alt+I 等字符无法清空
+                ) {
+                    keymapStr += event.code.substring(event.code.length - 1).toUpperCase();
+                }
             } else {
                 keymapStr += event.key === "Unidentified" ? "" : (event.key.length > 1 ? event.key : event.key.toUpperCase());
             }
         }
-
         it.setAttribute("data-value", keymapStr);
         // Mac 中文下会直接输入
         setTimeout(() => {

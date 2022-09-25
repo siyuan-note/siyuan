@@ -55,8 +55,9 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 	}
 
 	diff := level - hLevel
-	children := treenode.HeadingChildren(node)
-	var childrenHeadings []*ast.Node
+	var children, childrenHeadings []*ast.Node
+	children = append(children, node)
+	children = append(children, treenode.HeadingChildren(node)...)
 	for _, c := range children {
 		if ast.NodeHeading == c.Type {
 			childrenHeadings = append(childrenHeadings, c)

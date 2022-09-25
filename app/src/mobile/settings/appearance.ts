@@ -55,7 +55,7 @@ export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTML
         modelMainElement.querySelector("#fontSize").textContent = event.target.value + "px";
         fetchPost("/api/setting/setEditor", {
             displayBookmarkIcon: window.siyuan.config.editor.displayBookmarkIcon,
-            displayNetImgMark:  window.siyuan.config.editor.displayNetImgMark,
+            displayNetImgMark: window.siyuan.config.editor.displayNetImgMark,
             codeLineWrap: window.siyuan.config.editor.codeLineWrap,
             codeSyntaxHighlightLineNum: window.siyuan.config.editor.codeSyntaxHighlightLineNum,
             virtualBlockRef: window.siyuan.config.editor.virtualBlockRef,
@@ -79,6 +79,7 @@ export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTML
             fetchPost("/api/setting/setAppearance", {
                 icon: (modelMainElement.querySelector("#icon") as HTMLSelectElement).value,
                 mode: parseInt((modelMainElement.querySelector("#mode") as HTMLSelectElement).value),
+                modeOS: window.siyuan.config.appearance.modeOS,
                 codeBlockThemeDark: window.siyuan.config.appearance.codeBlockThemeDark,
                 codeBlockThemeLight: window.siyuan.config.appearance.codeBlockThemeLight,
                 themeDark: (modelMainElement.querySelector("#themeDark") as HTMLSelectElement).value,

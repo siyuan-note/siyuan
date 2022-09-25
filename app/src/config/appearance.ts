@@ -320,15 +320,15 @@ export const appearance = {
             }
             const themeLightElement = appearance.element.querySelector("#themeLight") as HTMLSelectElement;
             if (themeLightElement) {
-                themeLightElement.value = data.themeLight;
+                themeLightElement.innerHTML = genOptions(window.siyuan.config.appearance.lightThemes, window.siyuan.config.appearance.themeLight)
             }
             const themeDarkElement = appearance.element.querySelector("#themeDark") as HTMLSelectElement;
             if (themeDarkElement) {
-                themeDarkElement.value = data.themeDark;
+                themeDarkElement.innerHTML = genOptions(window.siyuan.config.appearance.darkThemes, window.siyuan.config.appearance.themeDark)
             }
             const iconElement = appearance.element.querySelector("#icon") as HTMLSelectElement;
             if (iconElement) {
-                iconElement.value = data.icon;
+                iconElement.innerHTML = genOptions(window.siyuan.config.appearance.icons, window.siyuan.config.appearance.icon)
             }
             if (data.customCSS) {
                 fetchPost("/api/setting/getCustomCSS", {

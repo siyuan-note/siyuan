@@ -483,6 +483,7 @@ export const bazaar = {
                         fetchPost("/api/setting/setAppearance", {
                             icon: packageName,
                             mode: window.siyuan.config.appearance.mode,
+                            modeOS: window.siyuan.config.appearance.modeOS,
                             codeBlockThemeDark: window.siyuan.config.appearance.codeBlockThemeDark,
                             codeBlockThemeLight: window.siyuan.config.appearance.codeBlockThemeLight,
                             themeDark: window.siyuan.config.appearance.themeDark,
@@ -501,7 +502,6 @@ export const bazaar = {
                                 switchElement.classList.remove("fn__none");
                                 switchElement.previousElementSibling.classList.remove("fn__none");
                             });
-                            appearance.onSetappearance(response.data);
                             bazaar.element.querySelectorAll(`[data-name="${packageName}"]`).forEach(item => {
                                 item.parentElement.classList.add("b3-card--current");
                                 const switchElement = item.querySelector('[data-type="switch"]');
@@ -514,6 +514,7 @@ export const bazaar = {
                         fetchPost("/api/setting/setAppearance", {
                             icon: window.siyuan.config.appearance.icon,
                             mode,
+                            modeOS: false,
                             codeBlockThemeDark: window.siyuan.config.appearance.codeBlockThemeDark,
                             codeBlockThemeLight: window.siyuan.config.appearance.codeBlockThemeLight,
                             themeDark: mode === 1 ? packageName : window.siyuan.config.appearance.themeDark,

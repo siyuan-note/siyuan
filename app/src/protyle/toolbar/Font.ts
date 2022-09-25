@@ -11,6 +11,9 @@ export class Font extends ToolbarItem {
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
         super(protyle, menuItem);
         this.element.addEventListener(getEventName(), () => {
+            if (protyle.toolbar.range.toString() === "") {
+                return;
+            }
             protyle.toolbar.element.classList.add("fn__none");
             protyle.toolbar.subElement.innerHTML = "";
             protyle.toolbar.subElement.style.width = "";

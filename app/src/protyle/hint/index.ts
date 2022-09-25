@@ -31,6 +31,7 @@ import {openFileById} from "../../editor/util";
 import {openMobileFileById} from "../../mobile/editor";
 import {getIconByType} from "../../editor/getIcon";
 import {processRender} from "../util/processCode";
+import {getEventName} from "../util/compatibility";
 
 export class Hint {
     public timeId: number;
@@ -245,7 +246,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         }
         if (hasSearch) {
             const searchElement = this.element.querySelector("input.b3-text-field") as HTMLInputElement;
-            const oldValue = this.element.querySelector("mark").textContent;
+            const oldValue = this.element.querySelector("mark")?.textContent || "";
             searchElement.value = oldValue;
             searchElement.select();
             searchElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -531,6 +532,10 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 range.deleteContents();
                 focusByRange(range);
                 protyle.toolbar.range = range;
+                if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(value)) {
+                    protyle.toolbar.element.querySelector(`[data-type="${value}"]`).dispatchEvent(new CustomEvent("block-ref" === value? getEventName() : "click"));
+                    return;
+                }
                 protyle.toolbar.setInlineMark(protyle, value, "range");
                 return;
             } else if (value === "emoji") {

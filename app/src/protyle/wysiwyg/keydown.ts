@@ -1,5 +1,5 @@
 import {hideElements} from "../ui/hideElements";
-import {isCtrl, isMac, writeText} from "../util/compatibility";
+import {getEventName, isCtrl, isMac, writeText} from "../util/compatibility";
 import {
     focusBlock,
     focusByRange,
@@ -1197,6 +1197,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 if (matchHotKey(menuItem.hotkey, event)) {
                     protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
+                    if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(menuItem.name)) {
+                        protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(new CustomEvent("block-ref" === menuItem.name ? getEventName() : "click"));
+                        return true;
+                    }
                     protyle.toolbar.setInlineMark(protyle, menuItem.name, "range");
                     return true;
                 }

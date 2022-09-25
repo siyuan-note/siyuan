@@ -391,7 +391,7 @@ export const globalShortcut = () => {
             event.stopPropagation();
             return;
         }
-        if (matchHotKey(window.siyuan.config.keymap.general.history.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.general.dataHistory.custom, event)) {
             openHistory();
             event.preventDefault();
             event.stopPropagation();

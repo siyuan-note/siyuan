@@ -128,7 +128,7 @@ export abstract class Constants {
             graphView: {default: "⌥8", custom: "⌥8"},
             globalGraph: {default: "⌥9", custom: "⌥9"},
             config: {default: "⌥P", custom: "⌥P"},
-            history: {default: "⌥H", custom: "⌥H"},
+            dataHistory: {default: "⌥H", custom: "⌥H"},
             toggleWin: {default: "⌥M", custom: "⌥M"},
             lockScreen: {default: "⌥N", custom: "⌥N"},
             move: {default: "", custom: ""},

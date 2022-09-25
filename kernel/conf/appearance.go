@@ -40,7 +40,7 @@ type Appearance struct {
 func NewAppearance() *Appearance {
 	return &Appearance{
 		Mode:                0,
-		ModeOS:              false,
+		ModeOS:              true,
 		ThemeDark:           "midnight",
 		ThemeLight:          "daylight",
 		Icon:                "material",

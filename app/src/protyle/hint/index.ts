@@ -422,11 +422,17 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     path: pathPosix().join(pathString, realFileName),
                     markdown: ""
                 }, response => {
+                    let tempElement = document.createElement("div");
                     let blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(realFileName)}</span>`;
                     if (fileNames.length === 2) {
                         blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="s">${escapeHtml(fileNames[0])}</span>`;
                     }
-                    insertHTML(genEmptyBlock(false, false, blockRefHTML), protyle);
+                    tempElement.innerHTML = blockRefHTML;
+                    tempElement = tempElement.firstElementChild as HTMLDivElement;
+                    protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                        type: "id",
+                        color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`
+                    });
                 });
             });
             return;
@@ -440,17 +446,13 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 }
                 return;
             }
-            range.insertNode(document.createElement("wbr"));
-            html = nodeElement.outerHTML;
-            range.deleteContents();
             let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
-            tempElement = tempElement.firstChild as HTMLDivElement;
-            range.insertNode(tempElement);
-            range.setStartAfter(tempElement);
-            range.collapse(true);
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
-            focusByWbr(nodeElement, range);
+            tempElement = tempElement.firstElementChild as HTMLDivElement;
+            protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                type: "id",
+                color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`
+            });
             return;
         } else if (this.splitChar === ":") {
             addEmoji(value);
@@ -533,7 +535,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 focusByRange(range);
                 protyle.toolbar.range = range;
                 if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(value)) {
-                    protyle.toolbar.element.querySelector(`[data-type="${value}"]`).dispatchEvent(new CustomEvent("block-ref" === value? getEventName() : "click"));
+                    protyle.toolbar.element.querySelector(`[data-type="${value}"]`).dispatchEvent(new CustomEvent("block-ref" === value ? getEventName() : "click"));
                     return;
                 }
                 protyle.toolbar.setInlineMark(protyle, value, "range");

@@ -409,7 +409,7 @@ export class Toolbar {
                                 if (item === "sup") {
                                     types.splice(index, 1);
                                     if (!this.element.classList.contains("fn__none")) {
-                                        this.element.querySelector("[data-type=\"sup\"]").classList.remove("protyle-toolbar__item--current");
+                                        this.element.querySelector('[data-type="sup"]').classList.remove("protyle-toolbar__item--current");
                                     }
                                     return true;
                                 }
@@ -419,8 +419,16 @@ export class Toolbar {
                                 if (item === "sub") {
                                     types.splice(index, 1);
                                     if (!this.element.classList.contains("fn__none")) {
-                                        this.element.querySelector("[data-type=\"sub\"]").classList.remove("protyle-toolbar__item--current");
+                                        this.element.querySelector('[data-type="sub"]').classList.remove("protyle-toolbar__item--current");
                                     }
+                                    return true;
+                                }
+                            });
+                        } else if (type === "block-ref" && types.includes("virtual-block-ref")) {
+                            // 虚拟引用和引用不能同时存在
+                            types.find((item, index) => {
+                                if (item === "virtual-block-ref") {
+                                    types.splice(index, 1);
                                     return true;
                                 }
                             });

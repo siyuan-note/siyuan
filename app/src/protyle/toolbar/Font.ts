@@ -151,6 +151,13 @@ export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
 };
 
 export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) => {
+    const setBlockRef = (blockRefOption: string) => {
+        const blockRefData = blockRefOption.split(Constants.ZWSP);
+        textElement.setAttribute("data-id", blockRefData[0]);
+        textElement.setAttribute("data-subtype", blockRefData[1]);
+        textElement.innerText = blockRefData[2];
+    }
+
     if (textOption) {
         switch (textOption.type) {
             case "color":
@@ -169,6 +176,9 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
             case "style4":
                 textElement.style.textShadow = "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)";
                 break;
+            case "id":
+                setBlockRef(textOption.color)
+                break;
         }
     }
 };
@@ -177,6 +187,18 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
     if (!textObj) {
         return true;
     }
+    if (textObj.type === "id") {
+        if (currentElement.nodeType !== 3) {
+            return currentElement.getAttribute("data-id") === sideElement.getAttribute("data-id") &&
+                currentElement.getAttribute("data-subtype") === sideElement.getAttribute("data-subtype") &&
+                currentElement.textContent === sideElement.textContent;
+        }
+        const blockRefData = textObj.color.split(Constants.ZWSP)
+        return blockRefData[0] === sideElement.getAttribute("data-id") &&
+            blockRefData[1] === sideElement.getAttribute("data-subtype") &&
+            blockRefData[2] === sideElement.textContent;
+    }
+
     let color = "";
     let webkitTextFillColor = "";
     let webkitTextStroke = "";

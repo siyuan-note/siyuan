@@ -337,7 +337,12 @@ export const bazaar = {
                 const type = target.getAttribute("data-type");
                 if (type === "open") {
                     /// #if !BROWSER
-                    shell.openPath(path.join(window.siyuan.config.system.confDir, "appearance", "themes", target.parentElement.getAttribute("data-name")));
+                    const dirName = target.parentElement.parentElement.getAttribute("data-bazaar")
+                    if (dirName === "icons" || dirName === "themes") {
+                        shell.openPath(path.join(window.siyuan.config.system.confDir, "appearance", dirName, target.parentElement.getAttribute("data-name")))
+                    } else {
+                        shell.openPath(path.join(window.siyuan.config.system.dataDir, dirName, target.parentElement.getAttribute("data-name")));
+                    }
                     /// #endif
                     event.preventDefault();
                     event.stopPropagation();

@@ -578,15 +578,17 @@ export class Toolbar {
                 protyle.toolbar.showRender(protyle, newNodes[0] as HTMLElement, undefined, html);
                 return;
             }
-        }
-        if (type === "inline-memo") {
+        } else if (type === "inline-memo") {
             protyle.toolbar.showRender(protyle, newNodes[0] as HTMLElement, newNodes as Element[], html);
             return;
-        }
-        if (type === "a") {
+        } else if (type === "block-ref") {
+            this.range.collapse(false);
+        } else if (type === "a") {
             const aElement = newNodes[0] as HTMLElement
             if (aElement.textContent.replace(Constants.ZWSP, "") === "" || !aElement.getAttribute("data-href")) {
                 linkMenu(protyle, aElement, aElement.getAttribute("data-href") ? true : false);
+            } else {
+                this.range.collapse(false);
             }
         }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));

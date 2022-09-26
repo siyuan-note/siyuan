@@ -193,14 +193,14 @@ func exportTempContent(c *gin.Context) {
 	}
 
 	content := arg["content"].(string)
-	tmpExport := filepath.Join(util.TempDir, "export")
+	tmpExport := filepath.Join(util.TempDir, "export", "temp")
 	if err := os.MkdirAll(tmpExport, 0755); nil != err {
 		ret.Code = 1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
 		return
 	}
-	p := filepath.Join(tmpExport, "temp", gulu.Rand.String(7))
+	p := filepath.Join(tmpExport, gulu.Rand.String(7))
 	if err := os.WriteFile(p, []byte(content), 0644); nil != err {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -209,7 +209,7 @@ func exportTempContent(c *gin.Context) {
 	}
 	url := path.Join("/export/temp/", filepath.Base(p))
 	ret.Data = map[string]interface{}{
-		"url": url,
+		"url": "http://127.0.0.1:" + util.ServerPort + url,
 	}
 }
 

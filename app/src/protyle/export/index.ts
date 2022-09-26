@@ -381,7 +381,9 @@ const renderPDF = (id: string) => {
             webSecurity: false,
         },
     });
-    window.siyuan.printWin.loadURL(servePath);
+    fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
+        window.siyuan.printWin.loadURL(response.data.url);
+    })
 };
 
 const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean) => {

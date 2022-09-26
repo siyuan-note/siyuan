@@ -147,7 +147,6 @@ export class MenuItem {
         }
         this.element.innerHTML = html;
         if (options.bind) {
-            this.element.classList.add("b3-menu__item--custom");
             options.bind(this.element);
         }
         if (options.submenu) {

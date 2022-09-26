@@ -46,7 +46,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     }
     const refBlockId = element.getAttribute("data-id");
     const id = nodeElement.getAttribute("data-node-id");
-    const oldHTML = nodeElement.outerHTML;
+    let oldHTML = nodeElement.outerHTML;
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.append(new MenuItem({
         label: `<input style="margin: 4px 0" class="b3-text-field" placeholder="${window.siyuan.languages.anchor}">`,
@@ -56,8 +56,8 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             inputElement.addEventListener("blur", (event) => {
                 if (nodeElement.outerHTML !== oldHTML) {
                     nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                    element.setAttribute("data-subtype", inputElement.value ? "s" : "d");
                     updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                    oldHTML = nodeElement.outerHTML;
                 }
                 protyle.toolbar.range.selectNodeContents(element);
                 protyle.toolbar.range.collapse(false);
@@ -72,6 +72,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                         element.innerHTML = response.data;
                     });
                 }
+                element.setAttribute("data-subtype", inputElement.value ? "s" : "d");
             });
             inputElement.addEventListener("keydown", (event) => {
                 if (event.key === "Enter" && !event.isComposing) {

@@ -840,6 +840,7 @@ export class Toolbar {
             if (hasClosestByClassName(event.target as HTMLElement, "block__icon")) {
                 return;
             }
+            event.stopPropagation();
             const documentSelf = document;
             this.subElement.style.userSelect = "none";
             const x = event.clientX - parseInt(this.subElement.style.left);

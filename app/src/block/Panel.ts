@@ -61,7 +61,6 @@ export class BlockPanel {
             if (this.element && window.siyuan.blockPanels.length > 1) {
                 this.element.classList.add("block__popover--top");
             }
-
             let targetElement = hasClosestByClassName(event.target, "block__icons");
             let type = "move";
             let x = event.clientX - parseInt(this.element.style.left);
@@ -190,7 +189,7 @@ export class BlockPanel {
         const index = parseInt(editorElement.getAttribute("data-index"));
         const editor = new Protyle(editorElement, {
             blockId: this.nodeIds[index],
-            defId: this.defIds[index] ||this.defIds[0] || "",
+            defId: this.defIds[index] || this.defIds[0] || "",
             action: [Constants.CB_GET_ALL],
             render: {
                 gutter: true,

@@ -7,7 +7,7 @@ require (
 	github.com/88250/css v0.1.2
 	github.com/88250/flock v0.8.2
 	github.com/88250/gulu v1.2.3-0.20220916075322-eb117059d70a
-	github.com/88250/lute v1.7.5-0.20220926145747-0899a4cd8776
+	github.com/88250/lute v1.7.5-0.20220926155035-518f58c05151
 	github.com/88250/pdfcpu v0.3.13
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732

@@ -28,51 +28,23 @@ export class Link extends ToolbarItem {
                 return;
             }
 
-            fixTableRange(range);
-
-            if (!["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName) && range.startOffset === 0 && !hasPreviousSibling(range.startContainer)) {
-                range.setStartBefore(range.startContainer.parentElement);
-            }
-            if (!["DIV", "TD", "TH", "TR"].includes(range.endContainer.parentElement.tagName) && range.endOffset === range.endContainer.textContent.length && !hasNextSibling(range.endContainer)) {
-                range.setEndAfter(range.endContainer.parentElement);
-            }
-            const wbrElement = document.createElement("wbr");
-            range.insertNode(wbrElement);
-            const html = nodeElement.outerHTML;
-
-            const newElement = document.createElement("span");
-            newElement.setAttribute("data-type", "a");
-            newElement.setAttribute("data-href", "");
-            const rangeString = range.toString();
-            newElement.textContent = rangeString;
-            range.extractContents();
-            range.insertNode(newElement);
-            let needShowLink = true;
-            let focusText = false;
+            const rangeString = range.toString().trim()
+            let dataHref = "";
             try {
                 const clipText = await navigator.clipboard.readText();
                 // 选中链接时需忽略剪切板内容 https://ld246.com/article/1643035329737
-                if (protyle.lute.IsValidLinkDest(rangeString.trim())) {
-                    (newElement as HTMLElement).setAttribute("data-href", rangeString.trim());
-                    needShowLink = false;
+                if (protyle.lute.IsValidLinkDest(rangeString)) {
+                    dataHref = rangeString;
                 } else if (protyle.lute.IsValidLinkDest(clipText)) {
-                    (newElement as HTMLElement).setAttribute("data-href", clipText);
-                    if (newElement.textContent.replace(Constants.ZWSP, "") !== "") {
-                        needShowLink = false;
-                    }
-                    focusText = true;
+                    dataHref = clipText;
                 }
             } catch (e) {
                 console.log(e);
             }
-            if (needShowLink) {
-                linkMenu(protyle, newElement as HTMLElement, focusText);
-            }
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-            range.setStartAfter(newElement);
-            range.collapse(true);
-            wbrElement.remove();
+            protyle.toolbar.setInlineMark(protyle, "a", "range", {
+                type: "a",
+                color: dataHref
+            });
         });
     }
 }

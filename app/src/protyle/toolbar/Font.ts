@@ -187,6 +187,16 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 textElement.removeAttribute("data-render");
                 textElement.textContent = "";
                 break;
+            case "a":
+                textElement.setAttribute("data-href", textOption.color);
+                textElement.removeAttribute("data-subtype");
+                textElement.removeAttribute("data-id");
+                break;
+            case "inline-memo":
+                textElement.removeAttribute("contenteditable");
+                textElement.removeAttribute("data-subtype");
+                textElement.removeAttribute("data-content");
+                break;
         }
     }
 };
@@ -195,7 +205,7 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
     if (!textObj) {
         return true;
     }
-    if (textObj.type === "inline-math") {
+    if (textObj.type === "inline-math" || textObj.type === "inline-memo" || textObj.type === "a") {
         return false;
     }
     if (textObj.type === "id") {

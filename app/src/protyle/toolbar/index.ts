@@ -43,6 +43,7 @@ import {showMessage} from "../../dialog/message";
 import {InlineMath} from "./InlineMath";
 import {InlineMemo} from "./InlineMemo";
 import {mathRender} from "../markdown/mathRender";
+import {linkMenu} from "../../menus/protyle";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -426,10 +427,18 @@ export class Toolbar {
                                     return true;
                                 }
                             });
-                        } else if (type === "block-ref" && types.includes("virtual-block-ref")) {
-                            // 虚拟引用和引用不能同时存在
+                        } else if (type === "block-ref" && (types.includes("virtual-block-ref") || types.includes("a"))) {
+                            // 虚拟引用和引用、链接不能同时存在
                             types.find((item, index) => {
-                                if (item === "virtual-block-ref") {
+                                if (item === "virtual-block-ref" || item === "a") {
+                                    types.splice(index, 1);
+                                    return true;
+                                }
+                            });
+                        } else if (type === "a" && (types.includes("virtual-block-ref") || types.includes("block-ref"))) {
+                            // 链接和引用、虚拟引用不能同时存在
+                            types.find((item, index) => {
+                                if (item === "virtual-block-ref" || item === "block-ref") {
                                     types.splice(index, 1);
                                     return true;
                                 }
@@ -573,6 +582,12 @@ export class Toolbar {
         if (type === "inline-memo") {
             protyle.toolbar.showRender(protyle, newNodes[0] as HTMLElement, newNodes as Element[], html);
             return;
+        }
+        if (type === "a") {
+            const aElement = newNodes[0] as HTMLElement
+            if (aElement.textContent.replace(Constants.ZWSP, "") === "" || !aElement.getAttribute("data-href")) {
+                linkMenu(protyle, aElement, aElement.getAttribute("data-href") ? true : false);
+            }
         }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);

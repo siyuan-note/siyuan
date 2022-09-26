@@ -209,7 +209,7 @@ func exportTempContent(c *gin.Context) {
 	}
 	url := path.Join("/export/temp/", filepath.Base(p))
 	ret.Data = map[string]interface{}{
-		"url": url,
+		"url": "http://127.0.0.1:" + util.ServerPort + url,
 	}
 }
 

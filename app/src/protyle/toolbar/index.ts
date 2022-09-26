@@ -434,6 +434,23 @@ export class Toolbar {
                                     return true;
                                 }
                             });
+                        } else if (type === "inline-memo" && types.includes("inline-math")) {
+                            // 数学公式和备注不能同时存在
+                            types.find((item, index) => {
+                                if (item === "inline-math") {
+                                    types.splice(index, 1);
+                                    return true;
+                                }
+                            });
+                            item.textContent = item.getAttribute("data-content");
+                        } else if (type === "inline-math" && types.includes("inline-memo")) {
+                            // 数学公式和备注不能同时存在
+                            types.find((item, index) => {
+                                if (item === "inline-memo") {
+                                    types.splice(index, 1);
+                                    return true;
+                                }
+                            });
                         }
                         types = [...new Set(types)];
                         if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
@@ -552,6 +569,10 @@ export class Toolbar {
                 protyle.toolbar.showRender(protyle, newNodes[0] as HTMLElement, undefined, html);
                 return;
             }
+        }
+        if (type === "inline-memo") {
+            protyle.toolbar.showRender(protyle, newNodes[0] as HTMLElement, newNodes as Element[], html);
+            return;
         }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);

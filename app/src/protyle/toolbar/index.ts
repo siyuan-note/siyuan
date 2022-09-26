@@ -992,7 +992,8 @@ export class Toolbar {
                             inlineLastNode = item;
                         }
                     } else {
-                        item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value));
+                        // 行级备注自动移除换行  https://ld246.com/article/1664205917326
+                        item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value.replace(/\n/g, " ")));
                     }
                 });
             } else if (types.includes("inline-math")) {

@@ -127,7 +127,7 @@ export class Toolbar {
         });
         const types = this.getCurrentType();
         types.forEach(item => {
-            if (["a", "block-ref", "virtual-block-ref", "text", "file-annotation-ref", "inline-math", "inline-memo", ""].includes(item)) {
+            if (["search-mark", "a", "block-ref", "virtual-block-ref", "text", "file-annotation-ref", "inline-math", "inline-memo", ""].includes(item)) {
                 return;
             }
             this.element.querySelector(`[data-type="${item}"]`).classList.add("protyle-toolbar__item--current");
@@ -427,18 +427,18 @@ export class Toolbar {
                                     return true;
                                 }
                             });
-                        } else if (type === "block-ref" && (types.includes("virtual-block-ref") || types.includes("a"))) {
-                            // 虚拟引用和引用、链接不能同时存在
+                        } else if (type === "block-ref" && (types.includes("virtual-block-ref") || types.includes("a") || types.includes("search-mark"))) {
+                            // 虚拟引用和引用、链接、搜索高亮不能同时存在
                             types.find((item, index) => {
-                                if (item === "virtual-block-ref" || item === "a") {
+                                if (item === "virtual-block-ref" || item === "a" || item === "search-mark") {
                                     types.splice(index, 1);
                                     return true;
                                 }
                             });
-                        } else if (type === "a" && (types.includes("virtual-block-ref") || types.includes("block-ref"))) {
-                            // 链接和引用、虚拟引用不能同时存在
+                        } else if (type === "a" && (types.includes("virtual-block-ref") || types.includes("block-ref") || types.includes("search-mark"))) {
+                            // 链接和引用、虚拟引用、搜索高亮不能同时存在
                             types.find((item, index) => {
-                                if (item === "virtual-block-ref" || item === "block-ref") {
+                                if (item === "virtual-block-ref" || item === "block-ref" || item === "search-mark") {
                                     types.splice(index, 1);
                                     return true;
                                 }

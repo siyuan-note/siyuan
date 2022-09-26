@@ -82,7 +82,7 @@ export const initConfigSearch = (element: HTMLElement) => {
         configIndex.map((item, index) => {
             item.map((subItem) => {
                 if (!subItem) {
-                    console.warn("Search config miss language: ", item, index)
+                    console.warn("Search config miss language: ", item, index);
                 }
                 if (subItem && (inputValue.toLowerCase().indexOf(subItem) > -1 || subItem.toLowerCase().indexOf(inputValue) > -1)) {
                     indexList.push(index);

@@ -214,7 +214,7 @@ export const appearance = {
     _send: () => {
         const themeLight = (appearance.element.querySelector("#themeLight") as HTMLSelectElement).value;
         const themeDark = (appearance.element.querySelector("#themeDark") as HTMLSelectElement).value;
-        const modeElementValue = parseInt((appearance.element.querySelector("#mode") as HTMLSelectElement).value)
+        const modeElementValue = parseInt((appearance.element.querySelector("#mode") as HTMLSelectElement).value);
         fetchPost("/api/setting/setAppearance", {
             icon: (appearance.element.querySelector("#icon") as HTMLSelectElement).value,
             mode: modeElementValue === 2 ? window.siyuan.config.appearance.mode : modeElementValue,
@@ -320,15 +320,15 @@ export const appearance = {
             }
             const themeLightElement = appearance.element.querySelector("#themeLight") as HTMLSelectElement;
             if (themeLightElement) {
-                themeLightElement.innerHTML = genOptions(window.siyuan.config.appearance.lightThemes, window.siyuan.config.appearance.themeLight)
+                themeLightElement.innerHTML = genOptions(window.siyuan.config.appearance.lightThemes, window.siyuan.config.appearance.themeLight);
             }
             const themeDarkElement = appearance.element.querySelector("#themeDark") as HTMLSelectElement;
             if (themeDarkElement) {
-                themeDarkElement.innerHTML = genOptions(window.siyuan.config.appearance.darkThemes, window.siyuan.config.appearance.themeDark)
+                themeDarkElement.innerHTML = genOptions(window.siyuan.config.appearance.darkThemes, window.siyuan.config.appearance.themeDark);
             }
             const iconElement = appearance.element.querySelector("#icon") as HTMLSelectElement;
             if (iconElement) {
-                iconElement.innerHTML = genOptions(window.siyuan.config.appearance.icons, window.siyuan.config.appearance.icon)
+                iconElement.innerHTML = genOptions(window.siyuan.config.appearance.icons, window.siyuan.config.appearance.icon);
             }
             if (data.customCSS) {
                 fetchPost("/api/setting/getCustomCSS", {

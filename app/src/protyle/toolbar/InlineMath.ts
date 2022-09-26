@@ -1,10 +1,6 @@
 import {ToolbarItem} from "./ToolbarItem";
-import * as dayjs from "dayjs";
-import {updateTransaction} from "../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
-import {mathRender} from "../markdown/mathRender";
-import {fixTableRange, focusByRange} from "../util/selection";
 
 export class InlineMath extends ToolbarItem {
     public element: HTMLElement;
@@ -24,7 +20,7 @@ export class InlineMath extends ToolbarItem {
             if (!mathElement && range.startContainer.nodeType !== 3) {
                 const previousSibling = hasPreviousSibling(range.startContainer.childNodes[range.startOffset]) as HTMLElement;
                 if (previousSibling && previousSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
-                    mathElement = previousSibling
+                    mathElement = previousSibling;
                 }
             }
             if (!mathElement && range.startOffset === range.startContainer.textContent.length && range.startContainer.nodeType === 3) {
@@ -34,9 +30,9 @@ export class InlineMath extends ToolbarItem {
                         (item.nodeType == 3 && item.textContent === "")) {
                         // 是否仅选中数学公式
                     } else {
-                        isMath = false
+                        isMath = false;
                     }
-                })
+                });
                 if (isMath) {
                     const nextSibling = hasNextSibling(range.startContainer) as HTMLElement;
                     if (nextSibling && nextSibling.nodeType !== 3 && nextSibling.getAttribute("data-type").indexOf("inline-math") > -1) {

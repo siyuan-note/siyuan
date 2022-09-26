@@ -383,7 +383,7 @@ const renderPDF = (id: string) => {
     });
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
         window.siyuan.printWin.loadURL(response.data.url);
-    })
+    });
 };
 
 const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean) => {

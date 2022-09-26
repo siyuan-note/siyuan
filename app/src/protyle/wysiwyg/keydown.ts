@@ -688,7 +688,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     previousSibling.classList.add("img--select");
                 } else if (previousSibling.getAttribute("data-type")?.indexOf("inline-math") > -1) {
                     // 数学公式相邻中有 zwsp,无法删除
-                    previousSibling.after(document.createElement("wbr"))
+                    previousSibling.after(document.createElement("wbr"));
                     const oldHTML = nodeElement.outerHTML;
                     range.startContainer.textContent = "";
                     previousSibling.remove();

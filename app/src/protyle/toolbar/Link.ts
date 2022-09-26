@@ -1,11 +1,7 @@
 import {ToolbarItem} from "./ToolbarItem";
 import {linkMenu} from "../../menus/protyle";
-import {Constants} from "../../constants";
-import * as dayjs from "dayjs";
-import {updateTransaction} from "../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
-import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
-import {fixTableRange, focusByRange, focusByWbr} from "../util/selection";
+import {focusByRange, focusByWbr} from "../util/selection";
 
 export class Link extends ToolbarItem {
     public element: HTMLElement;
@@ -28,7 +24,7 @@ export class Link extends ToolbarItem {
                 return;
             }
 
-            const rangeString = range.toString().trim()
+            const rangeString = range.toString().trim();
             let dataHref = "";
             try {
                 const clipText = await navigator.clipboard.readText();

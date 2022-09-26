@@ -379,7 +379,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         if (nodeElement) {
             id = nodeElement.getAttribute("data-node-id");
         }
-        let html = nodeElement.outerHTML;
+        const html = nodeElement.outerHTML;
         // 自顶向下法新建文档后光标定位问题 https://github.com/siyuan-note/siyuan/issues/299
         // QQ 拼音输入法自动补全需移除补全内容 https://github.com/siyuan-note/siyuan/issues/320
         // 前后有标记符的情况 https://github.com/siyuan-note/siyuan/issues/2511

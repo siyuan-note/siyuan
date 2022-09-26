@@ -1,8 +1,5 @@
 import {ToolbarItem} from "./ToolbarItem";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
-import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
-import {fixTableRange} from "../util/selection";
-import {isArrayEqual} from "../../util/functions";
 
 export class InlineMemo extends ToolbarItem {
     public element: HTMLElement;

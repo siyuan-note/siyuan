@@ -156,7 +156,7 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
         textElement.setAttribute("data-id", blockRefData[0]);
         textElement.setAttribute("data-subtype", blockRefData[1]);
         textElement.innerText = blockRefData[2];
-    }
+    };
 
     if (textOption) {
         switch (textOption.type) {
@@ -214,7 +214,7 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
                 currentElement.getAttribute("data-subtype") === sideElement.getAttribute("data-subtype") &&
                 currentElement.textContent === sideElement.textContent;
         }
-        const blockRefData = textObj.color.split(Constants.ZWSP)
+        const blockRefData = textObj.color.split(Constants.ZWSP);
         return blockRefData[0] === sideElement.getAttribute("data-id") &&
             blockRefData[1] === sideElement.getAttribute("data-subtype") &&
             blockRefData[2] === sideElement.textContent;

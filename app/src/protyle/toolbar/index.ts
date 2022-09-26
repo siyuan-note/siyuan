@@ -486,7 +486,7 @@ export class Toolbar {
                         } else if (item.tagName !== "BR") {
                             item.setAttribute("data-type", types.join(" "));
                             item.querySelectorAll("span").forEach(backslashItem => {
-                                backslashItem.remove()
+                                backslashItem.remove();
                             });
                             setFontStyle(item, textObj);
                             newNodes.push(item);
@@ -598,7 +598,7 @@ export class Toolbar {
         } else if (type === "block-ref") {
             this.range.collapse(false);
         } else if (type === "a") {
-            const aElement = newNodes[0] as HTMLElement
+            const aElement = newNodes[0] as HTMLElement;
             if (aElement.textContent.replace(Constants.ZWSP, "") === "" || !aElement.getAttribute("data-href")) {
                 linkMenu(protyle, aElement, aElement.getAttribute("data-href") ? true : false);
             } else {

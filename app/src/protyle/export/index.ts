@@ -2,7 +2,7 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {OpenDialogReturnValue} from "electron";
-import {BrowserWindow, dialog, app} from "@electron/remote";
+import {BrowserWindow, dialog} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "./util";
@@ -72,22 +72,6 @@ const renderPDF = (id: string) => {
         keepFold: false,
     }));
     const servePath = window.location.protocol + "//" + window.location.host;
-    window.siyuan.printWin = new BrowserWindow({
-        show: true,
-        width: 1032,
-        resizable: false,
-        frame: "darwin" === window.siyuan.config.system.os,
-        icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
-        titleBarStyle: "hidden",
-        webPreferences: {
-            contextIsolation: false,
-            nodeIntegration: true,
-            webviewTag: true,
-            webSecurity: false,
-        },
-    });
-    window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`
-
     let pdfWidth = "";
     if (localData.pageSize === "A3") {
         if (localData.landscape) {
@@ -383,7 +367,21 @@ const renderPDF = (id: string) => {
         });
     });
 </script></body></html>`;
-    window.siyuan.printWin.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent(html));
+    window.siyuan.printWin = new BrowserWindow({
+        show: true,
+        width: 1032,
+        resizable: false,
+        frame: "darwin" === window.siyuan.config.system.os,
+        icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
+        titleBarStyle: "hidden",
+        webPreferences: {
+            contextIsolation: false,
+            nodeIntegration: true,
+            webviewTag: true,
+            webSecurity: false,
+        },
+    });
+    window.siyuan.printWin.loadURL(servePath);
 };
 
 const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean) => {

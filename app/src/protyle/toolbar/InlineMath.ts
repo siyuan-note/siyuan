@@ -22,7 +22,10 @@ export class InlineMath extends ToolbarItem {
             }
             let mathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math") as Element;
             if (!mathElement && range.startContainer.nodeType !== 3) {
-                mathElement = (range.startContainer as HTMLElement).querySelector('[data-type~="inline-math"]');
+                const previousSibling = hasPreviousSibling(range.startContainer.childNodes[range.startOffset]) as HTMLElement;
+                if (previousSibling && previousSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
+                    mathElement = previousSibling
+                }
             }
             if (!mathElement && range.startOffset === range.startContainer.textContent.length && range.startContainer.nodeType === 3) {
                 let isMath = true;
@@ -38,6 +41,11 @@ export class InlineMath extends ToolbarItem {
                     const nextSibling = hasNextSibling(range.startContainer) as HTMLElement;
                     if (nextSibling && nextSibling.nodeType !== 3 && nextSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
                         mathElement = nextSibling;
+                    } else {
+                        const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
+                        if (previousSibling && previousSibling.nodeType !== 3 && previousSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
+                            mathElement = previousSibling;
+                        }
                     }
                 }
             }

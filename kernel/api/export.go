@@ -18,7 +18,9 @@ package api
 
 import (
 	"net/http"
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -178,6 +180,36 @@ func exportMdHTML(c *gin.Context) {
 		"id":      id,
 		"name":    name,
 		"content": content,
+	}
+}
+
+func exportTempContent(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	content := arg["content"].(string)
+	tmpExport := filepath.Join(util.TempDir, "export")
+	if err := os.MkdirAll(tmpExport, 0755); nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+	p := filepath.Join(tmpExport, "temp", gulu.Rand.String(7))
+	if err := os.WriteFile(p, []byte(content), 0644); nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+	url := path.Join("/export/temp/", filepath.Base(p))
+	ret.Data = map[string]interface{}{
+		"url": url,
 	}
 }
 

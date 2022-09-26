@@ -177,7 +177,15 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 textElement.style.textShadow = "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)";
                 break;
             case "id":
-                setBlockRef(textOption.color)
+                setBlockRef(textOption.color);
+                break;
+            case "inline-math":
+                textElement.className = "render-node";
+                textElement.setAttribute("contenteditable", "false");
+                textElement.setAttribute("data-subtype", "math");
+                textElement.setAttribute("data-content", textElement.textContent.replace(Constants.ZWSP, ""));
+                textElement.removeAttribute("data-render");
+                textElement.textContent = "";
                 break;
         }
     }
@@ -186,6 +194,9 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
 export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLElement, textObj: ITextOption) => {
     if (!textObj) {
         return true;
+    }
+    if (textObj.type === "inline-math") {
+        return false;
     }
     if (textObj.type === "id") {
         if (currentElement.nodeType !== 3) {

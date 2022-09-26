@@ -22,43 +22,32 @@ export class InlineMath extends ToolbarItem {
             }
             let mathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math") as Element;
             if (!mathElement && range.startContainer.nodeType !== 3) {
-                mathElement = (range.startContainer as HTMLElement).querySelector('[data-type="inline-math"]');
+                mathElement = (range.startContainer as HTMLElement).querySelector('[data-type~="inline-math"]');
+            }
+            if (!mathElement && range.startOffset === range.startContainer.textContent.length && range.startContainer.nodeType === 3) {
+                let isMath = true;
+                range.cloneContents().childNodes.forEach((item: HTMLElement) => {
+                    if ((item.nodeType !== 3 && item.getAttribute("data-type").indexOf("inline-math") > -1) ||
+                        (item.nodeType == 3 && item.textContent === "")) {
+                        // 是否仅选中数学公式
+                    } else {
+                        isMath = false
+                    }
+                })
+                if (isMath) {
+                    const nextSibling = hasNextSibling(range.startContainer) as HTMLElement;
+                    if (nextSibling && nextSibling.nodeType !== 3 && nextSibling.getAttribute("data-type").indexOf("inline-math") > -1) {
+                        mathElement = nextSibling;
+                    }
+                }
             }
             if (mathElement) {
                 protyle.toolbar.showRender(protyle, mathElement);
                 return;
             }
-            fixTableRange(range);
-            if (!["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName) && range.startOffset === 0 && !hasPreviousSibling(range.startContainer)) {
-                range.setStartBefore(range.startContainer.parentElement);
-            }
-            if (!["DIV", "TD", "TH", "TR"].includes(range.endContainer.parentElement.tagName) && range.endOffset === range.endContainer.textContent.length && !hasNextSibling(range.endContainer)) {
-                range.setEndAfter(range.endContainer.parentElement);
-            }
-            const wbrElement = document.createElement("wbr");
-            range.insertNode(wbrElement);
-            const html = nodeElement.outerHTML;
-
-            const newElement = document.createElement("span");
-            const rangeString = range.toString();
-            newElement.className = "render-node";
-            newElement.setAttribute("contenteditable", "false");
-            newElement.setAttribute("data-type", "inline-math");
-            newElement.setAttribute("data-subtype", "math");
-            newElement.setAttribute("data-content", rangeString.trim());
-            range.extractContents();
-            range.insertNode(newElement);
-            mathRender(newElement);
-            if (rangeString.trim() === "") {
-                protyle.toolbar.showRender(protyle, newElement, undefined, html);
-            } else {
-                range.setStartAfter(newElement);
-                range.collapse(true);
-                focusByRange(range);
-                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-                wbrElement.remove();
-            }
+            protyle.toolbar.setInlineMark(protyle, "inline-math", "range", {
+                type: "inline-math",
+            });
         });
     }
 }

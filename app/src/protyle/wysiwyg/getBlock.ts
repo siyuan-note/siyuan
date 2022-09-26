@@ -152,7 +152,7 @@ export const getTopAloneElement = (topSourceElement: Element) => {
 export const hasNextSibling = (element: Node) => {
     let nextSibling = element.nextSibling;
     while (nextSibling) {
-        if (nextSibling.textContent === "") {
+        if (nextSibling.textContent === "" && nextSibling.nodeType === 3) {
             nextSibling = nextSibling.nextSibling;
         } else {
             return nextSibling;

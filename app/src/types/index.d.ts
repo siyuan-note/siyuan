@@ -31,7 +31,7 @@ interface Window {
 }
 
 interface ITextOption {
-    color: string,
+    color?: string,
     type: string
 }
 

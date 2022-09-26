@@ -42,6 +42,7 @@ import {previewTemplate} from "./util";
 import {showMessage} from "../../dialog/message";
 import {InlineMath} from "./InlineMath";
 import {InlineMemo} from "./InlineMemo";
+import {mathRender} from "../markdown/mathRender";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -379,6 +380,7 @@ export class Toolbar {
                 rangeTypes.push(type);
                 inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));
                 inlineElement.textContent = Constants.ZWSP;
+                setFontStyle(inlineElement, textObj);
                 newNodes.push(inlineElement);
             } else {
                 contents.childNodes.forEach((item: HTMLElement, index) => {
@@ -486,7 +488,7 @@ export class Toolbar {
                 newNodes.splice(i, 1);
                 i--;
             } else {
-                this.range.insertNode(newNodes[i]);
+                this.range.insertNode(currentNewNode);
                 this.range.collapse(false);
             }
         }
@@ -499,12 +501,16 @@ export class Toolbar {
         if (previousIndex) {
             this.range.setStart(previousElement.firstChild, previousIndex);
         } else if (newNodes.length > 0) {
-            if (newNodes[0].firstChild) {
-                this.range.setStart(newNodes[0].firstChild, 0);
-            } else if (newNodes[0].nodeType === 3) {
-                this.range.setStart(newNodes[0], 0);
+            if (newNodes[0].nodeType !== 3 && (newNodes[0] as HTMLElement).getAttribute("data-type") === "inline-math") {
+                // 数学公式后面处理
             } else {
-                this.range.setStartBefore(newNodes[0]);
+                if (newNodes[0].firstChild) {
+                    this.range.setStart(newNodes[0].firstChild, 0);
+                } else if (newNodes[0].nodeType === 3) {
+                    this.range.setStart(newNodes[0], 0);
+                } else {
+                    this.range.setStartBefore(newNodes[0]);
+                }
             }
         } else if (nextElement) {
             // aaa**bbb** 选中 aaa 加粗
@@ -514,22 +520,38 @@ export class Toolbar {
             this.range.setEnd(nextElement.lastChild, nextIndex);
         } else if (newNodes.length > 0) {
             const lastNewNode = newNodes[newNodes.length - 1];
-            if (lastNewNode.lastChild) {
-                this.range.setEnd(lastNewNode.lastChild, lastNewNode.lastChild.textContent.length);
-            } else if (lastNewNode.nodeType === 3) {
-                this.range.setEnd(lastNewNode, lastNewNode.textContent.length);
-                if (lastNewNode.textContent === Constants.ZWSP) {
-                    // 粗体后取消粗体光标不存在 https://github.com/siyuan-note/insider/issues/1056
-                    this.range.collapse(false);
+            if (lastNewNode.nodeType !== 3 && (lastNewNode as HTMLElement).getAttribute("data-type") === "inline-math") {
+                if (lastNewNode.nextSibling) {
+                    this.range.setStart(lastNewNode.nextSibling, 0);
+                } else {
+                    this.range.setStartAfter(lastNewNode);
                 }
+                this.range.collapse(true);
             } else {
-                // eg: 表格中有3行时，选中第二行三级，多次加粗会增加换行
-                this.range.setEndAfter(lastNewNode);
+                if (lastNewNode.lastChild) {
+                    this.range.setEnd(lastNewNode.lastChild, lastNewNode.lastChild.textContent.length);
+                } else if (lastNewNode.nodeType === 3) {
+                    this.range.setEnd(lastNewNode, lastNewNode.textContent.length);
+                    if (lastNewNode.textContent === Constants.ZWSP) {
+                        // 粗体后取消粗体光标不存在 https://github.com/siyuan-note/insider/issues/1056
+                        this.range.collapse(false);
+                    }
+                } else {
+                    // eg: 表格中有3行时，选中第二行三级，多次加粗会增加换行
+                    this.range.setEndAfter(lastNewNode);
+                }
             }
         } else if (previousElement) {
             // **aaa**bbb 选中 bbb 加粗
             // 需进行 mergeNode ，否用 alt+x 为相同颜色 aaabbb 中的 bbb 再次赋值后无法选中
             this.range.setEnd(previousElement.firstChild, previousElement.firstChild.textContent.length);
+        }
+        if (type === "inline-math") {
+            mathRender(nodeElement);
+            if (selectText === "") {
+                protyle.toolbar.showRender(protyle, newNodes[0] as HTMLElement, undefined, html);
+                return;
+            }
         }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);

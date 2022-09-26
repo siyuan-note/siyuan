@@ -87,6 +87,9 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                                 // 随着浏览器的升级，从 beforeend 修改为 afterend
                                 mathElement.insertAdjacentText("afterend", Constants.ZWSP);
                             }
+                        } else if (nextSibling && nextSibling.nodeType !== 3 && (nextSibling as HTMLElement).getAttribute("data-type")?.indexOf("inline-math") > -1) {
+                            // 相邻的数学公式删除或光标移动有问题
+                            mathElement.after(document.createTextNode(Constants.ZWSP));
                         } else if (nextSibling && nextSibling.textContent !== "\n" &&
                             // 输入 $a$ 后，光标移动到其他块，再点击 a 后，光标不显示 https://github.com/siyuan-note/insider/issues/1076#issuecomment-1253215515
                             nextSibling.textContent !== Constants.ZWSP) {

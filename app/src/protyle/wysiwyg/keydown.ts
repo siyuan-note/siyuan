@@ -683,8 +683,21 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             // https://github.com/siyuan-note/siyuan/issues/5547
             const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
             if (range.startOffset === 1 && range.startContainer.textContent === Constants.ZWSP &&
-                previousSibling && previousSibling.nodeType !== 3 && previousSibling.classList.contains("img")) {
-                previousSibling.classList.add("img--select");
+                previousSibling && previousSibling.nodeType !== 3) {
+                if (previousSibling.classList.contains("img")) {
+                    previousSibling.classList.add("img--select");
+                } else if (previousSibling.getAttribute("data-type")?.indexOf("inline-math") > -1) {
+                    // 数学公式相邻中有 zwsp,无法删除
+                    previousSibling.after(document.createElement("wbr"))
+                    const oldHTML = nodeElement.outerHTML;
+                    range.startContainer.textContent = "";
+                    previousSibling.remove();
+                    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                    focusByWbr(nodeElement, range);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
             }
             const imgSelectElement = protyle.wysiwyg.element.querySelector(".img--select");
             if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {

@@ -90,7 +90,8 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     const hasShift = hotKeys.length > 2 && (hotKeys[0] === "⇧");
     if (isCtrl(event) && !event.altKey && ((!hasShift && !event.shiftKey) || (hasShift && event.shiftKey))) {
         const keyCode = (hasShift ? hotKeys[2] : hotKeys[1]);
-        let isMatchKey = event.key.toLowerCase() === keyCode.toLowerCase();
+        let isMatchKey = (/^[0-9]$/.test(keyCode) ? (event.code === "Digit" + keyCode || event.code === "Numpad" + keyCode) : event.code === "Key" + keyCode) ||
+            event.code === keyCode || event.key.toLowerCase() === keyCode.toLowerCase();
         // 更新 electron 后不需要判断 Mac，但 Mac 下中英文有区别，需使用 keyCode 辅助
         if (Constants.KEYCODE[event.keyCode]) {
             if (event.shiftKey) {

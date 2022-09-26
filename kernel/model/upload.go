@@ -45,6 +45,12 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 
 	docDirLocalPath := filepath.Join(util.DataDir, bt.BoxID, path.Dir(bt.Path))
 	assets := getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), docDirLocalPath)
+	if !gulu.File.IsExist(assets) {
+		if err = os.MkdirAll(assets, 0755); nil != err {
+			return
+		}
+	}
+
 	for _, p := range assetPaths {
 		fName := filepath.Base(p)
 		fName = util.FilterUploadFileName(fName)
@@ -124,7 +130,9 @@ func Upload(c *gin.Context) {
 	if nil != form.Value["assetsDirPath"] {
 		assetsDirPath = form.Value["assetsDirPath"][0]
 		assetsDirPath = filepath.Join(util.DataDir, assetsDirPath)
-		if err := os.MkdirAll(assetsDirPath, 0755); nil != err {
+	}
+	if !gulu.File.IsExist(assetsDirPath) {
+		if err = os.MkdirAll(assetsDirPath, 0755); nil != err {
 			ret.Code = -1
 			ret.Msg = err.Error()
 			return

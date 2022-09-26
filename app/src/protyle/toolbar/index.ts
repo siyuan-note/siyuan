@@ -485,6 +485,9 @@ export class Toolbar {
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
                         } else if (item.tagName !== "BR") {
                             item.setAttribute("data-type", types.join(" "));
+                            item.querySelectorAll("span").forEach(backslashItem => {
+                                backslashItem.remove()
+                            });
                             setFontStyle(item, textObj);
                             newNodes.push(item);
                         } else {

@@ -86,7 +86,7 @@ const renderPDF = (id: string) => {
             webSecurity: false,
         },
     });
-    window.siyuan.printWin.webContents.userAgent = 'SiYuan/' + app.getVersion() + ' https://b3log.org/siyuan Electron'
+    window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`
 
     let pdfWidth = "";
     if (localData.pageSize === "A3") {

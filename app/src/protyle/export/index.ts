@@ -2,7 +2,7 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {OpenDialogReturnValue} from "electron";
-import {BrowserWindow, dialog} from "@electron/remote";
+import {BrowserWindow, dialog, app} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "./util";
@@ -381,6 +381,7 @@ const renderPDF = (id: string) => {
             webSecurity: false,
         },
     });
+    window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
         window.siyuan.printWin.loadURL(response.data.url);
     });

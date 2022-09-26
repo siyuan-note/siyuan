@@ -409,6 +409,13 @@ export class Toolbar {
                         }
                     } else {
                         let types = (item.getAttribute("data-type") || "").split(" ");
+                        for (let i = 0; i < types.length; i++) {
+                            // "backslash", "virtual-block-ref", "search-mark" 只能单独存在
+                            if (["backslash", "virtual-block-ref", "search-mark"].includes(types[i])) {
+                                types.splice(i, 1);
+                                i--;
+                            }
+                        }
                         types.push(type);
                         // 上标和下标不能同时存在 https://github.com/siyuan-note/insider/issues/1049
                         if (type === "sub" && types.includes("sup")) {
@@ -431,18 +438,18 @@ export class Toolbar {
                                     return true;
                                 }
                             });
-                        } else if (type === "block-ref" && (types.includes("virtual-block-ref") || types.includes("a") || types.includes("search-mark"))) {
-                            // 虚拟引用和引用、链接、搜索高亮不能同时存在
+                        } else if (type === "block-ref" && types.includes("a")) {
+                            // 虚拟引用和链接不能同时存在
                             types.find((item, index) => {
-                                if (item === "virtual-block-ref" || item === "a" || item === "search-mark") {
+                                if (item === "a") {
                                     types.splice(index, 1);
                                     return true;
                                 }
                             });
-                        } else if (type === "a" && (types.includes("virtual-block-ref") || types.includes("block-ref") || types.includes("search-mark"))) {
-                            // 链接和引用、虚拟引用、搜索高亮不能同时存在
+                        } else if (type === "a" && types.includes("block-ref")) {
+                            // 链接和引用不能同时存在
                             types.find((item, index) => {
-                                if (item === "virtual-block-ref" || item === "block-ref" || item === "search-mark") {
+                                if (item === "block-ref") {
                                     types.splice(index, 1);
                                     return true;
                                 }

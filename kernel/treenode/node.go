@@ -19,6 +19,7 @@ package treenode
 import (
 	"bytes"
 	"strings"
+	"sync"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
@@ -358,6 +359,8 @@ func GetLegacyDynamicBlockRefDefIDs(node *ast.Node) (ret []string) {
 	return
 }
 
+var DynamicRefTexts = sync.Map{}
+
 func SetDynamicBlockRefText(blockRef *ast.Node, refText string) {
 	if !IsBlockRef(blockRef) {
 		return
@@ -384,6 +387,9 @@ func SetDynamicBlockRefText(blockRef *ast.Node, refText string) {
 
 	blockRef.TextMarkBlockRefSubtype = "d"
 	blockRef.TextMarkTextContent = refText
+
+	// 偶发编辑文档标题后引用处的动态锚文本不更新 https://github.com/siyuan-note/siyuan/issues/5891
+	DynamicRefTexts.Store(blockRef.TextMarkBlockRefID, refText)
 }
 
 func GetDynamicBlockRefText(blockRef *ast.Node) string {

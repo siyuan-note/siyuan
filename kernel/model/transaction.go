@@ -886,10 +886,18 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 				if "" == strings.TrimSpace(n.TextMarkInlineMathContent) {
 					unlinks = append(unlinks, n)
 				}
+			} else if n.IsTextMarkType("block-ref") {
+				sql.CacheRef(subTree, n)
+
+				if "d" == n.TextMarkBlockRefSubtype {
+					// 偶发编辑文档标题后引用处的动态锚文本不更新 https://github.com/siyuan-note/siyuan/issues/5891
+					// 使用缓存的动态锚文本强制覆盖当前块中的引用节点动态锚文本
+					if dRefText, ok := treenode.DynamicRefTexts.Load(n.TextMarkBlockRefID); ok && "" != dRefText {
+						n.TextMarkTextContent = dRefText.(string)
+					}
+				}
 			}
 		} else if ast.NodeBlockRef == n.Type {
-			sql.CacheRef(subTree, n)
-		} else if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {
 			sql.CacheRef(subTree, n)
 		}
 		return ast.WalkContinue

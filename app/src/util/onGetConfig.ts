@@ -22,7 +22,7 @@ import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
 import {openSetting} from "../config";
-import {getSearch} from "./functions";
+import {getSearch, isBrowser} from "./functions";
 import {openHistory} from "./history";
 import {initStatus} from "../layout/status";
 import {syncGuide} from "../sync/syncGuide";
@@ -143,7 +143,7 @@ export const onGetConfig = (isStart: boolean) => {
     initBar();
     initStatus();
     initWindow();
-    appearance.onSetappearance(window.siyuan.config.appearance, false);
+    appearance.onSetappearance(window.siyuan.config.appearance, isBrowser());
     initAssets();
     setInlineStyle();
     let resizeTimeout = 0;

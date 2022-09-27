@@ -37,8 +37,19 @@ export const isLocalPath = (link: string) => {
     if (!link) {
         return false;
     }
-    return link.startsWith("assets/") || link.startsWith("file://") ||
-        0 < link.indexOf(":/") || link.startsWith("\\\\"); // 超链接地址更好地兼容本地路径 https://github.com/siyuan-note/siyuan/issues/5980
+
+    link = link.trim()
+    if (1 > link.length) {
+        return false;
+    }
+
+    link = link.toLowerCase()
+    if (link.startsWith("assets/") || link.startsWith("file://") || link.startsWith("\\\\") /* Windows 网络共享路径 */) {
+        return true
+    }
+
+    const colonIdx = link.indexOf(":")
+    return 1 === colonIdx // 冒号前面只有一个字符认为是 Windows 盘符而不是网络协议
 };
 
 export const pathPosix = () => {

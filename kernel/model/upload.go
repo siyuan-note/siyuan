@@ -60,7 +60,10 @@ func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap m
 		fName += ext
 		baseName := fName
 		if gulu.File.IsDir(p) || !isUpload {
-			succMap[baseName] = "file://" + p
+			if !strings.HasPrefix(p, "\\\\") {
+				p = "file://" + p
+			}
+			succMap[baseName] = p
 			continue
 		}
 

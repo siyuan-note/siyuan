@@ -1,3 +1,36 @@
+## v2.2.2 / 2022-09-27
+
+### 改进功能
+
+* [外观模式支持跟随系统切换](https://github.com/siyuan-note/siyuan/issues/5854)
+* [退出时自动删除超过 30 天的安装包](https://github.com/siyuan-note/siyuan/issues/5957)
+* [行级备注自动移除换行](https://github.com/siyuan-note/siyuan/issues/5975)
+* [超链接地址更好地兼容本地路径](https://github.com/siyuan-note/siyuan/issues/5980)
+* [支持插入 `.ch` 域名超链接](https://github.com/siyuan-note/siyuan/issues/5981)
+* [改进选中块删除后光标位置](https://github.com/siyuan-note/siyuan/issues/5982)
+
+### 修复缺陷
+
+* [偶发编辑文档标题后引用处的动态锚文本不更新](https://github.com/siyuan-note/siyuan/issues/5891)
+* [虚拟引用无法通过快捷键转换为引用](https://github.com/siyuan-note/siyuan/issues/5953)
+* [字号回填错误](https://github.com/siyuan-note/siyuan/issues/5956)
+* [Windows 下 `Ctrl+Shift+9` 按键不识别](https://github.com/siyuan-note/siyuan/issues/5958)
+* [设置访问授权码后无法导出 PDF](https://github.com/siyuan-note/siyuan/issues/5959)
+* [块引锚文本输入框转换动/静态锚文本异常](https://github.com/siyuan-note/siyuan/issues/5961)
+* [`\\` 开头的 Windows 网络共享路径超链接问题](https://github.com/siyuan-note/siyuan/issues/5962)
+* [Markdown 超链接锚文本转义解析问题](https://github.com/siyuan-note/siyuan/issues/5963)
+* [在行级元素中添加公式、备注和链接导致类型丢失](https://github.com/siyuan-note/siyuan/issues/5964)
+* [表格内多个连续的超链接无法换行显示](https://github.com/siyuan-note/siyuan/issues/5966)
+* [集市已下载栏打开图标文件位置路径错误](https://github.com/siyuan-note/siyuan/issues/5967)
+* [行级代码不按照编辑器连字设置渲染](https://github.com/siyuan-note/siyuan/issues/5968)
+* [表格内无法将 `$` 字符在行内代码内正常使用](https://github.com/siyuan-note/siyuan/issues/5969)
+* [无法插入资源文件的问题](https://github.com/siyuan-note/siyuan/issues/5971)
+* [浮窗中图表编辑层拖动错误](https://github.com/siyuan-note/siyuan/issues/5972)
+* [全局搜索后使用 `Alt+[` 引用异常](https://github.com/siyuan-note/siyuan/issues/5973)
+* [超链接元素标题中存在 `"` 字符时粘贴无法正常解析](https://github.com/siyuan-note/siyuan/issues/5974)
+* [PDF 标注引用在数据库所有表中对应的 `markdown` 字段均没有标识符](https://github.com/siyuan-note/siyuan/issues/5977)
+* [动态锚文本后删除文本变静态锚文本](https://github.com/siyuan-note/siyuan/issues/5978)
+
 ## v2.2.1 / 2022-09-25
 
 ### 改进功能

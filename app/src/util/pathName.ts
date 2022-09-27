@@ -37,7 +37,8 @@ export const isLocalPath = (link: string) => {
     if (!link) {
         return false;
     }
-    return link.startsWith("assets/") || link.startsWith("file://");
+    return link.startsWith("assets/") || link.startsWith("file://") ||
+        0 < link.indexOf(":/") || link.startsWith("\\\\"); // 超链接地址更好地兼容本地路径 https://github.com/siyuan-note/siyuan/issues/5980
 };
 
 export const pathPosix = () => {

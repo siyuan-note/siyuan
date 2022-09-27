@@ -1171,6 +1171,33 @@ export class Gutter {
                     }
                 }]
             }).element);
+        } else if (type === "NodeHeading" && !window.siyuan.config.readonly) {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            const headingSubMenu = [];
+            if (subType !== "h1") {
+                headingSubMenu.push({
+                    icon: "iconHeading1",
+                    label: window.siyuan.languages.heading1,
+                    click() {
+                        protyle.toolbar.showRender(protyle, nodeElement);
+                    }
+                })
+            }
+            window.siyuan.menus.menu.append(new MenuItem({
+                type: "submenu",
+                icon: "iconRefresh",
+                label: window.siyuan.languages.tWithSubtitle,
+                submenu: headingSubMenu
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconCopy",
+                label: window.siyuan.languages.copyHeadings,
+                click() {
+                    fetchPost("/api/block/getHeadingChildrenDOM", {id: nodeElement.getAttribute("data-node-id")}, (response) => {
+                        writeText(response.data + Constants.ZWSP);
+                    })
+                }
+            }).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -1188,7 +1215,7 @@ export class Gutter {
                     const ids = protyle.path.split("/");
                     if (ids.length > 2) {
                         /// #if MOBILE
-                        openMobileFileById(ids[ids.length - 2],[Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
+                        openMobileFileById(ids[ids.length - 2], [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
                         /// #else
                         openFileById({
                             id: ids[ids.length - 2],

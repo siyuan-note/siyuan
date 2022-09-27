@@ -109,6 +109,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             files = event.dataTransfer.items;
         }
     }
+    // 复制标题及其下方块使用 writeText，需将 textPLain 转换为 textHTML
+    if (textPlain.endsWith(Constants.ZWSP) && !textHTML) {
+        textHTML = textPlain
+    }
     /// #if !MOBILE
     if (!textHTML && !textPlain && ("clipboardData" in event)) {
         if ("darwin" === window.siyuan.config.system.os) {

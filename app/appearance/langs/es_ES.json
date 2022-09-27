@@ -1,4 +1,6 @@
 {
+  "copyHeadings": "Copiar encabezados y bloques inferiores",
+  "tWithSubtitle": "Transformación con subtítulos",
   "clear": "claro",
   "autoDownloadUpdatePkg": "Descargar automáticamente el paquete de instalación de actualizaciones",
   "autoDownloadUpdatePkgTip": "Después de abrir, verificará automáticamente la actualización de la versión cada dos horas. Si hay una versión actualizada, descargará automáticamente el paquete de instalación y solicitará la instalación",

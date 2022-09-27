@@ -1,4 +1,6 @@
 {
+  "copyHeadings": "複製標題及下方塊",
+  "tWithSubtitle": "帶子標題轉換",
   "clear": "清空",
   "autoDownloadUpdatePkg": "自動下載更新安裝包",
   "autoDownloadUpdatePkgTip": "開啟後會每隔兩小時自動檢查版本更新，如果有更新版本則自動下載安裝包並提示安裝",

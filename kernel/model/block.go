@@ -17,6 +17,9 @@
 package model
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -82,6 +85,80 @@ func RecentUpdatedBlocks() (ret []*Block) {
 	}
 
 	ret = fromSQLBlocks(&sqlBlocks, "", 0)
+	return
+}
+
+func GetHeadingChildrenDOM(id string) (ret string) {
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+	heading := treenode.GetNodeInTree(tree, id)
+	if nil == heading || ast.NodeHeading != heading.Type {
+		return
+	}
+
+	nodes := append([]*ast.Node{}, heading)
+	children := treenode.HeadingChildren(heading)
+	nodes = append(nodes, children...)
+	luteEngine := NewLute()
+	ret = renderBlockDOMByNodes(nodes, luteEngine)
+	return
+}
+
+func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction, err error) {
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		err = errors.New(fmt.Sprintf(Conf.Language(15), id))
+		return
+	}
+
+	if ast.NodeHeading != node.Type {
+		return
+	}
+
+	hLevel := node.HeadingLevel
+	if hLevel == level {
+		return
+	}
+
+	diff := level - hLevel
+	var children, childrenHeadings []*ast.Node
+	children = append(children, node)
+	children = append(children, treenode.HeadingChildren(node)...)
+	for _, c := range children {
+		if ast.NodeHeading == c.Type {
+			childrenHeadings = append(childrenHeadings, c)
+		}
+	}
+
+	transaction = &Transaction{}
+	luteEngine := NewLute()
+	for _, c := range childrenHeadings {
+		op := &Operation{}
+		op.ID = c.ID
+		op.Action = "update"
+		op.Data = lute.RenderNodeBlockDOM(c, luteEngine.ParseOptions, luteEngine.RenderOptions)
+		transaction.UndoOperations = append(transaction.UndoOperations, op)
+
+		c.HeadingLevel += diff
+		if 6 < c.HeadingLevel {
+			c.HeadingLevel = 6
+		} else if 1 > c.HeadingLevel {
+			c.HeadingLevel = 1
+		}
+
+		op = &Operation{}
+		op.ID = c.ID
+		op.Action = "update"
+		op.Data = lute.RenderNodeBlockDOM(c, luteEngine.ParseOptions, luteEngine.RenderOptions)
+		transaction.DoOperations = append(transaction.DoOperations, op)
+	}
 	return
 }
 

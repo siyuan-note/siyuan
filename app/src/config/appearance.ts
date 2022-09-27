@@ -232,7 +232,14 @@ export const appearance = {
             nativeEmoji: (appearance.element.querySelector("#nativeEmoji") as HTMLInputElement).checked,
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
         }, response => {
-            if ((window.siyuan.config.appearance.themeJS && !response.data.modeOS && response.data.mode !== window.siyuan.config.appearance.mode) ||
+            if ((
+                    window.siyuan.config.appearance.themeJS && !response.data.modeOS &&
+                    (
+                        response.data.mode !== window.siyuan.config.appearance.mode ||
+                        window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
+                        window.siyuan.config.appearance.themeDark !== response.data.themeDark
+                    )
+                ) ||
                 (response.data.modeOS && !window.siyuan.config.appearance.modeOS)
             ) {
                 exportLayout(true);

@@ -31,6 +31,20 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getHeadingChildrenDOM(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	dom := model.GetHeadingChildrenDOM(id)
+	ret.Data = dom
+}
+
 func getHeadingLevelTransaction(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

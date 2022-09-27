@@ -31,6 +31,7 @@ import {openFileById} from "../../editor/util";
 /// #endif
 import {Constants} from "../../constants";
 import {openMobileFileById} from "../../mobile/editor";
+import {mathRender} from "../markdown/mathRender";
 
 export class Gutter {
     public element: HTMLElement;
@@ -661,7 +662,7 @@ export class Gutter {
         const turnIntoSubmenu: IMenu[] = [];
         hideElements(["select"], protyle);
         nodeElement.classList.add("protyle-wysiwyg--select");
-        countBlockWord([nodeElement.getAttribute("data-node-id")]);
+        countBlockWord([id]);
         // "heading1-6", "list", "ordered-list", "check", "quote", "code", "table", "line", "math", "paragraph"
         if (type === "NodeParagraph" && !window.siyuan.config.readonly) {
             turnIntoSubmenu.push(this.turnsIntoOne({
@@ -1175,13 +1176,22 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             const headingSubMenu = [];
             if (subType !== "h1") {
-                headingSubMenu.push({
-                    icon: "iconHeading1",
-                    label: window.siyuan.languages.heading1,
-                    click() {
-                        protyle.toolbar.showRender(protyle, nodeElement);
-                    }
-                })
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 1))
+            }
+            if (subType !== "h2") {
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 2))
+            }
+            if (subType !== "h3") {
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 3))
+            }
+            if (subType !== "h4") {
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 4))
+            }
+            if (subType !== "h5") {
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 5))
+            }
+            if (subType !== "h6") {
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 6))
             }
             window.siyuan.menus.menu.append(new MenuItem({
                 type: "submenu",
@@ -1193,7 +1203,7 @@ export class Gutter {
                 icon: "iconCopy",
                 label: window.siyuan.languages.copyHeadings,
                 click() {
-                    fetchPost("/api/block/getHeadingChildrenDOM", {id: nodeElement.getAttribute("data-node-id")}, (response) => {
+                    fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
                         writeText(response.data + Constants.ZWSP);
                     })
                 }
@@ -1309,6 +1319,29 @@ export class Gutter {
             label: `<div style="margin-left: -18px;white-space: nowrap;">${updateHTML}${window.siyuan.languages.createdAt} ${dayjs(id.substr(0, 14)).format("YYYY-MM-DD HH:mm:ss")}</div>`,
         }).element);
         return window.siyuan.menus.menu;
+    }
+
+    private genHeadingTransform(protyle: IProtyle, id: string, level: number) {
+        return {
+            icon: "iconHeading" + level,
+            label: window.siyuan.languages["heading" + level],
+            click() {
+                fetchPost("/api/block/getHeadingLevelTransaction", {
+                    id,
+                    level
+                }, (response) => {
+                    response.data.doOperations.forEach((operation: IOperation) => {
+                        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                            itemElement.outerHTML = operation.data;
+                        });
+                        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                            mathRender(itemElement);
+                        });
+                    });
+                    transaction(protyle, response.data.doOperations, response.data.undoOperations)
+                });
+            }
+        }
     }
 
     private genClick(nodeElements: Element[], protyle: IProtyle, cb: (e: HTMLElement) => void) {

@@ -102,7 +102,7 @@ const showErrorWindow = (title, content) => {
 try {
   firstOpen = !fs.existsSync(path.join(confDir, 'workspace.json'))
   if (!fs.existsSync(confDir)) {
-    fs.mkdirSync(confDir, { mode: 0o755, recursive: true })
+    fs.mkdirSync(confDir, {mode: 0o755, recursive: true})
   }
 } catch (e) {
   console.error(e)
@@ -217,7 +217,7 @@ const boot = () => {
     (details, cb) => {
       if (-1 < details.url.indexOf('bili')) {
         // B 站不移除 Referer https://github.com/siyuan-note/siyuan/issues/94
-        cb({ requestHeaders: details.requestHeaders })
+        cb({requestHeaders: details.requestHeaders})
         return
       }
 
@@ -226,7 +226,7 @@ const boot = () => {
           delete details.requestHeaders[key]
         }
       }
-      cb({ requestHeaders: details.requestHeaders })
+      cb({requestHeaders: details.requestHeaders})
     })
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, cb) => {
     for (let key in details.responseHeaders) {
@@ -238,7 +238,7 @@ const boot = () => {
         delete details.responseHeaders[key]
       }
     }
-    cb({ responseHeaders: details.responseHeaders })
+    cb({responseHeaders: details.responseHeaders})
   })
 
   mainWindow.webContents.on('did-finish-load', () => {
@@ -262,7 +262,7 @@ const boot = () => {
   })
 
   if (windowState.isDevToolsOpened) {
-    mainWindow.webContents.openDevTools({ mode: 'bottom' })
+    mainWindow.webContents.openDevTools({mode: 'bottom'})
   }
 
   // 主界面事件监听
@@ -290,16 +290,16 @@ const boot = () => {
           label: `About ${productName}`,
           role: 'about',
         },
-        { type: 'separator' },
-        { role: 'services' },
-        { type: 'separator' },
+        {type: 'separator'},
+        {role: 'services'},
+        {type: 'separator'},
         {
           label: `Hide ${productName}`,
           role: 'hide',
         },
-        { role: 'hideOthers' },
-        { role: 'unhide' },
-        { type: 'separator' },
+        {role: 'hideOthers'},
+        {role: 'unhide'},
+        {type: 'separator'},
         {
           label: `Quit ${productName}`,
           role: 'quit',
@@ -309,31 +309,31 @@ const boot = () => {
     {
       role: 'editMenu',
       submenu: [
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+C' },
-        { role: 'selectAll' },
+        {role: 'cut'},
+        {role: 'copy'},
+        {role: 'paste'},
+        {role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+C'},
+        {role: 'selectAll'},
       ],
     },
     {
       role: 'viewMenu',
       submenu: [
-        { role: 'resetZoom' },
-        { role: 'zoomIn', accelerator: 'CommandOrControl+=' },
-        { role: 'zoomOut' },
+        {role: 'resetZoom'},
+        {role: 'zoomIn', accelerator: 'CommandOrControl+='},
+        {role: 'zoomOut'},
       ],
     },
     {
       role: 'windowMenu',
       submenu: [
-        { role: 'minimize' },
-        { role: 'zoom' },
-        { role: 'togglefullscreen' },
-        { type: 'separator' },
-        { role: 'toggledevtools' },
-        { type: 'separator' },
-        { role: 'front' },
+        {role: 'minimize'},
+        {role: 'zoom'},
+        {role: 'togglefullscreen'},
+        {type: 'separator'},
+        {role: 'toggledevtools'},
+        {type: 'separator'},
+        {role: 'front'},
       ],
     },
   ]
@@ -408,7 +408,7 @@ const boot = () => {
       theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
       init: true,
     })
-    await fetch(`${serverOrigin}/api/system/uiproc?pid=${process.pid}`, { method: 'POST' })
+    await fetch(`${serverOrigin}/api/system/uiproc?pid=${process.pid}`, {method: 'POST'})
   })
   ipcMain.on('siyuan-hotkey', (event, hotkey) => {
     globalShortcut.unregisterAll()
@@ -626,15 +626,14 @@ const initKernel = (initData) => {
       if (!isDevEnv && apiData.data !== appVer) {
         writeLog(
           `kernel [${apiData.data}] is running, shutdown it now and then start kernel [${appVer}]`)
-        fetch(`${serverOrigin}/api/system/exit`, { method: 'POST' })
+        fetch(`${serverOrigin}/api/system/exit`, {method: 'POST'})
         bootWindow.destroy()
         resolve(false)
       } else {
         let progressing = false
         while (!progressing) {
           try {
-            const progressResult = await fetch(
-              `${serverOrigin}/api/system/bootProgress`)
+            const progressResult = await fetch(`${serverOrigin}/api/system/bootProgress`)
             const progressData = await progressResult.json()
             if (progressData.data.progress >= 100) {
               resolve(true)
@@ -644,7 +643,7 @@ const initKernel = (initData) => {
             }
           } catch (e) {
             writeLog('get boot progress failed: ' + e.message)
-            fetch(`${serverOrigin}/api/system/exit`, { method: 'POST' })
+            fetch(`${serverOrigin}/api/system/exit`, {method: 'POST'})
             bootWindow.destroy()
             resolve(false)
             progressing = true

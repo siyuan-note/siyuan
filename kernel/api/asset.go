@@ -231,8 +231,13 @@ func insertLocalAssets(c *gin.Context) {
 	for _, pathArg := range assetPathsArg {
 		assetPaths = append(assetPaths, pathArg.(string))
 	}
+	isUpload := true
+	isUploadArg := arg["isUpload"]
+	if nil != isUploadArg {
+		isUpload = isUploadArg.(bool)
+	}
 	id := arg["id"].(string)
-	succMap, err := model.InsertLocalAssets(id, assetPaths)
+	succMap, err := model.InsertLocalAssets(id, assetPaths, isUpload)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

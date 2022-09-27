@@ -41,6 +41,28 @@ let siyuanOpenURL
 let firstOpen = false
 require('@electron/remote/main').initialize()
 
+// 手动设置内核服务访问地址
+const serverOriginArg = process.argv.find((arg) => arg.startsWith('--server-origin='))
+const serverOrigin = (serverOriginArg && serverOriginArg.replace('--server-origin=', '')) ?? 'http://127.0.0.1:6806'
+
+// 服务访问地址是否规范
+try {
+  new URL(serverOrigin)
+} catch (e) {
+  console.error(e)
+  require('electron').
+    dialog.
+    showErrorBox('内核服务访问地址设置不规范 The kernel service access address is not standardized',
+      `启动参数 ${serverOriginArg} 设置的内核服务访问地址不规范。\n\nThe kernel service access address set by the startup parameter ${serverOriginArg} is not standardized.`
+    )
+  app.exit()
+}
+
+// 是否连接非本机服务
+const isLocalhost = serverOrigin === 'http://localhost:6806'
+  || serverOrigin === 'http://127.0.0.1:6806'
+  || serverOrigin === 'http://[::1]:6806'
+
 if (!app.requestSingleInstanceLock()) {
   app.quit()
   return
@@ -80,7 +102,7 @@ const showErrorWindow = (title, content) => {
 try {
   firstOpen = !fs.existsSync(path.join(confDir, 'workspace.json'))
   if (!fs.existsSync(confDir)) {
-    fs.mkdirSync(confDir, {mode: 0o755, recursive: true})
+    fs.mkdirSync(confDir, { mode: 0o755, recursive: true })
   }
 } catch (e) {
   console.error(e)
@@ -188,15 +210,14 @@ const boot = () => {
   })
 
   require('@electron/remote/main').enable(mainWindow.webContents)
-  mainWindow.webContents.userAgent = 'SiYuan/' + appVer +
-    ' https://b3log.org/siyuan Electron'
+  mainWindow.webContents.userAgent = `SiYuan/${appVer} https://b3log.org/siyuan ${isLocalhost ? 'Electron' : ''}`
 
   // 发起互联网服务请求时绕过安全策略 https://github.com/siyuan-note/siyuan/issues/5516
   mainWindow.webContents.session.webRequest.onBeforeSendHeaders(
     (details, cb) => {
       if (-1 < details.url.indexOf('bili')) {
         // B 站不移除 Referer https://github.com/siyuan-note/siyuan/issues/94
-        cb({requestHeaders: details.requestHeaders})
+        cb({ requestHeaders: details.requestHeaders })
         return
       }
 
@@ -205,7 +226,7 @@ const boot = () => {
           delete details.requestHeaders[key]
         }
       }
-      cb({requestHeaders: details.requestHeaders})
+      cb({ requestHeaders: details.requestHeaders })
     })
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, cb) => {
     for (let key in details.responseHeaders) {
@@ -217,7 +238,7 @@ const boot = () => {
         delete details.responseHeaders[key]
       }
     }
-    cb({responseHeaders: details.responseHeaders})
+    cb({ responseHeaders: details.responseHeaders })
   })
 
   mainWindow.webContents.on('did-finish-load', () => {
@@ -241,7 +262,7 @@ const boot = () => {
   })
 
   if (windowState.isDevToolsOpened) {
-    mainWindow.webContents.openDevTools({mode: 'bottom'})
+    mainWindow.webContents.openDevTools({ mode: 'bottom' })
   }
 
   // 主界面事件监听
@@ -258,9 +279,7 @@ const boot = () => {
   })
 
   // 加载主界面
-  mainWindow.loadURL('http://127.0.0.1:6806/stage/build/app/index.html?v=' +
-    new Date().getTime())
-
+  mainWindow.loadURL(`${serverOrigin}/stage/build/${isLocalhost ? 'app' : 'desktop'}/index.html?v=${new Date().getTime()}`)
   // 菜单
   const productName = 'SiYuan'
   const template = [
@@ -271,16 +290,16 @@ const boot = () => {
           label: `About ${productName}`,
           role: 'about',
         },
-        {type: 'separator'},
-        {role: 'services'},
-        {type: 'separator'},
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
         {
           label: `Hide ${productName}`,
           role: 'hide',
         },
-        {role: 'hideOthers'},
-        {role: 'unhide'},
-        {type: 'separator'},
+        { role: 'hideOthers' },
+        { role: 'unhide' },
+        { type: 'separator' },
         {
           label: `Quit ${productName}`,
           role: 'quit',
@@ -290,31 +309,31 @@ const boot = () => {
     {
       role: 'editMenu',
       submenu: [
-        {role: 'cut'},
-        {role: 'copy'},
-        {role: 'paste'},
-        {role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+C'},
-        {role: 'selectAll'},
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+C' },
+        { role: 'selectAll' },
       ],
     },
     {
       role: 'viewMenu',
       submenu: [
-        {role: 'resetZoom'},
-        {role: 'zoomIn', accelerator: 'CommandOrControl+='},
-        {role: 'zoomOut'},
+        { role: 'resetZoom' },
+        { role: 'zoomIn', accelerator: 'CommandOrControl+=' },
+        { role: 'zoomOut' },
       ],
     },
     {
       role: 'windowMenu',
       submenu: [
-        {role: 'minimize'},
-        {role: 'zoom'},
-        {role: 'togglefullscreen'},
-        {type: 'separator'},
-        {role: 'toggledevtools'},
-        {type: 'separator'},
-        {role: 'front'},
+        { role: 'minimize' },
+        { role: 'zoom' },
+        { role: 'togglefullscreen' },
+        { type: 'separator' },
+        { role: 'toggledevtools' },
+        { type: 'separator' },
+        { role: 'front' },
       ],
     },
   ]
@@ -322,7 +341,7 @@ const boot = () => {
   Menu.setApplicationMenu(menu)
   // 当前页面链接使用浏览器打开
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    if (url.startsWith('http://127.0.0.1:6806')) {
+    if (url.startsWith(serverOrigin)) {
       return
     }
     event.preventDefault()
@@ -331,7 +350,11 @@ const boot = () => {
 
   mainWindow.on('close', (event) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('siyuan-save-close', false)
+      if (isLocalhost) {
+        mainWindow.webContents.send('siyuan-save-close', false)
+      } else {
+        app.exit()
+      }
     }
     event.preventDefault()
   })
@@ -385,8 +408,7 @@ const boot = () => {
       theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
       init: true,
     })
-    await fetch('http://127.0.0.1:6806/api/system/uiproc?pid=' + process.pid,
-      {method: 'POST'})
+    await fetch(`${serverOrigin}/api/system/uiproc?pid=${process.pid}`, { method: 'POST' })
   })
   ipcMain.on('siyuan-hotkey', (event, hotkey) => {
     globalShortcut.unregisterAll()
@@ -454,7 +476,11 @@ const boot = () => {
       {
         label: 'Quit',
         click: () => {
-          mainWindow.webContents.send('siyuan-save-close', true)
+          if (isLocalhost) {
+            mainWindow.webContents.send('siyuan-save-close', true)
+          } else {
+            app.exit()
+          }
         },
       }]
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
@@ -517,9 +543,9 @@ const initKernel = (initData) => {
     const cp = require('child_process')
     const kernelProcess = cp.spawn(kernelPath,
       cmds, {
-        detached: true,
-        stdio: 'ignore',
-      },
+      detached: true,
+      stdio: 'ignore',
+    },
     )
 
     kernelProcess.on('close', (code) => {
@@ -576,12 +602,11 @@ const initKernel = (initData) => {
     writeLog('checking kernel version')
     while (!gotVersion) {
       try {
-        const apiResult = await fetch(
-          'http://127.0.0.1:6806/api/system/version')
+        const apiResult = await fetch(`${serverOrigin}/api/system/version`)
         apiData = await apiResult.json()
         gotVersion = true
         bootWindow.setResizable(false)
-        bootWindow.loadURL('http://127.0.0.1:6806/appearance/boot/index.html')
+        bootWindow.loadURL(`${serverOrigin}/appearance/boot/index.html`)
         bootWindow.show()
       } catch (e) {
         writeLog('get kernel version failed: ' + e.message)
@@ -601,7 +626,7 @@ const initKernel = (initData) => {
       if (!isDevEnv && apiData.data !== appVer) {
         writeLog(
           `kernel [${apiData.data}] is running, shutdown it now and then start kernel [${appVer}]`)
-        fetch('http://127.0.0.1:6806/api/system/exit', {method: 'POST'})
+        fetch(`${serverOrigin}/api/system/exit`, { method: 'POST' })
         bootWindow.destroy()
         resolve(false)
       } else {
@@ -609,7 +634,7 @@ const initKernel = (initData) => {
         while (!progressing) {
           try {
             const progressResult = await fetch(
-              'http://127.0.0.1:6806/api/system/bootProgress')
+              `${serverOrigin}/api/system/bootProgress`)
             const progressData = await progressResult.json()
             if (progressData.data.progress >= 100) {
               resolve(true)
@@ -619,7 +644,7 @@ const initKernel = (initData) => {
             }
           } catch (e) {
             writeLog('get boot progress failed: ' + e.message)
-            fetch('http://127.0.0.1:6806/api/system/exit', {method: 'POST'})
+            fetch(`${serverOrigin}/api/system/exit`, { method: 'POST' })
             bootWindow.destroy()
             resolve(false)
             progressing = true
@@ -666,28 +691,36 @@ app.whenReady().then(() => {
     }
     firstOpenWindow.loadFile(
       initHTMLPath, {
-        query: {
-          home: app.getPath('home'),
-          v: appVer,
-          icon: path.join(appDir, 'stage', 'icon-large.png'),
-        },
-      })
+      query: {
+        home: app.getPath('home'),
+        v: appVer,
+        icon: path.join(appDir, 'stage', 'icon-large.png'),
+      },
+    })
     firstOpenWindow.show()
     // 初始化启动
     ipcMain.on('siyuan-first-init', (event, initData) => {
-      initKernel(initData).then((isSucc) => {
+      if (isLocalhost) {
+        initKernel(initData).then((isSucc) => {
+          if (isSucc) {
+            boot()
+          }
+        })
+      } else {
+        boot()
+      }
+      firstOpenWindow.destroy()
+    })
+  } else {
+    if (isLocalhost) {
+      initKernel().then((isSucc) => {
         if (isSucc) {
           boot()
         }
       })
-      firstOpenWindow.destroy()
-    })
-  } else {
-    initKernel().then((isSucc) => {
-      if (isSucc) {
-        boot()
-      }
-    })
+    } else {
+      boot()
+    }
   }
 })
 
@@ -741,23 +774,30 @@ app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
 app.on('before-quit', (event) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     event.preventDefault()
-    mainWindow.webContents.send('siyuan-save-close', true)
+    if (isLocalhost) {
+      mainWindow.webContents.send('siyuan-save-close', true)
+    } else {
+      app.exit()
+    }
   }
 })
 
-const {powerMonitor} = require('electron')
 
-powerMonitor.on('suspend', () => {
-  writeLog('system suspend')
-  fetch('http://127.0.0.1:6806/api/sync/performSync', {method: 'POST'})
-})
+if (isLocalhost) {
+  const { powerMonitor } = require('electron')
 
-powerMonitor.on('resume', () => {
-  writeLog('system resume')
-  fetch('http://127.0.0.1:6806/api/sync/performSync', {method: 'POST'})
-})
+  powerMonitor.on('suspend', () => {
+    writeLog('system suspend')
+    fetch(`${serverOrigin}/api/sync/performSync`, { method: 'POST' })
+  })
 
-powerMonitor.on('shutdown', () => {
-  writeLog('system shutdown')
-  fetch('http://127.0.0.1:6806/api/system/exit', {method: 'POST'})
-})
+  powerMonitor.on('resume', () => {
+    writeLog('system resume')
+    fetch(`${serverOrigin}/api/sync/performSync`, { method: 'POST' })
+  })
+
+  powerMonitor.on('shutdown', () => {
+    writeLog('system shutdown')
+    fetch(`${serverOrigin}/api/system/exit`, { method: 'POST' })
+  })
+}

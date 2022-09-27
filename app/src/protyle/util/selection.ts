@@ -525,8 +525,16 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
                 cursorElement = cellElements[cellElements.length - 1];
             }
         }
-        // 需要定位到第一个 child https://github.com/siyuan-note/siyuan/issues/5930
-        const range = setFirstNodeRange(cursorElement, getEditorRange(cursorElement));
+        let range
+        if (toStart) {
+            // 需要定位到第一个 child https://github.com/siyuan-note/siyuan/issues/5930
+            range = setFirstNodeRange(cursorElement, getEditorRange(cursorElement));
+            range.collapse(true);
+        } else {
+            // 定位到末尾 https://github.com/siyuan-note/siyuan/issues/5982
+            range = setLastNodeRange(cursorElement, getEditorRange(cursorElement));
+            range.collapse(false);
+        }
         focusByRange(range);
         return range;
     } else if (parentElement) {

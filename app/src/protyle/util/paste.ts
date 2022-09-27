@@ -48,11 +48,8 @@ export const pasteAsPlainText = async (protyle:IProtyle) => {
         }
     }
     if (localFiles.length > 0) {
-        let fileText = "";
-        localFiles.forEach((item) => {
-            fileText += `[${path.basename(item).replace(/\]/g, "\\]").replace(/\[/g, "\\[")}](file://${item.replace(/\\/g, "\\\\").replace(/\)/g, "\\)").replace(/\(/g, "\\(")})\n`;
-        });
-        insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
+        uploadLocalFiles(localFiles, protyle, false);
+        writeText("");
     } else {
         insertHTML(protyle.lute.BlockDOM2Content(protyle.lute.InlineMd2BlockDOM(clipboard.readText())), protyle, false, false);
     }
@@ -124,7 +121,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 localFiles.push(item.childNodes[0].nodeValue);
             });
             if (localFiles.length > 0) {
-                uploadLocalFiles(localFiles, protyle);
+                uploadLocalFiles(localFiles, protyle, true);
                 writeText("");
                 return;
             }
@@ -132,7 +129,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         } else {
             const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
             if (xmlString.data.length > 0) {
-                uploadLocalFiles(xmlString.data, protyle);
+                uploadLocalFiles(xmlString.data, protyle, true);
                 writeText("");
                 return;
             }

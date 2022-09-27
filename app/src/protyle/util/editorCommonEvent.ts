@@ -706,27 +706,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
             if (event.dataTransfer.types[0] === "Files") {
                 const files: string[] = [];
-                let isAllFile = true;
                 for (let i = 0; i < event.dataTransfer.files.length; i++) {
                     files.push(event.dataTransfer.files[i].path);
-                    if (event.dataTransfer.files[i].type === "") {
-                        isAllFile = false;
-                    }
                 }
-                if (isAllFile) {
-                    if (event.altKey) {
-                        let fileText = "";
-                        files.forEach((item) => {
-                            // 拖入文件名包含 `)` 或 `]` 的文件以 `file://` 插入后链接解析错误 https://github.com/siyuan-note/siyuan/issues/5786
-                            fileText += `[${path.basename(item).replace(/\]/g, "\\]").replace(/\[/g, "\\[")}](file://${item.replace(/\\/g, "\\\\").replace(/\)/g, "\\)").replace(/\(/g, "\\(")})\n`;
-                        });
-                        insertHTML(protyle.lute.SpinBlockDOM(fileText), protyle);
-                    } else {
-                        uploadLocalFiles(files, protyle);
-                    }
-                } else {
-                    uploadLocalFiles(files, protyle);
-                }
+                uploadLocalFiles(files, protyle, !event.altKey);
             } else {
                 paste(protyle, event);
             }

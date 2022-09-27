@@ -34,7 +34,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]interface{}, err error) {
+func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap map[string]interface{}, err error) {
 	succMap = map[string]interface{}{}
 
 	bt := treenode.GetBlockTree(id)
@@ -44,9 +44,9 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 	}
 
 	docDirLocalPath := filepath.Join(util.DataDir, bt.BoxID, path.Dir(bt.Path))
-	assets := getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), docDirLocalPath)
-	if !gulu.File.IsExist(assets) {
-		if err = os.MkdirAll(assets, 0755); nil != err {
+	assetsDirPath := getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), docDirLocalPath)
+	if !gulu.File.IsExist(assetsDirPath) {
+		if err = os.MkdirAll(assetsDirPath, 0755); nil != err {
 			return
 		}
 	}
@@ -59,7 +59,7 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 		ext = strings.ToLower(ext)
 		fName += ext
 		baseName := fName
-		if gulu.File.IsDir(p) {
+		if gulu.File.IsDir(p) || !isUpload {
 			succMap[baseName] = "file://" + p
 			continue
 		}
@@ -87,7 +87,7 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 			ext := path.Ext(fName)
 			fName = fName[0 : len(fName)-len(ext)]
 			fName = fName + "-" + ast.NewNodeID() + ext
-			writePath := filepath.Join(assets, fName)
+			writePath := filepath.Join(assetsDirPath, fName)
 			if _, err = f.Seek(0, io.SeekStart); nil != err {
 				f.Close()
 				return

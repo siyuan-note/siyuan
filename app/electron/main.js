@@ -690,12 +690,12 @@ app.whenReady().then(() => {
     }
     firstOpenWindow.loadFile(
       initHTMLPath, {
-      query: {
-        home: app.getPath('home'),
-        v: appVer,
-        icon: path.join(appDir, 'stage', 'icon-large.png'),
-      },
-    })
+        query: {
+          home: app.getPath('home'),
+          v: appVer,
+          icon: path.join(appDir, 'stage', 'icon-large.png'),
+        },
+      })
     firstOpenWindow.show()
     // 初始化启动
     ipcMain.on('siyuan-first-init', (event, initData) => {

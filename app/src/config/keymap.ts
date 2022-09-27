@@ -14,12 +14,10 @@ export const keymap = {
                 html += `<li class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
     <span class="fn__space fn__flex-1"></span>
-    <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field" value="${updateHotkeyTip(keymap[key].custom)}">
-    <span class="fn__space"></span>
+    <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field" value="${updateHotkeyTip(keymap[key].custom)}" spellcheck="false">
     <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
-    <span class="fn__space"></span>
     <span data-type="clear" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}">
         <svg><use xlink:href="#iconTrashcan"></use></svg>
     </span>
@@ -47,10 +45,22 @@ export const keymap = {
     </button>
 </div>
 <div class="b3-label file-tree config-keymap" id="keymapList">
-    <label class="b3-form__icon" style="display:block;">
-        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-        <input id="keymapInput" class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">
-    </label>
+    <div class="fn__flex">
+        <label class="b3-form__icon fn__flex-1">
+            <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+            <input id="keymapInput" class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">
+        </label>
+        <div class="fn__space"></div>
+        <label class="b3-form__icon">
+            <svg class="b3-form__icon-icon"><use xlink:href="#iconKeymap"></use></svg>
+            <input id="searchByKey" class="b3-form__icon-input b3-text-field" spellcheck="false" placeholder="${window.siyuan.languages.keymap}">
+        </label>
+        <div class="fn__space"></div>
+        <button id="clearSearchBtn" class="b3-button b3-button--outline fn__flex-center fn__size200">
+            <svg style="height: 14px"><use xlink:href="#iconClose"></use></svg>
+            ${window.siyuan.languages.clear}
+        </button>
+    </div>
     <div class="fn__hr"></div>
     <ul class="b3-list b3-list--border b3-list--background">
         <li class="b3-list-item toggle">
@@ -125,29 +135,81 @@ export const keymap = {
             /// #endif
         });
     },
-    _search(value: string) {
+    _search(value: string, keymapString: string) {
         keymap.element.querySelectorAll("#keymapList .b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
-            if (item.textContent.toLowerCase().indexOf(value.toLowerCase()) > -1 || value === "") {
-                item.parentElement.classList.remove("fn__none");
-                item.parentElement.parentElement.classList.remove("fn__none");
+            const liElement = item.parentElement;
+            let matchedKeymap = false;
+            if (keymapString === "" || (item.nextElementSibling.nextElementSibling as HTMLInputElement).value.indexOf(updateHotkeyTip(keymapString)) > -1) {
+                matchedKeymap = true;
+            }
+            if ((item.textContent.toLowerCase().indexOf(value.toLowerCase()) > -1 || value === "") && matchedKeymap) {
+                liElement.classList.remove("fn__none");
+                liElement.parentElement.classList.remove("fn__none");
+                liElement.parentElement.parentElement.classList.remove("fn__none");
             } else {
-                item.parentElement.classList.add("fn__none");
+                liElement.classList.add("fn__none");
+            }
+            if (!liElement.nextElementSibling) {
+                const toggleElement = liElement.parentElement.previousElementSibling;
+                const toggleIconElement = toggleElement.querySelector(".b3-list-item__arrow");
+                if (value === "" && keymapString === "") {
+                    // 复原折叠状态
+                    if (toggleIconElement.classList.contains("b3-list-item__arrow--open")) {
+                        liElement.parentElement.classList.remove("fn__none");
+                    } else {
+                        liElement.parentElement.classList.add("fn__none");
+                    }
+                }
+                // 隐藏没有子项的快捷键项目
+                if (liElement.parentElement.childElementCount === liElement.parentElement.querySelectorAll(".fn__none").length) {
+                    toggleElement.classList.add("fn__none");
+                } else {
+                    toggleElement.classList.remove("fn__none");
+                }
             }
         });
+        // 编辑器中三级菜单单独处理
+        const editorKeymapElement = keymap.element.querySelector("#keymapList").lastElementChild;
+        if (value === "" && keymapString === "") {
+            // 复原折叠状态
+            if (editorKeymapElement.querySelector(".b3-list-item__arrow").classList.contains("b3-list-item__arrow--open")) {
+                editorKeymapElement.lastElementChild.classList.remove("fn__none");
+            } else {
+                editorKeymapElement.lastElementChild.classList.add("fn__none");
+            }
+        }
+        // 隐藏没有子项的快捷键项目
+        if (editorKeymapElement.querySelectorAll(".b3-list-item--hide-action.fn__none").length === editorKeymapElement.querySelectorAll(".b3-list-item--hide-action").length) {
+            editorKeymapElement.firstElementChild.classList.add("fn__none");
+        } else {
+            editorKeymapElement.firstElementChild.classList.remove("fn__none");
+        }
     },
     bindEvent() {
         keymap.element.querySelector("#keymapRefreshBtn").addEventListener("click", () => {
             exportLayout(true);
         });
         const searchElement = keymap.element.querySelector("#keymapInput") as HTMLInputElement;
-        this.element.addEventListener("compositionend", () => {
-            keymap._search(searchElement.value);
+        const searchKeymapElement = keymap.element.querySelector("#searchByKey") as HTMLInputElement;
+        searchElement.addEventListener("compositionend", () => {
+            keymap._search(searchElement.value, searchKeymapElement.value);
         });
         searchElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {
                 return;
             }
-            keymap._search(searchElement.value);
+            keymap._search(searchElement.value, searchKeymapElement.value);
+        });
+        searchKeymapElement.addEventListener("keydown", function (event: KeyboardEvent) {
+            event.stopPropagation();
+            event.preventDefault();
+            const keymapStr = keymap._getKeymapString(event, this);
+            keymap._search(searchElement.value, keymapStr);
+        });
+        keymap.element.querySelector("#clearSearchBtn").addEventListener("click", () => {
+            searchElement.value = "";
+            searchKeymapElement.value = "";
+            keymap._search("", "");
         });
         keymap.element.querySelector("#keymapResetBtn").addEventListener("click", () => {
             window.siyuan.config.keymap = Constants.SIYUAN_KEYMAP;
@@ -198,75 +260,7 @@ export const keymap = {
             item.addEventListener("keydown", function (event: KeyboardEvent) {
                 event.stopPropagation();
                 event.preventDefault();
-                let keymapStr = "";
-                if (event.ctrlKey && !event.metaKey && isMac()) {
-                    keymapStr += "⌃";
-                }
-                if (event.altKey) {
-                    keymapStr += "⌥";
-                }
-                if (event.shiftKey) {
-                    keymapStr += "⇧";
-                }
-                if (isCtrl(event)) {
-                    keymapStr += "⌘";
-                }
-                if (event.key !== "Shift" && event.key !== "Alt" && event.key !== "Meta" && event.key !== "Control") {
-                    if (event.key === "ArrowUp") {
-                        keymapStr += "↑";
-                    } else if (event.key === "ArrowDown") {
-                        keymapStr += "↓";
-                    } else if (event.key === "ArrowLeft") {
-                        keymapStr += "←";
-                    } else if (event.key === "ArrowRight") {
-                        keymapStr += "→";
-                    } else if (event.key === "Tab") {
-                        keymapStr += "⇥";
-                    } else if (event.code === "BracketLeft") {
-                        keymapStr += "[";
-                    } else if (event.code === "BracketRight") {
-                        keymapStr += "]";
-                    } else if (event.key === "Backspace") {
-                        keymapStr += "⌫";
-                    } else if (event.key === "Delete") {
-                        keymapStr += "⌦";
-                    } else if (event.key === "Enter") {
-                        keymapStr += "↩";
-                    } else if (event.altKey) {
-                        const codeKey = event.code.substr(event.code.length - 1, 1).toUpperCase();
-                        if (event.key === "Enter") {
-                            keymapStr += "↩";
-                        } else if (event.key.startsWith("F") && event.key.length > 1) {
-                            keymapStr += event.key;
-                        } else if (event.code === "Period") {
-                            keymapStr += ".";
-                        } else if (codeKey !== "I" && codeKey !== "E" && codeKey !== "N" && codeKey !== "U") {
-                            keymapStr += codeKey;
-                        } else if (event.which === 229) {
-                            setTimeout(() => {
-                                this.value = "";
-                            });
-                        }
-                    } else if (event.key === "》") {
-                        keymapStr += ">";
-                    } else if (event.key === "《") {
-                        keymapStr += "<";
-                    } else if (event.key === "—") {
-                        keymapStr += "-";
-                    } else {
-                        keymapStr += event.key.length > 1 ? event.key : event.key.toUpperCase();
-                    }
-                }
-
-                this.setAttribute("data-value", keymapStr);
-                if (event.key === "—") {
-                    // Mac 中文下会添加"——"
-                    setTimeout(() => {
-                        this.value = updateHotkeyTip(keymapStr);
-                    });
-                } else {
-                    this.value = updateHotkeyTip(keymapStr);
-                }
+                const keymapStr = keymap._getKeymapString(event, this);
                 clearTimeout(timeout);
                 timeout = window.setTimeout(() => {
                     const keys = this.getAttribute("data-key").split(Constants.ZWSP);
@@ -311,4 +305,59 @@ export const keymap = {
             });
         });
     },
+    _getKeymapString(event: KeyboardEvent, it: HTMLInputElement) {
+        let keymapStr = "";
+        if (event.ctrlKey && !event.metaKey && isMac()) {
+            keymapStr += "⌃";
+        }
+        if (event.altKey) {
+            keymapStr += "⌥";
+        }
+        if (event.shiftKey) {
+            keymapStr += "⇧";
+        }
+        if (isCtrl(event)) {
+            keymapStr += "⌘";
+        }
+        if (event.key !== "Shift" && event.key !== "Alt" && event.key !== "Meta" && event.key !== "Control") {
+            if (event.key === "ArrowUp") {
+                keymapStr += "↑";
+            } else if (event.key === "ArrowDown") {
+                keymapStr += "↓";
+            } else if (event.key === "ArrowLeft") {
+                keymapStr += "←";
+            } else if (event.key === "ArrowRight") {
+                keymapStr += "→";
+            } else if (event.key === "Tab") {
+                keymapStr += "⇥";
+            } else if (event.key === "Backspace") {
+                keymapStr += "⌫";
+            } else if (event.key === "Delete") {
+                keymapStr += "⌦";
+            } else if (event.key === "Enter") {
+                keymapStr += "↩";
+            } else if (Constants.KEYCODE[event.keyCode]) {
+                if (event.shiftKey) {
+                    keymapStr += Constants.KEYCODE[event.keyCode][1];
+                } else {
+                    keymapStr += Constants.KEYCODE[event.keyCode][0];
+                }
+            } else if (event.code.startsWith("Digit") || event.code.startsWith("Key") || event.code.startsWith("Numpad")) {
+                const codeKey = event.code.substring(event.code.length - 1).toUpperCase();
+                if (!event.altKey ||
+                    (event.altKey && !["I", "E", "N", "U"].includes(codeKey))   // Mac 编辑器中 alt+I 等字符无法清空
+                ) {
+                    keymapStr += event.code.substring(event.code.length - 1).toUpperCase();
+                }
+            } else {
+                keymapStr += event.key === "Unidentified" ? "" : (event.key.length > 1 ? event.key : event.key.toUpperCase());
+            }
+        }
+        it.setAttribute("data-value", keymapStr);
+        // Mac 中文下会直接输入
+        setTimeout(() => {
+            it.value = updateHotkeyTip(keymapStr);
+        });
+        return keymapStr;
+    }
 };

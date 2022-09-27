@@ -1,5 +1,6 @@
 {
 	"ID": "20210721101227-pi8f6ga",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20210721101227-pi8f6ga",
@@ -35,20 +36,9 @@
 					"Data": "云端存储空间大小为 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "8G"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "8G"
 				},
 				{
 					"Type": "NodeText",

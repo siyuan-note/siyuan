@@ -22,8 +22,8 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/melody"
 	"github.com/gin-gonic/gin"
+	"github.com/olahol/melody"
 	"github.com/siyuan-note/logging"
 )
 

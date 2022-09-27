@@ -1,5 +1,6 @@
 {
 	"ID": "20211226114339-dk0gtpr",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f4c4",
@@ -97,44 +98,18 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "SiYuan（思源筆記）"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "SiYuan（思源筆記）"
 				},
 				{
 					"Type": "NodeText",
 					"Data": "是雲南鏈滴科技有限公司（以下簡稱“我們”）通過合法擁有並運營的、包括且不限於思源筆記桌面端軟件、移動端應用、"
 				},
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "思源筆記云端服務"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "思源筆記云端服務"
 				},
 				{
 					"Type": "NodeText",
@@ -155,22 +130,9 @@
 					"Data": "我們深知個人隱私信息對您的重要性，所以"
 				},
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "我們在此承諾保護使用我們的產品和服務的用戶的個人信息及隱私安全"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "我們在此承諾保護使用我們的產品和服務的用戶的個人信息及隱私安全"
 				},
 				{
 					"Type": "NodeText",
@@ -462,22 +424,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "如果您不使用思源筆記本雲端服務，我們不會收集和獲得您的個人信息"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "如果您不使用思源筆記本雲端服務，我們不會收集和獲得您的個人信息"
 				},
 				{
 					"Type": "NodeText",
@@ -817,44 +766,18 @@
 									"Data": "設備信息：我們可能會根據您在軟件安裝及使用中授予的具體權限，接收並記錄您所使用的設備相關信息（例如 "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "IMEI、MAC、Serial、SIM 卡 IMSI 識別碼、設備機型、操作系統及版本、客戶端版本、設備分辨率、包名、設備設置、進程及軟件列表、唯一設備標識符、軟硬件特徵"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "IMEI、MAC、Serial、SIM 卡 IMSI 識別碼、設備機型、操作系統及版本、客戶端版本、設備分辨率、包名、設備設置、進程及軟件列表、唯一設備標識符、軟硬件特徵"
 								},
 								{
 									"Type": "NodeText",
 									"Data": "信息）、設備所在位置相關信息（"
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "例如 IP 地址、GPS 位置以及能夠提供相關個人信息的 WLAN 接入點、藍牙和基站傳感器"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "例如 IP 地址、GPS 位置以及能夠提供相關個人信息的 WLAN 接入點、藍牙和基站傳感器"
 								},
 								{
 									"Type": "NodeText",
@@ -904,22 +827,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "我們可能從管理方、第三方合作夥伴獲取您授權共享的相關個人信息。例如，我們可能從第三方獲取您授權共享的賬戶個人信息（頭像、暱稱、登錄時間）並在您同意本《隱私政策》後將您的第三方賬戶與您的思源筆記云端服務賬戶綁定，使您可以通過第三方賬戶直接登錄並使用我們的產品和服務。"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "我們可能從管理方、第三方合作夥伴獲取您授權共享的相關個人信息。例如，我們可能從第三方獲取您授權共享的賬戶個人信息（頭像、暱稱、登錄時間）並在您同意本《隱私政策》後將您的第三方賬戶與您的思源筆記云端服務賬戶綁定，使您可以通過第三方賬戶直接登錄並使用我們的產品和服務。"
 				},
 				{
 					"Type": "NodeText",
@@ -1048,22 +958,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "為提高您使用我們及合作夥伴提供服務的安全性，保護您或其他用戶或公眾的人身財產安全免遭侵害，更好地預防釣魚網站、欺詐、網絡漏洞、計算機病毒、網絡攻擊、網絡侵入等安全風險，更準確地識別違反法律法規或 思源 服務相關協議規則的情況，我們可能會收集、使用或整合您的賬戶信息、交易信息、設備信息、日誌信息以及我們關聯公司、合作夥伴取得您授權或依據法律共享的個人信息，來綜合判斷您賬戶及交易風險、進行身份驗證、檢測及防範安全事件，並依法採取必要的記錄、審計、分析、處置措施。"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "為提高您使用我們及合作夥伴提供服務的安全性，保護您或其他用戶或公眾的人身財產安全免遭侵害，更好地預防釣魚網站、欺詐、網絡漏洞、計算機病毒、網絡攻擊、網絡侵入等安全風險，更準確地識別違反法律法規或 思源 服務相關協議規則的情況，我們可能會收集、使用或整合您的賬戶信息、交易信息、設備信息、日誌信息以及我們關聯公司、合作夥伴取得您授權或依據法律共享的個人信息，來綜合判斷您賬戶及交易風險、進行身份驗證、檢測及防範安全事件，並依法採取必要的記錄、審計、分析、處置措施。"
 				}
 			]
 		},
@@ -1105,22 +1002,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "您了解並同意，在收集您的個人信息後，我們將通過技術手段對數據進行去標識化處理，去標識化處理的個人信息將無法識別您的身份，在此情況下我們有權使用已經去標識化的個人信息，對用戶數據庫進行分析並予以商業化的利用。"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "您了解並同意，在收集您的個人信息後，我們將通過技術手段對數據進行去標識化處理，去標識化處理的個人信息將無法識別您的身份，在此情況下我們有權使用已經去標識化的個人信息，對用戶數據庫進行分析並予以商業化的利用。"
 				}
 			]
 		},
@@ -1148,22 +1032,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "請您注意，如果我們要將您的個人信息用於本《隱私政策》中未載明的其他用途或額外收集未提及的其他個人信息，我們會另行事先請您同意（確認同意的方式：如勾選、彈窗、站內信、郵件、短信等方式）。一旦您同意，該等額外用途將視為本《隱私政策》的一部分，該等額外個人信息也將適用本《隱私政策》。"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "請您注意，如果我們要將您的個人信息用於本《隱私政策》中未載明的其他用途或額外收集未提及的其他個人信息，我們會另行事先請您同意（確認同意的方式：如勾選、彈窗、站內信、郵件、短信等方式）。一旦您同意，該等額外用途將視為本《隱私政策》的一部分，該等額外個人信息也將適用本《隱私政策》。"
 				}
 			]
 		},
@@ -2940,22 +2811,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeStrong",
-					"Data": "strong",
-					"Children": [
-						{
-							"Type": "NodeStrongA6kOpenMarker",
-							"Data": "**"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "請您理解，由於技術的限制以及風險防範的局限，即便我們已經盡量加強安全措施，也無法始終保證個人信息百分之百的安全。您需要了解，您接入思源筆記云端服務所用的系統和通訊網絡，有可能因我們可控範圍外的情況而發生問題。"
-						},
-						{
-							"Type": "NodeStrongA6kCloseMarker",
-							"Data": "**"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "請您理解，由於技術的限制以及風險防範的局限，即便我們已經盡量加強安全措施，也無法始終保證個人信息百分之百的安全。您需要了解，您接入思源筆記云端服務所用的系統和通訊網絡，有可能因我們可控範圍外的情況而發生問題。"
 				}
 			]
 		},
@@ -3298,20 +3156,9 @@
 					"Data": "如您需要註銷賬戶，請登錄鏈滴，進入 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "設置 - 賬號"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "設置 - 賬號"
 				},
 				{
 					"Type": "NodeText",
@@ -3595,30 +3442,10 @@
 									"Data": "SDK 官網："
 								},
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://open.weixin.qq.com (opens new window)"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://open.weixin.qq.com/"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://open.weixin.qq.com/",
+									"TextMarkTextContent": "https://open.weixin.qq.com (opens new window)"
 								}
 							]
 						},
@@ -3649,48 +3476,15 @@
 									"Data": "收集的個人信息類型/字段：設備標識信息\n"
 								},
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl "
-										},
-										{
-											"Type": "NodeStrong",
-											"Data": "strong",
-											"Children": [
-												{
-													"Type": "NodeStrongA6kOpenMarker",
-													"Data": "**"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "(opens new window)"
-												},
-												{
-													"Type": "NodeStrongA6kCloseMarker",
-													"Data": "**"
-												}
-											]
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl",
+									"TextMarkTextContent": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a strong",
+									"TextMarkTextContent": "(opens new window)"
 								}
 							]
 						}
@@ -3748,22 +3542,9 @@
 					},
 					"Children": [
 						{
-							"Type": "NodeStrong",
-							"Data": "strong",
-							"Children": [
-								{
-									"Type": "NodeStrongA6kOpenMarker",
-									"Data": "**"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "Android 應用會申請的權限允許訪問網絡："
-								},
-								{
-									"Type": "NodeStrongA6kCloseMarker",
-									"Data": "**"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "strong",
+							"TextMarkTextContent": "Android 應用會申請的權限允許訪問網絡："
 						}
 					]
 				},
@@ -3788,22 +3569,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "允許訪問網絡："
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "允許訪問網絡："
 								},
 								{
 									"Type": "NodeText",
@@ -3822,22 +3590,9 @@
 					},
 					"Children": [
 						{
-							"Type": "NodeStrong",
-							"Data": "strong",
-							"Children": [
-								{
-									"Type": "NodeStrongA6kOpenMarker",
-									"Data": "**"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "iOS 應用內會申請的權限"
-								},
-								{
-									"Type": "NodeStrongA6kCloseMarker",
-									"Data": "**"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "strong",
+							"TextMarkTextContent": "iOS 應用內會申請的權限"
 						}
 					]
 				},
@@ -3871,22 +3626,9 @@
 									},
 									"Children": [
 										{
-											"Type": "NodeStrong",
-											"Data": "strong",
-											"Children": [
-												{
-													"Type": "NodeStrongA6kOpenMarker",
-													"Data": "**"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "允許訪問網絡："
-												},
-												{
-													"Type": "NodeStrongA6kCloseMarker",
-													"Data": "**"
-												}
-											]
+											"Type": "NodeTextMark",
+											"TextMarkType": "strong",
+											"TextMarkTextContent": "允許訪問網絡："
 										},
 										{
 											"Type": "NodeText",
@@ -3917,22 +3659,9 @@
 									},
 									"Children": [
 										{
-											"Type": "NodeStrong",
-											"Data": "strong",
-											"Children": [
-												{
-													"Type": "NodeStrongA6kOpenMarker",
-													"Data": "**"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "允許訪問系統相冊："
-												},
-												{
-													"Type": "NodeStrongA6kCloseMarker",
-													"Data": "**"
-												}
-											]
+											"Type": "NodeTextMark",
+											"TextMarkType": "strong",
+											"TextMarkTextContent": "允許訪問系統相冊："
 										},
 										{
 											"Type": "NodeText",
@@ -4154,30 +3883,10 @@
 					"Data": "思源筆記使用 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "AGPLv3 開源協議"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/siyuan-note/siyuan/blob/master/LICENSE"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/LICENSE",
+					"TextMarkTextContent": "AGPLv3 開源協議"
 				},
 				{
 					"Type": "NodeText",
@@ -4210,30 +3919,10 @@
 							"Data": "// This program is free software: you can redistribute it and/or modify\n// it under the terms of the GNU Affero General Public License as published by\n// the Free Software Foundation, either version 3 of the License, or\n// (at your option) any later version.\n//\n// This program is distributed in the hope that it will be useful,\n// but WITHOUT ANY WARRANTY; without even the implied warranty of\n// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n// GNU Affero General Public License for more details.\n//\n// You should have received a copy of the GNU Affero General Public License\n// along with this program.  If not, see "
 						},
 						{
-							"Type": "NodeLink",
-							"Data": "span",
-							"Children": [
-								{
-									"Type": "NodeOpenBracket"
-								},
-								{
-									"Type": "NodeLinkText",
-									"Data": "https://www.gnu.org/licenses/"
-								},
-								{
-									"Type": "NodeCloseBracket"
-								},
-								{
-									"Type": "NodeOpenParen"
-								},
-								{
-									"Type": "NodeLinkDest",
-									"Data": "https://www.gnu.org/licenses/"
-								},
-								{
-									"Type": "NodeCloseParen"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "a",
+							"TextMarkAHref": "https://www.gnu.org/licenses/",
+							"TextMarkTextContent": "https://www.gnu.org/licenses/"
 						},
 						{
 							"Type": "NodeText",

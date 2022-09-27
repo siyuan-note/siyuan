@@ -44,19 +44,50 @@
     vertical-align: bottom;
   }
 
-  em {
+  span[data-type~="sup"],
+  span[data-type~="sub"] {
+    position: relative;
+    font-size: 75%;
+    line-height: 0;
+    vertical-align: baseline;
+  }
+
+  span[data-type~="sup"] {
+    top: -0.5em;
+  }
+
+  span[data-type~="sub"] {
+    bottom: -0.25em;
+  }
+
+  em,
+  span[data-type~="em"] {
+    font-style: italic;
     color: var(--b3-protyle-inline-em-color);
   }
 
-  s {
+  s,
+  span[data-type~="s"] {
     color: var(--b3-protyle-inline-s-color);
+    text-decoration: line-through;
   }
 
-  strong {
+  strong,
+  span[data-type~="strong"] {
+    font-weight: bold;
     color: var(--b3-protyle-inline-strong-color);
   }
 
-  mark {
+  span[data-type~="inline-math"] {
+    user-select: text;
+    display: inline;
+    // https://github.com/siyuan-note/siyuan/issues/3081 test $\begin{bmatrix}   a & b \\c & d \\   e & f\end{bmatrix}$ test
+    // https://ld246.com/article/1626937851892 <u>test $\mu_p$ test</u>
+    // https://ld246.com/article/1636204769623  test $\rightarrow$ test
+  }
+
+  mark,
+  span[data-type~="mark"] {
     background-color: var(--b3-protyle-inline-mark-background);
     color: var(--b3-protyle-inline-mark-color);
 
@@ -64,6 +95,33 @@
       background-color: var(--b3-protyle-search-current-background);
       box-shadow: 0 0 1px var(--b3-theme-on-background);
     }
+  }
+
+  kbd,
+  span[data-type~="kbd"] {
+    padding: 2px 4px;
+    font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    line-height: 1;
+    color: var(--b3-theme-on-surface);
+    vertical-align: middle;
+    background-color: var(--b3-theme-surface);
+    border: solid 1px var(--b3-border-color);
+    border-radius: 3px;
+    box-shadow: inset 0 -1px 0 var(--b3-border-color);
+  }
+
+  u {
+    text-decoration: none;
+  }
+
+  u,
+  span[data-type~="u"] {
+    border-bottom: 1px solid var(--b3-theme-on-background);
+  }
+
+  span[data-type~="inline-memo"] {
+    background-color: var(--b3-card-info-background);
+    border-bottom: 2px solid var(--b3-card-info-color);
   }
 
   blockquote,
@@ -144,23 +202,6 @@
     }
   }
 
-  kbd {
-    padding: 2px 4px;
-    font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace;
-    line-height: 1;
-    color: var(--b3-theme-on-surface);
-    vertical-align: middle;
-    background-color: var(--b3-theme-surface);
-    border: solid 1px var(--b3-border-color);
-    border-radius: 3px;
-    box-shadow: inset 0 -1px 0 var(--b3-border-color);
-  }
-
-  u {
-    text-decoration: none;
-    border-bottom: 1px solid var(--b3-theme-on-background);
-  }
-
   table {
     border-collapse: collapse;
     empty-cells: show;
@@ -203,7 +244,8 @@
     }
   }
 
-  code:not(.hljs) {
+  code:not(.hljs),
+  span[data-type~="code"] {
     @extend .fn__code;
   }
 

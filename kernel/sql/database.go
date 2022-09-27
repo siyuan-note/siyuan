@@ -252,7 +252,10 @@ func initDBConnection() {
 	db.SetConnMaxLifetime(365 * 24 * time.Hour)
 }
 
+var caseSensitive bool
+
 func SetCaseSensitive(b bool) {
+	caseSensitive = b
 	if b {
 		db.Exec("PRAGMA case_sensitive_like = ON;")
 	} else {
@@ -266,7 +269,7 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 			return ast.WalkContinue
 		}
 
-		if ast.NodeBlockRefID == n.Type {
+		if treenode.IsBlockRef(n) {
 			ref := buildRef(tree, n)
 			refs = append(refs, ref)
 		} else if ast.NodeFileAnnotationRefID == n.Type {
@@ -297,15 +300,43 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 				Type:         treenode.TypeAbbr(n.Type.String()),
 			}
 			fileAnnotationRefs = append(fileAnnotationRefs, ref)
+		} else if ast.NodeTextMark == n.Type && n.IsTextMarkType("file-annotation-ref") {
+			pathID := n.TextMarkFileAnnotationRefID
+			idx := strings.LastIndex(pathID, "/")
+			if -1 == idx {
+				return ast.WalkContinue
+			}
+
+			filePath := pathID[:idx]
+			annotationID := pathID[idx+1:]
+
+			anchor := n.TextMarkTextContent
+			text := filePath
+			if "" != anchor {
+				text = anchor
+			}
+			parentBlock := treenode.ParentBlock(n)
+			ref := &FileAnnotationRef{
+				ID:           ast.NewNodeID(),
+				FilePath:     filePath,
+				AnnotationID: annotationID,
+				BlockID:      parentBlock.ID,
+				RootID:       tree.ID,
+				Box:          tree.Box,
+				Path:         tree.Path,
+				Content:      text,
+				Type:         treenode.TypeAbbr(n.Type.String()),
+			}
+			fileAnnotationRefs = append(fileAnnotationRefs, ref)
 		}
 		return ast.WalkContinue
 	})
 	return
 }
 
-func buildRef(tree *parse.Tree, refIDNode *ast.Node) *Ref {
-	markdown := treenode.FormatNode(refIDNode.Parent, luteEngine)
-	defBlockID := refIDNode.TokensStr()
+func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
+	markdown := treenode.ExportNodeStdMd(refNode, luteEngine)
+	defBlockID, text, _ := treenode.GetBlockRef(refNode)
 	var defBlockParentID, defBlockRootID, defBlockPath string
 	defBlock := treenode.GetBlockTree(defBlockID)
 	if nil != defBlock {
@@ -313,8 +344,7 @@ func buildRef(tree *parse.Tree, refIDNode *ast.Node) *Ref {
 		defBlockRootID = defBlock.RootID
 		defBlockPath = defBlock.Path
 	}
-	text := treenode.GetDynamicBlockRefText(refIDNode.Parent)
-	parentBlock := treenode.ParentBlock(refIDNode)
+	parentBlock := treenode.ParentBlock(refNode)
 	return &Ref{
 		ID:               ast.NewNodeID(),
 		DefBlockID:       defBlockID,
@@ -327,7 +357,7 @@ func buildRef(tree *parse.Tree, refIDNode *ast.Node) *Ref {
 		Path:             tree.Path,
 		Content:          text,
 		Markdown:         markdown,
-		Type:             treenode.TypeAbbr(refIDNode.Type.String()),
+		Type:             treenode.TypeAbbr(refNode.Type.String()),
 	}
 }
 
@@ -399,6 +429,14 @@ func resolveRefContent0(node *ast.Node, anchors *map[string]string, depth *int, 
 		case ast.NodeText, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			buf.Write(n.Tokens)
+		case ast.NodeTextMark:
+			if n.IsTextMarkType("tag") {
+				buf.WriteByte('#')
+			}
+			buf.WriteString(n.Content())
+			if n.IsTextMarkType("tag") {
+				buf.WriteByte('#')
+			}
 		case ast.NodeBlockRef:
 			if anchor := n.ChildByType(ast.NodeBlockRefText); nil != anchor {
 				buf.WriteString(anchor.Text())
@@ -519,36 +557,9 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 	boxLocalPath := filepath.Join(util.DataDir, boxID)
 	docDirLocalPath := filepath.Join(boxLocalPath, p)
 	switch n.Type {
-	case ast.NodeLinkText:
+	case ast.NodeImage:
 		text := n.Text()
-		markdown := treenode.FormatNode(n.Parent, luteEngine)
-		parentBlock := treenode.ParentBlock(n)
-		span := &Span{
-			ID:       ast.NewNodeID(),
-			BlockID:  parentBlock.ID,
-			RootID:   rootID,
-			Box:      boxID,
-			Path:     p,
-			Content:  text,
-			Markdown: markdown,
-			Type:     treenode.TypeAbbr(n.Type.String()),
-			IAL:      treenode.IALStr(n),
-		}
-		spans = append(spans, span)
-		walkStatus = ast.WalkContinue
-		return
-	case ast.NodeTag, ast.NodeInlineMath, ast.NodeCodeSpan, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline:
-		var text string
-		switch n.Type {
-		case ast.NodeTag, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline:
-			text = n.Text()
-		case ast.NodeInlineMath:
-			text = n.ChildByType(ast.NodeInlineMathContent).TokensStr()
-		case ast.NodeCodeSpan:
-			text = n.ChildByType(ast.NodeCodeSpanContent).TokensStr()
-		}
-
-		markdown := treenode.FormatNode(n, luteEngine)
+		markdown := treenode.ExportNodeStdMd(n, luteEngine)
 		parentBlock := treenode.ParentBlock(n)
 		span := &Span{
 			ID:       ast.NewNodeID(),
@@ -563,35 +574,21 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		}
 		spans = append(spans, span)
 		walkStatus = ast.WalkSkipChildren
-		return
-	case ast.NodeLinkDest:
-		text := n.TokensStr()
-		markdown := treenode.FormatNode(n.Parent, luteEngine)
-		parentBlock := treenode.ParentBlock(n)
-		span := &Span{
-			ID:       ast.NewNodeID(),
-			BlockID:  parentBlock.ID,
-			RootID:   rootID,
-			Box:      boxID,
-			Path:     p,
-			Content:  text,
-			Markdown: markdown,
-			Type:     treenode.TypeAbbr(n.Type.String()),
-			IAL:      treenode.IALStr(n),
-		}
-		spans = append(spans, span)
 
-		// assetsLinkDestsInTree
-
-		if !IsAssetLinkDest(n.Tokens) {
-			walkStatus = ast.WalkContinue
+		destNode := n.ChildByType(ast.NodeLinkDest)
+		if nil == destNode {
 			return
 		}
 
-		dest := gulu.Str.FromBytes(n.Tokens)
-		parentBlock = treenode.ParentBlock(n)
+		// assetsLinkDestsInTree
+
+		if !IsAssetLinkDest(destNode.Tokens) {
+			return
+		}
+
+		dest := gulu.Str.FromBytes(destNode.Tokens)
 		var title string
-		if titleNode := n.Parent.ChildByType(ast.NodeLinkTitle); nil != titleNode {
+		if titleNode := n.ChildByType(ast.NodeLinkTitle); nil != titleNode {
 			title = gulu.Str.FromBytes(titleNode.Tokens)
 		}
 
@@ -618,6 +615,36 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			Hash:    hash,
 		}
 		assets = append(assets, asset)
+		return
+	case ast.NodeTag, ast.NodeInlineMath, ast.NodeCodeSpan, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline, ast.NodeTextMark:
+		typ := treenode.TypeAbbr(n.Type.String())
+		var text string
+		switch n.Type {
+		case ast.NodeTag, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline:
+			text = n.Text()
+		case ast.NodeInlineMath:
+			text = n.ChildByType(ast.NodeInlineMathContent).TokensStr()
+		case ast.NodeCodeSpan:
+			text = n.ChildByType(ast.NodeCodeSpanContent).TokensStr()
+		case ast.NodeTextMark:
+			text = n.Content()
+			typ = typ + " " + n.TextMarkType
+		}
+
+		markdown := treenode.ExportNodeStdMd(n, luteEngine)
+		parentBlock := treenode.ParentBlock(n)
+		span := &Span{
+			ID:       ast.NewNodeID(),
+			BlockID:  parentBlock.ID,
+			RootID:   rootID,
+			Box:      boxID,
+			Path:     p,
+			Content:  text,
+			Markdown: markdown,
+			Type:     typ,
+			IAL:      treenode.IALStr(n),
+		}
+		spans = append(spans, span)
 		walkStatus = ast.WalkSkipChildren
 		return
 	case ast.NodeDocument:
@@ -812,7 +839,7 @@ func tagFromNode(node *ast.Node) (ret string) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeTag == n.Type {
+		if ast.NodeTag == n.Type || n.IsTextMarkType("tag") {
 			tagBuilder.WriteString("#")
 			tagBuilder.WriteString(n.Text())
 			tagBuilder.WriteString("# ")
@@ -1202,7 +1229,7 @@ func nSort(n *ast.Node) int {
 	case ast.NodeSuperBlock:
 		return 30
 	// 以下为行级元素
-	case ast.NodeText:
+	case ast.NodeText, ast.NodeTextMark:
 		return 200
 	case ast.NodeTag:
 		return 205

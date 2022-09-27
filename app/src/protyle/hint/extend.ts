@@ -16,6 +16,7 @@ import {genEmptyElement} from "../../block/util";
 import {updateListOrder} from "../wysiwyg/list";
 import {escapeHtml} from "../../util/escape";
 import {zoomOut} from "../../menus/protyle";
+import {hideElements} from "../ui/hideElements";
 
 export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
@@ -109,24 +110,24 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: "emoji",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconEmoji"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.emoji}</span><span class="b3-menu__accelerator">:</span></div>`,
     }, {
-        filter: ["链接", "lianjie", "lj", "link"],
-        value: "link",
+        filter: ["链接", "lianjie", "lj", "link", "a"],
+        value: "a",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconLink"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.link}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.link.custom))}</span></div>`,
     }, {
-        filter: ["粗体", "cuti", "ct", "bold"],
-        value: "bold",
+        filter: ["粗体", "cuti", "ct", "bold", "strong"],
+        value: "strong",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconBold"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.bold}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.bold.custom))}</span></div>`,
     }, {
-        filter: ["斜体", "xieti", "xt", "italic"],
-        value: "italic",
+        filter: ["斜体", "xieti", "xt", "italic", "em"],
+        value: "em",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconItalic"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.italic}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.italic.custom))}</span></div>`,
     }, {
         filter: ["下划线", "xiahuaxian", "xhx", "underline"],
-        value: "underline",
+        value: "u",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconUnderline"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.underline}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.underline.custom))}</span></div>`,
     }, {
         filter: ["删除线", "shanchuxian", "scx", "strike"],
-        value: "strike",
+        value: "s",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconStrike"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.strike}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.strike.custom))}</span></div>`,
     }, {
         filter: ["标记", "biaoji", "bj", "mark"],
@@ -146,7 +147,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconTags"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.tag}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.tag.custom))}</span></div>`,
     }, {
         filter: ["行内代码", "hangneidaima", "hndm", "inline code"],
-        value: "inline-code",
+        value: "code",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconInlineCode"></use></svg><span class="b3-list-item__text">${window.siyuan.languages["inline-code"]}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert["inline-code"].custom))}</span></div>`,
     }, {
         filter: ["行内数学公式", "hangneishuxuegongshi", "hnsxgs", "inline math"],
@@ -413,14 +414,14 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
-        protyle.toolbar.subElement.classList.add("fn__none");
+        hideElements(["util"], protyle);
     });
 };
 
 export const hintRenderWidget = (value: string, protyle: IProtyle) => {
     focusByRange(protyle.toolbar.range);
     insertHTML(protyle.lute.SpinBlockDOM(`<iframe src="/widgets/${value}" data-subtype="widget" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`), protyle, true);
-    protyle.toolbar.subElement.classList.add("fn__none");
+    hideElements(["util"], protyle);
 };
 
 export const hintRenderAssets = (value: string, protyle: IProtyle) => {
@@ -438,7 +439,7 @@ export const hintRenderAssets = (value: string, protyle: IProtyle) => {
         fileMD += `[${value.startsWith("assets/") ? filename + type : value}](${value})`;
     }
     insertHTML(protyle.lute.SpinBlockDOM(fileMD), protyle);
-    protyle.toolbar.subElement.classList.add("fn__none");
+    hideElements(["util"], protyle);
 };
 
 export const hintMoveBlock = (pathString: string, sourceElements: Element[], protyle: IProtyle) => {
@@ -505,5 +506,5 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
 
     // 跨文档不支持撤销
     transaction(protyle, doOperations);
-    protyle.toolbar.subElement.classList.add("fn__none");
+    hideElements(["util"], protyle);
 };

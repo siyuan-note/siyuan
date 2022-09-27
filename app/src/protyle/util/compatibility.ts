@@ -86,26 +86,17 @@ export const updateHotkeyTip = (hotkey: string) => {
         "⌦": "Delete",
         "↩": "Enter",
     }));
-    const SHIFT_KEY_MAP = new Map(Object.entries({
-        ";": ":",
-        "=": "+",
-        "-": "_",
-        ".": ">",
-    }));
 
-    let keys = [];
+    const keys = [];
 
     if (hotkey.indexOf("⌘") > -1) keys.push(KEY_MAP.get("⌘"));
     if (hotkey.indexOf("⇧") > -1) keys.push(KEY_MAP.get("⇧"));
     if (hotkey.indexOf("⌥") > -1) keys.push(KEY_MAP.get("⌥"));
 
-    const lastKey = hotkey.charAt(hotkey.length - 1);
-    if ("⌘⇧⌥".indexOf(lastKey) < 0) {
-        keys.push(
-            KEY_MAP.get(lastKey)
-            || (hotkey.indexOf("⇧") > -1 && SHIFT_KEY_MAP.get(lastKey))
-            || lastKey
-        );
+    // 不能去最后一个，需匹配 F2
+    const lastKey = hotkey.replace(/⌘|⇧|⌥/g, "");
+    if (lastKey) {
+        keys.push(KEY_MAP.get(lastKey) || lastKey);
     }
 
     return keys.join("+");

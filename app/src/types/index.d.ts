@@ -30,6 +30,11 @@ interface Window {
     goBack(): void
 }
 
+interface ITextOption {
+    color?: string,
+    type: string
+}
+
 interface IInbox {
     oId: string
     shorthandContent: string
@@ -84,6 +89,7 @@ interface INotebook {
 }
 
 interface ISiyuan {
+    printWin?: import("electron").BrowserWindow
     transactionsTimeout?: number,
     transactions?: {
         protyle: IProtyle,
@@ -240,6 +246,7 @@ declare interface IWebSocketData {
 }
 
 declare interface IAppearance {
+    modeOS: boolean,
     hideStatusBar: boolean,
     nativeEmoji: boolean,
     customCSS: boolean,
@@ -478,6 +485,7 @@ declare interface IMenu {
     click?: (element: HTMLElement) => void,
     type?: "separator" | "submenu" | "readonly",
     accelerator?: string,
+    action?: string,
     id?: string,
     submenu?: IMenu[]
     disabled?: boolean

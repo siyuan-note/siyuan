@@ -27,6 +27,7 @@ import (
 
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -98,12 +99,13 @@ func flushTreeQueue() {
 		return
 	}
 
+	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	boxes := hashset.New()
 	for _, op := range ops {
 		switch op.action {
 		case "upsert":
 			tree := op.upsertTree
-			if err = upsertTree(tx, tree); nil != err {
+			if err = upsertTree(tx, tree, context); nil != err {
 				logging.LogErrorf("upsert tree [%s] into database failed: %s", tree.Box+tree.Path, err)
 			}
 			boxes.Add(op.upsertTree.Box)

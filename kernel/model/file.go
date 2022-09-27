@@ -34,7 +34,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
-	"github.com/88250/lute/render"
 	util2 "github.com/88250/lute/util"
 	"github.com/dustin/go-humanize"
 	"github.com/facette/natsort"
@@ -615,7 +614,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 		}
 	}
 
-	subTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
+	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 	keyword = strings.Join(strings.Split(keyword, " "), search.TermSep)
 	keywords := search.SplitKeyword(keyword)
 
@@ -638,13 +637,8 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 				}
 			}
 
-			if ast.NodeBlockRef == n.Type {
-				appendRefTextRenderResultForBlockRef(n)
-				return ast.WalkSkipChildren
-			}
-
 			// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
-			if ast.NodeCodeBlockCode == n.Type && 0 < len(keywords) && !render.IsChartCodeBlockCode(n) {
+			if ast.NodeCodeBlockCode == n.Type && 0 < len(keywords) && !treenode.IsChartCodeBlockCode(n) {
 				text := string(n.Tokens)
 				text = search.EncloseHighlighting(text, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.CaseSensitive)
 				n.Tokens = gulu.Str.ToBytes(text)
@@ -1066,9 +1060,6 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 	}
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	tree, err := LoadTree(fromBoxID, fromPath)
 	if nil != err {
 		err = ErrBlockNotFound
@@ -1194,9 +1185,6 @@ func RemoveDoc(boxID, p string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	tree, err := LoadTree(boxID, p)
 	if nil != err {
 		return
@@ -1210,8 +1198,7 @@ func RemoveDoc(boxID, p string) (err error) {
 
 	historyPath := filepath.Join(historyDir, boxID, p)
 	absPath := filepath.Join(util.DataDir, boxID, p)
-	filelock.ReleaseFileLocks(absPath)
-	if err = gulu.File.Copy(absPath, historyPath); nil != err {
+	if err = filesys.Copy(absPath, historyPath); nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(70), box.Name, absPath, err))
 	}
 
@@ -1434,6 +1421,7 @@ func createDoc(boxID, p, title, dom string) (err error) {
 	tree.HPath = hPath
 	tree.ID = id
 	tree.Root.ID = id
+	tree.Root.Spec = "1"
 	updated := util.TimeFromID(id)
 	tree.Root.KramdownIAL = [][]string{{"id", id}, {"title", html.EscapeAttrVal(title)}, {"updated", updated}}
 	if nil == tree.Root.FirstChild {
@@ -1541,8 +1529,8 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	}
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 
 	box := Conf.Box(boxID)
 	sortIDs := map[string]int{}

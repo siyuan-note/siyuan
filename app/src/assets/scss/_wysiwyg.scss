@@ -169,13 +169,13 @@
       }
     }
 
-    span[data-type="tag"] {
+    span[data-type~="tag"] {
       border-bottom: 1px solid var(--b3-protyle-inline-tag-color);
       color: var(--b3-protyle-inline-tag-color);
       transition: var(--b3-transition);
     }
 
-    span[data-type="a"] {
+    span[data-type~="a"] {
       color: var(--b3-protyle-inline-link-color);
       cursor: pointer;
       transition: var(--b3-transition);
@@ -183,14 +183,6 @@
       &:hover {
         border-bottom: 1px solid var(--b3-protyle-inline-link-color);
       }
-    }
-
-    span[data-type="inline-math"] {
-      user-select: text;
-      display: inline;
-      // https://github.com/siyuan-note/siyuan/issues/3081 test $\begin{bmatrix}   a & b \\c & d \\   e & f\end{bmatrix}$ test
-      // https://ld246.com/article/1626937851892 <u>test $\mu_p$ test</u>
-      // https://ld246.com/article/1636204769623  test $\rightarrow$ test
     }
 
     span[data-type="search-mark"] {
@@ -211,14 +203,14 @@
       background-color: var(--b3-protyle-inline-mark-background);
     }
 
-    span[data-type="block-ref"],
-    span[data-type="file-annotation-ref"] {
+    span[data-type~="block-ref"],
+    span[data-type~="file-annotation-ref"] {
       color: var(--b3-protyle-inline-blockref-color);
       opacity: .86;
       transition: var(--b3-transition);
     }
 
-    span[data-type="file-annotation-ref"]:before {
+    span[data-type~="file-annotation-ref"]:before {
       content: "🔖 ";
     }
 
@@ -545,10 +537,10 @@
 
 // 导出 html 不需要编辑样式
 .protyle-wysiwyg[contenteditable="true"] {
-  span[data-type="inline-math"],
-  span[data-type="tag"],
-  span[data-type="block-ref"],
-  span[data-type="file-annotation-ref"],
+  span[data-type~="inline-math"],
+  span[data-type~="tag"],
+  span[data-type~="block-ref"],
+  span[data-type~="file-annotation-ref"],
   .protyle-action__language,
   .img > span:nth-child(2),
   .li > .protyle-action,
@@ -556,12 +548,12 @@
     cursor: pointer;
   }
 
-  span[data-type="tag"]:hover {
+  span[data-type~="tag"]:hover {
     background-color: var(--b3-border-color);
   }
 
-  span[data-type="block-ref"]:hover,
-  span[data-type="file-annotation-ref"]:hover {
+  span[data-type~="block-ref"]:hover,
+  span[data-type~="file-annotation-ref"]:hover {
     opacity: 1;
   }
 

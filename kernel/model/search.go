@@ -165,6 +165,22 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 				if bytes.Contains(n.Tokens, []byte(keyword)) {
 					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))
 				}
+			case ast.NodeTextMark:
+				if strings.Contains(n.TextMarkTextContent, keyword) {
+					n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+				}
+				if strings.Contains(n.TextMarkInlineMathContent, keyword) {
+					n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, keyword, replacement)
+				}
+				if strings.Contains(n.TextMarkInlineMemoContent, keyword) {
+					n.TextMarkInlineMemoContent = strings.ReplaceAll(n.TextMarkInlineMemoContent, keyword, replacement)
+				}
+				if strings.Contains(n.TextMarkATitle, keyword) {
+					n.TextMarkATitle = strings.ReplaceAll(n.TextMarkATitle, keyword, replacement)
+				}
+				if strings.Contains(n.TextMarkAHref, keyword) {
+					n.TextMarkAHref = strings.ReplaceAll(n.TextMarkAHref, keyword, replacement)
+				}
 			}
 			return ast.WalkContinue
 		})
@@ -383,7 +399,7 @@ func query2Stmt(queryStr string) (ret string) {
 			if !entering {
 				return ast.WalkContinue
 			}
-			if ast.NodeTag == n.Type {
+			if ast.NodeTag == n.Type || (n.IsTextMarkType("tag")) {
 				tags = append(tags, n.Text())
 			}
 			return ast.WalkContinue

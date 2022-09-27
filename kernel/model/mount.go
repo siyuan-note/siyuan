@@ -29,15 +29,12 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func CreateBox(name string) (id string, err error) {
-	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	id = ast.NewNodeID()
 	boxLocalPath := filepath.Join(util.DataDir, id)
 	err = os.MkdirAll(boxLocalPath, 0755)
@@ -54,10 +51,6 @@ func CreateBox(name string) (id string, err error) {
 }
 
 func RenameBox(boxID, name string) (err error) {
-	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	box := Conf.Box(boxID)
 	if nil == box {
 		return errors.New(Conf.Language(0))
@@ -73,8 +66,6 @@ func RenameBox(boxID, name string) (err error) {
 
 func RemoveBox(boxID string) (err error) {
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
 
 	if util.IsReservedFilename(boxID) {
 		return errors.New(fmt.Sprintf("can not remove [%s] caused by it is a reserved file", boxID))
@@ -107,7 +98,7 @@ func RemoveBox(boxID string) (err error) {
 	}
 
 	unmount0(boxID)
-	if err = os.RemoveAll(localPath); nil != err {
+	if err = filesys.RemoveAll(localPath); nil != err {
 		return
 	}
 	IncSync()
@@ -116,8 +107,6 @@ func RemoveBox(boxID string) (err error) {
 
 func Unmount(boxID string) {
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
 
 	unmount0(boxID)
 	evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast, 0)
@@ -142,8 +131,6 @@ func unmount0(boxID string) {
 
 func Mount(boxID string) (alreadyMount bool, err error) {
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
 
 	localPath := filepath.Join(util.DataDir, boxID)
 

@@ -21,7 +21,8 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/melody"
+	"github.com/olahol/melody"
+	"github.com/siyuan-note/eventbus"
 )
 
 var (
@@ -148,6 +149,18 @@ func PushErrMsg(msg string, timeout int) (msgId string) {
 func PushStatusBar(msg string) {
 	msg += " (" + time.Now().Format("2006-01-02 15:04:05") + ")"
 	BroadcastByType("main", "statusbar", 0, msg, nil)
+}
+
+func ContextPushMsg(context map[string]interface{}, msg string) {
+	switch context[eventbus.CtxPushMsg].(int) {
+	case eventbus.CtxPushMsgToProgress:
+		PushEndlessProgress(msg)
+	case eventbus.CtxPushMsgToStatusBar:
+		PushStatusBar(msg)
+	case eventbus.CtxPushMsgToStatusBarAndProgress:
+		PushStatusBar(msg)
+		PushEndlessProgress(msg)
+	}
 }
 
 const (

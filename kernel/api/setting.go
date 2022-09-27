@@ -207,9 +207,14 @@ func setSearch(c *gin.Context) {
 		s.Limit = 32
 	}
 
+	oldCaseSensitive := model.Conf.Search.CaseSensitive
+
 	model.Conf.Search = s
 	model.Conf.Save()
 	sql.SetCaseSensitive(s.CaseSensitive)
+	if s.CaseSensitive != oldCaseSensitive {
+		model.FullReindex()
+	}
 	sql.ClearVirtualRefKeywords()
 	ret.Data = s
 }
@@ -374,19 +379,4 @@ func setEmoji(c *gin.Context) {
 	}
 
 	model.Conf.Editor.Emoji = emoji
-}
-
-func setSearchCaseSensitive(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	caseSensitive := arg["caseSensitive"].(bool)
-	model.Conf.Search.CaseSensitive = caseSensitive
-	model.Conf.Save()
-	sql.SetCaseSensitive(caseSensitive)
 }

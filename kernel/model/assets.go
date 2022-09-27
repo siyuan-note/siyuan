@@ -39,6 +39,7 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -58,6 +59,9 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 		if ast.NodeImage == n.Type {
 			linkDest := n.ChildByType(ast.NodeLinkDest)
 			dest := linkDest.Tokens
+			if 1 > len(dest) { // 双击打开图片不对 https://github.com/siyuan-note/siyuan/issues/5876
+				return ast.WalkContinue
+			}
 			ret = append(ret, gulu.Str.FromBytes(dest))
 		}
 		return ast.WalkContinue
@@ -138,7 +142,7 @@ func NetImg2LocalAssets(rootID string) (err error) {
 				name = util.FilterFileName(name)
 				name = "net-img-" + name + "-" + ast.NewNodeID() + ext
 				writePath := filepath.Join(util.DataDir, "assets", name)
-				if err = gulu.File.WriteFileSafer(writePath, data, 0644); nil != err {
+				if err = filesys.WriteFileSafer(writePath, data); nil != err {
 					logging.LogErrorf("write downloaded net img [%s] to local assets [%s] failed: %s", u, writePath, err)
 					return ast.WalkSkipChildren
 				}
@@ -192,6 +196,9 @@ func SearchAssetsByName(keyword string) (ret []*cache.Asset) {
 
 func GetAssetAbsPath(relativePath string) (absPath string, err error) {
 	relativePath = strings.TrimSpace(relativePath)
+	if strings.Contains(relativePath, "?") {
+		relativePath = relativePath[:strings.Index(relativePath, "?")]
+	}
 	notebooks, err := ListNotebooks()
 	if nil != err {
 		err = errors.New(Conf.Language(0))
@@ -377,7 +384,7 @@ func saveWorkspaceAssets(assets []string) {
 		logging.LogErrorf("create assets conf failed: %s", err)
 		return
 	}
-	if err = gulu.File.WriteFileSafer(confPath, data, 0644); nil != err {
+	if err = filesys.WriteFileSafer(confPath, data); nil != err {
 		logging.LogErrorf("write assets conf failed: %s", err)
 		return
 	}
@@ -472,7 +479,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 
 	newName = util.AssetName(newName) + filepath.Ext(oldPath)
 	newPath := "assets/" + newName
-	if err = gulu.File.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
+	if err = filesys.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
 		logging.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
 		return
 	}
@@ -678,7 +685,8 @@ func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		// 修改以下代码时需要同时修改 database 构造行级元素实现，增加必要的类型
 		if !entering || (ast.NodeLinkDest != n.Type && ast.NodeHTMLBlock != n.Type && ast.NodeInlineHTML != n.Type &&
-			ast.NodeIFrame != n.Type && ast.NodeWidget != n.Type && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type) {
+			ast.NodeIFrame != n.Type && ast.NodeWidget != n.Type && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type &&
+			!n.IsTextMarkType("a")) {
 			return ast.WalkContinue
 		}
 
@@ -688,6 +696,13 @@ func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 			}
 
 			dest := strings.TrimSpace(string(n.Tokens))
+			ret = append(ret, dest)
+		} else if n.IsTextMarkType("a") {
+			if !isRelativePath(gulu.Str.ToBytes(n.TextMarkAHref)) {
+				return ast.WalkContinue
+			}
+
+			dest := strings.TrimSpace(n.TextMarkAHref)
 			ret = append(ret, dest)
 		} else {
 			if ast.NodeWidget == n.Type {

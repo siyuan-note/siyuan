@@ -4,6 +4,7 @@ import {processPasteCode, processRender} from "./processCode";
 import {writeText} from "./compatibility";
 /// #if !BROWSER
 import {clipboard} from "electron";
+import * as path from "path";
 /// #endif
 import {hasClosestBlock} from "./hasClosest";
 import {focusByWbr, getEditorRange} from "./selection";
@@ -28,6 +29,31 @@ const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
     if (needRender) {
         protyle.hint.render(protyle);
     }
+};
+
+export const pasteAsPlainText = async (protyle:IProtyle) => {
+    /// #if !BROWSER && !MOBILE
+    let localFiles: string[] = [];
+    if ("darwin" === window.siyuan.config.system.os) {
+        const xmlString = clipboard.read("NSFilenamesPboardType");
+        const domParser = new DOMParser();
+        const xmlDom = domParser.parseFromString(xmlString, "application/xml");
+        Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
+            localFiles.push(item.childNodes[0].nodeValue);
+        });
+    } else {
+        const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
+        if (xmlString.data.length > 0) {
+            localFiles = xmlString.data;
+        }
+    }
+    if (localFiles.length > 0) {
+        uploadLocalFiles(localFiles, protyle, false);
+        writeText("");
+    } else {
+        insertHTML(protyle.lute.BlockDOM2Content(protyle.lute.InlineMd2BlockDOM(clipboard.readText())), protyle, false, false);
+    }
+    /// #endif
 };
 
 export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element) => {
@@ -95,7 +121,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 localFiles.push(item.childNodes[0].nodeValue);
             });
             if (localFiles.length > 0) {
-                uploadLocalFiles(localFiles, protyle);
+                uploadLocalFiles(localFiles, protyle, true);
                 writeText("");
                 return;
             }
@@ -103,7 +129,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         } else {
             const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
             if (xmlString.data.length > 0) {
-                uploadLocalFiles(xmlString.data, protyle);
+                uploadLocalFiles(xmlString.data, protyle, true);
                 writeText("");
                 return;
             }
@@ -246,7 +272,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     dom: tempElement.innerHTML
                 }, (response) => {
                     insertHTML(response.data, protyle);
-                    protyle.wysiwyg.element.querySelectorAll('[data-type="block-ref"]').forEach(item => {
+                    protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
                         if (item.textContent === "") {
                             fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
                                 item.innerHTML = response.data;

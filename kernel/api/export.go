@@ -18,7 +18,10 @@ package api
 
 import (
 	"net/http"
+	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -180,6 +183,36 @@ func exportMdHTML(c *gin.Context) {
 	}
 }
 
+func exportTempContent(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	content := arg["content"].(string)
+	tmpExport := filepath.Join(util.TempDir, "export", "temp")
+	if err := os.MkdirAll(tmpExport, 0755); nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+	p := filepath.Join(tmpExport, gulu.Rand.String(7))
+	if err := os.WriteFile(p, []byte(content), 0644); nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+	url := path.Join("/export/temp/", filepath.Base(p))
+	ret.Data = map[string]interface{}{
+		"url": "http://127.0.0.1:" + util.ServerPort + url,
+	}
+}
+
 func exportPreviewHTML(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -190,7 +223,14 @@ func exportPreviewHTML(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, content := model.ExportHTML(id, "", true)
+	keepFold := false
+	if arg["keepFold"] != nil {
+		keepFold = arg["keepFold"].(bool)
+	}
+	name, content := model.ExportHTML(id, "", true, keepFold)
+	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
+	content = strings.ReplaceAll(content, "http://127.0.0.1:"+util.ServerPort+"/#", "#")
+
 	ret.Data = map[string]interface{}{
 		"id":      id,
 		"name":    name,
@@ -210,7 +250,11 @@ func exportHTML(c *gin.Context) {
 	id := arg["id"].(string)
 	pdf := arg["pdf"].(bool)
 	savePath := arg["savePath"].(string)
-	name, content := model.ExportHTML(id, savePath, pdf)
+	keepFold := false
+	if arg["keepFold"] != nil {
+		keepFold = arg["keepFold"].(bool)
+	}
+	name, content := model.ExportHTML(id, savePath, pdf, keepFold)
 	ret.Data = map[string]interface{}{
 		"id":      id,
 		"name":    name,

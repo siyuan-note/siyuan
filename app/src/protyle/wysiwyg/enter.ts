@@ -152,7 +152,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         selectNode.firstChild.remove();
     }
     // https://github.com/siyuan-note/siyuan/issues/3850
-    if (editableElement?.lastElementChild?.getAttribute("data-type") === "inline-math" &&
+    if (editableElement?.lastElementChild?.getAttribute("data-type").indexOf("inline-math") > -1 &&
         !hasNextSibling(editableElement?.lastElementChild)) {
         editableElement.insertAdjacentText("beforeend", "\n");
     }
@@ -285,7 +285,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         }
         range.extractContents();
         const types = protyle.toolbar.getCurrentType(range);
-        if (types.includes("inline-code") && range.startContainer.nodeType !== 3) {
+        if (types.includes("code") && range.startContainer.nodeType !== 3) {
             // https://github.com/siyuan-note/siyuan/issues/4169
             const brElement = document.createElement("br");
             (range.startContainer as HTMLElement).after(brElement);
@@ -300,7 +300,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     }
 
     // bq
-    if (editableElement.textContent === "" && blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") && blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
+    if (editableElement.textContent.replace(Constants.ZWSP, "").replace("\n", "") === "" &&
+        blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") && blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
         range.insertNode(document.createElement("wbr"));
         const topElement = getTopEmptyElement(blockElement);
         const blockId = blockElement.getAttribute("data-node-id");
@@ -390,7 +391,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         selectNode.firstChild.remove();
     }
     // https://github.com/siyuan-note/siyuan/issues/3850
-    if (editableElement?.lastElementChild?.getAttribute("data-type") === "inline-math" &&
+    if (editableElement?.lastElementChild?.getAttribute("data-type").indexOf("inline-math") > -1 &&
         !hasNextSibling(editableElement?.lastElementChild)) {
         editableElement.insertAdjacentText("beforeend", "\n");
     }

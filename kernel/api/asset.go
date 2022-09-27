@@ -24,6 +24,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -85,7 +86,7 @@ func setFileAnnotation(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	if err := gulu.File.WriteFileSafer(writePath, []byte(data), 0644); nil != err {
+	if err := filesys.WriteFileSafer(writePath, []byte(data)); nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -230,8 +231,13 @@ func insertLocalAssets(c *gin.Context) {
 	for _, pathArg := range assetPathsArg {
 		assetPaths = append(assetPaths, pathArg.(string))
 	}
+	isUpload := true
+	isUploadArg := arg["isUpload"]
+	if nil != isUploadArg {
+		isUpload = isUploadArg.(bool)
+	}
 	id := arg["id"].(string)
-	succMap, err := model.InsertLocalAssets(id, assetPaths)
+	succMap, err := model.InsertLocalAssets(id, assetPaths, isUpload)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

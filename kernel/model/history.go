@@ -37,6 +37,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -178,11 +179,6 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 			n.RemoveIALAttr("heading-fold")
 			n.RemoveIALAttr("fold")
 
-			if ast.NodeBlockRef == n.Type {
-				appendRefTextRenderResultForBlockRef(n)
-				return ast.WalkSkipChildren
-			}
-
 			if ast.NodeText == n.Type {
 				if 0 < len(keywords) {
 					// 搜索高亮
@@ -238,7 +234,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
+	filesys.LockWriteFile()
 
 	srcPath := historyPath
 	var destPath string
@@ -249,24 +245,24 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	workingDoc := treenode.GetBlockTree(id)
 	if nil != workingDoc {
 		if err = os.RemoveAll(filepath.Join(util.DataDir, boxID, workingDoc.Path)); nil != err {
-			writingDataLock.Unlock()
+			filesys.UnlockWriteFile()
 			return
 		}
 	}
 
 	destPath, err = getRollbackDockPath(boxID, historyPath)
 	if nil != err {
-		writingDataLock.Unlock()
+		filesys.UnlockWriteFile()
 		return
 	}
 
 	if err = gulu.File.Copy(srcPath, destPath); nil != err {
-		writingDataLock.Unlock()
+		filesys.UnlockWriteFile()
 		return
 	}
-	writingDataLock.Unlock()
+	filesys.UnlockWriteFile()
 
-	RefreshFileTree()
+	FullReindex()
 	IncSync()
 	return nil
 }
@@ -321,7 +317,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 		return
 	}
 
-	RefreshFileTree()
+	FullReindex()
 	IncSync()
 	return nil
 }

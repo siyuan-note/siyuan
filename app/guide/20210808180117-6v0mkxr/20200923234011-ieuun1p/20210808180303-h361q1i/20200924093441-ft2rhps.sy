@@ -1,12 +1,14 @@
 {
 	"ID": "20200924093441-ft2rhps",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
+		"icon": "1f4f0",
 		"id": "20200924093441-ft2rhps",
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20220909095340"
+		"updated": "20220918174924"
 	},
 	"Children": [
 		{
@@ -30,7 +32,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091509-8csaq4j",
-				"updated": "20220521234603"
+				"updated": "20220918174924"
 			},
 			"Children": [
 				{
@@ -54,33 +56,11 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20200923234011-ieuun1p"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "Please Start Here"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200923234011-ieuun1p",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Please Start Here"
 								}
 							]
 						}
@@ -107,15 +87,77 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com",
+									"TextMarkTextContent": "Hyperlink"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220916200111-8pnrqr2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220916200111-8pnrqr2",
+						"updated": "20220916200115"
+					},
+					"Children": [
+						{
+							"ID": "20220916200111-4swvak0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220916200111-4swvak0",
+								"updated": "20220916200114"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Picture"
+								}
+							]
+						},
+						{
+							"ID": "20210604225055-4pq8g38",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210604225055-4pq8g38",
+								"updated": "20210604225153"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Support direct copy and paste or drag and upload. After uploading, you can adjust the size by dragging the sidebar."
+								}
+							]
+						},
+						{
+							"ID": "20220916200115-rstez65",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220916200115-rstez65"
+							},
+							"Children": [
+								{
+									"Type": "NodeImage",
 									"Data": "span",
+									"Properties": {
+										"style": "display: block;"
+									},
 									"Children": [
+										{
+											"Type": "NodeBang"
+										},
 										{
 											"Type": "NodeOpenBracket"
 										},
 										{
-											"Type": "NodeLinkText",
-											"Data": "Hyperlink"
+											"Type": "NodeLinkText"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -125,12 +167,16 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "https://ld246.com"
+											"Data": "assets/siyuan-128-20210604092437-7iqzf90.png"
 										},
 										{
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeKramdownSpanIAL",
+									"Data": "{: style=\"display: block;\"}"
 								},
 								{
 									"Type": "NodeText",
@@ -160,22 +206,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Bold"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Bold"
 								},
 								{
 									"Type": "NodeText",
@@ -205,22 +238,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeEmphasis",
-									"Data": "em",
-									"Children": [
-										{
-											"Type": "NodeEmA6kOpenMarker",
-											"Data": "*"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Italic"
-										},
-										{
-											"Type": "NodeEmA6kCloseMarker",
-											"Data": "*"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "em",
+									"TextMarkTextContent": "Italic"
 								}
 							]
 						}
@@ -246,20 +266,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeUnderline",
-									"Data": "u",
-									"Children": [
-										{
-											"Type": "NodeUnderlineOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Underline"
-										},
-										{
-											"Type": "NodeUnderlineCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "u",
+									"TextMarkTextContent": "Underline"
 								}
 							]
 						}
@@ -285,20 +294,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrikethrough",
-									"Data": "s",
-									"Children": [
-										{
-											"Type": "NodeStrikethrough2OpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Strikethrough"
-										},
-										{
-											"Type": "NodeStrikethrough2CloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "s",
+									"TextMarkTextContent": "Strikethrough"
 								},
 								{
 									"Type": "NodeText",
@@ -328,20 +326,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeMark",
-									"Data": "mark",
-									"Children": [
-										{
-											"Type": "NodeMark2OpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Mark"
-										},
-										{
-											"Type": "NodeMark2CloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "Mark"
 								}
 							]
 						}
@@ -367,20 +354,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeSup",
-									"Data": "sup",
-									"Children": [
-										{
-											"Type": "NodeSupOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Superscript"
-										},
-										{
-											"Type": "NodeSupCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "sup",
+									"TextMarkTextContent": "Superscript"
 								}
 							]
 						}
@@ -406,20 +382,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeSub",
-									"Data": "sub",
-									"Children": [
-										{
-											"Type": "NodeSubOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Subscript"
-										},
-										{
-											"Type": "NodeSubCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "sub",
+									"TextMarkTextContent": "Subscript"
 								}
 							]
 						}
@@ -445,20 +410,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Keymap"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
 								}
 							]
 						}
@@ -484,20 +438,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeTag",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeTagOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Tag"
-										},
-										{
-											"Type": "NodeTagCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "tag",
+									"TextMarkTextContent": "Tag"
 								}
 							]
 						}
@@ -523,20 +466,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "Inline Code"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Inline Code"
 								}
 							]
 						}
@@ -562,20 +494,43 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeInlineMath",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeInlineMathOpenMarker"
-										},
-										{
-											"Type": "NodeInlineMathContent",
-											"Data": "a^2 + b^2 = \\color{red}c^2"
-										},
-										{
-											"Type": "NodeInlineMathCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "inline-math",
+									"TextMarkInlineMathContent": "a^2 + b^2 = \\color{red}c^2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "\n"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220918174910-8q5x3x0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220918174910-8q5x3x0",
+						"updated": "20220918174924"
+					},
+					"Children": [
+						{
+							"ID": "20220918174910-p5i5ltq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220918174910-p5i5ltq",
+								"updated": "20220918174924"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "inline-memo",
+									"TextMarkInlineMemoContent": "This is a memo.",
+									"TextMarkTextContent": "Memo"
 								}
 							]
 						}
@@ -602,25 +557,12 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color1); background-color: var(--b3-font-background1);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 1"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 1"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -631,25 +573,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color2); background-color: var(--b3-font-background2);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 2"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 2"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -660,25 +589,12 @@
 									"Data": "  "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color3); background-color: var(--b3-font-background3);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 3"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 3"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -689,25 +605,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color4); background-color: var(--b3-font-background4);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 4"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 4"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -718,25 +621,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color5); background-color: var(--b3-font-background5);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 5"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 5"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -747,25 +637,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color6); background-color: var(--b3-font-background6);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 6"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 6"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -776,25 +653,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color7); background-color: var(--b3-font-background7);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 7"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 7"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -805,25 +669,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color8); background-color: var(--b3-font-background8);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 8"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 8"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -834,25 +685,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color9); background-color: var(--b3-font-background9);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 9"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 9"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -863,25 +701,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color10); background-color: var(--b3-font-background10);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 10"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 10"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -892,25 +717,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color11); background-color: var(--b3-font-background11);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 11"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 11"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -921,25 +733,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color12); background-color: var(--b3-font-background12);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 12"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 12"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -950,25 +749,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color13); background-color: var(--b3-font-background13);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Color 13"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Color 13"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -985,25 +771,12 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "-webkit-text-stroke: 0.2px var(--b3-theme-on-background); -webkit-text-fill-color: transparent;"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Style 1"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Style 1"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -1014,25 +787,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "text-shadow: 1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "Style 2"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Style 2"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -1067,20 +827,9 @@
 									"Data": "Trigger an emoji search by typing "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": ":"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ":"
 								},
 								{
 									"Type": "NodeText",
@@ -1089,80 +838,6 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20210104091509-xzmngg2",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210104091509-xzmngg2",
-				"updated": "20210415200914"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Pictures"
-				}
-			]
-		},
-		{
-			"ID": "20210604225055-4pq8g38",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210604225055-4pq8g38",
-				"updated": "20210604225153"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Support direct copy and paste or drag and upload. After uploading, you can adjust the size by dragging the sidebar."
-				}
-			]
-		},
-		{
-			"ID": "20210604225041-9i92rk2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210604225041-9i92rk2",
-				"updated": "20210604225041"
-			},
-			"Children": [
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Properties": {
-						"style": "display: block;"
-					},
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/siyuan-128-20210604092437-7iqzf90.png"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "\n"
 				}
 			]
 		},
@@ -2344,242 +2019,99 @@
 							"Data": "Tip: Language names support the following: "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"CodeMarkerLen": 1,
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker",
-									"Data": "`"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "ruby"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker",
-									"Data": "`"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "ruby"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"CodeMarkerLen": 1,
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker",
-									"Data": "`"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "python"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker",
-									"Data": "`"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "python"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"CodeMarkerLen": 1,
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker",
-									"Data": "`"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "js"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker",
-									"Data": "`"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "js"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"CodeMarkerLen": 1,
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker",
-									"Data": "`"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "html"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker",
-									"Data": "`"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "html"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"CodeMarkerLen": 1,
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker",
-									"Data": "`"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "erb"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker",
-									"Data": "`"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "erb"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"CodeMarkerLen": 1,
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker",
-									"Data": "`"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "css"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker",
-									"Data": "`"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "css"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"CodeMarkerLen": 1,
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker",
-									"Data": "`"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "coffee"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker",
-									"Data": "`"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "coffee"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"CodeMarkerLen": 1,
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker",
-									"Data": "`"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "bash"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker",
-									"Data": "`"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "bash"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"CodeMarkerLen": 1,
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker",
-									"Data": "`"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "json"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker",
-									"Data": "`"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "json"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"CodeMarkerLen": 1,
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker",
-									"Data": "`"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "yml"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker",
-									"Data": "`"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "yml"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"CodeMarkerLen": 1,
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker",
-									"Data": "`"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": " xml"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker",
-									"Data": "`"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": " xml"
 						},
 						{
 							"Type": "NodeText",
@@ -2761,20 +2293,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeTag",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeTagOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "Note"
-						},
-						{
-							"Type": "NodeTagCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
 				},
 				{
 					"Type": "NodeText",
@@ -2844,20 +2365,9 @@
 									"Data": "Because the Markdown specification is more complicated for HTML block parsing rules, it is recommended to use "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "\u003cdiv\u003e\u003c/div\u003e"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -3133,30 +2643,10 @@
 					"Data": "Please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3229,30 +2719,10 @@
 					"Data": "Please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3319,30 +2789,10 @@
 					"Data": "Please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3409,30 +2859,10 @@
 					"Data": "Please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3499,30 +2929,10 @@
 					"Data": "Please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3585,30 +2995,10 @@
 					"Data": "Please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3675,30 +3065,10 @@
 					"Data": "Please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3813,30 +3183,10 @@
 					"Data": "Please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "abcjs"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/paulrosen/abcjs"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/paulrosen/abcjs",
+					"TextMarkTextContent": "abcjs"
 				},
 				{
 					"Type": "NodeText",
@@ -3903,30 +3253,10 @@
 					"Data": "Please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Graphviz"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://graphviz.org"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://graphviz.org",
+					"TextMarkTextContent": "Graphviz"
 				},
 				{
 					"Type": "NodeText",
@@ -3999,30 +3329,10 @@
 					"Data": "Please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "flowchart.js"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/adrai/flowchart.js"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/adrai/flowchart.js",
+					"TextMarkTextContent": "flowchart.js"
 				},
 				{
 					"Type": "NodeText",
@@ -4095,30 +3405,10 @@
 					"Data": "Please refer to "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "PlantUML"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://plantuml.com"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://plantuml.com",
+					"TextMarkTextContent": "PlantUML"
 				},
 				{
 					"Type": "NodeText",

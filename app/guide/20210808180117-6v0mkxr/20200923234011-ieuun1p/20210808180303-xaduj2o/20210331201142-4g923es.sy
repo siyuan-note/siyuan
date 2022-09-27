@@ -1,5 +1,6 @@
 {
 	"ID": "20210331201142-4g923es",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20210331201142-4g923es",
@@ -40,22 +41,9 @@
 					"Data": "If you need to pull up the SiYuan desktop application in other places (such as a browser or software that supports hyperlinks), you can use the "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"CodeMarkerLen": 1,
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker",
-							"Data": "`"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "siyuan://"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker",
-							"Data": "`"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://"
 				},
 				{
 					"Type": "NodeText",
@@ -90,20 +78,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "siyuan://blocks/{id}"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://blocks/{id}"
 				},
 				{
 					"Type": "NodeText",
@@ -124,40 +101,18 @@
 					"Data": "Add query string parameter "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "focus=1"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "focus=1"
 				},
 				{
 					"Type": "NodeText",
 					"Data": " ("
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "siyuan://blocks/{id}?focus=1"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://blocks/{id}?focus=1"
 				},
 				{
 					"Type": "NodeText",
@@ -216,20 +171,9 @@
 									"Data": "After startup on Windows and macOS, it will automatically apply to the system for registration of the "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "siyuan://"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan://"
 								},
 								{
 									"Type": "NodeText",
@@ -297,20 +241,9 @@
 													"Data": "Create or find the "
 												},
 												{
-													"Type": "NodeCodeSpan",
-													"Data": "code",
-													"Children": [
-														{
-															"Type": "NodeCodeSpanOpenMarker"
-														},
-														{
-															"Type": "NodeCodeSpanContent",
-															"Data": "siyuan.desktop"
-														},
-														{
-															"Type": "NodeCodeSpanCloseMarker"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "siyuan.desktop"
 												},
 												{
 													"Type": "NodeText",
@@ -345,20 +278,9 @@
 															},
 															"Children": [
 																{
-																	"Type": "NodeCodeSpan",
-																	"Data": "code",
-																	"Children": [
-																		{
-																			"Type": "NodeCodeSpanOpenMarker"
-																		},
-																		{
-																			"Type": "NodeCodeSpanContent",
-																			"Data": "MimeType=MimeType=x-scheme-handler/siyuan;"
-																		},
-																		{
-																			"Type": "NodeCodeSpanCloseMarker"
-																		}
-																	]
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "MimeType=MimeType=x-scheme-handler/siyuan;"
 																}
 															]
 														}
@@ -387,60 +309,27 @@
 																	"Data": "Add "
 																},
 																{
-																	"Type": "NodeCodeSpan",
-																	"Data": "code",
-																	"Children": [
-																		{
-																			"Type": "NodeCodeSpanOpenMarker"
-																		},
-																		{
-																			"Type": "NodeCodeSpanContent",
-																			"Data": "%u"
-																		},
-																		{
-																			"Type": "NodeCodeSpanCloseMarker"
-																		}
-																	]
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "%u"
 																},
 																{
 																	"Type": "NodeText",
 																	"Data": " at the end of "
 																},
 																{
-																	"Type": "NodeCodeSpan",
-																	"Data": "code",
-																	"Children": [
-																		{
-																			"Type": "NodeCodeSpanOpenMarker"
-																		},
-																		{
-																			"Type": "NodeCodeSpanContent",
-																			"Data": "Exec"
-																		},
-																		{
-																			"Type": "NodeCodeSpanCloseMarker"
-																		}
-																	]
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "Exec"
 																},
 																{
 																	"Type": "NodeText",
 																	"Data": ", that is, "
 																},
 																{
-																	"Type": "NodeCodeSpan",
-																	"Data": "code",
-																	"Children": [
-																		{
-																			"Type": "NodeCodeSpanOpenMarker"
-																		},
-																		{
-																			"Type": "NodeCodeSpanContent",
-																			"Data": "Exec=executable file path %u"
-																		},
-																		{
-																			"Type": "NodeCodeSpanCloseMarker"
-																		}
-																	]
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "Exec=executable file path %u"
 																}
 															]
 														}
@@ -514,30 +403,10 @@
 													"Data": "For more details, refer to "
 												},
 												{
-													"Type": "NodeLink",
-													"Data": "span",
-													"Children": [
-														{
-															"Type": "NodeOpenBracket"
-														},
-														{
-															"Type": "NodeLinkText",
-															"Data": "xdg-utils"
-														},
-														{
-															"Type": "NodeCloseBracket"
-														},
-														{
-															"Type": "NodeOpenParen"
-														},
-														{
-															"Type": "NodeLinkDest",
-															"Data": "https://www.freedesktop.org/wiki/Software/xdg-utils/"
-														},
-														{
-															"Type": "NodeCloseParen"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://www.freedesktop.org/wiki/Software/xdg-utils/",
+													"TextMarkTextContent": "xdg-utils"
 												},
 												{
 													"Type": "NodeText",

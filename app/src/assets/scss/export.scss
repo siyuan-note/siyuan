@@ -8,7 +8,12 @@
 @import "switch";
 @import "slider";
 
-.protyle-wysiwyg a {
+.protyle-wysiwyg {
+  font-family: var(--b3-font-family);
+}
+
+.protyle-wysiwyg a,
+.b3-typography a {
   color: var(--b3-protyle-inline-link-color);
   cursor: pointer;
   transition: var(--b3-transition);

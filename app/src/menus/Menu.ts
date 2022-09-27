@@ -136,6 +136,9 @@ export class MenuItem {
         if (options.accelerator) {
             html += `<span class="b3-menu__accelerator">${updateHotkeyTip(options.accelerator)}</span>`;
         }
+        if (options.action) {
+            html += `<svg class="b3-menu__action"><use xlink:href="#${options.action}"></use></svg>`;
+        }
         if (options.id) {
             this.element.setAttribute("data-id", options.id);
         }
@@ -144,7 +147,6 @@ export class MenuItem {
         }
         this.element.innerHTML = html;
         if (options.bind) {
-            this.element.classList.add("b3-menu__item--custom");
             options.bind(this.element);
         }
         if (options.submenu) {

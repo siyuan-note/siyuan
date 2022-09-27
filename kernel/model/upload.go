@@ -28,12 +28,13 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]interface{}, err error) {
+func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap map[string]interface{}, err error) {
 	succMap = map[string]interface{}{}
 
 	bt := treenode.GetBlockTree(id)
@@ -43,7 +44,13 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 	}
 
 	docDirLocalPath := filepath.Join(util.DataDir, bt.BoxID, path.Dir(bt.Path))
-	assets := getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), docDirLocalPath)
+	assetsDirPath := getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), docDirLocalPath)
+	if !gulu.File.IsExist(assetsDirPath) {
+		if err = os.MkdirAll(assetsDirPath, 0755); nil != err {
+			return
+		}
+	}
+
 	for _, p := range assetPaths {
 		fName := filepath.Base(p)
 		fName = util.FilterUploadFileName(fName)
@@ -52,8 +59,11 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 		ext = strings.ToLower(ext)
 		fName += ext
 		baseName := fName
-		if gulu.File.IsDir(p) {
-			succMap[baseName] = "file://" + p
+		if gulu.File.IsDir(p) || !isUpload {
+			if !strings.HasPrefix(p, "\\\\") {
+				p = "file://" + p
+			}
+			succMap[baseName] = p
 			continue
 		}
 
@@ -80,12 +90,12 @@ func InsertLocalAssets(id string, assetPaths []string) (succMap map[string]inter
 			ext := path.Ext(fName)
 			fName = fName[0 : len(fName)-len(ext)]
 			fName = fName + "-" + ast.NewNodeID() + ext
-			writePath := filepath.Join(assets, fName)
+			writePath := filepath.Join(assetsDirPath, fName)
 			if _, err = f.Seek(0, io.SeekStart); nil != err {
 				f.Close()
 				return
 			}
-			if err = gulu.File.WriteFileSaferByReader(writePath, f, 0644); nil != err {
+			if err = filesys.WriteFileSaferByReader(writePath, f); nil != err {
 				f.Close()
 				return
 			}
@@ -123,7 +133,9 @@ func Upload(c *gin.Context) {
 	if nil != form.Value["assetsDirPath"] {
 		assetsDirPath = form.Value["assetsDirPath"][0]
 		assetsDirPath = filepath.Join(util.DataDir, assetsDirPath)
-		if err := os.MkdirAll(assetsDirPath, 0755); nil != err {
+	}
+	if !gulu.File.IsExist(assetsDirPath) {
+		if err = os.MkdirAll(assetsDirPath, 0755); nil != err {
 			ret.Code = -1
 			ret.Msg = err.Error()
 			return
@@ -168,7 +180,7 @@ func Upload(c *gin.Context) {
 				f.Close()
 				break
 			}
-			if err = gulu.File.WriteFileSaferByReader(writePath, f, 0644); nil != err {
+			if err = filesys.WriteFileSaferByReader(writePath, f); nil != err {
 				errFiles = append(errFiles, fName)
 				ret.Msg = err.Error()
 				f.Close()

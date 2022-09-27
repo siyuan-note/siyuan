@@ -23,6 +23,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/template"
 	"time"
@@ -88,6 +89,7 @@ func SearchTemplate(keyword string) (ret []*Block) {
 		}
 		return nil
 	})
+	sort.Slice(ret, func(i, j int) bool { return util.PinYinCompare(filepath.Base(ret[i].Path), filepath.Base(ret[j].Path)) })
 	return
 }
 
@@ -211,8 +213,6 @@ func renderTemplate(p, id string) (string, error) {
 			(ast.NodeBlockquote == n.Type && nil != n.FirstChild && nil != n.FirstChild.Next && ast.NodeKramdownBlockIAL == n.FirstChild.Next.Type) {
 			nodesNeedAppendChild = append(nodesNeedAppendChild, n)
 		}
-
-		appendRefTextRenderResultForBlockRef(n)
 		return ast.WalkContinue
 	})
 	for _, n := range nodesNeedAppendChild {
@@ -237,23 +237,18 @@ func renderTemplate(p, id string) (string, error) {
 }
 
 func appendRefTextRenderResultForBlockRef(blockRef *ast.Node) {
-	if ast.NodeBlockRef != blockRef.Type {
+	if !treenode.IsBlockRef(blockRef) {
 		return
 	}
 
-	refText := blockRef.ChildByType(ast.NodeBlockRefText)
-	if nil != refText {
-		return
-	}
-	refText = blockRef.ChildByType(ast.NodeBlockRefDynamicText)
-	if nil != refText {
+	refID, text, _ := treenode.GetBlockRef(blockRef)
+	if "" != text {
 		return
 	}
 
 	// 动态解析渲染 ((id)) 的锚文本
 	// 现行版本已经不存在该语法情况，这里保留是为了迁移历史数据
-	refID := blockRef.ChildByType(ast.NodeBlockRefID)
-	text := sql.GetRefText(refID.TokensStr())
+	text = sql.GetRefText(refID)
 	if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(text) {
 		text = gulu.Str.SubStr(text, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
 	}

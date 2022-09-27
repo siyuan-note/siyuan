@@ -31,6 +31,7 @@ export abstract class Constants {
     public static readonly SIYUAN_SAVE_CLOSE: string = "siyuan-save-close";
     public static readonly SIYUAN_EXPORT_PDF: string = "siyuan-export-pdf";
     public static readonly SIYUAN_EXPORT_CLOSE: string = "siyuan-export-close";
+    public static readonly SIYUAN_UPDATE_THEME: string = "siyuan-update-theme";
 
     // size
     public static readonly SIZE_TOOLBAR_HEIGHT: number = 30;
@@ -89,8 +90,21 @@ export abstract class Constants {
         fr_FR: "20200923234011-ieuun1p",
     };
 
+    public static readonly KEYCODE: { [key: string]: string[] } = {
+        "186": [";", ":"],
+        "187": ["=", "+"],
+        "188": [",", "<"],
+        "189": ["-", "_"],
+        "190": [".", ">"],
+        "191": ["/", "?"],
+        "192": ["`", "~"],
+        "219": ["[", "{"],
+        "220": ["\\", "|"],
+        "221": ["]", "}"],
+        "222": ["'", '"'],
+    };
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦" 不可自定义
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "⌃I", "⌃E", "⌃N", "⌃U" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {
             syncNow: {default: "F9", custom: "F9"},
@@ -114,7 +128,7 @@ export abstract class Constants {
             graphView: {default: "⌥8", custom: "⌥8"},
             globalGraph: {default: "⌥9", custom: "⌥9"},
             config: {default: "⌥P", custom: "⌥P"},
-            history: {default: "⌥H", custom: "⌥H"},
+            dataHistory: {default: "⌥H", custom: "⌥H"},
             toggleWin: {default: "⌥M", custom: "⌥M"},
             lockScreen: {default: "⌥N", custom: "⌥N"},
             move: {default: "", custom: ""},
@@ -171,6 +185,7 @@ export abstract class Constants {
                 sub: {default: "⌘J", custom: "⌘J"},
                 bold: {default: "⌘B", custom: "⌘B"},
                 "inline-math": {default: "⌘M", custom: "⌘M"},
+                memo: {default: "⌥⌘M", custom: "⌥⌘M"},
                 underline: {default: "⌘U", custom: "⌘U"},
                 italic: {default: "⌘I", custom: "⌘I"},
                 mark: {default: "⌘E", custom: "⌘E"},
@@ -181,6 +196,7 @@ export abstract class Constants {
                 check: {default: "⌘L", custom: "⌘L"},
                 table: {default: "⌘O", custom: "⌘O"},
                 code: {default: "⇧⌘K", custom: "⇧⌘K"},
+                clearFontStyle: {default: "⌘\\", custom: "⌘\\"},
             },
             heading: {
                 paragraph: {default: "⌥⌘0", custom: "⌥⌘0"},
@@ -397,7 +413,7 @@ export abstract class Constants {
         "lightfair", "magula", "mono-blue", "nnfx-light", "paraiso-light", "purebasic", "qtcreator-light", "routeros", "school-book",
         "stackoverflow-light", "tokyo-night-light", "vs", "xcode", "default"];
     public static readonly ZWSP: string = "\u200b";
-    public static readonly INLINE_TYPE: string[] = ["link", "bold", "italic", "underline", "strike", "mark", "sup", "sub", "tag", "inline-code", "inline-math"];
+    public static readonly INLINE_TYPE: string[] = ["block-ref", "kbd", "text", "file-annotation-ref", "a", "strong", "em", "u", "s", "mark", "sup", "sub", "tag", "code", "inline-math", "inline-memo"];
     public static readonly BLOCK_HINT_KEYS: string[] = ["((", "[[", "（（", "【【"];
     public static readonly BLOCK_HINT_CLOSE_KEYS: IObject = {"((": "))", "[[": "]]", "（（": "））", "【【": "】】"};
     public static readonly CODE_LANGUAGES: string[] = [

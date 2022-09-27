@@ -55,7 +55,9 @@ func renderOutline(node *ast.Node, luteEngine *lute.Lute) (ret string) {
 			tokens := html.EscapeHTML(n.Tokens)
 			tokens = bytes.ReplaceAll(tokens, []byte(" "), []byte("&nbsp;")) // 大纲面板条目中无法显示多个空格 https://github.com/siyuan-note/siyuan/issues/4370
 			buf.Write(tokens)
-		case ast.NodeInlineMath, ast.NodeStrong, ast.NodeEmphasis, ast.NodeCodeSpan:
+		case ast.NodeBackslashContent:
+			buf.Write(n.Tokens)
+		case ast.NodeInlineMath, ast.NodeStrong, ast.NodeEmphasis, ast.NodeCodeSpan, ast.NodeTextMark, ast.NodeMark:
 			dom := lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions)
 			buf.WriteString(dom)
 			return ast.WalkSkipChildren
@@ -104,7 +106,7 @@ func renderBlockText(node *ast.Node) (ret string) {
 
 func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
-	blockRenderer := render.NewBlockRenderer(tree, luteEngine.RenderOptions)
+	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
 	for _, n := range nodes {
 		ast.Walk(n, func(node *ast.Node, entering bool) ast.WalkStatus {
 			rendererFunc := blockRenderer.RendererFuncs[node.Type]

@@ -45,6 +45,9 @@ func LoadAssets() {
 
 	assets := filepath.Join(util.DataDir, "assets")
 	filepath.Walk(assets, func(path string, info fs.FileInfo, err error) error {
+		if nil == info {
+			return err
+		}
 		if info.IsDir() {
 			if strings.HasPrefix(info.Name(), ".") {
 				return filepath.SkipDir

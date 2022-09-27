@@ -137,6 +137,12 @@ declare class Lute {
 
     private constructor();
 
+    public BlockDOM2Content(text: string): string;
+
+    public InlineMd2BlockDOM(text: string): string;
+
+    public SetTextMark(enable: boolean): void;
+
     public SetHeadingID(enable: boolean): void;
 
     public SetProtyleMarkNetImg(enable: boolean): void;
@@ -154,6 +160,8 @@ declare class Lute {
     public SetImgPathAllowSpace(enable: boolean): void;
 
     public SetKramdownIAL(enable: boolean): void;
+
+    public BlockDOM2Md(html: string): string;
 
     public BlockDOM2StdMd(html: string): string;
 
@@ -192,8 +200,6 @@ declare class Lute {
     public SetEmojiSite(emojiSite: string): void;
 
     public PutEmojis(emojis: IObject): void;
-
-    public BlockDOM2Md(html: string): string;
 
     public SpinBlockDOM(html: string): string;
 
@@ -268,6 +274,7 @@ interface IUpload {
 interface IMenuItem {
     /** 唯一标示 */
     name: string;
+    lang?: string;
     /** svg 图标 */
     icon?: string;
     /** 提示 */

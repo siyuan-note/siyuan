@@ -35,6 +35,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -202,7 +203,7 @@ func (box *Box) saveConf0(data []byte) {
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); nil != err {
 		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
-	if err := filelock.NoLockFileWrite(confPath, data); nil != err {
+	if err := filesys.WriteFileSafer(confPath, data); nil != err {
 		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
 }
@@ -291,6 +292,9 @@ func (box *Box) Move(oldPath, newPath string) error {
 	fromPath := filepath.Join(boxLocalPath, oldPath)
 	toPath := filepath.Join(boxLocalPath, newPath)
 	filelock.ReleaseFileLocks(fromPath)
+
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 	if err := os.Rename(fromPath, toPath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(5), box.Name, fromPath, err)
 		logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, box.Name, err)
@@ -310,8 +314,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 func (box *Box) Remove(path string) error {
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	filePath := filepath.Join(boxLocalPath, path)
-	filelock.ReleaseFileLocks(filePath)
-	if err := os.RemoveAll(filePath); nil != err {
+	if err := filesys.RemoveAll(filePath); nil != err {
 		msg := fmt.Sprintf(Conf.Language(7), box.Name, path, err)
 		logging.LogErrorf("remove [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
@@ -483,10 +486,10 @@ func ReindexTree(path string) (err error) {
 	return
 }
 
-func RefreshFileTree() {
+func FullReindex() {
+	util.PushEndlessProgress(Conf.Language(35))
 	WaitForWritingFiles()
 
-	util.PushEndlessProgress(Conf.Language(35))
 	if err := sql.InitDatabase(true); nil != err {
 		util.PushErrMsg(fmt.Sprintf(Conf.Language(85), err), 5000)
 		return

@@ -1,12 +1,14 @@
 {
 	"ID": "20200825162036-4dx365o",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
+		"icon": "1f4f0",
 		"id": "20200825162036-4dx365o",
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20220908200902"
+		"updated": "20220918174723"
 	},
 	"Children": [
 		{
@@ -15,12 +17,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604182832-nm3hapx",
-				"updated": "20210604183630"
+				"updated": "20220916194920"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "行内元素"
+					"Data": "行级元素"
 				}
 			]
 		},
@@ -30,7 +32,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091228-ttcj9nm",
-				"updated": "20220521234027"
+				"updated": "20220918174723"
 			},
 			"Children": [
 				{
@@ -54,33 +56,11 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20200812220555-lj3enxa"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "请从这里开始"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200812220555-lj3enxa",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "请从这里开始"
 								}
 							]
 						}
@@ -107,15 +87,78 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com",
+									"TextMarkTextContent": "超级链接"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220916195046-bdzv6fy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220916195046-bdzv6fy",
+						"updated": "20210604222204"
+					},
+					"Children": [
+						{
+							"ID": "20220916195046-oy8nve3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220916195046-oy8nve3",
+								"updated": "20220916195047"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "图片"
+								}
+							]
+						},
+						{
+							"ID": "20210604222221-9zkgkky",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210604222221-9zkgkky",
+								"updated": "20220916195051"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可通过复制粘贴或拖拽来上传图片；上传后的图片可通过拖拽进行大小调整。"
+								}
+							]
+						},
+						{
+							"ID": "20210604222158-w17nnmy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210604222158-w17nnmy",
+								"updated": "20210604222204"
+							},
+							"Children": [
+								{
+									"Type": "NodeImage",
 									"Data": "span",
+									"Properties": {
+										"style": "display: block;"
+									},
 									"Children": [
+										{
+											"Type": "NodeBang"
+										},
 										{
 											"Type": "NodeOpenBracket"
 										},
 										{
-											"Type": "NodeLinkText",
-											"Data": "超级链接"
+											"Type": "NodeLinkText"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -125,7 +168,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "https://ld246.com"
+											"Data": "assets/siyuan-128-20210604092205-djd749a.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -133,8 +176,12 @@
 									]
 								},
 								{
-									"Type": "NodeBr",
-									"Data": "br"
+									"Type": "NodeKramdownSpanIAL",
+									"Data": "{: style=\"display: block;\"}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "\n"
 								}
 							]
 						}
@@ -160,22 +207,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "加粗"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "加粗"
 								}
 							]
 						}
@@ -201,22 +235,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeEmphasis",
-									"Data": "em",
-									"Children": [
-										{
-											"Type": "NodeEmA6kOpenMarker",
-											"Data": "*"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "倾斜"
-										},
-										{
-											"Type": "NodeEmA6kCloseMarker",
-											"Data": "*"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "em",
+									"TextMarkTextContent": "倾斜"
 								},
 								{
 									"Type": "NodeText",
@@ -247,20 +268,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeUnderline",
-									"Data": "u",
-									"Children": [
-										{
-											"Type": "NodeUnderlineOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "下划线"
-										},
-										{
-											"Type": "NodeUnderlineCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "u",
+									"TextMarkTextContent": "下划线"
 								}
 							]
 						}
@@ -287,20 +297,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrikethrough",
-									"Data": "s",
-									"Children": [
-										{
-											"Type": "NodeStrikethrough2OpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "删除线"
-										},
-										{
-											"Type": "NodeStrikethrough2CloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "s",
+									"TextMarkTextContent": "删除线"
 								}
 							]
 						}
@@ -326,20 +325,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeMark",
-									"Data": "mark",
-									"Children": [
-										{
-											"Type": "NodeMark2OpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "标记"
-										},
-										{
-											"Type": "NodeMark2CloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "标记"
 								}
 							]
 						}
@@ -365,20 +353,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeSup",
-									"Data": "sup",
-									"Children": [
-										{
-											"Type": "NodeSupOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "上标"
-										},
-										{
-											"Type": "NodeSupCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "sup",
+									"TextMarkTextContent": "上标"
 								}
 							]
 						}
@@ -404,20 +381,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeSub",
-									"Data": "sub",
-									"Children": [
-										{
-											"Type": "NodeSubOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "下标"
-										},
-										{
-											"Type": "NodeSubCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "sub",
+									"TextMarkTextContent": "下标"
 								}
 							]
 						}
@@ -443,20 +409,9 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeKbd",
-									"Data": "kbd",
-									"Children": [
-										{
-											"Type": "NodeKbdOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "快捷键"
-										},
-										{
-											"Type": "NodeKbdCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快捷键"
 								}
 							]
 						}
@@ -486,20 +441,9 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeTag",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeTagOpenMarker"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "标签"
-										},
-										{
-											"Type": "NodeTagCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "tag",
+									"TextMarkTextContent": "标签"
 								}
 							]
 						}
@@ -521,24 +465,13 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210201202130-085324n",
-								"updated": "20210604221052"
+								"updated": "20220916195010"
 							},
 							"Children": [
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "行内代码"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "行级代码"
 								}
 							]
 						}
@@ -565,20 +498,43 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeInlineMath",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeInlineMathOpenMarker"
-										},
-										{
-											"Type": "NodeInlineMathContent",
-											"Data": "a^2 + b^2 = \\color{red}c^2"
-										},
-										{
-											"Type": "NodeInlineMathCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "inline-math",
+									"TextMarkInlineMathContent": "a^2 + b^2 = \\color{red}c^2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "\n"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220918172212-57nf6j0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220918172212-57nf6j0",
+						"updated": "20220918174723"
+					},
+					"Children": [
+						{
+							"ID": "20220918172212-xvd14ba",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220918172212-xvd14ba",
+								"updated": "20220918174723"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "inline-memo",
+									"TextMarkInlineMemoContent": "这是一个行级备注",
+									"TextMarkTextContent": "备注"
 								}
 							]
 						}
@@ -605,25 +561,12 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color1); background-color: var(--b3-font-background1);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 1"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 1"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -634,25 +577,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color2); background-color: var(--b3-font-background2);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 2"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 2"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -663,25 +593,12 @@
 									"Data": "  "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color3); background-color: var(--b3-font-background3);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 3"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 3"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -692,25 +609,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color4); background-color: var(--b3-font-background4);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 4"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 4"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -721,25 +625,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color5); background-color: var(--b3-font-background5);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 5"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 5"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -750,25 +641,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color6); background-color: var(--b3-font-background6);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 6"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 6"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -779,25 +657,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color7); background-color: var(--b3-font-background7);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 7"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 7"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -808,25 +673,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color8); background-color: var(--b3-font-background8);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 8"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 8"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -837,25 +689,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color9); background-color: var(--b3-font-background9);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 9"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 9"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -866,25 +705,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color10); background-color: var(--b3-font-background10);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 10"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 10"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -895,25 +721,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color11); background-color: var(--b3-font-background11);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 11"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 11"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -924,25 +737,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color12); background-color: var(--b3-font-background12);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 12"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 12"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -953,25 +753,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "color: var(--b3-font-color13); background-color: var(--b3-font-background13);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "颜色 13"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "颜色 13"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -992,25 +779,12 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "-webkit-text-stroke: 0.2px var(--b3-theme-on-background); -webkit-text-fill-color: transparent;"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "特效 1"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "特效 1"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -1021,25 +795,12 @@
 									"Data": " "
 								},
 								{
-									"Type": "NodeStrong",
-									"Data": "strong",
+									"Type": "NodeTextMark",
 									"Properties": {
 										"style": "text-shadow: 1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color);"
 									},
-									"Children": [
-										{
-											"Type": "NodeStrongA6kOpenMarker",
-											"Data": "**"
-										},
-										{
-											"Type": "NodeText",
-											"Data": "特效 2"
-										},
-										{
-											"Type": "NodeStrongA6kCloseMarker",
-											"Data": "**"
-										}
-									]
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "特效 2"
 								},
 								{
 									"Type": "NodeKramdownSpanIAL",
@@ -1074,20 +835,9 @@
 									"Data": "通过输入 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": ":"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ":"
 								},
 								{
 									"Type": "NodeText",
@@ -1096,80 +846,6 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20210104091228-lft5b4z",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20210104091228-lft5b4z",
-				"updated": "20210604222220"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "图片 "
-				}
-			]
-		},
-		{
-			"ID": "20210604222221-9zkgkky",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210604222221-9zkgkky",
-				"updated": "20210604222341"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "可通过复制粘贴或拖拽来上传图片；上传后的图片可通过拖拽进行大小调整。"
-				}
-			]
-		},
-		{
-			"ID": "20210604222158-w17nnmy",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210604222158-w17nnmy",
-				"updated": "20210604222204"
-			},
-			"Children": [
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Properties": {
-						"style": "display: block;"
-					},
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/siyuan-128-20210604092205-djd749a.png"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "\n"
 				}
 			]
 		},
@@ -2334,220 +2010,99 @@
 							"Data": "Tip: 语言名称支持下面这些： "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"Data": "code",
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "ruby"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "ruby"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"Data": "code",
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "python"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "python"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"Data": "code",
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "js"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "js"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"Data": "code",
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "html"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "html"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"Data": "code",
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "erb"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "erb"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"Data": "code",
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "css"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "css"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"Data": "code",
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "coffee"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "coffee"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"Data": "code",
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "bash"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "bash"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"Data": "code",
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "json"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "json"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"Data": "code",
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "yml"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "yml"
 						},
 						{
 							"Type": "NodeText",
 							"Data": ", "
 						},
 						{
-							"Type": "NodeCodeSpan",
-							"Data": "code",
-							"Children": [
-								{
-									"Type": "NodeCodeSpanOpenMarker"
-								},
-								{
-									"Type": "NodeCodeSpanContent",
-									"Data": "xml"
-								},
-								{
-									"Type": "NodeCodeSpanCloseMarker"
-								}
-							]
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": "xml"
 						},
 						{
 							"Type": "NodeText",
@@ -2729,20 +2284,9 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeTag",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeTagOpenMarker"
-						},
-						{
-							"Type": "NodeText",
-							"Data": "注意"
-						},
-						{
-							"Type": "NodeTagCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
 				},
 				{
 					"Type": "NodeText",
@@ -2812,20 +2356,9 @@
 									"Data": "因为 Markdown 规范对 HTML 块解析规则较为复杂，建议使用 "
 								},
 								{
-									"Type": "NodeCodeSpan",
-									"Data": "code",
-									"Children": [
-										{
-											"Type": "NodeCodeSpanOpenMarker"
-										},
-										{
-											"Type": "NodeCodeSpanContent",
-											"Data": "\u003cdiv\u003e\u003c/div\u003e"
-										},
-										{
-											"Type": "NodeCodeSpanCloseMarker"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -3101,30 +2634,10 @@
 					"Data": "语法请参考 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3197,30 +2710,10 @@
 					"Data": "语法请参考 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3293,30 +2786,10 @@
 					"Data": "语法请参考 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3383,30 +2856,10 @@
 					"Data": "语法请参考 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3473,30 +2926,10 @@
 					"Data": "语法请参考 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3559,30 +2992,10 @@
 					"Data": "语法请参考 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3649,30 +3062,10 @@
 					"Data": "语法请参考 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Mermaid"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/mermaid-js/mermaid"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkTextContent": "Mermaid"
 				},
 				{
 					"Type": "NodeText",
@@ -3787,30 +3180,10 @@
 					"Data": "语法请参考 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "abcjs"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/paulrosen/abcjs"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/paulrosen/abcjs",
+					"TextMarkTextContent": "abcjs"
 				},
 				{
 					"Type": "NodeText",
@@ -3883,30 +3256,10 @@
 					"Data": "语法请参考 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "Graphviz"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://graphviz.org"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://graphviz.org",
+					"TextMarkTextContent": "Graphviz"
 				},
 				{
 					"Type": "NodeText",
@@ -3979,30 +3332,10 @@
 					"Data": "语法请参考 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "flowchart.js"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://github.com/adrai/flowchart.js"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/adrai/flowchart.js",
+					"TextMarkTextContent": "flowchart.js"
 				},
 				{
 					"Type": "NodeText",
@@ -4069,30 +3402,10 @@
 					"Data": "语法请参考 "
 				},
 				{
-					"Type": "NodeLink",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "PlantUML"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "https://plantuml.com"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://plantuml.com",
+					"TextMarkTextContent": "PlantUML"
 				},
 				{
 					"Type": "NodeText",

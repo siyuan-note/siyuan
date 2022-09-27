@@ -61,6 +61,23 @@ const closeMenu = (tab: Tab) => {
                 }
             }
         }).element);
+        if (unmodifiedTabs.length > 0) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.closeUnmodified,
+                click: async () => {
+                    for (let index = 0; index < unmodifiedTabs.length; index++) {
+                        if (!unmodifiedTabs[index].headElement.classList.contains("item--pin")) {
+                            await unmodifiedTabs[index].parent.removeTab(unmodifiedTabs[index].id);
+                        }
+                    }
+                    if (tab.headElement.parentElement && !tab.headElement.parentElement.querySelector(".item--focus")) {
+                        tab.parent.switchTab(tab.headElement, true);
+                    } else if (allTabs[0].headElement.parentElement) {
+                        allTabs[0].parent.switchTab(allTabs[0].headElement, true);
+                    }
+                }
+            }).element);
+        }
         if (leftTabs.length > 0) {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.closeLeft,
@@ -87,23 +104,6 @@ const closeMenu = (tab: Tab) => {
                     }
                     if (!tab.headElement.parentElement.querySelector(".item--focus")) {
                         tab.parent.switchTab(tab.headElement, true);
-                    }
-                }
-            }).element);
-        }
-        if (unmodifiedTabs.length > 0) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.closeUnmodified,
-                click: async () => {
-                    for (let index = 0; index < unmodifiedTabs.length; index++) {
-                        if (!unmodifiedTabs[index].headElement.classList.contains("item--pin")) {
-                            await unmodifiedTabs[index].parent.removeTab(unmodifiedTabs[index].id);
-                        }
-                    }
-                    if (tab.headElement.parentElement && !tab.headElement.parentElement.querySelector(".item--focus")) {
-                        tab.parent.switchTab(tab.headElement, true);
-                    } else if (allTabs[0].headElement.parentElement) {
-                        allTabs[0].parent.switchTab(allTabs[0].headElement, true);
                     }
                 }
             }).element);

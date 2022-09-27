@@ -132,7 +132,7 @@ const promiseTransaction = () => {
                     }
                 });
                 // 更新引用块
-                protyle.wysiwyg.element.querySelectorAll(`[data-type="block-ref"][data-id="${operation.id}"]`).forEach(item => {
+                protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${operation.id}"]`).forEach(item => {
                     if (item.getAttribute("data-subtype") === "d") {
                         item.textContent = "block not found";
                     }
@@ -265,7 +265,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
             }
         });
         // 更新 ws 引用块
-        protyle.wysiwyg.element.querySelectorAll(`[data-type="block-ref"][data-id="${operation.id}"]`).forEach(item => {
+        protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${operation.id}"]`).forEach(item => {
             if (item.getAttribute("data-subtype") === "d") {
                 item.textContent = "block not found";
             }
@@ -304,25 +304,39 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         return;
     }
     if (operation.action === "updateAttrs") { // 调用接口才推送
+        let nodeAttrHTML = "";
+        const data = operation.data as any;
+        const attrsResult: IObject = {};
+        Object.keys(data.new).forEach(key => {
+            attrsResult[key] = data.new[key];
+            const escapeHTML = data.new[key];
+            if (key === "bookmark") {
+                nodeAttrHTML += `<div class="protyle-attr--bookmark">${escapeHTML}</div>`;
+            } else if (key === "name") {
+                nodeAttrHTML += `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${escapeHTML}</div>`;
+            } else if (key === "alias") {
+                nodeAttrHTML += `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${escapeHTML}</div>`;
+            } else if (key === "memo") {
+                nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
+            }
+        });
+        if (protyle.block.rootID === operation.id) {
+            // 文档
+            const refElement = protyle.title.element.querySelector(".protyle-attr--refcount");
+            if (refElement) {
+                nodeAttrHTML += refElement.outerHTML;
+            }
+            protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
+            protyle.wysiwyg.renderCustom(attrsResult);
+            return;
+        }
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
-            const data = operation.data as any
             Object.keys(data.old).forEach(key => {
-                item.removeAttribute(key)
-            })
-            let nodeAttrHTML = ""
+                item.removeAttribute(key);
+            });
             Object.keys(data.new).forEach(key => {
                 item.setAttribute(key, data.new[key]);
-                const escapeHTML = data.new[key]
-                if (key === "bookmark") {
-                    nodeAttrHTML += `<div class="protyle-attr--bookmark">${escapeHTML}</div>`;
-                } else if (key === "name") {
-                    nodeAttrHTML += `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${escapeHTML}</div>`;
-                } else if (key === "alias") {
-                    nodeAttrHTML += `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${escapeHTML}</div>`;
-                } else if (key === "memo") {
-                    nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
-                }
-            })
+            });
             const refElement = item.lastElementChild.querySelector(".protyle-attr--refcount");
             if (refElement) {
                 nodeAttrHTML += refElement.outerHTML;
@@ -701,7 +715,7 @@ const updateRef = (protyle: IProtyle, id: string, index = 0) => {
     if (index > 6) {
         return;
     }
-    protyle.wysiwyg.element.querySelectorAll(`[data-type="block-ref"][data-id="${id}"]`).forEach(item => {
+    protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${id}"]`).forEach(item => {
         if (item.getAttribute("data-subtype") === "d") {
             fetchPost("/api/block/getRefText", {id: id}, (response) => {
                 item.innerHTML = response.data;

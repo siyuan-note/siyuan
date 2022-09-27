@@ -124,10 +124,11 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
     insertHTML(protyle.lute.SpinBlockDOM(succFileText), protyle);
 };
 
-export const uploadLocalFiles = (files: string[], protyle: IProtyle) => {
+export const uploadLocalFiles = (files: string[], protyle: IProtyle, isUpload:boolean) => {
     const msgId = showMessage(window.siyuan.languages.uploading, 0);
     fetchPost("/api/asset/insertLocalAssets", {
         assetPaths: files,
+        isUpload,
         id: protyle.block.rootID
     }, (response) => {
         hideMessage(msgId);
@@ -145,7 +146,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         }
         if (0 === fileItem.size && "" === fileItem.type && -1 === fileItem.name.indexOf(".")) {
             // 文件夹
-            document.execCommand("insertHTML", false, `[${fileItem.name}](file://${fileItem.path})`);
+            uploadLocalFiles([fileItem.path], protyle, false);
         } else {
             fileList.push(fileItem);
         }

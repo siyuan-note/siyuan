@@ -20,6 +20,7 @@ import "github.com/88250/lute"
 
 func NewLute() (ret *lute.Lute) {
 	ret = lute.New()
+	ret.SetTextMark(true)
 	ret.SetProtyleWYSIWYG(true)
 	ret.SetBlockRef(true)
 	ret.SetFileAnnotationRef(true)

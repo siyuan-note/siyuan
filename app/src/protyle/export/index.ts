@@ -1,8 +1,8 @@
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {OpenDialogReturnValue, ipcRenderer} from "electron";
-import {BrowserWindow, dialog} from "@electron/remote";
+import {OpenDialogReturnValue} from "electron";
+import {BrowserWindow, dialog, app} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "./util";
@@ -14,7 +14,6 @@ import {Dialog} from "../../dialog";
 import {lockFile} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
 import {replaceLocalPath} from "../../editor/rename";
-
 
 export const saveExport = (option: { type: string, id: string }) => {
     /// #if !BROWSER
@@ -62,12 +61,6 @@ export const saveExport = (option: { type: string, id: string }) => {
 };
 
 /// #if !BROWSER
-const destroyWin = (win: Electron.BrowserWindow) => {
-    setTimeout(() => {
-        win.destroy();
-    }, 1000);
-};
-
 const renderPDF = (id: string) => {
     const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_EXPORTPDF) || JSON.stringify({
         printBackground: true,
@@ -76,139 +69,59 @@ const renderPDF = (id: string) => {
         scaleFactor: 100,
         pageSize: "A4",
         removeAssets: true,
+        keepFold: false,
     }));
     const servePath = window.location.protocol + "//" + window.location.host;
-    const win = new BrowserWindow({
-        show: true,
-        width: 1032,
-        resizable: false,
-        frame: "darwin" === window.siyuan.config.system.os,
-        titleBarStyle: "hidden",
-        webPreferences: {
-            contextIsolation: false,
-            nodeIntegration: true,
-            webviewTag: true,
-            webSecurity: false,
-        },
-    });
-    ipcRenderer.on(Constants.SIYUAN_EXPORT_CLOSE, () => {
-        win.destroy();
-    });
-    ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, (e, ipcData) => {
-        dialog.showOpenDialog({
-            title: window.siyuan.languages.export + " PDF",
-            properties: ["createDirectory", "openDirectory"],
-        }).then((result: OpenDialogReturnValue) => {
-            if (!result.canceled) {
-                const msgId = showMessage(window.siyuan.languages.exporting, -1);
-                const filePath = result.filePaths[0].endsWith(ipcData.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle));
-                localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {removeAssets: ipcData.removeAssets})));
-                try {
-                    win.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {
-                        fetchPost("/api/export/exportHTML", {
-                            id: ipcData.rootId,
-                            pdf: true,
-                            removeAssets: ipcData.removeAssets,
-                            savePath: filePath
-                        }, () => {
-                            const pdfFilePath = path.join(filePath, path.basename(filePath) + ".pdf");
-                            fs.writeFileSync(pdfFilePath, pdfData);
-                            fetchPost("/api/export/addPDFOutline", {
-                                id: ipcData.rootId,
-                                path: pdfFilePath
-                            }, () => {
-                                afterExport(pdfFilePath, msgId);
-                                if (ipcData.removeAssets) {
-                                    const removePromise = (dir: string) => {
-                                        return new Promise(function (resolve) {
-                                            //先读文件夹
-                                            fs.stat(dir, function (err, stat) {
-                                                if (stat) {
-                                                    if (stat.isDirectory()) {
-                                                        fs.readdir(dir, function (err, files) {
-                                                            files = files.map(file => path.join(dir, file)); // a/b  a/m
-                                                            Promise.all(files.map(file => removePromise(file))).then(function () {
-                                                                fs.rmdir(dir, resolve);
-                                                            });
-                                                        });
-                                                    } else {
-                                                        fs.unlink(dir, resolve);
-                                                    }
-                                                }
-                                            });
-                                        });
-                                    };
-                                    removePromise(path.join(filePath, "assets"));
-                                }
-                            });
-                        });
-                        destroyWin(win);
-                    }).catch((error: string) => {
-                        showMessage("Export PDF error:" + error, 0, "error", msgId);
-                        destroyWin(win);
-                    });
-                } catch (e) {
-                    showMessage("Export PDF error:" + e + ". Export HTML and use Chrome's printing function to convert to PDF", 0, "error", msgId);
-                    destroyWin(win);
-                }
-            } else {
-                destroyWin(win);
-            }
-        });
-    });
-    fetchPost("/api/export/exportPreviewHTML", {
-        id,
-    }, response => {
-        let pdfWidth = "";
-        if (localData.pageSize === "A3") {
-            if (localData.landscape) {
-                pdfWidth = "16.5";
-            } else {
-                pdfWidth = "11.7";
-            }
-        } else if (localData.pageSize === "A4") {
-            if (localData.landscape) {
-                pdfWidth = "11.7";
-            } else {
-                pdfWidth = "8.8";
-            }
-        } else if (localData.pageSize === "A5") {
-            if (localData.landscape) {
-                pdfWidth = "8.3";
-            } else {
-                pdfWidth = "5.8";
-            }
-        } else if (localData.pageSize === "Legal") {
-            if (localData.landscape) {
-                pdfWidth = "14";
-            } else {
-                pdfWidth = "8.5";
-            }
-        } else if (localData.pageSize === "Letter") {
-            if (localData.landscape) {
-                pdfWidth = "11";
-            } else {
-                pdfWidth = "8.5";
-            }
-        } else if (localData.pageSize === "Tabloid") {
-            if (localData.landscape) {
-                pdfWidth = "17";
-            } else {
-                pdfWidth = "11";
-            }
+    let pdfWidth = "";
+    if (localData.pageSize === "A3") {
+        if (localData.landscape) {
+            pdfWidth = "16.5";
+        } else {
+            pdfWidth = "11.7";
         }
-        let pdfMargin = "0.66";
+    } else if (localData.pageSize === "A4") {
+        if (localData.landscape) {
+            pdfWidth = "11.7";
+        } else {
+            pdfWidth = "8.8";
+        }
+    } else if (localData.pageSize === "A5") {
+        if (localData.landscape) {
+            pdfWidth = "8.3";
+        } else {
+            pdfWidth = "5.8";
+        }
+    } else if (localData.pageSize === "Legal") {
+        if (localData.landscape) {
+            pdfWidth = "14";
+        } else {
+            pdfWidth = "8.5";
+        }
+    } else if (localData.pageSize === "Letter") {
+        if (localData.landscape) {
+            pdfWidth = "11";
+        } else {
+            pdfWidth = "8.5";
+        }
+    } else if (localData.pageSize === "Tabloid") {
+        if (localData.landscape) {
+            pdfWidth = "17";
+        } else {
+            pdfWidth = "11";
+        }
+    }
+    let pdfMargin = "0.66";
+    if (localData.landscape) {
+        pdfMargin = "1.69";
+    }
+    if (localData.marginsType !== 0) {
         if (localData.landscape) {
             pdfMargin = "1.69";
+        } else {
+            pdfMargin = "0.3";
         }
-        if (localData.marginsType !== 0) {
-            if (localData.landscape) {
-                pdfMargin = "1.69";
-            } else {
-                pdfMargin = "0.3";
-            }
-        }
-        const html = `<!DOCTYPE html><html>
+    }
+    const html = `<!DOCTYPE html><html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -218,59 +131,65 @@ const renderPDF = (id: string) => {
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
     <link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>
-    <title>${response.data.name} - ${window.siyuan.languages.siyuanNote}  v${Constants.SIYUAN_VERSION}</title>
+    <title>${window.siyuan.languages.export} PDF</title>
     <style>
-          body {
-            margin: 0;
-          }
-          
-          #action {
-                width: 200px;
-                background: var(--b3-theme-background-light);
-                padding: 8px 16px;
-                position: fixed;
-                right: 0;
-                top: 0;
-                overflow: auto;
-                bottom: 0;
-         }
-         
-         #preview {
-                max-width: 800px;
-                margin: 0 auto;
-                position: absolute;
-                right: 232px;
-                left: 0;
-         }
-         
-        ::-webkit-scrollbar {
-          width: 0px;
-          height: 0px;
+        body {
+          margin: 0;
+        }
+        
+        #action {
+          width: 200px;
+          background: var(--b3-theme-background-light);
+          padding: 16px;
+          position: fixed;
+          right: 0;
+          top: 0;
+          overflow: auto;
+          bottom: 0;
+        }
+        
+        #preview {
+          max-width: 800px;
+          margin: 0 auto;
+          position: absolute;
+          right: 232px;
+          left: 0;
+        }
+        
+        #preview.exporting {
+          position: inherit;
+          max-width: none;
+        }
+        
+        .exporting::-webkit-scrollbar {
+          width: 0;
+          height: 0;
         }
         pre code {
-            max-height: none !important;
-            word-break: break-all !important;
-            white-space: pre-wrap !important;
+          max-height: none !important;
+          word-break: break-all !important;
+          white-space: pre-wrap !important;
         }
         .protyle-wysiwyg {
-            box-sizing: border-box;
-            padding: 34px ${pdfMargin}in 16px;
-            width: ${pdfWidth}in
+          height: 100%;
+          overflow: auto;
+          box-sizing: border-box;
+          padding: 34px ${pdfMargin}in 16px;
+          width: ${pdfWidth}in
         }
+        
         .b3-label {
-            border-bottom: 1px solid var(--b3-border-color);
-            display: block;
-            color: var(--b3-theme-on-surface);
-            padding-bottom: 16px;
-            margin-bottom: 16px;
+          border-bottom: 1px solid var(--b3-border-color);
+          display: block;
+          color: var(--b3-theme-on-surface);
+          padding-bottom: 16px;
+          margin-bottom: 16px;
         }
         ${setInlineStyle(false)}
     </style>
 </head>
 <body>
-<div class="protyle-wysiwyg protyle-wysiwyg--attr" id="preview">${response.data.content.replace(/<iframe /g, "<no-iframe ")}</div>
 <div id="action">
-    <h2 class="b3-label">${window.siyuan.languages.config}</h2>
     <label class="b3-label">
         <div>
             ${window.siyuan.languages.exportPDF0}
@@ -317,6 +236,13 @@ const renderPDF = (id: string) => {
         <span class="fn__hr"></span>
         <input id="removeAssets" class="b3-switch" type="checkbox" ${localData.removeAssets ? "checked" : ""}>
     </label>
+    <label class="b3-label">
+        <div>
+            ${window.siyuan.languages.exportPDF5}
+        </div>
+        <span class="fn__hr"></span>
+        <input id="keepFold" class="b3-switch" type="checkbox" ${localData.keepFold ? "checked" : ""}>
+    </label>
     <div class="fn__flex">
       <div class="fn__flex-1"></div>
       <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
@@ -324,68 +250,140 @@ const renderPDF = (id: string) => {
       <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
+<div class="protyle-wysiwyg protyle-wysiwyg--attr" id="preview">
+    <div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>
+</div>
 <script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
-    window.siyuan = {
-      config: {
-        appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
-        editor: { 
-          codeLineWrap: true,
-          codeLigatures: ${window.siyuan.config.editor.codeLigatures},
-          plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
-          codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
-          katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
-        }
-      },
-      languages: {copy:"${window.siyuan.languages.copy}"}
-    };
-    const previewElement = document.getElementById('preview');
-    Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.mathRender(previewElement, "${servePath}/stage/protyle", true);
-    Protyle.mermaidRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.flowchartRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.graphvizRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.chartRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.mindmapRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.abcRender(previewElement, "${servePath}/stage/protyle");
-    Protyle.plantumlRender(previewElement, "${servePath}/stage/protyle");
-    previewElement.querySelectorAll(".protyle-action__copy").forEach((item) => {
-      item.addEventListener("click", (event) => {
-            navigator.clipboard.writeText(item.parentElement.nextElementSibling.textContent.trimEnd());
-            event.preventDefault();
-            event.stopPropagation();
-      })
-    });
-    previewElement.querySelectorAll("table").forEach(item => {
-        if (item.clientWidth > item.parentElement.clientWidth) {
-            item.style.zoom = item.parentElement.clientWidth / item.clientWidth;
-        }
-    })
-    const actionElement = document.getElementById('action');
-    actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
-        const {ipcRenderer}  = require("electron");
-        ipcRenderer.send("${Constants.SIYUAN_EXPORT_CLOSE}")
-    });
-    actionElement.querySelector('.b3-button--text').addEventListener('click', () => {
-        const {ipcRenderer}  = require("electron");
-        ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", {
-          pdfOptions:{
-            printBackground: true,
-            landscape: actionElement.querySelector("#landscape").checked,
-            marginsType: parseInt(actionElement.querySelector("#marginsType").value),
-            scaleFactor: parseInt(actionElement.querySelector("#scaleFactor").value),
-            pageSize: actionElement.querySelector("#pageSize").value,
-          },
-          removeAssets: actionElement.querySelector("#removeAssets").checked,
-          rootId: "${id}",
-          rootTitle: "${response.data.name}"
+    const fetchPost = (url, data, cb) => {
+        fetch("${servePath}" + url, {
+            method: "POST",
+            body: JSON.stringify(data)
+        }).then((response) => {
+            return response.json();
+        }).then((response) => {
+            cb(response);
         })
-        actionElement.remove();
+    }
+    const renderPreview = (previewElement, html) => {
+        previewElement.innerHTML = html;
+        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.mathRender(previewElement, "${servePath}/stage/protyle", true);
+        Protyle.mermaidRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.flowchartRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.graphvizRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.chartRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.mindmapRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.abcRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.plantumlRender(previewElement, "${servePath}/stage/protyle");
+        previewElement.querySelectorAll("table").forEach(item => {
+            if (item.clientWidth > item.parentElement.clientWidth) {
+                item.style.zoom = item.parentElement.clientWidth / item.clientWidth;
+            }
+        })
+    }
+    fetchPost("/api/export/exportPreviewHTML", {
+        id: "${id}",
+        keepFold: ${localData.keepFold},
+    }, response => {
+        if (response.code === 1) {
+            alert(response.msg)
+            return;
+        }
+        document.title = '${window.siyuan.languages.export} PDF - ' + response.data.name
+        window.siyuan = {
+          config: {
+            appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
+            editor: { 
+              codeLineWrap: true,
+              codeLigatures: ${window.siyuan.config.editor.codeLigatures},
+              plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
+              codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
+              katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
+            }
+          },
+          languages: {copy:"${window.siyuan.languages.copy}"}
+        };
+        const previewElement = document.getElementById('preview');
+        renderPreview(previewElement, response.data.content);
+        previewElement.addEventListener("click", (event) => {
+            let target = event.target;
+            while (target && !target.isEqualNode(previewElement)) {
+                if (target.tagName === "A") {
+                    const linkAddress = target.getAttribute("href");
+                    if (linkAddress.startsWith("#")) {
+                        // 导出预览模式点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5700
+                        previewElement.querySelector(linkAddress).scrollIntoView();
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
+                    }
+                } else if (target.classList.contains("protyle-action__copy")) {
+                    navigator.clipboard.writeText(target.parentElement.nextElementSibling.textContent.trimEnd());
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                }
+                target = target.parentElement;
+            }
+        });
+        const actionElement = document.getElementById('action');
+        const keepFoldElement = actionElement.querySelector('#keepFold');
+        keepFoldElement.addEventListener('change', () => {
+            previewElement.innerHTML = '<div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>'
+            fetchPost("/api/export/exportPreviewHTML", {
+                id: "${id}",
+                keepFold: keepFoldElement.checked,
+            }, response2 => {
+                if (response2.code === 1) {
+                    alert(response2.msg)
+                    return;
+                }
+                renderPreview(previewElement, response2.data.content);
+            })
+        })
+        actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
+            const {ipcRenderer}  = require("electron");
+            ipcRenderer.send("${Constants.SIYUAN_EXPORT_CLOSE}")
+        });
+        actionElement.querySelector('.b3-button--text').addEventListener('click', () => {
+            const {ipcRenderer}  = require("electron");
+            ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", {
+              pdfOptions:{
+                printBackground: true,
+                landscape: actionElement.querySelector("#landscape").checked,
+                marginsType: parseInt(actionElement.querySelector("#marginsType").value),
+                scaleFactor: parseInt(actionElement.querySelector("#scaleFactor").value),
+                pageSize: actionElement.querySelector("#pageSize").value,
+              },
+              removeAssets: actionElement.querySelector("#removeAssets").checked,
+              rootId: "${id}",
+              rootTitle: response.data.name,
+            })
+            actionElement.remove();
+            previewElement.classList.add("exporting");
+        });
     });
 </script></body></html>`;
-        win.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent(html));
+    window.siyuan.printWin = new BrowserWindow({
+        show: true,
+        width: 1032,
+        resizable: false,
+        frame: "darwin" === window.siyuan.config.system.os,
+        icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
+        titleBarStyle: "hidden",
+        webPreferences: {
+            contextIsolation: false,
+            nodeIntegration: true,
+            webviewTag: true,
+            webSecurity: false,
+        },
+    });
+    window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`
+    fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
+        window.siyuan.printWin.loadURL(response.data.url);
     });
 };
 

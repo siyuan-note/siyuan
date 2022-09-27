@@ -1,35 +1,19 @@
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByMatchTag} from "./hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import * as dayjs from "dayjs";
 import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
-import {focusBlock, getEditorRange, focusByWbr} from "./selection";
+import {focusBlock, getEditorRange, focusByWbr, fixTableRange} from "./selection";
 import {mathRender} from "../markdown/mathRender";
 import {Constants} from "../../constants";
 
-export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => {
+export const insertHTML = (html: string, protyle: IProtyle, isBlock = false, splitSpan = true) => {
     if (html === "") {
         return;
     }
     const range = getEditorRange(protyle.wysiwyg.element);
-    // table 选中处理 https://ld246.com/article/1624269001599
-    const tableElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeTable");
-    if (range.toString() !== "" && tableElement && range.commonAncestorContainer.nodeType !== 3) {
-        const parentTag = (range.commonAncestorContainer as Element).tagName;
-        if (parentTag !== "TH" && parentTag !== "TD") {
-            let cellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
-            if (!cellElement) {
-                cellElement = tableElement.querySelector("th") || tableElement.querySelector("td");
-                range.setStartBefore(cellElement.firstChild);
-            }
-            if (cellElement.lastChild) {
-                range.setEndAfter(cellElement.lastChild);
-            } else {
-                range.collapse(true);
-            }
-        }
-    }
-    if (tableElement && !isBlock) {
+    fixTableRange(range);
+    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeTable") && !isBlock) {
         html = protyle.lute.BlockDOM2InlineBlockDOM(html);
     }
     let blockElement = hasClosestBlock(range.startContainer) as Element;
@@ -54,9 +38,11 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         if (inlineMathElement) {
             // 表格内选中数学公式 https://ld246.com/article/1631708573504
             inlineMathElement.remove();
-        } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.getAttribute("data-type") === "block-ref") {
+        } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.getAttribute("data-type")?.indexOf("block-ref")>-1) {
             // ref 选中处理 https://ld246.com/article/1629214377537
             range.startContainer.parentElement.remove();
+            // 选中 ref**bbb** 后 alt+[
+            range.deleteContents();
         } else {
             range.deleteContents();
         }
@@ -84,6 +70,20 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
                     tempElement.content.firstElementChild.tagName !== "DIV"))) {
             if (tempElement.content.firstChild.nodeType !== 3 && tempElement.content.firstElementChild.classList.contains("p")) {
                 tempElement.innerHTML = tempElement.content.firstElementChild.firstElementChild.innerHTML.trim();
+            }
+            // 粘贴带样式的行内元素到另一个行内元素中需进行切割
+            const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement: range.startContainer as HTMLElement;
+            if (splitSpan && spanElement.tagName === "SPAN" && spanElement.isSameNode( range.endContainer.nodeType === 3 ? range.endContainer.parentElement: range.endContainer)) {
+                const afterElement = document.createElement("span");
+                const attributes = spanElement.attributes;
+                for (let i = 0; i < attributes.length; i++) {
+                    afterElement.setAttribute(attributes[i].name, attributes[i].value);
+                }
+                range.setEnd(spanElement.lastChild, spanElement.lastChild.textContent.length);
+                afterElement.append(range.extractContents());
+                spanElement.after(afterElement);
+                range.setStartBefore(afterElement);
+                range.collapse(true);
             }
             range.insertNode(tempElement.content.cloneNode(true));
             range.collapse(false);

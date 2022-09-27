@@ -120,7 +120,7 @@ func html2BlockDOM(c *gin.Context) {
 		})
 	}
 
-	renderer := render.NewBlockRenderer(tree, luteEngine.RenderOptions)
+	renderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
 	output := renderer.Render()
 	ret.Data = gulu.Str.FromBytes(output)
 }

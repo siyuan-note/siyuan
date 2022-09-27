@@ -542,6 +542,7 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                 nodeAttrHTML += refElement.outerHTML;
             }
             nodeElement.lastElementChild.innerHTML = nodeAttrHTML + Constants.ZWSP;
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
             dialog.destroy();
         });

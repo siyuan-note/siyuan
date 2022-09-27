@@ -32,8 +32,8 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
-	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/88250/pdfcpu/pkg/api"
@@ -42,6 +42,7 @@ import (
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -125,8 +126,6 @@ func ExportDataInFolder(exportFolder string) (err error) {
 	defer util.ClearPushProgress(100)
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
 
 	exportFolder = filepath.Join(exportFolder, util.CurrentTimeSecondsStr())
 	err = exportData(exportFolder)
@@ -141,8 +140,6 @@ func ExportData() (zipPath string) {
 	defer util.ClearPushProgress(100)
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
 
 	baseFolderName := "data-" + util.CurrentTimeSecondsStr()
 	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName)
@@ -161,6 +158,9 @@ func exportData(exportFolder string) (err error) {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
 	}
+
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 
 	err = filelock.ReleaseAllFileLocks()
 	if nil != err {
@@ -196,7 +196,7 @@ func exportData(exportFolder string) (err error) {
 
 func Preview(id string) string {
 	tree, _ := loadTreeByBlockID(id)
-	tree = exportTree(tree, false, false)
+	tree = exportTree(tree, false, false, false)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	md := treenode.FormatNode(tree.Root, luteEngine)
@@ -250,7 +250,7 @@ func ExportDocx(id, savePath string, removeAssets bool) (err error) {
 func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
 	tree, _ := loadTreeByBlockID(id)
 
-	tree = exportTree(tree, true, true)
+	tree = exportTree(tree, true, true, false)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
@@ -338,7 +338,7 @@ func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
 	return
 }
 
-func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
+func ExportHTML(id, savePath string, pdf, keepFold bool) (name, dom string) {
 	tree, _ := loadTreeByBlockID(id)
 	var headings []*ast.Node
 	if pdf { // 导出 PDF 需要标记目录书签
@@ -362,7 +362,7 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 		}
 	}
 
-	tree = exportTree(tree, true, true)
+	tree = exportTree(tree, true, true, keepFold)
 	//if pdf { // TODO: 导出 PDF 时块引转换脚注使用书签跳转 https://github.com/siyuan-note/siyuan/issues/5761
 	//	var footnotesDefs []*ast.Node
 	//	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -394,6 +394,10 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 
 		assets := assetsLinkDestsInTree(tree)
 		for _, asset := range assets {
+			if strings.Contains(asset, "?") {
+				asset = asset[:strings.LastIndex(asset, "?")]
+			}
+
 			srcAbsPath, err := GetAssetAbsPath(asset)
 			if nil != err {
 				logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
@@ -452,7 +456,8 @@ func ExportHTML(id, savePath string, pdf bool) (name, dom string) {
 
 	luteEngine.SetFootnotes(true)
 	luteEngine.RenderOptions.ProtyleContenteditable = false
-	renderer := render.NewBlockExportRenderer(tree, luteEngine.RenderOptions)
+	luteEngine.SetProtyleMarkNetImg(false)
+	renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions)
 	dom = gulu.Str.FromBytes(renderer.Render())
 	return
 }
@@ -551,6 +556,9 @@ func AddPDFOutline(id, p string) (err error) {
 			cur, ok := stack.Peek()
 			if !ok {
 				bm := bms[h.ID]
+				if nil == bm {
+					break L
+				}
 				bm.Level = h.HeadingLevel
 				stack.Push(bm)
 				topBms = append(topBms, bm)
@@ -592,7 +600,7 @@ func AddPDFOutline(id, p string) (err error) {
 
 func CopyStdMarkdown(id string) string {
 	tree, _ := loadTreeByBlockID(id)
-	tree = exportTree(tree, false, false)
+	tree = exportTree(tree, false, false, false)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
@@ -600,7 +608,7 @@ func CopyStdMarkdown(id string) string {
 		// 订阅用户使用云端图床服务
 		luteEngine.RenderOptions.LinkBase = "https://assets.b3logfile.com/siyuan/" + Conf.User.UserId + "/"
 	}
-	return treenode.FormatNode(tree.Root, luteEngine)
+	return treenode.ExportNodeStdMd(tree.Root, luteEngine)
 }
 
 func ExportMarkdown(id string) (name, zipPath string) {
@@ -888,6 +896,49 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		}
 	}
 
+	// 导出自定义排序
+	sortPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
+	fullSortIDs := map[string]int{}
+	sortIDs := map[string]int{}
+	var sortData []byte
+	var sortErr error
+	if gulu.File.IsExist(sortPath) {
+		sortData, sortErr = filelock.NoLockFileRead(sortPath)
+		if nil != sortErr {
+			logging.LogErrorf("read sort conf failed: %s", sortErr)
+		}
+
+		if sortErr = gulu.JSON.UnmarshalJSON(sortData, &fullSortIDs); nil != sortErr {
+			logging.LogErrorf("unmarshal sort conf failed: %s", sortErr)
+		}
+
+		if 0 < len(fullSortIDs) {
+			for _, tree := range trees {
+				if v, ok := fullSortIDs[tree.ID]; ok {
+					sortIDs[tree.ID] = v
+				}
+			}
+		}
+
+		if 0 < len(sortIDs) {
+			sortData, sortErr = gulu.JSON.MarshalJSON(sortIDs)
+			if nil != sortErr {
+				logging.LogErrorf("marshal sort conf failed: %s", sortErr)
+			}
+			if 0 < len(sortData) {
+				confDir := filepath.Join(exportFolder, ".siyuan")
+				if mkdirErr := os.MkdirAll(confDir, 0755); nil != mkdirErr {
+					logging.LogErrorf("create export conf folder [%s] failed: %s", confDir, mkdirErr)
+				} else {
+					sortPath = filepath.Join(confDir, "sort.json")
+					if writeErr := os.WriteFile(sortPath, sortData, 0644); nil != writeErr {
+						logging.LogErrorf("write sort conf failed: %s", writeErr)
+					}
+				}
+			}
+		}
+	}
+
 	zipPath = exportFolder + ".sy.zip"
 	zip, err := gulu.Zip.Create(zipPath)
 	if nil != err {
@@ -916,78 +967,34 @@ func ExportMarkdownContent(id string) (hPath, exportedMd string) {
 func exportMarkdownContent(id string) (hPath, exportedMd string) {
 	tree, _ := loadTreeByBlockID(id)
 	hPath = tree.HPath
-	tree = exportTree(tree, false, true)
+	tree = exportTree(tree, false, true, false)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
-	exportedMd = formatExportMd(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
+	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions)
+	exportedMd = gulu.Str.FromBytes(renderer.Render())
 	return
 }
 
-func formatExportMd(node *ast.Node, parseOptions *parse.Options, renderOptions *render.Options) string {
-	root := &ast.Node{Type: ast.NodeDocument}
-	tree := &parse.Tree{Root: root, Context: &parse.Context{ParseOption: parseOptions}}
-	renderer := render.NewFormatRenderer(tree, renderOptions)
-	renderer.Writer = &bytes.Buffer{}
-	renderer.Writer.Grow(4096)
-	renderer.NodeWriterStack = append(renderer.NodeWriterStack, renderer.Writer)
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		switch n.Type {
-		case ast.NodeParagraph: // 段落需要单独处理。导出为 Markdown 时段落开头空两格不生效 https://github.com/siyuan-note/siyuan/issues/3167
-			return renderExportMdParagraph(renderer, n, entering)
-		case ast.NodeMathBlockContent:
-			return renderExportMdMathBlockContent(renderer, n, entering)
-		case ast.NodeInlineMathContent:
-			return renderExportMdInlineMathContent(renderer, n, entering)
-		case ast.NodeCodeBlockCode:
-			return renderExportMdCodeBlockCode(renderer, n, entering)
-		default:
-			rendererFunc := renderer.RendererFuncs[n.Type]
-			return rendererFunc(n, entering)
-		}
-	})
-	return gulu.Str.FromBytes(renderer.Writer.Bytes())
-}
-
-func renderExportMdCodeBlockCode(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {
-	if entering {
-		tokens := node.Tokens
-		info := node.Parent.ChildByType(ast.NodeCodeBlockFenceInfoMarker)
-		if nil != info &&
-			bytes.Contains(info.CodeBlockInfo, []byte("flowchart")) ||
-			bytes.Contains(info.CodeBlockInfo, []byte("mermaid")) ||
-			bytes.Contains(info.CodeBlockInfo, []byte("graphviz")) ||
-			bytes.Contains(info.CodeBlockInfo, []byte("plantuml")) {
-			tokens = html.UnescapeHTML(tokens)
-		}
-		r.Write(tokens)
-	}
-	return ast.WalkContinue
-}
-
-func renderExportMdMathBlockContent(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {
-	if entering {
-		tokens := html.UnescapeHTML(node.Tokens)
-		r.Write(tokens)
-		r.WriteByte(lex.ItemNewline)
-	}
-	return ast.WalkContinue
-}
-
-func renderExportMdInlineMathContent(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {
-	if entering {
-		tokens := html.UnescapeHTML(node.Tokens)
-		r.Write(tokens)
-	}
-	return ast.WalkContinue
-}
-
 func processKaTexMacros(n *ast.Node) {
-	if ast.NodeInlineMathContent != n.Type && ast.NodeMathBlockContent != n.Type {
+	if ast.NodeInlineMathContent != n.Type && ast.NodeMathBlockContent != n.Type && ast.NodeTextMark != n.Type {
+		return
+	}
+	if ast.NodeTextMark == n.Type && !n.IsTextMarkType("inline-math") {
 		return
 	}
 
-	mathContent := string(n.Tokens)
+	var mathContent string
+	if ast.NodeTextMark == n.Type {
+		mathContent = n.TextMarkInlineMathContent
+	} else {
+		mathContent = string(n.Tokens)
+	}
+	mathContent = strings.TrimSpace(mathContent)
+	if "" == mathContent {
+		return
+	}
+
 	macros := map[string]string{}
 	if err := gulu.JSON.UnmarshalJSON([]byte(Conf.Editor.KaTexMacros), &macros); nil != err {
 		logging.LogWarnf("parse katex macros failed: %s", err)
@@ -1018,64 +1025,14 @@ func processKaTexMacros(n *ast.Node) {
 		mathContent = strings.ReplaceAll(mathContent, usedMacro, expanded)
 	}
 	mathContent = unescapeKaTexSupportedFunctions(mathContent)
-	n.Tokens = []byte(mathContent)
-}
-
-func renderExportMdParagraph(r *render.FormatRenderer, node *ast.Node, entering bool) ast.WalkStatus {
-	if entering {
-		if r.Options.ChineseParagraphBeginningSpace && ast.NodeDocument == node.Parent.Type {
-			r.WriteString("　　")
-		}
+	if ast.NodeTextMark == n.Type {
+		n.TextMarkInlineMathContent = mathContent
 	} else {
-		if !r.Options.KeepParagraphBeginningSpace && nil != node.FirstChild {
-			node.FirstChild.Tokens = bytes.TrimSpace(node.FirstChild.Tokens)
-		}
-
-		if node.ParentIs(ast.NodeTableCell) {
-			if nil != node.Next && ast.NodeText != node.Next.Type {
-				r.WriteString("<br /><br />")
-			}
-			return ast.WalkContinue
-		}
-
-		if withoutKramdownBlockIAL(r, node) {
-			r.Newline()
-		}
-
-		inTightList := false
-		lastListItemLastPara := false
-		if parent := node.Parent; nil != parent {
-			if ast.NodeListItem == parent.Type { // ListItem.Paragraph
-				listItem := parent
-				if nil != listItem.Parent && nil != listItem.Parent.ListData {
-					// 必须通过列表（而非列表项）上的紧凑标识判断，因为在设置该标识时仅设置了 List.Tight
-					// 设置紧凑标识的具体实现可参考函数 List.Finalize()
-					inTightList = listItem.Parent.ListData.Tight
-
-					if nextItem := listItem.Next; nil == nextItem {
-						nextPara := node.Next
-						lastListItemLastPara = nil == nextPara
-					}
-				} else {
-					inTightList = true
-				}
-			}
-		}
-
-		if !inTightList || (lastListItemLastPara) {
-			if withoutKramdownBlockIAL(r, node) {
-				r.WriteByte(lex.ItemNewline)
-			}
-		}
+		n.Tokens = []byte(mathContent)
 	}
-	return ast.WalkContinue
 }
 
-func withoutKramdownBlockIAL(r *render.FormatRenderer, node *ast.Node) bool {
-	return !r.Options.KramdownBlockIAL || 0 == len(node.KramdownIAL)
-}
-
-func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.Tree) {
+func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret = tree
 	id := tree.Root.ID
@@ -1173,82 +1130,49 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 		case ast.NodeInlineMathContent, ast.NodeMathBlockContent:
 			n.Tokens = bytes.TrimSpace(n.Tokens) // 导出 Markdown 时去除公式内容中的首尾空格 https://github.com/siyuan-note/siyuan/issues/4666
 			return ast.WalkContinue
+		case ast.NodeTextMark:
+			if n.IsTextMarkType("inline-math") {
+				n.TextMarkInlineMathContent = strings.TrimSpace(n.TextMarkInlineMathContent)
+				return ast.WalkContinue
+			} else if n.IsTextMarkType("file-annotation-ref") {
+				refID := n.TextMarkFileAnnotationRefID
+				status := processFileAnnotationRef(refID, n)
+				unlinks = append(unlinks, n)
+				return status
+			} else if n.IsTextMarkType("tag") {
+				if !wysiwyg {
+					n.Type = ast.NodeText
+					n.Tokens = []byte(Conf.Export.TagOpenMarker + n.TextMarkTextContent + Conf.Export.TagCloseMarker)
+					return ast.WalkContinue
+				}
+			}
 		case ast.NodeFileAnnotationRef:
 			refIDNode := n.ChildByType(ast.NodeFileAnnotationRefID)
 			if nil == refIDNode {
 				return ast.WalkSkipChildren
 			}
 			refID := refIDNode.TokensStr()
-			p := refID[:strings.LastIndex(refID, "/")]
-			absPath, err := GetAssetAbsPath(p)
-			if nil != err {
-				logging.LogWarnf("get assets abs path by rel path [%s] failed: %s", p, err)
-				return ast.WalkSkipChildren
-			}
-			sya := absPath + ".sya"
-			syaData, err := os.ReadFile(sya)
-			if nil != err {
-				logging.LogErrorf("read file [%s] failed: %s", sya, err)
-				return ast.WalkSkipChildren
-			}
-			syaJSON := map[string]interface{}{}
-			if err = gulu.JSON.UnmarshalJSON(syaData, &syaJSON); nil != err {
-				logging.LogErrorf("unmarshal file [%s] failed: %s", sya, err)
-				return ast.WalkSkipChildren
-			}
-			annotationID := refID[strings.LastIndex(refID, "/")+1:]
-			annotationData := syaJSON[annotationID]
-			if nil == annotationData {
-				logging.LogErrorf("not found annotation [%s] in .sya", annotationID)
-				return ast.WalkSkipChildren
-			}
-			pages := annotationData.(map[string]interface{})["pages"].([]interface{})
-			page := int(pages[0].(map[string]interface{})["index"].(float64)) + 1
-			pageStr := strconv.Itoa(page)
-			refTextNode := n.ChildByType(ast.NodeFileAnnotationRefText)
-			if nil == refTextNode {
-				return ast.WalkSkipChildren
-			}
-			refText := refTextNode.TokensStr()
-			ext := filepath.Ext(p)
-			file := p[7:len(p)-23-len(ext)] + ext
-			fileAnnotationRefLink := &ast.Node{Type: ast.NodeLink}
-			fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
-			if 0 == Conf.Export.FileAnnotationRefMode {
-				fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(file + " - p" + pageStr + " - " + refText)})
-			} else {
-				fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(refText)})
-			}
-			fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
-			fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-			fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(p + "?p=" + pageStr)})
-			fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
-			n.InsertBefore(fileAnnotationRefLink)
+			status := processFileAnnotationRef(refID, n)
 			unlinks = append(unlinks, n)
-			return ast.WalkSkipChildren
+			return status
 		}
 
-		if ast.NodeBlockRef != n.Type {
+		if !treenode.IsBlockRef(n) {
 			return ast.WalkContinue
 		}
 
 		// 处理引用节点
 
-		var linkText string
-		id := n.ChildByType(ast.NodeBlockRefID).TokensStr()
-		if anchor := n.ChildByType(ast.NodeBlockRefText); nil != anchor {
-			linkText = anchor.Text()
-		} else if anchor = n.ChildByType(ast.NodeBlockRefDynamicText); nil != anchor {
-			linkText = anchor.Text()
-		} else {
-			linkText = sql.GetRefText(id)
+		defID, linkText, _ := treenode.GetBlockRef(n)
+		if "" == linkText {
+			linkText = sql.GetRefText(defID)
 		}
 		if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(linkText) {
 			linkText = gulu.Str.SubStr(linkText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
 		}
 		linkText = Conf.Export.BlockRefTextLeft + linkText + Conf.Export.BlockRefTextRight
 
-		defTree, _ := loadTreeByBlockID(id)
+		defTree, _ := loadTreeByBlockID(defID)
 		if nil == defTree {
 			return ast.WalkContinue
 		}
@@ -1261,18 +1185,21 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(linkText)})
 			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
 			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte("siyuan://blocks/" + id)})
+			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte("siyuan://blocks/" + defID)})
 			blockRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 			n.InsertBefore(blockRefLink)
 		case 3: // 仅锚文本
 			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})
 		case 4: // 脚注
-			defID := n.ChildByType(ast.NodeBlockRefID).TokensStr()
 			refFoot := getRefAsFootnotes(defID, &refFootnotes)
 			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})
 		}
 		unlinks = append(unlinks, n)
+		if nil != n.Next && ast.NodeKramdownSpanIAL == n.Next.Type {
+			// 引用加排版标记（比如颜色）重叠时丢弃后面的排版属性节点
+			unlinks = append(unlinks, n.Next)
+		}
 		return ast.WalkSkipChildren
 	})
 	for _, n := range unlinks {
@@ -1317,9 +1244,17 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 			return ast.WalkContinue
 		}
 
-		// 块折叠以后导出 HTML/PDF 固定展开 https://github.com/siyuan-note/siyuan/issues/4064
-		n.RemoveIALAttr("fold")
-		n.RemoveIALAttr("heading-fold")
+		// 支持按照现有折叠状态导出 PDF https://github.com/siyuan-note/siyuan/issues/5941
+		if !keepFold {
+			// 块折叠以后导出 HTML/PDF 固定展开 https://github.com/siyuan-note/siyuan/issues/4064
+			n.RemoveIALAttr("fold")
+			n.RemoveIALAttr("heading-fold")
+		} else {
+			if "1" == n.IALAttr("heading-fold") {
+				unlinks = append(unlinks, n)
+				return ast.WalkContinue
+			}
+		}
 
 		if ast.NodeParagraph == n.Type {
 			if nil == n.FirstChild {
@@ -1328,7 +1263,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 			}
 		}
 
-		if expandKaTexMacros && (ast.NodeInlineMathContent == n.Type || ast.NodeMathBlockContent == n.Type) {
+		if expandKaTexMacros && (ast.NodeInlineMathContent == n.Type || ast.NodeMathBlockContent == n.Type || (ast.NodeTextMark == n.Type && n.IsTextMarkType("inline-math"))) {
 			processKaTexMacros(n)
 		}
 
@@ -1363,7 +1298,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros bool) (ret *parse.T
 		n.Unlink()
 	}
 	for _, emptyParagraph := range emptyParagraphs {
-		emptyParagraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(parse.Zwj)})
+		emptyParagraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(editor.Zwj)})
 	}
 	return ret
 }
@@ -1381,11 +1316,15 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string) (footn
 			continue
 		}
 		defNode := treenode.GetNodeInTree(t, foot.defID)
+		docID := strings.TrimSuffix(path.Base(defNode.Path), ".sy")
 		var nodes []*ast.Node
 		if ast.NodeHeading == defNode.Type {
 			nodes = append(nodes, defNode)
-			children := treenode.HeadingChildren(defNode)
-			nodes = append(nodes, children...)
+			if rootID != docID {
+				// 同文档块引转脚注缩略定义考虑容器块和标题块 https://github.com/siyuan-note/siyuan/issues/5917
+				children := treenode.HeadingChildren(defNode)
+				nodes = append(nodes, children...)
+			}
 		} else if ast.NodeDocument == defNode.Type {
 			docTitle := &ast.Node{ID: defNode.ID, Type: ast.NodeHeading, HeadingLevel: 1}
 			docTitle.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(defNode.IALAttr("title"))})
@@ -1406,8 +1345,8 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string) (footn
 					return ast.WalkContinue
 				}
 
-				if ast.NodeBlockRef == n.Type {
-					defID := n.ChildByType(ast.NodeBlockRefID).TokensStr()
+				if treenode.IsBlockRef(n) {
+					defID, _, _ := treenode.GetBlockRef(n)
 					if f := getRefAsFootnotes(defID, refFootnotes); nil != f {
 						n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(Conf.Export.BlockRefTextLeft + f.refAnchorText + Conf.Export.BlockRefTextRight)})
 						n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + f.refNum), FootnotesRefId: f.refNum, FootnotesRefLabel: []byte("^" + f.refNum)})
@@ -1461,7 +1400,8 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string) (footn
 				}
 
 				docID := strings.TrimSuffix(path.Base(n.Path), ".sy")
-				if rootID == docID { // 在同一个文档的话缩略显示 https://github.com/siyuan-note/siyuan/issues/3299
+				if rootID == docID {
+					// 同文档块引转脚注缩略定义 https://github.com/siyuan-note/siyuan/issues/3299
 					if text := sql.GetRefText(n.ID); 64 < utf8.RuneCountInString(text) {
 						var unlinkChildren []*ast.Node
 						for c := n.FirstChild; nil != c; c = c.Next {
@@ -1523,8 +1463,8 @@ func collectFootnotesDefs0(node *ast.Node, refFootnotes *[]*refAsFootnotes, tree
 			return ast.WalkContinue
 		}
 
-		if ast.NodeBlockRef == n.Type {
-			defID := n.ChildByType(ast.NodeBlockRefID).TokensStr()
+		if treenode.IsBlockRef(n) {
+			defID, _, _ := treenode.GetBlockRef(n)
 			if nil == getRefAsFootnotes(defID, refFootnotes) {
 				anchorText := sql.GetRefText(defID)
 				if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(anchorText) {
@@ -1574,12 +1514,11 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeBlockRef == n.Type {
-			defIDNode := n.ChildByType(ast.NodeBlockRefID)
-			if nil == defIDNode {
-				return ast.WalkSkipChildren
+		if treenode.IsBlockRef(n) {
+			defID, _, _ := treenode.GetBlockRef(n)
+			if "" == defID {
+				return ast.WalkContinue
 			}
-			defID := defIDNode.TokensStr()
 			defBlock := treenode.GetBlockTree(defID)
 			if nil == defBlock {
 				return ast.WalkSkipChildren
@@ -1593,4 +1532,59 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
 		}
 		return ast.WalkContinue
 	})
+}
+
+func processFileAnnotationRef(refID string, n *ast.Node) ast.WalkStatus {
+	p := refID[:strings.LastIndex(refID, "/")]
+	absPath, err := GetAssetAbsPath(p)
+	if nil != err {
+		logging.LogWarnf("get assets abs path by rel path [%s] failed: %s", p, err)
+		return ast.WalkSkipChildren
+	}
+	sya := absPath + ".sya"
+	syaData, err := os.ReadFile(sya)
+	if nil != err {
+		logging.LogErrorf("read file [%s] failed: %s", sya, err)
+		return ast.WalkSkipChildren
+	}
+	syaJSON := map[string]interface{}{}
+	if err = gulu.JSON.UnmarshalJSON(syaData, &syaJSON); nil != err {
+		logging.LogErrorf("unmarshal file [%s] failed: %s", sya, err)
+		return ast.WalkSkipChildren
+	}
+	annotationID := refID[strings.LastIndex(refID, "/")+1:]
+	annotationData := syaJSON[annotationID]
+	if nil == annotationData {
+		logging.LogErrorf("not found annotation [%s] in .sya", annotationID)
+		return ast.WalkSkipChildren
+	}
+	pages := annotationData.(map[string]interface{})["pages"].([]interface{})
+	page := int(pages[0].(map[string]interface{})["index"].(float64)) + 1
+	pageStr := strconv.Itoa(page)
+
+	var refText string
+	if ast.NodeTextMark == n.Type {
+		refText = n.TextMarkTextContent
+	} else {
+		refTextNode := n.ChildByType(ast.NodeFileAnnotationRefText)
+		if nil == refTextNode {
+			return ast.WalkSkipChildren
+		}
+		refText = refTextNode.TokensStr()
+	}
+	ext := filepath.Ext(p)
+	file := p[7:len(p)-23-len(ext)] + ext
+	fileAnnotationRefLink := &ast.Node{Type: ast.NodeLink}
+	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
+	if 0 == Conf.Export.FileAnnotationRefMode {
+		fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(file + " - p" + pageStr + " - " + refText)})
+	} else {
+		fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(refText)})
+	}
+	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
+	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
+	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(p + "?p=" + pageStr)})
+	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+	n.InsertBefore(fileAnnotationRefLink)
+	return ast.WalkSkipChildren
 }

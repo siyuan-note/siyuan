@@ -31,6 +31,29 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getHeadingLevelTransaction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	level := int(arg["level"].(float64))
+
+	transaction, err := model.GetHeadingLevelTransaction(id, level)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	ret.Data = transaction
+}
+
 func setBlockReminder(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

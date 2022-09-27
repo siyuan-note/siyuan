@@ -19,17 +19,65 @@ package treenode
 import (
 	"bytes"
 	"strings"
+	"sync"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
+	"github.com/88250/lute/util"
 	"github.com/siyuan-note/logging"
 )
 
+func GetBlockRef(n *ast.Node) (blockRefID, blockRefText, blockRefSubtype string) {
+	if !IsBlockRef(n) {
+		return
+	}
+	if ast.NodeBlockRef == n.Type {
+		id := n.ChildByType(ast.NodeBlockRefID)
+		if nil == id {
+			return
+		}
+		blockRefID = id.TokensStr()
+		text := n.ChildByType(ast.NodeBlockRefText)
+		if nil != text {
+			blockRefText = text.Text()
+			blockRefSubtype = "s"
+			return
+		}
+		text = n.ChildByType(ast.NodeBlockRefDynamicText)
+		if nil != text {
+			blockRefText = text.Text()
+			blockRefSubtype = "d"
+			return
+		}
+	}
+	if ast.NodeTextMark == n.Type {
+		blockRefID = n.TextMarkBlockRefID
+		blockRefText = n.TextMarkTextContent
+		blockRefSubtype = n.TextMarkBlockRefSubtype
+	}
+	return
+}
+
+func IsBlockRef(n *ast.Node) bool {
+	if nil == n {
+		return false
+	}
+	if ast.NodeBlockRef == n.Type {
+		return true
+	}
+	if ast.NodeTextMark == n.Type {
+		return n.IsTextMarkType("block-ref")
+	}
+	return false
+}
+
 func NodeStaticMdContent(node *ast.Node, luteEngine *lute.Lute) (md, content string) {
-	md = FormatNode(node, luteEngine)
+	md = ExportNodeStdMd(node, luteEngine)
 	content = NodeStaticContent(node)
 	return
 }
@@ -39,6 +87,15 @@ func FormatNode(node *ast.Node, luteEngine *lute.Lute) string {
 	if nil != err {
 		root := TreeRoot(node)
 		logging.LogFatalf("format node [%s] in tree [%s] failed: %s", node.ID, root.ID, err)
+	}
+	return markdown
+}
+
+func ExportNodeStdMd(node *ast.Node, luteEngine *lute.Lute) string {
+	markdown, err := lute.ProtyleExportMdNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
+	if nil != err {
+		root := TreeRoot(node)
+		logging.LogFatalf("export markdown for node [%s] in tree [%s] failed: %s", node.ID, root.ID, err)
 	}
 	return markdown
 }
@@ -86,6 +143,14 @@ func NodeStaticContent(node *ast.Node) string {
 		case ast.NodeText, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
 			buf.Write(n.Tokens)
+		case ast.NodeTextMark:
+			if n.IsTextMarkType("tag") {
+				buf.WriteByte('#')
+			}
+			buf.WriteString(n.Content())
+			if n.IsTextMarkType("tag") {
+				buf.WriteByte('#')
+			}
 		case ast.NodeBackslash:
 			buf.WriteByte(lex.ItemBackslash)
 		case ast.NodeBackslashContent:
@@ -211,6 +276,7 @@ var typeAbbrMap = map[string]string{
 	"NodeAudio":            "audio",
 	// 行级元素
 	"NodeText":          "text",
+	"NodeImage":         "img",
 	"NodeLinkText":      "link_text",
 	"NodeLinkDest":      "link_dest",
 	"NodeTag":           "tag",
@@ -225,6 +291,7 @@ var typeAbbrMap = map[string]string{
 	"NodeSub":           "sub",
 	"NodeKbd":           "kbd",
 	"NodeUnderline":     "underline",
+	"NodeTextMark":      "textmark",
 }
 
 var abbrTypeMap = map[string]string{}
@@ -292,26 +359,37 @@ func GetLegacyDynamicBlockRefDefIDs(node *ast.Node) (ret []string) {
 	return
 }
 
+var DynamicRefTexts = sync.Map{}
+
 func SetDynamicBlockRefText(blockRef *ast.Node, refText string) {
-	if nil == blockRef {
+	if !IsBlockRef(blockRef) {
 		return
 	}
 
-	idNode := blockRef.ChildByType(ast.NodeBlockRefID)
-	if nil == idNode {
+	if ast.NodeBlockRef == blockRef.Type {
+		idNode := blockRef.ChildByType(ast.NodeBlockRefID)
+		if nil == idNode {
+			return
+		}
+
+		var spacesRefTexts []*ast.Node // 可能会有多个空格，或者遗留错误插入的锚文本节点，这里做一次订正
+		for n := idNode.Next; ast.NodeCloseParen != n.Type; n = n.Next {
+			spacesRefTexts = append(spacesRefTexts, n)
+		}
+		for _, toRemove := range spacesRefTexts {
+			toRemove.Unlink()
+		}
+		refText = strings.TrimSpace(refText)
+		idNode.InsertAfter(&ast.Node{Type: ast.NodeBlockRefDynamicText, Tokens: []byte(refText)})
+		idNode.InsertAfter(&ast.Node{Type: ast.NodeBlockRefSpace})
 		return
 	}
 
-	var spacesRefTexts []*ast.Node // 可能会有多个空格，或者遗留错误插入的锚文本节点，这里做一次订正
-	for n := idNode.Next; ast.NodeCloseParen != n.Type; n = n.Next {
-		spacesRefTexts = append(spacesRefTexts, n)
-	}
-	for _, toRemove := range spacesRefTexts {
-		toRemove.Unlink()
-	}
-	refText = strings.TrimSpace(refText)
-	idNode.InsertAfter(&ast.Node{Type: ast.NodeBlockRefDynamicText, Tokens: []byte(refText)})
-	idNode.InsertAfter(&ast.Node{Type: ast.NodeBlockRefSpace})
+	blockRef.TextMarkBlockRefSubtype = "d"
+	blockRef.TextMarkTextContent = refText
+
+	// 偶发编辑文档标题后引用处的动态锚文本不更新 https://github.com/siyuan-note/siyuan/issues/5891
+	DynamicRefTexts.Store(blockRef.TextMarkBlockRefID, refText)
 }
 
 func GetDynamicBlockRefText(blockRef *ast.Node) string {
@@ -324,4 +402,14 @@ func GetDynamicBlockRefText(blockRef *ast.Node) string {
 		return refText.Text()
 	}
 	return "ref resolve failed"
+}
+
+func IsChartCodeBlockCode(code *ast.Node) bool {
+	if nil == code.Previous || ast.NodeCodeBlockFenceInfoMarker != code.Previous.Type || 1 > len(code.Previous.CodeBlockInfo) {
+		return false
+	}
+
+	language := util.BytesToStr(code.Previous.CodeBlockInfo)
+	language = strings.ReplaceAll(language, editor.Caret, "")
+	return render.NoHighlight(language)
 }

@@ -5,7 +5,7 @@ import {
     hasPreviousSibling,
     isNotEditBlock
 } from "../wysiwyg/getBlock";
-import {hasClosestByMatchTag} from "./hasClosest";
+import {hasClosestByAttribute, hasClosestByMatchTag} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
@@ -19,6 +19,32 @@ const selectIsEditor = (editor: Element, range?: Range) => {
     const container = range.commonAncestorContainer;
 
     return editor.isEqualNode(container) || editor.contains(container);
+};
+
+// table 选中处理
+export const fixTableRange = (range: Range) => {
+    const tableElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeTable");
+    if (range.toString() !== "" && tableElement && range.commonAncestorContainer.nodeType !== 3) {
+        const parentTag = (range.commonAncestorContainer as Element).tagName;
+        if (parentTag !== "TH" && parentTag !== "TD") {
+            const startCellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
+            const endCellElement = hasClosestByMatchTag(range.endContainer, "TD") || hasClosestByMatchTag(range.endContainer, "TH");
+            if (!startCellElement && !endCellElement) {
+                const cellElement = tableElement.querySelector("th") || tableElement.querySelector("td");
+                range.setStart(cellElement.firstChild, 0);
+                range.setEnd(cellElement.lastChild, cellElement.lastChild.textContent.length);
+            } else if (startCellElement &&
+                // 不能包含自身元素，否则对 cell 中的部分文字两次高亮后就会选中整个 cell。 https://github.com/siyuan-note/siyuan/issues/3649 第二点
+                !startCellElement.contains(range.endContainer)) {
+                const cloneRange = range.cloneRange();
+                range.setEnd(startCellElement.lastChild, startCellElement.lastChild.textContent.length);
+                if (range.toString() === "" && endCellElement) {
+                    range.setStart(endCellElement.firstChild, 0);
+                    range.setEnd(cloneRange.endContainer, cloneRange.endOffset);
+                }
+            }
+        }
+    }
 };
 
 export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range) => {
@@ -116,6 +142,9 @@ export const getEditorRange = (element: Element) => {
         targetElement = getContenteditableElement(element);
         if (!targetElement) {
             targetElement = element;
+        } else if (targetElement.tagName === "TABLE") {
+            // 文档中开头为表格，获取错误 https://ld246.com/article/1663408335459?r=88250
+            targetElement = targetElement.querySelector("th") || element.querySelector("td");
         }
     }
     range = targetElement.ownerDocument.createRange();
@@ -274,15 +303,19 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
     if (!editElement) {
         return range;
     }
-    let firstChild = editElement.firstChild;
-    while (firstChild && firstChild.nodeType !== 3) {
-        firstChild = firstChild.firstChild;
+    let firstChild = editElement.firstChild as HTMLElement;
+    while (firstChild && firstChild.nodeType !== 3 && !firstChild.classList.contains("render-node")) {
+        firstChild = firstChild.firstChild as HTMLElement;
     }
     if (!firstChild) {
         range.selectNodeContents(editElement);
         return range;
     }
-    range.setStart(firstChild, 0);
+    if (firstChild.nodeType !== 3 && firstChild.classList.contains("render-node")) {
+        range.setStartBefore(firstChild);
+    } else {
+        range.setStart(firstChild, 0);
+    }
     return range;
 };
 
@@ -492,9 +525,16 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
                 cursorElement = cellElements[cellElements.length - 1];
             }
         }
-        const range = getEditorRange(cursorElement);
-        range.selectNodeContents(cursorElement);
-        range.collapse(toStart);
+        let range
+        if (toStart) {
+            // 需要定位到第一个 child https://github.com/siyuan-note/siyuan/issues/5930
+            range = setFirstNodeRange(cursorElement, getEditorRange(cursorElement));
+            range.collapse(true);
+        } else {
+            // 定位到末尾 https://github.com/siyuan-note/siyuan/issues/5982
+            range = setLastNodeRange(cursorElement, getEditorRange(cursorElement));
+            range.collapse(false);
+        }
         focusByRange(range);
         return range;
     } else if (parentElement) {

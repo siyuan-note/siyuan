@@ -66,9 +66,15 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                         }
                     } else {
                         if (blockElement && mathElement.getBoundingClientRect().width > blockElement.clientWidth) {
-                            mathElement.setAttribute("style", "max-width:100%;overflow-x:auto;overflow-y:hidden;display:inline-block");
+                            mathElement.style.maxWidth = "100%";
+                            mathElement.style.overflowX = "auto";
+                            mathElement.style.overflowY = "hidden";
+                            mathElement.style.display = "inline-block";
                         } else {
-                            mathElement.removeAttribute("style");
+                            mathElement.style.maxWidth = "";
+                            mathElement.style.overflowX = "";
+                            mathElement.style.overflowY = "";
+                            mathElement.style.display = "";
                         }
                         const nextSibling = hasNextSibling(mathElement);
                         if (!nextSibling) {
@@ -81,7 +87,12 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                                 // 随着浏览器的升级，从 beforeend 修改为 afterend
                                 mathElement.insertAdjacentText("afterend", Constants.ZWSP);
                             }
-                        } else if (nextSibling && nextSibling.textContent !== "\n") {
+                        } else if (nextSibling && nextSibling.nodeType !== 3 && (nextSibling as HTMLElement).getAttribute("data-type")?.indexOf("inline-math") > -1) {
+                            // 相邻的数学公式删除或光标移动有问题
+                            mathElement.after(document.createTextNode(Constants.ZWSP));
+                        } else if (nextSibling && nextSibling.textContent !== "\n" &&
+                            // 输入 $a$ 后，光标移动到其他块，再点击 a 后，光标不显示 https://github.com/siyuan-note/insider/issues/1076#issuecomment-1253215515
+                            nextSibling.textContent !== Constants.ZWSP) {
                             // 数学公式后一个字符删除多 br https://ld246.com/article/1647157880974
                             // 数学公式后有 \n 不能再添加 &#xFEFF; https://ld246.com/article/1647329437541
                             mathElement.insertAdjacentHTML("beforeend", "&#xFEFF;");

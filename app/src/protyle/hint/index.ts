@@ -12,7 +12,7 @@ import {hintEmbed, hintRef, hintSlash} from "./extend";
 import {getSavePath} from "../../util/newFile";
 import {upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
-import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {genEmptyBlock} from "../../block/util";
 import {insertHTML} from "../util/insertHTML";
@@ -31,6 +31,7 @@ import {openFileById} from "../../editor/util";
 import {openMobileFileById} from "../../mobile/editor";
 import {getIconByType} from "../../editor/getIcon";
 import {processRender} from "../util/processCode";
+import {getEventName} from "../util/compatibility";
 
 export class Hint {
     public timeId: number;
@@ -128,7 +129,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         const key = this.getKey(currentLineValue, protyle.options.hint.extend);
 
         if (typeof key === "undefined" ||
-            (   // 除emoji 提示外，其余在 tag/inline math/inline-code 内移动不进行提示
+            (   // 除 emoji 提示外，其余在 tag/inline math/inline-code 内移动不进行提示
                 this.splitChar !== ":" &&
                 (protyle.toolbar.getCurrentType(range).length > 0 || hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock"))
             )
@@ -245,7 +246,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         }
         if (hasSearch) {
             const searchElement = this.element.querySelector("input.b3-text-field") as HTMLInputElement;
-            const oldValue = this.element.querySelector("mark").textContent;
+            const oldValue = this.element.querySelector("mark")?.textContent || "";
             searchElement.value = oldValue;
             searchElement.select();
             searchElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -378,7 +379,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         if (nodeElement) {
             id = nodeElement.getAttribute("data-node-id");
         }
-        let html = nodeElement.outerHTML;
+        const html = nodeElement.outerHTML;
         // 自顶向下法新建文档后光标定位问题 https://github.com/siyuan-note/siyuan/issues/299
         // QQ 拼音输入法自动补全需移除补全内容 https://github.com/siyuan-note/siyuan/issues/320
         // 前后有标记符的情况 https://github.com/siyuan-note/siyuan/issues/2511
@@ -421,11 +422,17 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     path: pathPosix().join(pathString, realFileName),
                     markdown: ""
                 }, response => {
+                    let tempElement = document.createElement("div");
                     let blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(realFileName)}</span>`;
                     if (fileNames.length === 2) {
                         blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="s">${escapeHtml(fileNames[0])}</span>`;
                     }
-                    insertHTML(genEmptyBlock(false, false, blockRefHTML), protyle);
+                    tempElement.innerHTML = blockRefHTML;
+                    tempElement = tempElement.firstElementChild as HTMLDivElement;
+                    protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                        type: "id",
+                        color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`
+                    });
                 });
             });
             return;
@@ -439,14 +446,13 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 }
                 return;
             }
-            range.deleteContents();
-            range.insertNode(document.createElement("wbr"));
-            html = nodeElement.outerHTML;
-            const tempElement = document.createElement("template");
+            let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
-            range.insertNode(tempElement.content.cloneNode(true));
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
-            focusByWbr(nodeElement, range);
+            tempElement = tempElement.firstElementChild as HTMLDivElement;
+            protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                type: "id",
+                color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`
+            });
             return;
         } else if (this.splitChar === ":") {
             addEmoji(value);
@@ -486,16 +492,19 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 return;
             } else if (value === Constants.ZWSP) {
                 range.deleteContents();
+                this.fixImageCursor(range);
                 protyle.toolbar.showTpl(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 1) {
                 range.deleteContents();
+                this.fixImageCursor(range);
                 protyle.toolbar.showWidget(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else if (value === Constants.ZWSP + 2) {
                 range.deleteContents();
+                this.fixImageCursor(range);
                 protyle.toolbar.showAssets(protyle, nodeElement, range);
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
@@ -525,7 +534,11 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 range.deleteContents();
                 focusByRange(range);
                 protyle.toolbar.range = range;
-                protyle.toolbar.setInlineMark(protyle, value, "add");
+                if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(value)) {
+                    protyle.toolbar.element.querySelector(`[data-type="${value}"]`).dispatchEvent(new CustomEvent("block-ref" === value ? getEventName() : "click"));
+                    return;
+                }
+                protyle.toolbar.setInlineMark(protyle, value, "range");
                 return;
             } else if (value === "emoji") {
                 range.deleteContents();
@@ -536,11 +549,15 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 return;
             } else if (value.indexOf("style") > -1) {
                 range.deleteContents();
+                this.fixImageCursor(range);
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
             } else {
                 range.deleteContents();
+                if (value !== "![]()") {
+                    this.fixImageCursor(range);
+                }
                 let textContent = value;
                 if (value === "```") {
                     textContent = value + (localStorage.getItem(Constants.LOCAL_CODELANG) || "") + Lute.Caret + "\n```";
@@ -714,6 +731,16 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             return true;
         }
         return false;
+    }
+
+    private fixImageCursor(range: Range) {
+        const previous = hasPreviousSibling(range.startContainer);
+        if (previous && previous.nodeType !== 3 && (previous as HTMLElement).classList.contains("img")) {
+            if (!hasNextSibling(previous)) {
+                range.insertNode(document.createTextNode(Constants.ZWSP));
+                range.collapse(false);
+            }
+        }
     }
 
     private getKey(currentLineValue: string, extend: IHintExtend[]) {

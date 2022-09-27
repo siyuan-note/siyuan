@@ -29,8 +29,8 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
-	util2 "github.com/88250/lute/util"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -39,8 +39,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
-
-var writingDataLock = sync.Mutex{}
 
 func IsFoldHeading(transactions *[]*Transaction) bool {
 	if 1 == len(*transactions) && 1 == len((*transactions)[0].DoOperations) {
@@ -110,9 +108,12 @@ func AutoFlushTx() {
 	}
 }
 
+var txLock = sync.Mutex{}
+
 func flushTx() {
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
+	txLock.Lock()
+	defer txLock.Unlock()
+
 	defer logging.Recover()
 
 	currentTx = mergeTx()
@@ -423,7 +424,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
 
-	data := strings.ReplaceAll(operation.Data.(string), util2.FrontEndCaret, "")
+	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	luteEngine := NewLute()
 	subTree := luteEngine.BlockDOM2Tree(data)
 	insertedNode := subTree.Root.FirstChild
@@ -511,7 +512,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
 
-	data := strings.ReplaceAll(operation.Data.(string), util2.FrontEndCaret, "")
+	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	luteEngine := NewLute()
 	subTree := luteEngine.BlockDOM2Tree(data)
 	insertedNode := subTree.Root.FirstChild
@@ -720,7 +721,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
 
-	data := strings.ReplaceAll(operation.Data.(string), util2.FrontEndCaret, "")
+	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	luteEngine := NewLute()
 	subTree := luteEngine.BlockDOM2Tree(data)
 
@@ -853,7 +854,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
-	data := strings.ReplaceAll(operation.Data.(string), util2.FrontEndCaret, "")
+	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	if "" == data {
 		logging.LogErrorf("update data is nil")
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
@@ -880,7 +881,23 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 				// 剔除空白的行级公式
 				unlinks = append(unlinks, n)
 			}
-		} else if ast.NodeBlockRefID == n.Type {
+		} else if ast.NodeTextMark == n.Type {
+			if n.IsTextMarkType("inline-math") {
+				if "" == strings.TrimSpace(n.TextMarkInlineMathContent) {
+					unlinks = append(unlinks, n)
+				}
+			} else if n.IsTextMarkType("block-ref") {
+				sql.CacheRef(subTree, n)
+
+				if "d" == n.TextMarkBlockRefSubtype {
+					// 偶发编辑文档标题后引用处的动态锚文本不更新 https://github.com/siyuan-note/siyuan/issues/5891
+					// 使用缓存的动态锚文本强制覆盖当前块中的引用节点动态锚文本
+					if dRefText, ok := treenode.DynamicRefTexts.Load(n.TextMarkBlockRefID); ok && "" != dRefText {
+						n.TextMarkTextContent = dRefText.(string)
+					}
+				}
+			}
+		} else if ast.NodeBlockRef == n.Type {
 			sql.CacheRef(subTree, n)
 		}
 		return ast.WalkContinue
@@ -1095,27 +1112,28 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 		if !entering {
 			return ast.WalkContinue
 		}
-		if ast.NodeBlockRef == n.Type && nil != n.ChildByType(ast.NodeBlockRefDynamicText) {
-			defIDNode := n.ChildByType(ast.NodeBlockRefID)
-			if nil == defIDNode {
-				return ast.WalkSkipChildren
-			}
-			defID := defIDNode.TokensStr()
-			defNode := changedDefNodes[defID]
-			if nil == defNode {
-				return ast.WalkSkipChildren
-			}
-			if ast.NodeDocument != defNode.Type && defNode.IsContainerBlock() {
-				defNode = treenode.FirstLeafBlock(defNode)
-			}
-			defContent := renderBlockText(defNode)
-			if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(defContent) {
-				defContent = gulu.Str.SubStr(defContent, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
-			}
-			treenode.SetDynamicBlockRefText(n, defContent)
-			changed = true
+		if !treenode.IsBlockRef(n) {
+			return ast.WalkContinue
+		}
+
+		defID, _, subtype := treenode.GetBlockRef(n)
+		if "s" == subtype || "" == defID {
+			return ast.WalkContinue
+		}
+
+		defNode := changedDefNodes[defID]
+		if nil == defNode {
 			return ast.WalkSkipChildren
 		}
+		if ast.NodeDocument != defNode.Type && defNode.IsContainerBlock() {
+			defNode = treenode.FirstLeafBlock(defNode)
+		}
+		defContent := renderBlockText(defNode)
+		if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(defContent) {
+			defContent = gulu.Str.SubStr(defContent, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
+		}
+		treenode.SetDynamicBlockRefText(n, defContent)
+		changed = true
 		return ast.WalkContinue
 	})
 	return

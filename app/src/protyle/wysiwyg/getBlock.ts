@@ -78,7 +78,7 @@ export const getNoContainerElement = (element: Element) => {
 };
 
 export const getContenteditableElement = (element: Element) => {
-    if (!element || element.getAttribute("contenteditable") === "true") {
+    if (!element || (element.getAttribute("contenteditable") === "true") && !element.classList.contains("protyle-wysiwyg")) {
         return element;
     }
     return element.querySelector('[contenteditable="true"]');
@@ -94,7 +94,8 @@ export const getTopEmptyElement = (element: Element) => {
     while (topElement.parentElement && !topElement.parentElement.classList.contains("protyle-wysiwyg")) {
         if (!topElement.parentElement.getAttribute("data-node-id")) {
             topElement = topElement.parentElement;
-        } else if (topElement.parentElement.textContent !== "" || topElement.previousElementSibling?.getAttribute("data-node-id")) {
+        } else if (getContenteditableElement(topElement.parentElement).textContent !== "" ||
+            topElement.previousElementSibling?.getAttribute("data-node-id")) {
             break;
         } else {
             topElement = topElement.parentElement;
@@ -151,7 +152,7 @@ export const getTopAloneElement = (topSourceElement: Element) => {
 export const hasNextSibling = (element: Node) => {
     let nextSibling = element.nextSibling;
     while (nextSibling) {
-        if (nextSibling.textContent === "") {
+        if (nextSibling.textContent === "" && nextSibling.nodeType === 3) {
             nextSibling = nextSibling.nextSibling;
         } else {
             return nextSibling;

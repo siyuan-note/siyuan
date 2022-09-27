@@ -1,6 +1,6 @@
 import {
     focusBlock,
-    focusByRange,
+    focusByRange, focusByWbr,
     getEditorRange,
 } from "../util/selection";
 import {fetchPost} from "../../util/fetch";
@@ -26,6 +26,8 @@ import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
 import {code160to32} from "../util/code160to32";
 import {deleteFile} from "../../editor/deleteFile";
+import {genEmptyElement} from "../../block/util";
+import {transaction} from "../wysiwyg/transaction";
 
 export class Title {
     public element: HTMLElement;
@@ -80,12 +82,28 @@ export class Title {
                 return true;
             }
 
-            if (event.key === "ArrowDown" || event.key === "Enter") {
+            if (event.key === "ArrowDown") {
                 const noContainerElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild);
                 // https://github.com/siyuan-note/siyuan/issues/4923
                 if (noContainerElement) {
                     focusBlock(noContainerElement, protyle.wysiwyg.element);
                 }
+                event.preventDefault();
+                event.stopPropagation();
+            } else if (event.key === "Enter") {
+                const newId = Lute.NewNodeID();
+                const newElement = genEmptyElement(false, true, newId);
+                protyle.wysiwyg.element.insertAdjacentElement("afterbegin", newElement);
+                focusByWbr(newElement, protyle.toolbar.range || getEditorRange(newElement));
+                transaction(protyle, [{
+                    action: "insert",
+                    data: newElement.outerHTML,
+                    id: newId,
+                    parentID: protyle.block.parentID
+                }], [{
+                    action: "delete",
+                    id: newId,
+                }]);
                 event.preventDefault();
                 event.stopPropagation();
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.attr.custom, event)) {

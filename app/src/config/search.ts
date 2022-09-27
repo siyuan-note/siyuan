@@ -12,8 +12,8 @@ export const initConfigSearch = (element: HTMLElement) => {
     const configIndex = [
         // 编辑器
         getLang(["config", "fullWidth",
-            "editor", "md2", "md3", "md12", "md16", "md27", "md28", "md29", "md30", "md31", "md32", "md33", "md34", "md39", "md40",
-            "fontSizeTip", "fontSize", "font", "font1", "generateHistory", "generateHistoryInterval",
+            "editor", "md2", "md3", "md12", "md16", "md27", "md28", "md29", "md30", "md31", "md32", "md33", "md34",
+            "md39", "md40", "fontSizeTip", "fontSize", "font", "font1", "generateHistory", "generateHistoryInterval",
             "historyRetentionDays", "historyRetentionDaysTip", "clearHistory", "katexMacros", "katexMacrosTip"
         ]),
 
@@ -26,17 +26,19 @@ export const initConfigSearch = (element: HTMLElement) => {
         getLang(["assets", "clearUnused"]),
 
         // 导出
-        getLang(["paragraphBeginningSpace", "md4", "export", "export1", "export2", "export5", "export11", "export13", "export14", "export15", "export19", "export20", "blockRef", "blockEmbed"]),
+        getLang(["paragraphBeginningSpace", "md4", "export", "export1", "export2", "export5", "export11",
+            "export13", "export14", "export15", "export19", "export20", "blockRef", "blockEmbed"]),
 
         // 外观
         window.siyuan.config.appearance.darkThemes.concat(window.siyuan.config.appearance.icons).concat(window.siyuan.config.appearance.lightThemes)
             .concat(Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE)
             .concat(Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE)
             .concat(["English", "简体中文"]).concat(getLang(["language", "language1"]))
-            .concat(getLang(["appearance", "appearance1", "appearance2", "appearance3", "appearance4", "appearance5",
-                "appearance6", "appearance7", "appearance8", "appearance9", "appearance10", "appearance11", "appearance14", "appearance15",
-                "resetLayout", "reset", "icon", "themeLight", "themeDark", "open", "close",
-                "theme", "theme2", "theme11", "theme12", "theme13", "theme14", "customEmoji"])),
+            .concat(getLang(["appearance", "appearance1", "appearance2", "appearance3", "appearance4",
+                "appearance5", "appearance6", "appearance8", "appearance9", "appearance10", "appearance11",
+                "appearance14", "appearance15", "appearance16", "appearance17",
+                "resetLayout", "reset", "icon", "themeLight", "themeDark", "open", "close", "themeOS", "theme",
+                "theme2", "theme11", "theme12", "theme13", "theme14", "customEmoji", "customEmojiTip", "refresh"])),
 
         // 集市
         getLang(["bazaar", "theme", "template", "icon", "widget"]),
@@ -54,18 +56,21 @@ export const initConfigSearch = (element: HTMLElement) => {
             .concat(Object.keys(Constants.SIYUAN_KEYMAP.editor.table))),
 
         // 云端
-        getLang(["sync", "cloudSpace", "backup", "cdn", "total", "cloudBackup", "updatePath", "cloudSync",
-            "syncTip", "reposTip", "openSyncTip1", "openSyncTip2", "cloudSyncDir"]),
+        getLang(["cloudStorage", "trafficStat", "sync", "backup", "cdn", "total", "sizeLimit", "cloudBackup",
+            "cloudBackupTip", "updatePath", "cloudSync", "upload", "download", "syncMode", "syncModeTip",
+            "syncMode1", "syncMode2", "reposTip", "openSyncTip1", "openSyncTip2", "cloudSyncDir", "config"]),
 
         // 账号
-        getLang(["accountTip", "accountName", "password", "captcha", "forgetPassword", "login", "register", "twoFactorCaptcha",
-            "account1", "account2", "account5", "networkProxy"]),
+        getLang(["accountTip", "accountName", "password", "captcha", "forgetPassword", "login", "register",
+            "twoFactorCaptcha", "account1", "account2", "account5"]),
 
         // 关于
         getLang(["about", "about1", "about2", "about3", "about4", "about5", "about6", "about7", "about8",
-            "about11", "about12", "about13", "about14", "about15", "about16",
-            "slogan", "currentVer", "checkUpdate", "updatePath", "snapshotPassword", "systemLog",
-            "autoDownloadUpdatePkg"]),
+            "about9", "about10", "about11", "about12", "about13", "about14", "about17", "config", "dataRepoKey",
+            "dataRepoKeyTip1", "dataRepoKeyTip2", "slogan", "currentVer", "checkUpdate", "updatePath", "systemLog",
+            "importKey", "genKey", "genKeyByPW", "copyKey", "resetRepo", "systemLogTip", "export", "visitAnnouncements",
+            "safeQuit", "directConnection", "siyuanNote", "key", "password", "copied", "resetRepoTip",
+            "autoDownloadUpdatePkg", "autoDownloadUpdatePkgTip", "networkProxy", "keyPlaceholder", "initRepoKeyTip"]),
     ];
     const inputElement = element.querySelector(".b3-form__icon input") as HTMLInputElement;
     if (window.siyuan.config.system.container !== "ios") {
@@ -75,7 +80,10 @@ export const initConfigSearch = (element: HTMLElement) => {
         const indexList: number[] = [];
         const inputValue = inputElement.value;
         configIndex.map((item, index) => {
-            item.map(subItem => {
+            item.map((subItem) => {
+                if (!subItem) {
+                    console.warn("Search config miss language: ", item, index);
+                }
                 if (subItem && (inputValue.toLowerCase().indexOf(subItem) > -1 || subItem.toLowerCase().indexOf(inputValue) > -1)) {
                     indexList.push(index);
                 }

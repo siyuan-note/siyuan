@@ -32,6 +32,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -62,6 +63,9 @@ func SyncData(boot, exit, byHand bool) {
 	if !boot && !exit && 2 == Conf.Sync.Mode && !byHand {
 		return
 	}
+
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 
 	if util.IsMutexLocked(&syncLock) {
 		logging.LogWarnf("sync is in progress")
@@ -345,7 +349,7 @@ func formatErrorMsg(err error) string {
 		msg = Conf.Language(24)
 	} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") {
 		msg = Conf.Language(24)
-	} else if strings.Contains(msgLowerCase, "connection was forcibly closed") {
+	} else if strings.Contains(msgLowerCase, "connection was") || strings.Contains(msgLowerCase, "reset by peer") || strings.Contains(msgLowerCase, "refused") || strings.Contains(msgLowerCase, "socket") {
 		msg = Conf.Language(28)
 	} else if strings.Contains(msgLowerCase, "cloud object not found") {
 		msg = Conf.Language(129)

@@ -55,9 +55,6 @@ func InstalledWidgets() (widgets []*bazaar.Widget) {
 }
 
 func InstallBazaarWidget(repoURL, repoHash, widgetName string) error {
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	installPath := filepath.Join(util.DataDir, "widgets", widgetName)
 	err := bazaar.InstallWidget(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
@@ -67,9 +64,6 @@ func InstallBazaarWidget(repoURL, repoHash, widgetName string) error {
 }
 
 func UninstallBazaarWidget(widgetName string) error {
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	installPath := filepath.Join(util.DataDir, "widgets", widgetName)
 	err := bazaar.UninstallWidget(installPath)
 	if nil != err {
@@ -105,9 +99,6 @@ func InstalledIcons() (icons []*bazaar.Icon) {
 }
 
 func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	installPath := filepath.Join(util.IconsPath, iconName)
 	err := bazaar.InstallIcon(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
@@ -120,9 +111,6 @@ func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
 }
 
 func UninstallBazaarIcon(iconName string) error {
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	installPath := filepath.Join(util.IconsPath, iconName)
 	err := bazaar.UninstallIcon(installPath)
 	if nil != err {
@@ -160,9 +148,6 @@ func InstalledThemes() (ret []*bazaar.Theme) {
 }
 
 func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bool) error {
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	closeThemeWatchers()
 
 	installPath := filepath.Join(util.ThemesPath, themeName)
@@ -188,9 +173,6 @@ func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bo
 }
 
 func UninstallBazaarTheme(themeName string) error {
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	closeThemeWatchers()
 
 	installPath := filepath.Join(util.ThemesPath, themeName)
@@ -224,9 +206,6 @@ func InstalledTemplates() (templates []*bazaar.Template) {
 }
 
 func InstallBazaarTemplate(repoURL, repoHash, templateName string) error {
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	installPath := filepath.Join(util.DataDir, "templates", templateName)
 	err := bazaar.InstallTemplate(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
@@ -236,9 +215,6 @@ func InstallBazaarTemplate(repoURL, repoHash, templateName string) error {
 }
 
 func UninstallBazaarTemplate(templateName string) error {
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
-
 	installPath := filepath.Join(util.DataDir, "templates", templateName)
 	err := bazaar.UninstallTemplate(installPath)
 	if nil != err {

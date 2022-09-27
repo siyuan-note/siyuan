@@ -11,9 +11,10 @@ export const initBlockPopover = () => {
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
             hasClosestByClassName(event.target, "emojis__item") ||
-            hasClosestByClassName(event.target, "emojis__type");
+            hasClosestByClassName(event.target, "emojis__type") ||
+            hasClosestByAttribute(event.target, "data-type", "inline-memo");
         if (aElement) {
-            let tip = aElement.getAttribute("aria-label");
+            let tip = aElement.getAttribute("aria-label") || aElement.getAttribute("data-inline-memo-content");
             // 折叠块标文案替换
             if (hasClosestByAttribute(event.target, "data-type", "fold", true)) {
                 tip = window.siyuan.languages.fold;
@@ -25,7 +26,7 @@ export const initBlockPopover = () => {
                     tip += " " + title;
                 }
             }
-            if (tip && !tip.startsWith("siyuan://blocks")) {
+            if (tip && !tip.startsWith("siyuan://blocks") && !aElement.classList.contains("b3-tooltips")) {
                 showTooltip(tip, aElement);
                 event.stopPropagation();
                 return;
@@ -48,6 +49,9 @@ export const initBlockPopover = () => {
             }
             let popoverTargetElement = hasClosestByAttribute(event.target, "data-type", "block-ref") as HTMLElement ||
                 hasClosestByAttribute(event.target, "data-type", "virtual-block-ref") as HTMLElement;
+            if (popoverTargetElement && popoverTargetElement.classList.contains("b3-tooltips")) {
+                popoverTargetElement = undefined;
+            }
             if (!popoverTargetElement) {
                 popoverTargetElement = hasClosestByClassName(event.target, "popover__block") as HTMLElement;
             }
@@ -103,6 +107,9 @@ export const initBlockPopover = () => {
             }
             let popoverTargetElement = hasClosestByAttribute(event.target, "data-type", "block-ref") as HTMLElement ||
                 hasClosestByAttribute(event.target, "data-type", "virtual-block-ref") as HTMLElement;
+            if (popoverTargetElement && popoverTargetElement.classList.contains("b3-tooltips")) {
+                popoverTargetElement = undefined;
+            }
             if (!popoverTargetElement) {
                 popoverTargetElement = hasClosestByClassName(event.target, "popover__block") as HTMLElement;
             }
@@ -132,7 +139,7 @@ export const initBlockPopover = () => {
                     ids = [dataId];
                 }
                 defIds = JSON.parse(popoverTargetElement.getAttribute("data-defids") || "[]");
-            } else if (popoverTargetElement.getAttribute("data-type") === "virtual-block-ref") {
+            } else if (popoverTargetElement.getAttribute("data-type")?.indexOf("virtual-block-ref") > -1) {
                 const nodeElement = hasClosestBlock(popoverTargetElement);
                 if (nodeElement) {
                     const postResponse = await fetchSyncPost("/api/block/getBlockDefIDsByRefText", {
@@ -141,7 +148,7 @@ export const initBlockPopover = () => {
                     });
                     ids = postResponse.data;
                 }
-            } else if (popoverTargetElement.getAttribute("data-type") === "a") {
+            } else if (popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a")) {
                 // 以思源协议开头的链接
                 ids = [popoverTargetElement.getAttribute("data-href").substr(16, 22)];
             } else {

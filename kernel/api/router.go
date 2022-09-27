@@ -147,6 +147,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/updateBlock", model.CheckAuth, updateBlock)
 	ginServer.Handle("POST", "/api/block/deleteBlock", model.CheckAuth, deleteBlock)
 	ginServer.Handle("POST", "/api/block/setBlockReminder", model.CheckAuth, setBlockReminder)
+	ginServer.Handle("POST", "/api/block/getHeadingLevelTransaction", model.CheckAuth, getHeadingLevelTransaction)
 
 	ginServer.Handle("POST", "/api/file/getFile", model.CheckAuth, getFile)
 	ginServer.Handle("POST", "/api/file/putFile", model.CheckAuth, putFile)
@@ -205,6 +206,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/export/preview", model.CheckAuth, exportPreview)
 	ginServer.Handle("POST", "/api/export/exportData", model.CheckAuth, exportData)
 	ginServer.Handle("POST", "/api/export/exportDataInFolder", model.CheckAuth, exportDataInFolder)
+	ginServer.Handle("POST", "/api/export/exportTempContent", model.CheckAuth, exportTempContent)
 
 	ginServer.Handle("POST", "/api/import/importStdMd", model.CheckAuth, model.CheckReadonly, importStdMd)
 	ginServer.Handle("POST", "/api/import/importData", model.CheckAuth, model.CheckReadonly, importData)
@@ -228,7 +230,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/setting/getCustomCSS", model.CheckAuth, getCustomCSS)
 	ginServer.Handle("POST", "/api/setting/setCustomCSS", model.CheckAuth, setCustomCSS)
 	ginServer.Handle("POST", "/api/setting/setEmoji", model.CheckAuth, setEmoji)
-	ginServer.Handle("POST", "/api/setting/setSearchCaseSensitive", model.CheckAuth, setSearchCaseSensitive)
 
 	ginServer.Handle("POST", "/api/graph/resetGraph", model.CheckAuth, resetGraph)
 	ginServer.Handle("POST", "/api/graph/resetLocalGraph", model.CheckAuth, resetLocalGraph)

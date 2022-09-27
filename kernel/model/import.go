@@ -124,12 +124,17 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if !entering {
 				return ast.WalkContinue
 			}
-			if ast.NodeBlockRefID == n.Type {
-				newDefID := blockIDs[n.TokensStr()]
+			if treenode.IsBlockRef(n) {
+				defID, _, _ := treenode.GetBlockRef(n)
+				newDefID := blockIDs[defID]
 				if "" != newDefID {
-					n.Tokens = []byte(newDefID)
-				} else {
-					logging.LogWarnf("not found def [" + n.TokensStr() + "]")
+					if ast.NodeBlockRef == n.Type {
+						if id := n.ChildByType(ast.NodeBlockRefID); nil != id {
+							id.Tokens = []byte(newDefID)
+						}
+					} else {
+						n.TextMarkBlockRefID = newDefID
+					}
 				}
 			} else if ast.NodeBlockQueryEmbedScript == n.Type {
 				for oldID, newID := range blockIDs {
@@ -144,6 +149,10 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	// 写回 .sy
 	for _, tree := range trees {
 		syPath := filepath.Join(unzipRootPath, tree.Path)
+		if "" == tree.Root.Spec {
+			luteEngine.NestedInlines2FlattedSpans(tree)
+			tree.Root.Spec = "1"
+		}
 		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
 		data := renderer.Render()
 
@@ -162,6 +171,51 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		if err = os.Rename(syPath, newSyPath); nil != err {
 			logging.LogErrorf("rename .sy from [%s] to [%s] failed: %s", syPath, newSyPath, err)
 			return
+		}
+	}
+
+	// 合并 sort.json
+	fullSortIDs := map[string]int{}
+	sortIDs := map[string]int{}
+	var sortData []byte
+	var sortErr error
+	sortPath := filepath.Join(unzipRootPath, ".siyuan", "sort.json")
+	if gulu.File.IsExist(sortPath) {
+		sortData, sortErr = filelock.NoLockFileRead(sortPath)
+		if nil != sortErr {
+			logging.LogErrorf("read import sort conf failed: %s", sortErr)
+		}
+
+		if sortErr = gulu.JSON.UnmarshalJSON(sortData, &sortIDs); nil != sortErr {
+			logging.LogErrorf("unmarshal sort conf failed: %s", sortErr)
+		}
+
+		sortPath = filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
+		if gulu.File.IsExist(sortPath) {
+			sortData, sortErr = filelock.NoLockFileRead(sortPath)
+			if nil != sortErr {
+				logging.LogErrorf("read box sort conf failed: %s", sortErr)
+			}
+
+			if sortErr = gulu.JSON.UnmarshalJSON(sortData, &fullSortIDs); nil != sortErr {
+				logging.LogErrorf("unmarshal box sort conf failed: %s", sortErr)
+			}
+		}
+
+		for oldID, sort := range sortIDs {
+			if newID := blockIDs[oldID]; "" != newID {
+				fullSortIDs[newID] = sort
+			}
+		}
+
+		sortData, sortErr = gulu.JSON.MarshalJSON(fullSortIDs)
+		if nil != sortErr {
+			logging.LogErrorf("marshal box sort conf failed: %s", sortErr)
+		} else {
+			sortErr = filelock.NoLockFileWrite(sortPath, sortData)
+			if nil != sortErr {
+				logging.LogErrorf("write box sort conf failed: %s", sortErr)
+			}
 		}
 	}
 
@@ -250,7 +304,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	for _, assets := range assetsDirs {
 		if gulu.File.IsDir(assets) {
 			dataAssets := filepath.Join(util.DataDir, "assets")
-			if err = gulu.File.Copy(assets, dataAssets); nil != err {
+			if err = filesys.Copy(assets, dataAssets); nil != err {
 				logging.LogErrorf("copy assets from [%s] to [%s] failed: %s", assets, dataAssets, err)
 				return
 			}
@@ -258,8 +312,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		os.RemoveAll(assets)
 	}
 
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 
 	filelock.ReleaseAllFileLocks()
 
@@ -287,7 +341,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	IncSync()
-	RefreshFileTree()
+	FullReindex()
 	return
 }
 
@@ -322,8 +376,8 @@ func ImportData(zipPath string) (err error) {
 		return errors.New("invalid data.zip")
 	}
 
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
+	filesys.LockWriteFile()
+	defer filesys.UnlockWriteFile()
 
 	filelock.ReleaseAllFileLocks()
 	tmpDataPath := filepath.Join(unzipPath, dirs[0].Name())
@@ -334,7 +388,7 @@ func ImportData(zipPath string) (err error) {
 	}
 
 	IncSync()
-	RefreshFileTree()
+	FullReindex()
 	return
 }
 
@@ -342,8 +396,6 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 
 	WaitForWritingFiles()
-	writingDataLock.Lock()
-	defer writingDataLock.Unlock()
 
 	var baseHPath, baseTargetPath, boxLocalPath string
 	if "/" == toPath {
@@ -360,6 +412,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	}
 	boxLocalPath = filepath.Join(util.DataDir, boxID)
 
+	luteEngine := NewLute()
 	if gulu.File.IsDir(localPath) {
 		// 收集所有资源文件
 		assets := map[string]string{}
@@ -451,6 +504,8 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			tree.Path = targetPath
 			targetPaths[curRelPath] = targetPath
 			tree.HPath = hPath
+			tree.Root.Spec = "1"
+			luteEngine.NestedInlines2FlattedSpans(tree)
 
 			docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 			assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
@@ -507,7 +562,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		}
 
 		IncSync()
-		RefreshFileTree()
+		FullReindex()
 	} else { // 导入单个文件
 		fileName := filepath.Base(localPath)
 		if !strings.HasSuffix(fileName, ".md") && !strings.HasSuffix(fileName, ".markdown") {
@@ -538,6 +593,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		tree.Box = boxID
 		tree.Path = targetPath
 		tree.HPath = path.Join(baseHPath, title)
+		luteEngine.NestedInlines2FlattedSpans(tree)
 
 		docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 		assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)

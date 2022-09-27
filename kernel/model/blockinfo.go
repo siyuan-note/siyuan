@@ -144,6 +144,9 @@ func GetBlockRefIDsByFileAnnotationID(id string) (refIDs, refTexts []string) {
 func GetBlockDefIDsByRefText(refText string, excludeIDs []string) (ret []string) {
 	ret = sql.QueryBlockDefIDsByRefText(refText, excludeIDs)
 	sort.Sort(sort.Reverse(sort.StringSlice(ret)))
+	if 1 > len(ret) {
+		ret = []string{}
+	}
 	return
 }
 

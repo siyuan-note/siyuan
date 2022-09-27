@@ -55,7 +55,7 @@ func refreshFiletree(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	model.RefreshFileTree()
+	model.FullReindex()
 }
 
 func doc2Heading(c *gin.Context) {

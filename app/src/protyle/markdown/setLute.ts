@@ -2,6 +2,7 @@ export const setLute = (options: ILuteOptions) => {
     const lute: Lute = Lute.New();
     lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);
     lute.SetFileAnnotationRef(true);
+    lute.SetTextMark(true);
     lute.SetHeadingID(false);
     lute.SetYamlFrontMatter(false);
     lute.PutEmojis(options.emojis);

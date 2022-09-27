@@ -1,5 +1,6 @@
 {
 	"ID": "20211226122943-st7fpcj",
+	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226122943-st7fpcj",
@@ -35,20 +36,9 @@
 					"Data": "將 PDF 文件通過編輯器上傳插入以後，PDF 將放到 assets 文件夾下，並在文檔內生成形如 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "[filename](assets/filename.pdf)"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[filename](assets/filename.pdf)"
 				},
 				{
 					"Type": "NodeText",
@@ -84,40 +74,18 @@
 					"Data": "新分頁打開預覽 PDF 支援指定頁碼，需要將連結帶上參數 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "page"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "page"
 				},
 				{
 					"Type": "NodeText",
 					"Data": "，例如需要跳轉到第七頁，則將連結編輯為 "
 				},
 				{
-					"Type": "NodeCodeSpan",
-					"Data": "code",
-					"Children": [
-						{
-							"Type": "NodeCodeSpanOpenMarker"
-						},
-						{
-							"Type": "NodeCodeSpanContent",
-							"Data": "[filename](assets/filename.pdf?page=7)"
-						},
-						{
-							"Type": "NodeCodeSpanCloseMarker"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[filename](assets/filename.pdf?page=7)"
 				},
 				{
 					"Type": "NodeText",

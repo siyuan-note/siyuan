@@ -25,13 +25,18 @@ export const unicode2Emoji = (unicode: string, assic = false) => {
     if (unicode.indexOf(".") > -1) {
         emoji = `<img src="/emojis/${unicode}"/>`;
     } else if (isMobile() || window.siyuan.config.appearance.nativeEmoji || assic) {
-        unicode.split("-").forEach(item => {
-            if (item.length < 5) {
-                emoji += String.fromCodePoint(parseInt("0" + item, 16));
-            } else {
-                emoji += String.fromCodePoint(parseInt(item, 16));
-            }
-        });
+        try {
+            unicode.split("-").forEach(item => {
+                if (item.length < 5) {
+                    emoji += String.fromCodePoint(parseInt("0" + item, 16));
+                } else {
+                    emoji += String.fromCodePoint(parseInt(item, 16));
+                }
+            });
+        } catch (e) {
+            // 自定义表情搜索报错 https://github.com/siyuan-note/siyuan/issues/5883
+            // 这里忽略错误不做处理
+        }
     } else {
         emoji = `<svg class="custom-icon"><use xlink:href="#icon-${unicode}"></use></svg>`;
     }

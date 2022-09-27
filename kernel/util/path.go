@@ -22,6 +22,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/logging"
@@ -131,6 +132,10 @@ func IsRelativePath(dest string) bool {
 }
 
 func TimeFromID(id string) (ret string) {
+	if 14 > len(id) {
+		logging.LogWarnf("invalid id [%s], stack [\n%s]", id, logging.ShortStack())
+		return time.Now().Format("20060102150405")
+	}
 	ret = id[:14]
 	return
 }

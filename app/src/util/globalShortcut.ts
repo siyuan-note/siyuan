@@ -391,7 +391,7 @@ export const globalShortcut = () => {
             event.stopPropagation();
             return;
         }
-        if (matchHotKey(window.siyuan.config.keymap.general.history.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.general.dataHistory.custom, event)) {
             openHistory();
             event.preventDefault();
             event.stopPropagation();
@@ -536,7 +536,7 @@ export const globalShortcut = () => {
         }
 
         // 面板折叠展开操作
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) || matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event)) {
+        if (!event.repeat && (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) || matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event))) {
             let activePanelElement = document.querySelector(".block__icons--active");
             if (!activePanelElement) {
                 Array.from(document.querySelectorAll(".layout__wnd--active .layout-tab-container > div")).forEach(item => {
@@ -563,7 +563,7 @@ export const globalShortcut = () => {
         }
 
         // close tab
-        if (matchHotKey(window.siyuan.config.keymap.general.closeTab.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.general.closeTab.custom, event) && !event.repeat) {
             event.preventDefault();
             event.stopPropagation();
             let activeTabElement = document.querySelector(".block__icons--active");

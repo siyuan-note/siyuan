@@ -312,16 +312,18 @@ const initWindow = () => {
     });
     ipcRenderer.on(Constants.SIYUAN_UPDATE_THEME, (event, data) => {
         if (data.init) {
-            if ((window.siyuan.config.appearance.mode === 0 && data.theme === "light") ||
-                (window.siyuan.config.appearance.mode === 1 && data.theme === "dark")) {
-                loadAssets(window.siyuan.config.appearance);
-            } else {
+            if (window.siyuan.config.appearance.modeOS && (
+                (window.siyuan.config.appearance.mode === 1 && data.theme === "light") ||
+                (window.siyuan.config.appearance.mode === 0 && data.theme === "dark")
+            )) {
                 fetchPost("/api/system/setAppearanceMode", {
                     mode: data.theme === "light" ? 0 : 1
                 }, response => {
                     window.siyuan.config.appearance = response.data.appearance;
                     loadAssets(response.data.appearance);
                 });
+            } else {
+                loadAssets(window.siyuan.config.appearance);
             }
             return;
         }

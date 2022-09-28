@@ -525,7 +525,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
                 cursorElement = cellElements[cellElements.length - 1];
             }
         }
-        let range
+        let range;
         if (toStart) {
             // 需要定位到第一个 child https://github.com/siyuan-note/siyuan/issues/5930
             range = setFirstNodeRange(cursorElement, getEditorRange(cursorElement));

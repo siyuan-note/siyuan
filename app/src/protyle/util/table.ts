@@ -69,7 +69,7 @@ export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], no
 };
 
 export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
-    const wbrElement = document.createElement("wbr")
+    const wbrElement = document.createElement("wbr");
     range.insertNode(wbrElement);
     const html = nodeElement.outerHTML;
     wbrElement.remove();
@@ -98,7 +98,7 @@ export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElem
 };
 
 export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
-    const wbrElement = document.createElement("wbr")
+    const wbrElement = document.createElement("wbr");
     range.insertNode(wbrElement);
     const html = nodeElement.outerHTML;
     wbrElement.remove();
@@ -131,10 +131,10 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
             previousTrElement = previousTrElement.previousElementSibling;
         }
     }
-    let newRowElememt: HTMLTableRowElement
+    let newRowElememt: HTMLTableRowElement;
     if (cellElement.parentElement.parentElement.tagName === "THEAD" && !cellElement.parentElement.previousElementSibling) {
         cellElement.parentElement.parentElement.insertAdjacentHTML("beforebegin", `<thead><tr>${rowHTML}</tr></thead>`);
-        newRowElememt = nodeElement.querySelector("thead tr")
+        newRowElememt = nodeElement.querySelector("thead tr");
         cellElement.parentElement.parentElement.nextElementSibling.insertAdjacentHTML("afterbegin", cellElement.parentElement.parentElement.innerHTML);
         cellElement.parentElement.parentElement.remove();
     } else {
@@ -147,15 +147,15 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
 };
 
 export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLElement, type: InsertPosition, range: Range) => {
-    const wbrElement = document.createElement("wbr")
+    const wbrElement = document.createElement("wbr");
     range.insertNode(wbrElement);
     const html = nodeElement.outerHTML;
     wbrElement.remove();
     const index = getColIndex(cellElement);
     const tableElement = nodeElement.querySelector("table");
     for (let i = 0; i < tableElement.rows.length; i++) {
-        const colCellElement =  tableElement.rows[i].cells[index]
-        const newCellElement = document.createElement(colCellElement.tagName)
+        const colCellElement =  tableElement.rows[i].cells[index];
+        const newCellElement = document.createElement(colCellElement.tagName);
         if (colCellElement.isSameNode(cellElement)) {
             newCellElement.innerHTML = "<wbr> ";
         } else {

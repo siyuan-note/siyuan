@@ -381,7 +381,7 @@ const renderPDF = (id: string) => {
             webSecurity: false,
         },
     });
-    window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`
+    window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`;
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
         window.siyuan.printWin.loadURL(response.data.url);
     });

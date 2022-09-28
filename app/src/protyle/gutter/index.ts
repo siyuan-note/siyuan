@@ -1176,22 +1176,22 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             const headingSubMenu = [];
             if (subType !== "h1") {
-                headingSubMenu.push(this.genHeadingTransform(protyle, id, 1))
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 1));
             }
             if (subType !== "h2") {
-                headingSubMenu.push(this.genHeadingTransform(protyle, id, 2))
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 2));
             }
             if (subType !== "h3") {
-                headingSubMenu.push(this.genHeadingTransform(protyle, id, 3))
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 3));
             }
             if (subType !== "h4") {
-                headingSubMenu.push(this.genHeadingTransform(protyle, id, 4))
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 4));
             }
             if (subType !== "h5") {
-                headingSubMenu.push(this.genHeadingTransform(protyle, id, 5))
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 5));
             }
             if (subType !== "h6") {
-                headingSubMenu.push(this.genHeadingTransform(protyle, id, 6))
+                headingSubMenu.push(this.genHeadingTransform(protyle, id, 6));
             }
             window.siyuan.menus.menu.append(new MenuItem({
                 type: "submenu",
@@ -1205,7 +1205,7 @@ export class Gutter {
                 click() {
                     fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
                         writeText(response.data + Constants.ZWSP);
-                    })
+                    });
                 }
             }).element);
         }
@@ -1338,10 +1338,10 @@ export class Gutter {
                             mathRender(itemElement);
                         });
                     });
-                    transaction(protyle, response.data.doOperations, response.data.undoOperations)
+                    transaction(protyle, response.data.doOperations, response.data.undoOperations);
                 });
             }
-        }
+        };
     }
 
     private genClick(nodeElements: Element[], protyle: IProtyle, cb: (e: HTMLElement) => void) {

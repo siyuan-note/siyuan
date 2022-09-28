@@ -9,7 +9,6 @@ import {
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
 import {breakList, genListItemElement, listOutdent, updateListOrder} from "./list";
-import {hasClosestByMatchTag} from "../util/hasClosest";
 import {highlightRender} from "../markdown/highlightRender";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";

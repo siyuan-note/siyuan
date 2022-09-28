@@ -38,18 +38,18 @@ export const isLocalPath = (link: string) => {
         return false;
     }
 
-    link = link.trim()
+    link = link.trim();
     if (1 > link.length) {
         return false;
     }
 
-    link = link.toLowerCase()
+    link = link.toLowerCase();
     if (link.startsWith("assets/") || link.startsWith("file://") || link.startsWith("\\\\") /* Windows 网络共享路径 */) {
-        return true
+        return true;
     }
 
-    const colonIdx = link.indexOf(":")
-    return 1 === colonIdx // 冒号前面只有一个字符认为是 Windows 盘符而不是网络协议
+    const colonIdx = link.indexOf(":");
+    return 1 === colonIdx; // 冒号前面只有一个字符认为是 Windows 盘符而不是网络协议
 };
 
 export const pathPosix = () => {

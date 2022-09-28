@@ -4,7 +4,6 @@ import {processPasteCode, processRender} from "./processCode";
 import {writeText} from "./compatibility";
 /// #if !BROWSER
 import {clipboard} from "electron";
-import * as path from "path";
 /// #endif
 import {hasClosestBlock} from "./hasClosest";
 import {focusByWbr, getEditorRange} from "./selection";
@@ -111,7 +110,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     }
     // 复制标题及其下方块使用 writeText，需将 textPLain 转换为 textHTML
     if (textPlain.endsWith(Constants.ZWSP) && !textHTML) {
-        textHTML = textPlain
+        textHTML = textPlain;
     }
     /// #if !MOBILE
     if (!textHTML && !textPlain && ("clipboardData" in event)) {

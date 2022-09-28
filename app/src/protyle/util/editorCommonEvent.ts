@@ -16,7 +16,6 @@ import {Tab} from "../../layout/Tab";
 import {getAllModels} from "../../layout/getAll";
 import {updatePanelByEditor} from "../../editor/util";
 /// #endif
-import * as path from "path";
 import {Editor} from "../../editor";
 import {blockRender} from "../markdown/blockRender";
 import {processRender} from "./processCode";

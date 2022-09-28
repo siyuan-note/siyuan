@@ -1,3 +1,24 @@
+## v2.2.3 / 2022-09-28
+
+### 改进功能
+
+* [带子级升降标题层级](https://github.com/siyuan-note/siyuan/issues/2860)
+* [标题块支持复制下方块](https://github.com/siyuan-note/siyuan/issues/5450)
+* [表格内光标和按键交互优化](https://github.com/siyuan-note/siyuan/issues/5955)
+* [提升桌面端自动更新安装包下载速度](https://github.com/siyuan-note/siyuan/issues/5997)
+* [手动检查更新时自动下载更新安装包](https://github.com/siyuan-note/siyuan/issues/5998)
+* [桌面端自动下载更新安装包选项默认开启](https://github.com/siyuan-note/siyuan/issues/6000)
+
+### 修复缺陷
+
+* [使用社区主题时外观模式跟随系统切换异常](https://github.com/siyuan-note/siyuan/issues/5985)
+* [浏览器端界面异常](https://github.com/siyuan-note/siyuan/issues/5986)
+* [切换同一种外观模式时主题没有清除 js 残留](https://github.com/siyuan-note/siyuan/issues/5988)
+* [点击引用到同一文档的聚焦块中后退光标消失](https://github.com/siyuan-note/siyuan/issues/5989)
+* [复制带超链接的图片无法保存到本地](https://github.com/siyuan-note/siyuan/issues/5993)
+* [桌面端拉起自动更新安装包偶尔失败](https://github.com/siyuan-note/siyuan/issues/5996)
+* [云端数据同步报错导致界面溢出异常](https://github.com/siyuan-note/siyuan/issues/5999)
+
 ## v2.2.2 / 2022-09-27
 
 ### 改进功能

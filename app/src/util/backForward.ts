@@ -48,7 +48,7 @@ const focusStack = async (stack: IBackStack) => {
                 callback(tab) {
                     const editor = new Editor({
                         tab,
-                        blockId: info.data.rootChildID,
+                        blockId: stack.id, // 忘记为什么要用 rootChildID 了，但用了会产生 https://github.com/siyuan-note/siyuan/issues/6004 问题
                     });
                     tab.addModel(editor);
                 }
@@ -159,18 +159,12 @@ const focusStack = async (stack: IBackStack) => {
             }
             return false;
         }
-        const info = await fetchSyncPost("/api/block/getBlockInfo", {id: stack.id});
-        if (info.code === 2) {
-            // 文件被锁定
-            lockFile(info.data);
-            return false;
-        }
         fetchPost("/api/filetree/getDoc", {
-            id: info.data.rootChildID,
+            id: stack.id, // 忘记为什么要用 rootChildID 了，但用了会产生 https://github.com/siyuan-note/siyuan/issues/6004 问题
             mode: stack.isZoom ? 0 : 3,
             size: stack.isZoom ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
         }, getResponse => {
-            onGet(getResponse, stack.protyle, [Constants.CB_GET_HTML]);
+            onGet(getResponse, stack.protyle, stack.isZoom ? [Constants.CB_GET_HTML, Constants.CB_GET_ALL] : [Constants.CB_GET_HTML]);
             Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find(item => {
                 if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
                     blockElement = item;
@@ -270,7 +264,7 @@ export const pushBack = (protyle: IProtyle, range?: Range, blockElement?: Elemen
         const position = getSelectionOffset(editElement, undefined, range);
         const id = blockElement.getAttribute("data-node-id") || protyle.block.rootID;
         const lastStack = window.siyuan.backStack[window.siyuan.backStack.length - 1];
-        const isZoom = protyle.block.id !== protyle.block.rootID;
+        const isZoom = protyle.block.showAll;
         if (lastStack && lastStack.id === id && lastStack.isZoom === isZoom) {
             lastStack.position = position;
         } else {

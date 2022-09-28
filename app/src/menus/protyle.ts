@@ -409,9 +409,9 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
         size: id === protyle.block.rootID ? Constants.SIZE_GET : Constants.SIZE_GET_MAX,
     }, getResponse => {
         if (isPushBack) {
-            onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS]);
+            onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_HTML]);
         } else {
-            onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO]);
+            onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML]);
         }
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (focusId) {

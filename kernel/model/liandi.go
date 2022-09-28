@@ -150,102 +150,109 @@ var (
 
 func AutoRefreshCheck() {
 	for {
-		if !subscriptionExpirationReminded {
-			subscriptionExpirationReminded = true
-			go func() {
-				defer logging.Recover()
-
-				if "ios" == util.Container {
-					return
-				}
-				if IsSubscriber() && -1 != Conf.User.UserSiYuanProExpireTime {
-					expired := int64(Conf.User.UserSiYuanProExpireTime)
-					if time.Now().UnixMilli() >= expired { // 已经过期
-						time.Sleep(time.Second * 30)
-						util.PushErrMsg(Conf.Language(128), 0)
-						return
-					}
-					remains := (expired - time.Now().UnixMilli()) / 1000 / 60 / 60 / 24
-					if 0 < remains && 15 > remains { // 15 后过期
-						time.Sleep(3 * time.Minute)
-						util.PushErrMsg(fmt.Sprintf(Conf.Language(127), remains), 0)
-						return
-					}
-				}
-			}()
-		}
-
-		go func() {
-			defer logging.Recover()
-
-			if nil != Conf.User {
-				time.Sleep(2 * time.Minute)
-				if nil != Conf.User {
-					RefreshUser(Conf.User.UserToken)
-				}
-				subscriptionExpirationReminded = false
-			}
-		}()
-
-		go func() {
-			defer logging.Recover()
-
-			time.Sleep(1 * time.Minute)
-			announcementConf := filepath.Join(util.HomeDir, ".config", "siyuan", "announcement.json")
-			var existingAnnouncements, newAnnouncements []*Announcement
-			if gulu.File.IsExist(announcementConf) {
-				data, err := os.ReadFile(announcementConf)
-				if nil != err {
-					logging.LogErrorf("read announcement conf failed: %s", err)
-					return
-				}
-				if err = gulu.JSON.UnmarshalJSON(data, &existingAnnouncements); nil != err {
-					logging.LogErrorf("unmarshal announcement conf failed: %s", err)
-					os.Remove(announcementConf)
-					return
-				}
-			}
-
-			for _, announcement := range GetAnnouncements() {
-				var exist bool
-				for _, existingAnnouncement := range existingAnnouncements {
-					if announcement.Id == existingAnnouncement.Id {
-						exist = true
-						break
-					}
-				}
-				if !exist {
-					existingAnnouncements = append(existingAnnouncements, announcement)
-					newAnnouncements = append(newAnnouncements, announcement)
-				}
-			}
-
-			data, err := gulu.JSON.MarshalJSON(existingAnnouncements)
-			if nil != err {
-				logging.LogErrorf("marshal announcement conf failed: %s", err)
-				return
-			}
-			if err = os.WriteFile(announcementConf, data, 0644); nil != err {
-				logging.LogErrorf("write announcement conf failed: %s", err)
-				return
-			}
-
-			for _, newAnnouncement := range newAnnouncements {
-				util.PushMsg(fmt.Sprintf(Conf.Language(11), newAnnouncement.URL, newAnnouncement.Title), 0)
-			}
-		}()
-
-		go func() {
-			defer logging.Recover()
-
-			time.Sleep(3 * time.Minute)
-			checkDownloadInstallPkg()
-			if "" != getNewVerInstallPkgPath() {
-				util.PushMsg(Conf.Language(62), 0)
-			}
-		}()
+		go refreshSubscriptionExpirationRemind()
+		go refreshUser()
+		go refreshAnnouncement()
+		go refreshCheckDownloadInstallPkg()
 
 		<-refreshCheckTicker.C
+	}
+}
+
+func refreshSubscriptionExpirationRemind() {
+	if subscriptionExpirationReminded {
+		return
+	}
+	subscriptionExpirationReminded = true
+
+	defer logging.Recover()
+
+	if "ios" == util.Container {
+		return
+	}
+	if IsSubscriber() && -1 != Conf.User.UserSiYuanProExpireTime {
+		expired := int64(Conf.User.UserSiYuanProExpireTime)
+		if time.Now().UnixMilli() >= expired { // 已经过期
+			time.Sleep(time.Second * 30)
+			util.PushErrMsg(Conf.Language(128), 0)
+			return
+		}
+		remains := (expired - time.Now().UnixMilli()) / 1000 / 60 / 60 / 24
+		if 0 < remains && 15 > remains { // 15 后过期
+			time.Sleep(3 * time.Minute)
+			util.PushErrMsg(fmt.Sprintf(Conf.Language(127), remains), 0)
+			return
+		}
+	}
+}
+
+func refreshUser() {
+	defer logging.Recover()
+
+	if nil != Conf.User {
+		time.Sleep(2 * time.Minute)
+		if nil != Conf.User {
+			RefreshUser(Conf.User.UserToken)
+		}
+		subscriptionExpirationReminded = false
+	}
+}
+
+func refreshCheckDownloadInstallPkg() {
+	defer logging.Recover()
+
+	time.Sleep(3 * time.Minute)
+	checkDownloadInstallPkg()
+	if "" != getNewVerInstallPkgPath() {
+		util.PushMsg(Conf.Language(62), 0)
+	}
+}
+
+func refreshAnnouncement() {
+	defer logging.Recover()
+
+	time.Sleep(1 * time.Minute)
+	announcementConf := filepath.Join(util.HomeDir, ".config", "siyuan", "announcement.json")
+	var existingAnnouncements, newAnnouncements []*Announcement
+	if gulu.File.IsExist(announcementConf) {
+		data, err := os.ReadFile(announcementConf)
+		if nil != err {
+			logging.LogErrorf("read announcement conf failed: %s", err)
+			return
+		}
+		if err = gulu.JSON.UnmarshalJSON(data, &existingAnnouncements); nil != err {
+			logging.LogErrorf("unmarshal announcement conf failed: %s", err)
+			os.Remove(announcementConf)
+			return
+		}
+	}
+
+	for _, announcement := range GetAnnouncements() {
+		var exist bool
+		for _, existingAnnouncement := range existingAnnouncements {
+			if announcement.Id == existingAnnouncement.Id {
+				exist = true
+				break
+			}
+		}
+		if !exist {
+			existingAnnouncements = append(existingAnnouncements, announcement)
+			newAnnouncements = append(newAnnouncements, announcement)
+		}
+	}
+
+	data, err := gulu.JSON.MarshalJSON(existingAnnouncements)
+	if nil != err {
+		logging.LogErrorf("marshal announcement conf failed: %s", err)
+		return
+	}
+	if err = os.WriteFile(announcementConf, data, 0644); nil != err {
+		logging.LogErrorf("write announcement conf failed: %s", err)
+		return
+	}
+
+	for _, newAnnouncement := range newAnnouncements {
+		util.PushMsg(fmt.Sprintf(Conf.Language(11), newAnnouncement.URL, newAnnouncement.Title), 0)
 	}
 }
 

@@ -76,6 +76,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
         protyle.block.id = data.data.id;
         protyle.scroll.lastScrollTop = 0;
         protyle.contentElement.scrollTop = 0;
+        preventScroll(protyle); // 聚焦返回时 protyle.contentElement.scrollTop 不等于 0，会导致滚动加载，从而导致 showAll 为 false
         protyle.wysiwyg.element.setAttribute("data-doc-type", data.data.type);
     }
 

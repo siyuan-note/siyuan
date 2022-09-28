@@ -135,7 +135,7 @@ const focusStack = async (stack: IBackStack) => {
             mode: stack.isZoom ? 0 : 3,
             size: stack.isZoom ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
         }, getResponse => {
-            onGet(getResponse, stack.protyle);
+            onGet(getResponse, stack.protyle, [Constants.CB_GET_HTML]);
             Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find(item => {
                 if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
                     blockElement = item;
@@ -170,7 +170,7 @@ const focusStack = async (stack: IBackStack) => {
             mode: stack.isZoom ? 0 : 3,
             size: stack.isZoom ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
         }, getResponse => {
-            onGet(getResponse, stack.protyle);
+            onGet(getResponse, stack.protyle, [Constants.CB_GET_HTML]);
             Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find(item => {
                 if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
                     blockElement = item;

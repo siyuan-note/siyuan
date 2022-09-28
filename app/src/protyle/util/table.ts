@@ -393,6 +393,8 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         let previousBrElement;
         if (startContainer.nodeType !== 3 && (startContainer.tagName === "TH" || startContainer.tagName === "TD")) {
             previousBrElement = (startContainer.childNodes[Math.max(0, range.startOffset - 1)] as HTMLElement)?.previousElementSibling;
+        } else if(startContainer.parentElement.tagName=== "SPAN") {
+            previousBrElement = startContainer.parentElement.previousElementSibling;
         } else {
             previousBrElement = startContainer.previousElementSibling;
         }
@@ -422,11 +424,13 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         let nextBrElement;
         if (endContainer.nodeType !== 3 && (endContainer.tagName === "TH" || endContainer.tagName === "TD")) {
             nextBrElement = (endContainer.childNodes[Math.max(0, range.endOffset - 1)] as HTMLElement)?.nextElementSibling;
+        } else if(endContainer.parentElement.tagName=== "SPAN") {
+            nextBrElement = endContainer.parentElement.nextElementSibling;
         } else {
             nextBrElement = endContainer.nextElementSibling;
         }
         while (nextBrElement) {
-            if (nextBrElement.tagName === "BR") {
+            if (nextBrElement.tagName === "BR" && nextBrElement.nextSibling) {
                 return false;
             }
             nextBrElement = nextBrElement.nextElementSibling;

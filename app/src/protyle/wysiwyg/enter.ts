@@ -272,33 +272,6 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         return true;
     }
 
-    // table
-    if (blockElement.getAttribute("data-type") === "NodeTable" &&
-        (hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH"))) {
-        const wbrElement = document.createElement("wbr");
-        range.insertNode(wbrElement);
-        const oldHTML = blockElement.outerHTML;
-        wbrElement.remove();
-        const cellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
-        if (cellElement && !cellElement.innerHTML.endsWith("<br>")) {
-            cellElement.insertAdjacentHTML("beforeend", "<br>");
-        }
-        range.extractContents();
-        const types = protyle.toolbar.getCurrentType(range);
-        if (types.includes("code") && range.startContainer.nodeType !== 3) {
-            // https://github.com/siyuan-note/siyuan/issues/4169
-            const brElement = document.createElement("br");
-            (range.startContainer as HTMLElement).after(brElement);
-            range.setStartAfter(brElement);
-        } else {
-            range.insertNode(document.createElement("br"));
-        }
-        range.collapse(false);
-        scrollCenter(protyle);
-        updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
-        return true;
-    }
-
     // bq
     if (editableElement.textContent.replace(Constants.ZWSP, "").replace("\n", "") === "" &&
         blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") && blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {

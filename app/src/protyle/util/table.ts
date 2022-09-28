@@ -46,7 +46,7 @@ export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], no
     const tableElement = nodeElement.querySelector("table");
     const columnCnt = tableElement.rows[0].cells.length;
     const rowCnt = tableElement.rows.length;
-    const currentColumns:number[] = [];
+    const currentColumns: number[] = [];
 
     for (let i = 0; i < rowCnt; i++) {
         for (let j = 0; j < columnCnt; j++) {
@@ -309,6 +309,52 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
 
     if (nodeElement.classList.contains("protyle-wysiwyg--select")) {
         return false;
+    }
+
+    // shift+enter 软换行
+    if (event.key === "Enter" && event.shiftKey && !isCtrl(event) && !event.altKey) {
+        const wbrElement = document.createElement("wbr");
+        range.insertNode(wbrElement);
+        const oldHTML = nodeElement.outerHTML;
+        wbrElement.remove();
+        if (cellElement && !cellElement.innerHTML.endsWith("<br>")) {
+            cellElement.insertAdjacentHTML("beforeend", "<br>");
+        }
+        range.extractContents();
+        const types = protyle.toolbar.getCurrentType(range);
+        if (types.includes("code") && range.startContainer.nodeType !== 3) {
+            // https://github.com/siyuan-note/siyuan/issues/4169
+            const brElement = document.createElement("br");
+            (range.startContainer as HTMLElement).after(brElement);
+            range.setStartAfter(brElement);
+        } else {
+            range.insertNode(document.createElement("br"));
+        }
+        range.collapse(false);
+        scrollCenter(protyle);
+        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+        event.preventDefault();
+        return true;
+    }
+    // enter 光标跳转到下一行同列
+    if (!isCtrl(event) && !event.shiftKey && !event.altKey &&event.key === "Enter") {
+        event.preventDefault();
+        const trElement = cellElement.parentElement as HTMLTableRowElement;
+        if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
+            (trElement.parentElement.tagName === "THEAD" && !trElement.parentElement.nextElementSibling)) {
+            return true;
+        }
+        let nextElement = trElement.nextElementSibling as HTMLTableRowElement;
+        if (!nextElement) {
+            nextElement = trElement.parentElement.nextElementSibling.firstChild as HTMLTableRowElement;
+        }
+        if (!nextElement) {
+            return true;
+        }
+        range.selectNodeContents(nextElement.cells[getColIndex(cellElement)]);
+        range.collapse(true);
+        scrollCenter(protyle);
+        return true;
     }
 
     // tab：光标移向下一个 cell

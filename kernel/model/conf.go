@@ -379,6 +379,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	//	return true
 	//})
 
+	waitSecondForExecInstallPkg := false
 	if !skipNewVerInstallPkg() {
 		newVerInstallPkgPath := getNewVerInstallPkgPath()
 		if "" != newVerInstallPkgPath {
@@ -387,6 +388,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 				logging.LogInfof("the new version install pkg is ready [%s], waiting for the user's next instruction", newVerInstallPkgPath)
 				return
 			} else if 2 == execInstallPkg { // 执行新版本安装
+				waitSecondForExecInstallPkg = true
 				go execNewVerInstallPkg(newVerInstallPkgPath)
 			}
 		}
@@ -398,6 +400,9 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 
 	go func() {
 		time.Sleep(500 * time.Millisecond)
+		if waitSecondForExecInstallPkg {
+			time.Sleep(1 * time.Second)
+		}
 		logging.LogInfof("exited kernel")
 		util.WebSocketServer.Close()
 		os.Exit(util.ExitCodeOk)

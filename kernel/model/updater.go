@@ -46,12 +46,11 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 		cmd = exec.Command("sh", "-c", newVerInstallPkgPath)
 	}
 	util.CmdAttr(cmd)
-	data, cmdErr := cmd.CombinedOutput()
+	cmdErr := cmd.Start()
 	if nil != cmdErr {
 		logging.LogErrorf("exec install new version failed: %s", cmdErr)
 		return
 	}
-	logging.LogInfof("installed new version output [%s]", data)
 }
 
 func getNewVerInstallPkgPath() string {
@@ -148,18 +147,13 @@ func downloadInstallPkg(pkgURL, checksum string) {
 
 	logging.LogInfof("downloading install package [%s]", pkgURL)
 	client := req.C().SetTimeout(60 * time.Minute)
-	callback := func(info req.DownloadInfo) {
-		//logging.LogDebugf("downloading install package [%s %.2f%%]", pkgURL, float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
-	}
-	resp, err := client.R().SetOutputFile(savePath).SetDownloadCallback(callback).Get(pkgURL)
+	err := client.NewParallelDownload(pkgURL).SetConcurrency(8).SetSegmentSize(1024 * 1024 * 4).
+		SetOutputFile(savePath).Do()
 	if nil != err {
 		logging.LogErrorf("download install package failed: %s", err)
 		return
 	}
-	if 200 != resp.StatusCode {
-		logging.LogErrorf("download install package [%s] failed [sc=%d]", pkgURL, resp.StatusCode)
-		return
-	}
+
 	localChecksum, _ := sha256Hash(savePath)
 	if checksum != localChecksum {
 		logging.LogErrorf("verify checksum failed, download install package [%s] checksum [%s] not equal to downloaded [%s] checksum [%s]", pkgURL, checksum, savePath, localChecksum)

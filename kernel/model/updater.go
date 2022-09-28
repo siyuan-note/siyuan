@@ -46,12 +46,11 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 		cmd = exec.Command("sh", "-c", newVerInstallPkgPath)
 	}
 	util.CmdAttr(cmd)
-	data, cmdErr := cmd.CombinedOutput()
+	cmdErr := cmd.Start()
 	if nil != cmdErr {
 		logging.LogErrorf("exec install new version failed: %s", cmdErr)
 		return
 	}
-	logging.LogInfof("installed new version output [%s]", data)
 }
 
 func getNewVerInstallPkgPath() string {

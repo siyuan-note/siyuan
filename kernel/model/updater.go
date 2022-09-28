@@ -146,11 +146,13 @@ func downloadInstallPkg(pkgURL, checksum string) {
 	}
 
 	logging.LogInfof("downloading install package [%s]", pkgURL)
-	client := req.C().SetTimeout(60 * time.Minute)
-	err := client.NewParallelDownload(pkgURL).SetConcurrency(8).SetSegmentSize(1024 * 1024 * 4).
+	msgId := util.PushMsg(Conf.Language(103), 60*1000*10)
+	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(10 * time.Minute)
+	err := client.NewParallelDownload(pkgURL).SetConcurrency(8).SetSegmentSize(1024 * 1024 * 2).
 		SetOutputFile(savePath).Do()
 	if nil != err {
 		logging.LogErrorf("download install package failed: %s", err)
+		util.PushUpdateMsg(msgId, Conf.Language(104), 7000)
 		return
 	}
 
@@ -237,6 +239,12 @@ func CheckUpdate(showMsg bool) {
 	}
 	if showMsg {
 		util.PushMsg(msg, timeout)
+		go func() {
+			checkDownloadInstallPkg()
+			if "" != getNewVerInstallPkgPath() {
+				util.PushMsg(Conf.Language(62), 0)
+			}
+		}()
 	}
 }
 

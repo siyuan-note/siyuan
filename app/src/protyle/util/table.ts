@@ -69,31 +69,39 @@ export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], no
 };
 
 export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
-    range.insertNode(document.createElement("wbr"));
+    const wbrElement = document.createElement("wbr")
+    range.insertNode(wbrElement);
     const html = nodeElement.outerHTML;
+    wbrElement.remove();
 
     let rowHTML = "";
     for (let m = 0; m < cellElement.parentElement.childElementCount; m++) {
         rowHTML += `<td align="${cellElement.parentElement.children[m].getAttribute("align") || ""}"> </td>`;
     }
+    let newRowElememt: HTMLTableRowElement;
     if (cellElement.tagName === "TH") {
         const tbodyElement = nodeElement.querySelector("tbody");
         if (tbodyElement) {
             tbodyElement.insertAdjacentHTML("afterbegin", `<tr>${rowHTML}</tr>`);
+            newRowElememt = tbodyElement.firstElementChild as HTMLTableRowElement;
         } else {
             cellElement.parentElement.parentElement.insertAdjacentHTML("afterend", `<tbody><tr>${rowHTML}</tr></tbody>`);
+            newRowElememt = cellElement.parentElement.parentElement.nextElementSibling.firstElementChild as HTMLTableRowElement;
         }
     } else {
         cellElement.parentElement.insertAdjacentHTML("afterend", `<tr>${rowHTML}</tr>`);
+        newRowElememt = cellElement.parentElement.nextElementSibling as HTMLTableRowElement;
     }
+    range.selectNodeContents(newRowElememt.cells[getColIndex(cellElement)]);
+    range.collapse(true);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-    nodeElement.querySelector("wbr").remove();
 };
 
 export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
-    range.insertNode(document.createElement("wbr"));
+    const wbrElement = document.createElement("wbr")
+    range.insertNode(wbrElement);
     const html = nodeElement.outerHTML;
-
+    wbrElement.remove();
     let rowHTML = "";
     let hasNone = false;
 
@@ -123,33 +131,41 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
             previousTrElement = previousTrElement.previousElementSibling;
         }
     }
-
+    let newRowElememt: HTMLTableRowElement
     if (cellElement.parentElement.parentElement.tagName === "THEAD" && !cellElement.parentElement.previousElementSibling) {
         cellElement.parentElement.parentElement.insertAdjacentHTML("beforebegin", `<thead><tr>${rowHTML}</tr></thead>`);
+        newRowElememt = nodeElement.querySelector("thead tr")
         cellElement.parentElement.parentElement.nextElementSibling.insertAdjacentHTML("afterbegin", cellElement.parentElement.parentElement.innerHTML);
         cellElement.parentElement.parentElement.remove();
     } else {
         cellElement.parentElement.insertAdjacentHTML("beforebegin", `<tr>${rowHTML}</tr>`);
+        newRowElememt = cellElement.parentElement.previousElementSibling as HTMLTableRowElement;
     }
+    range.selectNodeContents(newRowElememt.cells[getColIndex(cellElement)]);
+    range.collapse(true);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-    focusByWbr(protyle.wysiwyg.element, range);
 };
 
 export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLElement, type: InsertPosition, range: Range) => {
-    range.insertNode(document.createElement("wbr"));
+    const wbrElement = document.createElement("wbr")
+    range.insertNode(wbrElement);
     const html = nodeElement.outerHTML;
+    wbrElement.remove();
     const index = getColIndex(cellElement);
     const tableElement = nodeElement.querySelector("table");
     for (let i = 0; i < tableElement.rows.length; i++) {
-        if (i === 0) {
-            tableElement.rows[i].cells[index].insertAdjacentHTML(type, "<th></th>");
+        const colCellElement =  tableElement.rows[i].cells[index]
+        const newCellElement = document.createElement(colCellElement.tagName)
+        if (colCellElement.isSameNode(cellElement)) {
+            newCellElement.innerHTML = "<wbr> ";
         } else {
-            tableElement.rows[i].cells[index].insertAdjacentHTML(type, "<td></td>");
+            newCellElement.textContent = " ";
         }
+        colCellElement.insertAdjacentElement(type, newCellElement);
     }
     tableElement.querySelectorAll("col")[index].insertAdjacentHTML(type, "<col>");
+    focusByWbr(nodeElement, range);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-    nodeElement.querySelector("wbr").remove();
 };
 
 export const deleteRow = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
@@ -361,7 +377,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     if (event.key === "ArrowRight" && range.toString() === "" &&
         !nodeElement.nextElementSibling &&
         cellElement.isSameNode(nodeElement.querySelector("table").lastElementChild.lastElementChild.lastElementChild) &&
-        getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === cellElement.textContent.length ) {
+        getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === cellElement.textContent.length) {
         event.preventDefault();
         insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));
         return true;

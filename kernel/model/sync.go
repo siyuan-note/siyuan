@@ -122,7 +122,7 @@ func SyncData(boot, exit, byHand bool) {
 	if nil == err {
 		synced += Conf.Sync.Stat
 	} else {
-		synced += fmt.Sprintf(Conf.Language(80), err)
+		synced += fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 	}
 	msg := fmt.Sprintf(Conf.Language(82), synced)
 	Conf.Sync.Stat = msg

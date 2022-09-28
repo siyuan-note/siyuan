@@ -3,7 +3,7 @@ import {Tab} from "./Tab";
 import {Editor} from "../editor";
 import {Graph} from "./dock/Graph";
 import {Outline} from "./dock/Outline";
-import {Backlinks} from "./dock/Backlinks";
+import {Backlink} from "./dock/Backlink";
 import {Asset} from "../asset";
 import {Search} from "../search";
 
@@ -13,7 +13,7 @@ export const getAllModels = () => {
         graph: [],
         asset: [],
         outline: [],
-        backlinks: [],
+        backlink: [],
         search: []
     };
     const getTabs = (layout: Layout) => {
@@ -27,8 +27,8 @@ export const getAllModels = () => {
                     models.graph.push(model);
                 } else if (model instanceof Outline) {
                     models.outline.push(model);
-                } else if (model instanceof Backlinks) {
-                    models.backlinks.push(model);
+                } else if (model instanceof Backlink) {
+                    models.backlink.push(model);
                 } else if (model instanceof Asset) {
                     models.asset.push(model);
                 } else if (model instanceof Search) {

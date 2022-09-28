@@ -665,7 +665,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (isBacklink) {
                 setTimeout(() => {
                     // 等待 drag transaction
-                    getAllModels().backlinks.forEach(item => {
+                    getAllModels().backlink.forEach(item => {
                         item.refresh();
                     });
                 }, 200);

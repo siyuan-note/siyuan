@@ -1,12 +1,12 @@
 import {getAllModels} from "../getAll";
 import {Tab} from "../Tab";
-import {Backlinks} from "./Backlinks";
 import {Graph} from "./Graph";
 import {Outline} from "./Outline";
 import {switchWnd} from "../util";
+import {Backlink} from "./Backlink";
 
 export const openBacklink = (protyle: IProtyle) => {
-    const backlink = getAllModels().backlinks.find(item => {
+    const backlink = getAllModels().backlink.find(item => {
         if (item.blockId === protyle.block.id && item.type === "local") {
             item.parent.parent.removeTab(item.parent.id);
             return true;
@@ -20,7 +20,7 @@ export const openBacklink = (protyle: IProtyle) => {
         icon: "iconLink",
         title: protyle.title.editElement.textContent,
         callback(tab: Tab) {
-            tab.addModel(new Backlinks({
+            tab.addModel(new Backlink({
                 type: "local",
                 tab,
                 blockId: protyle.block.id,

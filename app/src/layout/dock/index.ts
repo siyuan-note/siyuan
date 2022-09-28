@@ -8,11 +8,11 @@ import {getAllModels} from "../getAll";
 import {Bookmark} from "./Bookmark";
 import {Tag} from "./Tag";
 import {Graph} from "./Graph";
-import {Backlinks} from "./Backlinks";
 import {Model} from "../Model";
 import {getDockByType, resizeTabs, setPanelFocus} from "../util";
 import {Inbox} from "./Inbox";
 import Protyle from "../../protyle";
+import {Backlink} from "./Backlink";
 
 export class Dock {
     public element: HTMLElement;
@@ -199,10 +199,22 @@ export class Dock {
                             }
                         });
                         break;
+                    // TODO: remove
+                    // case "backlink":
+                    //     tab = new Tab({
+                    //         callback(tab: Tab) {
+                    //             tab.addModel(new Backlinks({
+                    //                 type: "pin",
+                    //                 tab,
+                    //                 blockId: editor?.protyle?.block?.rootID,
+                    //             }));
+                    //         }
+                    //     });
+                    //     break;
                     case "backlink":
                         tab = new Tab({
                             callback(tab: Tab) {
-                                tab.addModel(new Backlinks({
+                                tab.addModel(new Backlink({
                                     type: "pin",
                                     tab,
                                     blockId: editor?.protyle?.block?.rootID,

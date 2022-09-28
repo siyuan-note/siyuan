@@ -429,7 +429,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             item.searchGraph(true, blockId);
         }
     });
-    models.backlinks.forEach(item => {
+    models.backlink.forEach(item => {
         if (item.type === "local" && item.rootId !== protyle?.block?.rootID) {
             return;
         }
@@ -443,7 +443,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
         item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.add("fn__rotate");
         fetchPost("/api/ref/getBacklink", {
             id: blockId || "",
-            beforeLen: item.element.querySelector('.block__icon[data-type="more"]').classList.contains("ft__primary") ? item.beforeLen * 20 : item.beforeLen,
+            beforeLen: 12,
             k: item.inputsElement[0].value,
             mk: item.inputsElement[1].value,
         }, response => {

@@ -11,7 +11,6 @@ import {newFile} from "../util/newFile";
 import {Outline} from "./dock/Outline";
 import {Bookmark} from "./dock/Bookmark";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
-import {Backlinks} from "./dock/Backlinks";
 import {Tag} from "./dock/Tag";
 import {getAllModels, getAllTabs} from "./getAll";
 import {Asset} from "../asset";
@@ -26,6 +25,7 @@ import {Constants} from "../constants";
 import {openSearch} from "../search/spread";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {pdfResize} from "../asset/renderAssets";
+import {Backlink} from "./dock/Backlink";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("block__icons--active") || element.classList.contains("layout__wnd--active")) {
@@ -214,8 +214,8 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
             tab: (layout as Tab),
             path: json.path,
         }));
-    } else if (json.instance === "Backlinks") {
-        (layout as Tab).addModel(new Backlinks({
+    } else if (json.instance === "Backlink") {
+        (layout as Tab).addModel(new Backlink({
             tab: (layout as Tab),
             blockId: json.blockId,
             rootId: json.rootId,
@@ -305,7 +305,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
             json.pin = layout.headElement.classList.contains("item--pin");
             if (layout.model instanceof Files) {
                 json.lang = "fileTree";
-            } else if (layout.model instanceof Backlinks && layout.model.type === "pin") {
+            } else if (layout.model instanceof Backlink && layout.model.type === "pin") {
                 json.lang = "backlinks";
             } else if (layout.model instanceof Bookmark) {
                 json.lang = "bookmark";
@@ -331,11 +331,11 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
     } else if (layout instanceof Asset) {
         json.path = layout.path;
         json.instance = "Asset";
-    } else if (layout instanceof Backlinks) {
+    } else if (layout instanceof Backlink) {
         json.blockId = layout.blockId;
         json.rootId = layout.rootId;
         json.type = layout.type;
-        json.instance = "Backlinks";
+        json.instance = "Backlink";
     } else if (layout instanceof Bookmark) {
         json.instance = "Bookmark";
     } else if (layout instanceof Files) {
@@ -471,8 +471,8 @@ export const copyTab = (tab: Tab) => {
                     blockId: tab.model.blockId,
                     type: tab.model.type
                 });
-            } else if (tab.model instanceof Backlinks) {
-                model = new Backlinks({
+            } else if (tab.model instanceof Backlink) {
+                model = new Backlink({
                     tab: newTab,
                     blockId: tab.model.blockId,
                     rootId: tab.model.rootId,

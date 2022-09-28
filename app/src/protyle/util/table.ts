@@ -4,6 +4,7 @@ import {hasClosestBlock, hasClosestByMatchTag} from "./hasClosest";
 import {matchHotKey} from "./hotKey";
 import {isCtrl} from "./compatibility";
 import {scrollCenter} from "../../util/highlightById";
+import {insertEmptyBlock} from "../../block/util";
 
 export const getColIndex = (cellElement: HTMLElement) => {
     let previousElement = cellElement.previousElementSibling;
@@ -337,7 +338,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return true;
     }
     // enter 光标跳转到下一行同列
-    if (!isCtrl(event) && !event.shiftKey && !event.altKey &&event.key === "Enter") {
+    if (!isCtrl(event) && !event.shiftKey && !event.altKey && event.key === "Enter") {
         event.preventDefault();
         const trElement = cellElement.parentElement as HTMLTableRowElement;
         if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
@@ -356,7 +357,15 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         scrollCenter(protyle);
         return true;
     }
-
+    // 表格后无内容时，按右键需新建空块
+    if (event.key === "ArrowRight" && range.toString() === "" &&
+        !nodeElement.nextElementSibling &&
+        cellElement.isSameNode(nodeElement.querySelector("table").lastElementChild.lastElementChild.lastElementChild) &&
+        getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === cellElement.textContent.length ) {
+        event.preventDefault();
+        insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));
+        return true;
+    }
     // tab：光标移向下一个 cell
     if (event.key === "Tab" && !event.ctrlKey) {
         if (event.shiftKey) {
@@ -393,7 +402,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         let previousBrElement;
         if (startContainer.nodeType !== 3 && (startContainer.tagName === "TH" || startContainer.tagName === "TD")) {
             previousBrElement = (startContainer.childNodes[Math.max(0, range.startOffset - 1)] as HTMLElement)?.previousElementSibling;
-        } else if(startContainer.parentElement.tagName=== "SPAN") {
+        } else if (startContainer.parentElement.tagName === "SPAN") {
             previousBrElement = startContainer.parentElement.previousElementSibling;
         } else {
             previousBrElement = startContainer.previousElementSibling;
@@ -424,7 +433,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         let nextBrElement;
         if (endContainer.nodeType !== 3 && (endContainer.tagName === "TH" || endContainer.tagName === "TD")) {
             nextBrElement = (endContainer.childNodes[Math.max(0, range.endOffset - 1)] as HTMLElement)?.nextElementSibling;
-        } else if(endContainer.parentElement.tagName=== "SPAN") {
+        } else if (endContainer.parentElement.tagName === "SPAN") {
             nextBrElement = endContainer.parentElement.nextElementSibling;
         } else {
             nextBrElement = endContainer.nextElementSibling;

@@ -22,7 +22,7 @@ WYSIWYG.
 
 ![feature1-1.png](https://b3logfile.com/file/2022/05/feature1-1-740d9a02.png)
 
-## ✨ Features
+## 🔮 Features
 
 ### Free
 
@@ -60,8 +60,7 @@ All local features are free.
 * Template snippet
 * Keymap
 * Themes and icons
-* Android APP
-* iOS APP
+* Android/iOS APP
 * Docker deployment
 * [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
 
@@ -75,6 +74,11 @@ Cloud services require a paid subscription.
 * Cloud assets serving
 * WeChat notification
 * Cloud inbox
+
+## 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date)](https://star-history.com/#siyuan-note/siyuan&Date)
+
 
 ## 🗺️ Roadmap
 

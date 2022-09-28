@@ -25,7 +25,7 @@
 
 ![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
 
-## ✨  特性
+## 🔮 特性
 
 ### 免费
 
@@ -63,8 +63,7 @@
 * 模板片段
 * 快捷键
 * 主题和图标
-* Android APP
-* iOS APP
+* Android/iOS APP
 * Docker 部署
 * [API](API_zh_CN.md)
 
@@ -78,6 +77,11 @@
 * 云端图床服务
 * 定时微信提醒
 * 云端收集箱
+
+## 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date)](https://star-history.com/#siyuan-note/siyuan&Date)
+
 
 ## 🗺️ 路线图
 

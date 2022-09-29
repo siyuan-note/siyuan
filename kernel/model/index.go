@@ -32,7 +32,6 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/eventbus"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -95,7 +94,6 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 		idHashMap[tree.ID] = tree.Hash
 		if 1 < i && 0 == i%64 {
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(88), i, len(files)-i))
-			filelock.ReleaseAllFileLocks()
 		}
 		i++
 	}
@@ -175,7 +173,6 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 		}
 		if 1 < i && 0 == i%64 {
 			util.PushEndlessProgress(fmt.Sprintf("["+box.Name+"] "+Conf.Language(53), i, treeCount-i))
-			filelock.ReleaseAllFileLocks()
 		}
 		i++
 	}
@@ -314,7 +311,6 @@ func IndexRefs() {
 				}
 				if 1 < i && 0 == i%64 {
 					util.PushEndlessProgress(fmt.Sprintf(Conf.Language(55), i))
-					filelock.ReleaseAllFileLocks()
 				}
 				i++
 			}

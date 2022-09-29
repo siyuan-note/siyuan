@@ -37,7 +37,6 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -147,7 +146,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 		return
 	}
 
-	data, err := filelock.NoLockFileRead(historyPath)
+	data, err := filelock.ReadFile(historyPath)
 	if nil != err {
 		logging.LogErrorf("read file [%s] failed: %s", historyPath, err)
 		return
@@ -234,33 +233,27 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	filesys.LockWriteFile()
 
 	srcPath := historyPath
 	var destPath string
 	baseName := filepath.Base(historyPath)
 	id := strings.TrimSuffix(baseName, ".sy")
 
-	filelock.ReleaseFileLocks(filepath.Join(util.DataDir, boxID))
 	workingDoc := treenode.GetBlockTree(id)
 	if nil != workingDoc {
-		if err = os.RemoveAll(filepath.Join(util.DataDir, boxID, workingDoc.Path)); nil != err {
-			filesys.UnlockWriteFile()
+		if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); nil != err {
 			return
 		}
 	}
 
 	destPath, err = getRollbackDockPath(boxID, historyPath)
 	if nil != err {
-		filesys.UnlockWriteFile()
 		return
 	}
 
-	if err = gulu.File.Copy(srcPath, destPath); nil != err {
-		filesys.UnlockWriteFile()
+	if err = filelock.Copy(srcPath, destPath); nil != err {
 		return
 	}
-	filesys.UnlockWriteFile()
 
 	FullReindex()
 	IncSync()
@@ -446,7 +439,7 @@ func (box *Box) generateDocHistory0() {
 		}
 
 		var data []byte
-		if data, err = filelock.NoLockFileRead(file); err != nil {
+		if data, err = filelock.ReadFile(file); err != nil {
 			logging.LogErrorf("generate history failed: %s", err)
 			return
 		}

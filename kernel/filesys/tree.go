@@ -38,7 +38,7 @@ import (
 
 func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	filePath := filepath.Join(util.DataDir, boxID, p)
-	data, err := filelock.LockFileRead(filePath)
+	data, err := filelock.ReadFile(filePath)
 	if nil != err {
 		return
 	}
@@ -72,7 +72,7 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 		}
 		parentPath += ".sy"
 		parentPath = filepath.Join(util.DataDir, boxID, parentPath)
-		parentData, readErr := filelock.LockFileRead(parentPath)
+		parentData, readErr := filelock.ReadFile(parentPath)
 		if nil != readErr {
 			logging.LogWarnf("read parent tree data [%s] failed: %s", parentPath, readErr)
 			hPathBuilder.WriteString("Untitled/")
@@ -124,7 +124,11 @@ func WriteTree(tree *parse.Tree) (err error) {
 		return
 	}
 
-	if err = filelock.LockFileWrite(filePath, output); nil != err {
+	if err = filelock.WriteFile(filePath, output); nil != err {
+		if errors.Is(err, filelock.ErrUnableAccessFile) {
+			return
+		}
+
 		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 		logging.LogErrorf(msg)
 		return errors.New(msg)
@@ -155,12 +159,12 @@ func recoverParseJSON2Tree(boxID, p, filePath string, luteEngine *lute.Lute) (re
 		return
 	}
 
-	data, err := filelock.NoLockFileRead(tmp)
+	data, err := filelock.ReadFile(tmp)
 	if nil != err {
 		logging.LogErrorf("recover tree read from tmp [%s] failed: %s", tmp, err)
 		return
 	}
-	if err = filelock.NoLockFileWrite(filePath, data); nil != err {
+	if err = filelock.WriteFile(filePath, data); nil != err {
 		logging.LogErrorf("recover tree write [%s] from tmp [%s] failed: %s", filePath, tmp, err)
 		return
 	}
@@ -209,7 +213,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
 			return
 		}
-		if err = filelock.LockFileWrite(filePath, output); nil != err {
+		if err = filelock.WriteFile(filePath, output); nil != err {
 			msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 			logging.LogErrorf(msg)
 		}

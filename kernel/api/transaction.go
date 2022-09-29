@@ -73,7 +73,7 @@ func performTransactions(c *gin.Context) {
 		err = model.PerformTransactions(&transactions)
 	}
 
-	if errors.Is(err, filelock.ErrUnableLockFile) {
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 1
 		return
 	}

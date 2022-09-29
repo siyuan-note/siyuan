@@ -362,7 +362,6 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 
 	logging.LogInfof("exiting kernel [force=%v, execInstallPkg=%d]", force, execInstallPkg)
 
-	treenode.CloseBlockTree()
 	util.PushMsg(Conf.Language(95), 10000*60)
 	WaitForWritingFiles()
 	if !force {
@@ -435,7 +434,7 @@ func (conf *AppConf) Save() {
 
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")
-	oldData, err := filelock.NoLockFileRead(confPath)
+	oldData, err := filelock.ReadFile(confPath)
 	if nil != err {
 		conf.save0(newData)
 		return
@@ -450,7 +449,7 @@ func (conf *AppConf) Save() {
 
 func (conf *AppConf) save0(data []byte) {
 	confPath := filepath.Join(util.ConfDir, "conf.json")
-	if err := filelock.NoLockFileWrite(confPath, data); nil != err {
+	if err := filelock.WriteFile(confPath, data); nil != err {
 		logging.LogFatalf("write conf [%s] failed: %s", confPath, err)
 	}
 }

@@ -45,7 +45,7 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 	} else if gulu.OS.IsLinux() {
 		cmd = exec.Command("sh", "-c", newVerInstallPkgPath)
 	}
-	util.CmdAttr(cmd)
+	gulu.CmdAttr(cmd)
 	cmdErr := cmd.Start()
 	if nil != cmdErr {
 		logging.LogErrorf("exec install new version failed: %s", cmdErr)

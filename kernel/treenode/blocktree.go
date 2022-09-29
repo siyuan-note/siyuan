@@ -24,7 +24,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/88250/flock"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -215,8 +214,6 @@ func IndexBlockTree(tree *parse.Tree) {
 	// 新建索引不变更持久化文件，调用处会负责调用 SaveBlockTree()
 }
 
-var blocktreeFileLock *flock.Flock
-
 func AutoFlushBlockTree() {
 	for {
 		if blockTreesChanged {
@@ -230,36 +227,23 @@ func AutoFlushBlockTree() {
 func InitBlockTree(force bool) {
 	start := time.Now()
 
-	if nil == blocktreeFileLock {
-		blocktreeFileLock = flock.New(util.BlockTreePath)
-	} else {
-		if force {
-			err := blocktreeFileLock.Unlock()
-			if nil != err {
-				logging.LogErrorf("unlock blocktree file failed: %s", err)
-			}
-			err = os.RemoveAll(util.BlockTreePath)
-			if nil != err {
-				logging.LogErrorf("remove blocktree file failed: %s", err)
-			}
-			blocktreeFileLock = flock.New(util.BlockTreePath)
-			return
+	if force {
+		err := os.RemoveAll(util.BlockTreePath)
+		if nil != err {
+			logging.LogErrorf("remove blocktree file failed: %s", err)
 		}
+		return
 	}
 
 	var err error
-	if err = blocktreeFileLock.Lock(); nil != err {
-		logging.LogErrorf("read block tree failed: %s", err)
+	fh, err := os.OpenFile(util.BlockTreePath, os.O_RDWR, 0644)
+	if nil != err {
+		logging.LogErrorf("open block tree file failed: %s", err)
 		os.Exit(util.ExitCodeBlockTreeErr)
 		return
 	}
+	defer fh.Close()
 
-	fh := blocktreeFileLock.Fh()
-	if _, err = fh.Seek(0, io.SeekStart); nil != err {
-		logging.LogErrorf("read block tree failed: %s", err)
-		os.Exit(util.ExitCodeBlockTreeErr)
-		return
-	}
 	data, err := io.ReadAll(fh)
 	if nil != err {
 		logging.LogErrorf("read block tree failed: %s", err)
@@ -269,7 +253,6 @@ func InitBlockTree(force bool) {
 	blockTreesLock.Lock()
 	if err = msgpack.Unmarshal(data, &blockTrees); nil != err {
 		logging.LogErrorf("unmarshal block tree failed: %s", err)
-		blocktreeFileLock.Unlock()
 		if err = os.RemoveAll(util.BlockTreePath); nil != err {
 			logging.LogErrorf("removed corrupted block tree failed: %s", err)
 		}
@@ -287,16 +270,6 @@ func InitBlockTree(force bool) {
 func SaveBlockTree() {
 	start := time.Now()
 
-	if nil == blocktreeFileLock {
-		blocktreeFileLock = flock.New(util.BlockTreePath)
-	}
-
-	if err := blocktreeFileLock.Lock(); nil != err {
-		logging.LogErrorf("read block tree failed: %s", err)
-		os.Exit(util.ExitCodeBlockTreeErr)
-		return
-	}
-
 	blockTreesLock.Lock()
 	data, err := msgpack.Marshal(blockTrees)
 	if nil != err {
@@ -306,8 +279,7 @@ func SaveBlockTree() {
 	}
 	blockTreesLock.Unlock()
 
-	fh := blocktreeFileLock.Fh()
-	if err = gulu.File.WriteFileSaferByHandle(fh, data); nil != err {
+	if err = gulu.File.WriteFileSafer(util.BlockTreePath, data, 0644); nil != err {
 		logging.LogErrorf("write block tree failed: %s", err)
 		os.Exit(util.ExitCodeBlockTreeErr)
 		return
@@ -315,12 +287,5 @@ func SaveBlockTree() {
 	debug.FreeOSMemory()
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
 		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), util.BlockTreePath, elapsed)
-	}
-}
-
-func CloseBlockTree() {
-	SaveBlockTree()
-	if err := blocktreeFileLock.Unlock(); nil != err {
-		logging.LogErrorf("close block tree failed: %s", err)
 	}
 }

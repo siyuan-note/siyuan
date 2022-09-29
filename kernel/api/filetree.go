@@ -488,10 +488,10 @@ func lockFile(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	locked, filePath := model.LockFileByBlockID(id)
+	locked := model.TryAccessFileByBlockID(id)
 	if !locked {
 		ret.Code = -1
-		ret.Msg = fmt.Sprintf(model.Conf.Language(75), filePath)
+		ret.Msg = fmt.Sprintf(model.Conf.Language(75))
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 	}
 }
@@ -635,7 +635,7 @@ func getDoc(c *gin.Context) {
 	}
 
 	blockCount, childBlockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, err := model.GetDoc(startID, endID, id, index, keyword, mode, size)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
 		return

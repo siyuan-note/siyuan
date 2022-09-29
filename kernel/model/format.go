@@ -95,7 +95,7 @@ func generateFormatHistory(tree *parse.Tree) {
 	}
 
 	var data []byte
-	if data, err = filelock.NoLockFileRead(filepath.Join(util.DataDir, tree.Box, tree.Path)); err != nil {
+	if data, err = filelock.ReadFile(filepath.Join(util.DataDir, tree.Box, tree.Path)); err != nil {
 		logging.LogErrorf("generate history failed: %s", err)
 		return
 	}

@@ -42,7 +42,6 @@ import (
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -159,16 +158,8 @@ func exportData(exportFolder string) (err error) {
 		return
 	}
 
-	filesys.LockWriteFile()
-	defer filesys.UnlockWriteFile()
-
-	err = filelock.ReleaseAllFileLocks()
-	if nil != err {
-		return
-	}
-
 	data := filepath.Join(util.WorkspaceDir, "data")
-	if err = stableCopy(data, exportFolder); nil != err {
+	if err = filelock.RoboCopy(data, exportFolder); nil != err {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", data, baseFolderName, err)
 		err = errors.New(fmt.Sprintf(Conf.Language(14), formatErrorMsg(err)))
 		return
@@ -224,7 +215,7 @@ func ExportDocx(id, savePath string, removeAssets bool) (err error) {
 	}
 
 	pandoc := exec.Command(Conf.Export.PandocBin, args...)
-	util.CmdAttr(pandoc)
+	gulu.CmdAttr(pandoc)
 	pandoc.Stdin = bytes.NewBufferString(content)
 	output, err := pandoc.CombinedOutput()
 	if nil != err {
@@ -819,7 +810,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	// 按文件夹结构复制选择的树
 	for _, tree := range trees {
 		readPath := filepath.Join(util.DataDir, tree.Box, tree.Path)
-		data, readErr := filelock.NoLockFileRead(readPath)
+		data, readErr := filelock.ReadFile(readPath)
 		if nil != readErr {
 			logging.LogErrorf("read file [%s] failed: %s", readPath, readErr)
 			continue
@@ -841,7 +832,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	// 引用树放在导出文件夹根路径下
 	for treeID, tree := range refTrees {
 		readPath := filepath.Join(util.DataDir, tree.Box, tree.Path)
-		data, readErr := filelock.NoLockFileRead(readPath)
+		data, readErr := filelock.ReadFile(readPath)
 		if nil != readErr {
 			logging.LogErrorf("read file [%s] failed: %s", readPath, readErr)
 			continue
@@ -903,7 +894,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	var sortData []byte
 	var sortErr error
 	if gulu.File.IsExist(sortPath) {
-		sortData, sortErr = filelock.NoLockFileRead(sortPath)
+		sortData, sortErr = filelock.ReadFile(sortPath)
 		if nil != sortErr {
 			logging.LogErrorf("read sort conf failed: %s", sortErr)
 		}

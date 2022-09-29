@@ -14,6 +14,7 @@ export class Tree {
     private click: (element: HTMLElement, event: MouseEvent) => void;
 
     private ctrlClick: (element: HTMLElement) => void;
+    private toggleClick: (element: HTMLElement) => void;
     private shiftClick: (element: HTMLElement) => void;
     private altClick: (element: HTMLElement) => void;
     private rightClick: (element: HTMLElement, event: MouseEvent) => void;
@@ -27,6 +28,7 @@ export class Tree {
         ctrlClick?(element: HTMLElement): void
         altClick?(element: HTMLElement): void
         shiftClick?(element: HTMLElement): void
+        toggleClick?(element: HTMLElement): void
         rightClick?(element: HTMLElement, event: MouseEvent): void
     }) {
         this.click = options.click;
@@ -34,6 +36,7 @@ export class Tree {
         this.altClick = options.altClick;
         this.shiftClick = options.shiftClick;
         this.rightClick = options.rightClick;
+        this.toggleClick = options.toggleClick;
         this.element = options.element;
         this.blockExtHTML = options.blockExtHTML;
         this.topExtHTML = options.topExtHTML;
@@ -76,7 +79,7 @@ data-type="${item.nodeType}"
 data-subtype="${item.subType}" 
 ${item.label ? "data-label='" + item.label + "'" : ""}>
     <span style="padding-left: ${item.depth * 16}px" class="b3-list-item__toggle">
-        <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow ${((item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0)) ? "b3-list-item__arrow--open" : "fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
+        <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow ${((item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0)) ? "b3-list-item__arrow--open" : (item.type === "backlink" ? "" : "fn__hidden")}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
     <span class="b3-list-item__text"${item.type === "outline" ? ' title="' + Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.name)) + '"' : ""}>${item.name}</span>
@@ -137,6 +140,10 @@ data-def-path="${item.defPath}">
     }
 
     private toggleBlocks(liElement: HTMLElement) {
+        if (this.toggleClick) {
+            this.toggleClick(liElement)
+            return;
+        }
         if (!liElement.nextElementSibling) {
             return;
         }

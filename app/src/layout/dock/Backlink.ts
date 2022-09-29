@@ -163,6 +163,22 @@ export class Backlink extends Model {
                     position: "bottom",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
+            },
+            toggleClick:(liElement: HTMLElement)=> {
+                const svgElement = liElement.firstElementChild.firstElementChild;
+                if (svgElement.classList.contains("b3-list-item__arrow--open")) {
+                    svgElement.classList.remove("b3-list-item__arrow--open");
+                    liElement.nextElementSibling?.classList.add("fn__none");
+                } else {
+                    svgElement.classList.add("b3-list-item__arrow--open");
+                    if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "UL") {
+                        liElement.nextElementSibling.classList.remove("fn__none");
+                    } else {
+                        fetchPost("/api/ref/getBacklinkDoc", {defID:this.blockId, refTreeID:liElement.getAttribute("data-node-id")}, (response)=>{
+
+                        })
+                    }
+                }
             }
         });
         this.mTree = new Tree({
@@ -355,7 +371,14 @@ export class Backlink extends Model {
         this.notebookId = data.box;
         this.inputsElement[0].value = data.k;
         this.inputsElement[1].value = data.mk;
-
+        data.backlinks.forEach((item) => {
+            delete item.blocks
+            delete item.children
+        })
+        data.backmentions.forEach((item) => {
+            delete item.blocks
+            delete item.children
+        })
         this.tree.updateData(data.backlinks);
         this.mTree.updateData(data.backmentions);
 

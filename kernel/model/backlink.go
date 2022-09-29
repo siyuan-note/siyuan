@@ -158,7 +158,7 @@ OK:
 	return
 }
 
-func GetBacklinkDoc(defID, refTreeID string) (ret []*Block) {
+func GetBacklinkDoc(defID, refTreeID string) (ret []string) {
 	keyword := ""
 	beforeLen := 12
 	sqlBlock := sql.GetBlock(defID)
@@ -168,7 +168,13 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Block) {
 	rootID := sqlBlock.RootID
 
 	var links []*Block
-	refs := sql.QueryRefsByDefIDRefRootID(defID, refTreeID)
+	tmpRefs := sql.QueryRefsByDefID(defID, true)
+	var refs []*sql.Ref
+	for _, ref := range tmpRefs {
+		if ref.RootID == refTreeID {
+			refs = append(refs, ref)
+		}
+	}
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
 	// 为了减少查询，组装好 IDs 后一次查出
@@ -271,10 +277,8 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Block) {
 	for _, link := range linkPaths {
 		for _, c := range link.Children {
 			n := treenode.GetNodeInTree(refTree, c.ID)
-			b := &Block{
-				Content: lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions),
-			}
-			ret = append(ret, b)
+			dom := lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions)
+			ret = append(ret, dom)
 		}
 	}
 	return

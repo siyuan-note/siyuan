@@ -49,9 +49,9 @@ func getBacklinkDoc(c *gin.Context) {
 
 	defID := arg["defID"].(string)
 	refTreeID := arg["refTreeID"].(string)
-	blocks := model.GetBacklinkDoc(defID, refTreeID)
+	doms := model.GetBacklinkDoc(defID, refTreeID)
 	ret.Data = map[string]interface{}{
-		"blocks": blocks,
+		"doms": doms,
 	}
 }
 

@@ -168,7 +168,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			return
 		}
 		newSyPath := filepath.Join(filepath.Dir(syPath), tree.ID+".sy")
-		if err = os.Rename(syPath, newSyPath); nil != err {
+		if err = filelock.Move(syPath, newSyPath); nil != err {
 			logging.LogErrorf("rename .sy from [%s] to [%s] failed: %s", syPath, newSyPath, err)
 			return
 		}
@@ -181,7 +181,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	var sortErr error
 	sortPath := filepath.Join(unzipRootPath, ".siyuan", "sort.json")
 	if gulu.File.IsExist(sortPath) {
-		sortData, sortErr = filelock.NoLockFileRead(sortPath)
+		sortData, sortErr = filelock.ReadFile(sortPath)
 		if nil != sortErr {
 			logging.LogErrorf("read import sort conf failed: %s", sortErr)
 		}
@@ -192,7 +192,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 		sortPath = filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
 		if gulu.File.IsExist(sortPath) {
-			sortData, sortErr = filelock.NoLockFileRead(sortPath)
+			sortData, sortErr = filelock.ReadFile(sortPath)
 			if nil != sortErr {
 				logging.LogErrorf("read box sort conf failed: %s", sortErr)
 			}
@@ -212,7 +212,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		if nil != sortErr {
 			logging.LogErrorf("marshal box sort conf failed: %s", sortErr)
 		} else {
-			sortErr = filelock.NoLockFileWrite(sortPath, sortData)
+			sortErr = filelock.WriteFile(sortPath, sortData)
 			if nil != sortErr {
 				logging.LogErrorf("write box sort conf failed: %s", sortErr)
 			}
@@ -265,7 +265,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	})
 	for i, oldPath := range oldPaths {
 		newPath := renamePaths[oldPath]
-		if err = os.Rename(oldPath, newPath); nil != err {
+		if err = filelock.Move(oldPath, newPath); nil != err {
 			logging.LogErrorf("rename path from [%s] to [%s] failed: %s", oldPath, renamePaths[oldPath], err)
 			return errors.New("rename path failed")
 		}
@@ -304,18 +304,13 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	for _, assets := range assetsDirs {
 		if gulu.File.IsDir(assets) {
 			dataAssets := filepath.Join(util.DataDir, "assets")
-			if err = filesys.Copy(assets, dataAssets); nil != err {
+			if err = filelock.Copy(assets, dataAssets); nil != err {
 				logging.LogErrorf("copy assets from [%s] to [%s] failed: %s", assets, dataAssets, err)
 				return
 			}
 		}
 		os.RemoveAll(assets)
 	}
-
-	filesys.LockWriteFile()
-	defer filesys.UnlockWriteFile()
-
-	filelock.ReleaseAllFileLocks()
 
 	var baseTargetPath string
 	if "/" == toPath {
@@ -334,7 +329,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		return
 	}
 
-	if err = stableCopy(unzipRootPath, targetDir); nil != err {
+	if err = filelock.RoboCopy(unzipRootPath, targetDir); nil != err {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", unzipRootPath, util.DataDir, err)
 		err = errors.New("copy data failed")
 		return
@@ -376,12 +371,8 @@ func ImportData(zipPath string) (err error) {
 		return errors.New("invalid data.zip")
 	}
 
-	filesys.LockWriteFile()
-	defer filesys.UnlockWriteFile()
-
-	filelock.ReleaseAllFileLocks()
 	tmpDataPath := filepath.Join(unzipPath, dirs[0].Name())
-	if err = stableCopy(tmpDataPath, util.DataDir); nil != err {
+	if err = filelock.RoboCopy(tmpDataPath, util.DataDir); nil != err {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", tmpDataPath, util.DataDir, err)
 		err = errors.New("copy data failed")
 		return
@@ -533,7 +524,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 						name = filepath.Base(fullPath)
 						name = util.AssetName(name)
 						assetTargetPath := filepath.Join(assetDirPath, name)
-						if err = gulu.File.Copy(fullPath, assetTargetPath); nil != err {
+						if err = filelock.Copy(fullPath, assetTargetPath); nil != err {
 							logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", fullPath, assetTargetPath, err)
 							return ast.WalkContinue
 						}
@@ -622,7 +613,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				name := filepath.Base(absolutePath)
 				name = util.AssetName(name)
 				assetTargetPath := filepath.Join(assetDirPath, name)
-				if err = gulu.File.CopyFile(absolutePath, assetTargetPath); nil != err {
+				if err = filelock.Copy(absolutePath, assetTargetPath); nil != err {
 					logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)
 					return ast.WalkContinue
 				}

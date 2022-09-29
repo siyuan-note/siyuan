@@ -30,9 +30,9 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/araddon/dateparse"
 	"github.com/imroc/req/v3"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	textUnicode "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
@@ -375,7 +375,7 @@ func installPackage(data []byte, installPath string) (err error) {
 		}
 	}
 	srcPath := filepath.Join(unzipPath, dir)
-	if err = filesys.Copy(srcPath, installPath); nil != err {
+	if err = filelock.Copy(srcPath, installPath); nil != err {
 		return
 	}
 	return

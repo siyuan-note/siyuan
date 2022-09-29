@@ -417,14 +417,14 @@ func Kill(pid string) {
 	} else {
 		kill = exec.Command("kill", "-9", pid)
 	}
-	CmdAttr(kill)
+	gulu.CmdAttr(kill)
 	kill.CombinedOutput()
 }
 
 func PidByPort(port string) (ret string) {
 	if gulu.OS.IsWindows() {
 		cmd := exec.Command("cmd", "/c", "netstat -ano | findstr "+port)
-		CmdAttr(cmd)
+		gulu.CmdAttr(cmd)
 		data, err := cmd.CombinedOutput()
 		if nil != err {
 			logging.LogErrorf("netstat failed: %s", err)
@@ -444,7 +444,7 @@ func PidByPort(port string) (ret string) {
 	}
 
 	cmd := exec.Command("lsof", "-Fp", "-i", ":"+port)
-	CmdAttr(cmd)
+	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
 	if nil != err {
 		logging.LogErrorf("lsof failed: %s", err)
@@ -507,7 +507,7 @@ func getPandocVer(binPath string) (ret string) {
 	}
 
 	cmd := exec.Command(binPath, "--version")
-	CmdAttr(cmd)
+	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
 	if nil == err && strings.HasPrefix(string(data), "pandoc") {
 		parts := bytes.Split(data, []byte("\n"))
@@ -527,7 +527,7 @@ func IsValidPandocBin(binPath string) bool {
 	}
 
 	cmd := exec.Command(binPath, "--version")
-	CmdAttr(cmd)
+	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
 	if nil == err && strings.HasPrefix(string(data), "pandoc") {
 		return true

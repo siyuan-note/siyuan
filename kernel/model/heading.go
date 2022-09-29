@@ -116,9 +116,9 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		if !util.IsEmptyDir(subDir) {
 			err = errors.New(Conf.Language(20))
 			return
-		} else {
-			os.Remove(subDir) // 移除空文件夹不会有副作用
 		}
+
+		os.Remove(subDir) // 移除空文件夹不会有副作用
 	}
 
 	targetTree, _ := loadTreeByBlockID(targetID)

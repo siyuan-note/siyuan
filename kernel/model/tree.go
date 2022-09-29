@@ -122,7 +122,7 @@ func pagedPaths(localPath string, pageSize int) (ret map[int][]string) {
 }
 
 func loadTree(localPath string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
-	data, err := filelock.NoLockFileRead(localPath)
+	data, err := filelock.ReadFile(localPath)
 	if nil != err {
 		logging.LogErrorf("get data [path=%s] failed: %s", localPath, err)
 		return

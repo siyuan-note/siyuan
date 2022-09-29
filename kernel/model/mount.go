@@ -29,7 +29,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -79,7 +78,6 @@ func RemoveBox(boxID string) (err error) {
 		return errors.New(fmt.Sprintf("can not remove [%s] caused by it is not a dir", boxID))
 	}
 
-	filelock.ReleaseFileLocks(localPath)
 	if !IsUserGuide(boxID) {
 		var historyDir string
 		historyDir, err = GetHistoryDir(HistoryOpDelete)
@@ -89,7 +87,7 @@ func RemoveBox(boxID string) (err error) {
 		}
 		p := strings.TrimPrefix(localPath, util.DataDir)
 		historyPath := filepath.Join(historyDir, p)
-		if err = gulu.File.Copy(localPath, historyPath); nil != err {
+		if err = filelock.Copy(localPath, historyPath); nil != err {
 			logging.LogErrorf("gen sync history failed: %s", err)
 			return
 		}
@@ -98,7 +96,7 @@ func RemoveBox(boxID string) (err error) {
 	}
 
 	unmount0(boxID)
-	if err = filesys.RemoveAll(localPath); nil != err {
+	if err = filelock.Remove(localPath); nil != err {
 		return
 	}
 	IncSync()
@@ -144,12 +142,12 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			reMountGuide = true
 		}
 
-		if err = os.RemoveAll(localPath); nil != err {
+		if err = filelock.Remove(localPath); nil != err {
 			return
 		}
 
 		p := filepath.Join(util.WorkingDir, "guide", boxID)
-		if err = gulu.File.Copy(p, localPath); nil != err {
+		if err = filelock.Copy(p, localPath); nil != err {
 			return
 		}
 

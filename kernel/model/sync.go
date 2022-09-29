@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -32,7 +31,6 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -63,9 +61,6 @@ func SyncData(boot, exit, byHand bool) {
 	if !boot && !exit && 2 == Conf.Sync.Mode && !byHand {
 		return
 	}
-
-	filesys.LockWriteFile()
-	defer filesys.UnlockWriteFile()
 
 	if util.IsMutexLocked(&syncLock) {
 		logging.LogWarnf("sync is in progress")
@@ -409,38 +404,6 @@ func getIgnoreLines() (ret []string) {
 func IncSync() {
 	syncSameCount = 0
 	planSyncAfter(30 * time.Second)
-}
-
-func stableCopy(src, dest string) (err error) {
-	if gulu.OS.IsWindows() {
-		robocopy := "robocopy"
-		cmd := exec.Command(robocopy, src, dest, "/DCOPY:T", "/E", "/IS", "/R:0", "/NFL", "/NDL", "/NJH", "/NJS", "/NP", "/NS", "/NC")
-		util.CmdAttr(cmd)
-		var output []byte
-		output, err = cmd.CombinedOutput()
-		if strings.Contains(err.Error(), "exit status 16") {
-			// 某些版本的 Windows 无法同步 https://github.com/siyuan-note/siyuan/issues/4197
-			return gulu.File.Copy(src, dest)
-		}
-
-		if nil != err && strings.Contains(err.Error(), exec.ErrNotFound.Error()) {
-			robocopy = os.Getenv("SystemRoot") + "\\System32\\" + "robocopy"
-			cmd = exec.Command(robocopy, src, dest, "/DCOPY:T", "/E", "/IS", "/R:0", "/NFL", "/NDL", "/NJH", "/NJS", "/NP", "/NS", "/NC")
-			util.CmdAttr(cmd)
-			output, err = cmd.CombinedOutput()
-		}
-		if nil == err ||
-			strings.Contains(err.Error(), "exit status 3") ||
-			strings.Contains(err.Error(), "exit status 1") ||
-			strings.Contains(err.Error(), "exit status 2") ||
-			strings.Contains(err.Error(), "exit status 5") ||
-			strings.Contains(err.Error(), "exit status 6") ||
-			strings.Contains(err.Error(), "exit status 7") {
-			return nil
-		}
-		logging.LogErrorf("robocopy data from [%s] to [%s] failed: %s %s", src, dest, string(output), err)
-	}
-	return gulu.File.Copy(src, dest)
 }
 
 func planSyncAfter(d time.Duration) {

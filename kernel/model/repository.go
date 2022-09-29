@@ -36,11 +36,9 @@ import (
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -222,11 +220,8 @@ func CheckoutRepo(id string) (err error) {
 	}
 
 	util.PushEndlessProgress(Conf.Language(63))
-	filesys.LockWriteFile()
-	defer filesys.UnlockWriteFile()
 	WaitForWritingFiles()
 	sql.WaitForWritingDatabase()
-	filelock.ReleaseAllFileLocks()
 	CloseWatchAssets()
 	defer WatchAssets()
 
@@ -451,7 +446,6 @@ func IndexRepo(memo string) (err error) {
 	start := time.Now()
 	latest, _ := repo.Latest()
 	WaitForWritingFiles()
-	filelock.ReleaseAllFileLocks()
 	index, err := repo.Index(memo, map[string]interface{}{
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress,
 	})

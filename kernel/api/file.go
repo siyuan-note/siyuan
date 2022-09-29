@@ -17,8 +17,7 @@
 package api
 
 import (
-	"errors"
-	"fmt"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -70,7 +69,7 @@ func copyFile(c *gin.Context) {
 	}
 
 	dest := arg["dest"].(string)
-	if err = gulu.File.CopyFile(src, dest); nil != err {
+	if err = filelock.Copy(src, dest); nil != err {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -127,27 +126,40 @@ func putFile(c *gin.Context) {
 			logging.LogErrorf("make a dir [%s] failed: %s", filePath, err)
 		}
 	} else {
-		file, _ := c.FormFile("file")
-		if nil == file {
+		fileHeader, _ := c.FormFile("file")
+		if nil == fileHeader {
 			logging.LogErrorf("form file is nil [path=%s]", filePath)
 			c.Status(400)
 			return
 		}
 
-		dir := filepath.Dir(filePath)
-		if err = os.MkdirAll(dir, 0755); nil != err {
-			logging.LogErrorf("put a file [%s] make dir [%s] failed: %s", filePath, dir, err)
-		} else {
-			if filelock.IsLocked(filePath) {
-				msg := fmt.Sprintf("file [%s] is locked", filePath)
-				logging.LogErrorf(msg)
-				err = errors.New(msg)
-			} else {
-				err = writeFile(file, filePath)
-				if nil != err {
-					logging.LogErrorf("put a file [%s] failed: %s", filePath, err)
-				}
+		for {
+			dir := filepath.Dir(filePath)
+			if err = os.MkdirAll(dir, 0755); nil != err {
+				logging.LogErrorf("put a file [%s] make dir [%s] failed: %s", filePath, dir, err)
+				break
 			}
+
+			var f multipart.File
+			f, err = fileHeader.Open()
+			if nil != err {
+				logging.LogErrorf("open file failed: %s", err)
+				break
+			}
+
+			var data []byte
+			data, err = io.ReadAll(f)
+			if nil != err {
+				logging.LogErrorf("read file failed: %s", err)
+				break
+			}
+
+			err = filelock.WriteFile(filePath, data)
+			if nil != err {
+				logging.LogErrorf("put a file [%s] failed: %s", filePath, err)
+				break
+			}
+			break
 		}
 	}
 	if nil != err {
@@ -170,20 +182,6 @@ func putFile(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-}
-
-func writeFile(file *multipart.FileHeader, dst string) error {
-	src, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer src.Close()
-
-	err = gulu.File.WriteFileSaferByReader(dst, src, 0644)
-	if nil != err {
-		return err
-	}
-	return nil
 }
 
 func millisecond2Time(t int64) time.Time {

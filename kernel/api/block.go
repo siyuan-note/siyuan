@@ -112,7 +112,7 @@ func checkBlockExist(c *gin.Context) {
 
 	id := arg["id"].(string)
 	b, err := model.GetBlock(id)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
 		return
@@ -303,7 +303,7 @@ func getBlockInfo(c *gin.Context) {
 
 	id := arg["id"].(string)
 	block, err := model.GetBlock(id)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
 		return
@@ -329,7 +329,7 @@ func getBlockInfo(c *gin.Context) {
 	}
 
 	root, err := model.GetBlock(block.RootID)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
 		return

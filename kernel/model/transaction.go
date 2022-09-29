@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -123,7 +122,7 @@ func flushTx() {
 		case TxErrCodeBlockNotFound:
 			util.PushTxErr("Transaction failed", txErr.code, nil)
 			return
-		case TxErrCodeUnableLockFile:
+		case TxErrCodeUnableAccessFile:
 			util.PushTxErr(Conf.Language(76), txErr.code, txErr.id)
 			return
 		default:
@@ -175,9 +174,9 @@ func PerformTransactions(transactions *[]*Transaction) (err error) {
 }
 
 const (
-	TxErrCodeBlockNotFound  = 0
-	TxErrCodeUnableLockFile = 1
-	TxErrCodeWriteTree      = 2
+	TxErrCodeBlockNotFound    = 0
+	TxErrCodeUnableAccessFile = 1
+	TxErrCodeWriteTree        = 2
 )
 
 type TxErr struct {
@@ -244,6 +243,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	}
 
 	if cr := tx.commit(); nil != cr {
+		if errors.Is(cr, filelock.ErrUnableAccessFile) {
+			return &TxErr{code: TxErrCodeUnableAccessFile, msg: cr.Error()}
+		}
+
 		logging.LogErrorf("commit tx failed: %s", cr)
 		return &TxErr{msg: cr.Error()}
 	}
@@ -415,8 +418,8 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	tree, err := tx.loadTree(block.ID)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
-		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: block.ID}
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
+		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
 		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
@@ -503,8 +506,8 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	tree, err := tx.loadTree(block.ID)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
-		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: block.ID}
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
+		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
 		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
@@ -661,8 +664,8 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	var err error
 	id := operation.ID
 	tree, err := tx.loadTree(id)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
-		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: id}
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
+		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: id}
 	}
 	if ErrBlockNotFound == err {
 		return nil // move 以后这里会空，算作正常情况
@@ -712,8 +715,8 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 	}
 	tree, err := tx.loadTree(block.ID)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
-		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: block.ID}
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
+		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
 		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
@@ -750,7 +753,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 				// 只有全局 assets 才移动到相对 assets
 				targetP := filepath.Join(assets, filepath.Base(assetPath))
-				if e = os.Rename(assetPath, targetP); nil != err {
+				if e = filelock.Move(assetPath, targetP); nil != err {
 					logging.LogErrorf("copy path of asset from [%s] to [%s] failed: %s", assetPath, targetP, err)
 					return ast.WalkContinue
 				}
@@ -846,8 +849,8 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 
 	tree, err := tx.loadTree(id)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
-		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: id}
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
+		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: id}
 	}
 	if nil != err {
 		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)

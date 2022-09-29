@@ -180,7 +180,7 @@ export class Backlink extends Model {
                             refTreeID: liElement.getAttribute("data-node-id")
                         }, (response) => {
                             const editorElement = document.createElement("div");
-                            liElement.after(editorElement)
+                            liElement.after(editorElement);
                             const editor = new Protyle(editorElement, {
                                 blockId: "",
                                 backlinkData: response.data.backlinks,
@@ -191,9 +191,9 @@ export class Backlink extends Model {
                                     scroll: false,
                                     breadcrumb: false,
                                 }
-                            })
-                            this.editors.push(editor)
-                        })
+                            });
+                            this.editors.push(editor);
+                        });
                     }
                 }
             }
@@ -259,8 +259,8 @@ export class Backlink extends Model {
                 this.tree.element.querySelectorAll(".protyle-wysiwyg--hl").forEach((hlItem) => {
                     hlItem.classList.remove("protyle-wysiwyg--hl");
                 });
-            })
-        })
+            });
+        });
         this.mTree.element.addEventListener("scroll", () => {
             this.mTree.element.querySelectorAll(".protyle-gutters").forEach(item => {
                 item.classList.add("fn__none");
@@ -269,8 +269,8 @@ export class Backlink extends Model {
                 this.mTree.element.querySelectorAll(".protyle-wysiwyg--hl").forEach((hlItem) => {
                     hlItem.classList.remove("protyle-wysiwyg--hl");
                 });
-            })
-        })
+            });
+        });
         // 为了快捷键的 dispatch
         this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {
             this.tree.collapseAll();
@@ -406,8 +406,8 @@ export class Backlink extends Model {
         }
 
         this.editors.forEach(item => {
-            item.destroy()
-        })
+            item.destroy();
+        });
         this.editors = [];
         this.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
         this.notebookId = data.box;
@@ -415,15 +415,15 @@ export class Backlink extends Model {
         this.inputsElement[1].value = data.mk;
         if (data.backlinks) {
             data.backlinks.forEach((item) => {
-                delete item.blocks
-                delete item.children
-            })
+                delete item.blocks;
+                delete item.children;
+            });
         }
         if (data.backmentions) {
             data.backmentions.forEach((item) => {
-                delete item.blocks
-                delete item.children
-            })
+                delete item.blocks;
+                delete item.children;
+            });
         }
         this.tree.updateData(data.backlinks);
         this.mTree.updateData(data.backmentions);

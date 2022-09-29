@@ -1374,10 +1374,10 @@ export class WYSIWYG {
         let shiftStartElement: HTMLElement;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             hideElements(["hint", "util"], protyle);
-           const backlinkBreadcrumbItemElement =  hasClosestByClassName(event.target, "protyle-breadcrumb__item")
+           const backlinkBreadcrumbItemElement =  hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {
                 loadBreadcrumb(backlinkBreadcrumbItemElement);
-                event.stopPropagation()
+                event.stopPropagation();
                 return;
             }
             if (!window.siyuan.shiftIsPressed) {

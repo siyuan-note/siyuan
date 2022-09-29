@@ -158,8 +158,8 @@ class Protyle {
             });
             setPadding(this.protyle);
             if (options.backlinkData) {
-                renderBacklink(this.protyle, options.backlinkData)
-                return
+                renderBacklink(this.protyle, options.backlinkData);
+                return;
             }
             fetchPost("/api/filetree/getDoc", {
                 id: options.blockId,

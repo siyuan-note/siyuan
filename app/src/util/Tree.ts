@@ -141,7 +141,7 @@ data-def-path="${item.defPath}">
 
     private toggleBlocks(liElement: HTMLElement) {
         if (this.toggleClick) {
-            this.toggleClick(liElement)
+            this.toggleClick(liElement);
             return;
         }
         if (!liElement.nextElementSibling) {

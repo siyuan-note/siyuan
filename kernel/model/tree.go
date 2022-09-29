@@ -45,6 +45,7 @@ func resetTree(tree *parse.Tree, titleSuffix string) {
 	titleSuffix = "(" + titleSuffix + ")"
 	tree.Root.SetIALAttr("id", tree.ID)
 	tree.Root.SetIALAttr("title", tree.Root.IALAttr("title")+" "+titleSuffix)
+	tree.Root.RemoveIALAttr("scroll")
 	p := path.Join(path.Dir(tree.Path), tree.ID) + ".sy"
 	tree.Path = p
 	tree.HPath = tree.HPath + " " + titleSuffix

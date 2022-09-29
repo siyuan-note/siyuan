@@ -364,7 +364,7 @@ export class Breadcrumb {
         this.id = id;
         fetchPost("/api/block/getBlockBreadcrumb", {id}, (response) => {
             let html = "";
-            response.data.forEach((item: { id: string, name: string, type: string, subType: string, children: [] }, index: number) => {
+            response.data.forEach((item: IBreadcrumb, index: number) => {
                 let isCurrent = false;
                 if (!protyle.block.showAll && item.id === protyle.block.parentID) {
                     isCurrent = true;

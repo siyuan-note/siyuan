@@ -11,6 +11,7 @@ import {onGet} from "../../protyle/util/onGet";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {MenuItem} from "../../menus/Menu";
+import Protyle from "../../protyle";
 
 export class Backlink extends Model {
     public element: HTMLElement;
@@ -21,6 +22,7 @@ export class Backlink extends Model {
     private tree: Tree;
     private notebookId: string;
     private mTree: Tree;
+    private editors:Protyle[] = [];
 
     constructor(options: {
         tab: Tab,
@@ -164,18 +166,34 @@ export class Backlink extends Model {
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
-            toggleClick:(liElement: HTMLElement)=> {
+            toggleClick: (liElement: HTMLElement) => {
                 const svgElement = liElement.firstElementChild.firstElementChild;
                 if (svgElement.classList.contains("b3-list-item__arrow--open")) {
                     svgElement.classList.remove("b3-list-item__arrow--open");
                     liElement.nextElementSibling?.classList.add("fn__none");
                 } else {
                     svgElement.classList.add("b3-list-item__arrow--open");
-                    if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "UL") {
+                    if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "DIV") {
                         liElement.nextElementSibling.classList.remove("fn__none");
                     } else {
-                        fetchPost("/api/ref/getBacklinkDoc", {defID:this.blockId, refTreeID:liElement.getAttribute("data-node-id")}, (response)=>{
-
+                        fetchPost("/api/ref/getBacklinkDoc", {
+                            defID: this.blockId,
+                            refTreeID: liElement.getAttribute("data-node-id")
+                        }, (response) => {
+                            const editorElement = document.createElement("div");
+                            liElement.after(editorElement)
+                            const editor = new Protyle(editorElement, {
+                                blockId: "",
+                                backlinkData: response.data.backlinks,
+                                render: {
+                                    background: false,
+                                    title: false,
+                                    gutter: false,
+                                    scroll: false,
+                                    breadcrumb: false,
+                                }
+                            })
+                            this.editors.push(editor)
                         })
                     }
                 }
@@ -367,18 +385,27 @@ export class Backlink extends Model {
                 mk: ""
             };
         }
+
+        this.editors.forEach(item => {
+            item.destroy()
+        })
+        this.editors = [];
         this.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
         this.notebookId = data.box;
         this.inputsElement[0].value = data.k;
         this.inputsElement[1].value = data.mk;
-        data.backlinks.forEach((item) => {
-            delete item.blocks
-            delete item.children
-        })
-        data.backmentions.forEach((item) => {
-            delete item.blocks
-            delete item.children
-        })
+        if (data.backlinks) {
+            data.backlinks.forEach((item) => {
+                delete item.blocks
+                delete item.children
+            })
+        }
+        if (data.backmentions) {
+            data.backmentions.forEach((item) => {
+                delete item.blocks
+                delete item.children
+            })
+        }
         this.tree.updateData(data.backlinks);
         this.mTree.updateData(data.backmentions);
 

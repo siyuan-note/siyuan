@@ -25,6 +25,7 @@ import {Background} from "./header/Background";
 import {getDisplayName} from "../util/pathName";
 import {onGet} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
+import {renderBacklink} from "./wysiwyg/renderBacklink";
 
 class Protyle {
 
@@ -155,6 +156,11 @@ class Protyle {
                     }
                 }
             });
+            setPadding(this.protyle);
+            if (options.backlinkData) {
+                renderBacklink(this.protyle, options.backlinkData)
+                return
+            }
             fetchPost("/api/filetree/getDoc", {
                 id: options.blockId,
                 k: options.key || "",
@@ -201,7 +207,6 @@ class Protyle {
                     mergedOptions.after(this);
                 }
             });
-            setPadding(this.protyle);
         }
     }
 

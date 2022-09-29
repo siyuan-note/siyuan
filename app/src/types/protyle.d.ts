@@ -105,6 +105,14 @@ interface ILuteRender {
     renderBackslashContent?: ILuteRenderCallback;
 }
 
+interface IBreadcrumb {
+    id: string,
+    name: string,
+    type: string,
+    subType: string,
+    children: []
+}
+
 interface ILuteOptions extends IMarkdownConfig {
     emojis: IObject;
     emojiSite: string;
@@ -351,6 +359,10 @@ interface IHint {
 
 /** @link https://ld246.com/article/1549638745630#options */
 interface IOptions {
+    backlinkData?: {
+        blockPaths: IBreadcrumb[],
+        dom: string
+    }[],
     action?: string[],
     mode?: TEditorMode,
     blockId: string

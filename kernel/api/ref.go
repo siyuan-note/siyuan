@@ -38,6 +38,23 @@ func refreshBacklink(c *gin.Context) {
 	model.RefreshBacklink(id)
 }
 
+func getBacklinkDoc(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	defID := arg["defID"].(string)
+	refTreeID := arg["refTreeID"].(string)
+	blocks := model.GetBacklinkDoc(defID, refTreeID)
+	ret.Data = map[string]interface{}{
+		"blocks": blocks,
+	}
+}
+
 func getBacklink(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

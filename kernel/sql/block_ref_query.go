@@ -343,6 +343,21 @@ func QueryRefsByDefID(defBlockID string, containChildren bool) (ret []*Ref) {
 	return
 }
 
+func QueryRefsByDefIDRefRootID(defBlockID, refRootBlockID string) (ret []*Ref) {
+	stmt := "SELECT * FROM refs WHERE def_block_id = ? AND root_id = ?"
+	rows, err := query(stmt, defBlockID, refRootBlockID)
+	if nil != err {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		ref := scanRefRows(rows)
+		ret = append(ret, ref)
+	}
+	return
+}
+
 func QueryRefsByDefIDRefID(defBlockID, refBlockID string) (ret []*Ref) {
 	stmt := "SELECT * FROM refs WHERE def_block_id = ? AND block_id = ?"
 	rows, err := query(stmt, defBlockID, refBlockID)

@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
@@ -154,6 +155,128 @@ OK:
 		IncSync()
 	}
 	sql.WaitForWritingDatabase()
+	return
+}
+
+func GetBacklinkDoc(defID, refTreeID string) (ret []*Block) {
+	keyword := ""
+	beforeLen := 12
+	sqlBlock := sql.GetBlock(defID)
+	if nil == sqlBlock {
+		return
+	}
+	rootID := sqlBlock.RootID
+
+	var links []*Block
+	refs := sql.QueryRefsByDefIDRefRootID(defID, refTreeID)
+	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
+
+	// 为了减少查询，组装好 IDs 后一次查出
+	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
+	var queryBlockIDs []string
+	for _, ref := range refs {
+		defSQLBlockIDs[ref.DefBlockID] = true
+		refSQLBlockIDs[ref.BlockID] = true
+		queryBlockIDs = append(queryBlockIDs, ref.DefBlockID)
+		queryBlockIDs = append(queryBlockIDs, ref.BlockID)
+	}
+	querySQLBlocks := sql.GetBlocks(queryBlockIDs)
+	defSQLBlocksCache := map[string]*sql.Block{}
+	for _, defSQLBlock := range querySQLBlocks {
+		if nil != defSQLBlock && defSQLBlockIDs[defSQLBlock.ID] {
+			defSQLBlocksCache[defSQLBlock.ID] = defSQLBlock
+		}
+	}
+	refSQLBlocksCache := map[string]*sql.Block{}
+	for _, refSQLBlock := range querySQLBlocks {
+		if nil != refSQLBlock && refSQLBlockIDs[refSQLBlock.ID] {
+			refSQLBlocksCache[refSQLBlock.ID] = refSQLBlock
+		}
+	}
+
+	excludeBacklinkIDs := hashset.New()
+	for _, ref := range refs {
+		defSQLBlock := defSQLBlocksCache[(ref.DefBlockID)]
+		if nil == defSQLBlock {
+			continue
+		}
+
+		refSQLBlock := refSQLBlocksCache[ref.BlockID]
+		if nil == refSQLBlock {
+			continue
+		}
+		refBlock := fromSQLBlock(refSQLBlock, "", beforeLen)
+		if rootID == refBlock.RootID { // 排除当前文档内引用提及
+			excludeBacklinkIDs.Add(refBlock.RootID, refBlock.ID)
+		}
+		defBlock := fromSQLBlock(defSQLBlock, "", beforeLen)
+		if defBlock.RootID == rootID { // 当前文档的定义块
+			links = append(links, defBlock)
+			if ref.DefBlockID == defBlock.ID {
+				defBlock.Refs = append(defBlock.Refs, refBlock)
+			}
+		}
+	}
+
+	for _, link := range links {
+		for _, ref := range link.Refs {
+			excludeBacklinkIDs.Add(ref.RootID, ref.ID)
+		}
+	}
+
+	var linkRefs []*Block
+	processedParagraphs := hashset.New()
+	var paragraphParentIDs []string
+	for _, link := range links {
+		for _, ref := range link.Refs {
+			if "NodeParagraph" == ref.Type {
+				paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
+			}
+		}
+	}
+	paragraphParents := sql.GetBlocks(paragraphParentIDs)
+	for _, p := range paragraphParents {
+		if "i" == p.Type || "h" == p.Type {
+			linkRefs = append(linkRefs, fromSQLBlock(p, keyword, beforeLen))
+			processedParagraphs.Add(p.ID)
+		}
+	}
+	for _, link := range links {
+		for _, ref := range link.Refs {
+			if "NodeParagraph" == ref.Type {
+				if processedParagraphs.Contains(ref.ParentID) {
+					continue
+				}
+			}
+
+			ref.DefID = link.ID
+			ref.DefPath = link.Path
+
+			content := ref.Content
+			if "" != keyword {
+				_, content = search.MarkText(content, keyword, beforeLen, Conf.Search.CaseSensitive)
+				ref.Content = content
+			}
+			linkRefs = append(linkRefs, ref)
+		}
+	}
+
+	luteEngine := NewLute()
+	refTree, err := loadTreeByBlockID(refTreeID)
+	if nil != err {
+		logging.LogErrorf("load ref tree [%s] failed: %s", refTreeID, err)
+		return
+	}
+	linkPaths := toSubTree(linkRefs, keyword)
+	for _, link := range linkPaths {
+		for _, c := range link.Children {
+			n := treenode.GetNodeInTree(refTree, c.ID)
+			b := &Block{
+				Content: lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions),
+			}
+			ret = append(ret, b)
+		}
+	}
 	return
 }
 

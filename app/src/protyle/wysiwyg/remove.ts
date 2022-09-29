@@ -103,6 +103,9 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
 
     // 列表项合并到前一个列表项的最后一个块末尾
     const listItemElement = blockElement.parentElement;
+    if (listItemElement.previousElementSibling && listItemElement.previousElementSibling.classList.contains("protyle-breadcrumb__bar")) {
+        return;
+    }
     const listItemId = listItemElement.getAttribute("data-node-id");
     const listElement = listItemElement.parentElement;
     range.insertNode(document.createElement("wbr"));
@@ -344,6 +347,10 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
 
     if (blockElement.parentElement.classList.contains("li") && blockElement.previousElementSibling.classList.contains("protyle-action")) {
         removeLi(protyle, blockElement, range);
+        return;
+    }
+
+    if (blockElement.previousElementSibling && blockElement.previousElementSibling.classList.contains("protyle-breadcrumb__bar")) {
         return;
     }
 

@@ -58,6 +58,7 @@ import {onGet} from "../util/onGet";
 import {setTableAlign} from "../util/table";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
+import {loadBreadcrumb} from "./renderBacklink";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -1152,7 +1153,9 @@ export class WYSIWYG {
                 }
             } else if (protyle.toolbar.range.toString() === "") {
                 hideElements(["util"], protyle);
-                protyle.gutter.renderMenu(protyle, nodeElement);
+                if (protyle.gutter) {
+                    protyle.gutter.renderMenu(protyle, nodeElement);
+                }
                 window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
                 protyle.toolbar?.element.classList.add("fn__none");
             }
@@ -1371,6 +1374,12 @@ export class WYSIWYG {
         let shiftStartElement: HTMLElement;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             hideElements(["hint", "util"], protyle);
+           const backlinkBreadcrumbItemElement =  hasClosestByClassName(event.target, "protyle-breadcrumb__item")
+            if (backlinkBreadcrumbItemElement) {
+                loadBreadcrumb(backlinkBreadcrumbItemElement);
+                event.stopPropagation()
+                return;
+            }
             if (!window.siyuan.shiftIsPressed) {
                 shiftStartElement = undefined;
             }

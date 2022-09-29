@@ -22,7 +22,7 @@ export class Backlink extends Model {
     private tree: Tree;
     private notebookId: string;
     private mTree: Tree;
-    private editors:Protyle[] = [];
+    private editors: Protyle[] = [];
 
     constructor(options: {
         tab: Tab,
@@ -135,7 +135,6 @@ export class Backlink extends Model {
                 }
             });
         });
-
         this.tree = new Tree({
             element: this.element.querySelector(".backlinkList") as HTMLElement,
             data: null,
@@ -188,7 +187,7 @@ export class Backlink extends Model {
                                 render: {
                                     background: false,
                                     title: false,
-                                    gutter: false,
+                                    gutter: true,
                                     scroll: false,
                                     breadcrumb: false,
                                 }
@@ -252,6 +251,26 @@ export class Backlink extends Model {
             },
             blockExtHTML: `<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`
         });
+        this.tree.element.addEventListener("scroll", () => {
+            this.tree.element.querySelectorAll(".protyle-gutters").forEach(item => {
+                item.classList.add("fn__none");
+                item.innerHTML = "";
+                // https://ld246.com/article/1651935412480
+                this.tree.element.querySelectorAll(".protyle-wysiwyg--hl").forEach((hlItem) => {
+                    hlItem.classList.remove("protyle-wysiwyg--hl");
+                });
+            })
+        })
+        this.mTree.element.addEventListener("scroll", () => {
+            this.mTree.element.querySelectorAll(".protyle-gutters").forEach(item => {
+                item.classList.add("fn__none");
+                item.innerHTML = "";
+                // https://ld246.com/article/1651935412480
+                this.mTree.element.querySelectorAll(".protyle-wysiwyg--hl").forEach((hlItem) => {
+                    hlItem.classList.remove("protyle-wysiwyg--hl");
+                });
+            })
+        })
         // 为了快捷键的 dispatch
         this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {
             this.tree.collapseAll();

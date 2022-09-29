@@ -136,7 +136,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.menus.menu.remove();
         }
 
-        if (!["Alt", "Meta", "Shift", "Control", "CapsLock", "Escape"].includes(event.key)) {
+        if (!["Alt", "Meta", "Shift", "Control", "CapsLock", "Escape"].includes(event.key) && protyle.options.render.breadcrumb) {
             protyle.breadcrumb.hide();
         }
 

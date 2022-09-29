@@ -17,6 +17,7 @@ export class Options {
             breadcrumbDocName: false,
             breadcrumbContext: false
         },
+        action: [],
         after: undefined,
         classes: {
             preview: "",

@@ -199,18 +199,6 @@ export class Dock {
                             }
                         });
                         break;
-                    // TODO: remove
-                    // case "backlink":
-                    //     tab = new Tab({
-                    //         callback(tab: Tab) {
-                    //             tab.addModel(new Backlinks({
-                    //                 type: "pin",
-                    //                 tab,
-                    //                 blockId: editor?.protyle?.block?.rootID,
-                    //             }));
-                    //         }
-                    //     });
-                    //     break;
                     case "backlink":
                         tab = new Tab({
                             callback(tab: Tab) {

@@ -484,10 +484,11 @@ export class Toolbar {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
                         } else if (item.tagName !== "BR") {
+                            if (item.getAttribute("data-type")?.indexOf("backslash") > -1 &&
+                                item.firstChild?.textContent === "\\") {
+                                item.firstChild.remove();
+                            }
                             item.setAttribute("data-type", types.join(" "));
-                            item.querySelectorAll("span").forEach(backslashItem => {
-                                backslashItem.remove();
-                            });
                             setFontStyle(item, textObj);
                             newNodes.push(item);
                         } else {

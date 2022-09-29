@@ -158,8 +158,13 @@ OK:
 	return
 }
 
-func GetBacklinkDoc(defID, refTreeID string) (ret []string) {
-	ret = []string{}
+type Backlink struct {
+	DOM        string       `json:"dom"`
+	BlockPaths []*BlockPath `json:"blockPaths"`
+}
+
+func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
+	ret = []*Backlink{}
 	keyword := ""
 	beforeLen := 12
 	sqlBlock := sql.GetBlock(defID)
@@ -279,7 +284,10 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []string) {
 		for _, c := range link.Children {
 			n := treenode.GetNodeInTree(refTree, c.ID)
 			dom := lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions)
-			ret = append(ret, dom)
+			ret = append(ret, &Backlink{
+				DOM:        dom,
+				BlockPaths: buildBlockBreadcrumb(n),
+			})
 		}
 	}
 	return

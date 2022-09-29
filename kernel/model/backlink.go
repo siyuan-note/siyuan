@@ -159,6 +159,7 @@ OK:
 }
 
 func GetBacklinkDoc(defID, refTreeID string) (ret []string) {
+	ret = []string{}
 	keyword := ""
 	beforeLen := 12
 	sqlBlock := sql.GetBlock(defID)

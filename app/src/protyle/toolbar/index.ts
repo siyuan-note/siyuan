@@ -518,6 +518,8 @@ export class Toolbar {
             const nextNewNode = newNodes[i + 1] as HTMLElement;
             if (currentNewNode.nodeType !== 3 && nextNewNode && nextNewNode.nodeType !== 3 &&
                 isArrayEqual(nextNewNode.getAttribute("data-type").split(" "), currentNewNode.getAttribute("data-type").split(" ")) &&
+                currentNewNode.getAttribute("data-id") === nextNewNode.getAttribute("data-id") &&
+                currentNewNode.getAttribute("data-subtype") === nextNewNode.getAttribute("data-subtype") &&
                 currentNewNode.style.color === nextNewNode.style.color &&
                 currentNewNode.style.webkitTextFillColor === nextNewNode.style.webkitTextFillColor &&
                 currentNewNode.style.webkitTextStroke === nextNewNode.style.webkitTextStroke &&
@@ -525,7 +527,9 @@ export class Toolbar {
                 currentNewNode.style.fontSize === nextNewNode.style.fontSize &&
                 currentNewNode.style.backgroundColor === nextNewNode.style.backgroundColor) {
                 // 合并相同的 node
-                nextNewNode.innerHTML = currentNewNode.innerHTML + nextNewNode.innerHTML;
+                if (currentNewNode.getAttribute("data-type").indexOf("block-ref") === -1) { // 引用不虚合并内容 https://ld246.com/article/1664454663564
+                    nextNewNode.innerHTML = currentNewNode.innerHTML + nextNewNode.innerHTML;
+                }
                 newNodes.splice(i, 1);
                 i--;
             } else {

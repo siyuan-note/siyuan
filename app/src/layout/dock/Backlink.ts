@@ -324,6 +324,7 @@ export class Backlink extends Model {
                     refTreeID: liElement.getAttribute("data-node-id")
                 }, (response) => {
                     const editorElement = document.createElement("div");
+                    editorElement.style.minHeight = "auto";
                     liElement.after(editorElement);
                     const editor = new Protyle(editorElement, {
                         blockId: "",

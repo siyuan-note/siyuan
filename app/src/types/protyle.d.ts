@@ -362,6 +362,7 @@ interface IOptions {
     backlinkData?: {
         blockPaths: IBreadcrumb[],
         dom: string
+        expand: boolean
     }[],
     action?: string[],
     mode?: TEditorMode,

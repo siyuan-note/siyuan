@@ -58,7 +58,7 @@ import {onGet} from "../util/onGet";
 import {setTableAlign} from "../util/table";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
-import {loadBreadcrumb} from "./renderBacklink";
+import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -123,7 +123,7 @@ export class WYSIWYG {
         // https://github.com/siyuan-note/siyuan/issues/5924
         if (currentTypes.length > 0 && range.toString() === "" && range.startOffset === inputData.length && inlineElement.tagName === "SPAN" &&
             inlineElement.textContent.replace(Constants.ZWSP, "") !== inputData &&
-            inlineElement.textContent.replace(Constants.ZWSP, "").length >= inputData.length&&
+            inlineElement.textContent.replace(Constants.ZWSP, "").length >= inputData.length &&
             !hasPreviousSibling(range.startContainer) && !hasPreviousSibling(inlineElement)) {
             const html = inlineElement.innerHTML.replace(Constants.ZWSP, "");
             inlineElement.innerHTML = html.substr(dataLength);
@@ -1374,9 +1374,14 @@ export class WYSIWYG {
         let shiftStartElement: HTMLElement;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             hideElements(["hint", "util"], protyle);
-           const backlinkBreadcrumbItemElement =  hasClosestByClassName(event.target, "protyle-breadcrumb__item");
+            const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {
-                loadBreadcrumb(backlinkBreadcrumbItemElement);
+                if (backlinkBreadcrumbItemElement.getAttribute("data-id")) {
+                    loadBreadcrumb(backlinkBreadcrumbItemElement);
+                } else {
+                    // 引用标题时的更多加载
+                    getBacklinkHeadingMore(backlinkBreadcrumbItemElement)
+                }
                 event.stopPropagation();
                 return;
             }

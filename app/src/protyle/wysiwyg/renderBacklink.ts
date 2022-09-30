@@ -5,36 +5,68 @@ import {Constants} from "../../constants";
 
 export const renderBacklink = (protyle: IProtyle, backlinkData: {
     blockPaths: IBreadcrumb[],
-    dom: string
+    dom: string,
+    expand: boolean
 }[]) => {
     protyle.block.showAll = true;
     let html = "";
     backlinkData.forEach(item => {
-        html += genBreadcrumb(item.blockPaths) + item.dom;
+        html += genBreadcrumb(item.blockPaths) + setBacklinkFold(item.dom, item.expand);
     });
     protyle.wysiwyg.element.innerHTML = html;
     removeLoading(protyle);
 };
 
+const setBacklinkFold = (html: string, expand: boolean) => {
+    const tempDom = document.createElement("template");
+    tempDom.innerHTML = html;
+    if (tempDom.content.firstElementChild.classList.contains("li")) {
+        if (expand) {
+            const thirdLiElement = tempDom.content.querySelector(".li .li .li")
+            if (thirdLiElement) {
+                thirdLiElement.setAttribute("fold", "1")
+            }
+        } else {
+            tempDom.content.firstElementChild.setAttribute("fold", "1")
+        }
+    } else if (tempDom.content.firstElementChild.getAttribute("data-type") === "NodeHeading") {
+        Array.from(tempDom.content.children).forEach((item, index) => {
+            if ((expand && index > 2) || (!expand && index > 1)) {
+                if ((expand && index === 3) || (!expand && index === 2)) {
+                    item.insertAdjacentHTML("beforebegin", `<div style="max-width: 100%;justify-content: center;" contenteditable="false" class="protyle-breadcrumb__item"><svg><use xlink:href="#iconMore"></use></svg></div>`);
+                }
+                item.classList.add("fn__none")
+            }
+        })
+    }
+    return tempDom.innerHTML;
+}
+
 export const loadBreadcrumb = (element: HTMLElement) => {
-    if (element.classList.contains("protyle-breadcrumb__item--active")) {
-        return;
-    }
-    element.parentElement.querySelector(".protyle-breadcrumb__item--active").classList.remove("protyle-breadcrumb__item--active");
-    element.classList.add("protyle-breadcrumb__item--active");
-    let nextElement = element.parentElement.nextElementSibling;
-    while (nextElement && !nextElement.classList.contains("protyle-breadcrumb__bar")) {
-        const tempElement = nextElement;
-        nextElement = nextElement.nextElementSibling;
-        tempElement.remove();
-    }
     fetchPost("/api/filetree/getDoc", {
         id: element.getAttribute("data-id"),
         size: Constants.SIZE_GET_MAX,
     }, getResponse => {
-        element.parentElement.insertAdjacentHTML("afterend", getResponse.data.content);
+        element.parentElement.querySelector(".protyle-breadcrumb__item--active").classList.remove("protyle-breadcrumb__item--active");
+        element.classList.add("protyle-breadcrumb__item--active");
+        let nextElement = element.parentElement.nextElementSibling;
+        while (nextElement && !nextElement.classList.contains("protyle-breadcrumb__bar")) {
+            const tempElement = nextElement;
+            nextElement = nextElement.nextElementSibling;
+            tempElement.remove();
+        }
+        element.parentElement.insertAdjacentHTML("afterend", setBacklinkFold(getResponse.data.content, true));
     });
 };
+
+export const getBacklinkHeadingMore = (moreElement: HTMLElement) => {
+    let nextElement = moreElement.nextElementSibling;
+    while (nextElement && !nextElement.classList.contains("protyle-breadcrumb__bar")) {
+        nextElement.classList.remove("fn__none");
+        nextElement = nextElement.nextElementSibling;
+    }
+    moreElement.remove();
+}
 
 const genBreadcrumb = (blockPaths: IBreadcrumb[]) => {
     let html = "";

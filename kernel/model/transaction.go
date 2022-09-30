@@ -24,7 +24,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -1131,11 +1130,9 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 		if ast.NodeDocument != defNode.Type && defNode.IsContainerBlock() {
 			defNode = treenode.FirstLeafBlock(defNode)
 		}
-		defContent := renderBlockText(defNode)
-		if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(defContent) {
-			defContent = gulu.Str.SubStr(defContent, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
-		}
-		treenode.SetDynamicBlockRefText(n, defContent)
+
+		refText := getNodeRefText(defNode)
+		treenode.SetDynamicBlockRefText(n, refText)
 		changed = true
 		return ast.WalkContinue
 	})

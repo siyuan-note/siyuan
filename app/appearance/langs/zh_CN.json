@@ -428,6 +428,8 @@
   "createdDESC": "创建时间降序",
   "docSizeASC": "文档大小升序",
   "docSizeDESC": "文档大小降序",
+  "subDocCountASC": "子文档数升序",
+  "subDocCountDESC": "子文档数降序",
   "sort": "排序",
   "enterFullscreen": "进入全屏幕",
   "exitFullscreen": "退出全屏幕",

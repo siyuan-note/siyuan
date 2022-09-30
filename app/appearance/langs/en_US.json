@@ -428,6 +428,8 @@
   "createdDESC": "Created Time DESC",
   "docSizeASC": "Document Size ASC",
   "docSizeDESC": "Document Size DESC",
+  "subDocCountASC": "Sub-docs Count ASC ",
+  "subDocCountDESC": "Sub-docs Count DESC",
   "sort": "Sort",
   "enterFullscreen": "Enter Full Screen",
   "exitFullscreen": "Exit Full Screen",

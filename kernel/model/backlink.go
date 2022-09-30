@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
@@ -160,6 +161,7 @@ OK:
 type Backlink struct {
 	DOM        string       `json:"dom"`
 	BlockPaths []*BlockPath `json:"blockPaths"`
+	Expand     bool         `json:"expand"`
 }
 
 func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
@@ -285,7 +287,7 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 			continue
 		}
 
-		var renderNodes []*ast.Node
+		expand := true
 		if ast.NodeListItem == n.Type {
 			if nil == n.FirstChild {
 				continue
@@ -296,7 +298,6 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 				c = n.FirstChild.Next
 			}
 
-			expand := true
 			for liFirstBlockSpan := c.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
 				if treenode.IsBlockRef(liFirstBlockSpan) {
 					continue
@@ -306,24 +307,12 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 					break
 				}
 			}
-
-			renderNodes = append(renderNodes, n)
-			if !expand {
-				var unlinks []*ast.Node
-				for cc := c.Next; nil != cc; cc = cc.Next {
-					unlinks = append(unlinks, cc)
-				}
-				for _, unlink := range unlinks {
-					unlink.Unlink()
-				}
-			}
 		} else if ast.NodeHeading == n.Type {
 			c := n.FirstChild
 			if nil == c {
 				continue
 			}
 
-			expand := true
 			for headingFirstSpan := c; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
 				if treenode.IsBlockRef(headingFirstSpan) {
 					continue
@@ -333,29 +322,13 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 					break
 				}
 			}
-
-			renderNodes = append(renderNodes, n)
-			if !expand {
-				var unlinks []*ast.Node
-				for cc := n.Next; nil != cc; cc = cc.Next {
-					unlinks = append(unlinks, cc)
-				}
-				for _, unlink := range unlinks {
-					unlink.Unlink()
-				}
-
-			} else {
-				cc := treenode.HeadingChildren(n)
-				renderNodes = append(renderNodes, cc...)
-			}
-		} else {
-			renderNodes = append(renderNodes, n)
 		}
 
-		dom := renderBlockDOMByNodes(renderNodes, luteEngine)
+		dom := lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions)
 		ret = append(ret, &Backlink{
 			DOM:        dom,
 			BlockPaths: buildBlockBreadcrumb(n),
+			Expand:     expand,
 		})
 	}
 

@@ -26,7 +26,6 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
@@ -287,6 +286,7 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 			continue
 		}
 
+		var renderNodes []*ast.Node
 		expand := true
 		if ast.NodeListItem == n.Type {
 			if nil == n.FirstChild {
@@ -307,6 +307,8 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 					break
 				}
 			}
+
+			renderNodes = append(renderNodes, n)
 		} else if ast.NodeHeading == n.Type {
 			c := n.FirstChild
 			if nil == c {
@@ -322,9 +324,15 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 					break
 				}
 			}
+
+			renderNodes = append(renderNodes, n)
+			cc := treenode.HeadingChildren(n)
+			renderNodes = append(renderNodes, cc...)
+		} else {
+			renderNodes = append(renderNodes, n)
 		}
 
-		dom := lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions)
+		dom := renderBlockDOMByNodes(renderNodes, luteEngine)
 		ret = append(ret, &Backlink{
 			DOM:        dom,
 			BlockPaths: buildBlockBreadcrumb(n),

@@ -527,7 +527,11 @@ export class Toolbar {
                 currentNewNode.style.fontSize === nextNewNode.style.fontSize &&
                 currentNewNode.style.backgroundColor === nextNewNode.style.backgroundColor) {
                 // 合并相同的 node
-                if (currentNewNode.getAttribute("data-type").indexOf("block-ref") === -1) { // 引用不虚合并内容 https://ld246.com/article/1664454663564
+                if (currentNewNode.getAttribute("data-type").indexOf("inline-math") > -1) {
+                    // 数学公式合并 data-content https://github.com/siyuan-note/siyuan/issues/6028
+                    nextNewNode.setAttribute("data-content", currentNewNode.getAttribute("data-content") + nextNewNode.getAttribute("data-content"))
+                } else if (currentNewNode.getAttribute("data-type").indexOf("block-ref") === -1) {
+                    // 引用不虚合并内容 https://ld246.com/article/1664454663564
                     nextNewNode.innerHTML = currentNewNode.innerHTML + nextNewNode.innerHTML;
                 }
                 newNodes.splice(i, 1);

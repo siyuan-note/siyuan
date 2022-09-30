@@ -91,7 +91,10 @@ func GetBlockRefText(id string) string {
 	if nil == node {
 		return ErrBlockNotFound.Error()
 	}
+	return getNodeRefText(node)
+}
 
+func getNodeRefText(node *ast.Node) string {
 	if name := node.IALAttr("name"); "" != name {
 		return name
 	}

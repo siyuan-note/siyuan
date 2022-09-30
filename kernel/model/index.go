@@ -24,9 +24,7 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"unicode/utf8"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
@@ -251,7 +249,7 @@ func IndexRefs() {
 					logging.LogErrorf("tree [%s] dynamic ref text to static failed: %s", dynamicRefTreeID, err)
 					continue
 				}
-				legacyDynamicRefTreeToStatic(tree)
+
 				if err := filesys.WriteTree(tree); nil == err {
 					//logging.LogInfof("persisted tree [%s] dynamic ref text", tree.Box+tree.Path)
 				}
@@ -317,35 +315,6 @@ func IndexRefs() {
 		}
 	}
 	logging.LogInfof("resolved refs [%d] in [%dms]", len(refBlocks), time.Now().Sub(start).Milliseconds())
-}
-
-func legacyDynamicRefTreeToStatic(tree *parse.Tree) {
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeBlockRef != n.Type {
-			return ast.WalkContinue
-		}
-		if isLegacyDynamicBlockRef(n) {
-			idNode := n.ChildByType(ast.NodeBlockRefID)
-			defID := idNode.TokensStr()
-			def := sql.GetBlock(defID)
-			var text string
-			if nil == def {
-				if "zh_CN" == Conf.Lang {
-					text = "解析引用锚文本失败，请尝试更新该引用指向的定义块后再重新打开该文档"
-				} else {
-					text = "Failed to parse the ref anchor text, please try to update the def block pointed to by the ref and then reopen this document"
-				}
-			} else {
-				text = sql.GetRefText(defID)
-			}
-			if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(text) {
-				text = gulu.Str.SubStr(text, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
-			}
-			treenode.SetDynamicBlockRefText(n, text)
-			return ast.WalkSkipChildren
-		}
-		return ast.WalkContinue
-	})
 }
 
 func isLegacyDynamicBlockRef(blockRef *ast.Node) bool {

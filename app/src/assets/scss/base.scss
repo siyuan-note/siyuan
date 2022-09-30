@@ -169,6 +169,13 @@ progressLoading: 400
     padding-left: 0;
   }
 
+  #windowControls {
+    top: -1px;
+    z-index: 502;
+    right: -1px;
+    position: relative;
+  }
+
   #drag {
     -webkit-app-region: drag;
     font-size: 12px;

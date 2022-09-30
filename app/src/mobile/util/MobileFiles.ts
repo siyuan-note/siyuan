@@ -306,6 +306,20 @@ export class MobileFiles extends Model {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            icon: window.siyuan.config.fileTree.sort === 11 ? "iconSelect" : undefined,
+            label: window.siyuan.languages.docSizeASC,
+            click: () => {
+                clickEvent(11);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: window.siyuan.config.fileTree.sort === 12 ? "iconSelect" : undefined,
+            label: window.siyuan.languages.docSizeDESC,
+            click: () => {
+                clickEvent(12);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
             icon: window.siyuan.config.fileTree.sort === 6 ? "iconSelect" : undefined,
             label: window.siyuan.languages.customSort,
             click: () => {
@@ -526,7 +540,7 @@ export class MobileFiles extends Model {
         if (liElement) {
             liElement.remove();
         }
-        setNoteBook((notebooks: INotebook[])=> {
+        setNoteBook((notebooks: INotebook[]) => {
             const html = this.genNotebook(data.data.box);
             if (this.element.childElementCount === 0) {
                 this.element.innerHTML = html;

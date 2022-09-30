@@ -426,6 +426,8 @@
   "refCountDESC": "Ref Count DESC",
   "createdASC": "Created Time ASC",
   "createdDESC": "Created Time DESC",
+  "docSizeASC": "Document Size ASC",
+  "docSizeDESC": "Document Size DESC",
   "sort": "Sort",
   "enterFullscreen": "Enter Full Screen",
   "exitFullscreen": "Exit Full Screen",

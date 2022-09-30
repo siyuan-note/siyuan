@@ -967,6 +967,18 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
                         clickEvent(8);
                     }
                 }, {type: "separator"}, {
+                    icon: window.siyuan.config.fileTree.sort === 11 ? "iconSelect" : undefined,
+                    label: window.siyuan.languages.docSizeASC,
+                    click: () => {
+                        clickEvent(11);
+                    }
+                }, {
+                    icon: window.siyuan.config.fileTree.sort === 12 ? "iconSelect" : undefined,
+                    label: window.siyuan.languages.docSizeDESC,
+                    click: () => {
+                        clickEvent(12);
+                    }
+                }, {type: "separator"}, {
                     icon: window.siyuan.config.fileTree.sort === 6 ? "iconSelect" : undefined,
                     label: window.siyuan.languages.customSort,
                     click: () => {

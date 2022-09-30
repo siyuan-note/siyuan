@@ -1014,6 +1014,24 @@ export class WYSIWYG {
                     tempElement.append(range.startContainer.parentElement);
                 } else if (selectImgElement) {
                     tempElement.append(selectImgElement);
+                } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN" &&
+                    range.startContainer.parentElement.isSameNode(range.endContainer.parentElement)) {
+                    // 剪切粗体等字体中的一部分
+                    const spanElement = range.startContainer.parentElement
+                    const attributes = spanElement.attributes;
+                    const newSpanElement = document.createElement("span");
+                    for (let i = 0; i < attributes.length; i++) {
+                        newSpanElement.setAttribute(attributes[i].name, attributes[i].value);
+                    }
+                    if (spanElement.getAttribute("data-type").indexOf("block-ref") > -1 &&
+                        spanElement.getAttribute("data-subtype") === "d") {
+                        // 引用被剪切后需变为静态锚文本
+                        newSpanElement.setAttribute("data-subtype", "s");
+                        spanElement.setAttribute("data-subtype", "s");
+                    }
+                    newSpanElement.textContent = range.toString();
+                    range.deleteContents();
+                    tempElement.append(newSpanElement);
                 } else {
                     if (range.cloneContents().querySelectorAll("td, th").length > 0) {
                         // 表格内多格子 cut https://github.com/siyuan-note/insider/issues/564

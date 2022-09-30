@@ -361,6 +361,14 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 		sort.Slice(docs, func(i, j int) bool { return docs[i].CTime < docs[j].CTime })
 	case util.SortModeCreatedDESC:
 		sort.Slice(docs, func(i, j int) bool { return docs[i].CTime > docs[j].CTime })
+	case util.SortModeSizeASC:
+		sort.Slice(docs, func(i, j int) bool { return docs[i].Size < docs[j].Size })
+	case util.SortModeSizeDESC:
+		sort.Slice(docs, func(i, j int) bool { return docs[i].Size > docs[j].Size })
+	case util.SortModeSubDocCountASC:
+		sort.Slice(docs, func(i, j int) bool { return docs[i].SubFileCount < docs[j].SubFileCount })
+	case util.SortModeSubDocCountDESC:
+		sort.Slice(docs, func(i, j int) bool { return docs[i].SubFileCount > docs[j].SubFileCount })
 	}
 
 	if util.SortModeCustom != sortMode {

@@ -918,7 +918,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
                     click: () => {
                         clickEvent(1);
                     }
-                }, {type: "separator"}, {
+                }, {
                     icon: window.siyuan.config.fileTree.sort === 4 ? "iconSelect" : undefined,
                     label: window.siyuan.languages.fileNameNatASC,
                     click: () => {
@@ -965,6 +965,30 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
                     label: window.siyuan.languages.refCountDESC,
                     click: () => {
                         clickEvent(8);
+                    }
+                }, {type: "separator"}, {
+                    icon: window.siyuan.config.fileTree.sort === 11 ? "iconSelect" : undefined,
+                    label: window.siyuan.languages.docSizeASC,
+                    click: () => {
+                        clickEvent(11);
+                    }
+                }, {
+                    icon: window.siyuan.config.fileTree.sort === 12 ? "iconSelect" : undefined,
+                    label: window.siyuan.languages.docSizeDESC,
+                    click: () => {
+                        clickEvent(12);
+                    }
+                }, {type: "separator"}, {
+                    icon: window.siyuan.config.fileTree.sort === 13 ? "iconSelect" : undefined,
+                    label: window.siyuan.languages.subDocCountASC,
+                    click: () => {
+                        clickEvent(13);
+                    }
+                }, {
+                    icon: window.siyuan.config.fileTree.sort === 14 ? "iconSelect" : undefined,
+                    label: window.siyuan.languages.subDocCountDESC,
+                    click: () => {
+                        clickEvent(14);
                     }
                 }, {type: "separator"}, {
                     icon: window.siyuan.config.fileTree.sort === 6 ? "iconSelect" : undefined,

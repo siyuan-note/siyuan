@@ -39,13 +39,13 @@ func PinYinCompare(str1, str2 string) bool {
 	return true
 }
 
-//UTF82GBK : transform UTF8 rune into GBK byte array
+// UTF82GBK transform UTF8 rune into GBK byte array.
 func UTF82GBK(src string) ([]byte, error) {
 	GB18030 := simplifiedchinese.All[0]
 	return io.ReadAll(transform.NewReader(bytes.NewReader([]byte(src)), GB18030.NewEncoder()))
 }
 
-//GBK2UTF8 : transform  GBK byte array into UTF8 string
+// GBK2UTF8 transform GBK byte array into UTF8 string.
 func GBK2UTF8(src []byte) (string, error) {
 	GB18030 := simplifiedchinese.All[0]
 	bytes, err := io.ReadAll(transform.NewReader(bytes.NewReader(src), GB18030.NewDecoder()))
@@ -53,15 +53,19 @@ func GBK2UTF8(src []byte) (string, error) {
 }
 
 const (
-	SortModeNameASC      = iota // 0：文件名字母升序
-	SortModeNameDESC            // 1：文件名字母降序
-	SortModeUpdatedASC          // 2：文件更新时间升序
-	SortModeUpdatedDESC         // 3：文件更新时间降序
-	SortModeAlphanumASC         // 4：文件名自然数升序
-	SortModeAlphanumDESC        // 5：文件名自然数降序
-	SortModeCustom              // 6：自定义排序
-	SortModeRefCountASC         // 7：引用数升序
-	SortModeRefCountDESC        // 8：引用数降序
-	SortModeCreatedASC          // 9：文件创建时间升序
-	SortModeCreatedDESC         // 10：文件创建时间降序
+	SortModeNameASC         = iota // 0：文件名字母升序
+	SortModeNameDESC               // 1：文件名字母降序
+	SortModeUpdatedASC             // 2：文件更新时间升序
+	SortModeUpdatedDESC            // 3：文件更新时间降序
+	SortModeAlphanumASC            // 4：文件名自然数升序
+	SortModeAlphanumDESC           // 5：文件名自然数降序
+	SortModeCustom                 // 6：自定义排序
+	SortModeRefCountASC            // 7：引用数升序
+	SortModeRefCountDESC           // 8：引用数降序
+	SortModeCreatedASC             // 9：文件创建时间升序
+	SortModeCreatedDESC            // 10：文件创建时间降序
+	SortModeSizeASC                // 11：文件大小升序
+	SortModeSizeDESC               // 12：文件大小降序
+	SortModeSubDocCountASC         // 13：子文档数升序
+	SortModeSubDocCountDESC        // 14：子文档数降序
 )

@@ -123,15 +123,14 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             clearTimeout(this.timeId);
             return;
         }
-        const range = getSelection().getRangeAt(0);
-        const start = getSelectionOffset(range.startContainer as HTMLElement, protyle.wysiwyg.element).start;
-        const currentLineValue = range.startContainer.textContent.substring(0, start) || "";
+        protyle.toolbar.range = getSelection().getRangeAt(0);
+        const start = getSelectionOffset(protyle.toolbar.range.startContainer as HTMLElement, protyle.wysiwyg.element).start;
+        const currentLineValue = protyle.toolbar.range.startContainer.textContent.substring(0, start) || "";
         const key = this.getKey(currentLineValue, protyle.options.hint.extend);
-
         if (typeof key === "undefined" ||
             (   // 除 emoji 提示外，其余在 tag/inline math/inline-code 内移动不进行提示
                 this.splitChar !== ":" &&
-                (protyle.toolbar.getCurrentType(range).length > 0 || hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock"))
+                (protyle.toolbar.getCurrentType(protyle.toolbar.range).length > 0 || hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "NodeCodeBlock"))
             )
         ) {
             this.element.classList.add("fn__none");
@@ -369,9 +368,9 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
 
     public fill(value: string, protyle: IProtyle) {
         hideElements(["hint", "toolbar"], protyle);
-        const range: Range = getEditorRange(protyle.wysiwyg.element);
-
-        let nodeElement = hasClosestBlock(range.startContainer) as HTMLElement;
+        protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
+        const range = protyle.toolbar.range;
+        let nodeElement = hasClosestBlock(protyle.toolbar.range.startContainer) as HTMLElement;
         if (!nodeElement) {
             return;
         }
@@ -533,7 +532,6 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             } else if (Constants.INLINE_TYPE.includes(value)) {
                 range.deleteContents();
                 focusByRange(range);
-                protyle.toolbar.range = range;
                 if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(value)) {
                     protyle.toolbar.element.querySelector(`[data-type="${value}"]`).dispatchEvent(new CustomEvent("block-ref" === value ? getEventName() : "click"));
                     return;

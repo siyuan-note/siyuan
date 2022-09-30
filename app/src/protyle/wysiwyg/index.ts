@@ -251,6 +251,11 @@ export class WYSIWYG {
                     for (let i = 0; i < attributes.length; i++) {
                         spanElement.setAttribute(attributes[i].name, attributes[i].value);
                     }
+                    if (spanElement.getAttribute("data-type").indexOf("block-ref") > -1 &&
+                        spanElement.getAttribute("data-subtype") === "d") {
+                        // 需变为静态锚文本
+                        spanElement.setAttribute("data-subtype", "s");
+                    }
                     spanElement.textContent = range.toString();
                     html = spanElement.outerHTML;
                 } else {

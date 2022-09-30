@@ -82,10 +82,6 @@ export class Backlink extends Model {
     <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.expand} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
-        <svg><use xlink:href="#iconFullscreen"></use></svg>
-    </span>
-    <span class="fn__space"></span>
     <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapse} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
@@ -104,10 +100,6 @@ export class Backlink extends Model {
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
         <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}" />
     </label>
-    <span class="fn__space"></span>
-    <span data-type="mExpand" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.expand}">
-        <svg><use xlink:href="#iconFullscreen"></use></svg>
-    </span>
     <span class="fn__space"></span>
     <span data-type="mCollapse" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.collapse}">
         <svg><use xlink:href="#iconContract"></use></svg>
@@ -138,64 +130,35 @@ export class Backlink extends Model {
         this.tree = new Tree({
             element: this.element.querySelector(".backlinkList") as HTMLElement,
             data: null,
-            click(element: HTMLElement) {
+            click(element) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
-            ctrlClick(element: HTMLElement) {
+            ctrlClick(element) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     keepCursor: true,
                     action: [Constants.CB_GET_CONTEXT]
                 });
             },
-            altClick(element: HTMLElement) {
+            altClick(element) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "right",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
-            shiftClick(element: HTMLElement) {
+            shiftClick(element) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
-            toggleClick: (liElement: HTMLElement) => {
-                const svgElement = liElement.firstElementChild.firstElementChild;
-                if (svgElement.classList.contains("b3-list-item__arrow--open")) {
-                    svgElement.classList.remove("b3-list-item__arrow--open");
-                    liElement.nextElementSibling?.classList.add("fn__none");
-                } else {
-                    svgElement.classList.add("b3-list-item__arrow--open");
-                    if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "DIV") {
-                        liElement.nextElementSibling.classList.remove("fn__none");
-                    } else {
-                        fetchPost("/api/ref/getBacklinkDoc", {
-                            defID: this.blockId,
-                            refTreeID: liElement.getAttribute("data-node-id")
-                        }, (response) => {
-                            const editorElement = document.createElement("div");
-                            liElement.after(editorElement);
-                            const editor = new Protyle(editorElement, {
-                                blockId: "",
-                                backlinkData: response.data.backlinks,
-                                render: {
-                                    background: false,
-                                    title: false,
-                                    gutter: true,
-                                    scroll: false,
-                                    breadcrumb: false,
-                                }
-                            });
-                            this.editors.push(editor);
-                        });
-                    }
-                }
+            toggleClick: (liElement) => {
+                this.toggleItem(liElement);
             }
         });
         this.mTree = new Tree({
@@ -228,21 +191,21 @@ export class Backlink extends Model {
                     });
                 }
             },
-            ctrlClick(element: HTMLElement) {
+            ctrlClick(element) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     keepCursor: true,
                     action: [Constants.CB_GET_CONTEXT]
                 });
             },
-            altClick(element: HTMLElement) {
+            altClick(element) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "right",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
             },
-            shiftClick(element: HTMLElement) {
+            shiftClick(element) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
@@ -273,10 +236,12 @@ export class Backlink extends Model {
         });
         // 为了快捷键的 dispatch
         this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {
-            this.tree.collapseAll();
-        });
-        this.element.querySelector('[data-type="expand"]').addEventListener("click", () => {
-            this.tree.expandAll();
+            this.tree.element.querySelectorAll(".protyle").forEach(item => {
+                item.classList.add("fn__none");
+            });
+            this.tree.element.querySelectorAll(".b3-list-item__arrow").forEach(item => {
+                item.classList.remove("b3-list-item__arrow--open");
+            });
         });
         this.element.addEventListener("click", (event) => {
             if (this.type === "local") {
@@ -292,11 +257,13 @@ export class Backlink extends Model {
                         case "refresh":
                             this.refresh();
                             break;
-                        case "mExpand":
-                            this.mTree.expandAll();
-                            break;
                         case "mCollapse":
-                            this.mTree.collapseAll();
+                            this.mTree.element.querySelectorAll(".protyle").forEach(item => {
+                                item.classList.add("fn__none");
+                            });
+                            this.mTree.element.querySelectorAll(".b3-list-item__arrow").forEach(item => {
+                                item.classList.remove("b3-list-item__arrow--open");
+                            });
                             break;
                         case "min":
                             getDockByType("backlink").toggleModel("backlink");
@@ -339,6 +306,39 @@ export class Backlink extends Model {
 
         if (this.type === "pin") {
             setPanelFocus(this.element.firstElementChild);
+        }
+    }
+
+    private toggleItem(liElement: HTMLElement) {
+        const svgElement = liElement.firstElementChild.firstElementChild;
+        if (svgElement.classList.contains("b3-list-item__arrow--open")) {
+            svgElement.classList.remove("b3-list-item__arrow--open");
+            liElement.nextElementSibling?.classList.add("fn__none");
+        } else {
+            svgElement.classList.add("b3-list-item__arrow--open");
+            if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "DIV") {
+                liElement.nextElementSibling.classList.remove("fn__none");
+            } else {
+                fetchPost("/api/ref/getBacklinkDoc", {
+                    defID: this.blockId,
+                    refTreeID: liElement.getAttribute("data-node-id")
+                }, (response) => {
+                    const editorElement = document.createElement("div");
+                    liElement.after(editorElement);
+                    const editor = new Protyle(editorElement, {
+                        blockId: "",
+                        backlinkData: response.data.backlinks,
+                        render: {
+                            background: false,
+                            title: false,
+                            gutter: true,
+                            scroll: false,
+                            breadcrumb: false,
+                        }
+                    });
+                    this.editors.push(editor);
+                });
+            }
         }
     }
 
@@ -434,6 +434,7 @@ export class Backlink extends Model {
         } else {
             countElement.classList.remove("fn__none");
             countElement.textContent = data.linkRefsCount.toString();
+            this.toggleItem(this.tree.element.firstElementChild.firstElementChild as HTMLElement);
         }
         const mCountElement = this.element.querySelector(".listMCount");
         if (data.mentionsCount === 0) {

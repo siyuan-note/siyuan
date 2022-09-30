@@ -92,7 +92,11 @@ export const setPadding = (protyle: IProtyle) => {
             bottomHeight = protyle.element.clientHeight / 2 + "px";
         }
     }
-    protyle.wysiwyg.element.style.padding = `16px ${min16}px ${bottomHeight} ${min24}px`;
+    if (protyle.options.backlinkData) {
+        protyle.wysiwyg.element.style.padding = `4px ${min16}px 4px ${min24}px`;
+    } else {
+        protyle.wysiwyg.element.style.padding = `16px ${min16}px ${bottomHeight} ${min24}px`;
+    }
     if (!isMobile()) {
         // 防止右侧分屏后，左侧页签抖动；10 为滚动条宽度
         if (!window.siyuan.config.editor.fullWidth) {

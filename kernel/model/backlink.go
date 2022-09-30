@@ -26,7 +26,6 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
@@ -279,17 +278,87 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 		logging.LogErrorf("load ref tree [%s] failed: %s", refTreeID, err)
 		return
 	}
-	linkPaths := toSubTree(linkRefs, keyword)
-	for _, link := range linkPaths {
-		for _, c := range link.Children {
-			n := treenode.GetNodeInTree(refTree, c.ID)
-			dom := lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions)
-			ret = append(ret, &Backlink{
-				DOM:        dom,
-				BlockPaths: buildBlockBreadcrumb(n),
-			})
+
+	for _, linkRef := range linkRefs {
+		n := treenode.GetNodeInTree(refTree, linkRef.ID)
+		if nil == n {
+			continue
 		}
+
+		var renderNodes []*ast.Node
+		if ast.NodeListItem == n.Type {
+			if nil == n.FirstChild {
+				continue
+			}
+
+			c := n.FirstChild
+			if 3 == n.ListData.Typ {
+				c = n.FirstChild.Next
+			}
+
+			expand := true
+			for liFirstBlockSpan := c.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
+				if treenode.IsBlockRef(liFirstBlockSpan) {
+					continue
+				}
+				if "" != strings.TrimSpace(liFirstBlockSpan.Text()) {
+					expand = false
+					break
+				}
+			}
+
+			renderNodes = append(renderNodes, n)
+			if !expand {
+				var unlinks []*ast.Node
+				for cc := c.Next; nil != cc; cc = cc.Next {
+					unlinks = append(unlinks, cc)
+				}
+				for _, unlink := range unlinks {
+					unlink.Unlink()
+				}
+			}
+		} else if ast.NodeHeading == n.Type {
+			c := n.FirstChild
+			if nil == c {
+				continue
+			}
+
+			expand := true
+			for headingFirstSpan := c; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
+				if treenode.IsBlockRef(headingFirstSpan) {
+					continue
+				}
+				if "" != strings.TrimSpace(headingFirstSpan.Text()) {
+					expand = false
+					break
+				}
+			}
+
+			renderNodes = append(renderNodes, n)
+			if !expand {
+				var unlinks []*ast.Node
+				for cc := n.Next; nil != cc; cc = cc.Next {
+					unlinks = append(unlinks, cc)
+				}
+				for _, unlink := range unlinks {
+					unlink.Unlink()
+				}
+
+			} else {
+				cc := treenode.HeadingChildren(n)
+				renderNodes = append(renderNodes, cc...)
+			}
+		} else {
+			renderNodes = append(renderNodes, n)
+		}
+
+		dom := renderBlockDOMByNodes(renderNodes, luteEngine)
+		ret = append(ret, &Backlink{
+			DOM:        dom,
+			BlockPaths: buildBlockBreadcrumb(n),
+		})
 	}
+
 	return
 }
 

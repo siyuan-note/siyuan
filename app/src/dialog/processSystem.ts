@@ -9,6 +9,7 @@ import {hideMessage, showMessage} from "./message";
 import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
+import {renderStatusbarCounter} from "../layout/status";
 
 export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>
@@ -185,6 +186,10 @@ export const progressStatus = (data: IWebSocketData) => {
         return;
     }
     document.querySelector("#status .status__msg").innerHTML = data.msg;
+};
+
+export const handleStatusbarCounter = (data: IWebSocketData) => {
+    renderStatusbarCounter(data.data.runeCount, data.data.wordCount);
 };
 
 export const progressLoading = (data: IWebSocketData) => {

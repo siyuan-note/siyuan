@@ -31,6 +31,11 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TreeStat(tree *parse.Tree) (runeCount, wordCount int) {
+	runeCount, wordCount = tree.Root.ContentLen()
+	return
+}
+
 func NodeHash(node *ast.Node, tree *parse.Tree, luteEngine *lute.Lute) string {
 	ialArray := node.KramdownIAL
 	sort.Slice(ialArray, func(i, j int) bool {

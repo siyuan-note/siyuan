@@ -151,6 +151,13 @@ func PushStatusBar(msg string) {
 	BroadcastByType("main", "statusbar", 0, msg, nil)
 }
 
+func PushStatusBarCounter(runeCount, wordCount int) {
+	BroadcastByType("main", "statusbarCounter", 0, "", map[string]interface{}{
+		"runeCount": runeCount,
+		"wordCount": wordCount},
+	)
+}
+
 func ContextPushMsg(context map[string]interface{}, msg string) {
 	switch context[eventbus.CtxPushMsg].(int) {
 	case eventbus.CtxPushMsgToProgress:

@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
@@ -163,9 +164,8 @@ type Backlink struct {
 	Expand     bool         `json:"expand"`
 }
 
-func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
+func GetBackmentionDoc(defID, keyword string) (ret []*Backlink) {
 	ret = []*Backlink{}
-	keyword := ""
 	beforeLen := 12
 	sqlBlock := sql.GetBlock(defID)
 	if nil == sqlBlock {
@@ -173,7 +173,39 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 	}
 	rootID := sqlBlock.RootID
 
-	var links []*Block
+	refs := sql.QueryRefsByDefID(defID, true)
+	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
+
+	linkRefs, excludeBacklinkIDs := buildLinkRefs(rootID, refs)
+	mentions := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
+	luteEngine := NewLute()
+	treeCache := map[string]*parse.Tree{}
+	for _, mention := range mentions {
+		refTree := treeCache[mention.RootID]
+		if nil == refTree {
+			var loadErr error
+			refTree, loadErr = loadTreeByBlockID(mention.ID)
+			if nil != loadErr {
+				logging.LogWarnf("load ref tree [%s] failed: %s", mention.ID, loadErr)
+				continue
+			}
+			treeCache[mention.RootID] = refTree
+		}
+
+		backlink := buildBacklink(mention.ID, refTree, luteEngine)
+		ret = append(ret, backlink)
+	}
+	return
+}
+
+func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
+	ret = []*Backlink{}
+	sqlBlock := sql.GetBlock(defID)
+	if nil == sqlBlock {
+		return
+	}
+	rootID := sqlBlock.RootID
+
 	tmpRefs := sql.QueryRefsByDefID(defID, true)
 	var refs []*sql.Ref
 	for _, ref := range tmpRefs {
@@ -183,6 +215,22 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 	}
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
+	linkRefs, _ := buildLinkRefs(rootID, refs)
+	refTree, err := loadTreeByBlockID(refTreeID)
+	if nil != err {
+		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
+		return
+	}
+
+	luteEngine := NewLute()
+	for _, linkRef := range linkRefs {
+		backlink := buildBacklink(linkRef.ID, refTree, luteEngine)
+		ret = append(ret, backlink)
+	}
+	return
+}
+
+func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, excludeBacklinkIDs *hashset.Set) {
 	// 为了减少查询，组装好 IDs 后一次查出
 	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
 	var queryBlockIDs []string
@@ -206,7 +254,8 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 		}
 	}
 
-	excludeBacklinkIDs := hashset.New()
+	var links []*Block
+	excludeBacklinkIDs = hashset.New()
 	for _, ref := range refs {
 		defSQLBlock := defSQLBlocksCache[(ref.DefBlockID)]
 		if nil == defSQLBlock {
@@ -217,12 +266,12 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 		if nil == refSQLBlock {
 			continue
 		}
-		refBlock := fromSQLBlock(refSQLBlock, "", beforeLen)
-		if rootID == refBlock.RootID { // 排除当前文档内引用提及
+		refBlock := fromSQLBlock(refSQLBlock, "", 12)
+		if defRootID == refBlock.RootID { // 排除当前文档内引用提及
 			excludeBacklinkIDs.Add(refBlock.RootID, refBlock.ID)
 		}
-		defBlock := fromSQLBlock(defSQLBlock, "", beforeLen)
-		if defBlock.RootID == rootID { // 当前文档的定义块
+		defBlock := fromSQLBlock(defSQLBlock, "", 12)
+		if defBlock.RootID == defRootID { // 当前文档的定义块
 			links = append(links, defBlock)
 			if ref.DefBlockID == defBlock.ID {
 				defBlock.Refs = append(defBlock.Refs, refBlock)
@@ -236,7 +285,6 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 		}
 	}
 
-	var linkRefs []*Block
 	processedParagraphs := hashset.New()
 	var paragraphParentIDs []string
 	for _, link := range links {
@@ -249,7 +297,7 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 	paragraphParents := sql.GetBlocks(paragraphParentIDs)
 	for _, p := range paragraphParents {
 		if "i" == p.Type || "h" == p.Type {
-			linkRefs = append(linkRefs, fromSQLBlock(p, keyword, beforeLen))
+			ret = append(ret, fromSQLBlock(p, "", 12))
 			processedParagraphs.Add(p.ID)
 		}
 	}
@@ -263,83 +311,70 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 
 			ref.DefID = link.ID
 			ref.DefPath = link.Path
-
-			content := ref.Content
-			if "" != keyword {
-				_, content = search.MarkText(content, keyword, beforeLen, Conf.Search.CaseSensitive)
-				ref.Content = content
-			}
-			linkRefs = append(linkRefs, ref)
+			ret = append(ret, ref)
 		}
 	}
+	return
+}
 
-	luteEngine := NewLute()
-	refTree, err := loadTreeByBlockID(refTreeID)
-	if nil != err {
-		logging.LogErrorf("load ref tree [%s] failed: %s", refTreeID, err)
+func buildBacklink(refID string, refTree *parse.Tree, luteEngine *lute.Lute) (ret *Backlink) {
+	n := treenode.GetNodeInTree(refTree, refID)
+	if nil == n {
 		return
 	}
 
-	for _, linkRef := range linkRefs {
-		n := treenode.GetNodeInTree(refTree, linkRef.ID)
-		if nil == n {
-			continue
+	var renderNodes []*ast.Node
+	expand := true
+	if ast.NodeListItem == n.Type {
+		if nil == n.FirstChild {
+			return
 		}
 
-		var renderNodes []*ast.Node
-		expand := true
-		if ast.NodeListItem == n.Type {
-			if nil == n.FirstChild {
-				continue
-			}
-
-			c := n.FirstChild
-			if 3 == n.ListData.Typ {
-				c = n.FirstChild.Next
-			}
-
-			for liFirstBlockSpan := c.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
-				if treenode.IsBlockRef(liFirstBlockSpan) {
-					continue
-				}
-				if "" != strings.TrimSpace(liFirstBlockSpan.Text()) {
-					expand = false
-					break
-				}
-			}
-
-			renderNodes = append(renderNodes, n)
-		} else if ast.NodeHeading == n.Type {
-			c := n.FirstChild
-			if nil == c {
-				continue
-			}
-
-			for headingFirstSpan := c; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
-				if treenode.IsBlockRef(headingFirstSpan) {
-					continue
-				}
-				if "" != strings.TrimSpace(headingFirstSpan.Text()) {
-					expand = false
-					break
-				}
-			}
-
-			renderNodes = append(renderNodes, n)
-			cc := treenode.HeadingChildren(n)
-			renderNodes = append(renderNodes, cc...)
-		} else {
-			renderNodes = append(renderNodes, n)
+		c := n.FirstChild
+		if 3 == n.ListData.Typ {
+			c = n.FirstChild.Next
 		}
 
-		dom := renderBlockDOMByNodes(renderNodes, luteEngine)
-		ret = append(ret, &Backlink{
-			DOM:        dom,
-			BlockPaths: buildBlockBreadcrumb(n),
-			Expand:     expand,
-		})
+		for liFirstBlockSpan := c.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
+			if treenode.IsBlockRef(liFirstBlockSpan) {
+				continue
+			}
+			if "" != strings.TrimSpace(liFirstBlockSpan.Text()) {
+				expand = false
+				break
+			}
+		}
+
+		renderNodes = append(renderNodes, n)
+	} else if ast.NodeHeading == n.Type {
+		c := n.FirstChild
+		if nil == c {
+			return
+		}
+
+		for headingFirstSpan := c; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
+			if treenode.IsBlockRef(headingFirstSpan) {
+				continue
+			}
+			if "" != strings.TrimSpace(headingFirstSpan.Text()) {
+				expand = false
+				break
+			}
+		}
+
+		renderNodes = append(renderNodes, n)
+		cc := treenode.HeadingChildren(n)
+		renderNodes = append(renderNodes, cc...)
+	} else {
+		renderNodes = append(renderNodes, n)
 	}
 
+	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
+	ret = &Backlink{
+		DOM:        dom,
+		BlockPaths: buildBlockBreadcrumb(n),
+		Expand:     expand,
+	}
 	return
 }
 

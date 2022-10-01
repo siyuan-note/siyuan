@@ -134,7 +134,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/getRefIDsByFileAnnotationID", model.CheckAuth, getRefIDsByFileAnnotationID)
 	ginServer.Handle("POST", "/api/block/getBlockDefIDsByRefText", model.CheckAuth, getBlockDefIDsByRefText)
 	ginServer.Handle("POST", "/api/block/getRefText", model.CheckAuth, getRefText)
-	ginServer.Handle("POST", "/api/block/getBlockWordCount", model.CheckAuth, getBlockWordCount)
+	ginServer.Handle("POST", "/api/block/getTreeStat", model.CheckAuth, getTreeStat)
 	ginServer.Handle("POST", "/api/block/getBlocksWordCount", model.CheckAuth, getBlocksWordCount)
 	ginServer.Handle("POST", "/api/block/getContentWordCount", model.CheckAuth, getContentWordCount)
 	ginServer.Handle("POST", "/api/block/getRecentUpdatedBlocks", model.CheckAuth, getRecentUpdatedBlocks)
@@ -157,6 +157,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ref/refreshBacklink", model.CheckAuth, refreshBacklink)
 	ginServer.Handle("POST", "/api/ref/getBacklink", model.CheckAuth, getBacklink)
 	ginServer.Handle("POST", "/api/ref/getBacklinkDoc", model.CheckAuth, getBacklinkDoc)
+	ginServer.Handle("POST", "/api/ref/getBackmentionDoc", model.CheckAuth, getBackmentionDoc)
 	ginServer.Handle("POST", "/api/ref/createBacklink", model.CheckAuth, model.CheckReadonly, createBacklink)
 
 	ginServer.Handle("POST", "/api/attr/getBookmarkLabels", model.CheckAuth, getBookmarkLabels)

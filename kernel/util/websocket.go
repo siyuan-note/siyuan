@@ -151,6 +151,18 @@ func PushStatusBar(msg string) {
 	BroadcastByType("main", "statusbar", 0, msg, nil)
 }
 
+type BlockStatResult struct {
+	RuneCount  int `json:"runeCount"`
+	WordCount  int `json:"wordCount"`
+	LinkCount  int `json:"linkCount"`
+	ImageCount int `json:"imageCount"`
+	RefCount   int `json:"refCount"`
+}
+
+func PushStatusBarCounter(stat *BlockStatResult) {
+	BroadcastByType("main", "statusbarCounter", 0, "", stat)
+}
+
 func ContextPushMsg(context map[string]interface{}, msg string) {
 	switch context[eventbus.CtxPushMsg].(int) {
 	case eventbus.CtxPushMsgToProgress:

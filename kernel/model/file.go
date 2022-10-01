@@ -387,14 +387,21 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 	return
 }
 
-func ContentWordCount(content string) (runeCount, wordCount int) {
+func ContentStat(content string) (ret *util.BlockStatResult) {
 	luteEngine := NewLute()
 	tree := luteEngine.BlockDOM2Tree(content)
-	runeCount, wordCount = tree.Root.ContentLen()
-	return
+	runeCnt, wordCnt, linkCnt, imgCnt, refCnt := tree.Root.Stat()
+	return &util.BlockStatResult{
+		RuneCount:  runeCnt,
+		WordCount:  wordCnt,
+		LinkCount:  linkCnt,
+		ImageCount: imgCnt,
+		RefCount:   refCnt,
+	}
 }
 
-func BlocksWordCount(ids []string) (runeCount, wordCount int) {
+func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
+	ret = &util.BlockStatResult{}
 	trees := map[string]*parse.Tree{} // 缓存
 	for _, id := range ids {
 		bt := treenode.GetBlockTree(id)
@@ -413,34 +420,30 @@ func BlocksWordCount(ids []string) (runeCount, wordCount int) {
 		}
 
 		node := treenode.GetNodeInTree(tree, id)
-		blockRuneCount, blockWordCount := node.ContentLen()
-		runeCount += blockRuneCount
-		wordCount += blockWordCount
+		runeCnt, wordCnt, linkCnt, imgCnt, refCnt := node.Stat()
+		ret.RuneCount += runeCnt
+		ret.WordCount += wordCnt
+		ret.LinkCount += linkCnt
+		ret.ImageCount += imgCnt
+		ret.RefCount += refCnt
 	}
 	return
 }
 
-func BlockWordCount(id string) (blockRuneCount, blockWordCount, rootBlockRuneCount, rootBlockWordCount int) {
+func StatTree(id string) (ret *util.BlockStatResult) {
 	tree, _ := loadTreeByBlockID(id)
 	if nil == tree {
 		return
 	}
 
-	node := treenode.GetNodeInTree(tree, id)
-	blockRuneCount, blockWordCount = node.ContentLen()
-	if ast.NodeHeading == node.Type {
-		level := node.HeadingLevel
-		for n := node.Next; nil != n; n = n.Next {
-			if ast.NodeHeading == n.Type && n.HeadingLevel <= level {
-				break
-			}
-			rc, wc := n.ContentLen()
-			blockRuneCount += rc
-			blockWordCount += wc
-		}
+	runeCnt, wordCnt, linkCnt, imgCnt, refCnt := tree.Root.Stat()
+	return &util.BlockStatResult{
+		RuneCount:  runeCnt,
+		WordCount:  wordCnt,
+		LinkCount:  linkCnt,
+		ImageCount: imgCnt,
+		RefCount:   refCnt,
 	}
-	rootBlockRuneCount, rootBlockWordCount = tree.Root.ContentLen()
-	return
 }
 
 func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int) (blockCount, childBlockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, err error) {

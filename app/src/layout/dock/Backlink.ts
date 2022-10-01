@@ -158,7 +158,7 @@ export class Backlink extends Model {
                 });
             },
             toggleClick: (liElement) => {
-                this.toggleItem(liElement);
+                this.toggleItem(liElement, false);
             }
         });
         this.mTree = new Tree({
@@ -211,6 +211,9 @@ export class Backlink extends Model {
                     position: "bottom",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
+            },
+            toggleClick: (liElement) => {
+                this.toggleItem(liElement, true);
             },
             blockExtHTML: `<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`
         });
@@ -309,7 +312,7 @@ export class Backlink extends Model {
         }
     }
 
-    private toggleItem(liElement: HTMLElement) {
+    private toggleItem(liElement: HTMLElement, isMention:boolean) {
         const svgElement = liElement.firstElementChild.firstElementChild;
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.remove("b3-list-item__arrow--open");
@@ -319,7 +322,7 @@ export class Backlink extends Model {
             if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "DIV") {
                 liElement.nextElementSibling.classList.remove("fn__none");
             } else {
-                fetchPost("/api/ref/getBacklinkDoc", {
+                fetchPost(isMention?"/api/ref/getBackmentionDoc":"/api/ref/getBacklinkDoc", {
                     defID: this.blockId,
                     refTreeID: liElement.getAttribute("data-node-id")
                 }, (response) => {
@@ -435,7 +438,7 @@ export class Backlink extends Model {
         } else {
             countElement.classList.remove("fn__none");
             countElement.textContent = data.linkRefsCount.toString();
-            this.toggleItem(this.tree.element.firstElementChild.firstElementChild as HTMLElement);
+            this.toggleItem(this.tree.element.firstElementChild.firstElementChild as HTMLElement, false);
         }
         const mCountElement = this.element.querySelector(".listMCount");
         if (data.mentionsCount === 0) {
@@ -443,6 +446,7 @@ export class Backlink extends Model {
         } else {
             mCountElement.classList.remove("fn__none");
             mCountElement.textContent = data.mentionsCount.toString();
+            this.toggleItem(this.mTree.element.firstElementChild.firstElementChild as HTMLElement, true);
         }
 
         const layoutElement = this.element.querySelector("[data-type='layout']");

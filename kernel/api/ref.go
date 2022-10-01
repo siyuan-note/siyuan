@@ -38,6 +38,23 @@ func refreshBacklink(c *gin.Context) {
 	model.RefreshBacklink(id)
 }
 
+func getBackmentionDoc(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	defID := arg["defID"].(string)
+	keyword := ""
+	backlinks := model.GetBackmentionDoc(defID, keyword)
+	ret.Data = map[string]interface{}{
+		"backmentions": backlinks,
+	}
+}
+
 func getBacklinkDoc(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

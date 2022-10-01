@@ -149,10 +149,10 @@ const boot = () => {
       windowState.width = Math.min(defaultWidth, workArea.width)
       windowState.height = Math.min(defaultHeight, workArea.height)
     }
-    if (x > workArea.width || x < 0) {
+    if (x > workArea.width) {
       x = 0
     }
-    if (y > workArea.height || y < 0) {
+    if (y > workArea.height) {
       y = 0
     }
   }
@@ -161,6 +161,12 @@ const boot = () => {
   }
   if (windowState.height < 300) {
     windowState.height = 300
+  }
+  if (x < 0) {
+    x = 0
+  }
+  if (y < 0) {
+    y = 0
   }
 
   // 创建主窗体

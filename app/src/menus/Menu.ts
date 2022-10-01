@@ -147,6 +147,8 @@ export class MenuItem {
         }
         this.element.innerHTML = html;
         if (options.bind) {
+            // 主题 rem craft 需要使用 b3-menu__item--custom 来区分自定义菜单 by 281261361
+            this.element.classList.add("b3-menu__item--custom");
             options.bind(this.element);
         }
         if (options.submenu) {

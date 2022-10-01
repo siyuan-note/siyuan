@@ -84,10 +84,8 @@ try {
   }
 } catch (e) {
   console.error(e)
-  require('electron').
-    dialog.
-    showErrorBox('创建配置目录失败 Failed to create config directory',
-      '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
+  require('electron').dialog.showErrorBox('创建配置目录失败 Failed to create config directory',
+    '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
   app.exit()
 }
 
@@ -151,18 +149,24 @@ const boot = () => {
       windowState.width = Math.min(defaultWidth, workArea.width)
       windowState.height = Math.min(defaultHeight, workArea.height)
     }
-    if (windowState.width < 256) {
-      windowState.width = Math.min(defaultWidth, workArea.width)
-    }
-    if (windowState.height < 256) {
-      windowState.height = Math.min(defaultHeight, workArea.height)
-    }
-    if (x > workArea.width || x < 0) {
+    if (x > workArea.width) {
       x = 0
     }
-    if (y > workArea.height || y < 0) {
+    if (y > workArea.height) {
       y = 0
     }
+  }
+  if (windowState.width < 400) {
+    windowState.width = 400
+  }
+  if (windowState.height < 300) {
+    windowState.height = 300
+  }
+  if (x < 0) {
+    x = 0
+  }
+  if (y < 0) {
+    y = 0
   }
 
   // 创建主窗体

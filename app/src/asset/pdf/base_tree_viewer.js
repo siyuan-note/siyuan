@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { removeNullCharacters } from "./ui_utils";
+import { removeNullCharacters } from "./ui_utils.js";
 
 const TREEITEM_OFFSET_TOP = -100; // px
 const TREEITEM_SELECTED_CLASS = "selected";
@@ -74,6 +74,7 @@ class BaseTreeViewer {
    */
   _addToggleButton(div, hidden = false) {
     const toggler = document.createElement("div");
+    // NOTE
     toggler.innerHTML = `<svg><use xlink:href="#iconDown"></use></svg>`
     toggler.className = "treeItemToggler";
     if (hidden) {
@@ -88,7 +89,7 @@ class BaseTreeViewer {
         this._toggleTreeItem(div, shouldShowAll);
       }
     };
-    div.insertBefore(toggler, div.firstChild);
+    div.prepend(toggler);
   }
 
   /**
@@ -123,7 +124,7 @@ class BaseTreeViewer {
 
       this._lastToggleIsShow = !fragment.querySelector(".treeItemsHidden");
     }
-    this.container.appendChild(fragment);
+    this.container.append(fragment);
 
     this._dispatchEvent(count);
   }
@@ -168,7 +169,7 @@ class BaseTreeViewer {
 
     this.container.scrollTo(
       treeItem.offsetLeft,
-      treeItem.offsetTop + TREEITEM_OFFSET_TOP + treeItem.offsetParent.offsetTop
+      treeItem.offsetTop + TREEITEM_OFFSET_TOP
     );
   }
 }

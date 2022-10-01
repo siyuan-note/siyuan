@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+import { RenderingStates, ScrollMode, SpreadMode } from './ui_utils.js'
 import { AppOptions } from './app_options.js'
+import { LinkTarget } from './pdf_link_service.js'
 import { PDFViewerApplication } from './app.js'
 import { initAnno } from '../anno'
 
@@ -24,18 +26,22 @@ const pdfjsVersion =
 const pdfjsBuild =
   typeof PDFJSDev !== 'undefined' ? PDFJSDev.eval('BUNDLE_BUILD') : void 0
 
+const AppConstants =
+  typeof PDFJSDev === 'undefined' || PDFJSDev.test('GENERIC')
+    ? {LinkTarget, RenderingStates, ScrollMode, SpreadMode}
+    : null
+
 window.PDFViewerApplication = PDFViewerApplication
+window.PDFViewerApplicationConstants = AppConstants
 window.PDFViewerApplicationOptions = AppOptions
 
 if (typeof PDFJSDev !== 'undefined' && PDFJSDev.test('CHROME')) {
-  var defaultUrl; // eslint-disable-line no-var
-
   (function rewriteUrlClosure () {
     // Run this code outside DOMContentLoaded to make sure that the URL
     // is rewritten as soon as possible.
     const queryString = document.location.search.slice(1)
     const m = /(^|&)file=([^&]*)/.exec(queryString)
-    defaultUrl = m ? decodeURIComponent(m[2]) : ''
+    const defaultUrl = m ? decodeURIComponent(m[2]) : ''
 
     // Example: chrome-extension://.../http://example.com/file.pdf
     const humanReadableUrl = '/' + defaultUrl + location.hash
@@ -44,27 +50,34 @@ if (typeof PDFJSDev !== 'undefined' && PDFJSDev.test('CHROME')) {
       // eslint-disable-next-line no-undef
       chrome.runtime.sendMessage('showPageAction')
     }
+
+    AppOptions.set('defaultUrl', defaultUrl)
   })()
 }
 
-function getViewerConfiguration (element) {
-  let errorWrapper = null
-  if (typeof PDFJSDev === 'undefined' || !PDFJSDev.test('MOZCENTRAL')) {
-    errorWrapper = {
-      container: element.querySelector('#errorWrapper'),
-      errorMessage: element.querySelector('#errorMessage'),
-      closeButton: element.querySelector('#errorClose'),
-      errorMoreInfo: element.querySelector('#errorMoreInfo'),
-      moreInfoButton: element.querySelector('#errorShowMore'),
-      lessInfoButton: element.querySelector('#errorShowLess'),
-    }
-  }
+// NOTE
+// if (typeof PDFJSDev !== 'undefined' && PDFJSDev.test('MOZCENTRAL')) {
+//   require('./firefoxcom.js')
+//   require('./firefox_print_service.js')
+// }
+// if (typeof PDFJSDev !== 'undefined' && PDFJSDev.test('GENERIC')) {
+//   require('./genericcom.js')
+// }
+// if (typeof PDFJSDev !== 'undefined' && PDFJSDev.test('CHROME')) {
+//   require('./chromecom.js')
+// }
+// if (typeof PDFJSDev !== 'undefined' && PDFJSDev.test('CHROME || GENERIC')) {
+//   require('./pdf_print_service.js')
+// }
 
+// NOTE
+function getViewerConfiguration (element) {
   return {
     appContainer: element,
     mainContainer: element.querySelector('#viewerContainer'),
     viewerContainer: element.querySelector('#viewer'),
     toolbar: {
+      // NOTE
       rectAnno: element.querySelector('#rectAnno'),
       container: element.querySelector('#toolbarViewer'),
       numPages: element.querySelector('#numPages'),
@@ -76,23 +89,28 @@ function getViewerConfiguration (element) {
       zoomIn: element.querySelector('#zoomIn'),
       zoomOut: element.querySelector('#zoomOut'),
       viewFind: element.querySelector('#viewFind'),
-      openFile: element.querySelector('#openFile'),
+      openFile:
+        typeof PDFJSDev === 'undefined' || PDFJSDev.test('GENERIC')
+          ? element.querySelector('#openFile')
+          : null,
       print: element.querySelector('#print'),
-      presentationModeButton: element.querySelector('#presentationMode'),
+      editorFreeTextButton: element.querySelector('#editorFreeText'),
+      editorFreeTextParamsToolbar: element.querySelector('#editorFreeTextParamsToolbar'),
+      editorInkButton: element.querySelector('#editorInk'),
+      editorInkParamsToolbar: element.querySelector('#editorInkParamsToolbar'),
       download: element.querySelector('#download'),
-      viewBookmark: element.querySelector('#viewBookmark'),
     },
     secondaryToolbar: {
       toolbar: element.querySelector('#secondaryToolbar'),
       toggleButton: element.querySelector('#secondaryToolbarToggle'),
-      toolbarButtonContainer: element.querySelector(
-        '#secondaryToolbarButtonContainer'),
-      presentationModeButton: element.querySelector(
-        '#secondaryPresentationMode'),
-      openFileButton: element.querySelector('#secondaryOpenFile'),
+      presentationModeButton: element.querySelector('#presentationMode'),
+      openFileButton:
+        typeof PDFJSDev === 'undefined' || PDFJSDev.test('GENERIC')
+          ? element.querySelector('#secondaryOpenFile')
+          : null,
       printButton: element.querySelector('#secondaryPrint'),
       downloadButton: element.querySelector('#secondaryDownload'),
-      viewBookmarkButton: element.querySelector('#secondaryViewBookmark'),
+      viewBookmarkButton: element.querySelector('#viewBookmark'),
       firstPageButton: element.querySelector('#firstPage'),
       lastPageButton: element.querySelector('#lastPage'),
       pageRotateCwButton: element.querySelector('#pageRotateCw'),
@@ -111,7 +129,7 @@ function getViewerConfiguration (element) {
     sidebar: {
       // Divs (and sidebar button)
       outerContainer: element.querySelector('#outerContainer'),
-      viewerContainer: element.querySelector('#viewerContainer'),
+      sidebarContainer: element.querySelector('#sidebarContainer'),
       toggleButton: element.querySelector('#sidebarToggle'),
       // Buttons
       thumbnailButton: element.querySelector('#viewThumbnail'),
@@ -124,8 +142,7 @@ function getViewerConfiguration (element) {
       attachmentsView: element.querySelector('#attachmentsView'),
       layersView: element.querySelector('#layersView'),
       // View-specific options
-      outlineOptionsContainer: element.querySelector(
-        '#outlineOptionsContainer'),
+      outlineOptionsContainer: element.querySelector('#outlineOptionsContainer'),
       currentOutlineItemButton: element.querySelector('#currentOutlineItem'),
     },
     sidebarResizer: {
@@ -146,16 +163,14 @@ function getViewerConfiguration (element) {
       findNextButton: element.querySelector('#findNext'),
     },
     passwordOverlay: {
-      overlayName: 'passwordOverlay',
-      container: element.querySelector('#passwordOverlay'),
+      dialog: element.querySelector('#passwordDialog'),
       label: element.querySelector('#passwordText'),
       input: element.querySelector('#password'),
       submitButton: element.querySelector('#passwordSubmit'),
       cancelButton: element.querySelector('#passwordCancel'),
     },
     documentProperties: {
-      overlayName: 'documentPropertiesOverlay',
-      container: element.querySelector('#documentPropertiesOverlay'),
+      dialog: element.querySelector('#documentPropertiesDialog'),
       closeButton: element.querySelector('#documentPropertiesClose'),
       fields: {
         fileName: element.querySelector('#fileNameField'),
@@ -174,9 +189,29 @@ function getViewerConfiguration (element) {
         linearized: element.querySelector('#linearizedField'),
       },
     },
-    errorWrapper,
+    annotationEditorParams: {
+      editorFreeTextFontSize: element.querySelector('#editorFreeTextFontSize'),
+      editorFreeTextColor: element.querySelector('#editorFreeTextColor'),
+      editorInkColor: element.querySelector('#editorInkColor'),
+      editorInkThickness: element.querySelector('#editorInkThickness'),
+      editorInkOpacity: element.querySelector('#editorInkOpacity'),
+    },
+    errorWrapper:
+      typeof PDFJSDev === 'undefined' || !PDFJSDev.test('MOZCENTRAL')
+        ? {
+          container: element.querySelector('#errorWrapper'),
+          errorMessage: element.querySelector('#errorMessage'),
+          closeButton: element.querySelector('#errorClose'),
+          errorMoreInfo: element.querySelector('#errorMoreInfo'),
+          moreInfoButton: element.querySelector('#errorShowMore'),
+          lessInfoButton: element.querySelector('#errorShowLess'),
+        }
+        : null,
     printContainer: element.querySelector('#printContainer'),
-    openFileInputName: 'fileInput',
+    openFileInput:
+      typeof PDFJSDev === 'undefined' || PDFJSDev.test('GENERIC')
+        ? element.querySelector('#fileInput')
+        : null,
     debuggerScriptPath: './debugger.js',
   }
 }
@@ -189,10 +224,6 @@ function webViewerLoad (file, element, pdfPage, annoId) {
   if (typeof PDFJSDev === 'undefined' || !PDFJSDev.test('PRODUCTION')) {
     config.file = file
   } else {
-    if (typeof PDFJSDev !== 'undefined' && PDFJSDev.test('CHROME')) {
-      AppOptions.set('defaultUrl', defaultUrl)
-    }
-
     if (typeof PDFJSDev !== 'undefined' && PDFJSDev.test('GENERIC')) {
       // Give custom implementations of the default viewer a simpler way to
       // set various `AppOptions`, by dispatching an event once all viewer
@@ -221,8 +252,20 @@ function webViewerLoad (file, element, pdfPage, annoId) {
 
 // Block the "load" event until all pages are loaded, to ensure that printing
 // works in Firefox; see https://bugzilla.mozilla.org/show_bug.cgi?id=1618553
-if (document.blockUnblockOnload) {
-  document.blockUnblockOnload(true)
-}
 
-export { PDFViewerApplication, webViewerLoad }
+document.blockUnblockOnload?.(true)
+// NOTE
+// if (
+//   document.readyState === 'interactive' ||
+//   document.readyState === 'complete'
+// ) {
+//   webViewerLoad()
+// } else {
+//   document.addEventListener('DOMContentLoaded', webViewerLoad, true)
+// }
+
+// NOTE
+export {
+  PDFViewerApplication,
+  webViewerLoad
+}

@@ -13,29 +13,30 @@
  * limitations under the License.
  */
 
-import { BasePreferences } from './preferences.js'
-import { DownloadManager } from './download_manager.js'
-import { GenericScripting } from './generic_scripting.js'
+import { BasePreferences } from "./preferences.js";
+import { DownloadManager } from "./download_manager.js";
+import { GenericScripting } from "./generic_scripting.js";
 import { shadow } from './pdfjs'
 
-if (typeof PDFJSDev !== 'undefined' && !PDFJSDev.test('GENERIC')) {
+if (typeof PDFJSDev !== "undefined" && !PDFJSDev.test("GENERIC")) {
   throw new Error(
-    'Module "pdfjs-web/genericcom" shall not be used outside GENERIC build.',
-  )
+    'Module "pdfjs-web/genericcom" shall not be used outside GENERIC build.'
+  );
 }
 
-const GenericCom = {}
+const GenericCom = {};
 
 class GenericPreferences extends BasePreferences {
-  async _writeToStorage (prefObj) {
-    localStorage.setItem('pdfjs.preferences', JSON.stringify(prefObj))
+  async _writeToStorage(prefObj) {
+    localStorage.setItem("pdfjs.preferences", JSON.stringify(prefObj));
   }
 
-  async _readFromStorage (prefObj) {
-    return JSON.parse(localStorage.getItem('pdfjs.preferences'))
+  async _readFromStorage(prefObj) {
+    return JSON.parse(localStorage.getItem("pdfjs.preferences"));
   }
 }
 
+// NOTE
 class GenericExternalServices {
   constructor () {
     throw new Error('Cannot initialize DefaultExternalServices.')
@@ -70,17 +71,22 @@ class GenericExternalServices {
     return shadow(this, 'isInAutomation', false)
   }
 
-  static createDownloadManager (options) {
-    return new DownloadManager()
+  static createDownloadManager(options) {
+    return new DownloadManager();
   }
 
-  static createPreferences () {
-    return new GenericPreferences()
+  static createPreferences() {
+    return new GenericPreferences();
   }
 
-  static createScripting ({sandboxBundleSrc}) {
-    return new GenericScripting(sandboxBundleSrc)
+  static createL10n({ locale = "en-US" }) {
+    // NOTE
+    // return new GenericL10n(locale);
+  }
+
+  static createScripting({ sandboxBundleSrc }) {
+    return new GenericScripting(sandboxBundleSrc);
   }
 }
-
-export { GenericCom, GenericExternalServices }
+// NOTE
+export { GenericCom, GenericExternalServices };

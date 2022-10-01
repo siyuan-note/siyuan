@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-import {
-  createPromiseCapability,
-  getPdfFilenameFromUrl,
-  PDFDateString,
-} from "./pdfjs";
+import { createPromiseCapability, PDFDateString } from "./pdfjs";
 import { getPageSizeInches, isPortraitOrientation } from "./ui_utils.js";
 
 const DEFAULT_FIELD_CONTENT = "-";
@@ -45,9 +41,8 @@ function getPageName(size, isPortrait, pageNames) {
 
 /**
  * @typedef {Object} PDFDocumentPropertiesOptions
- * @property {string} overlayName - Name/identifier for the overlay.
+ * @property {HTMLDialogElement} dialog - The overlay's DOM element.
  * @property {Object} fields - Names and elements of the overlay's fields.
- * @property {HTMLDivElement} container - Div container for the overlay.
  * @property {HTMLButtonElement} closeButton - Button for closing the overlay.
  */
 
@@ -59,28 +54,27 @@ class PDFDocumentProperties {
    * @param {OverlayManager} overlayManager - Manager for the viewer overlays.
    * @param {EventBus} eventBus - The application event bus.
    * @param {IL10n} l10n - Localization service.
+   * @param {function} fileNameLookup - The function that is used to lookup
+   *   the document fileName.
    */
   constructor(
-    { overlayName, fields, container, closeButton },
+    { dialog, fields, closeButton },
     overlayManager,
     eventBus,
-    l10n
+    l10n,
+    fileNameLookup
   ) {
-    this.overlayName = overlayName;
+    this.dialog = dialog;
     this.fields = fields;
-    this.container = container;
     this.overlayManager = overlayManager;
     this.l10n = l10n;
+    this._fileNameLookup = fileNameLookup;
 
     this.#reset();
     // Bind the event listener for the Close button.
     closeButton.addEventListener("click", this.close.bind(this));
 
-    this.overlayManager.register(
-      this.overlayName,
-      this.container,
-      this.close.bind(this)
-    );
+    this.overlayManager.register(this.dialog);
 
     eventBus._on("pagechanging", evt => {
       this._currentPageNumber = evt.pageNumber;
@@ -90,6 +84,10 @@ class PDFDocumentProperties {
     });
 
     this._isNonMetricLocale = true; // The default viewer locale is 'en-us'.
+    // NOTE
+    // l10n.getLanguage().then(locale => {
+    //   this._isNonMetricLocale = NON_METRIC_LOCALES.includes(locale);
+    // });
   }
 
   /**
@@ -97,7 +95,7 @@ class PDFDocumentProperties {
    */
   async open() {
     await Promise.all([
-      this.overlayManager.open(this.overlayName),
+      this.overlayManager.open(this.dialog),
       this._dataAvailableCapability.promise,
     ]);
     const currentPageNumber = this._currentPageNumber;
@@ -118,7 +116,7 @@ class PDFDocumentProperties {
     const {
       info,
       /* metadata, */
-      contentDispositionFilename,
+      /* contentDispositionFilename, */
       contentLength,
     } = await this.pdfDocument.getMetadata();
 
@@ -130,7 +128,7 @@ class PDFDocumentProperties {
       pageSize,
       isLinearized,
     ] = await Promise.all([
-      contentDispositionFilename || getPdfFilenameFromUrl(this.url),
+      this._fileNameLookup(),
       this.#parseFileSize(contentLength),
       this.#parseDate(info.CreationDate),
       this.#parseDate(info.ModDate),
@@ -176,20 +174,18 @@ class PDFDocumentProperties {
   /**
    * Close the document properties overlay.
    */
-  close() {
-    this.overlayManager.close(this.overlayName);
+  async close() {
+    this.overlayManager.close(this.dialog);
   }
 
   /**
-   * Set a reference to the PDF document and the URL in order
-   * to populate the overlay fields with the document properties.
-   * Note that the overlay will contain no information if this method
-   * is not called.
+   * Set a reference to the PDF document in order to populate the dialog fields
+   * with the document properties. Note that the dialog will contain no
+   * information if this method is not called.
    *
    * @param {PDFDocumentProxy} pdfDocument - A reference to the PDF document.
-   * @param {string} url - The URL of the document.
    */
-  setDocument(pdfDocument, url = null) {
+  setDocument(pdfDocument) {
     if (this.pdfDocument) {
       this.#reset();
       this.#updateUI(true);
@@ -198,14 +194,12 @@ class PDFDocumentProperties {
       return;
     }
     this.pdfDocument = pdfDocument;
-    this.url = url;
 
     this._dataAvailableCapability.resolve();
   }
 
   #reset() {
     this.pdfDocument = null;
-    this.url = null;
 
     this.#fieldData = null;
     this._dataAvailableCapability = createPromiseCapability();
@@ -225,7 +219,7 @@ class PDFDocumentProperties {
       }
       return;
     }
-    if (this.overlayManager.active !== this.overlayName) {
+    if (this.overlayManager.active !== this.dialog) {
       // Don't bother updating the dialog if has already been closed,
       // since it will be updated the next time `this.open` is called.
       return;
@@ -243,6 +237,7 @@ class PDFDocumentProperties {
     if (!kb) {
       return undefined;
     }
+    // NOTE
     if (mb >= 1) {
       return `${mb >= 1 && (+mb.toPrecision(
         3)).toLocaleString()} MB ${fileSize.toLocaleString()} bytes)`
@@ -315,6 +310,7 @@ class PDFDocumentProperties {
       }
     }
 
+    // NOTE
     const [{ width, height }, unit, name, orientation] = await Promise.all([
       this._isNonMetricLocale ? sizeInches : sizeMillimeters,
       this._isNonMetricLocale
@@ -337,10 +333,12 @@ class PDFDocumentProperties {
     if (!dateObject) {
       return undefined;
     }
+    // NOTE
     return `${dateObject.toLocaleDateString()}, ${dateObject.toLocaleTimeString()}`
   }
 
   #parseLinearization(isLinearized) {
+    // NOTE
     return isLinearized ? 'Yes' : 'No'
   }
 }

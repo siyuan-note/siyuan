@@ -544,7 +544,7 @@ export class Wnd {
             return;
         }
         if (model instanceof Asset) {
-            if (model.pdfObject) {
+            if (model.pdfObject && model.pdfObject.pdfLoadingTask) {
                 model.pdfObject.pdfLoadingTask.destroy();
             }
         }

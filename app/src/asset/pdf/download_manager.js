@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+/** @typedef {import("./interfaces").IDownloadManager} IDownloadManager */
+
 import { createValidAbsoluteUrl, isPdfFile } from "./pdfjs";
 
 if (typeof PDFJSDev !== "undefined" && !PDFJSDev.test("CHROME || GENERIC")) {
@@ -36,7 +38,7 @@ function download(blobUrl, filename) {
   }
   // <a> must be in the document for recent Firefox versions,
   // otherwise .click() is ignored.
-  (document.body || document.documentElement).appendChild(a);
+  (document.body || document.documentElement).append(a);
   a.click();
   a.remove();
 }
@@ -107,13 +109,7 @@ class DownloadManager {
     return false;
   }
 
-  /**
-   * @param sourceEventType {string} Used to signal what triggered the download.
-   *   The version of PDF.js integrated with Firefox uses this to to determine
-   *   which dialog to show. "save" triggers "save as" and "download" triggers
-   *   the "open with" dialog.
-   */
-  download(blob, url, filename, sourceEventType = "download") {
+  download(blob, url, filename) {
     const blobUrl = URL.createObjectURL(blob);
     download(blobUrl, filename);
   }

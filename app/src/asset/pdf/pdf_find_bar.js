@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import { FindState } from './pdf_find_controller.js'
+import { FindState } from "./pdf_find_controller.js";
 
-const MATCHES_COUNT_LIMIT = 1000
+const MATCHES_COUNT_LIMIT = 1000;
 
 /**
  * Creates a "search bar" given a set of DOM elements that act as controls
@@ -24,99 +24,102 @@ const MATCHES_COUNT_LIMIT = 1000
  * is done by PDFFindController.
  */
 class PDFFindBar {
-  constructor (options, eventBus, l10n) {
-    this.opened = false
+  constructor(options, eventBus, l10n) {
+    this.opened = false;
 
-    this.bar = options.bar
-    this.toggleButton = options.toggleButton
-    this.findField = options.findField
-    this.highlightAll = options.highlightAllCheckbox
-    this.caseSensitive = options.caseSensitiveCheckbox
-    this.matchDiacritics = options.matchDiacriticsCheckbox
-    this.entireWord = options.entireWordCheckbox
-    this.findMsg = options.findMsg
-    this.findResultsCount = options.findResultsCount
-    this.findPreviousButton = options.findPreviousButton
-    this.findNextButton = options.findNextButton
-    this.eventBus = eventBus
-    this.l10n = l10n
+    this.bar = options.bar;
+    this.toggleButton = options.toggleButton;
+    this.findField = options.findField;
+    this.highlightAll = options.highlightAllCheckbox;
+    this.caseSensitive = options.caseSensitiveCheckbox;
+    this.matchDiacritics = options.matchDiacriticsCheckbox;
+    this.entireWord = options.entireWordCheckbox;
+    this.findMsg = options.findMsg;
+    this.findResultsCount = options.findResultsCount;
+    this.findPreviousButton = options.findPreviousButton;
+    this.findNextButton = options.findNextButton;
+    this.eventBus = eventBus;
+    this.l10n = l10n;
 
     // Add event listeners to the DOM elements.
-    this.toggleButton.addEventListener('click', () => {
-      this.toggle()
-    })
+    this.toggleButton.addEventListener("click", () => {
+      this.toggle();
+    });
 
-    this.findField.addEventListener('input', () => {
-      this.dispatchEvent('')
-    })
+    this.findField.addEventListener("input", () => {
+      this.dispatchEvent("");
+    });
 
-    this.bar.addEventListener('keydown', e => {
+    this.bar.addEventListener("keydown", e => {
       switch (e.keyCode) {
         case 13: // Enter
           if (e.target === this.findField) {
-            this.dispatchEvent('again', e.shiftKey)
+            this.dispatchEvent("again", e.shiftKey);
           }
-          break
+          break;
         case 27: // Escape
-          this.close()
-          break
+          this.close();
+          break;
       }
-    })
+    });
 
-    this.findPreviousButton.addEventListener('click', () => {
-      this.dispatchEvent('again', true)
-    })
+    this.findPreviousButton.addEventListener("click", () => {
+      this.dispatchEvent("again", true);
+    });
 
-    this.findNextButton.addEventListener('click', () => {
-      this.dispatchEvent('again', false)
-    })
+    this.findNextButton.addEventListener("click", () => {
+      this.dispatchEvent("again", false);
+    });
 
-    this.highlightAll.addEventListener('click', () => {
-      this.dispatchEvent('highlightallchange')
-      // NOTE: 以下三个相同 https://github.com/siyuan-note/siyuan/issues/5338
+    this.highlightAll.addEventListener("click", () => {
+      this.dispatchEvent("highlightallchange");
+      // NOTE
       if (this.highlightAll.checked) {
         this.highlightAll.parentElement.classList.remove("b3-button--outline")
       } else {
         this.highlightAll.parentElement.classList.add("b3-button--outline")
       }
-    })
+    });
 
-    this.caseSensitive.addEventListener('click', () => {
-      this.dispatchEvent('casesensitivitychange')
+    this.caseSensitive.addEventListener("click", () => {
+      this.dispatchEvent("casesensitivitychange");
+      // NOTE
       if (this.caseSensitive.checked) {
         this.caseSensitive.parentElement.classList.remove("b3-button--outline")
       } else {
         this.caseSensitive.parentElement.classList.add("b3-button--outline")
       }
-    })
+    });
 
-    this.entireWord.addEventListener('click', () => {
-      this.dispatchEvent('entirewordchange')
+    this.entireWord.addEventListener("click", () => {
+      this.dispatchEvent("entirewordchange");
+      // NOTE
       if (this.entireWord.checked) {
         this.entireWord.parentElement.classList.remove("b3-button--outline")
       } else {
         this.entireWord.parentElement.classList.add("b3-button--outline")
       }
-    })
+    });
 
-    this.matchDiacritics.addEventListener('click', () => {
-      this.dispatchEvent('diacriticmatchingchange')
+    this.matchDiacritics.addEventListener("click", () => {
+      this.dispatchEvent("diacriticmatchingchange");
+      // NOTE
       if (this.matchDiacritics.checked) {
         this.matchDiacritics.parentElement.classList.remove("b3-button--outline")
       } else {
         this.matchDiacritics.parentElement.classList.add("b3-button--outline")
       }
-    })
+    });
 
-    this.eventBus._on('resize', this.#adjustWidth.bind(this))
+    this.eventBus._on("resize", this.#adjustWidth.bind(this));
   }
 
-  reset () {
-    this.updateUIState()
+  reset() {
+    this.updateUIState();
   }
 
-  dispatchEvent (type, findPrev = false) {
-    this.eventBus.dispatch('find', {
+  dispatchEvent(type, findPrev = false) {
+    this.eventBus.dispatch("find", {
       source: this,
       type,
       query: this.findField.value,
@@ -126,108 +129,115 @@ class PDFFindBar {
       highlightAll: this.highlightAll.checked,
       findPrevious: findPrev,
       matchDiacritics: this.matchDiacritics.checked,
-    })
+    });
   }
 
-  updateUIState (state, previous, matchesCount) {
-    let findMsg = ''
-    let status = ''
+  updateUIState(state, previous, matchesCount) {
+    // NOTE
+    let findMsg = "";
+    let status = "";
 
     switch (state) {
       case FindState.FOUND:
-        break
+        break;
       case FindState.PENDING:
-        status = 'pending'
-        break
+        status = "pending";
+        break;
       case FindState.NOT_FOUND:
+        // NOTE
         findMsg = window.siyuan.languages.find_not_found
-        status = 'notFound'
-        break
+        status = "notFound";
+        break;
       case FindState.WRAPPED:
         findMsg = window.siyuan.languages.find_not_found[`find_reached_${previous
           ? 'top'
           : 'bottom'}`]
-        break
+        break;
     }
-    this.findField.setAttribute('data-status', status)
+    this.findField.setAttribute("data-status", status);
+    this.findField.setAttribute("aria-invalid", state === FindState.NOT_FOUND);
 
+    // NOTE
     this.findMsg.textContent = findMsg
     this.#adjustWidth()
-    this.updateResultsCount(matchesCount)
+    this.updateResultsCount(matchesCount);
   }
 
-  updateResultsCount ({current = 0, total = 0} = {}) {
-    const limit = MATCHES_COUNT_LIMIT
-    let msg = ''
+  updateResultsCount({ current = 0, total = 0 } = {}) {
+    const limit = MATCHES_COUNT_LIMIT;
+    // // NOTE
+    let matchCountMsg = "";
 
     if (total > 0) {
       if (total > limit) {
-        msg = window.siyuan.languages.find_match_count_limit.replace(
+        matchCountMsg = window.siyuan.languages.find_match_count_limit.replace(
           '{{limit}}', limit)
       } else {
-        msg = window.siyuan.languages.find_match_count.replace('{{current}}',
+        matchCountMsg = window.siyuan.languages.find_match_count.replace('{{current}}',
           current).replace('{{total}}', total)
       }
     }
-    this.findResultsCount.textContent = msg
-    this.findResultsCount.classList.toggle('fn__hidden', !total)
+
+    this.findResultsCount.textContent = matchCountMsg
     this.#adjustWidth()
   }
 
-  open () {
+  open() {
     if (!this.opened) {
-      this.opened = true
-      this.toggleButton.classList.add('toggled')
-      this.toggleButton.setAttribute('aria-expanded', 'true')
-      this.bar.classList.remove('fn__hidden')
+      this.opened = true;
+      this.toggleButton.classList.add("toggled");
+      this.toggleButton.setAttribute("aria-expanded", "true");
+      // NOTE
+      this.bar.classList.remove("fn__hidden");
     }
-    this.findField.select()
-    this.findField.focus()
+    this.findField.select();
+    this.findField.focus();
 
-    this.#adjustWidth()
+    this.#adjustWidth();
   }
 
-  close () {
+  close() {
     if (!this.opened) {
-      return
+      return;
     }
-    this.opened = false
-    this.toggleButton.classList.remove('toggled')
-    this.toggleButton.setAttribute('aria-expanded', 'false')
-    this.bar.classList.add('fn__hidden')
+    this.opened = false;
+    this.toggleButton.classList.remove("toggled");
+    this.toggleButton.setAttribute("aria-expanded", "false");
+    // NOTE
+    this.bar.classList.add("fn__hidden");
 
-    this.eventBus.dispatch('findbarclose', {source: this})
+    this.eventBus.dispatch("findbarclose", { source: this });
   }
 
-  toggle () {
+  toggle() {
     if (this.opened) {
-      this.close()
+      this.close();
     } else {
-      this.open()
+      this.open();
     }
   }
 
-  #adjustWidth () {
+  #adjustWidth() {
     if (!this.opened) {
-      return
+      return;
     }
 
     // The find bar has an absolute position and thus the browser extends
     // its width to the maximum possible width once the find bar does not fit
     // entirely within the window anymore (and its elements are automatically
     // wrapped). Here we detect and fix that.
-    this.bar.classList.remove('wrapContainers')
+    this.bar.classList.remove("wrapContainers");
 
-    const findbarHeight = this.bar.clientHeight
-    const inputContainerHeight = this.bar.firstElementChild.clientHeight
+    const findbarHeight = this.bar.clientHeight;
+    const inputContainerHeight = this.bar.firstElementChild.clientHeight;
 
     if (findbarHeight > inputContainerHeight) {
       // The findbar is taller than the input container, which means that
       // the browser wrapped some of the elements. For a consistent look,
       // wrap all of them to adjust the width of the find bar.
-      this.bar.classList.add('wrapContainers')
+      this.bar.classList.add("wrapContainers");
     }
   }
 }
 
-export { PDFFindBar }
+export { PDFFindBar };

@@ -135,7 +135,7 @@ export class Breadcrumb {
         if (cursorNodeElement) {
             id = cursorNodeElement.getAttribute("data-node-id");
         }
-        fetchPost("/api/block/getBlockWordCount", {id: id || protyle.block.id}, (response) => {
+        fetchPost("/api/block/getTreeStat", {id: id || protyle.block.id}, (response) => {
             window.siyuan.menus.menu.remove();
 
             if (!protyle.contentElement.classList.contains("fn__none")) {
@@ -327,10 +327,11 @@ export class Breadcrumb {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 type: "readonly",
-                label: `<div class="fn__flex">${window.siyuan.languages.docRuneCount}<span class="fn__space fn__flex-1"></span>${response.data.rootBlockRuneCount}</div>
-<div class="fn__flex">${window.siyuan.languages.docWordCount}<span class="fn__space fn__flex-1"></span>${response.data.rootBlockWordCount}</div>
-<div class="fn__flex">${window.siyuan.languages.blockRuneCount}<span class="fn__space fn__flex-1"></span>${response.data.blockRuneCount}</div>
-<div class="fn__flex">${window.siyuan.languages.blockWordCount}<span class="fn__space fn__flex-1"></span>${response.data.blockWordCount}</div>`,
+                label: `<div class="fn__flex">${window.siyuan.languages.runeCount}<span class="fn__space fn__flex-1"></span>${response.data.runeCount}</div>
+<div class="fn__flex">${window.siyuan.languages.wordCount}<span class="fn__space fn__flex-1"></span>${response.data.wordCount}</div>
+<div class="fn__flex">${window.siyuan.languages.link}<span class="fn__space fn__flex-1"></span>${response.data.linkCount}</div>
+<div class="fn__flex">${window.siyuan.languages.image}<span class="fn__space fn__flex-1"></span>${response.data.imageCount}</div>
+<div class="fn__flex">${window.siyuan.languages.ref}<span class="fn__space fn__flex-1"></span>${response.data.refCount}</div>`,
             }).element);
             window.siyuan.menus.menu.popup(position);
         });

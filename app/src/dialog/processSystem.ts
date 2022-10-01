@@ -189,7 +189,7 @@ export const progressStatus = (data: IWebSocketData) => {
 };
 
 export const handleStatusbarCounter = (data: IWebSocketData) => {
-    renderStatusbarCounter(data.data.runeCount, data.data.wordCount);
+    renderStatusbarCounter(data.data);
 };
 
 export const progressLoading = (data: IWebSocketData) => {

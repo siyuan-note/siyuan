@@ -157,11 +157,7 @@ func getContentWordCount(c *gin.Context) {
 	}
 
 	content := arg["content"].(string)
-	runeCount, wordCount := model.ContentWordCount(content)
-	ret.Data = map[string]interface{}{
-		"runeCount": runeCount,
-		"wordCount": wordCount,
-	}
+	ret.Data = model.ContentStat(content)
 }
 
 func getBlocksWordCount(c *gin.Context) {
@@ -178,14 +174,10 @@ func getBlocksWordCount(c *gin.Context) {
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
 	}
-	runeCount, wordCount := model.BlocksWordCount(ids)
-	ret.Data = map[string]interface{}{
-		"runeCount": runeCount,
-		"wordCount": wordCount,
-	}
+	ret.Data = model.BlocksWordCount(ids)
 }
 
-func getBlockWordCount(c *gin.Context) {
+func getTreeStat(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -195,13 +187,7 @@ func getBlockWordCount(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	blockRuneCount, blockWordCount, rootBlockRuneCount, rootBlockWordCount := model.BlockWordCount(id)
-	ret.Data = map[string]interface{}{
-		"blockRuneCount":     blockRuneCount,
-		"blockWordCount":     blockWordCount,
-		"rootBlockRuneCount": rootBlockRuneCount,
-		"rootBlockWordCount": rootBlockWordCount,
-	}
+	ret.Data = model.StatTree(id)
 }
 
 func getRefText(c *gin.Context) {

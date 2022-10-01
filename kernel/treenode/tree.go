@@ -31,9 +31,15 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TreeStat(tree *parse.Tree) (runeCount, wordCount int) {
-	runeCount, wordCount = tree.Root.ContentLen()
-	return
+func StatTree(tree *parse.Tree) (ret *util.BlockStatResult) {
+	runeCnt, wordCnt, linkCnt, imgCnt, refCnt := tree.Root.Stat()
+	return &util.BlockStatResult{
+		RuneCount:  runeCnt,
+		WordCount:  wordCnt,
+		LinkCount:  linkCnt,
+		ImageCount: imgCnt,
+		RefCount:   refCnt,
+	}
 }
 
 func NodeHash(node *ast.Node, tree *parse.Tree, luteEngine *lute.Lute) string {

@@ -151,11 +151,16 @@ func PushStatusBar(msg string) {
 	BroadcastByType("main", "statusbar", 0, msg, nil)
 }
 
-func PushStatusBarCounter(runeCount, wordCount int) {
-	BroadcastByType("main", "statusbarCounter", 0, "", map[string]interface{}{
-		"runeCount": runeCount,
-		"wordCount": wordCount},
-	)
+type BlockStatResult struct {
+	RuneCount  int `json:"runeCount"`
+	WordCount  int `json:"wordCount"`
+	LinkCount  int `json:"linkCount"`
+	ImageCount int `json:"imageCount"`
+	RefCount   int `json:"refCount"`
+}
+
+func PushStatusBarCounter(stat *BlockStatResult) {
+	BroadcastByType("main", "statusbarCounter", 0, "", stat)
 }
 
 func ContextPushMsg(context map[string]interface{}, msg string) {

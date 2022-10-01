@@ -1010,8 +1010,8 @@ func (tx *Transaction) commit() (err error) {
 }
 
 func pushTreeStat(tree *parse.Tree) {
-	runeCount, wordCount := treenode.TreeStat(tree)
-	util.PushStatusBarCounter(runeCount, wordCount)
+	stat := treenode.StatTree(tree)
+	util.PushStatusBarCounter(stat)
 }
 
 func (tx *Transaction) rollback() {

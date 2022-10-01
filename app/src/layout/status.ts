@@ -137,7 +137,7 @@ export const countSelectWord = (range: Range) => {
     const selectText = range.toString();
     if (selectText) {
         fetchPost("/api/block/getContentWordCount", {"content": range.toString()}, (response) => {
-            renderStatusbarCounter(response.data.runeCount, response.data.wordCount);
+            renderStatusbarCounter(response.data);
         });
     } else {
         document.querySelector("#status .status__counter").innerHTML = "";
@@ -152,7 +152,7 @@ export const countBlockWord = (ids: string[]) => {
     }
     if (ids.length > 0) {
         fetchPost("/api/block/getBlocksWordCount", {ids}, (response) => {
-            renderStatusbarCounter(response.data.runeCount, response.data.wordCount);
+            renderStatusbarCounter(response.data);
         });
     } else {
         document.querySelector("#status .status__counter").innerHTML = "";
@@ -160,10 +160,17 @@ export const countBlockWord = (ids: string[]) => {
     /// #endif
 };
 
-export const renderStatusbarCounter = (runeCount: number, wordCount: number) => {
-    document.querySelector("#status .status__counter").innerHTML = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>
-&nbsp;${runeCount}
-<span class="fn__space"></span>
-<span class="ft__on-surface">${window.siyuan.languages.wordCount}</span>
-&nbsp;${wordCount}<span class="fn__space"></span>`;
+export const renderStatusbarCounter = (stat: { runeCount: number, wordCount: number, linkCount: number, imageCount: number, refCount: number }) => {
+    let html = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>
+<span class="ft__on-surface">${window.siyuan.languages.wordCount}</span>&nbsp;${stat.wordCount}<span class="fn__space"></span>`
+    if (0 < stat.linkCount) {
+        html += `<span class="ft__on-surface">${window.siyuan.languages.link}</span>&nbsp;${stat.linkCount}<span class="fn__space"></span>`
+    }
+    if (0 < stat.imageCount) {
+        html += `<span class="ft__on-surface">${window.siyuan.languages.image}</span>&nbsp;${stat.imageCount}<span class="fn__space"></span>`
+    }
+    if (0 < stat.refCount) {
+        html += `<span class="ft__on-surface">${window.siyuan.languages.ref}</span>&nbsp;${stat.refCount}<span class="fn__space"></span>`
+    }
+    document.querySelector("#status .status__counter").innerHTML = html;
 }

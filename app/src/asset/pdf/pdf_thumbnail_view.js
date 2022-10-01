@@ -239,9 +239,8 @@ class PDFThumbnailView {
 
     const image = document.createElement("img");
     image.className = "thumbnailImage";
-    this._thumbPageCanvas.then(msg => {
-      image.setAttribute("aria-label", msg);
-    });
+    // NOTE
+    image.setAttribute("aria-label", this._thumbPageCanvas);
     image.style.width = this.canvasWidth + "px";
     image.style.height = this.canvasHeight + "px";
 

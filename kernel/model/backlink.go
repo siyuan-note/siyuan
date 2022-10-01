@@ -186,7 +186,7 @@ func GetBackmentionDoc(defID, keyword string) (ret []*Backlink) {
 			var loadErr error
 			refTree, loadErr = loadTreeByBlockID(mention.ID)
 			if nil != loadErr {
-				logging.LogErrorf("load ref tree [%s] failed: %s", mention.ID, loadErr)
+				logging.LogWarnf("load ref tree [%s] failed: %s", mention.ID, loadErr)
 				continue
 			}
 			treeCache[mention.RootID] = refTree

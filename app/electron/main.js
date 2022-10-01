@@ -33,12 +33,14 @@ const appDir = path.dirname(app.getAppPath())
 const isDevEnv = process.env.NODE_ENV === 'development'
 const appVer = app.getVersion()
 const confDir = path.join(app.getPath('home'), '.config', 'siyuan')
+const windowStatePath = path.join(confDir, 'windowState.json')
 let tray // 托盘必须使用全局变量，以防止被垃圾回收 https://www.electronjs.org/docs/faq#my-apps-windowtray-disappeared-after-a-few-minutes
 let mainWindow // 从托盘处激活报错 https://github.com/siyuan-note/siyuan/issues/769
 let firstOpenWindow, bootWindow
 let closeButtonBehavior = 0
 let siyuanOpenURL
 let firstOpen = false
+let resetWindowStateOnRestart = false
 require('@electron/remote/main').initialize()
 
 if (!app.requestSingleInstanceLock()) {
@@ -112,8 +114,6 @@ const writeLog = (out) => {
 }
 
 const boot = () => {
-  const windowStatePath = path.join(confDir, 'windowState.json')
-
   // 恢复主窗体状态
   let oldWindowState = {}
   try {
@@ -368,17 +368,22 @@ const boot = () => {
   })
   ipcMain.on('siyuan-quit', () => {
     try {
-      const bounds = mainWindow.getBounds()
-      fs.writeFileSync(windowStatePath, JSON.stringify({
-        isMaximized: mainWindow.isMaximized(),
-        fullscreen: mainWindow.isFullScreen(),
-        isDevToolsOpened: mainWindow.webContents.isDevToolsOpened(),
-        x: bounds.x,
-        y: bounds.y,
-        width: bounds.width,
-        height: bounds.height,
-      }))
+      if (resetWindowStateOnRestart) {
+        fs.writeFileSync(windowStatePath, '{}')
+      } else {
+        const bounds = mainWindow.getBounds()
+        fs.writeFileSync(windowStatePath, JSON.stringify({
+          isMaximized: mainWindow.isMaximized(),
+          fullscreen: mainWindow.isFullScreen(),
+          isDevToolsOpened: mainWindow.webContents.isDevToolsOpened(),
+          x: bounds.x,
+          y: bounds.y,
+          width: bounds.width,
+          height: bounds.height,
+        }))
+      }
     } catch (e) {
+      writeLog(e)
     }
     app.exit()
     globalShortcut.unregisterAll()
@@ -420,7 +425,7 @@ const boot = () => {
   if ('win32' === process.platform || 'linux' === process.platform) {
     // 系统托盘
     tray = new Tray(path.join(appDir, 'stage', 'icon-large.png'))
-    tray.setToolTip('SiYuan')
+    tray.setToolTip('SiYuan v' + appVer)
     const trayMenuTemplate = [
       {
         label: 'Show Window',
@@ -453,6 +458,13 @@ const boot = () => {
         label: '中文反馈',
         click: () => {
           shell.openExternal('https://ld246.com/article/1649901726096')
+        },
+      },
+      {
+        label: 'Reset Window on restart',
+        type: 'checkbox',
+        click: v => {
+          resetWindowStateOnRestart = v.checked;
         },
       },
       {

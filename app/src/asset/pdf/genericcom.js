@@ -14,7 +14,8 @@
  */
 
 import { BasePreferences } from "./preferences.js";
-import { DownloadManager } from "./download_manager.js";
+// NOTE
+// import { DownloadManager } from "./download_manager.js";
 import { GenericScripting } from "./generic_scripting.js";
 import { shadow } from './pdfjs'
 
@@ -72,7 +73,8 @@ class GenericExternalServices {
   }
 
   static createDownloadManager(options) {
-    return new DownloadManager();
+    // NOTE
+    // return new DownloadManager();
   }
 
   static createPreferences() {

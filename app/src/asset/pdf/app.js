@@ -328,12 +328,13 @@ class PDFViewerApplication {
         case 'shadow':
         case 'hover':
           viewerContainer.classList.add(`textLayer-${params.get('textlayer')}`)
-          try {
-            await loadPDFBug(this)
-            this._PDFBug.loadCSS()
-          } catch (ex) {
-            console.error(`_parseHashParameters: "${ex.message}".`)
-          }
+          // NOTE
+          // try {
+          //   await loadPDFBug(this)
+          //   this._PDFBug.loadCSS()
+          // } catch (ex) {
+          //   console.error(`_parseHashParameters: "${ex.message}".`)
+          // }
           break
       }
     }
@@ -342,12 +343,13 @@ class PDFViewerApplication {
       AppOptions.set('fontExtraProperties', true)
 
       const enabled = params.get('pdfbug').split(',')
-      try {
-        await loadPDFBug(this)
-        this._PDFBug.init({OPS}, mainContainer, enabled)
-      } catch (ex) {
-        console.error(`_parseHashParameters: "${ex.message}".`)
-      }
+      // NOTE
+      // try {
+      //   await loadPDFBug(this)
+      //   this._PDFBug.init({OPS}, mainContainer, enabled)
+      // } catch (ex) {
+      //   console.error(`_parseHashParameters: "${ex.message}".`)
+      // }
     }
     // It is not possible to change locale for the (various) extension builds.
     if (
@@ -2126,21 +2128,22 @@ async function loadFakeWorker () {
 
   if (typeof PDFJSDev === 'undefined' || !PDFJSDev.test('PRODUCTION')) {
     // NOTE
-    window.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.js?v=2.14.102`)
+    window.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.js?v=3.0.150`)
     return
   }
   await loadScript(PDFWorker.workerSrc)
 }
 
-async function loadPDFBug (self) {
-  const {debuggerScriptPath} = self.appConfig
-  const {PDFBug} =
-    typeof PDFJSDev === 'undefined' || !PDFJSDev.test('PRODUCTION')
-      ? await import(debuggerScriptPath) // eslint-disable-line no-unsanitized/method
-      : await __non_webpack_import__(debuggerScriptPath) // eslint-disable-line no-undef
-
-  self._PDFBug = PDFBug
-}
+// NOTE
+// async function loadPDFBug (self) {
+//   const {debuggerScriptPath} = self.appConfig
+//   const {PDFBug} =
+//     typeof PDFJSDev === 'undefined' || !PDFJSDev.test('PRODUCTION')
+//       ? await import(debuggerScriptPath) // eslint-disable-line no-unsanitized/method
+//       : await __non_webpack_import__(debuggerScriptPath) // eslint-disable-line no-undef
+//
+//   self._PDFBug = PDFBug
+// }
 
 function reportPageStatsPDFBug ({pageNumber}) {
   if (!globalThis.Stats?.enabled) {

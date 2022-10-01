@@ -266,6 +266,5 @@ document.blockUnblockOnload?.(true)
 
 // NOTE
 export {
-  PDFViewerApplication,
   webViewerLoad
 }

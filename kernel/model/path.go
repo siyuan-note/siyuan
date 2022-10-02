@@ -27,6 +27,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -115,6 +116,49 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string) (ret []*Path) {
 			treeNode.Blocks = append(treeNode.Blocks, c)
 		}
 		ret = append(ret, treeNode)
+	}
+
+	sort.Slice(ret, func(i, j int) bool {
+		return ret[i].ID > ret[j].ID
+	})
+	return
+}
+
+func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
+	keyword = strings.TrimSpace(keyword)
+	var blockRoots []*Block
+	for _, block := range blocks {
+		root := getBlockIn(blockRoots, block.RootID)
+		if nil == root {
+			root, _ = getBlock(block.RootID)
+			blockRoots = append(blockRoots, root)
+		}
+		block.Depth = 1
+		block.Count = len(block.Children)
+		root.Children = append(root.Children, block)
+	}
+
+	for _, root := range blockRoots {
+		treeNode := &Path{
+			ID:       root.ID,
+			Box:      root.Box,
+			Name:     path.Base(root.HPath),
+			Type:     "backlink",
+			NodeType: "NodeDocument",
+			SubType:  root.SubType,
+			Depth:    0,
+			Count:    len(root.Children),
+		}
+
+		rootPos := -1
+		var rootContent string
+		if "" != keyword {
+			rootPos, rootContent = search.MarkText(treeNode.Name, keyword, 12, Conf.Search.CaseSensitive)
+			treeNode.Name = rootContent
+		}
+		if 0 < len(treeNode.Children) || 0 < len(treeNode.Blocks) || (-1 < rootPos && "" != keyword) {
+			ret = append(ret, treeNode)
+		}
 	}
 
 	sort.Slice(ret, func(i, j int) bool {

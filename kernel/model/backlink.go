@@ -298,6 +298,8 @@ func buildBacklink(refID string, refTree *parse.Tree, luteEngine *lute.Lute) (re
 }
 
 func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
+	keyword = strings.TrimSpace(keyword)
+	mentionKeyword = strings.TrimSpace(mentionKeyword)
 	backlinks, backmentions = []*Path{}, []*Path{}
 
 	sqlBlock := sql.GetBlock(id)
@@ -310,15 +312,27 @@ func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
 	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(id, refs)
-	backlinks = toFlatTree(linkRefs, 0, "backlink")
-	for _, l := range backlinks {
+	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink")
+	for _, l := range tmpBacklinks {
 		l.Blocks = nil
+		if "" != keyword {
+			if !strings.Contains(l.Name, keyword) {
+				continue
+			}
+		}
+		backlinks = append(backlinks, l)
 	}
 
 	mentionRefs := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen)
-	backmentions = toFlatTree(mentionRefs, 0, "backlink")
-	for _, l := range backmentions {
+	tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink")
+	for _, l := range tmpBackmentions {
 		l.Blocks = nil
+		if "" != mentionKeyword {
+			if !strings.Contains(l.Name, mentionKeyword) {
+				continue
+			}
+		}
+		backmentions = append(backmentions, l)
 	}
 	mentionsCount = len(backmentions)
 	return

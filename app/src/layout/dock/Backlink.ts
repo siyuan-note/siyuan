@@ -163,26 +163,6 @@ export class Backlink extends Model {
             data: null,
             click: (element, event) => {
                 this.toggleItem(element, true);
-                // const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
-                // if (actionElement) {
-                //     if (actionElement.firstElementChild.classList.contains("fn__rotate")) {
-                //         return;
-                //     }
-                //     window.siyuan.menus.menu.remove();
-                //     window.siyuan.menus.menu.append(new MenuItem({
-                //         label: window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToStaticRef,
-                //         click: () => {
-                //             this.turnToRef(element, false);
-                //         }
-                //     }).element);
-                //     window.siyuan.menus.menu.append(new MenuItem({
-                //         label: window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToDynamicRef,
-                //         click: () => {
-                //             this.turnToRef(element, true);
-                //         }
-                //     }).element);
-                //     window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
-                // }
             },
             ctrlClick(element) {
                 openFileById({
@@ -337,32 +317,6 @@ export class Backlink extends Model {
                 });
             }
         }
-    }
-
-    private turnToRef(element: HTMLElement, isDynamic: boolean) {
-        element.querySelector(".b3-list-item__action").innerHTML = '<svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg>';
-        this.element.querySelector('.block__icon[data-type="refresh"] svg').classList.add("fn__rotate");
-        fetchPost("/api/ref/createBacklink", {
-            refID: element.getAttribute("data-node-id"),
-            refText: decodeURIComponent(element.getAttribute("data-ref-text")),
-            defID: this.blockId,
-            pushMode: 0,
-            isDynamic
-        }, response => {
-            if (response.data.defID === this.blockId) {
-                this.searchBacklinks(true);
-            }
-            getAllModels().editor.forEach(item => {
-                if (response.data.refRootID === item.editor.protyle.block.rootID) {
-                    fetchPost("/api/filetree/getDoc", {
-                        id: item.editor.protyle.block.id,
-                        size: Constants.SIZE_GET,
-                    }, getResponse => {
-                        onGet(getResponse, item.editor.protyle);
-                    });
-                }
-            });
-        });
     }
 
     public refresh() {

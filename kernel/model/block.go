@@ -99,7 +99,9 @@ func SwapBlockRef(refID, defID string) (err error) {
 	if nil == refNode {
 		return
 	}
-	refParentType := refNode.Parent.Type
+	if ast.NodeListItem == refNode.Parent.Type {
+		refNode = refNode.Parent
+	}
 	defTree, err := loadTreeByBlockID(defID)
 	if nil != err {
 		return
@@ -108,12 +110,18 @@ func SwapBlockRef(refID, defID string) (err error) {
 	if nil == defNode {
 		return
 	}
+	if ast.NodeListItem == defNode.Parent.Type {
+		defNode = defNode.Parent
+	}
 
 	refPivot := parse.NewParagraph()
 	refNode.InsertBefore(refPivot)
 
 	if ast.NodeListItem == defNode.Type {
-		if ast.NodeListItem != refParentType {
+		if ast.NodeListItem == refNode.Type {
+			defNode.InsertAfter(refNode)
+			refPivot.InsertAfter(defNode)
+		} else {
 			newID := ast.NewNodeID()
 			li := &ast.Node{ID: newID, Type: ast.NodeListItem, ListData: &ast.ListData{Typ: defNode.Parent.ListData.Typ}}
 			li.SetIALAttr("id", newID)
@@ -127,19 +135,34 @@ func SwapBlockRef(refID, defID string) (err error) {
 			list.SetIALAttr("updated", newID[:14])
 			list.AppendChild(defNode)
 			refPivot.InsertAfter(list)
+		}
+	} else {
+		if ast.NodeListItem == refNode.Type {
+			newID := ast.NewNodeID()
+			li := &ast.Node{ID: newID, Type: ast.NodeListItem, ListData: &ast.ListData{Typ: refNode.Parent.ListData.Typ}}
+			li.SetIALAttr("id", newID)
+			li.SetIALAttr("updated", newID[:14])
+			li.AppendChild(refNode)
+			refPivot.InsertAfter(li)
+
+			newID = ast.NewNodeID()
+			list := &ast.Node{ID: newID, Type: ast.NodeList, ListData: &ast.ListData{Typ: refNode.Parent.ListData.Typ}}
+			list.SetIALAttr("id", newID)
+			list.SetIALAttr("updated", newID[:14])
+			list.AppendChild(defNode)
+			defNode.InsertAfter(list)
 		} else {
 			defNode.InsertAfter(refNode)
 			refPivot.InsertAfter(defNode)
 		}
-	} else {
-		defNode.InsertAfter(refNode)
-		refPivot.InsertAfter(defNode)
 	}
 	refPivot.Unlink()
 
+	treenode.ReindexBlockTree(refTree)
 	if err = writeJSONQueue(refTree); nil != err {
 		return
 	}
+	treenode.ReindexBlockTree(defTree)
 	if err = writeJSONQueue(defTree); nil != err {
 		return
 	}

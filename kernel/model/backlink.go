@@ -176,7 +176,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 	refs := sql.QueryRefsByDefID(defID, true)
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
-	linkRefs, excludeBacklinkIDs := buildLinkRefs(rootID, refs)
+	linkRefs, _, excludeBacklinkIDs := buildLinkRefs(rootID, refs)
 	tmpMentions := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
 	luteEngine := NewLute()
 	treeCache := map[string]*parse.Tree{}
@@ -221,7 +221,7 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 	}
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
-	linkRefs, _ := buildLinkRefs(rootID, refs)
+	linkRefs, _, _ := buildLinkRefs(rootID, refs)
 	refTree, err := loadTreeByBlockID(refTreeID)
 	if nil != err {
 		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
@@ -236,7 +236,7 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 	return
 }
 
-func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, excludeBacklinkIDs *hashset.Set) {
+func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set) {
 	// 为了减少查询，组装好 IDs 后一次查出
 	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
 	var queryBlockIDs []string
@@ -289,6 +289,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, excludeBack
 		for _, ref := range link.Refs {
 			excludeBacklinkIDs.Add(ref.RootID, ref.ID)
 		}
+		refsCount += len(link.Refs)
 	}
 
 	processedParagraphs := hashset.New()
@@ -396,7 +397,7 @@ func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID
 	refs := sql.QueryRefsByDefID(id, true)
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
-	linkRefs, excludeBacklinkIDs := buildLinkRefs(id, refs)
+	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(id, refs)
 	backlinks = toFlatTree(linkRefs, 0, "backlink")
 	for _, l := range backlinks {
 		l.Blocks = nil

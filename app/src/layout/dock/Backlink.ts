@@ -312,7 +312,7 @@ export class Backlink extends Model {
         }
     }
 
-    private toggleItem(liElement: HTMLElement, isMention:boolean) {
+    private toggleItem(liElement: HTMLElement, isMention: boolean) {
         const svgElement = liElement.firstElementChild.firstElementChild;
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.remove("b3-list-item__arrow--open");
@@ -322,7 +322,7 @@ export class Backlink extends Model {
             if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "DIV") {
                 liElement.nextElementSibling.classList.remove("fn__none");
             } else {
-                fetchPost(isMention?"/api/ref/getBackmentionDoc":"/api/ref/getBacklinkDoc", {
+                fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                     defID: this.blockId,
                     refTreeID: liElement.getAttribute("data-node-id")
                 }, (response) => {
@@ -331,7 +331,7 @@ export class Backlink extends Model {
                     liElement.after(editorElement);
                     const editor = new Protyle(editorElement, {
                         blockId: "",
-                        backlinkData: response.data.backlinks,
+                        backlinkData: isMention ? response.data.backmentions : response.data.backlinks,
                         render: {
                             background: false,
                             title: false,

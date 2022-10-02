@@ -76,8 +76,8 @@ export class Backlink extends Model {
     <span class="counter listCount"></span>
     <span class="fn__space"></span>
     <label class="b3-form__icon b3-form__icon--small search__label">
-        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-        <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}" />
+        <svg class="b3-form__icon-icon"><use xlink:href="#iconFilter"></use></svg>
+        <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.filter}" />
     </label>
     <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
@@ -97,8 +97,8 @@ export class Backlink extends Model {
     <span class="counter listMCount"></span>
     <span class="fn__space"></span>
     <label class="b3-form__icon b3-form__icon--small search__label">
-        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-        <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.search}" />
+        <svg class="b3-form__icon-icon"><use xlink:href="#iconFilter"></use></svg>
+        <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="Enter ${window.siyuan.languages.filter}" />
     </label>
     <span class="fn__space"></span>
     <span data-type="mCollapse" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.collapse}">

@@ -287,35 +287,40 @@ export class Backlink extends Model {
 
     private toggleItem(liElement: HTMLElement, isMention: boolean) {
         const svgElement = liElement.firstElementChild.firstElementChild;
+        const docId = liElement.getAttribute("data-node-id")
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.remove("b3-list-item__arrow--open");
-            liElement.nextElementSibling?.classList.add("fn__none");
+            this.editors.find((item, index) => {
+                if (item.protyle.block.rootID === docId) {
+                    item.destroy();
+                    this.editors.splice(index, 1);
+                    return true;
+                }
+            });
+            liElement.nextElementSibling?.remove();
         } else {
             svgElement.classList.add("b3-list-item__arrow--open");
-            if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "DIV") {
-                liElement.nextElementSibling.classList.remove("fn__none");
-            } else {
-                fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
-                    defID: this.blockId,
-                    refTreeID: liElement.getAttribute("data-node-id")
-                }, (response) => {
-                    const editorElement = document.createElement("div");
-                    editorElement.style.minHeight = "auto";
-                    liElement.after(editorElement);
-                    const editor = new Protyle(editorElement, {
-                        blockId: "",
-                        backlinkData: isMention ? response.data.backmentions : response.data.backlinks,
-                        render: {
-                            background: false,
-                            title: false,
-                            gutter: true,
-                            scroll: false,
-                            breadcrumb: false,
-                        }
-                    });
-                    this.editors.push(editor);
+            fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
+                defID: this.blockId,
+                refTreeID: docId
+            }, (response) => {
+                const editorElement = document.createElement("div");
+                editorElement.style.minHeight = "auto";
+                liElement.after(editorElement);
+                const editor = new Protyle(editorElement, {
+                    blockId: "",
+                    backlinkData: isMention ? response.data.backmentions : response.data.backlinks,
+                    render: {
+                        background: false,
+                        title: false,
+                        gutter: true,
+                        scroll: false,
+                        breadcrumb: false,
+                    }
                 });
-            }
+                editor.protyle.block.rootID = docId
+                this.editors.push(editor);
+            });
         }
     }
 

@@ -27,6 +27,8 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/search"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -115,6 +117,233 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string) (ret []*Path) {
 			treeNode.Blocks = append(treeNode.Blocks, c)
 		}
 		ret = append(ret, treeNode)
+	}
+
+	sort.Slice(ret, func(i, j int) bool {
+		return ret[i].ID > ret[j].ID
+	})
+	return
+}
+
+
+func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
+	keyword = strings.TrimSpace(keyword)
+	var blockRoots []*Block
+	for _, block := range blocks {
+		root := getBlockIn(blockRoots, block.RootID)
+		if nil == root {
+			root, _ = getBlock(block.RootID)
+			blockRoots = append(blockRoots, root)
+		}
+		block.Depth = 1
+		block.Count = len(block.Children)
+		root.Children = append(root.Children, block)
+	}
+
+	for _, root := range blockRoots {
+		treeNode := &Path{
+			ID:       root.ID,
+			Box:      root.Box,
+			Name:     path.Base(root.HPath),
+			Type:     "backlink",
+			NodeType: "NodeDocument",
+			SubType:  root.SubType,
+			Depth:    0,
+			Count:    len(root.Children),
+		}
+		for _, c := range root.Children {
+			if "NodeListItem" == c.Type {
+				tree, _ := loadTreeByBlockID(c.RootID)
+				li := treenode.GetNodeInTree(tree, c.ID)
+				if nil == li || nil == li.FirstChild {
+					// 反链面板拖拽到文档以后可能会出现这种情况 https://github.com/siyuan-note/siyuan/issues/5363
+					continue
+				}
+
+				var first *sql.Block
+				if 3 != li.ListData.Typ {
+					first = sql.GetBlock(li.FirstChild.ID)
+				} else {
+					first = sql.GetBlock(li.FirstChild.Next.ID)
+				}
+				name := first.Content
+				parentPos := 0
+				if "" != keyword {
+					parentPos, name = search.MarkText(name, keyword, 12, Conf.Search.CaseSensitive)
+				}
+				subRoot := &Path{
+					ID:       li.ID,
+					Box:      li.Box,
+					Name:     name,
+					Type:     "backlink",
+					NodeType: li.Type.String(),
+					SubType:  c.SubType,
+					Depth:    1,
+					Count:    1,
+				}
+
+				unfold := true
+				for liFirstBlockSpan := li.FirstChild.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
+					if treenode.IsBlockRef(liFirstBlockSpan) {
+						continue
+					}
+					if "" != strings.TrimSpace(liFirstBlockSpan.Text()) {
+						unfold = false
+						break
+					}
+				}
+				for next := li.FirstChild.Next; nil != next; next = next.Next {
+					subBlock, _ := getBlock(next.ID)
+					if unfold {
+						if ast.NodeList == next.Type {
+							for subLi := next.FirstChild; nil != subLi; subLi = subLi.Next {
+								subLiBlock, _ := getBlock(subLi.ID)
+								var subFirst *sql.Block
+								if 3 != subLi.ListData.Typ {
+									subFirst = sql.GetBlock(subLi.FirstChild.ID)
+								} else {
+									subFirst = sql.GetBlock(subLi.FirstChild.Next.ID)
+								}
+								subPos := 0
+								content := subFirst.Content
+								if "" != keyword {
+									subPos, content = search.MarkText(subFirst.Content, keyword, 12, Conf.Search.CaseSensitive)
+								}
+								if -1 < subPos {
+									parentPos = 0 // 需要显示父级
+								}
+								subLiBlock.Content = content
+								subLiBlock.Depth = 2
+								subRoot.Blocks = append(subRoot.Blocks, subLiBlock)
+							}
+						} else if ast.NodeHeading == next.Type {
+							subBlock.Depth = 2
+							subRoot.Blocks = append(subRoot.Blocks, subBlock)
+							headingChildren := treenode.HeadingChildren(next)
+							var breakSub bool
+							for _, n := range headingChildren {
+								block, _ := getBlock(n.ID)
+								subPos := 0
+								content := block.Content
+								if "" != keyword {
+									subPos, content = search.MarkText(block.Content, keyword, 12, Conf.Search.CaseSensitive)
+								}
+								if -1 < subPos {
+									parentPos = 0
+								}
+								block.Content = content
+								block.Depth = 3
+								subRoot.Blocks = append(subRoot.Blocks, block)
+								if ast.NodeHeading == n.Type {
+									// 跳过子标题下面的块
+									breakSub = true
+									break
+								}
+							}
+							if breakSub {
+								break
+							}
+						} else {
+							if nil == treenode.HeadingParent(next) {
+								subBlock.Depth = 2
+								subRoot.Blocks = append(subRoot.Blocks, subBlock)
+							}
+						}
+					}
+				}
+				if -1 < parentPos {
+					treeNode.Children = append(treeNode.Children, subRoot)
+				}
+			} else if "NodeHeading" == c.Type {
+				tree, _ := loadTreeByBlockID(c.RootID)
+				h := treenode.GetNodeInTree(tree, c.ID)
+				if nil == h {
+					continue
+				}
+
+				name := sql.GetBlock(h.ID).Content
+				parentPos := 0
+				if "" != keyword {
+					parentPos, name = search.MarkText(name, keyword, 12, Conf.Search.CaseSensitive)
+				}
+				subRoot := &Path{
+					ID:       h.ID,
+					Box:      h.Box,
+					Name:     name,
+					Type:     "backlink",
+					NodeType: h.Type.String(),
+					SubType:  c.SubType,
+					Depth:    1,
+					Count:    1,
+				}
+
+				unfold := true
+				for headingFirstSpan := h.FirstChild; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
+					if treenode.IsBlockRef(headingFirstSpan) {
+						continue
+					}
+					if "" != strings.TrimSpace(headingFirstSpan.Text()) {
+						unfold = false
+						break
+					}
+				}
+
+				if unfold {
+					headingChildren := treenode.HeadingChildren(h)
+					for _, headingChild := range headingChildren {
+						if ast.NodeList == headingChild.Type {
+							for subLi := headingChild.FirstChild; nil != subLi; subLi = subLi.Next {
+								subLiBlock, _ := getBlock(subLi.ID)
+								var subFirst *sql.Block
+								if 3 != subLi.ListData.Typ {
+									subFirst = sql.GetBlock(subLi.FirstChild.ID)
+								} else {
+									subFirst = sql.GetBlock(subLi.FirstChild.Next.ID)
+								}
+								subPos := 0
+								content := subFirst.Content
+								if "" != keyword {
+									subPos, content = search.MarkText(content, keyword, 12, Conf.Search.CaseSensitive)
+								}
+								if -1 < subPos {
+									parentPos = 0
+								}
+								subLiBlock.Content = subFirst.Content
+								subLiBlock.Depth = 2
+								subRoot.Blocks = append(subRoot.Blocks, subLiBlock)
+							}
+						} else {
+							subBlock, _ := getBlock(headingChild.ID)
+							subBlock.Depth = 2
+							subRoot.Blocks = append(subRoot.Blocks, subBlock)
+						}
+					}
+				}
+
+				if -1 < parentPos {
+					treeNode.Children = append(treeNode.Children, subRoot)
+				}
+			} else {
+				pos := 0
+				content := c.Content
+				if "" != keyword {
+					pos, content = search.MarkText(content, keyword, 12, Conf.Search.CaseSensitive)
+				}
+				if -1 < pos {
+					treeNode.Blocks = append(treeNode.Blocks, c)
+				}
+			}
+		}
+
+		rootPos := -1
+		var rootContent string
+		if "" != keyword {
+			rootPos, rootContent = search.MarkText(treeNode.Name, keyword, 12, Conf.Search.CaseSensitive)
+			treeNode.Name = rootContent
+		}
+		if 0 < len(treeNode.Children) || 0 < len(treeNode.Blocks) || (-1 < rootPos && "" != keyword) {
+			ret = append(ret, treeNode)
+		}
 	}
 
 	sort.Slice(ret, func(i, j int) bool {

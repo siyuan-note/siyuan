@@ -5,6 +5,9 @@ import {onGet} from "./onGet";
 import {saveScroll} from "../scroll/saveScroll";
 
 export const reloadProtyle = (protyle:IProtyle) => {
+    if (protyle.options.backlinkData) {
+        return;
+    }
     if (window.siyuan.config.editor.displayBookmarkIcon) {
         protyle.wysiwyg.element.classList.add("protyle-wysiwyg--attr");
     } else {

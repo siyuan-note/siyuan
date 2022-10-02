@@ -604,73 +604,56 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const targetElement = editorElement.querySelector(".dragover__bottom") || editorElement.querySelector(".dragover__top") || editorElement.querySelector(".dragover__left") || editorElement.querySelector(".dragover__right");
-        const isBacklink = window.siyuan.dragElement?.getAttribute("data-treetype") === "backlink";
-        if (window.siyuan.dragElement && (event.altKey || event.shiftKey) && isBacklink) {
-            focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
-            const sourceId = window.siyuan.dragElement.getAttribute("data-node-id");
-            if (event.altKey) {
-                fetchPost("/api/block/getRefText", {id: sourceId}, (response) => {
-                    insertHTML(`((${sourceId} '${response.data}'))`, protyle);
-                });
-            } else {
-                insertHTML(protyle.lute.SpinBlockDOM(`{{select * from blocks where id='${sourceId}'}}`), protyle);
-                blockRender(protyle, protyle.wysiwyg.element);
-            }
-        } else if (window.siyuan.dragElement && targetElement && (
+        if (window.siyuan.dragElement && (
             window.siyuan.dragElement.parentElement.classList.contains("protyle-gutters") ||
-            isBacklink ||
             window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem")) {
             // gutter 或反链面板拖拽
-            const sourceId = window.siyuan.dragElement.getAttribute("data-node-id");
-            let sourceElements: Element[] = [];
-            if (isBacklink) {
-                let sourceElement = document.createElement("div");
-                const domHTML = await fetchSyncPost("/api/block/getBlockDOM", {id: sourceId});
-                sourceElement.innerHTML = domHTML.data.dom;
-                sourceElement = sourceElement.firstElementChild as HTMLDivElement;
-                processRender(sourceElement);
-                highlightRender(sourceElement);
-                blockRender(protyle, sourceElement);
-                sourceElements = [sourceElement];
-            } else {
-                const selectedIdsData = window.siyuan.dragElement.getAttribute("data-selected-ids");
-                const selectedIds = selectedIdsData ? selectedIdsData.split(",") : [window.siyuan.dragElement.getAttribute("data-node-id")];
-                selectedIds.forEach(item => {
-                    const selectElement = window.siyuan.dragElement.parentElement.parentElement.querySelector(`.protyle-wysiwyg [data-node-id="${item}"]`);
-                    if (selectElement) {
-                        sourceElements.push(selectElement);
-                    }
-                });
-            }
+            const sourceElements: Element[] = [];
+            const selectedIdsData = window.siyuan.dragElement.getAttribute("data-selected-ids");
+            const selectedIds = selectedIdsData ? selectedIdsData.split(",") : [window.siyuan.dragElement.getAttribute("data-node-id")];
+            selectedIds.forEach(item => {
+                const selectElement = window.siyuan.dragElement.parentElement.parentElement.querySelector(`.protyle-wysiwyg [data-node-id="${item}"]`);
+                if (selectElement) {
+                    sourceElements.push(selectElement);
+                }
+            });
             sourceElements.forEach(item => {
                 item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
             });
-            const targetClass = targetElement.className.split(" ");
-            targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right", "protyle-wysiwyg--select");
-            if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
-                targetElement.parentElement.getAttribute("data-sb-layout") === "col") {
-                if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
-                    dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"));
-                } else {
-                    dragSb(protyle, sourceElements, targetElement, targetClass.includes("dragover__bottom"), "row");
+            if (event.altKey) {
+                focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
+                let html = ''
+                for (let i = 0; i < selectedIds.length; i++) {
+                    const response = await fetchSyncPost("/api/block/getRefText", {id: selectedIds[i]});
+                    html += `((${selectedIds[i]} '${response.data}')) `
                 }
-            } else {
-                if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
-                    dragSb(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"), "col");
+                insertHTML(html, protyle);
+            } else if (event.shiftKey) {
+                focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
+                let html = ''
+                selectedIds.forEach(item => {
+                    html += `{{select * from blocks where id='${item}'}}\n`
+                })
+                insertHTML(protyle.lute.SpinBlockDOM(html), protyle);
+                blockRender(protyle, protyle.wysiwyg.element);
+            } else if (targetElement) {
+                const targetClass = targetElement.className.split(" ");
+                targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right", "protyle-wysiwyg--select");
+                if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
+                    targetElement.parentElement.getAttribute("data-sb-layout") === "col") {
+                    if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
+                        dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"));
+                    } else {
+                        dragSb(protyle, sourceElements, targetElement, targetClass.includes("dragover__bottom"), "row");
+                    }
                 } else {
-                    dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__bottom"));
+                    if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
+                        dragSb(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"), "col");
+                    } else {
+                        dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__bottom"));
+                    }
                 }
             }
-            /// #if !MOBILE
-            if (isBacklink) {
-                setTimeout(() => {
-                    // 等待 drag transaction
-                    getAllModels().backlink.forEach(item => {
-                        item.refresh();
-                    });
-                }, 200);
-            }
-            /// #endif
         } else if (window.siyuan.dragElement && window.siyuan.dragElement.getAttribute("data-type") === "navigation-file" && targetElement) {
             // 文件树拖拽
             fetchPost("/api/filetree/doc2Heading", {
@@ -729,7 +712,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!window.siyuan.dragElement) {
             return;
         }
-        if ((event.shiftKey || event.altKey) && window.siyuan.dragElement.getAttribute("data-treetype") === "backlink") {
+        if (event.shiftKey || event.altKey) {
             const targetElement = hasClosestBlock(event.target);
             if (targetElement) {
                 targetElement.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
@@ -777,9 +760,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if (window.siyuan.dragElement.parentElement.classList.contains("protyle-gutters") ||
             // 列表项之前的点
-            window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem" ||
-            // 反向链接
-            window.siyuan.dragElement.getAttribute("data-treetype") === "backlink") {
+            window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem") {
             // gutter 文档内拖拽限制
             // 排除自己及子孙
             const selectedIdsData = window.siyuan.dragElement.getAttribute("data-selected-ids");

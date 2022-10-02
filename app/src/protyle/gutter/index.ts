@@ -55,7 +55,6 @@ export class Gutter {
                 event.dataTransfer.setDragImage(protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`), 0, 0);
             }
             event.target.style.opacity = "0.1";
-            event.dataTransfer.effectAllowed = "move";
             window.siyuan.dragElement = event.target;
             window.siyuan.dragElement.setAttribute("data-selected-ids", selectIds.toString());
         });

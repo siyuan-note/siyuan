@@ -236,94 +236,6 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 	return
 }
 
-func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set) {
-	// 为了减少查询，组装好 IDs 后一次查出
-	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
-	var queryBlockIDs []string
-	for _, ref := range refs {
-		defSQLBlockIDs[ref.DefBlockID] = true
-		refSQLBlockIDs[ref.BlockID] = true
-		queryBlockIDs = append(queryBlockIDs, ref.DefBlockID)
-		queryBlockIDs = append(queryBlockIDs, ref.BlockID)
-	}
-	querySQLBlocks := sql.GetBlocks(queryBlockIDs)
-	defSQLBlocksCache := map[string]*sql.Block{}
-	for _, defSQLBlock := range querySQLBlocks {
-		if nil != defSQLBlock && defSQLBlockIDs[defSQLBlock.ID] {
-			defSQLBlocksCache[defSQLBlock.ID] = defSQLBlock
-		}
-	}
-	refSQLBlocksCache := map[string]*sql.Block{}
-	for _, refSQLBlock := range querySQLBlocks {
-		if nil != refSQLBlock && refSQLBlockIDs[refSQLBlock.ID] {
-			refSQLBlocksCache[refSQLBlock.ID] = refSQLBlock
-		}
-	}
-
-	var links []*Block
-	excludeBacklinkIDs = hashset.New()
-	for _, ref := range refs {
-		defSQLBlock := defSQLBlocksCache[(ref.DefBlockID)]
-		if nil == defSQLBlock {
-			continue
-		}
-
-		refSQLBlock := refSQLBlocksCache[ref.BlockID]
-		if nil == refSQLBlock {
-			continue
-		}
-		refBlock := fromSQLBlock(refSQLBlock, "", 12)
-		if defRootID == refBlock.RootID { // 排除当前文档内引用提及
-			excludeBacklinkIDs.Add(refBlock.RootID, refBlock.ID)
-		}
-		defBlock := fromSQLBlock(defSQLBlock, "", 12)
-		if defBlock.RootID == defRootID { // 当前文档的定义块
-			links = append(links, defBlock)
-			if ref.DefBlockID == defBlock.ID {
-				defBlock.Refs = append(defBlock.Refs, refBlock)
-			}
-		}
-	}
-
-	for _, link := range links {
-		for _, ref := range link.Refs {
-			excludeBacklinkIDs.Add(ref.RootID, ref.ID)
-		}
-		refsCount += len(link.Refs)
-	}
-
-	processedParagraphs := hashset.New()
-	var paragraphParentIDs []string
-	for _, link := range links {
-		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type {
-				paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
-			}
-		}
-	}
-	paragraphParents := sql.GetBlocks(paragraphParentIDs)
-	for _, p := range paragraphParents {
-		if "i" == p.Type || "h" == p.Type {
-			ret = append(ret, fromSQLBlock(p, "", 12))
-			processedParagraphs.Add(p.ID)
-		}
-	}
-	for _, link := range links {
-		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type {
-				if processedParagraphs.Contains(ref.ParentID) {
-					continue
-				}
-			}
-
-			ref.DefID = link.ID
-			ref.DefPath = link.Path
-			ret = append(ret, ref)
-		}
-	}
-	return
-}
-
 func buildBacklink(refID string, refTree *parse.Tree, luteEngine *lute.Lute) (ret *Backlink) {
 	n := treenode.GetNodeInTree(refTree, refID)
 	if nil == n {
@@ -409,6 +321,94 @@ func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID
 		l.Blocks = nil
 	}
 	mentionsCount = len(backmentions)
+	return
+}
+
+func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set) {
+	// 为了减少查询，组装好 IDs 后一次查出
+	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
+	var queryBlockIDs []string
+	for _, ref := range refs {
+		defSQLBlockIDs[ref.DefBlockID] = true
+		refSQLBlockIDs[ref.BlockID] = true
+		queryBlockIDs = append(queryBlockIDs, ref.DefBlockID)
+		queryBlockIDs = append(queryBlockIDs, ref.BlockID)
+	}
+	querySQLBlocks := sql.GetBlocks(queryBlockIDs)
+	defSQLBlocksCache := map[string]*sql.Block{}
+	for _, defSQLBlock := range querySQLBlocks {
+		if nil != defSQLBlock && defSQLBlockIDs[defSQLBlock.ID] {
+			defSQLBlocksCache[defSQLBlock.ID] = defSQLBlock
+		}
+	}
+	refSQLBlocksCache := map[string]*sql.Block{}
+	for _, refSQLBlock := range querySQLBlocks {
+		if nil != refSQLBlock && refSQLBlockIDs[refSQLBlock.ID] {
+			refSQLBlocksCache[refSQLBlock.ID] = refSQLBlock
+		}
+	}
+
+	var links []*Block
+	excludeBacklinkIDs = hashset.New()
+	for _, ref := range refs {
+		defSQLBlock := defSQLBlocksCache[(ref.DefBlockID)]
+		if nil == defSQLBlock {
+			continue
+		}
+
+		refSQLBlock := refSQLBlocksCache[ref.BlockID]
+		if nil == refSQLBlock {
+			continue
+		}
+		refBlock := fromSQLBlock(refSQLBlock, "", 12)
+		if defRootID == refBlock.RootID { // 排除当前文档内引用提及
+			excludeBacklinkIDs.Add(refBlock.RootID, refBlock.ID)
+		}
+		defBlock := fromSQLBlock(defSQLBlock, "", 12)
+		if defBlock.RootID == defRootID { // 当前文档的定义块
+			links = append(links, defBlock)
+			if ref.DefBlockID == defBlock.ID {
+				defBlock.Refs = append(defBlock.Refs, refBlock)
+			}
+		}
+	}
+
+	for _, link := range links {
+		for _, ref := range link.Refs {
+			excludeBacklinkIDs.Add(ref.RootID, ref.ID)
+		}
+		refsCount += len(link.Refs)
+	}
+
+	processedParagraphs := hashset.New()
+	var paragraphParentIDs []string
+	for _, link := range links {
+		for _, ref := range link.Refs {
+			if "NodeParagraph" == ref.Type {
+				paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
+			}
+		}
+	}
+	paragraphParents := sql.GetBlocks(paragraphParentIDs)
+	for _, p := range paragraphParents {
+		if "i" == p.Type || "h" == p.Type {
+			ret = append(ret, fromSQLBlock(p, "", 12))
+			processedParagraphs.Add(p.ID)
+		}
+	}
+	for _, link := range links {
+		for _, ref := range link.Refs {
+			if "NodeParagraph" == ref.Type {
+				if processedParagraphs.Contains(ref.ParentID) {
+					continue
+				}
+			}
+
+			ref.DefID = link.ID
+			ref.DefPath = link.Path
+			ret = append(ret, ref)
+		}
+	}
 	return
 }
 

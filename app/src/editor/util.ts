@@ -441,9 +441,8 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             return;
         }
         item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.add("fn__rotate");
-        fetchPost("/api/ref/getBacklink", {
+        fetchPost("/api/ref/getBacklink2", {
             id: blockId || "",
-            beforeLen: 12,
             k: item.inputsElement[0].value,
             mk: item.inputsElement[1].value,
         }, response => {

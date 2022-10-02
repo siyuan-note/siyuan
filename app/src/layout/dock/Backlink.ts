@@ -379,10 +379,9 @@ export class Backlink extends Model {
             return;
         }
         element.classList.add("fn__rotate");
-        fetchPost("/api/ref/getBacklink", {
+        fetchPost("/api/ref/getBacklink2", {
             k: this.inputsElement[0].value,
             mk: this.inputsElement[1].value,
-            beforeLen: 12,
             id: this.blockId,
         }, response => {
             this.render(response.data);

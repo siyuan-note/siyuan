@@ -22,8 +22,10 @@ import (
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // Block 描述了内容块。
@@ -85,6 +87,64 @@ func RecentUpdatedBlocks() (ret []*Block) {
 	}
 
 	ret = fromSQLBlocks(&sqlBlocks, "", 0)
+	return
+}
+
+func SwapBlockRef(refID, defID string) (err error) {
+	refTree, err := loadTreeByBlockID(refID)
+	if nil != err {
+		return
+	}
+	refNode := treenode.GetNodeInTree(refTree, refID)
+	if nil == refNode {
+		return
+	}
+	refParentType := refNode.Parent.Type
+	defTree, err := loadTreeByBlockID(defID)
+	if nil != err {
+		return
+	}
+	defNode := treenode.GetNodeInTree(defTree, defID)
+	if nil == defNode {
+		return
+	}
+
+	refPivot := parse.NewParagraph()
+	refNode.InsertBefore(refPivot)
+
+	if ast.NodeListItem == defNode.Type {
+		if ast.NodeListItem != refParentType {
+			newID := ast.NewNodeID()
+			li := &ast.Node{ID: newID, Type: ast.NodeListItem, ListData: &ast.ListData{Typ: defNode.Parent.ListData.Typ}}
+			li.SetIALAttr("id", newID)
+			li.SetIALAttr("updated", newID[:14])
+			li.AppendChild(refNode)
+			defNode.InsertAfter(li)
+
+			newID = ast.NewNodeID()
+			list := &ast.Node{ID: newID, Type: ast.NodeList, ListData: &ast.ListData{Typ: defNode.Parent.ListData.Typ}}
+			list.SetIALAttr("id", newID)
+			list.SetIALAttr("updated", newID[:14])
+			list.AppendChild(defNode)
+			refPivot.InsertAfter(list)
+		} else {
+			defNode.InsertAfter(refNode)
+			refPivot.InsertAfter(defNode)
+		}
+	} else {
+		defNode.InsertAfter(refNode)
+		refPivot.InsertAfter(defNode)
+	}
+	refPivot.Unlink()
+
+	if err = writeJSONQueue(refTree); nil != err {
+		return
+	}
+	if err = writeJSONQueue(defTree); nil != err {
+		return
+	}
+	WaitForWritingFiles()
+	util.ReloadUI()
 	return
 }
 

@@ -42,7 +42,8 @@ func swapBlockRef(c *gin.Context) {
 
 	refID := arg["refID"].(string)
 	defID := arg["defID"].(string)
-	err := model.SwapBlockRef(refID, defID)
+	includeChildren := arg["includeChildren"].(bool)
+	err := model.SwapBlockRef(refID, defID, includeChildren)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

@@ -90,7 +90,7 @@ func RecentUpdatedBlocks() (ret []*Block) {
 	return
 }
 
-func SwapBlockRef(refID, defID string) (err error) {
+func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	refTree, err := loadTreeByBlockID(refID)
 	if nil != err {
 		return
@@ -99,7 +99,9 @@ func SwapBlockRef(refID, defID string) (err error) {
 	if nil == refNode {
 		return
 	}
-	refParentType := refNode.Parent.Type
+	if ast.NodeListItem == refNode.Parent.Type {
+		refNode = refNode.Parent
+	}
 	defTree, err := loadTreeByBlockID(defID)
 	if nil != err {
 		return
@@ -108,18 +110,44 @@ func SwapBlockRef(refID, defID string) (err error) {
 	if nil == defNode {
 		return
 	}
+	var defNodeChildren []*ast.Node
+	if ast.NodeListItem == defNode.Parent.Type {
+		defNode = defNode.Parent
+	} else if ast.NodeHeading == defNode.Type && includeChildren {
+		defNodeChildren = treenode.HeadingChildren(defNode)
+	}
+	if ast.NodeListItem == defNode.Type {
+		for c := defNode.FirstChild; nil != c; c = c.Next {
+			if ast.NodeList == c.Type {
+				defNodeChildren = append(defNodeChildren, c)
+			}
+		}
+	}
 
 	refPivot := parse.NewParagraph()
 	refNode.InsertBefore(refPivot)
 
 	if ast.NodeListItem == defNode.Type {
-		if ast.NodeListItem != refParentType {
+		if ast.NodeListItem == refNode.Type {
+			defNode.InsertAfter(refNode)
+			if !includeChildren {
+				for _, c := range defNodeChildren {
+					refNode.AppendChild(c)
+				}
+			}
+			refPivot.InsertAfter(defNode)
+		} else {
 			newID := ast.NewNodeID()
 			li := &ast.Node{ID: newID, Type: ast.NodeListItem, ListData: &ast.ListData{Typ: defNode.Parent.ListData.Typ}}
 			li.SetIALAttr("id", newID)
 			li.SetIALAttr("updated", newID[:14])
 			li.AppendChild(refNode)
 			defNode.InsertAfter(li)
+			if !includeChildren {
+				for _, c := range defNodeChildren {
+					li.AppendChild(c)
+				}
+			}
 
 			newID = ast.NewNodeID()
 			list := &ast.Node{ID: newID, Type: ast.NodeList, ListData: &ast.ListData{Typ: defNode.Parent.ListData.Typ}}
@@ -127,19 +155,37 @@ func SwapBlockRef(refID, defID string) (err error) {
 			list.SetIALAttr("updated", newID[:14])
 			list.AppendChild(defNode)
 			refPivot.InsertAfter(list)
+		}
+	} else {
+		if ast.NodeListItem == refNode.Type {
+			newID := ast.NewNodeID()
+			list := &ast.Node{ID: newID, Type: ast.NodeList, ListData: &ast.ListData{Typ: refNode.Parent.ListData.Typ}}
+			list.SetIALAttr("id", newID)
+			list.SetIALAttr("updated", newID[:14])
+			list.AppendChild(refNode)
+			defNode.InsertAfter(list)
+
+			newID = ast.NewNodeID()
+			li := &ast.Node{ID: newID, Type: ast.NodeListItem, ListData: &ast.ListData{Typ: refNode.Parent.ListData.Typ}}
+			li.SetIALAttr("id", newID)
+			li.SetIALAttr("updated", newID[:14])
+			li.AppendChild(defNode)
+			refPivot.InsertAfter(li)
 		} else {
 			defNode.InsertAfter(refNode)
 			refPivot.InsertAfter(defNode)
+			for i := len(defNodeChildren) - 1; -1 < i; i-- {
+				defNode.InsertAfter(defNodeChildren[i])
+			}
 		}
-	} else {
-		defNode.InsertAfter(refNode)
-		refPivot.InsertAfter(defNode)
 	}
 	refPivot.Unlink()
 
+	treenode.ReindexBlockTree(refTree)
 	if err = writeJSONQueue(refTree); nil != err {
 		return
 	}
+	treenode.ReindexBlockTree(defTree)
 	if err = writeJSONQueue(defTree); nil != err {
 		return
 	}

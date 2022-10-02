@@ -111,7 +111,7 @@ interface ISiyuan {
     notebooks?: INotebook[],
     emojis?: IEmoji[],
     backStack?: IBackStack[],
-    mobileEditor?: import("../protyle").default, // mobile
+    mobileEditor?: import("../protyle").Protyle, // mobile
     user?: {
         userId: string
         userName: string

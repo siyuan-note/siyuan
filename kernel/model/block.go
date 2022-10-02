@@ -113,6 +113,11 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	var defNodeChildren []*ast.Node
 	if ast.NodeListItem == defNode.Parent.Type {
 		defNode = defNode.Parent
+		for c := defNode.FirstChild; nil != c; c = c.Next {
+			if ast.NodeList == c.Type {
+				defNodeChildren = append(defNodeChildren, c)
+			}
+		}
 	} else if ast.NodeHeading == defNode.Type && includeChildren {
 		defNodeChildren = treenode.HeadingChildren(defNode)
 	}
@@ -131,6 +136,11 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 			li.SetIALAttr("updated", newID[:14])
 			li.AppendChild(refNode)
 			defNode.InsertAfter(li)
+			if !includeChildren {
+				for _, c := range defNodeChildren {
+					li.AppendChild(c)
+				}
+			}
 
 			newID = ast.NewNodeID()
 			list := &ast.Node{ID: newID, Type: ast.NodeList, ListData: &ast.ListData{Typ: defNode.Parent.ListData.Typ}}

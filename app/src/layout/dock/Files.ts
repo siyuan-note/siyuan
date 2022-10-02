@@ -772,12 +772,7 @@ export class Files extends Model {
             liItem.classList.remove("b3-list-item--focus");
         });
         target.classList.add("b3-list-item--focus");
-        const titleHeight = this.actionsElement.clientHeight;
-        if (target.offsetTop - titleHeight < this.element.scrollTop) {
-            this.element.scrollTop = target.offsetTop - titleHeight;
-        } else if (target.offsetTop - this.element.clientHeight - titleHeight + target.clientHeight > this.element.scrollTop) {
-            this.element.scrollTop = target.offsetTop - this.element.clientHeight - titleHeight + target.clientHeight;
-        }
+        this.element.scrollTop = target.offsetTop - this.element.clientHeight / 2 - this.actionsElement.clientHeight;
     }
 
     public getLeaf(liElement: Element, notebookId: string) {

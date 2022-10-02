@@ -73,7 +73,6 @@ func getBacklinkDoc(c *gin.Context) {
 	}
 }
 
-
 func getBacklink2(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -118,8 +117,11 @@ func getBacklink(c *gin.Context) {
 	id := arg["id"].(string)
 	keyword := arg["k"].(string)
 	mentionKeyword := arg["mk"].(string)
-	beforeLen := arg["beforeLen"].(float64)
-	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.GetBacklink(id, keyword, mentionKeyword, int(beforeLen))
+	beforeLen := 12
+	if nil != arg["beforeLen"] {
+		beforeLen = int(arg["beforeLen"].(float64))
+	}
+	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.GetBacklink(id, keyword, mentionKeyword, beforeLen)
 	ret.Data = map[string]interface{}{
 		"backlinks":     backlinks,
 		"linkRefsCount": linkRefsCount,

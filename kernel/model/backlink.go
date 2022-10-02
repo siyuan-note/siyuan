@@ -297,7 +297,7 @@ func buildBacklink(refID string, refTree *parse.Tree, luteEngine *lute.Lute) (re
 	return
 }
 
-func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
+func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
 	keyword = strings.TrimSpace(keyword)
 	mentionKeyword = strings.TrimSpace(mentionKeyword)
 	backlinks, backmentions = []*Path{}, []*Path{}

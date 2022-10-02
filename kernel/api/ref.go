@@ -90,7 +90,7 @@ func getBacklink(c *gin.Context) {
 	keyword := arg["k"].(string)
 	mentionKeyword := arg["mk"].(string)
 	beforeLen := arg["beforeLen"].(float64)
-	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.BuildTreeBacklink(id, keyword, mentionKeyword, int(beforeLen))
+	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.GetBacklink(id, keyword, mentionKeyword, int(beforeLen))
 	ret.Data = map[string]interface{}{
 		"backlinks":     backlinks,
 		"linkRefsCount": linkRefsCount,

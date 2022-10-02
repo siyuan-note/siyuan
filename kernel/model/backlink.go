@@ -164,7 +164,7 @@ type Backlink struct {
 	Expand     bool         `json:"expand"`
 }
 
-func GetBackmentionDoc(defID, keyword string) (ret []*Backlink) {
+func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 	ret = []*Backlink{}
 	beforeLen := 12
 	sqlBlock := sql.GetBlock(defID)
@@ -177,9 +177,15 @@ func GetBackmentionDoc(defID, keyword string) (ret []*Backlink) {
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
 	linkRefs, excludeBacklinkIDs := buildLinkRefs(rootID, refs)
-	mentions := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
+	tmpMentions := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
 	luteEngine := NewLute()
 	treeCache := map[string]*parse.Tree{}
+	var mentions []*Block
+	for _, mention := range tmpMentions {
+		if mention.RootID == refTreeID {
+			mentions = append(mentions, mention)
+		}
+	}
 	for _, mention := range mentions {
 		refTree := treeCache[mention.RootID]
 		if nil == refTree {

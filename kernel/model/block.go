@@ -113,13 +113,15 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	var defNodeChildren []*ast.Node
 	if ast.NodeListItem == defNode.Parent.Type {
 		defNode = defNode.Parent
+	} else if ast.NodeHeading == defNode.Type && includeChildren {
+		defNodeChildren = treenode.HeadingChildren(defNode)
+	}
+	if ast.NodeListItem == defNode.Type {
 		for c := defNode.FirstChild; nil != c; c = c.Next {
 			if ast.NodeList == c.Type {
 				defNodeChildren = append(defNodeChildren, c)
 			}
 		}
-	} else if ast.NodeHeading == defNode.Type && includeChildren {
-		defNodeChildren = treenode.HeadingChildren(defNode)
 	}
 
 	refPivot := parse.NewParagraph()
@@ -128,6 +130,11 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	if ast.NodeListItem == defNode.Type {
 		if ast.NodeListItem == refNode.Type {
 			defNode.InsertAfter(refNode)
+			if !includeChildren {
+				for _, c := range defNodeChildren {
+					refNode.AppendChild(c)
+				}
+			}
 			refPivot.InsertAfter(defNode)
 		} else {
 			newID := ast.NewNodeID()

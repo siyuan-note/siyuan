@@ -158,7 +158,7 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 			defNode.InsertAfter(refNode)
 			refPivot.InsertAfter(defNode)
 			for i := len(defNodeChildren) - 1; -1 < i; i-- {
-				refPivot.InsertAfter(defNodeChildren[i])
+				defNode.InsertAfter(defNodeChildren[i])
 			}
 		}
 	}

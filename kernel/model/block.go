@@ -96,12 +96,18 @@ func SwapBlockRef(refID, defID string) (err error) {
 		return
 	}
 	refNode := treenode.GetNodeInTree(refTree, refID)
+	if nil == refNode {
+		return
+	}
 	refParentType := refNode.Parent.Type
 	defTree, err := loadTreeByBlockID(defID)
 	if nil != err {
 		return
 	}
 	defNode := treenode.GetNodeInTree(defTree, defID)
+	if nil == defNode {
+		return
+	}
 
 	refPivot := parse.NewParagraph()
 	refNode.InsertBefore(refPivot)

@@ -397,10 +397,16 @@ func BuildTreeBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
 	linkRefs, excludeBacklinkIDs := buildLinkRefs(id, refs)
-	backlinks = toSubTree(linkRefs, keyword)
+	backlinks = toFlatTree(linkRefs, 0, "backlink")
+	for _, l := range backlinks {
+		l.Blocks = nil
+	}
 
 	mentionRefs := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen)
 	backmentions = toFlatTree(mentionRefs, 0, "backlink")
+	for _, l := range backmentions {
+		l.Blocks = nil
+	}
 	mentionsCount = len(backmentions)
 	return
 }

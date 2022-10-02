@@ -2,7 +2,7 @@ import {escapeHtml} from "../util/escape";
 import {getIconByType} from "../editor/getIcon";
 import {getDisplayName, getNotebookName, pathPosix} from "../util/pathName";
 import {Constants} from "../constants";
-import Protyle from "../protyle";
+import {Protyle} from "../protyle";
 import {Dialog} from "../dialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {onGet} from "../protyle/util/onGet";

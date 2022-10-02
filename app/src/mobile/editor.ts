@@ -1,4 +1,4 @@
-import Protyle from "../protyle";
+import {Protyle} from "../protyle";
 import {setEditor} from "./util/setEmpty";
 import {closePanel} from "./util/closePanel";
 import {Constants} from "../constants";
@@ -21,7 +21,7 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) =
             setEditMode(window.siyuan.mobileEditor.protyle, "wysiwyg");
         }
         let blockElement;
-        Array.from(window.siyuan.mobileEditor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
+        Array.from(window.siyuan.mobileEditor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find((item: HTMLElement) => {
             if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
                 blockElement = item;
                 return true;

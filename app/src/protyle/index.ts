@@ -27,7 +27,7 @@ import {onGet} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
 
-class Protyle {
+export class Protyle {
 
     public readonly version: string;
     public protyle: IProtyle;
@@ -95,7 +95,7 @@ class Protyle {
                         case "heading2doc":
                         case "li2doc":
                             if (this.protyle.block.rootID === data.data.srcRootBlockID) {
-                                if (this.protyle.block.showAll && data.cmd === "heading2doc") {
+                                if (this.protyle.block.showAll && data.cmd === "heading2doc" && !this.protyle.options.backlinkData) {
                                     fetchPost("/api/filetree/getDoc", {
                                         id: this.protyle.block.rootID,
                                         size: Constants.SIZE_GET,
@@ -245,5 +245,3 @@ class Protyle {
         destroy(this.protyle);
     }
 }
-
-export default Protyle;

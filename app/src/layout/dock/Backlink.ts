@@ -2,16 +2,12 @@ import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {getDisplayName} from "../../util/pathName";
 import {Tree} from "../../util/Tree";
-import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {getDockByType, setPanelFocus} from "../util";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
-import {getAllModels} from "../getAll";
-import {onGet} from "../../protyle/util/onGet";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
-import {MenuItem} from "../../menus/Menu";
-import Protyle from "../../protyle";
+import {Protyle} from "../../protyle";
 
 export class Backlink extends Model {
     public element: HTMLElement;
@@ -306,6 +302,8 @@ export class Backlink extends Model {
             }, (response) => {
                 const editorElement = document.createElement("div");
                 editorElement.style.minHeight = "auto";
+                editorElement.setAttribute("data-defid", this.blockId)
+                editorElement.setAttribute("data-ismention", isMention? "true" : "false")
                 liElement.after(editorElement);
                 const editor = new Protyle(editorElement, {
                     blockId: "",

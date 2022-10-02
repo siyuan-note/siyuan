@@ -6,7 +6,7 @@ import {escapeHtml} from "./escape";
 import {isMobile} from "./functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {renderAssetsPreview} from "../asset/renderAssets";
-import Protyle from "../protyle";
+import {Protyle} from "../protyle";
 import {onGet} from "../protyle/util/onGet";
 
 let historyEditor: Protyle;

@@ -446,7 +446,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // ctrl+home 光标移动到顶
         if (!event.altKey && !event.shiftKey && isCtrl(event) && event.key === "Home") {
             if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0" ||
-                protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true") {
+                protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||
+                protyle.options.backlinkData) {
                 focusBlock(protyle.wysiwyg.element.firstElementChild);
                 protyle.contentElement.scrollTop = 0;
                 protyle.scroll.lastScrollTop = 1;

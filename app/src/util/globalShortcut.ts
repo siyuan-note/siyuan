@@ -771,7 +771,7 @@ const editKeydown = (event: KeyboardEvent) => {
         event.stopPropagation();
         return true;
     }
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.wysiwyg.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.wysiwyg.custom, event) && !protyle.options.backlinkData) {
         setEditMode(protyle, "wysiwyg");
         protyle.scroll.lastScrollTop = 0;
         fetchPost("/api/filetree/getDoc", {

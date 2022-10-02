@@ -1,5 +1,5 @@
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import Protyle from "../protyle";
+import {Protyle} from "../protyle";
 import {genUUID} from "../util/genID";
 import {setPadding} from "../protyle/ui/initUI";
 import {setPosition} from "../util/setPosition";

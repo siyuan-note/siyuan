@@ -11,7 +11,7 @@ import {Graph} from "./Graph";
 import {Model} from "../Model";
 import {getDockByType, resizeTabs, setPanelFocus} from "../util";
 import {Inbox} from "./Inbox";
-import Protyle from "../../protyle";
+import {Protyle} from "../../protyle";
 import {Backlink} from "./Backlink";
 
 export class Dock {

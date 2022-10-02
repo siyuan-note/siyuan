@@ -401,7 +401,7 @@ interface IOptions {
     };
 
     /** 编辑器异步渲染完成后的回调方法 */
-    after?(protyle: import("../protyle/index").default): void;
+    after?(protyle: import("../protyle").Protyle): void;
 }
 
 interface IProtyle {

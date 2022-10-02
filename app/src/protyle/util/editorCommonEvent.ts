@@ -654,7 +654,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                 }
             }
-        } else if (window.siyuan.dragElement && window.siyuan.dragElement.getAttribute("data-type") === "navigation-file" && targetElement) {
+        } else if (window.siyuan.dragElement && window.siyuan.dragElement.getAttribute("data-type") === "navigation-file"
+            && targetElement && !protyle.options.backlinkData) {
             // 文件树拖拽
             fetchPost("/api/filetree/doc2Heading", {
                 srcID: window.siyuan.dragElement.getAttribute("data-node-id"),

@@ -1,6 +1,6 @@
 import {Model} from "../layout/Model";
 import {Tab} from "../layout/Tab";
-import Protyle from "../protyle";
+import {Protyle} from "../protyle";
 import {Constants} from "../constants";
 import {getIconByType} from "../editor/getIcon";
 import {getDisplayName, getNotebookName} from "../util/pathName";

@@ -297,7 +297,7 @@ func buildBacklink(refID string, refTree *parse.Tree, luteEngine *lute.Lute) (re
 	return
 }
 
-func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
+func GetBacklink2(id, keyword, mentionKeyword string) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
 	keyword = strings.TrimSpace(keyword)
 	mentionKeyword = strings.TrimSpace(mentionKeyword)
 	backlinks, backmentions = []*Path{}, []*Path{}
@@ -323,7 +323,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID strin
 		backlinks = append(backlinks, l)
 	}
 
-	mentionRefs := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen)
+	mentionRefs := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12)
 	tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink")
 	for _, l := range tmpBackmentions {
 		l.Blocks = nil
@@ -335,6 +335,119 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID strin
 		backmentions = append(backmentions, l)
 	}
 	mentionsCount = len(backmentions)
+	return
+}
+
+func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
+	linkPaths = []*Path{}
+	mentionPaths = []*Path{}
+
+	sqlBlock := sql.GetBlock(id)
+	if nil == sqlBlock {
+		return
+	}
+	rootID := sqlBlock.RootID
+	boxID = sqlBlock.Box
+
+	var links []*Block
+	refs := sql.QueryRefsByDefID(id, true)
+	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
+
+	// 为了减少查询，组装好 IDs 后一次查出
+	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
+	var queryBlockIDs []string
+	for _, ref := range refs {
+		defSQLBlockIDs[ref.DefBlockID] = true
+		refSQLBlockIDs[ref.BlockID] = true
+		queryBlockIDs = append(queryBlockIDs, ref.DefBlockID)
+		queryBlockIDs = append(queryBlockIDs, ref.BlockID)
+	}
+	querySQLBlocks := sql.GetBlocks(queryBlockIDs)
+	defSQLBlocksCache := map[string]*sql.Block{}
+	for _, defSQLBlock := range querySQLBlocks {
+		if nil != defSQLBlock && defSQLBlockIDs[defSQLBlock.ID] {
+			defSQLBlocksCache[defSQLBlock.ID] = defSQLBlock
+		}
+	}
+	refSQLBlocksCache := map[string]*sql.Block{}
+	for _, refSQLBlock := range querySQLBlocks {
+		if nil != refSQLBlock && refSQLBlockIDs[refSQLBlock.ID] {
+			refSQLBlocksCache[refSQLBlock.ID] = refSQLBlock
+		}
+	}
+
+	excludeBacklinkIDs := hashset.New()
+	for _, ref := range refs {
+		defSQLBlock := defSQLBlocksCache[(ref.DefBlockID)]
+		if nil == defSQLBlock {
+			continue
+		}
+
+		refSQLBlock := refSQLBlocksCache[ref.BlockID]
+		if nil == refSQLBlock {
+			continue
+		}
+		refBlock := fromSQLBlock(refSQLBlock, "", beforeLen)
+		if rootID == refBlock.RootID { // 排除当前文档内引用提及
+			excludeBacklinkIDs.Add(refBlock.RootID, refBlock.ID)
+		}
+		defBlock := fromSQLBlock(defSQLBlock, "", beforeLen)
+		if defBlock.RootID == rootID { // 当前文档的定义块
+			links = append(links, defBlock)
+			if ref.DefBlockID == defBlock.ID {
+				defBlock.Refs = append(defBlock.Refs, refBlock)
+			}
+		}
+	}
+
+	for _, link := range links {
+		for _, ref := range link.Refs {
+			excludeBacklinkIDs.Add(ref.RootID, ref.ID)
+		}
+		linkRefsCount += len(link.Refs)
+	}
+
+	var linkRefs []*Block
+	processedParagraphs := hashset.New()
+	var paragraphParentIDs []string
+	for _, link := range links {
+		for _, ref := range link.Refs {
+			if "NodeParagraph" == ref.Type {
+				paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
+			}
+		}
+	}
+	paragraphParents := sql.GetBlocks(paragraphParentIDs)
+	for _, p := range paragraphParents {
+		if "i" == p.Type || "h" == p.Type {
+			linkRefs = append(linkRefs, fromSQLBlock(p, keyword, beforeLen))
+			processedParagraphs.Add(p.ID)
+		}
+	}
+	for _, link := range links {
+		for _, ref := range link.Refs {
+			if "NodeParagraph" == ref.Type {
+				if processedParagraphs.Contains(ref.ParentID) {
+					continue
+				}
+			}
+
+			ref.DefID = link.ID
+			ref.DefPath = link.Path
+
+			content := ref.Content
+			if "" != keyword {
+				_, content = search.MarkText(content, keyword, beforeLen, Conf.Search.CaseSensitive)
+				ref.Content = content
+			}
+			linkRefs = append(linkRefs, ref)
+		}
+	}
+	linkPaths = toSubTree(linkRefs, keyword)
+
+	mentions := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen)
+	mentionsCount = len(mentions)
+	mentionPaths = toFlatTree(mentions, 0, "backlink")
 	return
 }
 

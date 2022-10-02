@@ -90,7 +90,7 @@ func RecentUpdatedBlocks() (ret []*Block) {
 	return
 }
 
-func SwapBlockRef(refID, defID string) (err error) {
+func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	refTree, err := loadTreeByBlockID(refID)
 	if nil != err {
 		return
@@ -112,6 +112,8 @@ func SwapBlockRef(refID, defID string) (err error) {
 	}
 	if ast.NodeListItem == defNode.Parent.Type {
 		defNode = defNode.Parent
+	} else if ast.NodeHeading == defNode.Type && includeChildren {
+
 	}
 
 	refPivot := parse.NewParagraph()
@@ -142,14 +144,14 @@ func SwapBlockRef(refID, defID string) (err error) {
 			li := &ast.Node{ID: newID, Type: ast.NodeListItem, ListData: &ast.ListData{Typ: refNode.Parent.ListData.Typ}}
 			li.SetIALAttr("id", newID)
 			li.SetIALAttr("updated", newID[:14])
-			li.AppendChild(refNode)
+			li.AppendChild(defNode)
 			refPivot.InsertAfter(li)
 
 			newID = ast.NewNodeID()
 			list := &ast.Node{ID: newID, Type: ast.NodeList, ListData: &ast.ListData{Typ: refNode.Parent.ListData.Typ}}
 			list.SetIALAttr("id", newID)
 			list.SetIALAttr("updated", newID[:14])
-			list.AppendChild(defNode)
+			list.AppendChild(refNode)
 			defNode.InsertAfter(list)
 		} else {
 			defNode.InsertAfter(refNode)

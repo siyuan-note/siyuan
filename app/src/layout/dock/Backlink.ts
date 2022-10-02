@@ -130,11 +130,8 @@ export class Backlink extends Model {
         this.tree = new Tree({
             element: this.element.querySelector(".backlinkList") as HTMLElement,
             data: null,
-            click(element) {
-                openFileById({
-                    id: element.getAttribute("data-node-id"),
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
-                });
+            click: (element) => {
+                this.toggleItem(element, false);
             },
             ctrlClick(element) {
                 openFileById({
@@ -165,31 +162,27 @@ export class Backlink extends Model {
             element: this.element.querySelector(".backlinkMList") as HTMLElement,
             data: null,
             click: (element, event) => {
-                const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
-                if (actionElement) {
-                    if (actionElement.firstElementChild.classList.contains("fn__rotate")) {
-                        return;
-                    }
-                    window.siyuan.menus.menu.remove();
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        label: window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToStaticRef,
-                        click: () => {
-                            this.turnToRef(element, false);
-                        }
-                    }).element);
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        label: window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToDynamicRef,
-                        click: () => {
-                            this.turnToRef(element, true);
-                        }
-                    }).element);
-                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
-                } else {
-                    openFileById({
-                        id: element.getAttribute("data-node-id"),
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
-                    });
-                }
+                this.toggleItem(element, true);
+                // const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
+                // if (actionElement) {
+                //     if (actionElement.firstElementChild.classList.contains("fn__rotate")) {
+                //         return;
+                //     }
+                //     window.siyuan.menus.menu.remove();
+                //     window.siyuan.menus.menu.append(new MenuItem({
+                //         label: window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToStaticRef,
+                //         click: () => {
+                //             this.turnToRef(element, false);
+                //         }
+                //     }).element);
+                //     window.siyuan.menus.menu.append(new MenuItem({
+                //         label: window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToDynamicRef,
+                //         click: () => {
+                //             this.turnToRef(element, true);
+                //         }
+                //     }).element);
+                //     window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                // }
             },
             ctrlClick(element) {
                 openFileById({
@@ -417,18 +410,6 @@ export class Backlink extends Model {
         this.notebookId = data.box;
         this.inputsElement[0].value = data.k;
         this.inputsElement[1].value = data.mk;
-        if (data.backlinks) {
-            data.backlinks.forEach((item) => {
-                delete item.blocks;
-                delete item.children;
-            });
-        }
-        if (data.backmentions) {
-            data.backmentions.forEach((item) => {
-                delete item.blocks;
-                delete item.children;
-            });
-        }
         this.tree.updateData(data.backlinks);
         this.mTree.updateData(data.backmentions);
 

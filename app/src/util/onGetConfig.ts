@@ -511,5 +511,8 @@ const initWindow = () => {
     window.addEventListener("beforeunload", () => {
         exportLayout(false);
     }, false);
+    window.addEventListener("pagehide", () => {
+        exportLayout(false);
+    }, false);
     /// #endif
 };

@@ -1022,7 +1022,7 @@ export class WYSIWYG {
                 } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN" &&
                     range.startContainer.parentElement.isSameNode(range.endContainer.parentElement)) {
                     // 剪切粗体等字体中的一部分
-                    const spanElement = range.startContainer.parentElement
+                    const spanElement = range.startContainer.parentElement;
                     const attributes = spanElement.attributes;
                     const newSpanElement = document.createElement("span");
                     for (let i = 0; i < attributes.length; i++) {
@@ -1403,7 +1403,7 @@ export class WYSIWYG {
                     loadBreadcrumb(backlinkBreadcrumbItemElement);
                 } else {
                     // 引用标题时的更多加载
-                    getBacklinkHeadingMore(backlinkBreadcrumbItemElement)
+                    getBacklinkHeadingMore(backlinkBreadcrumbItemElement);
                 }
                 event.stopPropagation();
                 return;

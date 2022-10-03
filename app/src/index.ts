@@ -49,7 +49,8 @@ class App {
                                 progressStatus(data);
                                 break;
                             case"statusbarCounter":
-                                handleStatusbarCounter(data)
+                                handleStatusbarCounter(data);
+                                break;
                             case"downloadProgress":
                                 downloadProgress(data.data);
                                 break;

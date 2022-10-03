@@ -22,25 +22,25 @@ const setBacklinkFold = (html: string, expand: boolean) => {
     tempDom.innerHTML = html;
     if (tempDom.content.firstElementChild.classList.contains("li")) {
         if (expand) {
-            const thirdLiElement = tempDom.content.querySelector(".li .li .li")
+            const thirdLiElement = tempDom.content.querySelector(".li .li .li");
             if (thirdLiElement) {
-                thirdLiElement.setAttribute("fold", "1")
+                thirdLiElement.setAttribute("fold", "1");
             }
         } else {
-            tempDom.content.firstElementChild.setAttribute("fold", "1")
+            tempDom.content.firstElementChild.setAttribute("fold", "1");
         }
     } else if (tempDom.content.firstElementChild.getAttribute("data-type") === "NodeHeading") {
         Array.from(tempDom.content.children).forEach((item, index) => {
             if ((expand && index > 2) || (!expand && index > 1)) {
                 if ((expand && index === 3) || (!expand && index === 2)) {
-                    item.insertAdjacentHTML("beforebegin", `<div style="max-width: 100%;justify-content: center;" contenteditable="false" class="protyle-breadcrumb__item"><svg><use xlink:href="#iconMore"></use></svg></div>`);
+                    item.insertAdjacentHTML("beforebegin", "<div style=\"max-width: 100%;justify-content: center;\" contenteditable=\"false\" class=\"protyle-breadcrumb__item\"><svg><use xlink:href=\"#iconMore\"></use></svg></div>");
                 }
-                item.classList.add("fn__none")
+                item.classList.add("fn__none");
             }
-        })
+        });
     }
     return tempDom.innerHTML;
-}
+};
 
 export const loadBreadcrumb = (element: HTMLElement) => {
     fetchPost("/api/filetree/getDoc", {
@@ -66,7 +66,7 @@ export const getBacklinkHeadingMore = (moreElement: HTMLElement) => {
         nextElement = nextElement.nextElementSibling;
     }
     moreElement.remove();
-}
+};
 
 const genBreadcrumb = (blockPaths: IBreadcrumb[]) => {
     let html = "";

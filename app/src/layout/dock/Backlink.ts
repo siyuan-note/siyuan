@@ -157,7 +157,7 @@ export class Backlink extends Model {
         this.mTree = new Tree({
             element: this.element.querySelector(".backlinkMList") as HTMLElement,
             data: null,
-            click: (element, event) => {
+            click: (element) => {
                 this.toggleItem(element, true);
             },
             ctrlClick(element) {
@@ -283,7 +283,7 @@ export class Backlink extends Model {
 
     private toggleItem(liElement: HTMLElement, isMention: boolean) {
         const svgElement = liElement.firstElementChild.firstElementChild;
-        const docId = liElement.getAttribute("data-node-id")
+        const docId = liElement.getAttribute("data-node-id");
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.remove("b3-list-item__arrow--open");
             this.editors.find((item, index) => {
@@ -302,8 +302,8 @@ export class Backlink extends Model {
             }, (response) => {
                 const editorElement = document.createElement("div");
                 editorElement.style.minHeight = "auto";
-                editorElement.setAttribute("data-defid", this.blockId)
-                editorElement.setAttribute("data-ismention", isMention? "true" : "false")
+                editorElement.setAttribute("data-defid", this.blockId);
+                editorElement.setAttribute("data-ismention", isMention? "true" : "false");
                 liElement.after(editorElement);
                 const editor = new Protyle(editorElement, {
                     blockId: "",
@@ -316,7 +316,7 @@ export class Backlink extends Model {
                         breadcrumb: false,
                     }
                 });
-                editor.protyle.block.rootID = docId
+                editor.protyle.block.rootID = docId;
                 this.editors.push(editor);
             });
         }

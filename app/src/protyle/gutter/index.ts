@@ -77,16 +77,16 @@ export class Gutter {
             if (!id) {
                 const gutterFold = () => {
                     buttonElement.setAttribute("disabled", "disabled");
-                    let foldElement: Element
+                    let foldElement: Element;
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${(buttonElement.previousElementSibling || buttonElement.nextElementSibling).getAttribute("data-node-id")}"]`)).find(item => {
                         const itemRect = item.getBoundingClientRect();
-                        const gutterTop = this.element.getBoundingClientRect().top
+                        const gutterTop = this.element.getBoundingClientRect().top;
                         if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
                             itemRect.top <= gutterTop && itemRect.bottom >= gutterTop) {
                             foldElement = item;
                             return true;
                         }
-                    })
+                    });
                     if (!foldElement) {
                         return;
                     }
@@ -159,16 +159,16 @@ export class Gutter {
             if (window.siyuan.ctrlIsPressed) {
                 zoomOut(protyle, id);
             } else if (window.siyuan.altIsPressed) {
-                let foldElement: Element
+                let foldElement: Element;
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
                     const itemRect = item.getBoundingClientRect();
-                    const gutterTop = this.element.getBoundingClientRect().top
+                    const gutterTop = this.element.getBoundingClientRect().top;
                     if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
                         itemRect.top <= gutterTop && itemRect.bottom >= gutterTop) {
                         foldElement = item;
                         return true;
                     }
-                })
+                });
                 if (!foldElement) {
                     return;
                 }
@@ -236,7 +236,7 @@ export class Gutter {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
                 if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
                     const itemRect = item.getBoundingClientRect();
-                    const gutterTop = this.element.getBoundingClientRect().top
+                    const gutterTop = this.element.getBoundingClientRect().top;
                     if (itemRect.top <= gutterTop && itemRect.bottom >= gutterTop) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl")).forEach(hlItem => {
                             if (!item.isSameNode(hlItem)) {
@@ -671,7 +671,7 @@ export class Gutter {
         if (buttonElement.tagName === "BUTTON") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
                 const itemRect = item.getBoundingClientRect();
-                const gutterTop = this.element.getBoundingClientRect().top
+                const gutterTop = this.element.getBoundingClientRect().top;
                 if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
                     itemRect.top <= gutterTop && itemRect.bottom >= gutterTop) {
                     nodeElement = item;

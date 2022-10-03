@@ -13,12 +13,10 @@ import {onGet} from "./onGet";
 /// #if !MOBILE
 import {getInstanceById} from "../../layout/util";
 import {Tab} from "../../layout/Tab";
-import {getAllModels} from "../../layout/getAll";
 import {updatePanelByEditor} from "../../editor/util";
 /// #endif
 import {Editor} from "../../editor";
 import {blockRender} from "../markdown/blockRender";
-import {processRender} from "./processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
@@ -622,18 +620,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             });
             if (event.altKey) {
                 focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
-                let html = ''
+                let html = "";
                 for (let i = 0; i < selectedIds.length; i++) {
                     const response = await fetchSyncPost("/api/block/getRefText", {id: selectedIds[i]});
-                    html += `((${selectedIds[i]} '${response.data}')) `
+                    html += `((${selectedIds[i]} '${response.data}')) `;
                 }
                 insertHTML(html, protyle);
             } else if (event.shiftKey) {
                 focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
-                let html = ''
+                let html = "";
                 selectedIds.forEach(item => {
-                    html += `{{select * from blocks where id='${item}'}}\n`
-                })
+                    html += `{{select * from blocks where id='${item}'}}\n`;
+                });
                 insertHTML(protyle.lute.SpinBlockDOM(html), protyle);
                 blockRender(protyle, protyle.wysiwyg.element);
             } else if (targetElement) {

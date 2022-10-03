@@ -226,7 +226,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 refID: id,
                 defID: refBlockId,
                 includeChildren: false
-            })
+            });
         }
     });
     submenu.push({
@@ -236,7 +236,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 refID: id,
                 defID: refBlockId,
                 includeChildren: true
-            })
+            });
         }
     });
     window.siyuan.menus.menu.append(new MenuItem({

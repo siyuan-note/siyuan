@@ -107,7 +107,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false, spl
             }
             const spinHTML = protyle.lute.SpinBlockDOM(removeEmbed(blockElement));
             const scrollLeft = blockElement.firstElementChild.scrollLeft;
-            const blockPreviousElement = blockElement.previousElementSibling
+            const blockPreviousElement = blockElement.previousElementSibling;
             blockElement.outerHTML = spinHTML;
             render = true;
             // spin 后变成多个块需后续处理 https://github.com/siyuan-note/insider/issues/451

@@ -1,4 +1,6 @@
 {
+  "defBlock": "定义块",
+  "defBlockChildren": "定义块及其子块",
   "filter": "过滤",
   "copyHeadings": "复制标题及下方块",
   "tWithSubtitle": "带子标题转换",

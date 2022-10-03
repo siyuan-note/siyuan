@@ -220,7 +220,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         });
     }
     submenu.push({
-        label: "原始块",
+        label: window.siyuan.languages.defBlock,
         click() {
             fetchPost("/api/block/swapBlockRef", {
                 refID: id,
@@ -230,7 +230,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         }
     });
     submenu.push({
-        label: "原始块及子块",
+        label: window.siyuan.languages.defBlockChildren,
         click() {
             fetchPost("/api/block/swapBlockRef", {
                 refID: id,

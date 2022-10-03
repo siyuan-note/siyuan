@@ -1,4 +1,6 @@
 {
+  "defBlock": "Définir le bloc",
+  "defBlockChildren": "Définir le bloc et ses enfants",
   "filter": "Filtre",
   "copyHeadings": "Copier les en-têtes et les blocs inférieurs",
   "tWithSubtitle": "Transformation avec sous-titres",

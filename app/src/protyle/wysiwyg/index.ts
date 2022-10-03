@@ -1125,7 +1125,7 @@ export class WYSIWYG {
                 return false;
             }
             protyle.toolbar.range = getEditorRange(protyle.element);
-            const types = (target.getAttribute("data-type") || "").split(" ");
+            const types = protyle.toolbar.getCurrentType(protyle.toolbar.range);
             if (types.includes("block-ref")) {
                 refMenu(protyle, target);
                 // 阻止 popover
@@ -1166,7 +1166,8 @@ export class WYSIWYG {
                 return false;
             }
             if (!isNotEditBlock(nodeElement) &&
-                (isMobile() || beforeContextmenuRange && nodeElement.contains(beforeContextmenuRange.startContainer))) {
+                (isMobile() || event.detail.target || (beforeContextmenuRange && nodeElement.contains(beforeContextmenuRange.startContainer)))
+            ) {
                 if (!isMobile() || protyle.toolbar?.element.classList.contains("fn__none")) {
                     contentMenu(protyle, nodeElement);
                     window.siyuan.menus.menu.popup({x, y: y + 13, h: 26});

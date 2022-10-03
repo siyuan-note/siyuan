@@ -161,14 +161,14 @@ export const newFileContentBySelect = (protyle: IProtyle) => {
 };
 
 export const newFileBySelect = (fileName: string, protyle: IProtyle) => {
-    fileName = replaceFileName(fileName);
+    const newName = replaceFileName(fileName) || "Untitled";
     const id = Lute.NewNodeID();
     fetchPost("/api/filetree/createDoc", {
         notebook: protyle.notebookId,
         path: pathPosix().join(getDisplayName(protyle.path, false, true), id + ".sy"),
-        title: fileName,
+        title: newName,
         md: ""
     }, () => {
-        insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${id}" data-subtype="d">${escapeHtml(fileName)}</span>`), protyle);
+        insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${id}" data-subtype="d">${escapeHtml(newName)}</span>`), protyle);
     });
 };

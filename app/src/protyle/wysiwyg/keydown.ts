@@ -996,8 +996,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (selectText.trim() && matchHotKey(window.siyuan.config.keymap.editor.general.newNameFile.custom, event)) {
-            newFileBySelect(selectText, protyle);
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.newNameFile.custom, event)) {
+            newFileBySelect(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML), protyle);
             event.preventDefault();
             event.stopPropagation();
             return;

@@ -219,6 +219,26 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             }
         });
     }
+    submenu.push({
+        label: "原始块",
+        click() {
+            fetchPost("/api/block/swapBlockRef", {
+                refID: id,
+                defID: refBlockId,
+                includeChildren: false
+            })
+        }
+    });
+    submenu.push({
+        label: "原始块及子块",
+        click() {
+            fetchPost("/api/block/swapBlockRef", {
+                refID: id,
+                defID: refBlockId,
+                includeChildren: true
+            })
+        }
+    });
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.turnInto,
         icon: "iconRefresh",

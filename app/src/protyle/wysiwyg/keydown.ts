@@ -5,7 +5,7 @@ import {
     focusByRange,
     focusByWbr,
     getEditorRange,
-    getSelectionOffset,
+    getSelectionOffset, getSelectionPosition,
     selectAll,
     setFirstNodeRange,
     setLastNodeRange
@@ -1626,6 +1626,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
                 return true;
             }
+        }
+
+        if (event.key === "ContextMenu") {
+            const rangePosition = getSelectionPosition(nodeElement, range);
+            protyle.wysiwyg.element.dispatchEvent(new CustomEvent("contextmenu", {
+                detail: {
+                    target: nodeElement,
+                    y: rangePosition.top + 8,
+                    x: rangePosition.left
+                }
+            }));
+            event.preventDefault();
+            event.stopPropagation();
+            return;
         }
 
         /// #if !MOBILE

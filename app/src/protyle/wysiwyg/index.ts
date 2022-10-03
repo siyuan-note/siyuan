@@ -1098,25 +1098,27 @@ export class WYSIWYG {
         });
 
         let beforeContextmenuRange: Range;
-        this.element.addEventListener("contextmenu", (event) => {
+        this.element.addEventListener("contextmenu", (event: MouseEvent & { detail: any }) => {
             event.stopPropagation();
             event.preventDefault();
+            const x = event.clientX || event.detail.x
+            const y = event.clientY || event.detail.y
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 1) {
                 // 多选块
                 hideElements(["util"], protyle);
                 protyle.gutter.renderMenu(protyle, selectElements[0]);
-                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                window.siyuan.menus.menu.popup({x, y});
                 return;
             }
-            const target = event.target as HTMLElement;
+            const target = event.detail.target || event.target as HTMLElement
             const embedElement = hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed");
             if (embedElement) {
                 if (getSelection().rangeCount === 0) {
                     focusSideBlock(embedElement);
                 }
                 protyle.gutter.renderMenu(protyle, embedElement);
-                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                window.siyuan.menus.menu.popup({x, y});
                 return false;
             }
             if (protyle.disabled) {
@@ -1154,8 +1156,8 @@ export class WYSIWYG {
             }
             if (target.tagName === "IMG" && hasClosestByClassName(target, "img")) {
                 imgMenu(protyle, protyle.toolbar.range, target.parentElement.parentElement, {
-                    clientX: event.clientX + 4,
-                    clientY: event.clientY
+                    clientX: x + 4,
+                    clientY: y
                 });
                 return false;
             }
@@ -1167,7 +1169,7 @@ export class WYSIWYG {
                 (isMobile() || beforeContextmenuRange && nodeElement.contains(beforeContextmenuRange.startContainer))) {
                 if (!isMobile() || protyle.toolbar?.element.classList.contains("fn__none")) {
                     contentMenu(protyle, nodeElement);
-                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 13, h: 26});
+                    window.siyuan.menus.menu.popup({x, y: y + 13, h: 26});
                     protyle.toolbar?.element.classList.add("fn__none");
                     if (nodeElement.classList.contains("table")) {
                         nodeElement.querySelector("table").classList.remove("select");
@@ -1179,7 +1181,7 @@ export class WYSIWYG {
                 if (protyle.gutter) {
                     protyle.gutter.renderMenu(protyle, nodeElement);
                 }
-                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                window.siyuan.menus.menu.popup({x, y});
                 protyle.toolbar?.element.classList.add("fn__none");
             }
         });

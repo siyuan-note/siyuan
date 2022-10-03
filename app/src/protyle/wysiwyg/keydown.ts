@@ -229,7 +229,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 仅处理以下快捷键操作
         if (event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" && event.key.indexOf("Arrow") === -1 &&
             !isCtrl(event) && event.key !== "Escape" && !event.shiftKey && !event.altKey && !/^F\d{1,2}$/.test(event.key) &&
-            event.key !== "Enter" && event.key !== "Tab" && event.key !== "Backspace" && event.key !== "Delete") {
+            event.key !== "Enter" && event.key !== "Tab" && event.key !== "Backspace" && event.key !== "Delete" &&event.key !== "ContextMenu" ) {
             event.stopPropagation();
             hideElements(["select"], protyle);
             return false;

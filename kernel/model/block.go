@@ -129,12 +129,12 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 
 	if ast.NodeListItem == defNode.Type {
 		if ast.NodeListItem == refNode.Type {
-			defNode.InsertAfter(refNode)
 			if !includeChildren {
 				for _, c := range defNodeChildren {
 					refNode.AppendChild(c)
 				}
 			}
+			defNode.InsertAfter(refNode)
 			refPivot.InsertAfter(defNode)
 		} else {
 			newID := ast.NewNodeID()

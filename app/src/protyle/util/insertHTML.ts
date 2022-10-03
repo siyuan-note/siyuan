@@ -107,16 +107,22 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false, spl
             }
             const spinHTML = protyle.lute.SpinBlockDOM(removeEmbed(blockElement));
             const scrollLeft = blockElement.firstElementChild.scrollLeft;
+            const blockPreviousElement = blockElement.previousElementSibling
             blockElement.outerHTML = spinHTML;
             render = true;
             // spin 后变成多个块需后续处理 https://github.com/siyuan-note/insider/issues/451
             tempElement.innerHTML = spinHTML;
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find((item) => {
-                if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
-                    blockElement = item;
-                    return true;
-                }
-            });
+            if (protyle.options.backlinkData) {
+                // 反链面板
+                blockElement = blockPreviousElement.nextElementSibling;
+            } else {
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find((item) => {
+                    if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                        blockElement = item;
+                        return true;
+                    }
+                });
+            }
             if (tempElement.content.childElementCount === 1) {
                 if (blockElement.classList.contains("table") && scrollLeft > 0) {
                     blockElement.firstElementChild.scrollLeft = scrollLeft;

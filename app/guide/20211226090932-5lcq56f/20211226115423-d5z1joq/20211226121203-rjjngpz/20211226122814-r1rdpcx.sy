@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226122814-r1rdpcx",
 		"title": "虛擬引用",
-		"updated": "20211228135304"
+		"updated": "20221003215039"
 	},
 	"Children": [
 		{
@@ -119,6 +119,98 @@
 				{
 					"Type": "NodeText",
 					"Data": "根據已有塊引的錨文本/定義塊文本、塊的命名和別名作為關鍵字搜索，如果在當前內容塊的純文本元素上搜索到這些關鍵字，那麽就會作為虛擬引用。"
+				}
+			]
+		},
+		{
+			"ID": "20221003215030-sldbsma",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221003215030-sldbsma",
+				"updated": "20221003215030"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20221003215030-n76ec39",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221003215030-n76ec39",
+				"updated": "20221003215039"
+			},
+			"Children": [
+				{
+					"ID": "20221003215030-w2qi431",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221003215030-w2qi431",
+						"updated": "20221003215039"
+					},
+					"Children": [
+						{
+							"ID": "20221003215030-v8qcvra",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221003215030-v8qcvra",
+								"updated": "20221003215039"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "出於性能考慮，虛擬引用並不是即時生效的，如果沒有顯示，可以嘗試通過 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "F5"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 刷新當前文檔"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221003215030-g5mzgmu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221003215030-g5mzgmu",
+						"updated": "20221003215030"
+					},
+					"Children": [
+						{
+							"ID": "20221003215030-k00obsv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221003215030-k00obsv",
+								"updated": "20221003215030"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "對於英文字符需要使用空格分詞才能使虛擬引用生效，如果英文內容出現在段首，也需要使用空格結尾才能生效"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

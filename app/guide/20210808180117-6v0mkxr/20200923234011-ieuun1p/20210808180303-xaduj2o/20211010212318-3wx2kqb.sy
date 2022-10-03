@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211010212318-3wx2kqb",
 		"title": "Virtual reference",
-		"updated": "20211010212551"
+		"updated": "20221003215008"
 	},
 	"Children": [
 		{
@@ -119,6 +119,94 @@
 				{
 					"Type": "NodeText",
 					"Data": "Search based on the anchor text/definition block text of the existing block ref, the name and alias of the block as keywords. If these keywords are searched on the plain text element of the current content block, it will be used as a virtual reference."
+				}
+			]
+		},
+		{
+			"ID": "20221003214846-p9q1wvx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221003214846-p9q1wvx",
+				"updated": "20221003214853"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				}
+			]
+		},
+		{
+			"ID": "20221003214937-bqvm7yz",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221003214937-bqvm7yz",
+				"updated": "20221003215008"
+			},
+			"Children": [
+				{
+					"ID": "20221003214937-hfdshei",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221003214937-hfdshei",
+						"updated": "20221003214948"
+					},
+					"Children": [
+						{
+							"ID": "20221003214937-w913xwl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221003214937-w913xwl",
+								"updated": "20221003214948"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "For performance reasons, virtual references do not take effect immediately. If they are not displayed, you can try to refresh the current document via "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "F5"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221003214937-0yqjmgz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221003214937-0yqjmgz",
+						"updated": "20221003215008"
+					},
+					"Children": [
+						{
+							"ID": "20221003214937-7rkkbhp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221003214937-7rkkbhp",
+								"updated": "20221003215008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "For English characters, you need to use a space for word segmentation to make the virtual reference take effect. If the English content appears at the beginning of the paragraph, you also need to use the space at the end to take effect"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

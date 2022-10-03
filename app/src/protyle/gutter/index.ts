@@ -65,6 +65,7 @@ export class Gutter {
                 window.siyuan.dragElement = undefined;
             }
         });
+        // TODO:fold
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLInputElement }) => {
             const buttonElement = hasClosestByTag(event.target, "BUTTON");
             if (!buttonElement) {
@@ -197,38 +198,35 @@ export class Gutter {
         });
         this.element.addEventListener("mouseover", (event: MouseEvent & { target: HTMLInputElement }) => {
             const buttonElement = hasClosestByTag(event.target, "BUTTON");
-            if (!buttonElement || buttonElement?.getAttribute("data-type") === "fold") {
+            if (!buttonElement) {
                 return;
             }
-            let nodeElement: Element;
+            if (buttonElement.getAttribute("data-type") === "fold") {
+                Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl")).forEach(hlItem => {
+                    hlItem.classList.remove("protyle-wysiwyg--hl");
+                });
+                return;
+            }
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
                 if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
-                    nodeElement = item;
-                    return true;
+                    if (item.getBoundingClientRect().top === this.element.getBoundingClientRect().top) {
+                        Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl")).forEach(hlItem => {
+                            if (!item.isSameNode(hlItem)) {
+                                hlItem.classList.remove("protyle-wysiwyg--hl");
+                            }
+                        });
+                        item.classList.add("protyle-wysiwyg--hl");
+                        return true;
+                    }
                 }
             });
-            if (!nodeElement) {
-                return;
-            }
-            nodeElement.classList.add("protyle-wysiwyg--hl");
             event.preventDefault();
+            event.stopPropagation();
         });
-        this.element.addEventListener("mouseout", (event: MouseEvent & { target: HTMLInputElement }) => {
-            const buttonElement = hasClosestByTag(event.target, "BUTTON");
-            if (!buttonElement || buttonElement?.getAttribute("data-type") === "fold") {
-                return;
-            }
-            let nodeElement: Element;
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
-                if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
-                    nodeElement = item;
-                    return true;
-                }
+        this.element.addEventListener("mouseleave", (event: MouseEvent & { target: HTMLInputElement }) => {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl")).forEach(item => {
+                item.classList.remove("protyle-wysiwyg--hl");
             });
-            if (!nodeElement) {
-                return;
-            }
-            nodeElement.classList.remove("protyle-wysiwyg--hl");
             event.preventDefault();
             event.stopPropagation();
         });
@@ -645,7 +643,8 @@ export class Gutter {
         let nodeElement: Element;
         if (buttonElement.tagName === "BUTTON") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
-                if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+                if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
+                    buttonElement.parentElement.getBoundingClientRect().top === item.getBoundingClientRect().top) {
                     nodeElement = item;
                     return true;
                 }

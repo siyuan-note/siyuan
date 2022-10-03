@@ -1,4 +1,6 @@
 {
+  "defBlock": "定義塊",
+  "defBlockChildren": "定義塊及其子塊",
   "filter": "過濾",
   "copyHeadings": "複製標題及下方塊",
   "tWithSubtitle": "帶子標題轉換",

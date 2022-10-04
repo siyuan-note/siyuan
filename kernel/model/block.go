@@ -106,7 +106,13 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	if nil != err {
 		return
 	}
-	defNode := treenode.GetNodeInTree(defTree, defID)
+	sameTree := defTree.ID == refTree.ID
+	var defNode *ast.Node
+	if !sameTree {
+		defNode = treenode.GetNodeInTree(defTree, defID)
+	} else {
+		defNode = treenode.GetNodeInTree(refTree, defID)
+	}
 	if nil == defNode {
 		return
 	}
@@ -185,9 +191,11 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	if err = writeJSONQueue(refTree); nil != err {
 		return
 	}
-	treenode.ReindexBlockTree(defTree)
-	if err = writeJSONQueue(defTree); nil != err {
-		return
+	if !sameTree {
+		treenode.ReindexBlockTree(defTree)
+		if err = writeJSONQueue(defTree); nil != err {
+			return
+		}
 	}
 	WaitForWritingFiles()
 	util.ReloadUI()

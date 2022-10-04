@@ -254,13 +254,15 @@ func buildBacklink(refID string, refTree *parse.Tree, luteEngine *lute.Lute) (re
 			c = n.FirstChild.Next
 		}
 
-		for liFirstBlockSpan := c.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
-			if treenode.IsBlockRef(liFirstBlockSpan) {
-				continue
-			}
-			if "" != strings.TrimSpace(liFirstBlockSpan.Text()) {
-				expand = false
-				break
+		if c != n.LastChild { // 存在子列表
+			for liFirstBlockSpan := c.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
+				if treenode.IsBlockRef(liFirstBlockSpan) {
+					continue
+				}
+				if "" != strings.TrimSpace(liFirstBlockSpan.Text()) {
+					expand = false
+					break
+				}
 			}
 		}
 

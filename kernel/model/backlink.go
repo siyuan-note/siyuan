@@ -306,12 +306,13 @@ func GetBacklink2(id, keyword, mentionKeyword string) (boxID string, backlinks, 
 	if nil == sqlBlock {
 		return
 	}
+	rootID := sqlBlock.RootID
 	boxID = sqlBlock.Box
 
 	refs := sql.QueryRefsByDefID(id, true)
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
-	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(id, refs)
+	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs)
 	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink")
 	for _, l := range tmpBacklinks {
 		l.Blocks = nil
@@ -461,6 +462,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, refsCount i
 		queryBlockIDs = append(queryBlockIDs, ref.DefBlockID)
 		queryBlockIDs = append(queryBlockIDs, ref.BlockID)
 	}
+	queryBlockIDs = gulu.Str.RemoveDuplicatedElem(queryBlockIDs)
 	querySQLBlocks := sql.GetBlocks(queryBlockIDs)
 	defSQLBlocksCache := map[string]*sql.Block{}
 	for _, defSQLBlock := range querySQLBlocks {

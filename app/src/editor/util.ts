@@ -450,6 +450,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
                 item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
                 return;
             }
+            item.saveStatus();
             item.blockId = blockId;
             item.render(response.data);
         });

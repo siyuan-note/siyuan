@@ -431,7 +431,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                 nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
             }
         });
-        if (protyle.block.rootID === operation.id) {
+        if (protyle.block.rootID === operation.id && protyle.title) {
             // 文档
             const refElement = protyle.title.element.querySelector(".protyle-attr--refcount");
             if (refElement) {

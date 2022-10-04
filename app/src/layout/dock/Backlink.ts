@@ -19,6 +19,15 @@ export class Backlink extends Model {
     private notebookId: string;
     private mTree: Tree;
     private editors: Protyle[] = [];
+    private status: {
+        [key: string]: {
+            scrollTop: number,
+            mScrollTop: number,
+            backlinkOpenIds: string[],
+            backlinkMOpenIds: string[],
+            backlinkMStatus: number // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
+        }
+    } = {};
 
     constructor(options: {
         tab: Tab,
@@ -190,20 +199,18 @@ export class Backlink extends Model {
             this.tree.element.querySelectorAll(".protyle-gutters").forEach(item => {
                 item.classList.add("fn__none");
                 item.innerHTML = "";
-                // https://ld246.com/article/1651935412480
-                this.tree.element.querySelectorAll(".protyle-wysiwyg--hl").forEach((hlItem) => {
-                    hlItem.classList.remove("protyle-wysiwyg--hl");
-                });
+            });
+            this.tree.element.querySelectorAll(".protyle-wysiwyg--hl").forEach((hlItem) => {
+                hlItem.classList.remove("protyle-wysiwyg--hl");
             });
         });
         this.mTree.element.addEventListener("scroll", () => {
             this.mTree.element.querySelectorAll(".protyle-gutters").forEach(item => {
                 item.classList.add("fn__none");
                 item.innerHTML = "";
-                // https://ld246.com/article/1651935412480
-                this.mTree.element.querySelectorAll(".protyle-wysiwyg--hl").forEach((hlItem) => {
-                    hlItem.classList.remove("protyle-wysiwyg--hl");
-                });
+            });
+            this.mTree.element.querySelectorAll(".protyle-wysiwyg--hl").forEach((hlItem) => {
+                hlItem.classList.remove("protyle-wysiwyg--hl");
             });
         });
         // 为了快捷键的 dispatch
@@ -266,7 +273,8 @@ export class Backlink extends Model {
                                     target.querySelector("use").setAttribute("xlink:href", "#iconDown");
                                 }
                             }
-                            target.setAttribute("data-clicked", "true");
+                            this.tree.element.dispatchEvent(new CustomEvent("scroll"));
+                            this.mTree.element.dispatchEvent(new CustomEvent("scroll"));
                             break;
                     }
                 }
@@ -303,7 +311,7 @@ export class Backlink extends Model {
                 const editorElement = document.createElement("div");
                 editorElement.style.minHeight = "auto";
                 editorElement.setAttribute("data-defid", this.blockId);
-                editorElement.setAttribute("data-ismention", isMention? "true" : "false");
+                editorElement.setAttribute("data-ismention", isMention ? "true" : "false");
                 liElement.after(editorElement);
                 const editor = new Protyle(editorElement, {
                     blockId: "",
@@ -322,7 +330,7 @@ export class Backlink extends Model {
         }
     }
 
-    public refresh() {
+    private refresh() {
         fetchPost("/api/ref/refreshBacklink", {
             id: this.blockId,
         }, () => {
@@ -341,8 +349,38 @@ export class Backlink extends Model {
             mk: this.inputsElement[1].value,
             id: this.blockId,
         }, response => {
+            this.saveStatus();
             this.render(response.data);
         });
+    }
+
+    public saveStatus() {
+        this.status[this.blockId] = {
+            scrollTop: this.tree.element.scrollTop,
+            mScrollTop: this.mTree.element.scrollTop,
+            backlinkOpenIds: [],
+            backlinkMOpenIds: [],
+            backlinkMStatus: 3 // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
+        }
+        this.tree.element.querySelectorAll(".b3-list-item__arrow--open").forEach(item => {
+            this.status[this.blockId].backlinkOpenIds.push(item.parentElement.parentElement.getAttribute("data-node-id"))
+        })
+        this.mTree.element.querySelectorAll(".b3-list-item__arrow--open").forEach(item => {
+            this.status[this.blockId].backlinkMOpenIds.push(item.parentElement.parentElement.getAttribute("data-node-id"))
+        })
+        if (this.mTree.element.style.flex) {
+            if (this.mTree.element.style.height === "0px") {
+                this.status[this.blockId].backlinkMStatus = 3;
+            } else {
+                this.status[this.blockId].backlinkMStatus = 0;
+            }
+        } else {
+            if (this.mTree.element.previousElementSibling.querySelector('[data-type="layout"]').getAttribute("aria-label") === window.siyuan.languages.down) {
+                this.status[this.blockId].backlinkMStatus = 1;
+            } else {
+                this.status[this.blockId].backlinkMStatus = 2;
+            }
+        }
     }
 
     public render(data: { box: string, backlinks: IBlockTree[], backmentions: IBlockTree[], linkRefsCount: number, mentionsCount: number, k: string, mk: string }) {
@@ -375,7 +413,6 @@ export class Backlink extends Model {
         } else {
             countElement.classList.remove("fn__none");
             countElement.textContent = data.linkRefsCount.toString();
-            this.toggleItem(this.tree.element.firstElementChild.firstElementChild as HTMLElement, false);
         }
         const mCountElement = this.element.querySelector(".listMCount");
         if (data.mentionsCount === 0) {
@@ -383,30 +420,68 @@ export class Backlink extends Model {
         } else {
             mCountElement.classList.remove("fn__none");
             mCountElement.textContent = data.mentionsCount.toString();
-            this.toggleItem(this.mTree.element.firstElementChild.firstElementChild as HTMLElement, true);
         }
 
-        const layoutElement = this.element.querySelector("[data-type='layout']");
-        if (layoutElement.getAttribute("data-clicked")) {
-            return;
+        if (!this.status[this.blockId]) {
+            this.status[this.blockId] = {
+                scrollTop: 0,
+                mScrollTop: 0,
+                backlinkOpenIds: [],
+                backlinkMOpenIds: [],
+                backlinkMStatus: 3
+            }
+            if (data.mentionsCount === 0) {
+                this.status[this.blockId].backlinkMStatus = 3;
+            } else {
+                this.status[this.blockId].backlinkMOpenIds = [data.backmentions[0].id]
+                if (data.linkRefsCount === 0) {
+                    this.status[this.blockId].backlinkMStatus = 0;
+                } else {
+                    this.status[this.blockId].backlinkOpenIds = [data.backlinks[0].id]
+                    this.status[this.blockId].backlinkMStatus = 1;
+                }
+            }
         }
-        if (data.mentionsCount === 0) {
+
+        // restore status
+        this.status[this.blockId].backlinkOpenIds.forEach(item => {
+            const liElement = this.tree.element.querySelector(`.b3-list-item[data-node-id="${item}"]`) as HTMLElement
+            if (liElement) {
+                this.toggleItem(liElement, false);
+            }
+        })
+        this.status[this.blockId].backlinkMOpenIds.forEach(item => {
+            const liElement = this.mTree.element.querySelector(`.b3-list-item[data-node-id="${item}"]`) as HTMLElement
+            if (liElement) {
+                this.toggleItem(liElement, true);
+            }
+        })
+        // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
+        const layoutElement = this.mTree.element.previousElementSibling.querySelector('[data-type="layout"]');
+        if (this.status[this.blockId].backlinkMStatus === 2 || this.status[this.blockId].backlinkMStatus === 1) {
+            this.tree.element.classList.remove("fn__none");
+            this.mTree.element.removeAttribute("style");
+            if (this.status[this.blockId].backlinkMStatus === 1) {
+                layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
+                layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
+            } else {
+                layoutElement.setAttribute("aria-label", window.siyuan.languages.up);
+                layoutElement.querySelector("use").setAttribute("xlink:href", "#iconUp");
+            }
+        }else if (this.status[this.blockId].backlinkMStatus === 3) {
             this.tree.element.classList.remove("fn__none");
             this.mTree.element.setAttribute("style", "flex:none;height:0px");
             layoutElement.setAttribute("aria-label", window.siyuan.languages.up);
             layoutElement.querySelector("use").setAttribute("xlink:href", "#iconUp");
-            return;
-        }
-        if (data.linkRefsCount === 0) {
+        } else {
             this.tree.element.classList.add("fn__none");
             this.mTree.element.setAttribute("style", `flex:none;height:${this.element.clientHeight - this.tree.element.previousElementSibling.clientHeight * 2}px`);
             layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
             layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
-        } else {
-            this.tree.element.classList.remove("fn__none");
-            this.mTree.element.removeAttribute("style");
-            layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
-            layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
         }
+        setTimeout(() => {
+            this.tree.element.scrollTop = this.status[this.blockId].scrollTop;
+            this.mTree.element.scrollTop = this.status[this.blockId].mScrollTop;
+        }, Constants.TIMEOUT_BLOCKLOAD);
     }
 }

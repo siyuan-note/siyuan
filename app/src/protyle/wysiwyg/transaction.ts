@@ -220,6 +220,7 @@ const promiseTransaction = () => {
                     if (operation.previousID) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
                             if (item.nextElementSibling?.getAttribute("data-node-id") !== operation.id &&
+                                !hasClosestByAttribute(item, "data-node-id", operation.id) && // 段落转列表会在段落后插入新列表
                                 (item.getAttribute("data-type") === "NodeBlockQueryEmbed" || !hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed"))) {
                                 item.insertAdjacentHTML("afterend", operation.data);
                                 cursorElements.push(item.nextElementSibling);
@@ -643,7 +644,7 @@ export const turnsIntoOneTransaction = (options: { protyle: IProtyle, selectsEle
         });
         parentElement.innerHTML = html + '<div class="protyle-attr" contenteditable="false"></div>';
     }
-    const previousId = options.selectsElement[0].previousElementSibling ? options.selectsElement[0].previousElementSibling.getAttribute("data-node-id") : undefined;
+    const previousId = options.selectsElement[0].getAttribute("data-node-id");
     const parentId = options.selectsElement[0].parentElement.getAttribute("data-node-id") || options.protyle.block.parentID;
     const doOperations: IOperation[] = [{
         action: "insert",
@@ -665,7 +666,7 @@ export const turnsIntoOneTransaction = (options: { protyle: IProtyle, selectsEle
         undoOperations.push({
             action: "move",
             id: itemId,
-            previousID: itemPreviousId || previousId,
+            previousID: itemPreviousId || id,
             parentID: parentId
         });
         if (options.type.endsWith("Ls")) {

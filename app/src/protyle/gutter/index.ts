@@ -65,7 +65,6 @@ export class Gutter {
                 window.siyuan.dragElement = undefined;
             }
         });
-        // TODO:fold
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLInputElement }) => {
             const buttonElement = hasClosestByTag(event.target, "BUTTON");
             if (!buttonElement) {
@@ -1454,7 +1453,6 @@ export class Gutter {
                 });
             }
         });
-        // TODO 字体大小
         return styles;
     }
 

@@ -9,7 +9,6 @@ import {hideMessage, showMessage} from "./message";
 import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
-import {renderStatusbarCounter} from "../layout/status";
 
 export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>
@@ -188,10 +187,6 @@ export const progressStatus = (data: IWebSocketData) => {
     document.querySelector("#status .status__msg").innerHTML = data.msg;
 };
 
-export const handleStatusbarCounter = (data: IWebSocketData) => {
-    renderStatusbarCounter(data.data);
-};
-
 export const progressLoading = (data: IWebSocketData) => {
     let progressElement = document.getElementById("progress");
     if (!progressElement) {
@@ -263,6 +258,7 @@ export const setTitle = (title: string) => {
         dragElement.textContent = versionTitle;
         dragElement.setAttribute("title", versionTitle);
     } else {
+        title = title || "Untitled";
         document.title = title + " - " + window.siyuan.languages.siyuanNote + " v" + Constants.SIYUAN_VERSION;
         dragElement.textContent = title;
         dragElement.setAttribute("title", title);

@@ -12,7 +12,7 @@ import {addBaseURL, setNoteBook} from "./util/pathName";
 import {openFileById} from "./editor/util";
 import {
     bootSync,
-    downloadProgress, handleStatusbarCounter,
+    downloadProgress,
     progressLoading,
     progressStatus,
     setTitle,
@@ -47,9 +47,6 @@ class App {
                                 break;
                             case"statusbar":
                                 progressStatus(data);
-                                break;
-                            case"statusbarCounter":
-                                handleStatusbarCounter(data);
                                 break;
                             case"downloadProgress":
                                 downloadProgress(data.data);

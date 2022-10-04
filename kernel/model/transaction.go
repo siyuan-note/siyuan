@@ -997,8 +997,6 @@ func (tx *Transaction) begin() (err error) {
 
 func (tx *Transaction) commit() (err error) {
 	for _, tree := range tx.trees {
-		go pushTreeStat(tree)
-
 		if err = writeJSONQueue(tree); nil != err {
 			return
 		}
@@ -1007,11 +1005,6 @@ func (tx *Transaction) commit() (err error) {
 	IncSync()
 	tx.trees = nil
 	return
-}
-
-func pushTreeStat(tree *parse.Tree) {
-	stat := treenode.StatTree(tree)
-	util.PushStatusBarCounter(stat)
 }
 
 func (tx *Transaction) rollback() {

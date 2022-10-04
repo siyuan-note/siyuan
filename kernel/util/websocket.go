@@ -159,10 +159,6 @@ type BlockStatResult struct {
 	RefCount   int `json:"refCount"`
 }
 
-func PushStatusBarCounter(stat *BlockStatResult) {
-	BroadcastByType("main", "statusbarCounter", 0, "", stat)
-}
-
 func ContextPushMsg(context map[string]interface{}, msg string) {
 	switch context[eventbus.CtxPushMsg].(int) {
 	case eventbus.CtxPushMsgToProgress:

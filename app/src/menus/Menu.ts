@@ -114,7 +114,8 @@ export class MenuItem {
             this.element.classList.add("b3-menu__item--selected");
         }
         if (options.click) {
-            this.element.addEventListener(getEventName(), (event) => {
+            // 需使用 click，否则移动端无法滚动
+            this.element.addEventListener("click", (event) => {
                 if (this.element.getAttribute("disabled")) {
                     return;
                 }

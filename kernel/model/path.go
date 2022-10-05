@@ -120,6 +120,10 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string) (ret []*Path) {
 			treeNode.Blocks = append(treeNode.Blocks, c)
 		}
 		ret = append(ret, treeNode)
+
+		if "backlink" == typ {
+			treeNode.HPath = root.HPath
+		}
 	}
 
 	sort.Slice(ret, func(i, j int) bool {

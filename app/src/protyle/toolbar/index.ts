@@ -570,8 +570,9 @@ export class Toolbar {
         } else if (newNodes.length > 0) {
             const lastNewNode = newNodes[newNodes.length - 1];
             if (lastNewNode.nodeType !== 3 && (lastNewNode as HTMLElement).getAttribute("data-type") === "inline-math") {
-                if (lastNewNode.nextSibling) {
-                    this.range.setStart(lastNewNode.nextSibling, 0);
+                const mathNextSibling = hasNextSibling(lastNewNode);
+                if (mathNextSibling) { // https://github.com/siyuan-note/siyuan/issues/6065
+                    this.range.setStart(mathNextSibling, 0);
                 } else {
                     this.range.setStartAfter(lastNewNode);
                 }

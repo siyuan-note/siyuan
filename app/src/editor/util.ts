@@ -317,7 +317,7 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
         if (focus) {
             if (protyle.toolbar.range) {
                 focusByRange(protyle.toolbar.range);
-                countSelectWord(protyle.toolbar.range);
+                countSelectWord(protyle.toolbar.range, protyle.block.rootID);
                 if (pushBackStack && protyle.preview.element.classList.contains("fn__none")) {
                     pushBack(protyle, protyle.toolbar.range);
                 }
@@ -326,8 +326,7 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
                 if (pushBackStack && protyle.preview.element.classList.contains("fn__none")) {
                     pushBack(protyle, undefined, protyle.wysiwyg.element.firstElementChild);
                 }
-                // 用于清空状态栏字数统计
-                countBlockWord([]);
+                countBlockWord([], protyle.block.rootID);
             }
         }
         if (window.siyuan.config.fileTree.alwaysSelectOpenedFile && protyle) {

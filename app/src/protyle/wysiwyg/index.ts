@@ -1378,12 +1378,8 @@ export class WYSIWYG {
             }
 
             if (event.eventPhase !== 3 && !event.shiftKey && (event.key.indexOf("Arrow") > -1 || event.key === "Home" || event.key === "End" || event.key === "PageUp" || event.key === "PageDown") && !event.isComposing) {
-                // 不可编辑的块处理
                 const nodeElement = hasClosestBlock(range.startContainer);
                 if (nodeElement) {
-                    if (!nodeElement.classList.contains("protyle-wysiwyg--select")) {
-                        countSelectWord(range);
-                    }
                     this.setEmptyOutline(protyle, nodeElement);
                 }
                 event.stopPropagation();

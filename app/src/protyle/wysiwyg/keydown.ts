@@ -338,7 +338,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                 ids.push(item.getAttribute("data-node-id"));
             });
-            countBlockWord(ids);
+            countBlockWord(ids, protyle.block.rootID);
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -386,7 +386,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                 ids.push(item.getAttribute("data-node-id"));
             });
-            countBlockWord(ids);
+            countBlockWord(ids, protyle.block.rootID);
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -680,7 +680,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         const selectText = range.toString();
         // 删除，不可使用 !isCtrl(event)，否则软删除回导致 https://github.com/siyuan-note/siyuan/issues/5607
         if (!event.altKey && !event.shiftKey && (event.key === "Backspace" || event.key === "Delete")) {
-            countBlockWord([]);
             // https://github.com/siyuan-note/siyuan/issues/5547
             const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
             if (range.startOffset === 1 && range.startContainer.textContent === Constants.ZWSP &&
@@ -1087,7 +1086,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 protyle.hint.enableEmoji = false;
             } else if (nodeElement.classList.contains("protyle-wysiwyg--select")) {
                 hideElements(["select"], protyle);
-                countBlockWord([]);
+                countBlockWord([], protyle.block.rootID);
             } else if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
                 // 防止 ESC 时选中当前块
                 window.siyuan.menus.menu.remove();
@@ -1097,7 +1096,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
                 range.collapse(false);
                 nodeElement.classList.add("protyle-wysiwyg--select");
-                countBlockWord([nodeElement.getAttribute("data-node-id")]);
+                countBlockWord([nodeElement.getAttribute("data-node-id")], protyle.block.rootID);
             }
             event.preventDefault();
             return;

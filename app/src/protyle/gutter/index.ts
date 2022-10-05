@@ -688,7 +688,7 @@ export class Gutter {
         const turnIntoSubmenu: IMenu[] = [];
         hideElements(["select"], protyle);
         nodeElement.classList.add("protyle-wysiwyg--select");
-        countBlockWord([id]);
+        countBlockWord([id], protyle.block.rootID);
         // "heading1-6", "list", "ordered-list", "check", "quote", "code", "table", "line", "math", "paragraph"
         if (type === "NodeParagraph" && !window.siyuan.config.readonly) {
             turnIntoSubmenu.push(this.turnsIntoOne({
@@ -1271,7 +1271,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.insertBefore.custom,
                 click() {
                     nodeElement.classList.remove("protyle-wysiwyg--select");
-                    countBlockWord([]);
+                    countBlockWord([], protyle.block.rootID);
                     insertEmptyBlock(protyle, "beforebegin", id);
                 }
             }).element);
@@ -1281,7 +1281,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.insertAfter.custom,
                 click() {
                     nodeElement.classList.remove("protyle-wysiwyg--select");
-                    countBlockWord([]);
+                    countBlockWord([], protyle.block.rootID);
                     insertEmptyBlock(protyle, "afterend", id);
                 }
             }).element);

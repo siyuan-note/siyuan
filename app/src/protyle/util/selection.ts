@@ -59,7 +59,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                     range.setStart(cellElement.firstChild, 0);
                     range.setEndAfter(cellElement.lastChild);
                     protyle.toolbar.render(protyle, range);
-                    countSelectWord(range);
+                    countSelectWord(range, protyle.block.rootID);
                     return true;
                 }
             }
@@ -103,7 +103,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                     }
                 }
                 protyle.toolbar.render(protyle, range);
-                countSelectWord(range);
+                countSelectWord(range, protyle.block.rootID);
                 return true;
             }
         }
@@ -121,7 +121,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
         item.classList.add("protyle-wysiwyg--select");
         ids.push(item.getAttribute("data-node-id"));
     });
-    countBlockWord(ids);
+    countBlockWord(ids, protyle.block.rootID);
 };
 
 export const getEditorRange = (element: Element) => {

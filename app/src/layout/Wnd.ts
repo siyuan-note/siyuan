@@ -23,7 +23,7 @@ import {showMessage} from "../dialog/message";
 import {openFileById, updatePanelByEditor} from "../editor/util";
 import {scrollCenter} from "../util/highlightById";
 import {getAllModels} from "./getAll";
-import {countBlockWord} from "./status";
+import {clearCounter} from "./status";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {Asset} from "../asset";
 import {newFile} from "../util/newFile";
@@ -534,7 +534,6 @@ export class Wnd {
                 }
             });
             model.editor.destroy();
-            countBlockWord([]);
             return;
         }
         if (model instanceof Search) {
@@ -552,6 +551,7 @@ export class Wnd {
     }
 
     private removeTabAction = (id: string, closeAll = false, hasSaveScroll = true) => {
+        clearCounter();
         this.children.find((item, index) => {
             if (item.id === id) {
                 if (item.model instanceof Editor && hasSaveScroll) {

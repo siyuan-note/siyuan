@@ -129,7 +129,7 @@ export const initStatus = () => {
     /// #endif
 };
 
-export const countSelectWord = (range: Range) => {
+export const countSelectWord = (range: Range, rootID?: string) => {
     /// #if !MOBILE
     if (document.getElementById("status").classList.contains("fn__none")) {
         return;
@@ -139,13 +139,15 @@ export const countSelectWord = (range: Range) => {
         fetchPost("/api/block/getContentWordCount", {"content": range.toString()}, (response) => {
             renderStatusbarCounter(response.data);
         });
-    } else {
-        document.querySelector("#status .status__counter").innerHTML = "";
+    } else if (rootID) {
+        fetchPost("/api/block/getTreeStat", {id: rootID}, (response) => {
+            renderStatusbarCounter(response.data);
+        });
     }
     /// #endif
 };
 
-export const countBlockWord = (ids: string[]) => {
+export const countBlockWord = (ids: string[], rootID?: string) => {
     /// #if !MOBILE
     if (document.getElementById("status").classList.contains("fn__none")) {
         return;
@@ -154,11 +156,17 @@ export const countBlockWord = (ids: string[]) => {
         fetchPost("/api/block/getBlocksWordCount", {ids}, (response) => {
             renderStatusbarCounter(response.data);
         });
-    } else {
-        document.querySelector("#status .status__counter").innerHTML = "";
+    } else if (rootID) {
+        fetchPost("/api/block/getTreeStat", {id: rootID}, (response) => {
+            renderStatusbarCounter(response.data);
+        });
     }
     /// #endif
 };
+
+export const clearCounter = () => {
+    document.querySelector("#status .status__counter").innerHTML = "";
+}
 
 export const renderStatusbarCounter = (stat: { runeCount: number, wordCount: number, linkCount: number, imageCount: number, refCount: number }) => {
     let html = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>

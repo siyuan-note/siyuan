@@ -317,6 +317,7 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 
 	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs)
 	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink")
+	var boxIDs []string
 	for _, l := range tmpBacklinks {
 		l.Blocks = nil
 		if "" != keyword {
@@ -325,6 +326,14 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 			}
 		}
 		backlinks = append(backlinks, l)
+		boxIDs = append(boxIDs, l.Box)
+	}
+	boxIDs = gulu.Str.RemoveDuplicatedElem(boxIDs)
+
+	boxNames := Conf.BoxNames(boxIDs)
+	for _, l := range backlinks {
+		name := boxNames[l.Box]
+		l.HPath = name + "/" + l.HPath
 	}
 
 	sort.Slice(backlinks, func(i, j int) bool {
@@ -359,6 +368,11 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 			}
 		}
 		backmentions = append(backmentions, l)
+	}
+
+	for _, l := range backmentions {
+		name := boxNames[l.Box]
+		l.HPath = name + "/" + l.HPath
 	}
 
 	sort.Slice(backmentions, func(i, j int) bool {

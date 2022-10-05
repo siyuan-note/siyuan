@@ -467,6 +467,21 @@ func (conf *AppConf) Box(boxID string) *Box {
 	return nil
 }
 
+func (conf *AppConf) BoxNames(boxIDs []string) (ret map[string]string) {
+	ret = map[string]string{}
+
+	boxes := conf.GetOpenedBoxes()
+	for _, boxID := range boxIDs {
+		for _, box := range boxes {
+			if box.ID == boxID {
+				ret[boxID] = box.Name
+				break
+			}
+		}
+	}
+	return
+}
+
 func (conf *AppConf) GetBoxes() (ret []*Box) {
 	ret = []*Box{}
 	notebooks, err := ListNotebooks()

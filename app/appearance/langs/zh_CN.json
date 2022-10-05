@@ -1,4 +1,5 @@
 {
+  "filterDocNameEnter": "过滤文档名 Enter",
   "defBlock": "定义块",
   "defBlockChildren": "定义块及其子块",
   "filter": "过滤",

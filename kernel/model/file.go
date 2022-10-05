@@ -431,6 +431,8 @@ func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 }
 
 func StatTree(id string) (ret *util.BlockStatResult) {
+	WaitForWritingFiles()
+
 	tree, _ := loadTreeByBlockID(id)
 	if nil == tree {
 		return

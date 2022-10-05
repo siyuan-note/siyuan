@@ -179,6 +179,9 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 			li.SetIALAttr("id", newID)
 			li.SetIALAttr("updated", newID[:14])
 			li.AppendChild(defNode)
+			for i := len(defNodeChildren) - 1; -1 < i; i-- {
+				defNode.InsertAfter(defNodeChildren[i])
+			}
 			refPivot.InsertAfter(li)
 		} else {
 			defNode.InsertAfter(refNode)

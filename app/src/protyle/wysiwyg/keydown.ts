@@ -996,7 +996,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey(window.siyuan.config.keymap.editor.general.newNameFile.custom, event)) {
-            newFileBySelect(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML), protyle);
+            if (!selectText.trim() && !nodeElement.querySelector("tr") && !nodeElement.querySelector("span")) {
+                // 没选中时，都是纯文本就创建子文档 https://ld246.com/article/1663073488381/comment/1664804353295#comments
+            } else {
+                newFileBySelect(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML), protyle);
+            }
             event.preventDefault();
             event.stopPropagation();
             return;

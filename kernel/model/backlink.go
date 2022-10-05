@@ -362,7 +362,7 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	}
 
 	sort.Slice(backmentions, func(i, j int) bool {
-		switch sortMode {
+		switch mentionSortMode {
 		case util.SortModeUpdatedDESC:
 			return backmentions[i].Updated > backmentions[j].Updated
 		case util.SortModeUpdatedASC:

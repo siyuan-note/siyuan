@@ -1,3 +1,5 @@
+import {focusByRange} from "./selection";
+
 export const openByMobile = (uri: string) => {
     if (!uri) {
         return;
@@ -12,6 +14,10 @@ export const openByMobile = (uri: string) => {
 };
 
 export const writeText = async (text: string) => {
+    let range: Range
+    if (getSelection().rangeCount > 0) {
+        range = getSelection().getRangeAt(0).cloneRange();
+    }
     try {
         // navigator.clipboard.writeText 抛出异常不进入 catch，这里需要先处理移动端复制
         if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
@@ -38,6 +44,9 @@ export const writeText = async (text: string) => {
             textElement.select();
             document.execCommand("copy");
             document.body.removeChild(textElement);
+            if (range) {
+                focusByRange(range);
+            }
         }
     }
 };

@@ -18,6 +18,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -92,12 +93,12 @@ func getBacklink2(c *gin.Context) {
 	sortArg := arg["sort"]
 	sort := util.SortModeUpdatedDESC
 	if nil != sortArg {
-		sort = int(sortArg.(float64))
+		sort, _ = strconv.Atoi(sortArg.(string))
 	}
 	mentionSortArg := arg["msort"]
 	mentionSort := util.SortModeUpdatedDESC
 	if nil != mentionSortArg {
-		sort = int(mentionSortArg.(float64))
+		mentionSort, _ = strconv.Atoi(mentionSortArg.(string))
 	}
 	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.GetBacklink2(id, keyword, mentionKeyword, sort, mentionSort)
 	ret.Data = map[string]interface{}{

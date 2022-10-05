@@ -306,7 +306,7 @@ export class Backlink extends Model {
         const clickEvent = (currentSort: string) => {
             (type === "sort" ? this.tree : this.mTree).element.previousElementSibling.querySelector(`[data-type="${type}"]`).setAttribute("data-sort", currentSort);
             this.searchBacklinks();
-        }
+        };
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.append(new MenuItem({
             icon: sort === "0" ? "iconSelect" : undefined,
@@ -314,57 +314,57 @@ export class Backlink extends Model {
             click: () => {
                 clickEvent("0");
             }
-        }).element)
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: sort === "1" ? "iconSelect" : undefined,
             label: window.siyuan.languages.fileNameDESC,
             click: () => {
                 clickEvent("1");
             }
-        }).element)
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: sort === "4" ? "iconSelect" : undefined,
             label: window.siyuan.languages.fileNameNatASC,
             click: () => {
                 clickEvent("4");
             }
-        }).element)
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: sort === "5" ? "iconSelect" : undefined,
             label: window.siyuan.languages.fileNameNatDESC,
             click: () => {
                 clickEvent("5");
             }
-        }).element)
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element)
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: sort === "9" ? "iconSelect" : undefined,
             label: window.siyuan.languages.createdASC,
             click: () => {
                 clickEvent("9");
             }
-        }).element)
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: sort === "10" ? "iconSelect" : undefined,
             label: window.siyuan.languages.createdDESC,
             click: () => {
                 clickEvent("10");
             }
-        }).element)
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: sort === "2" ? "iconSelect" : undefined,
             label: window.siyuan.languages.modifiedASC,
             click: () => {
                 clickEvent("2");
             }
-        }).element)
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: sort === "3" ? "iconSelect" : undefined,
             label: window.siyuan.languages.modifiedDESC,
             click: () => {
                 clickEvent("3");
             }
-        }).element)
+        }).element);
     }
 
     private toggleItem(liElement: HTMLElement, isMention: boolean) {
@@ -443,13 +443,13 @@ export class Backlink extends Model {
             backlinkOpenIds: [],
             backlinkMOpenIds: [],
             backlinkMStatus: 3 // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
-        }
+        };
         this.tree.element.querySelectorAll(".b3-list-item__arrow--open").forEach(item => {
-            this.status[this.blockId].backlinkOpenIds.push(item.parentElement.parentElement.getAttribute("data-node-id"))
-        })
+            this.status[this.blockId].backlinkOpenIds.push(item.parentElement.parentElement.getAttribute("data-node-id"));
+        });
         this.mTree.element.querySelectorAll(".b3-list-item__arrow--open").forEach(item => {
-            this.status[this.blockId].backlinkMOpenIds.push(item.parentElement.parentElement.getAttribute("data-node-id"))
-        })
+            this.status[this.blockId].backlinkMOpenIds.push(item.parentElement.parentElement.getAttribute("data-node-id"));
+        });
         if (this.mTree.element.style.flex) {
             if (this.mTree.element.style.height === "0px") {
                 this.status[this.blockId].backlinkMStatus = 3;
@@ -513,15 +513,15 @@ export class Backlink extends Model {
                 backlinkOpenIds: [],
                 backlinkMOpenIds: [],
                 backlinkMStatus: 3
-            }
+            };
             if (data.mentionsCount === 0) {
                 this.status[this.blockId].backlinkMStatus = 3;
             } else {
-                this.status[this.blockId].backlinkMOpenIds = [data.backmentions[0].id]
+                this.status[this.blockId].backlinkMOpenIds = [data.backmentions[0].id];
                 if (data.linkRefsCount === 0) {
                     this.status[this.blockId].backlinkMStatus = 0;
                 } else {
-                    this.status[this.blockId].backlinkOpenIds = [data.backlinks[0].id]
+                    this.status[this.blockId].backlinkOpenIds = [data.backlinks[0].id];
                     this.status[this.blockId].backlinkMStatus = 1;
                 }
             }
@@ -529,17 +529,17 @@ export class Backlink extends Model {
 
         // restore status
         this.status[this.blockId].backlinkOpenIds.forEach(item => {
-            const liElement = this.tree.element.querySelector(`.b3-list-item[data-node-id="${item}"]`) as HTMLElement
+            const liElement = this.tree.element.querySelector(`.b3-list-item[data-node-id="${item}"]`) as HTMLElement;
             if (liElement) {
                 this.toggleItem(liElement, false);
             }
-        })
+        });
         this.status[this.blockId].backlinkMOpenIds.forEach(item => {
-            const liElement = this.mTree.element.querySelector(`.b3-list-item[data-node-id="${item}"]`) as HTMLElement
+            const liElement = this.mTree.element.querySelector(`.b3-list-item[data-node-id="${item}"]`) as HTMLElement;
             if (liElement) {
                 this.toggleItem(liElement, true);
             }
-        })
+        });
         // 0 全展开，1 展开一半箭头向下，2 展开一半箭头向上，3 全收起
         const layoutElement = this.mTree.element.previousElementSibling.querySelector('[data-type="layout"]');
         if (this.status[this.blockId].backlinkMStatus === 2 || this.status[this.blockId].backlinkMStatus === 1) {
@@ -563,8 +563,8 @@ export class Backlink extends Model {
             layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
             layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
         }
-        this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').setAttribute("data-sort", this.status[this.blockId].sort)
-        this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').setAttribute("data-sort", this.status[this.blockId].mSort)
+        this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').setAttribute("data-sort", this.status[this.blockId].sort);
+        this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').setAttribute("data-sort", this.status[this.blockId].mSort);
 
         setTimeout(() => {
             this.tree.element.scrollTop = this.status[this.blockId].scrollTop;

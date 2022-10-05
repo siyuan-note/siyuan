@@ -446,6 +446,7 @@ declare interface IFile {
 
 declare interface IBlockTree {
     nodeType: string,
+    hPath: string,
     subType: string,
     name: string,
     type: string,

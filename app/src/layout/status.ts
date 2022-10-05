@@ -166,7 +166,7 @@ export const countBlockWord = (ids: string[], rootID?: string) => {
 
 export const clearCounter = () => {
     document.querySelector("#status .status__counter").innerHTML = "";
-}
+};
 
 export const renderStatusbarCounter = (stat: { runeCount: number, wordCount: number, linkCount: number, imageCount: number, refCount: number }) => {
     let html = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>

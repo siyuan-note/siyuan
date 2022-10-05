@@ -1101,8 +1101,8 @@ export class WYSIWYG {
         this.element.addEventListener("contextmenu", (event: MouseEvent & { detail: any }) => {
             event.stopPropagation();
             event.preventDefault();
-            const x = event.clientX || event.detail.x
-            const y = event.clientY || event.detail.y
+            const x = event.clientX || event.detail.x;
+            const y = event.clientY || event.detail.y;
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 1) {
                 // 多选块
@@ -1111,7 +1111,7 @@ export class WYSIWYG {
                 window.siyuan.menus.menu.popup({x, y});
                 return;
             }
-            const target = event.detail.target || event.target as HTMLElement
+            const target = event.detail.target || event.target as HTMLElement;
             const embedElement = hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed");
             if (embedElement) {
                 if (getSelection().rangeCount === 0) {

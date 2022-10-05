@@ -57,14 +57,17 @@ export class Tree {
     private genHTML(data: IBlockTree[]) {
         let html = `<ul${data[0].depth === 0 ? " class='b3-list b3-list--background'" : ""}>`;
         data.forEach((item) => {
+            let titleTip = "";
             let iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>';
             if (item.type === "bookmark") {
                 iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconBookmark"></use></svg>';
             } else if (item.type === "tag") {
                 iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconTags"></use></svg>';
             } else if (item.type === "backlink") {
+                titleTip= ` title="${item.hPath}"`;
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             } else if (item.type === "outline") {
+                titleTip= ` title="${Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.name))}"`;
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             }
             let countHTML = "";
@@ -82,7 +85,7 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
         <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow ${((item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0)) ? "b3-list-item__arrow--open" : (item.type === "backlink" ? "" : "fn__hidden")}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
-    <span class="b3-list-item__text"${item.type === "outline" ? ' title="' + Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.name)) + '"' : ""}>${item.name}</span>
+    <span class="b3-list-item__text"${titleTip}>${item.name}</span>
     ${countHTML}
     ${this.topExtHTML || ""}
 </li>`;

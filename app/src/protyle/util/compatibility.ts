@@ -14,7 +14,7 @@ export const openByMobile = (uri: string) => {
 };
 
 export const writeText = async (text: string) => {
-    let range: Range
+    let range: Range;
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0).cloneRange();
     }

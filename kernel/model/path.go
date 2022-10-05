@@ -112,6 +112,9 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string) (ret []*Path) {
 			SubType:  root.SubType,
 			Depth:    baseDepth,
 			Count:    len(root.Children),
+
+			Updated: root.IAL["updated"],
+			Created: root.ID[:14],
 		}
 		for _, c := range root.Children {
 			treeNode.Blocks = append(treeNode.Blocks, c)
@@ -124,7 +127,6 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string) (ret []*Path) {
 	})
 	return
 }
-
 
 func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 	keyword = strings.TrimSpace(keyword)

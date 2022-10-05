@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/facette/natsort"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -299,7 +300,7 @@ func buildBacklink(refID string, refTree *parse.Tree, luteEngine *lute.Lute) (re
 	return
 }
 
-func GetBacklink2(id, keyword, mentionKeyword string) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
+func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode int) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
 	keyword = strings.TrimSpace(keyword)
 	mentionKeyword = strings.TrimSpace(mentionKeyword)
 	backlinks, backmentions = []*Path{}, []*Path{}
@@ -326,6 +327,28 @@ func GetBacklink2(id, keyword, mentionKeyword string) (boxID string, backlinks, 
 		backlinks = append(backlinks, l)
 	}
 
+	sort.Slice(backlinks, func(i, j int) bool {
+		switch sortMode {
+		case util.SortModeUpdatedDESC:
+			return backlinks[i].Updated > backlinks[j].Updated
+		case util.SortModeUpdatedASC:
+			return backlinks[i].Updated < backlinks[j].Updated
+		case util.SortModeCreatedDESC:
+			return backlinks[i].Created > backlinks[j].Created
+		case util.SortModeCreatedASC:
+			return backlinks[i].Created < backlinks[j].Created
+		case util.SortModeNameDESC:
+			return util.PinYinCompare(util.RemoveEmoji(backlinks[j].Name), util.RemoveEmoji(backlinks[i].Name))
+		case util.SortModeNameASC:
+			return util.PinYinCompare(util.RemoveEmoji(backlinks[i].Name), util.RemoveEmoji(backlinks[j].Name))
+		case util.SortModeAlphanumDESC:
+			return natsort.Compare(util.RemoveEmoji(backlinks[j].Name), util.RemoveEmoji(backlinks[i].Name))
+		case util.SortModeAlphanumASC:
+			return natsort.Compare(util.RemoveEmoji(backlinks[i].Name), util.RemoveEmoji(backlinks[j].Name))
+		}
+		return backlinks[i].ID > backlinks[j].ID
+	})
+
 	mentionRefs := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12)
 	tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink")
 	for _, l := range tmpBackmentions {
@@ -337,6 +360,29 @@ func GetBacklink2(id, keyword, mentionKeyword string) (boxID string, backlinks, 
 		}
 		backmentions = append(backmentions, l)
 	}
+
+	sort.Slice(backmentions, func(i, j int) bool {
+		switch sortMode {
+		case util.SortModeUpdatedDESC:
+			return backmentions[i].Updated > backmentions[j].Updated
+		case util.SortModeUpdatedASC:
+			return backmentions[i].Updated < backmentions[j].Updated
+		case util.SortModeCreatedDESC:
+			return backmentions[i].Created > backmentions[j].Created
+		case util.SortModeCreatedASC:
+			return backmentions[i].Created < backmentions[j].Created
+		case util.SortModeNameDESC:
+			return util.PinYinCompare(util.RemoveEmoji(backmentions[j].Name), util.RemoveEmoji(backmentions[i].Name))
+		case util.SortModeNameASC:
+			return util.PinYinCompare(util.RemoveEmoji(backmentions[i].Name), util.RemoveEmoji(backmentions[j].Name))
+		case util.SortModeAlphanumDESC:
+			return natsort.Compare(util.RemoveEmoji(backmentions[j].Name), util.RemoveEmoji(backmentions[i].Name))
+		case util.SortModeAlphanumASC:
+			return natsort.Compare(util.RemoveEmoji(backmentions[i].Name), util.RemoveEmoji(backmentions[j].Name))
+		}
+		return backmentions[i].ID > backmentions[j].ID
+	})
+
 	mentionsCount = len(backmentions)
 	return
 }

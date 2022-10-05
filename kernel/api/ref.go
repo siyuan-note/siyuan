@@ -89,7 +89,17 @@ func getBacklink2(c *gin.Context) {
 	id := arg["id"].(string)
 	keyword := arg["k"].(string)
 	mentionKeyword := arg["mk"].(string)
-	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.GetBacklink2(id, keyword, mentionKeyword)
+	sortArg := arg["sort"]
+	sort := util.SortModeUpdatedDESC
+	if nil != sortArg {
+		sort = int(sortArg.(float64))
+	}
+	mentionSortArg := arg["msort"]
+	mentionSort := util.SortModeUpdatedDESC
+	if nil != mentionSortArg {
+		sort = int(mentionSortArg.(float64))
+	}
+	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.GetBacklink2(id, keyword, mentionKeyword, sort, mentionSort)
 	ret.Data = map[string]interface{}{
 		"backlinks":     backlinks,
 		"linkRefsCount": linkRefsCount,

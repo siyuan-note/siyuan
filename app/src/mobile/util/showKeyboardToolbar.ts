@@ -85,8 +85,10 @@ export const initKeyboardToolbar = () => {
         }
         if (type === "outdent") {
             listOutdent(protyle, [nodeElement.parentElement], range);
+            focusByRange(range);
         } else if (type === "indent") {
             listIndent(protyle, [nodeElement.parentElement], range);
+            focusByRange(range);
         }
     });
 };

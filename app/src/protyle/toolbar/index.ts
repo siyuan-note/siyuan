@@ -621,6 +621,9 @@ export class Toolbar {
         if (wbrElement) {
             wbrElement.remove();
         }
+        if (isMobile()) {
+            focusByRange(this.range);
+        }
     }
 
     public showFileAnnotationRef(protyle: IProtyle, refElement: HTMLElement) {

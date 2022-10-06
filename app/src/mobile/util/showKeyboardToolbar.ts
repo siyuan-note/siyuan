@@ -6,34 +6,34 @@ export const showKeyboardToolbar = (bottom = 0) => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.classList.remove("fn__none");
     toolbarElement.style.bottom = bottom + "px";
-}
+};
 
 export const hideKeyboardToolbar = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.classList.add("fn__none");
-}
+};
 
 export const initKeyboardToolbar = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.addEventListener(getEventName(), (event) => {
-        const target = event.target as HTMLElement
-        const buttonElement = hasClosestByMatchTag(target, "BUTTON")
+        const target = event.target as HTMLElement;
+        const buttonElement = hasClosestByMatchTag(target, "BUTTON");
         if (!buttonElement || !window.siyuan.mobileEditor) {
             return;
         }
         const type = buttonElement.getAttribute("data-type");
-        const protyle = window.siyuan.mobileEditor.protyle
+        const protyle = window.siyuan.mobileEditor.protyle;
         if (type === "undo") {
-            protyle.undo.undo(protyle)
+            protyle.undo.undo(protyle);
             return;
         }
         if (type === "redo") {
-            protyle.undo.redo(protyle)
+            protyle.undo.redo(protyle);
             return;
         }
-        let range: Range
+        let range: Range;
         if (getSelection().rangeCount > 0) {
-            range = getSelection().getRangeAt(0)
+            range = getSelection().getRangeAt(0);
         }
         if (!range) {
             return;
@@ -50,5 +50,5 @@ export const initKeyboardToolbar = () => {
         } else if (type === "indent") {
             listIndent(protyle, [nodeElement.parentElement], range);
         }
-    })
-}
+    });
+};

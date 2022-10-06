@@ -180,12 +180,12 @@ export const progressStatus = (data: IWebSocketData) => {
         statusElement.innerHTML = data.msg;
         statusElement.classList.remove("status--hide");
         if (document.querySelector("keyboardToolbar").classList.contains("fn__none")) {
-            statusElement.style.bottom = "0"
+            statusElement.style.bottom = "0";
         } else {
-            statusElement.style.bottom = "30px"
+            statusElement.style.bottom = "30px";
         }
         progressStatusTimeoutId = window.setTimeout(() => {
-            statusElement.style.bottom = ""
+            statusElement.style.bottom = "";
         }, 6000);
         return;
     }

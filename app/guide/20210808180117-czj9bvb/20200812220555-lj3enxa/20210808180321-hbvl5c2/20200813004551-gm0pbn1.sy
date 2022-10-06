@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20220916195306"
+		"updated": "20221006214105"
 	},
 	"Children": [
 		{
@@ -4551,7 +4551,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210102174148-snb76bj",
-				"updated": "20220916195234"
+				"updated": "20221006214105"
 			},
 			"Children": [
 				{
@@ -5042,13 +5042,8 @@
 							"Data": "td",
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "search-mark",
-									"TextMarkTextContent": "行"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "级数学公式"
+									"Data": "行级数学公式"
 								}
 							]
 						},

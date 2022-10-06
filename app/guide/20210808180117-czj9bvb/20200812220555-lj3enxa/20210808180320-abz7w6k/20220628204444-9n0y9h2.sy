@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20220628204444-9n0y9h2",
 		"title": "优化排版",
-		"updated": "20220916195228"
+		"updated": "20221006214307"
 	},
 	"Children": [
 		{
@@ -38,21 +38,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220628204604-qom7yyl",
-				"updated": "20220916195228"
+				"updated": "20221006214307"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "为了快速记录内容，我们时常会忽略一些排版细节，比如"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "search-mark",
-					"TextMarkTextContent": "行"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "级代码前后或者加粗前后缺少空格、中文和西文之间缺少空格。"
+					"Data": "为了快速记录内容，我们时常会忽略一些排版细节，比如行级代码前后或者加粗前后缺少空格、中文和西文之间缺少空格。"
 				}
 			]
 		},
@@ -148,7 +139,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220628205832-odovge3",
-				"updated": "20220916195220"
+				"updated": "20221006214303"
 			},
 			"Children": [
 				{
@@ -160,7 +151,7 @@
 					},
 					"Properties": {
 						"id": "20220628205833-kmfuhsp",
-						"updated": "20220916195218"
+						"updated": "20221006214303"
 					},
 					"Children": [
 						{
@@ -168,17 +159,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220628205833-iu4yxrq",
-								"updated": "20220916195218"
+								"updated": "20221006214303"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "search-mark",
-									"TextMarkTextContent": "行"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "级代码"
+									"Data": "行级代码"
 								}
 							]
 						}

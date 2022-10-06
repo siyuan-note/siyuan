@@ -15,7 +15,7 @@ import {promiseTransactions} from "../protyle/wysiwyg/transaction";
 import {bootSync} from "../dialog/processSystem";
 import {initMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
-import {showKeyboardToolbar} from "./util/showKeyboardToolbar";
+import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/showKeyboardToolbar";
 
 class App {
     constructor() {
@@ -78,3 +78,4 @@ new App();
 
 window.goBack = goBack;
 window.showKeyboardToolbar = showKeyboardToolbar;
+window.hideKeyboardToolbar = hideKeyboardToolbar;

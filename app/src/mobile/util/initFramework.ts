@@ -16,9 +16,11 @@ import {hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {MobileBacklinks} from "./MobileBacklinks";
 import {MobileBookmarks} from "./MobileBookmarks";
 import {MobileTags} from "./MobileTags";
+import {initKeyboardToolbar} from "./showKeyboardToolbar";
 
 export const initFramework = () => {
     setInlineStyle();
+    initKeyboardToolbar();
     const scrimElement = document.querySelector(".scrim");
     const sidebarElement = document.getElementById("sidebar");
     let outline: MobileOutline;

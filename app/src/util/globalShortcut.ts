@@ -984,7 +984,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         if (isFile) {
             deleteFile(notebookId, pathString, getDisplayName(liElement.getAttribute("data-name"), false, true));
         } else {
-            confirmDialog(window.siyuan.languages.delete,
+            confirmDialog(window.siyuan.languages.deleteOpConfirm,
                 `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(getNotebookName(notebookId))}</b>?`, () => {
                     fetchPost("/api/notebook/removeNotebook", {
                         notebook: notebookId,

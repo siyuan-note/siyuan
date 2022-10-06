@@ -1,4 +1,5 @@
 {
+  "deleteOpConfirm": "⚠️ Supprimer la confirmation de l'opération",
   "filterDocNameEnter": "Filtre doc name Enter",
   "defBlock": "Définir le bloc",
   "defBlockChildren": "Définir le bloc et ses enfants",

@@ -17,7 +17,7 @@ export const deleteFile = (notebookId: string, pathString: string, name: string)
         if (response.data.subFileCount > 0) {
             tip = `${window.siyuan.languages.confirmDelete} <b>${name}</b> ${window.siyuan.languages.andSubFile.replace("x", response.data.subFileCount)}?`;
         }
-        confirmDialog(window.siyuan.languages.delete, tip, () => {
+        confirmDialog(window.siyuan.languages.deleteOpConfirm, tip, () => {
             fetchPost("/api/filetree/removeDoc", {
                 notebook: notebookId,
                 path: pathString

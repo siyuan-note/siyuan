@@ -108,7 +108,7 @@ export class Inbox extends Model {
                                 this.update();
                                 break;
                             case "delete":
-                                confirmDialog(window.siyuan.languages.delete, window.siyuan.languages.confirmDelete + "?", () => {
+                                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete + "?", () => {
                                     this.remove(detailsElement.getAttribute("data-id"));
                                 });
                                 break;
@@ -209,7 +209,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             label: window.siyuan.languages.remove,
             icon: "iconTrashcan",
             click: () => {
-                confirmDialog(window.siyuan.languages.delete, window.siyuan.languages.confirmDelete + "?", () => {
+                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete + "?", () => {
                     this.remove();
                 });
             }

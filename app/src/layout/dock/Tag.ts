@@ -114,7 +114,7 @@ export class Tag extends Model {
                     icon: "iconTrashcan",
                     label: window.siyuan.languages.remove,
                     click: () => {
-                        confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`, () => {
+                        confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`, () => {
                             fetchPost("/api/tag/removeTag", {label: labelName});
                         });
                     },

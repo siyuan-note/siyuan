@@ -1,4 +1,5 @@
 {
+  "deleteOpConfirm": "⚠️ 删除操作确认",
   "filterDocNameEnter": "过滤文档名 Enter",
   "defBlock": "定义块",
   "defBlockChildren": "定义块及其子块",

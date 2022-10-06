@@ -60,7 +60,7 @@ export class MobileTags {
                             fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value});
                         });
                     } else {
-                        confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`, () => {
+                        confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`, () => {
                             fetchPost("/api/tag/removeTag", {label: labelName});
                         });
                     }

@@ -86,6 +86,7 @@ export const initKeyboardToolbar = () => {
         }
 
         if (!nodeElement.parentElement.classList.contains("li") || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
+            focusByRange(range);
             return;
         }
         if (type === "outdent") {

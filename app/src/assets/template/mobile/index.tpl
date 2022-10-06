@@ -55,7 +55,7 @@
 <div id="commonMenu" class="b3-menu fn__none"></div>
 <div id="message" class="b3-snackbars"></div>
 <div id="status" class="status status--hide"></div>
-<div id="keyboardToolbar" class="">
+<div id="keyboardToolbar" class="fn__none">
     <span class="fn__flex-1"></span>
     <button data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
     <button data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>

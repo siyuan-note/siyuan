@@ -1,6 +1,10 @@
 import {getEventName} from "../../protyle/util/compatibility";
 import {listIndent, listOutdent} from "../../protyle/wysiwyg/list";
 import {hasClosestBlock, hasClosestByMatchTag} from "../../protyle/util/hasClosest";
+import {insertEmptyBlock} from "../../block/util";
+import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
+import {Constants} from "../../constants";
+import {focusByRange} from "../../protyle/util/selection";
 
 export const showKeyboardToolbar = (bottom = 0) => {
     const toolbarElement = document.getElementById("keyboardToolbar");
@@ -35,13 +39,47 @@ export const initKeyboardToolbar = () => {
         if (getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
         }
-        if (!range) {
+        if (!range || (range && !protyle.wysiwyg.element.contains(range.startContainer))) {
             return;
         }
         const nodeElement = hasClosestBlock(range.startContainer);
         if (!nodeElement) {
             return;
         }
+
+        if (type === "up") {
+            moveToUp(protyle, nodeElement, range);
+            focusByRange(range);
+            return;
+        }
+        if (type === "down") {
+            moveToDown(protyle, nodeElement, range)
+            focusByRange(range);
+            return;
+        }
+
+        if (type === "before") {
+            insertEmptyBlock(protyle, "beforebegin");
+            return;
+        }
+        if (type === "after") {
+            insertEmptyBlock(protyle, "afterend");
+            return;
+        }
+
+        if (type === "clear") {
+            if (range.toString()) {
+                protyle.toolbar.setInlineMark(protyle, "clear", "toolbar");
+            } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN"){
+                range.setStartAfter(range.startContainer.parentElement);
+                range.collapse(false);
+                range.insertNode(document.createTextNode(Constants.ZWSP));
+                range.collapse(false);
+                focusByRange(range);
+            }
+            return;
+        }
+
         if (!nodeElement.parentElement.classList.contains("li") || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
             return;
         }

@@ -90,7 +90,8 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                         } else if (nextSibling && nextSibling.nodeType !== 3 && (nextSibling as HTMLElement).getAttribute("data-type")?.indexOf("inline-math") > -1) {
                             // 相邻的数学公式删除或光标移动有问题
                             mathElement.after(document.createTextNode(Constants.ZWSP));
-                        } else if (nextSibling && nextSibling.textContent !== "\n" &&
+                        } else if (nextSibling &&
+                            !nextSibling.textContent.startsWith("\n") && // https://github.com/siyuan-note/insider/issues/1089
                             // 输入 $a$ 后，光标移动到其他块，再点击 a 后，光标不显示 https://github.com/siyuan-note/insider/issues/1076#issuecomment-1253215515
                             nextSibling.textContent !== Constants.ZWSP) {
                             // 数学公式后一个字符删除多 br https://ld246.com/article/1647157880974

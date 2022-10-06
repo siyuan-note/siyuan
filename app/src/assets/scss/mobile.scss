@@ -248,6 +248,23 @@
   border-radius: 4px;
 }
 
+#keyboardToolbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  box-sizing: border-box;
+  height: 32px;
+  background: var(--b3-theme-background-light);
+
+  svg {
+    height: 18px;
+    width: 18px;
+    padding: 4px;
+    margin: 4px;
+    color: var(--b3-theme-on-surface);
+  }
+}
+
 .svg {
   fill: currentColor;
   display: inline-block;

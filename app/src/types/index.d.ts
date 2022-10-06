@@ -37,6 +37,7 @@ interface Window {
     }
 
     goBack(): void
+    showKeyboardToolbar(bottom?: number): void
 }
 
 interface ITextOption {

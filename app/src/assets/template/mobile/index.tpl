@@ -55,5 +55,11 @@
 <div id="commonMenu" class="b3-menu fn__none"></div>
 <div id="message" class="b3-snackbars"></div>
 <div id="status" class="status status--hide"></div>
+<div id="keyboardToolbar" class="fn__none">
+    <svg><use xlink:href="#iconUndo"></use></svg>
+    <svg><use xlink:href="#iconRedo"></use></svg>
+    <svg><use xlink:href="#iconOutdent"></use></svg>
+    <svg><use xlink:href="#iconIndent"></use></svg>
+</div>
 </body>
 </html>

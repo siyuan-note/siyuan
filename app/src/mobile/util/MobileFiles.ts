@@ -148,7 +148,7 @@ export class MobileFiles extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "remove") {
-                    confirmDialog(window.siyuan.languages.delete,
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm,
                         `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(target.parentElement.querySelector(".b3-list-item__text").textContent)}</b>?`, () => {
                             fetchPost("/api/notebook/removeNotebook", {
                                 notebook: target.getAttribute("data-url"),

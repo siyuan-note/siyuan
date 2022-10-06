@@ -88,7 +88,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             label: window.siyuan.languages.delete,
             accelerator: "⌦",
             click: () => {
-                confirmDialog(window.siyuan.languages.delete,
+                confirmDialog(window.siyuan.languages.deleteOpConfirm,
                     `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(name)}</b>?`, () => {
                         fetchPost("/api/notebook/removeNotebook", {
                             notebook: notebookId,

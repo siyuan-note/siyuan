@@ -451,7 +451,7 @@ export const openHistory = () => {
                 break;
             } else if (type === "removeRepoTagSnapshot" || type === "removeCloudRepoTagSnapshot") {
                 const tag = target.parentElement.getAttribute("data-tag");
-                confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <i>${tag}</i>?`, () => {
+                confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <i>${tag}</i>?`, () => {
                     fetchPost("/api/repo/" + type, {tag}, () => {
                         renderRepo(repoElement, type === "removeRepoTagSnapshot" ? -1 : -2);
                     });

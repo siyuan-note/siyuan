@@ -36,7 +36,7 @@ export class MobileBookmarks {
                 if (actionElement) {
                     const bookmark = (id ? element.parentElement.previousElementSibling : element).querySelector(".b3-list-item__text").textContent;
                     if (actionElement.getAttribute("data-type") === "remove") {
-                        confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(bookmark)}</b>?`, () => {
+                        confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(bookmark)}</b>?`, () => {
                             if (id) {
                                 fetchPost("/api/attr/setBlockAttrs", {id, attrs: {bookmark: ""}}, () => {
                                     this.update();

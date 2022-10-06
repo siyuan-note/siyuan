@@ -11,4 +11,10 @@ export const hideKeyboardToolbar = () => {
 
 export const initKeyboardToolbar = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
+    toolbarElement.addEventListener("click", (event) => {
+        const target = event.target as HTMLElement
+        if (target.tagName === "svg") {
+
+        }
+    })
 }

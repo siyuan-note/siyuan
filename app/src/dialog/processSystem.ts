@@ -176,11 +176,16 @@ let progressStatusTimeoutId: number;
 export const progressStatus = (data: IWebSocketData) => {
     if (isMobile()) {
         clearTimeout(progressStatusTimeoutId);
-        const statusElement = document.querySelector("#status");
+        const statusElement = document.querySelector("#status") as HTMLElement;
         statusElement.innerHTML = data.msg;
         statusElement.classList.remove("status--hide");
+        if (document.querySelector("keyboardToolbar").classList.contains("fn__none")) {
+            statusElement.style.bottom = "0"
+        } else {
+            statusElement.style.bottom = "30px"
+        }
         progressStatusTimeoutId = window.setTimeout(() => {
-            statusElement.classList.add("status--hide");
+            statusElement.style.bottom = ""
         }, 6000);
         return;
     }

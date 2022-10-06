@@ -56,10 +56,10 @@
 <div id="message" class="b3-snackbars"></div>
 <div id="status" class="status status--hide"></div>
 <div id="keyboardToolbar" class="fn__none">
-    <svg><use xlink:href="#iconUndo"></use></svg>
-    <svg><use xlink:href="#iconRedo"></use></svg>
-    <svg><use xlink:href="#iconOutdent"></use></svg>
-    <svg><use xlink:href="#iconIndent"></use></svg>
+    <svg data-type="undo"><use xlink:href="#iconUndo"></use></svg>
+    <svg data-type="redo"><use xlink:href="#iconRedo"></use></svg>
+    <svg data-type="outdent"><use xlink:href="#iconOutdent"></use></svg>
+    <svg data-type="indent"><use xlink:href="#iconIndent"></use></svg>
 </div>
 </body>
 </html>

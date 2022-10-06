@@ -255,6 +255,7 @@
   box-sizing: border-box;
   height: 32px;
   background: var(--b3-theme-background-light);
+  z-index: 221;
 
   svg {
     height: 18px;
@@ -313,7 +314,7 @@
 
 .status {
   position: fixed;
-  bottom: 0;
+  bottom: -30px;
   transition: var(--b3-transition);
   font-size: 12px;
   color: var(--b3-theme-on-surface);
@@ -324,10 +325,6 @@
   background-color: var(--b3-theme-background);
   z-index: 221;
   @extend .fn__ellipsis;
-
-  &--hide {
-    bottom: -30px;
-  }
 }
 
 @media (max-width: 620px) {

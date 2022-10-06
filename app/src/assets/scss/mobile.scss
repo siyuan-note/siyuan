@@ -254,15 +254,22 @@
   width: 100%;
   box-sizing: border-box;
   height: 32px;
-  background: var(--b3-theme-background-light);
+  background: var(--b3-theme-background);
   z-index: 221;
+  display: flex;
 
-  svg {
-    height: 18px;
-    width: 18px;
-    padding: 4px;
-    margin: 4px;
-    color: var(--b3-theme-on-surface);
+  button {
+    background: transparent;
+    padding: 0;
+    border: 0;
+
+    svg {
+      height: 18px;
+      width: 18px;
+      padding: 4px;
+      margin: 4px;
+      color: var(--b3-theme-on-surface);
+    }
   }
 }
 

@@ -55,11 +55,13 @@
 <div id="commonMenu" class="b3-menu fn__none"></div>
 <div id="message" class="b3-snackbars"></div>
 <div id="status" class="status status--hide"></div>
-<div id="keyboardToolbar" class="fn__none">
-    <svg data-type="undo"><use xlink:href="#iconUndo"></use></svg>
-    <svg data-type="redo"><use xlink:href="#iconRedo"></use></svg>
-    <svg data-type="outdent"><use xlink:href="#iconOutdent"></use></svg>
-    <svg data-type="indent"><use xlink:href="#iconIndent"></use></svg>
+<div id="keyboardToolbar" class="">
+    <span class="fn__flex-1"></span>
+    <button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
+    <button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
+    <button data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
+    <button data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>
+    <span class="fn__flex-1"></span>
 </div>
 </body>
 </html>

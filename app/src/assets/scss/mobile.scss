@@ -257,6 +257,7 @@
   background: var(--b3-theme-background);
   z-index: 221;
   display: flex;
+  border-top: 1px solid var(--b3-border-color);
 
   button {
     background: transparent;

@@ -19,12 +19,17 @@ export const hideKeyboardToolbar = () => {
 
 export const initKeyboardToolbar = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
-    toolbarElement.addEventListener(getEventName(), (event) => {
+    toolbarElement.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
         const buttonElement = hasClosestByMatchTag(target, "BUTTON");
         if (!buttonElement || !window.siyuan.mobileEditor) {
             return;
         }
+        if (window.siyuan.mobileEditor.protyle.disabled) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
         const type = buttonElement.getAttribute("data-type");
         const protyle = window.siyuan.mobileEditor.protyle;
         if (type === "undo") {
@@ -75,8 +80,8 @@ export const initKeyboardToolbar = () => {
                 range.collapse(false);
                 range.insertNode(document.createTextNode(Constants.ZWSP));
                 range.collapse(false);
-                focusByRange(range);
             }
+            focusByRange(range);
             return;
         }
 

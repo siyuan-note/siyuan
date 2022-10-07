@@ -20,7 +20,7 @@ export const showKeyboardToolbar = (bottom = 0) => {
     }
 
     if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
-        // Android 端事件需要滞后一些，所以这里统一延迟一下
+        // Android 端事件需要滞后一些，所以这里延迟一下
         setTimeout(() => {
             scrollCenter(window.siyuan.mobileEditor.protyle, undefined, false, (window.outerHeight - 65) / 2 - 30);
         }, 100);

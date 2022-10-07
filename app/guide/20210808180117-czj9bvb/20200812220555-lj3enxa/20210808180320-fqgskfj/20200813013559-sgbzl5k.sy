@@ -6,7 +6,7 @@
 		"id": "20200813013559-sgbzl5k",
 		"title": "引用内容块",
 		"type": "doc",
-		"updated": "20220623200842"
+		"updated": "20221007175038"
 	},
 	"Children": [
 		{
@@ -608,7 +608,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220623200042-wi0fnoq",
-				"updated": "20220623200048"
+				"updated": "20221007175038"
 			},
 			"Children": [
 				{
@@ -656,7 +656,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220623200105-p2p4qu7"
+						"id": "20220623200105-p2p4qu7",
+						"updated": "20221007175038"
 					},
 					"Children": [
 						{
@@ -664,7 +665,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220623200105-fpr7anp",
-								"updated": "20220623200138"
+								"updated": "20221007175038"
 							},
 							"Children": [
 								{
@@ -674,11 +675,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "'"
+									"TextMarkTextContent": "\u0026apos;"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 包裹锚文本为动态锚文本，会在重建索引是自动重写"
+									"Data": " 包裹锚文本为动态锚文本，会在重建索引时自动重写"
 								}
 							]
 						}

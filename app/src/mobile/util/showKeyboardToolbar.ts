@@ -1,15 +1,24 @@
-import {getEventName} from "../../protyle/util/compatibility";
 import {listIndent, listOutdent} from "../../protyle/wysiwyg/list";
 import {hasClosestBlock, hasClosestByMatchTag} from "../../protyle/util/hasClosest";
 import {insertEmptyBlock} from "../../block/util";
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusByRange} from "../../protyle/util/selection";
+import {scrollCenter} from "../../util/highlightById";
 
 export const showKeyboardToolbar = (bottom = 0) => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.classList.remove("fn__none");
     toolbarElement.style.bottom = bottom + "px";
+    let range: Range;
+    if (getSelection().rangeCount > 0) {
+        range = getSelection().getRangeAt(0);
+    }
+    if (!range || !window.siyuan.mobileEditor ||
+        !window.siyuan.mobileEditor.protyle.wysiwyg.element.contains(range.startContainer)) {
+        return;
+    }
+    scrollCenter(window.siyuan.mobileEditor.protyle);
 };
 
 export const hideKeyboardToolbar = () => {
@@ -75,7 +84,7 @@ export const initKeyboardToolbar = () => {
         if (type === "clear") {
             if (range.toString()) {
                 protyle.toolbar.setInlineMark(protyle, "clear", "toolbar");
-            } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN"){
+            } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN") {
                 range.setStartAfter(range.startContainer.parentElement);
                 range.collapse(false);
                 range.insertNode(document.createTextNode(Constants.ZWSP));

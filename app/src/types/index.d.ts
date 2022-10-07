@@ -34,6 +34,7 @@ interface Window {
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeImageClipboard(uri: string): void
+        readClipboard(): string
     }
 
     goBack(): void

@@ -13,6 +13,13 @@ export const openByMobile = (uri: string) => {
     }
 };
 
+export const readText = async ()  => {
+    if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
+        return window.JSAndroid.readClipboard();
+    }
+    return navigator.clipboard.readText();
+}
+
 export const writeText = async (text: string) => {
     let range: Range;
     if (getSelection().rangeCount > 0) {

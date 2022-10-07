@@ -19,7 +19,7 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {writeText} from "../protyle/util/compatibility";
+import {readText, writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
@@ -347,7 +347,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                 document.execCommand("paste");
             } else {
                 try {
-                    const clipText = await navigator.clipboard.readText();
+                    const clipText = await readText();
                     pasteText(protyle, clipText, nodeElement);
                 } catch (e) {
                     console.log(e);
@@ -370,7 +370,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         async click() {
             try {
                 // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
-                let clipText = await navigator.clipboard.readText();
+                let clipText = await readText();
                 // https://github.com/siyuan-note/siyuan/issues/5446
                 // A\B\C\D\
                 // E

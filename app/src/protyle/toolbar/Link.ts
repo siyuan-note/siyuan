@@ -2,6 +2,7 @@ import {ToolbarItem} from "./ToolbarItem";
 import {linkMenu} from "../../menus/protyle";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {focusByRange, focusByWbr} from "../util/selection";
+import {readText} from "../util/compatibility";
 
 export class Link extends ToolbarItem {
     public element: HTMLElement;
@@ -27,7 +28,7 @@ export class Link extends ToolbarItem {
             const rangeString = range.toString().trim();
             let dataHref = "";
             try {
-                const clipText = await navigator.clipboard.readText();
+                const clipText = await readText();
                 // 选中链接时需忽略剪切板内容 https://ld246.com/article/1643035329737
                 if (protyle.lute.IsValidLinkDest(rangeString)) {
                     dataHref = rangeString;

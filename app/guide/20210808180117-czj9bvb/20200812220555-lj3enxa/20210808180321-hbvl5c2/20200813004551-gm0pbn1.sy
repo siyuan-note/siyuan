@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20221006214105"
+		"updated": "20221007202446"
 	},
 	"Children": [
 		{
@@ -1657,7 +1657,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20220916195306"
+				"updated": "20221007202446"
 			},
 			"Children": [
 				{
@@ -4083,7 +4083,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+."
+									"TextMarkTextContent": "Atl+,"
 								},
 								{
 									"Type": "NodeText",
@@ -4092,7 +4092,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘."
+									"TextMarkTextContent": "⌥,"
 								}
 							]
 						},

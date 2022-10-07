@@ -146,7 +146,7 @@ export abstract class Constants {
                 collapse: {default: "⌘↑", custom: "⌘↑"},
                 insertBottom: {default: "⌥⌘.", custom: "⌥⌘."},
                 refTab: {default: "⇧⌘>", custom: "⇧⌘>"},
-                openBy: {default: "⌘.", custom: "⌘."},
+                openBy: {default: "⌥,", custom: "⌥,"},
                 insertRight: {default: "⌥.", custom: "⌥."},
                 attr: {default: "⌥⌘A", custom: "⌥⌘A"},
                 refresh: {default: "F5", custom: "F5"},

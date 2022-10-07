@@ -86,6 +86,9 @@ export class Menu {
     }
 
     public popup(options: { x: number, y: number, h?: number }, isLeft = false) {
+        if (this.element.innerHTML === "") {
+            return;
+        }
         if (isMobile()) {
             window.addEventListener("touchmove", this.preventDefault, {passive: false});
         } else {

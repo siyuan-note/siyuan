@@ -93,38 +93,13 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	return
 }
 
-func WriteTree(tree *parse.Tree) (err error) {
-	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
-
-	if nil == tree.Root.FirstChild {
-		newP := parse.NewParagraph()
-		tree.Root.AppendChild(newP)
-		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
-		treenode.ReindexBlockTree(tree)
-	}
-
-	filePath := filepath.Join(util.DataDir, tree.Box, tree.Path)
-	if oldSpec := tree.Root.Spec; "" == oldSpec {
-		luteEngine.NestedInlines2FlattedSpans(tree)
-		tree.Root.Spec = "1"
-		logging.LogInfof("migrated tree [%s] from spec [%s] to [%s]", filePath, oldSpec, tree.Root.Spec)
-	}
-	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
-	output := renderer.Render()
-
-	// .sy 文档数据使用格式化好的 JSON 而非单行 JSON
-	buf := bytes.Buffer{}
-	buf.Grow(4096)
-	if err = json.Indent(&buf, output, "", "\t"); nil != err {
-		return
-	}
-	output = buf.Bytes()
-
-	if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
+func WriteTreeWithoutChangeTime(tree *parse.Tree) (err error) {
+	data, filePath, err := prepareWriteTree(tree)
+	if nil != err {
 		return
 	}
 
-	if err = filelock.WriteFile(filePath, output); nil != err {
+	if err = filelock.WriteFileWithoutChangeTime(filePath, data); nil != err {
 		if errors.Is(err, filelock.ErrUnableAccessFile) {
 			return
 		}
@@ -134,9 +109,66 @@ func WriteTree(tree *parse.Tree) (err error) {
 		return errors.New(msg)
 	}
 
+	afterWriteTree(tree)
+	return
+}
+
+func WriteTree(tree *parse.Tree) (err error) {
+	data, filePath, err := prepareWriteTree(tree)
+	if nil != err {
+		return
+	}
+
+	if err = filelock.WriteFile(filePath, data); nil != err {
+		if errors.Is(err, filelock.ErrUnableAccessFile) {
+			return
+		}
+
+		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
+		logging.LogErrorf(msg)
+		return errors.New(msg)
+	}
+
+	afterWriteTree(tree)
+	return
+}
+
+func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error) {
+	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
+
+	if nil == tree.Root.FirstChild {
+		newP := parse.NewParagraph()
+		tree.Root.AppendChild(newP)
+		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
+		treenode.ReindexBlockTree(tree)
+	}
+
+	filePath = filepath.Join(util.DataDir, tree.Box, tree.Path)
+	if oldSpec := tree.Root.Spec; "" == oldSpec {
+		luteEngine.NestedInlines2FlattedSpans(tree)
+		tree.Root.Spec = "1"
+		logging.LogInfof("migrated tree [%s] from spec [%s] to [%s]", filePath, oldSpec, tree.Root.Spec)
+	}
+	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
+	data = renderer.Render()
+
+	// .sy 文档数据使用格式化好的 JSON 而非单行 JSON
+	buf := bytes.Buffer{}
+	buf.Grow(4096)
+	if err = json.Indent(&buf, data, "", "\t"); nil != err {
+		return
+	}
+	data = buf.Bytes()
+
+	if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
+		return
+	}
+	return
+}
+
+func afterWriteTree(tree *parse.Tree) {
 	docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
 	cache.PutDocIAL(tree.Path, docIAL)
-	return
 }
 
 func recoverParseJSON2Tree(boxID, p, filePath string, luteEngine *lute.Lute) (ret *parse.Tree) {

@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20220904093759"
+		"updated": "20221007203302"
 	},
 	"Children": [
 		{
@@ -1655,7 +1655,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-yozlufs",
-				"updated": "20220904093759"
+				"updated": "20221007203302"
 			},
 			"Children": [
 				{
@@ -4033,7 +4033,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+."
+									"TextMarkTextContent": "Atl+,"
 								},
 								{
 									"Type": "NodeText",
@@ -4042,7 +4042,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘."
+									"TextMarkTextContent": "⌥,"
 								}
 							]
 						},
@@ -4079,7 +4079,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Shift+\u003e"
+									"TextMarkTextContent": "Ctrl+Shift+\u0026gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -4088,7 +4088,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧⌘\u003e"
+									"TextMarkTextContent": "⇧⌘\u0026gt;"
 								}
 							]
 						},

@@ -6,7 +6,7 @@
 		"icon": "2328",
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
-		"updated": "20220916195834"
+		"updated": "20221007202526"
 	},
 	"Children": [
 		{
@@ -1645,7 +1645,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-pb50zx4",
-				"updated": "20220916195834"
+				"updated": "20221007202526"
 			},
 			"Children": [
 				{
@@ -4083,7 +4083,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+."
+									"TextMarkTextContent": "Atl+,"
 								},
 								{
 									"Type": "NodeText",
@@ -4092,7 +4092,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘."
+									"TextMarkTextContent": "⌥,"
+								},
+								{
+									"Type": "NodeBr",
+									"Data": "br"
 								}
 							]
 						},

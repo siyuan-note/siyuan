@@ -1381,6 +1381,9 @@ export class WYSIWYG {
                 const nodeElement = hasClosestBlock(range.startContainer);
                 if (nodeElement) {
                     this.setEmptyOutline(protyle, nodeElement);
+                    if (range.toString() === "") {
+                        countSelectWord(range, protyle.block.rootID);
+                    }
                 }
                 event.stopPropagation();
             }
@@ -1807,7 +1810,7 @@ export class WYSIWYG {
                     hideElements(["toolbar"], protyle);
                 }
                 if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
-                    countSelectWord(newRange);
+                    countSelectWord(newRange, protyle.block.rootID);
                 }
                 if (getSelection().rangeCount === 0) {
                     // https://github.com/siyuan-note/siyuan/issues/5901

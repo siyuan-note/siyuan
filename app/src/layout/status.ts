@@ -150,10 +150,13 @@ export const countSelectWord = (range: Range, rootID?: string) => {
     /// #endif
 };
 
-export const countBlockWord = (ids: string[], rootID?: string) => {
+export const countBlockWord = (ids: string[], rootID?: string, clearCache = false) => {
     /// #if !MOBILE
     if (document.getElementById("status").classList.contains("fn__none")) {
         return;
+    }
+    if (clearCache) {
+        countRootId = ""
     }
     if (ids.length > 0) {
         fetchPost("/api/block/getBlocksWordCount", {ids}, (response) => {

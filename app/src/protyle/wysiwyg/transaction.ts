@@ -72,7 +72,7 @@ const promiseTransaction = () => {
             lockFile(protyle.block.rootID);
             return;
         }
-        countBlockWord([], protyle.block.rootID);
+        countBlockWord([], protyle.block.rootID, true);
         if (doOperations.length === 1 && (doOperations[0].action === "unfoldHeading" || doOperations[0].action === "foldHeading" || doOperations[0].action === "setAttrs")) {
             const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
             if (gutterFoldElement) {

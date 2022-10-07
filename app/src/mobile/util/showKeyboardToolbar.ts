@@ -18,7 +18,10 @@ export const showKeyboardToolbar = (bottom = 0) => {
         !window.siyuan.mobileEditor.protyle.wysiwyg.element.contains(range.startContainer)) {
         return;
     }
-    scrollCenter(window.siyuan.mobileEditor.protyle, undefined, false, (window.outerHeight - 65) / 2 - 30);
+
+    setTimeout(() => {
+        scrollCenter(window.siyuan.mobileEditor.protyle, undefined, false, (window.outerHeight - 65) / 2 - 30);
+    }, 100);
 };
 
 export const hideKeyboardToolbar = () => {

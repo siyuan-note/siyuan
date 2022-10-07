@@ -72,15 +72,18 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
             }
         }
         // 是否匹配 ⌥[] / ⌥⌘[]
-        if (isMatchKey && (hotKeys.length === 3 ? isCtrl(event) : !isCtrl(event)) && event.altKey && !event.shiftKey) {
+        if (isMatchKey && event.altKey && !event.shiftKey &&
+            (hotKeys.length === 3 ? (isCtrl(event) && hotKey.startsWith("⌥⌘")) : !isCtrl(event))) {
             return true;
         }
         // ⌥⇧⌘[]
-        if (isMatchKey && hotKey.startsWith("⌥⇧⌘") && hotKeys.length === 4 && event.altKey && event.shiftKey && isCtrl(event)) {
+        if (isMatchKey && hotKey.startsWith("⌥⇧⌘") && hotKeys.length === 4 &&
+            event.altKey && event.shiftKey && isCtrl(event)) {
             return true;
         }
         // ⌥⇧[]
-        if (isMatchKey && hotKey.startsWith("⌥⇧") && hotKeys.length === 3 && event.altKey && event.shiftKey && !isCtrl(event)) {
+        if (isMatchKey && hotKey.startsWith("⌥⇧") && hotKeys.length === 3 &&
+            event.altKey && event.shiftKey && !isCtrl(event)) {
             return true;
         }
         return false;

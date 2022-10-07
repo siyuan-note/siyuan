@@ -20,6 +20,7 @@ import {blockRender} from "../markdown/blockRender";
 import {highlightRender} from "../markdown/highlightRender";
 import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
+import {isBrowser} from "../../util/functions";
 
 const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, direct: "col" | "row") => {
     const isSameDoc = protyle.element.contains(sourceElements[0]);
@@ -685,7 +686,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
             focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
-            if (event.dataTransfer.types[0] === "Files") {
+            if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
                 const files: string[] = [];
                 for (let i = 0; i < event.dataTransfer.files.length; i++) {
                     files.push(event.dataTransfer.files[i].path);

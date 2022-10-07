@@ -1125,34 +1125,36 @@ export class WYSIWYG {
                 return false;
             }
             protyle.toolbar.range = getEditorRange(protyle.element);
-            const types = protyle.toolbar.getCurrentType(protyle.toolbar.range);
-            if (types.includes("block-ref")) {
-                refMenu(protyle, target);
-                // 阻止 popover
-                target.setAttribute("prevent-popover", "true");
-                setTimeout(() => {
-                    target.removeAttribute("prevent-popover");
-                }, 620);
-                return false;
-            }
-            if (types.includes("file-annotation-ref")) {
-                protyle.toolbar.showFileAnnotationRef(protyle, target);
-                return false;
-            }
-            if (types.includes("inline-memo")) {
-                protyle.toolbar.showRender(protyle, target);
-                return false;
-            }
-            if (types.includes("a")) {
-                linkMenu(protyle, target);
-                if (target.getAttribute("data-href")?.startsWith("siyuan://blocks")) {
+            if (target.tagName === "SPAN") { // https://ld246.com/article/1665141518103
+                const types = protyle.toolbar.getCurrentType(protyle.toolbar.range);
+                if (types.includes("block-ref")) {
+                    refMenu(protyle, target);
                     // 阻止 popover
                     target.setAttribute("prevent-popover", "true");
                     setTimeout(() => {
                         target.removeAttribute("prevent-popover");
                     }, 620);
+                    return false;
                 }
-                return false;
+                if (types.includes("file-annotation-ref")) {
+                    protyle.toolbar.showFileAnnotationRef(protyle, target);
+                    return false;
+                }
+                if (types.includes("inline-memo")) {
+                    protyle.toolbar.showRender(protyle, target);
+                    return false;
+                }
+                if (types.includes("a")) {
+                    linkMenu(protyle, target);
+                    if (target.getAttribute("data-href")?.startsWith("siyuan://blocks")) {
+                        // 阻止 popover
+                        target.setAttribute("prevent-popover", "true");
+                        setTimeout(() => {
+                            target.removeAttribute("prevent-popover");
+                        }, 620);
+                    }
+                    return false;
+                }
             }
             if (target.tagName === "IMG" && hasClosestByClassName(target, "img")) {
                 imgMenu(protyle, protyle.toolbar.range, target.parentElement.parentElement, {

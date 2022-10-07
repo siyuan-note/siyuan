@@ -19,7 +19,7 @@ export const showKeyboardToolbar = (bottom = 0) => {
         return;
     }
 
-    setTimeout(() => {
+    setTimeout(() => { // Android 端事件需要滞后一些，所以这里统一延迟一下
         scrollCenter(window.siyuan.mobileEditor.protyle, undefined, false, (window.outerHeight - 65) / 2 - 30);
     }, 100);
 };

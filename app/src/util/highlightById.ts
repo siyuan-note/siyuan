@@ -44,10 +44,10 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
         const cursorTop = getSelectionPosition(editorElement).top - editorElement.getBoundingClientRect().top;
         if (offset) { // 仅移动端弹起键盘用到
             editorElement.scroll({
-                top: editorElement.scrollLeft,
-                left: editorElement.scrollTop + cursorTop - offset,
+                top: editorElement.scrollTop + cursorTop - offset,
+                left: editorElement.scrollLeft,
                 behavior: "smooth"
-            })
+            });
             return;
         }
         if (cursorTop < 0) {

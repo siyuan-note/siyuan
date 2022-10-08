@@ -1,3 +1,26 @@
+## v2.3.1 / 2022-10-08
+
+### 改进功能
+
+* [改进行级代码、键盘和标签元素边界编辑交互](https://github.com/siyuan-note/siyuan/issues/5595)
+* [文档滚动状态不产生同步冲突](https://github.com/siyuan-note/siyuan/issues/6076)
+* [移动端编辑工具栏仅在编辑器中触发](https://github.com/siyuan-note/siyuan/issues/6086)
+* [块引缺失锚文本情况下自动补全](https://github.com/siyuan-note/siyuan/issues/6087)
+* [内核接口 `api/system/getConf` 脱敏处理](https://github.com/siyuan-note/siyuan/issues/6088)
+* [分割线不应该支持折叠](https://github.com/siyuan-note/siyuan/issues/6097)
+* [关闭自适应宽度后反链面板无法根据内容自适应](https://github.com/siyuan-note/siyuan/issues/6099)
+
+### 修复缺陷
+
+* [加载自定义表情可能导致内核崩溃](https://github.com/siyuan-note/siyuan/issues/6078)
+* [文档实时统计失效](https://github.com/siyuan-note/siyuan/issues/6079)
+* [段落末尾为行级元素时右键异常](https://github.com/siyuan-note/siyuan/issues/6080)
+* [快捷键 `⌥⌘ ` 识别失败](https://github.com/siyuan-note/siyuan/issues/6081)
+* [反链面板刷新后数学公式无法加载](https://github.com/siyuan-note/siyuan/issues/6085)
+* [列表项行级元素结尾和转义元素编辑异常](https://github.com/siyuan-note/siyuan/issues/6092)
+* [列表项中 `Ctrl+Tab` 异常](https://github.com/siyuan-note/siyuan/issues/6093)
+* [分隔线块标菜单点击异常](https://github.com/siyuan-note/siyuan/issues/6094)
+
 ## v2.3.0 / 2022-10-07
 
 ### 引入特性

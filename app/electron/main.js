@@ -561,7 +561,7 @@ const initKernel = (initData) => {
           case 23:
             showErrorWindow(
               '⚠️ 无法读写块树文件 Failed to access blocktree file',
-              `<div>块树文件正在被其他程序锁定或者已经损坏，请删除 工作空间/temp/ 文件夹后重启</div><div>The block tree file is being locked by another program or is damaged, please delete the workspace/temp/ folder and restart.</div>`)
+              `<div>块树文件正在被其他程序锁定或者已经损坏，请删除 工作空间/temp/ 文件夹后重启</div><div>The block tree file is being locked by another program or is corrupted, please delete the workspace/temp/ folder and restart.</div>`)
             break
           case 0:
           case 1: // Fatal error

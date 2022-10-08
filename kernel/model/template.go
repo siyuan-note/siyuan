@@ -196,7 +196,7 @@ func renderTemplate(p, id string) (string, error) {
 		return "", errors.New(msg)
 	}
 
-	var nodesNeedAppendChild []*ast.Node
+	var nodesNeedAppendChild, unlinks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -213,10 +213,34 @@ func renderTemplate(p, id string) (string, error) {
 			(ast.NodeBlockquote == n.Type && nil != n.FirstChild && nil != n.FirstChild.Next && ast.NodeKramdownBlockIAL == n.FirstChild.Next.Type) {
 			nodesNeedAppendChild = append(nodesNeedAppendChild, n)
 		}
+
+		// 块引缺失锚文本情况下自动补全 https://github.com/siyuan-note/siyuan/issues/6087
+		if n.IsTextMarkType("block-ref") {
+			if refText := n.Text(); "" == refText {
+				refText = sql.GetRefText(n.TextMarkBlockRefID)
+				if "" != refText {
+					treenode.SetDynamicBlockRefText(n, refText)
+				} else {
+					unlinks = append(unlinks, n)
+				}
+			}
+		} else if ast.NodeBlockRef == n.Type {
+			if idNode := n.ChildByType(ast.NodeBlockRefID); nil != idNode {
+				refText := sql.GetRefText(idNode.TokensStr())
+				if "" != refText {
+					treenode.SetDynamicBlockRefText(n, refText)
+				} else {
+					unlinks = append(unlinks, n)
+				}
+			}
+		}
 		return ast.WalkContinue
 	})
 	for _, n := range nodesNeedAppendChild {
 		n.AppendChild(parse.NewParagraph())
+	}
+	for _, n := range unlinks {
+		n.Unlink()
 	}
 
 	// 折叠标题导出为模板后使用会出现内容重复 https://github.com/siyuan-note/siyuan/issues/4488

@@ -45,13 +45,15 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     }
 
     // 是否匹配 ⇧[]
-    if (hotKey.startsWith("⇧") && hotKeys.length === 2 && !event.ctrlKey && !isCtrl(event) && !event.altKey && event.shiftKey) {
-        if (event.code.startsWith("Digit") || event.code.startsWith("Numpad")) {
-            if (hotKeys[1] === event.code.slice(-1)) {
+    if (hotKey.startsWith("⇧") && hotKeys.length === 2) {
+        if (!event.ctrlKey && !isCtrl(event) && !event.altKey && event.shiftKey) {
+            if (event.code.startsWith("Digit") || event.code.startsWith("Numpad")) {
+                if (hotKeys[1] === event.code.slice(-1)) {
+                    return true;
+                }
+            } else if (event.key === hotKeys[1]) {
                 return true;
             }
-        } else if (event.key === hotKeys[1]) {
-            return true;
         }
         return false;
     }

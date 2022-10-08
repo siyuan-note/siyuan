@@ -7,18 +7,21 @@ import {focusByRange} from "../../protyle/util/selection";
 import {scrollCenter} from "../../util/highlightById";
 
 export const showKeyboardToolbar = (bottom = 0) => {
-    const toolbarElement = document.getElementById("keyboardToolbar");
-    toolbarElement.classList.remove("fn__none");
-    toolbarElement.style.bottom = bottom + "px";
-    let range: Range;
     if (getSelection().rangeCount > 0) {
-        range = getSelection().getRangeAt(0);
-    }
-    if (!range || !window.siyuan.mobileEditor ||
-        !window.siyuan.mobileEditor.protyle.wysiwyg.element.contains(range.startContainer)) {
+        const range = getSelection().getRangeAt(0);
+        if (!window.siyuan.mobileEditor ||
+            !window.siyuan.mobileEditor.protyle.wysiwyg.element.contains(range.startContainer)) {
+            return;
+        }
+    } else {
         return;
     }
-
+    const toolbarElement = document.getElementById("keyboardToolbar");
+    if (!toolbarElement.classList.contains("fn__none")) {
+        return;
+    }
+    toolbarElement.classList.remove("fn__none");
+    toolbarElement.style.bottom = bottom + "px";
     if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
         // Android 端事件需要滞后一些，所以这里延迟一下
         setTimeout(() => {

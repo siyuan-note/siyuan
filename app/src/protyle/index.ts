@@ -26,6 +26,7 @@ import {getDisplayName} from "../util/pathName";
 import {onGet} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
+import {showKeyboardToolbar} from "../mobile/util/showKeyboardToolbar";
 
 export class Protyle {
 
@@ -179,8 +180,8 @@ export class Protyle {
 
                 // 需等待 getDoc 完成后再执行，否则在无页签的时候 updatePanelByEditor 会执行2次
                 // 只能用 focusin，否则点击表格无法执行
-                /// #if !MOBILE
                 this.protyle.wysiwyg.element.addEventListener("focusin", () => {
+                    /// #if !MOBILE
                     if (this.protyle && this.protyle.model) {
                         let needUpdate = true;
                         if (this.protyle.model.element.parentElement.parentElement.classList.contains("layout__wnd--active") && this.protyle.model.headElement.classList.contains("item--focus")) {
@@ -200,8 +201,10 @@ export class Protyle {
                             item.classList.remove("layout__wnd--active");
                         });
                     }
+                    /// #else
+                    showKeyboardToolbar();
+                    /// #endif
                 });
-                /// #endif
                 // 需等渲染完后再回调，用于定位搜索字段 https://github.com/siyuan-note/siyuan/issues/3171
                 if (mergedOptions.after) {
                     mergedOptions.after(this);

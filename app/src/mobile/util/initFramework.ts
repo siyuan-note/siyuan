@@ -16,7 +16,7 @@ import {hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {MobileBacklinks} from "./MobileBacklinks";
 import {MobileBookmarks} from "./MobileBookmarks";
 import {MobileTags} from "./MobileTags";
-import {initKeyboardToolbar} from "./showKeyboardToolbar";
+import {hideKeyboardToolbar, initKeyboardToolbar} from "./showKeyboardToolbar";
 
 export const initFramework = () => {
     setInlineStyle();
@@ -70,7 +70,7 @@ export const initFramework = () => {
         });
     });
     new MobileFiles();
-    document.getElementById("toolbarFile").addEventListener(getEventName(), () => {
+    document.getElementById("toolbarFile").addEventListener("click", () => {
         sidebarElement.style.left = "0";
         document.querySelector(".scrim").classList.remove("fn__none");
         const type = sidebarElement.querySelector(".toolbar--border .toolbar__icon--active").getAttribute("data-type");
@@ -84,7 +84,8 @@ export const initFramework = () => {
             tag.update();
         }
     });
-    document.getElementById("toolbarMore").addEventListener(getEventName(), () => {
+    // 用 touchstart 会导致键盘不收起
+    document.getElementById("toolbarMore").addEventListener("click", () => {
         popMenu();
     });
     const editElement = document.getElementById("toolbarEdit");
@@ -138,6 +139,9 @@ export const initFramework = () => {
 const initEditorName = () => {
     const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
     inputElement.setAttribute("placeholder", window.siyuan.languages._kernel[16]);
+    inputElement.addEventListener("focus", () => {
+       hideKeyboardToolbar();
+    });
     inputElement.addEventListener("blur", () => {
         if (window.siyuan.config.readonly || document.querySelector("#toolbarEdit use").getAttribute("xlink:href") === "#iconEdit") {
             return;

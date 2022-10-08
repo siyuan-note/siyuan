@@ -2,6 +2,9 @@ import {getIconByType} from "../../editor/getIcon";
 import {removeLoading} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
+import {processRender} from "../util/processCode";
+import {highlightRender} from "../markdown/highlightRender";
+import {blockRender} from "../markdown/blockRender";
 
 export const renderBacklink = (protyle: IProtyle, backlinkData: {
     blockPaths: IBreadcrumb[],
@@ -14,6 +17,9 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: {
         html += genBreadcrumb(item.blockPaths) + setBacklinkFold(item.dom, item.expand);
     });
     protyle.wysiwyg.element.innerHTML = html;
+    processRender(protyle.wysiwyg.element);
+    highlightRender(protyle.wysiwyg.element);
+    blockRender(protyle, protyle.wysiwyg.element);
     removeLoading(protyle);
 };
 

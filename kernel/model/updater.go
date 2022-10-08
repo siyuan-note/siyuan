@@ -218,26 +218,35 @@ func GetAnnouncements() (ret []*Announcement) {
 }
 func ver2num(a string) int {
 	var version string
-	var alpha string
-	var alphapos int
+	var suffixpos int
+	var suffixStr string
 	var suffix string
 	a = strings.Trim(a, " ")
-	alphapos = strings.Index(a, "-alpha")
-	if alphapos != -1 {
-		version = a[0:alphapos]
-		alpha = a[alphapos+6 : len(a)]
-		suffix = fmt.Sprintf("%04s", alpha)
+	if strings.Contains(a, "alpha") {
+		suffixpos = strings.Index(a, "-alpha")
+		version = a[0:suffixpos]
+		suffixStr = a[suffixpos+6 : len(a)]
+		suffix = "0" + fmt.Sprintf("%03s", suffixStr)
+	} else if strings.Contains(a, "beta") {
+		suffixpos = strings.Index(a, "-beta")
+		version = a[0:suffixpos]
+		suffixStr = a[suffixpos+5 : len(a)]
+		suffix = "1" + fmt.Sprintf("%03s", suffixStr)
 	} else {
 		version = a
-		suffix = "1000"
+		suffix = "5000"
 	}
 	split := strings.Split(version, ".")
-
 	var verArr []string
 
 	verArr = append(verArr, "1")
-	for i := 0; i < len(split); i++ {
-		var tmp = split[i]
+	var tmp string
+	for i := 0; i < 3; i++ {
+		if i < len(split) {
+			tmp = split[i]
+		} else {
+			tmp = "0"
+		}
 		verArr = append(verArr, fmt.Sprintf("%04s", tmp))
 	}
 	verArr = append(verArr, suffix)

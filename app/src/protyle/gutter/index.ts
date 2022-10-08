@@ -78,10 +78,8 @@ export class Gutter {
                     buttonElement.setAttribute("disabled", "disabled");
                     let foldElement: Element;
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${(buttonElement.previousElementSibling || buttonElement.nextElementSibling).getAttribute("data-node-id")}"]`)).find(item => {
-                        const itemRect = item.getBoundingClientRect();
-                        const gutterTop = this.element.getBoundingClientRect().top + 8;
                         if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
-                            itemRect.top <= gutterTop && itemRect.bottom >= gutterTop) {
+                            this.isMatchNode(item)) {
                             foldElement = item;
                             return true;
                         }
@@ -160,10 +158,8 @@ export class Gutter {
             } else if (window.siyuan.altIsPressed) {
                 let foldElement: Element;
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
-                    const itemRect = item.getBoundingClientRect();
-                    const gutterTop = this.element.getBoundingClientRect().top + 8;
                     if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
-                        itemRect.top <= gutterTop && itemRect.bottom >= gutterTop) {
+                        this.isMatchNode(item)) {
                         foldElement = item;
                         return true;
                     }
@@ -233,18 +229,14 @@ export class Gutter {
                 return;
             }
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
-                if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
-                    const itemRect = item.getBoundingClientRect();
-                    const gutterTop = this.element.getBoundingClientRect().top + 8;
-                    if (itemRect.top <= gutterTop && itemRect.bottom >= gutterTop) {
-                        Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl")).forEach(hlItem => {
-                            if (!item.isSameNode(hlItem)) {
-                                hlItem.classList.remove("protyle-wysiwyg--hl");
-                            }
-                        });
-                        item.classList.add("protyle-wysiwyg--hl");
-                        return true;
-                    }
+                if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") && this.isMatchNode(item)) {
+                    Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl")).forEach(hlItem => {
+                        if (!item.isSameNode(hlItem)) {
+                            hlItem.classList.remove("protyle-wysiwyg--hl");
+                        }
+                    });
+                    item.classList.add("protyle-wysiwyg--hl");
+                    return true;
                 }
             });
             event.preventDefault();
@@ -256,6 +248,15 @@ export class Gutter {
             event.preventDefault();
             event.stopPropagation();
         });
+    }
+
+    private isMatchNode(item: Element) {
+        const itemRect = item.getBoundingClientRect();
+        let gutterTop = this.element.getBoundingClientRect().top + 4;
+        if (itemRect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8) {
+            gutterTop = gutterTop - (itemRect.height - this.element.clientHeight) / 2
+        }
+        return itemRect.top <= gutterTop && itemRect.bottom >= gutterTop
     }
 
     private turnsOneInto(options: {
@@ -669,10 +670,8 @@ export class Gutter {
         let nodeElement: Element;
         if (buttonElement.tagName === "BUTTON") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
-                const itemRect = item.getBoundingClientRect();
-                const gutterTop = this.element.getBoundingClientRect().top + 8;  // 缩放后小数点会有偏差
                 if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
-                    itemRect.top <= gutterTop && itemRect.bottom >= gutterTop) {
+                    this.isMatchNode(item)) {
                     nodeElement = item;
                     return true;
                 }

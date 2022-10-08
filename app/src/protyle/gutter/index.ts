@@ -1294,16 +1294,15 @@ export class Gutter {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
 
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.fold,
-                accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}/${updateHotkeyTip("⌥Click")}`,
-                click() {
-                    setFold(protyle, nodeElement);
-                    focusBlock(nodeElement);
-                }
-            }).element);
-
             if (type !== "NodeThematicBreak") {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.fold,
+                    accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}/${updateHotkeyTip("⌥Click")}`,
+                    click() {
+                        setFold(protyle, nodeElement);
+                        focusBlock(nodeElement);
+                    }
+                }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.attr,
                     accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧Click"),

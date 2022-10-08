@@ -1276,6 +1276,9 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
         // 没有子列表或多个块的列表项不进行折叠
         return -1;
     }
+    if (nodeElement.getAttribute("data-type") === "NodeThematicBreak") {
+        return -1;
+    }
     // 0 正常；1 折叠
     let fold = "0";
     if (nodeElement.getAttribute("fold") === "1") {

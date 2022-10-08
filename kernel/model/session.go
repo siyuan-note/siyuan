@@ -156,6 +156,11 @@ func CheckReadonly(c *gin.Context) {
 func CheckAuth(c *gin.Context) {
 	//logging.LogInfof("check auth for [%s]", c.Request.RequestURI)
 
+	if "" == Conf.AccessAuthCode {
+		c.Next()
+		return
+	}
+
 	// 放过 /appearance/
 	if strings.HasPrefix(c.Request.RequestURI, "/appearance/") ||
 		strings.HasPrefix(c.Request.RequestURI, "/stage/build/export/") ||

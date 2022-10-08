@@ -601,7 +601,9 @@ func GetMaskedConf() (ret *AppConf, err error) {
 	}
 
 	ret.UserData = MaskedUserData
-	ret.AccessAuthCode = MaskedAccessAuthCode
+	if "" != ret.AccessAuthCode {
+		ret.AccessAuthCode = MaskedAccessAuthCode
+	}
 	return
 }
 

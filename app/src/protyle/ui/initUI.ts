@@ -99,7 +99,8 @@ export const setPadding = (protyle: IProtyle) => {
     }
     if (!isMobile()) {
         // 防止右侧分屏后，左侧页签抖动；10 为滚动条宽度
-        if (!window.siyuan.config.editor.fullWidth) {
+        if (!protyle.options.backlinkData && // https://github.com/siyuan-note/siyuan/issues/6099
+            !window.siyuan.config.editor.fullWidth) {
             protyle.wysiwyg.element.style.width = (protyle.element.clientWidth - 10) + "px";
             if (protyle.options.render.title) {
                 protyle.title.element.style.width = (protyle.element.clientWidth - min16 - min24 - 10) + "px";

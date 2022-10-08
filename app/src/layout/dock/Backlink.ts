@@ -521,9 +521,11 @@ export class Backlink extends Model {
                 if (data.linkRefsCount === 0) {
                     this.status[this.blockId].backlinkMStatus = 0;
                 } else {
-                    this.status[this.blockId].backlinkOpenIds = [data.backlinks[0].id];
                     this.status[this.blockId].backlinkMStatus = 1;
                 }
+            }
+            if (data.linkRefsCount > 0) {
+                this.status[this.blockId].backlinkOpenIds = [data.backlinks[0].id];
             }
         }
 

@@ -10,7 +10,7 @@ import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../markdown/blockRender";
 import {hideElements} from "../ui/hideElements";
 import {hasClosestByAttribute} from "../util/hasClosest";
-import {fetchSyncPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 
 export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true) => {
     if (!blockElement.parentElement) {
@@ -182,6 +182,14 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             } else if (realType === "NodeThematicBreak" && focusHR) {
                 focusBlock(blockElement);
             } else {
+                // https://github.com/siyuan-note/siyuan/issues/6087
+                realElement.querySelectorAll('[data-type="block-ref"][data-subtype="d"]').forEach(refItem => {
+                    if (refItem.textContent === "") {
+                        fetchPost("/api/block/getRefText", {id: refItem.getAttribute("data-id")}, (response) => {
+                            refItem.innerHTML = response.data;
+                        });
+                    }
+                });
                 mathRender(realElement);
                 if (index === tempElement.content.childElementCount - 1) {
                     focusByWbr(protyle.wysiwyg.element, range);

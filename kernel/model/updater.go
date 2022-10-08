@@ -26,6 +26,8 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -214,6 +216,36 @@ func GetAnnouncements() (ret []*Announcement) {
 	}
 	return
 }
+func ver2num(a string) int {
+	var version string
+	var alpha string
+	var alphapos int
+	var suffix string
+	a = strings.Trim(a, " ")
+	alphapos = strings.Index(a, "-alpha")
+	if alphapos != -1 {
+		version = a[0:alphapos]
+		alpha = a[alphapos+6 : len(a)]
+		suffix = fmt.Sprintf("%04s", alpha)
+	} else {
+		version = a
+		suffix = "1000"
+	}
+	split := strings.Split(version, ".")
+
+	var verArr []string
+
+	verArr = append(verArr, "1")
+	for i := 0; i < len(split); i++ {
+		var tmp = split[i]
+		verArr = append(verArr, fmt.Sprintf("%04s", tmp))
+	}
+	verArr = append(verArr, suffix)
+
+	ver := strings.Join(verArr, "")
+	verNum, _ := strconv.Atoi(ver)
+	return verNum
+}
 
 func CheckUpdate(showMsg bool) {
 	if !showMsg {
@@ -229,7 +261,7 @@ func CheckUpdate(showMsg bool) {
 	release := result["release"].(string)
 	var msg string
 	var timeout int
-	if ver == util.Ver {
+	if ver2num(ver) <= ver2num(util.Ver) {
 		msg = Conf.Language(10)
 		timeout = 3000
 	} else {

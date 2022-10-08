@@ -8,6 +8,7 @@
 * [块引缺失锚文本情况下自动补全](https://github.com/siyuan-note/siyuan/issues/6087)
 * [内核接口 `api/system/getConf` 脱敏处理](https://github.com/siyuan-note/siyuan/issues/6088)
 * [分割线不应该支持折叠](https://github.com/siyuan-note/siyuan/issues/6097)
+* [关闭自适应宽度后反链面板无法根据内容自适应](https://github.com/siyuan-note/siyuan/issues/6099)
 
 ### 修复缺陷
 

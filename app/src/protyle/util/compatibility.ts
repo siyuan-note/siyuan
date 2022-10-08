@@ -18,7 +18,7 @@ export const readText = async ()  => {
         return window.JSAndroid.readClipboard();
     }
     return navigator.clipboard.readText();
-}
+};
 
 export const writeText = async (text: string) => {
     let range: Range;

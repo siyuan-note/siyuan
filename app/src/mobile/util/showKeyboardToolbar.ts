@@ -78,7 +78,7 @@ export const initKeyboardToolbar = () => {
             return;
         }
         if (type === "down") {
-            moveToDown(protyle, nodeElement, range)
+            moveToDown(protyle, nodeElement, range);
             focusByRange(range);
             return;
         }

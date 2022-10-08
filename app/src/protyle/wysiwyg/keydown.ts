@@ -32,12 +32,12 @@ import {matchHotKey} from "../util/hotKey";
 import {enter} from "./enter";
 import {fixTable} from "../util/table";
 import {
-    transaction, turnsIntoOneTransaction, turnsIntoTransaction,
+    turnsIntoOneTransaction, turnsIntoTransaction,
     updateBatchTransaction,
     updateTransaction
 } from "./transaction";
 import {fontEvent} from "../toolbar/Font";
-import {listIndent, listOutdent, updateListOrder} from "./list";
+import {listIndent, listOutdent} from "./list";
 import {newFileBySelect, newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {isLocalPath} from "../../util/pathName";
@@ -49,7 +49,6 @@ import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
-import {preventScroll} from "../scroll/preventScroll";
 import {bindMenuKeydown} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";

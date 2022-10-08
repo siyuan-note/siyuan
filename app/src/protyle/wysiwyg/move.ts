@@ -93,7 +93,7 @@ export const moveToUp  = (protyle:IProtyle, nodeElement:HTMLElement, range:Range
     }
     preventScroll(protyle);
     scrollCenter(protyle);
-}
+};
 
 export const moveToDown  = (protyle:IProtyle, nodeElement:HTMLElement, range:Range) => {
     let nextElement: Element;
@@ -180,4 +180,4 @@ export const moveToDown  = (protyle:IProtyle, nodeElement:HTMLElement, range:Ran
     }
     preventScroll(protyle);
     scrollCenter(protyle);
-}
+};

@@ -129,7 +129,7 @@ export const initStatus = () => {
     /// #endif
 };
 
-let countRootId: string
+let countRootId: string;
 export const countSelectWord = (range: Range, rootID?: string) => {
     /// #if !MOBILE
     if (document.getElementById("status").classList.contains("fn__none")) {
@@ -140,7 +140,7 @@ export const countSelectWord = (range: Range, rootID?: string) => {
         fetchPost("/api/block/getContentWordCount", {"content": range.toString()}, (response) => {
             renderStatusbarCounter(response.data);
         });
-        countRootId = ""
+        countRootId = "";
     } else if (rootID && rootID !== countRootId) {
         countRootId = rootID;
         fetchPost("/api/block/getTreeStat", {id: rootID}, (response) => {
@@ -156,15 +156,15 @@ export const countBlockWord = (ids: string[], rootID?: string, clearCache = fals
         return;
     }
     if (clearCache) {
-        countRootId = ""
+        countRootId = "";
     }
     if (ids.length > 0) {
         fetchPost("/api/block/getBlocksWordCount", {ids}, (response) => {
             renderStatusbarCounter(response.data);
         });
-        countRootId = ""
+        countRootId = "";
     } else if (rootID && rootID !== countRootId) {
-        countRootId = rootID
+        countRootId = rootID;
         fetchPost("/api/block/getTreeStat", {id: rootID}, (response) => {
             renderStatusbarCounter(response.data);
         });
@@ -173,7 +173,7 @@ export const countBlockWord = (ids: string[], rootID?: string, clearCache = fals
 };
 
 export const clearCounter = () => {
-    countRootId = ""
+    countRootId = "";
     document.querySelector("#status .status__counter").innerHTML = "";
 };
 

@@ -701,7 +701,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             // 行首转义符前删除 https://github.com/siyuan-note/siyuan/issues/6092
             if (range.startOffset === 0 &&
-                previousSibling && previousSibling.parentElement.getAttribute("data-type").indexOf('backslash') > -1 &&
+                previousSibling && previousSibling.parentElement.getAttribute("data-type").indexOf("backslash") > -1 &&
                 previousSibling.nodeType !== 3 && (previousSibling as HTMLElement).outerHTML === "<span>\\</span>" &&
                 !hasPreviousSibling(previousSibling)) {
                 range.setStartBefore(previousSibling.parentElement);
@@ -712,7 +712,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             // 光标位于转义符前 F5 后，rang 和点击后的不同，也需进行判断
             if (range.startOffset === 1 && range.startContainer.nodeType !== 3 &&
-                range.startContainer.parentElement.getAttribute("data-type").indexOf('backslash') > -1 &&
+                range.startContainer.parentElement.getAttribute("data-type").indexOf("backslash") > -1 &&
                 !hasPreviousSibling(range.startContainer.parentElement)) {
                 range.setStartBefore(range.startContainer.parentElement);
                 removeBlock(protyle, nodeElement, range);

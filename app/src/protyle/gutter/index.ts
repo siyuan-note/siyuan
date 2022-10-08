@@ -254,9 +254,9 @@ export class Gutter {
         const itemRect = item.getBoundingClientRect();
         let gutterTop = this.element.getBoundingClientRect().top + 4;
         if (itemRect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8) {
-            gutterTop = gutterTop - (itemRect.height - this.element.clientHeight) / 2
+            gutterTop = gutterTop - (itemRect.height - this.element.clientHeight) / 2;
         }
-        return itemRect.top <= gutterTop && itemRect.bottom >= gutterTop
+        return itemRect.top <= gutterTop && itemRect.bottom >= gutterTop;
     }
 
     private turnsOneInto(options: {

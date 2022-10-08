@@ -582,6 +582,29 @@ func IsSubscriber() bool {
 	return nil != Conf.User && (-1 == Conf.User.UserSiYuanProExpireTime || 0 < Conf.User.UserSiYuanProExpireTime) && 0 == Conf.User.UserSiYuanSubscriptionStatus
 }
 
+const (
+	MaskedUserData       = ""
+	MaskedAccessAuthCode = "*******"
+)
+
+func GetMaskedConf() (ret *AppConf, err error) {
+	// 脱敏处理
+	data, err := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
+	if nil != err {
+		logging.LogErrorf("marshal conf failed: %s", err)
+		return
+	}
+	ret = &AppConf{}
+	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
+		logging.LogErrorf("unmarshal conf failed: %s", err)
+		return
+	}
+
+	ret.UserData = MaskedUserData
+	ret.AccessAuthCode = MaskedAccessAuthCode
+	return
+}
+
 func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))

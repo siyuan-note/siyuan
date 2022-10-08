@@ -146,8 +146,15 @@ func getConf(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	maskedConf, err := model.GetMaskedConf()
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = "get conf failed: " + err.Error()
+		return
+	}
+
 	ret.Data = map[string]interface{}{
-		"conf":  model.Conf,
+		"conf":  maskedConf,
 		"start": start,
 	}
 
@@ -193,6 +200,10 @@ func setAccessAuthCode(c *gin.Context) {
 	}
 
 	aac := arg["accessAuthCode"].(string)
+	if model.MaskedAccessAuthCode == aac {
+		aac = model.Conf.AccessAuthCode
+	}
+
 	model.Conf.AccessAuthCode = aac
 	model.Conf.Save()
 

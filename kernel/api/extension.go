@@ -27,7 +27,9 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -58,6 +60,35 @@ func extensionCopy(c *gin.Context) {
 	luteEngine := model.NewLute()
 	md := luteEngine.HTML2Md(dom)
 	md = strings.TrimSpace(md)
+
+	var unlinks []*ast.Node
+	tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		// 浏览器剪藏扩展改进 https://github.com/siyuan-note/siyuan/issues/6124
+		if ast.NodeInlineMath == n.Type {
+			// $ 转义
+			text := &ast.Node{Type: ast.NodeText}
+			text.Tokens = []byte("\\$" + string(n.ChildByType(ast.NodeInlineMathContent).Tokens) + "\\$")
+			n.InsertBefore(text)
+			unlinks = append(unlinks, n)
+			return ast.WalkSkipChildren
+		} else if ast.NodeText == n.Type {
+			// 剔除行首空白
+			if ast.NodeParagraph == n.Parent.Type && n.Parent.FirstChild == n {
+				n.Tokens = bytes.TrimLeft(n.Tokens, " \t\n")
+			}
+		}
+		return ast.WalkContinue
+	})
+	for _, unlink := range unlinks {
+		unlink.Unlink()
+	}
+
+	md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	ret.Data = map[string]interface{}{
 		"md": md,
 	}

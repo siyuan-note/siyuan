@@ -1,4 +1,6 @@
 {
+  "generateConflictDoc": "同步衝突時生成衝突文檔",
+  "generateConflictDocTip": "啟用後當同步發生衝突時會生成衝突文檔，以便直接打開查看。無論是否啟用，數據歷史都會記錄衝突文檔",
   "deleteOpConfirm": "⚠️ Delete operation confirmation",
   "filterDocNameEnter": "過濾文檔名 Enter",
   "defBlock": "定義塊",

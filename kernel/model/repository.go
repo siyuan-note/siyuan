@@ -541,7 +541,7 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 
 	logSyncMergeResult(mergeResult)
 
-	if 0 < len(mergeResult.Conflicts) {
+	if 0 < len(mergeResult.Conflicts) && Conf.Sync.GenerateConflictDoc {
 		// 云端同步发生冲突时生成副本 https://github.com/siyuan-note/siyuan/issues/5687
 
 		luteEngine := NewLute()

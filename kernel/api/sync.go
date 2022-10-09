@@ -108,6 +108,19 @@ func createCloudSyncDir(c *gin.Context) {
 	}
 }
 
+func setSyncGenerateConflictDoc(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	enabled := arg["enabled"].(bool)
+	model.SetSyncGenerateConflictDoc(enabled)
+}
+
 func setSyncEnable(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

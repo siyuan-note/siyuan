@@ -216,6 +216,15 @@ func SetCloudSyncDir(name string) {
 	Conf.Save()
 }
 
+func SetSyncGenerateConflictDoc(b bool) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	Conf.Sync.GenerateConflictDoc = b
+	Conf.Save()
+	return
+}
+
 func SetSyncEnable(b bool) (err error) {
 	syncLock.Lock()
 	defer syncLock.Unlock()

@@ -1,4 +1,6 @@
 {
+  "generateConflictDoc": "Generate conflict documentation when syncing conflicts",
+  "generateConflictDocTip": "After enabling, a conflict document will be generated when a synchronization conflict occurs, so that it can be opened and viewed directly. Whether enabled or not, the data history will record the conflict document",
   "deleteOpConfirm": "⚠️ Delete operation confirmation",
   "filterDocNameEnter": "Filter doc name Enter",
   "defBlock": "Def block",

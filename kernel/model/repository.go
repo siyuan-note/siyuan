@@ -682,15 +682,21 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
 	})
 	if errors.Is(err, dejavu.ErrNotFoundObject) {
+		logging.LogWarnf("data repo is corrupted, try to reset it")
 		resetErr := os.RemoveAll(filepath.Join(repo.Path))
 		if nil != resetErr {
-			logging.LogErrorf("reset data repo failed: %s", resetErr)
+			logging.LogErrorf("remove data repo failed: %s", resetErr)
 			return
 		}
-		logging.LogWarnf("data repo has been reset caused by not found object")
 		index, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
 			eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
 		})
+		logging.LogWarnf("data repo has been reset")
+
+		go func() {
+			time.Sleep(5 * time.Second)
+			util.PushMsg(Conf.Language(105), 5000)
+		}()
 	}
 
 	if nil != err {

@@ -48,7 +48,7 @@ const setBacklinkFold = (html: string, expand: boolean) => {
     return tempDom.innerHTML;
 };
 
-export const loadBreadcrumb = (element: HTMLElement) => {
+export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
     fetchPost("/api/filetree/getDoc", {
         id: element.getAttribute("data-id"),
         size: Constants.SIZE_GET_MAX,
@@ -62,6 +62,9 @@ export const loadBreadcrumb = (element: HTMLElement) => {
             tempElement.remove();
         }
         element.parentElement.insertAdjacentHTML("afterend", setBacklinkFold(getResponse.data.content, true));
+        processRender(protyle.wysiwyg.element);
+        highlightRender(protyle.wysiwyg.element);
+        blockRender(protyle, protyle.wysiwyg.element);
     });
 };
 

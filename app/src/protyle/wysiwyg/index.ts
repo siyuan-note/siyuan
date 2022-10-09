@@ -1404,7 +1404,7 @@ export class WYSIWYG {
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {
                 if (backlinkBreadcrumbItemElement.getAttribute("data-id")) {
-                    loadBreadcrumb(backlinkBreadcrumbItemElement);
+                    loadBreadcrumb(protyle, backlinkBreadcrumbItemElement);
                 } else {
                     // 引用标题时的更多加载
                     getBacklinkHeadingMore(backlinkBreadcrumbItemElement);

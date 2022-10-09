@@ -303,6 +303,7 @@ declare interface IConfig {
         key: string
     },
     sync: {
+        generateConflictDoc: boolean
         enabled: boolean
         mode: number
         synced: number

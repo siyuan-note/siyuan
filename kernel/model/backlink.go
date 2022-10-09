@@ -178,7 +178,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
 	linkRefs, _, excludeBacklinkIDs := buildLinkRefs(rootID, refs)
-	tmpMentions := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
+	tmpMentions, mentionKeywords := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
 	luteEngine := NewLute()
 	treeCache := map[string]*parse.Tree{}
 	var mentions []*Block
@@ -199,7 +199,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 			treeCache[mention.RootID] = refTree
 		}
 
-		backlink := buildBacklink(mention.ID, refTree, luteEngine)
+		backlink := buildBacklink(mention.ID, refTree, mentionKeywords, luteEngine)
 		ret = append(ret, backlink)
 	}
 	return
@@ -231,13 +231,13 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 
 	luteEngine := NewLute()
 	for _, linkRef := range linkRefs {
-		backlink := buildBacklink(linkRef.ID, refTree, luteEngine)
+		backlink := buildBacklink(linkRef.ID, refTree, nil, luteEngine)
 		ret = append(ret, backlink)
 	}
 	return
 }
 
-func buildBacklink(refID string, refTree *parse.Tree, luteEngine *lute.Lute) (ret *Backlink) {
+func buildBacklink(refID string, refTree *parse.Tree, mentionKeywords []string, luteEngine *lute.Lute) (ret *Backlink) {
 	n := treenode.GetNodeInTree(refTree, refID)
 	if nil == n {
 		return
@@ -289,6 +289,39 @@ func buildBacklink(refID string, refTree *parse.Tree, luteEngine *lute.Lute) (re
 		renderNodes = append(renderNodes, cc...)
 	} else {
 		renderNodes = append(renderNodes, n)
+	}
+
+	if 0 < len(mentionKeywords) {
+		for _, renderNode := range renderNodes {
+			var unlinks []*ast.Node
+			ast.Walk(renderNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering {
+					return ast.WalkContinue
+				}
+				if ast.NodeText == n.Type {
+					text := string(n.Tokens)
+					text = search.EncloseHighlighting(text, mentionKeywords, "<span data-type=\"search-mark\">", "</span>", Conf.Search.CaseSensitive)
+					n.Tokens = gulu.Str.ToBytes(text)
+					if bytes.Contains(n.Tokens, []byte("search-mark")) {
+						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<span data-type=\"search-mark\">"), []byte("\\\\<span data-type=\"search-mark\">"))
+						linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
+						var children []*ast.Node
+						for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+							children = append(children, c)
+						}
+						for _, c := range children {
+							n.InsertBefore(c)
+						}
+						unlinks = append(unlinks, n)
+						return ast.WalkContinue
+					}
+				}
+				return ast.WalkContinue
+			})
+			for _, unlink := range unlinks {
+				unlink.Unlink()
+			}
+		}
 	}
 
 	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
@@ -350,7 +383,7 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 		return backlinks[i].ID > backlinks[j].ID
 	})
 
-	mentionRefs := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12)
+	mentionRefs, _ := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12)
 	tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink")
 	for _, l := range tmpBackmentions {
 		l.Blocks = nil
@@ -514,7 +547,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID strin
 	}
 	linkPaths = toSubTree(linkRefs, keyword)
 
-	mentions := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen)
+	mentions, _ := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen)
 	mentionsCount = len(mentions)
 	mentionPaths = toFlatTree(mentions, 0, "backlink")
 	return
@@ -625,7 +658,7 @@ func removeDuplicatedRefs(refs []*sql.Ref) (ret []*sql.Ref) {
 	return
 }
 
-func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword string, excludeBacklinkIDs *hashset.Set, beforeLen int) (ret []*Block) {
+func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword string, excludeBacklinkIDs *hashset.Set, beforeLen int) (ret []*Block, mentionKeywords []string) {
 	ret = []*Block{}
 
 	var names, aliases []string
@@ -676,7 +709,6 @@ func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword st
 		}
 	}
 
-	var mentionKeywords []string
 	for _, v := range set.Values() {
 		mentionKeywords = append(mentionKeywords, v.(string))
 	}

@@ -1,3 +1,19 @@
+## v2.3.2 / 2022-10-09
+
+### 改进功能
+
+* [代码语言可进行清空](https://github.com/siyuan-note/siyuan/issues/6022)
+* [改进检查更新时版本号比较](https://github.com/siyuan-note/siyuan/pull/6091)
+* [同步生成冲突文档时补全 `Spec` 属性字段](https://github.com/siyuan-note/siyuan/issues/6105)
+* [F3 在纯文本且没选中情况下应替换原有文本为引用](https://github.com/siyuan-note/siyuan/issues/6107)
+* [云端同步冲突时支持设置是否产生冲突文档](https://github.com/siyuan-note/siyuan/issues/6110)
+
+### 修复缺陷
+
+* [不应该重置锚文本为 `block not found`](https://github.com/siyuan-note/siyuan/issues/6104)
+* [同步创建数据快照失败](https://github.com/siyuan-note/siyuan/issues/6106)
+* [反链面板嵌入块无法加载](https://github.com/siyuan-note/siyuan/issues/6108)
+
 ## v2.3.1 / 2022-10-08
 
 ### 改进功能

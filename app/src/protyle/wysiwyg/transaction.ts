@@ -160,12 +160,6 @@ const promiseTransaction = () => {
                         blockRender(protyle, item);
                     }
                 });
-                // 更新引用块
-                protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${operation.id}"]`).forEach(item => {
-                    if (item.getAttribute("data-subtype") === "d") {
-                        item.textContent = "block not found";
-                    }
-                });
                 return;
             }
             if (operation.action === "move") {
@@ -373,12 +367,6 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
             if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
                 item.removeAttribute("data-render");
                 blockRender(protyle, item);
-            }
-        });
-        // 更新 ws 引用块
-        protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${operation.id}"]`).forEach(item => {
-            if (item.getAttribute("data-subtype") === "d") {
-                item.textContent = "block not found";
             }
         });
         return;

@@ -19,7 +19,7 @@ export class Backlink extends Model {
     private tree: Tree;
     private notebookId: string;
     private mTree: Tree;
-    private editors: Protyle[] = [];
+    public editors: Protyle[] = [];
     public status: {
         [key: string]: {
             sort: string,

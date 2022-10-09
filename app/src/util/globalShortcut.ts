@@ -100,21 +100,39 @@ export const globalShortcut = () => {
                 if (!targetBlockElement) {
                     return;
                 }
-                const hasTab = getAllModels().editor.find(item => {
+                const allModels = getAllModels()
+                let findNode = false
+                allModels.editor.find(item => {
                     if (item.editor.protyle.wysiwyg.element.isSameNode(eventPath0)) {
                         item.editor.protyle.gutter.render(targetBlockElement, item.editor.protyle.wysiwyg.element);
+                        findNode = true
                         return true;
                     }
                 });
-                if (!hasTab) {
+                if (!findNode) {
                     window.siyuan.blockPanels.find(item => {
-                        const hasEdit = item.editors.find(eItem => {
+                        item.editors.find(eItem => {
                             if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
                                 eItem.protyle.gutter.render(targetBlockElement, eItem.protyle.wysiwyg.element);
+                                findNode = true;
                                 return true;
                             }
                         });
-                        if (hasEdit) {
+                        if (findNode) {
+                            return true;
+                        }
+                    });
+                }
+                if (!findNode) {
+                    allModels.backlink.find(item => {
+                        item.editors.find(eItem => {
+                            if (eItem.protyle.wysiwyg.element.isSameNode(eventPath0)) {
+                                eItem.protyle.gutter.render(targetBlockElement, eItem.protyle.wysiwyg.element);
+                                findNode = true
+                                return true;
+                            }
+                        });
+                        if (findNode) {
                             return true;
                         }
                     });
@@ -128,21 +146,39 @@ export const globalShortcut = () => {
             if (!targetBlockElement) {
                 return;
             }
-            const hasTab = getAllModels().editor.find(item => {
+            const allModels = getAllModels();
+            let findNode = false;
+            allModels.editor.find(item => {
                 if (item.editor.protyle.wysiwyg.element.contains(eventPath0)) {
                     item.editor.protyle.gutter.render(targetBlockElement, item.editor.protyle.wysiwyg.element);
+                    findNode = true
                     return true;
                 }
             });
-            if (!hasTab) {
+            if (!findNode) {
                 window.siyuan.blockPanels.find(item => {
-                    const hasEdit = item.editors.find(eItem => {
+                    item.editors.find(eItem => {
                         if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
                             eItem.protyle.gutter.render(targetBlockElement, eItem.protyle.wysiwyg.element);
+                            findNode = true;
                             return true;
                         }
                     });
-                    if (hasEdit) {
+                    if (findNode) {
+                        return true;
+                    }
+                });
+            }
+            if (!findNode) {
+                allModels.backlink.find(item => {
+                    item.editors.find(eItem => {
+                        if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
+                            eItem.protyle.gutter.render(targetBlockElement, eItem.protyle.wysiwyg.element);
+                            findNode = true
+                            return true;
+                        }
+                    });
+                    if (findNode) {
                         return true;
                     }
                 });

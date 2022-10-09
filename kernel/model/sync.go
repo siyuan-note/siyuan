@@ -348,7 +348,7 @@ func formatErrorMsg(err error) string {
 	} else if strings.Contains(msgLowerCase, "cipher: message authentication failed") {
 		msg = Conf.Language(135)
 	} else if strings.Contains(msgLowerCase, "repo fatal error") {
-		msg = Conf.Language(23) + " " + err.Error()
+		msg = Conf.Language(23)
 	} else if strings.Contains(msgLowerCase, "no such host") || strings.Contains(msgLowerCase, "connection failed") || strings.Contains(msgLowerCase, "hostname resolution") || strings.Contains(msgLowerCase, "No address associated with hostname") {
 		msg = Conf.Language(24)
 	} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") {

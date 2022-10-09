@@ -23,7 +23,7 @@ export const initBlockPopover = () => {
                 tip = aElement.getAttribute("data-href");
                 const title = aElement.getAttribute("data-title");
                 if (title) {
-                    tip += " " + title;
+                    tip = title + "<br>" + tip;
                 }
             }
             if (tip && !tip.startsWith("siyuan://blocks") && !aElement.classList.contains("b3-tooltips")) {

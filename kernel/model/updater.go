@@ -26,6 +26,8 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -214,6 +216,45 @@ func GetAnnouncements() (ret []*Announcement) {
 	}
 	return
 }
+func ver2num(a string) int {
+	var version string
+	var suffixpos int
+	var suffixStr string
+	var suffix string
+	a = strings.Trim(a, " ")
+	if strings.Contains(a, "alpha") {
+		suffixpos = strings.Index(a, "-alpha")
+		version = a[0:suffixpos]
+		suffixStr = a[suffixpos+6 : len(a)]
+		suffix = "0" + fmt.Sprintf("%03s", suffixStr)
+	} else if strings.Contains(a, "beta") {
+		suffixpos = strings.Index(a, "-beta")
+		version = a[0:suffixpos]
+		suffixStr = a[suffixpos+5 : len(a)]
+		suffix = "1" + fmt.Sprintf("%03s", suffixStr)
+	} else {
+		version = a
+		suffix = "5000"
+	}
+	split := strings.Split(version, ".")
+	var verArr []string
+
+	verArr = append(verArr, "1")
+	var tmp string
+	for i := 0; i < 3; i++ {
+		if i < len(split) {
+			tmp = split[i]
+		} else {
+			tmp = "0"
+		}
+		verArr = append(verArr, fmt.Sprintf("%04s", tmp))
+	}
+	verArr = append(verArr, suffix)
+
+	ver := strings.Join(verArr, "")
+	verNum, _ := strconv.Atoi(ver)
+	return verNum
+}
 
 func CheckUpdate(showMsg bool) {
 	if !showMsg {
@@ -229,7 +270,7 @@ func CheckUpdate(showMsg bool) {
 	release := result["release"].(string)
 	var msg string
 	var timeout int
-	if ver == util.Ver {
+	if ver2num(ver) <= ver2num(util.Ver) {
 		msg = Conf.Language(10)
 		timeout = 3000
 	} else {

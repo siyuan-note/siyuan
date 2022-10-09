@@ -147,10 +147,16 @@ func downloadInstallPkg(pkgURL, checksum string) {
 		}
 	}
 
+	err := os.MkdirAll(filepath.Join(util.TempDir, "install"), 0755)
+	if nil != err {
+		logging.LogErrorf("create temp install dir failed: %s", err)
+		return
+	}
+
 	logging.LogInfof("downloading install package [%s]", pkgURL)
 	msgId := util.PushMsg(Conf.Language(103), 60*1000*10)
 	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(10 * time.Minute)
-	err := client.NewParallelDownload(pkgURL).SetConcurrency(8).SetSegmentSize(1024 * 1024 * 2).
+	err = client.NewParallelDownload(pkgURL).SetConcurrency(8).SetSegmentSize(1024 * 1024 * 2).
 		SetOutputFile(savePath).Do()
 	if nil != err {
 		logging.LogErrorf("download install package failed: %s", err)

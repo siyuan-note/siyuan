@@ -106,7 +106,7 @@ func getUpdatePkg() (downloadPkgURL, checksum string, err error) {
 
 	installPkgSite := result["installPkg"].(string)
 	ver := result["ver"].(string)
-	if ver == util.Ver {
+	if isVersionUpToDate(ver) {
 		return
 	}
 
@@ -216,6 +216,57 @@ func GetAnnouncements() (ret []*Announcement) {
 	}
 	return
 }
+
+func CheckUpdate(showMsg bool) {
+	if !showMsg {
+		return
+	}
+
+	result, err := util.GetRhyResult(showMsg)
+	if nil != err {
+		return
+	}
+
+	ver := result["ver"].(string)
+	release := result["release"].(string)
+	var msg string
+	var timeout int
+	if isVersionUpToDate(ver) {
+		msg = Conf.Language(10)
+		timeout = 3000
+	} else {
+		msg = fmt.Sprintf(Conf.Language(9), "<a href=\""+release+"\">"+release+"</a>")
+		showMsg = true
+		timeout = 15000
+	}
+	if showMsg {
+		util.PushMsg(msg, timeout)
+		go func() {
+			checkDownloadInstallPkg()
+			if "" != getNewVerInstallPkgPath() {
+				util.PushMsg(Conf.Language(62), 0)
+			}
+		}()
+	}
+}
+
+func isVersionUpToDate(releaseVer string) bool {
+	return ver2num(releaseVer) <= ver2num(util.Ver)
+}
+
+func skipNewVerInstallPkg() bool {
+	if !gulu.OS.IsWindows() && !gulu.OS.IsDarwin() && !gulu.OS.IsLinux() {
+		return true
+	}
+	if util.ISMicrosoftStore {
+		return true
+	}
+	if !Conf.System.DownloadInstallPkg {
+		return true
+	}
+	return false
+}
+
 func ver2num(a string) int {
 	var version string
 	var suffixpos int
@@ -254,50 +305,4 @@ func ver2num(a string) int {
 	ver := strings.Join(verArr, "")
 	verNum, _ := strconv.Atoi(ver)
 	return verNum
-}
-
-func CheckUpdate(showMsg bool) {
-	if !showMsg {
-		return
-	}
-
-	result, err := util.GetRhyResult(showMsg)
-	if nil != err {
-		return
-	}
-
-	ver := result["ver"].(string)
-	release := result["release"].(string)
-	var msg string
-	var timeout int
-	if ver2num(ver) <= ver2num(util.Ver) {
-		msg = Conf.Language(10)
-		timeout = 3000
-	} else {
-		msg = fmt.Sprintf(Conf.Language(9), "<a href=\""+release+"\">"+release+"</a>")
-		showMsg = true
-		timeout = 15000
-	}
-	if showMsg {
-		util.PushMsg(msg, timeout)
-		go func() {
-			checkDownloadInstallPkg()
-			if "" != getNewVerInstallPkgPath() {
-				util.PushMsg(Conf.Language(62), 0)
-			}
-		}()
-	}
-}
-
-func skipNewVerInstallPkg() bool {
-	if !gulu.OS.IsWindows() && !gulu.OS.IsDarwin() && !gulu.OS.IsLinux() {
-		return true
-	}
-	if util.ISMicrosoftStore {
-		return true
-	}
-	if !Conf.System.DownloadInstallPkg {
-		return true
-	}
-	return false
 }

@@ -156,7 +156,7 @@ ${syncModeHTML}
         });
         const switchConflictElement = repos.element.querySelector("#generateConflictDoc") as HTMLInputElement;
         switchConflictElement.addEventListener("change", () => {
-            fetchPost("/api/sync/setSyncGenerateConflictDoc", {enabled: switchConflictElement.checked}, (response) => {
+            fetchPost("/api/sync/setSyncGenerateConflictDoc", {enabled: switchConflictElement.checked}, () => {
                 window.siyuan.config.sync.generateConflictDoc = switchConflictElement.checked;
             });
         });

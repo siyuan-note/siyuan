@@ -100,12 +100,12 @@ export const globalShortcut = () => {
                 if (!targetBlockElement) {
                     return;
                 }
-                const allModels = getAllModels()
-                let findNode = false
+                const allModels = getAllModels();
+                let findNode = false;
                 allModels.editor.find(item => {
                     if (item.editor.protyle.wysiwyg.element.isSameNode(eventPath0)) {
                         item.editor.protyle.gutter.render(targetBlockElement, item.editor.protyle.wysiwyg.element);
-                        findNode = true
+                        findNode = true;
                         return true;
                     }
                 });
@@ -128,7 +128,7 @@ export const globalShortcut = () => {
                         item.editors.find(eItem => {
                             if (eItem.protyle.wysiwyg.element.isSameNode(eventPath0)) {
                                 eItem.protyle.gutter.render(targetBlockElement, eItem.protyle.wysiwyg.element);
-                                findNode = true
+                                findNode = true;
                                 return true;
                             }
                         });
@@ -151,7 +151,7 @@ export const globalShortcut = () => {
             allModels.editor.find(item => {
                 if (item.editor.protyle.wysiwyg.element.contains(eventPath0)) {
                     item.editor.protyle.gutter.render(targetBlockElement, item.editor.protyle.wysiwyg.element);
-                    findNode = true
+                    findNode = true;
                     return true;
                 }
             });
@@ -174,7 +174,7 @@ export const globalShortcut = () => {
                     item.editors.find(eItem => {
                         if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
                             eItem.protyle.gutter.render(targetBlockElement, eItem.protyle.wysiwyg.element);
-                            findNode = true
+                            findNode = true;
                             return true;
                         }
                     });

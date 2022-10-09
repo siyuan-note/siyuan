@@ -392,7 +392,7 @@ export class Backlink extends Model {
                 editorElement.setAttribute("data-ismention", isMention ? "true" : "false");
                 liElement.after(editorElement);
                 const editor = new Protyle(editorElement, {
-                    blockId: "",
+                    blockId: docId,
                     backlinkData: isMention ? response.data.backmentions : response.data.backlinks,
                     render: {
                         background: false,
@@ -402,7 +402,6 @@ export class Backlink extends Model {
                         breadcrumb: false,
                     }
                 });
-                editor.protyle.block.rootID = docId;
                 this.editors.push(editor);
             });
         }

@@ -159,6 +159,7 @@ export class Protyle {
             });
             setPadding(this.protyle);
             if (options.backlinkData) {
+                this.protyle.block.rootID = options.blockId;
                 renderBacklink(this.protyle, options.backlinkData);
                 return;
             }

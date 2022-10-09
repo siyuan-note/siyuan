@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
-		"updated": "20220831004450"
+		"updated": "20221009104430"
 	},
 	"Children": [
 		{
@@ -706,7 +706,7 @@
 			},
 			"Properties": {
 				"id": "20220703231640-9pkvgzl",
-				"updated": "20220821165506"
+				"updated": "20221009104430"
 			},
 			"Children": [
 				{
@@ -780,7 +780,7 @@
 					},
 					"Properties": {
 						"id": "20220703231640-ytzbgh6",
-						"updated": "20220821165506"
+						"updated": "20221009104430"
 					},
 					"Children": [
 						{
@@ -788,21 +788,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220703231640-qqg6ca6",
-								"updated": "20220821165506"
+								"updated": "20221009104430"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "此時雲端 a 文件會被 B 設備上的 a 覆蓋，同時在 B 設備上生成之前 A 設備 a 的歷史。如果 a 文件是文檔的話，生成歷史的同時也會在同級目錄下生成該文檔的副本（以 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "(Conflicted 2006-01-02 15:04:05)"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 作為文檔名後綴），以方便後續手動編輯合併衝突"
+									"Data": "此時雲端 a 文件會被 B 設備上的 a 覆蓋，同時在 B 設備上生成之前 A 設備 a 的歷史"
 								}
 							]
 						}

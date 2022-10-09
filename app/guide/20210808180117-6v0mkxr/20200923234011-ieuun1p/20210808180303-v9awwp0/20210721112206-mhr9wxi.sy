@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
-		"updated": "20220831004508"
+		"updated": "20221009104451"
 	},
 	"Children": [
 		{
@@ -685,7 +685,7 @@
 			},
 			"Properties": {
 				"id": "20220703232421-gmxxahn",
-				"updated": "20220821165444"
+				"updated": "20221009104451"
 			},
 			"Children": [
 				{
@@ -759,7 +759,7 @@
 					},
 					"Properties": {
 						"id": "20220703232421-axvmpcs",
-						"updated": "20220821165444"
+						"updated": "20221009104451"
 					},
 					"Children": [
 						{
@@ -767,21 +767,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220703232421-r4nw5op",
-								"updated": "20220821165444"
+								"updated": "20221009104451"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "At this time, the cloud file a will be overwritten by a of the B device, and the history of the previous A device file a will be generated on the B device. If the file a is a document, a copy of the document (with "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "(Conflicted 2006-01-02 15:04:05)"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " as the document name suffix) will be generated in the same level directory at the same time as the history is generated, so as to facilitate subsequent manual edit merge conflicts"
+									"Data": "At this time, the cloud file a will be overwritten by a of the B device, and the history of the previous A device file a will be generated on the B device"
 								}
 							]
 						}

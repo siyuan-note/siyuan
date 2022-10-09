@@ -452,9 +452,6 @@ func query2Stmt(queryStr string) (ret string) {
 func markSearch(text string, keyword string, beforeLen int) (marked string, score float64) {
 	if 0 == len(keyword) {
 		marked = text
-		if maxLen := 5120; maxLen < utf8.RuneCountInString(marked) {
-			marked = gulu.Str.SubStr(marked, maxLen) + "..."
-		}
 
 		if strings.Contains(marked, search.SearchMarkLeft) { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
 			marked = html.EscapeString(text)
@@ -550,6 +547,21 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 }
 
 func maxContent(content string, maxLen int) string {
+	idx := strings.Index(content, "<mark>")
+	if 128 < maxLen && maxLen <= idx {
+		head := bytes.Buffer{}
+		for i := 0; i < 512; i++ {
+			r, size := utf8.DecodeLastRuneInString(content[:idx])
+			head.WriteRune(r)
+			idx -= size
+			if 64 < head.Len() {
+				break
+			}
+		}
+
+		content = util.Reverse(head.String()) + content[idx:]
+	}
+
 	if maxLen < utf8.RuneCountInString(content) {
 		return gulu.Str.SubStr(content, maxLen) + "..."
 	}

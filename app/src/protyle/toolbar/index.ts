@@ -1030,22 +1030,24 @@ export class Toolbar {
             }
 
             // 光标定位
-            if (renderElement.tagName === "SPAN") {
-                if (inlineLastNode) {
-                    if (inlineLastNode.parentElement) {
-                        this.range.setStartAfter(inlineLastNode);
+            if (getSelection().rangeCount === 0) {  // https://ld246.com/article/1665306093005
+                if (renderElement.tagName === "SPAN") {
+                    if (inlineLastNode) {
+                        if (inlineLastNode.parentElement) {
+                            this.range.setStartAfter(inlineLastNode);
+                            this.range.collapse(true);
+                            focusByRange(this.range);
+                        } else {
+                            focusByWbr(nodeElement, this.range);
+                        }
+                    } else if (renderElement.parentElement) {
+                        this.range.setStartAfter(renderElement);
                         this.range.collapse(true);
                         focusByRange(this.range);
-                    } else {
-                        focusByWbr(nodeElement, this.range);
                     }
-                } else if (renderElement.parentElement) {
-                    this.range.setStartAfter(renderElement);
-                    this.range.collapse(true);
-                    focusByRange(this.range);
+                } else {
+                    focusSideBlock(renderElement);
                 }
-            } else {
-                focusSideBlock(renderElement);
             }
 
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));

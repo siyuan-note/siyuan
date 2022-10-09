@@ -170,6 +170,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/cloud/getCloudSpace", model.CheckAuth, getCloudSpace)
 
 	ginServer.Handle("POST", "/api/sync/setSyncEnable", model.CheckAuth, setSyncEnable)
+	ginServer.Handle("POST", "/api/sync/setSyncGenerateConflictDoc", model.CheckAuth, setSyncGenerateConflictDoc)
 	ginServer.Handle("POST", "/api/sync/setSyncMode", model.CheckAuth, setSyncMode)
 	ginServer.Handle("POST", "/api/sync/setCloudSyncDir", model.CheckAuth, setCloudSyncDir)
 	ginServer.Handle("POST", "/api/sync/createCloudSyncDir", model.CheckAuth, model.CheckReadonly, createCloudSyncDir)

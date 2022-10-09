@@ -295,7 +295,7 @@ export class Backlink extends Model {
             }
         });
 
-        this.searchBacklinks();
+        this.searchBacklinks(true);
 
         if (this.type === "pin") {
             setPanelFocus(this.element.firstElementChild);
@@ -415,9 +415,9 @@ export class Backlink extends Model {
         });
     }
 
-    private searchBacklinks(reload = false) {
+    private searchBacklinks(init = false) {
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
-        if (element.classList.contains("fn__rotate") && !reload) {
+        if (element.classList.contains("fn__rotate")) {
             return;
         }
         element.classList.add("fn__rotate");
@@ -428,7 +428,9 @@ export class Backlink extends Model {
             mk: this.inputsElement[1].value,
             id: this.blockId,
         }, response => {
-            this.saveStatus();
+            if (!init) {
+                this.saveStatus();
+            }
             this.render(response.data);
         });
     }

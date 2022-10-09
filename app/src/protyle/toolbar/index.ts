@@ -1079,9 +1079,9 @@ export class Toolbar {
         this.range = getEditorRange(nodeElement);
         const id = nodeElement.getAttribute("data-node-id");
         let oldHtml = nodeElement.outerHTML;
-        let html = "";
-        Constants.CODE_LANGUAGES.forEach((item, index) => {
-            html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item}</div>`;
+        let html = `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>`;
+        Constants.CODE_LANGUAGES.forEach((item) => {
+            html += `<div class="b3-list-item">${item}</div>`;
         });
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
@@ -1097,7 +1097,8 @@ export class Toolbar {
             }
             upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
             if (event.key === "Enter") {
-                languageElement.textContent = this.subElement.querySelector(".b3-list-item--focus").textContent;
+                const activeText = this.subElement.querySelector(".b3-list-item--focus").textContent;
+                languageElement.textContent = activeText === window.siyuan.languages.clear ? "" : activeText;
                 localStorage.setItem(Constants.LOCAL_CODELANG, languageElement.textContent);
                 const editElement = getContenteditableElement(nodeElement);
                 const lineNumber = nodeElement.getAttribute("linenumber");
@@ -1161,7 +1162,7 @@ export class Toolbar {
             if (!listElement) {
                 return;
             }
-            languageElement.textContent = listElement.textContent;
+            languageElement.textContent = listElement.textContent === window.siyuan.languages.clear ? "" : listElement.textContent;
             localStorage.setItem(Constants.LOCAL_CODELANG, languageElement.textContent);
             const nodeElement = hasClosestBlock(languageElement);
             if (nodeElement) {

@@ -209,6 +209,49 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	return
 }
 
+func GetHeadingDeleteTransaction(id string) (transaction *Transaction, err error) {
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		err = errors.New(fmt.Sprintf(Conf.Language(15), id))
+		return
+	}
+
+	if ast.NodeHeading != node.Type {
+		return
+	}
+
+	var nodes []*ast.Node
+	nodes = append(nodes, node)
+	nodes = append(nodes, treenode.HeadingChildren(node)...)
+
+	transaction = &Transaction{}
+	luteEngine := NewLute()
+	for _, n := range nodes {
+		op := &Operation{}
+		op.ID = n.ID
+		op.Action = "delete"
+		transaction.DoOperations = append(transaction.DoOperations, op)
+
+		op = &Operation{}
+		op.ID = n.ID
+		if nil != n.Parent {
+			op.ParentID = n.Parent.ID
+		}
+		if nil != n.Parent {
+			op.PreviousID = n.Previous.ID
+		}
+		op.Action = "insert"
+		op.Data = lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions)
+		transaction.UndoOperations = append(transaction.UndoOperations, op)
+	}
+	return
+}
+
 func GetHeadingChildrenDOM(id string) (ret string) {
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {

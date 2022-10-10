@@ -242,7 +242,7 @@ func GetHeadingDeleteTransaction(id string) (transaction *Transaction, err error
 		if nil != n.Parent {
 			op.ParentID = n.Parent.ID
 		}
-		if nil != n.Parent {
+		if nil != n.Previous {
 			op.PreviousID = n.Previous.ID
 		}
 		op.Action = "insert"

@@ -2,10 +2,9 @@ import {Divider} from "./Divider";
 import {Font, hasSameTextStyle, setFontStyle} from "./Font";
 import {ToolbarItem} from "./ToolbarItem";
 import {
-    fixTableRange,
+    fixTableRange, focusBlock,
     focusByRange,
     focusByWbr,
-    focusSideBlock,
     getEditorRange,
     getSelectionPosition,
     setFirstNodeRange,
@@ -1044,7 +1043,8 @@ export class Toolbar {
                         focusByRange(this.range);
                     }
                 } else {
-                    focusSideBlock(renderElement);
+                    focusBlock(renderElement);
+                    renderElement.classList.add("protyle-wysiwyg--select");
                 }
             }
 

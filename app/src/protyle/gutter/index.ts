@@ -1242,6 +1242,11 @@ export class Gutter {
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
                         }, (response) => {
+                            response.data.doOperations.forEach((operation: IOperation) => {
+                                protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                                    itemElement.remove();
+                                });
+                            });
                             transaction(protyle, response.data.doOperations, response.data.undoOperations);
                         });
                     });
@@ -1254,6 +1259,11 @@ export class Gutter {
                     fetchPost("/api/block/getHeadingDeleteTransaction", {
                         id,
                     }, (response) => {
+                        response.data.doOperations.forEach((operation: IOperation) => {
+                            protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                                itemElement.remove();
+                            });
+                        });
                         transaction(protyle, response.data.doOperations, response.data.undoOperations);
                     });
                 }

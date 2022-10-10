@@ -680,6 +680,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         const selectText = range.toString();
         // 删除，不可使用 !isCtrl(event)，否则软删除回导致 https://github.com/siyuan-note/siyuan/issues/5607
         if (!event.altKey && !event.shiftKey && (event.key === "Backspace" || event.key === "Delete")) {
+            if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
+                removeBlock(protyle, nodeElement, range);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             // https://github.com/siyuan-note/siyuan/issues/5547
             const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
             if (range.startOffset === 1 && range.startContainer.textContent === Constants.ZWSP &&
@@ -712,7 +718,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             // 光标位于转义符前 F5 后，rang 和点击后的不同，也需进行判断
             if (range.startOffset === 1 && range.startContainer.nodeType !== 3 &&
-                range.startContainer.parentElement.getAttribute("data-type").indexOf("backslash") > -1 &&
+                range.startContainer.parentElement.getAttribute("data-type")?.indexOf("backslash") > -1 &&
                 !hasPreviousSibling(range.startContainer.parentElement)) {
                 range.setStartBefore(range.startContainer.parentElement);
                 removeBlock(protyle, nodeElement, range);
@@ -721,12 +727,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             const imgSelectElement = protyle.wysiwyg.element.querySelector(".img--select");
-            if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
-                removeBlock(protyle, nodeElement, range);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            } else if (imgSelectElement) {
+            if (imgSelectElement) {
                 imgSelectElement.insertAdjacentHTML("afterend", "<wbr>");
                 imgSelectElement.classList.remove("img--select");
                 const oldHTML = nodeElement.outerHTML;

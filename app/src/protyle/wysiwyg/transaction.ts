@@ -578,18 +578,6 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                 wbrElement.remove();
             }
         });
-
-        // 更新 ws 嵌入块
-        protyle.wysiwyg.element.querySelectorAll(`[data-type="NodeBlockQueryEmbed"][data-node-id="${operation.id}"]`).forEach((item) => {
-            item.removeAttribute("data-render");
-            blockRender(protyle, item);
-        });
-        protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-            if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
-                item.removeAttribute("data-render");
-                blockRender(protyle, item);
-            }
-        });
         // 更新 ws 引用块
         updateRef(protyle, operation.id);
         return;

@@ -329,7 +329,7 @@ export class Toolbar {
                     const types = item.getAttribute("data-type").split(" ");
                     if (type === "clear") {
                         for (let i = 0; i < types.length; i++) {
-                            if (["strong", "em", "u", "s", "mark", "sup", "sub"].includes(types[i])) {
+                            if (Constants.INLINE_TYPE.includes(types[i])) {
                                 types.splice(i, 1);
                                 i--;
                             }
@@ -621,9 +621,7 @@ export class Toolbar {
         if (wbrElement) {
             wbrElement.remove();
         }
-        if (isMobile()) {
-            focusByRange(this.range);
-        }
+        focusByRange(this.range);
     }
 
     public showFileAnnotationRef(protyle: IProtyle, refElement: HTMLElement) {

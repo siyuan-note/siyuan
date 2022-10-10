@@ -507,6 +507,12 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	_, mergeResult, trafficStat, err := repo.Sync(cloudInfo, syncContext)
+	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+		// 重置仓库并再次尝试同步
+		if _, resetErr := resetRepository(repo); nil == resetErr {
+			_, mergeResult, trafficStat, err = repo.Sync(cloudInfo, syncContext)
+		}
+	}
 	elapsed := time.Since(start)
 	if nil != err {
 		syncDownloadErrCount++
@@ -682,21 +688,11 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
 	})
 	if errors.Is(err, dejavu.ErrNotFoundObject) {
-		logging.LogWarnf("data repo is corrupted, try to reset it")
-		resetErr := os.RemoveAll(filepath.Join(repo.Path))
+		var resetErr error
+		index, resetErr = resetRepository(repo)
 		if nil != resetErr {
-			logging.LogErrorf("remove data repo failed: %s", resetErr)
 			return
 		}
-		index, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
-			eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
-		})
-		logging.LogWarnf("data repo has been reset")
-
-		go func() {
-			time.Sleep(5 * time.Second)
-			util.PushMsg(Conf.Language(105), 5000)
-		}()
 	}
 
 	if nil != err {
@@ -724,6 +720,25 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 	if 7000 < elapsed.Milliseconds() {
 		logging.LogWarnf("index data repo before cloud sync elapsed [%dms]", elapsed.Milliseconds())
 	}
+	return
+}
+
+func resetRepository(repo *dejavu.Repo) (index *entity.Index, err error) {
+	logging.LogWarnf("data repo is corrupted, try to reset it")
+	err = os.RemoveAll(filepath.Join(repo.Path))
+	if nil != err {
+		logging.LogErrorf("remove data repo failed: %s", err)
+		return
+	}
+	index, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
+		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
+	})
+	logging.LogWarnf("data repo has been reset")
+
+	go func() {
+		time.Sleep(5 * time.Second)
+		util.PushMsg(Conf.Language(105), 5000)
+	}()
 	return
 }
 

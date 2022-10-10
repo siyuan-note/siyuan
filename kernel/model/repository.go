@@ -693,6 +693,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 		if nil != resetErr {
 			return
 		}
+		err = nil
 	}
 
 	if nil != err {

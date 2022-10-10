@@ -229,7 +229,7 @@ export class Files extends Model {
                         if (event.detail === 1) {
                             needFocus = false;
                             clickTimeout = window.setTimeout(() => {
-                                this.setCurrent(target);
+                                this.setCurrent(target, false);
                                 if (target.getAttribute("data-type") === "navigation-file") {
                                     if (window.siyuan.altIsPressed) {
                                         openFileById({
@@ -251,7 +251,7 @@ export class Files extends Model {
                         } else if (event.detail === 2) {
                             clearTimeout(clickTimeout);
                             this.getLeaf(target, notebookId);
-                            this.setCurrent(target);
+                            this.setCurrent(target, false);
                         }
                         window.siyuan.menus.menu.remove();
                         event.stopPropagation();
@@ -764,7 +764,7 @@ export class Files extends Model {
         this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
     }
 
-    private setCurrent(target: HTMLElement) {
+    private setCurrent(target: HTMLElement, isScroll = true) {
         if (!target) {
             return;
         }
@@ -772,7 +772,9 @@ export class Files extends Model {
             liItem.classList.remove("b3-list-item--focus");
         });
         target.classList.add("b3-list-item--focus");
-        this.element.scrollTop = target.offsetTop - this.element.clientHeight / 2 - this.actionsElement.clientHeight;
+        if (isScroll) {
+            this.element.scrollTop = target.offsetTop - this.element.clientHeight / 2 - this.actionsElement.clientHeight;
+        }
     }
 
     public getLeaf(liElement: Element, notebookId: string) {

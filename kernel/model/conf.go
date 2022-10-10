@@ -614,10 +614,10 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
 
-	// 退出时自动删除超过 30 天的安装包 https://github.com/siyuan-note/siyuan/issues/5957
+	// 退出时自动删除超过 7 天的安装包 https://github.com/siyuan-note/siyuan/issues/6128
 	install := filepath.Join(util.TempDir, "install")
 	if gulu.File.IsDir(install) {
-		monthAgo := time.Now().Add(-time.Hour * 24 * 30)
+		monthAgo := time.Now().Add(-time.Hour * 24 * 7)
 		entries, err := os.ReadDir(install)
 		if nil != err {
 			logging.LogErrorf("read dir [%s] failed: %s", install, err)

@@ -305,6 +305,10 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
     }
     let firstChild = editElement.firstChild as HTMLElement;
     while (firstChild && firstChild.nodeType !== 3 && !firstChild.classList.contains("render-node")) {
+        if (firstChild.classList.contains("img")) { // https://ld246.com/article/1665360254842
+            range.setStartBefore(firstChild);
+            return range;
+        }
         firstChild = firstChild.firstChild as HTMLElement;
     }
     if (!firstChild) {

@@ -39,7 +39,7 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
         action: "move",
         id: targetElement.getAttribute("data-node-id"),
         previousID: targetElement.previousElementSibling?.getAttribute("data-node-id"),
-        parentID: targetElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID
+        parentID: targetElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     }];
     let topSourceElement: Element;
     let oldSourceParentElement = sourceElements[0].parentElement;
@@ -50,7 +50,7 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
         data: sbElement.outerHTML,
         id: sbElement.getAttribute("data-node-id"),
         previousID: sbElement.previousElementSibling?.getAttribute("data-node-id"),
-        parentID: sbElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+        parentID: sbElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     }];
     if (newSourceElement) {
         sbElement.insertAdjacentElement("afterbegin", targetElement);
@@ -74,7 +74,7 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
                 data: newSourceElement.outerHTML,
                 id: newSourceElement.getAttribute("data-node-id"),
                 previousID: newSourceElement.previousElementSibling?.getAttribute("data-node-id"),
-                parentID: newSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID
+                parentID: newSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
             });
         }
         sourceElements.reverse().forEach((item, index) => {
@@ -197,7 +197,7 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
             data: topSourceElement.outerHTML,
             id: topSourceElement.getAttribute("data-node-id"),
             previousID: topSourceElement.previousElementSibling?.getAttribute("data-node-id"),
-            parentID: topSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID
+            parentID: topSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
         });
         if (!isSameDoc) {
             // 打开两个相同的文档
@@ -340,7 +340,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                 data: newSourceElement.outerHTML,
                 id: newSourceElement.getAttribute("data-node-id"),
                 previousID: newSourceElement.previousElementSibling?.getAttribute("data-node-id"),
-                parentID: newSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID
+                parentID: newSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
             });
             sourceElements.reverse().forEach((item, index) => {
                 if (index === sourceElements.length - 1) {
@@ -400,7 +400,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                     action: "move",
                     id: item.getAttribute("data-node-id"),
                     previousID: item.previousElementSibling?.getAttribute("data-node-id"),
-                    parentID: item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID
+                    parentID: item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
                 });
             });
             undoOperations.reverse();
@@ -475,7 +475,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
             data: topSourceElement.outerHTML,
             id: topSourceElement.getAttribute("data-node-id"),
             previousID: topSourceElement.previousElementSibling?.getAttribute("data-node-id"),
-            parentID: topSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID
+            parentID: topSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
         });
         oldSourceParentElement = topSourceElement.parentElement;
         topSourceElement.remove();
@@ -618,6 +618,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             });
             sourceElements.forEach(item => {
                 item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
+                // 反链提及有高亮，如果拖拽到正文的话，应移除
+                item.querySelectorAll('[data-type="search-mark"]').forEach(markItem => {
+                    markItem.outerHTML = markItem.innerHTML;
+                })
             });
             if (event.altKey) {
                 focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));

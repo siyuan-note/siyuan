@@ -707,7 +707,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             // 行首转义符前删除 https://github.com/siyuan-note/siyuan/issues/6092
             if (range.startOffset === 0 &&
-                previousSibling && previousSibling.parentElement.getAttribute("data-type").indexOf("backslash") > -1 &&
+                previousSibling && previousSibling.parentElement.getAttribute("data-type")?.indexOf("backslash") > -1 &&
                 previousSibling.nodeType !== 3 && (previousSibling as HTMLElement).outerHTML === "<span>\\</span>" &&
                 !hasPreviousSibling(previousSibling)) {
                 range.setStartBefore(previousSibling.parentElement);

@@ -1226,10 +1226,35 @@ export class Gutter {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconCopy",
-                label: window.siyuan.languages.copyHeadings,
+                label: `${window.siyuan.languages.copy} <b>${window.siyuan.languages.headings1}</b>`,
                 click() {
                     fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
                         writeText(response.data + Constants.ZWSP);
+                    });
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconCut",
+                label: `${window.siyuan.languages.cut} <b>${window.siyuan.languages.headings1}</b>`,
+                click() {
+                    fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
+                        writeText(response.data + Constants.ZWSP);
+                        fetchPost("/api/block/getHeadingDeleteTransaction", {
+                            id,
+                        }, (response) => {
+                            transaction(protyle, response.data.doOperations, response.data.undoOperations);
+                        });
+                    });
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconTrashcan",
+                label: `${window.siyuan.languages.delete} <b>${window.siyuan.languages.headings1}</b>`,
+                click() {
+                    fetchPost("/api/block/getHeadingDeleteTransaction", {
+                        id,
+                    }, (response) => {
+                        transaction(protyle, response.data.doOperations, response.data.undoOperations);
                     });
                 }
             }).element);

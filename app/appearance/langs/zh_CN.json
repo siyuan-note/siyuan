@@ -6,7 +6,7 @@
   "defBlock": "定义块",
   "defBlockChildren": "定义块及其子块",
   "filter": "过滤",
-  "copyHeadings": "复制标题及下方块",
+  "headings1": "标题及下方块",
   "tWithSubtitle": "带子标题转换",
   "clear": "清空",
   "autoDownloadUpdatePkg": "自动下载更新安装包",

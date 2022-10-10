@@ -6,7 +6,7 @@
   "defBlock": "Définir le bloc",
   "defBlockChildren": "Définir le bloc et ses enfants",
   "filter": "Filtre",
-  "copyHeadings": "Copier les en-têtes et les blocs inférieurs",
+  "headings1": "En-têtes et blocs inférieurs",
   "tWithSubtitle": "Transformation avec sous-titres",
   "clear": "Effacer",
   "autoDownloadUpdatePkg": "Télécharger automatiquement le package d'installation de la mise à jour",

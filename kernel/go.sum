@@ -19,6 +19,8 @@ github.com/88250/gulu v1.2.3-0.20221007162906-ded80d955178 h1:+Mvo3MW8qYoXNhLx3b
 github.com/88250/gulu v1.2.3-0.20221007162906-ded80d955178/go.mod h1:I1qBzsksFL2ciGSuqDE7R3XW4BUMrfDgOvSXEk7FsAI=
 github.com/88250/lute v1.7.5-0.20221010035631-282b765b5a5d h1:PqBjpCgoy/G2ILM1lbLdtWMV9zq0mmZKpfeaFcG0lfo=
 github.com/88250/lute v1.7.5-0.20221010035631-282b765b5a5d/go.mod h1:cEoBGi0zArPqAsp0MdG9SKinvH/xxZZWXU7sRx8vHSA=
+github.com/88250/lute v1.7.5-0.20221011020232-02c447c20db5 h1:EuouC1TAf3li8F0rqY8sG24fAIcy7Ert9bYqJKvtJxY=
+github.com/88250/lute v1.7.5-0.20221011020232-02c447c20db5/go.mod h1:cEoBGi0zArPqAsp0MdG9SKinvH/xxZZWXU7sRx8vHSA=
 github.com/88250/pdfcpu v0.3.13 h1:touMWMZkCGalMIbEg9bxYp7rETM+zwb9hXjwhqi4I7Q=
 github.com/88250/pdfcpu v0.3.13/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=
@@ -237,13 +239,10 @@ github.com/marten-seemann/qtls-go1-16 v0.1.5 h1:o9JrYPPco/Nukd/HpOHMHZoBDXQqoNtU
 github.com/marten-seemann/qtls-go1-16 v0.1.5/go.mod h1:gNpI2Ol+lRS3WwSOtIUUtRwZEQMXjYK+dQSBFbethAk=
 github.com/marten-seemann/qtls-go1-17 v0.1.2 h1:JADBlm0LYiVbuSySCHeY863dNkcpMmDR7s0bLKJeYlQ=
 github.com/marten-seemann/qtls-go1-17 v0.1.2/go.mod h1:C2ekUKcDdz9SDWxec1N/MvcXBpaX9l3Nx67XaR84L5s=
-github.com/marten-seemann/qtls-go1-18 v0.1.2 h1:JH6jmzbduz0ITVQ7ShevK10Av5+jBEKAHMntXmIV7kM=
 github.com/marten-seemann/qtls-go1-18 v0.1.2/go.mod h1:mJttiymBAByA49mhlNZZGrH5u1uXYZJ+RW28Py7f4m4=
 github.com/marten-seemann/qtls-go1-18 v0.1.3 h1:R4H2Ks8P6pAtUagjFty2p7BVHn3XiwDAl7TTQf5h7TI=
 github.com/marten-seemann/qtls-go1-18 v0.1.3/go.mod h1:mJttiymBAByA49mhlNZZGrH5u1uXYZJ+RW28Py7f4m4=
 github.com/marten-seemann/qtls-go1-19 v0.1.0-beta.1/go.mod h1:5HTDWtVudo/WFsHKRNuOhWlbdjrfs5JHrYb0wIJqGpI=
-github.com/marten-seemann/qtls-go1-19 v0.1.0 h1:rLFKD/9mp/uq1SYGYuVZhm83wkmU95pK5df3GufyYYU=
-github.com/marten-seemann/qtls-go1-19 v0.1.0/go.mod h1:5HTDWtVudo/WFsHKRNuOhWlbdjrfs5JHrYb0wIJqGpI=
 github.com/marten-seemann/qtls-go1-19 v0.1.1 h1:mnbxeq3oEyQxQXwI4ReCgW9DPoPR94sNlqWoDZnjRIE=
 github.com/marten-seemann/qtls-go1-19 v0.1.1/go.mod h1:5HTDWtVudo/WFsHKRNuOhWlbdjrfs5JHrYb0wIJqGpI=
 github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27kJ6hsGG94=
@@ -349,8 +348,6 @@ github.com/shurcooL/reactions v0.0.0-20181006231557-f2e0b4ca5b82/go.mod h1:TCR1l
 github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/shurcooL/users v0.0.0-20180125191416-49c67e49c537/go.mod h1:QJTqeLYEDaXHZDBsXlPCDqdhQuJkuw4NOtaxYe3xii4=
 github.com/shurcooL/webdavfs v0.0.0-20170829043945-18c3829fa133/go.mod h1:hKmq5kWdCj2z2KEozexVbfEZIWiTjhE0+UjmZgPqehw=
-github.com/siyuan-note/dejavu v0.0.0-20221009014342-57351eb27c75 h1:4aExF0IlFsBj+54knKzWfr+9FVui4lzua/fwXqjKmjQ=
-github.com/siyuan-note/dejavu v0.0.0-20221009014342-57351eb27c75/go.mod h1:Y+bg0j0Z7C66oJWPPYMs+wZuFeiTRWhh2aLkqctJFKk=
 github.com/siyuan-note/dejavu v0.0.0-20221010122243-4f76b4f0ae5e h1:l3NnxHDj+A+zd0I2diqa2a8tSpTt5qzDqYj+PfzpOoE=
 github.com/siyuan-note/dejavu v0.0.0-20221010122243-4f76b4f0ae5e/go.mod h1:Y+bg0j0Z7C66oJWPPYMs+wZuFeiTRWhh2aLkqctJFKk=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=

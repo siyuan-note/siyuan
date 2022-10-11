@@ -34,6 +34,7 @@ type Editor struct {
 	PlantUMLServePath               string   `json:"plantUMLServePath"`               // PlantUML 伺服地址
 	FullWidth                       bool     `json:"fullWidth"`                       // 是否使用最大宽度
 	KaTexMacros                     string   `json:"katexMacros"`                     // KeTex 宏定义
+	ReadOnly                        bool     `json:"readOnly"`                        // 只读模式
 }
 
 func NewEditor() *Editor {
@@ -53,5 +54,6 @@ func NewEditor() *Editor {
 		PlantUMLServePath:               "https://www.plantuml.com/plantuml/svg/~1",
 		FullWidth:                       true,
 		KaTexMacros:                     "{}",
+		ReadOnly:                        false,
 	}
 }

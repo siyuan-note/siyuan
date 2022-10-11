@@ -1,3 +1,42 @@
+## v2.3.3 / 2022-10-11
+
+### 改进功能
+
+* [鼠标悬浮显示超链接 URL 与标题时标题另起一行](https://github.com/siyuan-note/siyuan/issues/6114)
+* [鼠标移动到反链面板左侧空白位置不会显示图标](https://github.com/siyuan-note/siyuan/issues/6119)
+* [反链面板提及中的提及词高亮显示](https://github.com/siyuan-note/siyuan/issues/6121)
+* [公式编辑框存在时点击其他块后光标依旧会跳转到公式后](https://github.com/siyuan-note/siyuan/issues/6122)
+* [浏览器剪藏扩展改进](https://github.com/siyuan-note/siyuan/issues/6124)
+* [退出时自动删除超过 7 天的安装包](https://github.com/siyuan-note/siyuan/issues/6128)
+* [拖拽移动块后移除搜索高亮标记](https://github.com/siyuan-note/siyuan/issues/6131)
+* [行级代码、键盘和标签位于段首时光标交互改进](https://github.com/siyuan-note/siyuan/issues/6133)
+* [标题块标菜单支持 `删除标题及下方块` 和 `剪切标题及下方块`](https://github.com/siyuan-note/siyuan/issues/6135)
+* [图表、公式块等关闭编辑面板后高亮选中该块](https://github.com/siyuan-note/siyuan/issues/6140)
+* [改进表格交互](https://github.com/siyuan-note/siyuan/issues/6141)
+* [同步时如果发现数据仓库损坏则自动重建仓库](https://github.com/siyuan-note/siyuan/issues/6144)
+* [单双击文档树不应该对其进行滚动](https://github.com/siyuan-note/siyuan/issues/6147)
+* [浏览器剪藏扩展限制 Chrome 最低版本](https://github.com/siyuan-note/siyuan/issues/6149)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/6129)
+
+### 修复缺陷
+
+* [表格块过大时搜索无法高亮并定位匹配的关键字](https://github.com/siyuan-note/siyuan/issues/6103)
+* [解析 Markdown 嵌套行级元素异常](https://github.com/siyuan-note/siyuan/issues/6116)
+* [展开反链面板时第一项没有展开](https://github.com/siyuan-note/siyuan/issues/6117)
+* [桌面端自动更新创建文件夹失败](https://github.com/siyuan-note/siyuan/issues/6120)
+* [超链接标题内容转义问题](https://github.com/siyuan-note/siyuan/issues/6123)
+* [反链面板切换面包屑后公式无法渲染](https://github.com/siyuan-note/siyuan/issues/6125)
+* [在表格块中空单元格时使用 `Ctrl+/` 选中表格块后无法使用 `Backspace` 删除该块](https://github.com/siyuan-note/siyuan/issues/6126)
+* [清除某些样式导致文本顺序错乱且光标无法移动](https://github.com/siyuan-note/siyuan/issues/6127)
+* [Android 端粘贴显示 `undefined`](https://github.com/siyuan-note/siyuan/issues/6130)
+* [在图片前插入分隔线后光标丢失](https://github.com/siyuan-note/siyuan/issues/6132)
+* [转义字符加行级样式后继续输入会出现标记符](https://github.com/siyuan-note/siyuan/issues/6134)
+* [嵌入块删除后撤销会出现渲染两个完全一致的查询结果](https://github.com/siyuan-note/siyuan/issues/6138)
+* [`* * foo` 列表项拖拽到父级列表项下列表消失](https://github.com/siyuan-note/siyuan/issues/6151)
+
 ## v2.3.2 / 2022-10-09
 
 ### 改进功能

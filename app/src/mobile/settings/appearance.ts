@@ -53,22 +53,8 @@ export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTML
 </div>`;
     modelMainElement.querySelector(".b3-slider").addEventListener("input", (event: InputEvent & { target: HTMLInputElement }) => {
         modelMainElement.querySelector("#fontSize").textContent = event.target.value + "px";
-        fetchPost("/api/setting/setEditor", {
-            displayBookmarkIcon: window.siyuan.config.editor.displayBookmarkIcon,
-            displayNetImgMark: window.siyuan.config.editor.displayNetImgMark,
-            codeLineWrap: window.siyuan.config.editor.codeLineWrap,
-            codeSyntaxHighlightLineNum: window.siyuan.config.editor.codeSyntaxHighlightLineNum,
-            virtualBlockRef: window.siyuan.config.editor.virtualBlockRef,
-            virtualBlockRefExclude: window.siyuan.config.editor.virtualBlockRefExclude,
-            blockRefDynamicAnchorTextMaxLen: window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen,
-            fontSize: parseInt((modelMainElement.querySelector(".b3-slider") as HTMLInputElement).value),
-            codeLigatures: window.siyuan.config.editor.codeLigatures,
-            codeTabSpaces: window.siyuan.config.editor.codeTabSpaces,
-            generateHistoryInterval: window.siyuan.config.editor.generateHistoryInterval,
-            historyRetentionDays: window.siyuan.config.editor.historyRetentionDays,
-            fontFamily: window.siyuan.config.editor.fontFamily,
-            emoji: window.siyuan.config.editor.emoji
-        }, (response) => {
+        window.siyuan.config.editor.fontSize = parseInt(event.target.value);
+        fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
             window.siyuan.config.editor = response.data;
             reloadProtyle(window.siyuan.mobileEditor.protyle);
             setInlineStyle();

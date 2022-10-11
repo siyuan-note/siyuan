@@ -173,7 +173,7 @@ const initBar = () => {
 </div>
 <div id="barHistory" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.dataHistory} ${updateHotkeyTip(window.siyuan.config.keymap.general.dataHistory.custom)}">
     <svg>
-        <use xlink:href="#iconVideo"></use>
+        <use xlink:href="#iconTrashcan"></use>
     </svg>
 </div>
 <div id="barSetting" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.config} ${updateHotkeyTip(window.siyuan.config.keymap.general.config.custom)}">

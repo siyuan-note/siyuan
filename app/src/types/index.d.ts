@@ -230,6 +230,7 @@ declare interface IExport {
 }
 
 declare interface IEditor {
+    readOnly: boolean;
     katexMacros: string;
     fullWidth: boolean;
     fontSize: number;

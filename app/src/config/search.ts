@@ -14,7 +14,8 @@ export const initConfigSearch = (element: HTMLElement) => {
         getLang(["config", "fullWidth",
             "editor", "md2", "md3", "md12", "md16", "md27", "md28", "md29", "md30", "md31", "md32", "md33", "md34",
             "md39", "md40", "fontSizeTip", "fontSize", "font", "font1", "generateHistory", "generateHistoryInterval",
-            "historyRetentionDays", "historyRetentionDaysTip", "clearHistory", "katexMacros", "katexMacrosTip"
+            "historyRetentionDays", "historyRetentionDaysTip", "clearHistory", "katexMacros", "katexMacrosTip",
+            "editReadonly", "editReadonlyTip"
         ]),
 
         // 文档树

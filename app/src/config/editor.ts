@@ -24,7 +24,8 @@ export const editor = {
         fetchPost("/api/setting/setEditor", window.siyuan.config.editor, () => {
             const allModels = getAllModels()
             allModels.editor.forEach(editor => {
-                if (readOnly) { disabledProtyle(editor.editor.protyle);
+                if (readOnly) {
+                    disabledProtyle(editor.editor.protyle);
                 } else {
                     enableProtyle(editor.editor.protyle);
                 }
@@ -37,6 +38,13 @@ export const editor = {
                         enableProtyle(editor.protyle);
                     }
                 })
+            });
+            allModels.search.forEach(search => {
+                if (readOnly) {
+                    disabledProtyle(search.protyle.protyle);
+                } else {
+                    enableProtyle(search.protyle.protyle);
+                }
             });
             window.siyuan.blockPanels.forEach(item => {
                 item.editors.forEach(editor => {

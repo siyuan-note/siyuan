@@ -308,8 +308,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                     topSourceElement = getTopAloneElement(item);
                     if (topSourceElement.isSameNode(item)) {
                         topSourceElement = undefined;
-                    }
-                    if (topSourceElement.contains(item) && topSourceElement.contains(targetElement)) {
+                    } else if (topSourceElement.contains(item) && topSourceElement.contains(targetElement)) {
                         // * * 1 列表项拖拽到父级列表项下 https://ld246.com/article/1665448570858
                         topSourceElement = targetElement;
                     }
@@ -384,8 +383,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                     topSourceElement = getTopAloneElement(item);
                     if (topSourceElement.isSameNode(item)) {
                         topSourceElement = undefined;
-                    }
-                    if (topSourceElement.contains(item) && topSourceElement.contains(targetElement)) {
+                    } else if (topSourceElement.contains(item) && topSourceElement.contains(targetElement)) {
                         // * * 1 列表项拖拽到父级列表项上 https://ld246.com/article/1665448570858
                         topSourceElement = targetElement;
                     }

@@ -537,6 +537,24 @@ export class Toolbar {
                 i--;
             } else {
                 this.range.insertNode(currentNewNode);
+                // https://github.com/siyuan-note/siyuan/issues/6155
+                if (currentNewNode.nodeType !== 3 && ["code", "tag", "kbd"].includes(type)) {
+                    if (!hasPreviousSibling(currentNewNode)) {
+                        currentNewNode.before(document.createTextNode(Constants.ZWSP));
+                    }
+                    if (!currentNewNode.textContent.startsWith(Constants.ZWSP)) {
+                        currentNewNode.textContent = Constants.ZWSP + currentNewNode.textContent;
+                    }
+                    const currentNextSibling = hasNextSibling(currentNewNode);
+                    if (!currentNextSibling ||
+                        (currentNextSibling && (
+                                currentNextSibling.nodeType !== 3 ||
+                                (currentNextSibling.nodeType === 3 && !currentNextSibling.textContent.startsWith(Constants.ZWSP)))
+                        )
+                    ) {
+                        currentNewNode.after(document.createTextNode(Constants.ZWSP));
+                    }
+                }
                 this.range.collapse(false);
             }
         }

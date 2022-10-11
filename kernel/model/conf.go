@@ -58,11 +58,11 @@ type AppConf struct {
 	UserData       string           `json:"userData"`       // 社区用户信息，对 User 加密存储
 	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化
 	Account        *conf.Account    `json:"account"`        // 帐号配置
-	ReadOnly       bool             `json:"readonly"`       // 是否是只读
+	ReadOnly       bool             `json:"readonly"`       // 是否是以只读模式运行
 	LocalIPs       []string         `json:"localIPs"`       // 本地 IP 列表
 	AccessAuthCode string           `json:"accessAuthCode"` // 访问授权码
-	System         *conf.System     `json:"system"`         // 系统
-	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键
+	System         *conf.System     `json:"system"`         // 系统配置
+	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键配置
 	Sync           *conf.Sync       `json:"sync"`           // 同步配置
 	Search         *conf.Search     `json:"search"`         // 搜索配置
 	Stat           *conf.Stat       `json:"stat"`           // 统计
@@ -285,6 +285,7 @@ func InitConf() {
 	}
 
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
+	loadSnippets()
 }
 
 var langs = map[string]map[int]string{}
@@ -658,4 +659,51 @@ func clearWorkspaceTemp() {
 	}
 
 	logging.LogInfof("cleared workspace temp")
+}
+
+var Snippets []*conf.Snippet // js/css 代码片段配置
+
+func loadSnippets() {
+	Snippets = []*conf.Snippet{}
+
+	jsonPath := filepath.Join(util.DataDir, "snippets/js.json")
+	var data []byte
+	var err error
+
+	if gulu.File.IsExist(jsonPath) {
+		data, err = filelock.ReadFile(jsonPath)
+		if nil != err {
+			logging.LogErrorf("load js snippets failed: %s", err)
+		} else {
+			var jsSnippets []*conf.Snippet
+			if err = gulu.JSON.UnmarshalJSON(data, &jsSnippets); nil != err {
+				logging.LogErrorf("unmarshal js snippets failed: %s", err)
+			} else {
+				if count := len(jsSnippets); 0 < count {
+					Snippets = append(Snippets, jsSnippets...)
+					logging.LogInfof("loaded js snippets [%d]", count)
+				}
+			}
+		}
+	}
+
+	jsonPath = filepath.Join(util.DataDir, "snippets/css.json")
+	if gulu.File.IsExist(jsonPath) {
+		data, err = filelock.ReadFile(jsonPath)
+
+		if nil != err {
+			logging.LogErrorf("load css snippets failed: %s", err)
+		} else {
+			var cssSnippets []*conf.Snippet
+			if err = gulu.JSON.UnmarshalJSON(data, &cssSnippets); nil != err {
+				logging.LogErrorf("unmarshal css snippets failed: %s", err)
+			} else {
+				if count := len(cssSnippets); 0 < count {
+					Snippets = append(Snippets, cssSnippets...)
+					logging.LogInfof("loaded css snippets [%d]", count)
+				}
+			}
+		}
+	}
+	return
 }

@@ -7,7 +7,7 @@ import {isMobile} from "./functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {Protyle} from "../protyle";
-import {onGet} from "../protyle/util/onGet";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
 
 let historyEditor: Protyle;
 const renderDoc = (element: HTMLElement, currentPage: number) => {
@@ -328,6 +328,9 @@ export const openHistory = () => {
             breadcrumbContext: false,
         },
         typewriterMode: false,
+        after(editor) {
+            disabledProtyle(editor.protyle);
+        }
     });
     const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
     const selectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;

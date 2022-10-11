@@ -33,6 +33,9 @@ export const rename = (options: {
     type: "notebook" | "file"
     range?: Range,
 }) => {
+    if (window.siyuan.config.editor.readOnly) {
+        return;
+    }
     const dialog = new Dialog({
         title: window.siyuan.languages.rename,
         content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>

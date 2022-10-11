@@ -68,7 +68,7 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) =
                 },
                 after: (editor) => {
                     // protyle 仅初始化一次，后续更新时会对 url 等再次复制
-                    if (window.siyuan.config.readonly || document.querySelector("#toolbarEdit use").getAttribute("xlink:href") === "#iconEdit") {
+                    if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly || document.querySelector("#toolbarEdit use").getAttribute("xlink:href") === "#iconEdit") {
                         disabledProtyle(editor.protyle);
                     } else {
                         enableProtyle(editor.protyle);

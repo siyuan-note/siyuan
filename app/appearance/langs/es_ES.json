@@ -1,4 +1,5 @@
 {
+  "editMode": "Modo de edición",
   "editReadonly": "Modo de solo lectura",
   "editReadonlyTip": "Cuando está habilitado, el editor cargará el documento en modo de solo lectura. Cuando necesite editar, puede hacer clic en el botón editar en la barra superior para cambiar al modo de edición",
   "generateConflictDoc": "Generar documentación de conflicto al sincronizar conflictos",

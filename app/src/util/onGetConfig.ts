@@ -28,6 +28,7 @@ import {initStatus} from "../layout/status";
 import {syncGuide} from "../sync/syncGuide";
 import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
+import {editor} from "../config/editor";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -184,6 +185,9 @@ const initBar = () => {
 <div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom))}">
     <svg><use xlink:href="#iconCloud"></use></svg>
 </div>
+<div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly}">
+    <svg><use xlink:href="#icon${window.siyuan.config.editor.readOnly ? "Preview" : "Edit"}"></use></svg>
+</div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
     <svg>
         <use xlink:href="#iconLeft"></use>
@@ -205,6 +209,10 @@ const initBar = () => {
                 break;
             } else if (target.id === "barSync") {
                 syncGuide(target);
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barReadonly") {
+                editor.setMode();
                 event.stopPropagation();
                 break;
             } else if (target.id === "barForward") {

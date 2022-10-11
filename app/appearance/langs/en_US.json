@@ -1,4 +1,5 @@
 {
+  "editMode": "Edit Mode",
   "editReadonly": "Read-only mode",
   "editReadonlyTip": "After enabling, the editor will load the document in read-only mode. When you need to edit, you can click the edit button on the top bar to switch to edit mode",
   "generateConflictDoc": "Generate conflict documentation when syncing conflicts",

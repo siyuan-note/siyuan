@@ -286,7 +286,7 @@ export class Title {
                     }
                 }).element);
             }
-            if (!window.siyuan.config.readonly) {
+            if (!window.siyuan.config.readonly && !window.siyuan.config.editor.readOnly) {
                 window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.attr,

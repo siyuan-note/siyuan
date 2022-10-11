@@ -7,7 +7,7 @@ import {getDisplayName, getNotebookName} from "../util/pathName";
 import {setPanelFocus} from "../layout/util";
 import {escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
-import {onGet} from "../protyle/util/onGet";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {openFileById} from "../editor/util";
 import {addLoading} from "../protyle/ui/initUI";
 import {unicode2Emoji} from "../emoji";
@@ -203,7 +203,10 @@ export class Search extends Model {
                         gutter: true,
                         breadcrumbDocName: true,
                     },
-                    after: () => {
+                    after: (editor) => {
+                        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
+                            disabledProtyle(editor.protyle);
+                        }
                         setTimeout(() => {
                             const matchElement = this.protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${id}"] span[data-type="search-mark"]`);
                             if (matchElement) {

@@ -174,7 +174,6 @@ const setHTML = (options: { content: string, action?: string[], unScroll?: boole
     highlightRender(protyle.wysiwyg.element);
     blockRender(protyle, protyle.wysiwyg.element);
     if (options.action.includes(Constants.CB_GET_HISTORY)) {
-        disabledProtyle(protyle);
         return;
     }
     if (protyle.options.render.scroll) {
@@ -279,6 +278,9 @@ const setHTML = (options: { content: string, action?: string[], unScroll?: boole
 export const disabledProtyle = (protyle: IProtyle) => {
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
     protyle.disabled = true;
+    if (protyle.title) {
+        protyle.title.element.querySelector(".protyle-title__input").setAttribute("contenteditable", "false");
+    }
     protyle.wysiwyg.element.setAttribute("contenteditable", "false");
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="true"][spellcheck="false"]').forEach(item => {
         item.setAttribute("contenteditable", "false");
@@ -291,6 +293,9 @@ export const enableProtyle = (protyle: IProtyle) => {
     if (navigator && navigator.maxTouchPoints > 1 && ["MacIntel", "iPhone"].includes(navigator.platform)) {
         // iPhone，iPad 端输入 contenteditable 为 true 时会在块中间插入 span
     } else {
+        if (protyle.title) {
+            protyle.title.element.querySelector(".protyle-title__input").setAttribute("contenteditable", "true");
+        }
         protyle.wysiwyg.element.setAttribute("contenteditable", "true");
     }
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="false"][spellcheck="false"]').forEach(item => {

@@ -5,7 +5,7 @@ import {Constants} from "../constants";
 import {Protyle} from "../protyle";
 import {Dialog} from "../dialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {onGet} from "../protyle/util/onGet";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {openFileById} from "../editor/util";
 import {addLoading} from "../protyle/ui/initUI";
 import {getAllModels} from "../layout/getAll";
@@ -649,7 +649,10 @@ const getArticle = (options: {
                     gutter: true,
                     breadcrumbDocName: true
                 },
-                after: () => {
+                after: (editor) => {
+                    if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
+                        disabledProtyle(editor.protyle);
+                    }
                     setTimeout(() => {
                         const matchElement = protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`);
                         if (matchElement) {

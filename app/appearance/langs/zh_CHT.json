@@ -1,4 +1,5 @@
 {
+  "editMode": "編輯模式",
   "editReadonly": "只讀模式",
   "editReadonlyTip": "啟用後編輯器將以只讀模式載入文檔，需要編輯時可點擊頂欄編輯按鈕切換到編輯模式",
   "generateConflictDoc": "同步衝突時生成衝突文檔",

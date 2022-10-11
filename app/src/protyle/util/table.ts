@@ -65,7 +65,7 @@ export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], no
         });
     }
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-    focusByWbr(tableElement, range)
+    focusByWbr(tableElement, range);
 };
 
 export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
@@ -186,7 +186,7 @@ export const deleteRow = (protyle: IProtyle, range: Range, cellElement: HTMLElem
         const tbodyElement = cellElement.parentElement.parentElement;
         let previousTrElement = tbodyElement.previousElementSibling.lastElementChild as HTMLTableRowElement;
         if (cellElement.parentElement.previousElementSibling) {
-            previousTrElement = cellElement.parentElement.previousElementSibling as HTMLTableRowElement
+            previousTrElement = cellElement.parentElement.previousElementSibling as HTMLTableRowElement;
         }
 
         if (tbodyElement.childElementCount === 1) {
@@ -208,7 +208,7 @@ export const deleteColumn = (protyle: IProtyle, range: Range, nodeElement: Eleme
     const html = nodeElement.outerHTML;
     wbrElement.remove();
     const index = getColIndex(cellElement);
-    const sideCellElement = (cellElement.previousElementSibling || cellElement.nextElementSibling) as HTMLElement
+    const sideCellElement = (cellElement.previousElementSibling || cellElement.nextElementSibling) as HTMLElement;
     if (sideCellElement) {
         range.selectNodeContents(sideCellElement);
         range.collapse(true);

@@ -309,6 +309,10 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                     if (topSourceElement.isSameNode(item)) {
                         topSourceElement = undefined;
                     }
+                    if (topSourceElement.contains(item) && topSourceElement.contains(targetElement)) {
+                        // * * 1 列表项拖拽到父级列表项下 https://ld246.com/article/1665448570858
+                        topSourceElement = targetElement;
+                    }
                 }
                 undoOperations.push({
                     action: "move",
@@ -380,6 +384,10 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                     topSourceElement = getTopAloneElement(item);
                     if (topSourceElement.isSameNode(item)) {
                         topSourceElement = undefined;
+                    }
+                    if (topSourceElement.contains(item) && topSourceElement.contains(targetElement)) {
+                        // * * 1 列表项拖拽到父级列表项上 https://ld246.com/article/1665448570858
+                        topSourceElement = targetElement;
                     }
                 }
                 undoOperations.push({
@@ -621,7 +629,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 反链提及有高亮，如果拖拽到正文的话，应移除
                 item.querySelectorAll('[data-type="search-mark"]').forEach(markItem => {
                     markItem.outerHTML = markItem.innerHTML;
-                })
+                });
             });
             if (event.altKey) {
                 focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));

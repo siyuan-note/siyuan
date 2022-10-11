@@ -148,6 +148,8 @@ export const exportLayout = (reload: boolean, cb?: () => void) => {
             cb();
         }
     });
+
+    // TODO  save panel
 };
 
 const JSONToDock = (json: any) => {

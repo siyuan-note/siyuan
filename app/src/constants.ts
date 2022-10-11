@@ -69,6 +69,7 @@ export abstract class Constants {
     public static readonly LOCAL_EXPORTPDF = "local-exportpdf";
     public static readonly LOCAL_EXPORTWORD = "local-exportword";
     public static readonly LOCAL_BAZAAR = "local-bazaar";
+    public static readonly LOCAL_PANEL = "local-panel";
 
     // timeout
     public static readonly TIMEOUT_DBLCLICK = 190;

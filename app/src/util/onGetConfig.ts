@@ -15,7 +15,7 @@ import {globalShortcut} from "./globalShortcut";
 import {fetchPost} from "./fetch";
 import {mountHelp, newDailyNote} from "./mount";
 import {MenuItem} from "../menus/Menu";
-import {initAssets, loadAssets, setInlineStyle} from "./assets";
+import {initAssets, loadAssets, renderSnippet, setInlineStyle} from "./assets";
 import {goBack, goForward} from "./backForward";
 import {getOpenNotebookCount} from "./pathName";
 import {openFileById} from "../editor/util";
@@ -146,6 +146,7 @@ export const onGetConfig = (isStart: boolean) => {
     initWindow();
     appearance.onSetappearance(window.siyuan.config.appearance, isBrowser());
     initAssets();
+    renderSnippet();
     setInlineStyle();
     let resizeTimeout = 0;
     window.addEventListener("resize", () => {

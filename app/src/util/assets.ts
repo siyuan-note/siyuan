@@ -1,11 +1,11 @@
 import {Constants} from "../constants";
 import {addScript} from "../protyle/util/addScript";
 import {addStyle} from "../protyle/util/addStyle";
-import {setCodeTheme} from "../protyle/ui/setCodeTheme";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
 /// #endif
 import {isMobile} from "./functions";
+import {fetchPost} from "./fetch";
 
 export const loadAssets = (data: IAppearance) => {
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
@@ -53,17 +53,33 @@ export const loadAssets = (data: IAppearance) => {
         addScript(themeScriptAddress, "themeScript");
     }
 
-    const scriptElement = document.getElementById("iconScript");
+    const iconScriptElement = document.getElementById("iconScript");
     const iconURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
-    if (scriptElement) {
-        if (!scriptElement.getAttribute("src").startsWith(iconURL)) {
-            scriptElement.remove();
+    if (iconScriptElement) {
+        if (!iconScriptElement.getAttribute("src").startsWith(iconURL)) {
+            iconScriptElement.remove();
             addScript(iconURL, "iconScript");
         }
     } else {
         addScript(iconURL, "iconScript");
     }
 };
+
+export const renderSnippet = () => {
+    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 1}, (response) => {
+        response.data.snippets.forEach((item: {
+            "name": string
+            "type": string
+            "content": string
+        }) => {
+            if (item.type === "css") {
+                document.head.insertAdjacentHTML("beforeend", `<style type="text/css" id="snippet${item.name}">${item.content}</style>`);
+            } else if (item.type === "js") {
+                document.head.insertAdjacentHTML("beforeend", `<script type="text/javascript" id="snippet${item.name}">${item.content}</script>`);
+            }
+        })
+    });
+}
 
 export const initAssets = () => {
     const emojiElement = document.getElementById("emojiScript");
@@ -106,4 +122,27 @@ export const setInlineStyle = (set = true) => {
         document.getElementById("editorFontSize").innerHTML = style;
     }
     return style;
+};
+
+export const setCodeTheme = (cdn = Constants.PROTYLE_CDN) => {
+    const protyleHljsStyle = document.getElementById("protyleHljsStyle") as HTMLLinkElement;
+    let css;
+    if (window.siyuan.config.appearance.mode === 0) {
+        css = window.siyuan.config.appearance.codeBlockThemeLight;
+        if (!Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE.includes(css)) {
+            css = "default";
+        }
+    } else {
+        css = window.siyuan.config.appearance.codeBlockThemeDark;
+        if (!Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE.includes(css)) {
+            css = "github-dark";
+        }
+    }
+    const href = `${cdn}/js/highlight.js/styles/${css}.min.css?v=11.5.0`;
+    if (!protyleHljsStyle) {
+        addStyle(href, "protyleHljsStyle");
+    } else if (!protyleHljsStyle.href.includes(href)) {
+        protyleHljsStyle.remove();
+        addStyle(href, "protyleHljsStyle");
+    }
 };

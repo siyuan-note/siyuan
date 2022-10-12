@@ -5,7 +5,7 @@ import {validateName} from "../../editor/rename";
 import {getEventName} from "../../protyle/util/compatibility";
 import {mountHelp} from "../../util/mount";
 import {fetchPost} from "../../util/fetch";
-import {setInlineStyle} from "../../util/assets";
+import {renderSnippet, setInlineStyle} from "../../util/assets";
 import {setEmpty} from "./setEmpty";
 import {disabledProtyle, enableProtyle} from "../../protyle/util/onGet";
 import {getOpenNotebookCount} from "../../util/pathName";
@@ -20,6 +20,7 @@ import {hideKeyboardToolbar, initKeyboardToolbar} from "./showKeyboardToolbar";
 
 export const initFramework = () => {
     setInlineStyle();
+    renderSnippet();
     initKeyboardToolbar();
     const scrimElement = document.querySelector(".scrim");
     const sidebarElement = document.getElementById("sidebar");

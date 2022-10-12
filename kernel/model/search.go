@@ -86,6 +86,18 @@ func searchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []
 		})
 	}
 
+	// 添加笔记本名称
+	var boxIDs []string
+	for _, embedBlock := range ret {
+		boxIDs = append(boxIDs, embedBlock.Block.Box)
+	}
+	boxIDs = gulu.Str.RemoveDuplicatedElem(boxIDs)
+	boxNames := Conf.BoxNames(boxIDs)
+	for _, embedBlock := range ret {
+		name := boxNames[embedBlock.Block.Box]
+		embedBlock.Block.HPath = name + embedBlock.Block.HPath
+	}
+
 	if 1 > len(ret) {
 		ret = []*EmbedBlock{}
 	}

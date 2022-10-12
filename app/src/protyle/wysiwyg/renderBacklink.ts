@@ -84,7 +84,7 @@ export const getBacklinkHeadingMore = (moreElement: HTMLElement) => {
     moreElement.remove();
 };
 
-const genBreadcrumb = (blockPaths: IBreadcrumb[]) => {
+export const genBreadcrumb = (blockPaths: IBreadcrumb[]) => {
     let html = "";
     blockPaths.forEach((item, index) => {
         if (index === 0) {

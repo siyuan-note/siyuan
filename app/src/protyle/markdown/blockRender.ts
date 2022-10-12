@@ -3,6 +3,7 @@ import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
 import {Constants} from "../../constants";
+import {genBreadcrumb} from "../wysiwyg/renderBacklink";
 
 export const blockRender = (protyle: IProtyle, element: Element) => {
     let blockElements: Element[] = [];
@@ -35,8 +36,8 @@ export const blockRender = (protyle: IProtyle, element: Element) => {
                 rotateElement.classList.remove("fn__rotate");
             }
             let html = "";
-            response.data.blocks.forEach((block: IBlock) => {
-                html += `<div class="protyle-wysiwyg__embed" data-id="${block.id}">${block.content}</div>`;
+            response.data.blocks.forEach((blocksItem: { block: IBlock, blockPath: IBreadcrumb[] }) => {
+                html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}">${genBreadcrumb(blocksItem.blockPath)}${blocksItem.block.content}</div>`;
             });
             item.setAttribute("data-render", "true");
             if (response.data.blocks.length > 0) {

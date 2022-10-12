@@ -198,10 +198,7 @@ const defaultOptions = {
   },
   cMapUrl: {
     /** @type {string} */
-    value:
-      typeof PDFJSDev === 'undefined' || !PDFJSDev.test('PRODUCTION')
-        ? '../external/bcmaps/'
-        : 'cmaps/', // NOTE
+    value: 'cmaps/', // NOTE
     kind: OptionKind.API,
   },
   disableAutoFetch: {

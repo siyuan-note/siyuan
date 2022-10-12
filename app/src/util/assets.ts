@@ -77,7 +77,7 @@ export const renderSnippet = () => {
             } else if (item.type === "js") {
                 const scriptElement = document.createElement("script");
                 scriptElement.type = "text/javascript";
-                scriptElement.text = `try{${item.content}}catch(e){console.error(e, 111)}`;
+                scriptElement.text = item.content;
                 scriptElement.id = `snippetJS${item.name}`;
                 document.head.appendChild(scriptElement);
             }

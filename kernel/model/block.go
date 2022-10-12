@@ -296,9 +296,8 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 	children = append(children, node)
 	children = append(children, treenode.HeadingChildren(node)...)
 	for _, c := range children {
-		if ast.NodeHeading == c.Type {
-			childrenHeadings = append(childrenHeadings, c)
-		}
+		ccH := c.ChildrenByType(ast.NodeHeading)
+		childrenHeadings = append(childrenHeadings, ccH...)
 	}
 
 	transaction = &Transaction{}

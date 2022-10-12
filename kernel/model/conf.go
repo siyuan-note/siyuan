@@ -285,7 +285,6 @@ func InitConf() {
 	}
 
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
-	loadSnippets()
 }
 
 var langs = map[string]map[int]string{}
@@ -661,26 +660,28 @@ func clearWorkspaceTemp() {
 	logging.LogInfof("cleared workspace temp")
 }
 
-var Snippets []*conf.Snippet // js/css 代码片段配置
+var loadSnippetsLock = sync.Mutex{}
 
-func loadSnippets() {
-	Snippets = []*conf.Snippet{}
+func LoadSnippets() (ret []*conf.Snippet, err error) {
+	loadSnippetsLock.Lock()
+	defer loadSnippetsLock.Unlock()
 
+	ret = []*conf.Snippet{}
 	confPath := filepath.Join(util.DataDir, "snippets/conf.json")
-	var data []byte
-	var err error
-
-	if gulu.File.IsExist(confPath) {
-		data, err = filelock.ReadFile(confPath)
-		if nil != err {
-			logging.LogErrorf("load js snippets failed: %s", err)
-		} else {
-			if err = gulu.JSON.UnmarshalJSON(data, &Snippets); nil != err {
-				logging.LogErrorf("unmarshal js snippets failed: %s", err)
-			} else {
-				logging.LogInfof("loaded js snippets [%d]", len(Snippets))
-			}
-		}
+	if !gulu.File.IsExist(confPath) {
+		return
 	}
+
+	data, err := filelock.ReadFile(confPath)
+	if nil != err {
+		logging.LogErrorf("load js snippets failed: %s", err)
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("unmarshal js snippets failed: %s", err)
+		return
+	}
+	logging.LogInfof("loaded js snippets [%d]", len(ret))
 	return
 }

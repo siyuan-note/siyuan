@@ -42,8 +42,9 @@ func getSnippet(c *gin.Context) {
 		enabled = false
 	}
 
+	confSnippets := model.LoadSnippets()
 	var snippets []*conf.Snippet
-	for _, s := range model.Snippets {
+	for _, s := range confSnippets {
 		if ("all" == typ || s.Type == typ) && (2 == enabledArg || s.Enabled == enabled) {
 			snippets = append(snippets, s)
 		}

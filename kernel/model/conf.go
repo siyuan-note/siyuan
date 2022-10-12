@@ -285,7 +285,6 @@ func InitConf() {
 	}
 
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
-	loadSnippets()
 }
 
 var langs = map[string]map[int]string{}
@@ -661,10 +660,8 @@ func clearWorkspaceTemp() {
 	logging.LogInfof("cleared workspace temp")
 }
 
-var Snippets []*conf.Snippet // js/css 代码片段配置
-
-func loadSnippets() {
-	Snippets = []*conf.Snippet{}
+func LoadSnippets() (ret []*conf.Snippet) {
+	ret = []*conf.Snippet{}
 
 	confPath := filepath.Join(util.DataDir, "snippets/conf.json")
 	if !gulu.File.IsExist(confPath) {
@@ -677,10 +674,10 @@ func loadSnippets() {
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, &Snippets); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
 		logging.LogErrorf("unmarshal js snippets failed: %s", err)
 		return
 	}
-	logging.LogInfof("loaded js snippets [%d]", len(Snippets))
+	logging.LogInfof("loaded js snippets [%d]", len(ret))
 	return
 }

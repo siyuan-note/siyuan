@@ -660,9 +660,13 @@ func clearWorkspaceTemp() {
 	logging.LogInfof("cleared workspace temp")
 }
 
-func LoadSnippets() (ret []*conf.Snippet) {
-	ret = []*conf.Snippet{}
+var loadSnippetsLock = sync.Mutex{}
 
+func LoadSnippets() (ret []*conf.Snippet, err error) {
+	loadSnippetsLock.Lock()
+	defer loadSnippetsLock.Unlock()
+
+	ret = []*conf.Snippet{}
 	confPath := filepath.Join(util.DataDir, "snippets/conf.json")
 	if !gulu.File.IsExist(confPath) {
 		return

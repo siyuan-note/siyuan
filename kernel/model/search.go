@@ -39,8 +39,8 @@ import (
 )
 
 type EmbedBlock struct {
-	Block     *Block       `json:"block"`
-	BlockPath []*BlockPath `json:"blockPath"`
+	Block      *Block       `json:"block"`
+	BlockPaths []*BlockPath `json:"blockPaths"`
 }
 
 func SearchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []*EmbedBlock) {
@@ -81,8 +81,8 @@ func searchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []
 			continue
 		}
 		ret = append(ret, &EmbedBlock{
-			Block:     block,
-			BlockPath: blockPaths,
+			Block:      block,
+			BlockPaths: blockPaths,
 		})
 	}
 

@@ -50,7 +50,7 @@ export const pasteAsPlainText = async (protyle:IProtyle) => {
         uploadLocalFiles(localFiles, protyle, false);
         writeText("");
     } else {
-        insertHTML(protyle.lute.BlockDOM2Content(protyle.lute.InlineMd2BlockDOM(clipboard.readText())), protyle, false, false);
+        insertHTML(protyle.lute.BlockDOM2Content(protyle.lute.InlineMd2BlockDOM(clipboard.readText())), protyle, false);
     }
     /// #endif
 };

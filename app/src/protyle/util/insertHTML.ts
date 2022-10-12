@@ -7,7 +7,7 @@ import {focusBlock, getEditorRange, focusByWbr, fixTableRange} from "./selection
 import {mathRender} from "../markdown/mathRender";
 import {Constants} from "../../constants";
 
-export const insertHTML = (html: string, protyle: IProtyle, isBlock = false, splitSpan = true) => {
+export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => {
     if (html === "") {
         return;
     }
@@ -73,7 +73,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false, spl
             }
             // 粘贴带样式的行内元素到另一个行内元素中需进行切割
             const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement: range.startContainer as HTMLElement;
-            if (splitSpan && spanElement.tagName === "SPAN" && spanElement.isSameNode( range.endContainer.nodeType === 3 ? range.endContainer.parentElement: range.endContainer)) {
+            if (spanElement.tagName === "SPAN" && spanElement.isSameNode( range.endContainer.nodeType === 3 ? range.endContainer.parentElement: range.endContainer) &&
+                tempElement.content.querySelector("span") // 粘贴纯文本不需切割 https://ld246.com/article/1665556907936
+            ) {
                 const afterElement = document.createElement("span");
                 const attributes = spanElement.attributes;
                 for (let i = 0; i < attributes.length; i++) {

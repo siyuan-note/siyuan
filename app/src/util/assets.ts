@@ -73,9 +73,13 @@ export const renderSnippet = () => {
             "content": string
         }) => {
             if (item.type === "css") {
-                document.head.insertAdjacentHTML("beforeend", `<style type="text/css" id="snippet${item.name}">${item.content}</style>`);
+                document.head.insertAdjacentHTML("beforeend", `<style id="snippetCSS${item.name}">${item.content}</style>`);
             } else if (item.type === "js") {
-                document.head.insertAdjacentHTML("beforeend", `<script type="text/javascript" id="snippet${item.name}">${item.content}</script>`);
+                const scriptElement = document.createElement("script");
+                scriptElement.type = "text/javascript";
+                scriptElement.text = `try{${item.content}}catch(e){console.error(e, 111)}`;
+                scriptElement.id = `snippetJS${item.name}`;
+                document.head.appendChild(scriptElement);
             }
         })
     });

@@ -141,7 +141,7 @@ export class Gutter {
                             document.querySelector("#toolbarEdit use").setAttribute("xlink:href", "#iconPreview");
                             enableProtyle(protyle);
                             gutterFold();
-                        })
+                        });
                     }
                 } else {
                     gutterFold();

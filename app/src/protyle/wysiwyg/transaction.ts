@@ -1,5 +1,5 @@
 import {fetchPost} from "../../util/fetch";
-import {focusBlock, focusByRange, focusByWbr, focusSideBlock, getEditorRange} from "../util/selection";
+import {focusBlock, focusByWbr, focusSideBlock, getEditorRange} from "../util/selection";
 import {getTopAloneElement} from "./getBlock";
 import {Constants} from "../../constants";
 import {blockRender} from "../markdown/blockRender";
@@ -450,7 +450,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         let range;
         if (focus && getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
-            range.insertNode(document.createElement("wbr"))
+            range.insertNode(document.createElement("wbr"));
         }
         /// #if !MOBILE
         if (updateElements.length === 0) {

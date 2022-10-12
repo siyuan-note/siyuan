@@ -11,18 +11,18 @@ export const editor = {
     setMode: (readOnly?: boolean) => {
         const target = document.querySelector("#barReadonly");
         if (typeof readOnly === "undefined") {
-            readOnly = target.getAttribute("aria-label") === `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly}`
+            readOnly = target.getAttribute("aria-label") === `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly}`;
         }
         window.siyuan.config.editor.readOnly = readOnly;
         if (readOnly) {
             target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editMode}`);
-            target.querySelector('use').setAttribute("xlink:href", "#iconPreview");
+            target.querySelector("use").setAttribute("xlink:href", "#iconPreview");
         } else {
             target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly}`);
-            target.querySelector('use').setAttribute("xlink:href", "#iconEdit");
+            target.querySelector("use").setAttribute("xlink:href", "#iconEdit");
         }
         fetchPost("/api/setting/setEditor", window.siyuan.config.editor, () => {
-            const allModels = getAllModels()
+            const allModels = getAllModels();
             allModels.editor.forEach(editor => {
                 if (readOnly) {
                     disabledProtyle(editor.editor.protyle);
@@ -37,7 +37,7 @@ export const editor = {
                     } else {
                         enableProtyle(editor.protyle);
                     }
-                })
+                });
             });
             allModels.search.forEach(search => {
                 if (readOnly) {
@@ -53,8 +53,8 @@ export const editor = {
                     } else {
                         enableProtyle(editor.protyle);
                     }
-                })
-            })
+                });
+            });
         });
     },
     genHTML: () => {

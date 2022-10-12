@@ -138,8 +138,8 @@ func searchEmbedBlock(c *gin.Context) {
 	if nil != headingModeArg {
 		headingMode = int(headingModeArg.(float64))
 	}
-	blocks := model.SearchEmbedBlock(stmt, excludeIDs, headingMode)
 
+	blocks := model.SearchEmbedBlock(stmt, excludeIDs, headingMode)
 	ret.Data = map[string]interface{}{
 		"blocks": blocks,
 	}

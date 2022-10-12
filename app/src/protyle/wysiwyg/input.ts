@@ -58,8 +58,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
 
     blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-    if (editElement.innerHTML === "》<wbr>") {
-        editElement.innerHTML = "><wbr>";
+    if (editElement.innerHTML === "》<wbr>" || editElement.innerHTML.indexOf("\n》<wbr>") > -1) {
+        editElement.innerHTML = editElement.innerHTML.replace("》<wbr>","><wbr>");
     }
     const trimStartText = editElement.innerHTML.trimStart();
     if ((trimStartText.startsWith("````") || trimStartText.startsWith("····") || trimStartText.startsWith("~~~~")) &&

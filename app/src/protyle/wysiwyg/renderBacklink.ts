@@ -84,10 +84,10 @@ export const getBacklinkHeadingMore = (moreElement: HTMLElement) => {
     moreElement.remove();
 };
 
-export const genBreadcrumb = (blockPaths: IBreadcrumb[]) => {
+export const genBreadcrumb = (blockPaths: IBreadcrumb[], renderFirst = false) => {
     let html = "";
     blockPaths.forEach((item, index) => {
-        if (index === 0) {
+        if (index === 0 && !renderFirst) {
             return;
         }
         html += `<span class="protyle-breadcrumb__item${index === blockPaths.length - 1 ? " protyle-breadcrumb__item--active" : ""}" data-id="${item.id}">

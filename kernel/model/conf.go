@@ -666,42 +666,19 @@ var Snippets []*conf.Snippet // js/css 代码片段配置
 func loadSnippets() {
 	Snippets = []*conf.Snippet{}
 
-	jsonPath := filepath.Join(util.DataDir, "snippets/js.json")
+	confPath := filepath.Join(util.DataDir, "snippets/conf.json")
 	var data []byte
 	var err error
 
-	if gulu.File.IsExist(jsonPath) {
-		data, err = filelock.ReadFile(jsonPath)
+	if gulu.File.IsExist(confPath) {
+		data, err = filelock.ReadFile(confPath)
 		if nil != err {
 			logging.LogErrorf("load js snippets failed: %s", err)
 		} else {
-			var jsSnippets []*conf.Snippet
-			if err = gulu.JSON.UnmarshalJSON(data, &jsSnippets); nil != err {
+			if err = gulu.JSON.UnmarshalJSON(data, &Snippets); nil != err {
 				logging.LogErrorf("unmarshal js snippets failed: %s", err)
 			} else {
-				if count := len(jsSnippets); 0 < count {
-					Snippets = append(Snippets, jsSnippets...)
-					logging.LogInfof("loaded js snippets [%d]", count)
-				}
-			}
-		}
-	}
-
-	jsonPath = filepath.Join(util.DataDir, "snippets/css.json")
-	if gulu.File.IsExist(jsonPath) {
-		data, err = filelock.ReadFile(jsonPath)
-
-		if nil != err {
-			logging.LogErrorf("load css snippets failed: %s", err)
-		} else {
-			var cssSnippets []*conf.Snippet
-			if err = gulu.JSON.UnmarshalJSON(data, &cssSnippets); nil != err {
-				logging.LogErrorf("unmarshal css snippets failed: %s", err)
-			} else {
-				if count := len(cssSnippets); 0 < count {
-					Snippets = append(Snippets, cssSnippets...)
-					logging.LogInfof("loaded css snippets [%d]", count)
-				}
+				logging.LogInfof("loaded js snippets [%d]", len(Snippets))
 			}
 		}
 	}

@@ -61,22 +61,22 @@ export class BlockPanel {
             if (this.element && window.siyuan.blockPanels.length > 1) {
                 this.element.classList.add("block__popover--top");
             }
-            let targetElement = hasClosestByClassName(event.target, "block__icons");
+            let iconsElement = hasClosestByClassName(event.target, "block__icons");
             let type = "move";
             let x = event.clientX - parseInt(this.element.style.left);
             let y = event.clientY - parseInt(this.element.style.top);
-            if (!targetElement) {
+            if (!iconsElement) {
                 x = event.clientX - this.element.clientWidth;
                 y = event.clientY - this.element.clientHeight;
-                targetElement = hasClosestByClassName(event.target, "block__nwse");
+                iconsElement = hasClosestByClassName(event.target, "block__nwse");
                 type = "nwse-resize";
-                if (!targetElement) {
-                    targetElement = hasClosestByClassName(event.target, "block__ns");
+                if (!iconsElement) {
+                    iconsElement = hasClosestByClassName(event.target, "block__ns");
                     type = "ns-resize";
-                    if (!targetElement) {
-                        targetElement = hasClosestByClassName(event.target, "block__ew");
+                    if (!iconsElement) {
+                        iconsElement = hasClosestByClassName(event.target, "block__ew");
                         type = "ew-resize";
-                        if (!targetElement) {
+                        if (!iconsElement) {
                             return;
                         }
                     }
@@ -141,9 +141,9 @@ export class BlockPanel {
         this.element.setAttribute("data-pin", "false");
         this.element.addEventListener("dblclick", (event) => {
             const target = event.target as HTMLElement;
-            const targetElement = hasClosestByClassName(target, "block__icons");
-            if (targetElement) {
-                const pingElement = targetElement.querySelector('[data-type="pin"]');
+            const iconsElement = hasClosestByClassName(target, "block__icons");
+            if (iconsElement) {
+                const pingElement = iconsElement.querySelector('[data-type="pin"]');
                 if (pingElement.classList.contains("block__icon--active")) {
                     pingElement.classList.remove("block__icon--active");
                     pingElement.setAttribute("aria-label", window.siyuan.languages.pin);

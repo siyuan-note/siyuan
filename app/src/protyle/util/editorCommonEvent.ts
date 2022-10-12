@@ -555,57 +555,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
         if (event.dataTransfer.getData(Constants.SIYUAN_DROP_EDITOR)) {
             // 编辑器内选中文字拖拽
-            if (getSelection().rangeCount === 0) {
-                return;
-            }
-            const targetElement = hasClosestBlock(event.target);
-            const sourceElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
-            if (!targetElement || !sourceElement) {
-                return;
-            }
-            hideElements(["toolbar"], protyle);
-            const isSameNode = targetElement.isSameNode(sourceElement);
-            const undoOperations: IOperation[] = [{
-                action: "update",
-                data: targetElement.outerHTML,
-                id: targetElement.getAttribute("data-node-id"),
-            }];
-            if (!isSameNode) {
-                undoOperations.push({
-                    action: "update",
-                    data: sourceElement.outerHTML,
-                    id: sourceElement.getAttribute("data-node-id"),
-                });
-            }
-            setTimeout(() => {
-                const range = getSelection().getRangeAt(0);
-                range.insertNode(document.createElement("wbr"));
-                const targetHTML = protyle.lute.SpinBlockDOM(targetElement.outerHTML);
-                targetElement.outerHTML = targetHTML;
-                const doOperations: IOperation[] = [{
-                    action: "update",
-                    data: targetHTML,
-                    id: targetElement.getAttribute("data-node-id"),
-                }];
-                if (!isSameNode) {
-                    const sourceHTML = protyle.lute.SpinBlockDOM(sourceElement.outerHTML);
-                    sourceElement.outerHTML = sourceHTML;
-                    doOperations.push({
-                        action: "update",
-                        data: sourceHTML,
-                        id: sourceElement.getAttribute("data-node-id"),
-                    });
-                }
-                transaction(protyle, doOperations, undoOperations);
-                mathRender(protyle.wysiwyg.element);
-                if (targetElement.classList.contains("code-block")) {
-                    highlightRender(protyle.wysiwyg.element);
-                } else {
-                    focusByWbr(protyle.wysiwyg.element, range);
-                }
-                // 拖拽后无法使用快捷键
-                protyle.selectElement.classList.add("fn__none");
-            });
+            event.preventDefault();
+            event.stopPropagation();
             return;
         }
         const targetElement = editorElement.querySelector(".dragover__bottom") || editorElement.querySelector(".dragover__top") || editorElement.querySelector(".dragover__left") || editorElement.querySelector(".dragover__right");

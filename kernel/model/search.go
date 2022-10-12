@@ -38,12 +38,17 @@ import (
 	"github.com/xrash/smetrics"
 )
 
-func SearchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []*Block) {
+type EmbedBlock struct {
+	Block     *Block       `json:"block"`
+	BlockPath []*BlockPath `json:"blockPath"`
+}
+
+func SearchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []*EmbedBlock) {
 	WaitForWritingFiles()
 	return searchEmbedBlock(stmt, excludeIDs, headingMode)
 }
 
-func searchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []*Block) {
+func searchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []*EmbedBlock) {
 	sqlBlocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
 	var tmp []*sql.Block
 	for _, b := range sqlBlocks {
@@ -52,16 +57,37 @@ func searchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []
 		}
 	}
 	sqlBlocks = tmp
+
+	// 缓存最多 128 棵语法树
+	trees := map[string]*parse.Tree{}
+	count := 0
 	for _, sb := range sqlBlocks {
-		block := getBlockRendered(sb.ID, headingMode)
+		if nil == trees[sb.RootID] {
+			tree, _ := loadTreeByBlockID(sb.RootID)
+			if nil == tree {
+				continue
+			}
+			trees[sb.RootID] = tree
+			count++
+		}
+		if 127 < count {
+			break
+		}
+	}
+
+	for _, sb := range sqlBlocks {
+		block, blockPaths := getBlockRendered(trees, sb, headingMode)
 		if nil == block {
 			continue
 		}
-		ret = append(ret, block)
+		ret = append(ret, &EmbedBlock{
+			Block:     block,
+			BlockPath: blockPaths,
+		})
 	}
 
 	if 1 > len(ret) {
-		ret = []*Block{}
+		ret = []*EmbedBlock{}
 	}
 	return
 }

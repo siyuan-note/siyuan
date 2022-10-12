@@ -1038,14 +1038,14 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 		var defMd string
 		stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 		stmt = html.UnescapeString(stmt)
-		blocks := searchEmbedBlock(stmt, nil, 0)
-		if 1 > len(blocks) {
+		embedBlocks := searchEmbedBlock(stmt, nil, 0)
+		if 1 > len(embedBlocks) {
 			return ast.WalkContinue
 		}
 
 		defMdBuf := bytes.Buffer{}
-		for _, def := range blocks {
-			defMdBuf.WriteString(renderBlockMarkdownR(def.ID))
+		for _, def := range embedBlocks {
+			defMdBuf.WriteString(renderBlockMarkdownR(def.Block.ID))
 			defMdBuf.WriteString("\n\n")
 		}
 		defMd = defMdBuf.String()

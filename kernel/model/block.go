@@ -381,12 +381,15 @@ func getBlock(id string) (ret *Block, err error) {
 	return
 }
 
-func getBlockRendered(id string, headingMode int) (ret *Block) {
-	tree, _ := loadTreeByBlockID(id)
+func getBlockRendered(trees map[string]*parse.Tree, sqlBlock *sql.Block, headingMode int) (block *Block, blockPaths []*BlockPath) {
+	tree, _ := trees[sqlBlock.RootID]
+	if nil == tree {
+		tree, _ = loadTreeByBlockID(sqlBlock.RootID)
+	}
 	if nil == tree {
 		return
 	}
-	def := treenode.GetNodeInTree(tree, id)
+	def := treenode.GetNodeInTree(tree, sqlBlock.ID)
 	if nil == def {
 		return
 	}
@@ -430,6 +433,7 @@ func getBlockRendered(id string, headingMode int) (ret *Block) {
 	luteEngine := NewLute()
 	luteEngine.RenderOptions.ProtyleContenteditable = false // 不可编辑
 	dom := renderBlockDOMByNodes(nodes, luteEngine)
-	ret = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom}
+	block = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom}
+	blockPaths = buildBlockBreadcrumb(def)
 	return
 }

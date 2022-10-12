@@ -448,6 +448,11 @@ func StatTree(id string) (ret *util.BlockStatResult) {
 	}
 }
 
+const (
+	virtualBlockRefSpanStart = "<span data-type=\"virtual-block-ref\">"
+	virtualBlockRefSpanEnd   = "</span>"
+)
+
 func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int) (blockCount, childBlockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, err error) {
 	WaitForWritingFiles() // 写入数据时阻塞，避免获取到的数据不一致
 
@@ -592,7 +597,6 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 	refCount := sql.QueryRootChildrenRefCount(rootID)
 
 	var virtualBlockRefKeywords []string
-	var refKeywordReplacer *strings.Replacer
 	if Conf.Editor.VirtualBlockRef {
 		virtualBlockRefKeywords = sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc)
 		if "" != strings.TrimSpace(Conf.Editor.VirtualBlockRefExclude) {
@@ -609,21 +613,6 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 
 		// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
 		virtualBlockRefKeywords = gulu.Str.ExcludeElem(virtualBlockRefKeywords, []string{tree.Root.IALAttr("title")})
-
-		if 0 < len(virtualBlockRefKeywords) {
-			var tmp []string
-			for _, k := range virtualBlockRefKeywords {
-				repl := "<span data-type=\"virtual-block-ref\">" + k + "</span>"
-				if gulu.Str.IsASCII(k) {
-					tmp = append(tmp, " "+k, " "+repl)
-					tmp = append(tmp, " "+k+" ", " "+repl+" ")
-					tmp = append(tmp, k+" ", repl+" ")
-					continue
-				}
-				tmp = append(tmp, k, repl)
-			}
-			refKeywordReplacer = strings.NewReplacer(tmp...)
-		}
 	}
 
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
@@ -687,11 +676,30 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 				}
 
 				// 虚拟引用
-				if Conf.Editor.VirtualBlockRef && nil != refKeywordReplacer {
+				if Conf.Editor.VirtualBlockRef && 0 < len(virtualBlockRefKeywords) {
 					parentBlock := treenode.ParentBlock(n)
 					if nil != parentBlock && 1 > refCount[parentBlock.ID] {
 						content := string(n.Tokens)
-						newContent := refKeywordReplacer.Replace(content)
+						parts := strings.Split(content, " ")
+						for i, part := range parts {
+							if "" == part {
+								continue
+							}
+
+							for _, k := range virtualBlockRefKeywords {
+								if gulu.Str.IsASCII(k) {
+									if part == k {
+										parts[i] = virtualBlockRefSpanStart + k + virtualBlockRefSpanEnd
+									}
+								} else {
+									if strings.Contains(part, k) {
+										parts[i] = strings.ReplaceAll(part, k, virtualBlockRefSpanStart+k+virtualBlockRefSpanEnd)
+									}
+								}
+							}
+						}
+						newContent := strings.Join(parts, " ")
+
 						if content != newContent {
 							// 虚拟引用排除命中自身块命名和别名的情况 https://github.com/siyuan-note/siyuan/issues/3185
 							var blockKeys []string

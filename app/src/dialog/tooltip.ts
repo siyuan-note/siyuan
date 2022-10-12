@@ -17,6 +17,9 @@ export const showTooltip = (message: string, target: Element) => {
     } else {
         messageElement.innerHTML = message;
     }
+    if(target.getAttribute("data-inline-memo-content")) {
+        messageElement.classList.add("tooltip--memo"); // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
+    }
     let left = targetRect.left;
     const position = target.getAttribute("data-position");
     if (position === "right") {

@@ -682,6 +682,5 @@ func LoadSnippets() (ret []*conf.Snippet, err error) {
 		logging.LogErrorf("unmarshal js snippets failed: %s", err)
 		return
 	}
-	logging.LogInfof("loaded js snippets [%d]", len(ret))
 	return
 }

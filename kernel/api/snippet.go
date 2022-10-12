@@ -35,7 +35,7 @@ func getSnippet(c *gin.Context) {
 		return
 	}
 
-	typ := arg["type"].(string)
+	typ := arg["type"].(string)                 // js/css/all
 	enabledArg := int(arg["enabled"].(float64)) // 0：禁用，1：启用，2：全部
 	enabled := true
 	if 0 == enabledArg {
@@ -54,6 +54,9 @@ func getSnippet(c *gin.Context) {
 		if ("all" == typ || s.Type == typ) && (2 == enabledArg || s.Enabled == enabled) {
 			snippets = append(snippets, s)
 		}
+	}
+	if 1 > len(snippets) {
+		snippets = []*conf.Snippet{}
 	}
 
 	ret.Data = map[string]interface{}{

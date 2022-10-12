@@ -639,3 +639,25 @@ func stringQuery(query string) string {
 	}
 	return strings.TrimSpace(buf.String())
 }
+
+func markReplaceSpan(text string, keywords []string, replacementStart, replacementEnd string) string {
+	parts := strings.Split(text, " ")
+	for i, part := range parts {
+		if "" == part {
+			continue
+		}
+
+		for _, k := range keywords {
+			if gulu.Str.IsASCII(k) {
+				if part == k {
+					parts[i] = replacementStart + k + replacementEnd
+				}
+			} else {
+				if strings.Contains(part, k) {
+					parts[i] = strings.ReplaceAll(part, k, replacementStart+k+replacementEnd)
+				}
+			}
+		}
+	}
+	return strings.Join(parts, " ")
+}

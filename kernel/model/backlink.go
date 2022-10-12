@@ -300,10 +300,14 @@ func buildBacklink(refID string, refTree *parse.Tree, mentionKeywords []string, 
 				}
 				if ast.NodeText == n.Type {
 					text := string(n.Tokens)
-					text = search.EncloseHighlighting(text, mentionKeywords, "<span data-type=\"search-mark\">", "</span>", Conf.Search.CaseSensitive)
-					n.Tokens = gulu.Str.ToBytes(text)
+					newText := markReplaceSpan(text, mentionKeywords, searchMarkSpanStart, searchMarkSpanEnd)
+					if text == newText {
+						return ast.WalkContinue
+					}
+
+					n.Tokens = gulu.Str.ToBytes(newText)
 					if bytes.Contains(n.Tokens, []byte("search-mark")) {
-						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<span data-type=\"search-mark\">"), []byte("\\\\<span data-type=\"search-mark\">"))
+						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\"+searchMarkSpanStart), []byte("\\\\"+searchMarkSpanEnd))
 						linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
 						var children []*ast.Node
 						for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
@@ -789,8 +793,21 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 		text = strings.ToLower(text)
 		var contain bool
 		for _, mentionKeyword := range mentionKeywords {
-			if strings.Contains(text, strings.ToLower(mentionKeyword)) {
-				contain = true
+			parts := strings.Split(text, " ")
+			for _, part := range parts {
+				if gulu.Str.IsASCII(mentionKeyword) {
+					if part == mentionKeyword {
+						contain = true
+						break
+					}
+				} else {
+					if strings.Contains(part, strings.ToLower(mentionKeyword)) {
+						contain = true
+						break
+					}
+				}
+			}
+			if contain {
 				break
 			}
 		}

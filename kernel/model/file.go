@@ -449,6 +449,8 @@ func StatTree(id string) (ret *util.BlockStatResult) {
 }
 
 const (
+	searchMarkSpanStart      = "<span data-type=\"search-mark\">"
+	searchMarkSpanEnd        = "</span>"
 	virtualBlockRefSpanStart = "<span data-type=\"virtual-block-ref\">"
 	virtualBlockRefSpanEnd   = "</span>"
 )
@@ -657,10 +659,10 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 					if hitBlock {
 						// 搜索高亮
 						text := string(n.Tokens)
-						text = search.EncloseHighlighting(text, keywords, "<span data-type=\"search-mark\">", "</span>", Conf.Search.CaseSensitive)
+						text = search.EncloseHighlighting(text, keywords, searchMarkSpanStart, searchMarkSpanEnd, Conf.Search.CaseSensitive)
 						n.Tokens = gulu.Str.ToBytes(text)
 						if bytes.Contains(n.Tokens, []byte("search-mark")) {
-							n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<span data-type=\"search-mark\">"), []byte("\\\\<span data-type=\"search-mark\">"))
+							n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\"+searchMarkSpanStart), []byte("\\\\"+searchMarkSpanEnd))
 							linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
 							var children []*ast.Node
 							for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
@@ -680,26 +682,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 					parentBlock := treenode.ParentBlock(n)
 					if nil != parentBlock && 1 > refCount[parentBlock.ID] {
 						content := string(n.Tokens)
-						parts := strings.Split(content, " ")
-						for i, part := range parts {
-							if "" == part {
-								continue
-							}
-
-							for _, k := range virtualBlockRefKeywords {
-								if gulu.Str.IsASCII(k) {
-									if part == k {
-										parts[i] = virtualBlockRefSpanStart + k + virtualBlockRefSpanEnd
-									}
-								} else {
-									if strings.Contains(part, k) {
-										parts[i] = strings.ReplaceAll(part, k, virtualBlockRefSpanStart+k+virtualBlockRefSpanEnd)
-									}
-								}
-							}
-						}
-						newContent := strings.Join(parts, " ")
-
+						newContent := markReplaceSpan(content, virtualBlockRefKeywords, virtualBlockRefSpanStart, virtualBlockRefSpanEnd)
 						if content != newContent {
 							// 虚拟引用排除命中自身块命名和别名的情况 https://github.com/siyuan-note/siyuan/issues/3185
 							var blockKeys []string

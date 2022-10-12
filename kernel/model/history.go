@@ -182,10 +182,10 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 				if 0 < len(keywords) {
 					// 搜索高亮
 					text := string(n.Tokens)
-					text = search.EncloseHighlighting(text, keywords, "<span data-type=\"search-mark\">", "</span>", false)
+					text = search.EncloseHighlighting(text, keywords, searchMarkSpanStart, searchMarkSpanEnd, false)
 					n.Tokens = gulu.Str.ToBytes(text)
 					if bytes.Contains(n.Tokens, []byte("search-mark")) {
-						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<span data-type=\"search-mark\">"), []byte("\\\\<span data-type=\"search-mark\">"))
+						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\"+searchMarkSpanStart), []byte("\\\\"+searchMarkSpanStart))
 						linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
 						var children []*ast.Node
 						for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {

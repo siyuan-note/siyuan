@@ -648,19 +648,26 @@ func markReplaceSpan(text string, keywords []string, replacementStart, replaceme
 		}
 
 		for _, k := range keywords {
-			if gulu.Str.IsASCII(k) {
-				if gulu.Str.IsASCII(part) {
-					if part == k {
-						parts[i] = replacementStart + k + replacementEnd
+			tmpPart := part
+			tmpK := k
+			if !Conf.Search.CaseSensitive {
+				tmpPart = strings.ToLower(part)
+				tmpK = strings.ToLower(k)
+			}
+
+			if gulu.Str.IsASCII(tmpK) {
+				if gulu.Str.IsASCII(tmpPart) {
+					if tmpPart == tmpK {
+						parts[i] = replacementStart + part + replacementEnd
 					}
 				} else {
-					if strings.Contains(part, k) {
-						parts[i] = strings.ReplaceAll(part, k, replacementStart+k+replacementEnd)
+					if strings.Contains(tmpPart, tmpK) {
+						parts[i] = search.EncloseHighlighting(part, []string{k}, replacementStart, replacementEnd, Conf.Search.CaseSensitive)
 					}
 				}
 			} else {
-				if strings.Contains(part, k) {
-					parts[i] = strings.ReplaceAll(part, k, replacementStart+k+replacementEnd)
+				if strings.Contains(tmpPart, tmpK) {
+					parts[i] = search.EncloseHighlighting(part, []string{k}, replacementStart, replacementEnd, Conf.Search.CaseSensitive)
 				}
 			}
 		}

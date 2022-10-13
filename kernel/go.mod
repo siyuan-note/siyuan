@@ -6,7 +6,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/css v0.1.2
 	github.com/88250/gulu v1.2.3-0.20221007162906-ded80d955178
-	github.com/88250/lute v1.7.5-0.20221012140300-1c6e1cd71a9d
+	github.com/88250/lute v1.7.5-0.20221013130230-5e8f1855d305
 	github.com/88250/pdfcpu v0.3.13
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732

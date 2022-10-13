@@ -156,8 +156,10 @@ func downloadInstallPkg(pkgURL, checksum string) {
 	logging.LogInfof("downloading install package [%s]", pkgURL)
 	msgId := util.PushMsg(Conf.Language(103), 60*1000*10)
 	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(10 * time.Minute)
-	err = client.NewParallelDownload(pkgURL).SetConcurrency(8).SetSegmentSize(1024 * 1024 * 2).
-		SetOutputFile(savePath).Do()
+	callback := func(info req.DownloadInfo) {
+		//logging.LogDebugf("downloading install package [%s %.2f%%]", pkgURL, float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
+	}
+	_, err = client.R().SetOutputFile(savePath).SetDownloadCallback(callback).Get(pkgURL)
 	if nil != err {
 		logging.LogErrorf("download install package failed: %s", err)
 		util.PushUpdateMsg(msgId, Conf.Language(104), 7000)

@@ -1259,7 +1259,18 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 		}
 
 		if ast.NodeWidget == n.Type {
-			// 挂件块导出 https://github.com/siyuan-note/siyuan/issues/3834
+			// 挂件块导出 https://github.com/siyuan-note/siyuan/issues/3834 https://github.com/siyuan-note/siyuan/issues/6188
+
+			if wysiwyg {
+				exportHtmlVal := n.IALAttr("data-export-html")
+				if "" != exportHtmlVal {
+					htmlBlock := &ast.Node{Type: ast.NodeHTMLBlock, Tokens: []byte(exportHtmlVal)}
+					n.InsertBefore(htmlBlock)
+					unlinks = append(unlinks, n)
+					return ast.WalkContinue
+				}
+			}
+
 			exportMdVal := n.IALAttr("data-export-md")
 			exportMdVal = html.UnescapeString(exportMdVal) // 导出 `data-export-md` 时未解析代码块与行内代码内的转义字符 https://github.com/siyuan-note/siyuan/issues/4180
 			if "" != exportMdVal {

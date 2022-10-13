@@ -1249,9 +1249,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (!hasNextBlock) {
                     insertEmptyBlock(protyle, "afterend",id);
                 }
+                let oldHtml=nodeElement.outerHTML;
                 blockNeedToFocus=getNextBlock(nodeElement)
                 let curBlkBreaklineHtml=`<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div></div></div>`
                 nodeElement.outerHTML=curBlkBreaklineHtml
+                updateTransaction(protyle, id, curBlkBreaklineHtml, oldHtml);
             } else if (pos.start===0) {
                 //在前面插入分割线
 
@@ -1263,6 +1265,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     preBlockId=previousBlock.getAttribute("data-node-id");
                     let preBlkBreaklineHtml=`<div data-node-id="${preBlockId}" data-type="NodeThematicBreak" class="hr"><div></div></div>`
                     previousBlock.outerHTML=preBlkBreaklineHtml
+                    updateTransaction(protyle, preBlockId, preBlkBreaklineHtml, "");
                 }
             }else if (pos.start===curBlockTxtlen) {
                 //光标位于结尾 则在后面块添加分割线
@@ -1280,6 +1283,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     nextBlockId=nextBlock.getAttribute("data-node-id");
                     let nextBlkBreaklineHtml=`<div data-node-id="${nextBlockId}" data-type="NodeThematicBreak" class="hr"><div></div></div>`
                     nextBlock.outerHTML=nextBlkBreaklineHtml
+                    updateTransaction(protyle, nextBlockId, nextBlkBreaklineHtml, "");
                 }
             }
 

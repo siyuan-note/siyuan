@@ -791,10 +791,15 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 
 		text := textBuf.String()
 		text = strings.ToLower(text)
+		text = luteEngine.Space(text)
 		var contain bool
 		for _, mentionKeyword := range mentionKeywords {
 			parts := strings.Split(text, " ")
 			for _, part := range parts {
+				if "" == part {
+					continue
+				}
+
 				if gulu.Str.IsASCII(mentionKeyword) {
 					if part == mentionKeyword {
 						contain = true

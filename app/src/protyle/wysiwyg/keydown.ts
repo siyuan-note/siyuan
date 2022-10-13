@@ -1223,6 +1223,77 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return true;
         }
+        // 插入水平分割线
+        if ( matchHotKey("⌘H", event) &&
+                ["NodeParagraph","NodeHeading"].includes(nodeElement.getAttribute("data-type")))
+        {
+            const id = nodeElement.getAttribute("data-node-id");
+            let range = getEditorRange(protyle.wysiwyg.element);
+            let editElement = getContenteditableElement(nodeElement);
+            let editorElement = protyle.wysiwyg.element;
+            const pos = getSelectionOffset(nodeElement, editorElement, range);
+            let curBlockTxtlen = editElement.textContent.length;
+
+            let hasNextBlock = true;
+            const nextBlockElement = getNextBlock(nodeElement);
+            if(!nextBlockElement) {
+                hasNextBlock = false;
+            }
+            let previousBlock:Element|boolean ;
+            let nextBlock:Element|boolean ;
+            let preBlockId
+            let nextBlockId
+            let blockNeedToFocus
+            if (editElement.textContent.trim()===""){
+                //当前块全是空白字符, 则在当前块插入分割线
+                if (!hasNextBlock) {
+                    insertEmptyBlock(protyle, "afterend",id);
+                }
+                blockNeedToFocus=getNextBlock(nodeElement)
+                let curBlkBreaklineHtml=`<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div></div></div>`
+                nodeElement.outerHTML=curBlkBreaklineHtml
+            } else if (pos.start===0) {
+                //在前面插入分割线
+
+                insertEmptyBlock(protyle, "beforebegin",id);
+                blockNeedToFocus=nodeElement
+                //前面建的空块
+                previousBlock = getPreviousBlock(nodeElement);
+                if (typeof previousBlock !=="boolean" && previousBlock) {
+                    preBlockId=previousBlock.getAttribute("data-node-id");
+                    let preBlkBreaklineHtml=`<div data-node-id="${preBlockId}" data-type="NodeThematicBreak" class="hr"><div></div></div>`
+                    previousBlock.outerHTML=preBlkBreaklineHtml
+                }
+            }else if (pos.start===curBlockTxtlen) {
+                //光标位于结尾 则在后面块添加分割线
+
+                if (!hasNextBlock) {
+                    insertEmptyBlock(protyle, "afterend",id);
+                }
+                blockNeedToFocus=getNextBlock(nodeElement)
+
+                // 后面插入新块,用作分割线
+                insertEmptyBlock(protyle, "afterend",id);
+                nextBlock = getNextBlock(nodeElement);
+                if (typeof nextBlock !=="boolean" && nextBlock) {
+                    //分割线后面的块
+                    nextBlockId=nextBlock.getAttribute("data-node-id");
+                    let nextBlkBreaklineHtml=`<div data-node-id="${nextBlockId}" data-type="NodeThematicBreak" class="hr"><div></div></div>`
+                    nextBlock.outerHTML=nextBlkBreaklineHtml
+                }
+            }
+
+            if (blockNeedToFocus) {
+                // @ts-ignore
+                if (!isNotEditBlock(blockNeedToFocus)) {
+                    // @ts-ignore
+                    focusBlock(blockNeedToFocus);
+                }
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
         // toolbar action
 
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.lastUsed.custom, event)) {

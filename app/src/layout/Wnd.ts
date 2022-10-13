@@ -128,11 +128,20 @@ export class Wnd {
             }
         });
         this.headersElement.addEventListener("dragover", function (event: DragEvent & { target: HTMLElement }) {
-            if (!window.siyuan.dragElement || !event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
+            if (!window.siyuan.dragElement ||
+                (!event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB) && !event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE))) {
+                return;
+            }
+            if (window.siyuan.dragElement.getAttribute("data-type") === "navigation-root") {
+                // 文档数中笔记本不能拖拽打开
                 return;
             }
             event.preventDefault();
             const it = this as HTMLElement;
+            if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
+                it.style.opacity = ".1"
+                return;
+            }
             const newTabHeaderElement = hasClosestByTag(event.target, "LI");
             let oldTabHeaderElement = window.siyuan.dragElement;
             let exitDrag = false;
@@ -180,10 +189,22 @@ export class Wnd {
                     }
                 }
             });
+            it.style.opacity = "";
         });
         this.headersElement.addEventListener("drop", function (event: DragEvent & { target: HTMLElement }) {
-            const oldTab = getInstanceById(event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB)) as Tab;
             const it = this as HTMLElement;
+            if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
+                // 文档树拖拽
+                setPanelFocus(it.parentElement.parentElement);
+                openFileById({
+                    id: window.siyuan.dragElement.getAttribute("data-node-id"),
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                });
+                window.siyuan.dragElement = undefined;
+                it.style.opacity = "";
+                return;
+            }
+            const oldTab = getInstanceById(event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB)) as Tab;
             it.classList.remove("layout-tab-bar--drag");
 
             const nextTabHeaderElement = (Array.from(it.childNodes).find((item: HTMLElement) => {

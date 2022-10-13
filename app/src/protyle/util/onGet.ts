@@ -279,8 +279,11 @@ export const disabledProtyle = (protyle: IProtyle) => {
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
     protyle.disabled = true;
     if (protyle.title) {
-        protyle.title.element.querySelector(".protyle-title__input").setAttribute("contenteditable", "false");
+        const titleElement = protyle.title.element.querySelector(".protyle-title__input") as HTMLElement
+        titleElement.setAttribute("contenteditable", "false");
+        titleElement.style.userSelect = "text";
     }
+    protyle.wysiwyg.element.style.userSelect = "text";
     protyle.wysiwyg.element.setAttribute("contenteditable", "false");
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="true"][spellcheck="false"]').forEach(item => {
         item.setAttribute("contenteditable", "false");
@@ -294,9 +297,12 @@ export const enableProtyle = (protyle: IProtyle) => {
         // iPhone，iPad 端输入 contenteditable 为 true 时会在块中间插入 span
     } else {
         if (protyle.title) {
-            protyle.title.element.querySelector(".protyle-title__input").setAttribute("contenteditable", "true");
+            const titleElement = protyle.title.element.querySelector(".protyle-title__input") as HTMLElement
+            titleElement.setAttribute("contenteditable", "true");
+            titleElement.style.userSelect = "";
         }
         protyle.wysiwyg.element.setAttribute("contenteditable", "true");
+        protyle.wysiwyg.element.style.userSelect = "";
     }
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="false"][spellcheck="false"]').forEach(item => {
         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {

@@ -2,10 +2,12 @@ import {Constants} from "../constants";
 import {addScript} from "../protyle/util/addScript";
 import {addStyle} from "../protyle/util/addStyle";
 /// #if !MOBILE
+import {ipcRenderer} from "electron";
 import {getAllModels} from "../layout/getAll";
 /// #endif
 import {isMobile} from "./functions";
 import {fetchPost} from "./fetch";
+import {exportLayout} from "../layout/util";
 
 export const loadAssets = (data: IAppearance) => {
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
@@ -150,3 +152,31 @@ export const setCodeTheme = (cdn = Constants.PROTYLE_CDN) => {
         addStyle(href, "protyleHljsStyle");
     }
 };
+
+export const setMode = (modeElementValue: number) => {
+    fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
+        mode: modeElementValue === 2 ? window.siyuan.config.appearance.mode : modeElementValue,
+        modeOS: modeElementValue === 2,
+    }), response => {
+        if ((
+                window.siyuan.config.appearance.themeJS && !response.data.modeOS &&
+                (
+                    response.data.mode !== window.siyuan.config.appearance.mode ||
+                    window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
+                    window.siyuan.config.appearance.themeDark !== response.data.themeDark
+                )
+            ) ||
+            (response.data.modeOS && !window.siyuan.config.appearance.modeOS)
+        ) {
+            exportLayout(true);
+            return;
+        }
+        window.siyuan.config.appearance = response.data
+        /// #if !BROWSER
+        ipcRenderer.send(Constants.SIYUAN_CONFIG_THEME, response.data.modeOS ? "system" : (response.data.mode === 1 ? "dark" : "light"));
+        ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, response.data.closeButtonBehavior);
+        /// #endif
+        loadAssets(response.data);
+        document.querySelector("#barMode use").setAttribute("xlink:href", `#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}`);
+    });
+}

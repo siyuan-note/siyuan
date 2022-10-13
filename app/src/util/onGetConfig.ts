@@ -14,7 +14,7 @@ import {globalShortcut} from "./globalShortcut";
 import {fetchPost} from "./fetch";
 import {mountHelp, newDailyNote} from "./mount";
 import {MenuItem} from "../menus/Menu";
-import {initAssets, loadAssets, renderSnippet, setInlineStyle} from "./assets";
+import {initAssets, loadAssets, renderSnippet, setInlineStyle, setMode} from "./assets";
 import {goBack, goForward} from "./backForward";
 import {getOpenNotebookCount} from "./pathName";
 import {openFileById} from "../editor/util";
@@ -180,6 +180,9 @@ const initBar = () => {
 <div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly}">
     <svg><use xlink:href="#icon${window.siyuan.config.editor.readOnly ? "Preview" : "Edit"}"></use></svg>
 </div>
+<div id="barMode" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.appearance4}">
+    <svg><use xlink:href="#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}"></use></svg>
+</div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
     <svg><use xlink:href="#iconLeft"></use></svg>
 </button>
@@ -201,6 +204,35 @@ const initBar = () => {
                 break;
             } else if (target.id === "barReadonly") {
                 editor.setMode();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barMode") {
+                window.siyuan.menus.menu.remove();
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.themeLight,
+                    icon: "iconLight",
+                    current: window.siyuan.config.appearance.mode === 0 && !window.siyuan.config.appearance.modeOS,
+                    click: () => {
+                        setMode(0);
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.themeDark,
+                    current: window.siyuan.config.appearance.mode === 1 && !window.siyuan.config.appearance.modeOS,
+                    icon: "iconDark",
+                    click: () => {
+                        setMode(1);
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.themeOS,
+                    current: window.siyuan.config.appearance.modeOS,
+                    icon: "iconMode",
+                    click: () => {
+                        setMode(2);
+                    }
+                }).element);
+                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 8});
                 event.stopPropagation();
                 break;
             } else if (target.id === "barForward") {

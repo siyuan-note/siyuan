@@ -352,5 +352,6 @@ export const appearance = {
         if (needLoadAsset) {
             loadAssets(data);
         }
+        document.querySelector("#barMode use").setAttribute("xlink:href", `#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}`);
     }
 };

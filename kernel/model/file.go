@@ -693,7 +693,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 								blockKeys = append(blockKeys, alias)
 							}
 							if 0 < len(blockKeys) {
-								keys := gulu.Str.SubstringsBetween(newContent, "<span data-type=\"virtual-block-ref\">", "</span>")
+								keys := gulu.Str.SubstringsBetween(newContent, virtualBlockRefSpanStart, virtualBlockRefSpanEnd)
 								for _, k := range keys {
 									if gulu.Str.Contains(k, blockKeys) {
 										return ast.WalkContinue

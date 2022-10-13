@@ -1,3 +1,33 @@
+## v2.4.0 / 2022-10-13
+
+### 引入特性
+
+* [支持设置编辑器只读模式](https://github.com/siyuan-note/siyuan/issues/2648)
+* [增加公共代码 js/css 片段](https://github.com/siyuan-note/siyuan/issues/6143)
+
+### 改进功能
+
+* [查询嵌入块添加面包屑](https://github.com/siyuan-note/siyuan/issues/2985)
+* [起始块由于文字太长导致换行时上键会直接定位到文档标题](https://github.com/siyuan-note/siyuan/issues/6156)
+* [带子级升降级标题层级支持列表块中的标题](https://github.com/siyuan-note/siyuan/issues/6157)
+* [修改桌面端顶栏数据历史图标和图标顺序](https://github.com/siyuan-note/siyuan/issues/6158)
+* [改进查询嵌入块加载性能](https://github.com/siyuan-note/siyuan/issues/6160)
+* [给备注的 tooltip 设置选择器](https://github.com/siyuan-note/siyuan/issues/6161)
+* [改进提及和虚拟引用搜索分词](https://github.com/siyuan-note/siyuan/issues/6165)
+* [软换行后 `》` 无法创建引述块](https://github.com/siyuan-note/siyuan/issues/6170)
+* [出现行级 HTML 节点时转换为 HTML 块渲染](https://github.com/siyuan-note/siyuan/issues/6171)
+
+### 移除功能
+
+* [移除编辑器内文本拖拽功能](https://github.com/siyuan-note/siyuan/issues/6169)
+
+### 修复缺陷
+
+* [无法通过拖动块标移动非列表项的块](https://github.com/siyuan-note/siyuan/issues/6153)
+* [通过快捷键添加行级代码、键盘、标签后方向键跳出行不一致](https://github.com/siyuan-note/siyuan/issues/6155)
+* [标签中的单引号不应该被替换为 HTML 实体](https://github.com/siyuan-note/siyuan/issues/6163)
+* [行级元素内粘贴纯文本应保持该行级元素的状态](https://github.com/siyuan-note/siyuan/issues/6164)
+
 ## v2.3.3 / 2022-10-11
 
 ### 改进功能

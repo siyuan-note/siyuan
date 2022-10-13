@@ -95,7 +95,7 @@ func getBacklink2(c *gin.Context) {
 	if nil != sortArg {
 		sort, _ = strconv.Atoi(sortArg.(string))
 	}
-	mentionSortArg := arg["msort"]
+	mentionSortArg := arg["mSort"]
 	mentionSort := util.SortModeUpdatedDESC
 	if nil != mentionSortArg {
 		mentionSort, _ = strconv.Atoi(mentionSortArg.(string))

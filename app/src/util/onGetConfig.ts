@@ -172,7 +172,7 @@ const initBar = () => {
     <svg><use xlink:href="#iconSearch"></use></svg>
 </div>
 <div id="barHistory" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.dataHistory} ${updateHotkeyTip(window.siyuan.config.keymap.general.dataHistory.custom)}">
-    <svg><use xlink:href="#iconTrashcan"></use></svg>
+    <svg><use xlink:href="#iconHistory"></use></svg>
 </div>
 <div id="barDailyNote" data-menu="true" aria-label="${window.siyuan.languages.dailyNote} ${updateHotkeyTip(window.siyuan.config.keymap.general.dailyNote.custom)}" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg><use xlink:href="#iconCalendar"></use></svg>

@@ -1,4 +1,8 @@
-document.body.insertAdjacentHTML('afterbegin', `<svg style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg"><defs>
+document.body.insertAdjacentHTML('afterbegin', `<svg style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <symbol id="iconHistory" viewBox="0 0 32 32">
+    <path d="M15.867 32q-6.622 0-11.244-4.689t-4.622-11.356h2.667q0 5.556 3.822 9.467t9.378 3.911q5.644 0 9.556-3.956t3.911-9.6q0-5.511-3.956-9.311t-9.511-3.8q-3.022 0-5.667 1.378t-4.6 3.644h4.667v2.667h-9.289v-9.244h2.667v4.711q2.311-2.711 5.489-4.267t6.733-1.556q3.333 0 6.267 1.244t5.133 3.4 3.467 5.044 1.267 6.222-1.267 6.267-3.467 5.111-5.133 3.444-6.267 1.267zM21.556 23.244l-6.844-6.756v-9.511h2.667v8.4l6.089 5.956z"></path>
+  </symbol>
   <symbol id="iconFilter" viewBox="0 0 32 32">
     <path d="M14.044 31.65q-0.831 0-1.394-0.562t-0.562-1.394v-11.737l-11.688-14.916q-0.685-0.831-0.196-1.761t1.516-0.929h28.56q1.027 0 1.516 0.929t-0.196 1.761l-11.688 14.916v11.737q0 0.831-0.562 1.394t-1.394 0.562zM16 18.152l11.737-14.867h-23.474z"></path>
   </symbol>

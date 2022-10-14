@@ -229,9 +229,9 @@
 }
 
 .dock {
-  height: 30px;
+  height: 42px;
   display: flex;
-  padding: 0 30px;
+  padding: 0 42px;
   user-select: none;
   background-color: var(--b3-theme-surface);
 
@@ -250,21 +250,19 @@
   }
 
   svg {
-    height: 16px;
-    width: 16px;
+    height: 18px;
+    width: 18px;
   }
 
   &--vertical {
-    width: 30px;
+    width: 42px;
     flex-direction: column;
     height: 100%;
     padding: 0;
 
     .dock__item {
-      margin: 8px 3px;
-
       &[data-index="0"]:after {
-        top: -26px;
+        top: -32px;
         bottom: auto;
       }
 
@@ -275,11 +273,11 @@
   }
 
   &__item {
-    padding: 4px;
+    padding: 7px;
     color: var(--b3-theme-on-surface-light);
     display: flex;
-    border-radius: 2px;
-    margin: 3px 8px;
+    border-radius: 4px;
+    margin: 5px;
 
     &:hover {
       color: var(--b3-theme-on-background);

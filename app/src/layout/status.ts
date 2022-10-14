@@ -21,7 +21,7 @@ export const initStatus = () => {
     <svg>
         <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>
-    <div class="b3-menu fn__none" style="bottom: 21px;left: 4px">
+    <div class="b3-menu fn__none" style="bottom: 32px;left: 9px">
         ${menuHTML}
     </div>
 </div>

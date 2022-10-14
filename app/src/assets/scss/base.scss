@@ -161,9 +161,9 @@ progressLoading: 400
 .toolbar {
   background-color: var(--b3-theme-surface);
   box-sizing: border-box;
-  height: 22px;
+  height: 42px;
   line-height: 22px;
-  padding-left: 70px;
+  padding-left: 84px;
 
   &--browser {
     padding-left: 0;
@@ -178,26 +178,25 @@ progressLoading: 400
 
   #drag {
     -webkit-app-region: drag;
-    font-size: 12px;
+    font-size: 14px;
     color: var(--b3-theme-on-surface);
     user-select: none;
     text-align: center;
     white-space: nowrap;
+    align-self: center;
   }
 
   &__item {
+    flex-shrink: 0;
     cursor: pointer;
     color: var(--b3-theme-on-surface);
-    padding: 2px;
+    padding: 12px;
     box-sizing: border-box;
     transition: var(--b3-transition);
     display: flex;
     align-self: center;
     background-color: transparent;
     border: 0;
-    border-radius: 2px;
-    margin: 0 8px;
-    flex-shrink: 0;
 
     &:hover,
     &--active {
@@ -206,8 +205,8 @@ progressLoading: 400
     }
 
     svg {
-      height: 14px;
-      width: 14px;
+      height: 18px;
+      width: 18px;
     }
 
     &--disabled,
@@ -242,9 +241,18 @@ progressLoading: 400
 .status {
   background-color: var(--b3-theme-surface);
   box-sizing: border-box;
-  height: 22px;
-  line-height: 22px;
+  height: 32px;
+  line-height: 32px;
   z-index: 2;
+
+  .toolbar__item {
+    padding: 9px;
+
+    svg {
+      height: 14px;
+      width: 14px;
+    }
+  }
 
   &__msg {
     font-size: 12px;

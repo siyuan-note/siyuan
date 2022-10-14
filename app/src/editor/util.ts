@@ -335,15 +335,11 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
                 fileModel.selectItem(protyle.notebookId, protyle.path);
             }
         }
-        const models = getAllModels();
-        updateOutline(models, protyle, reload);
-        updateBacklinkGraph(models, protyle);
-    } else {
-        // 关闭所有页签时，需更新对应的面板
-        const models = getAllModels();
-        updateOutline(models, protyle, reload);
-        updateBacklinkGraph(models, protyle);
     }
+    // 切换页签或关闭所有页签时，需更新对应的面板
+    const models = getAllModels();
+    updateOutline(models, protyle, reload);
+    updateBacklinkGraph(models, protyle);
     setTitle(title);
 };
 
@@ -373,7 +369,7 @@ const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
             fetchPost("/api/outline/getDocOutline", {
                 id: blockId,
             }, response => {
-                if (!isCurrentEditor(blockId)) {
+                if (!isCurrentEditor(blockId) || item.blockId === blockId) {
                     return;
                 }
                 item.update(response, blockId);
@@ -447,7 +443,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             k: item.inputsElement[0].value,
             mk: item.inputsElement[1].value,
         }, response => {
-            if (!isCurrentEditor(blockId)) {
+            if (!isCurrentEditor(blockId) || item.blockId === blockId) {
                 item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
                 return;
             }

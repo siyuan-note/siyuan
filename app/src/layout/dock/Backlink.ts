@@ -369,6 +369,10 @@ export class Backlink extends Model {
 
     private toggleItem(liElement: HTMLElement, isMention: boolean) {
         const svgElement = liElement.firstElementChild.firstElementChild;
+        if (svgElement.getAttribute("disabled")) {
+            return;
+        }
+        svgElement.setAttribute("disabled", "disabled");
         const docId = liElement.getAttribute("data-node-id");
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.remove("b3-list-item__arrow--open");
@@ -380,12 +384,14 @@ export class Backlink extends Model {
                 }
             });
             liElement.nextElementSibling?.remove();
+            svgElement.removeAttribute("disabled");
         } else {
-            svgElement.classList.add("b3-list-item__arrow--open");
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: this.blockId,
                 refTreeID: docId
             }, (response) => {
+                svgElement.removeAttribute("disabled");
+                svgElement.classList.add("b3-list-item__arrow--open");
                 const editorElement = document.createElement("div");
                 editorElement.style.minHeight = "auto";
                 editorElement.setAttribute("data-defid", this.blockId);

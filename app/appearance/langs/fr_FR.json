@@ -218,8 +218,6 @@
   "changeIcon": "Changer l'icône",
   "includeSubFile": "\nInclure x sous-fichiers",
   "untitled": "Sans titre",
-  "goForward": "Suivant",
-  "goBack": "Retour",
   "lockScreen": "Verrouiller Écran",
   "cloudIntro1": "Synchronisation des données cryptées de bout en bout",
   "cloudIntro2": "Le processus de cryptage et de décryptage est entièrement réalisé sur le dispositif local",

@@ -218,8 +218,6 @@
   "changeIcon": "Cambiar el icono",
   "includeSubFile": "\nIncluir x subfichas",
   "untitled": "Sin título",
-  "goForward": "Ir hacia adelante",
-  "goBack": "Ir hacia atrás",
   "lockScreen": "Pantalla de bloqueo",
   "cloudIntro1": "Sincronización de datos cifrada de extremo a extremo",
   "cloudIntro2": "El proceso de cifrado y descifrado se realiza completamente en el dispositivo local",

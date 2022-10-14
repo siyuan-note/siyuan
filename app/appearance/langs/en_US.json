@@ -218,8 +218,6 @@
   "changeIcon": "Change icon",
   "includeSubFile": "\nInclude x subfiles",
   "untitled": "Untitled",
-  "goForward": "Go forward",
-  "goBack": "Go back",
   "lockScreen": "Lock Screen",
   "cloudIntro1": "End-to-end encrypted data synchronization",
   "cloudIntro2": "The encryption and decryption process is completely performed on the local device",

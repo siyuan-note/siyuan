@@ -218,8 +218,6 @@
   "changeIcon": "修改图标",
   "includeSubFile": "\n包含 x 个子文档",
   "untitled": "新文档",
-  "goForward": "前进",
-  "goBack": "后退",
   "lockScreen": "锁屏",
   "cloudIntro1": "端到端加密数据同步",
   "cloudIntro2": "加密和解密过程完全在本地设备上进行",

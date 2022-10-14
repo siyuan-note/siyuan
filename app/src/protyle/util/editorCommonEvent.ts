@@ -6,8 +6,6 @@ import {cancelSB, genEmptyElement, genSBElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {getTopAloneElement} from "../wysiwyg/getBlock";
 import {updateListOrder} from "../wysiwyg/list";
-import {hideElements} from "../ui/hideElements";
-import {mathRender} from "../markdown/mathRender";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "./onGet";
 /// #if !MOBILE
@@ -17,7 +15,6 @@ import {updatePanelByEditor} from "../../editor/util";
 /// #endif
 import {Editor} from "../../editor";
 import {blockRender} from "../markdown/blockRender";
-import {highlightRender} from "../markdown/highlightRender";
 import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
@@ -49,6 +46,7 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
         action: "insert",
         data: sbElement.outerHTML,
         id: sbElement.getAttribute("data-node-id"),
+        nextID: sbElement.nextElementSibling?.getAttribute("data-node-id"),
         previousID: sbElement.previousElementSibling?.getAttribute("data-node-id"),
         parentID: sbElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     }];
@@ -73,8 +71,7 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
                 action: "insert",
                 data: newSourceElement.outerHTML,
                 id: newSourceElement.getAttribute("data-node-id"),
-                previousID: newSourceElement.previousElementSibling?.getAttribute("data-node-id"),
-                parentID: newSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
+                nextID: targetElement.getAttribute("data-node-id"),
             });
         }
         sourceElements.reverse().forEach((item, index) => {
@@ -342,8 +339,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                 action: "insert",
                 data: newSourceElement.outerHTML,
                 id: newSourceElement.getAttribute("data-node-id"),
-                previousID: newSourceElement.previousElementSibling?.getAttribute("data-node-id"),
-                parentID: newSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
+                nextID: targetElement.getAttribute("data-node-id"),
             });
             sourceElements.reverse().forEach((item, index) => {
                 if (index === sourceElements.length - 1) {

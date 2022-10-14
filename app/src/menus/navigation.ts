@@ -195,7 +195,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
             label: window.siyuan.languages.copy,
             type: "submenu",
             icon: "iconCopy",
-            submenu: (copySubMenu(id, "", false) as IMenu[]).concat([{
+            submenu: (copySubMenu(id, false) as IMenu[]).concat([{
                 label: window.siyuan.languages.duplicate,
                 click() {
                     fetchPost("/api/filetree/duplicateDoc", {

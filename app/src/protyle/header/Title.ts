@@ -274,7 +274,7 @@ export class Title {
                 label: window.siyuan.languages.copy,
                 icon: "iconCopy",
                 type: "submenu",
-                submenu: copySubMenu(protyle.block.rootID, "")
+                submenu: copySubMenu(protyle.block.rootID)
             }).element);
             if (!window.siyuan.config.readonly) {
                 window.siyuan.menus.menu.append(movePathToMenu(protyle.notebookId, protyle.path));

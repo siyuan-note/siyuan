@@ -922,7 +922,7 @@ export class Gutter {
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             type: "submenu",
-            submenu: (copySubMenu(id, nodeElement.querySelector(".protyle-attr--name")?.textContent, true, nodeElement) as IMenu[]).concat([{
+            submenu: (copySubMenu(id, true, nodeElement) as IMenu[]).concat([{
                 label: window.siyuan.languages.copy,
                 accelerator: "⌘C",
                 click() {

@@ -555,20 +555,16 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
     });
 };
 
-export const copySubMenu = (id: string, name: string, accelerator = true, focusElement?: Element) => {
+export const copySubMenu = (id: string, accelerator = true, focusElement?: Element) => {
     return [
         {
             icon: "iconGraph",
             accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockRef.custom : undefined,
             label: window.siyuan.languages.copyBlockRef,
             click: () => {
-                if (name) {
-                    writeText(`((${id} "${name}"))`);
-                } else {
-                    fetchPost("/api/block/getRefText", {id}, (response) => {
-                        writeText(`((${id} '${response.data}'))`);
-                    });
-                }
+                fetchPost("/api/block/getRefText", {id}, (response) => {
+                    writeText(`((${id} '${response.data}'))`);
+                });
                 if (focusElement) {
                     focusBlock(focusElement);
                 }

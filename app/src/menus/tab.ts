@@ -178,7 +178,7 @@ export const initTabMenu = (tab: Tab) => {
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             type: "submenu",
-            submenu: copySubMenu(rootId, "", false)
+            submenu: copySubMenu(rootId, false)
         }).element);
     }
     if (tab.headElement.classList.contains("item--pin")) {

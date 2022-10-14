@@ -215,19 +215,11 @@ progressLoading: 400
       cursor: not-allowed;
     }
 
-    &--win {
-      margin: 0;
-      padding: 4px 8px;
-      border-radius: 0px;
-    }
-
     &--close {
-      margin: 0;
-      padding: 7px 8px;
-      border-radius: 0px;
+      padding: 16px 12px;
 
       svg {
-        height: 8px;
+        height: 10px;
       }
 
       &:hover {

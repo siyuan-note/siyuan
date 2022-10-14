@@ -162,26 +162,14 @@ export const onGetConfig = (isStart: boolean) => {
 
 const initBar = () => {
     document.querySelector(".toolbar").innerHTML = `<div id="toolbarVIP" class="fn__flex"></div>
-<div id="barSetting" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.config} ${updateHotkeyTip(window.siyuan.config.keymap.general.config.custom)}">
-    <svg><use xlink:href="#iconSettings"></use></svg>
-</div>
 <div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom))}">
     <svg><use xlink:href="#iconCloud"></use></svg>
-</div>
-<div id="barSearch" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
-    <svg><use xlink:href="#iconSearch"></use></svg>
 </div>
 <div id="barHistory" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.dataHistory} ${updateHotkeyTip(window.siyuan.config.keymap.general.dataHistory.custom)}">
     <svg><use xlink:href="#iconHistory"></use></svg>
 </div>
 <div id="barDailyNote" data-menu="true" aria-label="${window.siyuan.languages.dailyNote} ${updateHotkeyTip(window.siyuan.config.keymap.general.dailyNote.custom)}" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg><use xlink:href="#iconCalendar"></use></svg>
-</div>
-<div id="barMode" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.appearanceMode}">
-    <svg><use xlink:href="#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}"></use></svg>
-</div>
-<div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly}">
-    <svg><use xlink:href="#icon${window.siyuan.config.editor.readOnly ? "Preview" : "Edit"}"></use></svg>
 </div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
     <svg><use xlink:href="#iconLeft"></use></svg>
@@ -190,6 +178,18 @@ const initBar = () => {
     <svg><use xlink:href="#iconRight"></use></svg>
 </button>
 <div class="fn__flex-1 fn__ellipsis" id="drag"><span class="fn__none">开发版，使用前请进行备份 Development version, please backup before use</span></div>
+<div id="barSearch" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
+    <svg><use xlink:href="#iconSearch"></use></svg>
+</div>
+<div id="barSetting" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.config} ${updateHotkeyTip(window.siyuan.config.keymap.general.config.custom)}">
+    <svg><use xlink:href="#iconSettings"></use></svg>
+</div>
+<div id="barMode" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.appearanceMode}">
+    <svg><use xlink:href="#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}"></use></svg>
+</div>
+<div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly}">
+    <svg><use xlink:href="#icon${window.siyuan.config.editor.readOnly ? "Preview" : "Edit"}"></use></svg>
+</div>
 <div class="fn__flex" id="windowControls"></div>`;
     document.querySelector(".toolbar").addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
@@ -468,17 +468,17 @@ const initWindow = () => {
     }
     const controlsElement = document.querySelector("#windowControls");
     document.body.classList.add("body--win32");
-    controlsElement.innerHTML = `<div class="toolbar__item toolbar__item--win b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}" id="minWindow">
+    controlsElement.innerHTML = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}" id="minWindow">
     <svg>
         <use xlink:href="#iconMin"></use>
     </svg>
 </div>
-<div aria-label="${window.siyuan.languages.max}" class="b3-tooltips b3-tooltips__sw toolbar__item toolbar__item--win" id="maxWindow">
+<div aria-label="${window.siyuan.languages.max}" class="b3-tooltips b3-tooltips__sw toolbar__item" id="maxWindow">
     <svg style="height: 11px">
         <use xlink:href="#iconMax"></use>
     </svg>
 </div>
-<div aria-label="${window.siyuan.languages.restore}" class="b3-tooltips b3-tooltips__sw toolbar__item toolbar__item--win" id="restoreWindow">
+<div aria-label="${window.siyuan.languages.restore}" class="b3-tooltips b3-tooltips__sw toolbar__item" id="restoreWindow">
     <svg>
         <use xlink:href="#iconRestore"></use>
     </svg>

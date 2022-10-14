@@ -195,9 +195,16 @@ func CountBlockNodes(node *ast.Node) (ret int) {
 }
 
 func ParentNodes(node *ast.Node) (parents []*ast.Node) {
+	const maxDepth = 256
+	i := 0
 	for n := node.Parent; nil != n; n = n.Parent {
+		i++
 		parents = append(parents, n)
 		if ast.NodeDocument == n.Type {
+			return
+		}
+		if maxDepth < i {
+			logging.LogWarnf("parent nodes of node [%s] is too deep", node.ID)
 			return
 		}
 	}

@@ -123,12 +123,15 @@ func insertBlock(c *gin.Context) {
 
 	data := arg["data"].(string)
 	dataType := arg["dataType"].(string)
-	var parentID, previousID string
+	var parentID, previousID, nextID string
 	if nil != arg["parentID"] {
 		parentID = arg["parentID"].(string)
 	}
 	if nil != arg["previousID"] {
 		previousID = arg["previousID"].(string)
+	}
+	if nil != arg["nextID"] {
+		nextID = arg["nextID"].(string)
 	}
 
 	if "markdown" == dataType {
@@ -144,6 +147,7 @@ func insertBlock(c *gin.Context) {
 					Data:       data,
 					ParentID:   parentID,
 					PreviousID: previousID,
+					NextID:     nextID,
 				},
 			},
 		},

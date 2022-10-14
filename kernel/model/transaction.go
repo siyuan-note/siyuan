@@ -708,11 +708,15 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	if nil == block {
 		block = treenode.GetBlockTree(operation.PreviousID)
 		if nil == block {
-			msg := fmt.Sprintf("not found previous block [id=%s]", operation.PreviousID)
-			logging.LogErrorf(msg)
-			return &TxErr{code: TxErrCodeBlockNotFound, id: operation.PreviousID}
+			block = treenode.GetBlockTree(operation.NextID)
 		}
 	}
+	if nil == block {
+		msg := fmt.Sprintf("not found next block [id=%s]", operation.NextID)
+		logging.LogErrorf(msg)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.NextID}
+	}
+
 	tree, err := tx.loadTree(block.ID)
 	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: block.ID}
@@ -780,8 +784,20 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	}
 
 	var node *ast.Node
+	nextID := operation.NextID
 	previousID := operation.PreviousID
-	if "" != previousID {
+	if "" != nextID {
+		node = treenode.GetNodeInTree(tree, nextID)
+		if nil == node {
+			logging.LogErrorf("get node [%s] in tree [%s] failed", nextID, tree.Root.ID)
+			return &TxErr{code: TxErrCodeBlockNotFound, id: nextID}
+		}
+
+		if ast.NodeList == insertedNode.Type && nil != node.Parent && ast.NodeList == node.Parent.Type {
+			insertedNode = insertedNode.FirstChild
+		}
+		node.InsertBefore(insertedNode)
+	} else if "" != previousID {
 		node = treenode.GetNodeInTree(tree, previousID)
 		if nil == node {
 			logging.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
@@ -973,6 +989,7 @@ type Operation struct {
 	ID         string      `json:"id"`
 	ParentID   string      `json:"parentID"`
 	PreviousID string      `json:"previousID"`
+	NextID     string      `json:"nextID"`
 	RetData    interface{} `json:"retData"`
 
 	discard bool // 用于标识是否在事务合并中丢弃

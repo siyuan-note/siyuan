@@ -345,7 +345,7 @@ export class Dock {
                 break;
             case "Top":
                 if (index === 0) {
-                    direct = "e";
+                    direct = "se";
                 } else {
                     direct = "sw";
                 }

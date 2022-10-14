@@ -33,7 +33,7 @@
     --b3-toolbar-color: #9aa0a6;
 
     /* 线条 */
-    --b3-border-color: rgba(0, 0, 0, .06);
+    --b3-border-color: rgba(0, 0, 0, .1);
 
     /* 滚动条 */
     --b3-scroll-color: rgba(0, 0, 0, .2);

@@ -29,7 +29,7 @@
     z-index: 2;
 
     &:hover:after {
-      background-color: var(--b3-theme-primary-light);
+      background-color: var(--b3-theme-on-background);
     }
 
     &:after {
@@ -128,11 +128,11 @@
         transition: var(--b3-transition);
         flex: 1;
         min-height: 30px;
-        border-left: .5px solid transparent;
+        border-left: 1px solid transparent;
 
         &:not(:first-child),
         &:last-child:not(.item--focus):not(.item--readonly) {
-          border-left-color: var(--b3-list-hover);
+          border-left-color: var(--b3-theme-background-light)
         }
 
         &:hover:not(.item--focus):not(.item--readonly) {
@@ -145,7 +145,7 @@
         }
 
         &--readonly {
-          border-left-color: var(--b3-list-hover);
+          border-left-color: var(--b3-theme-background-light);
         }
 
         &--pin {

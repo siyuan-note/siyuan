@@ -55,15 +55,27 @@ export const loadAssets = (data: IAppearance) => {
         addScript(themeScriptAddress, "themeScript");
     }
 
-    const iconScriptElement = document.getElementById("iconScript");
-    const iconURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
-    if (iconScriptElement) {
-        if (!iconScriptElement.getAttribute("src").startsWith(iconURL)) {
-            iconScriptElement.remove();
-            addScript(iconURL, "iconScript");
+    const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
+    const iconURL = `/appearance/icons/${["ant", "material"].includes(data.icon) ? data.icon : "material"}/icon.js?v=${data.iconVer}`;
+    if (iconDefaultScriptElement) {
+        if (!iconDefaultScriptElement.getAttribute("src").startsWith(iconURL)) {
+            iconDefaultScriptElement.remove();
+            addScript(iconURL, "iconDefaultScript");
         }
     } else {
-        addScript(iconURL, "iconScript");
+        addScript(iconURL, "iconDefaultScript");
+    }
+    if (!["ant", "material"].includes(data.icon)) {
+        const iconScriptElement = document.getElementById("iconScript");
+        const iconURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
+        if (iconScriptElement) {
+            if (!iconScriptElement.getAttribute("src").startsWith(iconURL)) {
+                iconScriptElement.remove();
+                addScript(iconURL, "iconScript");
+            }
+        } else {
+            addScript(iconURL, "iconScript");
+        }
     }
 };
 

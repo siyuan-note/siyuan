@@ -25,19 +25,6 @@ body {
 
     .toolbar {
       padding-left: 0;
-
-      // https://github.com/siyuan-note/siyuan/issues/4460
-      .b3-tooltips__se,
-      .b3-tooltips__sw,
-      .b3-tooltips__s {
-        &:before {
-          bottom: -15px;
-        }
-
-        &:after {
-          top: calc(100% + 10px);
-        }
-      }
     }
 
     &.body--blur {

@@ -90,7 +90,7 @@
   background: var(--b3-theme-background);
 
   &--border {
-    border-bottom: 1px solid var(--b3-border-color);
+    border-bottom: 1px solid var(--b3-theme-surface-lighter);
   }
 
   &--dark {
@@ -257,7 +257,7 @@
   background: var(--b3-theme-background);
   z-index: 221;
   display: flex;
-  border-top: 1px solid var(--b3-border-color);
+  border-top: 1px solid var(--b3-theme-surface-lighter);
 
   button {
     background: transparent;

@@ -164,7 +164,7 @@ progressLoading: 400
   height: 42px;
   line-height: 22px;
   padding-left: 84px;
-  box-shadow: inset 0px -1px 1px 0px var(--b3-border-color);
+  border-bottom: .5px solid var(--b3-border-color);
 
   &--browser {
     padding-left: 0;
@@ -216,7 +216,7 @@ progressLoading: 400
 
     &--disabled,
     &--disabled:hover {
-      color: var(--b3-border-color);
+      color: var(--b3-theme-surface-lighter);
       cursor: not-allowed;
     }
 
@@ -241,6 +241,7 @@ progressLoading: 400
   height: 32px;
   line-height: 32px;
   z-index: 2;
+  border-top: .5px solid var(--b3-border-color);
 
   .toolbar__item {
     padding: 9px;
@@ -471,7 +472,7 @@ progressLoading: 400
 .spread-search {
   &__preview {
     background-color: var(--b3-theme-background);
-    border-top: 1px solid var(--b3-border-color);
+    border-top: 1px solid var(--b3-theme-surface-lighter);
   }
 
   &__filter {

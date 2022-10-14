@@ -1613,11 +1613,11 @@ export class Gutter {
             }
         }, {
             label: `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.shadow}">
-    <span style="text-shadow: 1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)" class="b3-color__square fn__flex-center">A</span>
+    <span style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)" class="b3-color__square fn__flex-center">A</span>
 </div>`,
             click: () => {
                 this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                    e.style.textShadow = "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)";
+                    e.style.textShadow = "1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)";
                 });
             }
         }, {

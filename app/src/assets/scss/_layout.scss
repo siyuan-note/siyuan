@@ -1,7 +1,7 @@
 .layout {
   &__wnd--active {
     .layout-tab-bar .item--focus {
-      box-shadow: inset 0 -2px 0 0 var(--b3-theme-primary) !important;
+      box-shadow: inset 0 -2px 0 0 var(--b3-theme-primary);
 
       & > .item__text {
         color: var(--b3-theme-on-background);
@@ -35,7 +35,7 @@
     &:after {
       content: "";
       width: 100%;
-      height: 1px;
+      height: .5px;
       display: block;
       background-color: var(--b3-border-color);
       top: 3px;
@@ -52,7 +52,7 @@
 
       &:after {
         top: 0;
-        width: 1px;
+        width: .5px;
         left: 0;
         height: 100%;
       }
@@ -128,23 +128,24 @@
         transition: var(--b3-transition);
         flex: 1;
         min-height: 30px;
+        border-left: .5px solid transparent;
 
-        &:not(:last-child),
+        &:not(:first-child),
         &:last-child:not(.item--focus):not(.item--readonly) {
-          box-shadow: 2px -26px 0px 0px var(--b3-theme-surface), 1px -4px 1px 0px var(--b3-theme-on-surface-light);
-        }
-
-        &:last-child:not(.item--readonly) {
-          margin-right: 2px;
+          border-left-color: var(--b3-list-hover);
         }
 
         &:hover:not(.item--focus):not(.item--readonly) {
           background-color: var(--b3-list-hover);
-          box-shadow: none;
+          border-left-color: transparent;
 
           .item__text::after {
             background: linear-gradient(90deg, rgba(0, 0, 0, 0.001), var(--b3-list-hover));
           }
+        }
+
+        &--readonly {
+          border-left-color: var(--b3-list-hover);
         }
 
         &--pin {
@@ -169,10 +170,15 @@
 
         &--focus {
           background-color: var(--b3-theme-background);
-          box-shadow: none !important;
+          border-left-color: transparent !important;
+          box-shadow: inset 0 -2px 0 0 var(--b3-theme-background-light);
 
           .item__text::after {
             background: linear-gradient(90deg, rgba(0, 0, 0, 0.001), var(--b3-theme-background));
+          }
+
+          & + .item {
+            border-left-color: transparent !important;
           }
         }
 
@@ -245,17 +251,19 @@
   background-color: var(--b3-theme-surface);
 
   &#dockLeft {
-    border-right: 1px solid var(--b3-border-color);
+    border-right: .5px solid var(--b3-border-color);
   }
 
   &#dockRight {
-    border-left: 1px solid var(--b3-border-color);
+    border-left: .5px solid var(--b3-border-color);
   }
 
-  &#dockTop,
+  &#dockTop {
+    border-bottom: .5px solid var(--b3-border-color);
+  }
+
   &#dockBottom {
-    border-top: 1px solid var(--b3-border-color);
-    border-bottom: 1px solid var(--b3-border-color);
+    border-top: .5px solid var(--b3-border-color);
   }
 
   svg {

@@ -9,6 +9,7 @@
     --b3-theme-background-light: #353637;
     --b3-theme-surface: #292a2d;
     --b3-theme-surface-light: rgba(41, 42, 45, .86);
+    --b3-theme-surface-lighter: rgba(230, 230, 230, .06);
     --b3-theme-error: #d23f31;
 
     /* 文字颜色 */

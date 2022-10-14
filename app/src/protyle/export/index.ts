@@ -179,7 +179,7 @@ const renderPDF = (id: string) => {
         }
         
         .b3-label {
-          border-bottom: 1px solid var(--b3-border-color);
+          border-bottom: 1px solid var(--b3-theme-surface-lighter);
           display: block;
           color: var(--b3-theme-on-surface);
           padding-bottom: 16px;

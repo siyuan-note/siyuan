@@ -55,7 +55,7 @@
     text-align: left;
     border: 0;
     color: var(--b3-theme-on-background);
-    margin-top: 0 !important;
+    margin: 0 8px !important;
 
     &[draggable="true"]:active {
       cursor: grabbing;

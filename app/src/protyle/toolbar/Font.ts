@@ -65,7 +65,7 @@ export const fontMenu = (protyle: IProtyle) => {
                     lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>`;
                     break;
                 case "style4":
-                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)">${window.siyuan.languages.shadow}</button>`;
+                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>`;
                     break;
                 case "fontSize":
                     lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style">${lastFontStatus[1]}</button>`;
@@ -93,7 +93,7 @@ export const fontMenu = (protyle: IProtyle) => {
 <div style="margin: 4px 0 2px">${window.siyuan.languages.fontStyle}</div>
 <div class="fn__flex">
     <button data-type="style2" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>
-    <button data-type="style4" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)">${window.siyuan.languages.shadow}</button>
+    <button data-type="style4" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>
 </div>
 <div style="margin: 4px 0 2px">${window.siyuan.languages.fontSize}</div>
 <div class="fn__flex">
@@ -174,7 +174,7 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 textElement.style.webkitTextFillColor = "transparent";
                 break;
             case "style4":
-                textElement.style.textShadow = "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)";
+                textElement.style.textShadow = "1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)";
                 break;
             case "id":
                 setBlockRef(textOption.color);
@@ -263,7 +263,7 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             webkitTextFillColor === sideElement.style.webkitTextFillColor &&
             webkitTextStroke === sideElement.style.webkitTextStroke &&
             fontSize === sideElement.style.fontSize &&
-            "1px 1px var(--b3-border-color), 2px 2px var(--b3-border-color), 3px 3px var(--b3-border-color), 4px 4px var(--b3-border-color)" === sideElement.style.textShadow &&
+            "1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)" === sideElement.style.textShadow &&
             backgroundColor === sideElement.style.backgroundColor;
     }
     if (textObj.type === "fontSize") {

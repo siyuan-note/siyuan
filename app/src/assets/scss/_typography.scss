@@ -36,7 +36,7 @@
   }
 
   iframe {
-    border: 1px solid var(--b3-border-color);
+    border: 1px solid var(--b3-theme-surface-lighter);
     width: 765px;
     box-sizing: border-box;
     height: 256px;
@@ -105,9 +105,9 @@
     color: var(--b3-theme-on-surface);
     vertical-align: middle;
     background-color: var(--b3-theme-surface);
-    border: solid 1px var(--b3-border-color);
+    border: solid 1px var(--b3-theme-surface-lighter);
     border-radius: 3px;
-    box-shadow: inset 0 -1px 0 var(--b3-border-color);
+    box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
   }
 
   u {
@@ -128,7 +128,7 @@
   .bq {
     padding: 4px;
     color: var(--b3-theme-on-surface);
-    border-left: 0.25em solid var(--b3-border-color);
+    border-left: 0.25em solid var(--b3-theme-surface-lighter);
     background-color: var(--b3-list-hover);
     margin: 4px 0;
   }
@@ -213,13 +213,13 @@
 
     tr {
       background-color: var(--b3-theme-surface);
-      border-top: 1px solid var(--b3-border-color);
+      border-top: 1px solid var(--b3-theme-surface-lighter);
     }
 
     td,
     th {
       padding: 4px 8px;
-      border: 1px solid var(--b3-border-color);
+      border: 1px solid var(--b3-theme-surface-lighter);
       box-sizing: border-box;
 
       &:empty::after {
@@ -563,7 +563,7 @@
     position: absolute;
     display: none;
     background-color: var(--b3-theme-surface);
-    border: 1px solid var(--b3-border-color);
+    border: 1px solid var(--b3-theme-surface-lighter);
     border-radius: 3px;
     padding: 3px;
     cursor: pointer;

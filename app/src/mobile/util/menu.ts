@@ -134,7 +134,7 @@ export const popMenu = () => {
 <div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHistory">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconVideo"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.dataHistory}</span>
 </div>
-<div slot="border-bottom: 1px solid var(--b3-border-color);"></div>
+<div slot="border-bottom: 1px solid var(--b3-theme-surface-lighter);"></div>
 <div class="b3-list-item b3-list-item--big" id="menuAppearance">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconTheme"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.appearance}</span>
 </div>

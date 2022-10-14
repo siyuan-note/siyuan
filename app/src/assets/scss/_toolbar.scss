@@ -35,12 +35,12 @@
       }
 
       &:hover {
-        background-color: var(--b3-border-color);
+        background-color: var(--b3-theme-surface-lighter);
       }
     }
 
     &__divider {
-      border-left: 1px solid var(--b3-border-color);
+      border-left: 1px solid var(--b3-theme-surface-lighter);
       margin: 6px 4px;
     }
   }
@@ -65,7 +65,7 @@
       white-space: nowrap;
 
       &:hover {
-        border-color: var(--b3-border-color);
+        border-color: var(--b3-theme-surface-lighter);
       }
     }
   }

@@ -77,7 +77,7 @@
   &__edit {
     display: flex;
     flex-direction: column;
-    border-bottom: 1px solid var(--b3-border-color);
+    border-bottom: 1px solid var(--b3-theme-surface-lighter);
 
     .protyle-wysiwyg {
       transition: none;

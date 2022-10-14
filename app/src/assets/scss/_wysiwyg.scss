@@ -46,7 +46,7 @@
         }
 
         & > .protyle-action:after {
-          background-color: var(--b3-border-color);
+          background-color: var(--b3-theme-surface-lighter);
         }
 
         & > div:nth-child(3):not(.protyle-attr),
@@ -223,11 +223,11 @@
 
       &[data-type="NodeBlockQueryEmbed"] {
         background-color: var(--b3-theme-surface);
-        border-left: 1px dashed var(--b3-border-color);
+        border-left: 1px dashed var(--b3-theme-surface-lighter);
 
         & > .protyle-wysiwyg__embed {
           -webkit-user-modify: read-only;
-          border-top: 1px dashed var(--b3-border-color);
+          border-top: 1px dashed var(--b3-theme-surface-lighter);
           position: relative;
 
           .code-block:hover .protyle-icon,
@@ -321,7 +321,7 @@
         top: 4px;
         left: 4px;
         color: var(--b3-theme-primary);
-        background-color: var(--b3-border-color);
+        background-color: var(--b3-theme-surface-lighter);
         padding: 4px;
         border-radius: 4px;
 
@@ -464,7 +464,7 @@
     content: "";
     height: 16px !important;
     width: 16px;
-    background: var(--b3-border-color);
+    background: var(--b3-theme-surface-lighter);
     display: block;
     position: absolute;
     left: -18px !important;
@@ -553,7 +553,7 @@
   }
 
   span[data-type~="tag"]:hover {
-    background-color: var(--b3-border-color);
+    background-color: var(--b3-theme-surface-lighter);
   }
 
   span[data-type~="block-ref"]:hover,

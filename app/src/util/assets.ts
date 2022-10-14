@@ -56,7 +56,8 @@ export const loadAssets = (data: IAppearance) => {
     }
 
     const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
-    const iconURL = `/appearance/icons/${["ant", "material"].includes(data.icon) ? data.icon : "material"}/icon.js?v=${data.iconVer}`;
+    // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
+    const iconURL = `/appearance/icons/${["ant", "material"].includes(data.icon) ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
     if (iconDefaultScriptElement) {
         if (!iconDefaultScriptElement.getAttribute("src").startsWith(iconURL)) {
             iconDefaultScriptElement.remove();

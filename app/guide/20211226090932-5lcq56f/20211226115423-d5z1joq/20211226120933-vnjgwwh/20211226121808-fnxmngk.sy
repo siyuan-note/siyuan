@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226121808-fnxmngk",
 		"title": "資料庫表",
-		"updated": "20220828090211"
+		"updated": "20221014133129"
 	},
 	"Children": [
 		{
@@ -52,7 +52,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20211226121831-s0emrpw",
-				"updated": "20220828090211"
+				"updated": "20221014133129"
 			},
 			"Children": [
 				{
@@ -459,13 +459,17 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "fcontent"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 長度"
+									"Data": "​ 長度"
 								}
 							]
 						}
@@ -495,33 +499,11 @@
 									"Data": "內容塊類型，參考"
 								},
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20211226121740-xjez6e9"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "這裡"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226121740-xjez6e9",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "這裡"
 								}
 							]
 						}
@@ -551,33 +533,11 @@
 									"Data": "內容塊子類型，參考"
 								},
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20211226121740-yo2ibhk"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "這裡"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226121740-yo2ibhk",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "這裡"
 								}
 							]
 						}
@@ -609,7 +569,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "{: name=\"value\"}"
+									"TextMarkTextContent": "{: name=\u0026quot;value\u0026quot;}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -663,7 +627,16 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "創建時間"
+									"Data": "創建時間，例如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20221013202001"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -690,7 +663,16 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "更新時間"
+									"Data": "更新時間，例如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20221013202001"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

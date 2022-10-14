@@ -19,15 +19,15 @@ body {
   max-height: 100%;
   overflow: hidden;
 
+  &.body--blur .toolbar {
+    background: var(--b3-toolbar-blur-background);
+  }
+
   &.body--win32 {
     -webkit-font-smoothing: auto;
 
     .toolbar {
       padding-left: 0;
-    }
-
-    &.body--blur {
-      border-top-color: var(--b3-theme-surface);
     }
 
     .fullscreen {

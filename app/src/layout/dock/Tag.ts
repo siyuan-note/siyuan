@@ -130,7 +130,7 @@ export class Tag extends Model {
             this.tree.expandAll();
         });
         this.element.addEventListener("click", (event: MouseEvent) => {
-            setPanelFocus(this.element.firstElementChild);
+            setPanelFocus(this.element);
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
                 if (target.classList.contains("block__icon")) {
@@ -202,7 +202,7 @@ export class Tag extends Model {
             }
         });
         this.update();
-        setPanelFocus(this.element.firstElementChild);
+        setPanelFocus(this.element);
     }
 
     private update() {

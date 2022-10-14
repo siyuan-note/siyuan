@@ -573,7 +573,7 @@ export const globalShortcut = () => {
 
         // 面板折叠展开操作
         if (!event.repeat && (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) || matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event))) {
-            let activePanelElement = document.querySelector(".block__icons--active");
+            let activePanelElement = document.querySelector(".layout__tab--active");
             if (!activePanelElement) {
                 Array.from(document.querySelectorAll(".layout__wnd--active .layout-tab-container > div")).forEach(item => {
                     if (!item.classList.contains("fn__none")) {
@@ -602,10 +602,10 @@ export const globalShortcut = () => {
         if (matchHotKey(window.siyuan.config.keymap.general.closeTab.custom, event) && !event.repeat) {
             event.preventDefault();
             event.stopPropagation();
-            let activeTabElement = document.querySelector(".block__icons--active");
+            let activeTabElement = document.querySelector(".layout__tab--active");
             if (activeTabElement && activeTabElement.getBoundingClientRect().width > 0) {
                 let type: TDockType;
-                Array.from(activeTabElement.parentElement.classList).find(item => {
+                Array.from(activeTabElement.classList).find(item => {
                     if (item.startsWith("sy__")) {
                         type = item.replace("sy__", "") as TDockType;
                         return true;
@@ -756,9 +756,9 @@ const editKeydown = (event: KeyboardEvent) => {
         }
         protyle = editor.editor.protyle;
     }
-    const activePanelElement = document.querySelector(".block__icons--active");
+    const activePanelElement = document.querySelector(".layout__tab--active");
     let isFileFocus = false;
-    if (activePanelElement && activePanelElement.parentElement.classList.contains("sy__file")) {
+    if (activePanelElement && activePanelElement.classList.contains("sy__file")) {
         isFileFocus = true;
     }
     let searchKey = "";
@@ -858,7 +858,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         dockFile.toggleModel("file", true);
         return;
     }
-    if (!files.element.previousElementSibling.classList.contains("block__icons--active")) {
+    if (!files.element.parentElement.classList.contains("layout__tab--active")) {
         return false;
     }
     let liElement = files.element.querySelector(".b3-list-item--focus");

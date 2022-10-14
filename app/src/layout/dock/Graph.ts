@@ -293,7 +293,7 @@ export class Graph extends Model {
             if (this.type === "local") {
                 setPanelFocus(this.element.parentElement.parentElement);
             } else {
-                setPanelFocus(this.element.firstElementChild);
+                setPanelFocus(this.element);
             }
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
@@ -364,7 +364,7 @@ export class Graph extends Model {
         });
         this.searchGraph(options.type !== "global");
         if (this.type !== "local") {
-            setPanelFocus(this.element.firstElementChild);
+            setPanelFocus(this.element);
         }
     }
 

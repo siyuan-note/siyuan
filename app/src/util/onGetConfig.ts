@@ -15,7 +15,6 @@ import {fetchPost} from "./fetch";
 import {mountHelp, newDailyNote} from "./mount";
 import {MenuItem} from "../menus/Menu";
 import {initAssets, loadAssets, renderSnippet, setInlineStyle, setMode} from "./assets";
-import {goBack, goForward} from "./backForward";
 import {getOpenNotebookCount} from "./pathName";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
@@ -314,6 +313,9 @@ const initWindow = () => {
     /// #if !BROWSER
     const currentWindow = getCurrentWindow();
     currentWindow.on("focus", winOnFocus);
+    currentWindow.on("blur", () => {
+        document.body.classList.add("body--blur");
+    });
     ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
         if (!/^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url)) {
             return;
@@ -505,10 +507,6 @@ const initWindow = () => {
         maxBtnElement.style.display = "none";
     });
     currentWindow.on("leave-full-screen", toggleMaxRestoreButtons);
-
-    currentWindow.on("blur", () => {
-        document.body.classList.add("body--blur");
-    });
     const minBtnElement = document.getElementById("minWindow");
     const closeBtnElement = document.getElementById("closeWindow");
     minBtnElement.addEventListener("click", () => {

@@ -92,7 +92,7 @@ export class Dock {
     public toggleModel(type: TDockType, show = false, close = false) {
         const target = this.element.querySelector(`[data-type="${type}"]`) as HTMLElement;
         if (show && target.classList.contains("dock__item--active")) {
-            target.classList.remove("dock__item--active");
+            target.classList.remove("dock__item--active", "dock__item--activefocus");
         }
         const index = parseInt(target.getAttribute("data-index"));
         const wnd = this.layout.children[index] as Wnd;
@@ -101,8 +101,8 @@ export class Dock {
                 let needFocus = false;
                 Array.from(wnd.element.querySelector(".layout-tab-container").children).find(item => {
                     if (item.getAttribute("data-id") === target.getAttribute("data-id")) {
-                        if (!item.firstElementChild.classList.contains("block__icons--active")) {
-                            setPanelFocus(item.firstElementChild);
+                        if (!item.classList.contains("layout__tab--active")) {
+                            setPanelFocus(item);
                             needFocus = true;
                         }
                         return true;
@@ -113,7 +113,7 @@ export class Dock {
                 }
             }
 
-            target.classList.remove("dock__item--active");
+            target.classList.remove("dock__item--active", "dock__item--activefocus");
             // dock 隐藏
             if (this.element.querySelectorAll(".dock__item--active").length === 0) {
                 if (this.position === "Left" || this.position === "Right") {
@@ -128,9 +128,9 @@ export class Dock {
             }
         } else {
             this.element.querySelectorAll(`.dock__item--active[data-index="${index}"]`).forEach(item => {
-                item.classList.remove("dock__item--active");
+                item.classList.remove("dock__item--active", "dock__item--activefocus");
             });
-            target.classList.add("dock__item--active");
+            target.classList.add("dock__item--active", "dock__item--activefocus");
             if (!target.getAttribute("data-id")) {
                 let editor: Protyle;
                 const models = getAllModels();
@@ -226,7 +226,7 @@ export class Dock {
                 Array.from(wnd.element.querySelector(".layout-tab-container").children).forEach(item => {
                     if (item.getAttribute("data-id") === target.getAttribute("data-id")) {
                         item.classList.remove("fn__none");
-                        setPanelFocus(item.firstElementChild);
+                        setPanelFocus(item);
                     } else {
                         item.classList.add("fn__none");
                     }

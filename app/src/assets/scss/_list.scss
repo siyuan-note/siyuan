@@ -8,6 +8,7 @@
     &:hover:not(.b3-list-item--focus),
     &--focus:not(.dragover):not(.dragover__top):not(.dragover__bottom) {
       background-color: var(--b3-list-hover);
+      border-radius: 4px;
     }
   }
 

@@ -121,7 +121,7 @@ export class Outline extends Model {
             if (this.type === "local") {
                 setPanelFocus(options.tab.panelElement.parentElement.parentElement);
             } else {
-                setPanelFocus(options.tab.panelElement.firstElementChild);
+                setPanelFocus(options.tab.panelElement);
             }
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(options.tab.panelElement)) {
@@ -163,7 +163,7 @@ export class Outline extends Model {
         });
 
         if (this.type === "pin") {
-            setPanelFocus(options.tab.panelElement.firstElementChild);
+            setPanelFocus(options.tab.panelElement);
         }
     }
 

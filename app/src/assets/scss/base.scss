@@ -159,11 +159,12 @@ progressLoading: 400
 }
 
 .toolbar {
-  background-color: #292a2d;
+  background-color: var(--b3-toolbar-background);
   box-sizing: border-box;
   height: 42px;
   line-height: 22px;
   padding-left: 84px;
+  box-shadow: inset 0px -1px 1px 0px var(--b3-border-color);
 
   &--browser {
     padding-left: 0;
@@ -183,7 +184,7 @@ progressLoading: 400
   #drag {
     -webkit-app-region: drag;
     font-size: 14px;
-    color: #9aa0a6;
+    color: var(--b3-toolbar-color);
     user-select: none;
     text-align: center;
     white-space: nowrap;
@@ -193,7 +194,7 @@ progressLoading: 400
   &__item {
     flex-shrink: 0;
     cursor: pointer;
-    color: #9aa0a6;
+    color: var(--b3-toolbar-color);
     padding: 12px;
     box-sizing: border-box;
     transition: var(--b3-transition);

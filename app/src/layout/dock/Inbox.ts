@@ -54,7 +54,7 @@ export class Inbox extends Model {
         const detailsElement = this.element.querySelector(".inbox__details");
         const selectAllElement = this.element.querySelector(".block__icons input") as HTMLInputElement;
         this.element.addEventListener("click", (event: MouseEvent) => {
-                setPanelFocus(this.element.firstElementChild);
+                setPanelFocus(this.element);
                 let target = event.target as HTMLElement;
                 while (target && !target.isEqualNode(this.element)) {
                     const typeElement = hasClosestByAttribute(target, "data-type", null);
@@ -160,7 +160,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             }
         );
         this.update();
-        setPanelFocus(this.element.firstElementChild);
+        setPanelFocus(this.element);
     }
 
     private updateAction() {

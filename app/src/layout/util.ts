@@ -28,11 +28,11 @@ import {pdfResize} from "../asset/renderAssets";
 import {Backlink} from "./dock/Backlink";
 
 export const setPanelFocus = (element: Element) => {
-    if (element.classList.contains("block__icons--active") || element.classList.contains("layout__wnd--active")) {
+    if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
         return;
     }
-    document.querySelectorAll(".block__icons--active").forEach(item => {
-        item.classList.remove("block__icons--active");
+    document.querySelectorAll(".layout__tab--active").forEach(item => {
+        item.classList.remove("layout__tab--active");
     });
     document.querySelectorAll(".dock__item--activefocus").forEach(item => {
         item.classList.remove("dock__item--activefocus");
@@ -40,10 +40,12 @@ export const setPanelFocus = (element: Element) => {
     document.querySelectorAll(".layout__wnd--active").forEach(item => {
         item.classList.remove("layout__wnd--active");
     });
-    if (element.classList.contains("block__icons")) {
-        element.classList.add("block__icons--active");
+    if (element.getAttribute("data-type") === "wnd") {
+        element.classList.add("layout__wnd--active");
+    } else {
+        element.classList.add("layout__tab--active");
         ["file", "inbox", "backlink", "tag", "bookmark", "graph", "globalGraph", "outline"].find(item => {
-            if (element.parentElement.classList.contains("sy__" + item)) {
+            if (element.classList.contains("sy__" + item)) {
                 document.querySelector(`.dock__item[data-type="${item}"]`).classList.add("dock__item--activefocus");
                 return true;
             }
@@ -55,8 +57,6 @@ export const setPanelFocus = (element: Element) => {
                 editElement.blur();
             }
         }
-    } else {
-        element.classList.add("layout__wnd--active");
     }
 };
 

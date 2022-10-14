@@ -26,6 +26,11 @@
     --b3-font-family-emoji: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji";
     --b3-font-family-math: KaTeX_Math;
 
+    /* 顶部工具栏 */
+    --b3-toolbar-background: #292a2d;
+    --b3-toolbar-blur-background: #3f4041;
+    --b3-toolbar-color: #9aa0a6;
+
     /* 线条 */
     --b3-border-color: rgba(0, 0, 0, .06);
 

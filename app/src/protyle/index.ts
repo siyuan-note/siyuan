@@ -195,8 +195,8 @@ export class Protyle {
                         updatePanelByEditor(this.protyle, false);
                     } else {
                         // 悬浮层应移除其余面板高亮，否则按键会被面板监听到
-                        document.querySelectorAll(".block__icons--active").forEach(item => {
-                            item.classList.remove("block__icons--active");
+                        document.querySelectorAll(".layout__tab--active").forEach(item => {
+                            item.classList.remove("layout__tab--active");
                         });
                         document.querySelectorAll(".layout__wnd--active").forEach(item => {
                             item.classList.remove("layout__wnd--active");

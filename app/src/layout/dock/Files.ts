@@ -93,7 +93,7 @@ export class Files extends Model {
         this.element = this.actionsElement.nextElementSibling as HTMLElement;
         this.closeElement = options.tab.panelElement.lastElementChild as HTMLElement;
         this.closeElement.addEventListener("click", (event) => {
-            setPanelFocus(this.actionsElement);
+            setPanelFocus(this.element.parentElement);
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.closeElement)) {
                 const type = target.getAttribute("data-type");
@@ -180,7 +180,7 @@ export class Files extends Model {
                 }
                 target = target.parentElement;
             }
-            setPanelFocus(this.actionsElement);
+            setPanelFocus(this.element.parentElement);
         });
         let clickTimeout: number;
         this.element.addEventListener("click", (event) => {
@@ -245,7 +245,7 @@ export class Files extends Model {
                                     }
                                 } else if (target.getAttribute("data-type") === "navigation-root") {
                                     this.getLeaf(target, notebookId);
-                                    setPanelFocus(this.actionsElement);
+                                    setPanelFocus(this.element.parentElement);
                                 }
                             }, Constants.TIMEOUT_DBLCLICK);
                         } else if (event.detail === 2) {
@@ -262,7 +262,7 @@ export class Files extends Model {
                 }
             }
             if (needFocus) {
-                setPanelFocus(this.actionsElement);
+                setPanelFocus(this.element.parentElement);
             }
         });
         // b3-list-item--focus 样式会遮挡拖拽排序的上下线条
@@ -467,7 +467,7 @@ export class Files extends Model {
             newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
         });
         this.init();
-        setPanelFocus(this.actionsElement);
+        setPanelFocus(this.element.parentElement);
     }
 
     private genNotebook(item: INotebook) {

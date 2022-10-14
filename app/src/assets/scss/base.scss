@@ -159,7 +159,7 @@ progressLoading: 400
 }
 
 .toolbar {
-  background-color: var(--b3-theme-surface);
+  background-color: #292a2d;
   box-sizing: border-box;
   height: 42px;
   line-height: 22px;
@@ -170,16 +170,20 @@ progressLoading: 400
   }
 
   #windowControls {
-    top: -1px;
+    top: 0;
     z-index: 502;
-    right: -1px;
+    right: 0;
     position: relative;
+
+    .toolbar__item svg {
+      width: 13px;
+    }
   }
 
   #drag {
     -webkit-app-region: drag;
     font-size: 14px;
-    color: var(--b3-theme-on-surface);
+    color: #9aa0a6;
     user-select: none;
     text-align: center;
     white-space: nowrap;
@@ -189,7 +193,7 @@ progressLoading: 400
   &__item {
     flex-shrink: 0;
     cursor: pointer;
-    color: var(--b3-theme-on-surface);
+    color: #9aa0a6;
     padding: 12px;
     box-sizing: border-box;
     transition: var(--b3-transition);
@@ -239,6 +243,7 @@ progressLoading: 400
 
   .toolbar__item {
     padding: 9px;
+    color: var(--b3-theme-on-surface);
 
     svg {
       height: 14px;

@@ -34,11 +34,20 @@ export const setPanelFocus = (element: Element) => {
     document.querySelectorAll(".block__icons--active").forEach(item => {
         item.classList.remove("block__icons--active");
     });
+    document.querySelectorAll(".dock__item--activefocus").forEach(item => {
+        item.classList.remove("dock__item--activefocus");
+    });
     document.querySelectorAll(".layout__wnd--active").forEach(item => {
         item.classList.remove("layout__wnd--active");
     });
     if (element.classList.contains("block__icons")) {
         element.classList.add("block__icons--active");
+        ["file", "inbox", "backlink", "tag", "bookmark", "graph", "globalGraph", "outline"].find(item => {
+            if (element.parentElement.classList.contains("sy__" + item)) {
+                document.querySelector(`.dock__item[data-type="${item}"]`).classList.add("dock__item--activefocus");
+                return true;
+            }
+        });
         const blockElement = hasClosestBlock(document.activeElement);
         if (blockElement) {
             const editElement = getContenteditableElement(blockElement) as HTMLElement;

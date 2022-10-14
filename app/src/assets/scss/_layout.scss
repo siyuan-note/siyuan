@@ -279,13 +279,14 @@
     border-radius: 4px;
     margin: 5px;
 
-    &:hover {
-      color: var(--b3-theme-on-background);
+    &:hover,
+    &--active {
       background-color: var(--b3-theme-background-light);
     }
 
-    &--active {
-      color: var(--b3-theme-on-background);
+    &--activefocus {
+      color: var(--b3-theme-on-primary) !important;
+      background-color: var(--b3-theme-primary) !important;
     }
   }
 }

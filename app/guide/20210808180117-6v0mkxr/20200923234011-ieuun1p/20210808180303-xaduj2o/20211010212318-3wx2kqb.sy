@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211010212318-3wx2kqb",
 		"title": "Virtual reference",
-		"updated": "20221003215008"
+		"updated": "20221003214948"
 	},
 	"Children": [
 		{
@@ -144,7 +144,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20221003214937-bqvm7yz",
-				"updated": "20221003215008"
+				"updated": "20221003214948"
 			},
 			"Children": [
 				{
@@ -175,34 +175,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "F5"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20221003214937-0yqjmgz",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221003214937-0yqjmgz",
-						"updated": "20221003215008"
-					},
-					"Children": [
-						{
-							"ID": "20221003214937-7rkkbhp",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221003214937-7rkkbhp",
-								"updated": "20221003215008"
-							},
-							"Children": [
+								},
 								{
 									"Type": "NodeText",
-									"Data": "For English characters, you need to use a space for word segmentation to make the virtual reference take effect. If the English content appears at the beginning of the paragraph, you also need to use the space at the end to take effect"
+									"Data": "​"
 								}
 							]
 						}

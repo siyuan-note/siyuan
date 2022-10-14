@@ -107,7 +107,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 
 	oldAttrs := parse.IAL2Map(node.KramdownIAL)
 
-	for name, _ := range nameValues {
+	for name := range nameValues {
 		for i := 0; i < len(name); i++ {
 			if !lex.IsASCIILetterNumHyphen(name[i]) {
 				return errors.New(fmt.Sprintf(Conf.Language(25), id))
@@ -119,7 +119,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		if "" == value {
 			node.RemoveIALAttr(name)
 		} else {
-			node.SetIALAttr(name, html.EscapeAttrVal(value))
+			node.SetIALAttr(name, value)
 		}
 	}
 
@@ -164,7 +164,7 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		return errors.New(fmt.Sprintf(Conf.Language(15), id))
 	}
 
-	for name, _ := range nameValues {
+	for name := range nameValues {
 		for i := 0; i < len(name); i++ {
 			if !lex.IsASCIILetterNumHyphen(name[i]) {
 				return errors.New(fmt.Sprintf(Conf.Language(25), id))

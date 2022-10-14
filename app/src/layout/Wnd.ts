@@ -443,6 +443,10 @@ export class Wnd {
                 this.headersElement.children[oldFocusIndex].after(tab.headElement);
             }
 
+            setTimeout(() => {
+                tab.headElement.removeAttribute("style")
+            }, Constants.TIMEOUT_TRANSITION);
+
             tab.headElement.querySelector(".item__close").addEventListener("click", (event) => {
                 if (tab.headElement.classList.contains("item--pin")) {
                     tab.unpin();
@@ -611,7 +615,10 @@ export class Wnd {
                             this.switchTab(this.children[currentIndex].headElement, true);
                         }
                     }
-                    item.headElement.remove();
+                    item.headElement.setAttribute("style", "flex: 0;width: 0;overflow: hidden");
+                    setTimeout(() => {
+                        item.headElement.remove();
+                    }, Constants.TIMEOUT_TRANSITION);
                 }
                 item.panelElement.remove();
                 this.destroyModel(item.model);

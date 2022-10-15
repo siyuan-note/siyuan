@@ -142,6 +142,13 @@
           }
         }
 
+        &:hover,
+        &.item--focus {
+          .item__close svg {
+            opacity: 1;
+          }
+        }
+
         &--readonly {
           border-left-color: var(--b3-theme-background-light);
         }
@@ -229,6 +236,7 @@
             color: var(--b3-theme-on-surface);
             transition: var(--b3-transition);
             padding: 4px;
+            opacity: 0;
           }
 
           &:hover svg {

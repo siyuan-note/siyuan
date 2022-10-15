@@ -224,6 +224,7 @@
       &[data-type="NodeBlockQueryEmbed"] {
         background-color: var(--b3-theme-surface);
         border-left: 1px dashed var(--b3-theme-surface-lighter);
+        max-width: 100%;
 
         & > .protyle-wysiwyg__embed {
           -webkit-user-modify: read-only;

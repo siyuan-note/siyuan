@@ -613,7 +613,7 @@ export class Toolbar {
             // 需进行 mergeNode ，否用 alt+x 为相同颜色 aaabbb 中的 bbb 再次赋值后无法选中
             this.range.setEnd(previousElement.firstChild, previousElement.firstChild.textContent.length);
         }
-        let needFocus = true
+        let needFocus = true;
         if (type === "inline-math") {
             mathRender(nodeElement);
             if (selectText === "") {

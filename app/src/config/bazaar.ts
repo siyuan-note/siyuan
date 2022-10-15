@@ -31,11 +31,11 @@ export const bazaar = {
         const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 72}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
         return `<div class="fn__flex-column" style="height: 100%">
 <div class="layout-tab-bar fn__flex">
-    <div data-type="theme" class="item item--focus"><span class="item__text">${window.siyuan.languages.theme}</span></div>
-    <div data-type="template" class="item"><span class="item__text">${window.siyuan.languages.template}</span></div>
-    <div data-type="icon" class="item"><span class="item__text">${window.siyuan.languages.icon}</span></div>
-    <div data-type="widget" class="item"><span class="item__text">${window.siyuan.languages.widget}</span></div>
-    <div data-type="downloaded" class="item"><span class="item__text">${window.siyuan.languages.downloaded}</span></div>
+    <div data-type="theme" class="item item--focus"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.theme}</span><span class="fn__flex-1"></span></div>
+    <div data-type="template" class="item"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.template}</span><span class="fn__flex-1"></span></div>
+    <div data-type="icon" class="item"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.icon}</span><span class="fn__flex-1"></span></div>
+    <div data-type="widget" class="item"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.widget}</span><span class="fn__flex-1"></span></div>
+    <div data-type="downloaded" class="item"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.downloaded}</span><span class="fn__flex-1"></span></div>
 </div>
 <div class="fn__flex-1">
     <div data-type="theme" class="bazaarPanel" data-init="true">

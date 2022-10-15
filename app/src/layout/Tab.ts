@@ -40,7 +40,9 @@ export class Tab {
             } else if (options.docIcon) {
                 iconHTML = `<span class="item__icon">${unicode2Emoji(options.docIcon)}</span>`;
             }
-            this.headElement.innerHTML = `${iconHTML}<span class="item__text">${escapeHtml(options.title)}</span>
+            this.headElement.innerHTML = `<span class="fn__flex-1"></span>
+${iconHTML}<span class="item__text">${escapeHtml(options.title)}</span>
+<span class="fn__flex-1"></span>
 <span class="item__close"><svg><use xlink:href='#iconClose'></use></svg></span>`;
             this.headElement.addEventListener("mouseenter", (event) => {
                 event.stopPropagation();

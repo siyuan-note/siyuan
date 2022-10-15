@@ -182,10 +182,6 @@
           border-left-color: transparent !important;
           box-shadow: inset 0 -2px 0 0 var(--b3-theme-background-light);
 
-          .item__text::after {
-            background: linear-gradient(90deg, rgba(0, 0, 0, 0.001), var(--b3-theme-background));
-          }
-
           & + .item {
             border-left-color: transparent !important;
           }
@@ -218,10 +214,8 @@
         }
 
         &__text {
-          padding: 4px 0 4px 8px;
           min-width: 56px;
           @include text-clamp(1);
-          flex: 1;
           text-align: center;
           -webkit-font-smoothing: subpixel-antialiased;
           color: var(--b3-theme-on-surface);

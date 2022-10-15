@@ -4,10 +4,10 @@ import {addStyle} from "../protyle/util/addStyle";
 /// #if !MOBILE
 import {ipcRenderer} from "electron";
 import {getAllModels} from "../layout/getAll";
+import {exportLayout} from "../layout/util";
 /// #endif
 import {isMobile} from "./functions";
 import {fetchPost} from "./fetch";
-import {exportLayout} from "../layout/util";
 
 export const loadAssets = (data: IAppearance) => {
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
@@ -167,6 +167,7 @@ export const setCodeTheme = (cdn = Constants.PROTYLE_CDN) => {
 };
 
 export const setMode = (modeElementValue: number) => {
+    /// #if !MOBILE
     fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
         mode: modeElementValue === 2 ? window.siyuan.config.appearance.mode : modeElementValue,
         modeOS: modeElementValue === 2,
@@ -192,4 +193,5 @@ export const setMode = (modeElementValue: number) => {
         loadAssets(response.data);
         document.querySelector("#barMode use").setAttribute("xlink:href", `#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}`);
     });
+    /// #endif
 }

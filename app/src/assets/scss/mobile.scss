@@ -117,9 +117,9 @@
     }
 
     &--active {
-      background-color: var(--b3-theme-background-light);
-      border-radius: 2px;
-      color: var(--b3-theme-on-background);
+      background-color: var(--b3-theme-primary);
+      border-radius: 4px;
+      color: var(--b3-theme-on-primary);
     }
   }
 

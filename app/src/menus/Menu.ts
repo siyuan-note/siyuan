@@ -45,7 +45,7 @@ export class Menu {
         if (rect.right > window.innerWidth && (
             leftPosition > 0 || Math.abs(leftPosition) < (rect.right - window.innerWidth))) {
             if (leftPosition >= 0) {
-                style = "left:auto;right:100%;";
+                style = "left:auto;right:calc(100% + 8px);";
             } else {
                 style = `z-index:1;mix-blend-mode: normal;left:-${this.element.style.left};`;
             }
@@ -236,7 +236,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         let style = "";
         if (rect.right > window.innerWidth && (rect.left - subMenuElement.clientWidth - rect.width > 0 ||
             Math.abs(rect.left - subMenuElement.clientWidth - rect.width) < (rect.right - window.innerWidth))) {
-            style = "left:auto;right:100%;";
+            style = "left:auto;right:calc(100% + 8px);";
         }
         if (rect.bottom > window.innerHeight) {
             style += `top: auto;bottom:-5px;max-height:${Math.min(rect.top, window.innerHeight * 0.4)}px`;

@@ -163,10 +163,13 @@
 
           .item__text {
             max-width: 148px;
-            padding: 0 8px;
-            min-width: auto;
             font-style: normal;
             color: var(--b3-theme-on-background);
+          }
+
+          .item__graphic,
+          .item__icon {
+            padding: 0;
           }
 
           .item__close {
@@ -190,7 +193,7 @@
         }
 
         &__icon {
-          padding: 4px 8px;
+          padding: 4px 0 4px 8px;
           line-height: 22px;
           flex-shrink: 0;
 
@@ -205,22 +208,22 @@
         }
 
         &__graphic {
-          padding: 4px 8px;
+          padding: 4px 0 4px 8px;
           height: 14px;
           width: 14px;
         }
 
         &__text {
-          min-width: 56px;
           @include text-clamp(1);
           text-align: center;
           -webkit-font-smoothing: subpixel-antialiased;
           color: var(--b3-theme-on-surface);
           transition: var(--b3-transition);
+          padding: 0 8px;
         }
 
         &__close {
-          padding: 4px 8px;
+          padding: 4px 8px 4px 0;
           display: flex;
           align-items: center;
 

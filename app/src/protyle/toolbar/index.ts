@@ -613,6 +613,7 @@ export class Toolbar {
             // 需进行 mergeNode ，否用 alt+x 为相同颜色 aaabbb 中的 bbb 再次赋值后无法选中
             this.range.setEnd(previousElement.firstChild, previousElement.firstChild.textContent.length);
         }
+        let needFocus = true
         if (type === "inline-math") {
             mathRender(nodeElement);
             if (selectText === "") {
@@ -627,6 +628,7 @@ export class Toolbar {
         } else if (type === "a") {
             const aElement = newNodes[0] as HTMLElement;
             if (aElement.textContent.replace(Constants.ZWSP, "") === "" || !aElement.getAttribute("data-href")) {
+                needFocus = false;
                 linkMenu(protyle, aElement, aElement.getAttribute("data-href") ? true : false);
             } else {
                 this.range.collapse(false);
@@ -638,7 +640,9 @@ export class Toolbar {
         if (wbrElement) {
             wbrElement.remove();
         }
-        focusByRange(this.range);
+        if (needFocus) {
+            focusByRange(this.range);
+        }
     }
 
     public showFileAnnotationRef(protyle: IProtyle, refElement: HTMLElement) {

@@ -72,7 +72,7 @@ export class Tag extends Model {
     <span class="fn__space"></span>
     <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
-<div class="fn__flex-1"></div>`;
+<div class="fn__flex-1" style="margin-bottom: 8px"></div>`;
 
         this.tree = new Tree({
             element: this.element.lastElementChild as HTMLElement,

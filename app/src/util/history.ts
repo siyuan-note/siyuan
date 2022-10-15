@@ -259,7 +259,7 @@ export const openHistory = () => {
                 <button data-type="rebuildIndex" class="b3-button b3-button--outline">${window.siyuan.languages.rebuildIndex}</button>
             </div>
             <div class="fn__flex fn__flex-1"${isMobile() ? ' style="flex-direction: column;"' : ""}>
-                <ul style="${isMobile() ? "height: 30%" : "width:200px"};overflow: auto;" class="b3-list b3-list--background">
+                <ul style="${isMobile() ? "height: 30%" : "width:200px"};overflow: auto;padding-bottom: 8px;" class="b3-list b3-list--background">
                     <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
                 </ul>
                 <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
@@ -267,7 +267,7 @@ export const openHistory = () => {
                 <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
             </div>
         </div>
-        <ul data-type="notebook" style="background-color: var(--b3-theme-background);border-radius: 0 0 4px 4px" class="fn__none b3-list b3-list--background">
+        <ul data-type="notebook" style="background-color: var(--b3-theme-background);border-radius: 0 0 4px 4px;padding-bottom: 8px;" class="fn__none b3-list b3-list--background">
             <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
         </ul>
         <div data-type="repo" class="fn__none history__repo">
@@ -286,7 +286,7 @@ export const openHistory = () => {
                     <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.createSnapshot}
                 </button>
             </div>    
-            <ul style="background: var(--b3-theme-background);" class="b3-list b3-list--background fn__flex-1">
+            <ul style="background: var(--b3-theme-background);padding-bottom: 8px;" class="b3-list b3-list--background fn__flex-1">
                 <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
             </ul>
         </div>

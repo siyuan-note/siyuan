@@ -209,7 +209,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             if (hintData.html === "separator") {
                 hintsHTML += '<div class="b3-menu__separator"></div>';
             } else {
-                hintsHTML += `<button class="b3-list-item b3-list-item--two fn__block${focusClass}" data-value="${encodeURIComponent(hintData.value)}">${hintData.html}</button>`;
+                hintsHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${focusClass}" data-value="${encodeURIComponent(hintData.value)}">${hintData.html}</button>`;
             }
         });
         if (hasSearch) {

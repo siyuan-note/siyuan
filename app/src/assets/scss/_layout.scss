@@ -1,11 +1,9 @@
 .layout {
-  &__wnd--active {
-    .layout-tab-bar .item--focus {
-      box-shadow: inset 0 -2px 0 0 var(--b3-theme-primary);
+  &__wnd--active .layout-tab-bar .item--focus {
+    box-shadow: inset 0 -2px 0 0 var(--b3-theme-primary);
 
-      & > .item__text {
-        color: var(--b3-theme-on-background);
-      }
+    & > .item__text {
+      color: var(--b3-theme-on-background);
     }
   }
 

@@ -285,7 +285,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             if (response.data.data.shorthands.length === 0) {
                 html = '<ul class="b3-list b3-list--background"><li class="b3-list--empty">打开帮助文档搜索 <b>收集箱</b> 查看使用说明</li></ul>';
             } else {
-                html = "<ul class=\"b3-list b3-list--background\">";
+                html = '<ul style="padding: 8px 0" class="b3-list b3-list--background">';
                 response.data.data.shorthands.forEach((item: IInbox) => {
                     html += `<li style="padding-left: 0" data-id="${item.oId}" class="b3-list-item">
     <label data-type="select" class="fn__flex">

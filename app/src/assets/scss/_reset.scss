@@ -19,8 +19,36 @@ body {
   max-height: 100%;
   overflow: hidden;
 
-  &.body--blur .toolbar {
-    background: var(--b3-toolbar-blur-background);
+  &.body--blur {
+    .toolbar {
+      background: var(--b3-toolbar-blur-background);
+    }
+
+    .layout {
+      &__wnd--active .layout-tab-bar .item--focus {
+        box-shadow: inset 0 -2px 0 0 var(--b3-theme-background-light);
+
+        & > .item__text {
+          color: var(--b3-theme-on-surface);
+        }
+      }
+
+      &__tab--active {
+        .b3-list--background .b3-list-item--focus:not(.dragover):not(.dragover__top):not(.dragover__bottom) {
+          background-color: var(--b3-list-hover);
+        }
+
+        .graph__svg,
+        .inbox__list {
+          background-color: var(--b3-theme-surface);
+        }
+      }
+    }
+
+    .dock__item--activefocus {
+      color: var(--b3-theme-on-surface-light) !important;
+      background-color: var(--b3-theme-background-light) !important;
+    }
   }
 
   &.body--win32 {

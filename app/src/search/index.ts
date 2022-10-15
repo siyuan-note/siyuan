@@ -43,6 +43,7 @@ export class Search extends Model {
         </div>
         <div id="globalSearchResult" class="b3-list-item ft__smaller ft__on-surface"></div>
         <div id="globalSearchList" class="fn__flex-1 b3-list b3-list--background"></div>
+        <div class="fn__hr"></div>
         <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>
     </div>
     <div class="fn__flex-1" id="searchPreview"></div>

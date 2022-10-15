@@ -93,7 +93,8 @@ export const movePathTo = async (notebookId: string, path: string, focus = true)
     <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
     <input class="b3-text-field fn__block b3-form__icon-input" value="" placeholder="${window.siyuan.languages.search}">
 </div>
-<ul id="foldList" class="b3-list b3-list--background" style="height: 50vh;overflow: auto;position: relative"></ul>`,
+<ul id="foldList" class="b3-list b3-list--background" style="height: 50vh;overflow: auto;position: relative"></ul>
+<div class="fn__hr"></div>`,
         width: isMobile() ? "80vw" : "50vw",
         destroyCallback() {
             if (range && focus) {

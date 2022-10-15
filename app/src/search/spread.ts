@@ -140,7 +140,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             <svg class="svg ft__on-surface" id="searchFilter" style="height: 19px;float: left"><use xlink:href="#iconSettings"></use></svg>
         </span>
     </div>
-    <div id="searchList" style="position:relative;height:calc(50% - 69px);overflow: auto" class="b3-list b3-list--background search__list"></div>
+    <div id="searchList" style="position:relative;height:calc(50% - 69px);overflow: auto;padding-bottom: 8px" class="b3-list b3-list--background search__list"></div>
     <div id="searchPreview" class="fn__flex-1 spread-search__preview"></div></div>
     <div id="searchFilterPanel" class="fn__none spread-search__filter">
         <label class="fn__flex">

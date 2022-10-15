@@ -27,7 +27,7 @@ export const openSetting = () => {
         content: `<div class="fn__flex-column" style="border-radius: 4px;overflow: hidden;position: relative">
 <div class="b3-form__icon search__header"><svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg><input class="b3-text-field b3-text-field--text fn__block b3-form__icon-input"></div>
 <div class="fn__flex-1 fn__flex">
-  <ul class="b3-tab-bar b3-list b3-list--background" style="user-select:none;width: 180px;height:${height}px;overflow: auto">
+  <ul class="b3-tab-bar b3-list b3-list--background" style="user-select:none;width: 180px;height:${height}px;overflow: auto;padding: 8px 0;box-sizing: border-box">
     <li data-name="editor" class="b3-list-item--focus b3-list-item b3-list-item--big"><svg class="b3-list-item__graphic"><use xlink:href="#iconEdit"></use></svg>${window.siyuan.languages.editor}</li>
     <li data-name="filetree" class="b3-list-item b3-list-item--big"><svg class="b3-list-item__graphic"><use xlink:href="#iconFiles"></use></svg>${window.siyuan.languages.fileTree}</li>
     <li data-name="image" class="b3-list-item b3-list-item--big"><svg class="b3-list-item__graphic"><use xlink:href="#iconImage"></use></svg>${window.siyuan.languages.assets}</li>

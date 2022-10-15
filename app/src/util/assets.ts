@@ -96,9 +96,9 @@ export const renderSnippet = () => {
                 scriptElement.id = `snippetJS${item.name}`;
                 document.head.appendChild(scriptElement);
             }
-        })
+        });
     });
-}
+};
 
 export const initAssets = () => {
     const emojiElement = document.getElementById("emojiScript");
@@ -185,7 +185,7 @@ export const setMode = (modeElementValue: number) => {
             exportLayout(true);
             return;
         }
-        window.siyuan.config.appearance = response.data
+        window.siyuan.config.appearance = response.data;
         /// #if !BROWSER
         ipcRenderer.send(Constants.SIYUAN_CONFIG_THEME, response.data.modeOS ? "system" : (response.data.mode === 1 ? "dark" : "light"));
         ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, response.data.closeButtonBehavior);
@@ -194,4 +194,4 @@ export const setMode = (modeElementValue: number) => {
         document.querySelector("#barMode use").setAttribute("xlink:href", `#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}`);
     });
     /// #endif
-}
+};

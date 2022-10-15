@@ -22,9 +22,6 @@ import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {cancelSB, insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {scrollCenter} from "../../util/highlightById";
-import {isMobile} from "../../util/functions";
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {enableProtyle} from "../util/onGet";
 import {countBlockWord} from "../../layout/status";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";

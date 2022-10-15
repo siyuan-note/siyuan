@@ -412,8 +412,8 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
 
 export const resizeDrag = () => {
     const dragElement = document.getElementById("drag");
-    const width = dragElement.clientWidth
-    const left = dragElement.getBoundingClientRect().left
+    const width = dragElement.clientWidth;
+    const left = dragElement.getBoundingClientRect().left;
     const right = document.querySelector("#windowControls").clientWidth + document.querySelector("#barSearch").clientWidth * 4;
     if (left > right && left - right < width) {
         dragElement.style.paddingRight = (left - right) + "px";

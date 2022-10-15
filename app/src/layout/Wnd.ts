@@ -139,7 +139,7 @@ export class Wnd {
             event.preventDefault();
             const it = this as HTMLElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
-                it.style.opacity = ".1"
+                it.style.opacity = ".1";
                 return;
             }
             const newTabHeaderElement = hasClosestByTag(event.target, "LI");
@@ -444,7 +444,7 @@ export class Wnd {
             }
 
             setTimeout(() => {
-                tab.headElement.removeAttribute("style")
+                tab.headElement.removeAttribute("style");
             }, Constants.TIMEOUT_TRANSITION);
 
             tab.headElement.querySelector(".item__close").addEventListener("click", (event) => {

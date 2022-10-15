@@ -1,4 +1,4 @@
-import {focusBlock, focusByRange, focusByWbr} from "./selection";
+import {focusBlock, focusByRange} from "./selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {Constants} from "../../constants";
 import {paste} from "./paste";

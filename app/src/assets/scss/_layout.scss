@@ -159,10 +159,11 @@
 
         &--pin {
           flex: none;
+          min-width: 42px;
 
           .item__text {
             max-width: 148px;
-            padding-right: 8px;
+            padding: 0 8px;
             min-width: auto;
             font-style: normal;
             color: var(--b3-theme-on-background);
@@ -170,10 +171,6 @@
 
           .item__close {
             display: none;
-          }
-
-          .item__graphic {
-            padding-right: 8px;
           }
         }
 
@@ -208,7 +205,7 @@
         }
 
         &__graphic {
-          padding: 4px 0 4px 8px;
+          padding: 4px 8px;
           height: 14px;
           width: 14px;
         }

@@ -558,7 +558,7 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
 export const copySubMenu = (id: string, accelerator = true, focusElement?: Element) => {
     return [
         {
-            icon: "iconGraph",
+            icon: "iconRef",
             accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockRef.custom : undefined,
             label: window.siyuan.languages.copyBlockRef,
             click: () => {

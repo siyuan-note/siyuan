@@ -178,7 +178,6 @@ export class Backlink extends Model {
             ctrlClick(element) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
-                    keepCursor: true,
                     action: [Constants.CB_GET_CONTEXT]
                 });
             },

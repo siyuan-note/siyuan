@@ -1,9 +1,9 @@
 :root {
     /* 主色 */
-    --b3-theme-primary: #0969da;
-    --b3-theme-primary-light: rgba(9, 105, 218, 0.54);
-    --b3-theme-primary-lighter: rgba(9, 105, 218, 0.38);
-    --b3-theme-primary-lightest: rgba(9, 105, 218, 0.12);
+    --b3-theme-primary: #3573f0;
+    --b3-theme-primary-light: rgba(53, 115, 240, 0.54);
+    --b3-theme-primary-lighter: rgba(53, 115, 240, 0.38);
+    --b3-theme-primary-lightest: rgba(53, 115, 240, 0.12);
     --b3-theme-secondary: #f3a92f;
     --b3-theme-background: #fff;
     --b3-theme-background-light: #dfe0e1;

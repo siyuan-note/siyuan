@@ -27,7 +27,7 @@
     z-index: 2;
 
     &:hover:after {
-      background-color: var(--b3-theme-on-background);
+      background-color: var(--b3-scroll-color);
     }
 
     &:after {
@@ -125,7 +125,7 @@
         align-items: center;
         transition: var(--b3-transition);
         flex: 1;
-        min-height: 30px;
+        min-height: 42px;
         border-left: 1px solid transparent;
 
         &:not(:first-child),
@@ -151,6 +151,10 @@
 
         &--readonly {
           border-left-color: var(--b3-theme-background-light);
+
+          .item__close svg {
+            opacity: 1;
+          }
         }
 
         &--pin {

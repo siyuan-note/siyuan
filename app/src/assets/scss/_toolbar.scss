@@ -45,6 +45,18 @@
     }
   }
 
+  &-hint {
+    position: fixed;
+    border-radius: 4px;
+    box-shadow: var(--b3-dialog-shadow);
+    background-color: var(--b3-menu-background);
+    z-index: 201;
+    overflow: auto;
+    max-height: 402px;
+    box-sizing: border-box;
+    padding: 8px 0;
+  }
+
   &-util {
     @extend .b3-menu;
     z-index: 200;

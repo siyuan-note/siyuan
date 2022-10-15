@@ -45,8 +45,8 @@ export class Hint {
         this.element = document.createElement("div");
         this.element.setAttribute("data-close", "false");
         // height 402 根据 .emojis max-height+8 得来
-        this.element.setAttribute("style", `z-index: 201;overflow:auto;max-height:402px;width:${Math.max(protyle.element.clientWidth / 2, 320)}px;box-sizing: border-box;`);
-        this.element.className = "b3-menu b3-list b3-list--background fn__none";
+        this.element.setAttribute("style", `width:${Math.max(protyle.element.clientWidth / 2, 320)}px;`);
+        this.element.className = "protyle-hint b3-list b3-list--background fn__none";
         this.element.addEventListener("click", (event) => {
             const eventTarget = event.target as HTMLElement;
             if (eventTarget.tagName === "INPUT") {

@@ -221,7 +221,7 @@ const initBar = () => {
                         setMode(2);
                     }
                 }).element);
-                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 8});
+                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 18});
                 event.stopPropagation();
                 break;
             } else if (target.id === "barHistory") {
@@ -259,7 +259,7 @@ const initBar = () => {
                             }).element);
                         }
                     });
-                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 18});
                 }
                 event.stopPropagation();
                 break;

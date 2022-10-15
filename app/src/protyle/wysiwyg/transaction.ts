@@ -626,7 +626,7 @@ export const turnsIntoOneTransaction = (options: { protyle: IProtyle, selectsEle
         action: "insert",
         id,
         data: parentElement.outerHTML,
-        previousID: previousId,
+        nextID: previousId,
         parentID: parentId
     }];
     const undoOperations: IOperation[] = [];

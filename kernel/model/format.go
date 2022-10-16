@@ -62,11 +62,13 @@ func AutoSpace(rootID string) (err error) {
 	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
 	md := formatRenderer.Render()
 	newTree := parseKTree(md)
+	newTree.Root.Spec = "1"
 	// 第二次格式化启用自动空格
 	luteEngine.SetAutoSpace(true)
 	formatRenderer = render.NewFormatRenderer(newTree, luteEngine.RenderOptions)
 	md = formatRenderer.Render()
 	newTree = parseKTree(md)
+	newTree.Root.Spec = "1"
 	newTree.Root.ID = tree.ID
 	newTree.Root.KramdownIAL = rootIAL
 	newTree.ID = tree.ID

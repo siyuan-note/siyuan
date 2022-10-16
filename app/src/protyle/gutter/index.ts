@@ -1214,7 +1214,7 @@ export class Gutter {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconCopy",
-                label: `${window.siyuan.languages.copy} <b>${window.siyuan.languages.headings1}</b>`,
+                label: `${window.siyuan.languages.copy} ${window.siyuan.languages.headings1}`,
                 click() {
                     fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
                         writeText(response.data + Constants.ZWSP);
@@ -1223,7 +1223,7 @@ export class Gutter {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconCut",
-                label: `${window.siyuan.languages.cut} <b>${window.siyuan.languages.headings1}</b>`,
+                label: `${window.siyuan.languages.cut} ${window.siyuan.languages.headings1}`,
                 click() {
                     fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
                         writeText(response.data + Constants.ZWSP);
@@ -1242,7 +1242,7 @@ export class Gutter {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconTrashcan",
-                label: `${window.siyuan.languages.delete} <b>${window.siyuan.languages.headings1}</b>`,
+                label: `${window.siyuan.languages.delete} ${window.siyuan.languages.headings1}`,
                 click() {
                     fetchPost("/api/block/getHeadingDeleteTransaction", {
                         id,

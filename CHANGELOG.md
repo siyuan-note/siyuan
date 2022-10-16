@@ -1,3 +1,45 @@
+## v2.4.1 / 2022-10-16
+
+### 改进功能
+
+* [样式类行级元素中支持 `/菜单` 和 `((引用`](https://github.com/siyuan-note/siyuan/issues/6152)
+* [文档树文档拖到指定分屏窗口页签栏在指定分屏窗口中打开](https://github.com/siyuan-note/siyuan/issues/6159)
+* [顶栏改进数据历史图标](https://github.com/siyuan-note/siyuan/issues/6174)
+* [桌面端自动更新安装包不进行并发下载](https://github.com/siyuan-note/siyuan/issues/6175)
+* [改进虚拟引用和反链提及搜索分词](https://github.com/siyuan-note/siyuan/issues/6176)
+* [改进编辑器只读模式](https://github.com/siyuan-note/siyuan/issues/6177)
+* [虚拟引用和反链提及大小写敏感遵循搜索设置](https://github.com/siyuan-note/siyuan/issues/6181)
+* [顶栏加入切换外观模式](https://github.com/siyuan-note/siyuan/issues/6186)
+* [增加挂件块数据导出属性 `data-export-html`](https://github.com/siyuan-note/siyuan/issues/6188)
+* [剔除块尾多余的软换行](https://github.com/siyuan-note/siyuan/issues/6191)
+* [第三方图标不全时使用系统自带的 material 图标替代](https://github.com/siyuan-note/siyuan/issues/6192)
+* [改进默认主题外观](https://github.com/siyuan-note/siyuan/issues/6197)
+* [区分引用块和关系图图标](https://github.com/siyuan-note/siyuan/issues/6202)
+* [反链面板文档块标 `Ctrl+Click` 从静默打开修改为直接打开](https://github.com/siyuan-note/siyuan/issues/6209)
+* [支持插入 `.la` 域名超链接](https://github.com/siyuan-note/siyuan/issues/6215)
+* [搜索资源文件支持跟随 assets 文件夹符号链接](https://github.com/siyuan-note/siyuan/issues/6217)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/6194)
+
+### 修复缺陷
+
+* [编辑器和块操作 API 解析 `~~~foo~~~` 失败](https://github.com/siyuan-note/siyuan/issues/6180)
+* [反链提及排序失效](https://github.com/siyuan-note/siyuan/issues/6187)
+* [快速折叠展开反链面板项异常](https://github.com/siyuan-note/siyuan/issues/6189)
+* [引用列表时锚文本获取错误](https://github.com/siyuan-note/siyuan/issues/6193)
+* [API `/api/attr/setBlockAttrs` 设置属性值转义问题](https://github.com/siyuan-note/siyuan/issues/6198)
+* [合并折叠标题为超级块后内存溢出导致内核崩溃](https://github.com/siyuan-note/siyuan/issues/6199)
+* [合并超级块后删除再撤销超级块解体](https://github.com/siyuan-note/siyuan/issues/6205)
+* [查询嵌入块面包屑过长导致分栏失效](https://github.com/siyuan-note/siyuan/issues/6211)
+* [`Ctrl+K` 弹层输入框没有聚焦](https://github.com/siyuan-note/siyuan/issues/6212)
+* [调整挂件块尺寸后 `data-export-md` 与 `data-export-html` 丢失](https://github.com/siyuan-note/siyuan/issues/6223)
+* [剪切行级元素粘贴为纯文本后输入标点重复](https://github.com/siyuan-note/siyuan/issues/6218)
+* [排版优化转义内容异常](https://github.com/siyuan-note/siyuan/issues/6219)
+* [行级元素键盘和下划线无法粘贴为纯文本](https://github.com/siyuan-note/siyuan/issues/6220)
+* [拖动分屏窗口时会漏出底层的拖拽线](https://github.com/siyuan-note/siyuan/issues/6221)
+
 ## v2.4.0 / 2022-10-13
 
 ### 引入特性

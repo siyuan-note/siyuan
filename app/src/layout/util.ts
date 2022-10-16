@@ -563,7 +563,9 @@ export const addResize = (obj: Layout | Wnd) => {
                 const nextElement = resizeElement.nextElementSibling as HTMLElement;
                 const previousElement = resizeElement.previousElementSibling as HTMLElement;
                 nextElement.style.transition = "";
+                nextElement.style.overflow = "auto"; // 拖动时 layout__resize 会出现 https://github.com/siyuan-note/siyuan/issues/6221
                 previousElement.style.transition = "";
+                previousElement.style.overflow = "auto";
                 setSize(nextElement, direction);
                 setSize(previousElement, direction);
                 const x = event[direction === "lr" ? "clientX" : "clientY"];
@@ -627,7 +629,9 @@ export const addResize = (obj: Layout | Wnd) => {
                         focusByRange(range);
                     }
                     nextElement.style.transition = "var(--b3-width-transition)";
+                    nextElement.style.overflow = "";
                     previousElement.style.transition = "var(--b3-width-transition)";
+                    previousElement.style.overflow = "";
                 };
             });
         };

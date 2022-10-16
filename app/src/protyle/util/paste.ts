@@ -50,7 +50,10 @@ export const pasteAsPlainText = async (protyle:IProtyle) => {
         uploadLocalFiles(localFiles, protyle, false);
         writeText("");
     } else {
-        insertHTML(protyle.lute.BlockDOM2Content(protyle.lute.InlineMd2BlockDOM(clipboard.readText())), protyle, false);
+        protyle.lute.SetHTMLTag2TextMark(true); // 临时设置 Lute 解析参数，行级元素键盘和下划线无法粘贴为纯文本 https://github.com/siyuan-note/siyuan/issues/6220
+        const dom = protyle.lute.InlineMd2BlockDOM(clipboard.readText())
+        protyle.lute.SetHTMLTag2TextMark(false);
+        insertHTML(protyle.lute.BlockDOM2Content(dom), protyle, false);
     }
     /// #endif
 };

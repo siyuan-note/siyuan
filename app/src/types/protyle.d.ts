@@ -215,6 +215,8 @@ declare class Lute {
 
     public SetProtyleWYSIWYG(wysiwyg: boolean): void;
 
+    public SetHTMLTag2TextMark(enable: boolean): void;
+
     public MarkdownStr(name: string, md: string): string;
 
     public IsValidLinkDest(text: string): boolean;

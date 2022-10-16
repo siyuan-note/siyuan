@@ -534,3 +534,21 @@ func IsValidPandocBin(binPath string) bool {
 	}
 	return false
 }
+
+func GetDataAssetsAbsPath() (ret string) {
+	ret = filepath.Join(DataDir, "assets")
+	var err error
+	stat, err := os.Lstat(ret)
+	if nil != err {
+		logging.LogErrorf("stat assets failed: %s", err)
+		return
+	}
+	if 0 != stat.Mode()&os.ModeSymlink {
+		// 跟随符号链接 https://github.com/siyuan-note/siyuan/issues/5480
+		ret, err = os.Readlink(ret)
+		if nil != err {
+			logging.LogErrorf("read assets link failed: %s", err)
+		}
+	}
+	return
+}

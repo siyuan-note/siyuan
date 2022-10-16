@@ -43,7 +43,7 @@ func LoadAssets() {
 	assetsLock.Lock()
 	defer assetsLock.Unlock()
 
-	assets := filepath.Join(util.DataDir, "assets")
+	assets := util.GetDataAssetsAbsPath()
 	filepath.Walk(assets, func(path string, info fs.FileInfo, err error) error {
 		if nil == info {
 			return err
@@ -59,7 +59,7 @@ func LoadAssets() {
 		}
 
 		hName := util.RemoveID(info.Name())
-		path = filepath.ToSlash(strings.TrimPrefix(path, util.DataDir))[1:]
+		path = "assets" + filepath.ToSlash(strings.TrimPrefix(path, assets))
 		Assets[path] = &Asset{
 			HName:   hName,
 			Path:    path,

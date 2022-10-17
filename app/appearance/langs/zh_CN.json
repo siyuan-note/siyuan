@@ -1,4 +1,5 @@
 {
+  "breadcrumb": "面包屑",
   "embedBlockBreadcrumb": "嵌入块面包屑",
   "embedBlockBreadcrumbTip": "启用后嵌入块将显示面包屑",
   "appearanceMode": "外观模式",

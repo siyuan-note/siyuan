@@ -448,6 +448,9 @@ func ExportHTML(id, savePath string, pdf, keepFold bool) (name, dom string) {
 	luteEngine.SetFootnotes(true)
 	luteEngine.RenderOptions.ProtyleContenteditable = false
 	luteEngine.SetProtyleMarkNetImg(false)
+	// 不进行安全过滤，因为导出时需要保留所有的 HTML 标签
+	// 使用属性 `data-export-html` 导出时 `<style></style>` 标签丢失 https://github.com/siyuan-note/siyuan/issues/6228
+	luteEngine.SetSanitize(false)
 	renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions)
 	dom = gulu.Str.FromBytes(renderer.Render())
 	return

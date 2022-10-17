@@ -138,8 +138,13 @@ func searchEmbedBlock(c *gin.Context) {
 	if nil != headingModeArg {
 		headingMode = int(headingModeArg.(float64))
 	}
+	breadcrumb := false
+	breadcrumbArg := arg["breadcrumb"]
+	if nil != breadcrumbArg {
+		breadcrumb = breadcrumbArg.(bool)
+	}
 
-	blocks := model.SearchEmbedBlock(stmt, excludeIDs, headingMode)
+	blocks := model.SearchEmbedBlock(stmt, excludeIDs, headingMode, breadcrumb)
 	ret.Data = map[string]interface{}{
 		"blocks": blocks,
 	}

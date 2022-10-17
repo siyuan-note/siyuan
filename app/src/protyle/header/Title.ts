@@ -276,7 +276,7 @@ export class Title {
                 type: "submenu",
                 submenu: copySubMenu(protyle.block.rootID)
             }).element);
-            if (!window.siyuan.config.readonly) {
+            if (protyle.disabled) {
                 window.siyuan.menus.menu.append(movePathToMenu(protyle.notebookId, protyle.path));
                 window.siyuan.menus.menu.append(new MenuItem({
                     icon: "iconTrashcan",
@@ -285,8 +285,6 @@ export class Title {
                         deleteFile(protyle.notebookId, protyle.path, escapeHtml(this.editElement.textContent));
                     }
                 }).element);
-            }
-            if (!window.siyuan.config.readonly && !window.siyuan.config.editor.readOnly) {
                 window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.attr,

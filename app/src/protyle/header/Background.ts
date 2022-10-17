@@ -118,6 +118,9 @@ export class Background {
             });
         });
         this.element.addEventListener(getEventName(), (event) => {
+            if (protyle.disabled) {
+                return;
+            }
             let target = event.target as HTMLElement;
             hideElements(["gutter"], protyle);
 

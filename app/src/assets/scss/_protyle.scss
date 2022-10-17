@@ -205,6 +205,24 @@
   position: relative;
   padding-bottom: 40px;
 
+  &--enable {
+    .protyle-background__tags .item:hover svg {
+      opacity: 1;
+    }
+
+    .protyle-background__img:hover .protyle-icons {
+      opacity: .86;
+    }
+
+    &:hover > .protyle-background__iconw > .protyle-icons {
+      opacity: .86;
+    }
+
+    .protyle-background__icon:hover {
+      opacity: .86;
+    }
+  }
+
   &__icon {
     height: 80px;
     width: 80px;
@@ -222,10 +240,6 @@
       float: left;
       border-radius: 4px;
     }
-
-    &:hover {
-      opacity: .96;
-    }
   }
 
   &__img {
@@ -238,10 +252,6 @@
       height: 30vh;
       opacity: 1;
       object-position: center;
-    }
-
-    &:hover .protyle-icons {
-      opacity: .86;
     }
 
     .protyle-icons {
@@ -283,10 +293,6 @@
 
       &:hover {
         color: var(--b3-theme-on-background);
-
-        svg {
-          opacity: 1;
-        }
       }
 
       &--1 {
@@ -336,10 +342,6 @@
       position: initial;
       margin-top: 40px;
     }
-  }
-
-  &:hover > .protyle-background__iconw > .protyle-icons {
-    opacity: .86;
   }
 }
 

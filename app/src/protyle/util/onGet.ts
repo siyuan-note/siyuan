@@ -276,12 +276,16 @@ const setHTML = (options: { content: string, action?: string[], unScroll?: boole
 
 /** 禁用编辑器 */
 export const disabledProtyle = (protyle: IProtyle) => {
+    window.siyuan.menus.menu.remove();
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
     protyle.disabled = true;
     if (protyle.title) {
         const titleElement = protyle.title.element.querySelector(".protyle-title__input") as HTMLElement;
         titleElement.setAttribute("contenteditable", "false");
         titleElement.style.userSelect = "text";
+    }
+    if (protyle.background) {
+        protyle.background.element.classList.remove("protyle-background--enable");
     }
     protyle.wysiwyg.element.style.userSelect = "text";
     protyle.wysiwyg.element.setAttribute("contenteditable", "false");
@@ -294,15 +298,18 @@ export const disabledProtyle = (protyle: IProtyle) => {
 export const enableProtyle = (protyle: IProtyle) => {
     protyle.disabled = false;
     if (navigator && navigator.maxTouchPoints > 1 && ["MacIntel", "iPhone"].includes(navigator.platform)) {
-        // iPhone，iPad 端输入 contenteditable 为 true 时会在块中间插入 span
+        // iPhone，iPad 端 protyle.wysiwyg.element contenteditable 为 true 时，输入会在块中间插入 span 导致保存失败 https://ld246.com/article/1643473862873/comment/1643813765839#comments
     } else {
-        if (protyle.title) {
-            const titleElement = protyle.title.element.querySelector(".protyle-title__input") as HTMLElement;
-            titleElement.setAttribute("contenteditable", "true");
-            titleElement.style.userSelect = "";
-        }
         protyle.wysiwyg.element.setAttribute("contenteditable", "true");
         protyle.wysiwyg.element.style.userSelect = "";
+    }
+    if (protyle.title) {
+        const titleElement = protyle.title.element.querySelector(".protyle-title__input") as HTMLElement;
+        titleElement.setAttribute("contenteditable", "true");
+        titleElement.style.userSelect = "";
+    }
+    if (protyle.background) {
+        protyle.background.element.classList.add("protyle-background--enable");
     }
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="false"][spellcheck="false"]').forEach(item => {
         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {

@@ -138,34 +138,29 @@ export class Breadcrumb {
         fetchPost("/api/block/getTreeStat", {id: id || protyle.block.id}, (response) => {
             window.siyuan.menus.menu.remove();
 
-            if (!protyle.contentElement.classList.contains("fn__none")) {
+            if (!protyle.contentElement.classList.contains("fn__none") && !protyle.disabled) {
                 let uploadHTML = "";
-                if (!protyle.disabled) {
-                    uploadHTML = '<input class="b3-form__upload" type="file" multiple="multiple"';
-                    if (protyle.options.upload.accept) {
-                        uploadHTML += ` accept="${protyle.options.upload.accept}">`;
-                    } else {
-                        uploadHTML += ">";
-                    }
+                uploadHTML = '<input class="b3-form__upload" type="file" multiple="multiple"';
+                if (protyle.options.upload.accept) {
+                    uploadHTML += ` accept="${protyle.options.upload.accept}">`;
+                } else {
+                    uploadHTML += ">";
                 }
                 const uploadMenu = new MenuItem({
-                    disabled: protyle.disabled,
                     icon: "iconDownload",
                     label: `${window.siyuan.languages.insertAsset}${uploadHTML}`,
                 }).element;
-                if (!protyle.disabled) {
-                    uploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
-                        if (event.target.files.length === 0) {
-                            return;
-                        }
-                        uploadFiles(protyle, event.target.files, event.target);
-                        window.siyuan.menus.menu.remove();
-                    });
-                }
+                uploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
+                    if (event.target.files.length === 0) {
+                        return;
+                    }
+                    uploadFiles(protyle, event.target.files, event.target);
+                    window.siyuan.menus.menu.remove();
+                });
                 window.siyuan.menus.menu.append(uploadMenu);
                 if (window.siyuan.config.system.container !== "android" || !window.JSAndroid) {
                     window.siyuan.menus.menu.append(new MenuItem({
-                        disabled: protyle.disabled && (!this.mediaRecorder || (this.mediaRecorder && !this.mediaRecorder.isRecording)),
+                        disabled: !this.mediaRecorder || (this.mediaRecorder && !this.mediaRecorder.isRecording),
                         current: this.mediaRecorder && this.mediaRecorder.isRecording,
                         icon: "iconRecord",
                         label: this.mediaRecorder?.isRecording ? window.siyuan.languages.endRecord : window.siyuan.languages.startRecord,
@@ -207,55 +202,57 @@ export class Breadcrumb {
                     }).element);
                 }
             }
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.uploadAssets2CDN,
-                icon: "iconCloud",
-                click() {
-                    if (!needSubscribe()) {
-                        fetchPost("/api/asset/uploadCloud", {id: protyle.block.parentID});
+            if (!protyle.disabled) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.uploadAssets2CDN,
+                    icon: "iconCloud",
+                    click() {
+                        if (!needSubscribe()) {
+                            fetchPost("/api/asset/uploadCloud", {id: protyle.block.parentID});
+                        }
                     }
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.netImg2LocalAsset,
-                icon: "iconTransform",
-                accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
-                click() {
-                    netImg2LocalAssets(protyle);
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.optimizeTypography,
-                icon: "iconFormat",
-                click: () => {
-                    hideElements(["toolbar"], protyle);
-                    fetchPost("/api/format/autoSpace", {
-                        id: protyle.block.rootID
-                    }, () => {
-                        /// #if MOBILE
-                        fetchPost("/api/filetree/getDoc", {
-                            id: protyle.block.id,
-                            mode: 0,
-                            size: Constants.SIZE_GET,
-                        }, getResponse => {
-                            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.netImg2LocalAsset,
+                    icon: "iconTransform",
+                    accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
+                    click() {
+                        netImg2LocalAssets(protyle);
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.optimizeTypography,
+                    icon: "iconFormat",
+                    click: () => {
+                        hideElements(["toolbar"], protyle);
+                        fetchPost("/api/format/autoSpace", {
+                            id: protyle.block.rootID
+                        }, () => {
+                            /// #if MOBILE
+                            fetchPost("/api/filetree/getDoc", {
+                                id: protyle.block.id,
+                                mode: 0,
+                                size: Constants.SIZE_GET,
+                            }, getResponse => {
+                                onGet(getResponse, protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
+                            });
+                            /// #else
+                            getAllModels().editor.forEach(item => {
+                                if (item.editor.protyle.block.rootID === protyle.block.rootID) {
+                                    fetchPost("/api/filetree/getDoc", {
+                                        id: item.editor.protyle.block.rootID,
+                                        mode: 0,
+                                        size: Constants.SIZE_GET,
+                                    }, getResponse => {
+                                        onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
+                                    });
+                                }
+                            });
+                            /// #endif
                         });
-                        /// #else
-                        getAllModels().editor.forEach(item => {
-                            if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                                fetchPost("/api/filetree/getDoc", {
-                                    id: item.editor.protyle.block.rootID,
-                                    mode: 0,
-                                    size: Constants.SIZE_GET,
-                                }, getResponse => {
-                                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
-                                });
-                            }
-                        });
-                        /// #endif
-                    });
-                }
-            }).element);
+                    }
+                }).element);
+            }
             if (!protyle.scroll?.element.classList.contains("fn__none")) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     current: protyle.scroll.keepLazyLoad,

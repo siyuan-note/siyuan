@@ -640,7 +640,7 @@ func stringQuery(query string) string {
 	return strings.TrimSpace(buf.String())
 }
 
-func markReplaceSpan(text string, keywords []string, replacementStart, replacementEnd string) string {
+func markReplaceSpan(text string, keywords []string, replacementStart, replacementEnd string) (ret string) {
 	parts := strings.Split(text, " ")
 	for i, part := range parts {
 		if "" == part {
@@ -676,5 +676,15 @@ func markReplaceSpan(text string, keywords []string, replacementStart, replaceme
 			parts[i] = search.EncloseHighlighting(part, hitKeywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive)
 		}
 	}
-	return strings.Join(parts, " ")
+
+	ret = strings.Join(parts, " ")
+	if ret != text {
+		return
+	}
+
+	// 包含非 ASCII 字符时再试试不分词匹配
+	if !gulu.Str.IsASCII(text) {
+		ret = search.EncloseHighlighting(text, keywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive)
+	}
+	return
 }

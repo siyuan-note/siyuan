@@ -769,7 +769,6 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 	}
 	blocks := fromSQLBlocks(&sqlBlocks, strings.Join(terms, search.TermSep), beforeLen)
 
-	// 排除链接文本 https://github.com/siyuan-note/siyuan/issues/1542
 	luteEngine := NewLute()
 	var tmp []*Block
 	for _, b := range blocks {
@@ -783,40 +782,20 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 			if !entering || n.IsBlock() {
 				return ast.WalkContinue
 			}
-			if ast.NodeText == n.Type || ast.NodeLinkText == n.Type {
+			if ast.NodeText == n.Type {
 				textBuf.Write(n.Tokens)
 			}
 			return ast.WalkContinue
 		})
 
 		text := textBuf.String()
-		text = strings.ToLower(text)
-		text = luteEngine.Space(text)
-		var contain bool
-		for _, mentionKeyword := range mentionKeywords {
-			parts := strings.Split(text, " ")
-			for _, part := range parts {
-				if "" == part {
-					continue
-				}
-
-				if gulu.Str.IsASCII(mentionKeyword) {
-					if part == mentionKeyword {
-						contain = true
-						break
-					}
-				} else {
-					if strings.Contains(part, strings.ToLower(mentionKeyword)) {
-						contain = true
-						break
-					}
-				}
-			}
-			if contain {
-				break
-			}
+		text = strings.TrimSpace(text)
+		if "" == text {
+			continue
 		}
-		if contain {
+
+		newText := markReplaceSpan(text, mentionKeywords, searchMarkSpanStart, searchMarkSpanEnd)
+		if text != newText {
 			tmp = append(tmp, b)
 		}
 	}

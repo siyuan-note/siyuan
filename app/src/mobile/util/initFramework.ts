@@ -92,11 +92,21 @@ export const initFramework = () => {
     const editElement = document.getElementById("toolbarEdit");
     if (window.siyuan.config.readonly) {
         editElement.classList.add("fn__none");
+    }
+    const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
+    const editIconElement = editElement.querySelector("use");
+    if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
+        inputElement.readOnly = true;
+        editIconElement.setAttribute("xlink:href", "#iconEdit");
     } else {
-        const editIconElement = editElement.querySelector("use");
-        editElement.addEventListener(getEventName(), () => {
-            const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
-            if (editIconElement.getAttribute("xlink:href") === "#iconEdit") {
+        inputElement.readOnly = false;
+        editIconElement.setAttribute("xlink:href", "#iconPreview");
+    }
+    editElement.addEventListener(getEventName(), () => {
+        const isReadonly = editIconElement.getAttribute("xlink:href") === "#iconPreview"
+        window.siyuan.config.editor.readOnly = isReadonly;
+        fetchPost("/api/setting/setEditor", window.siyuan.config.editor, () => {
+            if (!isReadonly) {
                 enableProtyle(window.siyuan.mobileEditor.protyle);
                 inputElement.readOnly = false;
                 editIconElement.setAttribute("xlink:href", "#iconPreview");
@@ -105,8 +115,9 @@ export const initFramework = () => {
                 inputElement.readOnly = true;
                 editIconElement.setAttribute("xlink:href", "#iconEdit");
             }
-        });
-    }
+        })
+    });
+
     scrimElement.addEventListener(getEventName(), () => {
         closePanel();
     });
@@ -141,10 +152,10 @@ const initEditorName = () => {
     const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
     inputElement.setAttribute("placeholder", window.siyuan.languages._kernel[16]);
     inputElement.addEventListener("focus", () => {
-       hideKeyboardToolbar();
+        hideKeyboardToolbar();
     });
     inputElement.addEventListener("blur", () => {
-        if (window.siyuan.config.readonly || document.querySelector("#toolbarEdit use").getAttribute("xlink:href") === "#iconEdit") {
+        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
             return;
         }
         if (!validateName(inputElement.value)) {

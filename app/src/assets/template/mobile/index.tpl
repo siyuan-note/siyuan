@@ -14,7 +14,7 @@
     <svg id="toolbarFile" class="toolbar__icon">
         <use xlink:href="#iconMenu"></use>
     </svg>
-    <input readonly class="toolbar__title b3-text-field fn__hidden" id="toolbarName">
+    <input class="toolbar__title b3-text-field fn__hidden" id="toolbarName">
     <svg id="toolbarEdit" class="toolbar__icon fn__hidden">
         <use xlink:href="#iconEdit"></use>
     </svg>

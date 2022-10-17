@@ -1649,7 +1649,7 @@ export class WYSIWYG {
             }
 
             const menuElement = hasClosestByClassName(event.target, "protyle-action__menu");
-            if (menuElement && !protyle.disabled) {
+            if (menuElement) {
                 protyle.gutter.renderMenu(protyle, menuElement.parentElement.parentElement);
                 const rect = menuElement.getBoundingClientRect();
                 window.siyuan.menus.menu.popup({

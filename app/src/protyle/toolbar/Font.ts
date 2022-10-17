@@ -157,6 +157,15 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
         textElement.setAttribute("data-subtype", blockRefData[1]);
         textElement.innerText = blockRefData[2];
     };
+    const setLink = (textOption: string) => {
+        const options = textOption.split(Constants.ZWSP)
+        textElement.setAttribute("data-href", options[0]);
+        textElement.removeAttribute("data-subtype");
+        textElement.removeAttribute("data-id");
+        if (options[1]) {
+            textElement.textContent = options[1];
+        }
+    };
 
     if (textOption) {
         switch (textOption.type) {
@@ -188,9 +197,7 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 textElement.textContent = "";
                 break;
             case "a":
-                textElement.setAttribute("data-href", textOption.color);
-                textElement.removeAttribute("data-subtype");
-                textElement.removeAttribute("data-id");
+                setLink(textOption.color);
                 break;
             case "inline-memo":
                 textElement.removeAttribute("contenteditable");

@@ -682,8 +682,8 @@ func markReplaceSpan(text string, keywords []string, replacementStart, replaceme
 		return
 	}
 
-	// 包含非 ASCII 字符时再试试不分词匹配
-	if !gulu.Str.IsASCII(text) {
+	// 包含非 ASCII 字符或者空格时再试试不分词匹配
+	if !gulu.Str.IsASCII(text) || strings.Contains(text, " ") {
 		ret = search.EncloseHighlighting(text, keywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive)
 	}
 	return

@@ -295,6 +295,19 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                 });
             });
             undoOperations.reverse();
+            if (newSourceElement.getAttribute("data-subtype") === "o") {
+                undoOperations.splice(0, 0,{
+                    action: "update",
+                    id: newSourceElement.getAttribute("data-node-id"),
+                    data: newSourceElement.outerHTML
+                });
+                updateListOrder(newSourceElement, 1);
+                doOperations.push({
+                    action: "update",
+                    id: newSourceElement.getAttribute("data-node-id"),
+                    data: newSourceElement.outerHTML
+                });
+            }
             undoOperations.push({
                 action: "delete",
                 id: newSourceElement.getAttribute("data-node-id"),
@@ -369,6 +382,19 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                 });
             });
             undoOperations.reverse();
+            if (newSourceElement.getAttribute("data-subtype") === "o") {
+                undoOperations.splice(0, 0,{
+                    action: "update",
+                    id: newSourceElement.getAttribute("data-node-id"),
+                    data: newSourceElement.outerHTML
+                });
+                updateListOrder(newSourceElement, 1);
+                doOperations.push({
+                    action: "update",
+                    id: newSourceElement.getAttribute("data-node-id"),
+                    data: newSourceElement.outerHTML
+                });
+            }
             undoOperations.push({
                 action: "delete",
                 id: newSourceElement.getAttribute("data-node-id"),

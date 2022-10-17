@@ -276,7 +276,7 @@ export class Title {
                 type: "submenu",
                 submenu: copySubMenu(protyle.block.rootID)
             }).element);
-            if (protyle.disabled) {
+            if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(movePathToMenu(protyle.notebookId, protyle.path));
                 window.siyuan.menus.menu.append(new MenuItem({
                     icon: "iconTrashcan",

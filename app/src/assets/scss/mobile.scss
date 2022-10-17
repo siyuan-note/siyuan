@@ -34,35 +34,7 @@
   }
 
   .b3-list-item {
-    line-height: 32px;
     font-size: 16px;
-
-    &__toggle,
-    &__icon,
-    &__action {
-      height: 32px;
-    }
-
-    &__icon {
-      line-height: 32px;
-
-      svg {
-        width: 18px;
-        height: 18px;
-        margin: 7px 0;
-      }
-    }
-
-    &__action svg,
-    &__graphic {
-      height: 18px;
-      width: 14px;
-    }
-
-    &__arrow {
-      height: 12px;
-      width: 12px;
-    }
   }
 }
 

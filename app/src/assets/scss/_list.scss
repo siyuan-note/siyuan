@@ -24,12 +24,12 @@
   }
 
   &--border {
-    ul {
+    div {
       margin-left: 34px;
       position: relative;
     }
 
-    & > ul ul:before {
+    & > div div:before {
       content: "";
       height: 100%;
       top: 0;
@@ -38,7 +38,7 @@
       left: -47px;
     }
 
-    & > ul li:before {
+    & > div label:before {
       content: "";
       height: 100%;
       top: 0;

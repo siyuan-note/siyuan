@@ -32,7 +32,7 @@ export const appearance = {
         <a href="javascript:void(0)" ${isBrowser() ? " class='fn__none'" : ""} id="appearanceOpenTheme" class="fn__flex-center">${window.siyuan.languages.appearance9}</a>
     </div>
     <div class="fn__hr"></div>
-    <div class="fn__flex">
+    <label class="fn__flex">
         <div class="fn__flex-center fn__flex-1 ft__on-surface">
             ${window.siyuan.languages.theme11}
         </div>
@@ -40,9 +40,9 @@ export const appearance = {
         <select class="b3-select fn__flex-center fn__size200" id="themeLight">
           ${genOptions(window.siyuan.config.appearance.lightThemes, window.siyuan.config.appearance.themeLight)}
         </select>
-    </div>
+    </label>
     <div class="fn__hr"></div>
-    <div class="fn__flex">
+    <label class="fn__flex">
         <div class="fn__flex-center fn__flex-1 ft__on-surface">
             ${window.siyuan.languages.theme12}
         </div>
@@ -50,7 +50,7 @@ export const appearance = {
         <select class="b3-select fn__flex-center fn__size200" id="themeDark">
            ${genOptions(window.siyuan.config.appearance.darkThemes, window.siyuan.config.appearance.themeDark)}
         </select>
-    </div>
+    </label>
 </div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -66,27 +66,27 @@ export const appearance = {
         ${genOptions(window.siyuan.config.appearance.icons, window.siyuan.config.appearance.icon)}
     </select>
 </label>
-<label class="b3-label fn__flex"><div class="fn__block">
+<div class="b3-label fn__flex"><div class="fn__block">
     <div>
         ${window.siyuan.languages.appearance1}
     </div>
     <div class="fn__hr"></div>
-    <div class="fn__flex">
+    <label class="fn__flex">
         <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.appearance2}</div>
         <span class="fn__space"></span>
         <select id="codeBlockThemeLight" class="b3-select fn__size200">
             ${genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE, window.siyuan.config.appearance.codeBlockThemeLight)}
         </select>
-    </div>
+    </label>
     <div class="fn__hr"></div>
-    <div class="fn__flex">
+    <label class="fn__flex">
         <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.appearance3}</div>
         <span class="fn__space"></span>
         <select id="codeBlockThemeDark" class="b3-select fn__size200">
             ${genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE, window.siyuan.config.appearance.codeBlockThemeDark)}
         </select>
-    </div>
-</div></label>
+    </label>
+</div></div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.language}
@@ -95,28 +95,26 @@ export const appearance = {
     <span class="fn__space"></span>
     <select id="lang" class="b3-select fn__flex-center fn__size200">${genOptions(window.siyuan.config.langs, window.siyuan.config.appearance.lang)}</select>
 </label>
-<div class="b3-label${isBrowser() ? " fn__none" : ""}">
-    <div class="fn__block fn__flex">
-        <div class="fn__flex-1">
-            ${window.siyuan.languages.customEmoji}
-            <div class="b3-label__text">${window.siyuan.languages.customEmojiTip}</div>
-        </div>
-        <span class="fn__space"></span>
-        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="appearanceRefresh">
-            <svg><use xlink:href="#iconRefresh"></use></svg>
-            ${window.siyuan.languages.refresh}
-        </button>
+<label class="b3-label${isBrowser() ? " fn__none" : " fn__flex"}">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.customEmoji}
+        <div class="b3-label__text">${window.siyuan.languages.customEmojiTip}</div>
     </div>
-</div>
+    <span class="fn__space"></span>
+    <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="appearanceRefresh">
+        <svg><use xlink:href="#iconRefresh"></use></svg>
+        ${window.siyuan.languages.refresh}
+    </button>
+</label>
 <div class="b3-label">
-    <div class="fn__block fn__flex">
+    <label class="fn__block fn__flex">
         <div class="fn__flex-1">
             ${window.siyuan.languages.theme13} <b id="appearanceCustomName">${window.siyuan.config.appearance.mode === 0 ? window.siyuan.config.appearance.themeLight : window.siyuan.config.appearance.themeDark}</b>
             <div class="b3-label__text">${window.siyuan.languages.theme14}</div>
         </div>
         <span class="fn__space"></span>
         <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="appearanceCustom">${window.siyuan.config.appearance.customCSS ? window.siyuan.languages.close : window.siyuan.languages.open}</button>
-    </div>
+    </label>
     <div id="appearanceCustomPanel"></div>
 </div>
 <label class="b3-label fn__flex">

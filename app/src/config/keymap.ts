@@ -11,7 +11,7 @@ export const keymap = {
         let html = "";
         Object.keys(keymap).forEach(key => {
             if (window.siyuan.languages[key]) {
-                html += `<li class="b3-list-item b3-list-item--hide-action">
+                html += `<label class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field" value="${updateHotkeyTip(keymap[key].custom)}" spellcheck="false">
@@ -21,21 +21,21 @@ export const keymap = {
     <span data-type="clear" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}">
         <svg><use xlink:href="#iconTrashcan"></use></svg>
     </span>
-</li>`;
+</label>`;
             }
         });
         return html;
     },
     genHTML() {
-        return `<div class="fn__flex b3-label">
+        return `<label class="fn__flex b3-label">
     <span class="fn__flex-center">${window.siyuan.languages.keymapTip}</span>
     <span class="fn__flex-1"></span>
     <button id="keymapRefreshBtn" class="b3-button b3-button--outline fn__flex-center fn__size200">
         <svg><use xlink:href="#iconRefresh"></use></svg>
         ${window.siyuan.languages.refresh}
     </button>
-</div>
-<div class="fn__flex b3-label">
+</label>
+<label class="fn__flex b3-label">
     <span class="fn__flex-center">${window.siyuan.languages.keymapTip2}</span>
     <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
@@ -43,7 +43,7 @@ export const keymap = {
         <svg><use xlink:href="#iconUndo"></use></svg>
         ${window.siyuan.languages.reset}
     </button>
-</div>
+</label>
 <div class="b3-label file-tree config-keymap" id="keymapList">
     <div class="fn__flex">
         <label class="b3-form__icon fn__flex-1">
@@ -62,63 +62,63 @@ export const keymap = {
         </button>
     </div>
     <div class="fn__hr"></div>
-    <ul class="b3-list b3-list--border b3-list--background">
-        <li class="b3-list-item toggle">
+    <div class="b3-list b3-list--border b3-list--background">
+        <div class="b3-list-item toggle">
             <span class="b3-list-item__toggle"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
             <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.general}</span>
-        </li>
-        <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.general, "general")}</ul>
-    </ul>
-    <ul class="b3-list b3-list--border b3-list--background">
-        <li class="b3-list-item toggle">
+        </div>
+        <div class="fn__none">${keymap._genItem(window.siyuan.config.keymap.general, "general")}</div>
+    </div>
+    <div class="b3-list b3-list--border b3-list--background">
+        <div class="b3-list-item toggle">
             <span class="b3-list-item__toggle">
                 <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
             </span>
             <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.editor}</span>
-        </li>
-        <ul>
-            <li class="b3-list-item toggle">
+        </div>
+        <div>
+            <label class="b3-list-item toggle">
                 <span class="b3-list-item__toggle">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.general}</span>
-            </li>
-            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.general, "editor" + Constants.ZWSP + "general")}</ul>
-            <li class="b3-list-item toggle">
+            </label>
+            <div class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.general, "editor" + Constants.ZWSP + "general")}</div>
+            <label class="b3-list-item toggle">
                 <span class="b3-list-item__toggle">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.insert}</span>
-            </li>
-            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.insert, "editor" + Constants.ZWSP + "insert")}</ul>
-            <li class="b3-list-item toggle">
+            </label>
+            <div class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.insert, "editor" + Constants.ZWSP + "insert")}</div>
+            <label class="b3-list-item toggle">
                 <span class="b3-list-item__toggle">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.headings}</span>
-            </li>
-            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.heading, "editor" + Constants.ZWSP + "heading")}</ul>
-            <li class="b3-list-item toggle">
+            </label>
+            <div class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.heading, "editor" + Constants.ZWSP + "heading")}</div>
+            <label class="b3-list-item toggle">
                 <span class="b3-list-item__toggle">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.list1}</span>
-            </li>
-            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.list, "editor" + Constants.ZWSP + "list")}</ul>
-            <li class="b3-list-item toggle">
+            </label>
+            <div class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.list, "editor" + Constants.ZWSP + "list")}</div>
+            <label class="b3-list-item toggle">
                 <span class="b3-list-item__toggle">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.table}</span>
-            </li>
-            <ul class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.table, "editor" + Constants.ZWSP + "table")}</ul>
-        </ul>
-    </ul>
+            </label>
+            <div class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.table, "editor" + Constants.ZWSP + "table")}</div>
+        </div>
+    </div>
 </div>`;
     },
     _setkeymap() {
         const data: IKeymap = Object.assign({}, Constants.SIYUAN_KEYMAP);
-        keymap.element.querySelectorAll("ul input").forEach((item) => {
+        keymap.element.querySelectorAll("label.b3-list-item input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
             if (keys[0] === "general") {
                 data[keys[0]][keys[1]].custom = item.getAttribute("data-value");
@@ -256,7 +256,7 @@ export const keymap = {
             }
         });
         let timeout: number;
-        keymapListElement.querySelectorAll("ul input").forEach(item => {
+        keymapListElement.querySelectorAll("label.b3-list-item input").forEach(item => {
             item.addEventListener("keydown", function (event: KeyboardEvent) {
                 event.stopPropagation();
                 event.preventDefault();
@@ -280,7 +280,7 @@ export const keymap = {
                         showMessage(tip + "] " + window.siyuan.languages.invalid);
                         return;
                     }
-                    const hasConflict = Array.from(keymap.element.querySelectorAll("ul input")).find(inputItem => {
+                    const hasConflict = Array.from(keymap.element.querySelectorAll("label.b3-list-item input")).find(inputItem => {
                         if (!inputItem.isSameNode(this) && inputItem.getAttribute("data-value") === keymapStr) {
                             const inputValueList = inputItem.getAttribute("data-key").split(Constants.ZWSP);
                             if (inputValueList[1] === "list") {

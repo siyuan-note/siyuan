@@ -118,13 +118,13 @@ export const repos = {
 </label>
 ${syncModeHTML}
 <div class="b3-label">
-    <div class="fn__flex">
+    <label class="fn__flex">
         <div class="fn__flex-center">${window.siyuan.languages.cloudSyncDir}</div>
         <div class="fn__flex-1"></div>
         <button class="b3-button b3-button--outline fn__flex-center${isMobile() ? "" : " fn__size200"}" data-type="config">
             <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}
         </button>
-    </div>
+    </label>
     <div id="reposCloudSyncList" class="fn__none config-repos__sync"><img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg"></div>
 </div>
 <div class="b3-label fn__flex">

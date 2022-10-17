@@ -201,12 +201,14 @@ export const editor = {
         <input class="b3-slider fn__size200" id="codeTabSpaces" max="8" min="0" step="2" type="range" value="${window.siyuan.config.editor.codeTabSpaces}">
     </div>
 </label>
-<div class="b3-label">
-    ${window.siyuan.languages.katexMacros}
-    <div class="b3-label__text">${window.siyuan.languages.katexMacrosTip}</div>
-    <div class="fn__hr"></div>
-    <textarea class="b3-text-field fn__block" id="katexMacros">${window.siyuan.config.editor.katexMacros}</textarea>
-</div>`;
+<label class="b3-label fn__flex">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.katexMacros}
+        <div class="b3-label__text">${window.siyuan.languages.katexMacrosTip}</div>
+        <div class="fn__hr"></div>
+        <textarea class="b3-text-field fn__block" id="katexMacros">${window.siyuan.config.editor.katexMacros}</textarea>
+    </div>
+</label>`;
     },
     bindEvent: () => {
         const fontFamilyElement = editor.element.querySelector("#fontFamily") as HTMLSelectElement;

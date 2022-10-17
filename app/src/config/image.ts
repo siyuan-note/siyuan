@@ -13,14 +13,14 @@ export const image = {
     genHTML: () => {
         return `
 <div class="b3-label config-assets">
-    <div class="fn__flex">
+    <label class="fn__flex">
         ${window.siyuan.languages.clearUnused}
         <div class="fn__flex-1"></div>
         <button id="removeAll" class="b3-button b3-button--outline fn__flex-center fn__size200">
             <svg class="svg"><use xlink:href="#iconTrashcan"></use></svg>
             ${window.siyuan.languages.delete}
         </button>
-    </div>
+    </label>
     <div class="fn__hr"></div>
     <ul class="b3-list b3-list--background" id="assetsList">
         <li class="ft__center" style="list-style: none"><img src="/stage/loading-pure.svg"></li>

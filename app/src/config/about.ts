@@ -16,31 +16,31 @@ import {confirmDialog} from "../dialog/confirmDialog";
 export const about = {
     element: undefined as Element,
     genHTML: () => {
-        return `<div class="fn__flex b3-label${isBrowser() || window.siyuan.config.system.isMicrosoftStore ? " fn__none" : ""}">
+        return `<label class="fn__flex b3-label${isBrowser() || window.siyuan.config.system.isMicrosoftStore ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.autoDownloadUpdatePkg}
         <div class="b3-label__text">${window.siyuan.languages.autoDownloadUpdatePkgTip}</div>
     </div>
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="downloadInstallPkg" type="checkbox"${window.siyuan.config.system.downloadInstallPkg ? " checked" : ""}>
-</div>
-<div class="b3-label fn__flex">
+</label>
+<label class="b3-label fn__flex">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about9}
         <div class="b3-label__text">${window.siyuan.languages.about10}</div>
     </div>
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="uploadErrLog" type="checkbox"${window.siyuan.config.system.uploadErrLog ? " checked" : ""}>
-</div>
-<div class="b3-label fn__flex">
+</label>
+<label class="b3-label fn__flex">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about11}
         <div class="b3-label__text">${window.siyuan.languages.about12}</div>
     </div>
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
-</div>
-<div class="fn__flex b3-label${isBrowser() ? " fn__none" : ""}">
+</label>
+<label class="b3-label${isBrowser() ? " fn__none" : " fn__flex"}">
     <div class="fn__flex-1">
        ${window.siyuan.languages.about2}
         <div class="b3-label__text">${window.siyuan.languages.about3}</div>
@@ -50,8 +50,8 @@ export const about = {
     <button data-type="open" data-url="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:6806" class="b3-button b3-button--outline fn__size200 fn__flex-center">
         <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
     </button>
-</div>
-<div class="b3-label fn__flex">
+</label>
+<label class="b3-label fn__flex">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about5}
         <div class="b3-label__text">${window.siyuan.languages.about6}</div>
@@ -60,7 +60,7 @@ export const about = {
     <button class="fn__flex-center b3-button b3-button--outline fn__size200" id="authCode">
         <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
     </button>
-</div>
+</label>
 <div class="b3-label fn__flex">
     <div class="fn__flex-1 fn__flex-center">
         ${window.siyuan.languages.dataRepoKey}
@@ -91,7 +91,7 @@ export const about = {
         </button>
     </div>
 </div>
-<div class="fn__flex b3-label">
+<label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.systemLog}
         <div class="b3-label__text">${window.siyuan.languages.systemLogTip}</div>
@@ -100,8 +100,8 @@ export const about = {
     <button id="exportLog" class="b3-button b3-button--outline fn__size200 fn__flex-center">
         <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
     </button>
-</div>
-<div class="fn__flex b3-label">
+</label>
+<label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}
         <span id="isInsider"></span>
@@ -117,8 +117,8 @@ export const about = {
             <svg><use xlink:href="#iconQuit"></use></svg>${window.siyuan.languages.safeQuit}
         </button>
     </div>
-</div>
-<div class="fn__flex b3-label${isBrowser() ? " fn__none" : ""}">
+</label>
+<label class="fn__flex b3-label${isBrowser() ? " fn__none" : ""}">
     <div class="fn__flex-1">
         <div class="fn__flex">
             ${window.siyuan.languages.about7}
@@ -129,7 +129,7 @@ export const about = {
     </div>
     <div class="fn__space"></div>
     <select id="workspaceDir" class="fn__flex-center b3-select fn__size200"></select>
-</div>
+</label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about13}

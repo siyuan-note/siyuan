@@ -76,7 +76,7 @@ func searchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []
 	}
 
 	for _, sb := range sqlBlocks {
-		block, blockPaths := getBlockRendered(trees, sb, headingMode)
+		block, blockPaths := getEmbeddedBlock(trees, sb, headingMode)
 		if nil == block {
 			continue
 		}

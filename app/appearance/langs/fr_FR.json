@@ -1,4 +1,6 @@
 {
+  "embedBlockBreadcrumb": "Intégrer le fil d'Ariane du bloc",
+  "embedBlockBreadcrumbTip": "Après avoir activé le bloc d'intégration, le fil d'Ariane s'affichera",
   "appearanceMode": "Mode d'apparence",
   "editMode": "Mode d'édition",
   "editReadonly": "Mode lecture seule",

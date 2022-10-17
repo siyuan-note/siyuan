@@ -241,6 +241,7 @@ declare interface IEditor {
     displayBookmarkIcon: boolean;
     displayNetImgMark: boolean;
     codeSyntaxHighlightLineNum: boolean;
+    embedBlockBreadcrumb: boolean;
     plantUMLServePath: string;
     codeLigatures: boolean;
     codeTabSpaces: number;

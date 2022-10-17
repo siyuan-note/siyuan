@@ -381,7 +381,7 @@ func getBlock(id string) (ret *Block, err error) {
 	return
 }
 
-func getBlockRendered(trees map[string]*parse.Tree, sqlBlock *sql.Block, headingMode int) (block *Block, blockPaths []*BlockPath) {
+func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, headingMode int) (block *Block, blockPaths []*BlockPath) {
 	tree, _ := trees[sqlBlock.RootID]
 	if nil == tree {
 		tree, _ = loadTreeByBlockID(sqlBlock.RootID)
@@ -434,6 +434,11 @@ func getBlockRendered(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	luteEngine.RenderOptions.ProtyleContenteditable = false // 不可编辑
 	dom := renderBlockDOMByNodes(nodes, luteEngine)
 	block = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom}
-	blockPaths = buildBlockBreadcrumb(def)
+	if Conf.Editor.EmbedBlockBreadcrumb {
+		blockPaths = buildBlockBreadcrumb(def)
+	}
+	if 1 > len(blockPaths) {
+		blockPaths = []*BlockPath{}
+	}
 	return
 }

@@ -1,4 +1,6 @@
 {
+  "embedBlockBreadcrumb": "Incrustar migas de pan de bloque",
+  "embedBlockBreadcrumbTip": "Después de habilitar el bloque incrustado, se mostrarán migas de pan",
   "appearanceMode": "Modo de apariencia",
   "editMode": "Modo de edición",
   "editReadonly": "Modo de solo lectura",

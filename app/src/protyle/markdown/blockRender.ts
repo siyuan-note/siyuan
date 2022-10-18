@@ -26,10 +26,17 @@ export const blockRender = (protyle: IProtyle, element: Element) => {
     <span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
 </div>${item.lastElementChild.outerHTML}`;
         const content = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
+        let breadcrumb: boolean | string = item.getAttribute("breadcrumb");
+        if (breadcrumb) {
+            breadcrumb = breadcrumb === "true"
+        } else {
+            breadcrumb = window.siyuan.config.editor.embedBlockBreadcrumb
+        }
         fetchPost("/api/search/searchEmbedBlock", {
             stmt: content,
             headingMode: item.getAttribute("custom-heading-mode") === "1" ? 1 : 0,
-            excludeIDs: [item.getAttribute("data-node-id"), protyle.block.rootID]
+            excludeIDs: [item.getAttribute("data-node-id"), protyle.block.rootID],
+            breadcrumb
         }, (response) => {
             const rotateElement = item.querySelector(".fn__rotate");
             if (rotateElement) {
@@ -37,7 +44,11 @@ export const blockRender = (protyle: IProtyle, element: Element) => {
             }
             let html = "";
             response.data.blocks.forEach((blocksItem: { block: IBlock, blockPaths: IBreadcrumb[] }) => {
-                html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}">${genBreadcrumb(blocksItem.blockPaths, true)}${blocksItem.block.content}</div>`;
+                let breadcrumbHTML = "";
+                if (blocksItem.blockPaths.length !== 0) {
+                    breadcrumbHTML = genBreadcrumb(blocksItem.blockPaths, true);
+                }
+                html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}">${breadcrumbHTML}${blocksItem.block.content}</div>`;
             });
             item.setAttribute("data-render", "true");
             if (response.data.blocks.length > 0) {

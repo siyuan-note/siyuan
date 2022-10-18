@@ -1165,6 +1165,7 @@ export class Gutter {
             }).element);
         } else if (type === "NodeBlockQueryEmbed" && !window.siyuan.config.readonly && !window.siyuan.config.editor.readOnly) {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            const breadcrumb = nodeElement.getAttribute("breadcrumb");
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "assetSubMenu",
                 type: "submenu",
@@ -1182,6 +1183,25 @@ export class Gutter {
                     label: `${window.siyuan.languages.update} SQL`,
                     click() {
                         protyle.toolbar.showRender(protyle, nodeElement);
+                    }
+                }, {
+                    label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.embedBlockBreadcrumb}</span><span class="fn__space fn__flex-1"></span>
+<input type="checkbox" class="b3-switch fn__flex-center"${breadcrumb === "true" ? " checked" : ((window.siyuan.config.editor.embedBlockBreadcrumb && breadcrumb !== "false") ? " checked" : "")}></div>`,
+                    bind(element) {
+                        element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+                            const inputElement = element.querySelector("input");
+                            if (event.target.tagName !== "INPUT") {
+                                inputElement.checked = !inputElement.checked;
+                            }
+                            nodeElement.setAttribute("breadcrumb", inputElement.checked.toString());
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id,
+                                attrs: {breadcrumb: inputElement.checked.toString()}
+                            });
+                            nodeElement.removeAttribute("data-render")
+                            blockRender(protyle, nodeElement);
+                            window.siyuan.menus.menu.remove();
+                        });
                     }
                 }]
             }).element);

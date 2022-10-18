@@ -80,7 +80,7 @@ export const fontMenu = (protyle: IProtyle) => {
         textElement = hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "text") as HTMLElement;
     }
     if (textElement) {
-        fontSize = textElement.style.fontSize;
+        fontSize = textElement.style.fontSize || "16px";
     }
     element.innerHTML = `${lastColorHTML}<div style="margin: 4px 0 2px">${window.siyuan.languages.colorFont}</div>
 <div class="fn__flex">

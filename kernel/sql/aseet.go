@@ -99,7 +99,6 @@ func DeleteAssetsByHashes(hashes []string) {
 		return
 	}
 	execStmtTx(tx, sqlStmt)
-
 	CommitTx(tx)
 }
 

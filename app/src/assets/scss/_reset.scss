@@ -59,10 +59,9 @@ body {
     }
 
     .fullscreen {
-      & > .protyle-breadcrumb,
-      & > .block__icons {
-        padding-left: 8px;
-        padding-right: 98px;
+      & > .protyle-breadcrumb {
+        padding-left: 9px;
+        padding-right: 126px;
       }
 
       .protyle-breadcrumb > .fn__flex-shrink {

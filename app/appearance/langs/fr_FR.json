@@ -1,4 +1,5 @@
 {
+  "docNameAndContent": "Nom et contenu du document",
   "fil d'Ariane": "Fil d'Ariane",
   "embedBlockBreadcrumb": "Intégrer le fil d'Ariane du bloc",
   "embedBlockBreadcrumbTip": "Après avoir activé le bloc d'intégration, le fil d'Ariane s'affichera",

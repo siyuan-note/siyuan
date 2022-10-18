@@ -240,7 +240,7 @@ export const openHistory = () => {
                 <span class="fn__space"></span>
                 <select data-type="typeselect" class="b3-select" style="min-width: auto">
                     <option value="0" selected>${window.siyuan.languages.docName}</option>
-                    <option value="1">${window.siyuan.languages.doc}</option>
+                    <option value="1">${window.siyuan.languages.docNameAndContent}</option>
                     <option value="2">${window.siyuan.languages.assets}</option>
                 </select>
                 <span class="fn__space"></span>

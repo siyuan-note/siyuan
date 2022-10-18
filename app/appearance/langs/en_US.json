@@ -1,4 +1,5 @@
 {
+  "docNameAndContent": "Doc Name and Content",
   "breadcrumb": "Breadcrumb",
   "embedBlockBreadcrumb": "Embed Block Breadcrumb",
   "embedBlockBreadcrumbTip": "After enabling embed block will show breadcrumbs",

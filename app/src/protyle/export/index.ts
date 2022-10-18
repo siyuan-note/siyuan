@@ -383,6 +383,7 @@ const renderPDF = (id: string) => {
     });
     window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`;
     window.siyuan.printWin.once("ready-to-show", () => {
+        // 导出 PDF 预览界面不受主界面缩放影响 https://github.com/siyuan-note/siyuan/issues/6262
         window.siyuan.printWin.webContents.setZoomFactor(1);
     })
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {

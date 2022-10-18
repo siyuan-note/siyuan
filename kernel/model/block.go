@@ -393,14 +393,6 @@ func getEmbeddedBlock(embedBlockID string, trees map[string]*parse.Tree, sqlBloc
 	if nil == def {
 		return
 	}
-	embedNodeTree, _ := loadTreeByBlockID(embedBlockID)
-	if nil == embedNodeTree {
-		return
-	}
-	embedNode := treenode.GetNodeInTree(embedNodeTree, embedBlockID)
-	if nil == embedNode {
-		return
-	}
 
 	var unlinks, nodes []*ast.Node
 	ast.Walk(def, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -444,7 +436,12 @@ func getEmbeddedBlock(embedBlockID string, trees map[string]*parse.Tree, sqlBloc
 	block = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom}
 
 	// 位于超级块中的嵌入块不显示面包屑 https://github.com/siyuan-note/siyuan/issues/6258
-	inSuperBlock := embedNode.ParentIs(ast.NodeSuperBlock)
+	inSuperBlock := false
+	embedNodeTree, _ := loadTreeByBlockID(embedBlockID)
+	if nil != embedNodeTree {
+		embedNode := treenode.GetNodeInTree(embedNodeTree, embedBlockID)
+		inSuperBlock = nil != embedNode && embedNode.ParentIs(ast.NodeSuperBlock)
+	}
 
 	if breadcrumb && !inSuperBlock {
 		blockPaths = buildBlockBreadcrumb(def)

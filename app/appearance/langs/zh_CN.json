@@ -2,7 +2,7 @@
   "docNameAndContent": "文档名和内容",
   "breadcrumb": "面包屑",
   "embedBlockBreadcrumb": "嵌入块面包屑",
-  "embedBlockBreadcrumbTip": "启用后嵌入块将显示面包屑",
+  "embedBlockBreadcrumbTip": "启用后嵌入块将显示面包屑，在超级块中的嵌入块忽略该选项，始终不显示面包屑",
   "appearanceMode": "外观模式",
   "editMode": "编辑模式",
   "editReadonly": "只读模式",

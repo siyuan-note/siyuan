@@ -780,10 +780,6 @@ export class Toolbar {
         this.subElement.innerHTML = `<div ${(isPin && this.subElement.firstElementChild.getAttribute("data-drag") === "true") ? 'data-drag="true"' : ""} class="block__popover--move"><div class="block__icons block__icons--border fn__flex">
     ${title}
     <span class="fn__flex-1"></span>
-    <label aria-label="${window.siyuan.languages.hideHeadingBelowBlocks}" style="overflow:inherit;" class="b3-tooltips b3-tooltips__nw${!types.includes("NodeBlockQueryEmbed") ? " fn__none" : ""}">
-        <input type="checkbox" class="b3-switch">
-        <span class="fn__space"></span>
-    </label>
     <button data-type="refresh" class="block__icon b3-tooltips b3-tooltips__nw${(isPin && !this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) ? "" : " block__icon--active"}${types.includes("NodeBlockQueryEmbed") ? " fn__none" : ""}" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="before" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages["insert-before"]}"><svg><use xlink:href="#iconBefore"></use></svg></button>
@@ -920,20 +916,6 @@ export class Toolbar {
         } else if (isInlineMemo) {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-inline-memo-content") || "");
         } else {
-            const switchElement = this.subElement.querySelector(".b3-switch") as HTMLInputElement;
-            if (nodeElement.getAttribute("custom-heading-mode") === "1") {
-                switchElement.checked = true;
-            }
-            switchElement.addEventListener("change", () => {
-                hideElements(["util"], protyle);
-                nodeElement.setAttribute("custom-heading-mode", switchElement.checked ? "1" : "0");
-                fetchPost("/api/attr/setBlockAttrs", {
-                    id,
-                    attrs: {"custom-heading-mode": switchElement.checked ? "1" : "0"}
-                });
-                renderElement.removeAttribute("data-render");
-                blockRender(protyle, renderElement);
-            });
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-content") || "");
         }
 

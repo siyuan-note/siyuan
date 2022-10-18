@@ -1185,6 +1185,8 @@ export class Gutter {
                         protyle.toolbar.showRender(protyle, nodeElement);
                     }
                 }, {
+                    type: "separator"
+                }, {
                     label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.embedBlockBreadcrumb}</span><span class="fn__space fn__flex-1"></span>
 <input type="checkbox" class="b3-switch fn__flex-center"${breadcrumb === "true" ? " checked" : ((window.siyuan.config.editor.embedBlockBreadcrumb && breadcrumb !== "false") ? " checked" : "")}></div>`,
                     bind(element) {
@@ -1199,6 +1201,25 @@ export class Gutter {
                                 attrs: {breadcrumb: inputElement.checked.toString()}
                             });
                             nodeElement.removeAttribute("data-render")
+                            blockRender(protyle, nodeElement);
+                            window.siyuan.menus.menu.remove();
+                        });
+                    }
+                }, {
+                    label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.hideHeadingBelowBlocks}</span><span class="fn__space fn__flex-1"></span>
+<input type="checkbox" class="b3-switch fn__flex-center"${nodeElement.getAttribute("custom-heading-mode") === "1" ? " checked" : ""}></div>`,
+                    bind(element) {
+                        element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+                            const inputElement = element.querySelector("input");
+                            if (event.target.tagName !== "INPUT") {
+                                inputElement.checked = !inputElement.checked;
+                            }
+                            nodeElement.setAttribute("custom-heading-mode", inputElement.checked ? "1" : "0");
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id,
+                                attrs: {"custom-heading-mode": inputElement.checked ? "1" : "0"}
+                            });
+                            nodeElement.removeAttribute("data-render");
                             blockRender(protyle, nodeElement);
                             window.siyuan.menus.menu.remove();
                         });

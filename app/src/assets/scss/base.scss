@@ -254,7 +254,6 @@ progressLoading: 400
   }
 
   &__msg {
-    font-size: 12px;
     color: var(--b3-theme-on-surface);
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -262,7 +261,6 @@ progressLoading: 400
   }
 
   &__counter {
-    font-size: 12px;
     display: flex;
     flex-shrink: 0;
   }

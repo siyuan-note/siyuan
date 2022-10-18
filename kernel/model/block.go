@@ -381,7 +381,7 @@ func getBlock(id string) (ret *Block, err error) {
 	return
 }
 
-func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, headingMode int, breadcrumb bool) (block *Block, blockPaths []*BlockPath) {
+func getEmbeddedBlock(embedBlockID string, trees map[string]*parse.Tree, sqlBlock *sql.Block, headingMode int, breadcrumb bool) (block *Block, blockPaths []*BlockPath) {
 	tree, _ := trees[sqlBlock.RootID]
 	if nil == tree {
 		tree, _ = loadTreeByBlockID(sqlBlock.RootID)
@@ -391,6 +391,14 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	}
 	def := treenode.GetNodeInTree(tree, sqlBlock.ID)
 	if nil == def {
+		return
+	}
+	embedNodeTree, _ := loadTreeByBlockID(embedBlockID)
+	if nil == embedNodeTree {
+		return
+	}
+	embedNode := treenode.GetNodeInTree(embedNodeTree, embedBlockID)
+	if nil == embedNode {
 		return
 	}
 
@@ -434,9 +442,12 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	luteEngine.RenderOptions.ProtyleContenteditable = false // 不可编辑
 	dom := renderBlockDOMByNodes(nodes, luteEngine)
 	block = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom}
-	if breadcrumb {
-		blockPaths = buildBlockBreadcrumb(def)
 
+	// 位于超级块中的嵌入块不显示面包屑 https://github.com/siyuan-note/siyuan/issues/6258
+	inSuperBlock := embedNode.ParentIs(ast.NodeSuperBlock)
+
+	if breadcrumb && !inSuperBlock {
+		blockPaths = buildBlockBreadcrumb(def)
 	}
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}

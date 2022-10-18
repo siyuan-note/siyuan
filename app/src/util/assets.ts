@@ -9,6 +9,23 @@ import {exportLayout} from "../layout/util";
 import {isMobile} from "./functions";
 import {fetchPost} from "./fetch";
 
+const loadIcon = (iconURL: string, data: IAppearance) => {
+    addScript(iconURL, "iconDefaultScript").then(() => {
+        if (!["ant", "material"].includes(data.icon)) {
+            const iconScriptElement = document.getElementById("iconScript");
+            const iconURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
+            if (iconScriptElement) {
+                if (!iconScriptElement.getAttribute("src").startsWith(iconURL)) {
+                    iconScriptElement.remove();
+                    addScript(iconURL, "iconScript");
+                }
+            } else {
+                addScript(iconURL, "iconScript");
+            }
+        }
+    })
+}
+
 export const loadAssets = (data: IAppearance) => {
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
     let defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/${data.customCSS ? "custom" : "theme"}.css?v=${data.customCSS ? new Date().getTime() : Constants.SIYUAN_VERSION}`;
@@ -61,22 +78,10 @@ export const loadAssets = (data: IAppearance) => {
     if (iconDefaultScriptElement) {
         if (!iconDefaultScriptElement.getAttribute("src").startsWith(iconURL)) {
             iconDefaultScriptElement.remove();
-            addScript(iconURL, "iconDefaultScript");
+            loadIcon(iconURL, data);
         }
     } else {
-        addScript(iconURL, "iconDefaultScript");
-    }
-    if (!["ant", "material"].includes(data.icon)) {
-        const iconScriptElement = document.getElementById("iconScript");
-        const iconURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
-        if (iconScriptElement) {
-            if (!iconScriptElement.getAttribute("src").startsWith(iconURL)) {
-                iconScriptElement.remove();
-                addScript(iconURL, "iconScript");
-            }
-        } else {
-            addScript(iconURL, "iconScript");
-        }
+        loadIcon(iconURL, data);
     }
 };
 

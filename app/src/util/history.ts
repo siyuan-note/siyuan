@@ -29,7 +29,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     const mdElement = element.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
     docElement.classList.add("fn__none");
     mdElement.classList.add("fn__none");
-    if (typeElement.value === "0") {
+    if (typeElement.value === "0" || typeElement.value === "1") {
         opElement.removeAttribute("disabled");
         notebookElement.removeAttribute("disabled");
         assetElement.classList.add("fn__none");
@@ -65,7 +65,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
             if (item.items.length > 0) {
                 logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
                 item.items.forEach((docItem) => {
-                    logsHTML += `<li title="${escapeHtml(docItem.title)}" data-type="${typeElement.value === "1" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 32px">
+                    logsHTML += `<li title="${escapeHtml(docItem.title)}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 32px">
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
@@ -239,8 +239,9 @@ export const openHistory = () => {
                 </div>
                 <span class="fn__space"></span>
                 <select data-type="typeselect" class="b3-select" style="min-width: auto">
-                    <option value="0" selected>${window.siyuan.languages.doc}</option>
-                    <option value="1">${window.siyuan.languages.assets}</option>
+                    <option value="0" selected>${window.siyuan.languages.docName}</option>
+                    <option value="1">${window.siyuan.languages.doc}</option>
+                    <option value="2">${window.siyuan.languages.assets}</option>
                 </select>
                 <span class="fn__space"></span>
                 <select data-type="opselect" class="b3-select" style="min-width: auto">

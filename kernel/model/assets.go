@@ -405,14 +405,20 @@ func RemoveUnusedAssets() (ret []string) {
 		return
 	}
 
+	var hashes []string
 	for _, p := range unusedAssets {
 		historyPath := filepath.Join(historyDir, p)
 		if p = filepath.Join(util.DataDir, p); gulu.File.IsExist(p) {
 			if err = gulu.File.Copy(p, historyPath); nil != err {
 				return
 			}
+
+			hash, _ := util.GetEtag(p)
+			hashes = append(hashes, hash)
 		}
 	}
+
+	sql.DeleteAssetsByHashes(hashes)
 
 	for _, unusedAsset := range unusedAssets {
 		if unusedAsset = filepath.Join(util.DataDir, unusedAsset); gulu.File.IsExist(unusedAsset) {
@@ -444,8 +450,13 @@ func RemoveUnusedAsset(p string) (ret string) {
 
 	newP := strings.TrimPrefix(p, util.DataDir)
 	historyPath := filepath.Join(historyDir, newP)
-	if err = gulu.File.Copy(p, historyPath); nil != err {
-		return
+	if gulu.File.IsExist(p) {
+		if err = gulu.File.Copy(p, historyPath); nil != err {
+			return
+		}
+
+		hash, _ := util.GetEtag(p)
+		sql.DeleteAssetsByHashes([]string{hash})
 	}
 
 	if err = os.RemoveAll(p); nil != err {

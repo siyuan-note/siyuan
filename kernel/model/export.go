@@ -1041,7 +1041,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 		var defMd string
 		stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 		stmt = html.UnescapeString(stmt)
-		embedBlocks := searchEmbedBlock(stmt, nil, 0, false)
+		embedBlocks := searchEmbedBlock(n.ID, stmt, nil, 0, false)
 		if 1 > len(embedBlocks) {
 			return ast.WalkContinue
 		}

@@ -33,6 +33,7 @@ export const blockRender = (protyle: IProtyle, element: Element) => {
             breadcrumb = window.siyuan.config.editor.embedBlockBreadcrumb
         }
         fetchPost("/api/search/searchEmbedBlock", {
+            embedBlockID: item.getAttribute("data-node-id"),
             stmt: content,
             headingMode: item.getAttribute("custom-heading-mode") === "1" ? 1 : 0,
             excludeIDs: [item.getAttribute("data-node-id"), protyle.block.rootID],

@@ -1,7 +1,8 @@
 {
+  "docNameAndContent": "文檔名和內容",
   "breadcrumb": "麵包屑",
   "embedBlockBreadcrumb": "嵌入塊麵包屑",
-  "embedBlockBreadcrumbTip": "啟用後嵌入塊將顯示麵包屑",
+  "embedBlockBreadcrumbTip": "啟用後嵌入塊將顯示麵包屑，在超級塊中的嵌入塊忽略該選項，始終不顯示麵包屑",
   "appearanceMode": "外觀模式",
   "editMode": "編輯模式",
   "editReadonly": "只讀模式",

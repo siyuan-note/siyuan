@@ -43,12 +43,13 @@ type EmbedBlock struct {
 	BlockPaths []*BlockPath `json:"blockPaths"`
 }
 
-func SearchEmbedBlock(stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
+func SearchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
+	time.Sleep(512 * time.Millisecond /* 前端队列轮询间隔 */)
 	WaitForWritingFiles()
-	return searchEmbedBlock(stmt, excludeIDs, headingMode, breadcrumb)
+	return searchEmbedBlock(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb)
 }
 
-func searchEmbedBlock(stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
+func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
 	sqlBlocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
 	var tmp []*sql.Block
 	for _, b := range sqlBlocks {
@@ -76,7 +77,7 @@ func searchEmbedBlock(stmt string, excludeIDs []string, headingMode int, breadcr
 	}
 
 	for _, sb := range sqlBlocks {
-		block, blockPaths := getEmbeddedBlock(trees, sb, headingMode, breadcrumb)
+		block, blockPaths := getEmbeddedBlock(embedBlockID, trees, sb, headingMode, breadcrumb)
 		if nil == block {
 			continue
 		}

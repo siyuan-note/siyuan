@@ -343,7 +343,11 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []*History
 		stmt += "1=1"
 	}
 
-	if HistoryTypeDoc == typ {
+	if HistoryTypeDocName == typ {
+		stmt = strings.ReplaceAll(stmt, "{title content}", "{title}")
+	}
+
+	if HistoryTypeDocName == typ || HistoryTypeDoc == typ {
 		if "all" != op {
 			stmt += " AND op = '" + op + "'"
 		}
@@ -578,8 +582,9 @@ func ReindexHistory() (err error) {
 var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync}
 
 const (
-	HistoryTypeDoc   = 0
-	HistoryTypeAsset = 1
+	HistoryTypeDocName = 0
+	HistoryTypeDoc     = 1
+	HistoryTypeAsset   = 2
 )
 
 func indexHistoryDir(name string, luteEngine *lute.Lute) {

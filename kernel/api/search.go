@@ -127,6 +127,7 @@ func searchEmbedBlock(c *gin.Context) {
 		return
 	}
 
+	embedBlockID := arg["embedBlockID"].(string)
 	stmt := arg["stmt"].(string)
 	excludeIDsArg := arg["excludeIDs"].([]interface{})
 	var excludeIDs []string
@@ -144,7 +145,7 @@ func searchEmbedBlock(c *gin.Context) {
 		breadcrumb = breadcrumbArg.(bool)
 	}
 
-	blocks := model.SearchEmbedBlock(stmt, excludeIDs, headingMode, breadcrumb)
+	blocks := model.SearchEmbedBlock(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb)
 	ret.Data = map[string]interface{}{
 		"blocks": blocks,
 	}

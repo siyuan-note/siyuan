@@ -58,14 +58,14 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         }
         let logsHTML = "";
         response.data.histories.forEach((item: { items: { path: string, title: string }[], hCreated: string }, index: number) => {
-            logsHTML += `<li class="b3-list-item" data-type="toggle" style="padding-left: 0">
-    <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
-    <span class="b3-list-item__text">${item.hCreated}</span>
+            logsHTML += `<li class="b3-list-item" data-type="toggle">
+    <span class="b3-list-item__toggle b3-list-item__toggle--hl"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
+    <span style="padding-left: 4px" class="b3-list-item__text">${item.hCreated}</span>
 </li>`;
             if (item.items.length > 0) {
                 logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
                 item.items.forEach((docItem) => {
-                    logsHTML += `<li title="${escapeHtml(docItem.title)}" data-type="${typeElement.value === "1" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 32px">
+                    logsHTML += `<li title="${escapeHtml(docItem.title)}" data-type="${typeElement.value === "1" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 44px">
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
@@ -179,14 +179,14 @@ const renderRmNotebook = (element: HTMLElement) => {
         }
         let logsHTML = "";
         response.data.histories.forEach((item: { items: { path: string, title: string }[], hCreated: string }, index: number) => {
-            logsHTML += `<li class="b3-list-item" style="padding-left: 0" data-type="toggle">
-    <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
-    <span class="b3-list-item__text">${item.hCreated}</span>
+            logsHTML += `<li class="b3-list-item" data-type="toggle">
+    <span class="b3-list-item__toggle b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
+    <span style="padding-left: 4px" class="b3-list-item__text">${item.hCreated}</span>
 </li>`;
             if (item.items.length > 0) {
                 logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
                 item.items.forEach((docItem) => {
-                    logsHTML += `<li data-type="notebook" data-path="${docItem.path}" class="b3-list-item" style="padding-left: 32px">
+                    logsHTML += `<li data-type="notebook" data-path="${docItem.path}" class="b3-list-item" style="padding-left: 44px">
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action" data-type="rollback">

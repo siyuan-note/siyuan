@@ -40,6 +40,7 @@
 
     /* 列表 */
     --b3-list-hover: #e9eaea;
+    --b3-list-icon-hover: rgba(33, 34, 36, .1);
 
     /* 菜单 */
     --b3-menu-background: #f8f9fa;

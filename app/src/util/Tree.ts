@@ -64,16 +64,17 @@ export class Tree {
             } else if (item.type === "tag") {
                 iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconTags"></use></svg>';
             } else if (item.type === "backlink") {
-                titleTip= ` title="${item.hPath}"`;
+                titleTip = ` title="${item.hPath}"`;
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             } else if (item.type === "outline") {
-                titleTip= ` title="${Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.name))}"`;
+                titleTip = ` title="${Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.name))}"`;
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             }
             let countHTML = "";
             if (item.count) {
                 countHTML = `<span class="counter">${item.count}</span>`;
             }
+            const hasChild = (item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0)
             html += `<li class="b3-list-item" 
 ${(item.nodeType !== "NodeDocument" && item.type === "backlink") ? 'draggable="true"' : ""}
 ${item.id ? 'data-node-id="' + item.id + '"' : ""} 
@@ -81,8 +82,8 @@ data-treetype="${item.type}"
 data-type="${item.nodeType}" 
 data-subtype="${item.subType}" 
 ${item.label ? "data-label='" + item.label + "'" : ""}>
-    <span style="padding-left: ${item.depth * 16}px" class="b3-list-item__toggle">
-        <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow ${((item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0)) ? "b3-list-item__arrow--open" : (item.type === "backlink" ? "" : "fn__hidden")}"><use xlink:href="#iconRight"></use></svg>
+    <span style="padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px" class="b3-list-item__toggle${(item.type === "backlink" || hasChild) ? " b3-list-item__toggle--hl" : ""}">
+        <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow ${hasChild ? "b3-list-item__arrow--open" : (item.type === "backlink" ? "" : "fn__hidden")}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
     <span class="b3-list-item__text"${titleTip}>${item.name}</span>
@@ -127,7 +128,7 @@ data-type="${item.type}"
 data-subtype="${item.subType}" 
 data-treetype="${type}"
 data-def-path="${item.defPath}">
-    <span style="padding-left: ${item.depth * 16}px" class="b3-list-item__toggle">
+    <span style="padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px" class="b3-list-item__toggle${item.children ? " b3-list-item__toggle--hl" : ""}">
         <svg data-id="${item.id}" class="b3-list-item__arrow${item.children ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}

@@ -486,7 +486,7 @@ export class Files extends Model {
         } else {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}">
 <li class="b3-list-item b3-list-item--hide-action" draggable="true" data-type="navigation-root" data-path="/">
-    <span class="b3-list-item__toggle">
+    <span class="b3-list-item__toggle b3-list-item__toggle--hl">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${emojiHTML}
@@ -844,7 +844,7 @@ export class Files extends Model {
 data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
-    <span style="padding-left: ${(item.path.split("/").length - 1) * 16}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
+    <span style="padding-left: ${(item.path.split("/").length - 2) * 18 + 22}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     <span class="b3-list-item__icon b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER))}</span>

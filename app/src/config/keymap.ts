@@ -64,49 +64,49 @@ export const keymap = {
     <div class="fn__hr"></div>
     <div class="b3-list b3-list--border b3-list--background">
         <div class="b3-list-item toggle">
-            <span class="b3-list-item__toggle"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
+            <span class="b3-list-item__toggle b3-list-item__toggle--hl"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
             <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.general}</span>
         </div>
         <div class="fn__none">${keymap._genItem(window.siyuan.config.keymap.general, "general")}</div>
     </div>
     <div class="b3-list b3-list--border b3-list--background">
         <div class="b3-list-item toggle">
-            <span class="b3-list-item__toggle">
+            <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                 <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
             </span>
             <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.editor}</span>
         </div>
         <div>
             <label class="b3-list-item toggle">
-                <span class="b3-list-item__toggle">
+                <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.general}</span>
             </label>
             <div class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.general, "editor" + Constants.ZWSP + "general")}</div>
             <label class="b3-list-item toggle">
-                <span class="b3-list-item__toggle">
+                <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.insert}</span>
             </label>
             <div class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.insert, "editor" + Constants.ZWSP + "insert")}</div>
             <label class="b3-list-item toggle">
-                <span class="b3-list-item__toggle">
+                <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.headings}</span>
             </label>
             <div class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.heading, "editor" + Constants.ZWSP + "heading")}</div>
             <label class="b3-list-item toggle">
-                <span class="b3-list-item__toggle">
+                <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.list1}</span>
             </label>
             <div class="fn__none">${keymap._genItem(window.siyuan.config.keymap.editor.list, "editor" + Constants.ZWSP + "list")}</div>
             <label class="b3-list-item toggle">
-                <span class="b3-list-item__toggle">
+                <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.table}</span>

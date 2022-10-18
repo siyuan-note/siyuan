@@ -17,9 +17,7 @@
 package sql
 
 import (
-	"crypto/sha256"
 	"database/sql"
-	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -75,7 +73,7 @@ func docTitleImgAsset(root *ast.Node) *Asset {
 		absPath := filepath.Join(util.DataDir, p)
 		if hash, err = util.GetEtag(absPath); nil != err {
 			logging.LogErrorf("read asset [%s] data failed: %s", absPath, err)
-			hash = fmt.Sprintf("%x", sha256.Sum256([]byte(gulu.Rand.String(7))))
+			return nil
 		}
 		name, _ := util.LastID(p)
 		asset := &Asset{
@@ -92,6 +90,17 @@ func docTitleImgAsset(root *ast.Node) *Asset {
 		return asset
 	}
 	return nil
+}
+
+func DeleteAssetsByHashes(hashes []string) {
+	sqlStmt := "DELETE FROM assets WHERE hash IN ('" + strings.Join(hashes, "','") + "') OR hash = ''"
+	tx, err := BeginTx()
+	if nil != err {
+		return
+	}
+	execStmtTx(tx, sqlStmt)
+
+	CommitTx(tx)
 }
 
 func QueryAssetByHash(hash string) (ret *Asset) {

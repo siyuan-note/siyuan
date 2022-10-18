@@ -64,23 +64,33 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	hPathBuilder := bytes.Buffer{}
 	hPathBuilder.WriteString("/")
 	for i, _ := range parts {
-		var parentPath string
+		var parentAbsPath string
 		if 0 < i {
-			parentPath = strings.Join(parts[:i+1], "/")
+			parentAbsPath = strings.Join(parts[:i+1], "/")
 		} else {
-			parentPath = parts[0]
+			parentAbsPath = parts[0]
 		}
-		parentPath += ".sy"
-		parentPath = filepath.Join(util.DataDir, boxID, parentPath)
-		parentData, readErr := filelock.ReadFile(parentPath)
+		parentAbsPath += ".sy"
+		parentPath := parentAbsPath
+		parentAbsPath = filepath.Join(util.DataDir, boxID, parentAbsPath)
+		parentData, readErr := filelock.ReadFile(parentAbsPath)
 		if nil != readErr {
-			logging.LogWarnf("read parent tree data [%s] failed: %s", parentPath, readErr)
+			if os.IsNotExist(readErr) {
+				parentTree := treenode.NewTree(boxID, parentPath, hPathBuilder.String()+"Untitled", "Untitled")
+				if writeErr := WriteTree(parentTree); nil != writeErr {
+					logging.LogErrorf("rebuild parent tree [%s] failed: %s", parentAbsPath, writeErr)
+				} else {
+					logging.LogInfof("rebuilt parent tree [%s]", parentAbsPath)
+				}
+			} else {
+				logging.LogWarnf("read parent tree data [%s] failed: %s", parentAbsPath, readErr)
+			}
 			hPathBuilder.WriteString("Untitled/")
 			continue
 		}
 		parentTree, parseErr := parse.ParseJSONWithoutFix(parentData, luteEngine.ParseOptions)
 		if nil != parseErr {
-			logging.LogWarnf("parse parent tree [%s] failed: %s", parentPath, parseErr)
+			logging.LogWarnf("parse parent tree [%s] failed: %s", parentAbsPath, parseErr)
 			hPathBuilder.WriteString("Untitled/")
 			continue
 		}

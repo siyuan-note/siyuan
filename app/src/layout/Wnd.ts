@@ -323,6 +323,9 @@ export class Wnd {
 
     public showHeading() {
         const currentElement = this.headersElement.querySelector(".item--focus") as HTMLElement;
+        if (!currentElement) {
+            return;
+        }
         if (currentElement.offsetLeft + currentElement.clientWidth > this.headersElement.scrollLeft + this.headersElement.clientWidth) {
             this.headersElement.scrollLeft = currentElement.offsetLeft + currentElement.clientWidth - this.headersElement.clientWidth;
         } else if (currentElement.offsetLeft < this.headersElement.scrollLeft) {

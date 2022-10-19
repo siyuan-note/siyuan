@@ -26,6 +26,7 @@ import {blockRender} from "../markdown/blockRender";
 /// #if !BROWSER
 import {clipboard, nativeImage, NativeImage} from "electron";
 import {getCurrentWindow} from "@electron/remote";
+import {openBy} from "../../editor/util";
 /// #endif
 import {fetchPost} from "../../util/fetch";
 import {isArrayEqual, isBrowser, isMobile} from "../../util/functions";
@@ -1202,7 +1203,15 @@ export class Toolbar {
         }, (response) => {
             let html = "";
             response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
-                html += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
+                html += `<div data-value="${item.path}" class="b3-list-item--hide-action b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
+<span class="b3-list-item__text">${item.content}</span>`;
+                /// #if !BROWSER
+                html += `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.showInFolder}">
+    <svg><use xlink:href="#iconFolder"></use></svg>
+</span></div>`;
+                /// #else
+                html += "</div>";
+                /// #endif
             });
             if (html === "") {
                 html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
@@ -1273,11 +1282,17 @@ export class Toolbar {
                     focusByRange(this.range);
                     return;
                 }
-                const listElement = hasClosestByClassName(target, "b3-list-item");
-                if (!listElement) {
+                /// #if !BROWSER
+                const iconElement = hasClosestByClassName(target, "b3-list-item__action");
+                if (iconElement) {
+                    openBy(iconElement.parentElement.getAttribute("data-value"), "folder");
                     return;
                 }
-                hintRenderTemplate(decodeURIComponent(listElement.getAttribute("data-value")), protyle, nodeElement);
+                /// #endif
+                const listElement = hasClosestByClassName(target, "b3-list-item");
+                if (listElement) {
+                    hintRenderTemplate(decodeURIComponent(listElement.getAttribute("data-value")), protyle, nodeElement);
+                }
             });
             const rangePosition = getSelectionPosition(nodeElement, range);
             this.subElement.classList.remove("fn__none");

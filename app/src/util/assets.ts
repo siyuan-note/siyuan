@@ -9,19 +9,16 @@ import {exportLayout} from "../layout/util";
 import {isMobile} from "./functions";
 import {fetchPost} from "./fetch";
 
-const loadThirdIcon = (data: IAppearance) => {
-    if (!["ant", "material"].includes(data.icon)) {
-        const iconScriptElement = document.getElementById("iconScript");
-        const iconURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
-        if (iconScriptElement) {
-            if (!iconScriptElement.getAttribute("src").startsWith(iconURL)) {
+const loadThirdIcon = (iconURL: string, data: IAppearance) => {
+    addScript(iconURL, "iconDefaultScript").then(() => {
+        if (!["ant", "material"].includes(data.icon)) {
+            const iconScriptElement = document.getElementById("iconScript");
+            if (iconScriptElement) {
                 iconScriptElement.remove();
-                addScript(iconURL, "iconScript");
             }
-        } else {
-            addScript(iconURL, "iconScript");
+            addScript(`/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`, "iconScript");
         }
-    }
+    })
 };
 
 export const loadAssets = (data: IAppearance) => {
@@ -74,19 +71,13 @@ export const loadAssets = (data: IAppearance) => {
     // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
     const iconURL = `/appearance/icons/${["ant", "material"].includes(data.icon) ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
     if (iconDefaultScriptElement) {
-        if (!iconDefaultScriptElement.getAttribute("src").startsWith(iconURL)) {
-            iconDefaultScriptElement.remove();
-            addScript(iconURL, "iconDefaultScript").then(() => {
-                loadThirdIcon(data);
-            });
-
-        } else {
-            loadThirdIcon(data);
+        iconDefaultScriptElement.remove();
+        while (document.body.firstElementChild.tagName === "svg") {
+            document.body.firstElementChild.remove();
         }
+        loadThirdIcon(iconURL, data);
     } else {
-        addScript(iconURL, "iconDefaultScript").then(() => {
-            loadThirdIcon(data);
-        });
+        loadThirdIcon(iconURL, data);
     }
 };
 

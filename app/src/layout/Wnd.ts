@@ -616,7 +616,7 @@ export class Wnd {
                             this.switchTab(this.children[currentIndex].headElement, true);
                         }
                     }
-                    item.headElement.setAttribute("style", "flex: 0;width: 0;overflow: hidden");
+                    item.headElement.setAttribute("style", "max-width: 0px;");
                     setTimeout(() => {
                         item.headElement.remove();
                     }, Constants.TIMEOUT_TRANSITION);

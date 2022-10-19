@@ -30,7 +30,7 @@ export class Tab {
             this.headElement = document.createElement("li");
             this.headElement.setAttribute("data-type", "tab-header");
             this.headElement.setAttribute("draggable", "true");
-            this.headElement.setAttribute("style", "flex: 0;width: 0;overflow: hidden");
+            this.headElement.setAttribute("style", "max-width: 0");
             this.headElement.setAttribute("data-id", this.id);
             this.headElement.setAttribute("data-position", "center"); // showTooltip 位置标识
             this.headElement.classList.add("item", "item--focus");
@@ -40,9 +40,7 @@ export class Tab {
             } else if (options.docIcon) {
                 iconHTML = `<span class="item__icon">${unicode2Emoji(options.docIcon)}</span>`;
             }
-            this.headElement.innerHTML = `<span class="fn__flex-1"></span>
-${iconHTML}<span class="item__text">${escapeHtml(options.title)}</span>
-<span class="fn__flex-1"></span>
+            this.headElement.innerHTML = `${iconHTML}<span class="item__text">${escapeHtml(options.title)}</span>
 <span class="item__close"><svg><use xlink:href='#iconClose'></use></svg></span>`;
             this.headElement.addEventListener("mouseenter", (event) => {
                 event.stopPropagation();

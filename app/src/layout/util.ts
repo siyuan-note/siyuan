@@ -414,7 +414,8 @@ export const resizeDrag = () => {
     const dragElement = document.getElementById("drag");
     const width = dragElement.clientWidth;
     const left = dragElement.getBoundingClientRect().left;
-    const right = document.querySelector("#windowControls").clientWidth + document.querySelector("#barSearch").clientWidth * 4;
+    const windowWidth = document.querySelector("#windowControls").clientWidth;
+    const right = (windowWidth ? windowWidth : 5) + document.querySelector("#barSearch").clientWidth * 4;
     if (left > right && left - right < width) {
         dragElement.style.paddingRight = (left - right) + "px";
     } else if (left < right && right - left < width) {
@@ -449,7 +450,7 @@ export const resizeTabs = () => {
         models.backlink.forEach(item => {
             const mTreeElement = item.element.querySelector(".backlinkMList") as HTMLElement;
             if (mTreeElement.style.height) {
-                mTreeElement.style.height = (item.element.clientHeight - mTreeElement.previousElementSibling.clientHeight * 2) +"px"
+                mTreeElement.style.height = (item.element.clientHeight - mTreeElement.previousElementSibling.clientHeight * 2) + "px"
             }
         })
         pdfResize();

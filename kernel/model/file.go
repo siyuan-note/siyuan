@@ -1275,12 +1275,14 @@ func RenameDoc(boxID, p, title string) (err error) {
 		title = "Untitled"
 	}
 
+	refText := getNodeRefText(tree.Root)
 	evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast, util.PushModeNone)
 	evt.Data = map[string]interface{}{
-		"box":   boxID,
-		"id":    tree.Root.ID,
-		"path":  p,
-		"title": title,
+		"box":     boxID,
+		"id":      tree.Root.ID,
+		"path":    p,
+		"title":   title,
+		"refText": refText,
 	}
 	util.PushEvent(evt)
 

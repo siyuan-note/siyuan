@@ -1,4 +1,6 @@
 {
+  "goForward": "Ir hacia adelante",
+  "goBack": "Ir hacia atrás",
   "docNameAndContent": "Nombre y contenido del documento",
   "miga de pan": "Miga de pan",
   "embedBlockBreadcrumb": "Incrustar migas de pan de bloque",

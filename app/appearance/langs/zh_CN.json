@@ -1,4 +1,6 @@
 {
+  "goForward": "前进",
+  "goBack": "后退",
   "docNameAndContent": "文档名和内容",
   "breadcrumb": "面包屑",
   "embedBlockBreadcrumb": "嵌入块面包屑",

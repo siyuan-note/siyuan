@@ -27,6 +27,7 @@ import {syncGuide} from "../sync/syncGuide";
 import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
 import {editor} from "../config/editor";
+import {goBack, goForward} from "./backForward";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -170,6 +171,12 @@ const initBar = () => {
 <div id="barDailyNote" data-menu="true" aria-label="${window.siyuan.languages.dailyNote} ${updateHotkeyTip(window.siyuan.config.keymap.general.dailyNote.custom)}" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg><use xlink:href="#iconCalendar"></use></svg>
 </div>
+<button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
+    <svg><use xlink:href="#iconLeft"></use></svg>
+</button>
+<button id="barForward" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goForward} ${updateHotkeyTip(window.siyuan.config.keymap.general.goForward.custom)}">
+    <svg><use xlink:href="#iconRight"></use></svg>
+</button>
 <div class="fn__flex-1 fn__ellipsis" id="drag"><span class="fn__none">开发版，使用前请进行备份 Development version, please backup before use</span></div>
 <div id="barSearch" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
     <svg><use xlink:href="#iconSearch"></use></svg>
@@ -187,7 +194,15 @@ const initBar = () => {
     document.querySelector(".toolbar").addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         while (!target.classList.contains("toolbar")) {
-            if (target.id === "barSync") {
+            if (target.id === "barBack") {
+                goBack();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barForward") {
+                goForward();
+                event.stopPropagation();
+                break;
+            }else if (target.id === "barSync") {
                 syncGuide(target);
                 event.stopPropagation();
                 break;

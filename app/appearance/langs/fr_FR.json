@@ -1,4 +1,6 @@
 {
+  "goForward": "Suivant",
+  "goBack": "Retour",
   "docNameAndContent": "Nom et contenu du document",
   "fil d'Ariane": "Fil d'Ariane",
   "embedBlockBreadcrumb": "Intégrer le fil d'Ariane du bloc",

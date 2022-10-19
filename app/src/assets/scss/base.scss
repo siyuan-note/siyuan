@@ -201,7 +201,7 @@ progressLoading: 400
     background-color: transparent;
     border: 0;
 
-    &:hover,
+    &:not(.toolbar__item--disabled):hover,
     &--active {
       color: var(--b3-theme-on-background);
       background-color: var(--b3-theme-background-light);
@@ -212,9 +212,8 @@ progressLoading: 400
       width: 14px;
     }
 
-    &--disabled,
-    &--disabled:hover {
-      color: var(--b3-theme-surface-lighter);
+    &--disabled {
+      opacity: .54;
       cursor: not-allowed;
     }
 

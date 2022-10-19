@@ -1,4 +1,6 @@
 {
+  "goForward": "Go forward",
+  "goBack": "Go back",
   "docNameAndContent": "Doc Name and Content",
   "breadcrumb": "Breadcrumb",
   "embedBlockBreadcrumb": "Embed Block Breadcrumb",

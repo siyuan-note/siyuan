@@ -187,7 +187,7 @@ export const goBack = async () => {
         }
         return;
     }
-
+    document.querySelector("#barForward").classList.remove("toolbar__item--disabled");
     if (!previousIsBack) {
         forwardStack.push(window.siyuan.backStack.pop());
     }
@@ -202,6 +202,9 @@ export const goBack = async () => {
         }
     }
     previousIsBack = true;
+    if (window.siyuan.backStack.length === 0) {
+        document.querySelector("#barBack").classList.add("toolbar__item--disabled");
+    }
 };
 
 export const goForward = async () => {
@@ -211,6 +214,7 @@ export const goForward = async () => {
         }
         return;
     }
+    document.querySelector("#barBack").classList.remove("toolbar__item--disabled");
     if (previousIsBack) {
         window.siyuan.backStack.push(forwardStack.pop());
     }
@@ -226,6 +230,9 @@ export const goForward = async () => {
         }
     }
     previousIsBack = false;
+    if (forwardStack.length === 0) {
+        document.querySelector("#barForward").classList.add("toolbar__item--disabled");
+    }
 };
 
 export const pushBack = (protyle: IProtyle, range?: Range, blockElement?: Element) => {
@@ -257,6 +264,7 @@ export const pushBack = (protyle: IProtyle, range?: Range, blockElement?: Elemen
                     window.siyuan.backStack.push(forwardStack.pop());
                 }
                 forwardStack = [];
+                document.querySelector("#barForward").classList.add("toolbar__item--disabled");
             }
             window.siyuan.backStack.push({
                 position,
@@ -268,6 +276,9 @@ export const pushBack = (protyle: IProtyle, range?: Range, blockElement?: Elemen
                 window.siyuan.backStack.shift();
             }
             previousIsBack = false;
+        }
+        if (window.siyuan.backStack.length > 1) {
+            document.querySelector("#barBack").classList.remove("toolbar__item--disabled");
         }
     }
 };

@@ -162,7 +162,7 @@ progressLoading: 400
   box-sizing: border-box;
   height: 32px;
   line-height: 32px;
-  padding-left: 69px;
+  padding: 0 5px 0 69px;
   border-bottom: .5px solid var(--b3-border-color);
 
   &--browser {
@@ -219,6 +219,8 @@ progressLoading: 400
     }
 
     &--close {
+      padding: 9px 16px;
+
       svg {
         width: 10px !important;
       }
@@ -238,6 +240,7 @@ progressLoading: 400
   height: 32px;
   line-height: 32px;
   border-top: .5px solid var(--b3-border-color);
+  padding: 0 5px;
 
   .toolbar__item {
     color: var(--b3-theme-on-surface);

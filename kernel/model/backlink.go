@@ -716,6 +716,7 @@ func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword st
 	for _, v := range set.Values() {
 		mentionKeywords = append(mentionKeywords, v.(string))
 	}
+	mentionKeywords = prepareMarkKeywords(mentionKeywords)
 	ret = searchBackmention(mentionKeywords, keyword, excludeBacklinkIDs, rootID, beforeLen)
 	return
 }
@@ -726,9 +727,6 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 	if 1 > len(mentionKeywords) {
 		return
 	}
-	sort.SliceStable(mentionKeywords, func(i, j int) bool {
-		return len(mentionKeywords[i]) < len(mentionKeywords[j])
-	})
 
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {

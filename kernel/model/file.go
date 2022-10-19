@@ -615,6 +615,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 
 		// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
 		virtualBlockRefKeywords = gulu.Str.ExcludeElem(virtualBlockRefKeywords, []string{tree.Root.IALAttr("title")})
+		virtualBlockRefKeywords = prepareMarkKeywords(virtualBlockRefKeywords)
 	}
 
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}

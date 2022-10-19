@@ -119,6 +119,11 @@
         background-color: var(--b3-theme-primary-lightest);
       }
 
+      &--readonly {
+        flex-shrink: 0;
+        min-width: 71px;
+      }
+
       .item {
         line-height: 22px;
         cursor: pointer;
@@ -129,6 +134,8 @@
         flex: 1;
         min-height: 42px;
         position: relative;
+        max-width: 186px;
+        flex-shrink: 0;
 
         &:hover:not(.item--focus):not(.item--readonly) .item__text {
           color: var(--b3-theme-on-background);
@@ -143,6 +150,7 @@
 
         &--readonly {
           padding-left: 13px;
+          max-width: none;
 
           .item__close svg {
             opacity: 1;
@@ -206,12 +214,14 @@
         }
 
         &__text {
-          @include text-clamp(1);
           text-align: center;
           -webkit-font-smoothing: subpixel-antialiased;
           color: var(--b3-theme-on-surface);
           transition: var(--b3-transition);
           padding: 0 8px;
+          white-space: nowrap;
+          overflow: hidden;
+          -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0, #000 12px);
         }
 
         &__close {

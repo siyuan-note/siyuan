@@ -49,10 +49,11 @@ export class Wnd {
         }
         this.element.innerHTML = `<div data-type="wnd" data-id="${this.id}" class="fn__flex-column fn__flex fn__flex-1">
     <div class="fn__flex fn__none">
-        <ul class="fn__flex layout-tab-bar fn__flex-1"></ul>
-        <ul class="layout-tab-bar">
+        <ul class="fn__flex layout-tab-bar"></ul>
+        <ul class="layout-tab-bar layout-tab-bar--readonly fn__flex-1">
             <li class="item item--readonly">
                 <span data-type="new" class="item__close" title="${window.siyuan.languages.newFile}"><svg style="height: 10px;width: 10px;padding: 3px"><use xlink:href="#iconAdd"></use></svg></span>
+                <span class="fn__flex-1"></span>
                 <span data-type="more" data-menu="true" class="item__close" title="${window.siyuan.languages.more}"><svg><use xlink:href="#iconDown"></use></svg></span>
             </li>
         </ul>

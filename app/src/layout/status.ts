@@ -21,26 +21,20 @@ export const initStatus = () => {
     <svg>
         <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>
-    <div class="b3-menu fn__none" style="bottom: 32px;left: 9px">
+    <div class="b3-menu fn__none" style="bottom: 32px;left: 5px">
         ${menuHTML}
     </div>
 </div>
 <div class="status__msg"></div>
 <div class="fn__flex-1"></div>
 <div class="status__counter"></div>
-<div id="barFeedback" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.feedback}">
-    <svg><use xlink:href="#iconHeart"></use></svg>
-</div>
-<div id="barLock" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.lockScreen} ${updateHotkeyTip(window.siyuan.config.keymap.general.lockScreen.custom)}">
-    <svg><use xlink:href="#iconLock"></use></svg>
-</div>
-<div id="barDebug" class="toolbar__item b3-tooltips b3-tooltips__nw fn__none" aria-label="${window.siyuan.languages.debug}">
-    <svg>
-        <use xlink:href="#iconBug"></use>
-    </svg>
-</div>
-<div id="barHelp" class="toolbar__item b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.help}">
+<div id="barHelp" class="toolbar__item b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.openBy} ${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
+    <div class="b3-menu fn__none" style="bottom: 32px;right: 5px">
+        <button id="barFeedback" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconHeart"></use></svg><span class="b3-menu__label">${window.siyuan.languages.feedback}</span></button>
+        <button id="barLock" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconLock"></use></svg><span class="b3-menu__label">${window.siyuan.languages.lockScreen}</span><span class="b3-menu__accelerator">${updateHotkeyTip(window.siyuan.config.keymap.general.lockScreen.custom)}</span></button>
+        <button id="barDebug" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconBug"></use></svg><span class="b3-menu__label">${window.siyuan.languages.debug}</span></button>
+    </div>
 </div>`;
     const dockElement = document.getElementById("barDock");
     dockElement.addEventListener("mousemove", () => {
@@ -48,6 +42,13 @@ export const initStatus = () => {
     });
     dockElement.addEventListener("mouseleave", () => {
         dockElement.querySelector(".b3-menu").classList.add("fn__none");
+    });
+    const helpElement = document.getElementById("barHelp");
+    helpElement.addEventListener("mousemove", () => {
+        helpElement.querySelector(".b3-menu").classList.remove("fn__none");
+    });
+    helpElement.addEventListener("mouseleave", () => {
+        helpElement.querySelector(".b3-menu").classList.add("fn__none");
     });
     /// #if !BROWSER
     document.querySelector("#barDebug").classList.remove("fn__none");
@@ -80,19 +81,6 @@ export const initStatus = () => {
                 target.querySelector(".b3-menu").classList.add("fn__none");
                 event.stopPropagation();
                 break;
-            } else if (target.classList.contains("b3-menu__item")) {
-                const type = target.getAttribute("data-type") as TDockType;
-                getDockByType(type).toggleModel(type);
-                if (type === "file" && getSelection().rangeCount > 0) {
-                    const range = getSelection().getRangeAt(0);
-                    const wysiwygElement = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
-                    if (wysiwygElement) {
-                        wysiwygElement.blur();
-                    }
-                }
-                target.parentElement.classList.add("fn__none");
-                event.stopPropagation();
-                break;
             } else if (target.id === "barLock") {
                 exportLayout(false, () => {
                     fetchPost("/api/system/logoutAuth", {}, () => {
@@ -117,6 +105,19 @@ export const initStatus = () => {
                 } else {
                     window.open("https://github.com/siyuan-note/siyuan/issues");
                 }
+                event.stopPropagation();
+                break;
+            } else if (target.classList.contains("b3-menu__item")) {
+                const type = target.getAttribute("data-type") as TDockType;
+                getDockByType(type).toggleModel(type);
+                if (type === "file" && getSelection().rangeCount > 0) {
+                    const range = getSelection().getRangeAt(0);
+                    const wysiwygElement = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
+                    if (wysiwygElement) {
+                        wysiwygElement.blur();
+                    }
+                }
+                target.parentElement.classList.add("fn__none");
                 event.stopPropagation();
                 break;
             }

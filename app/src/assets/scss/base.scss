@@ -251,6 +251,7 @@ progressLoading: 400
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    padding-left: 5px;
   }
 
   &__counter {
@@ -258,10 +259,15 @@ progressLoading: 400
     flex-shrink: 0;
   }
 
-  #barDock {
+  #barDock,
+  #barHelp {
     .b3-menu__item:hover {
       background-color: var(--b3-list-hover);
     }
+  }
+
+  .fn__space:last-child {
+    width: 5px;
   }
 }
 

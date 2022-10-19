@@ -18,7 +18,7 @@ Build Your Eternal Digital Garden
 SiYuan is a local-first personal knowledge management system, support fine-grained block-level reference and Markdown
 WYSIWYG.
 
-![feature0.png](https://b3logfile.com/file/2022/10/feature0-9kIbkZ4.png)
+![feature0.png](https://b3logfile.com/file/2022/10/feature0-EHMFc7T.png)
 
 ## 🔮 Features
 

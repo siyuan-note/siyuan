@@ -18,7 +18,7 @@ const loadThirdIcon = (iconURL: string, data: IAppearance) => {
             }
             addScript(`/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`, "iconScript");
         }
-    })
+    });
 };
 
 export const loadAssets = (data: IAppearance) => {

@@ -1,3 +1,41 @@
+## v2.4.2 / 2022-10-19
+
+### 改进功能
+
+* [查询嵌入块支持设置是否显示面包屑](https://github.com/siyuan-note/siyuan/issues/6184)
+* [触摸屏嵌入块固定显示操作按钮](https://github.com/siyuan-note/siyuan/issues/6210)
+* [支持例外情况输入的块引嵌套老数据迁移](https://github.com/siyuan-note/siyuan/issues/6229)
+* [只读模式禁止一些操作](https://github.com/siyuan-note/siyuan/issues/6231)
+* [移动端的只读模式使用编辑器配置项](https://github.com/siyuan-note/siyuan/issues/6232)
+* [改进 `Ctrl+K` 插入超链接补全锚文本](https://github.com/siyuan-note/siyuan/issues/6233)
+* [有序列表拖拽成新列表后从 `1` 开始排序](https://github.com/siyuan-note/siyuan/issues/6239)
+* [移动端文档树中的自定义文档图标错位](https://github.com/siyuan-note/siyuan/issues/6240)
+* [改进虚拟引用和反链提及搜索分词](https://github.com/siyuan-note/siyuan/issues/6241)
+* [改进外部复制富文本时相邻行级元素加粗、斜体和代码的处理](https://github.com/siyuan-note/siyuan/issues/6244)
+* [快捷键设置中点击列表都可使输入框获取光标](https://github.com/siyuan-note/siyuan/issues/6245)
+* [查询嵌入块 `隐藏标题下方的块` 开关移动到块标菜单中](https://github.com/siyuan-note/siyuan/issues/6249)
+* [加载文档时如果发现父文档 .sy 文件缺失则自动重建](https://github.com/siyuan-note/siyuan/issues/6252)
+* [列表配色及缩进改进](https://github.com/siyuan-note/siyuan/issues/6256)
+* [文件历史支持按文档名搜索](https://github.com/siyuan-note/siyuan/issues/6257)
+* [位于超级块中的嵌入块不显示面包屑](https://github.com/siyuan-note/siyuan/issues/6258)
+* [导出 PDF 预览界面不受主界面缩放影响](https://github.com/siyuan-note/siyuan/issues/6262)
+* [调整默认主题外观](https://github.com/siyuan-note/siyuan/issues/6264)
+* [启动或使用下拉列表切换页签后当前页签不在可视区域内](https://github.com/siyuan-note/siyuan/issues/6267)
+
+### 修复缺陷
+
+* [列表项内容为空时数据库表 blocks 的 markdown 字段缺少换行](https://github.com/siyuan-note/siyuan/issues/6206)
+* [使用属性 `data-export-html` 导出时丢失 `<style>` 标签](https://github.com/siyuan-note/siyuan/issues/6228)
+* [行级元素前输入转义符 `\` 导致异常](https://github.com/siyuan-note/siyuan/issues/6237)
+* [全屏模式图标错位](https://github.com/siyuan-note/siyuan/issues/6246)
+* [切换主题会把图标切换回默认](https://github.com/siyuan-note/siyuan/issues/6247)
+* [字体上色后大小识别错误](https://github.com/siyuan-note/siyuan/issues/6248)
+* [反链面板的提及子面板高度异常](https://github.com/siyuan-note/siyuan/issues/6250)
+* [嵌入块中有列表时块标显示位置错误](https://github.com/siyuan-note/siyuan/issues/6254)
+* [修改带命名的文档名锚文本会更新为文档名](https://github.com/siyuan-note/siyuan/issues/6259)
+* [清理资源文件后再次上传相同文件异常](https://github.com/siyuan-note/siyuan/issues/6260)
+* [网络超时导致同步失败时提示报错异常](https://github.com/siyuan-note/siyuan/issues/6265)
+
 ## v2.4.1 / 2022-10-16
 
 ### 改进功能

@@ -1,3 +1,18 @@
+## v2.4.3 / 2022-10-20
+
+### 改进功能
+
+* [桌面端 `/模板` 增加 `打开文件位置`](https://github.com/siyuan-note/siyuan/issues/5919)
+* [钉住有图标的页签样式错误](https://github.com/siyuan-note/siyuan/issues/6270)
+* [历史和集市页签大小调整](https://github.com/siyuan-note/siyuan/issues/6271)
+* [标点符号不纳入虚拟引用和提及搜索](https://github.com/siyuan-note/siyuan/issues/6272)
+
+### 修复缺陷
+
+* [集市图标下载和使用后不会更新](https://github.com/siyuan-note/siyuan/issues/6273)
+* [复制富文本和剪藏异常](https://github.com/siyuan-note/siyuan/issues/6274)
+* [在加载界面卡住](https://github.com/siyuan-note/siyuan/issues/6275)
+
 ## v2.4.2 / 2022-10-19
 
 ### 改进功能

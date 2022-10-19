@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -641,7 +642,24 @@ func stringQuery(query string) string {
 	return strings.TrimSpace(buf.String())
 }
 
+func prepareMarkKeywords(keywords []string) (ret []string) {
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	for _, k := range keywords {
+		if strings.ContainsAny(k, "?*!@#$%^&()[]{}\\|;:'\",.<>~`") {
+			continue
+		}
+		ret = append(ret, k)
+	}
+
+	sort.SliceStable(ret, func(i, j int) bool {
+		return len(ret[i]) < len(ret[j])
+	})
+	return
+}
+
 func markReplaceSpan(text string, keywords []string, replacementStart, replacementEnd string) (ret string) {
+	// 调用该函数前参数 keywords 必须使用 prepareMarkKeywords 函数进行预处理
+
 	parts := strings.Split(text, " ")
 	for i, part := range parts {
 		if "" == part {

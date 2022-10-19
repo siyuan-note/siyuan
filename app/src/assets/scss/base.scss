@@ -187,6 +187,7 @@ progressLoading: 400
     text-align: center;
     white-space: nowrap;
     align-self: center;
+    font-size: 12px;
   }
 
   &__item {
@@ -240,6 +241,7 @@ progressLoading: 400
   line-height: 32px;
   border-top: .5px solid var(--b3-border-color);
   padding: 0 5px;
+  font-size: 12px;
 
   .toolbar__item {
     color: var(--b3-theme-on-surface);

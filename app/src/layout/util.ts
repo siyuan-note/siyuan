@@ -216,6 +216,7 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
             child.headElement.setAttribute("data-init-active", "true");
         }
         (layout as Wnd).addTab(child);
+        (layout as Wnd).showHeading();
     } else if (json.instance === "Editor" && json.blockId) {
         (layout as Tab).headElement.setAttribute("data-initdata", JSON.stringify(json));
     } else if (json.instance === "Asset") {

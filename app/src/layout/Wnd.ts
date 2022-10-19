@@ -353,7 +353,6 @@ export class Wnd {
                 }
             }
         });
-
         const initData = currentTab.headElement.getAttribute("data-initdata");
         if (initData) {
             const json = JSON.parse(initData);
@@ -443,11 +442,6 @@ export class Wnd {
             } else {
                 this.headersElement.children[oldFocusIndex].after(tab.headElement);
             }
-
-            setTimeout(() => {
-                tab.headElement.removeAttribute("style");
-            }, Constants.TIMEOUT_TRANSITION);
-
             tab.headElement.querySelector(".item__close").addEventListener("click", (event) => {
                 if (tab.headElement.classList.contains("item--pin")) {
                     tab.unpin();
@@ -505,6 +499,7 @@ export class Wnd {
                             }
                         } else {
                             this.switchTab(item, true);
+                            this.showHeading();
                             window.siyuan.menus.menu.remove();
                         }
                         event.preventDefault();

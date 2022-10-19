@@ -30,7 +30,6 @@ export class Tab {
             this.headElement = document.createElement("li");
             this.headElement.setAttribute("data-type", "tab-header");
             this.headElement.setAttribute("draggable", "true");
-            this.headElement.setAttribute("style", "max-width: 0");
             this.headElement.setAttribute("data-id", this.id);
             this.headElement.setAttribute("data-position", "center"); // showTooltip 位置标识
             this.headElement.classList.add("item", "item--focus");

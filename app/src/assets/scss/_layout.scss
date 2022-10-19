@@ -126,16 +126,9 @@
         transition: var(--b3-transition);
         flex: 1;
         min-height: 42px;
-        border-left: 1px solid transparent;
-
-        &:not(:first-child),
-        &:last-child:not(.item--focus):not(.item--readonly) {
-          border-left-color: var(--b3-theme-background-light)
-        }
 
         &:hover:not(.item--focus):not(.item--readonly) {
           background-color: var(--b3-list-hover);
-          border-left-color: transparent;
 
           .item__text::after {
             background: linear-gradient(90deg, rgba(0, 0, 0, 0.001), var(--b3-list-hover));
@@ -150,7 +143,6 @@
         }
 
         &--readonly {
-          border-left-color: var(--b3-theme-background-light);
           padding-left: 13px;
 
           .item__close svg {
@@ -180,12 +172,7 @@
 
         &--focus {
           background-color: var(--b3-theme-background);
-          border-left-color: transparent !important;
           box-shadow: inset 0 -2px 0 0 var(--b3-theme-background-light);
-
-          & + .item {
-            border-left-color: transparent !important;
-          }
         }
 
         &--unupdate {

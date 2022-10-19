@@ -99,8 +99,7 @@ progressLoading: 400
   border-radius: 0;
 
   & > .protyle-breadcrumb {
-    padding-left: 84px;
-    height: 42px;
+    padding-left: 69px;
   }
 }
 
@@ -161,9 +160,9 @@ progressLoading: 400
 .toolbar {
   background-color: var(--b3-toolbar-background);
   box-sizing: border-box;
-  height: 42px;
-  line-height: 22px;
-  padding-left: 84px;
+  height: 32px;
+  line-height: 32px;
+  padding-left: 69px;
   border-bottom: .5px solid var(--b3-border-color);
 
   &--browser {
@@ -183,7 +182,6 @@ progressLoading: 400
 
   #drag {
     -webkit-app-region: drag;
-    font-size: 14px;
     color: var(--b3-toolbar-color);
     user-select: none;
     text-align: center;
@@ -195,7 +193,7 @@ progressLoading: 400
     flex-shrink: 0;
     cursor: pointer;
     color: var(--b3-toolbar-color);
-    padding: 12px;
+    padding: 9px;
     box-sizing: border-box;
     transition: var(--b3-transition);
     display: flex;
@@ -210,8 +208,8 @@ progressLoading: 400
     }
 
     svg {
-      height: 18px;
-      width: 18px;
+      height: 14px;
+      width: 14px;
     }
 
     &--disabled,
@@ -221,10 +219,8 @@ progressLoading: 400
     }
 
     &--close {
-      padding: 16px 12px;
-
       svg {
-        height: 10px;
+        width: 10px !important;
       }
 
       &:hover {
@@ -238,19 +234,13 @@ progressLoading: 400
 .status {
   background-color: var(--b3-theme-surface);
   box-sizing: border-box;
+  z-index: 2;
   height: 32px;
   line-height: 32px;
-  z-index: 2;
   border-top: .5px solid var(--b3-border-color);
 
   .toolbar__item {
-    padding: 9px;
     color: var(--b3-theme-on-surface);
-
-    svg {
-      height: 14px;
-      width: 14px;
-    }
   }
 
   &__msg {

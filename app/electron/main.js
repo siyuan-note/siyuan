@@ -181,7 +181,7 @@ const boot = () => {
     y,
     fullscreenable: true,
     fullscreen: windowState.fullscreen,
-    trafficLightPosition: {x: 13, y: 13},
+    trafficLightPosition: {x: 8, y: 8},
     webPreferences: {
       nodeIntegration: true,
       nativeWindowOpen: true,

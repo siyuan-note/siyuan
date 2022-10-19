@@ -9,21 +9,19 @@ import {exportLayout} from "../layout/util";
 import {isMobile} from "./functions";
 import {fetchPost} from "./fetch";
 
-const loadIcon = (iconURL: string, data: IAppearance) => {
-    addScript(iconURL, "iconDefaultScript").then(() => {
-        if (!["ant", "material"].includes(data.icon)) {
-            const iconScriptElement = document.getElementById("iconScript");
-            const iconURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
-            if (iconScriptElement) {
-                if (!iconScriptElement.getAttribute("src").startsWith(iconURL)) {
-                    iconScriptElement.remove();
-                    addScript(iconURL, "iconScript");
-                }
-            } else {
+const loadThirdIcon = (data: IAppearance) => {
+    if (!["ant", "material"].includes(data.icon)) {
+        const iconScriptElement = document.getElementById("iconScript");
+        const iconURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
+        if (iconScriptElement) {
+            if (!iconScriptElement.getAttribute("src").startsWith(iconURL)) {
+                iconScriptElement.remove();
                 addScript(iconURL, "iconScript");
             }
+        } else {
+            addScript(iconURL, "iconScript");
         }
-    });
+    }
 };
 
 export const loadAssets = (data: IAppearance) => {
@@ -78,10 +76,17 @@ export const loadAssets = (data: IAppearance) => {
     if (iconDefaultScriptElement) {
         if (!iconDefaultScriptElement.getAttribute("src").startsWith(iconURL)) {
             iconDefaultScriptElement.remove();
-            loadIcon(iconURL, data);
+            addScript(iconURL, "iconDefaultScript").then(() => {
+                loadThirdIcon(data);
+            });
+
+        } else {
+            loadThirdIcon(data);
         }
     } else {
-        loadIcon(iconURL, data);
+        addScript(iconURL, "iconDefaultScript").then(() => {
+            loadThirdIcon(data);
+        });
     }
 };
 

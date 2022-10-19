@@ -137,6 +137,11 @@
         flex-shrink: 0;
         overflow: hidden;
 
+        &--full {
+          max-width: none;
+          flex: 1;
+        }
+
         &:hover:not(.item--focus):not(.item--readonly) .item__text {
           color: var(--b3-theme-on-background);
         }

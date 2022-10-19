@@ -23,8 +23,8 @@ const loadIcon = (iconURL: string, data: IAppearance) => {
                 addScript(iconURL, "iconScript");
             }
         }
-    })
-}
+    });
+};
 
 export const loadAssets = (data: IAppearance) => {
     const defaultStyleElement = document.getElementById("themeDefaultStyle");

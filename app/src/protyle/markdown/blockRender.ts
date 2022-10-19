@@ -28,9 +28,9 @@ export const blockRender = (protyle: IProtyle, element: Element) => {
         const content = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
         let breadcrumb: boolean | string = item.getAttribute("breadcrumb");
         if (breadcrumb) {
-            breadcrumb = breadcrumb === "true"
+            breadcrumb = breadcrumb === "true";
         } else {
-            breadcrumb = window.siyuan.config.editor.embedBlockBreadcrumb
+            breadcrumb = window.siyuan.config.editor.embedBlockBreadcrumb;
         }
         fetchPost("/api/search/searchEmbedBlock", {
             embedBlockID: item.getAttribute("data-node-id"),

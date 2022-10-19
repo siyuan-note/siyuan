@@ -103,7 +103,7 @@ export const initFramework = () => {
         editIconElement.setAttribute("xlink:href", "#iconPreview");
     }
     editElement.addEventListener(getEventName(), () => {
-        const isReadonly = editIconElement.getAttribute("xlink:href") === "#iconPreview"
+        const isReadonly = editIconElement.getAttribute("xlink:href") === "#iconPreview";
         window.siyuan.config.editor.readOnly = isReadonly;
         fetchPost("/api/setting/setEditor", window.siyuan.config.editor, () => {
             if (!isReadonly) {
@@ -115,7 +115,7 @@ export const initFramework = () => {
                 inputElement.readOnly = true;
                 editIconElement.setAttribute("xlink:href", "#iconEdit");
             }
-        })
+        });
     });
 
     scrimElement.addEventListener(getEventName(), () => {

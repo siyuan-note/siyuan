@@ -1200,7 +1200,7 @@ export class Gutter {
                                 id,
                                 attrs: {breadcrumb: inputElement.checked.toString()}
                             });
-                            nodeElement.removeAttribute("data-render")
+                            nodeElement.removeAttribute("data-render");
                             blockRender(protyle, nodeElement);
                             window.siyuan.menus.menu.remove();
                         });

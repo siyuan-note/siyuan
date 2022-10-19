@@ -39,7 +39,7 @@ export class Link extends ToolbarItem {
                     dataHref = clipText;
                 } else {
                     // 360
-                    const lastSpace = clipText.lastIndexOf(' ')
+                    const lastSpace = clipText.lastIndexOf(" ");
                     if (lastSpace > -1) {
                         if (protyle.lute.IsValidLinkDest(clipText.substring(lastSpace))) {
                             dataHref = clipText.substring(lastSpace);

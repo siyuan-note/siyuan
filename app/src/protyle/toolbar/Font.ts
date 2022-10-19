@@ -158,7 +158,7 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
         textElement.innerText = blockRefData[2];
     };
     const setLink = (textOption: string) => {
-        const options = textOption.split(Constants.ZWSP)
+        const options = textOption.split(Constants.ZWSP);
         textElement.setAttribute("data-href", options[0]);
         textElement.removeAttribute("data-subtype");
         textElement.removeAttribute("data-id");

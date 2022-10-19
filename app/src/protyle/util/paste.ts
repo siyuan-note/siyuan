@@ -51,7 +51,7 @@ export const pasteAsPlainText = async (protyle:IProtyle) => {
         writeText("");
     } else {
         protyle.lute.SetHTMLTag2TextMark(true); // 临时设置 Lute 解析参数，行级元素键盘和下划线无法粘贴为纯文本 https://github.com/siyuan-note/siyuan/issues/6220
-        const dom = protyle.lute.InlineMd2BlockDOM(clipboard.readText())
+        const dom = protyle.lute.InlineMd2BlockDOM(clipboard.readText());
         protyle.lute.SetHTMLTag2TextMark(false);
         insertHTML(protyle.lute.BlockDOM2Content(dom), protyle, false);
     }

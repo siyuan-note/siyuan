@@ -451,9 +451,9 @@ export const resizeTabs = () => {
         models.backlink.forEach(item => {
             const mTreeElement = item.element.querySelector(".backlinkMList") as HTMLElement;
             if (mTreeElement.style.height && mTreeElement.style.height !== "0px") {
-                mTreeElement.style.height = (item.element.clientHeight - mTreeElement.previousElementSibling.clientHeight * 2) + "px"
+                mTreeElement.style.height = (item.element.clientHeight - mTreeElement.previousElementSibling.clientHeight * 2) + "px";
             }
-        })
+        });
         pdfResize();
     }, 200);
 };

@@ -1,6 +1,8 @@
 .layout {
   &__wnd--active .layout-tab-bar .item--focus {
-    box-shadow: inset 0 -2px 0 0 var(--b3-theme-primary);
+    &:after {
+      background-color: var(--b3-theme-primary);
+    }
 
     & > .item__text {
       color: var(--b3-theme-on-background);
@@ -126,13 +128,10 @@
         transition: var(--b3-transition);
         flex: 1;
         min-height: 42px;
+        position: relative;
 
-        &:hover:not(.item--focus):not(.item--readonly) {
-          background-color: var(--b3-list-hover);
-
-          .item__text::after {
-            background: linear-gradient(90deg, rgba(0, 0, 0, 0.001), var(--b3-list-hover));
-          }
+        &:hover:not(.item--focus):not(.item--readonly) .item__text {
+          color: var(--b3-theme-on-background);
         }
 
         &:hover,
@@ -170,9 +169,14 @@
           }
         }
 
-        &--focus {
-          background-color: var(--b3-theme-background);
-          box-shadow: inset 0 -2px 0 0 var(--b3-theme-background-light);
+        &--focus:after {
+          content: "";
+          width: 100%;
+          height: 3px;
+          border-radius: 6px;
+          bottom: 0;
+          position: absolute;
+          background-color: var(--b3-theme-background-light);
         }
 
         &--unupdate {

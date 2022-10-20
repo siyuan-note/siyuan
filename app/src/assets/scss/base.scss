@@ -98,8 +98,10 @@ progressLoading: 400
   z-index: 90;
   border-radius: 0;
 
-  & > .protyle-breadcrumb {
+  & > .protyle-breadcrumb,
+  & > .block__icons { // 关系图
     padding-left: 69px;
+    height: 32px;
   }
 }
 

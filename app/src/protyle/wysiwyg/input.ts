@@ -59,7 +59,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
 
     blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     if (editElement.innerHTML === "》<wbr>" || editElement.innerHTML.indexOf("\n》<wbr>") > -1) {
-        editElement.innerHTML = editElement.innerHTML.replace("》<wbr>","><wbr>");
+        editElement.innerHTML = editElement.innerHTML.replace("》<wbr>", "><wbr>");
     }
     const trimStartText = editElement.innerHTML.trimStart();
     if ((trimStartText.startsWith("````") || trimStartText.startsWith("····") || trimStartText.startsWith("~~~~")) &&
@@ -99,7 +99,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         if (blockElement.parentElement.classList.contains("li") &&
             blockElement.parentElement.childElementCount === 3  // https://ld246.com/article/1659315815506
         ) {
-            if (blockElement.parentElement.parentElement.childElementCount === 2) {
+            // 仅有一项的列表才可转换
+            if (!blockElement.parentElement.parentElement.classList.contains("protyle-wysiwyg") && // https://ld246.com/article/1659315815506
+                blockElement.parentElement.parentElement.childElementCount === 2) {
                 html = `<div data-subtype="t" data-node-id="${blockElement.parentElement.parentElement.getAttribute("data-node-id")}" data-type="NodeList" class="list"><div data-marker="*" data-subtype="t" data-node-id="${blockElement.parentElement.getAttribute("data-node-id")}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div><div data-node-id="${id}" data-type="NodeParagraph" class="p"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                 id = blockElement.parentElement.parentElement.getAttribute("data-node-id");
                 blockElement = blockElement.parentElement.parentElement;

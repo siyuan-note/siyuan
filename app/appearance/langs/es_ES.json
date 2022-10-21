@@ -901,7 +901,7 @@
     "103": "El paquete de instalación de la actualización se ha descargado automáticamente en segundo plano. Al salir, se le preguntará si desea instalar la nueva versión",
     "104": "El paquete de instalación de la actualización no se pudo descargar, verifique la conexión de red",
     "105": "El repositorio de datos corruptos se ha restablecido automáticamente",
-    "106": "TODO",
+    "106": "La longitud máxima del nombre del documento es de 512 caracteres.",
     "107": "Moviendo documento [%s]",
     "108": "Limpiando índices obsoletos...",
     "109": "Eliminación de recordatorios completada [%s]",

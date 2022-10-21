@@ -901,7 +901,7 @@
     "103": "The update installation package has been automatically downloaded in the background. When exiting, you will be asked whether to install the new version",
     "104": "The update installation package failed to download, please check the network connection",
     "105": "Corrupted data repo have been automatically reset",
-    "106": "TODO",
+    "106": "The maximum length of the document name is 512 characters",
     "107": "Moving document [%s]",
     "108": "Cleaning obsolete indexes...",
     "109": "Remove reminder completed [%s]",

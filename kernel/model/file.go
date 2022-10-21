@@ -29,6 +29,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -1268,6 +1269,11 @@ func RenameDoc(boxID, p, title string) (err error) {
 	}
 
 	title = gulu.Str.RemoveInvisible(title)
+	if 512 < utf8.RuneCountInString(title) {
+		// 限制文档名称最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
+		return errors.New(Conf.Language(106))
+	}
+
 	oldTitle := tree.Root.IALAttr("title")
 	if oldTitle == title {
 		return
@@ -1385,6 +1391,11 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 
 func createDoc(boxID, p, title, dom string) (err error) {
 	title = gulu.Str.RemoveInvisible(title)
+
+	if 512 < utf8.RuneCountInString(title) {
+		// 限制文档名称最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
+		return errors.New(Conf.Language(106))
+	}
 
 	baseName := strings.TrimSpace(path.Base(p))
 	if "" == strings.TrimSuffix(baseName, ".sy") {

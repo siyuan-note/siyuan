@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20220414110705-tu2un99",
 		"title": "收集箱",
-		"updated": "20220803164829"
+		"updated": "20221022010553"
 	},
 	"Children": [
 		{
@@ -366,10 +366,20 @@
 							"Type": "NodeCloseParen"
 						}
 					]
-				},
+				}
+			]
+		},
+		{
+			"ID": "20221022010309-yp452cb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221022010309-yp452cb",
+				"updated": "20221022010553"
+			},
+			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "支持的消息类型为文本、图片、语音、视频和文件，单个图片、语音、视频和文件的大小不超过 10M。"
 				}
 			]
 		},

@@ -1012,7 +1012,7 @@ func CreateWithMarkdown(boxID, hPath, md string) (id string, err error) {
 	WaitForWritingFiles()
 	luteEngine := NewLute()
 	dom := luteEngine.Md2BlockDOM(md)
-	id, err = createDocsByHPath(box.ID, hPath, dom)
+	id, _, err = createDocsByHPath(box.ID, hPath, dom)
 	return
 }
 
@@ -1311,7 +1311,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 	return
 }
 
-func CreateDailyNote(boxID string) (p string, err error) {
+func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	box := Conf.Box(boxID)
 	if nil == box {
 		err = ErrBoxNotFound
@@ -1333,11 +1333,12 @@ func CreateDailyNote(boxID string) (p string, err error) {
 
 	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
 	if nil != existRoot {
+		existed = true
 		p = existRoot.Path
 		return
 	}
 
-	id, err := createDocsByHPath(box.ID, hPath, "")
+	id, existed, err := createDocsByHPath(box.ID, hPath, "")
 	if nil != err {
 		return
 	}

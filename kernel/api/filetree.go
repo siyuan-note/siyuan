@@ -405,7 +405,7 @@ func createDailyNote(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
-	p, err := model.CreateDailyNote(notebook)
+	p, existed, err := model.CreateDailyNote(notebook)
 	if nil != err {
 		if model.ErrBoxNotFound == err {
 			ret.Code = 1
@@ -425,7 +425,18 @@ func createDailyNote(c *gin.Context) {
 		return
 	}
 
-	evt := util.NewCmdResult("createdailynote", 0, util.PushModeBroadcast, util.PushModeNone)
+	appArg := arg["app"]
+	app := ""
+	if nil != appArg {
+		app = appArg.(string)
+	}
+	pushMode := util.PushModeBroadcast
+	if existed && "" != app {
+		pushMode = util.PushModeBroadcastApp
+	}
+	evt := util.NewCmdResult("createdailynote", 0, pushMode, util.PushModeNone)
+	evt.AppId = app
+
 	name := path.Base(p)
 	files, _, _ := model.ListDocTree(box.ID, path.Dir(p), model.Conf.FileTree.Sort)
 	evt.Data = map[string]interface{}{

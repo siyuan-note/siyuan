@@ -103,6 +103,16 @@ progressLoading: 400
     padding-left: 69px;
     height: 32px;
   }
+
+  .protyle-breadcrumb > .protyle-breadcrumb__space {
+    -webkit-app-region: drag;
+    min-width: 32px;
+
+    &:hover {
+      border-radius: 16px;
+      background-color: var(--b3-theme-surface-light);
+    }
+  }
 }
 
 .custom-attr {

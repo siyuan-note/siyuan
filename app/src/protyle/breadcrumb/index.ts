@@ -34,7 +34,7 @@ export class Breadcrumb {
         const element = document.createElement("div");
         element.className = "protyle-breadcrumb";
         let html = `<div class="protyle-breadcrumb__bar"></div>
-<span class="fn__flex-1 fn__flex-shrink"></span>
+<span class="protyle-breadcrumb__space"></span>
 <button class="b3-tooltips b3-tooltips__w block__icon fn__flex-center" style="opacity: 1;" data-menu="true" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>`;
         if (protyle.options.render.breadcrumbContext) {
             html += `<span class="fn__space"></span>
@@ -116,7 +116,7 @@ export class Breadcrumb {
         /// #if !BROWSER
         if ("windows" !== window.siyuan.config.system.os && "linux" !== window.siyuan.config.system.os) {
             const currentWindow = getCurrentWindow();
-            element.querySelector(".fn__flex-shrink").addEventListener("dblclick", (event) => {
+            element.querySelector(".protyle-breadcrumb__space").addEventListener("dblclick", (event) => {
                 if (hasClosestByClassName(event.target as HTMLElement, "fullscreen")) {
                     if (currentWindow.isMaximized()) {
                         currentWindow.unmaximize();

@@ -111,12 +111,17 @@
   box-sizing: border-box;
   min-height: 30px;
 
+  &__space {
+    flex: 1;
+    min-width: 8px;
+    transition: var(--b3-transition);
+  }
+
   &__bar {
     align-items: center;
     flex-wrap: wrap;
     display: flex;
     transition: var(--b3-transition);
-    margin-right: 8px;
     overflow: auto;
     min-height: 30px;
 

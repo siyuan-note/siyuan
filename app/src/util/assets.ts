@@ -72,7 +72,7 @@ export const loadAssets = (data: IAppearance) => {
     const iconURL = `/appearance/icons/${["ant", "material"].includes(data.icon) ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
     if (iconDefaultScriptElement) {
         iconDefaultScriptElement.remove();
-        let svgElement = document.body.firstElementChild
+        let svgElement = document.body.firstElementChild;
         while (svgElement.tagName === "svg") {
             const currentSvgElement = svgElement;
             svgElement = svgElement.nextElementSibling;

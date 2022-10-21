@@ -267,7 +267,8 @@ const initBar = () => {
                                 label: item.name,
                                 click: () => {
                                     fetchPost("/api/filetree/createDailyNote", {
-                                        notebook: item.id
+                                        notebook: item.id,
+                                        app: Constants.SIYUAN_APPID,
                                     });
                                     window.localStorage.setItem(Constants.LOCAL_DAILYNOTEID, item.id);
                                 }

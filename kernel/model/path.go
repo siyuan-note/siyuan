@@ -33,9 +33,9 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func createDocsByHPath(boxID, hPath, content string) (id string, err error) {
+func createDocsByHPath(boxID, hPath, content string) (id string, existed bool, err error) {
 	hPath = strings.TrimSuffix(hPath, ".sy")
-	if docExist := nil != treenode.GetBlockTreeRootByHPath(boxID, hPath); docExist {
+	if existed = nil != treenode.GetBlockTreeRootByHPath(boxID, hPath); existed {
 		hPath += "-" + gulu.Rand.String(7)
 	}
 	pathBuilder := bytes.Buffer{}

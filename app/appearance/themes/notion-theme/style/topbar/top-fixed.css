@@ -1,0 +1,25 @@
+.toolbar{
+	height:22px;
+	margin-bottom: -22px;
+	opacity: 0;
+	transition: all 300ms;
+	transition-delay: 500ms;
+	box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px;
+}
+
+.toolbar:hover{
+	height:35px;
+	margin-bottom: -35px;
+	opacity: 1;
+	transition: all 300ms;
+}
+
+#notionToolbar{
+	transform:translateY(-8px);
+	transition: all 300ms;
+	transition-delay: 500ms;
+}
+.toolbar:hover #notionToolbar{
+	transform:translateY(0px);
+	transition: all 300ms;
+}

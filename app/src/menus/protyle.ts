@@ -1030,6 +1030,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                         }
                     }
                 }
+                focusByRange(range);
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
             }
         });

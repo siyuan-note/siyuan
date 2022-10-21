@@ -1,0 +1,97 @@
+/*---------ctrl+p窗口改造-------------*/
+/*放大ctrl+p窗口尺寸*/
+/*不添加[data-key]属性选择器将会同时影响alt+p窗口*/
+body > div[data-key] > .b3-dialog > .b3-dialog__container {
+	width: 90vw !important;
+}
+
+body > div[data-key] > .b3-dialog > .b3-dialog__container > div > .fn__flex > .fn__flex-column {
+	height: 80vh !important;
+	width: 90vw !important;
+}
+
+/*ctrl+p改造成左右排列*/
+/*先把容器改成左右排列并自动换行*/
+body > div[data-key] > .b3-dialog > .b3-dialog__container > div > .fn__flex > .fn__flex-column {
+	flex-direction: row !important;
+	flex-wrap: wrap;
+}
+
+
+/*设置需要占满一行的项目*/
+body > div[data-key] > .b3-dialog > .b3-dialog__container > div > .fn__flex > .fn__flex-column .search__header,
+body > div[data-key] > .b3-dialog > .b3-dialog__container > div > .fn__flex > .fn__flex-column>.b3-form__space--small {
+	width: 100vw;
+}
+
+/*窗口宽度大于一定尺寸时候，左右排列*/
+@media screen and (min-width: 960px) {
+	/*搜索结果列表占一半宽度，靠左排列*/
+	body > div[data-key] > .b3-dialog > .b3-dialog__container > div > .fn__flex > .fn__flex-column #searchList {
+		float: left;
+		width: 35vw;
+		height: calc(100% - 145px) !important;
+	}
+	/*结果预览自动占满剩余宽度，高度和结果列表等高*/
+	div[data-key] .b3-dialog__container .fn__flex-column #searchPreview {
+		/*width:45vw;*/
+		height: calc(100% - 146px) !important;
+	}
+}
+@media screen and (min-width: 960px) {
+	/*搜索结果列表占一半宽度，靠左排列*/
+	body > div[data-key] > .b3-dialog > .b3-dialog__container > div > .fn__flex > .fn__flex-column .fn__none~#searchList {
+		float: left;
+		width: 35vw;
+		height: calc(100% - 95px) !important;
+	}
+	/*结果预览自动占满剩余宽度，高度和结果列表等高*/
+	body > div[data-key] > .b3-dialog > .b3-dialog__container > div > .fn__flex > .fn__flex-column .fn__none~#searchPreview {
+		/*width:45vw;*/
+		height: calc(100% - 96px) !important;
+	}
+}
+
+/*窗口宽度小于一定尺寸时候，上下排列*/
+@media screen and (max-width: 960px) {
+	body > div[data-key] > .b3-dialog > .b3-dialog__container > div > .fn__flex > .fn__flex-column #searchList {
+		float: left;
+		/*width:45vw;*/
+		width: calc(100%);
+		height: calc(50% - 85px) !important;
+	}
+	body > div[data-key] > .b3-dialog > .b3-dialog__container > div > .fn__flex > .fn__flex-column {
+	flex-direction: column !important;
+	flex-wrap: nowrap;
+	}
+}
+
+/*结果预览自动占满剩余宽度*/
+body > div[data-key] > .b3-dialog > .b3-dialog__container > div > .fn_flex > .fn__flex-column #searchPreview {
+	width: 55vw;
+}
+
+/* 修复搜索文章不能完整显示的问题 */
+.spread-search__preview .protyle-content {
+	padding-bottom: 56px;
+}
+
+div[data-key='⌘R'] #searchPreview .protyle-content {
+	padding-bottom: 90px;
+}
+.fn__flex-column #searchList .b3-list-item[data-type='search-item']{
+	padding-bottom:20px;
+	border-radius: 0px;
+	box-shadow: 0 1px 0 0 var(--b3-toolbarSidebar) inset;
+}
+.fn__flex-column #searchList .b3-list-item[data-type='search-item']>.b3-list-item__meta{
+	color:var(--b3-list-item--meta);
+	top:22px;
+	right:8px;
+	max-width:34vw;
+	position:absolute;
+	white-space:nowrap;
+	overflow:hidden !important;
+	text-overflow: ellipsis;
+}
+

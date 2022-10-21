@@ -1,0 +1,85 @@
+/* -----------------------------------------------列表转化为表格------------------------------------------- */
+.list[data-node-id][data-type="NodeList"][custom-f="bg"]{
+	display:table;
+	padding:15px 50px 15px 5px;
+}
+/* ————————————————————所有子项目的表格（除去第一列其余的列），包含溢出的空白部分，所以才会有边框—————————————————————— */
+
+.protyle-wysiwyg *[custom-f="bg"] .li .list {
+    padding: 0px;
+    margin: 0px !important;
+	width:100%;
+    outline: 1px solid var(--b3-layout-resize);
+}
+
+/* ————————————————————对所有子列表项设置格式———————————————————— */
+.protyle-wysiwyg *[custom-f="bg"] .li {
+	display: flex;
+    outline:  1px solid var(--b3-layout-resize);
+    background-color: var(--b3-theme-background);
+}
+
+/* ————————————————————调整每个子列表项右侧边距———————————————————— */
+.protyle-wysiwyg *[custom-f="bg"] .li>div {
+    margin-right: 20px;
+}
+
+/* ————————————————————大神增加代码———————————————————— */
+.protyle-wysiwyg *[custom-f="bg"] [data-node-id].li>[data-node-id] {
+    margin-left: 6px !important;
+}
+
+/* ————————————————————对符号后文字设置格式———————————————————— */
+.protyle-wysiwyg *[custom-f="bg"] .p {
+    flex: 1;
+	left:18px;
+    text-align: left;
+    align-items: center;
+    display: flex;
+    min-width: 120px;
+	min-height: 30px;
+	height:auto;
+    margin: 0;
+}
+.protyle-wysiwyg *[custom-f="bg"] .li>.list>.li {
+    outline: none !important;
+    border-top:1px solid var(--b3-layout-resize);
+}
+.protyle-wysiwyg *[custom-f="bg"] .li>.list>.li:first-of-type {
+    border-top: none;
+}
+/* ————————————————————去除小竖线———————————————————— */
+.list[data-node-id][data-type="NodeList"][custom-f="bg"] .li>:before {
+    display: none;
+}
+
+/* ————————————————————设置前面的符号居中对齐———————————————————— */
+.list[data-node-id][data-type="NodeList"][custom-f="bg"] .li>.protyle-action {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+	opacity:0.3;
+}
+/*单子项居中*/
+
+.protyle-wysiwyg *[custom-f="bg"] .list>.li:first-child:nth-last-child(2){
+    top: 50%;
+    transform: translate(0, -50%);
+	height:100%;
+}
+
+.protyle-wysiwyg *[custom-f="bg"] .li [data-type="NodeHeading"]>[spellcheck="false"]:after{
+	display:none;
+}/*取消标题层级提示*/
+
+
+
+
+.protyle-wysiwyg *[custom-f="bg"] .code-block {
+	width:calc(100% - 12px);
+}
+
+
+
+
+/* ---------------------------------------------------------列表转化为表格 END-------------------------------------------------- */

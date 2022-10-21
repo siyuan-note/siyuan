@@ -1,0 +1,651 @@
+/* ———————————————————————————————————————————————————为链接前的icon图标设置格式———————————————————————————————————————————————— */
+.protyle-wysiwyg [data-node-id] span[data-type='a']:not(:empty)::before,
+.b3-typography a:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a:not(:empty)::before {
+    display: inline-block;
+    position: relative;
+    background-repeat: no-repeat;
+    background-size: 1em 1em;
+    top: 0.1em !important;
+    width: 1em;
+    height: 1em;
+    margin-right: 0.2em !important;
+}
+
+/* ————————————————————为常见的文件格式设置图标———————————————————— */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href^="file://"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href^="file://"]::before,
+.b3-typography a[href^="file://"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/folder.svg');
+}
+
+/* ————————————————————为没有收集icon图标的网站设置格式—————————————————— */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href ^="http"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href ^="http"]::before,
+.b3-typography a[href ^="http"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/link2.svg');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="weibo.com"]:not(:empty)::before,
+.b3-typography a[href *="weibo.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/weibo_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="zhihu.com"]:not(:empty)::before,
+.b3-typography a[href *="zhihu.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/zhihu_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="t.bilibili.com"]:not(:empty)::before,
+.b3-typography a[href *="t.bilibili.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/t_bilibili_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="bilibili.com"]:not(:empty)::before,
+.b3-typography a[href *="bilibili.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/bilibili_com.png');
+}
+
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="douban.com"]:not(:empty)::before,
+.b3-typography a[href *="douban.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/douban_com.png');
+}
+
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="oschina.net"]:not(:empty)::before,
+.b3-typography a[href *="oschina.net"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/oschina_net.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="ld246.com"]:not(:empty)::before,
+.b3-typography a[href *="ld246.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/ld246_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="music.163.com"]:not(:empty)::before,
+.b3-typography a[href *="music.163.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/music_163_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="runoob.com"]:not(:empty)::before,
+.b3-typography a[href *="runoob.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/runoob_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="iconfont.cn"]:not(:empty)::before,
+.b3-typography a[href *="iconfont.cn"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/iconfont_cn.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="pan.baidu.com"]:not(:empty)::before,
+.b3-typography a[href *="pan.baidu.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/pan_baidu_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="yuque.com"]:not(:empty)::before,
+.b3-typography a[href *="yuque.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/yuque_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="52pojie.cn"]:not(:empty)::before,
+.b3-typography a[href *="52pojie.cn"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/52pojie_cn.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="sspai.com"]:not(:empty)::before,
+.b3-typography a[href *="sspai.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/sspai_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="uisdc.com"]:not(:empty)::before,
+.b3-typography a[href *="uisdc.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/uisdc_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="cn.bing.com"]:not(:empty)::before,
+.b3-typography a[href *="cn.bing.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/cn_bing_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="jianshu.com"]:not(:empty)::before,
+.b3-typography a[href *="jianshu.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/jianshu_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="blog.csdn.net"]:not(:empty)::before,
+.b3-typography a[href *="blog.csdn.net"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/blog_csdn_net.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="zcool.com.cn"]:not(:empty)::before,
+.b3-typography a[href *="zcool.com.cn"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/zcool_com_cn.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="ixigua.com"]:not(:empty)::before,
+.b3-typography a[href *="ixigua.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/ixigua_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="weixin.sogou.com"]:not(:empty)::before,
+.b3-typography a[href *="weixin.sogou.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/weixin_sogou_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="baidu.com"]:not(:empty)::before,
+.b3-typography a[href *="baidu.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/baidu_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="tieba.baidu.com"]:not(:empty)::before,
+.b3-typography a[href *="tieba.baidu.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/tieba_baidu_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="fanyi.baidu.com"]:not(:empty)::before,
+.b3-typography a[href *="fanyi.baidu.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fanyi_baidu_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="iplaysoft.com"]:not(:empty)::before,
+.b3-typography a[href *="iplaysoft.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/iplaysoft_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="huaban.com"]:not(:empty)::before,
+.b3-typography a[href *="huaban.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/huaban_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="v.qq.com"]:not(:empty)::before,
+.b3-typography a[href *="v.qq.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/v_qq_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="iqiyi.com"]:not(:empty)::before,
+.b3-typography a[href *="iqiyi.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/iqiyi_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="youku.com"]:not(:empty)::before,
+.b3-typography a[href *="youku.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/youku_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="haokan.baidu.com"]:not(:empty)::before,
+.b3-typography a[href *="haokan.baidu.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/haokan_baidu_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="y.qq.com"]:not(:empty)::before,
+.b3-typography a[href *="y.qq.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/y_qq_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="kugou.com"]:not(:empty)::before,
+.b3-typography a[href *="kugou.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/kugou_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="kuwo.cn"]:not(:empty)::before,
+.b3-typography a[href *="kuwo.cn"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/kuwo_cn.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="toutiao.com"]:not(:empty)::before,
+.b3-typography a[href *="toutiao.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/toutiao_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="tianya.cn"]:not(:empty)::before,
+.b3-typography a[href *="tianya.cn"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/tianya_cn.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="bbs.hupu.com"]:not(:empty)::before,
+.b3-typography a[href *="bbs.hupu.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/bbs_hupu_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="wiz.cn"]:not(:empty)::before,
+.b3-typography a[href *="wiz.cn"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/wiz_cn.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="yinxiang.com"]:not(:empty)::before,
+.b3-typography a[href *="yinxiang.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/yinxiang_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="logseq.com"]:not(:empty)::before,
+.b3-typography a[href *="logseq.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/logseq_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="obsidian.md"]:not(:empty)::before,
+.b3-typography a[href *="obsidian.md"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/obsidian_md.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="taobao.com"]:not(:empty)::before,
+.b3-typography a[href *="taobao.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/taobao_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="so.com"]:not(:empty)::before,
+.b3-typography a[href *="so.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/so_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="mp.weixin.qq.com"]:not(:empty)::before,
+.b3-typography a[href *="mp.weixin.qq.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/mp_weixin_qq_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="yandex.com"]:not(:empty)::before,
+.b3-typography a[href *="yandex.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/yandex_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="wolai.com"]:not(:empty)::before,
+.b3-typography a[href *="wolai.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/wolai_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="auth.alipay.com"]:not(:empty)::before,
+.b3-typography a[href *="auth.alipay.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/auth_alipay_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="aliyundrive.com"]:not(:empty)::before,
+.b3-typography a[href *="aliyundrive.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/aliyundrive_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="baike.baidu.com"]:not(:empty)::before,
+.b3-typography a[href *="baike.baidu.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/baike_baidu_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="apple.com.cn"]:not(:empty)::before,
+.b3-typography a[href *="apple.com.cn"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/apple_com_cn.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="huawei.com"]:not(:empty)::before,
+.b3-typography a[href *="huawei.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/huawei_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="samsung.com"]:not(:empty)::before,
+.b3-typography a[href *="samsung.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/samsung_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="mi.com"]:not(:empty)::before,
+.b3-typography a[href *="mi.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/mi_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="oppo.com"]:not(:empty)::before,
+.b3-typography a[href *="oppo.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/oppo_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="vivo.com.cn"]:not(:empty)::before,
+.b3-typography a[href *="vivo.com.cn"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/vivo_com_cn.png');
+}
+
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="topbook.cc"]:not(:empty)::before,
+.b3-typography a[href *="topbook.cc"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/topbook_cc.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="appinn.com"]:not(:empty)::before,
+.b3-typography a[href *="appinn.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/appinn_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="ghxi.com"]:not(:empty)::before,
+.b3-typography a[href *="ghxi.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/ghxi_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="weread.qq.com"]:not(:empty)::before,
+.b3-typography a[href *="weread.qq.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/weread_qq_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="news.qq.com"]:not(:empty)::before,
+.b3-typography a[href *="news.qq.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/news_qq_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="news.163.com"]:not(:empty)::before,
+.b3-typography a[href *="news.163.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/news_163_com.png');
+}
+
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="guancha.cn"]:not(:empty)::before,
+.b3-typography a[href *="guancha.cn"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/guancha_cn.png');
+}
+
+/* pocket */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="getpocket.com"]:not(:empty)::before,
+.b3-typography a[href *="getpocket.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/getpocket_com.png');
+}
+
+/* instapaper */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="instapaper.com"]:not(:empty)::before,
+.b3-typography a[href *="instapaper.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/instapaper_com.png');
+}
+
+/* GitHub */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="github.com"]:not(:empty)::before,
+.b3-typography a[href *="github.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/github_com.png');
+}
+
+/* 谷歌翻译 */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="translate.google.cn"]:not(:empty)::before,
+.b3-typography a[href *="translate.google.cn"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/translate_google_cn.png');
+}
+
+
+/* zotero */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="zotero"]:not(:empty)::before,
+.b3-typography a[href *="zotero"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/zotero.png');
+}
+
+/* 搜狐 */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="sohu.com"]:not(:empty)::before,
+.b3-typography a[href *="sohu.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/souhu.svg');
+}
+
+/* 豌豆荚 */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="wandoujia.com"]:not(:empty)::before,
+.b3-typography a[href *="wandoujia.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/wandou.svg');
+}
+
+/* Reddit */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="redditinc.com"]:not(:empty)::before,
+.b3-typography a[href *="redditinc.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/reddit.svg');
+}
+
+/* Instagram.com */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="Instagram.com"]:not(:empty)::before,
+.b3-typography a[href *="Instagram.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/ins.svg');
+}
+
+/* twitter.com */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="twitter.com"]:not(:empty)::before,
+.b3-typography a[href *="twitter.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/Twitter.svg');
+}
+
+/* facebook.com */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="facebook.com"]:not(:empty)::before,
+.b3-typography a[href *="facebook.com"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/Facebook.svg');
+}
+
+/* notion */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="notion"]:not(:empty)::before,
+.b3-typography a[href *="notion"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/notion.svg');
+}
+
+/* Youtube */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href *="youtube"]:not(:empty)::before,
+.b3-typography a[href *="youtube"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/youtube.svg');
+}
+
+/* ————————————————————为常见的文件格式设置图标———————————————————— */
+/* 文件夹 */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href^="file://"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href^="file://"]::before,
+.b3-typography a[href^="file://"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/folder.svg');
+}
+
+/* 压缩包 */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".zip"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".zip"]::before,
+.b3-typography a[href ^="assets/"][href $=".zip"]::before,
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".rar"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".rar"]::before,
+.b3-typography a[href ^="assets/"][href $=".rar"]::before,
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".7z"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".7z"]::before,
+.b3-typography a[href ^="assets/"][href $=".7z"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/zip.svg');
+}
+
+/* word */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".docx"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".docx"]::before,
+.b3-typography [href ^="assets/"][href $=".docx"]::before,
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".doc"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".doc"]::before,
+.b3-typography [href ^="assets/"][href $=".doc"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/word.svg');
+}
+
+/* ppt */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".pptx"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".pptx"]::before,
+.b3-typography [href ^="assets/"][href $=".pptx"]::before,
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".ppt"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".ppt"]::before,
+.b3-typography [href ^="assets/"][href $=".ppt"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/ppt.svg');
+}
+
+/* excel */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".xlsx"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".xlsx"]::before,
+.b3-typography [href ^="assets/"][href $=".xlsx"]::before,
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".xls"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".xls"]::before,
+.b3-typography [href ^="assets/"][href $=".xls"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/excel.svg');
+}
+
+/* pdf */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".pdf"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".pdf"]::before,
+.b3-typography [href ^="assets/"][href $=".pdf"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/pdf.svg');
+}
+
+/* txt */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".txt"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".txt"]::before,
+.b3-typography [href ^="assets/"][href $=".txt"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/txt.svg');
+}
+
+/* 视频 */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".mp4"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".mp4"]::before,
+.b3-typography [href ^="assets/"][href $=".mp4"]::before,
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".m4v"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".m4v"]::before,
+.b3-typography [href ^="assets/"][href $=".m4v"]::before,
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".mov"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".mov"]::before,
+.b3-typography [href ^="assets/"][href $=".mov"]::before,
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".flv"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".flv"]::before,
+.b3-typography [href ^="assets/"][href $=".flv"]::before,
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".avi"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".avi"]::before,
+.b3-typography [href ^="assets/"][href $=".avi"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/MP4.svg');
+}
+
+/* 图片 */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".jpg"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".jpg"]::before,
+.b3-typography [href ^="assets/"][href $=".jpg"]::before,
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".png"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".png"]::before,
+.b3-typography [href ^="assets/"][href $=".png"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/jpg.svg');
+}
+
+/* html */
+/* .protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".html"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".html"]::before,
+.b3-typography [href ^="assets/"][href $=".html"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/html.svg');
+} */
+
+/* json */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".json"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".json"]::before,
+.b3-typography [href ^="assets/"][href $=".json"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/json.svg');
+}
+
+/* css */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".css"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".css"]::before,
+.b3-typography [href ^="assets/"][href $=".css"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/css.svg');
+}
+
+/* js,c++等 */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".java"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".java"]::before,
+.b3-typography [href ^="assets/"][href $=".java"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/JAVA.svg');
+}
+
+/* js,c++等 */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".js"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".js"]::before,
+.b3-typography [href ^="assets/"][href $=".js"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/vscode.svg');
+}
+
+/* xmind */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".xmind"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".xmind"]::before,
+.b3-typography [href ^="assets/"][href $=".xmind"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/xmind.svg');
+}
+
+/* xmind */
+.protyle-wysiwyg [data-node-id] span[data-type='a'][data-href $=".md"]:not(:empty)::before,
+.protyle-wysiwyg [data-node-id] a[href $=".md"]::before,
+.b3-typography [href ^="assets/"][href $=".md"]::before {
+    content: "";
+    background-image: url('../icon4Tsundoku/fold/md.svg');
+}
+
+/* ————————————————————————————————————————————————————文件格式到此为止—————————————————————————————————————————————————————— */

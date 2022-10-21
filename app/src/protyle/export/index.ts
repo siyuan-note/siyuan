@@ -65,62 +65,15 @@ const renderPDF = (id: string) => {
     const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_EXPORTPDF) || JSON.stringify({
         printBackground: true,
         landscape: false,
-        marginsType: 0,
+        margins: {
+            marginType: "default",
+        },
         scaleFactor: 100,
         pageSize: "A4",
         removeAssets: true,
         keepFold: false,
     }));
     const servePath = window.location.protocol + "//" + window.location.host;
-    let pdfWidth = "";
-    if (localData.pageSize === "A3") {
-        if (localData.landscape) {
-            pdfWidth = "16.5";
-        } else {
-            pdfWidth = "11.7";
-        }
-    } else if (localData.pageSize === "A4") {
-        if (localData.landscape) {
-            pdfWidth = "11.7";
-        } else {
-            pdfWidth = "8.8";
-        }
-    } else if (localData.pageSize === "A5") {
-        if (localData.landscape) {
-            pdfWidth = "8.3";
-        } else {
-            pdfWidth = "5.8";
-        }
-    } else if (localData.pageSize === "Legal") {
-        if (localData.landscape) {
-            pdfWidth = "14";
-        } else {
-            pdfWidth = "8.5";
-        }
-    } else if (localData.pageSize === "Letter") {
-        if (localData.landscape) {
-            pdfWidth = "11";
-        } else {
-            pdfWidth = "8.5";
-        }
-    } else if (localData.pageSize === "Tabloid") {
-        if (localData.landscape) {
-            pdfWidth = "17";
-        } else {
-            pdfWidth = "11";
-        }
-    }
-    let pdfMargin = "0.66";
-    if (localData.landscape) {
-        pdfMargin = "1.69";
-    }
-    if (localData.marginsType !== 0) {
-        if (localData.landscape) {
-            pdfMargin = "1.69";
-        } else {
-            pdfMargin = "0.3";
-        }
-    }
     const html = `<!DOCTYPE html><html>
 <head>
     <meta charset="utf-8">
@@ -174,8 +127,6 @@ const renderPDF = (id: string) => {
           height: 100%;
           overflow: auto;
           box-sizing: border-box;
-          padding: 34px ${pdfMargin}in 16px;
-          width: ${pdfWidth}in
         }
         
         .b3-label {
@@ -210,9 +161,9 @@ const renderPDF = (id: string) => {
         </div>
         <span class="fn__hr"></span>
         <select class="b3-select" id="marginsType">
-            <option ${localData.marginsType === 0 ? "selected" : ""} value="0">Default</option>
-            <option ${localData.marginsType === 1 ? "selected" : ""} value="1">None</option>
-            <option ${localData.marginsType === 2 ? "selected" : ""} value="2">Minimal</option>
+            <option ${localData.margins.marginType === "default" ? "selected" : ""} value="default">Default</option>
+            <option ${localData.margins.marginType === "none" ? "selected" : ""} value="none">None</option>
+            <option ${localData.margins.marginType === "printableArea" ? "selected" : ""} value="printableArea">Minimal</option>
         </select>
     </label>
     <label class="b3-label">
@@ -257,6 +208,20 @@ const renderPDF = (id: string) => {
 <script src="${servePath}/stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
+    const setPadding = () => {
+        let pdfMargin = "0.66";
+        if (document.querySelector("#landscape").checked) {
+            pdfMargin = "1.69";
+        }
+        if (document.querySelector("#marginsType").value !== "default") {
+            if (document.querySelector("#landscape").checked) {
+                pdfMargin = "1.69";
+            } else {
+                pdfMargin = "0.3";
+            }
+        }
+        document.getElementById('preview').style.padding = "34px " + pdfMargin + "in 16px";
+    }
     const fetchPost = (url, data, cb) => {
         fetch("${servePath}" + url, {
             method: "POST",
@@ -344,6 +309,9 @@ const renderPDF = (id: string) => {
                 renderPreview(previewElement, response2.data.content);
             })
         })
+        actionElement.querySelector("#marginsType").addEventListener('change', () => {
+            setPadding();
+        });
         actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
             ipcRenderer.send("${Constants.SIYUAN_EXPORT_CLOSE}")
@@ -354,7 +322,9 @@ const renderPDF = (id: string) => {
               pdfOptions:{
                 printBackground: true,
                 landscape: actionElement.querySelector("#landscape").checked,
-                marginsType: parseInt(actionElement.querySelector("#marginsType").value),
+                margins: {
+                  marginType: actionElement.querySelector("#marginsType").value
+                },
                 scaleFactor: parseInt(actionElement.querySelector("#scaleFactor").value),
                 pageSize: actionElement.querySelector("#pageSize").value,
               },
@@ -365,6 +335,7 @@ const renderPDF = (id: string) => {
             actionElement.remove();
             previewElement.classList.add("exporting");
         });
+        setPadding()
     });
 </script></body></html>`;
     window.siyuan.printWin = new BrowserWindow({

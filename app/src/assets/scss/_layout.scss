@@ -278,8 +278,8 @@
   }
 
   svg {
-    height: 18px;
-    width: 18px;
+    height: 16px;
+    width: 16px;
   }
 
   &--vertical {
@@ -301,7 +301,7 @@
   }
 
   &__item {
-    padding: 7px;
+    padding: 8px;
     color: var(--b3-theme-on-surface-light);
     display: flex;
     border-radius: 4px;

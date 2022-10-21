@@ -214,7 +214,7 @@ progressLoading: 400
     background-color: transparent;
     border: 0;
 
-    &:not(.toolbar__item--disabled):hover,
+    &:not(.toolbar__item--disabled):not(.toolbar__item--close):hover,
     &--active {
       color: var(--b3-theme-on-background);
       background-color: var(--b3-theme-background-light);

@@ -73,7 +73,9 @@ export const loadAssets = (data: IAppearance) => {
     if (iconDefaultScriptElement) {
         iconDefaultScriptElement.remove();
         while (document.body.firstElementChild.tagName === "svg") {
-            document.body.firstElementChild.remove();
+            if (document.body.firstElementChild.id !== "emojiScriptSvg") {
+                document.body.firstElementChild.remove();
+            }
         }
         loadThirdIcon(iconURL, data);
     } else {
@@ -105,7 +107,7 @@ export const initAssets = () => {
     const emojiElement = document.getElementById("emojiScript");
     const loadingElement = document.getElementById("loading");
     if (!emojiElement && !window.siyuan.config.appearance.nativeEmoji && !isMobile()) {
-        addScript("/appearance/emojis/twitter-emoji.js?v=1.0.0", "emojiScript").then(() => {
+        addScript("/appearance/emojis/twitter-emoji.js?v=1.0.1", "emojiScript").then(() => {
             if (loadingElement) {
                 loadingElement.remove();
             }

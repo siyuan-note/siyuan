@@ -72,9 +72,12 @@ export const loadAssets = (data: IAppearance) => {
     const iconURL = `/appearance/icons/${["ant", "material"].includes(data.icon) ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
     if (iconDefaultScriptElement) {
         iconDefaultScriptElement.remove();
-        while (document.body.firstElementChild.tagName === "svg") {
-            if (document.body.firstElementChild.id !== "emojiScriptSvg") {
-                document.body.firstElementChild.remove();
+        let svgElement = document.body.firstElementChild
+        while (svgElement.tagName === "svg") {
+            const currentSvgElement = svgElement;
+            svgElement = svgElement.nextElementSibling;
+            if (currentSvgElement.id !== "emojiScriptSvg") {
+                currentSvgElement.remove();
             }
         }
         loadThirdIcon(iconURL, data);

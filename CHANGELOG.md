@@ -1,3 +1,24 @@
+## v2.4.4 / 2022-10-21
+
+### 改进功能
+
+* [`Alt+5` 打开已有日记时不在内核伺服客户端之间同步](https://github.com/siyuan-note/siyuan/issues/5617)
+* [浏览器剪藏扩展改进为由下往上滚动](https://github.com/siyuan-note/siyuan/issues/6276)
+* [标题后直接跟图片时图片的提示文本不再渲染到大纲中](https://github.com/siyuan-note/siyuan/issues/6278)
+* [切换到全屏后支持拖拽窗口](https://github.com/siyuan-note/siyuan/issues/6279)
+* [拆分或合并单元格后光标消失](https://github.com/siyuan-note/siyuan/issues/6286)
+* [停靠栏图标大小调整](https://github.com/siyuan-note/siyuan/issues/6293)
+
+### 修复缺陷
+
+* [由未使用 `theme.js` 的主题切换至使用 `theme.js` 的主题时文档 emojis 图标不显示](https://github.com/siyuan-note/siyuan/issues/6281)
+* [关系图全屏切换后图标位置不对](https://github.com/siyuan-note/siyuan/issues/6282)
+* [聚焦列表项回车后输入 `[]` 后异常](https://github.com/siyuan-note/siyuan/issues/6283)
+* [合并单元格后 `Ctrl+A` 再 `Ctrl+B` 内容消失](https://github.com/siyuan-note/siyuan/issues/6284)
+* [Windows 端主窗口关闭按钮悬浮背景色没有变红](https://github.com/siyuan-note/siyuan/issues/6285)
+* [浏览器剪藏扩展列表下方段落缩进成为子块](https://github.com/siyuan-note/siyuan/issues/6289)
+* [云端同步后如果 Emojie 文件夹为空不应该删除](https://github.com/siyuan-note/siyuan/issues/6292)
+
 ## v2.4.3 / 2022-10-20
 
 ### 改进功能

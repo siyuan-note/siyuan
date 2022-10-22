@@ -77,6 +77,16 @@ export const fileTree = {
 </label>`;
     },
     _send() {
+        let inputMaxOpenTabCount = parseInt((fileTree.element.querySelector("#maxOpenTabCount") as HTMLInputElement).value);
+        if (32 < inputMaxOpenTabCount) {
+            inputMaxOpenTabCount = 32;
+            (fileTree.element.querySelector("#maxOpenTabCount") as HTMLInputElement).value = "32";
+        }
+        if (1 > inputMaxOpenTabCount) {
+            inputMaxOpenTabCount = 1;
+            (fileTree.element.querySelector("#maxOpenTabCount") as HTMLInputElement).value = "1";
+        }
+
         fetchPost("/api/setting/setFiletree", {
             sort: window.siyuan.config.fileTree.sort,
             alwaysSelectOpenedFile: (fileTree.element.querySelector("#alwaysSelectOpenedFile") as HTMLInputElement).checked,
@@ -87,7 +97,7 @@ export const fileTree = {
             allowCreateDeeper: (fileTree.element.querySelector("#allowCreateDeeper") as HTMLInputElement).checked,
             removeDocWithoutConfirm: (fileTree.element.querySelector("#removeDocWithoutConfirm") as HTMLInputElement).checked,
             maxListCount: parseInt((fileTree.element.querySelector("#maxListCount") as HTMLInputElement).value),
-            maxOpenTabCount: parseInt((fileTree.element.querySelector("#maxOpenTabCount") as HTMLInputElement).value),
+            maxOpenTabCount: inputMaxOpenTabCount,
         }, response => {
             fileTree.onSetfiletree(response.data);
         });

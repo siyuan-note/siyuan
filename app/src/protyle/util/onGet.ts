@@ -239,7 +239,7 @@ const setHTML = (options: {
         /// #endif
     }
     if (options.isSyncing) {
-        disabledForeverProtyle(protyle)
+        disabledForeverProtyle(protyle);
     } else {
         if (protyle.disabled) {
             disabledProtyle(protyle);
@@ -288,10 +288,10 @@ const setHTML = (options: {
 export const disabledForeverProtyle = (protyle: IProtyle) => {
     disabledProtyle(protyle);
     if (protyle.breadcrumb) {
-        protyle.breadcrumb.element.querySelector(".b3-button").textContent = window.siyuan.languages["_kernel"][81]
+        protyle.breadcrumb.element.querySelector(".b3-button").textContent = window.siyuan.languages["_kernel"][81];
     }
     protyle.element.setAttribute("disabled-forever", "true");
-}
+};
 
 /** 禁用编辑器 */
 export const disabledProtyle = (protyle: IProtyle) => {

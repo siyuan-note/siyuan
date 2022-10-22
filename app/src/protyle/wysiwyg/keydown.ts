@@ -7,8 +7,6 @@ import {
     getEditorRange,
     getSelectionOffset, getSelectionPosition,
     selectAll,
-    setFirstNodeRange,
-    setLastNodeRange
 } from "../util/selection";
 import {
     hasClosestBlock,
@@ -292,8 +290,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (previousElement && previousElement.getAttribute("data-node-id")) {
                         previousElement.classList.add("protyle-wysiwyg--select");
                         selectElements.forEach(item => {
-                            item.removeAttribute("select-end")
-                        })
+                            item.removeAttribute("select-end");
+                        });
                         previousElement.setAttribute("select-end", "true");
                         const top = previousElement.getBoundingClientRect().top - protyle.contentElement.getBoundingClientRect().top;
                         if (top < 0) {
@@ -318,8 +316,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (nextElement && nextElement.getAttribute("data-node-id")) {
                         nextElement.classList.add("protyle-wysiwyg--select");
                         selectElements.forEach(item => {
-                            item.removeAttribute("select-end")
-                        })
+                            item.removeAttribute("select-end");
+                        });
                         nextElement.setAttribute("select-end", "true");
                         const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
                         if (bottom > 0) {
@@ -331,7 +329,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         selectLastElement.parentElement.classList.add("protyle-wysiwyg--select");
                     }
                 }
-            })
+            });
             return;
         }
 
@@ -339,7 +337,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             upSelect({
                 protyle, event, nodeElement, editorElement, range,
                 cb(selectElements) {
-                    const startEndElement = getStartEndElement(selectElements)
+                    const startEndElement = getStartEndElement(selectElements);
                     if (startEndElement.startElement.getBoundingClientRect().top >= startEndElement.endElement.getBoundingClientRect().top) {
                         const previousElement = startEndElement.endElement.previousElementSibling as HTMLElement;
                         if (previousElement && previousElement.getAttribute("data-node-id")) {
@@ -360,11 +358,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         startEndElement.endElement.removeAttribute("select-end");
                         const previousElement = getPreviousBlock(startEndElement.endElement);
                         if (previousElement) {
-                            previousElement.setAttribute("select-end", "true")
+                            previousElement.setAttribute("select-end", "true");
                         }
                     }
                 }
-            })
+            });
             return;
         }
 
@@ -372,7 +370,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             downSelect({
                 protyle, event, nodeElement, editorElement, range,
                 cb(selectElements) {
-                    const startEndElement = getStartEndElement(selectElements)
+                    const startEndElement = getStartEndElement(selectElements);
                     if (startEndElement.startElement.getBoundingClientRect().top <= startEndElement.endElement.getBoundingClientRect().top) {
                         const nextElement = startEndElement.endElement.nextElementSibling as HTMLElement;
                         if (nextElement && nextElement.getAttribute("data-node-id")) {
@@ -393,11 +391,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         startEndElement.endElement.removeAttribute("select-end");
                         const nextElement = getNextBlock(startEndElement.endElement);
                         if (nextElement) {
-                            nextElement.setAttribute("select-end", "true")
+                            nextElement.setAttribute("select-end", "true");
                         }
                     }
                 }
-            })
+            });
             return;
         }
 

@@ -120,7 +120,7 @@ export const upSelect = (options: {
     countBlockWord(ids, options.protyle.block.rootID);
     options.event.stopPropagation();
     options.event.preventDefault();
-}
+};
 
 export const downSelect = (options: {
     protyle: IProtyle,
@@ -153,7 +153,7 @@ export const downSelect = (options: {
     if (selectElements.length === 0) {
         options.nodeElement.classList.add("protyle-wysiwyg--select");
     } else {
-        options.cb(selectElements)
+        options.cb(selectElements);
     }
     const ids: string[] = [];
     options.protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
@@ -162,29 +162,29 @@ export const downSelect = (options: {
     countBlockWord(ids, options.protyle.block.rootID);
     options.event.stopPropagation();
     options.event.preventDefault();
-}
+};
 
 export const getStartEndElement = (selectElements: NodeListOf<Element>) => {
-    let startElement
-    let endElement
+    let startElement;
+    let endElement;
     selectElements.forEach(item => {
         if (item.getAttribute("select-start")) {
-            startElement = item
+            startElement = item;
         }
         if (item.getAttribute("select-end")) {
-            endElement = item
+            endElement = item;
         }
     });
     if (!startElement) {
-        startElement = selectElements[0]
-        startElement.setAttribute("select-start", "true")
+        startElement = selectElements[0];
+        startElement.setAttribute("select-start", "true");
     }
     if (!endElement) {
-        endElement = selectElements[selectElements.length - 1]
-        endElement.setAttribute("select-end", "true")
+        endElement = selectElements[selectElements.length - 1];
+        endElement.setAttribute("select-end", "true");
     }
     return {
         startElement,
         endElement
-    }
-}
+    };
+};

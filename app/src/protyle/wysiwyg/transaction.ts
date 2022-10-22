@@ -743,8 +743,8 @@ export const turnsIntoTransaction = (options: {
             setFold(options.protyle, item);
         }
         item.classList.remove("protyle-wysiwyg--select");
-        item.removeAttribute("select-start")
-        item.removeAttribute("select-end")
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
         html += item.outerHTML;
         const id = item.getAttribute("data-node-id");
         undoOperations.push({

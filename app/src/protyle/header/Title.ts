@@ -252,7 +252,8 @@ export class Title {
     private rename(protyle: IProtyle) {
         clearTimeout(this.timeout);
         if (!validateName(this.editElement.textContent)) {
-            const offset = getSelectionOffset(this.editElement)
+            // 字数过长会导致滚动
+            const offset = getSelectionOffset(this.editElement);
             this.setTitle(this.editElement.textContent.substring(0, Constants.SIZE_TITLE));
             focusByOffset(this.editElement, offset.start, offset.end);
             return false;

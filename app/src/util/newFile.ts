@@ -9,6 +9,7 @@ import {openFileById} from "../editor/util";
 import {fetchPost} from "./fetch";
 import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
 import {Constants} from "../constants";
+import {validateName} from "../editor/rename";
 
 export const newFile = (notebookId?: string, currentPath?: string, open?: boolean, paths?: string[]) => {
     if (getOpenNotebookCount() === 0) {
@@ -57,6 +58,9 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
         const newPath = pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy");
         if (paths) {
             paths[paths.indexOf(undefined)] = newPath;
+        }
+        if (!validateName(data.data.name)) {
+            return;
         }
         fetchPost("/api/filetree/createDoc", {
             notebook: notebookId,

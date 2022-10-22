@@ -252,6 +252,7 @@ export class Title {
     private rename(protyle: IProtyle) {
         clearTimeout(this.timeout);
         if (!validateName(this.editElement.textContent)) {
+            this.setTitle(this.editElement.textContent.substring(0, Constants.SIZE_TITLE));
             return false;
         }
         this.timeout = window.setTimeout(() => {

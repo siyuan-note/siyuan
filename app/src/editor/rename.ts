@@ -9,17 +9,22 @@ import {isMobile} from "../util/functions";
 import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
 import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
+import {Constants} from "../constants";
 
 export const validateName = (name: string) => {
     if (/\r\n|\r|\n|\u2028|\u2029|\t|\//.test(name)) {
         showMessage(window.siyuan.languages.fileNameRule);
         return false;
     }
+    if (name.length > Constants.SIZE_TITLE) {
+        showMessage(window.siyuan.languages["_kernel"]["106"]);
+        return false;
+    }
     return true;
 };
 
 export const replaceFileName = (name: string) => {
-    return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|\//g, "");
+    return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|\//g, "").substring(0, Constants.SIZE_TITLE);
 };
 
 export const replaceLocalPath = (name: string) => {

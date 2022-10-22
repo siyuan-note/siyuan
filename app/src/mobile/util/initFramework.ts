@@ -159,6 +159,7 @@ const initEditorName = () => {
             return;
         }
         if (!validateName(inputElement.value)) {
+            inputElement.value = inputElement.value.substring(0, Constants.SIZE_TITLE);
             return false;
         }
 

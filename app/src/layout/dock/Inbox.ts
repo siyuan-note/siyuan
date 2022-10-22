@@ -7,6 +7,7 @@ import {needSubscribe} from "../../util/needSubscribe";
 import {MenuItem} from "../../menus/Menu";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {replaceFileName} from "../../editor/rename";
 
 export class Inbox extends Model {
     private element: Element;
@@ -254,7 +255,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             fetchPost("/api/filetree/createDoc", {
                 notebook: notebookId,
                 path: `/${Lute.NewNodeID()}.sy`,
-                title: this.data[item].shorthandTitle,
+                title: replaceFileName(this.data[item].shorthandTitle),
                 md: this.data[item].shorthandContent,
             }, () => {
                 this.remove(item);

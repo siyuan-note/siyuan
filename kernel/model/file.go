@@ -1270,7 +1270,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 
 	title = gulu.Str.RemoveInvisible(title)
 	if 512 < utf8.RuneCountInString(title) {
-		// 限制文档名称最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
+		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		return errors.New(Conf.Language(106))
 	}
 
@@ -1391,9 +1391,8 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 
 func createDoc(boxID, p, title, dom string) (err error) {
 	title = gulu.Str.RemoveInvisible(title)
-
 	if 512 < utf8.RuneCountInString(title) {
-		// 限制文档名称最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
+		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		return errors.New(Conf.Language(106))
 	}
 

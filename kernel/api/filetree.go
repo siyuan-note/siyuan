@@ -662,6 +662,9 @@ func getDoc(c *gin.Context) {
 		return
 	}
 
+	// 判断是否正在同步中 https://github.com/siyuan-note/siyuan/issues/6290
+	isSyncing := model.IsSyncingFile(rootID)
+
 	ret.Data = map[string]interface{}{
 		"id":              id,
 		"mode":            mode,
@@ -675,6 +678,7 @@ func getDoc(c *gin.Context) {
 		"eof":             eof,
 		"box":             boxID,
 		"path":            docPath,
+		"isSyncing":       isSyncing,
 	}
 }
 

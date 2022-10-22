@@ -45,7 +45,7 @@ func performSync(c *gin.Context) {
 func performBootSync(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
-	model.SyncData(true, false, true)
+	model.BootSyncData()
 	ret.Code = model.BootSyncSucc
 }
 

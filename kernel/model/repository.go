@@ -25,8 +25,10 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
@@ -468,7 +470,14 @@ func IndexRepo(memo string) (err error) {
 	return
 }
 
-func syncRepo(boot, exit, byHand bool) (err error) {
+var syncingFiles = sync.Map{}
+
+func IsSyncingFile(rootID string) (ret bool) {
+	_, ret = syncingFiles.Load(rootID)
+	return
+}
+
+func bootSyncRepo() (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		syncDownloadErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -506,11 +515,101 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 	}
 
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	_, mergeResult, trafficStat, err := repo.Sync(cloudInfo, syncContext)
+	fetchedFiles, err := repo.GetSyncCloudFiles(cloudInfo, syncContext)
 	if errors.Is(err, dejavu.ErrRepoFatalErr) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
-			_, mergeResult, trafficStat, err = repo.Sync(cloudInfo, syncContext)
+			fetchedFiles, err = repo.GetSyncCloudFiles(cloudInfo, syncContext)
+		}
+	}
+
+	syncingFiles = sync.Map{}
+	for _, fetchedFile := range fetchedFiles {
+		name := path.Base(fetchedFile.Path)
+		if !(strings.HasSuffix(name, ".sy")) {
+			continue
+		}
+
+		id := name[:len(name)-3]
+		syncingFiles.Store(id, true)
+	}
+
+	elapsed := time.Since(start)
+	logging.LogInfof("boot get sync cloud files elapsed [%.2fs]", elapsed.Seconds())
+	if nil != err {
+		syncDownloadErrCount++
+		planSyncAfter(fixSyncInterval)
+
+		logging.LogErrorf("sync data repo failed: %s", err)
+		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
+			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
+				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			}
+		}
+		Conf.Sync.Stat = msg
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		BootSyncSucc = 1
+		return
+	}
+
+	go func() {
+		time.Sleep(7 * time.Second) // 等待一段时间后前端完成界面初始化后再同步
+		syncErr := syncRepo(false, false)
+		if nil != err {
+			logging.LogErrorf("boot background sync repo failed: %s", syncErr)
+			return
+		}
+		syncingFiles = sync.Map{}
+	}()
+	return
+}
+
+func syncRepo(exit, byHand bool) (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		syncDownloadErrCount++
+		planSyncAfter(fixSyncInterval)
+
+		msg := Conf.Language(26)
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		err = errors.New(msg)
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		syncDownloadErrCount++
+		planSyncAfter(fixSyncInterval)
+
+		msg := fmt.Sprintf("sync repo failed: %s", err)
+		logging.LogErrorf(msg)
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		return
+	}
+
+	start := time.Now()
+	err = indexRepoBeforeCloudSync(repo)
+	if nil != err {
+		syncDownloadErrCount++
+		planSyncAfter(fixSyncInterval)
+		return
+	}
+
+	cloudInfo, err := buildCloudInfo()
+	if nil != err {
+		return
+	}
+
+	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+	mergeResult, trafficStat, err := repo.Sync(cloudInfo, syncContext)
+	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+		// 重置仓库并再次尝试同步
+		if _, resetErr := resetRepository(repo); nil == resetErr {
+			mergeResult, trafficStat, err = repo.Sync(cloudInfo, syncContext)
 		}
 	}
 	elapsed := time.Since(start)
@@ -529,9 +628,6 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 		Conf.Sync.Stat = msg
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 0)
-		if boot {
-			BootSyncSucc = 1
-		}
 		if exit {
 			ExitSyncSucc = 1
 		}
@@ -610,10 +706,6 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 		removes = append(removes, file.Path)
 	}
 
-	if boot && gulu.File.IsExist(util.BlockTreePath) {
-		treenode.InitBlockTree(false)
-	}
-
 	cache.ClearDocsIAL() // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
 
 	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764
@@ -622,7 +714,7 @@ func syncRepo(boot, exit, byHand bool) (err error) {
 	}
 	incReindex(upserts, removes)
 
-	if !boot && !exit {
+	if !exit {
 		util.ReloadUI()
 	}
 

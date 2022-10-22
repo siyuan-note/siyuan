@@ -55,6 +55,52 @@ func AutoSync() {
 	}
 }
 
+func BootSyncData() {
+	defer logging.Recover()
+
+	if util.IsMutexLocked(&syncLock) {
+		logging.LogWarnf("sync is in progress")
+		planSyncAfter(30 * time.Second)
+		return
+	}
+
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	util.IncBootProgress(3, "Syncing data from the cloud...")
+	BootSyncSucc = 0
+
+	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName || !IsValidCloudDirName(Conf.Sync.CloudName) {
+		return
+	}
+
+	logging.LogInfof("sync before boot")
+
+	if 7 < syncDownloadErrCount {
+		logging.LogErrorf("sync download error too many times, cancel auto sync, try to sync by hand")
+		util.PushErrMsg(Conf.Language(125), 1000*60*60)
+		planSyncAfter(64 * time.Minute)
+		return
+	}
+
+	now := util.CurrentTimeMillis()
+	Conf.Sync.Synced = now
+
+	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
+	err := bootSyncRepo()
+	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
+	if nil == err {
+		synced += Conf.Sync.Stat
+	} else {
+		synced += fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+	}
+	msg := fmt.Sprintf(Conf.Language(82), synced)
+	Conf.Sync.Stat = msg
+	Conf.Save()
+	util.BroadcastByType("main", "syncing", 1, msg, nil)
+	return
+}
+
 func SyncData(boot, exit, byHand bool) {
 	defer logging.Recover()
 
@@ -112,7 +158,7 @@ func SyncData(boot, exit, byHand bool) {
 	Conf.Sync.Synced = now
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	err := syncRepo(boot, exit, byHand)
+	err := syncRepo(exit, byHand)
 	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
 	if nil == err {
 		synced += Conf.Sync.Stat

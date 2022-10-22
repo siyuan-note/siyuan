@@ -85,6 +85,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
             content: html,
             action,
             unScroll: false,
+            isSyncing: data.data.isSyncing,
         }, protyle);
         removeLoading(protyle);
         return;
@@ -116,6 +117,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
             content: html,
             action,
             unScroll: (scrollObj && scrollObj.focusId) ? true : false,
+            isSyncing: data.data.isSyncing,
         }, protyle);
 
         if (scrollObj && protyle.options.mode !== "preview") {
@@ -125,7 +127,11 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     });
 };
 
-const setHTML = (options: { content: string, action?: string[], unScroll?: boolean }, protyle: IProtyle) => {
+const setHTML = (options: {
+    content: string,
+    action?: string[],
+    isSyncing: boolean,
+    unScroll?: boolean }, protyle: IProtyle) => {
     if (protyle.contentElement.classList.contains("fn__none")) {
         return;
     }
@@ -231,10 +237,14 @@ const setHTML = (options: { content: string, action?: string[], unScroll?: boole
         }
         /// #endif
     }
-    if (protyle.disabled) {
-        disabledProtyle(protyle);
+    if (options.isSyncing) {
+        disabledForeverProtyle(protyle)
     } else {
-        enableProtyle(protyle);
+        if (protyle.disabled) {
+            disabledProtyle(protyle);
+        } else {
+            enableProtyle(protyle);
+        }
     }
     if (options.action.includes(Constants.CB_GET_SETID)) {
         // 点击大纲后，如果需要动态加载，在定位后，需要重置 block.id https://github.com/siyuan-note/siyuan/issues/4487
@@ -274,6 +284,11 @@ const setHTML = (options: { content: string, action?: string[], unScroll?: boole
     }
 };
 
+export const disabledForeverProtyle = (protyle: IProtyle) => {
+    disabledProtyle(protyle);
+    protyle.element.setAttribute("disabled-forever", "true");
+}
+
 /** 禁用编辑器 */
 export const disabledProtyle = (protyle: IProtyle) => {
     window.siyuan.menus.menu.remove();
@@ -296,6 +311,9 @@ export const disabledProtyle = (protyle: IProtyle) => {
 
 /** 解除编辑器禁用 */
 export const enableProtyle = (protyle: IProtyle) => {
+    if (protyle.element.getAttribute("disabled-forever") === "true") {
+        return;
+    }
     protyle.disabled = false;
     if (navigator && navigator.maxTouchPoints > 1 && ["MacIntel", "iPhone"].includes(navigator.platform)) {
         // iPhone，iPad 端 protyle.wysiwyg.element contenteditable 为 true 时，输入会在块中间插入 span 导致保存失败 https://ld246.com/article/1643473862873/comment/1643813765839#comments

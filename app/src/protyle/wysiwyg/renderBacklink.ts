@@ -5,7 +5,7 @@ import {Constants} from "../../constants";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {blockRender} from "../markdown/blockRender";
-import {disabledProtyle} from "../util/onGet";
+import {disabledForeverProtyle, disabledProtyle} from "../util/onGet";
 
 export const renderBacklink = (protyle: IProtyle, backlinkData: {
     blockPaths: IBreadcrumb[],
@@ -69,7 +69,9 @@ export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
         blockRender(protyle, protyle.wysiwyg.element);
-        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
+        if (getResponse.data.isSyncing) {
+            disabledForeverProtyle(protyle);
+        } else if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
             disabledProtyle(protyle);
         }
     });

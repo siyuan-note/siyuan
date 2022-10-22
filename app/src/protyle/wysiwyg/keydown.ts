@@ -737,15 +737,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             const imgSelectElement = protyle.wysiwyg.element.querySelector(".img--select");
             if (imgSelectElement) {
-                imgSelectElement.insertAdjacentHTML("afterend", "<wbr>");
                 imgSelectElement.classList.remove("img--select");
-                const oldHTML = nodeElement.outerHTML;
-                imgSelectElement.remove();
-                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-                focusByWbr(nodeElement, range);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
+                if (nodeElement.contains(imgSelectElement)) {
+                    imgSelectElement.insertAdjacentHTML("afterend", "<wbr>");
+                    const oldHTML = nodeElement.outerHTML;
+                    imgSelectElement.remove();
+                    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                    focusByWbr(nodeElement, range);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
             } else if (selectText === "") {
                 const editElement = getContenteditableElement(nodeElement);
                 if (!editElement) {

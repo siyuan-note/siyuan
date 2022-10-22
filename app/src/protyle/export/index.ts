@@ -166,10 +166,10 @@ const renderPDF = (id: string) => {
     <label class="b3-label">
         <div>
             ${window.siyuan.languages.exportPDF3}
-            <span id="scaleTip" style="float: right;color: var(--b3-theme-on-background);">${localData.scale}</span>
+            <span id="scaleTip" style="float: right;color: var(--b3-theme-on-background);">${localData.scale||1}</span>
         </div>
         <span class="fn__hr"></span>
-        <input style="width: 192px" value="${localData.scale}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
+        <input style="width: 192px" value="${localData.scale||1}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
     </label>
     <label class="b3-label">
         <div>

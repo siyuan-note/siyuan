@@ -41,8 +41,8 @@ import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
-import {commonHotkey, downSelect, getStartEndElement, upSelect} from "./commonHotkey";
 /// #endif
+import {commonHotkey, downSelect, getStartEndElement, upSelect} from "./commonHotkey";
 import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";

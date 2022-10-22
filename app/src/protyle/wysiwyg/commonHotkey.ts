@@ -4,7 +4,9 @@ import {writeText} from "../util/compatibility";
 import {focusByOffset, getSelectionOffset, setFirstNodeRange, setLastNodeRange} from "../util/selection";
 import {fullscreen, netImg2LocalAssets} from "../breadcrumb/action";
 import {setPadding} from "../ui/initUI";
+/// #if !MOBILE
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
+/// #endif
 import {reloadProtyle} from "../util/reload";
 import {getContenteditableElement} from "./getBlock";
 import {hasClosestByMatchTag} from "../util/hasClosest";
@@ -44,6 +46,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
         event.stopPropagation();
         return;
     }
+    /// #if !MOBILE
     if (protyle.model) {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {
             event.preventDefault();
@@ -67,6 +70,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
             return true;
         }
     }
+    /// #endif
 };
 
 export const upSelect = (options: {

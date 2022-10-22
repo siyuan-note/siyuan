@@ -357,6 +357,37 @@ func RemoveCloudShorthands(ids []string) (err error) {
 	return
 }
 
+func GetCloudShorthand(id string) (result map[string]interface{}, err error) {
+	result = map[string]interface{}{}
+	request := httpclient.NewCloudRequest()
+	resp, err := request.
+		SetResult(&result).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		Post(util.AliyunServer + "/apis/siyuan/inbox/getCloudShorthand?id=" + id)
+	if nil != err {
+		logging.LogErrorf("get cloud shorthand failed: %s", err)
+		err = ErrFailedToConnectCloudServer
+		return
+	}
+
+	if 401 == resp.StatusCode {
+		err = errors.New(Conf.Language(31))
+		return
+	}
+
+	code := result["code"].(float64)
+	if 0 != code {
+		logging.LogErrorf("get cloud shorthand failed: %s", result["msg"])
+		err = errors.New(result["msg"].(string))
+		return
+	}
+	shorthand := result["data"].(map[string]interface{})
+	t, _ := strconv.ParseInt(id, 10, 64)
+	hCreated := util.Millisecond2Time(t)
+	shorthand["hCreated"] = hCreated.Format("2006-01-02 15:04")
+	return
+}
+
 func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 	result = map[string]interface{}{}
 	request := httpclient.NewCloudRequest()

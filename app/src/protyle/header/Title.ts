@@ -146,12 +146,12 @@ export class Title {
                 });
             } else {
                 const iconRect = iconElement.getBoundingClientRect();
-                this.renderMenu(protyle, iconElement, {x: iconRect.left, y: iconRect.top + 14});
+                this.renderMenu(protyle, {x: iconRect.left, y: iconRect.top + 14});
             }
         });
         this.element.addEventListener("contextmenu", (event) => {
             if (getSelection().rangeCount === 0) {
-                this.renderMenu(protyle, iconElement, {x: event.clientX, y: event.clientY});
+                this.renderMenu(protyle, {x: event.clientX, y: event.clientY});
                 return;
             }
             protyle.toolbar?.element.classList.add("fn__none");
@@ -269,7 +269,7 @@ export class Title {
         }, Constants.TIMEOUT_INPUT);
     }
 
-    private renderMenu(protyle: IProtyle, iconElement: Element, position: { x: number, y: number }) {
+    private renderMenu(protyle: IProtyle, position: { x: number, y: number }) {
         fetchPost("/api/block/getDocInfo", {
             id: protyle.block.rootID
         }, (response) => {

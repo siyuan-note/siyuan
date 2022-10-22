@@ -105,7 +105,7 @@ export abstract class Constants {
         "222": ["'", '"'],
     };
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "⌃I", "⌃E", "⌃N", "⌃U" 不可自定义
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⌥⇧↑", "⌥⇧↓", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "⌃I", "⌃E", "⌃N", "⌃U" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {
             syncNow: {default: "F9", custom: "F9"},

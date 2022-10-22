@@ -182,6 +182,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/sync/getBootSync", model.CheckAuth, getBootSync)
 
 	ginServer.Handle("POST", "/api/inbox/getShorthands", model.CheckAuth, getShorthands)
+	ginServer.Handle("POST", "/api/inbox/getShorthand", model.CheckAuth, getShorthand)
 	ginServer.Handle("POST", "/api/inbox/removeShorthands", model.CheckAuth, removeShorthands)
 
 	ginServer.Handle("POST", "/api/extension/copy", model.CheckAuth, extensionCopy)

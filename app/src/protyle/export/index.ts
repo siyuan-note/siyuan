@@ -64,9 +64,7 @@ export const saveExport = (option: { type: string, id: string }) => {
 const renderPDF = (id: string) => {
     const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_EXPORTPDF) || JSON.stringify({
         landscape: false,
-        margins: {
-            marginType: "0",
-        },
+        marginType: "0",
         scale: 1,
         pageSize: "A4",
         removeAssets: true,
@@ -160,9 +158,9 @@ const renderPDF = (id: string) => {
         </div>
         <span class="fn__hr"></span>
         <select class="b3-select" id="marginsType">
-            <option ${localData.margins.marginType === "0" ? "selected" : ""} value="0">Default</option>
-            <option ${localData.margins.marginType === "1" ? "selected" : ""} value="1">None</option>
-            <option ${localData.margins.marginType === "2" ? "selected" : ""} value="2">Minimal</option>
+            <option ${localData.marginType === "0" ? "selected" : ""} value="0">Default</option>
+            <option ${localData.marginType === "1" ? "selected" : ""} value="1">None</option>
+            <option ${localData.marginType === "2" ? "selected" : ""} value="2">Minimal</option>
         </select>
     </label>
     <label class="b3-label">
@@ -349,8 +347,8 @@ const renderPDF = (id: string) => {
               pdfOptions:{
                 printBackground: true,
                 landscape: actionElement.querySelector("#landscape").checked,
+                marginType: actionElement.querySelector("#marginsType").value,
                 margins: {
-                  marginType: actionElement.querySelector("#marginsType").value,
                   top: pdfTop * 0.6,
                   bottom: pdfTop * 0.6,
                   left: 0,

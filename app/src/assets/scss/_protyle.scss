@@ -115,6 +115,10 @@
     flex: 1;
     min-width: 8px;
     transition: var(--b3-transition);
+    color: var(--b3-theme-error);
+    text-align: center;
+    padding: 6px 0;
+    line-height: 18px;
   }
 
   &__bar {

@@ -131,7 +131,8 @@ const setHTML = (options: {
     content: string,
     action?: string[],
     isSyncing: boolean,
-    unScroll?: boolean }, protyle: IProtyle) => {
+    unScroll?: boolean
+}, protyle: IProtyle) => {
     if (protyle.contentElement.classList.contains("fn__none")) {
         return;
     }
@@ -286,6 +287,9 @@ const setHTML = (options: {
 
 export const disabledForeverProtyle = (protyle: IProtyle) => {
     disabledProtyle(protyle);
+    if (protyle.breadcrumb) {
+        protyle.breadcrumb.element.querySelector(".b3-button").textContent = window.siyuan.languages["_kernel"][81]
+    }
     protyle.element.setAttribute("disabled-forever", "true");
 }
 

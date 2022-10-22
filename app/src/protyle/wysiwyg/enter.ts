@@ -12,6 +12,7 @@ import {breakList, genListItemElement, listOutdent, updateListOrder} from "./lis
 import {highlightRender} from "../markdown/highlightRender";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
+import {hideElements} from "../ui/hideElements";
 
 const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {
     const listItemElement = blockElement.parentElement;
@@ -193,7 +194,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     if (!disableElement && blockElement.classList.contains("protyle-wysiwyg--select")) {
         setLastNodeRange(getContenteditableElement(blockElement), range, false);
         range.collapse(false);
-        blockElement.classList.remove("protyle-wysiwyg--select");
+        hideElements(["select"], protyle);
         return;
     }
     // https://github.com/siyuan-note/siyuan/issues/5471

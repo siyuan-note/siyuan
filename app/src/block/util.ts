@@ -5,12 +5,15 @@ import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
 import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
 import {Constants} from "../constants";
+import {hideElements} from "../protyle/ui/hideElements";
 
 export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let previousId = nodeElement.previousElementSibling ? nodeElement.previousElementSibling.getAttribute("data-node-id") : undefined;
     nodeElement.classList.remove("protyle-wysiwyg--select");
+    nodeElement.removeAttribute("select-start");
+    nodeElement.removeAttribute("select-end");
     const id = nodeElement.getAttribute("data-node-id");
     const sbElement = genSBElement(nodeElement.getAttribute("data-sb-layout"), id, nodeElement.lastElementChild.outerHTML);
     undoOperations.push({
@@ -85,9 +88,7 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
             } else {
                 blockElement = selectElements[selectElements.length - 1];
             }
-            selectElements.forEach(item => {
-                item.classList.remove("protyle-wysiwyg--select");
-            });
+            hideElements(["select"], protyle);
         } else {
             blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
             blockElement = getTopAloneElement(blockElement);

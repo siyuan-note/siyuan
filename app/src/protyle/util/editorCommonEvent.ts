@@ -597,6 +597,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             });
             sourceElements.forEach(item => {
                 item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
+                item.removeAttribute("select-start");
+                item.removeAttribute("select-end");
                 // 反链提及有高亮，如果拖拽到正文的话，应移除
                 item.querySelectorAll('[data-type="search-mark"]').forEach(markItem => {
                     markItem.outerHTML = markItem.innerHTML;
@@ -778,6 +780,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (nodeElement) {
             if ((window.siyuan.dragElement?.getAttribute("data-selected-ids") || "").indexOf(nodeElement.getAttribute("data-node-id")) === -1) {
                 nodeElement.classList.remove("protyle-wysiwyg--select");
+                nodeElement.removeAttribute("select-start");
+                nodeElement.removeAttribute("select-end");
             }
             nodeElement.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
         }

@@ -7,6 +7,7 @@ import {
 } from "../wysiwyg/getBlock";
 import {hasClosestByAttribute, hasClosestByMatchTag} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
+import {hideElements} from "../ui/hideElements";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -113,9 +114,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
     if (protyle.wysiwyg.element.childElementCount === selectElements.length && selectElements[0].parentElement.isSameNode(protyle.wysiwyg.element)) {
         return true;
     }
-    selectElements.forEach(item => {
-        item.classList.remove("protyle-wysiwyg--select");
-    });
+    hideElements(["select"], protyle);
     const ids: string [] = [];
     Array.from(protyle.wysiwyg.element.children).forEach(item => {
         item.classList.add("protyle-wysiwyg--select");

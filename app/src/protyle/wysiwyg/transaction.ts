@@ -638,6 +638,8 @@ export const turnsIntoOneTransaction = (options: { protyle: IProtyle, selectsEle
     let itemPreviousId: string;
     options.selectsElement.forEach((item, index) => {
         item.classList.remove("protyle-wysiwyg--select");
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
         const itemId = item.getAttribute("data-node-id");
         undoOperations.push({
             action: "move",
@@ -741,6 +743,8 @@ export const turnsIntoTransaction = (options: {
             setFold(options.protyle, item);
         }
         item.classList.remove("protyle-wysiwyg--select");
+        item.removeAttribute("select-start")
+        item.removeAttribute("select-end")
         html += item.outerHTML;
         const id = item.getAttribute("data-node-id");
         undoOperations.push({
@@ -858,6 +862,8 @@ export const updateBatchTransaction = (nodeElements: Element[], protyle: IProtyl
     nodeElements.forEach((element) => {
         const id = element.getAttribute("data-node-id");
         element.classList.remove("protyle-wysiwyg--select");
+        element.removeAttribute("select-start");
+        element.removeAttribute("select-end");
         undoOperations.push({
             action: "update",
             id,

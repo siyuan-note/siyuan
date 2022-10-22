@@ -38,6 +38,8 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
     if (panels.includes("select")) {
         protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
             item.classList.remove("protyle-wysiwyg--select");
+            item.removeAttribute("select-start");
+            item.removeAttribute("select-end");
         });
     }
 };

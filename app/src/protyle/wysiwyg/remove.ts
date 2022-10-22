@@ -183,8 +183,8 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         let sideElement = selectElements[0].previousElementSibling || selectElements[selectElements.length - 1].nextElementSibling;
         let listElement: Element;
         let topParentElement: Element;
+        hideElements(["select"], protyle);
         selectElements.find((item: HTMLElement) => {
-            item.classList.remove("protyle-wysiwyg--select");
             const topElement = getTopAloneElement(item);
             topParentElement = topElement.parentElement;
             const id = topElement.getAttribute("data-node-id");

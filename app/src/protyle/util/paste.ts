@@ -16,6 +16,7 @@ import {isDynamicRef, isFileAnnotation} from "../../util/functions";
 import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {hideElements} from "../ui/hideElements";
 
 const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
     let needRender = true;
@@ -173,8 +174,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
         return;
     }
-    protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select, .protyle-wysiwyg--hl").forEach(item => {
-        item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
+    hideElements(["select"], protyle);
+    protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
+        item.classList.remove("protyle-wysiwyg--hl");
     });
     const code = processPasteCode(textHTML, textPlain);
     const range = getEditorRange(protyle.wysiwyg.element);

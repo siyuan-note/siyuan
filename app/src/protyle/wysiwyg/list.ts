@@ -50,6 +50,8 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
     range.insertNode(document.createElement("wbr"));
     liItemElements.forEach(item => {
         item.classList.remove("protyle-wysiwyg--select");
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
     });
     const html = previousElement.parentElement.outerHTML;
     if (previousElement.lastElementChild.previousElementSibling.getAttribute("data-type") === "NodeList") {
@@ -297,6 +299,8 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
         let previousElement: Element = liElement;
         liItemElements.forEach(item => {
             item.classList.remove("protyle-wysiwyg--select");
+            item.removeAttribute("select-start");
+            item.removeAttribute("select-end");
             Array.from(item.children).forEach((blockElement, index) => {
                 const id = blockElement.getAttribute("data-node-id");
                 if (!id) {
@@ -379,6 +383,8 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
     const previousID = liItemElements[0].previousElementSibling?.getAttribute("data-node-id");
     liItemElements.forEach(item => {
         item.classList.remove("protyle-wysiwyg--select");
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
     });
     let startIndex;
     if (!liItemElements[0].previousElementSibling && liElement.getAttribute("data-subtype") === "o") {

@@ -43,7 +43,7 @@ import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
-import {commonHotkey} from "./commonHotkey";
+import {commonHotkey, downSelect, getStartEndElement, upSelect} from "./commonHotkey";
 /// #endif
 import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import {removeEmbed} from "./removeEmbed";
@@ -145,9 +145,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectElements.length > 0) {
                 event.preventDefault();
                 event.stopPropagation();
-                selectElements.forEach(item => {
-                    item.classList.remove("protyle-wysiwyg--select");
-                });
+                hideElements(["select"], protyle);
                 if (event.key === "ArrowDown") {
                     const currentSelectElement = selectElements[selectElements.length - 1] as HTMLElement;
                     let nextElement = getNextBlock(currentSelectElement) as HTMLElement;
@@ -286,109 +284,120 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
 
+        if (matchHotKey("⌥⇧↑", event)) {
+            upSelect({
+                protyle, event, nodeElement, editorElement, range,
+                cb(selectElements) {
+                    const previousElement = selectElements[0].previousElementSibling as HTMLElement;
+                    if (previousElement && previousElement.getAttribute("data-node-id")) {
+                        previousElement.classList.add("protyle-wysiwyg--select");
+                        selectElements.forEach(item => {
+                            item.removeAttribute("select-end")
+                        })
+                        previousElement.setAttribute("select-end", "true");
+                        const top = previousElement.getBoundingClientRect().top - protyle.contentElement.getBoundingClientRect().top;
+                        if (top < 0) {
+                            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + top;
+                            protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop + 1;
+                        }
+                    } else if (!selectElements[0].parentElement.classList.contains("protyle-wysiwyg")) {
+                        hideElements(["select"], protyle);
+                        selectElements[0].parentElement.classList.add("protyle-wysiwyg--select");
+                    }
+                }
+            });
+            return;
+        }
+
+        if (matchHotKey("⌥⇧↓", event)) {
+            downSelect({
+                protyle, event, nodeElement, editorElement, range,
+                cb(selectElements) {
+                    const selectLastElement = selectElements[selectElements.length - 1];
+                    const nextElement = selectLastElement.nextElementSibling as HTMLElement;
+                    if (nextElement && nextElement.getAttribute("data-node-id")) {
+                        nextElement.classList.add("protyle-wysiwyg--select");
+                        selectElements.forEach(item => {
+                            item.removeAttribute("select-end")
+                        })
+                        nextElement.setAttribute("select-end", "true");
+                        const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
+                        if (bottom > 0) {
+                            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
+                            protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
+                        }
+                    } else if (!selectLastElement.parentElement.classList.contains("protyle-wysiwyg")) {
+                        hideElements(["select"], protyle);
+                        selectLastElement.parentElement.classList.add("protyle-wysiwyg--select");
+                    }
+                }
+            })
+            return;
+        }
+
         if (matchHotKey("⇧↑", event)) {
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
-                event.stopPropagation();
-                event.preventDefault();
-            } else {
-                const start = getSelectionOffset(nodeElement, editorElement, range).start;
-                if (start !== 0) {
-                    const editElement = getContenteditableElement(nodeElement);
-                    if (editElement.tagName === "TABLE") {
-                        const cellElement = hasClosestByMatchTag(range.startContainer, "TH") || hasClosestByMatchTag(range.startContainer, "TD") || editElement.querySelector("th, td");
-                        if (getSelectionOffset(cellElement, cellElement, range).start !== 0) {
-                            setFirstNodeRange(cellElement, range);
-                            event.stopPropagation();
-                            event.preventDefault();
-                            return;
+            upSelect({
+                protyle, event, nodeElement, editorElement, range,
+                cb(selectElements) {
+                    const startEndElement = getStartEndElement(selectElements)
+                    if (startEndElement.startElement.getBoundingClientRect().top >= startEndElement.endElement.getBoundingClientRect().top) {
+                        const previousElement = startEndElement.endElement.previousElementSibling as HTMLElement;
+                        if (previousElement && previousElement.getAttribute("data-node-id")) {
+                            previousElement.classList.add("protyle-wysiwyg--select");
+                            previousElement.setAttribute("select-end", "true");
+                            startEndElement.endElement.removeAttribute("select-end");
+                            const top = previousElement.getBoundingClientRect().top - protyle.contentElement.getBoundingClientRect().top;
+                            if (top < 0) {
+                                protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + top;
+                                protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop + 1;
+                            }
+                        } else if (!startEndElement.endElement.parentElement.classList.contains("protyle-wysiwyg")) {
+                            hideElements(["select"], protyle);
+                            startEndElement.endElement.parentElement.classList.add("protyle-wysiwyg--select");
                         }
                     } else {
-                        const firstIndex = editElement.textContent.indexOf("\n");
-                        if (firstIndex === -1 || start <= firstIndex || start === editElement.textContent.replace("\n", " ").indexOf("\n")) {
-                            setFirstNodeRange(editElement, range);
-                            event.stopPropagation();
-                            event.preventDefault();
-                            return;
-                        } else {
-                            return;
+                        startEndElement.endElement.classList.remove("protyle-wysiwyg--select");
+                        startEndElement.endElement.removeAttribute("select-end");
+                        const previousElement = getPreviousBlock(startEndElement.endElement);
+                        if (previousElement) {
+                            previousElement.setAttribute("select-end", "true")
                         }
                     }
                 }
-            }
-            range.collapse(true);
-            hideElements(["toolbar"], protyle);
-            if (selectElements.length === 0) {
-                nodeElement.classList.add("protyle-wysiwyg--select");
-            } else {
-                const previousElement = selectElements[0].previousElementSibling as HTMLElement;
-                if (previousElement && previousElement.getAttribute("data-node-id")) {
-                    previousElement.classList.add("protyle-wysiwyg--select");
-                    const top = previousElement.getBoundingClientRect().top - protyle.contentElement.getBoundingClientRect().top;
-                    if (top < 0) {
-                        protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + top;
-                        protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop + 1;
-                    }
-                } else if (!selectElements[0].parentElement.classList.contains("protyle-wysiwyg")) {
-                    hideElements(["select"], protyle);
-                    selectElements[0].parentElement.classList.add("protyle-wysiwyg--select");
-                }
-            }
-            const ids: string[] = [];
-            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                ids.push(item.getAttribute("data-node-id"));
-            });
-            countBlockWord(ids, protyle.block.rootID);
-            event.stopPropagation();
-            event.preventDefault();
+            })
             return;
         }
 
         if (matchHotKey("⇧↓", event)) {
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
-                event.stopPropagation();
-                event.preventDefault();
-            } else {
-                const editElement = getContenteditableElement(nodeElement);
-                const end = getSelectionOffset(nodeElement, editorElement, range).end;
-                if (end < editElement.textContent.length) {
-                    if (end > editElement.textContent.lastIndexOf("\n")) {
-                        setLastNodeRange(editElement, range, false);
-                        event.stopPropagation();
-                        event.preventDefault();
-                        return;
+            downSelect({
+                protyle, event, nodeElement, editorElement, range,
+                cb(selectElements) {
+                    const startEndElement = getStartEndElement(selectElements)
+                    if (startEndElement.startElement.getBoundingClientRect().top <= startEndElement.endElement.getBoundingClientRect().top) {
+                        const nextElement = startEndElement.endElement.nextElementSibling as HTMLElement;
+                        if (nextElement && nextElement.getAttribute("data-node-id")) {
+                            nextElement.classList.add("protyle-wysiwyg--select");
+                            nextElement.setAttribute("select-end", "true");
+                            startEndElement.endElement.removeAttribute("select-end");
+                            const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
+                            if (bottom > 0) {
+                                protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
+                                protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
+                            }
+                        } else if (!startEndElement.endElement.parentElement.classList.contains("protyle-wysiwyg")) {
+                            hideElements(["select"], protyle);
+                            startEndElement.endElement.parentElement.classList.add("protyle-wysiwyg--select");
+                        }
                     } else {
-                        return;
+                        startEndElement.endElement.classList.remove("protyle-wysiwyg--select");
+                        startEndElement.endElement.removeAttribute("select-end");
+                        const nextElement = getNextBlock(startEndElement.endElement);
+                        if (nextElement) {
+                            nextElement.setAttribute("select-end", "true")
+                        }
                     }
                 }
-            }
-            range.collapse(false);
-            hideElements(["toolbar"], protyle);
-            const selectLastElement = selectElements[selectElements.length - 1];
-            if (selectElements.length === 0) {
-                nodeElement.classList.add("protyle-wysiwyg--select");
-            } else {
-                const nextElement = selectLastElement.nextElementSibling as HTMLElement;
-                if (nextElement && nextElement.getAttribute("data-node-id")) {
-                    nextElement.classList.add("protyle-wysiwyg--select");
-                    const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
-                    if (bottom > 0) {
-                        protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
-                        protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
-                    }
-                } else if (!selectLastElement.parentElement.classList.contains("protyle-wysiwyg")) {
-                    hideElements(["select"], protyle);
-                    selectLastElement.parentElement.classList.add("protyle-wysiwyg--select");
-                }
-            }
-            const ids: string[] = [];
-            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                ids.push(item.getAttribute("data-node-id"));
-            });
-            countBlockWord(ids, protyle.block.rootID);
-            event.stopPropagation();
-            event.preventDefault();
+            })
             return;
         }
 
@@ -1121,9 +1130,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 防止 ESC 时选中当前块
                 window.siyuan.menus.menu.remove();
             } else {
-                protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                    item.classList.remove("protyle-wysiwyg--select");
-                });
+                hideElements(["select"], protyle);
                 range.collapse(false);
                 nodeElement.classList.add("protyle-wysiwyg--select");
                 countBlockWord([nodeElement.getAttribute("data-node-id")], protyle.block.rootID);

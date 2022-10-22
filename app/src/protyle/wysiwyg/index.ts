@@ -1935,15 +1935,21 @@ export class WYSIWYG {
                     ctrlElement = getTopAloneElement(ctrlElement) as HTMLElement;
                     if (ctrlElement.classList.contains("protyle-wysiwyg--select")) {
                         ctrlElement.classList.remove("protyle-wysiwyg--select");
+                        ctrlElement.removeAttribute("select-start");
+                        ctrlElement.removeAttribute("select-end");
                     } else {
                         ctrlElement.classList.add("protyle-wysiwyg--select");
                     }
                     ctrlElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                         item.classList.remove("protyle-wysiwyg--select");
+                        item.removeAttribute("select-start");
+                        item.removeAttribute("select-end");
                     });
                     const ctrlParentElement = hasClosestByClassName(ctrlElement, "protyle-wysiwyg--select");
                     if (ctrlParentElement && !ctrlElement.isSameNode(ctrlParentElement)) {
                         ctrlParentElement.classList.remove("protyle-wysiwyg--select");
+                        ctrlParentElement.removeAttribute("select-start");
+                        ctrlParentElement.removeAttribute("select-end");
                     }
                     const ids: string[] = [];
                     protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {

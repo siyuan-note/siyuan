@@ -42,6 +42,8 @@ export class Inbox extends Model {
     <div class="fn__flex fn__none">
         <span data-type="back" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.back}"><svg><use xlink:href='#iconLeft'></use></svg></span>
         <span class="fn__space"></span>
+        <span data-type="refreshDetails" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
+        <span class="fn__space"></span>
         <span data-type="move" data-menu="true" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.move}"><svg><use xlink:href='#iconMove'></use></svg></span>
         <span class="fn__space"></span>
         <span data-type="delete" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href='#iconTrashcan'></use></svg></span>
@@ -107,6 +109,20 @@ export class Inbox extends Model {
                             case "refresh":
                                 this.currentPage = 1;
                                 this.update();
+                                break;
+                            case "refreshDetails":
+                                fetchPost("/api/inbox/getShorthand", {
+                                    id: detailsElement.getAttribute("data-id")
+                                }, (response) => {
+                                    detailsElement.innerHTML = `<h3 class="fn__ellipsis">${response.data.shorthandTitle}</h3>
+<div class="fn__hr"></div>
+<a href="${response.data.shorthandURL}" target="_blank">${response.data.shorthandURL}</a>
+<div class="fn__hr"></div>
+<div class="b3-typography b3-typography--default">
+${(Lute.New()).MarkdownStr("", response.data.shorthandContent)}
+</div>`;
+                                    detailsElement.scrollTop = 0;
+                                })
                                 break;
                             case "delete":
                                 confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete + "?", () => {

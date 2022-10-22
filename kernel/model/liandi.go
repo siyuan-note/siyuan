@@ -357,8 +357,8 @@ func RemoveCloudShorthands(ids []string) (err error) {
 	return
 }
 
-func GetCloudShorthand(id string) (result map[string]interface{}, err error) {
-	result = map[string]interface{}{}
+func GetCloudShorthand(id string) (ret map[string]interface{}, err error) {
+	result := map[string]interface{}{}
 	request := httpclient.NewCloudRequest()
 	resp, err := request.
 		SetResult(&result).
@@ -381,10 +381,10 @@ func GetCloudShorthand(id string) (result map[string]interface{}, err error) {
 		err = errors.New(result["msg"].(string))
 		return
 	}
-	shorthand := result["data"].(map[string]interface{})
+	ret = result["data"].(map[string]interface{})
 	t, _ := strconv.ParseInt(id, 10, 64)
 	hCreated := util.Millisecond2Time(t)
-	shorthand["hCreated"] = hCreated.Format("2006-01-02 15:04")
+	ret["hCreated"] = hCreated.Format("2006-01-02 15:04")
 	return
 }
 

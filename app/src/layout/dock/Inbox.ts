@@ -122,7 +122,7 @@ export class Inbox extends Model {
 ${(Lute.New()).MarkdownStr("", response.data.shorthandContent)}
 </div>`;
                                     detailsElement.scrollTop = 0;
-                                })
+                                });
                                 break;
                             case "delete":
                                 confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete + "?", () => {

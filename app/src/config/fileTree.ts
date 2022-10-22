@@ -77,6 +77,7 @@ export const fileTree = {
 </label>`;
     },
     _send() {
+        // 限制页签最大打开数量为 `32` https://github.com/siyuan-note/siyuan/issues/6303
         let inputMaxOpenTabCount = parseInt((fileTree.element.querySelector("#maxOpenTabCount") as HTMLInputElement).value);
         if (32 < inputMaxOpenTabCount) {
             inputMaxOpenTabCount = 32;

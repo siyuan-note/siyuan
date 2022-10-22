@@ -24,6 +24,7 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -34,6 +35,13 @@ import (
 )
 
 func CreateBox(name string) (id string, err error) {
+	name = gulu.Str.RemoveInvisible(name)
+	if 512 < utf8.RuneCountInString(name) {
+		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
+		err = errors.New(Conf.Language(106))
+		return
+	}
+
 	id = ast.NewNodeID()
 	boxLocalPath := filepath.Join(util.DataDir, id)
 	err = os.MkdirAll(boxLocalPath, 0755)

@@ -687,7 +687,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         const selectText = range.toString();
         // 删除，不可使用 !isCtrl(event)，否则软删除回导致 https://github.com/siyuan-note/siyuan/issues/5607
-        if (!event.altKey && !event.shiftKey && (event.key === "Backspace" || event.key === "Delete")) {
+        // 不可使用 !event.shiftKey，否则 https://ld246.com/article/1666434796806
+        if (!event.altKey && (event.key === "Backspace" || event.key === "Delete")) {
             if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
                 removeBlock(protyle, nodeElement, range);
                 event.stopPropagation();

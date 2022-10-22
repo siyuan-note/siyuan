@@ -1,7 +1,7 @@
 import {
-    focusBlock,
+    focusBlock, focusByOffset,
     focusByRange, focusByWbr,
-    getEditorRange,
+    getEditorRange, getSelectionOffset,
 } from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {replaceFileName, validateName} from "../../editor/rename";
@@ -252,7 +252,9 @@ export class Title {
     private rename(protyle: IProtyle) {
         clearTimeout(this.timeout);
         if (!validateName(this.editElement.textContent)) {
+            const offset = getSelectionOffset(this.editElement)
             this.setTitle(this.editElement.textContent.substring(0, Constants.SIZE_TITLE));
+            focusByOffset(this.editElement, offset.start, offset.end);
             return false;
         }
         this.timeout = window.setTimeout(() => {

@@ -555,15 +555,17 @@ func bootSyncRepo() (err error) {
 		return
 	}
 
-	go func() {
-		time.Sleep(7 * time.Second) // 等待一段时间后前端完成界面初始化后再同步
-		syncErr := syncRepo(false, false)
-		if nil != err {
-			logging.LogErrorf("boot background sync repo failed: %s", syncErr)
-			return
-		}
-		syncingFiles = sync.Map{}
-	}()
+	if 0 < len(fetchedFiles) {
+		go func() {
+			time.Sleep(7 * time.Second) // 等待一段时间后前端完成界面初始化后再同步
+			syncErr := syncRepo(false, false)
+			if nil != err {
+				logging.LogErrorf("boot background sync repo failed: %s", syncErr)
+				return
+			}
+			syncingFiles = sync.Map{}
+		}()
+	}
 	return
 }
 

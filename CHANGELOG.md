@@ -1,3 +1,30 @@
+## v2.4.5 / 2022-10-23
+
+### 改进功能
+
+* [Shift+↑/↓ 逻辑改进](https://github.com/siyuan-note/siyuan/issues/5382)
+* [云端同步数据在启动后执行](https://github.com/siyuan-note/siyuan/issues/6290)
+* [优化触摸屏题头图和 emoji 点击](https://github.com/siyuan-note/siyuan/issues/6294)
+* [微信小助手支持语音、视频和文件](https://github.com/siyuan-note/siyuan/issues/6296)
+* [改进虚拟引用和反链提及搜索分词](https://github.com/siyuan-note/siyuan/issues/6298)
+* [限制笔记本名和文档名最大长度为 `512`](https://github.com/siyuan-note/siyuan/issues/6299)
+* [升级 Electron 解决导出 PDF 页边距设置无效](https://github.com/siyuan-note/siyuan/issues/6300)
+* [微信小助手发送图片、语音、视频和文件单个文件最大限制为 `10M`](https://github.com/siyuan-note/siyuan/issues/6301)
+* [限制页签最大打开数量为 `32`](https://github.com/siyuan-note/siyuan/issues/6303)
+* [云端收集箱文档内添加刷新按钮](https://github.com/siyuan-note/siyuan/issues/6306)
+* [嵌入块在原文上方时更新原文其中的数学公式会抖动](https://github.com/siyuan-note/siyuan/issues/6315)
+* [数据快照内置忽略 `.tmp` 文件](https://github.com/siyuan-note/siyuan/issues/6316)
+* [提升数据仓库快照性能](https://github.com/siyuan-note/siyuan/issues/6317)
+
+### 修复缺陷
+
+* [给文字和图片同时设置字体格式后图片丢失](https://github.com/siyuan-note/siyuan/issues/6297)
+* [优化排版未处理样式文本](https://github.com/siyuan-note/siyuan/issues/6305)
+* [点击图片 `Ctrl+Shift+A` 新建一行输入文本后按 `Backspace` 会导致图片消失](https://github.com/siyuan-note/siyuan/issues/6309)
+* [块首 `Shift + Backspace` 异常](https://github.com/siyuan-note/siyuan/issues/6310)
+* [优化排版导致无法删除 HTML 块](https://github.com/siyuan-note/siyuan/issues/6311)
+* [嵌入块在原文上方时拖拽导致数据异常](https://github.com/siyuan-note/siyuan/issues/6319)
+
 ## v2.4.4 / 2022-10-21
 
 ### 改进功能

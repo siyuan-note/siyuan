@@ -361,18 +361,9 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	defer exitLock.Unlock()
 
 	logging.LogInfof("exiting kernel [force=%v, execInstallPkg=%d]", force, execInstallPkg)
-
 	util.PushMsg(Conf.Language(95), 10000*60)
+	WaitForWritingFiles()
 
-	wg := sync.WaitGroup{}
-	go func() {
-		wg.Add(1)
-		time.Sleep(util.FrontendQueueInterval + 50*time.Millisecond)
-		WaitForWritingFiles()
-		time.Sleep(50 * time.Millisecond)
-		sql.WaitForWritingDatabase()
-		wg.Done()
-	}()
 	if !force {
 		SyncData(false, true, false)
 		if 0 != ExitSyncSucc {
@@ -380,7 +371,6 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 			return
 		}
 	}
-	wg.Wait()
 
 	//util.UIProcessIDs.Range(func(key, _ interface{}) bool {
 	//	pid := key.(string)

@@ -152,7 +152,12 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             // 使用 md 闭合后继续输入应为普通文本
             blockElement.outerHTML = html.replace("</span><wbr>", "</span>" + Constants.ZWSP + "<wbr>");
         }
-        blockElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`).forEach((item: HTMLElement) => {
+            if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" ||
+                !hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                blockElement = item;
+            }
+        });
         Array.from(tempElement.content.children).forEach((item, index) => {
             const tempId = item.getAttribute("data-node-id");
             let realElement;

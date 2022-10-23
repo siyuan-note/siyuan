@@ -367,7 +367,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	wg := sync.WaitGroup{}
 	go func() {
 		wg.Add(1)
-		time.Sleep(util.FrontendQueueInterval)
+		time.Sleep(util.FrontendQueueInterval * 2)
 		WaitForWritingFiles()
 		time.Sleep(50 * time.Millisecond)
 		sql.WaitForWritingDatabase()

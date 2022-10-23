@@ -296,7 +296,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
             });
             undoOperations.reverse();
             if (newSourceElement.getAttribute("data-subtype") === "o") {
-                undoOperations.splice(0, 0,{
+                undoOperations.splice(0, 0, {
                     action: "update",
                     id: newSourceElement.getAttribute("data-node-id"),
                     data: newSourceElement.outerHTML
@@ -383,7 +383,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
             });
             undoOperations.reverse();
             if (newSourceElement.getAttribute("data-subtype") === "o") {
-                undoOperations.splice(0, 0,{
+                undoOperations.splice(0, 0, {
                     action: "update",
                     id: newSourceElement.getAttribute("data-node-id"),
                     data: newSourceElement.outerHTML
@@ -590,10 +590,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             const selectedIdsData = window.siyuan.dragElement.getAttribute("data-selected-ids");
             const selectedIds = selectedIdsData ? selectedIdsData.split(",") : [window.siyuan.dragElement.getAttribute("data-node-id")];
             selectedIds.forEach(item => {
-                const selectElement = window.siyuan.dragElement.parentElement.parentElement.querySelector(`.protyle-wysiwyg [data-node-id="${item}"]`);
-                if (selectElement) {
-                    sourceElements.push(selectElement);
-                }
+                window.siyuan.dragElement.parentElement.parentElement.querySelectorAll(`.protyle-wysiwyg [data-node-id="${item}"]`).forEach(elementItem => {
+                    if (elementItem.getAttribute("data-type") === "NodeBlockQueryEmbed" ||
+                        !hasClosestByAttribute(elementItem, "data-type", "NodeBlockQueryEmbed")) {
+                        sourceElements.push(elementItem);
+                    }
+                });
             });
             sourceElements.forEach(item => {
                 item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");

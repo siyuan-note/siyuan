@@ -353,9 +353,9 @@ var exitLock = sync.Mutex{}
 // force：是否不执行同步过程而直接退出
 // execInstallPkg：是否执行新版本安装包
 //
-//		0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
-//	 1：不执行新版本安装
-//	 2：执行新版本安装
+//	  0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
+//		 1：不执行新版本安装
+//		 2：执行新版本安装
 func Close(force bool, execInstallPkg int) (exitCode int) {
 	exitLock.Lock()
 	defer exitLock.Unlock()
@@ -363,7 +363,16 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	logging.LogInfof("exiting kernel [force=%v, execInstallPkg=%d]", force, execInstallPkg)
 
 	util.PushMsg(Conf.Language(95), 10000*60)
-	WaitForWritingFiles()
+
+	wg := sync.WaitGroup{}
+	go func() {
+		wg.Add(1)
+		time.Sleep(util.FrontendQueueInterval)
+		WaitForWritingFiles()
+		time.Sleep(50 * time.Millisecond)
+		sql.WaitForWritingDatabase()
+		wg.Done()
+	}()
 	if !force {
 		SyncData(false, true, false)
 		if 0 != ExitSyncSucc {
@@ -371,6 +380,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 			return
 		}
 	}
+	wg.Wait()
 
 	//util.UIProcessIDs.Range(func(key, _ interface{}) bool {
 	//	pid := key.(string)

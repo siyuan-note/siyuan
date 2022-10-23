@@ -89,3 +89,11 @@ func SetNetworkProxy(proxyURL string) {
 		logging.LogInfof("use network proxy [%s]", proxyURL)
 	}
 }
+
+const (
+	// FrontendQueueInterval 为前端请求队列轮询间隔。
+	FrontendQueueInterval = 512 * time.Millisecond
+
+	// SQLFlushInterval 为数据库事务队列写入间隔。
+	SQLFlushInterval = 3000 * time.Millisecond
+)

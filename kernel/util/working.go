@@ -42,7 +42,7 @@ var Mode = "prod"
 
 const (
 	Ver       = "2.4.5"
-	IsInsider = true
+	IsInsider = false
 )
 
 var (

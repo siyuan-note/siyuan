@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -396,6 +397,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	Conf.Close()
 	sql.CloseDatabase()
 	clearWorkspaceTemp()
+	clearPortJSON()
 
 	go func() {
 		time.Sleep(500 * time.Millisecond)
@@ -605,6 +607,34 @@ func GetMaskedConf() (ret *AppConf, err error) {
 		ret.AccessAuthCode = MaskedAccessAuthCode
 	}
 	return
+}
+
+func clearPortJSON() {
+	pid := fmt.Sprintf("%d", os.Getpid())
+	portJSON := filepath.Join(util.HomeDir, ".config", "siyuan", "port.json")
+	pidPorts := map[string]string{}
+	var data []byte
+	var err error
+
+	if gulu.File.IsExist(portJSON) {
+		data, err = os.ReadFile(portJSON)
+		if nil != err {
+			logging.LogWarnf("read port.json failed: %s", err)
+		} else {
+			if err = gulu.JSON.UnmarshalJSON(data, &pidPorts); nil != err {
+				logging.LogWarnf("unmarshal port.json failed: %s", err)
+			}
+		}
+	}
+
+	delete(pidPorts, pid)
+	if data, err = gulu.JSON.MarshalIndentJSON(pidPorts, "", "  "); nil != err {
+		logging.LogWarnf("marshal port.json failed: %s", err)
+	} else {
+		if err = os.WriteFile(portJSON, data, 0644); nil != err {
+			logging.LogWarnf("write port.json failed: %s", err)
+		}
+	}
 }
 
 func clearWorkspaceTemp() {

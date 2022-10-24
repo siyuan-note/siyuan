@@ -110,8 +110,6 @@ func Boot() {
 	bootBanner := figure.NewColorFigure("SiYuan", "isometric3", "green", true)
 	logging.LogInfof("\n" + bootBanner.String())
 	logBootInfo()
-
-	go cleanOld()
 }
 
 func setBootDetails(details string) {
@@ -319,17 +317,6 @@ func initPathDir() {
 	emojis := filepath.Join(DataDir, "emojis")
 	if err := os.MkdirAll(emojis, 0755); nil != err && !os.IsExist(err) {
 		log.Fatalf("create data emojis folder [%s] failed: %s", widgets, err)
-	}
-}
-
-// TODO: v2.2.0 移除
-func cleanOld() {
-	dirs, _ := os.ReadDir(WorkingDir)
-	for _, dir := range dirs {
-		if strings.HasSuffix(dir.Name(), ".old") {
-			old := filepath.Join(WorkingDir, dir.Name())
-			os.RemoveAll(old)
-		}
 	}
 }
 

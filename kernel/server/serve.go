@@ -17,6 +17,8 @@
 package server
 
 import (
+	"fmt"
+	"net"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -70,18 +72,68 @@ func Serve(fastMode bool) {
 	serveTemplates(ginServer)
 	api.ServeAPI(ginServer)
 
-	var addr string
+	var host string
 	if model.Conf.System.NetworkServe || util.ContainerDocker == util.Container {
-		addr = "0.0.0.0:" + util.ServerPort
+		host = "0.0.0.0"
 	} else {
-		addr = "127.0.0.1:" + util.ServerPort
+		host = "127.0.0.1"
 	}
-	logging.LogInfof("kernel is booting [%s]", "http://"+addr)
-	util.HttpServing = true
-	if err := ginServer.Run(addr); nil != err {
+
+	ln, err := net.Listen("tcp", ":"+util.ServerPort)
+	if nil != err {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
 			os.Exit(util.ExitCodeUnavailablePort)
+		}
+	}
+
+	_, port, err := net.SplitHostPort(ln.Addr().String())
+	if nil != err {
+		if !fastMode {
+			logging.LogErrorf("boot kernel failed: %s", err)
+			os.Exit(util.ExitCodeUnavailablePort)
+		}
+	}
+
+	pid := fmt.Sprintf("%d", os.Getpid())
+	if !fastMode {
+		rewritePortJSON(pid, port)
+	}
+
+	logging.LogInfof("kernel [pid=%s] is booting [%s]", pid, "http://"+host+":"+port)
+	util.HttpServing = true
+
+	if err = http.Serve(ln, ginServer); nil != err {
+		if !fastMode {
+			logging.LogErrorf("boot kernel failed: %s", err)
+			os.Exit(util.ExitCodeUnavailablePort)
+		}
+	}
+}
+
+func rewritePortJSON(pid, port string) {
+	portJSON := filepath.Join(util.HomeDir, ".config", "siyuan", "port.json")
+	pidPorts := map[string]string{}
+	var data []byte
+	var err error
+
+	if gulu.File.IsExist(portJSON) {
+		data, err = os.ReadFile(portJSON)
+		if nil != err {
+			logging.LogWarnf("read port.json failed: %s", err)
+		} else {
+			if err = gulu.JSON.UnmarshalJSON(data, &pidPorts); nil != err {
+				logging.LogWarnf("unmarshal port.json failed: %s", err)
+			}
+		}
+	}
+
+	pidPorts[pid] = port
+	if data, err = gulu.JSON.MarshalIndentJSON(pidPorts, "", "  "); nil != err {
+		logging.LogWarnf("marshal port.json failed: %s", err)
+	} else {
+		if err = os.WriteFile(portJSON, data, 0644); nil != err {
+			logging.LogWarnf("write port.json failed: %s", err)
 		}
 	}
 }

@@ -750,6 +750,7 @@
   "nameEmpty": "檔案名不能為空",
   "ordered-list": "有序列表",
   "outdent": "列表反向縮進",
+  "outdentTip": "啟用後將使用列表大綱的邏輯式反向縮進，即將列表項移動到父級下方",
   "over": "超過",
   "preview": "匯出預覽",
   "quote": "引述",

@@ -750,6 +750,7 @@
   "nameEmpty": "Name is empty",
   "ordered-list": "Order List",
   "outdent": "Outdent",
+  "outdentTip": "After enabling will use the logical outdent of the list outline, move the list item below the parent",
   "over": "over",
   "preview": "Export Preview",
   "quote": "Blockquote",

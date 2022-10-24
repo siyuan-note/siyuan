@@ -1282,6 +1282,15 @@ func RenameDoc(boxID, p, title string) (err error) {
 		title = "Untitled"
 	}
 
+	oldHPath := tree.HPath
+	tree.HPath = path.Join(path.Dir(tree.HPath), title)
+	tree.Root.SetIALAttr("title", title)
+	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+
+	if err = renameWriteJSONQueue(tree, oldHPath); nil != err {
+		return
+	}
+
 	refText := getNodeRefText(tree.Root)
 	evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast, util.PushModeNone)
 	evt.Data = map[string]interface{}{
@@ -1293,26 +1302,8 @@ func RenameDoc(boxID, p, title string) (err error) {
 	}
 	util.PushEvent(evt)
 
-	oldHPath := tree.HPath
-	tree.HPath = path.Join(path.Dir(tree.HPath), title)
-	tree.Root.SetIALAttr("title", title)
-	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-
-	if err = renameWriteJSONQueue(tree, oldHPath); nil != err {
-		return
-	}
-
 	box.renameSubTrees(tree)
-	changedDefs := map[string]*ast.Node{tree.ID: tree.Root}
-	changedTrees := map[string]*parse.Tree{tree.ID: tree}
-
-	// 引用文档时锚文本没有跟随文档重命名 https://github.com/siyuan-note/siyuan/issues/4193
-	// 详见 refreshDynamicRefText 函数实现
-	go func() {
-		sql.WaitForWritingDatabase()
-		refreshDynamicRefText(changedDefs, changedTrees)
-	}()
-
+	go updateRefTextRenameDoc(tree)
 	IncSync()
 	return
 }

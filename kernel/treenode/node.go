@@ -142,7 +142,12 @@ func NodeStaticContent(node *ast.Node) string {
 			buf.Write(n.Tokens)
 		case ast.NodeText, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
-			buf.Write(n.Tokens)
+			tokens := n.Tokens
+			if IsChartCodeBlockCode(n) {
+				// 图表块的内容在数据库 `blocks` 表 `content` 字段中被转义 https://github.com/siyuan-note/siyuan/issues/6326
+				tokens = html.UnescapeHTML(tokens)
+			}
+			buf.Write(tokens)
 		case ast.NodeTextMark:
 			if n.IsTextMarkType("tag") {
 				buf.WriteByte('#')

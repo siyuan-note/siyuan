@@ -219,15 +219,18 @@
       opacity: 1;
     }
 
-    .protyle-background__img:hover .protyle-icons {
-      opacity: .86;
-    }
-
-    &:hover > .protyle-background__iconw > .protyle-icons {
-      opacity: .86;
-    }
-
+    .protyle-background__img:hover .protyle-icons,
+    &:hover > .protyle-background__iconw > .protyle-icons,
     .protyle-background__icon:hover {
+      opacity: .86;
+    }
+  }
+
+
+  &--mobileshow {
+    .protyle-background__iconw > .protyle-icons,
+    .protyle-background__img .protyle-icons,
+    .protyle-background__tags .item svg {
       opacity: .86;
     }
   }
@@ -462,14 +465,6 @@
           margin-right: 74px;
         }
       }
-    }
-  }
-
-  .protyle-background--enable {
-    .protyle-background__iconw > .protyle-icons,
-    .protyle-background__img .protyle-icons,
-    .protyle-background__tags .item svg {
-      opacity: .86;
     }
   }
 }

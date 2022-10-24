@@ -375,7 +375,26 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                 // A\B\C\D\
                 // E
                 // task-blog-2~default~baiduj https://github.com/siyuan-note/siyuan/issues/5523
-                clipText = clipText.replace(/\\/g, "\\\\").replace(/\*/g, "\\*").replace(/\_/g, "\\_").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\!/g, "\\!").replace(/\`/g, "\\`").replace(/\</g, "\\<").replace(/\>/g, "\\>").replace(/\&/g, "\\&").replace(/\~/g, "\\~").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\=/g, "\\=").replace(/\#/g, "\\#").replace(/\$/g, "\\$").replace(/\^/g, "\\^").replace(/\|/g, "\\|");
+                clipText = clipText.replace(/\\/g, "\\\\\\\\")
+                    .replace(/\*/g, "\\\\\\*")
+                    .replace(/\_/g, "\\\\\\_")
+                    .replace(/\[/g, "\\\\\\[")
+                    .replace(/\]/g, "\\\\\\]")
+                    .replace(/\!/g, "\\\\\\!")
+                    .replace(/\`/g, "\\\\\\`")
+                    .replace(/\</g, "\\\\\\<")
+                    .replace(/\>/g, "\\\\\\>")
+                    .replace(/\&/g, "\\\\\\&")
+                    .replace(/\~/g, "\\\\\\~")
+                    .replace(/\{/g, "\\\\\\{")
+                    .replace(/\}/g, "\\\\\\}")
+                    .replace(/\(/g, "\\\\\\(")
+                    .replace(/\)/g, "\\\\\\)")
+                    .replace(/\=/g, "\\\\\\=")
+                    .replace(/\#/g, "\\\\\\#")
+                    .replace(/\$/g, "\\\\\\$")
+                    .replace(/\^/g, "\\\\\\^")
+                    .replace(/\|/g, "\\\\\\|");
                 pasteText(protyle, clipText, nodeElement);
             } catch (e) {
                 console.log(e);

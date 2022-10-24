@@ -155,7 +155,7 @@ const initEditorName = () => {
         hideKeyboardToolbar();
     });
     inputElement.addEventListener("blur", () => {
-        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
+        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly || window.siyuan.mobileEditor.protyle.disabled) {
             return;
         }
         if (!validateName(inputElement.value)) {

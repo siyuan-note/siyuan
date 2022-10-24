@@ -1256,9 +1256,9 @@ export class WYSIWYG {
             if (nodeElement) {
                 const embedElement = hasClosestByAttribute(nodeElement, "data-type", "NodeBlockQueryEmbed");
                 if (embedElement) {
-                    protyle.gutter.render(embedElement, this.element);
+                    protyle.gutter.render(protyle, embedElement, this.element);
                 } else {
-                    protyle.gutter.render(nodeElement, this.element);
+                    protyle.gutter.render(protyle, nodeElement, this.element);
                 }
             }
         });

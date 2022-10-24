@@ -36,6 +36,7 @@ type Editor struct {
 	KaTexMacros                     string   `json:"katexMacros"`                     // KeTex 宏定义
 	ReadOnly                        bool     `json:"readOnly"`                        // 只读模式
 	EmbedBlockBreadcrumb            bool     `json:"embedBlockBreadcrumb"`            // 嵌入块是否显示面包屑
+	ListLogicalOutdent              bool     `json:"listLogicalOutdent"`              // 列表逻辑反向缩进
 }
 
 func NewEditor() *Editor {
@@ -57,5 +58,6 @@ func NewEditor() *Editor {
 		KaTexMacros:                     "{}",
 		ReadOnly:                        false,
 		EmbedBlockBreadcrumb:            false,
+		ListLogicalOutdent:              false,
 	}
 }

@@ -8,14 +8,12 @@ import {clipboard} from "electron";
 import {hasClosestBlock} from "./hasClosest";
 import {focusByWbr, getEditorRange} from "./selection";
 import {blockRender} from "../markdown/blockRender";
-import * as dayjs from "dayjs";
 import {highlightRender} from "../markdown/highlightRender";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isDynamicRef, isFileAnnotation} from "../../util/functions";
 import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
-import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {hideElements} from "../ui/hideElements";
 
 const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
@@ -169,7 +167,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     });
     const code = processPasteCode(textHTML, textPlain);
     const range = getEditorRange(protyle.wysiwyg.element);
-    const id = nodeElement.getAttribute("data-node-id");
     // process code
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
         // 粘贴在代码位置

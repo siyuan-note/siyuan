@@ -336,12 +336,15 @@ const boot = () => {
   })
 
   // iframe 使用短网址会打开浏览器或跳转 APP https://github.com/siyuan-note/siyuan/issues/6327
-  mainWindow.webContents.on('will-redirect', (event, url) => {
+  mainWindow.webContents.on('will-redirect', (event, url, isInPlace, isMainFrame) => {
     if (url.startsWith('http://127.0.0.1:6806')) {
       return
     }
 
-    event.preventDefault()
+    if (!isMainFrame) {
+      event.preventDefault()
+      return
+    }
   })
 
   mainWindow.on('close', (event) => {

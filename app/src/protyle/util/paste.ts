@@ -31,7 +31,7 @@ const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
     }
 };
 
-export const pasteAsPlainText = async (protyle:IProtyle) => {
+export const pasteAsPlainText = async (protyle: IProtyle) => {
     /// #if !BROWSER && !MOBILE
     let localFiles: string[] = [];
     if ("darwin" === window.siyuan.config.system.os) {
@@ -54,27 +54,16 @@ export const pasteAsPlainText = async (protyle:IProtyle) => {
         protyle.lute.SetHTMLTag2TextMark(true); // 临时设置 Lute 解析参数，行级元素键盘和下划线无法粘贴为纯文本 https://github.com/siyuan-note/siyuan/issues/6220
         const dom = protyle.lute.InlineMd2BlockDOM(clipboard.readText());
         protyle.lute.SetHTMLTag2TextMark(false);
-        insertHTML(protyle.lute.BlockDOM2Content(dom), protyle, false);
+        insertHTML(protyle.lute.BlockDOM2Content(dom), protyle);
     }
     /// #endif
 };
 
 export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element) => {
     const range = getEditorRange(protyle.wysiwyg.element);
-    const id = nodeElement.getAttribute("data-node-id");
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
         // 粘贴在代码位置
-        range.insertNode(document.createElement("wbr"));
-        const html = nodeElement.outerHTML;
-        range.deleteContents();
-        range.insertNode(document.createTextNode(textPlain.replace(/\r\n|\r|\u2028|\u2029/g, "\n")));
-        range.collapse(false);
-        range.insertNode(document.createElement("wbr"));
-        nodeElement.outerHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
-        nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) as HTMLElement;
-        highlightRender(nodeElement);
-        nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-        updateTransaction(protyle, id, nodeElement.outerHTML, html);
+        insertHTML(textPlain, protyle);
         return;
     }
     if (range.toString() !== "") {
@@ -184,19 +173,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     // process code
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
         // 粘贴在代码位置
-        range.insertNode(document.createElement("wbr"));
-        const html = nodeElement.outerHTML;
-        range.deleteContents();
-        range.insertNode(document.createTextNode(textPlain.replace(/\r\n|\r|\u2028|\u2029/g, "\n")));
-        range.collapse(false);
-        range.insertNode(document.createElement("wbr"));
-        getContenteditableElement(nodeElement).removeAttribute("data-render");
-        highlightRender(nodeElement);
-        nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-        updateTransaction(protyle, id, nodeElement.outerHTML, html);
-        setTimeout(() => {
-            scrollCenter(protyle, nodeElement as Element);
-        }, Constants.TIMEOUT_BLOCKLOAD);
+        insertHTML(textPlain, protyle);
         return;
     } else if (code) {
         if (!code.startsWith('<div data-type="NodeCodeBlock" class="code-block" data-node-id="')) {

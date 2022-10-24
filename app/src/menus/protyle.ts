@@ -116,7 +116,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertRight,
-        icon: "iconRight",
+        icon: "iconLayoutRight",
         accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/⌥Click",
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
@@ -131,7 +131,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertBottom,
-        icon: "iconDown",
+        icon: "iconLayoutBottom",
         accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + "⇧Click",
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {

@@ -245,14 +245,14 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
     }
     /// #if !MOBILE
     const openSubmenus: IMenu[] = [{
-        icon: "iconRight",
+        icon: "iconLayoutRight",
         label: window.siyuan.languages.insertRight,
         accelerator: "⌥Click",
         click: () => {
             openFileById({id, position: "right", action: [Constants.CB_GET_FOCUS]});
         }
     }, {
-        icon: "iconDown",
+        icon: "iconLayoutBottom",
         label: window.siyuan.languages.insertBottom,
         click: () => {
             openFileById({id, position: "bottom", action: [Constants.CB_GET_FOCUS]});

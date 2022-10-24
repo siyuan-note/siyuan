@@ -1,4 +1,6 @@
 {
+  "expandDown": "向下擴選",
+  "expandUp": "向上擴選",
   "goForward": "前進",
   "goBack": "後退",
   "docNameAndContent": "文檔名和內容",

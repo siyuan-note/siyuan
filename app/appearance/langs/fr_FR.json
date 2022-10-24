@@ -1,4 +1,6 @@
 {
+  "expandDown": "Développer vers le bas",
+  "expandUp": "Développer vers le haut",
   "goForward": "Suivant",
   "goBack": "Retour",
   "docNameAndContent": "Nom et contenu du document",

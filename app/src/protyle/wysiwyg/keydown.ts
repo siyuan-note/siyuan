@@ -282,7 +282,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
 
-        if (matchHotKey("⌥⇧↑", event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.expandUp.custom, event)) {
             upSelect({
                 protyle, event, nodeElement, editorElement, range,
                 cb(selectElements) {
@@ -307,7 +307,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (matchHotKey("⌥⇧↓", event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.expandDown.custom, event)) {
             downSelect({
                 protyle, event, nodeElement, editorElement, range,
                 cb(selectElements) {

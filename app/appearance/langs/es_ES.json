@@ -1,4 +1,6 @@
 {
+  "expandDown": "Expandir hacia abajo",
+  "expandUp": "Expandir hacia arriba",
   "goForward": "Ir hacia adelante",
   "goBack": "Ir hacia atrás",
   "docNameAndContent": "Nombre y contenido del documento",

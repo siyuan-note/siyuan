@@ -547,7 +547,7 @@ const initKernel = (initData) => {
     const cp = require('child_process')
     const kernelProcess = cp.spawn(kernelPath,
       cmds, {
-        detached: true,
+        detached: false, // 桌面端内核进程不再以游离模式拉起 https://github.com/siyuan-note/siyuan/issues/6336
         stdio: 'ignore',
       },
     )
@@ -593,7 +593,6 @@ const initKernel = (initData) => {
       }
     })
 
-    kernelProcess.unref()
     writeLog('booted kernel process')
 
     const sleep = (ms) => {

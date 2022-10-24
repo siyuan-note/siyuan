@@ -34,6 +34,7 @@ const isDevEnv = process.env.NODE_ENV === 'development'
 const appVer = app.getVersion()
 const confDir = path.join(app.getPath('home'), '.config', 'siyuan')
 const windowStatePath = path.join(confDir, 'windowState.json')
+const portJSONPath = path.join(confDir, 'port.json')
 let tray // 托盘必须使用全局变量，以防止被垃圾回收 https://www.electronjs.org/docs/faq#my-apps-windowtray-disappeared-after-a-few-minutes
 let mainWindow // 从托盘处激活报错 https://github.com/siyuan-note/siyuan/issues/769
 let firstOpenWindow, bootWindow
@@ -41,6 +42,7 @@ let closeButtonBehavior = 0
 let siyuanOpenURL
 let firstOpen = false
 let resetWindowStateOnRestart = false
+let kernelPort = "6806"
 require('@electron/remote/main').initialize()
 
 if (!app.requestSingleInstanceLock()) {
@@ -92,6 +94,7 @@ try {
 }
 
 const writeLog = (out) => {
+  console.log(out)
   const logFile = path.join(confDir, 'app.log')
   let log = ''
   const maxLogLines = 1024
@@ -263,7 +266,7 @@ const boot = () => {
   })
 
   // 加载主界面
-  mainWindow.loadURL('http://127.0.0.1:6806/stage/build/app/index.html?v=' +
+  mainWindow.loadURL('http://127.0.0.1:' + kernelPort + '/stage/build/app/index.html?v=' +
     new Date().getTime())
 
   // 菜单
@@ -327,7 +330,7 @@ const boot = () => {
   Menu.setApplicationMenu(menu)
   // 当前页面链接使用浏览器打开
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    if (url.startsWith('http://127.0.0.1:6806')) {
+    if (url.startsWith('http://127.0.0.1:' + kernelPort)) {
       return
     }
 
@@ -337,7 +340,7 @@ const boot = () => {
 
   // IFrame 块不跟随重定向 https://github.com/siyuan-note/siyuan/issues/6327
   mainWindow.webContents.on('will-redirect', (event, url, isInPlace, isMainFrame) => {
-    if (url.startsWith('http://127.0.0.1:6806')) {
+    if (url.startsWith('http://127.0.0.1:' + kernelPort)) {
       return
     }
 
@@ -408,7 +411,7 @@ const boot = () => {
       theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
       init: true,
     })
-    await fetch('http://127.0.0.1:6806/api/system/uiproc?pid=' + process.pid,
+    await fetch('http://127.0.0.1:' + kernelPort + '/api/system/uiproc?pid=' + process.pid,
       {method: 'POST'})
   })
   ipcMain.on('siyuan-hotkey', (event, hotkey) => {
@@ -551,6 +554,7 @@ const initKernel = (initData) => {
         stdio: 'ignore',
       },
     )
+    writeLog('booted kernel process [pid=' + kernelProcess.pid + ']')
 
     kernelProcess.on('close', (code) => {
       if (0 !== code) {
@@ -561,11 +565,11 @@ const initKernel = (initData) => {
               `<div>数据库文件正在被其他程序锁定。如果你使用了第三方同步盘，请在思源运行期间关闭同步。</div><div>The database file is being locked by another program. If you use a third-party sync disk, please turn off sync while SiYuan is running.</div>`)
             break
           case 21:
-            showErrorWindow('⚠️ 6806 端口不可用 The port 6806 is unavailable',
-              '<div>思源需要监听 6806 端口，请确保该端口可用且不是其他程序的保留端口。可尝试使用管理员运行命令：' +
-              '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=6806 numberofports=1\nnet start winnat</code></pre></div>' +
-              '<div>SiYuan needs to listen to port 6806, please make sure this port is available, and not a reserved port by other software. Try running the command as an administrator: ' +
-              '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=6806 numberofports=1\nnet start winnat</code></pre></div>')
+            showErrorWindow('⚠️ ' + kernelPort + ' 端口不可用 The port ' + kernelPort + ' is unavailable',
+              '<div>思源需要监听 ' + kernelPort + ' 端口，请确保该端口可用且不是其他程序的保留端口。可尝试使用管理员运行命令：' +
+              '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=' + kernelPort + ' numberofports=1\nnet start winnat</code></pre></div>' +
+              '<div>SiYuan needs to listen to port ' + kernelPort + ', please make sure this port is available, and not a reserved port by other software. Try running the command as an administrator: ' +
+              '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=' + kernelPort + ' numberofports=1\nnet start winnat</code></pre></div>')
             break
           case 22:
             showErrorWindow(
@@ -593,11 +597,42 @@ const initKernel = (initData) => {
       }
     })
 
-    writeLog('booted kernel process')
-
     const sleep = (ms) => {
       return new Promise(resolve => setTimeout(resolve, ms))
     }
+
+    const getKernelPort = async () => {
+      if (isDevEnv) {
+        return kernelPort
+      }
+
+      await sleep(200)
+      let gotPort = false
+      let count = 0
+      while (!gotPort) {
+        try {
+          const portJSON = JSON.parse(fs.readFileSync(portJSONPath, 'utf8'))
+          const ret = portJSON[kernelProcess.pid.toString()]
+          if (ret) {
+            gotPort = true
+            return ret
+          }
+          await sleep(100)
+        } catch (e) {
+          await sleep(100)
+        } finally {
+          count++
+          if (64 < count) {
+            writeLog('get kernel port failed [pid=' + kernelProcess.pid + ']')
+            bootWindow.destroy()
+            resolve(false)
+          }
+        }
+      }
+    }
+
+    kernelPort = await getKernelPort()
+    writeLog("got kernel port [" + kernelPort + "]")
 
     let gotVersion = false
     let apiData
@@ -605,16 +640,15 @@ const initKernel = (initData) => {
     writeLog('checking kernel version')
     while (!gotVersion) {
       try {
-        const apiResult = await fetch(
-          'http://127.0.0.1:6806/api/system/version')
+        const apiResult = await fetch('http://127.0.0.1:' + kernelPort + '/api/system/version')
         apiData = await apiResult.json()
         gotVersion = true
         bootWindow.setResizable(false)
-        bootWindow.loadURL('http://127.0.0.1:6806/appearance/boot/index.html')
+        bootWindow.loadURL('http://127.0.0.1:' + kernelPort + '/appearance/boot/index.html')
         bootWindow.show()
       } catch (e) {
         writeLog('get kernel version failed: ' + e.message)
-        await sleep(100)
+        await sleep(200)
       } finally {
         count++
         if (64 < count) {
@@ -630,15 +664,14 @@ const initKernel = (initData) => {
       if (!isDevEnv && apiData.data !== appVer) {
         writeLog(
           `kernel [${apiData.data}] is running, shutdown it now and then start kernel [${appVer}]`)
-        fetch('http://127.0.0.1:6806/api/system/exit', {method: 'POST'})
+        fetch('http://127.0.0.1:' + kernelPort + '/api/system/exit', {method: 'POST'})
         bootWindow.destroy()
         resolve(false)
       } else {
         let progressing = false
         while (!progressing) {
           try {
-            const progressResult = await fetch(
-              'http://127.0.0.1:6806/api/system/bootProgress')
+            const progressResult = await fetch('http://127.0.0.1:' + kernelPort + '/api/system/bootProgress')
             const progressData = await progressResult.json()
             if (progressData.data.progress >= 100) {
               resolve(true)
@@ -648,7 +681,7 @@ const initKernel = (initData) => {
             }
           } catch (e) {
             writeLog('get boot progress failed: ' + e.message)
-            fetch('http://127.0.0.1:6806/api/system/exit', {method: 'POST'})
+            fetch('http://127.0.0.1:' + kernelPort + '/api/system/exit', {method: 'POST'})
             bootWindow.destroy()
             resolve(false)
             progressing = true
@@ -778,15 +811,15 @@ const {powerMonitor} = require('electron')
 
 powerMonitor.on('suspend', () => {
   writeLog('system suspend')
-  fetch('http://127.0.0.1:6806/api/sync/performSync', {method: 'POST'})
+  fetch('http://127.0.0.1:' + kernelPort + '/api/sync/performSync', {method: 'POST'})
 })
 
 powerMonitor.on('resume', () => {
   writeLog('system resume')
-  fetch('http://127.0.0.1:6806/api/sync/performSync', {method: 'POST'})
+  fetch('http://127.0.0.1:' + kernelPort + '/api/sync/performSync', {method: 'POST'})
 })
 
 powerMonitor.on('shutdown', () => {
   writeLog('system shutdown')
-  fetch('http://127.0.0.1:6806/api/system/exit', {method: 'POST'})
+  fetch('http://127.0.0.1:' + kernelPort + '/api/system/exit', {method: 'POST'})
 })

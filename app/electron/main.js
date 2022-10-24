@@ -330,7 +330,7 @@ const boot = () => {
     if (url.startsWith('http://127.0.0.1:6806')) {
       return
     }
-    console.log("will-navigate", url)
+
     event.preventDefault()
     shell.openExternal(url)
   })
@@ -340,6 +340,7 @@ const boot = () => {
     if (url.startsWith('http://127.0.0.1:6806')) {
       return
     }
+
     event.preventDefault()
   })
 

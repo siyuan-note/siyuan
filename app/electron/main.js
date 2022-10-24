@@ -335,7 +335,7 @@ const boot = () => {
     shell.openExternal(url)
   })
 
-  // iframe 使用短网址会打开浏览器或跳转 APP https://github.com/siyuan-note/siyuan/issues/6327
+  // IFrame 块不跟随重定向 https://github.com/siyuan-note/siyuan/issues/6327
   mainWindow.webContents.on('will-redirect', (event, url, isInPlace, isMainFrame) => {
     if (url.startsWith('http://127.0.0.1:6806')) {
       return

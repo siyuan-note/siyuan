@@ -750,6 +750,7 @@
   "nameEmpty": "Nom est vide",
   "ordered-list": "Liste d'ordres",
   "outdent": "Outdent",
+  "outdentTip": "Après l'activation, le retrait logique du contour de la liste sera utilisé, déplacez l'élément de la liste sous le parent",
   "over": "over",
   "preview": "Aperçu de l'exportation",
   "quote": "Citation de bloc",

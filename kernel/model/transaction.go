@@ -100,6 +100,7 @@ func isWritingFiles() bool {
 }
 
 func AutoFlushTx() {
+	go autoFlushUpdateRefTextRenameDoc()
 	for {
 		flushTx()
 		time.Sleep(time.Duration(txDelay) * time.Millisecond)
@@ -1060,9 +1061,6 @@ func (tx *Transaction) writeTree(tree *parse.Tree) (err error) {
 
 func refreshDynamicRefText(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) {
 	// 这个实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
-	// 比如通过块引创建文档后立即重命名文档，这时引用关系还没有入库，所以重命名查询不到引用关系，最终导致动态锚文本设置失败
-	// 引用文档时锚文本没有跟随文档重命名 https://github.com/siyuan-note/siyuan/issues/4193
-	// 解决方案是将重命名通过协程异步调用，详见 RenameDoc 函数
 
 	treeRefNodeIDs := map[string]*hashset.Set{}
 	for _, updateNode := range updatedDefNodes {
@@ -1124,6 +1122,34 @@ func refreshDynamicRefText(updatedDefNodes map[string]*ast.Node, updatedTrees ma
 			indexWriteJSONQueue(refTree)
 		}
 	}
+}
+
+var updateRefTextRenameDocs = map[string]*parse.Tree{}
+var updateRefTextRenameDocLock = sync.Mutex{}
+
+func updateRefTextRenameDoc(renamedTree *parse.Tree) {
+	updateRefTextRenameDocLock.Lock()
+	updateRefTextRenameDocs[renamedTree.ID] = renamedTree
+	updateRefTextRenameDocLock.Unlock()
+}
+
+func autoFlushUpdateRefTextRenameDoc() {
+	for {
+		sql.WaitForWritingDatabase()
+		flushUpdateRefTextRenameDoc()
+	}
+}
+
+func flushUpdateRefTextRenameDoc() {
+	updateRefTextRenameDocLock.Lock()
+	defer updateRefTextRenameDocLock.Unlock()
+
+	for _, tree := range updateRefTextRenameDocs {
+		changedDefs := map[string]*ast.Node{tree.ID: tree.Root}
+		changedTrees := map[string]*parse.Tree{tree.ID: tree}
+		refreshDynamicRefText(changedDefs, changedTrees)
+	}
+	updateRefTextRenameDocs = map[string]*parse.Tree{}
 }
 
 func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (changed bool) {

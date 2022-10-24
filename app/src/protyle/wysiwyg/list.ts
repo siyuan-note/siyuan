@@ -537,12 +537,12 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             lastBlockElement.setAttribute("data-type", "NodeList");
             lastBlockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             lastBlockElement.innerHTML = `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
-            parentLiItemElement.after(lastBlockElement);
+            liItemElements[0].lastElementChild.before(lastBlockElement);
             doOperations.push({
                 action: "insert",
                 id: newId,
                 data: lastBlockElement.outerHTML,
-                previousID: parentLiItemElement.getAttribute("data-node-id"),
+                previousID: liItemElements[0].lastElementChild.previousElementSibling.getAttribute("data-node-id"),
             });
         }
         let previousID;

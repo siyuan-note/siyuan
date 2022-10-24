@@ -17,6 +17,7 @@
 package server
 
 import (
+	"net"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -70,15 +71,33 @@ func Serve(fastMode bool) {
 	serveTemplates(ginServer)
 	api.ServeAPI(ginServer)
 
-	var addr string
+	var host string
 	if model.Conf.System.NetworkServe || util.ContainerDocker == util.Container {
-		addr = "0.0.0.0:" + util.ServerPort
+		host = "0.0.0.0"
 	} else {
-		addr = "127.0.0.1:" + util.ServerPort
+		host = "127.0.0.1"
 	}
-	logging.LogInfof("kernel is booting [%s]", "http://"+addr)
+
+	ln, err := net.Listen("tcp", ":"+util.ServerPort)
+	if nil != err {
+		if !fastMode {
+			logging.LogErrorf("boot kernel failed: %s", err)
+			os.Exit(util.ExitCodeUnavailablePort)
+		}
+	}
+
+	_, port, err := net.SplitHostPort(ln.Addr().String())
+	if nil != err {
+		if !fastMode {
+			logging.LogErrorf("boot kernel failed: %s", err)
+			os.Exit(util.ExitCodeUnavailablePort)
+		}
+	}
+
+	logging.LogInfof("kernel is booting [%s]", "http://"+host+":"+port)
 	util.HttpServing = true
-	if err := ginServer.Run(addr); nil != err {
+
+	if err = http.Serve(ln, ginServer); nil != err {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
 			os.Exit(util.ExitCodeUnavailablePort)

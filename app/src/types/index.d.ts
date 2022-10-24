@@ -232,6 +232,7 @@ declare interface IExport {
 
 declare interface IEditor {
     readOnly: boolean;
+    listLogicalOutdent: boolean;
     katexMacros: string;
     fullWidth: boolean;
     fontSize: number;

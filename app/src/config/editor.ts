@@ -102,8 +102,8 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.outdent}
-        <div class="b3-label__text">${window.siyuan.languages.outdentTip}</div>
+        ${window.siyuan.languages.outlineOutdent}
+        <div class="b3-label__text">${window.siyuan.languages.outlineOutdentTip}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="listLogicalOutdent" type="checkbox"${window.siyuan.config.editor.listLogicalOutdent ? " checked" : ""}/>

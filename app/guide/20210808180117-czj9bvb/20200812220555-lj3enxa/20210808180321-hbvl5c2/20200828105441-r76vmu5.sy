@@ -6,7 +6,7 @@
 		"id": "20200828105441-r76vmu5",
 		"title": "内核参数",
 		"type": "doc",
-		"updated": "20220601091012"
+		"updated": "20221025095729"
 	},
 	"Children": [
 		{
@@ -652,6 +652,120 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20221025095421-rl06zab",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20221025095421-rl06zab",
+				"updated": "20221025095440"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​​"
+				}
+			]
+		},
+		{
+			"ID": "20221025095536-emwgpz0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025095536-emwgpz0",
+				"updated": "20221025095536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用于指定监听端口，不指定时："
+				}
+			]
+		},
+		{
+			"ID": "20221025095536-5m5f1uu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221025095536-5m5f1uu",
+				"updated": "20221025095729"
+			},
+			"Children": [
+				{
+					"ID": "20221025095536-xq0w85y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095536-xq0w85y",
+						"updated": "20221025095536"
+					},
+					"Children": [
+						{
+							"ID": "20221025095536-zng5iv9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095536-zng5iv9",
+								"updated": "20221025095536"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端使用随机端口"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221025095536-gpuhscm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095536-gpuhscm",
+						"updated": "20221025095729"
+					},
+					"Children": [
+						{
+							"ID": "20221025095536-76oy599",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095536-76oy599",
+								"updated": "20221025095729"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Docker/移动端使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "6806"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

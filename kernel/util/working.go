@@ -78,7 +78,7 @@ func Boot() {
 	Mode = *mode
 	Resident = *resident
 	ServerPort = *port
-	if isRunningInDockerContainer() {
+	if isRunningInDockerContainer() || "dev" == Mode {
 		ServerPort = "6806"
 	}
 	ReadOnly = *readOnly

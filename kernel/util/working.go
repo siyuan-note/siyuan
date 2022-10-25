@@ -61,8 +61,8 @@ func Boot() {
 	servePath := flag.String("servePath", "", "obsoleted https://github.com/siyuan-note/siyuan/issues/4647")
 	_ = servePath
 	port := flag.String("port", "0", "port of the HTTP server")
-	resident := flag.Bool("resident", true, "resident memory even if no active session")
-	readOnly := flag.Bool("readonly", false, "read-only mode")
+	resident := flag.String("resident", "true", "resident memory even if no active session")
+	readOnly := flag.String("readonly", "false", "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
 	lang := flag.String("lang", "", "zh_CN/zh_CHT/en_US/fr_FR/es_ES")
@@ -76,12 +76,12 @@ func Boot() {
 		Lang = *lang
 	}
 	Mode = *mode
-	Resident = *resident
+	Resident, _ = strconv.ParseBool(*resident)
 	ServerPort = *port
 	if isRunningInDockerContainer() || "dev" == Mode {
 		ServerPort = "6806"
 	}
-	ReadOnly = *readOnly
+	ReadOnly, _ = strconv.ParseBool(*readOnly)
 	AccessAuthCode = *accessAuthCode
 	Container = ContainerStd
 	if isRunningInDockerContainer() {

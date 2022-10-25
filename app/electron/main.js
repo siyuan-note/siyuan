@@ -538,18 +538,18 @@ const initKernel = (initData) => {
       return
     }
 
-    let cmd = `ui version [${appVer}], booting kernel [${kernelPath} --wd=${appDir}]`
     const cmds = ['--wd', appDir]
     cmds.push('--resident', 'false')
     if (isDevEnv) {
       cmds.push('--mode', 'dev')
+      cmds.push('--port', '6806')
     }
     if (initData) {
       const initDatas = initData.split('-')
       cmds.push('--workspace', initDatas[0])
       cmds.push('--lang', initDatas[1])
-      cmd = `ui version [${appVer}], booting kernel [${kernelPath} --wd=${appDir} --workspace=${initDatas[0]} --lang=${initDatas[1]}]`
     }
+    let cmd = `ui version [${appVer}], booting kernel [${kernelPath} ${cmds.join(' ')}]`
     writeLog(cmd)
     const cp = require('child_process')
     const kernelProcess = cp.spawn(kernelPath,

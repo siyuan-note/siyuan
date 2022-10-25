@@ -2,7 +2,7 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {OpenDialogReturnValue} from "electron";
-import {app, BrowserWindow, dialog} from "@electron/remote";
+import {app, BrowserWindow, dialog, getCurrentWindow} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "./util";
@@ -370,7 +370,11 @@ const renderPDF = (id: string) => {
         setPadding()
     });
 </script></body></html>`;
+    const mainWindow = getCurrentWindow();
+    const mainWindowZoomFactor = mainWindow.webContents.getZoomFactor();
     window.siyuan.printWin = new BrowserWindow({
+        parent: mainWindow,
+        modal: true,
         show: true,
         width: 1032,
         resizable: false,
@@ -389,6 +393,7 @@ const renderPDF = (id: string) => {
         // 导出 PDF 预览界面不受主界面缩放影响 https://github.com/siyuan-note/siyuan/issues/6262
         window.siyuan.printWin.webContents.setZoomFactor(1);
     });
+    window.siyuan
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
         window.siyuan.printWin.loadURL(response.data.url);
     });

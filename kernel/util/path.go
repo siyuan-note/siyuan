@@ -34,7 +34,7 @@ var (
 )
 
 const (
-	ServerPort       = "6806"                              // HTTP/WebSocket 端口
+	ServerPort       = "0"                                 // HTTP/WebSocket 端口
 	AliyunServer     = "https://siyuan-sync.b3logfile.com" // 云端服务地址，阿里云负载均衡，用于接口，数据同步文件上传、下载会走七牛云 OSS http://siyuan-data.b3logfile.com
 	BazaarStatServer = "http://bazaar.b3logfile.com"       // 集市包统计服务地址，直接对接 Bucket 没有 CDN 缓存
 	BazaarOSSServer  = "https://oss.b3logfile.com"         // 云端对象存储地址，七牛云，仅用于读取集市包

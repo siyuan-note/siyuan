@@ -338,18 +338,6 @@ const boot = () => {
     shell.openExternal(url)
   })
 
-  // IFrame 块不跟随重定向 https://github.com/siyuan-note/siyuan/issues/6327
-  mainWindow.webContents.on('will-redirect', (event, url, isInPlace, isMainFrame) => {
-    if (url.startsWith('http://127.0.0.1:' + kernelPort)) {
-      return
-    }
-
-    if (!isMainFrame) {
-      event.preventDefault()
-      return
-    }
-  })
-
   mainWindow.on('close', (event) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('siyuan-save-close', false)

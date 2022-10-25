@@ -321,6 +321,20 @@ func getBlockBreadcrumb(c *gin.Context) {
 	ret.Data = blockPath
 }
 
+func getBlockIndex(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	index := model.GetBlockIndex(id)
+	ret.Data = index
+}
+
 func getBlockInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

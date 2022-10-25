@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226122523-rl8356a",
 		"title": "在瀏覽器上使用",
-		"updated": "20211228145303"
+		"updated": "20221025093344"
 	},
 	"Children": [
 		{
@@ -24,128 +24,52 @@
 			]
 		},
 		{
-			"ID": "20211226122545-rinwfjn",
+			"ID": "20221025093315-nlguzfi",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226122545-rinwfjn",
-				"updated": "20211228145303"
+				"id": "20221025093315-nlguzfi",
+				"updated": "20221025093344"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源桌面端是基於 "
+					"Data": "在 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://www.electronjs.org",
-					"TextMarkTextContent": "Electron"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 打包的獨立應用，但這並不唯一的使用方式。只要啟動思源內核後，就能在瀏覽器上直接使用了，支援行動端瀏覽器。"
-				}
-			]
-		},
-		{
-			"ID": "20211226122545-1uf71lc",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20211226122545-1uf71lc",
-				"updated": "20211228145232"
-			},
-			"Children": [
-				{
-					"ID": "20211226122545-7tq2rvn",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226122545-7tq2rvn"
-					},
-					"Children": [
-						{
-							"ID": "20211226122545-7ocbf35",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226122545-7ocbf35"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "桌面端網頁版：使用體驗幾乎和 Electron 獨立應用一致"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226122545-opylma4",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226122545-opylma4",
-						"updated": "20211228145232"
-					},
-					"Children": [
-						{
-							"ID": "20211226122545-fw3lwa7",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226122545-fw3lwa7",
-								"updated": "20211228145232"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "行動端網頁版：為行動端使用體驗設計"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20211226122545-6qtqipo",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226122545-6qtqipo",
-				"updated": "20211228145236"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "存取 "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "http://127.0.0.1:6806/"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "關於"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 後會自動根據瀏覽器版本切換桌面端或行動端。"
-				}
-			]
-		},
-		{
-			"ID": "20211226122545-vawibm9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226122545-vawibm9",
-				"updated": "20211228140806"
-			},
-			"Children": [
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "在瀏覽器上使用"
+				},
 				{
 					"Type": "NodeText",
-					"Data": "如果需要在區域網內使用，將 "
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打開瀏覽器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 後就可以直接在瀏覽器上使用了，如果需要在局域網內使用，將 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -154,7 +78,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 換成區域網 IP 位址即可。除了本地區域網使用，這裡提供兩個自助方案實作公網使用："
+					"Data": "​ 換成局域網 IP 地址即可。"
+				}
+			]
+		},
+		{
+			"ID": "20221025093315-v89zg6i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025093315-v89zg6i",
+				"updated": "20221025093315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了本地局域網使用，通過以下兩個方法可以實現公網使用："
 				}
 			]
 		},

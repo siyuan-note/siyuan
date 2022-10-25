@@ -40,6 +40,14 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
 </label>
+<label class="b3-label fn__flex">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.useFixedPort}
+        <div class="b3-label__text">${window.siyuan.languages.useFixedPortTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <input class="b3-switch fn__flex-center" id="fixedPort" type="checkbox"${window.siyuan.config.system.fixedPort ? " checked" : ""}>
+</label>
 <label class="b3-label${isBrowser() ? " fn__none" : " fn__flex"}">
     <div class="fn__flex-1">
        ${window.siyuan.languages.about2}
@@ -343,6 +351,14 @@ export const about = {
         const networkServeElement = about.element.querySelector("#networkServe") as HTMLInputElement;
         networkServeElement.addEventListener("change", () => {
             fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
+                exportLayout(false, () => {
+                    exitSiYuan();
+                });
+            });
+        });
+        const fixedPortElement = about.element.querySelector("#fixedPort") as HTMLInputElement;
+        fixedPortElement.addEventListener("change", () => {
+            fetchPost("/api/system/setFixedPort", {networkServe: fixedPortElement.checked}, () => {
                 exportLayout(false, () => {
                     exitSiYuan();
                 });

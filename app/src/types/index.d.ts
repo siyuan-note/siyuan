@@ -341,6 +341,7 @@ declare interface IConfig {
         uploadErrLog: boolean
         downloadInstallPkg: boolean
         networkServe: boolean
+        fixedPort: boolean
         useExistingDB: boolean
     }
     localIPs: string[]

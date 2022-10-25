@@ -39,6 +39,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/getEmojiConf", model.CheckAuth, getEmojiConf)
 	ginServer.Handle("POST", "/api/system/setAccessAuthCode", model.CheckAuth, setAccessAuthCode)
 	ginServer.Handle("POST", "/api/system/setNetworkServe", model.CheckAuth, setNetworkServe)
+	ginServer.Handle("POST", "/api/system/setFixedPort", model.CheckAuth, setFixedPort)
 	ginServer.Handle("POST", "/api/system/setUploadErrLog", model.CheckAuth, setUploadErrLog)
 	ginServer.Handle("POST", "/api/system/setDownloadInstallPkg", model.CheckAuth, setDownloadInstallPkg)
 	ginServer.Handle("POST", "/api/system/setNetworkProxy", model.CheckAuth, setNetworkProxy)

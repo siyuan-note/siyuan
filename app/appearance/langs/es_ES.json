@@ -1,4 +1,6 @@
 {
+  "useFixedPort": "Usar puerto fijo",
+  "useFixedPortTip": "Después de habilitar, se usará el puerto fijo <code class='fn__code'>6806</code>, y se usará un puerto aleatorio cuando esté deshabilitado",
   "expandDown": "Expandir hacia abajo",
   "expandUp": "Expandir hacia arriba",
   "goForward": "Ir hacia adelante",

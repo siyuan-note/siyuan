@@ -1,4 +1,6 @@
 {
+  "useFixedPort": "Use Fixed Port",
+  "useFixedPortTip": "After enabling, the fixed port <code class='fn__code'>6806</code> will be used, and a random port will be used when it is disabled",
   "expandDown": "Expand Down",
   "expandUp": "Expand Up",
   "goForward": "Go forward",

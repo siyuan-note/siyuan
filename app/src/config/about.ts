@@ -358,7 +358,7 @@ export const about = {
         });
         const fixedPortElement = about.element.querySelector("#fixedPort") as HTMLInputElement;
         fixedPortElement.addEventListener("change", () => {
-            fetchPost("/api/system/setFixedPort", {networkServe: fixedPortElement.checked}, () => {
+            fetchPost("/api/system/setFixedPort", {fixedPort: fixedPortElement.checked}, () => {
                 exportLayout(false, () => {
                     exitSiYuan();
                 });

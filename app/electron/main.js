@@ -540,11 +540,14 @@ const initKernel = (initData) => {
 
     let cmd = `ui version [${appVer}], booting kernel [${kernelPath} --wd=${appDir}]`
     const cmds = ['--wd', appDir]
+    cmds.push('--resident', 'false')
+    if (isDevEnv) {
+      cmds.push('--mode', 'dev')
+    }
     if (initData) {
       const initDatas = initData.split('-')
       cmds.push('--workspace', initDatas[0])
       cmds.push('--lang', initDatas[1])
-      cmds.push("--resident", "false")
       cmd = `ui version [${appVer}], booting kernel [${kernelPath} --wd=${appDir} --workspace=${initDatas[0]} --lang=${initDatas[1]}]`
     }
     writeLog(cmd)

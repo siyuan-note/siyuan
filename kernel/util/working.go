@@ -335,6 +335,17 @@ func initMime() {
 	mime.AddExtensionType(".js", "application/x-javascript")
 	mime.AddExtensionType(".json", "application/json")
 	mime.AddExtensionType(".html", "text/html")
+
+	// 某些系统上下载资源文件后打开是 zip
+	// https://github.com/siyuan-note/siyuan/issues/6347
+	mime.AddExtensionType(".doc", "application/msword")
+	mime.AddExtensionType(".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+	mime.AddExtensionType(".xls", "application/vnd.ms-excel")
+	mime.AddExtensionType(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	mime.AddExtensionType(".dwg", "image/x-dwg")
+	mime.AddExtensionType(".dxf", "image/x-dxf")
+	mime.AddExtensionType(".dwf", "drawing/x-dwf")
+	mime.AddExtensionType(".pdf", "application/pdf")
 }
 
 func KillByPort(port string) {

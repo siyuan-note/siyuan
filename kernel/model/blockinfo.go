@@ -153,6 +153,34 @@ func GetBlockDefIDsByRefText(refText string, excludeIDs []string) (ret []string)
 	return
 }
 
+func GetBlockIndex(id string) (ret int) {
+	tree, _ := loadTreeByBlockID(id)
+	if nil == tree {
+		return
+	}
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		return
+	}
+
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if !n.IsChildBlockOf(tree.Root, 1) {
+			return ast.WalkContinue
+		}
+
+		ret++
+		if node == n {
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	return
+}
+
 type BlockPath struct {
 	ID       string       `json:"id"`
 	Name     string       `json:"name"`

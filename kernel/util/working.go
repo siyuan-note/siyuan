@@ -79,7 +79,7 @@ func Boot() {
 	Resident, _ = strconv.ParseBool(*resident)
 	ServerPort = *port
 	if isRunningInDockerContainer() || "dev" == Mode {
-		ServerPort = "6806"
+		ServerPort = FixedPort
 	}
 	ReadOnly, _ = strconv.ParseBool(*readOnly)
 	AccessAuthCode = *accessAuthCode
@@ -291,6 +291,8 @@ const (
 	ContainerDocker  = "docker"  // Docker 容器端
 	ContainerAndroid = "android" // Android 端
 	ContainerIOS     = "ios"     // iOS 端
+
+	FixedPort = "6806" // 固定端口
 )
 
 func initPathDir() {

@@ -275,7 +275,7 @@ func InitConf() {
 		Conf.System.FixedPort = true
 	}
 	if Conf.System.FixedPort {
-		util.ServerPort = "6806"
+		util.ServerPort = util.FixedPort
 	}
 
 	Conf.LocalIPs = util.GetLocalIPs()

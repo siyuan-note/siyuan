@@ -1,4 +1,5 @@
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
+import {Constants} from "../../constants";
 
 export const getPreviousHeading = (element: Element) => {
     let previous = getPreviousBlock(element);
@@ -68,7 +69,7 @@ export const getNextBlock = (element: Element) => {
 export const getNoContainerElement = (element: Element) => {
     let childElement = element;
     while (childElement) {
-        if (childElement.classList.contains("list") || childElement.classList.contains("li")|| childElement.classList.contains("bq")|| childElement.classList.contains("sb")) {
+        if (childElement.classList.contains("list") || childElement.classList.contains("li") || childElement.classList.contains("bq") || childElement.classList.contains("sb")) {
             childElement = childElement.querySelector("[data-node-id]");
         } else {
             return childElement;
@@ -94,11 +95,18 @@ export const getTopEmptyElement = (element: Element) => {
     while (topElement.parentElement && !topElement.parentElement.classList.contains("protyle-wysiwyg")) {
         if (!topElement.parentElement.getAttribute("data-node-id")) {
             topElement = topElement.parentElement;
-        } else if (getContenteditableElement(topElement.parentElement).textContent !== "" ||
-            topElement.previousElementSibling?.getAttribute("data-node-id")) {
-            break;
         } else {
-            topElement = topElement.parentElement;
+            const hasText = Array.from(topElement.parentElement.querySelectorAll('[contenteditable="true"]')).find(item => {
+                if (item.textContent.replace(Constants.ZWSP, "").replace("\n", "") !== "") {
+                    return true;
+                }
+            });
+            if (!hasText || topElement.previousElementSibling?.getAttribute("data-node-id") ||
+                topElement.nextElementSibling?.getAttribute("data-node-id")) {
+                break;
+            } else {
+                topElement = topElement.parentElement;
+            }
         }
     }
     return topElement;

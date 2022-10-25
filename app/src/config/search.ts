@@ -72,7 +72,8 @@ export const initConfigSearch = (element: HTMLElement) => {
             "dataRepoKeyTip1", "dataRepoKeyTip2", "slogan", "currentVer", "checkUpdate", "updatePath", "systemLog",
             "importKey", "genKey", "genKeyByPW", "copyKey", "resetRepo", "systemLogTip", "export", "visitAnnouncements",
             "safeQuit", "directConnection", "siyuanNote", "key", "password", "copied", "resetRepoTip",
-            "autoDownloadUpdatePkg", "autoDownloadUpdatePkgTip", "networkProxy", "keyPlaceholder", "initRepoKeyTip"]),
+            "autoDownloadUpdatePkg", "autoDownloadUpdatePkgTip", "networkProxy", "keyPlaceholder", "initRepoKeyTip",
+            "useFixedPort", "useFixedPortTip"]),
     ];
     const inputElement = element.querySelector(".b3-form__icon input") as HTMLInputElement;
     if (window.siyuan.config.system.container !== "ios") {

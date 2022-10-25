@@ -34,6 +34,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
+	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	util2 "github.com/88250/lute/util"
 	"github.com/dustin/go-humanize"
@@ -665,6 +666,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 						n.Tokens = gulu.Str.ToBytes(text)
 						if bytes.Contains(n.Tokens, []byte("search-mark")) {
 							n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\"+searchMarkSpanStart), []byte("\\\\"+searchMarkSpanEnd))
+							n.Tokens = lex.EscapeMarkers(n.Tokens)
 							linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
 							var children []*ast.Node
 							for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
@@ -704,6 +706,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 							}
 
 							n.Tokens = []byte(newContent)
+							n.Tokens = lex.EscapeMarkers(n.Tokens)
 							linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
 							var children []*ast.Node
 							for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {

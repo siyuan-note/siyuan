@@ -530,7 +530,6 @@ const initKernel = (initData) => {
     cmds.push('--resident', 'false')
     if (isDevEnv) {
       cmds.push('--mode', 'dev')
-      cmds.push('--port', '6806')
     }
     if (initData) {
       const initDatas = initData.split('-')

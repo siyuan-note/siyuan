@@ -295,7 +295,7 @@ func setFixedPort(c *gin.Context) {
 	}
 
 	fixedPort := arg["fixedPort"].(bool)
-	model.Conf.FixedPort = fixedPort
+	model.Conf.System.FixedPort = fixedPort
 	model.Conf.Save()
 
 	util.PushMsg(model.Conf.Language(42), 1000*15)

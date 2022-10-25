@@ -60,7 +60,6 @@ type AppConf struct {
 	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化
 	Account        *conf.Account    `json:"account"`        // 帐号配置
 	ReadOnly       bool             `json:"readonly"`       // 是否是以只读模式运行
-	FixedPort      bool             `json:"fixedPort"`      // 是否使用固定端口 6806
 	LocalIPs       []string         `json:"localIPs"`       // 本地 IP 列表
 	AccessAuthCode string           `json:"accessAuthCode"` // 访问授权码
 	System         *conf.System     `json:"system"`         // 系统配置
@@ -273,7 +272,10 @@ func InitConf() {
 	}
 
 	if util.ContainerStd != util.Container {
-		Conf.FixedPort = true
+		Conf.System.FixedPort = true
+	}
+	if Conf.System.FixedPort {
+		util.ServerPort = util.FixedPort
 	}
 
 	Conf.LocalIPs = util.GetLocalIPs()

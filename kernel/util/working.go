@@ -61,8 +61,8 @@ func Boot() {
 	servePath := flag.String("servePath", "", "obsoleted https://github.com/siyuan-note/siyuan/issues/4647")
 	_ = servePath
 	port := flag.String("port", "0", "port of the HTTP server")
-	resident := flag.Bool("resident", true, "resident memory even if no active session")
-	readOnly := flag.Bool("readonly", false, "read-only mode")
+	resident := flag.String("resident", "true", "resident memory even if no active session")
+	readOnly := flag.String("readonly", "false", "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
 	lang := flag.String("lang", "", "zh_CN/zh_CHT/en_US/fr_FR/es_ES")
@@ -76,16 +76,16 @@ func Boot() {
 		Lang = *lang
 	}
 	Mode = *mode
-	Resident = *resident
+	Resident, _ = strconv.ParseBool(*resident)
 	ServerPort = *port
-	if isRunningInDockerContainer() || "dev" == Mode {
-		ServerPort = "6806"
-	}
-	ReadOnly = *readOnly
+	ReadOnly, _ = strconv.ParseBool(*readOnly)
 	AccessAuthCode = *accessAuthCode
 	Container = ContainerStd
 	if isRunningInDockerContainer() {
 		Container = ContainerDocker
+	}
+	if ContainerStd != Container || "dev" == Mode {
+		ServerPort = FixedPort
 	}
 
 	msStoreFilePath := filepath.Join(WorkingDir, "ms-store")
@@ -291,6 +291,8 @@ const (
 	ContainerDocker  = "docker"  // Docker 容器端
 	ContainerAndroid = "android" // Android 端
 	ContainerIOS     = "ios"     // iOS 端
+
+	FixedPort = "6806" // 固定端口
 )
 
 func initPathDir() {
@@ -333,6 +335,17 @@ func initMime() {
 	mime.AddExtensionType(".js", "application/x-javascript")
 	mime.AddExtensionType(".json", "application/json")
 	mime.AddExtensionType(".html", "text/html")
+
+	// 某些系统上下载资源文件后打开是 zip
+	// https://github.com/siyuan-note/siyuan/issues/6347
+	mime.AddExtensionType(".doc", "application/msword")
+	mime.AddExtensionType(".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+	mime.AddExtensionType(".xls", "application/vnd.ms-excel")
+	mime.AddExtensionType(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	mime.AddExtensionType(".dwg", "image/x-dwg")
+	mime.AddExtensionType(".dxf", "image/x-dxf")
+	mime.AddExtensionType(".dwf", "drawing/x-dwf")
+	mime.AddExtensionType(".pdf", "application/pdf")
 }
 
 func KillByPort(port string) {

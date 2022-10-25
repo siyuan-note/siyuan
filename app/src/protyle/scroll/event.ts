@@ -5,10 +5,12 @@ import {onGet} from "../util/onGet";
 import {showMessage} from "../../dialog/message";
 import {updateHotkeyTip} from "../util/compatibility";
 import {isMobile} from "../../util/functions";
+import {hasClosestBlock} from "../util/hasClosest";
 
+let getIndexTimeout: number
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
     let elementRect = element.getBoundingClientRect();
-    element.addEventListener("scroll", () => {
+    element.addEventListener("scroll", (event) => {
         if (!protyle.toolbar.element.classList.contains("fn__none")) {
             const initY = protyle.toolbar.element.getAttribute("data-inity").split(Constants.ZWSP);
             const top = parseInt(initY[0]) + (parseInt(initY[1]) - element.scrollTop);
@@ -73,6 +75,26 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             });
         }
         protyle.scroll.lastScrollTop = Math.max(element.scrollTop, 0);
+        if (protyle.scroll && !protyle.scroll.element.classList.contains("fn__none")) {
+            clearTimeout(getIndexTimeout);
+            getIndexTimeout = window.setTimeout(() => {
+                elementRect = element.getBoundingClientRect();
+                const targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10)
+                console.log(targetElement, hasClosestBlock(targetElement), event);
+                const blockElement = hasClosestBlock(targetElement);
+                if (!blockElement) {
+                    return;
+                }
+                fetchPost("/api/block/getBlockIndex", {id: blockElement.getAttribute("data-node-id")}, (response) => {
+                    if (!response.data) {
+                        return;
+                    }
+                    const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement
+                    inputElement.value = response.data;
+                    protyle.scroll.element.setAttribute("aria-label", `Blocks ${response.data}/${protyle.block.blockCount}`);
+                });
+            }, Constants.TIMEOUT_BLOCKLOAD);
+        }
     }, {
         capture: false,
         passive: true,

@@ -5,7 +5,7 @@ import {onGet} from "../util/onGet";
 import {showMessage} from "../../dialog/message";
 import {updateHotkeyTip} from "../util/compatibility";
 import {isMobile} from "../../util/functions";
-import {hasClosestBlock} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 
 let getIndexTimeout: number
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
@@ -47,9 +47,14 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             getIndexTimeout = window.setTimeout(() => {
                 elementRect = element.getBoundingClientRect();
                 const targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10)
-                console.log(targetElement, hasClosestBlock(targetElement), event);
                 const blockElement = hasClosestBlock(targetElement);
                 if (!blockElement) {
+                    if (hasClosestByClassName(targetElement, "protyle-background") ||
+                        hasClosestByClassName(targetElement, "protyle-title")) {
+                        const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement;
+                        inputElement.value = "1";
+                        protyle.scroll.element.setAttribute("aria-label", `Blocks 1/${protyle.block.blockCount}`);
+                    }
                     return;
                 }
                 fetchPost("/api/block/getBlockIndex", {id: blockElement.getAttribute("data-node-id")}, (response) => {

@@ -545,6 +545,9 @@ const initKernel = (initData) => {
       cmds.push('--workspace', initDatas[0])
       cmds.push('--lang', initDatas[1])
       cmds.push("--resident", "false")
+      if (isDevEnv) {
+        cmds.push('--mode', 'dev')
+      }
       cmd = `ui version [${appVer}], booting kernel [${kernelPath} --wd=${appDir} --workspace=${initDatas[0]} --lang=${initDatas[1]}]`
     }
     writeLog(cmd)

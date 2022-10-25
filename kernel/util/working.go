@@ -60,6 +60,7 @@ func Boot() {
 	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
 	servePath := flag.String("servePath", "", "obsoleted https://github.com/siyuan-note/siyuan/issues/4647")
 	_ = servePath
+	port := flag.String("port", "0", "port of the HTTP server")
 	resident := flag.Bool("resident", true, "resident memory even if no active session")
 	readOnly := flag.Bool("readonly", false, "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
@@ -76,6 +77,10 @@ func Boot() {
 	}
 	Mode = *mode
 	Resident = *resident
+	ServerPort = *port
+	if isRunningInDockerContainer() {
+		ServerPort = "6806"
+	}
 	ReadOnly = *readOnly
 	AccessAuthCode = *accessAuthCode
 	Container = ContainerStd
@@ -104,7 +109,6 @@ func Boot() {
 	}
 
 	initPathDir()
-	checkPort()
 	go initPandoc()
 
 	bootBanner := figure.NewColorFigure("SiYuan", "isometric3", "green", true)
@@ -272,6 +276,7 @@ func initWorkspaceDir(workspaceArg string) {
 }
 
 var (
+	ServerPort     = "0" // HTTP/WebSocket 端口，0 为使用随机端口
 	Resident       bool
 	ReadOnly       bool
 	AccessAuthCode string
@@ -317,60 +322,6 @@ func initPathDir() {
 	emojis := filepath.Join(DataDir, "emojis")
 	if err := os.MkdirAll(emojis, 0755); nil != err && !os.IsExist(err) {
 		log.Fatalf("create data emojis folder [%s] failed: %s", widgets, err)
-	}
-}
-
-func checkPort() {
-	portOpened := isPortOpen(ServerPort)
-	if !portOpened {
-		return
-	}
-
-	logging.LogInfof("port [%s] is opened, try to check version of running kernel", ServerPort)
-	result := NewResult()
-	_, err := httpclient.NewBrowserRequest().
-		SetResult(result).
-		SetHeader("User-Agent", UserAgent).
-		Get("http://127.0.0.1:" + ServerPort + "/api/system/version")
-	if nil != err || 0 != result.Code {
-		logging.LogErrorf("connect to port [%s] for checking running kernel failed", ServerPort)
-		KillByPort(ServerPort)
-		return
-	}
-
-	if nil == result.Data {
-		logging.LogErrorf("connect ot port [%s] for checking running kernel failed", ServerPort)
-		os.Exit(ExitCodeUnavailablePort)
-	}
-
-	runningVer := result.Data.(string)
-	if runningVer == Ver {
-		logging.LogInfof("version of the running kernel is the same as this boot [%s], exit this boot", runningVer)
-		os.Exit(ExitCodeOk)
-	}
-
-	logging.LogInfof("found kernel [%s] is running, try to exit it", runningVer)
-	processes, err := goPS.Processes()
-	if nil != err {
-		logging.LogErrorf("close kernel [%s] failed: %s", runningVer, err)
-		os.Exit(ExitCodeUnavailablePort)
-	}
-
-	currentPid := os.Getpid()
-	for _, p := range processes {
-		name := p.Executable()
-		if strings.Contains(strings.ToLower(name), "siyuan-kernel") || strings.Contains(strings.ToLower(name), "siyuan kernel") {
-			kernelPid := p.Pid()
-			if currentPid != kernelPid {
-				pid := strconv.Itoa(kernelPid)
-				Kill(pid)
-				logging.LogInfof("killed kernel [name=%s, pid=%s, ver=%s], continue to boot", name, pid, runningVer)
-			}
-		}
-	}
-
-	if !tryToListenPort() {
-		os.Exit(ExitCodeUnavailablePort)
 	}
 }
 

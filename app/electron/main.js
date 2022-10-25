@@ -603,6 +603,10 @@ const initKernel = (initData) => {
     }
 
     const getKernelPort = async () => {
+      if (isDevEnv) {
+        return kernelPort
+      }
+
       await sleep(200)
       let gotPort = false
       let count = 0

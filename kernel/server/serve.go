@@ -20,7 +20,9 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"net/http/pprof"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -79,7 +81,7 @@ func Serve(fastMode bool) {
 		host = "127.0.0.1"
 	}
 
-	ln, err := net.Listen("tcp", ":"+util.ServerPort)
+	ln, err := net.Listen("tcp", host+":"+util.ServerPort)
 	if nil != err {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
@@ -102,6 +104,17 @@ func Serve(fastMode bool) {
 
 	logging.LogInfof("kernel [pid=%s] is booting [%s]", pid, "http://"+host+":"+port)
 	util.HttpServing = true
+
+	go func() {
+		if util.FixedPort != port {
+			serverURL, _ := url.Parse("http://" + host + ":" + port)
+			proxy := httputil.NewSingleHostReverseProxy(serverURL)
+			logging.LogInfof("kernel reverse proxy server [%s] is booting", util.FixedPort)
+			if proxyErr := http.ListenAndServe(host+":"+util.FixedPort, proxy); nil != proxyErr {
+				logging.LogErrorf("boot kernel reverse proxy server failed: %s", serverURL, proxyErr)
+			}
+		}
+	}()
 
 	if err = http.Serve(ln, ginServer); nil != err {
 		if !fastMode {

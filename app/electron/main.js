@@ -630,7 +630,7 @@ const initKernel = (initData) => {
           await sleep(100)
         } finally {
           count++
-          if (64 < count) {
+          if (32 < count) {
             writeLog('get kernel port failed [pid=' + kernelProcessPid + ']')
             bootWindow.destroy()
             resolve(false)
@@ -656,10 +656,10 @@ const initKernel = (initData) => {
         bootWindow.show()
       } catch (e) {
         writeLog('get kernel version failed: ' + e.message)
-        await sleep(200)
+        await sleep(100)
       } finally {
         count++
-        if (64 < count) {
+        if (14 < count) {
           writeLog('get kernel ver failed')
           bootWindow.destroy()
           resolve(false)

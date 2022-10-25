@@ -42,6 +42,26 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             // 悬浮窗需展开上下文后才能进行滚动 https://github.com/siyuan-note/siyuan/issues/2311
             return;
         }
+        if (protyle.scroll && !protyle.scroll.element.classList.contains("fn__none")) {
+            clearTimeout(getIndexTimeout);
+            getIndexTimeout = window.setTimeout(() => {
+                elementRect = element.getBoundingClientRect();
+                const targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10)
+                console.log(targetElement, hasClosestBlock(targetElement), event);
+                const blockElement = hasClosestBlock(targetElement);
+                if (!blockElement) {
+                    return;
+                }
+                fetchPost("/api/block/getBlockIndex", {id: blockElement.getAttribute("data-node-id")}, (response) => {
+                    if (!response.data) {
+                        return;
+                    }
+                    const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement
+                    inputElement.value = response.data;
+                    protyle.scroll.element.setAttribute("aria-label", `Blocks ${response.data}/${protyle.block.blockCount}`);
+                });
+            }, Constants.TIMEOUT_BLOCKLOAD);
+        }
         if (protyle.wysiwyg.element.getAttribute("data-top") || protyle.block.showAll || protyle.scroll.lastScrollTop === element.scrollTop || protyle.scroll.lastScrollTop === -1) {
             return;
         }
@@ -75,26 +95,6 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             });
         }
         protyle.scroll.lastScrollTop = Math.max(element.scrollTop, 0);
-        if (protyle.scroll && !protyle.scroll.element.classList.contains("fn__none")) {
-            clearTimeout(getIndexTimeout);
-            getIndexTimeout = window.setTimeout(() => {
-                elementRect = element.getBoundingClientRect();
-                const targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10)
-                console.log(targetElement, hasClosestBlock(targetElement), event);
-                const blockElement = hasClosestBlock(targetElement);
-                if (!blockElement) {
-                    return;
-                }
-                fetchPost("/api/block/getBlockIndex", {id: blockElement.getAttribute("data-node-id")}, (response) => {
-                    if (!response.data) {
-                        return;
-                    }
-                    const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement
-                    inputElement.value = response.data;
-                    protyle.scroll.element.setAttribute("aria-label", `Blocks ${response.data}/${protyle.block.blockCount}`);
-                });
-            }, Constants.TIMEOUT_BLOCKLOAD);
-        }
     }, {
         capture: false,
         passive: true,

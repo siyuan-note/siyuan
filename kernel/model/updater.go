@@ -43,8 +43,10 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 	if gulu.OS.IsWindows() {
 		cmd = exec.Command(newVerInstallPkgPath)
 	} else if gulu.OS.IsDarwin() {
+		exec.Command("chmod", "+x", newVerInstallPkgPath).CombinedOutput()
 		cmd = exec.Command("open", newVerInstallPkgPath)
 	} else if gulu.OS.IsLinux() {
+		exec.Command("chmod", "+x", newVerInstallPkgPath).CombinedOutput()
 		cmd = exec.Command("sh", "-c", newVerInstallPkgPath)
 	}
 	gulu.CmdAttr(cmd)

@@ -219,6 +219,7 @@ func initWorkspaceDir(workspaceArg string) {
 
 		tmp := workspacePaths[:0]
 		for _, d := range workspacePaths {
+			d = strings.TrimRight(d, " \t\n") // 去掉工作空间路径尾部空格 https://github.com/siyuan-note/siyuan/issues/6353
 			if gulu.File.IsDir(d) {
 				tmp = append(tmp, d)
 			}

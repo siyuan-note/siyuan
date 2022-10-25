@@ -96,7 +96,7 @@ export const getTopEmptyElement = (element: Element) => {
         if (!topElement.parentElement.getAttribute("data-node-id")) {
             topElement = topElement.parentElement;
         } else {
-            let hasText = false
+            let hasText = false;
             Array.from(topElement.parentElement.querySelectorAll('[contenteditable="true"]')).find(item => {
                 if (item.textContent.replace(Constants.ZWSP, "").replace("\n", "") !== "") {
                     hasText = true;

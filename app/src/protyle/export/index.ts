@@ -61,6 +61,7 @@ export const saveExport = (option: { type: string, id: string }) => {
 };
 
 /// #if !BROWSER
+let originalZoomFactor = 1;
 const renderPDF = (id: string) => {
     const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_EXPORTPDF) || JSON.stringify({
         landscape: false,
@@ -371,12 +372,13 @@ const renderPDF = (id: string) => {
     });
 </script></body></html>`;
     const mainWindow = getCurrentWindow();
-    const mainWindowZoomFactor = mainWindow.webContents.getZoomFactor();
+    originalZoomFactor = mainWindow.webContents.zoomFactor;
     window.siyuan.printWin = new BrowserWindow({
         parent: mainWindow,
         modal: true,
         show: true,
         width: 1032,
+        height: 618,
         resizable: false,
         frame: "darwin" === window.siyuan.config.system.os,
         icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
@@ -393,10 +395,14 @@ const renderPDF = (id: string) => {
         // 导出 PDF 预览界面不受主界面缩放影响 https://github.com/siyuan-note/siyuan/issues/6262
         window.siyuan.printWin.webContents.setZoomFactor(1);
     });
-    window.siyuan
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
         window.siyuan.printWin.loadURL(response.data.url);
     });
+};
+
+export const destroyPrintWindow = () => {
+    getCurrentWindow().webContents.setZoomFactor(originalZoomFactor);
+    window.siyuan.printWin.destroy();
 };
 
 const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean) => {

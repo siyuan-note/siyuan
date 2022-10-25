@@ -28,6 +28,7 @@ import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
 import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
+import {destroyPrintWindow} from "../protyle/export";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -381,7 +382,7 @@ const initWindow = () => {
         winOnClose(currentWindow, close);
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_CLOSE, () => {
-        window.siyuan.printWin.destroy();
+        destroyPrintWindow();
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, (e, ipcData) => {
         dialog.showOpenDialog({
@@ -389,7 +390,7 @@ const initWindow = () => {
             properties: ["createDirectory", "openDirectory"],
         }).then((result: OpenDialogReturnValue) => {
             if (result.canceled) {
-                window.siyuan.printWin.destroy();
+                destroyPrintWindow();
                 return;
             }
             const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -405,7 +406,7 @@ const initWindow = () => {
                     }, () => {
                         const pdfFilePath = path.join(filePath, path.basename(filePath) + ".pdf");
                         fs.writeFileSync(pdfFilePath, pdfData);
-                        window.siyuan.printWin.destroy();
+                        destroyPrintWindow();
                         fetchPost("/api/export/addPDFOutline", {
                             id: ipcData.rootId,
                             path: pdfFilePath
@@ -437,11 +438,11 @@ const initWindow = () => {
                     });
                 }).catch((error: string) => {
                     showMessage("Export PDF error:" + error, 0, "error", msgId);
-                    window.siyuan.printWin.destroy();
+                    destroyPrintWindow();
                 });
             } catch (e) {
                 showMessage("Export PDF failed: " + e, 0, "error", msgId);
-                window.siyuan.printWin.destroy();
+                destroyPrintWindow();
             }
             window.siyuan.printWin.hide();
         });

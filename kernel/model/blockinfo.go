@@ -163,6 +163,10 @@ func GetBlockIndex(id string) (ret int) {
 		return
 	}
 
+	rootChild := node
+	for ; nil == rootChild.Parent || ast.NodeDocument != rootChild.Parent.Type; rootChild = rootChild.Parent {
+	}
+
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -173,7 +177,7 @@ func GetBlockIndex(id string) (ret int) {
 		}
 
 		ret++
-		if node == n {
+		if n.ID == rootChild.ID {
 			return ast.WalkStop
 		}
 		return ast.WalkContinue

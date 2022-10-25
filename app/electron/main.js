@@ -560,11 +560,8 @@ const initKernel = (initData) => {
                 `<div>数据库文件正在被其他程序锁定。如果你使用了第三方同步盘，请在思源运行期间关闭同步。</div><div>The database file is being locked by another program. If you use a third-party sync disk, please turn off sync while SiYuan is running.</div>`)
               break
             case 21:
-              showErrorWindow('⚠️ ' + kernelPort + ' 端口不可用 The port ' + kernelPort + ' is unavailable',
-                '<div>思源需要监听 ' + kernelPort + ' 端口，请确保该端口可用且不是其他程序的保留端口。可尝试使用管理员运行命令：' +
-                '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=' + kernelPort + ' numberofports=1\nnet start winnat</code></pre></div>' +
-                '<div>SiYuan needs to listen to port ' + kernelPort + ', please make sure this port is available, and not a reserved port by other software. Try running the command as an administrator: ' +
-                '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=' + kernelPort + ' numberofports=1\nnet start winnat</code></pre></div>')
+              showErrorWindow('⚠️ 监听端口 ' + kernelPort + ' 失败 Failed to listen to port ' + kernelPort,
+                '<div>监听 ' + kernelPort + ' 端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to listen to port ' + kernelPort + ', please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>')
               break
             case 22:
               showErrorWindow(

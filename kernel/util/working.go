@@ -78,14 +78,14 @@ func Boot() {
 	Mode = *mode
 	Resident, _ = strconv.ParseBool(*resident)
 	ServerPort = *port
-	if isRunningInDockerContainer() || "dev" == Mode {
-		ServerPort = FixedPort
-	}
 	ReadOnly, _ = strconv.ParseBool(*readOnly)
 	AccessAuthCode = *accessAuthCode
 	Container = ContainerStd
 	if isRunningInDockerContainer() {
 		Container = ContainerDocker
+	}
+	if ContainerStd != Container || "dev" == Mode {
+		ServerPort = FixedPort
 	}
 
 	msStoreFilePath := filepath.Join(WorkingDir, "ms-store")

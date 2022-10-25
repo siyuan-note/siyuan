@@ -551,55 +551,59 @@ const initKernel = (initData) => {
     }
     let cmd = `ui version [${appVer}], booting kernel [${kernelPath} ${cmds.join(' ')}]`
     writeLog(cmd)
-    const cp = require('child_process')
-    const kernelProcess = cp.spawn(kernelPath,
-      cmds, {
-        detached: false, // 桌面端内核进程不再以游离模式拉起 https://github.com/siyuan-note/siyuan/issues/6336
-        stdio: 'ignore',
-      },
-    )
-    writeLog('booted kernel process [pid=' + kernelProcess.pid + ']')
+    let kernelProcessPid = ""
+    if (!isDevEnv) {
+      const cp = require('child_process')
+      const kernelProcess = cp.spawn(kernelPath,
+        cmds, {
+          detached: false, // 桌面端内核进程不再以游离模式拉起 https://github.com/siyuan-note/siyuan/issues/6336
+          stdio: 'ignore',
+        },
+      )
+      kernelProcessPid = kernelProcess.pid
+      writeLog('booted kernel process [pid=' + kernelProcessPid + ']')
 
-    kernelProcess.on('close', (code) => {
-      if (0 !== code) {
-        writeLog(`kernel exited with code [${code}]`)
-        switch (code) {
-          case 20:
-            showErrorWindow('⚠️ 数据库被锁定 The database is locked',
-              `<div>数据库文件正在被其他程序锁定。如果你使用了第三方同步盘，请在思源运行期间关闭同步。</div><div>The database file is being locked by another program. If you use a third-party sync disk, please turn off sync while SiYuan is running.</div>`)
-            break
-          case 21:
-            showErrorWindow('⚠️ ' + kernelPort + ' 端口不可用 The port ' + kernelPort + ' is unavailable',
-              '<div>思源需要监听 ' + kernelPort + ' 端口，请确保该端口可用且不是其他程序的保留端口。可尝试使用管理员运行命令：' +
-              '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=' + kernelPort + ' numberofports=1\nnet start winnat</code></pre></div>' +
-              '<div>SiYuan needs to listen to port ' + kernelPort + ', please make sure this port is available, and not a reserved port by other software. Try running the command as an administrator: ' +
-              '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=' + kernelPort + ' numberofports=1\nnet start winnat</code></pre></div>')
-            break
-          case 22:
-            showErrorWindow(
-              '⚠️ 创建配置目录失败 Failed to create config directory',
-              `<div>思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。</div><div>SiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.</div>`)
-            break
-          case 23:
-            showErrorWindow(
-              '⚠️ 无法读写块树文件 Failed to access blocktree file',
-              `<div>块树文件正在被其他程序锁定或者已经损坏，请删除 工作空间/temp/ 文件夹后重启</div><div>The block tree file is being locked by another program or is corrupted, please delete the workspace/temp/ folder and restart.</div>`)
-            break
-          case 0:
-          case 1: // Fatal error
-            break
-          default:
-            showErrorWindow(
-              '⚠️ 内核因未知原因退出 The kernel exited for unknown reasons',
-              `<div>思源内核因未知原因退出 [code=${code}]，请尝试重启操作系统后再启动思源。如果该问题依然发生，请检查杀毒软件是否阻止思源内核启动。</div>
+      kernelProcess.on('close', (code) => {
+        if (0 !== code) {
+          writeLog(`kernel exited with code [${code}]`)
+          switch (code) {
+            case 20:
+              showErrorWindow('⚠️ 数据库被锁定 The database is locked',
+                `<div>数据库文件正在被其他程序锁定。如果你使用了第三方同步盘，请在思源运行期间关闭同步。</div><div>The database file is being locked by another program. If you use a third-party sync disk, please turn off sync while SiYuan is running.</div>`)
+              break
+            case 21:
+              showErrorWindow('⚠️ ' + kernelPort + ' 端口不可用 The port ' + kernelPort + ' is unavailable',
+                '<div>思源需要监听 ' + kernelPort + ' 端口，请确保该端口可用且不是其他程序的保留端口。可尝试使用管理员运行命令：' +
+                '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=' + kernelPort + ' numberofports=1\nnet start winnat</code></pre></div>' +
+                '<div>SiYuan needs to listen to port ' + kernelPort + ', please make sure this port is available, and not a reserved port by other software. Try running the command as an administrator: ' +
+                '<pre><code>net stop winnat\nnetsh interface ipv4 add excludedportrange protocol=tcp startport=' + kernelPort + ' numberofports=1\nnet start winnat</code></pre></div>')
+              break
+            case 22:
+              showErrorWindow(
+                '⚠️ 创建配置目录失败 Failed to create config directory',
+                `<div>思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。</div><div>SiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.</div>`)
+              break
+            case 23:
+              showErrorWindow(
+                '⚠️ 无法读写块树文件 Failed to access blocktree file',
+                `<div>块树文件正在被其他程序锁定或者已经损坏，请删除 工作空间/temp/ 文件夹后重启</div><div>The block tree file is being locked by another program or is corrupted, please delete the workspace/temp/ folder and restart.</div>`)
+              break
+            case 0:
+            case 1: // Fatal error
+              break
+            default:
+              showErrorWindow(
+                '⚠️ 内核因未知原因退出 The kernel exited for unknown reasons',
+                `<div>思源内核因未知原因退出 [code=${code}]，请尝试重启操作系统后再启动思源。如果该问题依然发生，请检查杀毒软件是否阻止思源内核启动。</div>
 <div>SiYuan Kernel exited for unknown reasons [code=${code}], please try to reboot your operating system and then start SiYuan again. If occurs this problem still, please check your anti-virus software whether kill the SiYuan Kernel.</div>`)
-            break
-        }
+              break
+          }
 
-        bootWindow.destroy()
-        resolve(false)
-      }
-    })
+          bootWindow.destroy()
+          resolve(false)
+        }
+      })
+    }
 
     const sleep = (ms) => {
       return new Promise(resolve => setTimeout(resolve, ms))
@@ -616,7 +620,7 @@ const initKernel = (initData) => {
       while (!gotPort) {
         try {
           const portJSON = JSON.parse(fs.readFileSync(portJSONPath, 'utf8'))
-          const ret = portJSON[kernelProcess.pid.toString()]
+          const ret = portJSON[kernelProcessPid]
           if (ret) {
             gotPort = true
             return ret
@@ -627,7 +631,7 @@ const initKernel = (initData) => {
         } finally {
           count++
           if (64 < count) {
-            writeLog('get kernel port failed [pid=' + kernelProcess.pid + ']')
+            writeLog('get kernel port failed [pid=' + kernelProcessPid + ']')
             bootWindow.destroy()
             resolve(false)
           }
@@ -812,6 +816,7 @@ app.on('before-quit', (event) => {
 })
 
 const {powerMonitor} = require('electron')
+const cp = require("child_process");
 
 powerMonitor.on('suspend', () => {
   writeLog('system suspend')

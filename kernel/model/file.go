@@ -602,19 +602,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 
 	var virtualBlockRefKeywords []string
 	if Conf.Editor.VirtualBlockRef {
-		virtualBlockRefKeywords = sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc)
-		if "" != strings.TrimSpace(Conf.Editor.VirtualBlockRefExclude) {
-			exclude := strings.ReplaceAll(Conf.Editor.VirtualBlockRefExclude, "\\,", "__comma@sep__")
-			excludes := strings.Split(exclude, ",")
-			var tmp []string
-			for _, e := range excludes {
-				e = strings.ReplaceAll(e, "__comma@sep__", ",")
-				tmp = append(tmp, e)
-			}
-			excludes = tmp
-			virtualBlockRefKeywords = gulu.Str.ExcludeElem(virtualBlockRefKeywords, excludes)
-		}
-
+		virtualBlockRefKeywords = getVirtualRefKeywords()
 		// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
 		virtualBlockRefKeywords = gulu.Str.ExcludeElem(virtualBlockRefKeywords, []string{tree.Root.IALAttr("title")})
 		virtualBlockRefKeywords = prepareMarkKeywords(virtualBlockRefKeywords)

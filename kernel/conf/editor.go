@@ -30,6 +30,7 @@ type Editor struct {
 	Emoji                           []string `json:"emoji"`                           // 常用表情
 	VirtualBlockRef                 bool     `json:"virtualBlockRef"`                 // 是否启用虚拟引用
 	VirtualBlockRefExclude          string   `json:"virtualBlockRefExclude"`          // 虚拟引用关键字排除列表
+	VirtualBlockRefInclude          string   `json:"virtualBlockRefInclude"`          // 虚拟引用关键字包含列表
 	BlockRefDynamicAnchorTextMaxLen int      `json:"blockRefDynamicAnchorTextMaxLen"` // 块引动态锚文本最大长度
 	PlantUMLServePath               string   `json:"plantUMLServePath"`               // PlantUML 伺服地址
 	FullWidth                       bool     `json:"fullWidth"`                       // 是否使用最大宽度

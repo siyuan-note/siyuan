@@ -573,6 +573,7 @@
   "md4": "Sangria automáticamente el comienzo de los párrafos para ajustarse a los hábitos tipográficos tradicionales chinos",
   "md7": "Mostrar la marca de esquina de la imagen de red",
   "md8": "Después de habilitarlo, si la imagen es un archivo de red (archivo de activos no locales), mostrará una marca de esquina",
+  "md9": "Lista de inclusión de palabras clave de referencia virtual",
   "md12": "Mostrar el marcador, el nombre, el alias, el memo y el recuento de referencias",
   "md16": "Una vez habilitado, si existe dicha información, se mostrará en la parte superior derecha del bloque",
   "md27": "El bloque de código muestra el número de línea",

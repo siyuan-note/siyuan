@@ -96,6 +96,7 @@ func Serve(fastMode bool) {
 			os.Exit(util.ExitCodeUnavailablePort)
 		}
 	}
+	util.ServerPort = port
 
 	pid := fmt.Sprintf("%d", os.Getpid())
 	if !fastMode {

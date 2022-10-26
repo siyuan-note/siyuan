@@ -74,6 +74,8 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             // up
             if (element.scrollTop < element.clientHeight &&
                 protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "true") {
+                // 禁用滚动时会产生抖动 https://ld246.com/article/1666717094418
+                protyle.contentElement.style.width = (protyle.contentElement.clientWidth) + "px";
                 protyle.contentElement.style.overflow = "hidden";
                 protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
                 fetchPost("/api/filetree/getDoc", {
@@ -83,6 +85,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                     size: Constants.SIZE_GET,
                 }, getResponse => {
                     protyle.contentElement.style.overflow = "";
+                    protyle.contentElement.style.width = "";
                     onGet(getResponse, protyle, [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID]);
                 });
             }

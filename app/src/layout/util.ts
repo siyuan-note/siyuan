@@ -453,6 +453,9 @@ export const resizeTabs = () => {
             if (mTreeElement.style.height && mTreeElement.style.height !== "0px") {
                 mTreeElement.style.height = (item.element.clientHeight - mTreeElement.previousElementSibling.clientHeight * 2) + "px";
             }
+            item.editors.forEach(editorItem => {
+                hideElements(["gutter"], editorItem.protyle);
+            })
         });
         pdfResize();
     }, 200);

@@ -115,7 +115,7 @@
   "type": "Tipo",
   "searchType": "Tipos (busque en los tipos habilitados a continuación, la opción de filtro en la búsqueda global anula esta configuración)",
   "searchAttr": "Atributo (busca no sólo en el contenido, sino también en los siguientes atributos habilitados)",
-  "searchBackmention": "Menciones de Backlinks (las menciones de backlinks de las que se obtienen las palabras clave de la búsqueda)",
+  "searchBackmention": "Menciones de backlinks (las menciones de backlinks de las que se obtienen las palabras clave de la búsqueda)",
   "searchVirtualRef": "Referencia virtual (las palabras clave de búsqueda de referencias virtuales se obtienen a partir de ellas)",
   "netImg2LocalAsset": "Convertir imágenes de red en imágenes locales",
   "releaseDate": "Fecha de lanzamiento",

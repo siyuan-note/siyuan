@@ -1296,34 +1296,36 @@ export class Gutter {
             }).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom)}/${updateHotkeyTip("⌘Click")}`,
-            label: window.siyuan.languages.enter,
-            click() {
-                zoomOut(protyle, id);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            accelerator: window.siyuan.config.keymap.general.enterBack.custom,
-            label: window.siyuan.languages.enterBack,
-            click() {
-                if (!protyle.block.showAll) {
-                    const ids = protyle.path.split("/");
-                    if (ids.length > 2) {
-                        /// #if MOBILE
-                        openMobileFileById(ids[ids.length - 2], [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
-                        /// #else
-                        openFileById({
-                            id: ids[ids.length - 2],
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
-                        });
-                        /// #endif
-                    }
-                } else {
-                    zoomOut(protyle, protyle.block.parent2ID, id);
+        if (!protyle.options.backlinkData) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom)}/${updateHotkeyTip("⌘Click")}`,
+                label: window.siyuan.languages.enter,
+                click() {
+                    zoomOut(protyle, id);
                 }
-            }
-        }).element);
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                accelerator: window.siyuan.config.keymap.general.enterBack.custom,
+                label: window.siyuan.languages.enterBack,
+                click() {
+                    if (!protyle.block.showAll) {
+                        const ids = protyle.path.split("/");
+                        if (ids.length > 2) {
+                            /// #if MOBILE
+                            openMobileFileById(ids[ids.length - 2], [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
+                            /// #else
+                            openFileById({
+                                id: ids[ids.length - 2],
+                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                            });
+                            /// #endif
+                        }
+                    } else {
+                        zoomOut(protyle, protyle.block.parent2ID, id);
+                    }
+                }
+            }).element);
+        }
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconBefore",

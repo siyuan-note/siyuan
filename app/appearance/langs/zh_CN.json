@@ -1,6 +1,6 @@
 {
   "useFixedPort": "使用固定端口",
-  "useFixedPortTip": "开启后将使用固定端口 <code class='fn__code'>6806</code>，关闭时使用随机端口。修改后会自动关闭应用，请手动重启",
+  "useFixedPortTip": "开启后将仅使用固定端口 <code class='fn__code'>6806</code>，关闭时同时使用随机端口和 <code class='fn__code'>6806</code>。修改后会自动关闭应用，请手动重启",
   "expandDown": "向下扩选",
   "expandUp": "向上扩选",
   "goForward": "前进",

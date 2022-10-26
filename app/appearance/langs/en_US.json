@@ -1,6 +1,6 @@
 {
   "useFixedPort": "Use Fixed Port",
-  "useFixedPortTip": "After enabling, the fixed port <code class='fn__code'>6806</code> will be used, and a random port will be used when it is disabled. The application will be closed automatically after modification, please restart manually",
+  "useFixedPortTip": "After enabling, only the port <code class='fn__code'>6806</code> will be used. When disabled, both random ports and <code class='fn__code'>6806</code> will be used. The application will be closed automatically after modification, please restart manually",
   "expandDown": "Expand Down",
   "expandUp": "Expand Up",
   "goForward": "Go forward",

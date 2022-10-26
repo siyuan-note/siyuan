@@ -40,11 +40,24 @@
       padding: 0;
       margin: 0;
 
-      &[fold="1"] {
-        & > [data-node-id]:before {
-          content: none;
-        }
+      &:before {
+        content: "";
+        position: absolute;
+        height: calc(100% - 19px);
+        border-left: 1px solid var(--b3-theme-background-light);
+        top: 29px;
+        left: 16px;
+      }
 
+      &:hover:before {
+        border-left-color: var(--b3-scroll-color);
+      }
+
+      &:nth-last-child(2):before {
+        height: calc(100% - 36px)
+      }
+
+      &[fold="1"] {
         & > .protyle-action:after {
           background-color: var(--b3-theme-surface-lighter);
         }
@@ -99,50 +112,15 @@
 
       & > div:nth-child(2) {
         margin-top: 0 !important;
-
-        &:before {
-          top: 34px !important;
-          height: calc(100% - 26px) !important; // https://ld246.com/article/1636540486193
-        }
-
-        &:nth-last-child(2):before {
-          content: none;
-        }
-      }
-
-      & > div:nth-last-child(2):before {
-        height: 100%;
-        top: 0;
       }
 
       & > [data-node-id] {
         margin-left: 34px !important;
         padding-right: 0;
 
-        &:before {
-          content: "";
-          position: absolute;
-          height: calc(100% + 4px);
-          border-left: 1px solid var(--b3-theme-background-light);
-          top: 4px;
-          left: -18px;
-        }
-
-        &[data-type="NodeBlockQueryEmbed"]:before {
-          left: -19px;
-        }
-
-        &.bq:before {
-          left: calc(-18px - 0.25em);
-        }
-
         &.code-block {
           margin-top: 4px;
           margin-bottom: 4px;
-        }
-
-        &.list:before {
-          left: -2px;
         }
       }
 

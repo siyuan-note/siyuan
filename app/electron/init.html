@@ -361,6 +361,8 @@
       })
     })
   })
+  // 防止内核长时间不用被回收
+  new WebSocket(`${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`);
 </script>
 </body>
 </html>

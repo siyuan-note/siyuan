@@ -6,7 +6,7 @@
 		"id": "20200813131152-0wk5akh",
 		"title": "在内容块中遨游",
 		"type": "doc",
-		"updated": "20220312233009"
+		"updated": "20221026222004"
 	},
 	"Children": [
 		{
@@ -433,21 +433,74 @@
 			"ID": "20210106201743-z1iz0ce",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210106201743-z1iz0ce"
+				"id": "20210106201743-z1iz0ce",
+				"updated": "20221026221118"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "提及使用当前文档中内容块名称和别名作为关键字进行搜索，搜索结果为包含这些关键字的内容块。可以通过链接按钮将提及转换为链接：提及处会使用 "
+					"Data": "提及使用当前文档中内容块命名、别名、引用锚文本和文档名作为关键字进行搜索（可在 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "((id \"内容块名称\"))"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 进行替换。"
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "反链提及"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中设置搜索范围），搜索结果为包含这些关键字的内容块。"
+				}
+			]
+		},
+		{
+			"ID": "20221026221105-dyj8l8n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221026221105-dyj8l8n",
+				"updated": "20221026222004"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​：提及搜索仅会在普通文本中搜索，不会在粗体、斜体等行级元素和代码块、图表等块级元素中搜索，这一点和"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211010211708-0qn8cpl",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "虚拟引用探测规则"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "是相同的。"
 				}
 			]
 		}

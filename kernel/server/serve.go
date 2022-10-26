@@ -308,7 +308,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 	})
 
 	util.WebSocketServer.HandlePong(func(session *melody.Session) {
-		//model.Logger.Debugf("pong")
+		//logging.LogInfof("pong")
 	})
 
 	util.WebSocketServer.HandleConnect(func(s *melody.Session) {
@@ -338,8 +338,13 @@ func serveWebSocket(ginServer *gin.Engine) {
 		}
 
 		if !authOk {
+			// 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
+			authOk = strings.Contains(s.Request.RequestURI, "/ws?app=siyuan&id=auth")
+		}
+
+		if !authOk {
 			s.CloseWithMsg([]byte("  unauthenticated"))
-			//logging.LogWarnf("closed a unauthenticated session [%s]", util.GetRemoteAddr(s))
+			//logging.LogWarnf("closed an unauthenticated session [%s]", util.GetRemoteAddr(s))
 			return
 		}
 
@@ -351,7 +356,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 	util.WebSocketServer.HandleDisconnect(func(s *melody.Session) {
 		util.RemovePushChan(s)
 		//sessionId, _ := s.Get("id")
-		//model.Logger.Debugf("ws [%s] disconnected", sessionId)
+		//logging.LogInfof("ws [%s] disconnected", sessionId)
 	})
 
 	util.WebSocketServer.HandleError(func(s *melody.Session, err error) {

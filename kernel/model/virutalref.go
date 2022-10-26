@@ -17,13 +17,69 @@
 package model
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
+	"github.com/88250/lute/ast"
+	"github.com/88250/lute/lex"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
-func getVirtualRefKeywords() (ret []string) {
+func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeywords []string, refCount map[string]int, luteEngine *lute.Lute) bool {
+	if !Conf.Editor.VirtualBlockRef || 1 > len(virtualBlockRefKeywords) {
+		return false
+	}
+
+	parentBlock := treenode.ParentBlock(n)
+	if nil == parentBlock || 0 < refCount[parentBlock.ID] {
+		return false
+	}
+
+	content := string(n.Tokens)
+	newContent := markReplaceSpanWithSplit(content, virtualBlockRefKeywords, virtualBlockRefSpanStart, virtualBlockRefSpanEnd)
+	if content != newContent {
+		// 虚拟引用排除命中自身块命名和别名的情况 https://github.com/siyuan-note/siyuan/issues/3185
+		var blockKeys []string
+		if name := parentBlock.IALAttr("name"); "" != name {
+			blockKeys = append(blockKeys, name)
+		}
+		if alias := parentBlock.IALAttr("alias"); "" != alias {
+			blockKeys = append(blockKeys, alias)
+		}
+		if 0 < len(blockKeys) {
+			keys := gulu.Str.SubstringsBetween(newContent, virtualBlockRefSpanStart, virtualBlockRefSpanEnd)
+			for _, k := range keys {
+				if gulu.Str.Contains(k, blockKeys) {
+					return true
+				}
+			}
+		}
+
+		n.Tokens = []byte(newContent)
+		n.Tokens = lex.EscapeMarkers(n.Tokens)
+		linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
+		var children []*ast.Node
+		for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+			children = append(children, c)
+		}
+		for _, c := range children {
+			n.InsertBefore(c)
+		}
+		*unlinks = append(*unlinks, n)
+		return true
+	}
+	return false
+}
+
+func getVirtualRefKeywords(docName string) (ret []string) {
+	if !Conf.Editor.VirtualBlockRef {
+		return
+	}
+
 	ret = sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc)
 	if "" != strings.TrimSpace(Conf.Editor.VirtualBlockRefInclude) {
 		include := strings.ReplaceAll(Conf.Editor.VirtualBlockRefInclude, "\\,", "__comma@sep__")
@@ -49,5 +105,24 @@ func getVirtualRefKeywords() (ret []string) {
 		excludes = tmp
 		ret = gulu.Str.ExcludeElem(ret, excludes)
 	}
+
+	// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
+	ret = gulu.Str.ExcludeElem(ret, []string{docName})
+	ret = prepareMarkKeywords(ret)
+	return
+}
+
+func prepareMarkKeywords(keywords []string) (ret []string) {
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	for _, k := range keywords {
+		if strings.ContainsAny(k, "?*!@#$%^&()[]{}\\|;:'\",.<>~`") {
+			continue
+		}
+		ret = append(ret, k)
+	}
+
+	sort.SliceStable(ret, func(i, j int) bool {
+		return len(ret[i]) < len(ret[j])
+	})
 	return
 }

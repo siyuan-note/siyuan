@@ -43,10 +43,10 @@
       &:before {
         content: "";
         position: absolute;
-        height: calc(100% - 19px);
-        border-left: 1px solid var(--b3-theme-background-light);
-        top: 29px;
-        left: 16px;
+        height: calc(100% - 31px);
+        border-left: 0.5px solid var(--b3-theme-background-light);
+        top: 35px;
+        left: 17px;
       }
 
       &:hover:before {
@@ -58,6 +58,10 @@
       }
 
       &[fold="1"] {
+        &:before {
+          content: none;
+        }
+
         & > .protyle-action:after {
           background-color: var(--b3-theme-surface-lighter);
         }

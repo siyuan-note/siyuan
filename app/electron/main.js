@@ -551,8 +551,8 @@ const initKernel = (initData) => {
       writeLog('booted kernel process [pid=' + kernelProcessPid + ']')
 
       kernelProcess.on('close', (code) => {
+        writeLog(`kernel exited with code [${code}]`)
         if (0 !== code) {
-          writeLog(`kernel exited with code [${code}]`)
           switch (code) {
             case 20:
               showErrorWindow('⚠️ 数据库被锁定 The database is locked',

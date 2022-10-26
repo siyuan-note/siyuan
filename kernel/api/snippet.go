@@ -88,3 +88,24 @@ func getSnippet(c *gin.Context) {
 		"snippets": snippets,
 	}
 }
+
+func setSnippet(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	name := arg["name"].(string)
+	typ := arg["type"].(string)
+	content := arg["content"].(string)
+	enabled := arg["enabled"].(bool)
+	err := model.SetSnippet(name, typ, content, enabled)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = "set snippet failed: " + err.Error()
+		return
+	}
+}

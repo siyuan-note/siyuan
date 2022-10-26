@@ -696,28 +696,3 @@ func clearWorkspaceTemp() {
 
 	logging.LogInfof("cleared workspace temp")
 }
-
-var loadSnippetsLock = sync.Mutex{}
-
-func LoadSnippets() (ret []*conf.Snippet, err error) {
-	loadSnippetsLock.Lock()
-	defer loadSnippetsLock.Unlock()
-
-	ret = []*conf.Snippet{}
-	confPath := filepath.Join(util.DataDir, "snippets/conf.json")
-	if !gulu.File.IsExist(confPath) {
-		return
-	}
-
-	data, err := filelock.ReadFile(confPath)
-	if nil != err {
-		logging.LogErrorf("load js snippets failed: %s", err)
-		return
-	}
-
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		logging.LogErrorf("unmarshal js snippets failed: %s", err)
-		return
-	}
-	return
-}

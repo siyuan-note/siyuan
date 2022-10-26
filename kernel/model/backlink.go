@@ -301,14 +301,13 @@ func buildBacklink(refID string, refTree *parse.Tree, mentionKeywords []string, 
 				}
 				if ast.NodeText == n.Type {
 					text := string(n.Tokens)
-					newText := markReplaceSpan(text, mentionKeywords, searchMarkSpanStart, searchMarkSpanEnd)
+					newText := markReplaceSpanWithSplit(text, mentionKeywords, searchMarkSpanStart, searchMarkSpanEnd)
 					if text == newText {
 						return ast.WalkContinue
 					}
 
 					n.Tokens = gulu.Str.ToBytes(newText)
 					if bytes.Contains(n.Tokens, []byte("search-mark")) {
-						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\"+searchMarkSpanStart), []byte("\\\\"+searchMarkSpanEnd))
 						n.Tokens = lex.EscapeMarkers(n.Tokens)
 						linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
 						var children []*ast.Node
@@ -794,7 +793,7 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 			continue
 		}
 
-		newText := markReplaceSpan(text, mentionKeywords, searchMarkSpanStart, searchMarkSpanEnd)
+		newText := markReplaceSpanWithSplit(text, mentionKeywords, searchMarkSpanStart, searchMarkSpanEnd)
 		if text != newText {
 			tmp = append(tmp, b)
 		}

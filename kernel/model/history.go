@@ -17,7 +17,6 @@
 package model
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -32,7 +31,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/filelock"
@@ -181,22 +179,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 
 			if ast.NodeText == n.Type {
 				if 0 < len(keywords) {
-					// 搜索高亮
-					text := string(n.Tokens)
-					text = search.EncloseHighlighting(text, keywords, searchMarkSpanStart, searchMarkSpanEnd, false)
-					n.Tokens = gulu.Str.ToBytes(text)
-					if bytes.Contains(n.Tokens, []byte("search-mark")) {
-						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\"+searchMarkSpanStart), []byte("\\\\"+searchMarkSpanStart))
-						n.Tokens = lex.EscapeMarkers(n.Tokens)
-						linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
-						var children []*ast.Node
-						for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
-							children = append(children, c)
-						}
-						for _, c := range children {
-							n.InsertBefore(c)
-						}
-						unlinks = append(unlinks, n)
+					if markReplaceSpan(n, &unlinks, string(n.Tokens), keywords, searchMarkSpanStart, searchMarkSpanEnd, luteEngine) {
 						return ast.WalkContinue
 					}
 				}

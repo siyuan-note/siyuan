@@ -17,7 +17,6 @@
 package model
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -34,7 +33,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
-	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	util2 "github.com/88250/lute/util"
 	"github.com/dustin/go-humanize"
@@ -598,15 +596,9 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 	} else {
 		nodes, eof = loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)
 	}
-	refCount := sql.QueryRootChildrenRefCount(rootID)
 
-	var virtualBlockRefKeywords []string
-	if Conf.Editor.VirtualBlockRef {
-		virtualBlockRefKeywords = getVirtualRefKeywords()
-		// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
-		virtualBlockRefKeywords = gulu.Str.ExcludeElem(virtualBlockRefKeywords, []string{tree.Root.IALAttr("title")})
-		virtualBlockRefKeywords = prepareMarkKeywords(virtualBlockRefKeywords)
-	}
+	refCount := sql.QueryRootChildrenRefCount(rootID)
+	virtualBlockRefKeywords := getVirtualRefKeywords(tree.Root.IALAttr("title"))
 
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 	keyword = strings.Join(strings.Split(keyword, " "), search.TermSep)
@@ -648,65 +640,14 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 						}
 					}
 					if hitBlock {
-						// 搜索高亮
-						text := string(n.Tokens)
-						text = search.EncloseHighlighting(text, keywords, searchMarkSpanStart, searchMarkSpanEnd, Conf.Search.CaseSensitive)
-						n.Tokens = gulu.Str.ToBytes(text)
-						if bytes.Contains(n.Tokens, []byte("search-mark")) {
-							n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\"+searchMarkSpanStart), []byte("\\\\"+searchMarkSpanEnd))
-							n.Tokens = lex.EscapeMarkers(n.Tokens)
-							linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
-							var children []*ast.Node
-							for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
-								children = append(children, c)
-							}
-							for _, c := range children {
-								n.InsertBefore(c)
-							}
-							unlinks = append(unlinks, n)
+						if markReplaceSpan(n, &unlinks, string(n.Tokens), keywords, searchMarkSpanStart, searchMarkSpanEnd, luteEngine) {
 							return ast.WalkContinue
 						}
 					}
 				}
 
-				// 虚拟引用
-				if Conf.Editor.VirtualBlockRef && 0 < len(virtualBlockRefKeywords) {
-					parentBlock := treenode.ParentBlock(n)
-					if nil != parentBlock && 1 > refCount[parentBlock.ID] {
-						content := string(n.Tokens)
-						newContent := markReplaceSpan(content, virtualBlockRefKeywords, virtualBlockRefSpanStart, virtualBlockRefSpanEnd)
-						if content != newContent {
-							// 虚拟引用排除命中自身块命名和别名的情况 https://github.com/siyuan-note/siyuan/issues/3185
-							var blockKeys []string
-							if name := parentBlock.IALAttr("name"); "" != name {
-								blockKeys = append(blockKeys, name)
-							}
-							if alias := parentBlock.IALAttr("alias"); "" != alias {
-								blockKeys = append(blockKeys, alias)
-							}
-							if 0 < len(blockKeys) {
-								keys := gulu.Str.SubstringsBetween(newContent, virtualBlockRefSpanStart, virtualBlockRefSpanEnd)
-								for _, k := range keys {
-									if gulu.Str.Contains(k, blockKeys) {
-										return ast.WalkContinue
-									}
-								}
-							}
-
-							n.Tokens = []byte(newContent)
-							n.Tokens = lex.EscapeMarkers(n.Tokens)
-							linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
-							var children []*ast.Node
-							for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
-								children = append(children, c)
-							}
-							for _, c := range children {
-								n.InsertBefore(c)
-							}
-							unlinks = append(unlinks, n)
-							return ast.WalkContinue
-						}
-					}
+				if processVirtualRef(n, &unlinks, virtualBlockRefKeywords, refCount, luteEngine) {
+					return ast.WalkContinue
 				}
 			}
 			return ast.WalkContinue

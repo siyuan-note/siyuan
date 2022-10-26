@@ -1,3 +1,44 @@
+## v2.4.6 / 2022-10-26
+
+### 改进功能
+
+* [支持非列表大纲式缩出](https://github.com/siyuan-note/siyuan/issues/4346)
+* [块滚动条跟随滚动](https://github.com/siyuan-note/siyuan/issues/4612)
+* [桌面端内核进程使用随机端口](https://github.com/siyuan-note/siyuan/issues/4952)
+* [列表里代码块折叠后丢失列表线](https://github.com/siyuan-note/siyuan/issues/6280)
+* [IFrame 块不打开浏览器重定向](https://github.com/siyuan-note/siyuan/issues/6327)
+* [触摸屏点击题头图可对相关按钮进行显示和隐藏的切换](https://github.com/siyuan-note/siyuan/issues/6328)
+* [导出 PDF/HTML 时遵循是否显示书签、命名等设置](https://github.com/siyuan-note/siyuan/issues/6333)
+* [更新在页签右侧或下侧打开的图标](https://github.com/siyuan-note/siyuan/issues/6338)
+* [为向上扩选和向下或选添加快捷键配置](https://github.com/siyuan-note/siyuan/issues/6339)
+* [内核参数增加 `--port`](https://github.com/siyuan-note/siyuan/issues/6344)
+* [某些系统上下载资源文件后打开是 zip](https://github.com/siyuan-note/siyuan/issues/6347)
+* [浏览器剪藏扩展转义 Markdown 标记符](https://github.com/siyuan-note/siyuan/issues/6348)
+* [导出 PDF 后主窗口保持原有缩放](https://github.com/siyuan-note/siyuan/issues/6349)
+* [去掉工作空间路径尾部空格](https://github.com/siyuan-note/siyuan/issues/6353)
+* [支持设置 `虚拟引用关键字包含列表`](https://github.com/siyuan-note/siyuan/issues/6354)
+* [支持伺服代码片段 `/snippets/`](https://github.com/siyuan-note/siyuan/issues/6356)
+
+### 开发重构
+
+* [桌面端内核进程不再以游离模式拉起](https://github.com/siyuan-note/siyuan/issues/6336)
+* [桌面端内核进程端口号写入文件 `port.json`](https://github.com/siyuan-note/siyuan/issues/6337)
+* [前端统一使用内核端口号变量](https://github.com/siyuan-note/siyuan/issues/6343)
+
+### 修复缺陷
+
+* [`Ctrl+Shift+V` 复制内容到代码块中导致渲染偏移](https://github.com/siyuan-note/siyuan/issues/6321)
+* [浏览器剪藏扩展丢失标题和代码块](https://github.com/siyuan-note/siyuan/issues/6325)
+* [图表块的内容在数据库 `blocks` 表 `content` 字段中被转义](https://github.com/siyuan-note/siyuan/issues/6326)
+* [短时间内多次修改文档定义块标题后动态锚文本没有跟随](https://github.com/siyuan-note/siyuan/issues/6330)
+* [超级块起始删除撤销触发状态异常](https://github.com/siyuan-note/siyuan/issues/6335)
+* [同步中的文档应禁止块标操作](https://github.com/siyuan-note/siyuan/issues/6340)
+* [`粘贴转义文本` 失效](https://github.com/siyuan-note/siyuan/issues/6341)
+* [Linux 桌面端自动更新未赋予可执行权限](https://github.com/siyuan-note/siyuan/issues/6342)
+* [内核参数 `--resident` 和 `--readonly` 参数解析问题](https://github.com/siyuan-note/siyuan/issues/6345)
+* [渲染虚拟引用和搜索高亮导致 Markdown 标记符重复解析](https://github.com/siyuan-note/siyuan/issues/6352)
+* [编辑器内修改标题后顶部标题没有更新](https://github.com/siyuan-note/siyuan/issues/6355)
+
 ## v2.4.5 / 2022-10-23
 
 ### 改进功能

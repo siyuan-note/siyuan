@@ -142,6 +142,14 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.md9}
+        <div class="b3-label__text">${window.siyuan.languages.md36}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" id="virtualBlockRefInclude" value="${window.siyuan.config.editor.virtualBlockRefInclude}" />
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.md35}
         <div class="b3-label__text">${window.siyuan.languages.md36}</div>
     </div>
@@ -248,6 +256,7 @@ export const editor = {
                 katexMacros: (editor.element.querySelector("#katexMacros") as HTMLTextAreaElement).value,
                 codeLineWrap: (editor.element.querySelector("#codeLineWrap") as HTMLInputElement).checked,
                 virtualBlockRef: (editor.element.querySelector("#virtualBlockRef") as HTMLInputElement).checked,
+                virtualBlockRefInclude: (editor.element.querySelector("#virtualBlockRefInclude") as HTMLInputElement).value,
                 virtualBlockRefExclude: (editor.element.querySelector("#virtualBlockRefExclude") as HTMLInputElement).value,
                 blockRefDynamicAnchorTextMaxLen: parseInt((editor.element.querySelector("#blockRefDynamicAnchorTextMaxLen") as HTMLInputElement).value),
                 codeLigatures: (editor.element.querySelector("#codeLigatures") as HTMLInputElement).checked,

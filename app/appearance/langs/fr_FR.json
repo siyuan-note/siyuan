@@ -573,6 +573,7 @@
   "md4": "indenter automatiquement le début des paragraphes pour se conformer aux habitudes de composition traditionnelles chinoises.",
   "md7": "Affichage ou non de la marque d'angle de l'image réseau",
   "md8": "Après l'activation, si l'image est un fichier web (fichier d'actif non local), une marque d'angle apparaîtra.",
+  "md9": "Liste d'inclusion de mots-clés de référence virtuelle",
   "md12": "Affichage ou non du nombre de signets, de noms, d'alias, de mémos et de références.",
   "md16": "Après l'activation, si de telles informations existent, elles seront affichées dans la partie haute à droite du bloc.",
   "md27": "Le bloc de code indique le numéro de ligne",

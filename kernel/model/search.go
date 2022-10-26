@@ -19,15 +19,16 @@ package model
 import (
 	"bytes"
 	"path"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
+	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
@@ -642,22 +643,28 @@ func stringQuery(query string) string {
 	return strings.TrimSpace(buf.String())
 }
 
-func prepareMarkKeywords(keywords []string) (ret []string) {
-	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
-	for _, k := range keywords {
-		if strings.ContainsAny(k, "?*!@#$%^&()[]{}\\|;:'\",.<>~`") {
-			continue
+// markReplaceSpan 用于处理搜索高亮。
+func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, text string, keywords []string, replacementStart, replacementEnd string, luteEngine *lute.Lute) bool {
+	text = search.EncloseHighlighting(text, keywords, searchMarkSpanStart, searchMarkSpanEnd, Conf.Search.CaseSensitive)
+	n.Tokens = gulu.Str.ToBytes(text)
+	if bytes.Contains(n.Tokens, []byte("search-mark")) {
+		n.Tokens = lex.EscapeMarkers(n.Tokens)
+		linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
+		var children []*ast.Node
+		for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+			children = append(children, c)
 		}
-		ret = append(ret, k)
+		for _, c := range children {
+			n.InsertBefore(c)
+		}
+		*unlinks = append(*unlinks, n)
+		return true
 	}
-
-	sort.SliceStable(ret, func(i, j int) bool {
-		return len(ret[i]) < len(ret[j])
-	})
-	return
+	return false
 }
 
-func markReplaceSpan(text string, keywords []string, replacementStart, replacementEnd string) (ret string) {
+// markReplaceSpanWithSplit 用于处理虚拟引用和反链提及高亮。
+func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, replacementEnd string) (ret string) {
 	// 调用该函数前参数 keywords 必须使用 prepareMarkKeywords 函数进行预处理
 
 	parts := strings.Split(text, " ")

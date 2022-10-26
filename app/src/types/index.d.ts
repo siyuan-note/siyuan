@@ -249,6 +249,7 @@ declare interface IEditor {
     fontFamily: string;
     virtualBlockRef: string;
     virtualBlockRefExclude: string;
+    virtualBlockRefInclude: string;
     blockRefDynamicAnchorTextMaxLen: number;
 
     emoji: string[];

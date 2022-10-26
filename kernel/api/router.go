@@ -283,4 +283,5 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/notification/pushErrMsg", model.CheckAuth, pushErrMsg)
 
 	ginServer.Handle("POST", "/api/snippet/getSnippet", model.CheckAuth, getSnippet)
+	ginServer.Handle("GET", "/snippets/*filepath", serveSnippets)
 }

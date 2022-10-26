@@ -17,14 +17,39 @@
 package api
 
 import (
+	"mime"
 	"net/http"
+	"path/filepath"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func serveSnippets(c *gin.Context) {
+	name := strings.TrimPrefix(c.Request.URL.Path, "/snippets/")
+	ext := filepath.Ext(name)
+	name = strings.TrimSuffix(name, ext)
+	confSnippets, err := model.LoadSnippets()
+	if nil != err {
+		logging.LogErrorf("load snippets failed: %s", name, err)
+		c.Status(404)
+		return
+	}
+
+	for _, s := range confSnippets {
+		if s.Name == name && ("" != ext && s.Type == ext[1:]) {
+			c.Header("Content-Type", mime.TypeByExtension(ext))
+			c.String(http.StatusOK, s.Content)
+			return
+		}
+	}
+	c.Status(404)
+}
 
 func getSnippet(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

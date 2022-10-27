@@ -180,7 +180,7 @@ func refreshSubscriptionExpirationRemind() {
 		remains := int((expired - time.Now().UnixMilli()) / 1000 / 60 / 60 / 24)
 		expireDay := 15 // 付费订阅提前 15 天提醒
 		if 2 == Conf.User.UserSiYuanSubscriptionPlan {
-			expireDay = 2 // 试用订阅提前 2 天提醒
+			expireDay = 3 // 试用订阅提前 3 天提醒
 		}
 
 		if 0 < remains && expireDay > remains {

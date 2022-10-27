@@ -161,7 +161,7 @@ export const onGetConfig = (isStart: boolean) => {
     }
 
     window.gtag("event", "config", {
-        a: "1"
+        "version": Constants.SIYUAN_VERSION,
     });
 };
 

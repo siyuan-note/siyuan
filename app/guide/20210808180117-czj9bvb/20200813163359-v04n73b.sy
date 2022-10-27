@@ -7,7 +7,7 @@
 		"id": "20200813163359-v04n73b",
 		"title": "隐私政策和用户协议",
 		"type": "doc",
-		"updated": "20221027113107"
+		"updated": "20221027114353"
 	},
 	"Children": [
 		{
@@ -31,7 +31,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220212224529-q784muc",
-				"updated": "20220904093913"
+				"updated": "20221027114353"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20220212224529-q652whb",
-						"updated": "20220904093913"
+						"updated": "20221027114353"
 					},
 					"Children": [
 						{
@@ -79,12 +79,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220212224529-1embibu",
-								"updated": "20220904093913"
+								"updated": "20221027114353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最新日期：2022 年 9 月 4 日"
+									"Data": "最新日期：2022 年 10 月 27 日"
 								}
 							]
 						}

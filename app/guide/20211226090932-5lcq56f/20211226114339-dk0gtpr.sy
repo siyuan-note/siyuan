@@ -6,7 +6,7 @@
 		"icon": "1f4c4",
 		"id": "20211226114339-dk0gtpr",
 		"title": "隱私政策和用戶協議",
-		"updated": "20220904095814"
+		"updated": "20221027113639"
 	},
 	"Children": [
 		{
@@ -3246,7 +3246,7 @@
 			},
 			"Properties": {
 				"id": "20220212225553-ud2rl66",
-				"updated": "20220904095758"
+				"updated": "20221027113639"
 			},
 			"Children": [
 				{
@@ -3394,7 +3394,7 @@
 					"Type": "NodeBlockquote",
 					"Properties": {
 						"id": "20220212225609-ldb77xo",
-						"updated": "20220212225609"
+						"updated": "20221027113634"
 					},
 					"Children": [
 						{
@@ -3468,7 +3468,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220212225609-qi9dahc",
-								"updated": "20220212225609"
+								"updated": "20221027113634"
 							},
 							"Children": [
 								{
@@ -3479,12 +3479,213 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl",
-									"TextMarkTextContent": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl "
+									"TextMarkTextContent": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221027113639-mf376ih",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20221027113639-mf376ih",
+						"updated": "20221027113639"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "開發類服務 SDK："
+						}
+					]
+				},
+				{
+					"ID": "20221027113639-fos5fwy",
+					"Type": "NodeBlockquote",
+					"Properties": {
+						"id": "20221027113639-fos5fwy",
+						"updated": "20221027113639"
+					},
+					"Children": [
+						{
+							"Type": "NodeBlockquoteMarker",
+							"Data": "\u003e"
+						},
+						{
+							"ID": "20221027113639-sr12gat",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221027113639-sr12gat",
+								"updated": "20221027113639"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SDK 名稱：Sentry"
+								}
+							]
+						},
+						{
+							"ID": "20221027113639-tqeakh3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221027113639-tqeakh3",
+								"updated": "20221027113639"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "公司名稱：FUNCTIONAL SOFTWARE, INC."
+								}
+							]
+						},
+						{
+							"ID": "20221027113639-9f2m2y5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221027113639-9f2m2y5",
+								"updated": "20221027113639"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SDK 官網："
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "a strong",
-									"TextMarkTextContent": "(opens new window)"
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://sentry.io/",
+									"TextMarkTextContent": "https://sentry.io"
+								}
+							]
+						},
+						{
+							"ID": "20221027113639-9ae8fqy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221027113639-9ae8fqy",
+								"updated": "20221027113639"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用目的：用於收集報錯信息和診斷數據，進而改善用戶體驗"
+								}
+							]
+						},
+						{
+							"ID": "20221027113639-zlm8yb8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221027113639-zlm8yb8",
+								"updated": "20221027113639"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "收集的個人信息類型/字段：設備標識信息和報錯日誌、診斷數據等不涉及個人隱私的數據 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://sentry.io/privacy/",
+									"TextMarkTextContent": "https://sentry.io/privacy/"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221027113639-7ruumya",
+					"Type": "NodeBlockquote",
+					"Properties": {
+						"id": "20221027113639-7ruumya",
+						"updated": "20221027113639"
+					},
+					"Children": [
+						{
+							"Type": "NodeBlockquoteMarker",
+							"Data": "\u003e"
+						},
+						{
+							"ID": "20221027113639-lv5mrci",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221027113639-lv5mrci",
+								"updated": "20221027113639"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SDK 名稱：Google Analytics"
+								}
+							]
+						},
+						{
+							"ID": "20221027113639-xwmtu21",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221027113639-xwmtu21",
+								"updated": "20221027113639"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "公司名稱：Google"
+								}
+							]
+						},
+						{
+							"ID": "20221027113639-jqbrx5d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221027113639-jqbrx5d",
+								"updated": "20221027113639"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SDK 官網："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://analytics.google.com",
+									"TextMarkTextContent": "https://analytics.google.com"
+								}
+							]
+						},
+						{
+							"ID": "20221027113639-9naic6y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221027113639-9naic6y",
+								"updated": "20221027113639"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用目的：用於收集統計信息，進而改善用戶體驗"
+								}
+							]
+						},
+						{
+							"ID": "20221027113639-uyvl07k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221027113639-uyvl07k",
+								"updated": "20221027113639"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "收集的個人信息類型/字段：程序信息和賬號訂閱狀態等不涉及個人隱私的數據 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://policies.google.com/privacy",
+									"TextMarkTextContent": "https://policies.google.com/privacy"
 								}
 							]
 						}

@@ -106,7 +106,7 @@ export const openSnippets = () => {
                         type: item.getAttribute("data-type"),
                         content: item.querySelector("textarea").value,
                         enabled: (item.querySelector(".b3-switch") as HTMLInputElement).checked
-                    })
+                    });
                 });
                 fetchPost("/api/snippet/setSnippet", {snippets}, () => {
                     renderSnippet();

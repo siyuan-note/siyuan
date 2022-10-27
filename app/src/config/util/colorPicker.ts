@@ -3,7 +3,7 @@ import {Dialog} from "../../dialog";
 import * as Pickr from "@simonwep/pickr";
 
 export const openColorPicker = () => {
-    const theme = window.siyuan.config.appearance.mode === 0 ? window.siyuan.config.appearance.themeLight : window.siyuan.config.appearance.themeDark
+    const theme = window.siyuan.config.appearance.mode === 0 ? window.siyuan.config.appearance.themeLight : window.siyuan.config.appearance.themeDark;
     fetchPost("/api/setting/getCustomCSS", {
         theme
     }, response => {
@@ -26,7 +26,7 @@ export const openColorPicker = () => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`
-        })
+        });
         const pickrs: Record<string, Record<string, any>> = {};
         dialog.element.querySelectorAll(".colorPicker").forEach((item: HTMLInputElement) => {
             // @ts-ignore
@@ -52,8 +52,8 @@ export const openColorPicker = () => {
             pickrs[key][item.getAttribute("data-subkey")] = pickr;
         });
         dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => {
-            dialog.destroy()
-        })
+            dialog.destroy();
+        });
         dialog.element.querySelector(".b3-button--text").addEventListener("click", () => {
             const css: Record<string, Record<string, string>> = {};
             Object.keys(pickrs).forEach((item) => {
@@ -66,7 +66,7 @@ export const openColorPicker = () => {
                 theme,
                 css
             });
-            dialog.destroy()
+            dialog.destroy();
         });
     });
-}
+};

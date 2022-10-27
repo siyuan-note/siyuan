@@ -197,7 +197,7 @@ export class WYSIWYG {
             }
             event.stopPropagation();
             event.preventDefault();
-            window.siyuan.ctrlIsPressed = false // https://github.com/siyuan-note/siyuan/issues/6373
+            window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             const range = getEditorRange(protyle.wysiwyg.element);
             const nodeElement = hasClosestBlock(range.startContainer);
             if (!nodeElement) {

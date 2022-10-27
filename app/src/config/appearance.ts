@@ -211,10 +211,10 @@ export const appearance = {
     },
     bindEvent: () => {
         appearance.element.querySelector("#codeSnippet").addEventListener("click", () => {
-            openSnippets()
+            openSnippets();
         });
         appearance.element.querySelector("#appearanceCustomSetting").addEventListener("click", () => {
-            openColorPicker()
+            openColorPicker();
         });
         appearance.element.querySelector("#resetLayout").addEventListener("click", () => {
             fetchPost("/api/system/setUILayout", {layout: {}}, () => {
@@ -253,7 +253,6 @@ export const appearance = {
         }
         window.siyuan.config.appearance = data;
         if (appearance.element) {
-            const theme = data.mode === 0 ? data.themeLight : data.themeDark;
             const modeElement = appearance.element.querySelector("#mode") as HTMLSelectElement;
             if (modeElement) {
                 if (data.modeOS) {

@@ -1,4 +1,5 @@
 {
+  "codeSnippet": "代碼片段",
   "useFixedPort": "使用固定端口",
   "useFixedPortTip": "开启后将仅使用固定端口 <code class='fn__code'>6806</code>，关闭时同时使用随机端口和 <code class='fn__code'>6806</code>。修改後會自動關閉應用，請手動重啟",
   "expandDown": "向下擴選",

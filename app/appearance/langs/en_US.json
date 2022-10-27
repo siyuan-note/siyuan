@@ -1,4 +1,5 @@
 {
+  "codeSnippet": "Code Snippet",
   "useFixedPort": "Use Fixed Port",
   "useFixedPortTip": "After enabling, only the port <code class='fn__code'>6806</code> will be used. When disabled, both random ports and <code class='fn__code'>6806</code> will be used. The application will be closed automatically after modification, please restart manually",
   "expandDown": "Expand Down",

@@ -1,4 +1,5 @@
 {
+  "codeSnippet": "Fragmento de código",
   "useFixedPort": "Usar puerto fijo",
   "useFixedPortTip": "Después de habilitarlo, solo se usará el puerto <code class='fn__code'>6806</code>. Cuando está deshabilitado, se utilizarán tanto los puertos aleatorios como <code class='fn__code'>6806</code>. La aplicación se cerrará automáticamente después de la modificación, por favor reinicie manualmente",
   "expandDown": "Expandir hacia abajo",

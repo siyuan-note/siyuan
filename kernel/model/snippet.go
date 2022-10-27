@@ -21,6 +21,7 @@ import (
 	"sync"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -106,7 +107,7 @@ func loadSnippets() (ret []*conf.Snippet, err error) {
 	needRewrite := false
 	for _, snippet := range ret {
 		if "" == snippet.ID {
-			snippet.ID = gulu.Rand.String(12)
+			snippet.ID = ast.NewNodeID()
 			needRewrite = true
 		}
 	}

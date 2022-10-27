@@ -510,7 +510,6 @@
   "--b3-protyle-inline-mark-color": "标记",
   "--b3-protyle-inline-tag-color": "标签",
   "--b3-protyle-inline-blockref-color": "引用块",
-  "open": "开启",
   "sync": "同步",
   "syncNow": "立即同步",
   "cloudBook": "云端笔记本",

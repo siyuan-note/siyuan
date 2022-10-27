@@ -510,7 +510,6 @@
   "--b3-protyle-inline-mark-color": "Marqueur",
   "--b3-protyle-inline-tag-color": "Tag",
   "--b3-protyle-inline-blockref-color": "Ref Bloc",
-  "open": "Allumer",
   "sync": "Synchro",
   "syncNow": "Synchro maintenant",
   "cloudBook": "Carnet de notes du Cloud",

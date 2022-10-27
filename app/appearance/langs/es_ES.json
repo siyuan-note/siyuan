@@ -510,7 +510,6 @@
   "--b3-protyle-inline-mark-color": "Marca",
   "--b3-protyle-inline-tag-color": "Etiqueta",
   "--b3-protyle-inline-blockref-color": "Bloque Ref",
-  "open": "Encender",
   "sync": "Sincronización",
   "syncNow": "Sincronizar ahora",
   "cloudBook": "Cuaderno de notas en la nube",

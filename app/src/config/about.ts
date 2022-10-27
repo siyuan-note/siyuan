@@ -5,7 +5,7 @@ import {dialog} from "@electron/remote";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
-import {setAccessAuthCode} from "./util";
+import {setAccessAuthCode} from "./util/setAccessAuthCode";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan} from "../dialog/processSystem";
 import {openByMobile, writeText} from "../protyle/util/compatibility";

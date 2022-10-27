@@ -15,10 +15,6 @@ a.b3-chip:hover {
   border-radius: 16px;
   transition: var(--b3-transition);
 
-  &--small {
-    line-height: 20px;
-  }
-
   &--secondary {
     background-color: var(--b3-theme-secondary);
     color: var(--b3-theme-on-secondary);

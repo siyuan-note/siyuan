@@ -86,36 +86,6 @@ export const loadAssets = (data: IAppearance) => {
     }
 };
 
-export const renderSnippet = () => {
-    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
-        response.data.snippets.forEach((item: ISnippet) => {
-            const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
-            let exitElement = document.getElementById(id) as HTMLScriptElement;
-            if (!item.enabled) {
-                if (exitElement) {
-                    exitElement.remove();
-                }
-                return;
-            }
-            if (exitElement) {
-                if (exitElement.innerHTML === item.content) {
-                    return;
-                }
-                exitElement.remove();
-            }
-            if (item.type === "css") {
-                document.head.insertAdjacentHTML("beforeend", `<style id="${id}">${item.content}</style>`);
-            } else if (item.type === "js") {
-                exitElement = document.createElement("script");
-                exitElement.type = "text/javascript";
-                exitElement.text = item.content;
-                exitElement.id = id;
-                document.head.appendChild(exitElement);
-            }
-        });
-    });
-};
-
 export const initAssets = () => {
     const emojiElement = document.getElementById("emojiScript");
     const loadingElement = document.getElementById("loading");

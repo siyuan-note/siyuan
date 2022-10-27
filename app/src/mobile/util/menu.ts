@@ -4,7 +4,7 @@ import {popSearch} from "./search";
 import {initAppearance} from "../settings/appearance";
 import {closePanel} from "./closePanel";
 import {Constants} from "../../constants";
-import {setAccessAuthCode} from "../../config/util";
+import {setAccessAuthCode} from "../../config/util/setAccessAuthCode";
 import {mountHelp, newDailyNote, newNotebook} from "../../util/mount";
 import {needSubscribe} from "../../util/needSubscribe";
 import {repos} from "../../config/repos";

@@ -29,7 +29,7 @@ import (
 
 var snippetsLock = sync.Mutex{}
 
-func RemoveSnippet(id string) (err error) {
+func RemoveSnippet(id string) (ret *conf.Snippet, err error) {
 	snippetsLock.Lock()
 	defer snippetsLock.Unlock()
 
@@ -40,6 +40,7 @@ func RemoveSnippet(id string) (err error) {
 
 	for i, s := range snippets {
 		if s.ID == id {
+			ret = s
 			snippets = append(snippets[:i], snippets[i+1:]...)
 			break
 		}
@@ -48,7 +49,7 @@ func RemoveSnippet(id string) (err error) {
 	return
 }
 
-func SetSnippet(id, name, typ, content string, enabled bool) (snippet *conf.Snippet, err error) {
+func SetSnippet(id, name, typ, content string, enabled bool) (ret *conf.Snippet, err error) {
 	snippetsLock.Lock()
 	defer snippetsLock.Unlock()
 
@@ -64,15 +65,15 @@ func SetSnippet(id, name, typ, content string, enabled bool) (snippet *conf.Snip
 			s.Type = typ
 			s.Content = content
 			s.Enabled = enabled
-			snippet = s
+			ret = s
 			isUpdate = true
 			break
 		}
 	}
 
 	if !isUpdate {
-		snippet = &conf.Snippet{ID: id, Name: name, Type: typ, Content: content, Enabled: enabled}
-		snippets = append(snippets, snippet)
+		ret = &conf.Snippet{ID: id, Name: name, Type: typ, Content: content, Enabled: enabled}
+		snippets = append(snippets, ret)
 	}
 	err = writeSnippetsConf(snippets)
 	return

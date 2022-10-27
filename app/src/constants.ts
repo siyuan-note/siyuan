@@ -427,4 +427,7 @@ export abstract class Constants {
         // third
         "yul", "solidity", "abap",
     ];
+
+    // Google Analytics 事件
+    public static readonly ANALYTICS_EVT_ON_GET_CONFIG: string = "siyuan.onGetConfig";
 }

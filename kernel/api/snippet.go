@@ -126,9 +126,11 @@ func removeSnippet(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	if err := model.RemoveSnippet(id); nil != err {
+	snippet, err := model.RemoveSnippet(id)
+	if nil != err {
 		ret.Code = -1
 		ret.Msg = "remove snippet failed: " + err.Error()
 		return
 	}
+	ret.Data = snippet
 }

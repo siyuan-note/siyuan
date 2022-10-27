@@ -29,7 +29,7 @@ import (
 
 var snippetsLock = sync.Mutex{}
 
-func SetSnippet(name, typ, content string, enabled bool) (err error) {
+func RemoveSnippet(id string) (err error) {
 	snippetsLock.Lock()
 	defer snippetsLock.Unlock()
 
@@ -37,8 +37,43 @@ func SetSnippet(name, typ, content string, enabled bool) (err error) {
 	if nil != err {
 		return
 	}
-	snippet := &conf.Snippet{Name: name, Type: typ, Content: content, Enabled: enabled}
-	snippets = append(snippets, snippet)
+
+	for i, s := range snippets {
+		if s.ID == id {
+			snippets = append(snippets[:i], snippets[i+1:]...)
+			break
+		}
+	}
+	err = writeSnippetsConf(snippets)
+	return
+}
+
+func SetSnippet(id, name, typ, content string, enabled bool) (snippet *conf.Snippet, err error) {
+	snippetsLock.Lock()
+	defer snippetsLock.Unlock()
+
+	snippets, err := loadSnippets()
+	if nil != err {
+		return
+	}
+
+	isUpdate := false
+	for _, s := range snippets {
+		if s.ID == id {
+			s.Name = name
+			s.Type = typ
+			s.Content = content
+			s.Enabled = enabled
+			snippet = s
+			isUpdate = true
+			break
+		}
+	}
+
+	if !isUpdate {
+		snippet = &conf.Snippet{ID: id, Name: name, Type: typ, Content: content, Enabled: enabled}
+		snippets = append(snippets, snippet)
+	}
 	err = writeSnippetsConf(snippets)
 	return
 }
@@ -65,6 +100,17 @@ func loadSnippets() (ret []*conf.Snippet, err error) {
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
 		logging.LogErrorf("unmarshal js snippets failed: %s", err)
 		return
+	}
+
+	needRewrite := false
+	for _, snippet := range ret {
+		if "" == snippet.ID {
+			snippet.ID = gulu.Rand.String(12)
+			needRewrite = true
+		}
+	}
+	if needRewrite {
+		writeSnippetsConf(ret)
 	}
 	return
 }

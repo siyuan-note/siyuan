@@ -98,14 +98,37 @@ func setSnippet(c *gin.Context) {
 		return
 	}
 
+	id := gulu.Rand.String(12)
+	idArg := arg["id"]
+	if nil != idArg {
+		id = idArg.(string)
+	}
 	name := arg["name"].(string)
 	typ := arg["type"].(string)
 	content := arg["content"].(string)
 	enabled := arg["enabled"].(bool)
-	err := model.SetSnippet(name, typ, content, enabled)
+	snippet, err := model.SetSnippet(id, name, typ, content, enabled)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = "set snippet failed: " + err.Error()
+		return
+	}
+	ret.Data = snippet
+}
+
+func removeSnippet(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if err := model.RemoveSnippet(id); nil != err {
+		ret.Code = -1
+		ret.Msg = "remove snippet failed: " + err.Error()
 		return
 	}
 }

@@ -36,6 +36,7 @@ type User struct {
 	UserTrafficTime              float64      `json:"userTrafficTime"`
 	UserSiYuanSubscriptionPlan   float64      `json:"userSiYuanSubscriptionPlan"`   // -2：未订阅，-1：试用，0：标准订阅，1：教育订阅
 	UserSiYuanSubscriptionStatus float64      `json:"userSiYuanSubscriptionStatus"` // -1：未订阅，0：订阅可用，1：订阅封禁，2：订阅过期
+	UserSiYuanSubscriptionType   float64      `json:"userSiYuanSubscriptionType"`   // 0 年付；1 终生；2 月付
 }
 
 type UserTitle struct {

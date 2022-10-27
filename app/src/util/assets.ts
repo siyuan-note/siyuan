@@ -87,20 +87,30 @@ export const loadAssets = (data: IAppearance) => {
 };
 
 export const renderSnippet = () => {
-    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 1}, (response) => {
-        response.data.snippets.forEach((item: {
-            "name": string
-            "type": string
-            "content": string
-        }) => {
+    fetchPost("/api/snippet/getSnippet", {type: "all"}, (response) => {
+        response.data.snippets.forEach((item: ISnippet) => {
+            const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.name}`;
+            let exitElement = document.getElementById(id) as HTMLScriptElement;
+            if (!item.enabled) {
+                if (exitElement) {
+                    exitElement.remove();
+                }
+                return;
+            }
+            if (exitElement) {
+                if (exitElement.innerHTML === item.content) {
+                    return;
+                }
+                exitElement.remove();
+            }
             if (item.type === "css") {
-                document.head.insertAdjacentHTML("beforeend", `<style id="snippetCSS${item.name}">${item.content}</style>`);
+                document.head.insertAdjacentHTML("beforeend", `<style id="${id}">${item.content}</style>`);
             } else if (item.type === "js") {
-                const scriptElement = document.createElement("script");
-                scriptElement.type = "text/javascript";
-                scriptElement.text = item.content;
-                scriptElement.id = `snippetJS${item.name}`;
-                document.head.appendChild(scriptElement);
+                exitElement = document.createElement("script");
+                exitElement.type = "text/javascript";
+                exitElement.text = item.content;
+                exitElement.id = id;
+                document.head.appendChild(exitElement);
             }
         });
     });

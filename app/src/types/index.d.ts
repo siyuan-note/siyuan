@@ -49,6 +49,13 @@ interface ITextOption {
     type: string
 }
 
+interface ISnippet {
+    name: string
+    type: string
+    enabled: boolean
+    content: string
+}
+
 interface IInbox {
     oId: string
     shorthandContent: string

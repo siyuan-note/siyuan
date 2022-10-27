@@ -7,7 +7,7 @@ import {exportLayout} from "../layout/util";
 import * as Pickr from "@simonwep/pickr";
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
-import {loadAssets} from "../util/assets";
+import {loadAssets, renderSnippet} from "../util/assets";
 import {genOptions} from "../util/genOptions";
 
 export const appearance = {
@@ -106,6 +106,16 @@ export const appearance = {
         ${window.siyuan.languages.refresh}
     </button>
 </label>
+<label class="b3-label fn__flex">
+   <div class="fn__flex-1">
+        ${window.siyuan.languages.resetLayout}
+        <div class="b3-label__text">${window.siyuan.languages.appearance6}</div>
+    </div>
+    <span class="fn__space"></span>
+    <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="resetLayout">
+        <svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.reset}
+    </button>
+</label>
 <div class="b3-label">
     <label class="fn__block fn__flex">
         <div class="fn__flex-1">
@@ -117,16 +127,18 @@ export const appearance = {
     </label>
     <div id="appearanceCustomPanel"></div>
 </div>
-<label class="b3-label fn__flex">
-   <div class="fn__flex-1">
-        ${window.siyuan.languages.resetLayout}
-        <div class="b3-label__text">${window.siyuan.languages.appearance6}</div>
-    </div>
-    <span class="fn__space"></span>
-    <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="resetLayout">
-        <svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.reset}
-    </button>
-</label>
+<div class="b3-label">
+    <label class="fn__block fn__flex">
+        <div class="fn__flex-1 fn__flex-center">
+            ${window.siyuan.languages.codeSnippet}
+        </div>
+        <span class="fn__space"></span>
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="codeSnippet">
+            <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}
+        </button>
+    </label>
+    <div id="codeSnippetPanel"></div>
+</div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.appearance14}
@@ -251,6 +263,7 @@ export const appearance = {
             }
         });
     },
+    _snippet: [] as ISnippet[],
     bindEvent: () => {
         if (window.siyuan.config.appearance.customCSS) {
             fetchPost("/api/setting/getCustomCSS", {
@@ -259,6 +272,58 @@ export const appearance = {
                 appearance.onGetcustomcss(response.data);
             });
         }
+        const codeSnippetPanelElement = appearance.element.querySelector("#codeSnippetPanel");
+        const codeSnippetElement = appearance.element.querySelector("#codeSnippet");
+        codeSnippetElement.addEventListener("click", () => {
+            if (codeSnippetPanelElement.innerHTML) {
+                codeSnippetPanelElement.innerHTML = "";
+                return;
+            }
+            fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
+                appearance._snippet = response.data._snippet;
+                let html = `<div class="fn__hr"></div>
+<div class="fn__flex">
+    <div class="fn__flex-1"></div>
+    <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="addCodeSnippetCSS">
+        <svg><use xlink:href="#iconAdd"></use></svg> ${window.siyuan.languages.addAttr} CSS
+    </button>
+    <div class="fn__space"></div>
+    <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="addCodeSnippetJS">
+        <svg><use xlink:href="#iconAdd"></use></svg> ${window.siyuan.languages.addAttr} JS
+    </button>
+</div>`;
+                response.data.snippets.forEach((item: ISnippet) => {
+                    html += `<div class="b3-label" style="margin: 0">
+    <div class="fn__flex">
+        <div class="b3-chip b3-chip--secondary b3-chip--small">${item.type}</div>
+        <div class="fn__space"></div>
+        <div class="fn__flex-center">${item.name}</div>
+        <div class="fn__flex-1"></div>
+        <input class="b3-switch fn__flex-center" type="checkbox"${item.enabled ? " checked" : ""}>
+    </div>
+    <div class="fn__hr"></div>
+    <textarea class="fn__block b3-text-field">${item.content}</textarea>
+</div>`
+                });
+                codeSnippetPanelElement.innerHTML = html;
+            });
+        });
+        codeSnippetPanelElement.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement;
+            if (target.id === "addCodeSnippetCSS" || target.id === "addCodeSnippetJS") {
+                target.parentElement.insertAdjacentHTML("afterend", `<div class="b3-label" style="margin: 0">
+    <div class="fn__flex">
+        <div class="b3-chip fn__flex-center b3-chip--small b3-chip--secondary">${target.id === "addCodeSnippetCSS" ? "css" : "js"}</div>
+        <div class="fn__space"></div>
+        <input class="b3-text-field" placeholder="${window.siyuan.languages.title}">
+        <div class="fn__flex-1"></div>
+        <input class="b3-switch fn__flex-center" type="checkbox">
+    </div>
+    <div class="fn__hr"></div>
+    <textarea class="fn__block b3-text-field" placeholder="${window.siyuan.languages.codeSnippet}"></textarea>
+</div>`)
+            }
+        })
         const appearanceCustomElement = appearance.element.querySelector("#appearanceCustom");
         appearanceCustomElement.addEventListener("click", () => {
             if (window.siyuan.config.appearance.customCSS) {

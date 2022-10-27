@@ -87,7 +87,7 @@ var LocalIPs []string
 func GetLocalIPs() (ret []string) {
 	if ContainerAndroid == Container {
 		// Android 上用不了 net.InterfaceAddrs() https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
-		LocalIPs = append(LocalIPs, "127.0.0.1")
+		LocalIPs = append(LocalIPs, LocalHost)
 		LocalIPs = gulu.Str.RemoveDuplicatedElem(LocalIPs)
 		return LocalIPs
 	}
@@ -104,7 +104,7 @@ func GetLocalIPs() (ret []string) {
 			ret = append(ret, networkIp.IP.String())
 		}
 	}
-	ret = append(ret, "127.0.0.1")
+	ret = append(ret, LocalHost)
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
 }

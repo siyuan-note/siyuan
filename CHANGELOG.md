@@ -1,3 +1,34 @@
+## v2.4.7 / 2022-10-27
+
+### 改进功能
+
+* [支持通过界面设置代码片段](https://github.com/siyuan-note/siyuan/issues/6357)
+* [反链面板块标菜单移除缩放功能](https://github.com/siyuan-note/siyuan/issues/6360)
+* [某些主题下页面向上滚动时会左右抖动](https://github.com/siyuan-note/siyuan/issues/6361)
+* [改进块引用语法解析避免识别 `((foo))` 文本](https://github.com/siyuan-note/siyuan/issues/6363)
+* [Android 端 IFrame 块加载不打开其他 APP 但支持继续加载页面](https://github.com/siyuan-note/siyuan/issues/6365)
+* [加入 Google Analytics](https://github.com/siyuan-note/siyuan/issues/6369)
+* [使用鼠标的复制粘贴按钮导致 `Command` 不被释放 ](https://github.com/siyuan-note/siyuan/issues/6373)
+* [改进云端收集箱剪藏](https://github.com/siyuan-note/siyuan/issues/6374)
+* [订阅试用从 30 天缩短为 7 天](https://github.com/siyuan-note/siyuan/issues/6375)
+
+### 文档相关
+
+* [修改隐私政策](https://github.com/siyuan-note/siyuan/issues/6370)
+
+### 开发重构
+
+* [Android 端适配 Android 13](https://github.com/siyuan-note/siyuan/issues/6362)
+* [Android 端最低版本要求从 6.0 改为 7.0](https://github.com/siyuan-note/siyuan/issues/6366)
+* [通过域名 `siyuan.localhost` 加载](https://github.com/siyuan-note/siyuan/issues/6368)
+
+### 修复缺陷
+
+* [反链面板首块起始插入行导致状态异常](https://github.com/siyuan-note/siyuan/issues/6359)
+* [拖拽窗口后反链面板块标位置错误](https://github.com/siyuan-note/siyuan/issues/6364)
+* [从全局搜索打开文档后反链面板为空](https://github.com/siyuan-note/siyuan/issues/6367)
+* [快速来回滚动会导致嵌入块重复](https://github.com/siyuan-note/siyuan/issues/6377)
+
 ## v2.4.6 / 2022-10-26
 
 ### 改进功能

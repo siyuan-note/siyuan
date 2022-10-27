@@ -108,7 +108,7 @@ export const openSnippets = () => {
                         enabled: (item.querySelector(".b3-switch") as HTMLInputElement).checked
                     })
                 });
-                fetchPost("/api/snippet/setSnippets", {snippets}, () => {
+                fetchPost("/api/snippet/setSnippet", {snippets}, () => {
                     renderSnippet();
                     dialog.destroy();
                 });

@@ -170,7 +170,6 @@ export const onGetConfig = (isStart: boolean) => {
     if (window.siyuan.user) {
         para.isLoggedIn = "true";
         if (0 === window.siyuan.user.userSiYuanSubscriptionStatus) {
-            console.log(window.siyuan.user);
             para.subscriptionStatus = window.siyuan.user.userSiYuanSubscriptionStatus.toString();
             para.subscriptionPlan = window.siyuan.user.userSiYuanSubscriptionPlan.toString();
             para.subscriptionType = window.siyuan.user.userSiYuanSubscriptionType.toString();

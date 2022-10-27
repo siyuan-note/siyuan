@@ -177,8 +177,13 @@ func refreshSubscriptionExpirationRemind() {
 			util.PushErrMsg(Conf.Language(128), 0)
 			return
 		}
-		remains := (expired - time.Now().UnixMilli()) / 1000 / 60 / 60 / 24
-		if 0 < remains && 15 > remains { // 15 后过期
+		remains := int((expired - time.Now().UnixMilli()) / 1000 / 60 / 60 / 24)
+		expireDay := 15 // 付费订阅提前 15 天提醒
+		if 2 == Conf.User.UserSiYuanSubscriptionPlan {
+			expireDay = 2 // 试用订阅提前 2 天提醒
+		}
+
+		if 0 < remains && expireDay > remains {
 			time.Sleep(3 * time.Minute)
 			util.PushErrMsg(fmt.Sprintf(Conf.Language(127), remains), 0)
 			return

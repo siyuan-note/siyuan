@@ -50,32 +50,10 @@ func RemoveSnippet(id string) (ret *conf.Snippet, err error) {
 	return
 }
 
-func SetSnippet(id, name, typ, content string, enabled bool) (ret *conf.Snippet, err error) {
+func SetSnippet(snippets []*conf.Snippet) (err error) {
 	snippetsLock.Lock()
 	defer snippetsLock.Unlock()
 
-	snippets, err := loadSnippets()
-	if nil != err {
-		return
-	}
-
-	isUpdate := false
-	for _, s := range snippets {
-		if s.ID == id {
-			s.Name = name
-			s.Type = typ
-			s.Content = content
-			s.Enabled = enabled
-			ret = s
-			isUpdate = true
-			break
-		}
-	}
-
-	if !isUpdate {
-		ret = &conf.Snippet{ID: id, Name: name, Type: typ, Content: content, Enabled: enabled}
-		snippets = append(snippets, ret)
-	}
 	err = writeSnippetsConf(snippets)
 	return
 }

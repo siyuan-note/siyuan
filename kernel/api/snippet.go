@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -98,22 +99,29 @@ func setSnippet(c *gin.Context) {
 		return
 	}
 
-	id := gulu.Rand.String(12)
-	idArg := arg["id"]
-	if nil != idArg {
-		id = idArg.(string)
+	snippetsArg := arg["snippets"].([]interface{})
+	var snippets []*conf.Snippet
+	for _, s := range snippetsArg {
+		m := s.(map[string]interface{})
+		snippet := &conf.Snippet{
+			ID:      m["id"].(string),
+			Name:    m["name"].(string),
+			Type:    m["type"].(string),
+			Content: m["content"].(string),
+			Enabled: m["enabled"].(bool),
+		}
+		if "" == snippet.ID {
+			snippet.ID = ast.NewNodeID()
+		}
+		snippets = append(snippets, snippet)
 	}
-	name := arg["name"].(string)
-	typ := arg["type"].(string)
-	content := arg["content"].(string)
-	enabled := arg["enabled"].(bool)
-	snippet, err := model.SetSnippet(id, name, typ, content, enabled)
+
+	err := model.SetSnippet(snippets)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = "set snippet failed: " + err.Error()
 		return
 	}
-	ret.Data = snippet
 }
 
 func removeSnippet(c *gin.Context) {

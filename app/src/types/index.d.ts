@@ -28,6 +28,7 @@ declare module "blueimp-md5"
 interface Window {
     siyuan: ISiyuan
     webkit: any
+
     JSAndroid: {
         returnDesktop(): void
         openExternal(url: string): void
@@ -42,6 +43,8 @@ interface Window {
     showKeyboardToolbar(bottom?: number): void
 
     hideKeyboardToolbar(): void
+
+    gtag(name: string, key: string, value: IObject): void;
 }
 
 interface ITextOption {

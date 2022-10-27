@@ -160,8 +160,8 @@ export const onGetConfig = (isStart: boolean) => {
         mountHelp();
     }
 
-    gtag("event", "config", {
-
+    window.gtag("event", "config", {
+        a: "1"
     });
 };
 
@@ -207,7 +207,7 @@ const initBar = () => {
                 goForward();
                 event.stopPropagation();
                 break;
-            }else if (target.id === "barSync") {
+            } else if (target.id === "barSync") {
                 syncGuide(target);
                 event.stopPropagation();
                 break;
@@ -399,7 +399,10 @@ const initWindow = () => {
             }
             const msgId = showMessage(window.siyuan.languages.exporting, -1);
             const filePath = result.filePaths[0].endsWith(ipcData.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle));
-            localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {removeAssets: ipcData.removeAssets, keepFold: ipcData.keepFold})));
+            localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {
+                removeAssets: ipcData.removeAssets,
+                keepFold: ipcData.keepFold
+            })));
             try {
                 window.siyuan.printWin.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {
                     fetchPost("/api/export/exportHTML", {

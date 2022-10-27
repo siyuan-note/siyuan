@@ -42,7 +42,6 @@ import (
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -159,16 +158,8 @@ func exportData(exportFolder string) (err error) {
 		return
 	}
 
-	filesys.LockWriteFile()
-	defer filesys.UnlockWriteFile()
-
-	err = filelock.ReleaseAllFileLocks()
-	if nil != err {
-		return
-	}
-
 	data := filepath.Join(util.WorkspaceDir, "data")
-	if err = stableCopy(data, exportFolder); nil != err {
+	if err = filelock.RoboCopy(data, exportFolder); nil != err {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", data, baseFolderName, err)
 		err = errors.New(fmt.Sprintf(Conf.Language(14), formatErrorMsg(err)))
 		return
@@ -224,7 +215,7 @@ func ExportDocx(id, savePath string, removeAssets bool) (err error) {
 	}
 
 	pandoc := exec.Command(Conf.Export.PandocBin, args...)
-	util.CmdAttr(pandoc)
+	gulu.CmdAttr(pandoc)
 	pandoc.Stdin = bytes.NewBufferString(content)
 	output, err := pandoc.CombinedOutput()
 	if nil != err {
@@ -447,7 +438,7 @@ func ExportHTML(id, savePath string, pdf, keepFold bool) (name, dom string) {
 			}
 		}
 	} else { // 导出 PDF 需要将资源文件路径改为 HTTP 伺服
-		luteEngine.RenderOptions.LinkBase = "http://127.0.0.1:" + util.ServerPort + "/"
+		luteEngine.RenderOptions.LinkBase = "http://" + util.LocalHost + ":" + util.ServerPort + "/"
 	}
 
 	if pdf {
@@ -457,6 +448,9 @@ func ExportHTML(id, savePath string, pdf, keepFold bool) (name, dom string) {
 	luteEngine.SetFootnotes(true)
 	luteEngine.RenderOptions.ProtyleContenteditable = false
 	luteEngine.SetProtyleMarkNetImg(false)
+	// 不进行安全过滤，因为导出时需要保留所有的 HTML 标签
+	// 使用属性 `data-export-html` 导出时 `<style></style>` 标签丢失 https://github.com/siyuan-note/siyuan/issues/6228
+	luteEngine.SetSanitize(false)
 	renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions)
 	dom = gulu.Str.FromBytes(renderer.Render())
 	return
@@ -819,7 +813,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	// 按文件夹结构复制选择的树
 	for _, tree := range trees {
 		readPath := filepath.Join(util.DataDir, tree.Box, tree.Path)
-		data, readErr := filelock.NoLockFileRead(readPath)
+		data, readErr := filelock.ReadFile(readPath)
 		if nil != readErr {
 			logging.LogErrorf("read file [%s] failed: %s", readPath, readErr)
 			continue
@@ -841,7 +835,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	// 引用树放在导出文件夹根路径下
 	for treeID, tree := range refTrees {
 		readPath := filepath.Join(util.DataDir, tree.Box, tree.Path)
-		data, readErr := filelock.NoLockFileRead(readPath)
+		data, readErr := filelock.ReadFile(readPath)
 		if nil != readErr {
 			logging.LogErrorf("read file [%s] failed: %s", readPath, readErr)
 			continue
@@ -903,7 +897,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	var sortData []byte
 	var sortErr error
 	if gulu.File.IsExist(sortPath) {
-		sortData, sortErr = filelock.NoLockFileRead(sortPath)
+		sortData, sortErr = filelock.ReadFile(sortPath)
 		if nil != sortErr {
 			logging.LogErrorf("read sort conf failed: %s", sortErr)
 		}
@@ -1047,14 +1041,14 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 		var defMd string
 		stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 		stmt = html.UnescapeString(stmt)
-		blocks := searchEmbedBlock(stmt, nil, 0)
-		if 1 > len(blocks) {
+		embedBlocks := searchEmbedBlock(n.ID, stmt, nil, 0, false)
+		if 1 > len(embedBlocks) {
 			return ast.WalkContinue
 		}
 
 		defMdBuf := bytes.Buffer{}
-		for _, def := range blocks {
-			defMdBuf.WriteString(renderBlockMarkdownR(def.ID))
+		for _, def := range embedBlocks {
+			defMdBuf.WriteString(renderBlockMarkdownR(def.Block.ID))
 			defMdBuf.WriteString("\n\n")
 		}
 		defMd = defMdBuf.String()
@@ -1214,7 +1208,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 
 	if Conf.Export.AddTitle {
 		if root, _ := getBlock(id); nil != root {
-			title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1}
+			title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1, KramdownIAL: parse.Map2IAL(root.IAL)}
 			content := html.UnescapeString(root.Content)
 			title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(content)})
 			ret.Root.PrependChild(title)
@@ -1268,7 +1262,18 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 		}
 
 		if ast.NodeWidget == n.Type {
-			// 挂件块导出 https://github.com/siyuan-note/siyuan/issues/3834
+			// 挂件块导出 https://github.com/siyuan-note/siyuan/issues/3834 https://github.com/siyuan-note/siyuan/issues/6188
+
+			if wysiwyg {
+				exportHtmlVal := n.IALAttr("data-export-html")
+				if "" != exportHtmlVal {
+					htmlBlock := &ast.Node{Type: ast.NodeHTMLBlock, Tokens: []byte(exportHtmlVal)}
+					n.InsertBefore(htmlBlock)
+					unlinks = append(unlinks, n)
+					return ast.WalkContinue
+				}
+			}
+
 			exportMdVal := n.IALAttr("data-export-md")
 			exportMdVal = html.UnescapeString(exportMdVal) // 导出 `data-export-md` 时未解析代码块与行内代码内的转义字符 https://github.com/siyuan-note/siyuan/issues/4180
 			if "" != exportMdVal {

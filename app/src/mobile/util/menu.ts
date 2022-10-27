@@ -4,7 +4,7 @@ import {popSearch} from "./search";
 import {initAppearance} from "../settings/appearance";
 import {closePanel} from "./closePanel";
 import {Constants} from "../../constants";
-import {setAccessAuthCode} from "../../config/util";
+import {setAccessAuthCode} from "../../config/util/setAccessAuthCode";
 import {mountHelp, newDailyNote, newNotebook} from "../../util/mount";
 import {needSubscribe} from "../../util/needSubscribe";
 import {repos} from "../../config/repos";
@@ -134,7 +134,7 @@ export const popMenu = () => {
 <div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHistory">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconVideo"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.dataHistory}</span>
 </div>
-<div slot="border-bottom: 1px solid var(--b3-border-color);"></div>
+<div slot="border-bottom: 1px solid var(--b3-theme-surface-lighter);"></div>
 <div class="b3-list-item b3-list-item--big" id="menuAppearance">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconTheme"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.appearance}</span>
 </div>
@@ -177,7 +177,7 @@ ${accountHTML}
                     closePanel();
                     if (!window.siyuan.config.localIPs || window.siyuan.config.localIPs.length === 0 ||
                         (window.siyuan.config.localIPs.length === 1 && window.siyuan.config.localIPs[0] === "")) {
-                        window.siyuan.config.localIPs = ["127.0.0.1"];
+                        window.siyuan.config.localIPs = ["siyuan.localhost"];
                     }
                     modelElement.style.top = "0";
                     modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconInfo"></use>';
@@ -193,8 +193,8 @@ ${accountHTML}
 <div class="b3-label">
        ${window.siyuan.languages.about2}
        <div class="fn__hr"></div>
-       <input class="b3-text-field fn__block" readonly value="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:6806">
-       <div class="b3-label__text">${window.siyuan.languages.about3}</div>
+       <input class="b3-text-field fn__block" readonly value="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "siyuan.localhost"}:${location.port}">
+       <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
        <div class="fn__hr"></div>
        <span class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.join("</code> <code class='fn__code'>")}</code></span>
 </div>

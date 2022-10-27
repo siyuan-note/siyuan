@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226122358-hctqcn5",
 		"title": "Kernel 參數",
-		"updated": "20220601091200"
+		"updated": "20221025095721"
 	},
 	"Children": [
 		{
@@ -651,6 +651,116 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20221025095644-g0ka4wv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20221025095644-g0ka4wv",
+				"updated": "20221025095644"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20221025095644-7uijx77",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025095644-7uijx77",
+				"updated": "20221025095644"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於指定監聽端口，不指定時："
+				}
+			]
+		},
+		{
+			"ID": "20221025095644-yxap136",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221025095644-yxap136",
+				"updated": "20221025095721"
+			},
+			"Children": [
+				{
+					"ID": "20221025095644-4yq1w95",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095644-4yq1w95",
+						"updated": "20221025095644"
+					},
+					"Children": [
+						{
+							"ID": "20221025095644-rf1ldjb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095644-rf1ldjb",
+								"updated": "20221025095644"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端使用隨機端口"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221025095644-weqayss",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095644-weqayss",
+						"updated": "20221025095721"
+					},
+					"Children": [
+						{
+							"ID": "20221025095644-uhgv2bx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095644-uhgv2bx",
+								"updated": "20221025095721"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Docker/移動端使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "6806"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

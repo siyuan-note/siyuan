@@ -62,11 +62,13 @@ func AutoSpace(rootID string) (err error) {
 	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
 	md := formatRenderer.Render()
 	newTree := parseKTree(md)
+	newTree.Root.Spec = "1"
 	// 第二次格式化启用自动空格
 	luteEngine.SetAutoSpace(true)
 	formatRenderer = render.NewFormatRenderer(newTree, luteEngine.RenderOptions)
 	md = formatRenderer.Render()
 	newTree = parseKTree(md)
+	newTree.Root.Spec = "1"
 	newTree.Root.ID = tree.ID
 	newTree.Root.KramdownIAL = rootIAL
 	newTree.ID = tree.ID
@@ -95,7 +97,7 @@ func generateFormatHistory(tree *parse.Tree) {
 	}
 
 	var data []byte
-	if data, err = filelock.NoLockFileRead(filepath.Join(util.DataDir, tree.Box, tree.Path)); err != nil {
+	if data, err = filelock.ReadFile(filepath.Join(util.DataDir, tree.Box, tree.Path)); err != nil {
 		logging.LogErrorf("generate history failed: %s", err)
 		return
 	}

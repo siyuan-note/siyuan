@@ -34,7 +34,7 @@ export abstract class Constants {
     public static readonly SIYUAN_UPDATE_THEME: string = "siyuan-update-theme";
 
     // size
-    public static readonly SIZE_TOOLBAR_HEIGHT: number = 30;
+    public static readonly SIZE_TOOLBAR_HEIGHT: number = 42;
     public static readonly SIZE_GET = 36;
     public static readonly SIZE_GET_MAX = 102400;
     public static readonly SIZE_UNDO = 64;
@@ -75,6 +75,7 @@ export abstract class Constants {
     public static readonly TIMEOUT_SEARCH = 300;
     public static readonly TIMEOUT_INPUT = 256;
     public static readonly TIMEOUT_BLOCKLOAD = 300;
+    public static readonly TIMEOUT_TRANSITION = 150;
 
     // help path
     public static readonly HELP_PATH = {
@@ -104,7 +105,7 @@ export abstract class Constants {
         "222": ["'", '"'],
     };
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "⌃I", "⌃E", "⌃N", "⌃U" 不可自定义
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "⌃I", "⌃E", "⌃N", "⌃U" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {
             syncNow: {default: "F9", custom: "F9"},
@@ -136,6 +137,8 @@ export abstract class Constants {
         },
         editor: {
             general: {
+                expandDown: {default: "⌥⇧↓", custom: "⌥⇧↓"},
+                expandUp: {default: "⌥⇧↑", custom: "⌥⇧↑"},
                 copyPlainText: {default: "", custom: ""},
                 copyID: {default: "", custom: ""},
                 netImg2LocalAsset: {default: "", custom: ""},
@@ -146,7 +149,7 @@ export abstract class Constants {
                 collapse: {default: "⌘↑", custom: "⌘↑"},
                 insertBottom: {default: "⌥⌘.", custom: "⌥⌘."},
                 refTab: {default: "⇧⌘>", custom: "⇧⌘>"},
-                openBy: {default: "⌘.", custom: "⌘."},
+                openBy: {default: "⌥,", custom: "⌥,"},
                 insertRight: {default: "⌥.", custom: "⌥."},
                 attr: {default: "⌥⌘A", custom: "⌥⌘A"},
                 refresh: {default: "F5", custom: "F5"},
@@ -424,4 +427,7 @@ export abstract class Constants {
         // third
         "yul", "solidity", "abap",
     ];
+
+    // Google Analytics 事件
+    public static readonly ANALYTICS_EVT_ON_GET_CONFIG: string = "siyuan.onGetConfig";
 }

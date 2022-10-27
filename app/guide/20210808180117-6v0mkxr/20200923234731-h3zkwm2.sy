@@ -1580,7 +1580,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Data synchronization through third-party synchronization disks is not supported, otherwise data may be damaged. Consider manually exporting and importing Data for data synchronization:"
+					"Data": "Data synchronization through third-party synchronization disks is not supported, otherwise data may be corrupted. Consider manually exporting and importing Data for data synchronization:"
 				}
 			]
 		},

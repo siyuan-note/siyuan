@@ -45,7 +45,7 @@ export class Menu {
         if (rect.right > window.innerWidth && (
             leftPosition > 0 || Math.abs(leftPosition) < (rect.right - window.innerWidth))) {
             if (leftPosition >= 0) {
-                style = "left:auto;right:100%;";
+                style = "left:auto;right:calc(100% + 8px);";
             } else {
                 style = `z-index:1;mix-blend-mode: normal;left:-${this.element.style.left};`;
             }
@@ -86,6 +86,9 @@ export class Menu {
     }
 
     public popup(options: { x: number, y: number, h?: number }, isLeft = false) {
+        if (this.element.innerHTML === "") {
+            return;
+        }
         if (isMobile()) {
             window.addEventListener("touchmove", this.preventDefault, {passive: false});
         } else {
@@ -114,7 +117,8 @@ export class MenuItem {
             this.element.classList.add("b3-menu__item--selected");
         }
         if (options.click) {
-            this.element.addEventListener(getEventName(), (event) => {
+            // 需使用 click，否则移动端无法滚动
+            this.element.addEventListener("click", (event) => {
                 if (this.element.getAttribute("disabled")) {
                     return;
                 }
@@ -147,6 +151,8 @@ export class MenuItem {
         }
         this.element.innerHTML = html;
         if (options.bind) {
+            // 主题 rem craft 需要使用 b3-menu__item--custom 来区分自定义菜单 by 281261361
+            this.element.classList.add("b3-menu__item--custom");
             options.bind(this.element);
         }
         if (options.submenu) {
@@ -230,7 +236,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         let style = "";
         if (rect.right > window.innerWidth && (rect.left - subMenuElement.clientWidth - rect.width > 0 ||
             Math.abs(rect.left - subMenuElement.clientWidth - rect.width) < (rect.right - window.innerWidth))) {
-            style = "left:auto;right:100%;";
+            style = "left:auto;right:calc(100% + 8px);";
         }
         if (rect.bottom > window.innerHeight) {
             style += `top: auto;bottom:-5px;max-height:${Math.min(rect.top, window.innerHeight * 0.4)}px`;

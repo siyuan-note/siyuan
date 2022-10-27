@@ -56,7 +56,7 @@
 
     &:hover {
       color: var(--b3-theme-on-background);
-      background-color: var(--b3-border-color);
+      background-color: var(--b3-theme-surface-lighter);
     }
   }
 
@@ -111,12 +111,21 @@
   box-sizing: border-box;
   min-height: 30px;
 
+  &__space {
+    flex: 1;
+    min-width: 8px;
+    transition: var(--b3-transition);
+    color: var(--b3-theme-on-surface);
+    text-align: center;
+    padding: 6px 0;
+    line-height: 18px;
+  }
+
   &__bar {
     align-items: center;
     flex-wrap: wrap;
     display: flex;
     transition: var(--b3-transition);
-    margin-right: 8px;
     overflow: auto;
     min-height: 30px;
 
@@ -168,7 +177,7 @@
     padding: 4px;
     line-height: 16px;
     height: 16px;
-    border-radius: 2px;
+    border-radius: 4px;
     margin: 3px 0;
     color: var(--b3-theme-on-surface);
     max-width: 70%;
@@ -205,6 +214,27 @@
   position: relative;
   padding-bottom: 40px;
 
+  &--enable {
+    .protyle-background__tags .item:hover svg {
+      opacity: 1;
+    }
+
+    .protyle-background__img:hover .protyle-icons,
+    &:hover > .protyle-background__iconw > .protyle-icons,
+    .protyle-background__icon:hover {
+      opacity: .86;
+    }
+  }
+
+
+  &--mobileshow {
+    .protyle-background__iconw > .protyle-icons,
+    .protyle-background__img .protyle-icons,
+    .protyle-background__tags .item svg {
+      opacity: .86;
+    }
+  }
+
   &__icon {
     height: 80px;
     width: 80px;
@@ -222,10 +252,6 @@
       float: left;
       border-radius: 4px;
     }
-
-    &:hover {
-      opacity: .96;
-    }
   }
 
   &__img {
@@ -238,10 +264,6 @@
       height: 30vh;
       opacity: 1;
       object-position: center;
-    }
-
-    &:hover .protyle-icons {
-      opacity: .86;
     }
 
     .protyle-icons {
@@ -283,10 +305,6 @@
 
       &:hover {
         color: var(--b3-theme-on-background);
-
-        svg {
-          opacity: 1;
-        }
       }
 
       &--1 {
@@ -336,10 +354,6 @@
       position: initial;
       margin-top: 40px;
     }
-  }
-
-  &:hover > .protyle-background__iconw > .protyle-icons {
-    opacity: .86;
   }
 }
 
@@ -433,5 +447,24 @@
     position: relative;
     transition: var(--b3-transition);
   }
+}
 
+// 触摸屏嵌入块固定显示操作按钮
+@media (hover: none) {
+  .protyle-wysiwyg {
+    &[contenteditable="false"] .render-node[data-type=NodeBlockQueryEmbed] .protyle-action__edit {
+      display: none;
+    }
+
+    [data-node-id].render-node[data-type=NodeBlockQueryEmbed] {
+      .protyle-icons {
+        opacity: .86;
+        top: 8px;
+
+        & + .protyle-wysiwyg__embed > .protyle-breadcrumb__bar {
+          margin-right: 74px;
+        }
+      }
+    }
+  }
 }

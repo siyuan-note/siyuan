@@ -3,6 +3,7 @@ import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
 import {Constants} from "../../constants";
+import {genBreadcrumb} from "../wysiwyg/renderBacklink";
 
 export const blockRender = (protyle: IProtyle, element: Element) => {
     let blockElements: Element[] = [];
@@ -19,26 +20,39 @@ export const blockRender = (protyle: IProtyle, element: Element) => {
         if (item.getAttribute("data-render") === "true") {
             return;
         }
+        // 需置于请求返回前，否则快速滚动会导致重复加载 https://ld246.com/article/1666857862494?r=88250
+        item.setAttribute("data-render", "true");
         item.innerHTML = `<div class="protyle-icons${hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") ? " fn__none" : ""}">
     <span class="protyle-icon protyle-action__reload protyle-icon--first"><svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg></span>
     <span class="protyle-icon protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
     <span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
 </div>${item.lastElementChild.outerHTML}`;
         const content = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
+        let breadcrumb: boolean | string = item.getAttribute("breadcrumb");
+        if (breadcrumb) {
+            breadcrumb = breadcrumb === "true";
+        } else {
+            breadcrumb = window.siyuan.config.editor.embedBlockBreadcrumb;
+        }
         fetchPost("/api/search/searchEmbedBlock", {
+            embedBlockID: item.getAttribute("data-node-id"),
             stmt: content,
             headingMode: item.getAttribute("custom-heading-mode") === "1" ? 1 : 0,
-            excludeIDs: [item.getAttribute("data-node-id"), protyle.block.rootID]
+            excludeIDs: [item.getAttribute("data-node-id"), protyle.block.rootID],
+            breadcrumb
         }, (response) => {
             const rotateElement = item.querySelector(".fn__rotate");
             if (rotateElement) {
                 rotateElement.classList.remove("fn__rotate");
             }
             let html = "";
-            response.data.blocks.forEach((block: IBlock) => {
-                html += `<div class="protyle-wysiwyg__embed" data-id="${block.id}">${block.content}</div>`;
+            response.data.blocks.forEach((blocksItem: { block: IBlock, blockPaths: IBreadcrumb[] }) => {
+                let breadcrumbHTML = "";
+                if (blocksItem.blockPaths.length !== 0) {
+                    breadcrumbHTML = genBreadcrumb(blocksItem.blockPaths, true);
+                }
+                html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}">${breadcrumbHTML}${blocksItem.block.content}</div>`;
             });
-            item.setAttribute("data-render", "true");
             if (response.data.blocks.length > 0) {
                 item.lastElementChild.insertAdjacentHTML("beforebegin", html +
                     // 辅助上下移动时进行选中

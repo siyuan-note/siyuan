@@ -405,7 +405,7 @@ func createDailyNote(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
-	p, err := model.CreateDailyNote(notebook)
+	p, existed, err := model.CreateDailyNote(notebook)
 	if nil != err {
 		if model.ErrBoxNotFound == err {
 			ret.Code = 1
@@ -425,7 +425,18 @@ func createDailyNote(c *gin.Context) {
 		return
 	}
 
-	evt := util.NewCmdResult("createdailynote", 0, util.PushModeBroadcast, util.PushModeNone)
+	appArg := arg["app"]
+	app := ""
+	if nil != appArg {
+		app = appArg.(string)
+	}
+	pushMode := util.PushModeBroadcast
+	if existed && "" != app {
+		pushMode = util.PushModeBroadcastApp
+	}
+	evt := util.NewCmdResult("createdailynote", 0, pushMode, util.PushModeNone)
+	evt.AppId = app
+
 	name := path.Base(p)
 	files, _, _ := model.ListDocTree(box.ID, path.Dir(p), model.Conf.FileTree.Sort)
 	evt.Data = map[string]interface{}{
@@ -488,10 +499,10 @@ func lockFile(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	locked, filePath := model.LockFileByBlockID(id)
+	locked := model.TryAccessFileByBlockID(id)
 	if !locked {
 		ret.Code = -1
-		ret.Msg = fmt.Sprintf(model.Conf.Language(75), filePath)
+		ret.Msg = fmt.Sprintf(model.Conf.Language(75))
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 	}
 }
@@ -635,7 +646,7 @@ func getDoc(c *gin.Context) {
 	}
 
 	blockCount, childBlockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, err := model.GetDoc(startID, endID, id, index, keyword, mode, size)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
 		return
@@ -651,6 +662,9 @@ func getDoc(c *gin.Context) {
 		return
 	}
 
+	// 判断是否正在同步中 https://github.com/siyuan-note/siyuan/issues/6290
+	isSyncing := model.IsSyncingFile(rootID)
+
 	ret.Data = map[string]interface{}{
 		"id":              id,
 		"mode":            mode,
@@ -664,6 +678,7 @@ func getDoc(c *gin.Context) {
 		"eof":             eof,
 		"box":             boxID,
 		"path":            docPath,
+		"isSyncing":       isSyncing,
 	}
 }
 

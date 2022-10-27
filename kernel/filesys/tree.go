@@ -38,7 +38,7 @@ import (
 
 func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	filePath := filepath.Join(util.DataDir, boxID, p)
-	data, err := filelock.LockFileRead(filePath)
+	data, err := filelock.ReadFile(filePath)
 	if nil != err {
 		return
 	}
@@ -64,23 +64,33 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	hPathBuilder := bytes.Buffer{}
 	hPathBuilder.WriteString("/")
 	for i, _ := range parts {
-		var parentPath string
+		var parentAbsPath string
 		if 0 < i {
-			parentPath = strings.Join(parts[:i+1], "/")
+			parentAbsPath = strings.Join(parts[:i+1], "/")
 		} else {
-			parentPath = parts[0]
+			parentAbsPath = parts[0]
 		}
-		parentPath += ".sy"
-		parentPath = filepath.Join(util.DataDir, boxID, parentPath)
-		parentData, readErr := filelock.LockFileRead(parentPath)
+		parentAbsPath += ".sy"
+		parentPath := parentAbsPath
+		parentAbsPath = filepath.Join(util.DataDir, boxID, parentAbsPath)
+		parentData, readErr := filelock.ReadFile(parentAbsPath)
 		if nil != readErr {
-			logging.LogWarnf("read parent tree data [%s] failed: %s", parentPath, readErr)
+			if os.IsNotExist(readErr) {
+				parentTree := treenode.NewTree(boxID, parentPath, hPathBuilder.String()+"Untitled", "Untitled")
+				if writeErr := WriteTree(parentTree); nil != writeErr {
+					logging.LogErrorf("rebuild parent tree [%s] failed: %s", parentAbsPath, writeErr)
+				} else {
+					logging.LogInfof("rebuilt parent tree [%s]", parentAbsPath)
+				}
+			} else {
+				logging.LogWarnf("read parent tree data [%s] failed: %s", parentAbsPath, readErr)
+			}
 			hPathBuilder.WriteString("Untitled/")
 			continue
 		}
 		parentTree, parseErr := parse.ParseJSONWithoutFix(parentData, luteEngine.ParseOptions)
 		if nil != parseErr {
-			logging.LogWarnf("parse parent tree [%s] failed: %s", parentPath, parseErr)
+			logging.LogWarnf("parse parent tree [%s] failed: %s", parentAbsPath, parseErr)
 			hPathBuilder.WriteString("Untitled/")
 			continue
 		}
@@ -93,7 +103,47 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	return
 }
 
+func WriteTreeWithoutChangeTime(tree *parse.Tree) (err error) {
+	data, filePath, err := prepareWriteTree(tree)
+	if nil != err {
+		return
+	}
+
+	if err = filelock.WriteFileWithoutChangeTime(filePath, data); nil != err {
+		if errors.Is(err, filelock.ErrUnableAccessFile) {
+			return
+		}
+
+		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
+		logging.LogErrorf(msg)
+		return errors.New(msg)
+	}
+
+	afterWriteTree(tree)
+	return
+}
+
 func WriteTree(tree *parse.Tree) (err error) {
+	data, filePath, err := prepareWriteTree(tree)
+	if nil != err {
+		return
+	}
+
+	if err = filelock.WriteFile(filePath, data); nil != err {
+		if errors.Is(err, filelock.ErrUnableAccessFile) {
+			return
+		}
+
+		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
+		logging.LogErrorf(msg)
+		return errors.New(msg)
+	}
+
+	afterWriteTree(tree)
+	return
+}
+
+func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error) {
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
 
 	if nil == tree.Root.FirstChild {
@@ -103,36 +153,32 @@ func WriteTree(tree *parse.Tree) (err error) {
 		treenode.ReindexBlockTree(tree)
 	}
 
-	filePath := filepath.Join(util.DataDir, tree.Box, tree.Path)
+	filePath = filepath.Join(util.DataDir, tree.Box, tree.Path)
 	if oldSpec := tree.Root.Spec; "" == oldSpec {
 		luteEngine.NestedInlines2FlattedSpans(tree)
 		tree.Root.Spec = "1"
 		logging.LogInfof("migrated tree [%s] from spec [%s] to [%s]", filePath, oldSpec, tree.Root.Spec)
 	}
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
-	output := renderer.Render()
+	data = renderer.Render()
 
 	// .sy 文档数据使用格式化好的 JSON 而非单行 JSON
 	buf := bytes.Buffer{}
 	buf.Grow(4096)
-	if err = json.Indent(&buf, output, "", "\t"); nil != err {
+	if err = json.Indent(&buf, data, "", "\t"); nil != err {
 		return
 	}
-	output = buf.Bytes()
+	data = buf.Bytes()
 
 	if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
 		return
 	}
+	return
+}
 
-	if err = filelock.LockFileWrite(filePath, output); nil != err {
-		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
-		logging.LogErrorf(msg)
-		return errors.New(msg)
-	}
-
+func afterWriteTree(tree *parse.Tree) {
 	docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
 	cache.PutDocIAL(tree.Path, docIAL)
-	return
 }
 
 func recoverParseJSON2Tree(boxID, p, filePath string, luteEngine *lute.Lute) (ret *parse.Tree) {
@@ -155,12 +201,12 @@ func recoverParseJSON2Tree(boxID, p, filePath string, luteEngine *lute.Lute) (re
 		return
 	}
 
-	data, err := filelock.NoLockFileRead(tmp)
+	data, err := filelock.ReadFile(tmp)
 	if nil != err {
 		logging.LogErrorf("recover tree read from tmp [%s] failed: %s", tmp, err)
 		return
 	}
-	if err = filelock.NoLockFileWrite(filePath, data); nil != err {
+	if err = filelock.WriteFile(filePath, data); nil != err {
 		logging.LogErrorf("recover tree write [%s] from tmp [%s] failed: %s", filePath, tmp, err)
 		return
 	}
@@ -209,7 +255,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
 			return
 		}
-		if err = filelock.LockFileWrite(filePath, output); nil != err {
+		if err = filelock.WriteFile(filePath, output); nil != err {
 			msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 			logging.LogErrorf(msg)
 		}

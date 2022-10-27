@@ -32,11 +32,24 @@ func HookResident() {
 	}
 
 	for range time.Tick(time.Second * 30) {
-		if 0 == util.CountSessions() {
+		if makeSureSessionEmpty() {
 			logging.LogInfof("no active session, exit kernel process now")
 			Close(false, 1)
 		}
 	}
+}
+
+func makeSureSessionEmpty() bool {
+	count := 0
+	for i := 0; i < 7; i++ {
+		count = util.CountSessions()
+		//logging.LogDebugf("session count [%d]", count)
+		if 0 < count {
+			return false
+		}
+		time.Sleep(time.Second * 1)
+	}
+	return true
 }
 
 func HandleSignal() {

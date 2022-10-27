@@ -38,10 +38,18 @@ export const highlightById = (protyle: IProtyle, id: string, top = false) => {
     }
 };
 
-export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = false) => {
+export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = false, offset = 0) => {
     if (!top && getSelection().rangeCount > 0 && hasClosestBlock(getSelection().getRangeAt(0).startContainer)) {
         const editorElement = protyle.contentElement;
         const cursorTop = getSelectionPosition(editorElement).top - editorElement.getBoundingClientRect().top;
+        if (offset) { // 仅移动端弹起键盘用到
+            editorElement.scroll({
+                top: editorElement.scrollTop + cursorTop - offset,
+                left: editorElement.scrollLeft,
+                behavior: "smooth"
+            });
+            return;
+        }
         if (cursorTop < 0) {
             editorElement.scrollTop = editorElement.scrollTop + cursorTop;
         } else if (cursorTop > editorElement.clientHeight - 34) {

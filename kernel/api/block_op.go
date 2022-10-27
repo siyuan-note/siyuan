@@ -123,12 +123,15 @@ func insertBlock(c *gin.Context) {
 
 	data := arg["data"].(string)
 	dataType := arg["dataType"].(string)
-	var parentID, previousID string
+	var parentID, previousID, nextID string
 	if nil != arg["parentID"] {
 		parentID = arg["parentID"].(string)
 	}
 	if nil != arg["previousID"] {
 		previousID = arg["previousID"].(string)
+	}
+	if nil != arg["nextID"] {
+		nextID = arg["nextID"].(string)
 	}
 
 	if "markdown" == dataType {
@@ -144,6 +147,7 @@ func insertBlock(c *gin.Context) {
 					Data:       data,
 					ParentID:   parentID,
 					PreviousID: previousID,
+					NextID:     nextID,
 				},
 			},
 		},
@@ -290,6 +294,8 @@ func broadcastTransactions(transactions []*model.Transaction) {
 }
 
 func dataBlockDOM(data string, luteEngine *lute.Lute) (ret string) {
+	luteEngine.SetHTMLTag2TextMark(true) // API `/api/block/**` 无法使用 `<u>foo</u>` 与 `<kbd>bar</kbd>` 插入/更新行内元素 https://github.com/siyuan-note/siyuan/issues/6039
+
 	ret = luteEngine.Md2BlockDOM(data)
 	if "" == ret {
 		// 使用 API 插入空字符串出现错误 https://github.com/siyuan-note/siyuan/issues/3931

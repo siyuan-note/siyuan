@@ -105,6 +105,14 @@ interface ILuteRender {
     renderBackslashContent?: ILuteRenderCallback;
 }
 
+interface IBreadcrumb {
+    id: string,
+    name: string,
+    type: string,
+    subType: string,
+    children: []
+}
+
 interface ILuteOptions extends IMarkdownConfig {
     emojis: IObject;
     emojiSite: string;
@@ -206,6 +214,8 @@ declare class Lute {
     public Md2BlockDOM(html: string): string;
 
     public SetProtyleWYSIWYG(wysiwyg: boolean): void;
+
+    public SetHTMLTag2TextMark(enable: boolean): void;
 
     public MarkdownStr(name: string, md: string): string;
 
@@ -351,6 +361,11 @@ interface IHint {
 
 /** @link https://ld246.com/article/1549638745630#options */
 interface IOptions {
+    backlinkData?: {
+        blockPaths: IBreadcrumb[],
+        dom: string
+        expand: boolean
+    }[],
     action?: string[],
     mode?: TEditorMode,
     blockId: string
@@ -388,7 +403,7 @@ interface IOptions {
     };
 
     /** 编辑器异步渲染完成后的回调方法 */
-    after?(protyle: import("../protyle/index").default): void;
+    after?(protyle: import("../protyle").Protyle): void;
 }
 
 interface IProtyle {

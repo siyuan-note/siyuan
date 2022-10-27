@@ -7,6 +7,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {needSubscribe} from "../util/needSubscribe";
 import {syncGuide} from "../sync/syncGuide";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {getEventName} from "../protyle/util/compatibility";
 
 export const account = {
     element: undefined as Element,
@@ -86,6 +87,10 @@ ${window.siyuan.languages.account8}`;
             <span class="fn__space"></span>
             <button class="b3-button b3-button--cancel" id="logout">
                 ${window.siyuan.languages.logout}
+            </button>
+            <span class="fn__space"></span>
+            <button class="b3-button b3-button--cancel${window.siyuan.config.system.container === "ios" ? "" : " fn__none"}" id="deactivateUser">
+                ${window.siyuan.languages.deactivateUser}
             </button>
             <span class="fn__flex-1"></span>
             <button class="b3-button b3-button--cancel b3-tooltips b3-tooltips__n" id="refresh" aria-label="${window.siyuan.languages.refresh}">
@@ -202,6 +207,16 @@ ${window.siyuan.languages.account8}`;
                 fetchPost("/api/setting/logoutCloudUser", {}, () => {
                     fetchPost("/api/setting/getCloudUser", {}, response => {
                         window.siyuan.user = response.data;
+                        element.innerHTML = account.genHTML();
+                        account.bindEvent(element);
+                        account.onSetaccount();
+                    });
+                });
+            });
+            element.querySelector("#deactivateUser").addEventListener(getEventName(), () => {
+                confirmDialog("⚠️ " + window.siyuan.languages.deactivateUser, window.siyuan.languages.deactivateUserTip, () => {
+                    fetchPost("/api/account/deactivate", {}, () => {
+                        window.siyuan.user = null;
                         element.innerHTML = account.genHTML();
                         account.bindEvent(element);
                         account.onSetaccount();

@@ -7,6 +7,7 @@ import {needSubscribe} from "../../util/needSubscribe";
 import {MenuItem} from "../../menus/Menu";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {replaceFileName} from "../../editor/rename";
 
 export class Inbox extends Model {
     private element: Element;
@@ -41,6 +42,8 @@ export class Inbox extends Model {
     <div class="fn__flex fn__none">
         <span data-type="back" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.back}"><svg><use xlink:href='#iconLeft'></use></svg></span>
         <span class="fn__space"></span>
+        <span data-type="refreshDetails" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
+        <span class="fn__space"></span>
         <span data-type="move" data-menu="true" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.move}"><svg><use xlink:href='#iconMove'></use></svg></span>
         <span class="fn__space"></span>
         <span data-type="delete" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href='#iconTrashcan'></use></svg></span>
@@ -54,7 +57,7 @@ export class Inbox extends Model {
         const detailsElement = this.element.querySelector(".inbox__details");
         const selectAllElement = this.element.querySelector(".block__icons input") as HTMLInputElement;
         this.element.addEventListener("click", (event: MouseEvent) => {
-                setPanelFocus(this.element.firstElementChild);
+                setPanelFocus(this.element);
                 let target = event.target as HTMLElement;
                 while (target && !target.isEqualNode(this.element)) {
                     const typeElement = hasClosestByAttribute(target, "data-type", null);
@@ -107,8 +110,22 @@ export class Inbox extends Model {
                                 this.currentPage = 1;
                                 this.update();
                                 break;
+                            case "refreshDetails":
+                                fetchPost("/api/inbox/getShorthand", {
+                                    id: detailsElement.getAttribute("data-id")
+                                }, (response) => {
+                                    detailsElement.innerHTML = `<h3 class="fn__ellipsis">${response.data.shorthandTitle}</h3>
+<div class="fn__hr"></div>
+<a href="${response.data.shorthandURL}" target="_blank">${response.data.shorthandURL}</a>
+<div class="fn__hr"></div>
+<div class="b3-typography b3-typography--default">
+${(Lute.New()).MarkdownStr("", response.data.shorthandContent)}
+</div>`;
+                                    detailsElement.scrollTop = 0;
+                                });
+                                break;
                             case "delete":
-                                confirmDialog(window.siyuan.languages.delete, window.siyuan.languages.confirmDelete + "?", () => {
+                                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete + "?", () => {
                                     this.remove(detailsElement.getAttribute("data-id"));
                                 });
                                 break;
@@ -160,7 +177,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             }
         );
         this.update();
-        setPanelFocus(this.element.firstElementChild);
+        setPanelFocus(this.element);
     }
 
     private updateAction() {
@@ -209,7 +226,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             label: window.siyuan.languages.remove,
             icon: "iconTrashcan",
             click: () => {
-                confirmDialog(window.siyuan.languages.delete, window.siyuan.languages.confirmDelete + "?", () => {
+                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete + "?", () => {
                     this.remove();
                 });
             }
@@ -254,7 +271,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             fetchPost("/api/filetree/createDoc", {
                 notebook: notebookId,
                 path: `/${Lute.NewNodeID()}.sy`,
-                title: this.data[item].shorthandTitle,
+                title: replaceFileName(this.data[item].shorthandTitle),
                 md: this.data[item].shorthandContent,
             }, () => {
                 this.remove(item);
@@ -285,7 +302,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             if (response.data.data.shorthands.length === 0) {
                 html = '<ul class="b3-list b3-list--background"><li class="b3-list--empty">打开帮助文档搜索 <b>收集箱</b> 查看使用说明</li></ul>';
             } else {
-                html = "<ul class=\"b3-list b3-list--background\">";
+                html = '<ul style="padding: 8px 0" class="b3-list b3-list--background">';
                 response.data.data.shorthands.forEach((item: IInbox) => {
                     html += `<li style="padding-left: 0" data-id="${item.oId}" class="b3-list-item">
     <label data-type="select" class="fn__flex">

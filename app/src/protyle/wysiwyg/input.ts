@@ -10,7 +10,7 @@ import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../markdown/blockRender";
 import {hideElements} from "../ui/hideElements";
 import {hasClosestByAttribute} from "../util/hasClosest";
-import {fetchSyncPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 
 export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true) => {
     if (!blockElement.parentElement) {
@@ -58,8 +58,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
 
     blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-    if (editElement.innerHTML === "》<wbr>") {
-        editElement.innerHTML = "><wbr>";
+    if (editElement.innerHTML === "》<wbr>" || editElement.innerHTML.indexOf("\n》<wbr>") > -1) {
+        editElement.innerHTML = editElement.innerHTML.replace("》<wbr>", "><wbr>");
     }
     const trimStartText = editElement.innerHTML.trimStart();
     if ((trimStartText.startsWith("````") || trimStartText.startsWith("····") || trimStartText.startsWith("~~~~")) &&
@@ -99,7 +99,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         if (blockElement.parentElement.classList.contains("li") &&
             blockElement.parentElement.childElementCount === 3  // https://ld246.com/article/1659315815506
         ) {
-            if (blockElement.parentElement.parentElement.childElementCount === 2) {
+            // 仅有一项的列表才可转换
+            if (!blockElement.parentElement.parentElement.classList.contains("protyle-wysiwyg") && // https://ld246.com/article/1659315815506
+                blockElement.parentElement.parentElement.childElementCount === 2) {
                 html = `<div data-subtype="t" data-node-id="${blockElement.parentElement.parentElement.getAttribute("data-node-id")}" data-type="NodeList" class="list"><div data-marker="*" data-subtype="t" data-node-id="${blockElement.parentElement.getAttribute("data-node-id")}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div><div data-node-id="${id}" data-type="NodeParagraph" class="p"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                 id = blockElement.parentElement.parentElement.getAttribute("data-node-id");
                 blockElement = blockElement.parentElement.parentElement;
@@ -150,7 +152,12 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             // 使用 md 闭合后继续输入应为普通文本
             blockElement.outerHTML = html.replace("</span><wbr>", "</span>" + Constants.ZWSP + "<wbr>");
         }
-        blockElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`).forEach((item: HTMLElement) => {
+            if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" ||
+                !hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                blockElement = item;
+            }
+        });
         Array.from(tempElement.content.children).forEach((item, index) => {
             const tempId = item.getAttribute("data-node-id");
             let realElement;
@@ -182,6 +189,14 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             } else if (realType === "NodeThematicBreak" && focusHR) {
                 focusBlock(blockElement);
             } else {
+                // https://github.com/siyuan-note/siyuan/issues/6087
+                realElement.querySelectorAll('[data-type="block-ref"][data-subtype="d"]').forEach(refItem => {
+                    if (refItem.textContent === "") {
+                        fetchPost("/api/block/getRefText", {id: refItem.getAttribute("data-id")}, (response) => {
+                            refItem.innerHTML = response.data;
+                        });
+                    }
+                });
                 mathRender(realElement);
                 if (index === tempElement.content.childElementCount - 1) {
                     focusByWbr(protyle.wysiwyg.element, range);

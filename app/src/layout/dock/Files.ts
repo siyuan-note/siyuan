@@ -93,7 +93,7 @@ export class Files extends Model {
         this.element = this.actionsElement.nextElementSibling as HTMLElement;
         this.closeElement = options.tab.panelElement.lastElementChild as HTMLElement;
         this.closeElement.addEventListener("click", (event) => {
-            setPanelFocus(this.actionsElement);
+            setPanelFocus(this.element.parentElement);
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.closeElement)) {
                 const type = target.getAttribute("data-type");
@@ -117,7 +117,7 @@ export class Files extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "remove") {
-                    confirmDialog(window.siyuan.languages.delete,
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm,
                         `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(target.parentElement.querySelector(".b3-list-item__text").textContent)}</b>?`, () => {
                             fetchPost("/api/notebook/removeNotebook", {
                                 notebook: target.getAttribute("data-url"),
@@ -180,7 +180,7 @@ export class Files extends Model {
                 }
                 target = target.parentElement;
             }
-            setPanelFocus(this.actionsElement);
+            setPanelFocus(this.element.parentElement);
         });
         let clickTimeout: number;
         this.element.addEventListener("click", (event) => {
@@ -229,7 +229,7 @@ export class Files extends Model {
                         if (event.detail === 1) {
                             needFocus = false;
                             clickTimeout = window.setTimeout(() => {
-                                this.setCurrent(target);
+                                this.setCurrent(target, false);
                                 if (target.getAttribute("data-type") === "navigation-file") {
                                     if (window.siyuan.altIsPressed) {
                                         openFileById({
@@ -245,13 +245,13 @@ export class Files extends Model {
                                     }
                                 } else if (target.getAttribute("data-type") === "navigation-root") {
                                     this.getLeaf(target, notebookId);
-                                    setPanelFocus(this.actionsElement);
+                                    setPanelFocus(this.element.parentElement);
                                 }
                             }, Constants.TIMEOUT_DBLCLICK);
                         } else if (event.detail === 2) {
                             clearTimeout(clickTimeout);
                             this.getLeaf(target, notebookId);
-                            this.setCurrent(target);
+                            this.setCurrent(target, false);
                         }
                         window.siyuan.menus.menu.remove();
                         event.stopPropagation();
@@ -262,7 +262,7 @@ export class Files extends Model {
                 }
             }
             if (needFocus) {
-                setPanelFocus(this.actionsElement);
+                setPanelFocus(this.element.parentElement);
             }
         });
         // b3-list-item--focus 样式会遮挡拖拽排序的上下线条
@@ -467,7 +467,7 @@ export class Files extends Model {
             newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
         });
         this.init();
-        setPanelFocus(this.actionsElement);
+        setPanelFocus(this.element.parentElement);
     }
 
     private genNotebook(item: INotebook) {
@@ -486,7 +486,7 @@ export class Files extends Model {
         } else {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}">
 <li class="b3-list-item b3-list-item--hide-action" draggable="true" data-type="navigation-root" data-path="/">
-    <span class="b3-list-item__toggle">
+    <span class="b3-list-item__toggle b3-list-item__toggle--hl">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${emojiHTML}
@@ -764,7 +764,7 @@ export class Files extends Model {
         this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
     }
 
-    private setCurrent(target: HTMLElement) {
+    private setCurrent(target: HTMLElement, isScroll = true) {
         if (!target) {
             return;
         }
@@ -772,11 +772,8 @@ export class Files extends Model {
             liItem.classList.remove("b3-list-item--focus");
         });
         target.classList.add("b3-list-item--focus");
-        const titleHeight = this.actionsElement.clientHeight;
-        if (target.offsetTop - titleHeight < this.element.scrollTop) {
-            this.element.scrollTop = target.offsetTop - titleHeight;
-        } else if (target.offsetTop - this.element.clientHeight - titleHeight + target.clientHeight > this.element.scrollTop) {
-            this.element.scrollTop = target.offsetTop - this.element.clientHeight - titleHeight + target.clientHeight;
+        if (isScroll) {
+            this.element.scrollTop = target.offsetTop - this.element.clientHeight / 2 - this.actionsElement.clientHeight;
         }
     }
 
@@ -847,7 +844,7 @@ export class Files extends Model {
 data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
-    <span style="padding-left: ${(item.path.split("/").length - 1) * 16}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
+    <span style="padding-left: ${(item.path.split("/").length - 2) * 18 + 22}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     <span class="b3-list-item__icon b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER))}</span>
@@ -918,7 +915,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
                     click: () => {
                         clickEvent(1);
                     }
-                }, {type: "separator"}, {
+                }, {
                     icon: window.siyuan.config.fileTree.sort === 4 ? "iconSelect" : undefined,
                     label: window.siyuan.languages.fileNameNatASC,
                     click: () => {
@@ -965,6 +962,30 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
                     label: window.siyuan.languages.refCountDESC,
                     click: () => {
                         clickEvent(8);
+                    }
+                }, {type: "separator"}, {
+                    icon: window.siyuan.config.fileTree.sort === 11 ? "iconSelect" : undefined,
+                    label: window.siyuan.languages.docSizeASC,
+                    click: () => {
+                        clickEvent(11);
+                    }
+                }, {
+                    icon: window.siyuan.config.fileTree.sort === 12 ? "iconSelect" : undefined,
+                    label: window.siyuan.languages.docSizeDESC,
+                    click: () => {
+                        clickEvent(12);
+                    }
+                }, {type: "separator"}, {
+                    icon: window.siyuan.config.fileTree.sort === 13 ? "iconSelect" : undefined,
+                    label: window.siyuan.languages.subDocCountASC,
+                    click: () => {
+                        clickEvent(13);
+                    }
+                }, {
+                    icon: window.siyuan.config.fileTree.sort === 14 ? "iconSelect" : undefined,
+                    label: window.siyuan.languages.subDocCountDESC,
+                    click: () => {
+                        clickEvent(14);
                     }
                 }, {type: "separator"}, {
                     icon: window.siyuan.config.fileTree.sort === 6 ? "iconSelect" : undefined,

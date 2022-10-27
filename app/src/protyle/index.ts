@@ -25,8 +25,10 @@ import {Background} from "./header/Background";
 import {getDisplayName} from "../util/pathName";
 import {onGet} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
+import {renderBacklink} from "./wysiwyg/renderBacklink";
+import {showKeyboardToolbar} from "../mobile/util/showKeyboardToolbar";
 
-class Protyle {
+export class Protyle {
 
     public readonly version: string;
     public protyle: IProtyle;
@@ -80,7 +82,7 @@ class Protyle {
         }
 
         this.init();
-        if (!options.action.includes(Constants.CB_GET_HISTORY)) {
+        if (!mergedOptions.action.includes(Constants.CB_GET_HISTORY)) {
             this.protyle.ws = new Model({
                 id: this.protyle.id,
                 type: "protyle",
@@ -94,7 +96,7 @@ class Protyle {
                         case "heading2doc":
                         case "li2doc":
                             if (this.protyle.block.rootID === data.data.srcRootBlockID) {
-                                if (this.protyle.block.showAll && data.cmd === "heading2doc") {
+                                if (this.protyle.block.showAll && data.cmd === "heading2doc" && !this.protyle.options.backlinkData) {
                                     fetchPost("/api/filetree/getDoc", {
                                         id: this.protyle.block.rootID,
                                         size: Constants.SIZE_GET,
@@ -131,7 +133,7 @@ class Protyle {
                             // update ref
                             this.protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${data.data.id}"]`).forEach(item => {
                                 if (item.getAttribute("data-subtype") === "d") {
-                                    item.textContent = data.data.title;
+                                    item.textContent = data.data.refText;
                                 }
                             });
                             break;
@@ -155,16 +157,22 @@ class Protyle {
                     }
                 }
             });
+            setPadding(this.protyle);
+            if (options.backlinkData) {
+                this.protyle.block.rootID = options.blockId;
+                renderBacklink(this.protyle, options.backlinkData);
+                return;
+            }
             fetchPost("/api/filetree/getDoc", {
                 id: options.blockId,
                 k: options.key || "",
-                mode: (options.action && options.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0, // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后
-                size: options.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
+                mode: (mergedOptions.action && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0, // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后
+                size: mergedOptions.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
             }, getResponse => {
-                onGet(getResponse, this.protyle, options.action, options.scrollAttr);
+                onGet(getResponse, this.protyle, mergedOptions.action, options.scrollAttr);
                 if (this.protyle.model) {
                     /// #if !MOBILE
-                    if (options.action?.includes(Constants.CB_GET_FOCUS)) {
+                    if (mergedOptions.action?.includes(Constants.CB_GET_FOCUS)) {
                         setPanelFocus(this.protyle.model.element.parentElement.parentElement);
                     }
                     updatePanelByEditor(this.protyle, false);
@@ -173,8 +181,8 @@ class Protyle {
 
                 // 需等待 getDoc 完成后再执行，否则在无页签的时候 updatePanelByEditor 会执行2次
                 // 只能用 focusin，否则点击表格无法执行
-                /// #if !MOBILE
                 this.protyle.wysiwyg.element.addEventListener("focusin", () => {
+                    /// #if !MOBILE
                     if (this.protyle && this.protyle.model) {
                         let needUpdate = true;
                         if (this.protyle.model.element.parentElement.parentElement.classList.contains("layout__wnd--active") && this.protyle.model.headElement.classList.contains("item--focus")) {
@@ -187,21 +195,22 @@ class Protyle {
                         updatePanelByEditor(this.protyle, false);
                     } else {
                         // 悬浮层应移除其余面板高亮，否则按键会被面板监听到
-                        document.querySelectorAll(".block__icons--active").forEach(item => {
-                            item.classList.remove("block__icons--active");
+                        document.querySelectorAll(".layout__tab--active").forEach(item => {
+                            item.classList.remove("layout__tab--active");
                         });
                         document.querySelectorAll(".layout__wnd--active").forEach(item => {
                             item.classList.remove("layout__wnd--active");
                         });
                     }
+                    /// #else
+                    showKeyboardToolbar();
+                    /// #endif
                 });
-                /// #endif
                 // 需等渲染完后再回调，用于定位搜索字段 https://github.com/siyuan-note/siyuan/issues/3171
                 if (mergedOptions.after) {
                     mergedOptions.after(this);
                 }
             });
-            setPadding(this.protyle);
         }
     }
 
@@ -240,5 +249,3 @@ class Protyle {
         destroy(this.protyle);
     }
 }
-
-export default Protyle;

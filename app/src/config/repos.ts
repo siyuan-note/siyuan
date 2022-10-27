@@ -108,15 +108,23 @@ export const repos = {
     <span class="fn__space"></span>
     <input type="checkbox" id="reposCloudSyncSwitch"${window.siyuan.config.sync.enabled ? " checked='checked'" : ""} class="b3-switch fn__flex-center">
 </label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.generateConflictDoc}
+        <div class="b3-label__text">${window.siyuan.languages.generateConflictDocTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input type="checkbox" id="generateConflictDoc"${window.siyuan.config.sync.generateConflictDoc ? " checked='checked'" : ""} class="b3-switch fn__flex-center">
+</label>
 ${syncModeHTML}
 <div class="b3-label">
-    <div class="fn__flex">
+    <label class="fn__flex">
         <div class="fn__flex-center">${window.siyuan.languages.cloudSyncDir}</div>
         <div class="fn__flex-1"></div>
         <button class="b3-button b3-button--outline fn__flex-center${isMobile() ? "" : " fn__size200"}" data-type="config">
             <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}
         </button>
-    </div>
+    </label>
     <div id="reposCloudSyncList" class="fn__none config-repos__sync"><img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg"></div>
 </div>
 <div class="b3-label fn__flex">
@@ -144,6 +152,12 @@ ${syncModeHTML}
                 } else {
                     window.siyuan.config.sync.enabled = switchElement.checked;
                 }
+            });
+        });
+        const switchConflictElement = repos.element.querySelector("#generateConflictDoc") as HTMLInputElement;
+        switchConflictElement.addEventListener("change", () => {
+            fetchPost("/api/sync/setSyncGenerateConflictDoc", {enabled: switchConflictElement.checked}, () => {
+                window.siyuan.config.sync.generateConflictDoc = switchConflictElement.checked;
             });
         });
         const syncModeElement = repos.element.querySelector("#syncMode") as HTMLSelectElement;

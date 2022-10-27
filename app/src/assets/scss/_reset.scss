@@ -19,40 +19,50 @@ body {
   max-height: 100%;
   overflow: hidden;
 
-  &.body--win32 {
-    -webkit-font-smoothing: auto;
-    border: 1px solid var(--b3-border-color);
-
+  &.body--blur {
     .toolbar {
-      padding-left: 0;
+      background: var(--b3-toolbar-blur-background);
+    }
 
-      // https://github.com/siyuan-note/siyuan/issues/4460
-      .b3-tooltips__se,
-      .b3-tooltips__sw,
-      .b3-tooltips__s {
-        &:before {
-          bottom: -15px;
+    .layout {
+      &__wnd--active .layout-tab-bar .item--focus {
+        box-shadow: inset 0 -2px 0 0 var(--b3-theme-background-light);
+
+        & > .item__text {
+          color: var(--b3-theme-on-surface);
+        }
+      }
+
+      &__tab--active {
+        .b3-list--background .b3-list-item--focus:not(.dragover):not(.dragover__top):not(.dragover__bottom) {
+          background-color: var(--b3-list-hover);
         }
 
-        &:after {
-          top: calc(100% + 10px);
+        .graph__svg,
+        .inbox__list {
+          background-color: var(--b3-theme-surface);
         }
       }
     }
 
-    &.body--blur {
-      border-top-color: var(--b3-theme-surface);
+    .dock__item--activefocus {
+      color: var(--b3-theme-on-surface-light) !important;
+      background-color: var(--b3-theme-background-light) !important;
+    }
+  }
+
+  &.body--win32 {
+    -webkit-font-smoothing: auto;
+
+    .toolbar {
+      padding: 0 0 0 5px;
     }
 
     .fullscreen {
       & > .protyle-breadcrumb,
       & > .block__icons {
-        padding-left: 8px;
-        padding-right: 98px;
-      }
-
-      .protyle-breadcrumb > .fn__flex-shrink {
-        -webkit-app-region: drag;
+        padding-left: 10px;
+        padding-right: 108px;
       }
     }
   }

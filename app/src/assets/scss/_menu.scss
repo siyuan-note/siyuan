@@ -3,11 +3,12 @@
   border-radius: 4px;
   box-shadow: var(--b3-dialog-shadow);
   background-color: var(--b3-menu-background);
-  padding: 4px 0;
+  padding: 8px;
   z-index: 210;
 
   &__item {
     padding: 0 16px 0 8px;
+    border-radius: 4px;
     user-select: none;
     display: flex;
     line-height: 30px;
@@ -31,12 +32,12 @@
 
       .b3-menu__submenu {
         display: block;
-        border: 1px solid var(--b3-border-color);
+        border: 1px solid var(--b3-theme-surface-lighter);
         border-radius: 4px;
         background-color: var(--b3-menu-background);
-        padding: 4px 0;
+        padding: 8px;
         position: absolute;
-        left: 100%;
+        left: calc(100% + 8px);
         top: -5px;
         box-shadow: var(--b3-dialog-shadow);
         mix-blend-mode: difference;
@@ -143,7 +144,7 @@
   }
 
   &__separator {
-    background-color: var(--b3-border-color);
+    background-color: var(--b3-theme-surface-lighter);
     height: 1px;
     margin: 4px 0;
     display: block;
@@ -245,7 +246,7 @@
     font-size: 16px;
 
     &:hover {
-      background-color: var(--b3-border-color);
+      background-color: var(--b3-theme-surface-lighter);
     }
 
     svg {

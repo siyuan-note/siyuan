@@ -31,6 +31,27 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func swapBlockRef(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	refID := arg["refID"].(string)
+	defID := arg["defID"].(string)
+	includeChildren := arg["includeChildren"].(bool)
+	err := model.SwapBlockRef(refID, defID, includeChildren)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+}
+
 func getHeadingChildrenDOM(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -43,6 +64,28 @@ func getHeadingChildrenDOM(c *gin.Context) {
 	id := arg["id"].(string)
 	dom := model.GetHeadingChildrenDOM(id)
 	ret.Data = dom
+}
+
+func getHeadingDeleteTransaction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+
+	transaction, err := model.GetHeadingDeleteTransaction(id)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	ret.Data = transaction
 }
 
 func getHeadingLevelTransaction(c *gin.Context) {
@@ -112,7 +155,7 @@ func checkBlockExist(c *gin.Context) {
 
 	id := arg["id"].(string)
 	b, err := model.GetBlock(id)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
 		return
@@ -157,11 +200,7 @@ func getContentWordCount(c *gin.Context) {
 	}
 
 	content := arg["content"].(string)
-	runeCount, wordCount := model.ContentWordCount(content)
-	ret.Data = map[string]interface{}{
-		"runeCount": runeCount,
-		"wordCount": wordCount,
-	}
+	ret.Data = model.ContentStat(content)
 }
 
 func getBlocksWordCount(c *gin.Context) {
@@ -178,14 +217,10 @@ func getBlocksWordCount(c *gin.Context) {
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
 	}
-	runeCount, wordCount := model.BlocksWordCount(ids)
-	ret.Data = map[string]interface{}{
-		"runeCount": runeCount,
-		"wordCount": wordCount,
-	}
+	ret.Data = model.BlocksWordCount(ids)
 }
 
-func getBlockWordCount(c *gin.Context) {
+func getTreeStat(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -195,13 +230,7 @@ func getBlockWordCount(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	blockRuneCount, blockWordCount, rootBlockRuneCount, rootBlockWordCount := model.BlockWordCount(id)
-	ret.Data = map[string]interface{}{
-		"blockRuneCount":     blockRuneCount,
-		"blockWordCount":     blockWordCount,
-		"rootBlockRuneCount": rootBlockRuneCount,
-		"rootBlockWordCount": rootBlockWordCount,
-	}
+	ret.Data = model.StatTree(id)
 }
 
 func getRefText(c *gin.Context) {
@@ -292,6 +321,20 @@ func getBlockBreadcrumb(c *gin.Context) {
 	ret.Data = blockPath
 }
 
+func getBlockIndex(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	index := model.GetBlockIndex(id)
+	ret.Data = index
+}
+
 func getBlockInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -303,7 +346,7 @@ func getBlockInfo(c *gin.Context) {
 
 	id := arg["id"].(string)
 	block, err := model.GetBlock(id)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
 		return
@@ -329,7 +372,7 @@ func getBlockInfo(c *gin.Context) {
 	}
 
 	root, err := model.GetBlock(block.RootID)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
 		return

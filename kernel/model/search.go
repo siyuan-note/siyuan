@@ -25,8 +25,10 @@ import (
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
+	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
@@ -38,12 +40,18 @@ import (
 	"github.com/xrash/smetrics"
 )
 
-func SearchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []*Block) {
-	WaitForWritingFiles()
-	return searchEmbedBlock(stmt, excludeIDs, headingMode)
+type EmbedBlock struct {
+	Block      *Block       `json:"block"`
+	BlockPaths []*BlockPath `json:"blockPaths"`
 }
 
-func searchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []*Block) {
+func SearchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
+	time.Sleep(util.FrontendQueueInterval)
+	WaitForWritingFiles()
+	return searchEmbedBlock(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb)
+}
+
+func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
 	sqlBlocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
 	var tmp []*sql.Block
 	for _, b := range sqlBlocks {
@@ -52,16 +60,49 @@ func searchEmbedBlock(stmt string, excludeIDs []string, headingMode int) (ret []
 		}
 	}
 	sqlBlocks = tmp
+
+	// 缓存最多 128 棵语法树
+	trees := map[string]*parse.Tree{}
+	count := 0
 	for _, sb := range sqlBlocks {
-		block := getBlockRendered(sb.ID, headingMode)
+		if nil == trees[sb.RootID] {
+			tree, _ := loadTreeByBlockID(sb.RootID)
+			if nil == tree {
+				continue
+			}
+			trees[sb.RootID] = tree
+			count++
+		}
+		if 127 < count {
+			break
+		}
+	}
+
+	for _, sb := range sqlBlocks {
+		block, blockPaths := getEmbeddedBlock(embedBlockID, trees, sb, headingMode, breadcrumb)
 		if nil == block {
 			continue
 		}
-		ret = append(ret, block)
+		ret = append(ret, &EmbedBlock{
+			Block:      block,
+			BlockPaths: blockPaths,
+		})
+	}
+
+	// 添加笔记本名称
+	var boxIDs []string
+	for _, embedBlock := range ret {
+		boxIDs = append(boxIDs, embedBlock.Block.Box)
+	}
+	boxIDs = gulu.Str.RemoveDuplicatedElem(boxIDs)
+	boxNames := Conf.BoxNames(boxIDs)
+	for _, embedBlock := range ret {
+		name := boxNames[embedBlock.Block.Box]
+		embedBlock.Block.HPath = name + embedBlock.Block.HPath
 	}
 
 	if 1 > len(ret) {
-		ret = []*Block{}
+		ret = []*EmbedBlock{}
 	}
 	return
 }
@@ -452,9 +493,6 @@ func query2Stmt(queryStr string) (ret string) {
 func markSearch(text string, keyword string, beforeLen int) (marked string, score float64) {
 	if 0 == len(keyword) {
 		marked = text
-		if maxLen := 5120; maxLen < utf8.RuneCountInString(marked) {
-			marked = gulu.Str.SubStr(marked, maxLen) + "..."
-		}
 
 		if strings.Contains(marked, search.SearchMarkLeft) { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
 			marked = html.EscapeString(text)
@@ -550,6 +588,21 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 }
 
 func maxContent(content string, maxLen int) string {
+	idx := strings.Index(content, "<mark>")
+	if 128 < maxLen && maxLen <= idx {
+		head := bytes.Buffer{}
+		for i := 0; i < 512; i++ {
+			r, size := utf8.DecodeLastRuneInString(content[:idx])
+			head.WriteRune(r)
+			idx -= size
+			if 64 < head.Len() {
+				break
+			}
+		}
+
+		content = util.Reverse(head.String()) + content[idx:]
+	}
+
 	if maxLen < utf8.RuneCountInString(content) {
 		return gulu.Str.SubStr(content, maxLen) + "..."
 	}
@@ -588,4 +641,76 @@ func stringQuery(query string) string {
 		buf.WriteString(" ")
 	}
 	return strings.TrimSpace(buf.String())
+}
+
+// markReplaceSpan 用于处理搜索高亮。
+func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, text string, keywords []string, replacementStart, replacementEnd string, luteEngine *lute.Lute) bool {
+	text = search.EncloseHighlighting(text, keywords, searchMarkSpanStart, searchMarkSpanEnd, Conf.Search.CaseSensitive)
+	n.Tokens = gulu.Str.ToBytes(text)
+	if bytes.Contains(n.Tokens, []byte("search-mark")) {
+		n.Tokens = lex.EscapeMarkers(n.Tokens)
+		linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
+		var children []*ast.Node
+		for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+			children = append(children, c)
+		}
+		for _, c := range children {
+			n.InsertBefore(c)
+		}
+		*unlinks = append(*unlinks, n)
+		return true
+	}
+	return false
+}
+
+// markReplaceSpanWithSplit 用于处理虚拟引用和反链提及高亮。
+func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, replacementEnd string) (ret string) {
+	// 调用该函数前参数 keywords 必须使用 prepareMarkKeywords 函数进行预处理
+
+	parts := strings.Split(text, " ")
+	for i, part := range parts {
+		if "" == part {
+			continue
+		}
+
+		var hitKeywords []string
+		for _, k := range keywords {
+			tmpPart := part
+			tmpK := k
+			if !Conf.Search.CaseSensitive {
+				tmpPart = strings.ToLower(part)
+				tmpK = strings.ToLower(k)
+			}
+
+			if gulu.Str.IsASCII(tmpK) {
+				if gulu.Str.IsASCII(tmpPart) {
+					if tmpPart == tmpK {
+						hitKeywords = append(hitKeywords, k)
+					}
+				} else {
+					if strings.Contains(tmpPart, tmpK) {
+						hitKeywords = append(hitKeywords, k)
+					}
+				}
+			} else {
+				if strings.Contains(tmpPart, tmpK) {
+					hitKeywords = append(hitKeywords, k)
+				}
+			}
+		}
+		if 0 < len(hitKeywords) {
+			parts[i] = search.EncloseHighlighting(part, hitKeywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive)
+		}
+	}
+
+	ret = strings.Join(parts, " ")
+	if ret != text {
+		return
+	}
+
+	// 非 ASCII 文本并且不包含空格时再试试不分词匹配
+	if !gulu.Str.IsASCII(text) && !strings.Contains(text, " ") {
+		ret = search.EncloseHighlighting(text, keywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive)
+	}
+	return
 }

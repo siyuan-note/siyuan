@@ -39,7 +39,6 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -142,7 +141,7 @@ func NetImg2LocalAssets(rootID string) (err error) {
 				name = util.FilterFileName(name)
 				name = "net-img-" + name + "-" + ast.NewNodeID() + ext
 				writePath := filepath.Join(util.DataDir, "assets", name)
-				if err = filesys.WriteFileSafer(writePath, data); nil != err {
+				if err = filelock.WriteFile(writePath, data); nil != err {
 					logging.LogErrorf("write downloaded net img [%s] to local assets [%s] failed: %s", u, writePath, err)
 					return ast.WalkSkipChildren
 				}
@@ -384,7 +383,7 @@ func saveWorkspaceAssets(assets []string) {
 		logging.LogErrorf("create assets conf failed: %s", err)
 		return
 	}
-	if err = filesys.WriteFileSafer(confPath, data); nil != err {
+	if err = filelock.WriteFile(confPath, data); nil != err {
 		logging.LogErrorf("write assets conf failed: %s", err)
 		return
 	}
@@ -406,14 +405,20 @@ func RemoveUnusedAssets() (ret []string) {
 		return
 	}
 
+	var hashes []string
 	for _, p := range unusedAssets {
 		historyPath := filepath.Join(historyDir, p)
 		if p = filepath.Join(util.DataDir, p); gulu.File.IsExist(p) {
 			if err = gulu.File.Copy(p, historyPath); nil != err {
 				return
 			}
+
+			hash, _ := util.GetEtag(p)
+			hashes = append(hashes, hash)
 		}
 	}
+
+	sql.DeleteAssetsByHashes(hashes)
 
 	for _, unusedAsset := range unusedAssets {
 		if unusedAsset = filepath.Join(util.DataDir, unusedAsset); gulu.File.IsExist(unusedAsset) {
@@ -445,8 +450,13 @@ func RemoveUnusedAsset(p string) (ret string) {
 
 	newP := strings.TrimPrefix(p, util.DataDir)
 	historyPath := filepath.Join(historyDir, newP)
-	if err = gulu.File.Copy(p, historyPath); nil != err {
-		return
+	if gulu.File.IsExist(p) {
+		if err = gulu.File.Copy(p, historyPath); nil != err {
+			return
+		}
+
+		hash, _ := util.GetEtag(p)
+		sql.DeleteAssetsByHashes([]string{hash})
 	}
 
 	if err = os.RemoveAll(p); nil != err {
@@ -479,7 +489,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 
 	newName = util.AssetName(newName) + filepath.Ext(oldPath)
 	newPath := "assets/" + newName
-	if err = filesys.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
+	if err = filelock.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
 		logging.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
 		return
 	}
@@ -493,7 +503,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
 		for _, paths := range pages {
 			for _, treeAbsPath := range paths {
-				data, readErr := filelock.NoLockFileRead(treeAbsPath)
+				data, readErr := filelock.ReadFile(treeAbsPath)
 				if nil != readErr {
 					logging.LogErrorf("get data [path=%s] failed: %s", treeAbsPath, readErr)
 					err = readErr
@@ -505,7 +515,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 				}
 
 				data = bytes.Replace(data, []byte(oldName), []byte(newName), -1)
-				if writeErr := filelock.NoLockFileWrite(treeAbsPath, data); nil != writeErr {
+				if writeErr := filelock.WriteFile(treeAbsPath, data); nil != writeErr {
 					logging.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
 					err = writeErr
 					return
@@ -633,11 +643,7 @@ func UnusedAssets() (ret []string) {
 		delete(assetsPathMap, toRemove)
 	}
 
-	dataAssetsAbsPath, err := getDataAssetsAbsPath()
-	if nil != err {
-		return
-	}
-
+	dataAssetsAbsPath := util.GetDataAssetsAbsPath()
 	for _, assetAbsPath := range assetsPathMap {
 		if _, ok := linkDestMap[assetAbsPath]; ok {
 			continue
@@ -795,10 +801,7 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 	}
 
 	// 全局 assets
-	dataAssetsAbsPath, err := getDataAssetsAbsPath()
-	if nil != err {
-		return
-	}
+	dataAssetsAbsPath := util.GetDataAssetsAbsPath()
 	filepath.Walk(dataAssetsAbsPath, func(assetPath string, info fs.FileInfo, err error) error {
 		if dataAssetsAbsPath == assetPath {
 			return nil
@@ -835,8 +838,6 @@ func copyDocAssetsToDataAssets(boxID, parentDocPath string) {
 }
 
 func copyAssetsToDataAssets(rootPath string) {
-	filelock.ReleaseFileLocks(rootPath)
-
 	var assetsDirPaths []string
 	filepath.Walk(rootPath, func(path string, info fs.FileInfo, err error) error {
 		if rootPath == path || nil == info {
@@ -861,25 +862,8 @@ func copyAssetsToDataAssets(rootPath string) {
 
 	dataAssetsPath := filepath.Join(util.DataDir, "assets")
 	for _, assetsDirPath := range assetsDirPaths {
-		if err := gulu.File.Copy(assetsDirPath, dataAssetsPath); nil != err {
+		if err := filelock.Copy(assetsDirPath, dataAssetsPath); nil != err {
 			logging.LogErrorf("copy tree assets from [%s] to [%s] failed: %s", assetsDirPaths, dataAssetsPath, err)
 		}
 	}
-}
-
-func getDataAssetsAbsPath() (ret string, err error) {
-	ret = filepath.Join(util.DataDir, "assets")
-	stat, statErr := os.Lstat(ret)
-	if nil != statErr {
-		err = statErr
-		return
-	}
-	if 0 != stat.Mode()&os.ModeSymlink {
-		// 跟随符号链接 https://github.com/siyuan-note/siyuan/issues/5480
-		ret, err = os.Readlink(ret)
-		if nil != err {
-			return
-		}
-	}
-	return
 }

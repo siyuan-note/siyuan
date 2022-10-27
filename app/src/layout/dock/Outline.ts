@@ -85,7 +85,7 @@ export class Outline extends Model {
     <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
 <div class="b3-list-item"></div>
-<div class="fn__flex-1"></div>`;
+<div class="fn__flex-1" style="margin-bottom: 8px"></div>`;
         this.element = options.tab.panelElement.lastElementChild as HTMLElement;
         this.headerElement = options.tab.panelElement.firstElementChild as HTMLElement;
         this.tree = new Tree({
@@ -121,7 +121,7 @@ export class Outline extends Model {
             if (this.type === "local") {
                 setPanelFocus(options.tab.panelElement.parentElement.parentElement);
             } else {
-                setPanelFocus(options.tab.panelElement.firstElementChild);
+                setPanelFocus(options.tab.panelElement);
             }
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(options.tab.panelElement)) {
@@ -163,7 +163,7 @@ export class Outline extends Model {
         });
 
         if (this.type === "pin") {
-            setPanelFocus(options.tab.panelElement.firstElementChild);
+            setPanelFocus(options.tab.panelElement);
         }
     }
 
@@ -220,13 +220,7 @@ export class Outline extends Model {
         }
         if (currentElement) {
             currentElement.classList.add("b3-list-item--focus");
-            const currentRect = currentElement.getBoundingClientRect();
-            const scrollRect = this.element.getBoundingClientRect();
-            if (currentRect.top < scrollRect.top) {
-                currentElement.scrollIntoView();
-            } else if (currentRect.bottom > scrollRect.bottom) {
-                currentElement.scrollIntoView(false);
-            }
+            this.element.scrollTop = currentElement.offsetTop - this.element.clientHeight / 2 - 30;
         }
     }
 

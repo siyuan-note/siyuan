@@ -1,5 +1,5 @@
 import {fetchPost} from "../../util/fetch";
-import {focusBlock, focusByRange, focusByWbr, focusSideBlock, getEditorRange} from "../util/selection";
+import {focusBlock, focusByWbr, focusSideBlock, getEditorRange} from "../util/selection";
 import {getTopAloneElement} from "./getBlock";
 import {Constants} from "../../constants";
 import {blockRender} from "../markdown/blockRender";
@@ -8,7 +8,6 @@ import {highlightRender} from "../markdown/highlightRender";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {lockFile} from "../../dialog/processSystem";
 import {setFold} from "../../menus/protyle";
-import {addLoading} from "../ui/initUI";
 import {onGet} from "../util/onGet";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
@@ -16,6 +15,8 @@ import {getAllModels} from "../../layout/getAll";
 import {removeFoldHeading} from "../util/heading";
 import {genEmptyElement, genSBElement} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
+import {reloadProtyle} from "../util/reload";
+import {countBlockWord} from "../../layout/status";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -71,6 +72,7 @@ const promiseTransaction = () => {
             lockFile(protyle.block.rootID);
             return;
         }
+        countBlockWord([], protyle.block.rootID, true);
         if (doOperations.length === 1 && (doOperations[0].action === "unfoldHeading" || doOperations[0].action === "foldHeading" || doOperations[0].action === "setAttrs")) {
             const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
             if (gutterFoldElement) {
@@ -115,8 +117,28 @@ const promiseTransaction = () => {
             return;
         }
 
+        let range: Range;
+        if (getSelection().rangeCount > 0) {
+            range = getSelection().getRangeAt(0);
+        }
         doOperations.forEach(operation => {
             if (operation.action === "update") {
+                if (protyle.options.backlinkData) {
+                    // 反链中有多个相同块的情况
+                    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
+                        if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" ||
+                            !hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                            if (range && (item.isSameNode(range.startContainer) || item.contains(range.startContainer))) {
+                                // 正在编辑的块不能进行更新
+                            } else {
+                                item.outerHTML = operation.data.replace("<wbr>", "");
+                            }
+                        }
+                    });
+                    processRender(protyle.wysiwyg.element);
+                    highlightRender(protyle.wysiwyg.element);
+                    blockRender(protyle, protyle.wysiwyg.element);
+                }
                 // 当前编辑器中更新嵌入块
                 updateEmbed(protyle, operation);
                 // 更新引用块
@@ -124,22 +146,60 @@ const promiseTransaction = () => {
                 return;
             }
             if (operation.action === "delete" || operation.action === "append") {
+                if (protyle.options.backlinkData) {
+                    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
+                        if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                            item.remove();
+                        }
+                    });
+                }
                 // 更新嵌入块
                 protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
                     if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
                         item.removeAttribute("data-render");
                         blockRender(protyle, item);
-                    }
-                });
-                // 更新引用块
-                protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${operation.id}"]`).forEach(item => {
-                    if (item.getAttribute("data-subtype") === "d") {
-                        item.textContent = "block not found";
                     }
                 });
                 return;
             }
             if (operation.action === "move") {
+                if (protyle.options.backlinkData) {
+                    const updateElements: Element[] = [];
+                    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
+                        if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" || !hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                            updateElements.push(item);
+                            return;
+                        }
+                    });
+                    let hasFind = false;
+                    if (operation.previousID && updateElements.length > 0) {
+                        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
+                            if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" || !hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+                                item.after(updateElements[0].cloneNode(true));
+                                hasFind = true;
+                            }
+                        });
+                    } else if (updateElements.length > 0) {
+                        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
+                            if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" || !hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+                                // 列表特殊处理
+                                if (item.firstElementChild?.classList.contains("protyle-action")) {
+                                    item.firstElementChild.after(updateElements[0].cloneNode(true));
+                                } else {
+                                    item.prepend(updateElements[0].cloneNode(true));
+                                }
+                                hasFind = true;
+                            }
+                        });
+                    }
+                    updateElements.forEach(item => {
+                        if (hasFind) {
+                            item.remove();
+                        } else if (!hasFind && item.parentElement) {
+                            removeTopElement(item, protyle);
+                        }
+                    });
+                }
                 // 更新嵌入块
                 protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
                     if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
@@ -149,16 +209,60 @@ const promiseTransaction = () => {
                 });
                 return;
             }
-            // insert
-            // 不更新嵌入块：在快速删除时重新渲染嵌入块会导致滚动条产生滚动从而触发 getDoc 请求，此时删除的块还没有写库，会把已删除的块 append 到文档底部，最终导致查询块失败、光标丢失
-            // protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-            //     if (item.getAttribute("data-node-id") === operation.id) {
-            //         item.removeAttribute("data-render");
-            //         blockRender(protyle, item);
-            //     }
-            // });
-            // 更新引用块
-            updateRef(protyle, operation.id);
+            if (operation.action === "insert") {
+                // insert
+                if (protyle.options.backlinkData) {
+                    const cursorElements: Element[] = [];
+                    if (operation.previousID) {
+                        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
+                            if (item.nextElementSibling?.getAttribute("data-node-id") !== operation.id &&
+                                !hasClosestByAttribute(item, "data-node-id", operation.id) && // 段落转列表会在段落后插入新列表
+                                (item.getAttribute("data-type") === "NodeBlockQueryEmbed" || !hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed"))) {
+                                item.insertAdjacentHTML("afterend", operation.data);
+                                cursorElements.push(item.nextElementSibling);
+                            }
+                        });
+                    } else {
+                        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
+                            if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" || !hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+                                // 列表特殊处理
+                                if (item.firstElementChild && item.firstElementChild.classList.contains("protyle-action") &&
+                                    item.firstElementChild.nextElementSibling.getAttribute("data-node-id") !== operation.id) {
+                                    item.firstElementChild.insertAdjacentHTML("afterend", operation.data);
+                                    cursorElements.push(item.firstElementChild.nextElementSibling);
+                                } else if (item.firstElementChild && item.firstElementChild.getAttribute("data-node-id") !== operation.id) {
+                                    item.insertAdjacentHTML("afterbegin", operation.data);
+                                    cursorElements.push(item.firstElementChild);
+                                }
+                            }
+                        });
+                    }
+                    // https://github.com/siyuan-note/siyuan/issues/4420
+                    protyle.wysiwyg.element.querySelectorAll('[data-type="NodeHeading"]').forEach(item => {
+                        if (item.lastElementChild.getAttribute("spin") === "1") {
+                            item.lastElementChild.remove();
+                        }
+                    });
+                    cursorElements.forEach(item => {
+                        processRender(item);
+                        highlightRender(item);
+                        blockRender(protyle, item);
+                        const wbrElement = item.querySelector("wbr");
+                        if (wbrElement) {
+                            wbrElement.remove();
+                        }
+                    });
+                }
+                // 不更新嵌入块：在快速删除时重新渲染嵌入块会导致滚动条产生滚动从而触发 getDoc 请求，此时删除的块还没有写库，会把已删除的块 append 到文档底部，最终导致查询块失败、光标丢失
+                // protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
+                //     if (item.getAttribute("data-node-id") === operation.id) {
+                //         item.removeAttribute("data-render");
+                //         blockRender(protyle, item);
+                //     }
+                // });
+                // 更新引用块
+                updateRef(protyle, operation.id);
+            }
         });
     });
 };
@@ -196,11 +300,10 @@ export const promiseTransactions = () => {
 
 // 用于推送和撤销
 export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: boolean) => {
-    let updateElement: Element;
-    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).find(item => {
+    const updateElements: Element[] = [];
+    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
         if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
-            updateElement = item;
-            return true;
+            updateElements.push(item);
         }
     });
     if (operation.action === "setAttrs") {
@@ -251,11 +354,13 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         return;
     }
     if (operation.action === "delete") {
-        if (updateElement) {
+        if (updateElements.length > 0) {
             if (focus) {
-                focusSideBlock(updateElement);
+                focusSideBlock(updateElements[0]);
             }
-            updateElement.remove();
+            updateElements.forEach(item => {
+                item.remove();
+            });
         }
         // 更新 ws 嵌入块
         protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
@@ -264,38 +369,34 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                 blockRender(protyle, item);
             }
         });
-        // 更新 ws 引用块
-        protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${operation.id}"]`).forEach(item => {
-            if (item.getAttribute("data-subtype") === "d") {
-                item.textContent = "block not found";
-            }
-        });
         return;
     }
     if (operation.action === "update") {
-        if (updateElement) {
-            updateElement.outerHTML = operation.data;
+        if (updateElements.length > 0) {
+            updateElements.forEach(item => {
+                item.outerHTML = operation.data;
+            });
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).find(item => {
                 if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" // 引用转换为块嵌入，undo、redo 后也需要更新 updateElement
                     || !hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
-                    updateElement = item;
+                    updateElements[0] = item;
                     return true;
                 }
             });
-            const wbrElement = updateElement.querySelector("wbr");
+            const wbrElement = updateElements[0].querySelector("wbr");
             if (focus) {
-                const range = getEditorRange(updateElement);
+                const range = getEditorRange(updateElements[0]);
                 if (wbrElement) {
-                    focusByWbr(updateElement, range);
+                    focusByWbr(updateElements[0], range);
                 } else {
-                    focusBlock(updateElement);
+                    focusBlock(updateElements[0]);
                 }
             } else if (wbrElement) {
                 wbrElement.remove();
             }
-            processRender(updateElement);
-            highlightRender(updateElement);
-            blockRender(protyle, updateElement);
+            processRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
+            highlightRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
+            blockRender(protyle, updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
         }
         // 更新 ws 嵌入块
         updateEmbed(protyle, operation);
@@ -320,7 +421,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                 nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
             }
         });
-        if (protyle.block.rootID === operation.id) {
+        if (protyle.block.rootID === operation.id && protyle.title) {
             // 文档
             const refElement = protyle.title.element.querySelector(".protyle-attr--refcount");
             if (refElement) {
@@ -346,69 +447,66 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         return;
     }
     if (operation.action === "move") {
-        let cloneRange;
         let range;
         if (focus && getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
-            cloneRange = {
-                startContainer: range.startContainer,
-                startOffset: range.startOffset,
-                endContainer: range.endContainer,
-                endOffset: range.endOffset,
-            };
+            range.insertNode(document.createElement("wbr"));
         }
         /// #if !MOBILE
-        if (!updateElement) {
+        if (updateElements.length === 0) {
             // 打开两个相同的文档 A、A1，从 A 拖拽块 B 到 A1，在后续 ws 处理中，无法获取到拖拽出去的 B
             getAllModels().editor.forEach(editor => {
                 const updateCloneElement = editor.editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`);
                 if (updateCloneElement) {
-                    updateElement = updateCloneElement.cloneNode(true) as Element;
+                    updateElements.push(updateCloneElement.cloneNode(true) as Element);
                 }
             });
         }
         /// #endif
-        if (operation.previousID) {
-            let beforeElement: Element;
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).find(item => {
+        let hasFind = false;
+        if (operation.previousID && updateElements.length > 0) {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
                 if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
-                    beforeElement = item;
-                    return true;
+                    item.after(updateElements[0].cloneNode(true));
+                    hasFind = true;
                 }
             });
-            if (beforeElement && updateElement) {
-                beforeElement.after(updateElement);
-            } else if (updateElement && updateElement.parentElement) {
-                removeTopElement(updateElement, protyle);
-            }
-        } else {
-            let parentElement: Element;
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).find(item => {
-                if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
-                    parentElement = item;
-                    return true;
-                }
-            });
-            if (parentElement && updateElement) {
-                // 列表特殊处理
-                if (parentElement.firstElementChild?.classList.contains("protyle-action")) {
-                    parentElement.firstElementChild.after(updateElement);
-                } else {
-                    parentElement.prepend(updateElement);
-                }
-            } else if (operation.parentID === protyle.block.parentID && updateElement) {
-                protyle.wysiwyg.element.prepend(updateElement);
-            } else if (updateElement && updateElement.parentElement) {
-                removeTopElement(updateElement, protyle);
+        } else if (updateElements.length > 0) {
+            if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
+                protyle.wysiwyg.element.prepend(updateElements[0].cloneNode(true));
+                hasFind = true;
+            } else {
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
+                    if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+                        // 列表特殊处理
+                        if (item.firstElementChild?.classList.contains("protyle-action")) {
+                            item.firstElementChild.after(updateElements[0].cloneNode(true));
+                        } else {
+                            item.prepend(updateElements[0].cloneNode(true));
+                        }
+                        hasFind = true;
+                    }
+                });
             }
         }
-        if (focus && cloneRange && range) {
+        updateElements.forEach(item => {
+            if (hasFind) {
+                item.remove();
+            } else if (!hasFind && item.parentElement) {
+                removeTopElement(item, protyle);
+            }
+        });
+        if (focus && range) {
             if (operation.data === "focus") {
-                focusBlock(updateElement);
+                // 标记需要 focus，https://ld246.com/article/1650018446988/comment/1650081404993?r=Vanessa#comments
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).find(item => {
+                    if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+                        focusBlock(item);
+                        return true;
+                    }
+                });
             } else {
-                range.setStart(cloneRange.startContainer, cloneRange.startOffset);
-                range.setEnd(cloneRange.endContainer, cloneRange.endOffset);
-                focusByRange(range);
+                focusByWbr(protyle.wysiwyg.element, range);
             }
         }
         // 更新 ws 嵌入块
@@ -421,80 +519,61 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         return;
     }
     if (operation.action === "insert") {
-        let cursorElement;
+        const cursorElements = [];
         if (operation.previousID) {
-            let beforeElement: Element;
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).find(item => {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
                 const embedElement = hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed");
                 if (embedElement) {
                     // https://github.com/siyuan-note/siyuan/issues/5524
                     embedElement.removeAttribute("data-render");
                     blockRender(protyle, embedElement);
                 } else {
-                    beforeElement = item;
-                    return true;
+                    item.insertAdjacentHTML("afterend", operation.data);
+                    cursorElements.push(item.nextElementSibling);
                 }
             });
-            if (beforeElement) {
-                beforeElement.insertAdjacentHTML("afterend", operation.data);
-                cursorElement = beforeElement.nextElementSibling as HTMLElement;
-            }
         } else {
-            let parentElement: Element;
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).find(item => {
-                if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
-                    parentElement = item;
-                    return true;
-                }
-            });
-            if (parentElement) {
-                // 列表特殊处理
-                if (parentElement.firstElementChild?.classList.contains("protyle-action")) {
-                    parentElement.firstElementChild.insertAdjacentHTML("afterend", operation.data);
-                    cursorElement = parentElement.firstElementChild.nextElementSibling as HTMLElement;
-                } else {
-                    parentElement.insertAdjacentHTML("afterbegin", operation.data);
-                    cursorElement = parentElement.firstElementChild as HTMLElement;
-                }
-            } else if (operation.parentID === protyle.block.parentID) {
+            if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
                 protyle.wysiwyg.element.insertAdjacentHTML("afterbegin", operation.data);
-                cursorElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
+                cursorElements.push(protyle.wysiwyg.element.firstElementChild);
+            } else {
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
+                    if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+                        // 列表特殊处理
+                        if (item.firstElementChild?.classList.contains("protyle-action")) {
+                            item.firstElementChild.insertAdjacentHTML("afterend", operation.data);
+                            cursorElements.push(item.firstElementChild.nextElementSibling);
+                        } else {
+                            item.insertAdjacentHTML("afterbegin", operation.data);
+                            cursorElements.push(item.firstElementChild);
+                        }
+                    }
+                });
             }
         }
-        if (!cursorElement) {
-            return;
-        }
-        processRender(cursorElement);
-        highlightRender(cursorElement);
-        blockRender(protyle, cursorElement);
-
         // https://github.com/siyuan-note/siyuan/issues/4420
         protyle.wysiwyg.element.querySelectorAll('[data-type="NodeHeading"]').forEach(item => {
             if (item.lastElementChild.getAttribute("spin") === "1") {
                 item.lastElementChild.remove();
             }
         });
-
-        const wbrElement = cursorElement.querySelector("wbr");
-        if (focus) {
-            const range = getEditorRange(cursorElement);
-            if (wbrElement) {
-                focusByWbr(cursorElement, range);
-            } else {
-                focusBlock(cursorElement);
-            }
-        } else if (wbrElement) {
-            wbrElement.remove();
+        if (cursorElements.length === 0) {
+            return;
         }
-        // 更新 ws 嵌入块
-        protyle.wysiwyg.element.querySelectorAll(`[data-type="NodeBlockQueryEmbed"][data-node-id="${operation.id}"]`).forEach((item) => {
-            item.removeAttribute("data-render");
+        cursorElements.forEach(item => {
+            processRender(item);
+            highlightRender(item);
             blockRender(protyle, item);
-        });
-        protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-            if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
-                item.removeAttribute("data-render");
-                blockRender(protyle, item);
+            const wbrElement = item.querySelector("wbr");
+            if (focus) {
+                const range = getEditorRange(item);
+                if (wbrElement) {
+                    focusByWbr(item, range);
+                } else {
+                    focusBlock(item);
+                }
+            } else if (wbrElement) {
+                wbrElement.remove();
             }
         });
         // 更新 ws 引用块
@@ -502,14 +581,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         return;
     }
     if (operation.action === "append") {
-        addLoading(protyle);
-        fetchPost("/api/filetree/getDoc", {
-            id: protyle.block.id,
-            mode: 0,
-            size: Constants.SIZE_GET,
-        }, getResponse => {
-            onGet(getResponse, protyle);
-        });
+        reloadProtyle(protyle);
     }
 };
 
@@ -548,13 +620,13 @@ export const turnsIntoOneTransaction = (options: { protyle: IProtyle, selectsEle
         });
         parentElement.innerHTML = html + '<div class="protyle-attr" contenteditable="false"></div>';
     }
-    const previousId = options.selectsElement[0].previousElementSibling ? options.selectsElement[0].previousElementSibling.getAttribute("data-node-id") : undefined;
+    const previousId = options.selectsElement[0].getAttribute("data-node-id");
     const parentId = options.selectsElement[0].parentElement.getAttribute("data-node-id") || options.protyle.block.parentID;
     const doOperations: IOperation[] = [{
         action: "insert",
         id,
         data: parentElement.outerHTML,
-        previousID: previousId,
+        nextID: previousId,
         parentID: parentId
     }];
     const undoOperations: IOperation[] = [];
@@ -566,11 +638,13 @@ export const turnsIntoOneTransaction = (options: { protyle: IProtyle, selectsEle
     let itemPreviousId: string;
     options.selectsElement.forEach((item, index) => {
         item.classList.remove("protyle-wysiwyg--select");
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
         const itemId = item.getAttribute("data-node-id");
         undoOperations.push({
             action: "move",
             id: itemId,
-            previousID: itemPreviousId || previousId,
+            previousID: itemPreviousId || id,
             parentID: parentId
         });
         if (options.type.endsWith("Ls")) {
@@ -669,6 +743,8 @@ export const turnsIntoTransaction = (options: {
             setFold(options.protyle, item);
         }
         item.classList.remove("protyle-wysiwyg--select");
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
         html += item.outerHTML;
         const id = item.getAttribute("data-node-id");
         undoOperations.push({
@@ -786,6 +862,8 @@ export const updateBatchTransaction = (nodeElements: Element[], protyle: IProtyl
     nodeElements.forEach((element) => {
         const id = element.getAttribute("data-node-id");
         element.classList.remove("protyle-wysiwyg--select");
+        element.removeAttribute("select-start");
+        element.removeAttribute("select-end");
         undoOperations.push({
             action: "update",
             id,

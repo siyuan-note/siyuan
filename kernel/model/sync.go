@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -32,7 +31,6 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -57,15 +55,58 @@ func AutoSync() {
 	}
 }
 
+func BootSyncData() {
+	defer logging.Recover()
+
+	if util.IsMutexLocked(&syncLock) {
+		logging.LogWarnf("sync is in progress")
+		planSyncAfter(30 * time.Second)
+		return
+	}
+
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	util.IncBootProgress(3, "Syncing data from the cloud...")
+	BootSyncSucc = 0
+
+	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName || !IsValidCloudDirName(Conf.Sync.CloudName) {
+		return
+	}
+
+	logging.LogInfof("sync before boot")
+
+	if 7 < syncDownloadErrCount {
+		logging.LogErrorf("sync download error too many times, cancel auto sync, try to sync by hand")
+		util.PushErrMsg(Conf.Language(125), 1000*60*60)
+		planSyncAfter(64 * time.Minute)
+		return
+	}
+
+	now := util.CurrentTimeMillis()
+	Conf.Sync.Synced = now
+
+	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
+	err := bootSyncRepo()
+	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
+	if nil == err {
+		synced += Conf.Sync.Stat
+	} else {
+		synced += fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+	}
+	msg := fmt.Sprintf(Conf.Language(82), synced)
+	Conf.Sync.Stat = msg
+	Conf.Save()
+	util.BroadcastByType("main", "syncing", 1, msg, nil)
+	return
+}
+
 func SyncData(boot, exit, byHand bool) {
 	defer logging.Recover()
 
 	if !boot && !exit && 2 == Conf.Sync.Mode && !byHand {
 		return
 	}
-
-	filesys.LockWriteFile()
-	defer filesys.UnlockWriteFile()
 
 	if util.IsMutexLocked(&syncLock) {
 		logging.LogWarnf("sync is in progress")
@@ -117,12 +158,12 @@ func SyncData(boot, exit, byHand bool) {
 	Conf.Sync.Synced = now
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	err := syncRepo(boot, exit, byHand)
+	err := syncRepo(exit, byHand)
 	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
 	if nil == err {
 		synced += Conf.Sync.Stat
 	} else {
-		synced += fmt.Sprintf(Conf.Language(80), err)
+		synced += fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
 	}
 	msg := fmt.Sprintf(Conf.Language(82), synced)
 	Conf.Sync.Stat = msg
@@ -219,6 +260,15 @@ func SetCloudSyncDir(name string) {
 
 	Conf.Sync.CloudName = name
 	Conf.Save()
+}
+
+func SetSyncGenerateConflictDoc(b bool) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	Conf.Sync.GenerateConflictDoc = b
+	Conf.Save()
+	return
 }
 
 func SetSyncEnable(b bool) (err error) {
@@ -344,10 +394,10 @@ func formatErrorMsg(err error) string {
 	} else if strings.Contains(msgLowerCase, "cipher: message authentication failed") {
 		msg = Conf.Language(135)
 	} else if strings.Contains(msgLowerCase, "repo fatal error") {
-		msg = Conf.Language(23) + " " + err.Error()
+		msg = Conf.Language(23)
 	} else if strings.Contains(msgLowerCase, "no such host") || strings.Contains(msgLowerCase, "connection failed") || strings.Contains(msgLowerCase, "hostname resolution") || strings.Contains(msgLowerCase, "No address associated with hostname") {
 		msg = Conf.Language(24)
-	} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") {
+	} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") || strings.Contains(msgLowerCase, "timeout") || strings.Contains(msgLowerCase, "context cancellation while reading body") {
 		msg = Conf.Language(24)
 	} else if strings.Contains(msgLowerCase, "connection was") || strings.Contains(msgLowerCase, "reset by peer") || strings.Contains(msgLowerCase, "refused") || strings.Contains(msgLowerCase, "socket") {
 		msg = Conf.Language(28)
@@ -409,38 +459,6 @@ func getIgnoreLines() (ret []string) {
 func IncSync() {
 	syncSameCount = 0
 	planSyncAfter(30 * time.Second)
-}
-
-func stableCopy(src, dest string) (err error) {
-	if gulu.OS.IsWindows() {
-		robocopy := "robocopy"
-		cmd := exec.Command(robocopy, src, dest, "/DCOPY:T", "/E", "/IS", "/R:0", "/NFL", "/NDL", "/NJH", "/NJS", "/NP", "/NS", "/NC")
-		util.CmdAttr(cmd)
-		var output []byte
-		output, err = cmd.CombinedOutput()
-		if strings.Contains(err.Error(), "exit status 16") {
-			// 某些版本的 Windows 无法同步 https://github.com/siyuan-note/siyuan/issues/4197
-			return gulu.File.Copy(src, dest)
-		}
-
-		if nil != err && strings.Contains(err.Error(), exec.ErrNotFound.Error()) {
-			robocopy = os.Getenv("SystemRoot") + "\\System32\\" + "robocopy"
-			cmd = exec.Command(robocopy, src, dest, "/DCOPY:T", "/E", "/IS", "/R:0", "/NFL", "/NDL", "/NJH", "/NJS", "/NP", "/NS", "/NC")
-			util.CmdAttr(cmd)
-			output, err = cmd.CombinedOutput()
-		}
-		if nil == err ||
-			strings.Contains(err.Error(), "exit status 3") ||
-			strings.Contains(err.Error(), "exit status 1") ||
-			strings.Contains(err.Error(), "exit status 2") ||
-			strings.Contains(err.Error(), "exit status 5") ||
-			strings.Contains(err.Error(), "exit status 6") ||
-			strings.Contains(err.Error(), "exit status 7") {
-			return nil
-		}
-		logging.LogErrorf("robocopy data from [%s] to [%s] failed: %s %s", src, dest, string(output), err)
-	}
-	return gulu.File.Copy(src, dest)
 }
 
 func planSyncAfter(d time.Duration) {

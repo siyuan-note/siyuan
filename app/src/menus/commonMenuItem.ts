@@ -214,7 +214,7 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
         <div class="fn__space"></div>
         <span class="block__icon fn__flex-center"><svg></svg></span>
     </label>
-    <div style="background-color: var(--b3-border-color);height: 1px;margin: 16px 0;"></div>
+    <div style="background-color: var(--b3-theme-surface-lighter);height: 1px;margin: 16px 0;"></div>
     <div class="custom-attr__add">
         ${notifyHTML}
         ${customHTML}
@@ -410,7 +410,7 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
         <div class="fn__space"></div>
         <span class="block__icon fn__flex-center"><svg></svg></span>
     </label>
-    <div style="background-color: var(--b3-border-color);height: 1px;margin: 16px 0;"></div>
+    <div style="background-color: var(--b3-theme-surface-lighter);height: 1px;margin: 16px 0;"></div>
     <div class="custom-attr__add">
         ${notifyHTML}
         ${customHTML}
@@ -555,20 +555,16 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
     });
 };
 
-export const copySubMenu = (id: string, name: string, accelerator = true, focusElement?: Element) => {
+export const copySubMenu = (id: string, accelerator = true, focusElement?: Element) => {
     return [
         {
-            icon: "iconGraph",
+            icon: "iconRef",
             accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockRef.custom : undefined,
             label: window.siyuan.languages.copyBlockRef,
             click: () => {
-                if (name) {
-                    writeText(`((${id} "${name}"))`);
-                } else {
-                    fetchPost("/api/block/getRefText", {id}, (response) => {
-                        writeText(`((${id} '${response.data}'))`);
-                    });
-                }
+                fetchPost("/api/block/getRefText", {id}, (response) => {
+                    writeText(`((${id} '${response.data}'))`);
+                });
                 if (focusElement) {
                     focusBlock(focusElement);
                 }

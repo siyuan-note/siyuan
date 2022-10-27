@@ -77,7 +77,7 @@
   &__edit {
     display: flex;
     flex-direction: column;
-    border-bottom: 1px solid var(--b3-border-color);
+    border-bottom: 1px solid var(--b3-theme-surface-lighter);
 
     .protyle-wysiwyg {
       transition: none;
@@ -92,12 +92,8 @@
     padding: 0 8px;
     display: flex;
     align-items: center;
-    height: 30px;
+    height: 42px;
     flex-shrink: 0;
-
-    &--active {
-      background-color: var(--b3-list-hover);
-    }
 
     &--border {
       background-color: var(--b3-theme-surface);
@@ -116,7 +112,6 @@
     color: var(--b3-theme-on-surface);
     cursor: pointer;
     opacity: 0;
-    transition: var(--b3-transition);
     border: 0;
     background: transparent;
     flex-shrink: 0;
@@ -124,15 +119,16 @@
     display: flex;
     align-items: center;
     border-radius: 2px;
+    transition: var(--b3-transition), opacity .3s cubic-bezier(0, 0, .2, 1) 0ms;
 
     &:hover:not([disabled]):not(.ft__primary),
     &--active {
       color: var(--b3-theme-on-background);
-      background-color: var(--b3-theme-background-light);
+      background-color: var(--b3-list-icon-hover);
     }
 
     &[disabled] {
-      opacity: 0.68 !important;
+      opacity: 0.68;
       cursor: not-allowed;
     }
 
@@ -148,8 +144,8 @@
 
   &__logo {
     svg {
-      height: 14px;
-      width: 14px;
+      height: 16px;
+      width: 16px;
       padding: 8px 4px 8px 0;
     }
 

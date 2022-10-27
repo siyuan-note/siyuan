@@ -322,7 +322,7 @@ export class Asset extends Model {
         </div>
       </div>
       <div id="overlayContainer" class="fn__hidden">
-        <div id="passwordOverlay" class="container fn__hidden">
+        <div id="passwordDialog" class="container fn__hidden">
           <div class="dialog">
             <div class="row">
               <p id="passwordText" data-l10n-id="password_label">Enter the password to open this PDF file:</p>
@@ -336,7 +336,7 @@ export class Asset extends Model {
             </div>
           </div>
         </div>
-        <div id="documentPropertiesOverlay" class="container fn__hidden">
+        <div id="documentPropertiesDialog" class="container fn__hidden">
           <div class="dialog b3-menu">
             <div class="row">
               <span>${window.siyuan.languages.fileName}</span> <p id="fileNameField">-</p>
@@ -419,13 +419,20 @@ export class Asset extends Model {
             <span class="b3-menu__label">${window.siyuan.languages.showHideBg}</span>
         </button>
         <button class="b3-menu__item pdf__util__hide" data-type="copy">
-            <svg class="b3-menu__icon"><use xlink:href="#iconGraph"></use></svg>
+            <svg class="b3-menu__icon"><use xlink:href="#iconRef"></use></svg>
             <span class="b3-menu__label">${window.siyuan.languages.copyAnnotation}</span>
         </button>
         <button class="b3-menu__item pdf__util__hide" data-type="remove">
             <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
             <span class="b3-menu__label">${window.siyuan.languages.remove}</span>
         </button>
+      </div>
+      <div class="fn__none">
+        <input id="editorFreeTextFontSize">
+        <input id="editorFreeTextColor">
+        <input id="editorInkColor">
+        <input id="editorInkThickness">
+        <input id="editorInkOpacity">
       </div>
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>`;

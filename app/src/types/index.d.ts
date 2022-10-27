@@ -1,6 +1,15 @@
 type TLayout = "normal" | "top" | "bottom" | "left" | "right" | "center"
 type TDirection = "lr" | "tb"
-type TDockType = "file" | "outline" | "bookmark" | "tag" | "graph" | "globalGraph" | "backlink" | "inbox"
+type TDockType =
+    "file"
+    | "outline"
+    | "bookmark"
+    | "tag"
+    | "graph"
+    | "globalGraph"
+    | "backlink"
+    | "backlinkOld"
+    | "inbox"
 type TDockPosition = "Left" | "Right" | "Top" | "Bottom"
 type TWS = "main" | "filetree" | "protyle"
 type TEditorMode = "preview" | "wysiwyg"
@@ -19,20 +28,36 @@ declare module "blueimp-md5"
 interface Window {
     siyuan: ISiyuan
     webkit: any
+
     JSAndroid: {
         returnDesktop(): void
         openExternal(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeImageClipboard(uri: string): void
+        readClipboard(): string
     }
 
     goBack(): void
+
+    showKeyboardToolbar(bottom?: number): void
+
+    hideKeyboardToolbar(): void
+
+    gtag(name: string, key: string, value: IObject): void;
 }
 
 interface ITextOption {
     color?: string,
     type: string
+}
+
+interface ISnippet {
+    id?: string
+    name: string
+    type: string
+    enabled: boolean
+    content: string
 }
 
 interface IInbox {
@@ -102,7 +127,7 @@ interface ISiyuan {
     notebooks?: INotebook[],
     emojis?: IEmoji[],
     backStack?: IBackStack[],
-    mobileEditor?: import("../protyle").default, // mobile
+    mobileEditor?: import("../protyle").Protyle, // mobile
     user?: {
         userId: string
         userName: string
@@ -158,6 +183,7 @@ interface IOperation {
     parentID?: string
     previousID?: string
     retData?: any
+    nextID?: string // insert 专享
 }
 
 interface IObject {
@@ -216,6 +242,8 @@ declare interface IExport {
 }
 
 declare interface IEditor {
+    readOnly: boolean;
+    listLogicalOutdent: boolean;
     katexMacros: string;
     fullWidth: boolean;
     fontSize: number;
@@ -225,12 +253,14 @@ declare interface IEditor {
     displayBookmarkIcon: boolean;
     displayNetImgMark: boolean;
     codeSyntaxHighlightLineNum: boolean;
+    embedBlockBreadcrumb: boolean;
     plantUMLServePath: string;
     codeLigatures: boolean;
     codeTabSpaces: number;
     fontFamily: string;
     virtualBlockRef: string;
     virtualBlockRefExclude: string;
+    virtualBlockRefInclude: string;
     blockRefDynamicAnchorTextMaxLen: number;
 
     emoji: string[];
@@ -289,6 +319,7 @@ declare interface IConfig {
         key: string
     },
     sync: {
+        generateConflictDoc: boolean
         enabled: boolean
         mode: number
         synced: number
@@ -322,6 +353,7 @@ declare interface IConfig {
         uploadErrLog: boolean
         downloadInstallPkg: boolean
         networkServe: boolean
+        fixedPort: boolean
         useExistingDB: boolean
     }
     localIPs: string[]
@@ -437,6 +469,7 @@ declare interface IFile {
 
 declare interface IBlockTree {
     nodeType: string,
+    hPath: string,
     subType: string,
     name: string,
     type: string,
@@ -475,7 +508,7 @@ declare interface IModels {
     editor: import("../editor").Editor [],
     graph: import("../layout/dock/Graph").Graph[],
     outline: import("../layout/dock/Outline").Outline[]
-    backlinks: import("../layout/dock/Backlinks").Backlinks[]
+    backlink: import("../layout/dock/Backlink").Backlink[]
     asset: import("../asset").Asset[]
     search: import("../search").Search[]
 }

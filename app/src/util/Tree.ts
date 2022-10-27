@@ -14,6 +14,7 @@ export class Tree {
     private click: (element: HTMLElement, event: MouseEvent) => void;
 
     private ctrlClick: (element: HTMLElement) => void;
+    private toggleClick: (element: HTMLElement) => void;
     private shiftClick: (element: HTMLElement) => void;
     private altClick: (element: HTMLElement) => void;
     private rightClick: (element: HTMLElement, event: MouseEvent) => void;
@@ -27,6 +28,7 @@ export class Tree {
         ctrlClick?(element: HTMLElement): void
         altClick?(element: HTMLElement): void
         shiftClick?(element: HTMLElement): void
+        toggleClick?(element: HTMLElement): void
         rightClick?(element: HTMLElement, event: MouseEvent): void
     }) {
         this.click = options.click;
@@ -34,6 +36,7 @@ export class Tree {
         this.altClick = options.altClick;
         this.shiftClick = options.shiftClick;
         this.rightClick = options.rightClick;
+        this.toggleClick = options.toggleClick;
         this.element = options.element;
         this.blockExtHTML = options.blockExtHTML;
         this.topExtHTML = options.topExtHTML;
@@ -54,20 +57,24 @@ export class Tree {
     private genHTML(data: IBlockTree[]) {
         let html = `<ul${data[0].depth === 0 ? " class='b3-list b3-list--background'" : ""}>`;
         data.forEach((item) => {
+            let titleTip = "";
             let iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>';
             if (item.type === "bookmark") {
                 iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconBookmark"></use></svg>';
             } else if (item.type === "tag") {
                 iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconTags"></use></svg>';
             } else if (item.type === "backlink") {
+                titleTip = ` title="${item.hPath}"`;
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             } else if (item.type === "outline") {
+                titleTip = ` title="${Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.name))}"`;
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             }
             let countHTML = "";
             if (item.count) {
                 countHTML = `<span class="counter">${item.count}</span>`;
             }
+            const hasChild = (item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0);
             html += `<li class="b3-list-item" 
 ${(item.nodeType !== "NodeDocument" && item.type === "backlink") ? 'draggable="true"' : ""}
 ${item.id ? 'data-node-id="' + item.id + '"' : ""} 
@@ -75,11 +82,11 @@ data-treetype="${item.type}"
 data-type="${item.nodeType}" 
 data-subtype="${item.subType}" 
 ${item.label ? "data-label='" + item.label + "'" : ""}>
-    <span style="padding-left: ${item.depth * 16}px" class="b3-list-item__toggle">
-        <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow ${((item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0)) ? "b3-list-item__arrow--open" : "fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
+    <span style="padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px" class="b3-list-item__toggle${(item.type === "backlink" || hasChild) ? " b3-list-item__toggle--hl" : ""}">
+        <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow ${hasChild ? "b3-list-item__arrow--open" : (item.type === "backlink" ? "" : "fn__hidden")}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
-    <span class="b3-list-item__text"${item.type === "outline" ? ' title="' + Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.name)) + '"' : ""}>${item.name}</span>
+    <span class="b3-list-item__text"${titleTip}>${item.name}</span>
     ${countHTML}
     ${this.topExtHTML || ""}
 </li>`;
@@ -121,7 +128,7 @@ data-type="${item.type}"
 data-subtype="${item.subType}" 
 data-treetype="${type}"
 data-def-path="${item.defPath}">
-    <span style="padding-left: ${item.depth * 16}px" class="b3-list-item__toggle">
+    <span style="padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px" class="b3-list-item__toggle${item.children ? " b3-list-item__toggle--hl" : ""}">
         <svg data-id="${item.id}" class="b3-list-item__arrow${item.children ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
@@ -137,6 +144,10 @@ data-def-path="${item.defPath}">
     }
 
     private toggleBlocks(liElement: HTMLElement) {
+        if (this.toggleClick) {
+            this.toggleClick(liElement);
+            return;
+        }
         if (!liElement.nextElementSibling) {
             return;
         }

@@ -45,13 +45,15 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     }
 
     // 是否匹配 ⇧[]
-    if (hotKey.startsWith("⇧") && hotKeys.length === 2 && !event.ctrlKey && !isCtrl(event) && !event.altKey && event.shiftKey) {
-        if (event.code.startsWith("Digit") || event.code.startsWith("Numpad")) {
-            if (hotKeys[1] === event.code.slice(-1)) {
+    if (hotKey.startsWith("⇧") && hotKeys.length === 2) {
+        if (!event.ctrlKey && !isCtrl(event) && !event.altKey && event.shiftKey) {
+            if (event.code.startsWith("Digit") || event.code.startsWith("Numpad")) {
+                if (hotKeys[1] === event.code.slice(-1)) {
+                    return true;
+                }
+            } else if (event.key === hotKeys[1]) {
                 return true;
             }
-        } else if (event.key === hotKeys[1]) {
-            return true;
         }
         return false;
     }
@@ -72,15 +74,18 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
             }
         }
         // 是否匹配 ⌥[] / ⌥⌘[]
-        if (isMatchKey && (hotKeys.length === 3 ? isCtrl(event) : !isCtrl(event)) && event.altKey && !event.shiftKey) {
+        if (isMatchKey && event.altKey && !event.shiftKey &&
+            (hotKeys.length === 3 ? (isCtrl(event) && hotKey.startsWith("⌥⌘")) : !isCtrl(event))) {
             return true;
         }
         // ⌥⇧⌘[]
-        if (isMatchKey && hotKey.startsWith("⌥⇧⌘") && hotKeys.length === 4 && event.altKey && event.shiftKey && isCtrl(event)) {
+        if (isMatchKey && hotKey.startsWith("⌥⇧⌘") && hotKeys.length === 4 &&
+            event.altKey && event.shiftKey && isCtrl(event)) {
             return true;
         }
         // ⌥⇧[]
-        if (isMatchKey && hotKey.startsWith("⌥⇧") && hotKeys.length === 3 && event.altKey && event.shiftKey && !isCtrl(event)) {
+        if (isMatchKey && hotKey.startsWith("⌥⇧") && hotKeys.length === 3 &&
+            event.altKey && event.shiftKey && !isCtrl(event)) {
             return true;
         }
         return false;

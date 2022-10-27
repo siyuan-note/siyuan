@@ -2,6 +2,8 @@ import {ToolbarItem} from "./ToolbarItem";
 import {linkMenu} from "../../menus/protyle";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {focusByRange, focusByWbr} from "../util/selection";
+import {readText} from "../util/compatibility";
+import {Constants} from "../../constants";
 
 export class Link extends ToolbarItem {
     public element: HTMLElement;
@@ -26,20 +28,31 @@ export class Link extends ToolbarItem {
 
             const rangeString = range.toString().trim();
             let dataHref = "";
+            let dataText = "";
             try {
-                const clipText = await navigator.clipboard.readText();
+                const clipText = await readText();
+
                 // 选中链接时需忽略剪切板内容 https://ld246.com/article/1643035329737
                 if (protyle.lute.IsValidLinkDest(rangeString)) {
                     dataHref = rangeString;
                 } else if (protyle.lute.IsValidLinkDest(clipText)) {
                     dataHref = clipText;
+                } else {
+                    // 360
+                    const lastSpace = clipText.lastIndexOf(" ");
+                    if (lastSpace > -1) {
+                        if (protyle.lute.IsValidLinkDest(clipText.substring(lastSpace))) {
+                            dataHref = clipText.substring(lastSpace);
+                            dataText = clipText.substring(0, lastSpace);
+                        }
+                    }
                 }
             } catch (e) {
                 console.log(e);
             }
             protyle.toolbar.setInlineMark(protyle, "a", "range", {
                 type: "a",
-                color: dataHref
+                color: dataHref + (dataText ? Constants.ZWSP + dataText : "")
             });
         });
     }

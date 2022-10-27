@@ -151,6 +151,14 @@ func PushStatusBar(msg string) {
 	BroadcastByType("main", "statusbar", 0, msg, nil)
 }
 
+type BlockStatResult struct {
+	RuneCount  int `json:"runeCount"`
+	WordCount  int `json:"wordCount"`
+	LinkCount  int `json:"linkCount"`
+	ImageCount int `json:"imageCount"`
+	RefCount   int `json:"refCount"`
+}
+
 func ContextPushMsg(context map[string]interface{}, msg string) {
 	switch context[eventbus.CtxPushMsg].(int) {
 	case eventbus.CtxPushMsgToProgress:
@@ -218,6 +226,8 @@ func PushEvent(event *Result) {
 		broadcastOthers(msg, event.SessionId)
 	case PushModeBroadcastExcludeSelfApp:
 		broadcastOtherApps(msg, event.AppId)
+	case PushModeBroadcastApp:
+		broadcastApp(msg, event.AppId)
 	case PushModeNone:
 	}
 }
@@ -258,6 +268,21 @@ func broadcastOtherApps(msg []byte, excludeApp string) {
 		appSessions.Range(func(key, value interface{}) bool {
 			session := value.(*melody.Session)
 			if app, _ := session.Get("app"); app == excludeApp {
+				return true
+			}
+			session.Write(msg)
+			return true
+		})
+		return true
+	})
+}
+
+func broadcastApp(msg []byte, app string) {
+	sessions.Range(func(key, value interface{}) bool {
+		appSessions := value.(*sync.Map)
+		appSessions.Range(func(key, value interface{}) bool {
+			session := value.(*melody.Session)
+			if sessionApp, _ := session.Get("app"); sessionApp != app {
 				return true
 			}
 			session.Write(msg)

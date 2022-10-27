@@ -6,6 +6,7 @@ import {getEventName} from "../../protyle/util/compatibility";
 import {mountHelp} from "../../util/mount";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
+import {renderSnippet} from "../../config/util/snippets";
 import {setEmpty} from "./setEmpty";
 import {disabledProtyle, enableProtyle} from "../../protyle/util/onGet";
 import {getOpenNotebookCount} from "../../util/pathName";
@@ -16,9 +17,12 @@ import {hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {MobileBacklinks} from "./MobileBacklinks";
 import {MobileBookmarks} from "./MobileBookmarks";
 import {MobileTags} from "./MobileTags";
+import {hideKeyboardToolbar, initKeyboardToolbar} from "./showKeyboardToolbar";
 
 export const initFramework = () => {
     setInlineStyle();
+    renderSnippet();
+    initKeyboardToolbar();
     const scrimElement = document.querySelector(".scrim");
     const sidebarElement = document.getElementById("sidebar");
     let outline: MobileOutline;
@@ -68,7 +72,7 @@ export const initFramework = () => {
         });
     });
     new MobileFiles();
-    document.getElementById("toolbarFile").addEventListener(getEventName(), () => {
+    document.getElementById("toolbarFile").addEventListener("click", () => {
         sidebarElement.style.left = "0";
         document.querySelector(".scrim").classList.remove("fn__none");
         const type = sidebarElement.querySelector(".toolbar--border .toolbar__icon--active").getAttribute("data-type");
@@ -82,17 +86,28 @@ export const initFramework = () => {
             tag.update();
         }
     });
-    document.getElementById("toolbarMore").addEventListener(getEventName(), () => {
+    // 用 touchstart 会导致键盘不收起
+    document.getElementById("toolbarMore").addEventListener("click", () => {
         popMenu();
     });
     const editElement = document.getElementById("toolbarEdit");
     if (window.siyuan.config.readonly) {
         editElement.classList.add("fn__none");
+    }
+    const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
+    const editIconElement = editElement.querySelector("use");
+    if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
+        inputElement.readOnly = true;
+        editIconElement.setAttribute("xlink:href", "#iconEdit");
     } else {
-        const editIconElement = editElement.querySelector("use");
-        editElement.addEventListener(getEventName(), () => {
-            const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
-            if (editIconElement.getAttribute("xlink:href") === "#iconEdit") {
+        inputElement.readOnly = false;
+        editIconElement.setAttribute("xlink:href", "#iconPreview");
+    }
+    editElement.addEventListener(getEventName(), () => {
+        const isReadonly = editIconElement.getAttribute("xlink:href") === "#iconPreview";
+        window.siyuan.config.editor.readOnly = isReadonly;
+        fetchPost("/api/setting/setEditor", window.siyuan.config.editor, () => {
+            if (!isReadonly) {
                 enableProtyle(window.siyuan.mobileEditor.protyle);
                 inputElement.readOnly = false;
                 editIconElement.setAttribute("xlink:href", "#iconPreview");
@@ -102,7 +117,8 @@ export const initFramework = () => {
                 editIconElement.setAttribute("xlink:href", "#iconEdit");
             }
         });
-    }
+    });
+
     scrimElement.addEventListener(getEventName(), () => {
         closePanel();
     });
@@ -136,11 +152,15 @@ export const initFramework = () => {
 const initEditorName = () => {
     const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
     inputElement.setAttribute("placeholder", window.siyuan.languages._kernel[16]);
+    inputElement.addEventListener("focus", () => {
+        hideKeyboardToolbar();
+    });
     inputElement.addEventListener("blur", () => {
-        if (window.siyuan.config.readonly || document.querySelector("#toolbarEdit use").getAttribute("xlink:href") === "#iconEdit") {
+        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly || window.siyuan.mobileEditor.protyle.disabled) {
             return;
         }
         if (!validateName(inputElement.value)) {
+            inputElement.value = inputElement.value.substring(0, Constants.SIZE_TITLE);
             return false;
         }
 

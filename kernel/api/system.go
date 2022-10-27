@@ -146,8 +146,15 @@ func getConf(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	maskedConf, err := model.GetMaskedConf()
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = "get conf failed: " + err.Error()
+		return
+	}
+
 	ret.Data = map[string]interface{}{
-		"conf":  model.Conf,
+		"conf":  maskedConf,
 		"start": start,
 	}
 
@@ -193,6 +200,10 @@ func setAccessAuthCode(c *gin.Context) {
 	}
 
 	aac := arg["accessAuthCode"].(string)
+	if model.MaskedAccessAuthCode == aac {
+		aac = model.Conf.AccessAuthCode
+	}
+
 	model.Conf.AccessAuthCode = aac
 	model.Conf.Save()
 
@@ -268,6 +279,23 @@ func setNetworkServe(c *gin.Context) {
 
 	networkServe := arg["networkServe"].(bool)
 	model.Conf.System.NetworkServe = networkServe
+	model.Conf.Save()
+
+	util.PushMsg(model.Conf.Language(42), 1000*15)
+	time.Sleep(time.Second * 3)
+}
+
+func setFixedPort(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	fixedPort := arg["fixedPort"].(bool)
+	model.Conf.System.FixedPort = fixedPort
 	model.Conf.Save()
 
 	util.PushMsg(model.Conf.Language(42), 1000*15)

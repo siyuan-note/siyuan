@@ -6,7 +6,7 @@ import {zoomOut} from "../../menus/protyle";
 import {processRender} from "../../protyle/util/processCode";
 import {highlightRender} from "../../protyle/markdown/highlightRender";
 import {blockRender} from "../../protyle/markdown/blockRender";
-import {disabledProtyle, enableProtyle} from "../../protyle/util/onGet";
+import {disabledForeverProtyle, disabledProtyle, enableProtyle} from "../../protyle/util/onGet";
 
 const forwardStack: IBackStack[] = [];
 
@@ -69,10 +69,14 @@ const focusStack = (backStack: IBackStack) => {
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
         blockRender(protyle, protyle.wysiwyg.element);
-        if (protyle.disabled) {
-            disabledProtyle(protyle);
+        if (getResponse.data.isSyncing) {
+            disabledForeverProtyle(protyle);
         } else {
-            enableProtyle(protyle);
+            if (protyle.disabled) {
+                disabledProtyle(protyle);
+            } else {
+                enableProtyle(protyle);
+            }
         }
         protyle.contentElement.scrollTop = backStack.scrollTop;
         window.siyuan.mobileEditor.protyle.breadcrumb?.render(protyle);

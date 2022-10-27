@@ -7,7 +7,7 @@ import {pushBack} from "../../util/backForward";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {blockRender} from "../markdown/blockRender";
-import {disabledProtyle, enableProtyle} from "../util/onGet";
+import {disabledForeverProtyle, disabledProtyle, enableProtyle} from "../util/onGet";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
     if (!protyle.wysiwyg.element.firstElementChild) {
@@ -84,10 +84,14 @@ export const restoreScroll = (protyle: IProtyle, scrollAttr: IScrollAttr) => {
             processRender(protyle.wysiwyg.element);
             highlightRender(protyle.wysiwyg.element);
             blockRender(protyle, protyle.wysiwyg.element);
-            if (protyle.disabled) {
-                disabledProtyle(protyle);
+            if (getResponse.data.isSyncing) {
+                disabledForeverProtyle(protyle);
             } else {
-                enableProtyle(protyle);
+                if (protyle.disabled) {
+                    disabledProtyle(protyle);
+                } else {
+                    enableProtyle(protyle);
+                }
             }
             protyle.contentElement.scrollTop = scrollAttr.scrollTop;
             if (scrollAttr.focusId) {

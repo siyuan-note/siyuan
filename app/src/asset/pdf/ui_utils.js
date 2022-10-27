@@ -23,8 +23,6 @@ const MAX_AUTO_SCALE = 1.25;
 const SCROLLBAR_PADDING = 40;
 const VERTICAL_PADDING = 5;
 
-const LOADINGBAR_END_OFFSET_VAR = "--loadingBar-end-offset";
-
 const RenderingStates = {
   INITIAL: 0,
   RUNNING: 1,
@@ -48,15 +46,17 @@ const SidebarView = {
   LAYERS: 4,
 };
 
-const RendererType = {
-  CANVAS: "canvas",
-  SVG: "svg",
-};
+const RendererType =
+  typeof PDFJSDev === "undefined" || PDFJSDev.test("!PRODUCTION || GENERIC")
+    ? {
+        CANVAS: "canvas",
+        SVG: "svg",
+      }
+    : null;
 
 const TextLayerMode = {
   DISABLE: 0,
   ENABLE: 1,
-  ENABLE_ENHANCE: 2,
 };
 
 const ScrollMode = {
@@ -129,7 +129,7 @@ function scrollIntoView(element, spot, scrollMatches = false) {
     (scrollMatches &&
       (parent.classList.contains("markedContent") ||
         getComputedStyle(parent).overflow === "hidden"))
-    ) {
+  ) {
     offsetY += parent.offsetTop;
     offsetX += parent.offsetLeft;
 
@@ -465,12 +465,12 @@ function backtrackBeforeAllVisibleElements(index, views, top) {
  * @returns {Object} `{ first, last, views: [{ id, x, y, view, percent }] }`
  */
 function getVisibleElements({
-                              scrollEl,
-                              views,
-                              sortByVisibility = false,
-                              horizontal = false,
-                              rtl = false,
-                            }) {
+  scrollEl,
+  views,
+  sortByVisibility = false,
+  horizontal = false,
+  rtl = false,
+}) {
   const top = scrollEl.scrollTop,
     bottom = top + scrollEl.clientHeight;
   const left = scrollEl.scrollLeft,
@@ -590,7 +590,7 @@ function getVisibleElements({
   }
 
   const first = visible[0],
-    last = visible[visible.length - 1];
+    last = visible.at(-1);
 
   if (sortByVisibility) {
     visible.sort(function (a, b) {
@@ -679,49 +679,43 @@ const animationStarted = new Promise(function (resolve) {
   window.requestAnimationFrame(resolve);
 });
 
+const docStyle =
+  typeof PDFJSDev !== "undefined" &&
+  PDFJSDev.test("LIB") &&
+  typeof document === "undefined"
+    ? null
+    : document.documentElement.style;
+
 function clamp(v, min, max) {
   return Math.min(Math.max(v, min), max);
 }
 
 class ProgressBar {
-  constructor(element, { height, width, units } = {}) {
-    this.visible = true;
+  #classList = null;
 
-    // Fetch the sub-elements for later.
-    this.div = element.querySelector("#loadingBar .progress");
-    // Get the loading bar element, so it can be resized to fit the viewer.
-    this.bar = this.div.parentNode;
+  #percent = 0;
 
-    // Get options, with sensible defaults.
-    this.height = height || 100;
-    this.width = width || 100;
-    this.units = units || "%";
+  #visible = true;
 
-    // Initialize heights.
-    this.div.style.height = this.height + this.units;
-    this.percent = 0;
-  }
-
-  _updateBar() {
-    if (this._indeterminate) {
-      this.div.classList.add("indeterminate");
-      this.div.style.width = this.width + this.units;
-      return;
-    }
-
-    this.div.classList.remove("indeterminate");
-    const progressSize = (this.width * this._percent) / 100;
-    this.div.style.width = progressSize + this.units;
+  constructor(id) {
+    const bar = document.getElementById(id);
+    this.#classList = bar.classList;
   }
 
   get percent() {
-    return this._percent;
+    return this.#percent;
   }
 
   set percent(val) {
-    this._indeterminate = isNaN(val);
-    this._percent = clamp(val, 0, 100);
-    this._updateBar();
+    this.#percent = clamp(val, 0, 100);
+
+    if (isNaN(val)) {
+      this.#classList.add("indeterminate");
+      return;
+    }
+    this.#classList.remove("indeterminate");
+
+    docStyle.setProperty("--progressBar-percent", `${this.#percent}%`);
   }
 
   setWidth(viewer) {
@@ -731,25 +725,26 @@ class ProgressBar {
     const container = viewer.parentNode;
     const scrollbarWidth = container.offsetWidth - viewer.offsetWidth;
     if (scrollbarWidth > 0) {
-      const doc = document.documentElement;
-      doc.style.setProperty(LOADINGBAR_END_OFFSET_VAR, `${scrollbarWidth}px`);
+      docStyle.setProperty("--progressBar-end-offset", `${scrollbarWidth}px`);
     }
   }
 
   hide() {
-    if (!this.visible) {
+    if (!this.#visible) {
       return;
     }
-    this.visible = false;
-    this.bar.classList.add("fn__hidden");
+    this.#visible = false;
+    // NOTE
+    this.#classList.add("fn__hidden");
   }
 
   show() {
-    if (this.visible) {
+    if (this.#visible) {
       return;
     }
-    this.visible = true;
-    this.bar.classList.remove("fn__hidden");
+    this.#visible = true;
+    // NOTE
+    this.#classList.remove("fn__hidden");
   }
 }
 
@@ -844,6 +839,7 @@ export {
   DEFAULT_SCALE,
   DEFAULT_SCALE_DELTA,
   DEFAULT_SCALE_VALUE,
+  docStyle,
   getActiveOrFocusedElement,
   getPageSizeInches,
   getVisibleElements,

@@ -18,6 +18,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -38,6 +39,79 @@ func refreshBacklink(c *gin.Context) {
 	model.RefreshBacklink(id)
 }
 
+func getBackmentionDoc(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	defID := arg["defID"].(string)
+	refTreeID := arg["refTreeID"].(string)
+	keyword := ""
+	backlinks := model.GetBackmentionDoc(defID, refTreeID, keyword)
+	ret.Data = map[string]interface{}{
+		"backmentions": backlinks,
+	}
+}
+
+func getBacklinkDoc(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	defID := arg["defID"].(string)
+	refTreeID := arg["refTreeID"].(string)
+	backlinks := model.GetBacklinkDoc(defID, refTreeID)
+	ret.Data = map[string]interface{}{
+		"backlinks": backlinks,
+	}
+}
+
+func getBacklink2(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	if nil == arg["id"] {
+		return
+	}
+
+	id := arg["id"].(string)
+	keyword := arg["k"].(string)
+	mentionKeyword := arg["mk"].(string)
+	sortArg := arg["sort"]
+	sort := util.SortModeUpdatedDESC
+	if nil != sortArg {
+		sort, _ = strconv.Atoi(sortArg.(string))
+	}
+	mentionSortArg := arg["mSort"]
+	mentionSort := util.SortModeUpdatedDESC
+	if nil != mentionSortArg {
+		mentionSort, _ = strconv.Atoi(mentionSortArg.(string))
+	}
+	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.GetBacklink2(id, keyword, mentionKeyword, sort, mentionSort)
+	ret.Data = map[string]interface{}{
+		"backlinks":     backlinks,
+		"linkRefsCount": linkRefsCount,
+		"backmentions":  backmentions,
+		"mentionsCount": mentionsCount,
+		"k":             keyword,
+		"mk":            mentionKeyword,
+		"box":           boxID,
+	}
+}
+
 func getBacklink(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -54,8 +128,11 @@ func getBacklink(c *gin.Context) {
 	id := arg["id"].(string)
 	keyword := arg["k"].(string)
 	mentionKeyword := arg["mk"].(string)
-	beforeLen := arg["beforeLen"].(float64)
-	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.BuildTreeBacklink(id, keyword, mentionKeyword, int(beforeLen))
+	beforeLen := 12
+	if nil != arg["beforeLen"] {
+		beforeLen = int(arg["beforeLen"].(float64))
+	}
+	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.GetBacklink(id, keyword, mentionKeyword, beforeLen)
 	ret.Data = map[string]interface{}{
 		"backlinks":     backlinks,
 		"linkRefsCount": linkRefsCount,

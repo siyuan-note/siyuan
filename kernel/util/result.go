@@ -24,10 +24,11 @@ import (
 type PushMode int
 
 const (
-	PushModeBroadcast               PushMode = 0  // 广播
-	PushModeSingleSelf              PushMode = 1  // 自我单播
-	PushModeBroadcastExcludeSelf    PushMode = 2  // 非自我广播
-	PushModeBroadcastExcludeSelfApp PushMode = 4  // 非自我应用广播
+	PushModeBroadcast               PushMode = 0  // 所有应用所有会话广播
+	PushModeSingleSelf              PushMode = 1  // 自我应用会话单播
+	PushModeBroadcastExcludeSelf    PushMode = 2  // 非自我会话广播
+	PushModeBroadcastExcludeSelfApp PushMode = 4  // 非自我应用所有会话广播
+	PushModeBroadcastApp            PushMode = 5  // 单个应用内所有会话广播
 	PushModeNone                    PushMode = 10 // 不进行 reload
 )
 

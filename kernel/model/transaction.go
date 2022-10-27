@@ -20,12 +20,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -102,6 +100,7 @@ func isWritingFiles() bool {
 }
 
 func AutoFlushTx() {
+	go autoFlushUpdateRefTextRenameDoc()
 	for {
 		flushTx()
 		time.Sleep(time.Duration(txDelay) * time.Millisecond)
@@ -123,7 +122,7 @@ func flushTx() {
 		case TxErrCodeBlockNotFound:
 			util.PushTxErr("Transaction failed", txErr.code, nil)
 			return
-		case TxErrCodeUnableLockFile:
+		case TxErrCodeUnableAccessFile:
 			util.PushTxErr(Conf.Language(76), txErr.code, txErr.id)
 			return
 		default:
@@ -175,9 +174,9 @@ func PerformTransactions(transactions *[]*Transaction) (err error) {
 }
 
 const (
-	TxErrCodeBlockNotFound  = 0
-	TxErrCodeUnableLockFile = 1
-	TxErrCodeWriteTree      = 2
+	TxErrCodeBlockNotFound    = 0
+	TxErrCodeUnableAccessFile = 1
+	TxErrCodeWriteTree        = 2
 )
 
 type TxErr struct {
@@ -244,6 +243,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	}
 
 	if cr := tx.commit(); nil != cr {
+		if errors.Is(cr, filelock.ErrUnableAccessFile) {
+			return &TxErr{code: TxErrCodeUnableAccessFile, msg: cr.Error()}
+		}
+
 		logging.LogErrorf("commit tx failed: %s", cr)
 		return &TxErr{msg: cr.Error()}
 	}
@@ -415,8 +418,8 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	tree, err := tx.loadTree(block.ID)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
-		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: block.ID}
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
+		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
 		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
@@ -503,8 +506,8 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	tree, err := tx.loadTree(block.ID)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
-		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: block.ID}
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
+		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
 		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
@@ -661,8 +664,8 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	var err error
 	id := operation.ID
 	tree, err := tx.loadTree(id)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
-		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: id}
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
+		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: id}
 	}
 	if ErrBlockNotFound == err {
 		return nil // move 以后这里会空，算作正常情况
@@ -706,14 +709,18 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	if nil == block {
 		block = treenode.GetBlockTree(operation.PreviousID)
 		if nil == block {
-			msg := fmt.Sprintf("not found previous block [id=%s]", operation.PreviousID)
-			logging.LogErrorf(msg)
-			return &TxErr{code: TxErrCodeBlockNotFound, id: operation.PreviousID}
+			block = treenode.GetBlockTree(operation.NextID)
 		}
 	}
+	if nil == block {
+		msg := fmt.Sprintf("not found next block [id=%s]", operation.NextID)
+		logging.LogErrorf(msg)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.NextID}
+	}
+
 	tree, err := tx.loadTree(block.ID)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
-		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: block.ID}
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
+		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
 		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
@@ -750,7 +757,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 				// 只有全局 assets 才移动到相对 assets
 				targetP := filepath.Join(assets, filepath.Base(assetPath))
-				if e = os.Rename(assetPath, targetP); nil != err {
+				if e = filelock.Move(assetPath, targetP); nil != err {
 					logging.LogErrorf("copy path of asset from [%s] to [%s] failed: %s", assetPath, targetP, err)
 					return ast.WalkContinue
 				}
@@ -778,8 +785,20 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	}
 
 	var node *ast.Node
+	nextID := operation.NextID
 	previousID := operation.PreviousID
-	if "" != previousID {
+	if "" != nextID {
+		node = treenode.GetNodeInTree(tree, nextID)
+		if nil == node {
+			logging.LogErrorf("get node [%s] in tree [%s] failed", nextID, tree.Root.ID)
+			return &TxErr{code: TxErrCodeBlockNotFound, id: nextID}
+		}
+
+		if ast.NodeList == insertedNode.Type && nil != node.Parent && ast.NodeList == node.Parent.Type {
+			insertedNode = insertedNode.FirstChild
+		}
+		node.InsertBefore(insertedNode)
+	} else if "" != previousID {
 		node = treenode.GetNodeInTree(tree, previousID)
 		if nil == node {
 			logging.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
@@ -846,8 +865,8 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 
 	tree, err := tx.loadTree(id)
-	if errors.Is(err, filelock.ErrUnableLockFile) {
-		return &TxErr{code: TxErrCodeUnableLockFile, msg: err.Error(), id: id}
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
+		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: id}
 	}
 	if nil != err {
 		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)
@@ -971,6 +990,7 @@ type Operation struct {
 	ID         string      `json:"id"`
 	ParentID   string      `json:"parentID"`
 	PreviousID string      `json:"previousID"`
+	NextID     string      `json:"nextID"`
 	RetData    interface{} `json:"retData"`
 
 	discard bool // 用于标识是否在事务合并中丢弃
@@ -1041,9 +1061,6 @@ func (tx *Transaction) writeTree(tree *parse.Tree) (err error) {
 
 func refreshDynamicRefText(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) {
 	// 这个实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
-	// 比如通过块引创建文档后立即重命名文档，这时引用关系还没有入库，所以重命名查询不到引用关系，最终导致动态锚文本设置失败
-	// 引用文档时锚文本没有跟随文档重命名 https://github.com/siyuan-note/siyuan/issues/4193
-	// 解决方案是将重命名通过协程异步调用，详见 RenameDoc 函数
 
 	treeRefNodeIDs := map[string]*hashset.Set{}
 	for _, updateNode := range updatedDefNodes {
@@ -1107,6 +1124,34 @@ func refreshDynamicRefText(updatedDefNodes map[string]*ast.Node, updatedTrees ma
 	}
 }
 
+var updateRefTextRenameDocs = map[string]*parse.Tree{}
+var updateRefTextRenameDocLock = sync.Mutex{}
+
+func updateRefTextRenameDoc(renamedTree *parse.Tree) {
+	updateRefTextRenameDocLock.Lock()
+	updateRefTextRenameDocs[renamedTree.ID] = renamedTree
+	updateRefTextRenameDocLock.Unlock()
+}
+
+func autoFlushUpdateRefTextRenameDoc() {
+	for {
+		sql.WaitForWritingDatabase()
+		flushUpdateRefTextRenameDoc()
+	}
+}
+
+func flushUpdateRefTextRenameDoc() {
+	updateRefTextRenameDocLock.Lock()
+	defer updateRefTextRenameDocLock.Unlock()
+
+	for _, tree := range updateRefTextRenameDocs {
+		changedDefs := map[string]*ast.Node{tree.ID: tree.Root}
+		changedTrees := map[string]*parse.Tree{tree.ID: tree}
+		refreshDynamicRefText(changedDefs, changedTrees)
+	}
+	updateRefTextRenameDocs = map[string]*parse.Tree{}
+}
+
 func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (changed bool) {
 	ast.Walk(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -1128,11 +1173,9 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 		if ast.NodeDocument != defNode.Type && defNode.IsContainerBlock() {
 			defNode = treenode.FirstLeafBlock(defNode)
 		}
-		defContent := renderBlockText(defNode)
-		if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(defContent) {
-			defContent = gulu.Str.SubStr(defContent, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
-		}
-		treenode.SetDynamicBlockRefText(n, defContent)
+
+		refText := getNodeRefText(defNode)
+		treenode.SetDynamicBlockRefText(n, refText)
 		changed = true
 		return ast.WalkContinue
 	})

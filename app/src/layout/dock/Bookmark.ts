@@ -71,7 +71,7 @@ export class Bookmark extends Model {
     <span class="fn__space"></span>
     <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
-<div class="fn__flex-1"></div>`;
+<div class="fn__flex-1" style="margin-bottom: 8px"></div>`;
         this.tree = new Tree({
             element: this.element.lastElementChild as HTMLElement,
             data: null,
@@ -128,7 +128,7 @@ export class Bookmark extends Model {
                     label: window.siyuan.languages.remove,
                     click: () => {
                         const bookmark = (id ? element.parentElement.previousElementSibling : element).querySelector(".b3-list-item__text").textContent;
-                        confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(bookmark)}</b>?`, () => {
+                        confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(bookmark)}</b>?`, () => {
                             if (id) {
                                 fetchPost("/api/attr/setBlockAttrs", {id, attrs: {bookmark: ""}}, () => {
                                     this.update();
@@ -178,7 +178,7 @@ export class Bookmark extends Model {
             this.tree.expandAll();
         });
         this.element.addEventListener("click", (event) => {
-            setPanelFocus(this.element.firstElementChild);
+            setPanelFocus(this.element);
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
                 if (target.classList.contains("block__icon")) {
@@ -197,7 +197,7 @@ export class Bookmark extends Model {
         });
 
         this.update();
-        setPanelFocus(this.element.firstElementChild);
+        setPanelFocus(this.element);
     }
 
     public update() {

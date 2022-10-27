@@ -88,7 +88,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             label: window.siyuan.languages.delete,
             accelerator: "⌦",
             click: () => {
-                confirmDialog(window.siyuan.languages.delete,
+                confirmDialog(window.siyuan.languages.deleteOpConfirm,
                     `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(name)}</b>?`, () => {
                         fetchPost("/api/notebook/removeNotebook", {
                             notebook: notebookId,
@@ -195,7 +195,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
             label: window.siyuan.languages.copy,
             type: "submenu",
             icon: "iconCopy",
-            submenu: (copySubMenu(id, "", false) as IMenu[]).concat([{
+            submenu: (copySubMenu(id, false) as IMenu[]).concat([{
                 label: window.siyuan.languages.duplicate,
                 click() {
                     fetchPost("/api/filetree/duplicateDoc", {
@@ -245,14 +245,14 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
     }
     /// #if !MOBILE
     const openSubmenus: IMenu[] = [{
-        icon: "iconRight",
+        icon: "iconLayoutRight",
         label: window.siyuan.languages.insertRight,
         accelerator: "⌥Click",
         click: () => {
             openFileById({id, position: "right", action: [Constants.CB_GET_FOCUS]});
         }
     }, {
-        icon: "iconDown",
+        icon: "iconLayoutBottom",
         label: window.siyuan.languages.insertBottom,
         click: () => {
             openFileById({id, position: "bottom", action: [Constants.CB_GET_FOCUS]});

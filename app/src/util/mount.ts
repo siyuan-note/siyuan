@@ -20,14 +20,16 @@ export const newDailyNote = () => {
             }
         });
         fetchPost("/api/filetree/createDailyNote", {
-            notebook: notebookId
+            notebook: notebookId,
+            app: Constants.SIYUAN_APPID,
         });
         return;
     }
     const localNotebookId = window.localStorage.getItem(Constants.LOCAL_DAILYNOTEID);
     if (localNotebookId && getNotebookName(localNotebookId) && !isMobile()) {
         fetchPost("/api/filetree/createDailyNote", {
-            notebook:localNotebookId
+            notebook:localNotebookId,
+            app: Constants.SIYUAN_APPID,
         });
     } else {
         let optionsHTML = "";
@@ -56,7 +58,8 @@ export const newDailyNote = () => {
             const notebook = selectElement.value;
             window.localStorage.setItem(Constants.LOCAL_DAILYNOTEID, notebook);
             fetchPost("/api/filetree/createDailyNote", {
-                notebook
+                notebook,
+                app: Constants.SIYUAN_APPID,
             });
             dialog.destroy();
         });

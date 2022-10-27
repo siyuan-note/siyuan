@@ -5,12 +5,15 @@ import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
 import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
 import {Constants} from "../constants";
+import {hideElements} from "../protyle/ui/hideElements";
 
 export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let previousId = nodeElement.previousElementSibling ? nodeElement.previousElementSibling.getAttribute("data-node-id") : undefined;
     nodeElement.classList.remove("protyle-wysiwyg--select");
+    nodeElement.removeAttribute("select-start");
+    nodeElement.removeAttribute("select-end");
     const id = nodeElement.getAttribute("data-node-id");
     const sbElement = genSBElement(nodeElement.getAttribute("data-sb-layout"), id, nodeElement.lastElementChild.outerHTML);
     undoOperations.push({
@@ -60,7 +63,7 @@ export const genSBElement = (layout: string, id?: string, attrHTML?: string) => 
     return sbElement;
 };
 
-export const jumpToParentNext = (protyle:IProtyle,nodeElement: Element) => {
+export const jumpToParentNext = (protyle: IProtyle, nodeElement: Element) => {
     const topElement = getTopAloneElement(nodeElement);
     if (topElement) {
         const topParentElement = hasClosestByClassName(topElement, "list") || hasClosestByClassName(topElement, "bq") || hasClosestByClassName(topElement, "sb") || topElement;
@@ -85,9 +88,7 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
             } else {
                 blockElement = selectElements[selectElements.length - 1];
             }
-            selectElements.forEach(item => {
-                item.classList.remove("protyle-wysiwyg--select");
-            });
+            hideElements(["select"], protyle);
         } else {
             blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
             blockElement = getTopAloneElement(blockElement);
@@ -95,14 +96,6 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
     }
     if (!blockElement) {
         return;
-    }
-    let previousID;
-    if (position === "beforebegin") {
-        if (blockElement.previousElementSibling) {
-            previousID = blockElement.previousElementSibling.getAttribute("data-node-id");
-        }
-    } else {
-        previousID = blockElement.getAttribute("data-node-id");
     }
     let newElement = genEmptyElement(false, true);
     let orderIndex = 1;
@@ -118,13 +111,23 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
         updateListOrder(newElement.parentElement, orderIndex);
         updateTransaction(protyle, newElement.parentElement.getAttribute("data-node-id"), newElement.parentElement.outerHTML, parentOldHTML);
     } else {
-        transaction(protyle, [{
-            action: "insert",
-            data: newElement.outerHTML,
-            id: newId,
-            previousID,
-            parentID: blockElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
-        }], [{
+        let doOperations: IOperation[];
+        if (position === "beforebegin") {
+            doOperations = [{
+                action: "insert",
+                data: newElement.outerHTML,
+                id: newId,
+                nextID: blockElement.getAttribute("data-node-id"),
+            }];
+        } else {
+            doOperations = [{
+                action: "insert",
+                data: newElement.outerHTML,
+                id: newId,
+                previousID: blockElement.getAttribute("data-node-id"),
+            }];
+        }
+        transaction(protyle, doOperations, [{
             action: "delete",
             id: newId,
         }]);

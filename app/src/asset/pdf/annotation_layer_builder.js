@@ -13,6 +13,15 @@
  * limitations under the License.
  */
 
+/** @typedef {import("../src/display/api").PDFPageProxy} PDFPageProxy */
+// eslint-disable-next-line max-len
+/** @typedef {import("../src/display/display_utils").PageViewport} PageViewport */
+/** @typedef {import("./interfaces").IDownloadManager} IDownloadManager */
+/** @typedef {import("./interfaces").IL10n} IL10n */
+/** @typedef {import("./interfaces").IPDFLinkService} IPDFLinkService */
+// eslint-disable-next-line max-len
+/** @typedef {import("./textaccessibility.js").TextAccessibilityManager} TextAccessibilityManager */
+
 import { AnnotationLayer } from "./pdfjs";
 import { NullL10n } from "./l10n_utils.js";
 
@@ -33,6 +42,7 @@ import { NullL10n } from "./l10n_utils.js";
  *   [fieldObjectsPromise]
  * @property {Object} [mouseState]
  * @property {Map<string, HTMLCanvasElement>} [annotationCanvasMap]
+ * @property {TextAccessibilityManager} accessibilityManager
  */
 
 class AnnotationLayerBuilder {
@@ -53,6 +63,7 @@ class AnnotationLayerBuilder {
     fieldObjectsPromise = null,
     mouseState = null,
     annotationCanvasMap = null,
+    accessibilityManager = null,
   }) {
     this.pageDiv = pageDiv;
     this.pdfPage = pdfPage;
@@ -67,6 +78,7 @@ class AnnotationLayerBuilder {
     this._fieldObjectsPromise = fieldObjectsPromise;
     this._mouseState = mouseState;
     this._annotationCanvasMap = annotationCanvasMap;
+    this._accessibilityManager = accessibilityManager;
 
     this.div = null;
     this._cancelled = false;
@@ -105,6 +117,7 @@ class AnnotationLayerBuilder {
       fieldObjects,
       mouseState: this._mouseState,
       annotationCanvasMap: this._annotationCanvasMap,
+      accessibilityManager: this._accessibilityManager,
     };
 
     if (this.div) {
@@ -116,7 +129,7 @@ class AnnotationLayerBuilder {
       // if there is at least one annotation.
       this.div = document.createElement("div");
       this.div.className = "annotationLayer";
-      this.pageDiv.appendChild(this.div);
+      this.pageDiv.append(this.div);
       parameters.div = this.div;
 
       AnnotationLayer.render(parameters);

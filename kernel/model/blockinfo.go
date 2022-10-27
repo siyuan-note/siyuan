@@ -91,7 +91,10 @@ func GetBlockRefText(id string) string {
 	if nil == node {
 		return ErrBlockNotFound.Error()
 	}
+	return getNodeRefText(node)
+}
 
+func getNodeRefText(node *ast.Node) string {
 	if name := node.IALAttr("name"); "" != name {
 		return name
 	}
@@ -147,6 +150,38 @@ func GetBlockDefIDsByRefText(refText string, excludeIDs []string) (ret []string)
 	if 1 > len(ret) {
 		ret = []string{}
 	}
+	return
+}
+
+func GetBlockIndex(id string) (ret int) {
+	tree, _ := loadTreeByBlockID(id)
+	if nil == tree {
+		return
+	}
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		return
+	}
+
+	rootChild := node
+	for ; nil == rootChild.Parent || ast.NodeDocument != rootChild.Parent.Type; rootChild = rootChild.Parent {
+	}
+
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if !n.IsChildBlockOf(tree.Root, 1) {
+			return ast.WalkContinue
+		}
+
+		ret++
+		if n.ID == rootChild.ID {
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
 	return
 }
 

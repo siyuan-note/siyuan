@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -58,11 +59,11 @@ type AppConf struct {
 	UserData       string           `json:"userData"`       // 社区用户信息，对 User 加密存储
 	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化
 	Account        *conf.Account    `json:"account"`        // 帐号配置
-	ReadOnly       bool             `json:"readonly"`       // 是否是只读
+	ReadOnly       bool             `json:"readonly"`       // 是否是以只读模式运行
 	LocalIPs       []string         `json:"localIPs"`       // 本地 IP 列表
 	AccessAuthCode string           `json:"accessAuthCode"` // 访问授权码
-	System         *conf.System     `json:"system"`         // 系统
-	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键
+	System         *conf.System     `json:"system"`         // 系统配置
+	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键配置
 	Sync           *conf.Sync       `json:"sync"`           // 同步配置
 	Search         *conf.Search     `json:"search"`         // 搜索配置
 	Stat           *conf.Stat       `json:"stat"`           // 统计
@@ -270,6 +271,13 @@ func InitConf() {
 		Conf.AccessAuthCode = util.AccessAuthCode
 	}
 
+	if util.ContainerStd != util.Container {
+		Conf.System.FixedPort = true
+	}
+	if Conf.System.FixedPort {
+		util.ServerPort = util.FixedPort
+	}
+
 	Conf.LocalIPs = util.GetLocalIPs()
 
 	Conf.Save()
@@ -353,18 +361,17 @@ var exitLock = sync.Mutex{}
 // force：是否不执行同步过程而直接退出
 // execInstallPkg：是否执行新版本安装包
 //
-//		0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
-//	 1：不执行新版本安装
-//	 2：执行新版本安装
+//	  0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
+//		 1：不执行新版本安装
+//		 2：执行新版本安装
 func Close(force bool, execInstallPkg int) (exitCode int) {
 	exitLock.Lock()
 	defer exitLock.Unlock()
 
 	logging.LogInfof("exiting kernel [force=%v, execInstallPkg=%d]", force, execInstallPkg)
-
-	treenode.CloseBlockTree()
 	util.PushMsg(Conf.Language(95), 10000*60)
 	WaitForWritingFiles()
+
 	if !force {
 		SyncData(false, true, false)
 		if 0 != ExitSyncSucc {
@@ -379,6 +386,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	//	return true
 	//})
 
+	waitSecondForExecInstallPkg := false
 	if !skipNewVerInstallPkg() {
 		newVerInstallPkgPath := getNewVerInstallPkgPath()
 		if "" != newVerInstallPkgPath {
@@ -387,6 +395,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 				logging.LogInfof("the new version install pkg is ready [%s], waiting for the user's next instruction", newVerInstallPkgPath)
 				return
 			} else if 2 == execInstallPkg { // 执行新版本安装
+				waitSecondForExecInstallPkg = true
 				go execNewVerInstallPkg(newVerInstallPkgPath)
 			}
 		}
@@ -395,9 +404,13 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	Conf.Close()
 	sql.CloseDatabase()
 	clearWorkspaceTemp()
+	clearPortJSON()
 
 	go func() {
 		time.Sleep(500 * time.Millisecond)
+		if waitSecondForExecInstallPkg {
+			time.Sleep(1 * time.Second)
+		}
 		logging.LogInfof("exited kernel")
 		util.WebSocketServer.Close()
 		os.Exit(util.ExitCodeOk)
@@ -430,7 +443,7 @@ func (conf *AppConf) Save() {
 
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")
-	oldData, err := filelock.NoLockFileRead(confPath)
+	oldData, err := filelock.ReadFile(confPath)
 	if nil != err {
 		conf.save0(newData)
 		return
@@ -445,7 +458,7 @@ func (conf *AppConf) Save() {
 
 func (conf *AppConf) save0(data []byte) {
 	confPath := filepath.Join(util.ConfDir, "conf.json")
-	if err := filelock.NoLockFileWrite(confPath, data); nil != err {
+	if err := filelock.WriteFile(confPath, data); nil != err {
 		logging.LogFatalf("write conf [%s] failed: %s", confPath, err)
 	}
 }
@@ -461,6 +474,21 @@ func (conf *AppConf) Box(boxID string) *Box {
 		}
 	}
 	return nil
+}
+
+func (conf *AppConf) BoxNames(boxIDs []string) (ret map[string]string) {
+	ret = map[string]string{}
+
+	boxes := conf.GetOpenedBoxes()
+	for _, boxID := range boxIDs {
+		for _, box := range boxes {
+			if box.ID == boxID {
+				ret[boxID] = box.Name
+				break
+			}
+		}
+	}
+	return
 }
 
 func (conf *AppConf) GetBoxes() (ret []*Box) {
@@ -563,6 +591,59 @@ func IsSubscriber() bool {
 	return nil != Conf.User && (-1 == Conf.User.UserSiYuanProExpireTime || 0 < Conf.User.UserSiYuanProExpireTime) && 0 == Conf.User.UserSiYuanSubscriptionStatus
 }
 
+const (
+	MaskedUserData       = ""
+	MaskedAccessAuthCode = "*******"
+)
+
+func GetMaskedConf() (ret *AppConf, err error) {
+	// 脱敏处理
+	data, err := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
+	if nil != err {
+		logging.LogErrorf("marshal conf failed: %s", err)
+		return
+	}
+	ret = &AppConf{}
+	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
+		logging.LogErrorf("unmarshal conf failed: %s", err)
+		return
+	}
+
+	ret.UserData = MaskedUserData
+	if "" != ret.AccessAuthCode {
+		ret.AccessAuthCode = MaskedAccessAuthCode
+	}
+	return
+}
+
+func clearPortJSON() {
+	pid := fmt.Sprintf("%d", os.Getpid())
+	portJSON := filepath.Join(util.HomeDir, ".config", "siyuan", "port.json")
+	pidPorts := map[string]string{}
+	var data []byte
+	var err error
+
+	if gulu.File.IsExist(portJSON) {
+		data, err = os.ReadFile(portJSON)
+		if nil != err {
+			logging.LogWarnf("read port.json failed: %s", err)
+		} else {
+			if err = gulu.JSON.UnmarshalJSON(data, &pidPorts); nil != err {
+				logging.LogWarnf("unmarshal port.json failed: %s", err)
+			}
+		}
+	}
+
+	delete(pidPorts, pid)
+	if data, err = gulu.JSON.MarshalIndentJSON(pidPorts, "", "  "); nil != err {
+		logging.LogWarnf("marshal port.json failed: %s", err)
+	} else {
+		if err = os.WriteFile(portJSON, data, 0644); nil != err {
+			logging.LogWarnf("write port.json failed: %s", err)
+		}
+	}
+}
+
 func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))
@@ -570,10 +651,10 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
 
-	// 退出时自动删除超过 30 天的安装包 https://github.com/siyuan-note/siyuan/issues/5957
+	// 退出时自动删除超过 7 天的安装包 https://github.com/siyuan-note/siyuan/issues/6128
 	install := filepath.Join(util.TempDir, "install")
 	if gulu.File.IsDir(install) {
-		monthAgo := time.Now().Add(-time.Hour * 24 * 30)
+		monthAgo := time.Now().Add(-time.Hour * 24 * 7)
 		entries, err := os.ReadDir(install)
 		if nil != err {
 			logging.LogErrorf("read dir [%s] failed: %s", install, err)

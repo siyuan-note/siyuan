@@ -2,7 +2,7 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {OpenDialogReturnValue} from "electron";
-import {BrowserWindow, dialog, app} from "@electron/remote";
+import {app, BrowserWindow, dialog, getCurrentWindow} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "./util";
@@ -61,66 +61,17 @@ export const saveExport = (option: { type: string, id: string }) => {
 };
 
 /// #if !BROWSER
+let originalZoomFactor = 1;
 const renderPDF = (id: string) => {
     const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_EXPORTPDF) || JSON.stringify({
-        printBackground: true,
         landscape: false,
-        marginsType: 0,
-        scaleFactor: 100,
+        marginType: "0",
+        scale: 1,
         pageSize: "A4",
         removeAssets: true,
         keepFold: false,
     }));
     const servePath = window.location.protocol + "//" + window.location.host;
-    let pdfWidth = "";
-    if (localData.pageSize === "A3") {
-        if (localData.landscape) {
-            pdfWidth = "16.5";
-        } else {
-            pdfWidth = "11.7";
-        }
-    } else if (localData.pageSize === "A4") {
-        if (localData.landscape) {
-            pdfWidth = "11.7";
-        } else {
-            pdfWidth = "8.8";
-        }
-    } else if (localData.pageSize === "A5") {
-        if (localData.landscape) {
-            pdfWidth = "8.3";
-        } else {
-            pdfWidth = "5.8";
-        }
-    } else if (localData.pageSize === "Legal") {
-        if (localData.landscape) {
-            pdfWidth = "14";
-        } else {
-            pdfWidth = "8.5";
-        }
-    } else if (localData.pageSize === "Letter") {
-        if (localData.landscape) {
-            pdfWidth = "11";
-        } else {
-            pdfWidth = "8.5";
-        }
-    } else if (localData.pageSize === "Tabloid") {
-        if (localData.landscape) {
-            pdfWidth = "17";
-        } else {
-            pdfWidth = "11";
-        }
-    }
-    let pdfMargin = "0.66";
-    if (localData.landscape) {
-        pdfMargin = "1.69";
-    }
-    if (localData.marginsType !== 0) {
-        if (localData.landscape) {
-            pdfMargin = "1.69";
-        } else {
-            pdfMargin = "0.3";
-        }
-    }
     const html = `<!DOCTYPE html><html>
 <head>
     <meta charset="utf-8">
@@ -174,12 +125,10 @@ const renderPDF = (id: string) => {
           height: 100%;
           overflow: auto;
           box-sizing: border-box;
-          padding: 34px ${pdfMargin}in 16px;
-          width: ${pdfWidth}in
         }
         
         .b3-label {
-          border-bottom: 1px solid var(--b3-border-color);
+          border-bottom: 1px solid var(--b3-theme-surface-lighter);
           display: block;
           color: var(--b3-theme-on-surface);
           padding-bottom: 16px;
@@ -210,17 +159,18 @@ const renderPDF = (id: string) => {
         </div>
         <span class="fn__hr"></span>
         <select class="b3-select" id="marginsType">
-            <option ${localData.marginsType === 0 ? "selected" : ""} value="0">Default</option>
-            <option ${localData.marginsType === 1 ? "selected" : ""} value="1">None</option>
-            <option ${localData.marginsType === 2 ? "selected" : ""} value="2">Minimal</option>
+            <option ${localData.marginType === "0" ? "selected" : ""} value="0">Default</option>
+            <option ${localData.marginType === "1" ? "selected" : ""} value="1">None</option>
+            <option ${localData.marginType === "2" ? "selected" : ""} value="2">Minimal</option>
         </select>
     </label>
     <label class="b3-label">
         <div>
             ${window.siyuan.languages.exportPDF3}
+            <span id="scaleTip" style="float: right;color: var(--b3-theme-on-background);">${localData.scale || 1}</span>
         </div>
         <span class="fn__hr"></span>
-        <input style="width: 192px" value="${localData.scaleFactor}" id="scaleFactor" step="1" class="b3-slider" type="range" min="0" max="100">
+        <input style="width: 192px" value="${localData.scale || 1}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
     </label>
     <label class="b3-label">
         <div>
@@ -250,13 +200,48 @@ const renderPDF = (id: string) => {
       <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
-<div class="protyle-wysiwyg protyle-wysiwyg--attr" id="preview">
+<div class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview">
     <div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>
 </div>
 <script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
+    let pdfLeft = 0;
+    let pdfTop = 0;
+    const setPadding = () => {
+        const isLandscape = document.querySelector("#landscape").checked;
+        switch (document.querySelector("#marginsType").value) { // none
+            case "0":
+                if (isLandscape) {
+                    pdfLeft = 0.42;
+                    pdfTop = 0.42;
+                } else {
+                    pdfLeft = 0.54;
+                    pdfTop = 1;
+                }
+                break;
+            case "2": // minimal
+                if (isLandscape) {
+                    pdfLeft = 0.07;
+                    pdfTop = 0.07;
+                } else {
+                    pdfLeft = 0.1;
+                    pdfTop = 0.58;
+                }
+                break;
+            case "1": // none
+                if (isLandscape) {
+                    pdfLeft = 0;
+                    pdfTop = 0;
+                } else {
+                    pdfLeft = 0;
+                    pdfTop = 0;
+                }
+                break;
+        }
+        document.getElementById('preview').style.padding = pdfTop + "in " + pdfLeft + "in";
+    }
     const fetchPost = (url, data, cb) => {
         fetch("${servePath}" + url, {
             method: "POST",
@@ -344,6 +329,15 @@ const renderPDF = (id: string) => {
                 renderPreview(previewElement, response2.data.content);
             })
         })
+        actionElement.querySelector("#scale").addEventListener("input", () => {
+            actionElement.querySelector("#scaleTip").innerText = actionElement.querySelector("#scale").value;
+        })
+        actionElement.querySelector("#marginsType").addEventListener('change', () => {
+            setPadding();
+        });
+        actionElement.querySelector("#landscape").addEventListener('change', () => {
+            setPadding();
+        });
         actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
             ipcRenderer.send("${Constants.SIYUAN_EXPORT_CLOSE}")
@@ -354,22 +348,37 @@ const renderPDF = (id: string) => {
               pdfOptions:{
                 printBackground: true,
                 landscape: actionElement.querySelector("#landscape").checked,
-                marginsType: parseInt(actionElement.querySelector("#marginsType").value),
-                scaleFactor: parseInt(actionElement.querySelector("#scaleFactor").value),
+                marginType: actionElement.querySelector("#marginsType").value,
+                margins: {
+                  top: pdfTop * 0.6,
+                  bottom: pdfTop * 0.6,
+                  left: 0,
+                  right: 0,
+                },
+                scale:  parseFloat(actionElement.querySelector("#scale").value),
                 pageSize: actionElement.querySelector("#pageSize").value,
               },
+              keepFold: keepFoldElement.checked,
               removeAssets: actionElement.querySelector("#removeAssets").checked,
               rootId: "${id}",
               rootTitle: response.data.name,
             })
             actionElement.remove();
             previewElement.classList.add("exporting");
+            previewElement.style.paddingTop = "0";
+            previewElement.style.paddingBottom = "0";
         });
+        setPadding()
     });
 </script></body></html>`;
+    const mainWindow = getCurrentWindow();
+    originalZoomFactor = mainWindow.webContents.zoomFactor;
     window.siyuan.printWin = new BrowserWindow({
+        parent: mainWindow,
+        modal: true,
         show: true,
         width: 1032,
+        height: 618,
         resizable: false,
         frame: "darwin" === window.siyuan.config.system.os,
         icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
@@ -381,10 +390,19 @@ const renderPDF = (id: string) => {
             webSecurity: false,
         },
     });
-    window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`
+    window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`;
+    window.siyuan.printWin.once("ready-to-show", () => {
+        // 导出 PDF 预览界面不受主界面缩放影响 https://github.com/siyuan-note/siyuan/issues/6262
+        window.siyuan.printWin.webContents.setZoomFactor(1);
+    });
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
         window.siyuan.printWin.loadURL(response.data.url);
     });
+};
+
+export const destroyPrintWindow = () => {
+    getCurrentWindow().webContents.setZoomFactor(originalZoomFactor);
+    window.siyuan.printWin.destroy();
 };
 
 const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean) => {
@@ -470,7 +488,7 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     </style>
 </head>
 <body>
-<div class="${["htmlmd", "word"].includes(type) ? "b3-typography" : "protyle-wysiwyg protyle-wysiwyg--attr"}" style="max-width: 800px;margin: 0 auto;" id="preview">${data.data.content}</div>
+<div class="${["htmlmd", "word"].includes(type) ? "b3-typography" : "protyle-wysiwyg" + (window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : "")}" style="max-width: 800px;margin: 0 auto;" id="preview">${data.data.content}</div>
 <script src="appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    

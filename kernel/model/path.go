@@ -33,9 +33,9 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func createDocsByHPath(boxID, hPath, content string) (id string, err error) {
+func createDocsByHPath(boxID, hPath, content string) (id string, existed bool, err error) {
 	hPath = strings.TrimSuffix(hPath, ".sy")
-	if docExist := nil != treenode.GetBlockTreeRootByHPath(boxID, hPath); docExist {
+	if existed = nil != treenode.GetBlockTreeRootByHPath(boxID, hPath); existed {
 		hPath += "-" + gulu.Rand.String(7)
 	}
 	pathBuilder := bytes.Buffer{}
@@ -112,11 +112,18 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string) (ret []*Path) {
 			SubType:  root.SubType,
 			Depth:    baseDepth,
 			Count:    len(root.Children),
+
+			Updated: root.IAL["updated"],
+			Created: root.ID[:14],
 		}
 		for _, c := range root.Children {
 			treeNode.Blocks = append(treeNode.Blocks, c)
 		}
 		ret = append(ret, treeNode)
+
+		if "backlink" == typ {
+			treeNode.HPath = root.HPath
+		}
 	}
 
 	sort.Slice(ret, func(i, j int) bool {

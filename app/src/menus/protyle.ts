@@ -19,7 +19,7 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {writeText} from "../protyle/util/compatibility";
+import {readText, writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
@@ -116,7 +116,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertRight,
-        icon: "iconRight",
+        icon: "iconLayoutRight",
         accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/⌥Click",
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
@@ -131,7 +131,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertBottom,
-        icon: "iconDown",
+        icon: "iconLayoutBottom",
         accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + "⇧Click",
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
@@ -219,6 +219,26 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             }
         });
     }
+    submenu.push({
+        label: window.siyuan.languages.defBlock,
+        click() {
+            fetchPost("/api/block/swapBlockRef", {
+                refID: id,
+                defID: refBlockId,
+                includeChildren: false
+            });
+        }
+    });
+    submenu.push({
+        label: window.siyuan.languages.defBlockChildren,
+        click() {
+            fetchPost("/api/block/swapBlockRef", {
+                refID: id,
+                defID: refBlockId,
+                includeChildren: true
+            });
+        }
+    });
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.turnInto,
         icon: "iconRefresh",
@@ -327,7 +347,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                 document.execCommand("paste");
             } else {
                 try {
-                    const clipText = await navigator.clipboard.readText();
+                    const clipText = await readText();
                     pasteText(protyle, clipText, nodeElement);
                 } catch (e) {
                     console.log(e);
@@ -350,12 +370,34 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         async click() {
             try {
                 // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
-                let clipText = await navigator.clipboard.readText();
+                let clipText = await readText();
                 // https://github.com/siyuan-note/siyuan/issues/5446
                 // A\B\C\D\
                 // E
-                // task-blog-2~default~baiduj https://github.com/siyuan-note/siyuan/issues/5523
-                clipText = clipText.replace(/\\/g, "\\\\").replace(/\*/g, "\\*").replace(/\_/g, "\\_").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\!/g, "\\!").replace(/\`/g, "\\`").replace(/\</g, "\\<").replace(/\>/g, "\\>").replace(/\&/g, "\\&").replace(/\~/g, "\\~").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\=/g, "\\=").replace(/\#/g, "\\#").replace(/\$/g, "\\$").replace(/\^/g, "\\^").replace(/\|/g, "\\|");
+                // task-blog-2~default~baiduj 无法原义粘贴含有 `~foo~` 的文本 https://github.com/siyuan-note/siyuan/issues/5523
+
+                // 这里必须多加一个反斜杆，因为 Lute 在进行 Markdown 嵌套节点转换平铺标记节点时会剔除 Backslash 节点，
+                // 多加入的一个反斜杆会作为文本节点保留下来，后续 Spin 时刚好用于转义标记符 https://github.com/siyuan-note/siyuan/issues/6341
+                clipText = clipText.replace(/\\/g, "\\\\\\\\")
+                    .replace(/\*/g, "\\\\\\*")
+                    .replace(/\_/g, "\\\\\\_")
+                    .replace(/\[/g, "\\\\\\[")
+                    .replace(/\]/g, "\\\\\\]")
+                    .replace(/\!/g, "\\\\\\!")
+                    .replace(/\`/g, "\\\\\\`")
+                    .replace(/\</g, "\\\\\\<")
+                    .replace(/\>/g, "\\\\\\>")
+                    .replace(/\&/g, "\\\\\\&")
+                    .replace(/\~/g, "\\\\\\~")
+                    .replace(/\{/g, "\\\\\\{")
+                    .replace(/\}/g, "\\\\\\}")
+                    .replace(/\(/g, "\\\\\\(")
+                    .replace(/\)/g, "\\\\\\)")
+                    .replace(/\=/g, "\\\\\\=")
+                    .replace(/\#/g, "\\\\\\#")
+                    .replace(/\$/g, "\\\\\\$")
+                    .replace(/\^/g, "\\\\\\^")
+                    .replace(/\|/g, "\\\\\\|");
                 pasteText(protyle, clipText, nodeElement);
             } catch (e) {
                 console.log(e);
@@ -383,6 +425,9 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
 };
 
 export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushBack = true, callback?: () => void) => {
+    if (protyle.options.backlinkData) {
+        return;
+    }
     const breadcrumbHLElement = protyle.breadcrumb?.element.querySelector(".protyle-breadcrumb__item--active");
     if (breadcrumbHLElement && breadcrumbHLElement.getAttribute("data-node-id") === id) {
         if (id === protyle.block.rootID) {
@@ -409,9 +454,9 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
         size: id === protyle.block.rootID ? Constants.SIZE_GET : Constants.SIZE_GET_MAX,
     }, getResponse => {
         if (isPushBack) {
-            onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS]);
+            onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_HTML]);
         } else {
-            onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO]);
+            onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML]);
         }
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (focusId) {
@@ -785,7 +830,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     if (linkAddress?.startsWith("siyuan://blocks/")) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.blockRef}</b>`,
-            icon: "iconGraph",
+            icon: "iconRef",
             click() {
                 linkElement.setAttribute("data-subtype", "s");
                 const types = linkElement.getAttribute("data-type").split(" ");
@@ -1007,6 +1052,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                         }
                     }
                 }
+                focusByRange(range);
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
             }
         });
@@ -1251,6 +1297,9 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
 export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolean, isRemove?: boolean) => {
     if (nodeElement.getAttribute("data-type") === "NodeListItem" && nodeElement.childElementCount < 4) {
         // 没有子列表或多个块的列表项不进行折叠
+        return -1;
+    }
+    if (nodeElement.getAttribute("data-type") === "NodeThematicBreak") {
         return -1;
     }
     // 0 正常；1 折叠

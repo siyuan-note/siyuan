@@ -148,7 +148,7 @@ export class MobileFiles extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "remove") {
-                    confirmDialog(window.siyuan.languages.delete,
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm,
                         `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(target.parentElement.querySelector(".b3-list-item__text").textContent)}</b>?`, () => {
                             fetchPost("/api/notebook/removeNotebook", {
                                 notebook: target.getAttribute("data-url"),
@@ -244,9 +244,6 @@ export class MobileFiles extends Model {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            type: "separator"
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
             icon: window.siyuan.config.fileTree.sort === 4 ? "iconSelect" : undefined,
             label: window.siyuan.languages.fileNameNatASC,
             click: () => {
@@ -303,6 +300,34 @@ export class MobileFiles extends Model {
             label: window.siyuan.languages.refCountDESC,
             click: () => {
                 clickEvent(8);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: window.siyuan.config.fileTree.sort === 11 ? "iconSelect" : undefined,
+            label: window.siyuan.languages.docSizeASC,
+            click: () => {
+                clickEvent(11);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: window.siyuan.config.fileTree.sort === 12 ? "iconSelect" : undefined,
+            label: window.siyuan.languages.docSizeDESC,
+            click: () => {
+                clickEvent(12);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: window.siyuan.config.fileTree.sort === 13 ? "iconSelect" : undefined,
+            label: window.siyuan.languages.subDocCountASC,
+            click: () => {
+                clickEvent(13);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: window.siyuan.config.fileTree.sort === 14 ? "iconSelect" : undefined,
+            label: window.siyuan.languages.subDocCountDESC,
+            click: () => {
+                clickEvent(14);
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -526,7 +551,7 @@ export class MobileFiles extends Model {
         if (liElement) {
             liElement.remove();
         }
-        setNoteBook((notebooks: INotebook[])=> {
+        setNoteBook((notebooks: INotebook[]) => {
             const html = this.genNotebook(data.data.box);
             if (this.element.childElementCount === 0) {
                 this.element.innerHTML = html;
@@ -697,7 +722,7 @@ export class MobileFiles extends Model {
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" 
 data-type="navigation-file" 
 class="b3-list-item" data-path="${item.path}">
-    <span style="padding-left: ${(item.path.split("/").length - 1) * 16}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
+    <span style="padding-left: ${(item.path.split("/").length - 2) * 18 + 22}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     <span class="b3-list-item__icon">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER))}</span>

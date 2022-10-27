@@ -1,13 +1,13 @@
 import {Model} from "../layout/Model";
 import {Tab} from "../layout/Tab";
-import Protyle from "../protyle";
+import {Protyle} from "../protyle";
 import {Constants} from "../constants";
 import {getIconByType} from "../editor/getIcon";
 import {getDisplayName, getNotebookName} from "../util/pathName";
 import {setPanelFocus} from "../layout/util";
 import {escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
-import {onGet} from "../protyle/util/onGet";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {openFileById} from "../editor/util";
 import {addLoading} from "../protyle/ui/initUI";
 import {unicode2Emoji} from "../emoji";
@@ -43,6 +43,7 @@ export class Search extends Model {
         </div>
         <div id="globalSearchResult" class="b3-list-item ft__smaller ft__on-surface"></div>
         <div id="globalSearchList" class="fn__flex-1 b3-list b3-list--background"></div>
+        <div class="fn__hr"></div>
         <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>
     </div>
     <div class="fn__flex-1" id="searchPreview"></div>
@@ -203,7 +204,10 @@ export class Search extends Model {
                         gutter: true,
                         breadcrumbDocName: true,
                     },
-                    after: () => {
+                    after: (editor) => {
+                        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
+                            disabledProtyle(editor.protyle);
+                        }
                         setTimeout(() => {
                             const matchElement = this.protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${id}"] span[data-type="search-mark"]`);
                             if (matchElement) {

@@ -32,10 +32,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-const (
-	upsertTreesFlushDelay = 3000
-)
-
 var (
 	operationQueue      []*treeQueueOperation
 	upsertTreeQueueLock = sync.Mutex{}
@@ -57,7 +53,7 @@ type treeQueueOperation struct {
 func AutoFlushTreeQueue() {
 	for {
 		flushTreeQueue()
-		time.Sleep(time.Duration(upsertTreesFlushDelay) * time.Millisecond)
+		time.Sleep(util.SQLFlushInterval)
 	}
 }
 
@@ -78,7 +74,7 @@ func WaitForWritingDatabase() {
 }
 
 func isWritingDatabase() bool {
-	time.Sleep(time.Duration(upsertTreesFlushDelay+50) * time.Millisecond)
+	time.Sleep(util.SQLFlushInterval + 50*time.Millisecond)
 	if 0 < len(operationQueue) || util.IsMutexLocked(&txLock) {
 		return true
 	}

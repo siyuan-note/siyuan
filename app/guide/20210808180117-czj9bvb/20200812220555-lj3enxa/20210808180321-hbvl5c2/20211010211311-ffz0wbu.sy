@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211010211311-ffz0wbu",
 		"title": "虚拟引用",
-		"updated": "20211010212520"
+		"updated": "20221003214924"
 	},
 	"Children": [
 		{
@@ -119,6 +119,70 @@
 				{
 					"Type": "NodeText",
 					"Data": "根据已有块引的锚文本/定义块文本、块的命名和别名作为关键字搜索，如果在当前内容块的纯文本元素上搜索到这些关键字，那么就会作为虚拟引用。"
+				}
+			]
+		},
+		{
+			"ID": "20221003214348-710vren",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221003214348-710vren",
+				"updated": "20221003214410"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20221003214411-d3c0jte",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221003214411-d3c0jte",
+				"updated": "20221003214924"
+			},
+			"Children": [
+				{
+					"ID": "20221003214412-j7wcb07",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221003214412-j7wcb07",
+						"updated": "20221003214924"
+					},
+					"Children": [
+						{
+							"ID": "20221003214412-uixysyj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221003214412-uixysyj",
+								"updated": "20221003214924"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "出于性能考虑，虚拟引用并不是即时生效的，如果没有显示，可以尝试通过 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "F5"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 刷新当前文档"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

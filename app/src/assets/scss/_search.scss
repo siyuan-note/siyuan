@@ -3,7 +3,7 @@
     display: flex;
     background: var(--b3-theme-background);
     position: relative;
-    border-bottom: 1px solid var(--b3-border-color);
+    border-bottom: 1px solid var(--b3-theme-surface-lighter);
 
     .b3-text-field--text {
       font-size: 18px;

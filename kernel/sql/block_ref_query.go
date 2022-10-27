@@ -195,7 +195,11 @@ func QueryBlockDefIDsByRefText(refText string, excludeIDs []string) (ret []strin
 func queryDefIDsByDefText(keyword string, excludeIDs []string) (ret []string) {
 	ret = []string{}
 	notIn := "('" + strings.Join(excludeIDs, "','") + "')"
-	rows, err := query("SELECT DISTINCT(def_block_id) FROM refs WHERE content = ? AND def_block_id NOT IN "+notIn, keyword)
+	q := "SELECT DISTINCT(def_block_id) FROM refs WHERE content LIKE ? AND def_block_id NOT IN " + notIn
+	if caseSensitive {
+		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content = ? AND def_block_id NOT IN " + notIn
+	}
+	rows, err := query(q, keyword)
 	if nil != err {
 		logging.LogErrorf("sql query failed: %s", err)
 		return

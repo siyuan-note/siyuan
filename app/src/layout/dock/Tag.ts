@@ -72,7 +72,7 @@ export class Tag extends Model {
     <span class="fn__space"></span>
     <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
-<div class="fn__flex-1"></div>`;
+<div class="fn__flex-1" style="margin-bottom: 8px"></div>`;
 
         this.tree = new Tree({
             element: this.element.lastElementChild as HTMLElement,
@@ -114,7 +114,7 @@ export class Tag extends Model {
                     icon: "iconTrashcan",
                     label: window.siyuan.languages.remove,
                     click: () => {
-                        confirmDialog(window.siyuan.languages.delete, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`, () => {
+                        confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`, () => {
                             fetchPost("/api/tag/removeTag", {label: labelName});
                         });
                     },
@@ -130,7 +130,7 @@ export class Tag extends Model {
             this.tree.expandAll();
         });
         this.element.addEventListener("click", (event: MouseEvent) => {
-            setPanelFocus(this.element.firstElementChild);
+            setPanelFocus(this.element);
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
                 if (target.classList.contains("block__icon")) {
@@ -202,7 +202,7 @@ export class Tag extends Model {
             }
         });
         this.update();
-        setPanelFocus(this.element.firstElementChild);
+        setPanelFocus(this.element);
     }
 
     private update() {

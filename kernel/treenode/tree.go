@@ -31,6 +31,17 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func StatTree(tree *parse.Tree) (ret *util.BlockStatResult) {
+	runeCnt, wordCnt, linkCnt, imgCnt, refCnt := tree.Root.Stat()
+	return &util.BlockStatResult{
+		RuneCount:  runeCnt,
+		WordCount:  wordCnt,
+		LinkCount:  linkCnt,
+		ImageCount: imgCnt,
+		RefCount:   refCnt,
+	}
+}
+
 func NodeHash(node *ast.Node, tree *parse.Tree, luteEngine *lute.Lute) string {
 	ialArray := node.KramdownIAL
 	sort.Slice(ialArray, func(i, j int) bool {
@@ -65,6 +76,7 @@ func NewTree(boxID, p, hp, title string) *parse.Tree {
 	ret.Box = boxID
 	ret.Path = p
 	ret.HPath = hp
+	ret.Root.Spec = "1"
 	newPara := &ast.Node{Type: ast.NodeParagraph, ID: ast.NewNodeID()}
 	newPara.SetIALAttr("id", newPara.ID)
 	newPara.SetIALAttr("updated", util.TimeFromID(newPara.ID))

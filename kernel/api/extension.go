@@ -27,10 +27,12 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -58,6 +60,27 @@ func extensionCopy(c *gin.Context) {
 	luteEngine := model.NewLute()
 	md := luteEngine.HTML2Md(dom)
 	md = strings.TrimSpace(md)
+
+	var unlinks []*ast.Node
+	tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeText == n.Type {
+			// 剔除行首空白
+			if ast.NodeParagraph == n.Parent.Type && n.Parent.FirstChild == n {
+				n.Tokens = bytes.TrimLeft(n.Tokens, " \t\n")
+			}
+		}
+		return ast.WalkContinue
+	})
+	for _, unlink := range unlinks {
+		unlink.Unlink()
+	}
+
+	md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	ret.Data = map[string]interface{}{
 		"md": md,
 	}
@@ -107,7 +130,7 @@ func extensionCopy(c *gin.Context) {
 		}
 		fName = fName + "-" + ast.NewNodeID() + ext
 		writePath := filepath.Join(assets, fName)
-		if err = filesys.WriteFileSafer(writePath, data); nil != err {
+		if err = filelock.WriteFile(writePath, data); nil != err {
 			ret.Code = -1
 			ret.Msg = err.Error()
 			break

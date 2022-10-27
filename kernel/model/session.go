@@ -156,6 +156,11 @@ func CheckReadonly(c *gin.Context) {
 func CheckAuth(c *gin.Context) {
 	//logging.LogInfof("check auth for [%s]", c.Request.RequestURI)
 
+	if "" == Conf.AccessAuthCode {
+		c.Next()
+		return
+	}
+
 	// 放过 /appearance/
 	if strings.HasPrefix(c.Request.RequestURI, "/appearance/") ||
 		strings.HasPrefix(c.Request.RequestURI, "/stage/build/export/") ||
@@ -166,7 +171,7 @@ func CheckAuth(c *gin.Context) {
 	}
 
 	// 放过来自本机的某些请求
-	if strings.HasPrefix(c.Request.RemoteAddr, "127.0.0.1") {
+	if strings.HasPrefix(c.Request.RemoteAddr, util.LocalHost) || strings.HasPrefix(c.Request.RemoteAddr, "127.0.0.1") {
 		if strings.HasPrefix(c.Request.RequestURI, "/assets/") || strings.HasPrefix(c.Request.RequestURI, "/history/assets/") {
 			c.Next()
 			return

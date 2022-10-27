@@ -212,7 +212,7 @@
   position: absolute;
   height: 4px;
   background-color: var(--b3-theme-on-background);
-  border-bottom: 1px solid var(--b3-border-color);
+  border-bottom: 1px solid var(--b3-theme-surface-lighter);
   transition-duration: 200ms;
   transition-timing-function: ease;
 }
@@ -344,7 +344,7 @@
   }
 
   &[disabled] {
-    color: var(--b3-border-color);
+    color: var(--b3-theme-surface-lighter);
   }
 }
 
@@ -446,7 +446,7 @@
   border-radius: 2px;
   padding: 7px;
   margin: 0 auto;
-  box-shadow: 0 0 1px 1px var(--b3-border-color);
+  box-shadow: 0 0 1px 1px var(--b3-theme-surface-lighter);
 }
 
 a:focus > .thumbnail > .thumbnailSelectionRing > .thumbnailImage,
@@ -535,7 +535,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
 }
 
 .treeItem.selected > a {
-  background-color: var(--b3-border-color);
+  background-color: var(--b3-theme-surface-lighter);
 }
 
 .treeItemToggler:hover + a,
@@ -565,7 +565,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
 #errorMoreInfo {
   background-color: var(--b3-theme-surface);
   color: var(--b3-theme-on-surface);
-  border: 1px solid var(--b3-border-color);
+  border: 1px solid var(--b3-theme-surface-lighter);
   padding: 3px;
   margin: 3px;
   width: 98%;
@@ -627,7 +627,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
   margin: 4px 0;
   height: 1px;
   width: 100%;
-  background-color: var(--b3-border-color);
+  background-color: var(--b3-theme-surface-lighter);
 }
 
 .dialog .buttonRow {

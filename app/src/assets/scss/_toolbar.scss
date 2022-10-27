@@ -35,14 +35,26 @@
       }
 
       &:hover {
-        background-color: var(--b3-border-color);
+        background-color: var(--b3-theme-surface-lighter);
       }
     }
 
     &__divider {
-      border-left: 1px solid var(--b3-border-color);
+      border-left: 1px solid var(--b3-theme-surface-lighter);
       margin: 6px 4px;
     }
+  }
+
+  &-hint {
+    position: fixed;
+    border-radius: 4px;
+    box-shadow: var(--b3-dialog-shadow);
+    background-color: var(--b3-menu-background);
+    z-index: 201;
+    overflow: auto;
+    max-height: 402px;
+    box-sizing: border-box;
+    padding: 8px 0;
   }
 
   &-util {
@@ -65,7 +77,7 @@
       white-space: nowrap;
 
       &:hover {
-        border-color: var(--b3-border-color);
+        border-color: var(--b3-theme-surface-lighter);
       }
     }
   }

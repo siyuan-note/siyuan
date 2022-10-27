@@ -6,8 +6,10 @@ import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {focusBlock, getEditorRange, focusByWbr, fixTableRange} from "./selection";
 import {mathRender} from "../markdown/mathRender";
 import {Constants} from "../../constants";
+import {highlightRender} from "../markdown/highlightRender";
+import {scrollCenter} from "../../util/highlightById";
 
-export const insertHTML = (html: string, protyle: IProtyle, isBlock = false, splitSpan = true) => {
+export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => {
     if (html === "") {
         return;
     }
@@ -31,6 +33,21 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false, spl
     let id = blockElement.getAttribute("data-node-id");
     range.insertNode(document.createElement("wbr"));
     let oldHTML = blockElement.outerHTML;
+    if (!isBlock && blockElement.getAttribute("data-type") === "NodeCodeBlock") {
+        range.deleteContents();
+        range.insertNode(document.createTextNode(html.replace(/\r\n|\r|\u2028|\u2029/g, "\n")));
+        range.collapse(false);
+        range.insertNode(document.createElement("wbr"));
+        getContenteditableElement(blockElement).removeAttribute("data-render");
+        highlightRender(blockElement);
+        blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+        updateTransaction(protyle, id, blockElement.outerHTML, oldHTML);
+        setTimeout(() => {
+            scrollCenter(protyle, blockElement);
+        }, Constants.TIMEOUT_BLOCKLOAD);
+        return;
+    }
+
     const undoOperation: IOperation[] = [];
     const doOperation: IOperation[] = [];
     if (range.toString() !== "") {
@@ -73,7 +90,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false, spl
             }
             // 粘贴带样式的行内元素到另一个行内元素中需进行切割
             const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement: range.startContainer as HTMLElement;
-            if (splitSpan && spanElement.tagName === "SPAN" && spanElement.isSameNode( range.endContainer.nodeType === 3 ? range.endContainer.parentElement: range.endContainer)) {
+            if (spanElement.tagName === "SPAN" && spanElement.isSameNode( range.endContainer.nodeType === 3 ? range.endContainer.parentElement: range.endContainer) &&
+                tempElement.content.querySelector("span") // 粘贴纯文本不需切割 https://ld246.com/article/1665556907936
+            ) {
                 const afterElement = document.createElement("span");
                 const attributes = spanElement.attributes;
                 for (let i = 0; i < attributes.length; i++) {
@@ -107,16 +126,22 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false, spl
             }
             const spinHTML = protyle.lute.SpinBlockDOM(removeEmbed(blockElement));
             const scrollLeft = blockElement.firstElementChild.scrollLeft;
+            const blockPreviousElement = blockElement.previousElementSibling;
             blockElement.outerHTML = spinHTML;
             render = true;
             // spin 后变成多个块需后续处理 https://github.com/siyuan-note/insider/issues/451
             tempElement.innerHTML = spinHTML;
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find((item) => {
-                if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
-                    blockElement = item;
-                    return true;
-                }
-            });
+            if (protyle.options.backlinkData) {
+                // 反链面板
+                blockElement = blockPreviousElement.nextElementSibling;
+            } else {
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find((item) => {
+                    if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                        blockElement = item;
+                        return true;
+                    }
+                });
+            }
             if (tempElement.content.childElementCount === 1) {
                 if (blockElement.classList.contains("table") && scrollLeft > 0) {
                     blockElement.firstElementChild.scrollLeft = scrollLeft;

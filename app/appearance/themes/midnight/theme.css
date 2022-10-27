@@ -1,14 +1,15 @@
 :root {
     /* 主色 */
-    --b3-theme-primary: #1f6feb;
-    --b3-theme-primary-light: rgba(31, 111, 235, 0.54);
-    --b3-theme-primary-lighter: rgba(31, 111, 235, 0.38);
-    --b3-theme-primary-lightest: rgba(31, 111, 235, 0.12);
+    --b3-theme-primary: #3573f0;
+    --b3-theme-primary-light: rgba(53, 115, 240, 0.72);
+    --b3-theme-primary-lighter: rgba(53, 115, 240, 0.48);
+    --b3-theme-primary-lightest: rgba(53, 115, 240, 0.24);
     --b3-theme-secondary: #f3a92f;
     --b3-theme-background: #212224;
     --b3-theme-background-light: #353637;
     --b3-theme-surface: #292a2d;
     --b3-theme-surface-light: rgba(41, 42, 45, .86);
+    --b3-theme-surface-lighter: rgba(230, 230, 230, .06);
     --b3-theme-error: #d23f31;
 
     /* 文字颜色 */
@@ -26,14 +27,20 @@
     --b3-font-family-emoji: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji";
     --b3-font-family-math: KaTeX_Math;
 
+    /* 顶部工具栏 */
+    --b3-toolbar-background: #292a2d;
+    --b3-toolbar-blur-background: #3f4041;
+    --b3-toolbar-color: #9aa0a6;
+
     /* 线条 */
-    --b3-border-color: rgba(230, 230, 230, .06);
+    --b3-border-color: #0e0f10;
 
     /* 滚动条 */
     --b3-scroll-color: rgba(230, 230, 230, .2);
 
     /* 列表 */
     --b3-list-hover: #3f4041;
+    --b3-list-icon-hover: rgba(201, 209, 217, .1);
 
     /* 菜单 */
     --b3-menu-background: #27282a;
@@ -127,7 +134,7 @@
     --b3-protyle-inline-em-color: #e8eaed;
     --b3-protyle-inline-s-color: #e8eaed;
     --b3-protyle-inline-link-color: #8ab4f8;
-    --b3-protyle-inline-mark-background: #32593c;
+    --b3-protyle-inline-mark-background: rgb(50, 89, 61);
     --b3-protyle-inline-mark-color: #e8eaed;
     --b3-protyle-inline-tag-color: #9aa0a6;
     --b3-protyle-inline-blockref-color: #9876aa;

@@ -1,9 +1,10 @@
 import {Tab} from "../layout/Tab";
-import Protyle from "../protyle";
+import {Protyle} from "../protyle";
 import {Model} from "../layout/Model";
 import {disabledProtyle} from "../protyle/util/onGet";
 import {setPadding} from "../protyle/ui/initUI";
 import {getAllModels} from "../layout/getAll";
+import {countBlockWord} from "../layout/status";
 
 export class Editor extends Model {
     public element: HTMLElement;
@@ -46,7 +47,7 @@ export class Editor extends Model {
             scrollAttr: options.scrollAttr,
             typewriterMode: true,
             after: (editor) => {
-                if (window.siyuan.config.readonly) {
+                if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
                     disabledProtyle(editor.protyle);
                 }
 
@@ -60,6 +61,7 @@ export class Editor extends Model {
                         }
                     });
                 }
+                countBlockWord([], editor.protyle.block.rootID);
             },
         });
         // 需在 after 回调之前，否则不会聚焦 https://github.com/siyuan-note/siyuan/issues/5303

@@ -17,6 +17,7 @@ export class Options {
             breadcrumbDocName: false,
             breadcrumbContext: false
         },
+        action: [],
         after: undefined,
         classes: {
             preview: "",
@@ -147,7 +148,7 @@ export class Options {
             name: "block-ref",
             hotkey: window.siyuan.config.keymap.editor.insert.blockRef.custom,
             lang: "blockRef",
-            icon: "iconGraph",
+            icon: "iconRef",
             tipPosition: "ne",
         }, {
             name: "a",

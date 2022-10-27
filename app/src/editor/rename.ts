@@ -9,17 +9,22 @@ import {isMobile} from "../util/functions";
 import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
 import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
+import {Constants} from "../constants";
 
 export const validateName = (name: string) => {
     if (/\r\n|\r|\n|\u2028|\u2029|\t|\//.test(name)) {
         showMessage(window.siyuan.languages.fileNameRule);
         return false;
     }
+    if (name.length > Constants.SIZE_TITLE) {
+        showMessage(window.siyuan.languages["_kernel"]["106"]);
+        return false;
+    }
     return true;
 };
 
 export const replaceFileName = (name: string) => {
-    return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|\//g, "");
+    return name.replace(/\r\n|\r|\n|\u2028|\u2029|\t|\//g, "").substring(0, Constants.SIZE_TITLE);
 };
 
 export const replaceLocalPath = (name: string) => {
@@ -33,6 +38,9 @@ export const rename = (options: {
     type: "notebook" | "file"
     range?: Range,
 }) => {
+    if (window.siyuan.config.editor.readOnly || window.siyuan.config.readonly) {
+        return;
+    }
     const dialog = new Dialog({
         title: window.siyuan.languages.rename,
         content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
@@ -161,14 +169,14 @@ export const newFileContentBySelect = (protyle: IProtyle) => {
 };
 
 export const newFileBySelect = (fileName: string, protyle: IProtyle) => {
-    fileName = replaceFileName(fileName);
+    const newName = replaceFileName(fileName) || "Untitled";
     const id = Lute.NewNodeID();
     fetchPost("/api/filetree/createDoc", {
         notebook: protyle.notebookId,
         path: pathPosix().join(getDisplayName(protyle.path, false, true), id + ".sy"),
-        title: fileName,
+        title: newName,
         md: ""
     }, () => {
-        insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${id}" data-subtype="d">${escapeHtml(fileName)}</span>`), protyle);
+        insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${id}" data-subtype="d">${escapeHtml(newName)}</span>`), protyle);
     });
 };

@@ -1,7 +1,7 @@
 import {
-    focusBlock,
+    focusBlock, focusByOffset,
     focusByRange, focusByWbr,
-    getEditorRange,
+    getEditorRange, getSelectionOffset,
 } from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {replaceFileName, validateName} from "../../editor/rename";
@@ -146,12 +146,12 @@ export class Title {
                 });
             } else {
                 const iconRect = iconElement.getBoundingClientRect();
-                this.renderMenu(protyle, iconElement, {x: iconRect.left, y: iconRect.top + 14});
+                this.renderMenu(protyle, {x: iconRect.left, y: iconRect.top + 14});
             }
         });
         this.element.addEventListener("contextmenu", (event) => {
             if (getSelection().rangeCount === 0) {
-                this.renderMenu(protyle, iconElement, {x: event.clientX, y: event.clientY});
+                this.renderMenu(protyle, {x: event.clientX, y: event.clientY});
                 return;
             }
             protyle.toolbar?.element.classList.add("fn__none");
@@ -252,6 +252,10 @@ export class Title {
     private rename(protyle: IProtyle) {
         clearTimeout(this.timeout);
         if (!validateName(this.editElement.textContent)) {
+            // 字数过长会导致滚动
+            const offset = getSelectionOffset(this.editElement);
+            this.setTitle(this.editElement.textContent.substring(0, Constants.SIZE_TITLE));
+            focusByOffset(this.editElement, offset.start, offset.end);
             return false;
         }
         this.timeout = window.setTimeout(() => {
@@ -262,10 +266,11 @@ export class Title {
                 title: fileName,
             });
             this.setTitle(fileName);
+            setTitle(fileName);
         }, Constants.TIMEOUT_INPUT);
     }
 
-    private renderMenu(protyle: IProtyle, iconElement: Element, position: { x: number, y: number }) {
+    private renderMenu(protyle: IProtyle, position: { x: number, y: number }) {
         fetchPost("/api/block/getDocInfo", {
             id: protyle.block.rootID
         }, (response) => {
@@ -274,9 +279,9 @@ export class Title {
                 label: window.siyuan.languages.copy,
                 icon: "iconCopy",
                 type: "submenu",
-                submenu: copySubMenu(protyle.block.rootID, "")
+                submenu: copySubMenu(protyle.block.rootID)
             }).element);
-            if (!window.siyuan.config.readonly) {
+            if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(movePathToMenu(protyle.notebookId, protyle.path));
                 window.siyuan.menus.menu.append(new MenuItem({
                     icon: "iconTrashcan",
@@ -285,8 +290,6 @@ export class Title {
                         deleteFile(protyle.notebookId, protyle.path, escapeHtml(this.editElement.textContent));
                     }
                 }).element);
-            }
-            if (!window.siyuan.config.readonly) {
                 window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.attr,

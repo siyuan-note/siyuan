@@ -14,7 +14,7 @@
     <svg id="toolbarFile" class="toolbar__icon">
         <use xlink:href="#iconMenu"></use>
     </svg>
-    <input readonly class="toolbar__title b3-text-field fn__hidden" id="toolbarName">
+    <input class="toolbar__title b3-text-field fn__hidden" id="toolbarName">
     <svg id="toolbarEdit" class="toolbar__icon fn__hidden">
         <use xlink:href="#iconEdit"></use>
     </svg>
@@ -55,5 +55,32 @@
 <div id="commonMenu" class="b3-menu fn__none"></div>
 <div id="message" class="b3-snackbars"></div>
 <div id="status" class="status status--hide"></div>
+<div id="keyboardToolbar" class="fn__none">
+    <span class="fn__flex-1"></span>
+    <button data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
+    <button data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>
+
+    <button data-type="up"><svg><use xlink:href="#iconUp"></use></svg></button>
+    <button data-type="down"><svg><use xlink:href="#iconDown"></use></svg></button>
+
+    <button data-type="before"><svg><use xlink:href="#iconBefore"></use></svg></button>
+    <button data-type="after"><svg><use xlink:href="#iconAfter"></use></svg></button>
+
+    <button data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
+
+    <button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
+    <button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
+    <span class="fn__flex-1"></span>
+</div>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-L7WEXVQCR9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-L7WEXVQCR9');
+</script>
 </body>
 </html>

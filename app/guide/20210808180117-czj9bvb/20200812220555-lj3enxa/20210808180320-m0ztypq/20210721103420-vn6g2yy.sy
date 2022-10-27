@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210721103420-vn6g2yy",
 		"title": "数据同步",
-		"updated": "20220831004438"
+		"updated": "20221009104351"
 	},
 	"Children": [
 		{
@@ -726,7 +726,7 @@
 			},
 			"Properties": {
 				"id": "20220307093112-lz7p32d",
-				"updated": "20220821165223"
+				"updated": "20221009104351"
 			},
 			"Children": [
 				{
@@ -799,7 +799,7 @@
 					},
 					"Properties": {
 						"id": "20220307094021-74y5lau",
-						"updated": "20220821165223"
+						"updated": "20221009104351"
 					},
 					"Children": [
 						{
@@ -807,21 +807,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220307094021-jtlbgw4",
-								"updated": "20220821165223"
+								"updated": "20221009104351"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "此时云端 a 文件会被 B 设备上的 a 覆盖，同时在 B 设备上生成之前 A 设备 a 的历史。如果 a 文件是文档的话，生成历史的同时也会在同级目录下生成该文档的副本（以 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "(Conflicted 2006-01-02 15:04:05)"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 作为文档名后缀），以方便后续手动编辑合并冲突"
+									"Data": "此时云端 a 文件会被 B 设备上的 a 覆盖，同时在 B 设备上生成之前 A 设备 a 的历史"
 								}
 							]
 						}

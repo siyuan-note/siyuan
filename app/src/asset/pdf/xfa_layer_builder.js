@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/** @typedef {import("../src/display/api").PDFPageProxy} PDFPageProxy */
+// eslint-disable-next-line max-len
+/** @typedef {import("../src/display/display_utils").PageViewport} PageViewport */
+/** @typedef {import("./interfaces").IPDFLinkService} IPDFLinkService */
+
 import { XfaLayer } from "./pdfjs";
 
 /**
@@ -65,7 +70,7 @@ class XfaLayerBuilder {
 
       // Create an xfa layer div and render the form
       const div = document.createElement("div");
-      this.pageDiv.appendChild(div);
+      this.pageDiv.append(div);
       parameters.div = div;
 
       const result = XfaLayer.render(parameters);
@@ -94,7 +99,7 @@ class XfaLayerBuilder {
         }
         // Create an xfa layer div and render the form
         this.div = document.createElement("div");
-        this.pageDiv.appendChild(this.div);
+        this.pageDiv.append(this.div);
         parameters.div = this.div;
         return XfaLayer.render(parameters);
       })

@@ -34,7 +34,7 @@ export class Breadcrumb {
         const element = document.createElement("div");
         element.className = "protyle-breadcrumb";
         let html = `<div class="protyle-breadcrumb__bar"></div>
-<span class="fn__flex-1 fn__flex-shrink"></span>
+<span class="protyle-breadcrumb__space"></span>
 <button class="b3-tooltips b3-tooltips__w block__icon fn__flex-center" style="opacity: 1;" data-menu="true" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>`;
         if (protyle.options.render.breadcrumbContext) {
             html += `<span class="fn__space"></span>
@@ -116,7 +116,7 @@ export class Breadcrumb {
         /// #if !BROWSER
         if ("windows" !== window.siyuan.config.system.os && "linux" !== window.siyuan.config.system.os) {
             const currentWindow = getCurrentWindow();
-            element.querySelector(".fn__flex-shrink").addEventListener("dblclick", (event) => {
+            element.querySelector(".protyle-breadcrumb__space").addEventListener("dblclick", (event) => {
                 if (hasClosestByClassName(event.target as HTMLElement, "fullscreen")) {
                     if (currentWindow.isMaximized()) {
                         currentWindow.unmaximize();
@@ -135,37 +135,32 @@ export class Breadcrumb {
         if (cursorNodeElement) {
             id = cursorNodeElement.getAttribute("data-node-id");
         }
-        fetchPost("/api/block/getBlockWordCount", {id: id || protyle.block.id}, (response) => {
+        fetchPost("/api/block/getTreeStat", {id: id || protyle.block.id}, (response) => {
             window.siyuan.menus.menu.remove();
 
-            if (!protyle.contentElement.classList.contains("fn__none")) {
+            if (!protyle.contentElement.classList.contains("fn__none") && !protyle.disabled) {
                 let uploadHTML = "";
-                if (!protyle.disabled) {
-                    uploadHTML = '<input class="b3-form__upload" type="file" multiple="multiple"';
-                    if (protyle.options.upload.accept) {
-                        uploadHTML += ` accept="${protyle.options.upload.accept}">`;
-                    } else {
-                        uploadHTML += ">";
-                    }
+                uploadHTML = '<input class="b3-form__upload" type="file" multiple="multiple"';
+                if (protyle.options.upload.accept) {
+                    uploadHTML += ` accept="${protyle.options.upload.accept}">`;
+                } else {
+                    uploadHTML += ">";
                 }
                 const uploadMenu = new MenuItem({
-                    disabled: protyle.disabled,
                     icon: "iconDownload",
                     label: `${window.siyuan.languages.insertAsset}${uploadHTML}`,
                 }).element;
-                if (!protyle.disabled) {
-                    uploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
-                        if (event.target.files.length === 0) {
-                            return;
-                        }
-                        uploadFiles(protyle, event.target.files, event.target);
-                        window.siyuan.menus.menu.remove();
-                    });
-                }
+                uploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
+                    if (event.target.files.length === 0) {
+                        return;
+                    }
+                    uploadFiles(protyle, event.target.files, event.target);
+                    window.siyuan.menus.menu.remove();
+                });
                 window.siyuan.menus.menu.append(uploadMenu);
                 if (window.siyuan.config.system.container !== "android" || !window.JSAndroid) {
                     window.siyuan.menus.menu.append(new MenuItem({
-                        disabled: protyle.disabled && (!this.mediaRecorder || (this.mediaRecorder && !this.mediaRecorder.isRecording)),
+                        disabled: !this.mediaRecorder || (this.mediaRecorder && !this.mediaRecorder.isRecording),
                         current: this.mediaRecorder && this.mediaRecorder.isRecording,
                         icon: "iconRecord",
                         label: this.mediaRecorder?.isRecording ? window.siyuan.languages.endRecord : window.siyuan.languages.startRecord,
@@ -207,55 +202,57 @@ export class Breadcrumb {
                     }).element);
                 }
             }
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.uploadAssets2CDN,
-                icon: "iconCloud",
-                click() {
-                    if (!needSubscribe()) {
-                        fetchPost("/api/asset/uploadCloud", {id: protyle.block.parentID});
+            if (!protyle.disabled) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.uploadAssets2CDN,
+                    icon: "iconCloud",
+                    click() {
+                        if (!needSubscribe()) {
+                            fetchPost("/api/asset/uploadCloud", {id: protyle.block.parentID});
+                        }
                     }
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.netImg2LocalAsset,
-                icon: "iconTransform",
-                accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
-                click() {
-                    netImg2LocalAssets(protyle);
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.optimizeTypography,
-                icon: "iconFormat",
-                click: () => {
-                    hideElements(["toolbar"], protyle);
-                    fetchPost("/api/format/autoSpace", {
-                        id: protyle.block.rootID
-                    }, () => {
-                        /// #if MOBILE
-                        fetchPost("/api/filetree/getDoc", {
-                            id: protyle.block.id,
-                            mode: 0,
-                            size: Constants.SIZE_GET,
-                        }, getResponse => {
-                            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.netImg2LocalAsset,
+                    icon: "iconTransform",
+                    accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
+                    click() {
+                        netImg2LocalAssets(protyle);
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.optimizeTypography,
+                    icon: "iconFormat",
+                    click: () => {
+                        hideElements(["toolbar"], protyle);
+                        fetchPost("/api/format/autoSpace", {
+                            id: protyle.block.rootID
+                        }, () => {
+                            /// #if MOBILE
+                            fetchPost("/api/filetree/getDoc", {
+                                id: protyle.block.id,
+                                mode: 0,
+                                size: Constants.SIZE_GET,
+                            }, getResponse => {
+                                onGet(getResponse, protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
+                            });
+                            /// #else
+                            getAllModels().editor.forEach(item => {
+                                if (item.editor.protyle.block.rootID === protyle.block.rootID) {
+                                    fetchPost("/api/filetree/getDoc", {
+                                        id: item.editor.protyle.block.rootID,
+                                        mode: 0,
+                                        size: Constants.SIZE_GET,
+                                    }, getResponse => {
+                                        onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
+                                    });
+                                }
+                            });
+                            /// #endif
                         });
-                        /// #else
-                        getAllModels().editor.forEach(item => {
-                            if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                                fetchPost("/api/filetree/getDoc", {
-                                    id: item.editor.protyle.block.rootID,
-                                    mode: 0,
-                                    size: Constants.SIZE_GET,
-                                }, getResponse => {
-                                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
-                                });
-                            }
-                        });
-                        /// #endif
-                    });
-                }
-            }).element);
+                    }
+                }).element);
+            }
             if (!protyle.scroll?.element.classList.contains("fn__none")) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     current: protyle.scroll.keepLazyLoad,
@@ -327,10 +324,11 @@ export class Breadcrumb {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 type: "readonly",
-                label: `<div class="fn__flex">${window.siyuan.languages.docRuneCount}<span class="fn__space fn__flex-1"></span>${response.data.rootBlockRuneCount}</div>
-<div class="fn__flex">${window.siyuan.languages.docWordCount}<span class="fn__space fn__flex-1"></span>${response.data.rootBlockWordCount}</div>
-<div class="fn__flex">${window.siyuan.languages.blockRuneCount}<span class="fn__space fn__flex-1"></span>${response.data.blockRuneCount}</div>
-<div class="fn__flex">${window.siyuan.languages.blockWordCount}<span class="fn__space fn__flex-1"></span>${response.data.blockWordCount}</div>`,
+                label: `<div class="fn__flex">${window.siyuan.languages.runeCount}<span class="fn__space fn__flex-1"></span>${response.data.runeCount}</div>
+<div class="fn__flex">${window.siyuan.languages.wordCount}<span class="fn__space fn__flex-1"></span>${response.data.wordCount}</div>
+<div class="fn__flex">${window.siyuan.languages.link}<span class="fn__space fn__flex-1"></span>${response.data.linkCount}</div>
+<div class="fn__flex">${window.siyuan.languages.image}<span class="fn__space fn__flex-1"></span>${response.data.imageCount}</div>
+<div class="fn__flex">${window.siyuan.languages.ref}<span class="fn__space fn__flex-1"></span>${response.data.refCount}</div>`,
             }).element);
             window.siyuan.menus.menu.popup(position);
         });
@@ -364,7 +362,7 @@ export class Breadcrumb {
         this.id = id;
         fetchPost("/api/block/getBlockBreadcrumb", {id}, (response) => {
             let html = "";
-            response.data.forEach((item: { id: string, name: string, type: string, subType: string, children: [] }, index: number) => {
+            response.data.forEach((item: IBreadcrumb, index: number) => {
                 let isCurrent = false;
                 if (!protyle.block.showAll && item.id === protyle.block.parentID) {
                     isCurrent = true;

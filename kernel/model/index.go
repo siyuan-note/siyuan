@@ -24,15 +24,12 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"unicode/utf8"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/eventbus"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -95,7 +92,6 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 		idHashMap[tree.ID] = tree.Hash
 		if 1 < i && 0 == i%64 {
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(88), i, len(files)-i))
-			filelock.ReleaseAllFileLocks()
 		}
 		i++
 	}
@@ -175,7 +171,6 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 		}
 		if 1 < i && 0 == i%64 {
 			util.PushEndlessProgress(fmt.Sprintf("["+box.Name+"] "+Conf.Language(53), i, treeCount-i))
-			filelock.ReleaseAllFileLocks()
 		}
 		i++
 	}
@@ -195,72 +190,6 @@ func IndexRefs() {
 	start := time.Now()
 	util.SetBootDetails("Resolving refs...")
 	util.PushEndlessProgress(Conf.Language(54))
-
-	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress}
-	// 解析并更新引用块
-	util.SetBootDetails("Resolving ref block content...")
-	refUnresolvedBlocks := sql.GetRefUnresolvedBlocks() // TODO: v2.2.0 以后移除
-	if 0 < len(refUnresolvedBlocks) {
-		dynamicRefTreeIDs := hashset.New()
-		bootProgressPart := 10.0 / float64(len(refUnresolvedBlocks))
-		anchors := map[string]string{}
-		var refBlockIDs []string
-		for i, refBlock := range refUnresolvedBlocks {
-			util.IncBootProgress(bootProgressPart, "Resolving ref block content "+util.ShortPathForBootingDisplay(refBlock.ID))
-			tx, err := sql.BeginTx()
-			if nil != err {
-				return
-			}
-			blockContent := sql.ResolveRefContent(refBlock, &anchors)
-			refBlock.Content = blockContent
-			refBlockIDs = append(refBlockIDs, refBlock.ID)
-			dynamicRefTreeIDs.Add(refBlock.RootID)
-			sql.CommitTx(tx)
-			if 1 < i && 0 == i%64 {
-				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(53), i, len(refUnresolvedBlocks)-i))
-			}
-		}
-
-		// 将需要更新动态引用文本内容的块先删除，后面会重新插入，这样比直接 update 快很多
-		util.SetBootDetails("Deleting unresolved block content...")
-		tx, err := sql.BeginTx()
-		if nil != err {
-			return
-		}
-		sql.DeleteBlockByIDs(tx, refBlockIDs)
-		sql.CommitTx(tx)
-
-		bootProgressPart = 10.0 / float64(len(refUnresolvedBlocks))
-		for i, refBlock := range refUnresolvedBlocks {
-			util.IncBootProgress(bootProgressPart, "Updating block content "+util.ShortPathForBootingDisplay(refBlock.ID))
-			tx, err = sql.BeginTx()
-			if nil != err {
-				return
-			}
-			sql.InsertBlock(tx, refBlock, context)
-			sql.CommitTx(tx)
-			if 1 < i && 0 == i%64 {
-				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(53), i, len(refUnresolvedBlocks)-i))
-			}
-		}
-
-		if 0 < dynamicRefTreeIDs.Size() {
-			// 块引锚文本静态化
-			for _, dynamicRefTreeIDVal := range dynamicRefTreeIDs.Values() {
-				dynamicRefTreeID := dynamicRefTreeIDVal.(string)
-				util.IncBootProgress(bootProgressPart, "Persisting block ref text "+util.ShortPathForBootingDisplay(dynamicRefTreeID))
-				tree, err := loadTreeByBlockID(dynamicRefTreeID)
-				if nil != err {
-					logging.LogErrorf("tree [%s] dynamic ref text to static failed: %s", dynamicRefTreeID, err)
-					continue
-				}
-				legacyDynamicRefTreeToStatic(tree)
-				if err := filesys.WriteTree(tree); nil == err {
-					//logging.LogInfof("persisted tree [%s] dynamic ref text", tree.Box+tree.Path)
-				}
-			}
-		}
-	}
 
 	// 引用入库
 	util.SetBootDetails("Indexing refs...")
@@ -314,42 +243,12 @@ func IndexRefs() {
 				}
 				if 1 < i && 0 == i%64 {
 					util.PushEndlessProgress(fmt.Sprintf(Conf.Language(55), i))
-					filelock.ReleaseAllFileLocks()
 				}
 				i++
 			}
 		}
 	}
 	logging.LogInfof("resolved refs [%d] in [%dms]", len(refBlocks), time.Now().Sub(start).Milliseconds())
-}
-
-func legacyDynamicRefTreeToStatic(tree *parse.Tree) {
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeBlockRef != n.Type {
-			return ast.WalkContinue
-		}
-		if isLegacyDynamicBlockRef(n) {
-			idNode := n.ChildByType(ast.NodeBlockRefID)
-			defID := idNode.TokensStr()
-			def := sql.GetBlock(defID)
-			var text string
-			if nil == def {
-				if "zh_CN" == Conf.Lang {
-					text = "解析引用锚文本失败，请尝试更新该引用指向的定义块后再重新打开该文档"
-				} else {
-					text = "Failed to parse the ref anchor text, please try to update the def block pointed to by the ref and then reopen this document"
-				}
-			} else {
-				text = sql.GetRefText(defID)
-			}
-			if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(text) {
-				text = gulu.Str.SubStr(text, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
-			}
-			treenode.SetDynamicBlockRefText(n, text)
-			return ast.WalkSkipChildren
-		}
-		return ast.WalkContinue
-	})
 }
 
 func isLegacyDynamicBlockRef(blockRef *ast.Node) bool {

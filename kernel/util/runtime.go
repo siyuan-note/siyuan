@@ -47,13 +47,15 @@ func logBootInfo() {
 	logging.LogInfof("kernel is booting:\n"+
 		"    * ver [%s]\n"+
 		"    * arch [%s]\n"+
+		"    * resident [%v]\n"+
+		"    * pid [%d]\n"+
 		"    * runtime mode [%s]\n"+
 		"    * working directory [%s]\n"+
 		"    * read only [%v]\n"+
 		"    * container [%s]\n"+
 		"    * database [ver=%s]\n"+
 		"    * workspace directory [%s, data %s]",
-		Ver, runtime.GOARCH, Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir, dataDirSize)
+		Ver, runtime.GOARCH, Resident, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir, dataDirSize)
 }
 
 func IsMutexLocked(m *sync.Mutex) bool {
@@ -89,3 +91,11 @@ func SetNetworkProxy(proxyURL string) {
 		logging.LogInfof("use network proxy [%s]", proxyURL)
 	}
 }
+
+const (
+	// FrontendQueueInterval 为前端请求队列轮询间隔。
+	FrontendQueueInterval = 512 * time.Millisecond
+
+	// SQLFlushInterval 为数据库事务队列写入间隔。
+	SQLFlushInterval = 3000 * time.Millisecond
+)

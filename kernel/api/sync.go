@@ -45,7 +45,7 @@ func performSync(c *gin.Context) {
 func performBootSync(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
-	model.SyncData(true, false, true)
+	model.BootSyncData()
 	ret.Code = model.BootSyncSucc
 }
 
@@ -106,6 +106,19 @@ func createCloudSyncDir(c *gin.Context) {
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
 	}
+}
+
+func setSyncGenerateConflictDoc(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	enabled := arg["enabled"].(bool)
+	model.SetSyncGenerateConflictDoc(enabled)
 }
 
 func setSyncEnable(c *gin.Context) {

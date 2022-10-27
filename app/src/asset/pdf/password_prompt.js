@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-import { PasswordResponses } from "./pdfjs";
+import { createPromiseCapability, PasswordResponses } from "./pdfjs";
 
 /**
  * @typedef {Object} PasswordPromptOptions
- * @property {string} overlayName - Name of the overlay for the overlay manager.
- * @property {HTMLDivElement} container - Div container for the overlay.
+ * @property {HTMLDialogElement} dialog - The overlay's DOM element.
  * @property {HTMLParagraphElement} label - Label containing instructions for
  *                                          entering the password.
  * @property {HTMLInputElement} input - Input field for entering the password.
@@ -29,6 +28,12 @@ import { PasswordResponses } from "./pdfjs";
  */
 
 class PasswordPrompt {
+  #activeCapability = null;
+
+  #updateCallback = null;
+
+  #reason = null;
+
   /**
    * @param {PasswordPromptOptions} options
    * @param {OverlayManager} overlayManager - Manager for the viewer overlays.
@@ -37,8 +42,7 @@ class PasswordPrompt {
    *   an <iframe> or an <object>. The default value is `false`.
    */
   constructor(options, overlayManager, l10n, isViewerEmbedded = false) {
-    this.overlayName = options.overlayName;
-    this.container = options.container;
+    this.dialog = options.dialog;
     this.label = options.label;
     this.input = options.input;
     this.submitButton = options.submitButton;
@@ -47,61 +51,80 @@ class PasswordPrompt {
     this.l10n = l10n;
     this._isViewerEmbedded = isViewerEmbedded;
 
-    this.updateCallback = null;
-    this.reason = null;
-
     // Attach the event listeners.
     this.submitButton.addEventListener("click", this.#verify.bind(this));
-    this.cancelButton.addEventListener("click", this.#cancel.bind(this));
+    this.cancelButton.addEventListener("click", this.close.bind(this));
     this.input.addEventListener("keydown", e => {
       if (e.keyCode === /* Enter = */ 13) {
         this.#verify();
       }
     });
 
-    this.overlayManager.register(
-      this.overlayName,
-      this.container,
-      this.#cancel.bind(this),
-      true
-    );
+    this.overlayManager.register(this.dialog, /* canForceClose = */ true);
+
+    this.dialog.addEventListener("close", this.#cancel.bind(this));
   }
 
   async open() {
-    await this.overlayManager.open(this.overlayName);
+    if (this.#activeCapability) {
+      await this.#activeCapability.promise;
+    }
+    this.#activeCapability = createPromiseCapability();
+
+    try {
+      await this.overlayManager.open(this.dialog);
+    } catch (ex) {
+      this.#activeCapability = null;
+      throw ex;
+    }
 
     const passwordIncorrect =
-      this.reason === PasswordResponses.INCORRECT_PASSWORD;
+      this.#reason === PasswordResponses.INCORRECT_PASSWORD;
 
     if (!this._isViewerEmbedded || passwordIncorrect) {
       this.input.focus();
     }
+    // NOTE
     this.label.textContent = window.siyuan.languages[`password_${passwordIncorrect
       ? 'invalid'
       : 'label'}`]
   }
 
   async close() {
-    await this.overlayManager.close(this.overlayName);
-    this.input.value = "";
+    if (this.overlayManager.active === this.dialog) {
+      this.overlayManager.close(this.dialog);
+    }
   }
 
   #verify() {
     const password = this.input.value;
     if (password?.length > 0) {
-      this.close();
-      this.updateCallback(password);
+      this.#invokeCallback(password);
     }
   }
 
   #cancel() {
-    this.close();
-    this.updateCallback(new Error("PasswordPrompt cancelled."));
+    this.#invokeCallback(new Error("PasswordPrompt cancelled."));
+    this.#activeCapability.resolve();
   }
 
-  setUpdateCallback(updateCallback, reason) {
-    this.updateCallback = updateCallback;
-    this.reason = reason;
+  #invokeCallback(password) {
+    if (!this.#updateCallback) {
+      return; // Ensure that the callback is only invoked once.
+    }
+    this.close();
+    this.input.value = "";
+
+    this.#updateCallback(password);
+    this.#updateCallback = null;
+  }
+
+  async setUpdateCallback(updateCallback, reason) {
+    if (this.#activeCapability) {
+      await this.#activeCapability.promise;
+    }
+    this.#updateCallback = updateCallback;
+    this.#reason = reason;
   }
 }
 

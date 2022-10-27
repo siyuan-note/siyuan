@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { docStyle } from "./ui_utils.js";
+
+// NOTE
 const SIDEBAR_WIDTH_VAR = "--b3-pdf-sidebar-width";
 const SIDEBAR_MIN_WIDTH = 200; // pixels
 const SIDEBAR_RESIZING_CLASS = "sidebarResizing";
@@ -34,7 +37,6 @@ class PDFSidebarResizer {
   constructor(options, eventBus, l10n) {
     this.isRTL = false;
     this.sidebarOpen = false;
-    this.doc = document.documentElement;
     this._width = null;
     this._outerContainerWidth = null;
     this._boundEvents = Object.create(null);
@@ -42,6 +44,7 @@ class PDFSidebarResizer {
     this.outerContainer = options.outerContainer;
     this.resizer = options.resizer;
     this.eventBus = eventBus;
+    // NOTE
     this.isRTL = false;
     this._addEventListeners();
   }
@@ -72,7 +75,8 @@ class PDFSidebarResizer {
       return false;
     }
     this._width = width;
-    this.doc.style.setProperty(SIDEBAR_WIDTH_VAR, `${width}px`);
+
+    docStyle.setProperty(SIDEBAR_WIDTH_VAR, `${width}px`);
     return true;
   }
 

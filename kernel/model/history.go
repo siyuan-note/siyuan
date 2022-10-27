@@ -17,7 +17,6 @@
 package model
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -37,7 +36,6 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -147,7 +145,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 		return
 	}
 
-	data, err := filelock.NoLockFileRead(historyPath)
+	data, err := filelock.ReadFile(historyPath)
 	if nil != err {
 		logging.LogErrorf("read file [%s] failed: %s", historyPath, err)
 		return
@@ -181,21 +179,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 
 			if ast.NodeText == n.Type {
 				if 0 < len(keywords) {
-					// 搜索高亮
-					text := string(n.Tokens)
-					text = search.EncloseHighlighting(text, keywords, "<span data-type=\"search-mark\">", "</span>", false)
-					n.Tokens = gulu.Str.ToBytes(text)
-					if bytes.Contains(n.Tokens, []byte("search-mark")) {
-						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<span data-type=\"search-mark\">"), []byte("\\\\<span data-type=\"search-mark\">"))
-						linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
-						var children []*ast.Node
-						for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
-							children = append(children, c)
-						}
-						for _, c := range children {
-							n.InsertBefore(c)
-						}
-						unlinks = append(unlinks, n)
+					if markReplaceSpan(n, &unlinks, string(n.Tokens), keywords, searchMarkSpanStart, searchMarkSpanEnd, luteEngine) {
 						return ast.WalkContinue
 					}
 				}
@@ -234,33 +218,27 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	filesys.LockWriteFile()
 
 	srcPath := historyPath
 	var destPath string
 	baseName := filepath.Base(historyPath)
 	id := strings.TrimSuffix(baseName, ".sy")
 
-	filelock.ReleaseFileLocks(filepath.Join(util.DataDir, boxID))
 	workingDoc := treenode.GetBlockTree(id)
 	if nil != workingDoc {
-		if err = os.RemoveAll(filepath.Join(util.DataDir, boxID, workingDoc.Path)); nil != err {
-			filesys.UnlockWriteFile()
+		if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); nil != err {
 			return
 		}
 	}
 
 	destPath, err = getRollbackDockPath(boxID, historyPath)
 	if nil != err {
-		filesys.UnlockWriteFile()
 		return
 	}
 
-	if err = gulu.File.Copy(srcPath, destPath); nil != err {
-		filesys.UnlockWriteFile()
+	if err = filelock.Copy(srcPath, destPath); nil != err {
 		return
 	}
-	filesys.UnlockWriteFile()
 
 	FullReindex()
 	IncSync()
@@ -350,7 +328,11 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []*History
 		stmt += "1=1"
 	}
 
-	if HistoryTypeDoc == typ {
+	if HistoryTypeDocName == typ {
+		stmt = strings.ReplaceAll(stmt, "{title content}", "{title}")
+	}
+
+	if HistoryTypeDocName == typ || HistoryTypeDoc == typ {
 		if "all" != op {
 			stmt += " AND op = '" + op + "'"
 		}
@@ -446,7 +428,7 @@ func (box *Box) generateDocHistory0() {
 		}
 
 		var data []byte
-		if data, err = filelock.NoLockFileRead(file); err != nil {
+		if data, err = filelock.ReadFile(file); err != nil {
 			logging.LogErrorf("generate history failed: %s", err)
 			return
 		}
@@ -585,8 +567,9 @@ func ReindexHistory() (err error) {
 var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync}
 
 const (
-	HistoryTypeDoc   = 0
-	HistoryTypeAsset = 1
+	HistoryTypeDocName = 0
+	HistoryTypeDoc     = 1
+	HistoryTypeAsset   = 2
 )
 
 func indexHistoryDir(name string, luteEngine *lute.Lute) {

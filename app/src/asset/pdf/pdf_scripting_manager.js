@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+/** @typedef {import("./event_utils").EventBus} EventBus */
+
 import { apiPageLayoutToViewerModes, RenderingStates } from "./ui_utils.js";
 import { createPromiseCapability, shadow } from "./pdfjs";
 
@@ -33,11 +35,11 @@ class PDFScriptingManager {
    * @param {PDFScriptingManagerOptions} options
    */
   constructor({
-                eventBus,
-                sandboxBundleSrc = null,
-                scriptingFactory = null,
-                docPropertiesLookup = null,
-              }) {
+    eventBus,
+    sandboxBundleSrc = null,
+    scriptingFactory = null,
+    docPropertiesLookup = null,
+  }) {
     this._pdfDocument = null;
     this._pdfViewer = null;
     this._closeCapability = null;
@@ -152,7 +154,7 @@ class PDFScriptingManager {
       this._eventBus._on(name, listener);
     }
     for (const [name, listener] of this._domEvents) {
-      window.addEventListener(name, listener);
+      window.addEventListener(name, listener, true);
     }
 
     try {
@@ -309,7 +311,7 @@ class PDFScriptingManager {
           this._pdfViewer.currentScaleValue = value;
           break;
         case "SaveAs":
-          this._eventBus.dispatch("save", { source: this });
+          this._eventBus.dispatch("download", { source: this });
           break;
         case "FirstPage":
           this._pdfViewer.currentPageNumber = 1;
@@ -349,7 +351,9 @@ class PDFScriptingManager {
 
     const ids = siblings ? [id, ...siblings] : [id];
     for (const elementId of ids) {
-      const element = document.getElementById(elementId);
+      const element = document.querySelector(
+        `[data-element-id="${elementId}"]`
+      );
       if (element) {
         element.dispatchEvent(new CustomEvent("updatefromsandbox", { detail }));
       } else {
@@ -505,7 +509,7 @@ class PDFScriptingManager {
     this._internalEvents.clear();
 
     for (const [name, listener] of this._domEvents) {
-      window.removeEventListener(name, listener);
+      window.removeEventListener(name, listener, true);
     }
     this._domEvents.clear();
 

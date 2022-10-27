@@ -317,7 +317,7 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
         if (focus) {
             if (protyle.toolbar.range) {
                 focusByRange(protyle.toolbar.range);
-                countSelectWord(protyle.toolbar.range);
+                countSelectWord(protyle.toolbar.range, protyle.block.rootID);
                 if (pushBackStack && protyle.preview.element.classList.contains("fn__none")) {
                     pushBack(protyle, protyle.toolbar.range);
                 }
@@ -326,8 +326,7 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
                 if (pushBackStack && protyle.preview.element.classList.contains("fn__none")) {
                     pushBack(protyle, undefined, protyle.wysiwyg.element.firstElementChild);
                 }
-                // 用于清空状态栏字数统计
-                countBlockWord([]);
+                countBlockWord([], protyle.block.rootID);
             }
         }
         if (window.siyuan.config.fileTree.alwaysSelectOpenedFile && protyle) {
@@ -336,15 +335,11 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
                 fileModel.selectItem(protyle.notebookId, protyle.path);
             }
         }
-        const models = getAllModels();
-        updateOutline(models, protyle, reload);
-        updateBacklinkGraph(models, protyle);
-    } else {
-        // 关闭所有页签时，需更新对应的面板
-        const models = getAllModels();
-        updateOutline(models, protyle, reload);
-        updateBacklinkGraph(models, protyle);
     }
+    // 切换页签或关闭所有页签时，需更新对应的面板
+    const models = getAllModels();
+    updateOutline(models, protyle, reload);
+    updateBacklinkGraph(models, protyle);
     setTitle(title);
 };
 
@@ -374,7 +369,7 @@ const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
             fetchPost("/api/outline/getDocOutline", {
                 id: blockId,
             }, response => {
-                if (!isCurrentEditor(blockId)) {
+                if (!isCurrentEditor(blockId) || item.blockId === blockId) {
                     return;
                 }
                 item.update(response, blockId);
@@ -429,7 +424,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             item.searchGraph(true, blockId);
         }
     });
-    models.backlinks.forEach(item => {
+    models.backlink.forEach(item => {
         if (item.type === "local" && item.rootId !== protyle?.block?.rootID) {
             return;
         }
@@ -441,16 +436,18 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             return;
         }
         item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.add("fn__rotate");
-        fetchPost("/api/ref/getBacklink", {
+        fetchPost("/api/ref/getBacklink2", {
+            sort: item.status[blockId] ? item.status[blockId].sort : "3",
+            mSort: item.status[blockId] ? item.status[blockId].mSort : "3",
             id: blockId || "",
-            beforeLen: item.element.querySelector('.block__icon[data-type="more"]').classList.contains("ft__primary") ? item.beforeLen * 20 : item.beforeLen,
             k: item.inputsElement[0].value,
             mk: item.inputsElement[1].value,
         }, response => {
-            if (!isCurrentEditor(blockId)) {
+            if (!isCurrentEditor(blockId) || item.blockId === blockId) {
                 item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
                 return;
             }
+            item.saveStatus();
             item.blockId = blockId;
             item.render(response.data);
         });

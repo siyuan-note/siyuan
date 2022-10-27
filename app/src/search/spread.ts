@@ -2,10 +2,10 @@ import {escapeHtml} from "../util/escape";
 import {getIconByType} from "../editor/getIcon";
 import {getDisplayName, getNotebookName, pathPosix} from "../util/pathName";
 import {Constants} from "../constants";
-import Protyle from "../protyle";
+import {Protyle} from "../protyle";
 import {Dialog} from "../dialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {onGet} from "../protyle/util/onGet";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {openFileById} from "../editor/util";
 import {addLoading} from "../protyle/ui/initUI";
 import {getAllModels} from "../layout/getAll";
@@ -140,7 +140,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             <svg class="svg ft__on-surface" id="searchFilter" style="height: 19px;float: left"><use xlink:href="#iconSettings"></use></svg>
         </span>
     </div>
-    <div id="searchList" style="position:relative;height:calc(50% - 69px);overflow: auto" class="b3-list b3-list--background search__list"></div>
+    <div id="searchList" style="position:relative;height:calc(50% - 69px);overflow: auto;padding-bottom: 8px" class="b3-list b3-list--background search__list"></div>
     <div id="searchPreview" class="fn__flex-1 spread-search__preview"></div></div>
     <div id="searchFilterPanel" class="fn__none spread-search__filter">
         <label class="fn__flex">
@@ -649,7 +649,10 @@ const getArticle = (options: {
                     gutter: true,
                     breadcrumbDocName: true
                 },
-                after: () => {
+                after: (editor) => {
+                    if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
+                        disabledProtyle(editor.protyle);
+                    }
                     setTimeout(() => {
                         const matchElement = protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`);
                         if (matchElement) {

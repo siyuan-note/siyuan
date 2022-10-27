@@ -61,6 +61,8 @@ func renderOutline(node *ast.Node, luteEngine *lute.Lute) (ret string) {
 			dom := lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions)
 			buf.WriteString(dom)
 			return ast.WalkSkipChildren
+		case ast.NodeImage:
+			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue
 	})

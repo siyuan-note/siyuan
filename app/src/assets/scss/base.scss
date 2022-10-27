@@ -1,5 +1,6 @@
 @import "keyframes";
 @import "mixin";
+@import "function";
 @import "chip";
 @import "slider";
 @import "switch";
@@ -18,7 +19,6 @@
 @import "layout";
 @import "block";
 @import "reset";
-@import "function";
 @import "card";
 @import "menu";
 @import "color";
@@ -38,7 +38,7 @@ ctrl+p 搜索: 199
 .protyle-util: 200
 
 // 引用提示需小于 .block__popover
-.b3-menu: 201
+.protyle-hint: 201
 
 // 需小于 .b3-menu 悬浮窗点击更多
 // 需小于 .b3-dialog https://ld246.com/article/1637204682648
@@ -99,8 +99,19 @@ progressLoading: 400
   border-radius: 0;
 
   & > .protyle-breadcrumb,
-  & > .block__icons {
-    padding-left: 72px;
+  & > .block__icons { // 关系图
+    padding-left: 69px;
+    height: 32px;
+  }
+
+  .protyle-breadcrumb > .protyle-breadcrumb__space {
+    -webkit-app-region: drag;
+    min-width: 32px;
+
+    &:hover {
+      border-radius: 16px;
+      background-color: var(--b3-theme-surface-light);
+    }
   }
 }
 
@@ -159,40 +170,51 @@ progressLoading: 400
 }
 
 .toolbar {
-  background-color: var(--b3-theme-surface);
+  background-color: var(--b3-toolbar-background);
   box-sizing: border-box;
-  height: 22px;
-  line-height: 22px;
-  padding-left: 70px;
+  height: 32px;
+  line-height: 32px;
+  padding: 0 5px 0 69px;
+  border-bottom: .5px solid var(--b3-border-color);
 
   &--browser {
     padding-left: 0;
   }
 
+  #windowControls {
+    top: 0;
+    z-index: 502;
+    right: 0;
+    position: relative;
+
+    .toolbar__item svg {
+      width: 13px;
+    }
+  }
+
   #drag {
     -webkit-app-region: drag;
-    font-size: 12px;
-    color: var(--b3-theme-on-surface);
+    color: var(--b3-toolbar-color);
     user-select: none;
     text-align: center;
     white-space: nowrap;
+    align-self: center;
+    font-size: 12px;
   }
 
   &__item {
+    flex-shrink: 0;
     cursor: pointer;
-    color: var(--b3-theme-on-surface);
-    padding: 2px;
+    color: var(--b3-toolbar-color);
+    padding: 9px;
     box-sizing: border-box;
     transition: var(--b3-transition);
     display: flex;
     align-self: center;
     background-color: transparent;
     border: 0;
-    border-radius: 2px;
-    margin: 0 8px;
-    flex-shrink: 0;
 
-    &:hover,
+    &:not(.toolbar__item--disabled):not(.toolbar__item--close):hover,
     &--active {
       color: var(--b3-theme-on-background);
       background-color: var(--b3-theme-background-light);
@@ -203,25 +225,16 @@ progressLoading: 400
       width: 14px;
     }
 
-    &--disabled,
-    &--disabled:hover {
-      color: var(--b3-border-color);
+    &--disabled {
+      opacity: .54;
       cursor: not-allowed;
     }
 
-    &--win {
-      margin: 0;
-      padding: 4px 8px;
-      border-radius: 0px;
-    }
-
     &--close {
-      margin: 0;
-      padding: 7px 8px;
-      border-radius: 0px;
+      padding: 9px 16px;
 
       svg {
-        height: 8px;
+        width: 10px !important;
       }
 
       &:hover {
@@ -235,28 +248,39 @@ progressLoading: 400
 .status {
   background-color: var(--b3-theme-surface);
   box-sizing: border-box;
-  height: 22px;
-  line-height: 22px;
   z-index: 2;
+  height: 32px;
+  line-height: 32px;
+  border-top: .5px solid var(--b3-border-color);
+  padding: 0 5px;
+  font-size: 12px;
+
+  .toolbar__item {
+    color: var(--b3-theme-on-surface);
+  }
 
   &__msg {
-    font-size: 12px;
     color: var(--b3-theme-on-surface);
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    padding-left: 5px;
   }
 
   &__counter {
-    font-size: 12px;
     display: flex;
     flex-shrink: 0;
   }
 
-  #barDock {
+  #barDock,
+  #barHelp {
     .b3-menu__item:hover {
       background-color: var(--b3-list-hover);
     }
+  }
+
+  .fn__space:last-child {
+    width: 5px;
   }
 }
 
@@ -458,7 +482,7 @@ progressLoading: 400
 .spread-search {
   &__preview {
     background-color: var(--b3-theme-background);
-    border-top: 1px solid var(--b3-border-color);
+    border-top: 1px solid var(--b3-theme-surface-lighter);
   }
 
   &__filter {
@@ -502,6 +526,14 @@ progressLoading: 400
 
   &:hover .block__icons .block__icon:not([disabled]) {
     opacity: 1;
+  }
+
+  &:hover .block__icons .block__icon[disabled] {
+    opacity: .68;
+  }
+
+  .block__icons .block__icon[disabled] {
+    opacity: 0;
   }
 
   &__close {

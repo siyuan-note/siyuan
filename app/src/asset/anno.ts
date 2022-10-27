@@ -28,7 +28,7 @@ const rectAnno = (config: any, pdf: any, element: HTMLElement) => {
             // 右键
             return;
         }
-        const canvasRect = pdf.pdfViewer._getCurrentVisiblePage().first.view.canvas.getBoundingClientRect();
+        const canvasRect = pdf.pdfViewer._getVisiblePages().first.view.canvas.getBoundingClientRect();
         const containerRet = config.mainContainer.getBoundingClientRect();
         const mostLeft = canvasRect.left;
         const mostRight = canvasRect.right;

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容塊",
-		"updated": "20220623200859"
+		"updated": "20221007175123"
 	},
 	"Children": [
 		{
@@ -566,7 +566,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220623200859-xhkfk38",
-				"updated": "20220623200859"
+				"updated": "20221007175123"
 			},
 			"Children": [
 				{
@@ -615,7 +615,7 @@
 					},
 					"Properties": {
 						"id": "20220623200859-p2du2ng",
-						"updated": "20220623200859"
+						"updated": "20221007175123"
 					},
 					"Children": [
 						{
@@ -623,7 +623,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220623200859-xdls0yl",
-								"updated": "20220623200859"
+								"updated": "20221007175123"
 							},
 							"Children": [
 								{
@@ -633,11 +633,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "'"
+									"TextMarkTextContent": "\u0026apos;"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 包裹錨文本為動態錨文本，會在重建索引是自動重寫"
+									"Data": " 包裹錨文本為動態錨文本，會在重建索引時自動重寫"
 								}
 							]
 						}

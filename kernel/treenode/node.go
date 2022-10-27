@@ -142,7 +142,12 @@ func NodeStaticContent(node *ast.Node) string {
 			buf.Write(n.Tokens)
 		case ast.NodeText, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
-			buf.Write(n.Tokens)
+			tokens := n.Tokens
+			if IsChartCodeBlockCode(n) {
+				// 图表块的内容在数据库 `blocks` 表 `content` 字段中被转义 https://github.com/siyuan-note/siyuan/issues/6326
+				tokens = html.UnescapeHTML(tokens)
+			}
+			buf.Write(tokens)
 		case ast.NodeTextMark:
 			if n.IsTextMarkType("tag") {
 				buf.WriteByte('#')
@@ -195,9 +200,16 @@ func CountBlockNodes(node *ast.Node) (ret int) {
 }
 
 func ParentNodes(node *ast.Node) (parents []*ast.Node) {
+	const maxDepth = 256
+	i := 0
 	for n := node.Parent; nil != n; n = n.Parent {
+		i++
 		parents = append(parents, n)
 		if ast.NodeDocument == n.Type {
+			return
+		}
+		if maxDepth < i {
+			logging.LogWarnf("parent nodes of node [%s] is too deep", node.ID)
 			return
 		}
 	}

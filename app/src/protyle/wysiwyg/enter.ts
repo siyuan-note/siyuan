@@ -9,10 +9,10 @@ import {
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
 import {breakList, genListItemElement, listOutdent, updateListOrder} from "./list";
-import {hasClosestByMatchTag} from "../util/hasClosest";
 import {highlightRender} from "../markdown/highlightRender";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
+import {hideElements} from "../ui/hideElements";
 
 const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {
     const listItemElement = blockElement.parentElement;
@@ -152,7 +152,8 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         selectNode.firstChild.remove();
     }
     // https://github.com/siyuan-note/siyuan/issues/3850
-    if (editableElement?.lastElementChild?.getAttribute("data-type").indexOf("inline-math") > -1 &&
+    // https://github.com/siyuan-note/siyuan/issues/6018
+    if ((editableElement?.lastElementChild?.getAttribute("data-type") || "").indexOf("inline-math") > -1 &&
         !hasNextSibling(editableElement?.lastElementChild)) {
         editableElement.insertAdjacentText("beforeend", "\n");
     }
@@ -193,7 +194,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     if (!disableElement && blockElement.classList.contains("protyle-wysiwyg--select")) {
         setLastNodeRange(getContenteditableElement(blockElement), range, false);
         range.collapse(false);
-        blockElement.classList.remove("protyle-wysiwyg--select");
+        hideElements(["select"], protyle);
         return;
     }
     // https://github.com/siyuan-note/siyuan/issues/5471
@@ -268,33 +269,6 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         range.insertNode(wbrElement);
         editableElement.removeAttribute("data-render");
         highlightRender(blockElement);
-        updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
-        return true;
-    }
-
-    // table
-    if (blockElement.getAttribute("data-type") === "NodeTable" &&
-        (hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH"))) {
-        const wbrElement = document.createElement("wbr");
-        range.insertNode(wbrElement);
-        const oldHTML = blockElement.outerHTML;
-        wbrElement.remove();
-        const cellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
-        if (cellElement && !cellElement.innerHTML.endsWith("<br>")) {
-            cellElement.insertAdjacentHTML("beforeend", "<br>");
-        }
-        range.extractContents();
-        const types = protyle.toolbar.getCurrentType(range);
-        if (types.includes("code") && range.startContainer.nodeType !== 3) {
-            // https://github.com/siyuan-note/siyuan/issues/4169
-            const brElement = document.createElement("br");
-            (range.startContainer as HTMLElement).after(brElement);
-            range.setStartAfter(brElement);
-        } else {
-            range.insertNode(document.createElement("br"));
-        }
-        range.collapse(false);
-        scrollCenter(protyle);
         updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
         return true;
     }
@@ -391,7 +365,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         selectNode.firstChild.remove();
     }
     // https://github.com/siyuan-note/siyuan/issues/3850
-    if (editableElement?.lastElementChild?.getAttribute("data-type").indexOf("inline-math") > -1 &&
+    // https://github.com/siyuan-note/siyuan/issues/6018
+    if ((editableElement?.lastElementChild?.getAttribute("data-type") || "").indexOf("inline-math") > -1 &&
         !hasNextSibling(editableElement?.lastElementChild)) {
         editableElement.insertAdjacentText("beforeend", "\n");
     }

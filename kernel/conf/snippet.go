@@ -14,13 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package util
+package conf
 
-import (
-	"os/exec"
-	"syscall"
-)
-
-func CmdAttr(cmd *exec.Cmd) {
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+type Snippet struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Memo    string `json:"memo"`
+	Type    string `json:"type"` // js/css
+	Enabled bool   `json:"enabled"`
+	Content string `json:"content"`
 }

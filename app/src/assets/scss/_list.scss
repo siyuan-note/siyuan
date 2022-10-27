@@ -5,7 +5,12 @@
   }
 
   &--background .b3-list-item {
-    &:hover:not(.b3-list-item--focus),
+    border-radius: 4px;
+
+    &:hover:not(.b3-list-item--focus) {
+      background-color: var(--b3-theme-background-light);
+    }
+
     &--focus:not(.dragover):not(.dragover__top):not(.dragover__bottom) {
       background-color: var(--b3-list-hover);
     }
@@ -19,21 +24,21 @@
   }
 
   &--border {
-    ul {
+    div {
       margin-left: 34px;
       position: relative;
     }
 
-    & > ul ul:before {
+    & > div div:before {
       content: "";
       height: 100%;
       top: 0;
       position: absolute;
       border-left: 1px solid var(--b3-theme-background-light);
-      left: -55px;
+      left: -47px;
     }
 
-    & > ul li:before {
+    & > div label:before {
       content: "";
       height: 100%;
       top: 0;
@@ -41,11 +46,15 @@
       border-left: 1px solid var(--b3-theme-background-light);
       left: -21px;
     }
+
+    .b3-list-item__text {
+      padding-left: 4px;
+    }
   }
 
   &-item {
     line-height: 28px;
-    padding: 1px 8px;
+    padding: 1px 4px;
     display: flex;
     cursor: pointer;
     align-items: center;
@@ -54,7 +63,7 @@
     text-align: left;
     border: 0;
     color: var(--b3-theme-on-background);
-    margin-top: 0 !important;
+    margin: 0 8px !important;
 
     &[draggable="true"]:active {
       cursor: grabbing;
@@ -98,13 +107,13 @@
       display: flex;
       align-items: center;
       height: 22px;
-      padding-right: 6px;
+      padding: 0 4px;
       color: var(--b3-theme-on-surface);
       transition: var(--b3-transition);
 
       &--hl:hover {
         color: var(--b3-theme-on-background);
-        background-color: var(--b3-theme-background-light);
+        background-color: var(--b3-list-icon-hover);
         border-radius: 2px;
       }
     }
@@ -125,12 +134,12 @@
       line-height: 22px;
       height: 22px;
       transition: var(--b3-transition);
-      padding: 0 3px;
+      padding: 0 4px;
       flex-shrink: 0;
 
       &:hover {
         color: var(--b3-theme-on-background);
-        background-color: var(--b3-theme-background-light);
+        background-color: var(--b3-list-icon-hover);
         border-radius: 2px;
       }
     }
@@ -226,7 +235,7 @@
 
       &:hover {
         color: var(--b3-theme-on-background);
-        background-color: var(--b3-theme-background-light);
+        background-color: var(--b3-list-icon-hover);
         border-radius: 2px;
       }
     }
@@ -236,7 +245,7 @@
 
       &:hover {
         color: var(--b3-theme-on-background);
-        background-color: var(--b3-theme-background-light);
+        background-color: var(--b3-list-icon-hover);
       }
     }
   }

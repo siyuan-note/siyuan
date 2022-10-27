@@ -107,7 +107,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 
 	oldAttrs := parse.IAL2Map(node.KramdownIAL)
 
-	for name, _ := range nameValues {
+	for name := range nameValues {
 		for i := 0; i < len(name); i++ {
 			if !lex.IsASCIILetterNumHyphen(name[i]) {
 				return errors.New(fmt.Sprintf(Conf.Language(25), id))
@@ -119,13 +119,21 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		if "" == value {
 			node.RemoveIALAttr(name)
 		} else {
-			node.SetIALAttr(name, html.EscapeAttrVal(value))
+			node.SetIALAttr(name, value)
 		}
 	}
 
-	if err = indexWriteJSONQueue(tree); nil != err {
-		return
+	if 1 == len(nameValues) && "" != nameValues["scroll"] {
+		// 文档滚动状态不产生同步冲突 https://github.com/siyuan-note/siyuan/issues/6076
+		if err = indexWriteJSONQueueWithoutChangeTime(tree); nil != err {
+			return
+		}
+	} else {
+		if err = indexWriteJSONQueue(tree); nil != err {
+			return
+		}
 	}
+
 	IncSync()
 	cache.PutBlockIAL(id, parse.IAL2Map(node.KramdownIAL))
 
@@ -156,7 +164,7 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		return errors.New(fmt.Sprintf(Conf.Language(15), id))
 	}
 
-	for name, _ := range nameValues {
+	for name := range nameValues {
 		for i := 0; i < len(name); i++ {
 			if !lex.IsASCIILetterNumHyphen(name[i]) {
 				return errors.New(fmt.Sprintf(Conf.Language(25), id))

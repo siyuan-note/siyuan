@@ -26,6 +26,8 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -41,17 +43,18 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 	if gulu.OS.IsWindows() {
 		cmd = exec.Command(newVerInstallPkgPath)
 	} else if gulu.OS.IsDarwin() {
+		exec.Command("chmod", "+x", newVerInstallPkgPath).CombinedOutput()
 		cmd = exec.Command("open", newVerInstallPkgPath)
 	} else if gulu.OS.IsLinux() {
+		exec.Command("chmod", "+x", newVerInstallPkgPath).CombinedOutput()
 		cmd = exec.Command("sh", "-c", newVerInstallPkgPath)
 	}
-	util.CmdAttr(cmd)
-	data, cmdErr := cmd.CombinedOutput()
+	gulu.CmdAttr(cmd)
+	cmdErr := cmd.Start()
 	if nil != cmdErr {
 		logging.LogErrorf("exec install new version failed: %s", cmdErr)
 		return
 	}
-	logging.LogInfof("installed new version output [%s]", data)
 }
 
 func getNewVerInstallPkgPath() string {
@@ -105,7 +108,7 @@ func getUpdatePkg() (downloadPkgURL, checksum string, err error) {
 
 	installPkgSite := result["installPkg"].(string)
 	ver := result["ver"].(string)
-	if ver == util.Ver {
+	if isVersionUpToDate(ver) {
 		return
 	}
 
@@ -146,20 +149,25 @@ func downloadInstallPkg(pkgURL, checksum string) {
 		}
 	}
 
+	err := os.MkdirAll(filepath.Join(util.TempDir, "install"), 0755)
+	if nil != err {
+		logging.LogErrorf("create temp install dir failed: %s", err)
+		return
+	}
+
 	logging.LogInfof("downloading install package [%s]", pkgURL)
-	client := req.C().SetTimeout(60 * time.Minute)
+	msgId := util.PushMsg(Conf.Language(103), 60*1000*10)
+	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(10 * time.Minute)
 	callback := func(info req.DownloadInfo) {
 		//logging.LogDebugf("downloading install package [%s %.2f%%]", pkgURL, float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
 	}
-	resp, err := client.R().SetOutputFile(savePath).SetDownloadCallback(callback).Get(pkgURL)
+	_, err = client.R().SetOutputFile(savePath).SetDownloadCallback(callback).Get(pkgURL)
 	if nil != err {
 		logging.LogErrorf("download install package failed: %s", err)
+		util.PushUpdateMsg(msgId, Conf.Language(104), 7000)
 		return
 	}
-	if 200 != resp.StatusCode {
-		logging.LogErrorf("download install package [%s] failed [sc=%d]", pkgURL, resp.StatusCode)
-		return
-	}
+
 	localChecksum, _ := sha256Hash(savePath)
 	if checksum != localChecksum {
 		logging.LogErrorf("verify checksum failed, download install package [%s] checksum [%s] not equal to downloaded [%s] checksum [%s]", pkgURL, checksum, savePath, localChecksum)
@@ -233,7 +241,7 @@ func CheckUpdate(showMsg bool) {
 	release := result["release"].(string)
 	var msg string
 	var timeout int
-	if ver == util.Ver {
+	if isVersionUpToDate(ver) {
 		msg = Conf.Language(10)
 		timeout = 3000
 	} else {
@@ -243,7 +251,17 @@ func CheckUpdate(showMsg bool) {
 	}
 	if showMsg {
 		util.PushMsg(msg, timeout)
+		go func() {
+			checkDownloadInstallPkg()
+			if "" != getNewVerInstallPkgPath() {
+				util.PushMsg(Conf.Language(62), 0)
+			}
+		}()
 	}
+}
+
+func isVersionUpToDate(releaseVer string) bool {
+	return ver2num(releaseVer) <= ver2num(util.Ver)
 }
 
 func skipNewVerInstallPkg() bool {
@@ -257,4 +275,44 @@ func skipNewVerInstallPkg() bool {
 		return true
 	}
 	return false
+}
+
+func ver2num(a string) int {
+	var version string
+	var suffixpos int
+	var suffixStr string
+	var suffix string
+	a = strings.Trim(a, " ")
+	if strings.Contains(a, "alpha") {
+		suffixpos = strings.Index(a, "-alpha")
+		version = a[0:suffixpos]
+		suffixStr = a[suffixpos+6 : len(a)]
+		suffix = "0" + fmt.Sprintf("%03s", suffixStr)
+	} else if strings.Contains(a, "beta") {
+		suffixpos = strings.Index(a, "-beta")
+		version = a[0:suffixpos]
+		suffixStr = a[suffixpos+5 : len(a)]
+		suffix = "1" + fmt.Sprintf("%03s", suffixStr)
+	} else {
+		version = a
+		suffix = "5000"
+	}
+	split := strings.Split(version, ".")
+	var verArr []string
+
+	verArr = append(verArr, "1")
+	var tmp string
+	for i := 0; i < 3; i++ {
+		if i < len(split) {
+			tmp = split[i]
+		} else {
+			tmp = "0"
+		}
+		verArr = append(verArr, fmt.Sprintf("%04s", tmp))
+	}
+	verArr = append(verArr, suffix)
+
+	ver := strings.Join(verArr, "")
+	verNum, _ := strconv.Atoi(ver)
+	return verNum
 }

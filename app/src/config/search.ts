@@ -14,7 +14,8 @@ export const initConfigSearch = (element: HTMLElement) => {
         getLang(["config", "fullWidth",
             "editor", "md2", "md3", "md12", "md16", "md27", "md28", "md29", "md30", "md31", "md32", "md33", "md34",
             "md39", "md40", "fontSizeTip", "fontSize", "font", "font1", "generateHistory", "generateHistoryInterval",
-            "historyRetentionDays", "historyRetentionDaysTip", "clearHistory", "katexMacros", "katexMacrosTip"
+            "historyRetentionDays", "historyRetentionDaysTip", "clearHistory", "katexMacros", "katexMacrosTip",
+            "editReadonly", "editReadonlyTip", "embedBlockBreadcrumb", "embedBlockBreadcrumbTip", "outdentTip", "outdent"
         ]),
 
         // 文档树
@@ -58,6 +59,7 @@ export const initConfigSearch = (element: HTMLElement) => {
         // 云端
         getLang(["cloudStorage", "trafficStat", "sync", "backup", "cdn", "total", "sizeLimit", "cloudBackup",
             "cloudBackupTip", "updatePath", "cloudSync", "upload", "download", "syncMode", "syncModeTip",
+            "generateConflictDoc", "generateConflictDocTip",
             "syncMode1", "syncMode2", "reposTip", "openSyncTip1", "openSyncTip2", "cloudSyncDir", "config"]),
 
         // 账号
@@ -70,7 +72,8 @@ export const initConfigSearch = (element: HTMLElement) => {
             "dataRepoKeyTip1", "dataRepoKeyTip2", "slogan", "currentVer", "checkUpdate", "updatePath", "systemLog",
             "importKey", "genKey", "genKeyByPW", "copyKey", "resetRepo", "systemLogTip", "export", "visitAnnouncements",
             "safeQuit", "directConnection", "siyuanNote", "key", "password", "copied", "resetRepoTip",
-            "autoDownloadUpdatePkg", "autoDownloadUpdatePkgTip", "networkProxy", "keyPlaceholder", "initRepoKeyTip"]),
+            "autoDownloadUpdatePkg", "autoDownloadUpdatePkgTip", "networkProxy", "keyPlaceholder", "initRepoKeyTip",
+            "useFixedPort", "useFixedPortTip"]),
     ];
     const inputElement = element.querySelector(".b3-form__icon input") as HTMLInputElement;
     if (window.siyuan.config.system.container !== "ios") {

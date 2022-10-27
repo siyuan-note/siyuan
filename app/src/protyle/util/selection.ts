@@ -7,6 +7,7 @@ import {
 } from "../wysiwyg/getBlock";
 import {hasClosestByAttribute, hasClosestByMatchTag} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
+import {hideElements} from "../ui/hideElements";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -59,7 +60,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                     range.setStart(cellElement.firstChild, 0);
                     range.setEndAfter(cellElement.lastChild);
                     protyle.toolbar.render(protyle, range);
-                    countSelectWord(range);
+                    countSelectWord(range, protyle.block.rootID);
                     return true;
                 }
             }
@@ -103,7 +104,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                     }
                 }
                 protyle.toolbar.render(protyle, range);
-                countSelectWord(range);
+                countSelectWord(range, protyle.block.rootID);
                 return true;
             }
         }
@@ -113,15 +114,13 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
     if (protyle.wysiwyg.element.childElementCount === selectElements.length && selectElements[0].parentElement.isSameNode(protyle.wysiwyg.element)) {
         return true;
     }
-    selectElements.forEach(item => {
-        item.classList.remove("protyle-wysiwyg--select");
-    });
+    hideElements(["select"], protyle);
     const ids: string [] = [];
     Array.from(protyle.wysiwyg.element.children).forEach(item => {
         item.classList.add("protyle-wysiwyg--select");
         ids.push(item.getAttribute("data-node-id"));
     });
-    countBlockWord(ids);
+    countBlockWord(ids, protyle.block.rootID);
 };
 
 export const getEditorRange = (element: Element) => {
@@ -204,7 +203,8 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range) => {
             }
         }
     } else {
-        cursorRect = range.getBoundingClientRect();
+        const rects = range.getClientRects(); // 由于长度过长折行，光标在行首时有多个 rects https://github.com/siyuan-note/siyuan/issues/6156
+        cursorRect = rects[rects.length - 1];
     }
 
     return {
@@ -305,6 +305,10 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
     }
     let firstChild = editElement.firstChild as HTMLElement;
     while (firstChild && firstChild.nodeType !== 3 && !firstChild.classList.contains("render-node")) {
+        if (firstChild.classList.contains("img")) { // https://ld246.com/article/1665360254842
+            range.setStartBefore(firstChild);
+            return range;
+        }
         firstChild = firstChild.firstChild as HTMLElement;
     }
     if (!firstChild) {
@@ -525,7 +529,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
                 cursorElement = cellElements[cellElements.length - 1];
             }
         }
-        let range
+        let range;
         if (toStart) {
             // 需要定位到第一个 child https://github.com/siyuan-note/siyuan/issues/5930
             range = setFirstNodeRange(cursorElement, getEditorRange(cursorElement));

@@ -118,6 +118,9 @@ export class Background {
             });
         });
         this.element.addEventListener(getEventName(), (event) => {
+            if (protyle.disabled) {
+                return;
+            }
             let target = event.target as HTMLElement;
             hideElements(["gutter"], protyle);
 
@@ -332,6 +335,19 @@ export class Background {
                 }
                 target = target.parentElement;
             }
+        });
+        this.element.addEventListener("touchstart", (event) => {
+            // https://github.com/siyuan-note/siyuan/issues/6328
+            if (protyle.disabled) {
+                return;
+            }
+            const target = event.target as HTMLElement;
+            if (hasClosestByClassName(target, "protyle-icons") ||
+                hasClosestByClassName(target, "item") ||
+                target.classList.contains("protyle-background__icon")) {
+                return;
+            }
+            this.element.classList.toggle("protyle-background--mobileshow");
         });
     }
 

@@ -19,9 +19,11 @@
 package model
 
 import (
+	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/fsnotify/fsnotify"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -88,6 +90,10 @@ func watchAssets() {
 			}
 		}
 	}()
+
+	if !gulu.File.IsDir(assetsDir) {
+		os.MkdirAll(assetsDir, 0755)
+	}
 
 	if err = assetsWatcher.Add(assetsDir); err != nil {
 		logging.LogErrorf("add assets watcher for folder [%s] failed: %s", assetsDir, err)

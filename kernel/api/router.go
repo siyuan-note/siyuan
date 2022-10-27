@@ -39,6 +39,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/getEmojiConf", model.CheckAuth, getEmojiConf)
 	ginServer.Handle("POST", "/api/system/setAccessAuthCode", model.CheckAuth, setAccessAuthCode)
 	ginServer.Handle("POST", "/api/system/setNetworkServe", model.CheckAuth, setNetworkServe)
+	ginServer.Handle("POST", "/api/system/setFixedPort", model.CheckAuth, setFixedPort)
 	ginServer.Handle("POST", "/api/system/setUploadErrLog", model.CheckAuth, setUploadErrLog)
 	ginServer.Handle("POST", "/api/system/setDownloadInstallPkg", model.CheckAuth, setDownloadInstallPkg)
 	ginServer.Handle("POST", "/api/system/setNetworkProxy", model.CheckAuth, setNetworkProxy)
@@ -130,11 +131,12 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/getBlockDOM", model.CheckAuth, getBlockDOM)
 	ginServer.Handle("POST", "/api/block/getBlockKramdown", model.CheckAuth, getBlockKramdown)
 	ginServer.Handle("POST", "/api/block/getBlockBreadcrumb", model.CheckAuth, getBlockBreadcrumb)
+	ginServer.Handle("POST", "/api/block/getBlockIndex", model.CheckAuth, getBlockIndex)
 	ginServer.Handle("POST", "/api/block/getRefIDs", model.CheckAuth, getRefIDs)
 	ginServer.Handle("POST", "/api/block/getRefIDsByFileAnnotationID", model.CheckAuth, getRefIDsByFileAnnotationID)
 	ginServer.Handle("POST", "/api/block/getBlockDefIDsByRefText", model.CheckAuth, getBlockDefIDsByRefText)
 	ginServer.Handle("POST", "/api/block/getRefText", model.CheckAuth, getRefText)
-	ginServer.Handle("POST", "/api/block/getBlockWordCount", model.CheckAuth, getBlockWordCount)
+	ginServer.Handle("POST", "/api/block/getTreeStat", model.CheckAuth, getTreeStat)
 	ginServer.Handle("POST", "/api/block/getBlocksWordCount", model.CheckAuth, getBlocksWordCount)
 	ginServer.Handle("POST", "/api/block/getContentWordCount", model.CheckAuth, getContentWordCount)
 	ginServer.Handle("POST", "/api/block/getRecentUpdatedBlocks", model.CheckAuth, getRecentUpdatedBlocks)
@@ -148,7 +150,9 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/deleteBlock", model.CheckAuth, deleteBlock)
 	ginServer.Handle("POST", "/api/block/setBlockReminder", model.CheckAuth, setBlockReminder)
 	ginServer.Handle("POST", "/api/block/getHeadingLevelTransaction", model.CheckAuth, getHeadingLevelTransaction)
+	ginServer.Handle("POST", "/api/block/getHeadingDeleteTransaction", model.CheckAuth, getHeadingDeleteTransaction)
 	ginServer.Handle("POST", "/api/block/getHeadingChildrenDOM", model.CheckAuth, getHeadingChildrenDOM)
+	ginServer.Handle("POST", "/api/block/swapBlockRef", model.CheckAuth, swapBlockRef)
 
 	ginServer.Handle("POST", "/api/file/getFile", model.CheckAuth, getFile)
 	ginServer.Handle("POST", "/api/file/putFile", model.CheckAuth, putFile)
@@ -156,6 +160,9 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/ref/refreshBacklink", model.CheckAuth, refreshBacklink)
 	ginServer.Handle("POST", "/api/ref/getBacklink", model.CheckAuth, getBacklink)
+	ginServer.Handle("POST", "/api/ref/getBacklink2", model.CheckAuth, getBacklink2)
+	ginServer.Handle("POST", "/api/ref/getBacklinkDoc", model.CheckAuth, getBacklinkDoc)
+	ginServer.Handle("POST", "/api/ref/getBackmentionDoc", model.CheckAuth, getBackmentionDoc)
 	ginServer.Handle("POST", "/api/ref/createBacklink", model.CheckAuth, model.CheckReadonly, createBacklink)
 
 	ginServer.Handle("POST", "/api/attr/getBookmarkLabels", model.CheckAuth, getBookmarkLabels)
@@ -166,6 +173,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/cloud/getCloudSpace", model.CheckAuth, getCloudSpace)
 
 	ginServer.Handle("POST", "/api/sync/setSyncEnable", model.CheckAuth, setSyncEnable)
+	ginServer.Handle("POST", "/api/sync/setSyncGenerateConflictDoc", model.CheckAuth, setSyncGenerateConflictDoc)
 	ginServer.Handle("POST", "/api/sync/setSyncMode", model.CheckAuth, setSyncMode)
 	ginServer.Handle("POST", "/api/sync/setCloudSyncDir", model.CheckAuth, setCloudSyncDir)
 	ginServer.Handle("POST", "/api/sync/createCloudSyncDir", model.CheckAuth, model.CheckReadonly, createCloudSyncDir)
@@ -176,6 +184,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/sync/getBootSync", model.CheckAuth, getBootSync)
 
 	ginServer.Handle("POST", "/api/inbox/getShorthands", model.CheckAuth, getShorthands)
+	ginServer.Handle("POST", "/api/inbox/getShorthand", model.CheckAuth, getShorthand)
 	ginServer.Handle("POST", "/api/inbox/removeShorthands", model.CheckAuth, removeShorthands)
 
 	ginServer.Handle("POST", "/api/extension/copy", model.CheckAuth, extensionCopy)
@@ -272,4 +281,9 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/notification/pushMsg", model.CheckAuth, pushMsg)
 	ginServer.Handle("POST", "/api/notification/pushErrMsg", model.CheckAuth, pushErrMsg)
+
+	ginServer.Handle("POST", "/api/snippet/getSnippet", model.CheckAuth, getSnippet)
+	ginServer.Handle("POST", "/api/snippet/setSnippet", model.CheckAuth, setSnippet)
+	ginServer.Handle("POST", "/api/snippet/removeSnippet", model.CheckAuth, removeSnippet)
+	ginServer.Handle("GET", "/snippets/*filepath", serveSnippets)
 }

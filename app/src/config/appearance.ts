@@ -9,6 +9,7 @@ import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {loadAssets, renderSnippet} from "../util/assets";
 import {genOptions} from "../util/genOptions";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 export const appearance = {
     element: undefined as Element,
@@ -263,7 +264,39 @@ export const appearance = {
             }
         });
     },
-    _snippet: [] as ISnippet[],
+    _bindSnippet: (element: HTMLElement) => {
+        const itemContentElement = hasClosestByClassName(element, "b3-label");
+        if (!itemContentElement) {
+            return
+        }
+        fetchPost("/api/snippet/setSnippet", {
+            id: itemContentElement.getAttribute("data-id"),
+            name: itemContentElement.querySelector("input").value,
+            type: itemContentElement.querySelector(".b3-chip").textContent,
+            content: itemContentElement.querySelector("textarea").value,
+            enabled: (itemContentElement.querySelector(".b3-switch") as HTMLInputElement).checked
+        }, (response) => {
+            itemContentElement.setAttribute("data-id", response.data.id)
+            renderSnippet();
+        })
+    },
+    _genSnippet: (options: ISnippet) => {
+        return `<div class="b3-label" style="margin: 0" data-id="${options.id || ""}">
+    <div class="fn__flex">
+        <div class="b3-chip fn__flex-center b3-chip--small b3-chip--secondary">${options.type}</div>
+        <div class="fn__space"></div>
+        <input type="text" class="fn__size200 b3-text-field" placeholder="${window.siyuan.languages.title}">
+        <div class="fn__flex-1"></div>
+        <span aria-label="${window.siyuan.languages.remove}" class="b3-tooltips b3-tooltips__n block__icon block__icon--show">
+            <svg><use xlink:href="#iconTrashcan"></use></svg>
+        </span>
+        <div class="fn__space"></div>
+        <input data-type="snippet" class="b3-switch fn__flex-center" type="checkbox"${options.enabled ? " checked" : ""}>
+    </div>
+    <div class="fn__hr"></div>
+    <textarea class="fn__block b3-text-field" placeholder="${window.siyuan.languages.codeSnippet}"></textarea>
+</div>`
+    },
     bindEvent: () => {
         if (window.siyuan.config.appearance.customCSS) {
             fetchPost("/api/setting/getCustomCSS", {
@@ -280,7 +313,6 @@ export const appearance = {
                 return;
             }
             fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
-                appearance._snippet = response.data._snippet;
                 let html = `<div class="fn__hr"></div>
 <div class="fn__flex">
     <div class="fn__flex-1"></div>
@@ -293,35 +325,61 @@ export const appearance = {
     </button>
 </div>`;
                 response.data.snippets.forEach((item: ISnippet) => {
-                    html += `<div class="b3-label" style="margin: 0">
-    <div class="fn__flex">
-        <div class="b3-chip b3-chip--secondary b3-chip--small">${item.type}</div>
-        <div class="fn__space"></div>
-        <div class="fn__flex-center">${item.name}</div>
-        <div class="fn__flex-1"></div>
-        <input class="b3-switch fn__flex-center" type="checkbox"${item.enabled ? " checked" : ""}>
-    </div>
-    <div class="fn__hr"></div>
-    <textarea class="fn__block b3-text-field">${item.content}</textarea>
-</div>`
+                    html += appearance._genSnippet(item);
                 });
                 codeSnippetPanelElement.innerHTML = html;
+                response.data.snippets.forEach((item: ISnippet) => {
+                    const nameElement = (codeSnippetPanelElement.querySelector(`[data-id="${item.id}"] input`) as HTMLInputElement)
+                    nameElement.value = item.name;
+                    const contentElement = codeSnippetPanelElement.querySelector(`[data-id="${item.id}"] textarea`) as HTMLTextAreaElement;
+                    contentElement.textContent = item.content;
+                    nameElement.addEventListener("blur", (event) => {
+                        appearance._bindSnippet(nameElement);
+                    })
+                    contentElement.addEventListener("blur", (event) => {
+                        appearance._bindSnippet(contentElement);
+                    })
+                    codeSnippetPanelElement.querySelector(`[data-id="${item.id}"] .b3-switch`).addEventListener("change", (event) => {
+                        appearance._bindSnippet(contentElement);
+                    })
+                });
             });
         });
         codeSnippetPanelElement.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
             if (target.id === "addCodeSnippetCSS" || target.id === "addCodeSnippetJS") {
-                target.parentElement.insertAdjacentHTML("afterend", `<div class="b3-label" style="margin: 0">
-    <div class="fn__flex">
-        <div class="b3-chip fn__flex-center b3-chip--small b3-chip--secondary">${target.id === "addCodeSnippetCSS" ? "css" : "js"}</div>
-        <div class="fn__space"></div>
-        <input class="b3-text-field" placeholder="${window.siyuan.languages.title}">
-        <div class="fn__flex-1"></div>
-        <input class="b3-switch fn__flex-center" type="checkbox">
-    </div>
-    <div class="fn__hr"></div>
-    <textarea class="fn__block b3-text-field" placeholder="${window.siyuan.languages.codeSnippet}"></textarea>
-</div>`)
+                target.parentElement.insertAdjacentHTML("afterend", appearance._genSnippet({
+                    type: target.id === "addCodeSnippetCSS" ? "css" : "js",
+                    name: "",
+                    content: "",
+                    enabled: false
+                }))
+                codeSnippetPanelElement.querySelector(".b3-text-field").addEventListener("blur", (event) => {
+                    appearance._bindSnippet(event.target as HTMLElement);
+                })
+                codeSnippetPanelElement.querySelector("textarea.b3-text-field").addEventListener("blur", (event) => {
+                    appearance._bindSnippet(event.target as HTMLElement);
+                })
+                codeSnippetPanelElement.querySelector('.b3-switch').addEventListener("change", (event) => {
+                    appearance._bindSnippet(event.target as HTMLElement);
+                })
+                return;
+            }
+            const removeElement = hasClosestByClassName(target, "b3-tooltips")
+            if (removeElement) {
+                const id = removeElement.parentElement.parentElement.getAttribute("data-id");
+                removeElement.parentElement.parentElement.remove();
+                if (!id) {
+                    return;
+                }
+                fetchPost("/api/snippet/removeSnippet", {
+                    id
+                }, (response) => {
+                    const exitElement = document.getElementById(`snippet${response.data.type === "css" ? "CSS" : "JS"}${response.data.id}`) as HTMLScriptElement;
+                    if (exitElement) {
+                        exitElement.remove();
+                    }
+                })
             }
         })
         const appearanceCustomElement = appearance.element.querySelector("#appearanceCustom");

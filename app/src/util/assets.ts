@@ -87,9 +87,9 @@ export const loadAssets = (data: IAppearance) => {
 };
 
 export const renderSnippet = () => {
-    fetchPost("/api/snippet/getSnippet", {type: "all"}, (response) => {
+    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
         response.data.snippets.forEach((item: ISnippet) => {
-            const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.name}`;
+            const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
             let exitElement = document.getElementById(id) as HTMLScriptElement;
             if (!item.enabled) {
                 if (exitElement) {

@@ -53,6 +53,7 @@ interface ITextOption {
 }
 
 interface ISnippet {
+    id?: string
     name: string
     type: string
     enabled: boolean

@@ -76,7 +76,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan.localhost"
+					"TextMarkTextContent": "127.0.0.1"
 				},
 				{
 					"Type": "NodeText",

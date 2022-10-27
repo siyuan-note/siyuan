@@ -6,7 +6,7 @@
 		"id": "20200813131152-0wk5akh",
 		"title": "在内容块中遨游",
 		"type": "doc",
-		"updated": "20221026222004"
+		"updated": "20210104090757"
 	},
 	"Children": [
 		{
@@ -17,10 +17,6 @@
 				"id": "20210104090757-ig8gk5o"
 			},
 			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
 				{
 					"Type": "NodeText",
 					"Data": "链接"

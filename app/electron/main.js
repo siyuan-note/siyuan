@@ -43,11 +43,16 @@ let siyuanOpenURL
 let firstOpen = false
 let resetWindowStateOnRestart = false
 let kernelPort = "6806"
+const localhost = "siyuan.localhost"
 require('@electron/remote/main').initialize()
 
 if (!app.requestSingleInstanceLock()) {
   app.quit()
   return
+}
+
+const getServer = () => {
+  return "http://" + localhost + ":" + kernelPort
 }
 
 const showErrorWindow = (title, content) => {
@@ -266,7 +271,7 @@ const boot = () => {
   })
 
   // 加载主界面
-  mainWindow.loadURL('http://127.0.0.1:' + kernelPort + '/stage/build/app/index.html?v=' +
+  mainWindow.loadURL(getServer() + '/stage/build/app/index.html?v=' +
     new Date().getTime())
 
   // 菜单
@@ -330,7 +335,7 @@ const boot = () => {
   Menu.setApplicationMenu(menu)
   // 当前页面链接使用浏览器打开
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    if (url.startsWith('http://127.0.0.1:' + kernelPort)) {
+    if (url.startsWith(getServer())) {
       return
     }
 
@@ -399,7 +404,7 @@ const boot = () => {
       theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
       init: true,
     })
-    await fetch('http://127.0.0.1:' + kernelPort + '/api/system/uiproc?pid=' + process.pid,
+    await fetch(getServer() + '/api/system/uiproc?pid=' + process.pid,
       {method: 'POST'})
   })
   ipcMain.on('siyuan-hotkey', (event, hotkey) => {
@@ -632,11 +637,11 @@ const initKernel = (initData) => {
     writeLog('checking kernel version')
     while (!gotVersion) {
       try {
-        const apiResult = await fetch('http://127.0.0.1:' + kernelPort + '/api/system/version')
+        const apiResult = await fetch(getServer() + '/api/system/version')
         apiData = await apiResult.json()
         gotVersion = true
         bootWindow.setResizable(false)
-        bootWindow.loadURL('http://127.0.0.1:' + kernelPort + '/appearance/boot/index.html')
+        bootWindow.loadURL(getServer() + '/appearance/boot/index.html')
         bootWindow.show()
       } catch (e) {
         writeLog('get kernel version failed: ' + e.message)
@@ -656,14 +661,14 @@ const initKernel = (initData) => {
       if (!isDevEnv && apiData.data !== appVer) {
         writeLog(
           `kernel [${apiData.data}] is running, shutdown it now and then start kernel [${appVer}]`)
-        fetch('http://127.0.0.1:' + kernelPort + '/api/system/exit', {method: 'POST'})
+        fetch(getServer() + '/api/system/exit', {method: 'POST'})
         bootWindow.destroy()
         resolve(false)
       } else {
         let progressing = false
         while (!progressing) {
           try {
-            const progressResult = await fetch('http://127.0.0.1:' + kernelPort + '/api/system/bootProgress')
+            const progressResult = await fetch(getServer() + '/api/system/bootProgress')
             const progressData = await progressResult.json()
             if (progressData.data.progress >= 100) {
               resolve(true)
@@ -673,7 +678,7 @@ const initKernel = (initData) => {
             }
           } catch (e) {
             writeLog('get boot progress failed: ' + e.message)
-            fetch('http://127.0.0.1:' + kernelPort + '/api/system/exit', {method: 'POST'})
+            fetch(getServer() + '/api/system/exit', {method: 'POST'})
             bootWindow.destroy()
             resolve(false)
             progressing = true
@@ -804,15 +809,15 @@ const cp = require("child_process");
 
 powerMonitor.on('suspend', () => {
   writeLog('system suspend')
-  fetch('http://127.0.0.1:' + kernelPort + '/api/sync/performSync', {method: 'POST'})
+  fetch(getServer() + '/api/sync/performSync', {method: 'POST'})
 })
 
 powerMonitor.on('resume', () => {
   writeLog('system resume')
-  fetch('http://127.0.0.1:' + kernelPort + '/api/sync/performSync', {method: 'POST'})
+  fetch(getServer() + '/api/sync/performSync', {method: 'POST'})
 })
 
 powerMonitor.on('shutdown', () => {
   writeLog('system shutdown')
-  fetch('http://127.0.0.1:' + kernelPort + '/api/system/exit', {method: 'POST'})
+  fetch(getServer() + '/api/system/exit', {method: 'POST'})
 })

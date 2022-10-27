@@ -209,7 +209,7 @@ func exportTempContent(c *gin.Context) {
 	}
 	url := path.Join("/export/temp/", filepath.Base(p))
 	ret.Data = map[string]interface{}{
-		"url": "http://127.0.0.1:" + util.ServerPort + url,
+		"url": "http://" + util.LocalHost + ":" + util.ServerPort + url,
 	}
 }
 
@@ -229,7 +229,7 @@ func exportPreviewHTML(c *gin.Context) {
 	}
 	name, content := model.ExportHTML(id, "", true, keepFold)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
-	content = strings.ReplaceAll(content, "http://127.0.0.1:"+util.ServerPort+"/#", "#")
+	content = strings.ReplaceAll(content, "http://"+util.LocalHost+":"+util.ServerPort+"/#", "#")
 
 	ret.Data = map[string]interface{}{
 		"id":      id,

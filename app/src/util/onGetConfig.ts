@@ -159,6 +159,10 @@ export const onGetConfig = (isStart: boolean) => {
     if (window.siyuan.config.newbie) {
         mountHelp();
     }
+
+    gtag("event", "config", {
+
+    });
 };
 
 const initBar = () => {

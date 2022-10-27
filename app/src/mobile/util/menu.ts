@@ -177,7 +177,7 @@ ${accountHTML}
                     closePanel();
                     if (!window.siyuan.config.localIPs || window.siyuan.config.localIPs.length === 0 ||
                         (window.siyuan.config.localIPs.length === 1 && window.siyuan.config.localIPs[0] === "")) {
-                        window.siyuan.config.localIPs = ["127.0.0.1"];
+                        window.siyuan.config.localIPs = ["siyuan.localhost"];
                     }
                     modelElement.style.top = "0";
                     modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconInfo"></use>';
@@ -193,7 +193,7 @@ ${accountHTML}
 <div class="b3-label">
        ${window.siyuan.languages.about2}
        <div class="fn__hr"></div>
-       <input class="b3-text-field fn__block" readonly value="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:${location.port}">
+       <input class="b3-text-field fn__block" readonly value="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "siyuan.localhost"}:${location.port}">
        <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
        <div class="fn__hr"></div>
        <span class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.join("</code> <code class='fn__code'>")}</code></span>

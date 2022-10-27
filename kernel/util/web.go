@@ -17,9 +17,7 @@
 package util
 
 import (
-	"net"
 	"strings"
-	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -49,17 +47,4 @@ func JsonArg(c *gin.Context, result *gulu.Result) (arg map[string]interface{}, o
 
 	ok = true
 	return
-}
-
-func isPortOpen(port string) bool {
-	timeout := time.Second
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", port), timeout)
-	if nil != err {
-		return false
-	}
-	if nil != conn {
-		conn.Close()
-		return true
-	}
-	return false
 }

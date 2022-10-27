@@ -111,7 +111,7 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
         updateListOrder(newElement.parentElement, orderIndex);
         updateTransaction(protyle, newElement.parentElement.getAttribute("data-node-id"), newElement.parentElement.outerHTML, parentOldHTML);
     } else {
-        let doOperations: IOperation[]
+        let doOperations: IOperation[];
         if (position === "beforebegin") {
             doOperations = [{
                 action: "insert",

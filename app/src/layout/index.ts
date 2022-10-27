@@ -82,7 +82,7 @@ export class Layout {
                     if (this.direction === "lr") {
                         // 向右分屏，左侧文档抖动，移除动画和边距
                         item.element.querySelectorAll(".protyle-wysiwyg").forEach((element: HTMLElement) => {
-                            element.style.transition = "none"
+                            element.style.transition = "none";
                             element.style.paddingRight = "16px";
                             element.style.paddingLeft = "24px";
                         });

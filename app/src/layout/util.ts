@@ -455,7 +455,7 @@ export const resizeTabs = () => {
             }
             item.editors.forEach(editorItem => {
                 hideElements(["gutter"], editorItem.protyle);
-            })
+            });
         });
         pdfResize();
     }, 200);

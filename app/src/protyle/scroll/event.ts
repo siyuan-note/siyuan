@@ -7,10 +7,10 @@ import {updateHotkeyTip} from "../util/compatibility";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 
-let getIndexTimeout: number
+let getIndexTimeout: number;
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
     let elementRect = element.getBoundingClientRect();
-    element.addEventListener("scroll", (event) => {
+    element.addEventListener("scroll", () => {
         if (!protyle.toolbar.element.classList.contains("fn__none")) {
             const initY = protyle.toolbar.element.getAttribute("data-inity").split(Constants.ZWSP);
             const top = parseInt(initY[0]) + (parseInt(initY[1]) - element.scrollTop);
@@ -46,7 +46,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             clearTimeout(getIndexTimeout);
             getIndexTimeout = window.setTimeout(() => {
                 elementRect = element.getBoundingClientRect();
-                const targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10)
+                const targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10);
                 const blockElement = hasClosestBlock(targetElement);
                 if (!blockElement) {
                     if (hasClosestByClassName(targetElement, "protyle-background") ||
@@ -61,7 +61,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                     if (!response.data) {
                         return;
                     }
-                    const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement
+                    const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement;
                     inputElement.value = response.data;
                     protyle.scroll.element.setAttribute("aria-label", `Blocks ${response.data}/${protyle.block.blockCount}`);
                 });

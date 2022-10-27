@@ -267,7 +267,7 @@ export const appearance = {
     _bindSnippet: (element: HTMLElement) => {
         const itemContentElement = hasClosestByClassName(element, "b3-label");
         if (!itemContentElement) {
-            return
+            return;
         }
         fetchPost("/api/snippet/setSnippet", {
             id: itemContentElement.getAttribute("data-id"),
@@ -276,9 +276,9 @@ export const appearance = {
             content: itemContentElement.querySelector("textarea").value,
             enabled: (itemContentElement.querySelector(".b3-switch") as HTMLInputElement).checked
         }, (response) => {
-            itemContentElement.setAttribute("data-id", response.data.id)
+            itemContentElement.setAttribute("data-id", response.data.id);
             renderSnippet();
-        })
+        });
     },
     _genSnippet: (options: ISnippet) => {
         return `<div class="b3-label" style="margin: 0" data-id="${options.id || ""}">
@@ -295,7 +295,7 @@ export const appearance = {
     </div>
     <div class="fn__hr"></div>
     <textarea class="fn__block b3-text-field" placeholder="${window.siyuan.languages.codeSnippet}"></textarea>
-</div>`
+</div>`;
     },
     bindEvent: () => {
         if (window.siyuan.config.appearance.customCSS) {
@@ -329,19 +329,19 @@ export const appearance = {
                 });
                 codeSnippetPanelElement.innerHTML = html;
                 response.data.snippets.forEach((item: ISnippet) => {
-                    const nameElement = (codeSnippetPanelElement.querySelector(`[data-id="${item.id}"] input`) as HTMLInputElement)
+                    const nameElement = (codeSnippetPanelElement.querySelector(`[data-id="${item.id}"] input`) as HTMLInputElement);
                     nameElement.value = item.name;
                     const contentElement = codeSnippetPanelElement.querySelector(`[data-id="${item.id}"] textarea`) as HTMLTextAreaElement;
                     contentElement.textContent = item.content;
-                    nameElement.addEventListener("blur", (event) => {
+                    nameElement.addEventListener("blur", () => {
                         appearance._bindSnippet(nameElement);
-                    })
-                    contentElement.addEventListener("blur", (event) => {
+                    });
+                    contentElement.addEventListener("blur", () => {
                         appearance._bindSnippet(contentElement);
-                    })
-                    codeSnippetPanelElement.querySelector(`[data-id="${item.id}"] .b3-switch`).addEventListener("change", (event) => {
+                    });
+                    codeSnippetPanelElement.querySelector(`[data-id="${item.id}"] .b3-switch`).addEventListener("change", () => {
                         appearance._bindSnippet(contentElement);
-                    })
+                    });
                 });
             });
         });
@@ -353,19 +353,19 @@ export const appearance = {
                     name: "",
                     content: "",
                     enabled: false
-                }))
+                }));
                 codeSnippetPanelElement.querySelector(".b3-text-field").addEventListener("blur", (event) => {
                     appearance._bindSnippet(event.target as HTMLElement);
-                })
+                });
                 codeSnippetPanelElement.querySelector("textarea.b3-text-field").addEventListener("blur", (event) => {
                     appearance._bindSnippet(event.target as HTMLElement);
-                })
-                codeSnippetPanelElement.querySelector('.b3-switch').addEventListener("change", (event) => {
+                });
+                codeSnippetPanelElement.querySelector(".b3-switch").addEventListener("change", (event) => {
                     appearance._bindSnippet(event.target as HTMLElement);
-                })
+                });
                 return;
             }
-            const removeElement = hasClosestByClassName(target, "b3-tooltips")
+            const removeElement = hasClosestByClassName(target, "b3-tooltips");
             if (removeElement) {
                 const id = removeElement.parentElement.parentElement.getAttribute("data-id");
                 removeElement.parentElement.parentElement.remove();
@@ -379,9 +379,9 @@ export const appearance = {
                     if (exitElement) {
                         exitElement.remove();
                     }
-                })
+                });
             }
-        })
+        });
         const appearanceCustomElement = appearance.element.querySelector("#appearanceCustom");
         appearanceCustomElement.addEventListener("click", () => {
             if (window.siyuan.config.appearance.customCSS) {

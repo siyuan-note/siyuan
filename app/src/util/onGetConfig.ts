@@ -160,17 +160,17 @@ export const onGetConfig = (isStart: boolean) => {
         mountHelp();
     }
 
-    let para = {
+    const para = {
         "version": Constants.SIYUAN_VERSION,
         "isLoggedIn": "false",
         "subscriptionStatus": "-1",
         "subscriptionPlan": "-1",
         "subscriptionType": "-1",
-    }
+    };
     if (window.siyuan.user) {
         para.isLoggedIn = "true";
         if (0 === window.siyuan.user.userSiYuanSubscriptionStatus) {
-            console.log(window.siyuan.user)
+            console.log(window.siyuan.user);
             para.subscriptionStatus = window.siyuan.user.userSiYuanSubscriptionStatus.toString();
             para.subscriptionPlan = window.siyuan.user.userSiYuanSubscriptionPlan.toString();
             para.subscriptionType = window.siyuan.user.userSiYuanSubscriptionType.toString();

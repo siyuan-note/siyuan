@@ -60,6 +60,7 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	AppearancePath = filepath.Join(ConfDir, "appearance")
 	ThemesPath = filepath.Join(AppearancePath, "themes")
 	IconsPath = filepath.Join(AppearancePath, "icons")
+	SnippetsPath = filepath.Join(DataDir, "snippets")
 	Resident = true
 	ServerPort = FixedPort
 	Container = container

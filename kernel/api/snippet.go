@@ -32,16 +32,16 @@ import (
 )
 
 func serveSnippets(c *gin.Context) {
-	name := strings.TrimPrefix(c.Request.URL.Path, "/snippets/")
-	ext := filepath.Ext(name)
-	name = strings.TrimSuffix(name, ext)
+	filePath := strings.TrimPrefix(c.Request.URL.Path, "/snippets/")
+	ext := filepath.Ext(filePath)
+	name := strings.TrimSuffix(filePath, ext)
 	confSnippets, err := model.LoadSnippets()
 	if nil != err {
 		logging.LogErrorf("load snippets failed: %s", name, err)
 		c.Status(404)
 		return
 	}
-
+	
 	for _, s := range confSnippets {
 		if s.Name == name && ("" != ext && s.Type == ext[1:]) {
 			c.Header("Content-Type", mime.TypeByExtension(ext))
@@ -49,7 +49,8 @@ func serveSnippets(c *gin.Context) {
 			return
 		}
 	}
-	c.Status(404)
+	filePath = filepath.Join(util.SnippetsPath, filePath)
+	c.File(filePath)
 }
 
 func getSnippet(c *gin.Context) {

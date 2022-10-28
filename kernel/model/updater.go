@@ -114,11 +114,7 @@ func getUpdatePkg() (downloadPkgURL, checksum string, err error) {
 
 	var suffix string
 	if gulu.OS.IsWindows() {
-		if "386" == runtime.GOARCH {
-			suffix = "win32.exe"
-		} else {
-			suffix = "win.exe"
-		}
+		suffix = "win.exe"
 	} else if gulu.OS.IsDarwin() {
 		if "arm64" == runtime.GOARCH {
 			suffix = "mac-arm64.dmg"

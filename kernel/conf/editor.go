@@ -38,6 +38,7 @@ type Editor struct {
 	ReadOnly                        bool     `json:"readOnly"`                        // 只读模式
 	EmbedBlockBreadcrumb            bool     `json:"embedBlockBreadcrumb"`            // 嵌入块是否显示面包屑
 	ListLogicalOutdent              bool     `json:"listLogicalOutdent"`              // 列表逻辑反向缩进
+	FloatWindowMode                 int      `json:"floatWindowMode"`                 // 浮窗触发模式，0：光标悬停，1：按住 Ctrl 悬停
 }
 
 func NewEditor() *Editor {
@@ -60,5 +61,6 @@ func NewEditor() *Editor {
 		ReadOnly:                        false,
 		EmbedBlockBreadcrumb:            false,
 		ListLogicalOutdent:              false,
+		FloatWindowMode:                 0,
 	}
 }

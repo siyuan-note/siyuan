@@ -1,4 +1,6 @@
 {
+  "floatWindow Mode": "懸停出現浮窗",
+  "floatWindow Mode Tip": "關閉後需按住 <code class='fn__code'>${hotkey}</code> 鍵才能出現浮窗",
   "codeSnippet": "代碼片段",
   "useFixedPort": "使用固定端口",
   "useFixedPortTip": "开启后将仅使用固定端口 <code class='fn__code'>6806</code>，关闭时同时使用随机端口和 <code class='fn__code'>6806</code>。修改後會自動關閉應用，請手動重啟",

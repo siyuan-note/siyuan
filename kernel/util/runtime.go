@@ -47,7 +47,6 @@ func logBootInfo() {
 	logging.LogInfof("kernel is booting:\n"+
 		"    * ver [%s]\n"+
 		"    * arch [%s]\n"+
-		"    * resident [%v]\n"+
 		"    * pid [%d]\n"+
 		"    * runtime mode [%s]\n"+
 		"    * working directory [%s]\n"+
@@ -55,7 +54,7 @@ func logBootInfo() {
 		"    * container [%s]\n"+
 		"    * database [ver=%s]\n"+
 		"    * workspace directory [%s, data %s]",
-		Ver, runtime.GOARCH, Resident, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir, dataDirSize)
+		Ver, runtime.GOARCH, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir, dataDirSize)
 }
 
 func IsMutexLocked(m *sync.Mutex) bool {

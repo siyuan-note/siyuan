@@ -246,6 +246,7 @@ declare interface IEditor {
     listLogicalOutdent: boolean;
     katexMacros: string;
     fullWidth: boolean;
+    floatWindowMode: number;
     fontSize: number;
     generateHistoryInterval: number;
     historyRetentionDays: number;

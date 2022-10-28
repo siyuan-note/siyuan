@@ -87,6 +87,9 @@ func Serve(fastMode bool) {
 			logging.LogErrorf("boot kernel failed: %s", err)
 			os.Exit(util.ExitCodeUnavailablePort)
 		}
+
+		// fast 模式下启动失败则直接返回
+		return
 	}
 
 	_, port, err := net.SplitHostPort(ln.Addr().String())

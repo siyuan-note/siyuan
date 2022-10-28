@@ -532,7 +532,6 @@ const initKernel = (initData) => {
     }
 
     const cmds = ['--wd', appDir]
-    cmds.push('--resident', 'false')
     if (isDevEnv) {
       cmds.push('--mode', 'dev')
     }

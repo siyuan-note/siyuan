@@ -50,7 +50,6 @@ func main() {
 	go sql.AutoFlushTreeQueue()
 	go treenode.AutoFlushBlockTree()
 	go cache.LoadAssets()
-	go model.HookResident()
 	model.WatchAssets()
 	model.HandleSignal()
 }

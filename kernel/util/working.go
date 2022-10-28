@@ -58,10 +58,7 @@ func Boot() {
 
 	workspacePath := flag.String("workspace", "", "dir path of the workspace, default to ~/Documents/SiYuan/")
 	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
-	servePath := flag.String("servePath", "", "obsoleted https://github.com/siyuan-note/siyuan/issues/4647")
-	_ = servePath
 	port := flag.String("port", "0", "port of the HTTP server")
-	resident := flag.String("resident", "true", "resident memory even if no active session")
 	readOnly := flag.String("readonly", "false", "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
@@ -76,7 +73,6 @@ func Boot() {
 		Lang = *lang
 	}
 	Mode = *mode
-	Resident, _ = strconv.ParseBool(*resident)
 	ServerPort = *port
 	ReadOnly, _ = strconv.ParseBool(*readOnly)
 	AccessAuthCode = *accessAuthCode
@@ -280,7 +276,6 @@ func initWorkspaceDir(workspaceArg string) {
 
 var (
 	ServerPort     = "0" // HTTP/WebSocket 端口，0 为使用随机端口
-	Resident       bool
 	ReadOnly       bool
 	AccessAuthCode string
 	Lang           = ""

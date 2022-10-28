@@ -40,7 +40,7 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-L7WEXVQCR9');
+  gtag('config', 'G-L7WEXVQCR9',{ 'debug_mode':true });
 </script>
 </body>
 </html>

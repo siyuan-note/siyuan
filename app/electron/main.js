@@ -43,7 +43,7 @@ let siyuanOpenURL
 let firstOpen = false
 let resetWindowStateOnRestart = false
 let kernelPort = "6806"
-const localhost = "siyuan.localhost"
+const localhost = "localhost"
 require('@electron/remote/main').initialize()
 
 if (!app.requestSingleInstanceLock()) {

@@ -295,8 +295,8 @@ const (
 	ContainerAndroid = "android" // Android 端
 	ContainerIOS     = "ios"     // iOS 端
 
-	LocalHost = "siyuan.localhost" // 本地域名，由操作系统自动解析到 127.0.0.1
-	FixedPort = "6806"             // 固定端口
+	LocalHost = "localhost" // 本地域名，由操作系统自动解析到 127.0.0.1
+	FixedPort = "6806"      // 固定端口
 )
 
 func initPathDir() {

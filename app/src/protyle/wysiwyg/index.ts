@@ -1407,8 +1407,13 @@ export class WYSIWYG {
             hideElements(["hint", "util"], protyle);
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {
-                if (backlinkBreadcrumbItemElement.getAttribute("data-id")) {
-                    loadBreadcrumb(protyle, backlinkBreadcrumbItemElement);
+                const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id")
+                if (breadcrumbId) {
+                    if (window.siyuan.ctrlIsPressed) {
+                        openFileById({id: breadcrumbId, action: [Constants.CB_GET_FOCUS]});
+                    } else {
+                        loadBreadcrumb(protyle, backlinkBreadcrumbItemElement);
+                    }
                 } else {
                     // 引用标题时的更多加载
                     getBacklinkHeadingMore(backlinkBreadcrumbItemElement);

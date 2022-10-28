@@ -7,6 +7,7 @@ import {ipcRenderer, OpenDialogReturnValue} from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
+import {destroyPrintWindow} from "../protyle/export";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
@@ -29,7 +30,6 @@ import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
 import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
-import {destroyPrintWindow} from "../protyle/export";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {

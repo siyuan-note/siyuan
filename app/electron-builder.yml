@@ -27,11 +27,11 @@ win:
   target:
     - target: "nsis"
 nsis:
-  oneClick: false
+  oneClick: true
   perMachine: false
-  allowToChangeInstallationDirectory: true
+  allowToChangeInstallationDirectory: false
   allowElevation: true
-  deleteAppDataOnUninstall: true
+  deleteAppDataOnUninstall: false
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: "SiYuan"

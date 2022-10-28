@@ -172,7 +172,7 @@ var (
 	AppearancePath string        // 配置目录下的外观目录 appearance/ 路径
 	ThemesPath     string        // 配置目录下的外观目录下的 themes/ 路径
 	IconsPath      string        // 配置目录下的外观目录下的 icons/ 路径
-	SnippetsPath   string		 // 数据目录下的 snippets/ 路径
+	SnippetsPath   string        // 数据目录下的 snippets/ 路径
 
 	AndroidNativeLibDir   string // Android 库路径
 	AndroidPrivateDataDir string // Android 私有数据路径
@@ -295,8 +295,8 @@ const (
 	ContainerAndroid = "android" // Android 端
 	ContainerIOS     = "ios"     // iOS 端
 
-	LocalHost = "siyuan.localhost" // 本地域名，由操作系统自动解析到 127.0.0.1
-	FixedPort = "6806"             // 固定端口
+	LocalHost = "localhost" // 本地域名，由操作系统自动解析到 127.0.0.1
+	FixedPort = "6806"      // 固定端口
 )
 
 func initPathDir() {

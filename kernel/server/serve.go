@@ -103,7 +103,7 @@ func Serve(fastMode bool) {
 		rewritePortJSON(pid, port)
 	}
 
-	logging.LogInfof("kernel [pid=%s] is booting [%s]", pid, "http://"+host+":"+port)
+	logging.LogInfof("kernel [pid=%s] is booting [%s]", pid, "http://"+util.LocalHost+":"+port)
 	util.HttpServing = true
 
 	go func() {

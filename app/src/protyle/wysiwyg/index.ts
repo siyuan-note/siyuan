@@ -1405,10 +1405,16 @@ export class WYSIWYG {
         let shiftStartElement: HTMLElement;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             hideElements(["hint", "util"], protyle);
+            /// #if !MOBILE
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {
-                if (backlinkBreadcrumbItemElement.getAttribute("data-id")) {
-                    loadBreadcrumb(protyle, backlinkBreadcrumbItemElement);
+                const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id")
+                if (breadcrumbId) {
+                    if (window.siyuan.ctrlIsPressed) {
+                        openFileById({id: breadcrumbId, action: [Constants.CB_GET_FOCUS]});
+                    } else {
+                        loadBreadcrumb(protyle, backlinkBreadcrumbItemElement);
+                    }
                 } else {
                     // 引用标题时的更多加载
                     getBacklinkHeadingMore(backlinkBreadcrumbItemElement);
@@ -1416,6 +1422,7 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            /// #endif
             if (!window.siyuan.shiftIsPressed) {
                 shiftStartElement = undefined;
             }

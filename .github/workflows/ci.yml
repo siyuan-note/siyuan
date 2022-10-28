@@ -100,15 +100,6 @@ jobs:
             mingwsys: "MINGW64"
             goarch: "amd64"
             suffix: "win.exe"
-          - os: windows-2019
-            kernel_path: "../app/kernel32/SiYuan-Kernel.exe"
-            build_args: "-s -w -H=windowsgui -X github.com/siyuan-note/siyuan/kernel/util.Mode=prod"
-            electron_args: "dist-win32"
-            goos: "windows"
-            mingwsys: "MINGW32"
-            goarch: "386"
-            gobin: "bin\\windows_386"
-            suffix: "win32.exe"
 
     steps:
     - uses: actions/checkout@v3

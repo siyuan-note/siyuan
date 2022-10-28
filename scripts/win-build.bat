@@ -22,16 +22,12 @@ set GOOS=windows
 set GOARCH=amd64
 go build --tags fts5 -v -o "../app/kernel/SiYuan-Kernel.exe" -ldflags "-s -w -H=windowsgui" .
 
-set GOOS=windows
-set GOARCH=386
-go build --tags fts5 -v -o "../app/kernel32/SiYuan-Kernel.exe" -ldflags "-s -w -H=windowsgui" .
 cd ..
 
 echo 'Building Electron'
 cd app
 call pnpm run dist
-echo 'Building Electron win32'
-call pnpm run dist-win32
+
 cd ..
 
 echo 'Building Appx'

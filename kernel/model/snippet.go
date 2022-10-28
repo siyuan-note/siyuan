@@ -17,6 +17,7 @@
 package model
 
 import (
+	"os"
 	"path/filepath"
 	"sync"
 
@@ -66,7 +67,7 @@ func LoadSnippets() (ret []*conf.Snippet, err error) {
 
 func loadSnippets() (ret []*conf.Snippet, err error) {
 	ret = []*conf.Snippet{}
-	confPath := filepath.Join(util.DataDir, "snippets/conf.json")
+	confPath := filepath.Join(util.SnippetsPath, "conf.json")
 	if !gulu.File.IsExist(confPath) {
 		return
 	}
@@ -102,7 +103,11 @@ func writeSnippetsConf(snippets []*conf.Snippet) (err error) {
 		return
 	}
 
-	confPath := filepath.Join(util.DataDir, "snippets/conf.json")
+	if err = os.MkdirAll(util.SnippetsPath, 0755); nil != err {
+		return
+	}
+
+	confPath := filepath.Join(util.SnippetsPath, "conf.json")
 	err = filelock.WriteFile(confPath, data)
 	return
 }

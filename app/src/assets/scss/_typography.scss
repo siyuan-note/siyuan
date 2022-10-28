@@ -472,6 +472,10 @@
     right: 4px;
     top: 4px;
     display: flex;
+
+    &--show {
+      opacity: .86;
+    }
   }
 
   &-icon {

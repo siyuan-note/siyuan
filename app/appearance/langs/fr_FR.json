@@ -1,4 +1,6 @@
 {
+  "floatWindow Mode": "Survolez pour afficher une fenêtre flottante",
+  "floatWindow Mode Tip": "Après la fermeture, vous devez maintenir la touche <code class='fn__code'>${hotkey}</code> enfoncée pour afficher la fenêtre flottante",
   "codeSnippet": "Extrait de code",
   "useFixedPort": "Utiliser un port fixe",
   "useFixedPortTip": "Après activation, seul le port <code class='fn__code'>6806</code> sera utilisé. Lorsqu'il est désactivé, les ports aléatoires et <code class='fn__code'>6806</code> seront utilisés. L'application sera fermée automatiquement après modification, veuillez la redémarrer manuellement.",

@@ -1,4 +1,6 @@
 {
+  "floatWindow Mode": "Hover to display a floating window",
+  "floatWindow Mode Tip": "After closing, you need to hold down the <code class='fn__code'>${hotkey}</code> key to display the floating window",
   "codeSnippet": "Code Snippet",
   "useFixedPort": "Use Fixed Port",
   "useFixedPortTip": "After enabling, only the port <code class='fn__code'>6806</code> will be used. When disabled, both random ports and <code class='fn__code'>6806</code> will be used. The application will be closed automatically after modification, please restart manually",

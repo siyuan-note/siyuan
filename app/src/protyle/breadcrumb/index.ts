@@ -29,6 +29,7 @@ export class Breadcrumb {
     public element: HTMLElement;
     private mediaRecorder: RecordMedia;
     private id: string;
+    private messageId: string;
 
     constructor(protyle: IProtyle) {
         const element = document.createElement("div");
@@ -160,12 +161,10 @@ export class Breadcrumb {
                 window.siyuan.menus.menu.append(uploadMenu);
                 if (window.siyuan.config.system.container !== "android" || !window.JSAndroid) {
                     window.siyuan.menus.menu.append(new MenuItem({
-                        disabled: !this.mediaRecorder || (this.mediaRecorder && !this.mediaRecorder.isRecording),
                         current: this.mediaRecorder && this.mediaRecorder.isRecording,
                         icon: "iconRecord",
                         label: this.mediaRecorder?.isRecording ? window.siyuan.languages.endRecord : window.siyuan.languages.startRecord,
                         click: () => {
-                            let messageId = "";
                             if (!this.mediaRecorder) {
                                 navigator.mediaDevices.getUserMedia({audio: true}).then((mediaStream: MediaStream) => {
                                     this.mediaRecorder = new RecordMedia(mediaStream);
@@ -180,7 +179,7 @@ export class Breadcrumb {
                                         this.mediaRecorder.cloneChannelData(left, right);
                                     };
                                     this.mediaRecorder.startRecordingNewWavFile();
-                                    messageId = showMessage(window.siyuan.languages.recording, -1);
+                                    this.messageId = showMessage(window.siyuan.languages.recording, -1);
                                 }).catch(() => {
                                     showMessage(window.siyuan.languages["record-tip"]);
                                 });
@@ -189,13 +188,13 @@ export class Breadcrumb {
 
                             if (this.mediaRecorder.isRecording) {
                                 this.mediaRecorder.stopRecording();
-                                hideMessage(messageId);
+                                hideMessage(this.messageId);
                                 const file: File = new File([this.mediaRecorder.buildWavFileBlob()],
                                     `record${(new Date()).getTime()}.wav`, {type: "video/webm"});
                                 uploadFiles(protyle, [file]);
                             } else {
-                                hideMessage(messageId);
-                                messageId = showMessage(window.siyuan.languages.recording, -1);
+                                hideMessage(this.messageId);
+                                this.messageId = showMessage(window.siyuan.languages.recording, -1);
                                 this.mediaRecorder.startRecordingNewWavFile();
                             }
                         }

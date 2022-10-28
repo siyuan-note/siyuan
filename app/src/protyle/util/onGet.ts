@@ -305,7 +305,11 @@ export const disabledProtyle = (protyle: IProtyle) => {
     }
     if (protyle.background) {
         protyle.background.element.classList.remove("protyle-background--enable");
+        protyle.background.element.classList.remove("protyle-background--mobileshow");
     }
+    protyle.wysiwyg.element.querySelectorAll(".protyle-icons--show").forEach(item => {
+        item.classList.remove("protyle-icons--show");
+    })
     protyle.wysiwyg.element.style.userSelect = "text";
     protyle.wysiwyg.element.setAttribute("contenteditable", "false");
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="true"][spellcheck="false"]').forEach(item => {

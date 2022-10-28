@@ -448,23 +448,3 @@
     transition: var(--b3-transition);
   }
 }
-
-// 触摸屏嵌入块固定显示操作按钮
-@media (hover: none) {
-  .protyle-wysiwyg {
-    &[contenteditable="false"] .render-node[data-type=NodeBlockQueryEmbed] .protyle-action__edit {
-      display: none;
-    }
-
-    [data-node-id].render-node[data-type=NodeBlockQueryEmbed] {
-      .protyle-icons {
-        opacity: .86;
-        top: 8px;
-
-        & + .protyle-wysiwyg__embed > .protyle-breadcrumb__bar {
-          margin-right: 74px;
-        }
-      }
-    }
-  }
-}

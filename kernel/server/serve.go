@@ -81,13 +81,15 @@ func Serve(fastMode bool) {
 		host = "127.0.0.1"
 	}
 
-	logging.LogInfof("boot kernel [fast=%v, port=%s]", fastMode, util.ServerPort)
 	ln, err := net.Listen("tcp", host+":"+util.ServerPort)
 	if nil != err {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
 			os.Exit(util.ExitCodeUnavailablePort)
 		}
+
+		// fast 模式下启动失败则直接返回
+		return
 	}
 
 	_, port, err := net.SplitHostPort(ln.Addr().String())

@@ -172,7 +172,7 @@ var (
 	AppearancePath string        // 配置目录下的外观目录 appearance/ 路径
 	ThemesPath     string        // 配置目录下的外观目录下的 themes/ 路径
 	IconsPath      string        // 配置目录下的外观目录下的 icons/ 路径
-	SnippetsPath   string		 // 数据目录下的 snippets/ 路径
+	SnippetsPath   string        // 数据目录下的 snippets/ 路径
 
 	AndroidNativeLibDir   string // Android 库路径
 	AndroidPrivateDataDir string // Android 私有数据路径

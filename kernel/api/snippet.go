@@ -41,7 +41,7 @@ func serveSnippets(c *gin.Context) {
 		c.Status(404)
 		return
 	}
-	
+
 	for _, s := range confSnippets {
 		if s.Name == name && ("" != ext && s.Type == ext[1:]) {
 			c.Header("Content-Type", mime.TypeByExtension(ext))
@@ -49,6 +49,8 @@ func serveSnippets(c *gin.Context) {
 			return
 		}
 	}
+
+	// 没有在配置文件中命中时在文件系统上查找
 	filePath = filepath.Join(util.SnippetsPath, filePath)
 	c.File(filePath)
 }

@@ -38,6 +38,7 @@ import {unicode2Emoji} from "../emoji";
 import {deleteFile} from "../editor/deleteFile";
 import {escapeHtml} from "./escape";
 import {syncGuide} from "../sync/syncGuide";
+import {showPopover} from "../block/popover";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -338,6 +339,9 @@ export const globalShortcut = () => {
         if (!event.altKey && !event.shiftKey && isCtrl(event)) {
             if (event.key === "Meta" || event.key === "Control" || event.ctrlKey || event.metaKey) {
                 window.siyuan.ctrlIsPressed = true;
+                if (window.siyuan.config.editor.floatWindowMode === 1 && !event.repeat) {
+                    showPopover()
+                }
             } else {
                 window.siyuan.ctrlIsPressed = false;
             }

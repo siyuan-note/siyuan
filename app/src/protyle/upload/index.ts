@@ -68,7 +68,7 @@ const validateFile = (protyle: IProtyle, files: File[]) => {
     }
     let msgId;
     if (errorTip !== "" || uploadingStr !== "") {
-        msgId = showMessage(`<ul>${errorTip}${uploadingStr}</ul>`);
+        msgId = showMessage(`<ul>${errorTip}${uploadingStr}</ul>`, -1);
     }
 
     return {files: uploadFileList, msgId};

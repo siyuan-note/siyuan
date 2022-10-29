@@ -161,22 +161,25 @@ export const onGetConfig = (isStart: boolean) => {
         mountHelp();
     }
 
-    const para = {
-        "version": Constants.SIYUAN_VERSION,
-        "isLoggedIn": "false",
-        "subscriptionStatus": "-1",
-        "subscriptionPlan": "-1",
-        "subscriptionType": "-1",
-    };
-    if (window.siyuan.user) {
-        para.isLoggedIn = "true";
-        if (0 === window.siyuan.user.userSiYuanSubscriptionStatus) {
+    try {
+        const para = {
+            "version": Constants.SIYUAN_VERSION,
+            "container": window.siyuan.config.system.container,
+            "isLoggedIn": "false",
+            "subscriptionStatus": "-1",
+            "subscriptionPlan": "-1",
+            "subscriptionType": "-1",
+        };
+        if (window.siyuan.user) {
+            para.isLoggedIn = "true";
             para.subscriptionStatus = window.siyuan.user.userSiYuanSubscriptionStatus.toString();
             para.subscriptionPlan = window.siyuan.user.userSiYuanSubscriptionPlan.toString();
             para.subscriptionType = window.siyuan.user.userSiYuanSubscriptionType.toString();
         }
+        window.gtag("event", Constants.ANALYTICS_EVT_ON_GET_CONFIG, para);
+    } catch (e) {
+        console.error(e);
     }
-    window.gtag("event", Constants.ANALYTICS_EVT_ON_GET_CONFIG, para);
 };
 
 const initBar = () => {
@@ -191,10 +194,10 @@ const initBar = () => {
     <svg><use xlink:href="#iconCalendar"></use></svg>
 </div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
-    <svg><use xlink:href="#iconLeft"></use></svg>
+    <svg><use xlink:href="#iconBack"></use></svg>
 </button>
 <button id="barForward" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goForward} ${updateHotkeyTip(window.siyuan.config.keymap.general.goForward.custom)}">
-    <svg><use xlink:href="#iconRight"></use></svg>
+    <svg><use xlink:href="#iconForward"></use></svg>
 </button>
 <div class="fn__flex-1 fn__ellipsis" id="drag"><span class="fn__none">开发版，使用前请进行备份 Development version, please backup before use</span></div>
 <div id="barSearch" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">

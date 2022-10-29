@@ -297,13 +297,13 @@
   right: 4px;
   position: absolute;
   top: 36px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 #secondaryToolbarButtonContainer {
   max-width: 220px;
   max-height: 400px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 #secondaryToolbarButtonContainer.hiddenScrollModeButtons > .scrollModeButtons,

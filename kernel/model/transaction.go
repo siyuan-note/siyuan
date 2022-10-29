@@ -1170,9 +1170,6 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 		if nil == defNode {
 			return ast.WalkSkipChildren
 		}
-		if ast.NodeDocument != defNode.Type && defNode.IsContainerBlock() {
-			defNode = treenode.FirstLeafBlock(defNode)
-		}
 
 		refText := getNodeRefText(defNode)
 		treenode.SetDynamicBlockRefText(n, refText)

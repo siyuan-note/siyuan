@@ -164,8 +164,9 @@ export const onGetConfig = (isStart: boolean) => {
     if (!window.siyuan.config.system.disableGoogleAnalytics) {
         try {
             window.dataLayer = window.dataLayer || [];
-            // @ts-ignore
-            window.gtag = () => {window.dataLayer.push(arguments)};
+            window.gtag = function (...args) {
+                window.dataLayer.push(args);
+            };
             window.gtag("js", new Date());
             window.gtag("config", "G-L7WEXVQCR9");
             const para = {

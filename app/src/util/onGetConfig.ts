@@ -30,6 +30,7 @@ import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
 import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
+import {addScript} from "../protyle/util/addScript";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -162,31 +163,33 @@ export const onGetConfig = (isStart: boolean) => {
     }
 
     if (!window.siyuan.config.system.disableGoogleAnalytics) {
-        try {
-            window.dataLayer = window.dataLayer || [];
-            window.gtag = function (...args) {
-                window.dataLayer.push(args);
-            };
-            window.gtag("js", new Date());
-            window.gtag("config", "G-L7WEXVQCR9");
-            const para = {
-                "version": Constants.SIYUAN_VERSION,
-                "container": window.siyuan.config.system.container,
-                "isLoggedIn": "false",
-                "subscriptionStatus": "-1",
-                "subscriptionPlan": "-1",
-                "subscriptionType": "-1",
-            };
-            if (window.siyuan.user) {
-                para.isLoggedIn = "true";
-                para.subscriptionStatus = window.siyuan.user.userSiYuanSubscriptionStatus.toString();
-                para.subscriptionPlan = window.siyuan.user.userSiYuanSubscriptionPlan.toString();
-                para.subscriptionType = window.siyuan.user.userSiYuanSubscriptionType.toString();
+        addScript("https://www.googletagmanager.com/gtag/js?id=G-L7WEXVQCR9", "gaScript").then(() => {
+            try {
+                window.dataLayer = window.dataLayer || [];
+                window.gtag = function (...args) {
+                    window.dataLayer.push(args);
+                };
+                window.gtag("js", new Date());
+                window.gtag("config", "G-L7WEXVQCR9");
+                const para = {
+                    "version": Constants.SIYUAN_VERSION,
+                    "container": window.siyuan.config.system.container,
+                    "isLoggedIn": "false",
+                    "subscriptionStatus": "-1",
+                    "subscriptionPlan": "-1",
+                    "subscriptionType": "-1",
+                };
+                if (window.siyuan.user) {
+                    para.isLoggedIn = "true";
+                    para.subscriptionStatus = window.siyuan.user.userSiYuanSubscriptionStatus.toString();
+                    para.subscriptionPlan = window.siyuan.user.userSiYuanSubscriptionPlan.toString();
+                    para.subscriptionType = window.siyuan.user.userSiYuanSubscriptionType.toString();
+                }
+                window.gtag("event", Constants.ANALYTICS_EVT_ON_GET_CONFIG, para);
+            } catch (e) {
+                console.error(e);
             }
-            window.gtag("event", Constants.ANALYTICS_EVT_ON_GET_CONFIG, para);
-        } catch (e) {
-            console.error(e);
-        }
+        });
     }
 };
 

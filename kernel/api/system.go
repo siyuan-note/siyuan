@@ -314,9 +314,6 @@ func setGoogleAnalytics(c *gin.Context) {
 	googleAnalytics := arg["googleAnalytics"].(bool)
 	model.Conf.System.GoogleAnalytics = googleAnalytics
 	model.Conf.Save()
-
-	util.PushMsg(model.Conf.Language(42), 1000*15)
-	time.Sleep(time.Second * 3)
 }
 
 func setUploadErrLog(c *gin.Context) {

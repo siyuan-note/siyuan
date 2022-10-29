@@ -325,6 +325,12 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                 item.editor.protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
                 item.editor.protyle.wysiwyg.renderCustom(attrsResult);
             }
+            // https://github.com/siyuan-note/siyuan/issues/6398
+            item.editor.protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${id}"][data-subtype="d"]`).forEach(item => {
+                fetchPost("/api/block/getRefText", {id: id}, (response) => {
+                    item.innerHTML = response.data;
+                });
+            });
         });
         /// #endif
         fetchPost("/api/attr/resetBlockAttrs", {id, attrs: attrsResult}, () => {

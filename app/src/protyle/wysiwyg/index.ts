@@ -1408,7 +1408,7 @@ export class WYSIWYG {
             /// #if !MOBILE
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {
-                const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id")
+                const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id");
                 if (breadcrumbId) {
                     if (window.siyuan.ctrlIsPressed) {
                         openFileById({id: breadcrumbId, action: [Constants.CB_GET_FOCUS]});

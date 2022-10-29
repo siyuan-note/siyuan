@@ -444,44 +444,44 @@ export class Asset extends Model {
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>`;
             const localPDF = JSON.parse(localStorage.getItem(Constants.LOCAL_PDFTHEME) || "{}");
-            let pdfTheme
+            let pdfTheme;
             if (window.siyuan.config.appearance.mode === 0) {
-                pdfTheme = localPDF.light || "light"
+                pdfTheme = localPDF.light || "light";
             } else {
-                pdfTheme = localPDF.dark || "dark"
+                pdfTheme = localPDF.dark || "dark";
             }
-            const darkElement = this.element.querySelector("#pdfDark")
-            const lightElement = this.element.querySelector("#pdfLight")
+            const darkElement = this.element.querySelector("#pdfDark");
+            const lightElement = this.element.querySelector("#pdfLight");
             if (pdfTheme === "dark") {
                 this.element.firstElementChild.classList.add("pdf__outer--dark");
-                lightElement.classList.remove("toggled")
-                darkElement.classList.add("toggled")
+                lightElement.classList.remove("toggled");
+                darkElement.classList.add("toggled");
             } else {
-                lightElement.classList.add("toggled")
-                darkElement.classList.remove("toggled")
+                lightElement.classList.add("toggled");
+                darkElement.classList.remove("toggled");
             }
             lightElement.addEventListener("click", () => {
                 if (window.siyuan.config.appearance.mode === 0) {
-                    localPDF.light = "light"
+                    localPDF.light = "light";
                 } else {
-                    localPDF.dark = "light"
+                    localPDF.dark = "light";
                 }
                 this.element.firstElementChild.classList.remove("pdf__outer--dark");
                 localStorage.setItem(Constants.LOCAL_PDFTHEME, JSON.stringify(localPDF));
-                lightElement.classList.add("toggled")
-                darkElement.classList.remove("toggled")
-            })
+                lightElement.classList.add("toggled");
+                darkElement.classList.remove("toggled");
+            });
             darkElement.addEventListener("click", () => {
                 if (window.siyuan.config.appearance.mode === 0) {
-                    localPDF.light = "dark"
+                    localPDF.light = "dark";
                 } else {
-                    localPDF.dark = "dark"
+                    localPDF.dark = "dark";
                 }
                 this.element.firstElementChild.classList.add("pdf__outer--dark");
                 localStorage.setItem(Constants.LOCAL_PDFTHEME, JSON.stringify(localPDF));
-                lightElement.classList.remove("toggled")
-                darkElement.classList.add("toggled")
-            })
+                lightElement.classList.remove("toggled");
+                darkElement.classList.add("toggled");
+            });
             // 初始化完成后需等待页签是否显示设置完成，才可以判断 pdf 是否能进行渲染
             setTimeout(() => {
                 if (this.element.clientWidth === 0) {

@@ -3,7 +3,7 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {fetchSyncPost} from "../util/fetch";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
 
-let popoverTargetElement: HTMLElement
+let popoverTargetElement: HTMLElement;
 export const initBlockPopover = () => {
     let timeout: number;
     let timeoutHide: number;
@@ -41,7 +41,7 @@ export const initBlockPopover = () => {
         if (window.siyuan.config.editor.floatWindowMode === 1) {
             clearTimeout(timeoutHide);
             timeoutHide = window.setTimeout(() => {
-                hidePopover(event)
+                hidePopover(event);
             }, 200);
 
             if (!getTarget(event, aElement)) {
@@ -49,7 +49,7 @@ export const initBlockPopover = () => {
             }
             if (window.siyuan.ctrlIsPressed) {
                 clearTimeout(timeoutHide);
-                showPopover()
+                showPopover();
             }
             return;
         }
@@ -69,7 +69,7 @@ export const initBlockPopover = () => {
                 return;
             }
             clearTimeout(timeoutHide);
-            showPopover()
+            showPopover();
         }, 620);
     });
 };
@@ -134,7 +134,7 @@ const hidePopover = (event: MouseEvent & { target: HTMLElement }) => {
             }
         }
     }
-}
+};
 
 const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false | HTMLElement) => {
     if (hasClosestByClassName(event.target, "history__repo", true)) {
@@ -164,8 +164,8 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
             return false;
         }
     }
-    return true
-}
+    return true;
+};
 
 export const showPopover = async () => {
     if (!popoverTargetElement) {
@@ -231,4 +231,4 @@ export const showPopover = async () => {
         }));
     }
     popoverTargetElement = undefined;
-}
+};

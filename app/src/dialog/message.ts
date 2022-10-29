@@ -86,13 +86,13 @@ export const hideMessage = (id?: string) => {
                 }
             }, Constants.TIMEOUT_INPUT);
         }
-        let hasShowItem = false
+        let hasShowItem = false;
         Array.from(messagesElement.children).find(item => {
             if (!item.classList.contains("b3-snackbar--hide")) {
-                hasShowItem = true
+                hasShowItem = true;
                 return true;
             }
-        })
+        });
         if (hasShowItem) {
             messagesElement.parentElement.classList.add("b3-snackbars--show");
         } else {

@@ -65,7 +65,7 @@ export const initUI = (protyle: IProtyle) => {
             protyle.background.element.classList.toggle("protyle-background--mobileshow");
             return;
         }
-        const embedBlockElement = hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")
+        const embedBlockElement = hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed");
         if (embedBlockElement) {
             embedBlockElement.firstElementChild.classList.toggle("protyle-icons--show");
         }

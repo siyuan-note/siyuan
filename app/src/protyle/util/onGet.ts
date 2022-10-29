@@ -309,7 +309,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
     }
     protyle.wysiwyg.element.querySelectorAll(".protyle-icons--show").forEach(item => {
         item.classList.remove("protyle-icons--show");
-    })
+    });
     protyle.wysiwyg.element.style.userSelect = "text";
     protyle.wysiwyg.element.setAttribute("contenteditable", "false");
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="true"][spellcheck="false"]').forEach(item => {

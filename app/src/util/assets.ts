@@ -53,6 +53,26 @@ export const loadAssets = (data: IAppearance) => {
     getAllModels().graph.forEach(item => {
         item.searchGraph(false);
     });
+    const localPDF = JSON.parse(localStorage.getItem(Constants.LOCAL_PDFTHEME) || "{}");
+    let pdfTheme: string
+    if (window.siyuan.config.appearance.mode === 0) {
+        pdfTheme = localPDF.light || "light"
+    } else {
+        pdfTheme = localPDF.dark || "dark"
+    }
+    document.querySelectorAll(".pdf__outer").forEach(item => {
+        const darkElement = item.querySelector("#pdfDark")
+        const lightElement = item.querySelector("#pdfLight")
+        if (pdfTheme === "dark") {
+            item.classList.add("pdf__outer--dark");
+            lightElement.classList.remove("toggled")
+            darkElement.classList.add("toggled")
+        } else {
+            item.classList.remove("pdf__outer--dark");
+            lightElement.classList.add("toggled")
+            darkElement.classList.remove("toggled")
+        }
+    })
     /// #endif
     setCodeTheme();
 

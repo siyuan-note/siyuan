@@ -353,7 +353,7 @@ declare interface IConfig {
         xanadu: boolean
         udanax: boolean
         uploadErrLog: boolean
-        googleAnalytics: boolean
+        disableGoogleAnalytics: boolean
         downloadInstallPkg: boolean
         networkServe: boolean
         fixedPort: boolean

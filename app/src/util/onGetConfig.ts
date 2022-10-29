@@ -161,7 +161,7 @@ export const onGetConfig = (isStart: boolean) => {
         mountHelp();
     }
 
-    if (window.siyuan.config.system.googleAnalytics) {
+    if (!window.siyuan.config.system.disableGoogleAnalytics) {
         try {
             window.dataLayer = window.dataLayer || [];
             // @ts-ignore

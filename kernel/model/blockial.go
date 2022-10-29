@@ -179,6 +179,12 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		}
 	}
 
+	if ast.NodeDocument == node.Type {
+		// 修改命名文档块后引用动态锚文本未跟随 https://github.com/siyuan-note/siyuan/issues/6398
+		// 使用重命名文档队列来刷新引用锚文本
+		updateRefTextRenameDoc(tree)
+	}
+
 	if err = indexWriteJSONQueue(tree); nil != err {
 		return
 	}

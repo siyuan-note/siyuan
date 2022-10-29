@@ -171,8 +171,10 @@ func CheckAuth(c *gin.Context) {
 	}
 
 	// 放过来自本机的某些请求
-	if strings.HasPrefix(c.Request.RemoteAddr, util.LocalHost) || strings.HasPrefix(c.Request.RemoteAddr, "127.0.0.1") {
-		if strings.HasPrefix(c.Request.RequestURI, "/assets/") || strings.HasPrefix(c.Request.RequestURI, "/history/assets/") {
+	if strings.HasPrefix(c.Request.RemoteAddr, util.LocalHost) ||
+		strings.HasPrefix(c.Request.RemoteAddr, "127.0.0.1") ||
+		strings.HasPrefix(c.Request.RemoteAddr, "[::1]") {
+		if strings.HasPrefix(c.Request.RequestURI, "/assets/") {
 			c.Next()
 			return
 		}

@@ -1235,7 +1235,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 	util.PushEvent(evt)
 
 	box.renameSubTrees(tree)
-	go updateRefTextRenameDoc(tree)
+	updateRefTextRenameDoc(tree)
 	IncSync()
 	return
 }

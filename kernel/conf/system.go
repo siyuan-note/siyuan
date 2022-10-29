@@ -39,6 +39,7 @@ type System struct {
 	NetworkProxy *NetworkProxy `json:"networkProxy"`
 
 	UploadErrLog       bool `json:"uploadErrLog"`
+	GoogleAnalytics    bool `json:"googleAnalytics"`
 	DownloadInstallPkg bool `json:"downloadInstallPkg"`
 }
 

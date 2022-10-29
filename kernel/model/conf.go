@@ -292,7 +292,7 @@ func InitConf() {
 		})
 	}
 
-	if !Conf.System.GoogleAnalytics {
+	if Conf.System.DisableGoogleAnalytics {
 		logging.LogInfof("user has disabled [Google Analytics]")
 	}
 

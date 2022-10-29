@@ -312,7 +312,7 @@ func setGoogleAnalytics(c *gin.Context) {
 	}
 
 	googleAnalytics := arg["googleAnalytics"].(bool)
-	model.Conf.System.GoogleAnalytics = googleAnalytics
+	model.Conf.System.DisableGoogleAnalytics = googleAnalytics
 	model.Conf.Save()
 }
 

@@ -1,4 +1,6 @@
 {
+  "googleAnalytics": "Google Analytics",
+  "googleAnalyticsTip": "Après l'activation, l'utilisation sera comptabilisée via <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> afin que les développeurs puissent améliorer l'expérience utilisateur du produit.",
   "floatWindowMode": "Survolez pour afficher une fenêtre flottante",
   "floatWindowModeTip": "Après l'activation, une fenêtre flottante apparaît lorsque la souris survole la référence du bloc, l'icône du fil d'Ariane, etc. Après la désactivation, vous devez maintenir enfoncée la touche <code class='fn__code'>${hotkey}</code> pour apparaît la fenêtre flottante",
   "codeSnippet": "Extrait de code",

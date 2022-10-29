@@ -1,4 +1,6 @@
 {
+  "googleAnalytics": "Google Analytics",
+  "googleAnalyticsTip": "After enabling, usage will be counted through <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> so that developers can improve the product user experience",
   "floatWindowMode": "Hover to display a floating window",
   "floatWindowModeTip": "After enabling, a floating window will appear when the mouse hovers over the block reference, breadcrumb block icon, etc. After disabling, you need to hold down the <code class='fn__code'>${hotkey}</code> key to appear the floating window",
   "codeSnippet": "Code Snippet",

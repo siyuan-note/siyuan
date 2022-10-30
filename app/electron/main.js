@@ -692,9 +692,12 @@ const initKernel = (initData) => {
 }
 
 app.setAsDefaultProtocolClient('siyuan')
+
 app.commandLine.appendSwitch('disable-web-security')
 app.commandLine.appendSwitch('auto-detect', 'false')
 app.commandLine.appendSwitch('no-proxy-server')
+app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport')
+
 app.setPath('userData', app.getPath('userData') + '-Electron') // `~/.config` 下 Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
 
 app.whenReady().then(() => {

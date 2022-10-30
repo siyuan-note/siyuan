@@ -1,6 +1,6 @@
 {
   "dynamicLoadBlocks": "動態加載塊數",
-  "dynamicLoadBlocksTip": "如果需要渲染的代碼塊、公式塊或圖表塊較多，建議不要設置過大",
+  "dynamicLoadBlocksTip": "該值包含了子塊數。如果需要渲染的代碼塊、公式塊或圖表塊較多，建議不要設置過大",
   "googleAnalytics": "Google Analytics",
   "googleAnalyticsTip": "啟用後會通過 <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> 統計使用情況，以便開發者提升產品使用體驗",
   "floatWindowMode": "懸停出現浮窗",

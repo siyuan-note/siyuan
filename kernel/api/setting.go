@@ -204,7 +204,7 @@ func setSearch(c *gin.Context) {
 	}
 
 	if 1 > s.Limit {
-		s.Limit = 32
+		s.Limit = 64
 	}
 
 	oldCaseSensitive := model.Conf.Search.CaseSensitive

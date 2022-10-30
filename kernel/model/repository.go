@@ -555,8 +555,6 @@ func bootSyncRepo() (err error) {
 		return
 	}
 
-	logging.LogInfof("%d", len(fetchedFiles))
-
 	if 0 < len(fetchedFiles) {
 		go func() {
 			time.Sleep(7 * time.Second) // 等待一段时间后前端完成界面初始化后再同步

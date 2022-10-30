@@ -20,6 +20,8 @@ export const blockRender = (protyle: IProtyle, element: Element) => {
         if (item.getAttribute("data-render") === "true") {
             return;
         }
+        // 需置于请求返回前，否则快速滚动会导致重复加载 https://ld246.com/article/1666857862494?r=88250
+        item.setAttribute("data-render", "true");
         item.innerHTML = `<div class="protyle-icons${hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") ? " fn__none" : ""}">
     <span class="protyle-icon protyle-action__reload protyle-icon--first"><svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg></span>
     <span class="protyle-icon protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
@@ -51,7 +53,6 @@ export const blockRender = (protyle: IProtyle, element: Element) => {
                 }
                 html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}">${breadcrumbHTML}${blocksItem.block.content}</div>`;
             });
-            item.setAttribute("data-render", "true");
             if (response.data.blocks.length > 0) {
                 item.lastElementChild.insertAdjacentHTML("beforebegin", html +
                     // 辅助上下移动时进行选中

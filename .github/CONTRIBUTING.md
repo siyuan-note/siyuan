@@ -32,6 +32,8 @@ On the desktop, go to the app folder to run:
 * `pnpm run dev`
 * `pnpm run start`
 
+Note: In the development environment, the kernel process will not be automatically started, and you need to manually start the kernel process first.
+
 ## Kernel
 
 ### Desktop

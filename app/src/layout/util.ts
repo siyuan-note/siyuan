@@ -10,7 +10,7 @@ import {setPadding} from "../protyle/ui/initUI";
 import {newFile} from "../util/newFile";
 import {Outline} from "./dock/Outline";
 import {Bookmark} from "./dock/Bookmark";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {exportLocalStorage, updateHotkeyTip} from "../protyle/util/compatibility";
 import {Tag} from "./dock/Tag";
 import {getAllModels, getAllTabs} from "./getAll";
 import {Asset} from "../asset";
@@ -136,6 +136,14 @@ const dockToJSON = (dock: Dock) => {
     return json;
 };
 
+export const resetLayout = () => {
+    fetchPost("/api/system/setUILayout", {layout: {}}, () => {
+        exportLocalStorage(() => {
+            window.location.reload();
+        });
+    });
+};
+
 export const exportLayout = (reload: boolean, cb?: () => void) => {
     const useElement = document.querySelector("#barDock use");
     if (!useElement) {
@@ -151,11 +159,13 @@ export const exportLayout = (reload: boolean, cb?: () => void) => {
     };
     layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
     fetchPost("/api/system/setUILayout", {layout: layoutJSON, exit: typeof cb !== "undefined"}, () => {
-        if (reload) {
-            window.location.reload();
-        } else if (cb) {
-            cb();
-        }
+        exportLocalStorage(() => {
+            if (reload) {
+                window.location.reload();
+            } else if (cb) {
+                cb();
+            }
+        });
     });
 };
 
@@ -453,6 +463,9 @@ export const resizeTabs = () => {
             if (mTreeElement.style.height && mTreeElement.style.height !== "0px") {
                 mTreeElement.style.height = (item.element.clientHeight - mTreeElement.previousElementSibling.clientHeight * 2) + "px";
             }
+            item.editors.forEach(editorItem => {
+                hideElements(["gutter"], editorItem.protyle);
+            });
         });
         pdfResize();
     }, 200);

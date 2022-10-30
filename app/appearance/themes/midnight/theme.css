@@ -153,11 +153,6 @@
 }
 
 /* PDF */
-.pdfViewer .page canvas,
-.thumbnailImage {
-    filter: grayscale(0%) invert(100%) contrast(100%) brightness(100%) hue-rotate(180deg);
-}
-
 .textLayer,
 .pdf__resize {
     mix-blend-mode: screen;

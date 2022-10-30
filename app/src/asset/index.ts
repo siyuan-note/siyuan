@@ -167,6 +167,15 @@ export class Asset extends Model {
         </div>  <!-- findbar -->
         <div id="secondaryToolbar" class="secondaryToolbar fn__hidden doorHangerRight b3-menu">
           <div id="secondaryToolbarButtonContainer">
+            <button id="pdfLight" class="secondaryToolbarButton b3-menu__item toggled" tabindex="54">
+              <svg class="b3-menu__icon"><use xlink:href="#iconLight"></use></svg> 
+              <span class="b3-menu__label">${window.siyuan.languages.themeLight}</span>
+            </button>
+            <button id="pdfDark" class="secondaryToolbarButton b3-menu__item" tabindex="55">
+              <svg class="b3-menu__icon"><use xlink:href="#iconDark"></use></svg> 
+              <span class="b3-menu__label">${window.siyuan.languages.themeDark}</span>
+            </button>
+            <div class="horizontalToolbarSeparator b3-menu__separator"></div>
             <button id="firstPage" class="secondaryToolbarButton b3-menu__item firstPage" tabindex="56">
               <svg class="b3-menu__icon"><use xlink:href="#iconUp"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.firstPage}</span>
@@ -175,9 +184,7 @@ export class Asset extends Model {
               <svg class="b3-menu__icon"><use xlink:href="#iconDown"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.lastPage}</span>
             </button>
-
             <div class="horizontalToolbarSeparator b3-menu__separator"></div>
-
             <button id="pageRotateCw" class="secondaryToolbarButton b3-menu__item rotateCw" tabindex="58">
                <svg class="b3-menu__icon"><use xlink:href="#iconRedo"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.rotateCw}</span>
@@ -436,6 +443,45 @@ export class Asset extends Model {
       </div>
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>`;
+            const localPDF = JSON.parse(localStorage.getItem(Constants.LOCAL_PDFTHEME) || "{}");
+            let pdfTheme;
+            if (window.siyuan.config.appearance.mode === 0) {
+                pdfTheme = localPDF.light || "light";
+            } else {
+                pdfTheme = localPDF.dark || "dark";
+            }
+            const darkElement = this.element.querySelector("#pdfDark");
+            const lightElement = this.element.querySelector("#pdfLight");
+            if (pdfTheme === "dark") {
+                this.element.firstElementChild.classList.add("pdf__outer--dark");
+                lightElement.classList.remove("toggled");
+                darkElement.classList.add("toggled");
+            } else {
+                lightElement.classList.add("toggled");
+                darkElement.classList.remove("toggled");
+            }
+            lightElement.addEventListener("click", () => {
+                if (window.siyuan.config.appearance.mode === 0) {
+                    localPDF.light = "light";
+                } else {
+                    localPDF.dark = "light";
+                }
+                this.element.firstElementChild.classList.remove("pdf__outer--dark");
+                localStorage.setItem(Constants.LOCAL_PDFTHEME, JSON.stringify(localPDF));
+                lightElement.classList.add("toggled");
+                darkElement.classList.remove("toggled");
+            });
+            darkElement.addEventListener("click", () => {
+                if (window.siyuan.config.appearance.mode === 0) {
+                    localPDF.light = "dark";
+                } else {
+                    localPDF.dark = "dark";
+                }
+                this.element.firstElementChild.classList.add("pdf__outer--dark");
+                localStorage.setItem(Constants.LOCAL_PDFTHEME, JSON.stringify(localPDF));
+                lightElement.classList.remove("toggled");
+                darkElement.classList.add("toggled");
+            });
             // 初始化完成后需等待页签是否显示设置完成，才可以判断 pdf 是否能进行渲染
             setTimeout(() => {
                 if (this.element.clientWidth === 0) {

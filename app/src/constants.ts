@@ -61,7 +61,7 @@ export abstract class Constants {
     // localstorage
     public static readonly LOCAL_SEARCHEDATA = "local-searchedata";
     public static readonly LOCAL_SEARCHETABDATA = "local-searchetabdata";
-    public static readonly LOCAL_DOCINFO = "local-docinfo";
+    public static readonly LOCAL_DOCINFO = "local-docinfo"; // only mobile
     public static readonly LOCAL_DAILYNOTEID = "local-dailynoteid";
     public static readonly LOCAL_HISTORYNOTEID = "local-historynoteid";
     public static readonly LOCAL_CODELANG = "local-codelang";
@@ -69,6 +69,7 @@ export abstract class Constants {
     public static readonly LOCAL_EXPORTPDF = "local-exportpdf";
     public static readonly LOCAL_EXPORTWORD = "local-exportword";
     public static readonly LOCAL_BAZAAR = "local-bazaar";
+    public static readonly LOCAL_PDFTHEME = "local-pdftheme";
 
     // timeout
     public static readonly TIMEOUT_DBLCLICK = 190;
@@ -105,7 +106,7 @@ export abstract class Constants {
         "222": ["'", '"'],
     };
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⌥⇧↑", "⌥⇧↓", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "⌃I", "⌃E", "⌃N", "⌃U" 不可自定义
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "⌃I", "⌃E", "⌃N", "⌃U" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {
             syncNow: {default: "F9", custom: "F9"},
@@ -137,6 +138,8 @@ export abstract class Constants {
         },
         editor: {
             general: {
+                expandDown: {default: "⌥⇧↓", custom: "⌥⇧↓"},
+                expandUp: {default: "⌥⇧↑", custom: "⌥⇧↑"},
                 copyPlainText: {default: "", custom: ""},
                 copyID: {default: "", custom: ""},
                 netImg2LocalAsset: {default: "", custom: ""},
@@ -425,4 +428,7 @@ export abstract class Constants {
         // third
         "yul", "solidity", "abap",
     ];
+
+    // Google Analytics 事件
+    public static readonly ANALYTICS_EVT_ON_GET_CONFIG: string = "siyuan.onGetConfig";
 }

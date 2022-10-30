@@ -60,7 +60,8 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	AppearancePath = filepath.Join(ConfDir, "appearance")
 	ThemesPath = filepath.Join(AppearancePath, "themes")
 	IconsPath = filepath.Join(AppearancePath, "icons")
-	Resident = true
+	SnippetsPath = filepath.Join(DataDir, "snippets")
+	ServerPort = FixedPort
 	Container = container
 	UserAgent = UserAgent + " " + Container
 	httpclient.SetUserAgent(UserAgent)

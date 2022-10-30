@@ -30,12 +30,15 @@ type Editor struct {
 	Emoji                           []string `json:"emoji"`                           // 常用表情
 	VirtualBlockRef                 bool     `json:"virtualBlockRef"`                 // 是否启用虚拟引用
 	VirtualBlockRefExclude          string   `json:"virtualBlockRefExclude"`          // 虚拟引用关键字排除列表
+	VirtualBlockRefInclude          string   `json:"virtualBlockRefInclude"`          // 虚拟引用关键字包含列表
 	BlockRefDynamicAnchorTextMaxLen int      `json:"blockRefDynamicAnchorTextMaxLen"` // 块引动态锚文本最大长度
 	PlantUMLServePath               string   `json:"plantUMLServePath"`               // PlantUML 伺服地址
 	FullWidth                       bool     `json:"fullWidth"`                       // 是否使用最大宽度
 	KaTexMacros                     string   `json:"katexMacros"`                     // KeTex 宏定义
 	ReadOnly                        bool     `json:"readOnly"`                        // 只读模式
 	EmbedBlockBreadcrumb            bool     `json:"embedBlockBreadcrumb"`            // 嵌入块是否显示面包屑
+	ListLogicalOutdent              bool     `json:"listLogicalOutdent"`              // 列表逻辑反向缩进
+	FloatWindowMode                 int      `json:"floatWindowMode"`                 // 浮窗触发模式，0：光标悬停，1：按住 Ctrl 悬停
 }
 
 func NewEditor() *Editor {
@@ -57,5 +60,7 @@ func NewEditor() *Editor {
 		KaTexMacros:                     "{}",
 		ReadOnly:                        false,
 		EmbedBlockBreadcrumb:            false,
+		ListLogicalOutdent:              false,
+		FloatWindowMode:                 0,
 	}
 }

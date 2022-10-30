@@ -29,7 +29,7 @@ win:
 nsis:
   oneClick: false
   perMachine: false
-  allowToChangeInstallationDirectory: true
+  allowToChangeInstallationDirectory: false
   allowElevation: true
   deleteAppDataOnUninstall: true
   createDesktopShortcut: true

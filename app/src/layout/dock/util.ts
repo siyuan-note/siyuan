@@ -23,7 +23,8 @@ export const openBacklink = (protyle: IProtyle) => {
             tab.addModel(new Backlink({
                 type: "local",
                 tab,
-                blockId: protyle.block.id,
+                // 通过搜索打开的包含上下文，但不是缩放，因此需要传 rootID https://ld246.com/article/1666786639708
+                blockId: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
                 rootId: protyle.block.rootID,
             }));
         }

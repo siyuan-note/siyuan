@@ -39,7 +39,9 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/getEmojiConf", model.CheckAuth, getEmojiConf)
 	ginServer.Handle("POST", "/api/system/setAccessAuthCode", model.CheckAuth, setAccessAuthCode)
 	ginServer.Handle("POST", "/api/system/setNetworkServe", model.CheckAuth, setNetworkServe)
+	ginServer.Handle("POST", "/api/system/setFixedPort", model.CheckAuth, setFixedPort)
 	ginServer.Handle("POST", "/api/system/setUploadErrLog", model.CheckAuth, setUploadErrLog)
+	ginServer.Handle("POST", "/api/system/setGoogleAnalytics", model.CheckAuth, setGoogleAnalytics)
 	ginServer.Handle("POST", "/api/system/setDownloadInstallPkg", model.CheckAuth, setDownloadInstallPkg)
 	ginServer.Handle("POST", "/api/system/setNetworkProxy", model.CheckAuth, setNetworkProxy)
 	ginServer.Handle("POST", "/api/system/setWorkspaceDir", model.CheckAuth, setWorkspaceDir)
@@ -51,6 +53,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/getConf", model.CheckAuth, getConf)
 	ginServer.Handle("POST", "/api/system/checkUpdate", model.CheckAuth, checkUpdate)
 	ginServer.Handle("POST", "/api/system/exportLog", model.CheckAuth, exportLog)
+	ginServer.Handle("POST", "/api/system/setLocalStorage", model.CheckAuth, setLocalStorage)
+	ginServer.Handle("POST", "/api/system/getLocalStorage", model.CheckAuth, getLocalStorage)
 
 	ginServer.Handle("POST", "/api/account/login", model.CheckAuth, login)
 	ginServer.Handle("POST", "/api/account/checkActivationcode", model.CheckAuth, checkActivationcode)
@@ -130,6 +134,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/getBlockDOM", model.CheckAuth, getBlockDOM)
 	ginServer.Handle("POST", "/api/block/getBlockKramdown", model.CheckAuth, getBlockKramdown)
 	ginServer.Handle("POST", "/api/block/getBlockBreadcrumb", model.CheckAuth, getBlockBreadcrumb)
+	ginServer.Handle("POST", "/api/block/getBlockIndex", model.CheckAuth, getBlockIndex)
 	ginServer.Handle("POST", "/api/block/getRefIDs", model.CheckAuth, getRefIDs)
 	ginServer.Handle("POST", "/api/block/getRefIDsByFileAnnotationID", model.CheckAuth, getRefIDsByFileAnnotationID)
 	ginServer.Handle("POST", "/api/block/getBlockDefIDsByRefText", model.CheckAuth, getBlockDefIDsByRefText)
@@ -281,4 +286,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/notification/pushErrMsg", model.CheckAuth, pushErrMsg)
 
 	ginServer.Handle("POST", "/api/snippet/getSnippet", model.CheckAuth, getSnippet)
+	ginServer.Handle("POST", "/api/snippet/setSnippet", model.CheckAuth, setSnippet)
+	ginServer.Handle("POST", "/api/snippet/removeSnippet", model.CheckAuth, removeSnippet)
+	ginServer.Handle("GET", "/snippets/*filepath", serveSnippets)
 }

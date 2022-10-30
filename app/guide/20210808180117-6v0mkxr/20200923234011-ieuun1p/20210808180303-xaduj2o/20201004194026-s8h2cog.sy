@@ -4,8 +4,10 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20201004194026-s8h2cog",
+		"scroll": "{\u0026quot;startId\u0026quot;:\u0026quot;20210104091447-8iiuxlt\u0026quot;,\u0026quot;endId\u0026quot;:\u0026quot;20210117211053-tq2km4f\u0026quot;,\u0026quot;scrollTop\u0026quot;:346,\u0026quot;focusId\u0026quot;:\u0026quot;20210302223802-ghpurq7\u0026quot;,\u0026quot;focusStart\u0026quot;:22,\u0026quot;focusEnd\u0026quot;:22}",
 		"title": "Use on browser",
-		"type": "doc"
+		"type": "doc",
+		"updated": "20221025093157"
 	},
 	"Children": [
 		{
@@ -17,147 +19,58 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
 					"Data": "Browser usage"
 				}
 			]
 		},
 		{
-			"ID": "20210104091447-3oeqhre",
+			"ID": "20221025092947-gd0wmbi",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091447-3oeqhre",
-				"updated": "20210302223804"
+				"id": "20221025092947-gd0wmbi",
+				"updated": "20221025093054"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan Desktop is an standalone application packaged based on "
+					"Data": "In "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://www.electronjs.org",
-					"TextMarkTextContent": "Electron"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", but this is not the only way to use it. As long as the kernel of SiYuan is started, it can be used directly on the browser, supporting mobile browsers."
-				}
-			]
-		},
-		{
-			"ID": "20210104091447-35vbebb",
-			"Type": "NodeList",
-			"ListData": {
-				"Tight": true,
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
-			"Properties": {
-				"id": "20210104091447-35vbebb"
-			},
-			"Children": [
-				{
-					"ID": "20210104091447-2cfema8",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20210104091447-2cfema8"
-					},
-					"Children": [
-						{
-							"ID": "20210302223802-g5brri7",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210302223802-g5brri7"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Desktop Web version: the experience is almost the same as the Electron standalone application"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210104091447-i60nkht",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20210104091447-i60nkht"
-					},
-					"Children": [
-						{
-							"ID": "20210302223802-ju54kjt",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210302223802-ju54kjt"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Mobile Web version: specially designed for mobile-end user experience"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20210104091447-3gpw4m6",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104091447-3gpw4m6"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "After visiting "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "http://127.0.0.1:6806/"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "About"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", the desktop or mobile version will be automatically switched according to the browser version."
-				}
-			]
-		},
-		{
-			"ID": "20210104091447-ztky9z6",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104091447-ztky9z6"
-			},
-			"Children": [
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Use on browser"
+				},
 				{
 					"Type": "NodeText",
-					"Data": "If you need to use it in a local area network, just replace "
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Open browser"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, you can directly use SiYuan on the browser, if you need to use it in the local area network, replace "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -166,7 +79,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " with the local area network IP address. In addition to local LAN use, here are two self-service solutions for public network use:"
+					"Data": "​ with the local area network IP address."
+				}
+			]
+		},
+		{
+			"ID": "20221025092947-5m97t0e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025092947-5m97t0e",
+				"updated": "20221025093148"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition to the use of the local LAN, the use of the public network can be achieved by the following two methods::"
 				}
 			]
 		},
@@ -181,7 +108,8 @@
 				"Num": -1
 			},
 			"Properties": {
-				"id": "20210104091447-6y4386v"
+				"id": "20210104091447-6y4386v",
+				"updated": "20221025093157"
 			},
 			"Children": [
 				{
@@ -226,19 +154,21 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20210104091447-oo5sodh"
+						"id": "20210104091447-oo5sodh",
+						"updated": "20221025093157"
 					},
 					"Children": [
 						{
 							"ID": "20210302223802-ghpurq7",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210302223802-ghpurq7"
+								"id": "20210302223802-ghpurq7",
+								"updated": "20221025093157"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Build your own SiYuanServer (recommended)"
+									"Data": "Build your own SiYuan Server (recommended)"
 								}
 							]
 						}

@@ -2,7 +2,7 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {OpenDialogReturnValue} from "electron";
-import {app, BrowserWindow, dialog} from "@electron/remote";
+import {app, BrowserWindow, dialog, getCurrentWindow} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "./util";
@@ -61,6 +61,7 @@ export const saveExport = (option: { type: string, id: string }) => {
 };
 
 /// #if !BROWSER
+let originalZoomFactor = 1;
 const renderPDF = (id: string) => {
     const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_EXPORTPDF) || JSON.stringify({
         landscape: false,
@@ -166,10 +167,10 @@ const renderPDF = (id: string) => {
     <label class="b3-label">
         <div>
             ${window.siyuan.languages.exportPDF3}
-            <span id="scaleTip" style="float: right;color: var(--b3-theme-on-background);">${localData.scale||1}</span>
+            <span id="scaleTip" style="float: right;color: var(--b3-theme-on-background);">${localData.scale || 1}</span>
         </div>
         <span class="fn__hr"></span>
-        <input style="width: 192px" value="${localData.scale||1}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
+        <input style="width: 192px" value="${localData.scale || 1}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
     </label>
     <label class="b3-label">
         <div>
@@ -199,7 +200,7 @@ const renderPDF = (id: string) => {
       <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
-<div class="protyle-wysiwyg protyle-wysiwyg--attr" id="preview">
+<div class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview">
     <div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>
 </div>
 <script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
@@ -370,9 +371,14 @@ const renderPDF = (id: string) => {
         setPadding()
     });
 </script></body></html>`;
+    const mainWindow = getCurrentWindow();
+    originalZoomFactor = mainWindow.webContents.zoomFactor;
     window.siyuan.printWin = new BrowserWindow({
+        parent: mainWindow,
+        modal: true,
         show: true,
         width: 1032,
+        height: 618,
         resizable: false,
         frame: "darwin" === window.siyuan.config.system.os,
         icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
@@ -392,6 +398,11 @@ const renderPDF = (id: string) => {
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
         window.siyuan.printWin.loadURL(response.data.url);
     });
+};
+
+export const destroyPrintWindow = () => {
+    getCurrentWindow().webContents.setZoomFactor(originalZoomFactor);
+    window.siyuan.printWin.destroy();
 };
 
 const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean) => {
@@ -477,7 +488,7 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     </style>
 </head>
 <body>
-<div class="${["htmlmd", "word"].includes(type) ? "b3-typography" : "protyle-wysiwyg protyle-wysiwyg--attr"}" style="max-width: 800px;margin: 0 auto;" id="preview">${data.data.content}</div>
+<div class="${["htmlmd", "word"].includes(type) ? "b3-typography" : "protyle-wysiwyg" + (window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : "")}" style="max-width: 800px;margin: 0 auto;" id="preview">${data.data.content}</div>
 <script src="appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    

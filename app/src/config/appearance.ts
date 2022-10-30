@@ -3,12 +3,13 @@ import {ipcRenderer, shell} from "electron";
 import * as path from "path";
 /// #endif
 import {Constants} from "../constants";
-import {exportLayout} from "../layout/util";
-import * as Pickr from "@simonwep/pickr";
+import {exportLayout, resetLayout} from "../layout/util";
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {loadAssets} from "../util/assets";
 import {genOptions} from "../util/genOptions";
+import {openSnippets} from "./util/snippets";
+import {openColorPicker} from "./util/colorPicker";
 
 export const appearance = {
     element: undefined as Element,
@@ -106,17 +107,6 @@ export const appearance = {
         ${window.siyuan.languages.refresh}
     </button>
 </label>
-<div class="b3-label">
-    <label class="fn__block fn__flex">
-        <div class="fn__flex-1">
-            ${window.siyuan.languages.theme13} <b id="appearanceCustomName">${window.siyuan.config.appearance.mode === 0 ? window.siyuan.config.appearance.themeLight : window.siyuan.config.appearance.themeDark}</b>
-            <div class="b3-label__text">${window.siyuan.languages.theme14}</div>
-        </div>
-        <span class="fn__space"></span>
-        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="appearanceCustom">${window.siyuan.config.appearance.customCSS ? window.siyuan.languages.close : window.siyuan.languages.open}</button>
-    </label>
-    <div id="appearanceCustomPanel"></div>
-</div>
 <label class="b3-label fn__flex">
    <div class="fn__flex-1">
         ${window.siyuan.languages.resetLayout}
@@ -126,6 +116,31 @@ export const appearance = {
     <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="resetLayout">
         <svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.reset}
     </button>
+</label>
+<label class="b3-label fn__flex">
+    <div class="fn__flex-1 fn__flex-center">
+        ${window.siyuan.languages.codeSnippet}
+    </div>
+    <span class="fn__space"></span>
+    <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="codeSnippet">
+        <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}
+    </button>
+</label>
+<label class="b3-label fn__flex">
+    <div class="fn__flex-1 fn__flex-center">
+        ${window.siyuan.languages.theme13} 
+    </div>
+    <span class="fn__space"></span>
+    <button class="b3-button b3-button--outline fn__size200" id="appearanceCustomSetting">
+        <svg><use xlink:href="#iconFormat"></use></svg>${window.siyuan.languages.custom}
+    </button> 
+</label>
+<label class="b3-label fn__flex">
+    <div class="fn__flex-1 fn__flex-center">
+        ${window.siyuan.languages.theme14}
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="appearanceCustom" type="checkbox"${window.siyuan.config.appearance.customCSS ? " checked" : ""}>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -152,63 +167,6 @@ export const appearance = {
     <input class="b3-switch fn__flex-center" id="closeButtonBehavior" type="checkbox"${window.siyuan.config.appearance.closeButtonBehavior === 0 ? "" : " checked"}>
 </label>`;
     },
-    onGetcustomcss: (data: Record<string, Record<string, string>>) => {
-        let customHTML = '<div class="fn__hr"></div>';
-        Object.keys(data).forEach((item) => {
-            customHTML += `<div class="fn__hr"></div><div>${window.siyuan.languages[item]}</div><div class="fn__hr"></div>`;
-            Object.keys(data[item]).forEach(subItem => {
-                customHTML += `<div class="fn__flex">
-    <span class="colorPicker" data-key="${item}" data-subkey="${subItem}" data-value="${data[item][subItem]}"></span>
-    <span class="fn__space"></span>
-    <span class="ft__on-surface fn__flex-center">${window.siyuan.languages[subItem]}</span>
-</div><div class="fn__hr"></div>`;
-            });
-        });
-        appearance.element.querySelector("#appearanceCustomPanel").innerHTML = customHTML;
-        const pickrs: Record<string, Record<string, any>> = {};
-        appearance.element.querySelectorAll("#appearanceCustomPanel .colorPicker").forEach((item: HTMLInputElement) => {
-            // @ts-ignore
-            const pickr = Pickr.create({
-                container: "#appearanceCustomPanel",
-                el: item,
-                theme: "nano",
-                default: item.getAttribute("data-value"),
-                comparison: false,
-                components: {
-                    preview: true,
-                    opacity: true,
-                    hue: true,
-                    interaction: {
-                        input: true,
-                    }
-                }
-            });
-            pickr.on("hide", () => {
-                appearance._sendCustomcss(pickrs);
-            });
-            pickr.on("changestop", () => {
-                appearance._sendCustomcss(pickrs);
-            });
-            const key = item.getAttribute("data-key");
-            if (!pickrs[key]) {
-                pickrs[key] = {};
-            }
-            pickrs[key][item.getAttribute("data-subkey")] = pickr;
-        });
-    },
-    _sendCustomcss: (pickrs: Record<string, Record<string, any>>) => {
-        const css: Record<string, Record<string, string>> = {};
-        Object.keys(pickrs).forEach((item) => {
-            css[item] = {};
-            Object.keys(pickrs[item]).forEach(subItem => {
-                css[item][subItem] = pickrs[item][subItem].getColor().toRGBA().toString(0);
-            });
-        });
-        fetchPost("/api/setting/setCustomCSS", {
-            theme: appearance.element.querySelector("#appearanceCustomName").textContent,
-            css
-        });
-    },
     _send: () => {
         const themeLight = (appearance.element.querySelector("#themeLight") as HTMLSelectElement).value;
         const themeDark = (appearance.element.querySelector("#themeDark") as HTMLSelectElement).value;
@@ -225,7 +183,7 @@ export const appearance = {
             lightThemes: window.siyuan.config.appearance.lightThemes,
             icons: window.siyuan.config.appearance.icons,
             lang: (appearance.element.querySelector("#lang") as HTMLSelectElement).value,
-            customCSS: window.siyuan.config.appearance.customCSS,
+            customCSS: (appearance.element.querySelector("#appearanceCustom") as HTMLInputElement).checked,
             closeButtonBehavior: (appearance.element.querySelector("#closeButtonBehavior") as HTMLInputElement).checked ? 1 : 0,
             nativeEmoji: (appearance.element.querySelector("#nativeEmoji") as HTMLInputElement).checked,
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
@@ -252,34 +210,14 @@ export const appearance = {
         });
     },
     bindEvent: () => {
-        if (window.siyuan.config.appearance.customCSS) {
-            fetchPost("/api/setting/getCustomCSS", {
-                theme: appearance.element.querySelector("#appearanceCustomName").textContent
-            }, response => {
-                appearance.onGetcustomcss(response.data);
-            });
-        }
-        const appearanceCustomElement = appearance.element.querySelector("#appearanceCustom");
-        appearanceCustomElement.addEventListener("click", () => {
-            if (window.siyuan.config.appearance.customCSS) {
-                window.siyuan.config.appearance.customCSS = false;
-                appearanceCustomElement.textContent = window.siyuan.languages.open;
-                appearance.element.querySelector("#appearanceCustomPanel").innerHTML = "";
-            } else {
-                window.siyuan.config.appearance.customCSS = true;
-                fetchPost("/api/setting/getCustomCSS", {
-                    theme: appearance.element.querySelector("#appearanceCustomName").textContent
-                }, response => {
-                    appearance.onGetcustomcss(response.data);
-                });
-                appearanceCustomElement.textContent = window.siyuan.languages.close;
-            }
-            appearance._send();
+        appearance.element.querySelector("#codeSnippet").addEventListener("click", () => {
+            openSnippets();
+        });
+        appearance.element.querySelector("#appearanceCustomSetting").addEventListener("click", () => {
+            openColorPicker();
         });
         appearance.element.querySelector("#resetLayout").addEventListener("click", () => {
-            fetchPost("/api/system/setUILayout", {layout: {}}, () => {
-                window.location.reload();
-            });
+           resetLayout();
         });
         /// #if !BROWSER
         appearance.element.querySelector("#appearanceOpenIcon").addEventListener("click", () => {
@@ -313,7 +251,6 @@ export const appearance = {
         }
         window.siyuan.config.appearance = data;
         if (appearance.element) {
-            const theme = data.mode === 0 ? data.themeLight : data.themeDark;
             const modeElement = appearance.element.querySelector("#mode") as HTMLSelectElement;
             if (modeElement) {
                 if (data.modeOS) {
@@ -321,7 +258,6 @@ export const appearance = {
                 } else {
                     modeElement.value = data.mode === 0 ? "0" : "1";
                 }
-                appearance.element.querySelector("#appearanceCustomName").textContent = theme;
             }
             const themeLightElement = appearance.element.querySelector("#themeLight") as HTMLSelectElement;
             if (themeLightElement) {
@@ -334,13 +270,6 @@ export const appearance = {
             const iconElement = appearance.element.querySelector("#icon") as HTMLSelectElement;
             if (iconElement) {
                 iconElement.innerHTML = genOptions(window.siyuan.config.appearance.icons, window.siyuan.config.appearance.icon);
-            }
-            if (data.customCSS) {
-                fetchPost("/api/setting/getCustomCSS", {
-                    theme
-                }, response => {
-                    appearance.onGetcustomcss(response.data);
-                });
             }
         }
         /// #if !BROWSER

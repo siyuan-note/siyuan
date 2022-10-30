@@ -219,15 +219,18 @@
       opacity: 1;
     }
 
-    .protyle-background__img:hover .protyle-icons {
-      opacity: .86;
-    }
-
-    &:hover > .protyle-background__iconw > .protyle-icons {
-      opacity: .86;
-    }
-
+    .protyle-background__img:hover .protyle-icons,
+    &:hover > .protyle-background__iconw > .protyle-icons,
     .protyle-background__icon:hover {
+      opacity: .86;
+    }
+  }
+
+
+  &--mobileshow {
+    .protyle-background__iconw > .protyle-icons,
+    .protyle-background__img .protyle-icons,
+    .protyle-background__tags .item svg {
       opacity: .86;
     }
   }
@@ -443,33 +446,5 @@
     background: var(--b3-theme-primary-lightest);
     position: relative;
     transition: var(--b3-transition);
-  }
-}
-
-// 触摸屏嵌入块固定显示操作按钮
-@media (hover: none) {
-  .protyle-wysiwyg {
-    &[contenteditable="false"] .render-node[data-type=NodeBlockQueryEmbed] .protyle-action__edit {
-      display: none;
-    }
-
-    [data-node-id].render-node[data-type=NodeBlockQueryEmbed] {
-      .protyle-icons {
-        opacity: .86;
-        top: 8px;
-
-        & + .protyle-wysiwyg__embed > .protyle-breadcrumb__bar {
-          margin-right: 74px;
-        }
-      }
-    }
-  }
-
-  .protyle-background--enable {
-    .protyle-background__iconw > .protyle-icons,
-    .protyle-background__img .protyle-icons,
-    .protyle-background__tags .item svg {
-      opacity: .86;
-    }
   }
 }

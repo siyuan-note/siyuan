@@ -40,13 +40,26 @@
       padding: 0;
       margin: 0;
 
+      &:before {
+        content: "";
+        position: absolute;
+        height: calc(100% - 35px);
+        border-left: 0.5px solid var(--b3-theme-background-light);
+        top: 35px;
+        left: 17px;
+      }
+
+      &:hover:before {
+        border-left-color: var(--b3-scroll-color);
+      }
+
       &[fold="1"] {
-        & > [data-node-id]:before {
+        &:before {
           content: none;
         }
 
         & > .protyle-action:after {
-          background-color: var(--b3-theme-surface-lighter);
+          background-color: var(--b3-list-hover);
         }
 
         & > div:nth-child(3):not(.protyle-attr),
@@ -99,50 +112,15 @@
 
       & > div:nth-child(2) {
         margin-top: 0 !important;
-
-        &:before {
-          top: 34px !important;
-          height: calc(100% - 26px) !important; // https://ld246.com/article/1636540486193
-        }
-
-        &:nth-last-child(2):before {
-          content: none;
-        }
-      }
-
-      & > div:nth-last-child(2):before {
-        height: 100%;
-        top: 0;
       }
 
       & > [data-node-id] {
         margin-left: 34px !important;
         padding-right: 0;
 
-        &:before {
-          content: "";
-          position: absolute;
-          height: calc(100% + 4px);
-          border-left: 1px solid var(--b3-theme-background-light);
-          top: 4px;
-          left: -18px;
-        }
-
-        &[data-type="NodeBlockQueryEmbed"]:before {
-          left: -19px;
-        }
-
-        &.bq:before {
-          left: calc(-18px - 0.25em);
-        }
-
         &.code-block {
           margin-top: 4px;
           margin-bottom: 4px;
-        }
-
-        &.list:before {
-          left: -2px;
         }
       }
 
@@ -478,7 +456,7 @@
 
   [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {
     @include text-clamp(1);
-    opacity: 0.68;
+    opacity: 0.54;
     font-size: 16px;
     height: 26px;
     line-height: 26px;
@@ -565,7 +543,6 @@
 
   .li > .protyle-action:hover {
     &:after {
-      background-color: var(--b3-theme-background-light) !important;
       opacity: .68;
     }
 

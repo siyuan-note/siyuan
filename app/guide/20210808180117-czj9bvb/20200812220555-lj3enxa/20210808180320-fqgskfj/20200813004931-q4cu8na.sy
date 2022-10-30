@@ -6,7 +6,7 @@
 		"id": "20200813004931-q4cu8na",
 		"title": "什么是内容块",
 		"type": "doc",
-		"updated": "20211223192435"
+		"updated": "20221026234721"
 	},
 	"Children": [
 		{
@@ -269,40 +269,28 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118101917-4n4ygss",
-				"memo": "备注通常是一句简短的话。"
+				"memo": "备注通常是一句简短的话。",
+				"updated": "20221026234721"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "我们可以为每个内容块命名、添加别名和备注。命名和别名主要用于反链"
+					"Data": "我们可以为每个"
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20210106201736-oyu11fw"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "提及"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeText",
+					"Data": "内容块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "命名、添加别名和备注。命名和别名主要用于反链"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210106201736-oyu11fw",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "提及"
 				},
 				{
 					"Type": "NodeText",

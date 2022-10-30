@@ -53,6 +53,26 @@ export const loadAssets = (data: IAppearance) => {
     getAllModels().graph.forEach(item => {
         item.searchGraph(false);
     });
+    const localPDF = JSON.parse(localStorage.getItem(Constants.LOCAL_PDFTHEME) || "{}");
+    let pdfTheme: string;
+    if (window.siyuan.config.appearance.mode === 0) {
+        pdfTheme = localPDF.light || "light";
+    } else {
+        pdfTheme = localPDF.dark || "dark";
+    }
+    document.querySelectorAll(".pdf__outer").forEach(item => {
+        const darkElement = item.querySelector("#pdfDark");
+        const lightElement = item.querySelector("#pdfLight");
+        if (pdfTheme === "dark") {
+            item.classList.add("pdf__outer--dark");
+            lightElement.classList.remove("toggled");
+            darkElement.classList.add("toggled");
+        } else {
+            item.classList.remove("pdf__outer--dark");
+            lightElement.classList.add("toggled");
+            darkElement.classList.remove("toggled");
+        }
+    });
     /// #endif
     setCodeTheme();
 
@@ -86,26 +106,6 @@ export const loadAssets = (data: IAppearance) => {
     }
 };
 
-export const renderSnippet = () => {
-    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 1}, (response) => {
-        response.data.snippets.forEach((item: {
-            "name": string
-            "type": string
-            "content": string
-        }) => {
-            if (item.type === "css") {
-                document.head.insertAdjacentHTML("beforeend", `<style id="snippetCSS${item.name}">${item.content}</style>`);
-            } else if (item.type === "js") {
-                const scriptElement = document.createElement("script");
-                scriptElement.type = "text/javascript";
-                scriptElement.text = item.content;
-                scriptElement.id = `snippetJS${item.name}`;
-                document.head.appendChild(scriptElement);
-            }
-        });
-    });
-};
-
 export const initAssets = () => {
     const emojiElement = document.getElementById("emojiScript");
     const loadingElement = document.getElementById("loading");
@@ -119,6 +119,38 @@ export const initAssets = () => {
         setTimeout(() => {
             loadingElement.remove();
         }, 160);
+    }
+};
+
+export const addGA = () => {
+    if (!window.siyuan.config.system.disableGoogleAnalytics) {
+        addScript("https://www.googletagmanager.com/gtag/js?id=G-L7WEXVQCR9", "gaScript").then(() => {
+            try {
+                window.dataLayer = window.dataLayer || [];
+                window.gtag = function (...args) {
+                    window.dataLayer.push(args);
+                };
+                window.gtag("js", new Date());
+                window.gtag("config", "G-L7WEXVQCR9");
+                const para = {
+                    "version": Constants.SIYUAN_VERSION,
+                    "container": window.siyuan.config.system.container,
+                    "isLoggedIn": "false",
+                    "subscriptionStatus": "-1",
+                    "subscriptionPlan": "-1",
+                    "subscriptionType": "-1",
+                };
+                if (window.siyuan.user) {
+                    para.isLoggedIn = "true";
+                    para.subscriptionStatus = window.siyuan.user.userSiYuanSubscriptionStatus.toString();
+                    para.subscriptionPlan = window.siyuan.user.userSiYuanSubscriptionPlan.toString();
+                    para.subscriptionType = window.siyuan.user.userSiYuanSubscriptionType.toString();
+                }
+                window.gtag("event", Constants.ANALYTICS_EVT_ON_GET_CONFIG, para);
+            } catch (e) {
+                console.error(e);
+            }
+        });
     }
 };
 

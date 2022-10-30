@@ -34,7 +34,6 @@ var (
 )
 
 const (
-	ServerPort       = "6806"                              // HTTP/WebSocket 端口
 	AliyunServer     = "https://siyuan-sync.b3logfile.com" // 云端服务地址，阿里云负载均衡，用于接口，数据同步文件上传、下载会走七牛云 OSS http://siyuan-data.b3logfile.com
 	BazaarStatServer = "http://bazaar.b3logfile.com"       // 集市包统计服务地址，直接对接 Bucket 没有 CDN 缓存
 	BazaarOSSServer  = "https://oss.b3logfile.com"         // 云端对象存储地址，七牛云，仅用于读取集市包
@@ -88,7 +87,7 @@ var LocalIPs []string
 func GetLocalIPs() (ret []string) {
 	if ContainerAndroid == Container {
 		// Android 上用不了 net.InterfaceAddrs() https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
-		LocalIPs = append(LocalIPs, "127.0.0.1")
+		LocalIPs = append(LocalIPs, LocalHost)
 		LocalIPs = gulu.Str.RemoveDuplicatedElem(LocalIPs)
 		return LocalIPs
 	}
@@ -105,7 +104,7 @@ func GetLocalIPs() (ret []string) {
 			ret = append(ret, networkIp.IP.String())
 		}
 	}
-	ret = append(ret, "127.0.0.1")
+	ret = append(ret, LocalHost)
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
 }

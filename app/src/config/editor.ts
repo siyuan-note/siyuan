@@ -5,6 +5,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {setPadding} from "../protyle/ui/initUI";
 import {reloadProtyle} from "../protyle/util/reload";
 import {disabledProtyle, enableProtyle} from "../protyle/util/onGet";
+import {updateHotkeyTip} from "../protyle/util/compatibility";
 
 export const editor = {
     element: undefined as Element,
@@ -94,6 +95,30 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.embedBlockBreadcrumb}
+        <div class="b3-label__text">${window.siyuan.languages.embedBlockBreadcrumbTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="embedBlockBreadcrumb" type="checkbox"${window.siyuan.config.editor.embedBlockBreadcrumb ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.floatWindowMode}
+        <div class="b3-label__text">${window.siyuan.languages.floatWindowModeTip.replace("${hotkey}", updateHotkeyTip("⌘"))}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="floatWindowMode" type="checkbox"${window.siyuan.config.editor.floatWindowMode === 0 ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.outlineOutdent}
+        <div class="b3-label__text">${window.siyuan.languages.outlineOutdentTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="listLogicalOutdent" type="checkbox"${window.siyuan.config.editor.listLogicalOutdent ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.md31}
         <div class="b3-label__text">${window.siyuan.languages.md32}</div>
     </div>
@@ -118,19 +143,19 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.embedBlockBreadcrumb}
-        <div class="b3-label__text">${window.siyuan.languages.embedBlockBreadcrumbTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="embedBlockBreadcrumb" type="checkbox"${window.siyuan.config.editor.embedBlockBreadcrumb ? " checked" : ""}/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
         ${window.siyuan.languages.md33}
         <div class="b3-label__text">${window.siyuan.languages.md34}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="virtualBlockRef" type="checkbox"${window.siyuan.config.editor.virtualBlockRef ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.md9}
+        <div class="b3-label__text">${window.siyuan.languages.md36}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" id="virtualBlockRefInclude" value="${window.siyuan.config.editor.virtualBlockRefInclude}" />
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -235,10 +260,13 @@ export const editor = {
                 displayNetImgMark: (editor.element.querySelector("#displayNetImgMark") as HTMLInputElement).checked,
                 codeSyntaxHighlightLineNum: (editor.element.querySelector("#codeSyntaxHighlightLineNum") as HTMLInputElement).checked,
                 embedBlockBreadcrumb: (editor.element.querySelector("#embedBlockBreadcrumb") as HTMLInputElement).checked,
+                listLogicalOutdent: (editor.element.querySelector("#listLogicalOutdent") as HTMLInputElement).checked,
+                floatWindowMode: (editor.element.querySelector("#floatWindowMode") as HTMLInputElement).checked ? 0 : 1,
                 plantUMLServePath: (editor.element.querySelector("#plantUMLServePath") as HTMLInputElement).value,
                 katexMacros: (editor.element.querySelector("#katexMacros") as HTMLTextAreaElement).value,
                 codeLineWrap: (editor.element.querySelector("#codeLineWrap") as HTMLInputElement).checked,
                 virtualBlockRef: (editor.element.querySelector("#virtualBlockRef") as HTMLInputElement).checked,
+                virtualBlockRefInclude: (editor.element.querySelector("#virtualBlockRefInclude") as HTMLInputElement).value,
                 virtualBlockRefExclude: (editor.element.querySelector("#virtualBlockRefExclude") as HTMLInputElement).value,
                 blockRefDynamicAnchorTextMaxLen: parseInt((editor.element.querySelector("#blockRefDynamicAnchorTextMaxLen") as HTMLInputElement).value),
                 codeLigatures: (editor.element.querySelector("#codeLigatures") as HTMLInputElement).checked,

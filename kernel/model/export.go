@@ -438,7 +438,7 @@ func ExportHTML(id, savePath string, pdf, keepFold bool) (name, dom string) {
 			}
 		}
 	} else { // 导出 PDF 需要将资源文件路径改为 HTTP 伺服
-		luteEngine.RenderOptions.LinkBase = "http://127.0.0.1:" + util.ServerPort + "/"
+		luteEngine.RenderOptions.LinkBase = "http://" + util.LocalHost + ":" + util.ServerPort + "/"
 	}
 
 	if pdf {
@@ -1208,7 +1208,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 
 	if Conf.Export.AddTitle {
 		if root, _ := getBlock(id); nil != root {
-			title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1}
+			title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1, KramdownIAL: parse.Map2IAL(root.IAL)}
 			content := html.UnescapeString(root.Content)
 			title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(content)})
 			ret.Root.PrependChild(title)

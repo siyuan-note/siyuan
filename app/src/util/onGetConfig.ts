@@ -1,5 +1,5 @@
 import {openSearch} from "../search/spread";
-import {exportLayout, JSONToLayout, resizeDrag, resizeTabs} from "../layout/util";
+import {exportLayout, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
 import {hotKey2Electron, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
@@ -7,6 +7,7 @@ import {ipcRenderer, OpenDialogReturnValue} from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
+import {destroyPrintWindow} from "../protyle/export";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
@@ -14,7 +15,8 @@ import {globalShortcut} from "./globalShortcut";
 import {fetchPost} from "./fetch";
 import {mountHelp, newDailyNote} from "./mount";
 import {MenuItem} from "../menus/Menu";
-import {initAssets, loadAssets, renderSnippet, setInlineStyle, setMode} from "./assets";
+import {addGA, initAssets, loadAssets, setInlineStyle, setMode} from "./assets";
+import {renderSnippet} from "../config/util/snippets";
 import {getOpenNotebookCount} from "./pathName";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
@@ -135,9 +137,7 @@ export const onGetConfig = (isStart: boolean) => {
         try {
             JSONToLayout(isStart);
         } catch (e) {
-            fetchPost("/api/system/setUILayout", {layout: {}}, () => {
-                window.location.reload();
-            });
+            resetLayout();
         }
     });
     initBar();
@@ -158,6 +158,7 @@ export const onGetConfig = (isStart: boolean) => {
     if (window.siyuan.config.newbie) {
         mountHelp();
     }
+    addGA();
 };
 
 const initBar = () => {
@@ -172,10 +173,10 @@ const initBar = () => {
     <svg><use xlink:href="#iconCalendar"></use></svg>
 </div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
-    <svg><use xlink:href="#iconLeft"></use></svg>
+    <svg><use xlink:href="#iconBack"></use></svg>
 </button>
 <button id="barForward" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goForward} ${updateHotkeyTip(window.siyuan.config.keymap.general.goForward.custom)}">
-    <svg><use xlink:href="#iconRight"></use></svg>
+    <svg><use xlink:href="#iconForward"></use></svg>
 </button>
 <div class="fn__flex-1 fn__ellipsis" id="drag"><span class="fn__none">开发版，使用前请进行备份 Development version, please backup before use</span></div>
 <div id="barSearch" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
@@ -202,7 +203,7 @@ const initBar = () => {
                 goForward();
                 event.stopPropagation();
                 break;
-            }else if (target.id === "barSync") {
+            } else if (target.id === "barSync") {
                 syncGuide(target);
                 event.stopPropagation();
                 break;
@@ -381,7 +382,7 @@ const initWindow = () => {
         winOnClose(currentWindow, close);
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_CLOSE, () => {
-        window.siyuan.printWin.destroy();
+        destroyPrintWindow();
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, (e, ipcData) => {
         dialog.showOpenDialog({
@@ -389,12 +390,15 @@ const initWindow = () => {
             properties: ["createDirectory", "openDirectory"],
         }).then((result: OpenDialogReturnValue) => {
             if (result.canceled) {
-                window.siyuan.printWin.destroy();
+                destroyPrintWindow();
                 return;
             }
             const msgId = showMessage(window.siyuan.languages.exporting, -1);
             const filePath = result.filePaths[0].endsWith(ipcData.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle));
-            localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {removeAssets: ipcData.removeAssets, keepFold: ipcData.keepFold})));
+            localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {
+                removeAssets: ipcData.removeAssets,
+                keepFold: ipcData.keepFold
+            })));
             try {
                 window.siyuan.printWin.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {
                     fetchPost("/api/export/exportHTML", {
@@ -405,7 +409,7 @@ const initWindow = () => {
                     }, () => {
                         const pdfFilePath = path.join(filePath, path.basename(filePath) + ".pdf");
                         fs.writeFileSync(pdfFilePath, pdfData);
-                        window.siyuan.printWin.destroy();
+                        destroyPrintWindow();
                         fetchPost("/api/export/addPDFOutline", {
                             id: ipcData.rootId,
                             path: pdfFilePath
@@ -437,11 +441,11 @@ const initWindow = () => {
                     });
                 }).catch((error: string) => {
                     showMessage("Export PDF error:" + error, 0, "error", msgId);
-                    window.siyuan.printWin.destroy();
+                    destroyPrintWindow();
                 });
             } catch (e) {
                 showMessage("Export PDF failed: " + e, 0, "error", msgId);
-                window.siyuan.printWin.destroy();
+                destroyPrintWindow();
             }
             window.siyuan.printWin.hide();
         });

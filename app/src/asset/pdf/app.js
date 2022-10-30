@@ -2943,7 +2943,7 @@ function webViewerClick (evt) {
   if (
     pdfInstance.pdfViewer.containsElement(evt.target) ||
     (appConfig.toolbar.container.contains(evt.target) &&
-      evt.target !== appConfig.secondaryToolbar.toggleButton)
+      !appConfig.secondaryToolbar.toggleButton.contains(evt.target)) // NOTE
   ) {
     pdfInstance.secondaryToolbar.close()
   }

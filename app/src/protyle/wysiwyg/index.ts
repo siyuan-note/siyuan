@@ -190,6 +190,7 @@ export class WYSIWYG {
 
     private bindCommonEvent(protyle: IProtyle) {
         this.element.addEventListener("copy", (event: ClipboardEvent & { target: HTMLElement }) => {
+            window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             // https://github.com/siyuan-note/siyuan/issues/4600
             if (event.target.tagName === "PROTYLE-HTML") {
                 event.stopPropagation();
@@ -910,6 +911,7 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("cut", (event: ClipboardEvent & { target: HTMLElement }) => {
+            window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             if (event.target.tagName === "PROTYLE-HTML") {
                 event.stopPropagation();
                 return;
@@ -1256,14 +1258,15 @@ export class WYSIWYG {
             if (nodeElement) {
                 const embedElement = hasClosestByAttribute(nodeElement, "data-type", "NodeBlockQueryEmbed");
                 if (embedElement) {
-                    protyle.gutter.render(embedElement, this.element);
+                    protyle.gutter.render(protyle, embedElement, this.element);
                 } else {
-                    protyle.gutter.render(nodeElement, this.element);
+                    protyle.gutter.render(protyle, nodeElement, this.element);
                 }
             }
         });
 
         this.element.addEventListener("paste", (event: ClipboardEvent & { target: HTMLElement }) => {
+            window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             // https://github.com/siyuan-note/siyuan/issues/4600
             if (event.target.tagName === "PROTYLE-HTML") {
                 event.stopPropagation();
@@ -1402,10 +1405,16 @@ export class WYSIWYG {
         let shiftStartElement: HTMLElement;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             hideElements(["hint", "util"], protyle);
+            /// #if !MOBILE
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {
-                if (backlinkBreadcrumbItemElement.getAttribute("data-id")) {
-                    loadBreadcrumb(protyle, backlinkBreadcrumbItemElement);
+                const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id");
+                if (breadcrumbId) {
+                    if (window.siyuan.ctrlIsPressed) {
+                        openFileById({id: breadcrumbId, action: [Constants.CB_GET_FOCUS]});
+                    } else {
+                        loadBreadcrumb(protyle, backlinkBreadcrumbItemElement);
+                    }
                 } else {
                     // 引用标题时的更多加载
                     getBacklinkHeadingMore(backlinkBreadcrumbItemElement);
@@ -1413,6 +1422,7 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            /// #endif
             if (!window.siyuan.shiftIsPressed) {
                 shiftStartElement = undefined;
             }

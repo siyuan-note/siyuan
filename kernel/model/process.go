@@ -20,24 +20,9 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
-
-func HookResident() {
-	if util.Resident {
-		return
-	}
-
-	for range time.Tick(time.Second * 30) {
-		if 0 == util.CountSessions() {
-			logging.LogInfof("no active session, exit kernel process now")
-			Close(false, 1)
-		}
-	}
-}
 
 func HandleSignal() {
 	c := make(chan os.Signal)

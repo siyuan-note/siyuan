@@ -584,6 +584,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		tree.Box = boxID
 		tree.Path = targetPath
 		tree.HPath = path.Join(baseHPath, title)
+		tree.Root.Spec = "1"
 		luteEngine.NestedInlines2FlattedSpans(tree)
 
 		docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))

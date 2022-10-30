@@ -38,6 +38,11 @@ func listWorkspaceDirs(c *gin.Context) {
 	userHomeConfDir := filepath.Join(util.HomeDir, ".config", "siyuan")
 	workspaceConf := filepath.Join(userHomeConfDir, "workspace.json")
 	data, err := os.ReadFile(workspaceConf)
+	if nil != err {
+		logging.LogErrorf("read workspace conf [%s] failed: %s", workspaceConf, err)
+		return
+	}
+
 	var workspacePaths []string
 	if err = gulu.JSON.UnmarshalJSON(data, &workspacePaths); nil != err {
 		logging.LogErrorf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)

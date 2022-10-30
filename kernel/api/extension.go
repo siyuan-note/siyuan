@@ -68,15 +68,7 @@ func extensionCopy(c *gin.Context) {
 			return ast.WalkContinue
 		}
 
-		// 浏览器剪藏扩展改进 https://github.com/siyuan-note/siyuan/issues/6124
-		if ast.NodeInlineMath == n.Type {
-			// $ 转义
-			text := &ast.Node{Type: ast.NodeText}
-			text.Tokens = []byte("\\$" + string(n.ChildByType(ast.NodeInlineMathContent).Tokens) + "\\$")
-			n.InsertBefore(text)
-			unlinks = append(unlinks, n)
-			return ast.WalkSkipChildren
-		} else if ast.NodeText == n.Type {
+		if ast.NodeText == n.Type {
 			// 剔除行首空白
 			if ast.NodeParagraph == n.Parent.Type && n.Parent.FirstChild == n {
 				n.Tokens = bytes.TrimLeft(n.Tokens, " \t\n")

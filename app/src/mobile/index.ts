@@ -10,12 +10,13 @@ import {addBaseURL, setNoteBook} from "../util/pathName";
 import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
-import {initAssets, loadAssets} from "../util/assets";
+import {addGA, initAssets, loadAssets} from "../util/assets";
 import {promiseTransactions} from "../protyle/wysiwyg/transaction";
 import {bootSync} from "../dialog/processSystem";
 import {initMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/showKeyboardToolbar";
+import {setLocalStorage} from "../protyle/util/compatibility";
 
 class App {
     constructor() {
@@ -43,6 +44,7 @@ class App {
                 window.siyuan.menus.menu.remove();
             }
         });
+        setLocalStorage();
         fetchPost("/api/system/getConf", {}, confResponse => {
             confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
             window.siyuan.config = confResponse.data.conf;
@@ -62,6 +64,7 @@ class App {
                     }
                     initMessage();
                 });
+                addGA();
             });
             if (navigator.userAgent.indexOf("iPhone") > -1) {
                 document.addEventListener("touchstart", handleTouchStart, false);

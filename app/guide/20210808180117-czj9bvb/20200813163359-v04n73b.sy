@@ -7,7 +7,7 @@
 		"id": "20200813163359-v04n73b",
 		"title": "隐私政策和用户协议",
 		"type": "doc",
-		"updated": "20220904093913"
+		"updated": "20221027114353"
 	},
 	"Children": [
 		{
@@ -31,7 +31,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220212224529-q784muc",
-				"updated": "20220904093913"
+				"updated": "20221027114353"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20220212224529-q652whb",
-						"updated": "20220904093913"
+						"updated": "20221027114353"
 					},
 					"Children": [
 						{
@@ -79,12 +79,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220212224529-1embibu",
-								"updated": "20220904093913"
+								"updated": "20221027114353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最新日期：2022 年 9 月 4 日"
+									"Data": "最新日期：2022 年 10 月 27 日"
 								}
 							]
 						}
@@ -3399,7 +3399,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20220212224529-0gjshrh",
-				"updated": "20220212224529"
+				"updated": "20221027112713"
 			},
 			"Children": [
 				{
@@ -3469,23 +3469,225 @@
 					"ID": "20220212224529-lo20g0r",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"id": "20220212224529-lo20g0r"
+						"id": "20220212224529-lo20g0r",
+						"updated": "20221027112713"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "收集的个人信息类型/字段：设备标识信息\n"
+							"Data": "收集的个人信息类型/字段：设备标识信息 "
 						},
 						{
 							"Type": "NodeTextMark",
 							"TextMarkType": "a",
 							"TextMarkAHref": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl",
-							"TextMarkTextContent": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl "
+							"TextMarkTextContent": "https://open.weixin.qq.com/cgi-bin/frame?t=news/protocol_developer_tmpl"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221027112322-xic5fg3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221027112322-xic5fg3",
+				"updated": "20221027112323"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "开发类服务 SDK："
+				}
+			]
+		},
+		{
+			"ID": "20221027112340-j85t36u",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20221027112340-j85t36u",
+				"updated": "20221027112341"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20221027112341-fh7jv2y",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20221027112341-fh7jv2y",
+						"updated": "20221027112341"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "SDK 名称：Sentry"
+						}
+					]
+				},
+				{
+					"ID": "20221027112341-znirf8k",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20221027112341-znirf8k",
+						"updated": "20221027112341"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "公司名称：FUNCTIONAL SOFTWARE, INC."
+						}
+					]
+				},
+				{
+					"ID": "20221027112341-japnv8y",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20221027112341-japnv8y",
+						"updated": "20221027112341"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "SDK 官网："
 						},
 						{
 							"Type": "NodeTextMark",
-							"TextMarkType": "a strong",
-							"TextMarkTextContent": "(opens new window)"
+							"TextMarkType": "a",
+							"TextMarkAHref": "https://sentry.io/",
+							"TextMarkTextContent": "https://sentry.io"
+						}
+					]
+				},
+				{
+					"ID": "20221027112341-ohaorb0",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20221027112341-ohaorb0",
+						"updated": "20221027112341"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "使用目的：用于收集报错信息和诊断数据，进而改善用户体验"
+						}
+					]
+				},
+				{
+					"ID": "20221027112341-n2n81eo",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20221027112341-n2n81eo",
+						"updated": "20221027112341"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "收集的个人信息类型/字段：设备标识信息和报错日志、诊断数据等不涉及个人隐私的数据 "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "a",
+							"TextMarkAHref": "https://sentry.io/privacy/",
+							"TextMarkTextContent": "https://sentry.io/privacy/"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221027112333-rjv80e0",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20221027112333-rjv80e0",
+				"updated": "20221027113107"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20221027112413-nh1wdmr",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20221027112413-nh1wdmr",
+						"updated": "20221027112434"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "SDK 名称：Google Analytics"
+						}
+					]
+				},
+				{
+					"ID": "20221027112435-jjna2vq",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20221027112435-jjna2vq",
+						"updated": "20221027112621"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "公司名称：Google"
+						}
+					]
+				},
+				{
+					"ID": "20221027112621-9jn8l41",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20221027112621-9jn8l41",
+						"updated": "20221027112720"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "SDK 官网："
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "a",
+							"TextMarkAHref": "https://analytics.google.com",
+							"TextMarkTextContent": "https://analytics.google.com"
+						}
+					]
+				},
+				{
+					"ID": "20221027112722-az61sln",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20221027112722-az61sln",
+						"updated": "20221027112811"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "使用目的：用于收集统计信息，进而改善用户体验"
+						}
+					]
+				},
+				{
+					"ID": "20221027112811-3gzm8bk",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20221027112811-3gzm8bk",
+						"updated": "20221027113107"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "收集的个人信息类型/字段：程序信息和账号订阅状态等不涉及个人隐私的数据 "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "a",
+							"TextMarkAHref": "https://policies.google.com/privacy",
+							"TextMarkTextContent": "https://policies.google.com/privacy"
 						}
 					]
 				}

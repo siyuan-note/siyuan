@@ -6,6 +6,8 @@ import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {focusBlock, getEditorRange, focusByWbr, fixTableRange} from "./selection";
 import {mathRender} from "../markdown/mathRender";
 import {Constants} from "../../constants";
+import {highlightRender} from "../markdown/highlightRender";
+import {scrollCenter} from "../../util/highlightById";
 
 export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => {
     if (html === "") {
@@ -31,6 +33,21 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
     let id = blockElement.getAttribute("data-node-id");
     range.insertNode(document.createElement("wbr"));
     let oldHTML = blockElement.outerHTML;
+    if (!isBlock && blockElement.getAttribute("data-type") === "NodeCodeBlock") {
+        range.deleteContents();
+        range.insertNode(document.createTextNode(html.replace(/\r\n|\r|\u2028|\u2029/g, "\n")));
+        range.collapse(false);
+        range.insertNode(document.createElement("wbr"));
+        getContenteditableElement(blockElement).removeAttribute("data-render");
+        highlightRender(blockElement);
+        blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+        updateTransaction(protyle, id, blockElement.outerHTML, oldHTML);
+        setTimeout(() => {
+            scrollCenter(protyle, blockElement);
+        }, Constants.TIMEOUT_BLOCKLOAD);
+        return;
+    }
+
     const undoOperation: IOperation[] = [];
     const doOperation: IOperation[] = [];
     if (range.toString() !== "") {

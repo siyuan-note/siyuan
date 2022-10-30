@@ -191,72 +191,6 @@ func IndexRefs() {
 	util.SetBootDetails("Resolving refs...")
 	util.PushEndlessProgress(Conf.Language(54))
 
-	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress}
-	// 解析并更新引用块
-	util.SetBootDetails("Resolving ref block content...")
-	refUnresolvedBlocks := sql.GetRefUnresolvedBlocks() // TODO: v2.2.0 以后移除
-	if 0 < len(refUnresolvedBlocks) {
-		dynamicRefTreeIDs := hashset.New()
-		bootProgressPart := 10.0 / float64(len(refUnresolvedBlocks))
-		anchors := map[string]string{}
-		var refBlockIDs []string
-		for i, refBlock := range refUnresolvedBlocks {
-			util.IncBootProgress(bootProgressPart, "Resolving ref block content "+util.ShortPathForBootingDisplay(refBlock.ID))
-			tx, err := sql.BeginTx()
-			if nil != err {
-				return
-			}
-			blockContent := sql.ResolveRefContent(refBlock, &anchors)
-			refBlock.Content = blockContent
-			refBlockIDs = append(refBlockIDs, refBlock.ID)
-			dynamicRefTreeIDs.Add(refBlock.RootID)
-			sql.CommitTx(tx)
-			if 1 < i && 0 == i%64 {
-				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(53), i, len(refUnresolvedBlocks)-i))
-			}
-		}
-
-		// 将需要更新动态引用文本内容的块先删除，后面会重新插入，这样比直接 update 快很多
-		util.SetBootDetails("Deleting unresolved block content...")
-		tx, err := sql.BeginTx()
-		if nil != err {
-			return
-		}
-		sql.DeleteBlockByIDs(tx, refBlockIDs)
-		sql.CommitTx(tx)
-
-		bootProgressPart = 10.0 / float64(len(refUnresolvedBlocks))
-		for i, refBlock := range refUnresolvedBlocks {
-			util.IncBootProgress(bootProgressPart, "Updating block content "+util.ShortPathForBootingDisplay(refBlock.ID))
-			tx, err = sql.BeginTx()
-			if nil != err {
-				return
-			}
-			sql.InsertBlock(tx, refBlock, context)
-			sql.CommitTx(tx)
-			if 1 < i && 0 == i%64 {
-				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(53), i, len(refUnresolvedBlocks)-i))
-			}
-		}
-
-		if 0 < dynamicRefTreeIDs.Size() {
-			// 块引锚文本静态化
-			for _, dynamicRefTreeIDVal := range dynamicRefTreeIDs.Values() {
-				dynamicRefTreeID := dynamicRefTreeIDVal.(string)
-				util.IncBootProgress(bootProgressPart, "Persisting block ref text "+util.ShortPathForBootingDisplay(dynamicRefTreeID))
-				tree, err := loadTreeByBlockID(dynamicRefTreeID)
-				if nil != err {
-					logging.LogErrorf("tree [%s] dynamic ref text to static failed: %s", dynamicRefTreeID, err)
-					continue
-				}
-
-				if err := filesys.WriteTree(tree); nil == err {
-					//logging.LogInfof("persisted tree [%s] dynamic ref text", tree.Box+tree.Path)
-				}
-			}
-		}
-	}
-
 	// 引用入库
 	util.SetBootDetails("Indexing refs...")
 	refBlocks := sql.GetRefExistedBlocks()
@@ -323,11 +257,21 @@ func isLegacyDynamicBlockRef(blockRef *ast.Node) bool {
 
 func init() {
 	eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]interface{}, blockCount int, hash string) {
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+			// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392
+			return
+		}
+
 		msg := fmt.Sprintf(Conf.Language(89), blockCount, hash)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, blockCount int, hash string) {
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+			// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392
+			return
+		}
+
 		msg := fmt.Sprintf(Conf.Language(90), blockCount, hash)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)

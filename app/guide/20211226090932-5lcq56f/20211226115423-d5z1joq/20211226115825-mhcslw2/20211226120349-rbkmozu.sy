@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226120349-rbkmozu",
 		"title": "在内容塊中遨遊",
-		"updated": "20220312233003"
+		"updated": "20221026222236"
 	},
 	"Children": [
 		{
@@ -380,21 +380,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120415-k8yvb62",
-				"updated": "20211226152312"
+				"updated": "20221026221359"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "提及使用當前文檔中內容塊名稱和別名作為關鍵字進行搜索，搜索結果為包含這些關鍵字的內容塊。可以通過連結按鈕將提及轉換為連結：提及處會使用 "
+					"Data": "提及使用當前文檔中內容塊命名、別名、引用錨文本和文檔名作為關鍵字進行搜索（可在 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "((id \"內容塊名稱\"))"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 進行替換。"
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "反鏈提及"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中設置搜索範圍），搜索結果為包含這些關鍵字的內容塊。"
 				}
 			]
 		},
@@ -403,8 +421,34 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211228134547-inyam43",
-				"updated": "20211228134547"
-			}
+				"updated": "20221026222236"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​：提及搜索僅會在普通文本中搜索，不會在粗體、斜體等行級元素和代碼塊、圖表等塊級元素中搜索，這一點和"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226122825-w6wxq0c",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "虛擬引用探測規則"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "是相同的。"
+				}
+			]
 		}
 	]
 }

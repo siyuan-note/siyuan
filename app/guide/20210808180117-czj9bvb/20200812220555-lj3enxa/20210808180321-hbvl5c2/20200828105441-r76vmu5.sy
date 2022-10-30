@@ -6,7 +6,7 @@
 		"id": "20200828105441-r76vmu5",
 		"title": "内核参数",
 		"type": "doc",
-		"updated": "20220601091012"
+		"updated": "20221025095729"
 	},
 	"Children": [
 		{
@@ -104,111 +104,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "内核工作目录路径，不指定时按内核可执行文件入口自动获取。",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20201225172241-opf042s",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20201225172241-opf042s",
-				"updated": "20201225172241"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
-					"Type": "NodeTextMark",
-					"Properties": {
-						"id": ""
-					},
-					"TextMarkType": "code",
-					"TextMarkTextContent": "--resident"
-				}
-			]
-		},
-		{
-			"ID": "20201225172241-84qsa3m",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20201225172241-84qsa3m",
-				"updated": "20201225172241"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "使用 ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
-					"Type": "NodeTextMark",
-					"Properties": {
-						"id": ""
-					},
-					"TextMarkType": "code",
-					"TextMarkTextContent": "--resident=true"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 指定后内核将常驻内存，默认 ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
-					"Type": "NodeTextMark",
-					"Properties": {
-						"id": ""
-					},
-					"TextMarkType": "code",
-					"TextMarkTextContent": "true"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20201225172241-t7tw5b8",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20201225172241-t7tw5b8",
-				"updated": "20201225172241"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "设置为 ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
-					"Type": "NodeTextMark",
-					"Properties": {
-						"id": ""
-					},
-					"TextMarkType": "code",
-					"TextMarkTextContent": "false"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 后会每隔 30 秒检查一次活动会话列表，如果没有活动会话则退出内核进程。",
 					"Properties": {
 						"id": ""
 					}
@@ -652,6 +547,120 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20221025095421-rl06zab",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20221025095421-rl06zab",
+				"updated": "20221025095440"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​​"
+				}
+			]
+		},
+		{
+			"ID": "20221025095536-emwgpz0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025095536-emwgpz0",
+				"updated": "20221025095536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用于指定监听端口，不指定时："
+				}
+			]
+		},
+		{
+			"ID": "20221025095536-5m5f1uu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221025095536-5m5f1uu",
+				"updated": "20221025095729"
+			},
+			"Children": [
+				{
+					"ID": "20221025095536-xq0w85y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095536-xq0w85y",
+						"updated": "20221025095536"
+					},
+					"Children": [
+						{
+							"ID": "20221025095536-zng5iv9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095536-zng5iv9",
+								"updated": "20221025095536"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端使用随机端口"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221025095536-gpuhscm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095536-gpuhscm",
+						"updated": "20221025095729"
+					},
+					"Children": [
+						{
+							"ID": "20221025095536-76oy599",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095536-76oy599",
+								"updated": "20221025095729"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Docker/移动端使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "6806"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

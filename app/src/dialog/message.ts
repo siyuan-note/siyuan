@@ -4,7 +4,7 @@ import {Constants} from "../constants";
 export const initMessage = () => {
     const messageElement = document.getElementById("message");
     messageElement.innerHTML = `<div class="fn__flex-1"></div>
-<button class="b3-button b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.clearMessage}"><svg style="margin-right: 0"><use xlink:href="#iconSelect"></use></svg></button>`;
+<button class="b3-button--cancel b3-button b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.clearMessage}"><svg style="margin-right: 0"><use xlink:href="#iconSelect"></use></svg></button>`;
     messageElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(messageElement)) {
@@ -55,9 +55,7 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
         }, timeout);
         messageHTML = messageHTML.replace("<div data-id", `<div data-timeoutid="${timeoutId}" data-id`);
     }
-    if (messagesElement.childElementCount === 0) {
-        messagesElement.parentElement.classList.add("b3-snackbars--show");
-    }
+    messagesElement.parentElement.classList.add("b3-snackbars--show");
     messagesElement.insertAdjacentHTML("afterbegin", messageHTML + "</div>");
     setTimeout(() => {
         messagesElement.querySelectorAll(".b3-snackbar--hide").forEach(item => {
@@ -83,9 +81,21 @@ export const hideMessage = (id?: string) => {
             messageElement.classList.add("b3-snackbar--hide");
             setTimeout(() => {
                 messageElement.remove();
+                if (messagesElement.childElementCount === 0) {
+                    hideMessage();
+                }
             }, Constants.TIMEOUT_INPUT);
         }
-        if (messagesElement.childElementCount < 2) {
+        let hasShowItem = false;
+        Array.from(messagesElement.children).find(item => {
+            if (!item.classList.contains("b3-snackbar--hide")) {
+                hasShowItem = true;
+                return true;
+            }
+        });
+        if (hasShowItem) {
+            messagesElement.parentElement.classList.add("b3-snackbars--show");
+        } else {
             messagesElement.parentElement.classList.remove("b3-snackbars--show");
         }
     } else {

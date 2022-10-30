@@ -6,7 +6,7 @@
 		"id": "20200924100717-yzwzn64",
 		"title": "Kernel parameter",
 		"type": "doc",
-		"updated": "20220601091217"
+		"updated": "20221025095725"
 	},
 	"Children": [
 		{
@@ -81,78 +81,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "Kernel working directory path, automatically obtained according to the kernel executable file entry if it is not specified."
-				}
-			]
-		},
-		{
-			"ID": "20201225172241-r2u4sx1",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20201225172241-r2u4sx1"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "--resident"
-				}
-			]
-		},
-		{
-			"ID": "20201225172241-1ikfkn1",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20201225172241-1ikfkn1"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "After specifying with "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "--resident=true"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ", the kernel will be resident in memory, the default is "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "true"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "."
-				}
-			]
-		},
-		{
-			"ID": "20201225172241-gon6cqc",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20201225172241-gon6cqc"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "After set to "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "false"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ", the list of active sessions will be checked every 30 seconds, and the kernel process will be exited if there are no active sessions."
 				}
 			]
 		},
@@ -469,6 +397,116 @@
 				{
 					"Type": "NodeText",
 					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20221025095658-mbq3mbp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20221025095658-mbq3mbp",
+				"updated": "20221025095658"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20221025095658-gbk6adn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025095658-gbk6adn",
+				"updated": "20221025095658"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used to specify the listening port, when not specified:"
+				}
+			]
+		},
+		{
+			"ID": "20221025095658-gek9f6g",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221025095658-gek9f6g",
+				"updated": "20221025095725"
+			},
+			"Children": [
+				{
+					"ID": "20221025095658-a9jiv3h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095658-a9jiv3h",
+						"updated": "20221025095658"
+					},
+					"Children": [
+						{
+							"ID": "20221025095658-dl9lzdj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095658-dl9lzdj",
+								"updated": "20221025095658"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use random port on desktop"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221025095658-nn81h2p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095658-nn81h2p",
+						"updated": "20221025095725"
+					},
+					"Children": [
+						{
+							"ID": "20221025095658-nwhyy7m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095658-nwhyy7m",
+								"updated": "20221025095725"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Docker/mobile uses "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "6806"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

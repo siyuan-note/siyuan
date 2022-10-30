@@ -38,6 +38,7 @@ import {unicode2Emoji} from "../emoji";
 import {deleteFile} from "../editor/deleteFile";
 import {escapeHtml} from "./escape";
 import {syncGuide} from "../sync/syncGuide";
+import {showPopover} from "../block/popover";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -104,7 +105,7 @@ export const globalShortcut = () => {
                 let findNode = false;
                 allModels.editor.find(item => {
                     if (item.editor.protyle.wysiwyg.element.isSameNode(eventPath0)) {
-                        item.editor.protyle.gutter.render(targetBlockElement, item.editor.protyle.wysiwyg.element);
+                        item.editor.protyle.gutter.render(item.editor.protyle, targetBlockElement, item.editor.protyle.wysiwyg.element);
                         findNode = true;
                         return true;
                     }
@@ -113,7 +114,7 @@ export const globalShortcut = () => {
                     window.siyuan.blockPanels.find(item => {
                         item.editors.find(eItem => {
                             if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                                eItem.protyle.gutter.render(targetBlockElement, eItem.protyle.wysiwyg.element);
+                                eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, eItem.protyle.wysiwyg.element);
                                 findNode = true;
                                 return true;
                             }
@@ -127,7 +128,7 @@ export const globalShortcut = () => {
                     allModels.backlink.find(item => {
                         item.editors.find(eItem => {
                             if (eItem.protyle.wysiwyg.element.isSameNode(eventPath0)) {
-                                eItem.protyle.gutter.render(targetBlockElement, eItem.protyle.wysiwyg.element);
+                                eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, eItem.protyle.wysiwyg.element);
                                 findNode = true;
                                 return true;
                             }
@@ -150,7 +151,7 @@ export const globalShortcut = () => {
             let findNode = false;
             allModels.editor.find(item => {
                 if (item.editor.protyle.wysiwyg.element.contains(eventPath0)) {
-                    item.editor.protyle.gutter.render(targetBlockElement, item.editor.protyle.wysiwyg.element);
+                    item.editor.protyle.gutter.render(item.editor.protyle, targetBlockElement, item.editor.protyle.wysiwyg.element);
                     findNode = true;
                     return true;
                 }
@@ -159,7 +160,7 @@ export const globalShortcut = () => {
                 window.siyuan.blockPanels.find(item => {
                     item.editors.find(eItem => {
                         if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                            eItem.protyle.gutter.render(targetBlockElement, eItem.protyle.wysiwyg.element);
+                            eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, eItem.protyle.wysiwyg.element);
                             findNode = true;
                             return true;
                         }
@@ -173,7 +174,7 @@ export const globalShortcut = () => {
                 allModels.backlink.find(item => {
                     item.editors.find(eItem => {
                         if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                            eItem.protyle.gutter.render(targetBlockElement, eItem.protyle.wysiwyg.element);
+                            eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, eItem.protyle.wysiwyg.element);
                             findNode = true;
                             return true;
                         }
@@ -338,6 +339,9 @@ export const globalShortcut = () => {
         if (!event.altKey && !event.shiftKey && isCtrl(event)) {
             if (event.key === "Meta" || event.key === "Control" || event.ctrlKey || event.metaKey) {
                 window.siyuan.ctrlIsPressed = true;
+                if (window.siyuan.config.editor.floatWindowMode === 1 && !event.repeat) {
+                    showPopover();
+                }
             } else {
                 window.siyuan.ctrlIsPressed = false;
             }

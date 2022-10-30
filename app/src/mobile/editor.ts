@@ -3,7 +3,7 @@ import {setEditor} from "./util/setEmpty";
 import {closePanel} from "./util/closePanel";
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
-import {disabledProtyle, enableProtyle, onGet} from "../protyle/util/onGet";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
 import {focusBlock} from "../protyle/util/selection";
 import {scrollCenter} from "../util/highlightById";
@@ -70,8 +70,6 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) =
                     // protyle 仅初始化一次，后续更新时会对 url 等再次复制
                     if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
                         disabledProtyle(editor.protyle);
-                    } else {
-                        enableProtyle(editor.protyle);
                     }
                 }
             });

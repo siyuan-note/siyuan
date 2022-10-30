@@ -41,7 +41,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "2.4.5"
+	Ver       = "2.4.8"
 	IsInsider = false
 )
 
@@ -58,10 +58,8 @@ func Boot() {
 
 	workspacePath := flag.String("workspace", "", "dir path of the workspace, default to ~/Documents/SiYuan/")
 	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
-	servePath := flag.String("servePath", "", "obsoleted https://github.com/siyuan-note/siyuan/issues/4647")
-	_ = servePath
-	resident := flag.Bool("resident", true, "resident memory even if no active session")
-	readOnly := flag.Bool("readonly", false, "read-only mode")
+	port := flag.String("port", "0", "port of the HTTP server")
+	readOnly := flag.String("readonly", "false", "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
 	lang := flag.String("lang", "", "zh_CN/zh_CHT/en_US/fr_FR/es_ES")
@@ -75,12 +73,15 @@ func Boot() {
 		Lang = *lang
 	}
 	Mode = *mode
-	Resident = *resident
-	ReadOnly = *readOnly
+	ServerPort = *port
+	ReadOnly, _ = strconv.ParseBool(*readOnly)
 	AccessAuthCode = *accessAuthCode
 	Container = ContainerStd
 	if isRunningInDockerContainer() {
 		Container = ContainerDocker
+	}
+	if ContainerStd != Container || "dev" == Mode {
+		ServerPort = FixedPort
 	}
 
 	msStoreFilePath := filepath.Join(WorkingDir, "ms-store")
@@ -104,14 +105,11 @@ func Boot() {
 	}
 
 	initPathDir()
-	checkPort()
 	go initPandoc()
 
 	bootBanner := figure.NewColorFigure("SiYuan", "isometric3", "green", true)
 	logging.LogInfof("\n" + bootBanner.String())
 	logBootInfo()
-
-	go cleanOld()
 }
 
 func setBootDetails(details string) {
@@ -170,6 +168,7 @@ var (
 	AppearancePath string        // 配置目录下的外观目录 appearance/ 路径
 	ThemesPath     string        // 配置目录下的外观目录下的 themes/ 路径
 	IconsPath      string        // 配置目录下的外观目录下的 icons/ 路径
+	SnippetsPath   string        // 数据目录下的 snippets/ 路径
 
 	AndroidNativeLibDir   string // Android 库路径
 	AndroidPrivateDataDir string // Android 私有数据路径
@@ -217,6 +216,7 @@ func initWorkspaceDir(workspaceArg string) {
 
 		tmp := workspacePaths[:0]
 		for _, d := range workspacePaths {
+			d = strings.TrimRight(d, " \t\n") // 去掉工作空间路径尾部空格 https://github.com/siyuan-note/siyuan/issues/6353
 			if gulu.File.IsDir(d) {
 				tmp = append(tmp, d)
 			}
@@ -271,10 +271,11 @@ func initWorkspaceDir(workspaceArg string) {
 	DBPath = filepath.Join(TempDir, DBName)
 	HistoryDBPath = filepath.Join(TempDir, "history.db")
 	BlockTreePath = filepath.Join(TempDir, "blocktree.msgpack")
+	SnippetsPath = filepath.Join(DataDir, "snippets")
 }
 
 var (
-	Resident       bool
+	ServerPort     = "0" // HTTP/WebSocket 端口，0 为使用随机端口
 	ReadOnly       bool
 	AccessAuthCode string
 	Lang           = ""
@@ -288,6 +289,9 @@ const (
 	ContainerDocker  = "docker"  // Docker 容器端
 	ContainerAndroid = "android" // Android 端
 	ContainerIOS     = "ios"     // iOS 端
+
+	LocalHost = "127.0.0.1" // 伺服地址
+	FixedPort = "6806"      // 固定端口
 )
 
 func initPathDir() {
@@ -322,71 +326,6 @@ func initPathDir() {
 	}
 }
 
-// TODO: v2.2.0 移除
-func cleanOld() {
-	dirs, _ := os.ReadDir(WorkingDir)
-	for _, dir := range dirs {
-		if strings.HasSuffix(dir.Name(), ".old") {
-			old := filepath.Join(WorkingDir, dir.Name())
-			os.RemoveAll(old)
-		}
-	}
-}
-
-func checkPort() {
-	portOpened := isPortOpen(ServerPort)
-	if !portOpened {
-		return
-	}
-
-	logging.LogInfof("port [%s] is opened, try to check version of running kernel", ServerPort)
-	result := NewResult()
-	_, err := httpclient.NewBrowserRequest().
-		SetResult(result).
-		SetHeader("User-Agent", UserAgent).
-		Get("http://127.0.0.1:" + ServerPort + "/api/system/version")
-	if nil != err || 0 != result.Code {
-		logging.LogErrorf("connect to port [%s] for checking running kernel failed", ServerPort)
-		KillByPort(ServerPort)
-		return
-	}
-
-	if nil == result.Data {
-		logging.LogErrorf("connect ot port [%s] for checking running kernel failed", ServerPort)
-		os.Exit(ExitCodeUnavailablePort)
-	}
-
-	runningVer := result.Data.(string)
-	if runningVer == Ver {
-		logging.LogInfof("version of the running kernel is the same as this boot [%s], exit this boot", runningVer)
-		os.Exit(ExitCodeOk)
-	}
-
-	logging.LogInfof("found kernel [%s] is running, try to exit it", runningVer)
-	processes, err := goPS.Processes()
-	if nil != err {
-		logging.LogErrorf("close kernel [%s] failed: %s", runningVer, err)
-		os.Exit(ExitCodeUnavailablePort)
-	}
-
-	currentPid := os.Getpid()
-	for _, p := range processes {
-		name := p.Executable()
-		if strings.Contains(strings.ToLower(name), "siyuan-kernel") || strings.Contains(strings.ToLower(name), "siyuan kernel") {
-			kernelPid := p.Pid()
-			if currentPid != kernelPid {
-				pid := strconv.Itoa(kernelPid)
-				Kill(pid)
-				logging.LogInfof("killed kernel [name=%s, pid=%s, ver=%s], continue to boot", name, pid, runningVer)
-			}
-		}
-	}
-
-	if !tryToListenPort() {
-		os.Exit(ExitCodeUnavailablePort)
-	}
-}
-
 func initMime() {
 	// 在某版本的 Windows 10 操作系统上界面样式异常问题
 	// https://github.com/siyuan-note/siyuan/issues/247
@@ -395,6 +334,17 @@ func initMime() {
 	mime.AddExtensionType(".js", "application/x-javascript")
 	mime.AddExtensionType(".json", "application/json")
 	mime.AddExtensionType(".html", "text/html")
+
+	// 某些系统上下载资源文件后打开是 zip
+	// https://github.com/siyuan-note/siyuan/issues/6347
+	mime.AddExtensionType(".doc", "application/msword")
+	mime.AddExtensionType(".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+	mime.AddExtensionType(".xls", "application/vnd.ms-excel")
+	mime.AddExtensionType(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	mime.AddExtensionType(".dwg", "image/x-dwg")
+	mime.AddExtensionType(".dxf", "image/x-dxf")
+	mime.AddExtensionType(".dwf", "drawing/x-dwf")
+	mime.AddExtensionType(".pdf", "application/pdf")
 }
 
 func KillByPort(port string) {

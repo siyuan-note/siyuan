@@ -21,6 +21,7 @@ import {
 import {promiseTransactions} from "./protyle/wysiwyg/transaction";
 import {initMessage} from "./dialog/message";
 import {resizeDrag} from "./layout/util";
+import {setLocalStorage} from "./protyle/util/compatibility";
 
 class App {
     constructor() {
@@ -63,6 +64,9 @@ class App {
                                 document.querySelector("#barSync").setAttribute("aria-label", data.msg);
                                 break;
                             case "refreshtheme":
+                                if (!window.siyuan.config.appearance.customCSS && data.data.theme.indexOf("custom.css") > -1) {
+                                    return;
+                                }
                                 if ((window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark !== "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight !== "daylight")) {
                                     (document.getElementById("themeStyle") as HTMLLinkElement).href = data.data.theme;
                                 } else {
@@ -78,6 +82,7 @@ class App {
             }),
             menus: new Menus()
         };
+        setLocalStorage();
         fetchPost("/api/system/getConf", {}, response => {
             window.siyuan.config = response.data.conf;
             fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {

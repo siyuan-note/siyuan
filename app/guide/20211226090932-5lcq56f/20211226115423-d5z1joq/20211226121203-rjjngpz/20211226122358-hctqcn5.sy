@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226122358-hctqcn5",
 		"title": "Kernel 參數",
-		"updated": "20220601091200"
+		"updated": "20221025095721"
 	},
 	"Children": [
 		{
@@ -103,111 +103,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "Kernel 工作目錄路徑，不指定時按 Kernel 可執行文件入口自動獲取。",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20211226122447-8tgkcep",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20211226122447-8tgkcep",
-				"updated": "20211226011025"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
-					"Type": "NodeTextMark",
-					"Properties": {
-						"id": ""
-					},
-					"TextMarkType": "code",
-					"TextMarkTextContent": "--resident"
-				}
-			]
-		},
-		{
-			"ID": "20211226122447-kbcejv5",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226122447-kbcejv5",
-				"updated": "20211228132931"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "使用 ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
-					"Type": "NodeTextMark",
-					"Properties": {
-						"id": ""
-					},
-					"TextMarkType": "code",
-					"TextMarkTextContent": "--resident=true"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 指定後 Kernel 將常駐記憶體，預設 ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
-					"Type": "NodeTextMark",
-					"Properties": {
-						"id": ""
-					},
-					"TextMarkType": "code",
-					"TextMarkTextContent": "true"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20211226122447-wpeb408",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226122447-wpeb408",
-				"updated": "20220517144242"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "設置為 ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
-					"Type": "NodeTextMark",
-					"Properties": {
-						"id": ""
-					},
-					"TextMarkType": "code",
-					"TextMarkTextContent": "false"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 後會每隔 30 秒檢查一次活動會話列表，如果沒有活動會話則退出 Kernel 程式。",
 					"Properties": {
 						"id": ""
 					}
@@ -651,6 +546,116 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20221025095644-g0ka4wv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20221025095644-g0ka4wv",
+				"updated": "20221025095644"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20221025095644-7uijx77",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025095644-7uijx77",
+				"updated": "20221025095644"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於指定監聽端口，不指定時："
+				}
+			]
+		},
+		{
+			"ID": "20221025095644-yxap136",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221025095644-yxap136",
+				"updated": "20221025095721"
+			},
+			"Children": [
+				{
+					"ID": "20221025095644-4yq1w95",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095644-4yq1w95",
+						"updated": "20221025095644"
+					},
+					"Children": [
+						{
+							"ID": "20221025095644-rf1ldjb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095644-rf1ldjb",
+								"updated": "20221025095644"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端使用隨機端口"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221025095644-weqayss",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095644-weqayss",
+						"updated": "20221025095721"
+					},
+					"Children": [
+						{
+							"ID": "20221025095644-uhgv2bx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095644-uhgv2bx",
+								"updated": "20221025095721"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Docker/移動端使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "6806"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

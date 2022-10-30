@@ -5,7 +5,9 @@ import {onGet} from "../util/onGet";
 import {showMessage} from "../../dialog/message";
 import {updateHotkeyTip} from "../util/compatibility";
 import {isMobile} from "../../util/functions";
+import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 
+let getIndexTimeout: number;
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
     let elementRect = element.getBoundingClientRect();
     element.addEventListener("scroll", () => {
@@ -40,6 +42,31 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             // 悬浮窗需展开上下文后才能进行滚动 https://github.com/siyuan-note/siyuan/issues/2311
             return;
         }
+        if (protyle.scroll && !protyle.scroll.element.classList.contains("fn__none")) {
+            clearTimeout(getIndexTimeout);
+            getIndexTimeout = window.setTimeout(() => {
+                elementRect = element.getBoundingClientRect();
+                const targetElement = document.elementFromPoint(elementRect.left + elementRect.width / 2, elementRect.top + 10);
+                const blockElement = hasClosestBlock(targetElement);
+                if (!blockElement) {
+                    if (hasClosestByClassName(targetElement, "protyle-background") ||
+                        hasClosestByClassName(targetElement, "protyle-title")) {
+                        const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement;
+                        inputElement.value = "1";
+                        protyle.scroll.element.setAttribute("aria-label", `Blocks 1/${protyle.block.blockCount}`);
+                    }
+                    return;
+                }
+                fetchPost("/api/block/getBlockIndex", {id: blockElement.getAttribute("data-node-id")}, (response) => {
+                    if (!response.data) {
+                        return;
+                    }
+                    const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement;
+                    inputElement.value = response.data;
+                    protyle.scroll.element.setAttribute("aria-label", `Blocks ${response.data}/${protyle.block.blockCount}`);
+                });
+            }, Constants.TIMEOUT_BLOCKLOAD);
+        }
         if (protyle.wysiwyg.element.getAttribute("data-top") || protyle.block.showAll || protyle.scroll.lastScrollTop === element.scrollTop || protyle.scroll.lastScrollTop === -1) {
             return;
         }
@@ -47,6 +74,8 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             // up
             if (element.scrollTop < element.clientHeight &&
                 protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "true") {
+                // 禁用滚动时会产生抖动 https://ld246.com/article/1666717094418
+                protyle.contentElement.style.width = (protyle.contentElement.clientWidth) + "px";
                 protyle.contentElement.style.overflow = "hidden";
                 protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
                 fetchPost("/api/filetree/getDoc", {
@@ -56,6 +85,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                     size: Constants.SIZE_GET,
                 }, getResponse => {
                     protyle.contentElement.style.overflow = "";
+                    protyle.contentElement.style.width = "";
                     onGet(getResponse, protyle, [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID]);
                 });
             }

@@ -4,8 +4,10 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20201004184819-nj8ibyg",
+		"scroll": "{\u0026quot;startId\u0026quot;:\u0026quot;20210104090909-6pyfjgx\u0026quot;,\u0026quot;endId\u0026quot;:\u0026quot;20210104090909-20f2hvi\u0026quot;,\u0026quot;scrollTop\u0026quot;:0,\u0026quot;focusId\u0026quot;:\u0026quot;20221025092410-jsrv6gc\u0026quot;,\u0026quot;focusStart\u0026quot;:0,\u0026quot;focusEnd\u0026quot;:0}",
 		"title": "在浏览器上使用",
-		"type": "doc"
+		"type": "doc",
+		"updated": "20221025093126"
 	},
 	"Children": [
 		{
@@ -18,147 +20,58 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
 					"Data": "浏览器用法"
 				}
 			]
 		},
 		{
-			"ID": "20210104090909-3fkdb8b",
+			"ID": "20221025092410-jsrv6gc",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090909-3fkdb8b",
-				"updated": "20210302223612"
+				"id": "20221025092410-jsrv6gc",
+				"updated": "20221025092711"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源桌面端是基于 "
+					"Data": "在 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://www.electronjs.org",
-					"TextMarkTextContent": "Electron"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 打包的独立应用，但这并不唯一的使用方式。只要启动思源内核后，就能在浏览器上直接使用了，支持移动端浏览器。"
-				}
-			]
-		},
-		{
-			"ID": "20210104090909-z9210o7",
-			"Type": "NodeList",
-			"ListData": {
-				"Tight": true,
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
-			"Properties": {
-				"id": "20210104090909-z9210o7"
-			},
-			"Children": [
-				{
-					"ID": "20210104090909-5occty9",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20210104090909-5occty9"
-					},
-					"Children": [
-						{
-							"ID": "20210302223610-ngnee0k",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210302223610-ngnee0k"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "桌面端网页版：使用体验几乎和 Electron 独立应用一致"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210104090909-ipt2k4r",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20210104090909-ipt2k4r"
-					},
-					"Children": [
-						{
-							"ID": "20210302223610-hnshr1s",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210302223610-hnshr1s"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "移动端网页版：为移动端使用体验设计"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20210104090909-5ucwkfd",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104090909-5ucwkfd"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "访问 "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "http://127.0.0.1:6806/"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "关于"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 后会自动根据浏览器版本切换桌面端或移动端。"
-				}
-			]
-		},
-		{
-			"ID": "20210104090909-z2r76p3",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104090909-z2r76p3"
-			},
-			"Children": [
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "在浏览器上使用"
+				},
 				{
 					"Type": "NodeText",
-					"Data": "如果需要在局域网内使用，将 "
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打开浏览器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 后就可以直接在浏览器上使用了，如果需要在局域网内使用，将 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -167,7 +80,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 换成局域网 IP 地址即可。除了本地局域网使用，这里提供两个自助方案实现公网使用："
+					"Data": "​ 换成局域网 IP 地址即可。"
+				}
+			]
+		},
+		{
+			"ID": "20221025092746-xsahzmh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025092746-xsahzmh",
+				"updated": "20221025093126"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了本地局域网使用，通过以下两个方法可以实现公网使用："
 				}
 			]
 		},
@@ -320,13 +247,6 @@
 					"Data": " 中可配置浏览器访问鉴权密码，留空表示不启用鉴权。这在开放网络（比如办公场所和公网）会比较有用，只有鉴权通过后才能进入工作空间。"
 				}
 			]
-		},
-		{
-			"ID": "20210117210851-87cdi7m",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210117210851-87cdi7m"
-			}
 		}
 	]
 }

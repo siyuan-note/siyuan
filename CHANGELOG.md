@@ -1,3 +1,106 @@
+## v2.4.8 / 2022-10-30
+
+### 改进功能
+
+* [支持设置悬浮窗弹出选项](https://github.com/siyuan-note/siyuan/issues/4781)
+* [PDF 支持深色和浅色模式选择](https://github.com/siyuan-note/siyuan/issues/6376)
+* [改进伺服代码片段 `/snippets/`](https://github.com/siyuan-note/siyuan/pull/6380)
+* [切换回通过 IP `127.0.0.1` 加载](https://github.com/siyuan-note/siyuan/issues/6381)
+* [Windows 端不再支持安装时选择安装路径](https://github.com/siyuan-note/siyuan/issues/6385)
+* [反链面板中面包屑支持 `Ctrl+点击` 打开新页签](https://github.com/siyuan-note/siyuan/issues/6387)
+* [改进触摸屏中嵌入块工具栏显示规则](https://github.com/siyuan-note/siyuan/issues/6388)
+* [Android/iOS 端不显示数据索引和搜索索引状态提示](https://github.com/siyuan-note/siyuan/issues/6392)
+* [前进后退按钮图标更新](https://github.com/siyuan-note/siyuan/issues/6395)
+* [支持插入 `.im` 和 `.build` 域名超链接](https://github.com/siyuan-note/siyuan/issues/6399)
+* [鉴权兼容 IPv6 本机回环地址](https://github.com/siyuan-note/siyuan/pull/6400)
+* [明显区分折叠和非折叠状态颜色](https://github.com/siyuan-note/siyuan/issues/6402)
+* [支持关闭 Google Analytics](https://github.com/siyuan-note/siyuan/issues/6403)
+
+### 移除功能
+
+* [Windows 端不再支持 32 位系统](https://github.com/siyuan-note/siyuan/issues/6386)
+* [移除 `--resident` 和 `--servePath` 内核参数](https://github.com/siyuan-note/siyuan/issues/6389)
+
+### 修复缺陷
+
+* [设置代码片段报错](https://github.com/siyuan-note/siyuan/issues/6382)
+* [录音功能无法点击](https://github.com/siyuan-note/siyuan/issues/6393)
+* [引用非文档命名块时动态锚文本没有使用命名](https://github.com/siyuan-note/siyuan/issues/6397)
+* [修改命名文档块后引用动态锚文本未跟随](https://github.com/siyuan-note/siyuan/issues/6398)
+* [标记公式为标签后无法在标签面板删除标签](https://github.com/siyuan-note/siyuan/issues/6401)
+
+## v2.4.7 / 2022-10-27
+
+### 改进功能
+
+* [支持通过界面设置代码片段](https://github.com/siyuan-note/siyuan/issues/6357)
+* [反链面板块标菜单移除缩放功能](https://github.com/siyuan-note/siyuan/issues/6360)
+* [某些主题下页面向上滚动时会左右抖动](https://github.com/siyuan-note/siyuan/issues/6361)
+* [改进块引用语法解析避免识别 `((foo))` 文本](https://github.com/siyuan-note/siyuan/issues/6363)
+* [Android 端 IFrame 块加载不打开其他 APP 但支持继续加载页面](https://github.com/siyuan-note/siyuan/issues/6365)
+* [加入 Google Analytics](https://github.com/siyuan-note/siyuan/issues/6369)
+* [使用鼠标的复制粘贴按钮导致 `Command` 不被释放 ](https://github.com/siyuan-note/siyuan/issues/6373)
+* [改进云端收集箱剪藏](https://github.com/siyuan-note/siyuan/issues/6374)
+* [订阅试用从 30 天缩短为 7 天](https://github.com/siyuan-note/siyuan/issues/6375)
+
+### 文档相关
+
+* [修改隐私政策](https://github.com/siyuan-note/siyuan/issues/6370)
+
+### 开发重构
+
+* [Android 端适配 Android 13](https://github.com/siyuan-note/siyuan/issues/6362)
+* [Android 端最低版本要求从 6.0 改为 7.0](https://github.com/siyuan-note/siyuan/issues/6366)
+* [通过域名 `siyuan.localhost` 加载](https://github.com/siyuan-note/siyuan/issues/6368)
+
+### 修复缺陷
+
+* [反链面板首块起始插入行导致状态异常](https://github.com/siyuan-note/siyuan/issues/6359)
+* [拖拽窗口后反链面板块标位置错误](https://github.com/siyuan-note/siyuan/issues/6364)
+* [从全局搜索打开文档后反链面板为空](https://github.com/siyuan-note/siyuan/issues/6367)
+* [快速来回滚动会导致嵌入块重复](https://github.com/siyuan-note/siyuan/issues/6377)
+
+## v2.4.6 / 2022-10-26
+
+### 改进功能
+
+* [支持非列表大纲式缩出](https://github.com/siyuan-note/siyuan/issues/4346)
+* [块滚动条跟随滚动](https://github.com/siyuan-note/siyuan/issues/4612)
+* [桌面端内核进程使用随机端口](https://github.com/siyuan-note/siyuan/issues/4952)
+* [列表里代码块折叠后丢失列表线](https://github.com/siyuan-note/siyuan/issues/6280)
+* [IFrame 块不打开浏览器重定向](https://github.com/siyuan-note/siyuan/issues/6327)
+* [触摸屏点击题头图可对相关按钮进行显示和隐藏的切换](https://github.com/siyuan-note/siyuan/issues/6328)
+* [导出 PDF/HTML 时遵循是否显示书签、命名等设置](https://github.com/siyuan-note/siyuan/issues/6333)
+* [更新在页签右侧或下侧打开的图标](https://github.com/siyuan-note/siyuan/issues/6338)
+* [为向上扩选和向下或选添加快捷键配置](https://github.com/siyuan-note/siyuan/issues/6339)
+* [内核参数增加 `--port`](https://github.com/siyuan-note/siyuan/issues/6344)
+* [某些系统上下载资源文件后打开是 zip](https://github.com/siyuan-note/siyuan/issues/6347)
+* [浏览器剪藏扩展转义 Markdown 标记符](https://github.com/siyuan-note/siyuan/issues/6348)
+* [导出 PDF 后主窗口保持原有缩放](https://github.com/siyuan-note/siyuan/issues/6349)
+* [去掉工作空间路径尾部空格](https://github.com/siyuan-note/siyuan/issues/6353)
+* [支持设置 `虚拟引用关键字包含列表`](https://github.com/siyuan-note/siyuan/issues/6354)
+* [支持伺服代码片段 `/snippets/`](https://github.com/siyuan-note/siyuan/issues/6356)
+
+### 开发重构
+
+* [桌面端内核进程不再以游离模式拉起](https://github.com/siyuan-note/siyuan/issues/6336)
+* [桌面端内核进程端口号写入文件 `port.json`](https://github.com/siyuan-note/siyuan/issues/6337)
+* [前端统一使用内核端口号变量](https://github.com/siyuan-note/siyuan/issues/6343)
+
+### 修复缺陷
+
+* [`Ctrl+Shift+V` 复制内容到代码块中导致渲染偏移](https://github.com/siyuan-note/siyuan/issues/6321)
+* [浏览器剪藏扩展丢失标题和代码块](https://github.com/siyuan-note/siyuan/issues/6325)
+* [图表块的内容在数据库 `blocks` 表 `content` 字段中被转义](https://github.com/siyuan-note/siyuan/issues/6326)
+* [短时间内多次修改文档定义块标题后动态锚文本没有跟随](https://github.com/siyuan-note/siyuan/issues/6330)
+* [超级块起始删除撤销触发状态异常](https://github.com/siyuan-note/siyuan/issues/6335)
+* [同步中的文档应禁止块标操作](https://github.com/siyuan-note/siyuan/issues/6340)
+* [`粘贴转义文本` 失效](https://github.com/siyuan-note/siyuan/issues/6341)
+* [Linux 桌面端自动更新未赋予可执行权限](https://github.com/siyuan-note/siyuan/issues/6342)
+* [内核参数 `--resident` 和 `--readonly` 参数解析问题](https://github.com/siyuan-note/siyuan/issues/6345)
+* [渲染虚拟引用和搜索高亮导致 Markdown 标记符重复解析](https://github.com/siyuan-note/siyuan/issues/6352)
+* [编辑器内修改标题后顶部标题没有更新](https://github.com/siyuan-note/siyuan/issues/6355)
+
 ## v2.4.5 / 2022-10-23
 
 ### 改进功能

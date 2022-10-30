@@ -26,8 +26,10 @@ type TBazaarType = "templates" | "icons" | "widgets" | "themes"
 declare module "blueimp-md5"
 
 interface Window {
+    dataLayer: any[]
     siyuan: ISiyuan
     webkit: any
+
     JSAndroid: {
         returnDesktop(): void
         openExternal(url: string): void
@@ -42,11 +44,21 @@ interface Window {
     showKeyboardToolbar(bottom?: number): void
 
     hideKeyboardToolbar(): void
+
+    gtag(name: string, key: string | Date, value?: IObject): void;
 }
 
 interface ITextOption {
     color?: string,
     type: string
+}
+
+interface ISnippet {
+    id?: string
+    name: string
+    type: string
+    enabled: boolean
+    content: string
 }
 
 interface IInbox {
@@ -232,8 +244,10 @@ declare interface IExport {
 
 declare interface IEditor {
     readOnly: boolean;
+    listLogicalOutdent: boolean;
     katexMacros: string;
     fullWidth: boolean;
+    floatWindowMode: number;
     fontSize: number;
     generateHistoryInterval: number;
     historyRetentionDays: number;
@@ -248,6 +262,7 @@ declare interface IEditor {
     fontFamily: string;
     virtualBlockRef: string;
     virtualBlockRefExclude: string;
+    virtualBlockRefInclude: string;
     blockRefDynamicAnchorTextMaxLen: number;
 
     emoji: string[];
@@ -338,8 +353,10 @@ declare interface IConfig {
         xanadu: boolean
         udanax: boolean
         uploadErrLog: boolean
+        disableGoogleAnalytics: boolean
         downloadInstallPkg: boolean
         networkServe: boolean
+        fixedPort: boolean
         useExistingDB: boolean
     }
     localIPs: string[]

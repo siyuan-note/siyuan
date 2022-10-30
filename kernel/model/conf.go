@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -270,6 +271,13 @@ func InitConf() {
 		Conf.AccessAuthCode = util.AccessAuthCode
 	}
 
+	if util.ContainerStd != util.Container {
+		Conf.System.FixedPort = true
+	}
+	if Conf.System.FixedPort {
+		util.ServerPort = util.FixedPort
+	}
+
 	Conf.LocalIPs = util.GetLocalIPs()
 
 	Conf.Save()
@@ -282,6 +290,10 @@ func InitConf() {
 			Release:     util.Ver,
 			Environment: util.Mode,
 		})
+	}
+
+	if Conf.System.DisableGoogleAnalytics {
+		logging.LogInfof("user has disabled [Google Analytics]")
 	}
 
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
@@ -396,6 +408,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	Conf.Close()
 	sql.CloseDatabase()
 	clearWorkspaceTemp()
+	clearPortJSON()
 
 	go func() {
 		time.Sleep(500 * time.Millisecond)
@@ -607,6 +620,34 @@ func GetMaskedConf() (ret *AppConf, err error) {
 	return
 }
 
+func clearPortJSON() {
+	pid := fmt.Sprintf("%d", os.Getpid())
+	portJSON := filepath.Join(util.HomeDir, ".config", "siyuan", "port.json")
+	pidPorts := map[string]string{}
+	var data []byte
+	var err error
+
+	if gulu.File.IsExist(portJSON) {
+		data, err = os.ReadFile(portJSON)
+		if nil != err {
+			logging.LogWarnf("read port.json failed: %s", err)
+		} else {
+			if err = gulu.JSON.UnmarshalJSON(data, &pidPorts); nil != err {
+				logging.LogWarnf("unmarshal port.json failed: %s", err)
+			}
+		}
+	}
+
+	delete(pidPorts, pid)
+	if data, err = gulu.JSON.MarshalIndentJSON(pidPorts, "", "  "); nil != err {
+		logging.LogWarnf("marshal port.json failed: %s", err)
+	} else {
+		if err = os.WriteFile(portJSON, data, 0644); nil != err {
+			logging.LogWarnf("write port.json failed: %s", err)
+		}
+	}
+}
+
 func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))
@@ -658,29 +699,4 @@ func clearWorkspaceTemp() {
 	}
 
 	logging.LogInfof("cleared workspace temp")
-}
-
-var loadSnippetsLock = sync.Mutex{}
-
-func LoadSnippets() (ret []*conf.Snippet, err error) {
-	loadSnippetsLock.Lock()
-	defer loadSnippetsLock.Unlock()
-
-	ret = []*conf.Snippet{}
-	confPath := filepath.Join(util.DataDir, "snippets/conf.json")
-	if !gulu.File.IsExist(confPath) {
-		return
-	}
-
-	data, err := filelock.ReadFile(confPath)
-	if nil != err {
-		logging.LogErrorf("load js snippets failed: %s", err)
-		return
-	}
-
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		logging.LogErrorf("unmarshal js snippets failed: %s", err)
-		return
-	}
-	return
 }

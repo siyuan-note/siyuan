@@ -100,7 +100,7 @@
     return new Promise(resolve => setTimeout(resolve, ms))
   }
   const redirect = () => {
-    const uri = 'http://127.0.0.1:6806'
+    const uri = 'http://127.0.0.1:' + location.port
     if (navigator.userAgent.match(/Android/i))
       document.location = uri
     else
@@ -113,7 +113,7 @@
     let progressing = false
     while (!progressing) {
       try {
-        const progressResult = await fetch('http://127.0.0.1:6806/api/system/bootProgress')
+        const progressResult = await fetch('http://127.0.0.1:' + location.port + '/api/system/bootProgress')
         const progressData = await progressResult.json()
         document.getElementById('progress').style.width = progressData.data.progress + '%'
         document.getElementById('details').textContent = progressData.data.details

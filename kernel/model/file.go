@@ -17,7 +17,6 @@
 package model
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -597,27 +596,9 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 	} else {
 		nodes, eof = loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)
 	}
+
 	refCount := sql.QueryRootChildrenRefCount(rootID)
-
-	var virtualBlockRefKeywords []string
-	if Conf.Editor.VirtualBlockRef {
-		virtualBlockRefKeywords = sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc)
-		if "" != strings.TrimSpace(Conf.Editor.VirtualBlockRefExclude) {
-			exclude := strings.ReplaceAll(Conf.Editor.VirtualBlockRefExclude, "\\,", "__comma@sep__")
-			excludes := strings.Split(exclude, ",")
-			var tmp []string
-			for _, e := range excludes {
-				e = strings.ReplaceAll(e, "__comma@sep__", ",")
-				tmp = append(tmp, e)
-			}
-			excludes = tmp
-			virtualBlockRefKeywords = gulu.Str.ExcludeElem(virtualBlockRefKeywords, excludes)
-		}
-
-		// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
-		virtualBlockRefKeywords = gulu.Str.ExcludeElem(virtualBlockRefKeywords, []string{tree.Root.IALAttr("title")})
-		virtualBlockRefKeywords = prepareMarkKeywords(virtualBlockRefKeywords)
-	}
+	virtualBlockRefKeywords := getVirtualRefKeywords(tree.Root.IALAttr("title"))
 
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 	keyword = strings.Join(strings.Split(keyword, " "), search.TermSep)
@@ -659,63 +640,14 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 						}
 					}
 					if hitBlock {
-						// 搜索高亮
-						text := string(n.Tokens)
-						text = search.EncloseHighlighting(text, keywords, searchMarkSpanStart, searchMarkSpanEnd, Conf.Search.CaseSensitive)
-						n.Tokens = gulu.Str.ToBytes(text)
-						if bytes.Contains(n.Tokens, []byte("search-mark")) {
-							n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\"+searchMarkSpanStart), []byte("\\\\"+searchMarkSpanEnd))
-							linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
-							var children []*ast.Node
-							for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
-								children = append(children, c)
-							}
-							for _, c := range children {
-								n.InsertBefore(c)
-							}
-							unlinks = append(unlinks, n)
+						if markReplaceSpan(n, &unlinks, string(n.Tokens), keywords, searchMarkSpanStart, searchMarkSpanEnd, luteEngine) {
 							return ast.WalkContinue
 						}
 					}
 				}
 
-				// 虚拟引用
-				if Conf.Editor.VirtualBlockRef && 0 < len(virtualBlockRefKeywords) {
-					parentBlock := treenode.ParentBlock(n)
-					if nil != parentBlock && 1 > refCount[parentBlock.ID] {
-						content := string(n.Tokens)
-						newContent := markReplaceSpan(content, virtualBlockRefKeywords, virtualBlockRefSpanStart, virtualBlockRefSpanEnd)
-						if content != newContent {
-							// 虚拟引用排除命中自身块命名和别名的情况 https://github.com/siyuan-note/siyuan/issues/3185
-							var blockKeys []string
-							if name := parentBlock.IALAttr("name"); "" != name {
-								blockKeys = append(blockKeys, name)
-							}
-							if alias := parentBlock.IALAttr("alias"); "" != alias {
-								blockKeys = append(blockKeys, alias)
-							}
-							if 0 < len(blockKeys) {
-								keys := gulu.Str.SubstringsBetween(newContent, virtualBlockRefSpanStart, virtualBlockRefSpanEnd)
-								for _, k := range keys {
-									if gulu.Str.Contains(k, blockKeys) {
-										return ast.WalkContinue
-									}
-								}
-							}
-
-							n.Tokens = []byte(newContent)
-							linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
-							var children []*ast.Node
-							for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
-								children = append(children, c)
-							}
-							for _, c := range children {
-								n.InsertBefore(c)
-							}
-							unlinks = append(unlinks, n)
-							return ast.WalkContinue
-						}
-					}
+				if processVirtualRef(n, &unlinks, virtualBlockRefKeywords, refCount, luteEngine) {
+					return ast.WalkContinue
 				}
 			}
 			return ast.WalkContinue
@@ -1282,6 +1214,15 @@ func RenameDoc(boxID, p, title string) (err error) {
 		title = "Untitled"
 	}
 
+	oldHPath := tree.HPath
+	tree.HPath = path.Join(path.Dir(tree.HPath), title)
+	tree.Root.SetIALAttr("title", title)
+	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+
+	if err = renameWriteJSONQueue(tree, oldHPath); nil != err {
+		return
+	}
+
 	refText := getNodeRefText(tree.Root)
 	evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast, util.PushModeNone)
 	evt.Data = map[string]interface{}{
@@ -1293,26 +1234,8 @@ func RenameDoc(boxID, p, title string) (err error) {
 	}
 	util.PushEvent(evt)
 
-	oldHPath := tree.HPath
-	tree.HPath = path.Join(path.Dir(tree.HPath), title)
-	tree.Root.SetIALAttr("title", title)
-	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-
-	if err = renameWriteJSONQueue(tree, oldHPath); nil != err {
-		return
-	}
-
 	box.renameSubTrees(tree)
-	changedDefs := map[string]*ast.Node{tree.ID: tree.Root}
-	changedTrees := map[string]*parse.Tree{tree.ID: tree}
-
-	// 引用文档时锚文本没有跟随文档重命名 https://github.com/siyuan-note/siyuan/issues/4193
-	// 详见 refreshDynamicRefText 函数实现
-	go func() {
-		sql.WaitForWritingDatabase()
-		refreshDynamicRefText(changedDefs, changedTrees)
-	}()
-
+	updateRefTextRenameDoc(tree)
 	IncSync()
 	return
 }

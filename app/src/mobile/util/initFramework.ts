@@ -5,7 +5,8 @@ import {validateName} from "../../editor/rename";
 import {getEventName} from "../../protyle/util/compatibility";
 import {mountHelp} from "../../util/mount";
 import {fetchPost} from "../../util/fetch";
-import {renderSnippet, setInlineStyle} from "../../util/assets";
+import {setInlineStyle} from "../../util/assets";
+import {renderSnippet} from "../../config/util/snippets";
 import {setEmpty} from "./setEmpty";
 import {disabledProtyle, enableProtyle} from "../../protyle/util/onGet";
 import {getOpenNotebookCount} from "../../util/pathName";
@@ -155,7 +156,7 @@ const initEditorName = () => {
         hideKeyboardToolbar();
     });
     inputElement.addEventListener("blur", () => {
-        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
+        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly || window.siyuan.mobileEditor.protyle.disabled) {
             return;
         }
         if (!validateName(inputElement.value)) {

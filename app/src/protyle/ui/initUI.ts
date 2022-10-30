@@ -3,6 +3,7 @@ import {lineNumberRender} from "../markdown/highlightRender";
 import {scrollEvent} from "../scroll/event";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
+import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -47,6 +48,28 @@ export const initUI = (protyle: IProtyle) => {
 
     setEditMode(protyle, protyle.options.mode);
     document.execCommand("DefaultParagraphSeparator", false, "p");
+
+    // 触摸屏背景和嵌入块按钮显示
+    protyle.contentElement.addEventListener("touchstart", (event) => {
+        // https://github.com/siyuan-note/siyuan/issues/6328
+        if (protyle.disabled) {
+            return;
+        }
+        const target = event.target as HTMLElement;
+        if (hasClosestByClassName(target, "protyle-icons") ||
+            hasClosestByClassName(target, "item") ||
+            target.classList.contains("protyle-background__icon")) {
+            return;
+        }
+        if (hasClosestByClassName(target, "protyle-background")) {
+            protyle.background.element.classList.toggle("protyle-background--mobileshow");
+            return;
+        }
+        const embedBlockElement = hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed");
+        if (embedBlockElement) {
+            embedBlockElement.firstElementChild.classList.toggle("protyle-icons--show");
+        }
+    });
 };
 
 export const addLoading = (protyle: IProtyle) => {
@@ -97,21 +120,7 @@ export const setPadding = (protyle: IProtyle) => {
     } else {
         protyle.wysiwyg.element.style.padding = `16px ${min16}px ${bottomHeight} ${min24}px`;
     }
-    if (!isMobile()) {
-        // 防止右侧分屏后，左侧页签抖动；10 为滚动条宽度
-        if (!protyle.options.backlinkData && // https://github.com/siyuan-note/siyuan/issues/6099
-            !window.siyuan.config.editor.fullWidth) {
-            protyle.wysiwyg.element.style.width = (protyle.element.clientWidth - 10) + "px";
-            if (protyle.options.render.title) {
-                protyle.title.element.style.width = (protyle.element.clientWidth - min16 - min24 - 10) + "px";
-            }
-        } else {
-            protyle.wysiwyg.element.style.width = "";
-            if (protyle.options.render.title) {
-                protyle.title.element.style.width = "";
-            }
-        }
-    }
+    protyle.wysiwyg.element.style.transition = ""; // addWnd 时防止向右分屏，左侧文档抖动，移除动画
     if (window.siyuan.config.editor.codeSyntaxHighlightLineNum) {
         setTimeout(() => { // https://github.com/siyuan-note/siyuan/issues/5612
             protyle.wysiwyg.element.querySelectorAll('.code-block [contenteditable="true"]').forEach((block: HTMLElement) => {

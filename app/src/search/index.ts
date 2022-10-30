@@ -187,7 +187,7 @@ export class Search extends Model {
                     id,
                     k: value,
                     mode: foldResponse.data ? 0 : 3,
-                    size: foldResponse.data ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
+                    size: foldResponse.data ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getResponse => {
                     onGet(getResponse, this.protyle.protyle, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML]);
                     const matchElement = this.protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${id}"] span[data-type="search-mark"]`);

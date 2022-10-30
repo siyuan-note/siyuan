@@ -108,7 +108,7 @@ const promiseTransaction = () => {
                         id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
                         mode: 2,
                         k: protyle.options.key || "",
-                        size: Constants.SIZE_GET,
+                        size: window.siyuan.config.editor.dynamicLoadBlocks,
                     }, getResponse => {
                         onGet(getResponse, protyle, [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]);
                     });

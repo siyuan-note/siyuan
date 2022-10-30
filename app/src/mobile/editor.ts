@@ -47,7 +47,7 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) =
             addLoading(window.siyuan.mobileEditor.protyle);
             fetchPost("/api/filetree/getDoc", {
                 id,
-                size: action.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
+                size: action.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 mode: action.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
             }, getResponse => {
                 onGet(getResponse, window.siyuan.mobileEditor.protyle, action);

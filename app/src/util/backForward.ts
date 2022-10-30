@@ -133,7 +133,7 @@ const focusStack = async (stack: IBackStack) => {
         fetchPost("/api/filetree/getDoc", {
             id: stack.id,
             mode: stack.isZoom ? 0 : 3,
-            size: stack.isZoom ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
+            size: stack.isZoom ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
             onGet(getResponse, stack.protyle, [Constants.CB_GET_HTML]);
             Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find(item => {
@@ -162,7 +162,7 @@ const focusStack = async (stack: IBackStack) => {
         fetchPost("/api/filetree/getDoc", {
             id: stack.id, // 忘记为什么要用 rootChildID 了，但用了会产生 https://github.com/siyuan-note/siyuan/issues/6004 问题
             mode: stack.isZoom ? 0 : 3,
-            size: stack.isZoom ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
+            size: stack.isZoom ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
             onGet(getResponse, stack.protyle, stack.isZoom ? [Constants.CB_GET_HTML, Constants.CB_GET_ALL] : [Constants.CB_GET_HTML]);
             Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find(item => {

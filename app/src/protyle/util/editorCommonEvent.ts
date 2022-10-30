@@ -655,7 +655,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
                 fetchPost("/api/filetree/getDoc", {
                     id: protyle.block.id,
-                    size: Constants.SIZE_GET,
+                    size: window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getResponse => {
                     onGet(getResponse, protyle);
                     /// #if !MOBILE

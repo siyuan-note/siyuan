@@ -462,7 +462,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 fetchPost("/api/filetree/getDoc", {
                     id: protyle.block.rootID,
                     mode: 0,
-                    size: Constants.SIZE_GET,
+                    size: window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getResponse => {
                     onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
                 });
@@ -478,7 +478,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 fetchPost("/api/filetree/getDoc", {
                     id: protyle.block.rootID,
                     mode: 4,
-                    size: Constants.SIZE_GET,
+                    size: window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getResponse => {
                     onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
                 });

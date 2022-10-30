@@ -35,7 +35,6 @@ export abstract class Constants {
 
     // size
     public static readonly SIZE_TOOLBAR_HEIGHT: number = 42;
-    public static readonly SIZE_GET = 36;
     public static readonly SIZE_GET_MAX = 102400;
     public static readonly SIZE_UNDO = 64;
     public static readonly SIZE_TITLE = 512;

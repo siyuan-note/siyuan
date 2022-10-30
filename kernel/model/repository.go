@@ -555,6 +555,8 @@ func bootSyncRepo() (err error) {
 		return
 	}
 
+	logging.LogInfof("%d", len(fetchedFiles))
+
 	if 0 < len(fetchedFiles) {
 		go func() {
 			time.Sleep(7 * time.Second) // 等待一段时间后前端完成界面初始化后再同步
@@ -1024,6 +1026,19 @@ func buildCloudInfo() (ret *dejavu.CloudInfo, err error) {
 		logging.LogWarnf("invalid cloud repo name, rename it to [main]")
 		Conf.Sync.CloudName = "main"
 		Conf.Save()
+	}
+
+	if Conf.Sync.CustomSync {
+		ret = &dejavu.CloudInfo{
+			CustomSync: true,
+			Dir:        Conf.Sync.CloudName,
+			AccessKey:  Conf.Sync.AccessKey,
+			SecretKey:  Conf.Sync.SecretKey,
+			Endpoint:   Conf.Sync.Endpoint,
+			Region:     Conf.Sync.Region,
+			Bucket:     Conf.Sync.Bucket,
+		}
+		return
 	}
 
 	if nil == Conf.User {

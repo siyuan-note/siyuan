@@ -23,6 +23,12 @@ type Sync struct {
 	Synced              int64  `json:"synced"`              // 最近同步时间
 	Stat                string `json:"stat"`                // 最近同步统计信息
 	GenerateConflictDoc bool   `json:"generateConflictDoc"` // 云端同步冲突时是否生成冲突文档
+	CustomSync          bool   `json:"customSync"`          // 自定义同步
+	AccessKey           string `json:"accessKey"`           // Access Key
+	SecretKey           string `json:"secretKey"`           // Secret Key
+	Endpoint            string `json:"endpoint`             // Endpoint
+	Region              string `json:"region"`              // Region
+	Bucket              string `json:"bucket`               // Bucket
 }
 
 func NewSync() *Sync {

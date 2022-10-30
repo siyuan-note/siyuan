@@ -70,7 +70,8 @@ func BootSyncData() {
 	util.IncBootProgress(3, "Syncing data from the cloud...")
 	BootSyncSucc = 0
 
-	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName || !IsValidCloudDirName(Conf.Sync.CloudName) {
+	if !Conf.Sync.CustomSync &&
+		(!IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName || !IsValidCloudDirName(Conf.Sync.CloudName)) {
 		return
 	}
 
@@ -124,7 +125,8 @@ func SyncData(boot, exit, byHand bool) {
 	if exit {
 		ExitSyncSucc = 0
 	}
-	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName {
+	if !Conf.Sync.CustomSync &&
+		(!IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName) {
 		if byHand {
 			if "" == Conf.Sync.CloudName {
 				util.PushMsg(Conf.Language(123), 5000)

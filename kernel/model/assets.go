@@ -76,6 +76,15 @@ func NetImg2LocalAssets(rootID string) (err error) {
 
 	var files int
 	msgId := gulu.Rand.String(7)
+
+	docDirLocalPath := filepath.Join(util.DataDir, tree.Box, path.Dir(tree.Path))
+	assetsDirPath := getAssetsDir(filepath.Join(util.DataDir, tree.Box), docDirLocalPath)
+	if !gulu.File.IsExist(assetsDirPath) {
+		if err = os.MkdirAll(assetsDirPath, 0755); nil != err {
+			return
+		}
+	}
+
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -140,7 +149,7 @@ func NetImg2LocalAssets(rootID string) (err error) {
 				name = gulu.Str.SubStr(name, 64)
 				name = util.FilterFileName(name)
 				name = "net-img-" + name + "-" + ast.NewNodeID() + ext
-				writePath := filepath.Join(util.DataDir, "assets", name)
+				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.WriteFile(writePath, data); nil != err {
 					logging.LogErrorf("write downloaded net img [%s] to local assets [%s] failed: %s", u, writePath, err)
 					return ast.WalkSkipChildren

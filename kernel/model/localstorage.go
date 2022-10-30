@@ -39,7 +39,7 @@ func RemoveLocalStorageVal(key string) (err error) {
 	}
 
 	delete(localStorage, key)
-	return
+	return setLocalStorage(localStorage)
 }
 
 func SetLocalStorageVal(key string, val interface{}) (err error) {

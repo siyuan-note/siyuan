@@ -261,7 +261,7 @@ export const editor = {
         });
 
         const setEditor = () => {
-            let dynamicLoadBlocks = parseInt((editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value)
+            let dynamicLoadBlocks = parseInt((editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value);
             if (128 > dynamicLoadBlocks) {
                 dynamicLoadBlocks = 128;
                 (editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value = "128";

@@ -144,16 +144,16 @@ export const setLocalStorage = () => {
     });
 
     // 复写 localStorage
-    window.__localStorage__setItem = localStorage.setItem
-    window.__localStorage__removeItem = localStorage.removeItem
+    window.__localStorage__setItem = localStorage.setItem;
+    window.__localStorage__removeItem = localStorage.removeItem;
     localStorage.setItem = function (key, val) {
-        window.__localStorage__setItem.call(this, key, val)
+        window.__localStorage__setItem.call(this, key, val);
         fetchPost("/api/storage/setLocalStorageVal", {key, val});
-    }
+    };
     localStorage.removeItem = function (key) {
-        window.__localStorage__removeItem.call(this, key)
+        window.__localStorage__removeItem.call(this, key);
         fetchPost("/api/storage/removeLocalStorageVal", {key});
-    }
+    };
 };
 
 export const exportLocalStorage = (cb: () => void) => {

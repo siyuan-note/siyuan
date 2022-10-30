@@ -1,5 +1,5 @@
 import {openSearch} from "../search/spread";
-import {exportLayout, JSONToLayout, resizeDrag, resizeTabs} from "../layout/util";
+import {exportLayout, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
 import {hotKey2Electron, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
@@ -15,7 +15,7 @@ import {globalShortcut} from "./globalShortcut";
 import {fetchPost} from "./fetch";
 import {mountHelp, newDailyNote} from "./mount";
 import {MenuItem} from "../menus/Menu";
-import {initAssets, loadAssets, setInlineStyle, setMode} from "./assets";
+import {addGA, initAssets, loadAssets, setInlineStyle, setMode} from "./assets";
 import {renderSnippet} from "../config/util/snippets";
 import {getOpenNotebookCount} from "./pathName";
 import {openFileById} from "../editor/util";
@@ -138,9 +138,7 @@ export const onGetConfig = (isStart: boolean) => {
         try {
             JSONToLayout(isStart);
         } catch (e) {
-            fetchPost("/api/system/setUILayout", {layout: {}}, () => {
-                window.location.reload();
-            });
+            resetLayout();
         }
     });
     initBar();
@@ -161,36 +159,7 @@ export const onGetConfig = (isStart: boolean) => {
     if (window.siyuan.config.newbie) {
         mountHelp();
     }
-
-    if (!window.siyuan.config.system.disableGoogleAnalytics) {
-        addScript("https://www.googletagmanager.com/gtag/js?id=G-L7WEXVQCR9", "gaScript").then(() => {
-            try {
-                window.dataLayer = window.dataLayer || [];
-                window.gtag = function (...args) {
-                    window.dataLayer.push(args);
-                };
-                window.gtag("js", new Date());
-                window.gtag("config", "G-L7WEXVQCR9");
-                const para = {
-                    "version": Constants.SIYUAN_VERSION,
-                    "container": window.siyuan.config.system.container,
-                    "isLoggedIn": "false",
-                    "subscriptionStatus": "-1",
-                    "subscriptionPlan": "-1",
-                    "subscriptionType": "-1",
-                };
-                if (window.siyuan.user) {
-                    para.isLoggedIn = "true";
-                    para.subscriptionStatus = window.siyuan.user.userSiYuanSubscriptionStatus.toString();
-                    para.subscriptionPlan = window.siyuan.user.userSiYuanSubscriptionPlan.toString();
-                    para.subscriptionType = window.siyuan.user.userSiYuanSubscriptionType.toString();
-                }
-                window.gtag("event", Constants.ANALYTICS_EVT_ON_GET_CONFIG, para);
-            } catch (e) {
-                console.error(e);
-            }
-        });
-    }
+    addGA();
 };
 
 const initBar = () => {

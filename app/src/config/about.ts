@@ -247,10 +247,6 @@ export const about = {
                     searchData.idPath = "";
                     localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(searchData));
                 }
-                localStorage.removeItem(Constants.LOCAL_DAILYNOTEID);
-                localStorage.removeItem(Constants.LOCAL_DOCINFO);
-                localStorage.removeItem(Constants.LOCAL_HISTORYNOTEID);
-                localStorage.removeItem("pdfjs.history");
                 exportLayout(false, () => {
                     exitSiYuan();
                 });

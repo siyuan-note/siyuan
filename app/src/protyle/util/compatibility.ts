@@ -131,3 +131,11 @@ export const hotKey2Electron = (key: string) => {
     }
     return electronKey + key.substr(key.length - 1);
 };
+
+export const setLocalStorage = () => {
+
+}
+
+export const exportLocalStorage = () => {
+
+}

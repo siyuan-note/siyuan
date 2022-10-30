@@ -136,6 +136,12 @@ const dockToJSON = (dock: Dock) => {
     return json;
 };
 
+export const resetLayout = () => {
+    fetchPost("/api/system/setUILayout", {layout: {}}, () => {
+        window.location.reload();
+    });
+};
+
 export const exportLayout = (reload: boolean, cb?: () => void) => {
     const useElement = document.querySelector("#barDock use");
     if (!useElement) {

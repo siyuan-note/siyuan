@@ -10,7 +10,7 @@ import {addBaseURL, setNoteBook} from "../util/pathName";
 import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
-import {initAssets, loadAssets} from "../util/assets";
+import {addGA, initAssets, loadAssets} from "../util/assets";
 import {promiseTransactions} from "../protyle/wysiwyg/transaction";
 import {bootSync} from "../dialog/processSystem";
 import {initMessage} from "../dialog/message";
@@ -62,6 +62,7 @@ class App {
                     }
                     initMessage();
                 });
+                addGA();
             });
             if (navigator.userAgent.indexOf("iPhone") > -1) {
                 document.addEventListener("touchstart", handleTouchStart, false);

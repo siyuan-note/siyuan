@@ -3,7 +3,7 @@ import {ipcRenderer, shell} from "electron";
 import * as path from "path";
 /// #endif
 import {Constants} from "../constants";
-import {exportLayout} from "../layout/util";
+import {exportLayout, resetLayout} from "../layout/util";
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {loadAssets} from "../util/assets";
@@ -217,9 +217,7 @@ export const appearance = {
             openColorPicker();
         });
         appearance.element.querySelector("#resetLayout").addEventListener("click", () => {
-            fetchPost("/api/system/setUILayout", {layout: {}}, () => {
-                window.location.reload();
-            });
+           resetLayout()
         });
         /// #if !BROWSER
         appearance.element.querySelector("#appearanceOpenIcon").addEventListener("click", () => {

@@ -248,6 +248,7 @@ declare interface IEditor {
     katexMacros: string;
     fullWidth: boolean;
     floatWindowMode: number;
+    dynamicLoadBlocks: number;
     fontSize: number;
     generateHistoryInterval: number;
     historyRetentionDays: number;

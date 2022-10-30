@@ -175,6 +175,14 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.dynamicLoadBlocks}
+        <div class="b3-label__text">${window.siyuan.languages.dynamicLoadBlocksTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" id="dynamicLoadBlocks" type="number" min="128" max="1024" value="${window.siyuan.config.editor.dynamicLoadBlocks}"/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.md37}
         <div class="b3-label__text">${window.siyuan.languages.md38}</div>
     </div>
@@ -269,6 +277,7 @@ export const editor = {
                 virtualBlockRefInclude: (editor.element.querySelector("#virtualBlockRefInclude") as HTMLInputElement).value,
                 virtualBlockRefExclude: (editor.element.querySelector("#virtualBlockRefExclude") as HTMLInputElement).value,
                 blockRefDynamicAnchorTextMaxLen: parseInt((editor.element.querySelector("#blockRefDynamicAnchorTextMaxLen") as HTMLInputElement).value),
+                dynamicLoadBlocks: parseInt((editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value),
                 codeLigatures: (editor.element.querySelector("#codeLigatures") as HTMLInputElement).checked,
                 codeTabSpaces: parseInt((editor.element.querySelector("#codeTabSpaces") as HTMLInputElement).value),
                 fontSize: parseInt((editor.element.querySelector("#fontSize") as HTMLInputElement).value),

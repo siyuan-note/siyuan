@@ -16,6 +16,7 @@ import {bootSync} from "../dialog/processSystem";
 import {initMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/showKeyboardToolbar";
+import {setLocalStorage} from "../protyle/util/compatibility";
 
 class App {
     constructor() {
@@ -43,6 +44,7 @@ class App {
                 window.siyuan.menus.menu.remove();
             }
         });
+        setLocalStorage();
         fetchPost("/api/system/getConf", {}, confResponse => {
             confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
             window.siyuan.config = confResponse.data.conf;

@@ -10,7 +10,7 @@ import {setPadding} from "../protyle/ui/initUI";
 import {newFile} from "../util/newFile";
 import {Outline} from "./dock/Outline";
 import {Bookmark} from "./dock/Bookmark";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {exportLocalStorage, updateHotkeyTip} from "../protyle/util/compatibility";
 import {Tag} from "./dock/Tag";
 import {getAllModels, getAllTabs} from "./getAll";
 import {Asset} from "../asset";
@@ -138,7 +138,9 @@ const dockToJSON = (dock: Dock) => {
 
 export const resetLayout = () => {
     fetchPost("/api/system/setUILayout", {layout: {}}, () => {
-        window.location.reload();
+        exportLocalStorage(() => {
+            window.location.reload();
+        });
     });
 };
 
@@ -157,11 +159,13 @@ export const exportLayout = (reload: boolean, cb?: () => void) => {
     };
     layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
     fetchPost("/api/system/setUILayout", {layout: layoutJSON, exit: typeof cb !== "undefined"}, () => {
-        if (reload) {
-            window.location.reload();
-        } else if (cb) {
-            cb();
-        }
+        exportLocalStorage(() => {
+            if (reload) {
+                window.location.reload();
+            } else if (cb) {
+                cb();
+            }
+        })
     });
 };
 

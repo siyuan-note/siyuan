@@ -168,13 +168,6 @@ func getLocalStorage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	key := arg["key"].(string)
-
 	lsPath := filepath.Join(util.DataDir, "storage/local.json")
 	if !gulu.File.IsExist(lsPath) {
 		return
@@ -194,8 +187,7 @@ func getLocalStorage(c *gin.Context) {
 		return
 	}
 
-	value := ls[key]
-	ret.Data = value
+	ret.Data = ls
 }
 
 func setLocalStorage(c *gin.Context) {

@@ -165,7 +165,7 @@ export const exportLayout = (reload: boolean, cb?: () => void) => {
             } else if (cb) {
                 cb();
             }
-        })
+        });
     });
 };
 

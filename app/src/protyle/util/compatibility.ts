@@ -137,12 +137,12 @@ export const setLocalStorage = () => {
     fetchPost("/api/system/getLocalStorage", undefined, (response) => {
         Object.keys(response.data).forEach(item => {
             window.localStorage.setItem(item, response.data[item]);
-        })
+        });
     });
-}
+};
 
 export const exportLocalStorage = (cb: () => void) => {
-    fetchPost("/api/system/setLocalStorage", {val: JSON.stringify(localStorage)}, (response) => {
+    fetchPost("/api/system/setLocalStorage", {val: JSON.stringify(localStorage)}, () => {
         cb();
     });
-}
+};

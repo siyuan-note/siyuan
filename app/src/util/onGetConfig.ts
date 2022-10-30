@@ -30,7 +30,6 @@ import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
 import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
-import {addScript} from "../protyle/util/addScript";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {

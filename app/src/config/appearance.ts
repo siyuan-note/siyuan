@@ -217,7 +217,7 @@ export const appearance = {
             openColorPicker();
         });
         appearance.element.querySelector("#resetLayout").addEventListener("click", () => {
-           resetLayout()
+           resetLayout();
         });
         /// #if !BROWSER
         appearance.element.querySelector("#appearanceOpenIcon").addEventListener("click", () => {

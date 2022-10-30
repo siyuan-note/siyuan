@@ -152,7 +152,7 @@ export const addGA = () => {
             }
         });
     }
-}
+};
 
 export const setInlineStyle = (set = true) => {
     const height = Math.floor(window.siyuan.config.editor.fontSize * 1.625);

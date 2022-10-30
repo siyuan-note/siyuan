@@ -14,7 +14,7 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {pushBack} from "./util/MobileBackFoward";
 
 export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) => {
-    window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({id, action}));
+    localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({id, action}));
     if (window.siyuan.mobileEditor) {
         hideElements(["toolbar", "hint", "util"], window.siyuan.mobileEditor.protyle);
         if (window.siyuan.mobileEditor.protyle.contentElement.classList.contains("fn__none")) {

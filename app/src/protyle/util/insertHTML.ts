@@ -119,7 +119,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
                         replaceInnerHTML += "\n```";
                     }
                     const languageIndex = replaceInnerHTML.indexOf("```") + 3;
-                    replaceInnerHTML = replaceInnerHTML.substring(0, languageIndex) + (window.localStorage["local-codelang"] || "") + replaceInnerHTML.substring(languageIndex);
+                    replaceInnerHTML = replaceInnerHTML.substring(0, languageIndex) + (localStorage["local-codelang"] || "") + replaceInnerHTML.substring(languageIndex);
 
                     editableElement.innerHTML = replaceInnerHTML;
                 }

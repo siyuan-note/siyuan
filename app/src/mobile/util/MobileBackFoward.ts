@@ -12,7 +12,7 @@ const forwardStack: IBackStack[] = [];
 
 const focusStack = (backStack: IBackStack) => {
     const protyle = window.siyuan.mobileEditor.protyle;
-    window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({
+    localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({
         id: backStack.id,
         action: backStack.callback,
     }));

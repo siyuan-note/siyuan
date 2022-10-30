@@ -135,21 +135,20 @@ export const hotKey2Electron = (key: string) => {
 
 export const setLocalStorage = () => {
     fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
+        localStorage.clear();
         if (response.data) {
             Object.keys(response.data).forEach(item => {
-                window.localStorage.setItem(item, response.data[item]);
+                localStorage.setItem(item, response.data[item]);
             });
-        } else {
-            localStorage.clear();
         }
     });
 
     // 复写 localStorage
     window.__localStorage__setItem = localStorage.setItem
     window.__localStorage__removeItem = localStorage.removeItem
-    localStorage.setItem = function (key, value) {
-        window.__localStorage__setItem.call(this, key, value)
-        fetchPost("/api/storage/setLocalStorageVal", {key, value});
+    localStorage.setItem = function (key, val) {
+        window.__localStorage__setItem.call(this, key, val)
+        fetchPost("/api/storage/setLocalStorageVal", {key, val});
     }
     localStorage.removeItem = function (key) {
         window.__localStorage__removeItem.call(this, key)
@@ -158,7 +157,7 @@ export const setLocalStorage = () => {
 };
 
 export const exportLocalStorage = (cb: () => void) => {
-    fetchPost("/api/storage/setLocalStorage", {val: window.localStorage}, () => {
+    fetchPost("/api/storage/setLocalStorage", {val: localStorage}, () => {
         cb();
     });
 };

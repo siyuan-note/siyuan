@@ -441,7 +441,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
         }
     }
     if (window.siyuan.mobileEditor) {
-        window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({
+        localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({
             id,
             action: id === protyle.block.rootID ? [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT] : [Constants.CB_GET_ALL]
         }));

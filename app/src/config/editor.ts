@@ -261,6 +261,16 @@ export const editor = {
         });
 
         const setEditor = () => {
+            let dynamicLoadBlocks = parseInt((editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value)
+            if (128 > dynamicLoadBlocks) {
+                dynamicLoadBlocks = 128;
+                (editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value = "128";
+            }
+            if (1024 < dynamicLoadBlocks) {
+                dynamicLoadBlocks = 1024;
+                (editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value = "1024";
+            }
+
             fetchPost("/api/setting/setEditor", {
                 fullWidth: (editor.element.querySelector("#fullWidth") as HTMLInputElement).checked,
                 readOnly: (editor.element.querySelector("#readOnly") as HTMLInputElement).checked,
@@ -277,7 +287,7 @@ export const editor = {
                 virtualBlockRefInclude: (editor.element.querySelector("#virtualBlockRefInclude") as HTMLInputElement).value,
                 virtualBlockRefExclude: (editor.element.querySelector("#virtualBlockRefExclude") as HTMLInputElement).value,
                 blockRefDynamicAnchorTextMaxLen: parseInt((editor.element.querySelector("#blockRefDynamicAnchorTextMaxLen") as HTMLInputElement).value),
-                dynamicLoadBlocks: parseInt((editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value),
+                dynamicLoadBlocks: dynamicLoadBlocks,
                 codeLigatures: (editor.element.querySelector("#codeLigatures") as HTMLInputElement).checked,
                 codeTabSpaces: parseInt((editor.element.querySelector("#codeTabSpaces") as HTMLInputElement).value),
                 fontSize: parseInt((editor.element.querySelector("#fontSize") as HTMLInputElement).value),

@@ -53,8 +53,11 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/getConf", model.CheckAuth, getConf)
 	ginServer.Handle("POST", "/api/system/checkUpdate", model.CheckAuth, checkUpdate)
 	ginServer.Handle("POST", "/api/system/exportLog", model.CheckAuth, exportLog)
-	ginServer.Handle("POST", "/api/system/setLocalStorage", model.CheckAuth, setLocalStorage)
-	ginServer.Handle("POST", "/api/system/getLocalStorage", model.CheckAuth, getLocalStorage)
+
+	ginServer.Handle("POST", "/api/storage/setLocalStorage", model.CheckAuth, setLocalStorage)
+	ginServer.Handle("POST", "/api/storage/getLocalStorage", model.CheckAuth, getLocalStorage)
+	ginServer.Handle("POST", "/api/storage/setLocalStorageVal", model.CheckAuth, setLocalStorageVal)
+	ginServer.Handle("POST", "/api/storage/removeLocalStorageVal", model.CheckAuth, removeLocalStorageVal)
 
 	ginServer.Handle("POST", "/api/account/login", model.CheckAuth, login)
 	ginServer.Handle("POST", "/api/account/checkActivationcode", model.CheckAuth, checkActivationcode)

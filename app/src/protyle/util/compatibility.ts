@@ -135,9 +135,13 @@ export const hotKey2Electron = (key: string) => {
 
 export const setLocalStorage = () => {
     fetchPost("/api/system/getLocalStorage", undefined, (response) => {
-        Object.keys(response.data).forEach(item => {
-            window.localStorage.setItem(item, response.data[item]);
-        });
+        if (response.data) {
+            Object.keys(response.data).forEach(item => {
+                window.localStorage.setItem(item, response.data[item]);
+            });
+        } else {
+            localStorage.clear();
+        }
     });
 };
 

@@ -142,7 +142,7 @@ export const setLocalStorage = () => {
 };
 
 export const exportLocalStorage = (cb: () => void) => {
-    fetchPost("/api/system/setLocalStorage", {val: JSON.stringify(localStorage)}, () => {
+    fetchPost("/api/system/setLocalStorage", {val: window.localStorage}, () => {
         cb();
     });
 };

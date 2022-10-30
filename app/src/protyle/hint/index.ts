@@ -421,9 +421,9 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     markdown: ""
                 }, response => {
                     let tempElement = document.createElement("div");
-                    let blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(realFileName)}</span>`;
+                    let blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(realFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`;
                     if (fileNames.length === 2) {
-                        blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="s">${escapeHtml(fileNames[0])}</span>`;
+                        blockRefHTML = `<span data-type="block-ref" data-id="${response.data}" data-subtype="s">${escapeHtml(fileNames[0].substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`;
                     }
                     tempElement.innerHTML = blockRefHTML;
                     tempElement = tempElement.firstElementChild as HTMLDivElement;

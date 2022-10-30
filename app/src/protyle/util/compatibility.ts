@@ -1,4 +1,5 @@
 import {focusByRange} from "./selection";
+import {fetchPost} from "../../util/fetch";
 
 export const openByMobile = (uri: string) => {
     if (!uri) {
@@ -13,7 +14,7 @@ export const openByMobile = (uri: string) => {
     }
 };
 
-export const readText = async ()  => {
+export const readText = async () => {
     if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
         return window.JSAndroid.readClipboard();
     }
@@ -130,4 +131,22 @@ export const hotKey2Electron = (key: string) => {
         electronKey += "Alt+";
     }
     return electronKey + key.substr(key.length - 1);
+};
+
+export const setLocalStorage = () => {
+    fetchPost("/api/system/getLocalStorage", undefined, (response) => {
+        if (response.data) {
+            Object.keys(response.data).forEach(item => {
+                window.localStorage.setItem(item, response.data[item]);
+            });
+        } else {
+            localStorage.clear();
+        }
+    });
+};
+
+export const exportLocalStorage = (cb: () => void) => {
+    fetchPost("/api/system/setLocalStorage", {val: window.localStorage}, () => {
+        cb();
+    });
 };

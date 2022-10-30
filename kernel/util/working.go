@@ -41,7 +41,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "2.4.7"
+	Ver       = "2.4.8"
 	IsInsider = false
 )
 
@@ -290,7 +290,7 @@ const (
 	ContainerAndroid = "android" // Android 端
 	ContainerIOS     = "ios"     // iOS 端
 
-	LocalHost = "localhost" // 本地域名，由操作系统自动解析到 127.0.0.1
+	LocalHost = "127.0.0.1" // 伺服地址
 	FixedPort = "6806"      // 固定端口
 )
 

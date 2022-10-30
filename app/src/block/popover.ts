@@ -3,12 +3,15 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {fetchSyncPost} from "../util/fetch";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
 
-let popoverTargetElement: HTMLElement
+let popoverTargetElement: HTMLElement;
 export const initBlockPopover = () => {
     let timeout: number;
     let timeoutHide: number;
     // 编辑器内容块引用/backlinks/tag/bookmark/套娃中使用
     document.addEventListener("mouseover", (event: MouseEvent & { target: HTMLElement }) => {
+        if (!window.siyuan.config) {
+            return;
+        }
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
             hasClosestByClassName(event.target, "emojis__item") ||
@@ -35,11 +38,10 @@ export const initBlockPopover = () => {
         } else if (!aElement) {
             hideTooltip();
         }
-
         if (window.siyuan.config.editor.floatWindowMode === 1) {
             clearTimeout(timeoutHide);
             timeoutHide = window.setTimeout(() => {
-                hidePopover(event)
+                hidePopover(event);
             }, 200);
 
             if (!getTarget(event, aElement)) {
@@ -47,7 +49,7 @@ export const initBlockPopover = () => {
             }
             if (window.siyuan.ctrlIsPressed) {
                 clearTimeout(timeoutHide);
-                showPopover()
+                showPopover();
             }
             return;
         }
@@ -67,7 +69,7 @@ export const initBlockPopover = () => {
                 return;
             }
             clearTimeout(timeoutHide);
-            showPopover()
+            showPopover();
         }, 620);
     });
 };
@@ -132,7 +134,7 @@ const hidePopover = (event: MouseEvent & { target: HTMLElement }) => {
             }
         }
     }
-}
+};
 
 const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false | HTMLElement) => {
     if (hasClosestByClassName(event.target, "history__repo", true)) {
@@ -162,8 +164,8 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
             return false;
         }
     }
-    return true
-}
+    return true;
+};
 
 export const showPopover = async () => {
     if (!popoverTargetElement) {
@@ -229,4 +231,4 @@ export const showPopover = async () => {
         }));
     }
     popoverTargetElement = undefined;
-}
+};

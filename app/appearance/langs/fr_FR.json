@@ -1,4 +1,6 @@
 {
+  "googleAnalytics": "Google Analytics",
+  "googleAnalyticsTip": "Après l'activation, l'utilisation sera comptabilisée via <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> afin que les développeurs puissent améliorer l'expérience utilisateur du produit.",
   "floatWindowMode": "Survolez pour afficher une fenêtre flottante",
   "floatWindowModeTip": "Après l'activation, une fenêtre flottante apparaît lorsque la souris survole la référence du bloc, l'icône du fil d'Ariane, etc. Après la désactivation, vous devez maintenir enfoncée la touche <code class='fn__code'>${hotkey}</code> pour apparaît la fenêtre flottante",
   "codeSnippet": "Extrait de code",
@@ -698,7 +700,7 @@
   "about7": "Répertoire de l'espace de travail",
   "about8": "Une fois l'espace de travail basculé, les données de l'espace de travail actuel ne seront pas copiées dans l'espace de travail cible<br>Si vous devez copier des données, veuillez copier manuellement le dossier <code class='fn__code'>data</code> de l'espace de travail actuel sur le système de fichiers vers l'espace de travail cible<br>L'application se fermera automatiquement après modification, merci de redémarrer manuellement",
   "about9": "Télécharger automatiquement les messages d'erreur et les données de diagnostic",
-  "about10": "Après l'ouverture, il télécharge automatiquement les informations d'erreur et les données de diagnostic via le SDK <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a>, qui n'implique pas de données personnelles de confidentialité afin que les développeurs puissent corriger les bogues et améliorer l'expérience utilisateur.  L'application sera fermée automatiquement après modification, veuillez la redémarrer manuellement.",
+  "about10": "Après l'activation, il télécharge automatiquement les informations d'erreur et les données de diagnostic via le SDK <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a>, qui n'implique pas de données de confidentialité personnelles afin que les développeurs peut corriger des bogues.  L'application sera fermée automatiquement après modification, veuillez la redémarrer manuellement.",
   "about11": "Service de réseau",
   "about12": "Après l'activation, les autres appareils du même réseau local seront autorisés à accéder. L'application sera fermée automatiquement après modification, veuillez la redémarrer manuellement.",
   "about13": "API token",

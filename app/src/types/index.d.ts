@@ -26,6 +26,7 @@ type TBazaarType = "templates" | "icons" | "widgets" | "themes"
 declare module "blueimp-md5"
 
 interface Window {
+    dataLayer: any[]
     siyuan: ISiyuan
     webkit: any
 
@@ -44,7 +45,7 @@ interface Window {
 
     hideKeyboardToolbar(): void
 
-    gtag(name: string, key: string, value: IObject): void;
+    gtag(name: string, key: string | Date, value?: IObject): void;
 }
 
 interface ITextOption {
@@ -352,6 +353,7 @@ declare interface IConfig {
         xanadu: boolean
         udanax: boolean
         uploadErrLog: boolean
+        disableGoogleAnalytics: boolean
         downloadInstallPkg: boolean
         networkServe: boolean
         fixedPort: boolean

@@ -75,6 +75,10 @@
   }
 }
 
+.pdf__outer--dark .pdfViewer .page canvas,
+.pdf__outer--dark .thumbnailImage {
+  filter: grayscale(0%) invert(100%) contrast(100%) brightness(100%) hue-rotate(180deg);
+}
 .annotationLayer section:not(.linkAnnotation) {
   display: none;
 }
@@ -303,7 +307,7 @@
 
 #secondaryToolbarButtonContainer {
   max-width: 220px;
-  max-height: 400px;
+  max-height: 60vh;
 }
 
 #secondaryToolbarButtonContainer.hiddenScrollModeButtons > .scrollModeButtons,

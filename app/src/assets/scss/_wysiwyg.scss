@@ -59,7 +59,7 @@
         }
 
         & > .protyle-action:after {
-          background-color: var(--b3-theme-surface-lighter);
+          background-color: var(--b3-list-hover);
         }
 
         & > div:nth-child(3):not(.protyle-attr),
@@ -456,7 +456,7 @@
 
   [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {
     @include text-clamp(1);
-    opacity: 0.68;
+    opacity: 0.54;
     font-size: 16px;
     height: 26px;
     line-height: 26px;
@@ -543,7 +543,6 @@
 
   .li > .protyle-action:hover {
     &:after {
-      background-color: var(--b3-theme-background-light) !important;
       opacity: .68;
     }
 

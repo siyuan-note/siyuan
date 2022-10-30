@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -160,6 +161,66 @@ func getConf(c *gin.Context) {
 
 	if start {
 		start = false
+	}
+}
+
+func getLocalStorage(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	lsPath := filepath.Join(util.DataDir, "storage/local.json")
+	if !gulu.File.IsExist(lsPath) {
+		return
+	}
+
+	data, err := filelock.ReadFile(lsPath)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ls := map[string]interface{}{}
+	if err = gulu.JSON.UnmarshalJSON(data, &ls); nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = ls
+}
+
+func setLocalStorage(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	val := arg["val"].(interface{})
+
+	dirPath := filepath.Join(util.DataDir, "storage")
+	if err := os.MkdirAll(dirPath, 0755); nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	data, err := gulu.JSON.MarshalJSON(val)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	lsPath := filepath.Join(dirPath, "local.json")
+	err = filelock.WriteFile(lsPath, data)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
 }
 
@@ -300,6 +361,20 @@ func setFixedPort(c *gin.Context) {
 
 	util.PushMsg(model.Conf.Language(42), 1000*15)
 	time.Sleep(time.Second * 3)
+}
+
+func setGoogleAnalytics(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	googleAnalytics := arg["googleAnalytics"].(bool)
+	model.Conf.System.DisableGoogleAnalytics = !googleAnalytics
+	model.Conf.Save()
 }
 
 func setUploadErrLog(c *gin.Context) {

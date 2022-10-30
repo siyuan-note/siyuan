@@ -1,3 +1,34 @@
+## v2.4.8 / 2022-10-30
+
+### 改进功能
+
+* [支持设置悬浮窗弹出选项](https://github.com/siyuan-note/siyuan/issues/4781)
+* [PDF 支持深色和浅色模式选择](https://github.com/siyuan-note/siyuan/issues/6376)
+* [改进伺服代码片段 `/snippets/`](https://github.com/siyuan-note/siyuan/pull/6380)
+* [切换回通过 IP `127.0.0.1` 加载](https://github.com/siyuan-note/siyuan/issues/6381)
+* [Windows 端不再支持安装时选择安装路径](https://github.com/siyuan-note/siyuan/issues/6385)
+* [反链面板中面包屑支持 `Ctrl+点击` 打开新页签](https://github.com/siyuan-note/siyuan/issues/6387)
+* [改进触摸屏中嵌入块工具栏显示规则](https://github.com/siyuan-note/siyuan/issues/6388)
+* [Android/iOS 端不显示数据索引和搜索索引状态提示](https://github.com/siyuan-note/siyuan/issues/6392)
+* [前进后退按钮图标更新](https://github.com/siyuan-note/siyuan/issues/6395)
+* [支持插入 `.im` 和 `.build` 域名超链接](https://github.com/siyuan-note/siyuan/issues/6399)
+* [鉴权兼容 IPv6 本机回环地址](https://github.com/siyuan-note/siyuan/pull/6400)
+* [明显区分折叠和非折叠状态颜色](https://github.com/siyuan-note/siyuan/issues/6402)
+* [支持关闭 Google Analytics](https://github.com/siyuan-note/siyuan/issues/6403)
+
+### 移除功能
+
+* [Windows 端不再支持 32 位系统](https://github.com/siyuan-note/siyuan/issues/6386)
+* [移除 `--resident` 和 `--servePath` 内核参数](https://github.com/siyuan-note/siyuan/issues/6389)
+
+### 修复缺陷
+
+* [设置代码片段报错](https://github.com/siyuan-note/siyuan/issues/6382)
+* [录音功能无法点击](https://github.com/siyuan-note/siyuan/issues/6393)
+* [引用非文档命名块时动态锚文本没有使用命名](https://github.com/siyuan-note/siyuan/issues/6397)
+* [修改命名文档块后引用动态锚文本未跟随](https://github.com/siyuan-note/siyuan/issues/6398)
+* [标记公式为标签后无法在标签面板删除标签](https://github.com/siyuan-note/siyuan/issues/6401)
+
 ## v2.4.7 / 2022-10-27
 
 ### 改进功能

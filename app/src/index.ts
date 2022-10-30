@@ -21,6 +21,7 @@ import {
 import {promiseTransactions} from "./protyle/wysiwyg/transaction";
 import {initMessage} from "./dialog/message";
 import {resizeDrag} from "./layout/util";
+import {setLocalStorage} from "./protyle/util/compatibility";
 
 class App {
     constructor() {
@@ -81,6 +82,7 @@ class App {
             }),
             menus: new Menus()
         };
+        setLocalStorage();
         fetchPost("/api/system/getConf", {}, response => {
             window.siyuan.config = response.data.conf;
             fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {

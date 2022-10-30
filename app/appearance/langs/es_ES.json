@@ -1,4 +1,6 @@
 {
+  "googleAnalytics": "Google Analytics",
+  "googleAnalyticsTip": "Después de habilitar, el uso se contará a través de <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> para que los desarrolladores puedan mejorar la experiencia del usuario del producto.",
   "floatWindowMode": "Pase el cursor para mostrar una ventana flotante",
   "floatWindowModeTip": "Después de habilitar, aparecerá una ventana flotante cuando el mouse se desplace sobre la referencia del bloque, el ícono del bloque de navegación, etc. Después de deshabilitar, debe mantener presionada la tecla <code class='fn__code'>${hotkey}</code> para aparece la ventana flotante",
   "codeSnippet": "Fragmento de código",
@@ -698,7 +700,7 @@
   "about7": "Directorio del espacio de trabajo",
   "about8": "Después de cambiar el espacio de trabajo, los datos del espacio de trabajo actual no se copiarán en el espacio de trabajo de destino<br>Si necesita copiar datos, copie manualmente la carpeta <code class='fn__code'>data</code> del espacio de trabajo actual en el sistema de archivos al espacio de trabajo de destino<br>La aplicación se cerrará automáticamente después de la modificación, por favor reinicie manualmente",
   "about9": "Carga automática de mensajes de error y datos de diagnóstico",
-  "about10": "Después de abrirlo, cargará automáticamente la información de error y los datos de diagnóstico a través de <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a> SDK, que no involucra datos personales de privacidad para que los desarrolladores puedan corregir errores y mejorar la experiencia del usuario. La aplicación se cerrará automáticamente después de la modificación, por favor, reinicie manualmente",
+  "about10": "Después de habilitarlo, cargará automáticamente información de error y datos de diagnóstico a través del <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a> SDK, que no involucra datos de privacidad personal para que los desarrolladores puede corregir errores. La aplicación se cerrará automáticamente después de la modificación, por favor, reinicie manualmente",
   "about11": "Red de servicio",
   "about12": "Después de habilitarla, se permitirá el acceso a otros dispositivos de la misma LAN. La aplicación se cerrará automáticamente después de la modificación, por favor reinicie manualmente",
   "about13": "Token API",

@@ -292,6 +292,10 @@ func InitConf() {
 		})
 	}
 
+	if Conf.System.DisableGoogleAnalytics {
+		logging.LogInfof("user has disabled [Google Analytics]")
+	}
+
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
 }
 

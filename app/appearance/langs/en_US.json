@@ -1,4 +1,6 @@
 {
+  "googleAnalytics": "Google Analytics",
+  "googleAnalyticsTip": "After enabling, usage will be counted through <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> so that developers can improve the product user experience",
   "floatWindowMode": "Hover to display a floating window",
   "floatWindowModeTip": "After enabling, a floating window will appear when the mouse hovers over the block reference, breadcrumb block icon, etc. After disabling, you need to hold down the <code class='fn__code'>${hotkey}</code> key to appear the floating window",
   "codeSnippet": "Code Snippet",
@@ -698,7 +700,7 @@
   "about7": "Workspace dir",
   "about8": "After the workspace is switched, the data in the current workspace will not be copied to the target workspace<br>If you need to copy data, please manually copy the current workspace <code class='fn__code'>data</code> folder on the file system to the target workspace<br>The application will be closed automatically after modification, please restart manually",
   "about9": "Automatically upload error messages and diagnostic data",
-  "about10": "After opening, it will automatically upload error information and diagnostic data through the <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a> SDK, which does not involve personal privacy data so that developers can fix bugs and improve user experience. The application will be closed automatically after modification, please restart manually",
+  "about10": "After enabling, it will automatically upload error information and diagnostic data through the <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a> SDK, which does not involve personal privacy data so that developers can fix bugs. The application will be closed automatically after modification, please restart manually",
   "about11": "Network serving",
   "about12": "After enabling, other devices in the same LAN will be allowed to access. The application will be closed automatically after modification, please restart manually",
   "about13": "API token",

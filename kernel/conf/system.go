@@ -38,8 +38,9 @@ type System struct {
 	FixedPort    bool          `json:"fixedPort"`    // 是否使用固定端口 6806
 	NetworkProxy *NetworkProxy `json:"networkProxy"`
 
-	UploadErrLog       bool `json:"uploadErrLog"`
-	DownloadInstallPkg bool `json:"downloadInstallPkg"`
+	UploadErrLog           bool `json:"uploadErrLog"`
+	DisableGoogleAnalytics bool `json:"disableGoogleAnalytics"`
+	DownloadInstallPkg     bool `json:"downloadInstallPkg"`
 }
 
 func NewSystem() *System {

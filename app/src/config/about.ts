@@ -26,6 +26,14 @@ export const about = {
 </label>
 <label class="b3-label fn__flex">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.googleAnalytics}
+        <div class="b3-label__text">${window.siyuan.languages.googleAnalyticsTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <input class="b3-switch fn__flex-center" id="googleAnalytics" type="checkbox"${window.siyuan.config.system.disableGoogleAnalytics ? "" : " checked"}>
+</label>
+<label class="b3-label fn__flex">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.about9}
         <div class="b3-label__text">${window.siyuan.languages.about10}</div>
     </div>
@@ -55,7 +63,7 @@ export const about = {
         <span class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.join("</code> <code class='fn__code'>")}</code></span>
     </div>
     <div class="fn__space"></div>
-    <button data-type="open" data-url="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "localhost"}:${location.port}" class="b3-button b3-button--outline fn__size200 fn__flex-center">
+    <button data-type="open" data-url="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:${location.port}" class="b3-button b3-button--outline fn__size200 fn__flex-center">
         <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
     </button>
 </label>
@@ -239,10 +247,6 @@ export const about = {
                     searchData.idPath = "";
                     localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(searchData));
                 }
-                localStorage.removeItem(Constants.LOCAL_DAILYNOTEID);
-                localStorage.removeItem(Constants.LOCAL_DOCINFO);
-                localStorage.removeItem(Constants.LOCAL_HISTORYNOTEID);
-                localStorage.removeItem("pdfjs.history");
                 exportLayout(false, () => {
                     exitSiYuan();
                 });
@@ -362,6 +366,12 @@ export const about = {
                 exportLayout(false, () => {
                     exitSiYuan();
                 });
+            });
+        });
+        const googleAnalyticsElement = about.element.querySelector("#googleAnalytics") as HTMLInputElement;
+        googleAnalyticsElement.addEventListener("change", () => {
+            fetchPost("/api/system/setGoogleAnalytics", {googleAnalytics: googleAnalyticsElement.checked}, () => {
+                exportLayout(true);
             });
         });
         const uploadErrLogElement = about.element.querySelector("#uploadErrLog") as HTMLInputElement;

@@ -33,9 +33,9 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
-	"github.com/qiniu/go-sdk/v7/storage"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
+	"github.com/siyuan-note/dejavu/transport"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/httpclient"
@@ -259,13 +259,8 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-
 	defer util.PushClearProgress()
-	downloadFileCount, downloadChunkCount, downloadBytes, err := repo.DownloadTagIndex(tag, id, cloudInfo, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	downloadFileCount, downloadChunkCount, downloadBytes, err := repo.DownloadTagIndex(tag, id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
 		return
 	}
@@ -286,14 +281,9 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-
 	util.PushEndlessProgress(Conf.Language(116))
 	defer util.PushClearProgress()
-	uploadFileCount, uploadChunkCount, uploadBytes, err := repo.UploadTagIndex(tag, id, cloudInfo, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	uploadFileCount, uploadChunkCount, uploadBytes, err := repo.UploadTagIndex(tag, id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
 		if errors.Is(err, dejavu.ErrCloudBackupCountExceeded) {
 			err = fmt.Errorf(Conf.Language(84), Conf.Language(154))
@@ -324,12 +314,7 @@ func RemoveCloudRepoTag(tag string) (err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-
-	err = repo.RemoveCloudRepoTag(tag, cloudInfo, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
+	err = repo.RemoveCloudRepoTag(tag, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
 	if nil != err {
 		return
 	}
@@ -347,11 +332,7 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-	ret, err = repo.GetCloudRepoTagLogs(cloudInfo, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
+	ret, err = repo.GetCloudRepoTagLogs(map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
 	if 1 > len(ret) {
 		ret = []*dejavu.Log{}
 	}
@@ -509,17 +490,12 @@ func bootSyncRepo() (err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	fetchedFiles, err := repo.GetSyncCloudFiles(cloudInfo, syncContext)
+	fetchedFiles, err := repo.GetSyncCloudFiles(syncContext)
 	if errors.Is(err, dejavu.ErrRepoFatalErr) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
-			fetchedFiles, err = repo.GetSyncCloudFiles(cloudInfo, syncContext)
+			fetchedFiles, err = repo.GetSyncCloudFiles(syncContext)
 		}
 	}
 
@@ -601,17 +577,12 @@ func syncRepo(exit, byHand bool) (err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	mergeResult, trafficStat, err := repo.Sync(cloudInfo, syncContext)
+	mergeResult, trafficStat, err := repo.Sync(syncContext)
 	if errors.Is(err, dejavu.ErrRepoFatalErr) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
-			mergeResult, trafficStat, err = repo.Sync(cloudInfo, syncContext)
+			mergeResult, trafficStat, err = repo.Sync(syncContext)
 		}
 	}
 	elapsed := time.Since(start)
@@ -838,9 +809,17 @@ func resetRepository(repo *dejavu.Repo) (index *entity.Index, err error) {
 }
 
 func newRepository() (ret *dejavu.Repo, err error) {
+	transportConf, err := buildRepoTransportConf()
+	if nil != err {
+		return
+	}
+
+	// TODO: 数据同步支持接入第三方对象存储服务 https://github.com/siyuan-note/siyuan/issues/6426
+	siyuanTransport := &transport.SiYuan{Conf: transportConf}
+
 	ignoreLines := getIgnoreLines()
 	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置
-	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines)
+	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines, siyuanTransport)
 	if nil != err {
 		logging.LogErrorf("init data repo failed: %s", err)
 	}
@@ -1019,25 +998,25 @@ func subscribeEvents() {
 	})
 }
 
-func buildCloudInfo() (ret *dejavu.CloudInfo, err error) {
+func buildRepoTransportConf() (ret *transport.Conf, err error) {
 	if !IsValidCloudDirName(Conf.Sync.CloudName) {
 		logging.LogWarnf("invalid cloud repo name, rename it to [main]")
 		Conf.Sync.CloudName = "main"
 		Conf.Save()
 	}
 
-	if nil == Conf.User {
-		err = errors.New("user auth failed")
-		return
+	userId, token := "0", ""
+	if nil != Conf.User {
+		userId = Conf.User.UserId
+		token = Conf.User.UserToken
 	}
 
-	ret = &dejavu.CloudInfo{
+	ret = &transport.Conf{
 		Dir:       Conf.Sync.CloudName,
-		UserID:    Conf.User.UserId,
-		Token:     Conf.User.UserToken,
+		UserID:    userId,
+		Token:     token,
 		LimitSize: int64(Conf.User.UserSiYuanRepoSize - Conf.User.UserSiYuanAssetSize),
 		Server:    util.AliyunServer,
-		Zone:      &storage.ZoneHuadong, // TODO: 海外版需要条件编译
 	}
 	return
 }

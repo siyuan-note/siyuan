@@ -301,13 +301,12 @@ func CreateCloudSyncDir(name string) (err error) {
 		return errors.New(Conf.Language(37))
 	}
 
-	var cloudInfo *dejavu.CloudInfo
-	cloudInfo, err = buildCloudInfo()
+	repo, err := newRepository()
 	if nil != err {
 		return
 	}
 
-	err = dejavu.CreateCloudRepo(name, cloudInfo)
+	err = repo.CreateCloudRepo(name)
 	return
 }
 
@@ -321,13 +320,12 @@ func RemoveCloudSyncDir(name string) (err error) {
 		return
 	}
 
-	var cloudInfo *dejavu.CloudInfo
-	cloudInfo, err = buildCloudInfo()
+	repo, err := newRepository()
 	if nil != err {
 		return
 	}
 
-	err = dejavu.RemoveCloudRepo(name, cloudInfo)
+	err = repo.RemoveCloudRepo(name)
 	if nil != err {
 		err = errors.New(formatErrorMsg(err))
 		return
@@ -348,13 +346,12 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 	var dirs []map[string]interface{}
 	var size int64
 
-	var cloudInfo *dejavu.CloudInfo
-	cloudInfo, err = buildCloudInfo()
+	repo, err := newRepository()
 	if nil != err {
 		return
 	}
 
-	dirs, size, err = dejavu.GetCloudRepos(cloudInfo)
+	dirs, size, err = repo.GetCloudRepos()
 	if nil != err {
 		err = errors.New(formatErrorMsg(err))
 		return

@@ -29,7 +29,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
-	"github.com/siyuan-note/dejavu/transport"
+	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -378,7 +378,7 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 }
 
 func formatErrorMsg(err error) string {
-	if errors.Is(err, transport.ErrCloudAuthFailed) {
+	if errors.Is(err, cloud.ErrCloudAuthFailed) {
 		return Conf.Language(31) + " v" + util.Ver
 	}
 

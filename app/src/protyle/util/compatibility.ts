@@ -135,11 +135,15 @@ export const hotKey2Electron = (key: string) => {
 
 export const setLocalStorage = () => {
     fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
-        localStorage.clear();
         if (response.data) {
+            localStorage.clear();
             Object.keys(response.data).forEach(item => {
-                localStorage.setItem(item, response.data[item]);
+                if (item !== "setItem" && item !== "removeItem") {
+                    localStorage.setItem(item, response.data[item]);
+                }
             });
+        } else {
+            exportLocalStorage();
         }
     });
 
@@ -156,8 +160,10 @@ export const setLocalStorage = () => {
     };
 };
 
-export const exportLocalStorage = (cb: () => void) => {
+export const exportLocalStorage = (cb?: () => void) => {
     fetchPost("/api/storage/setLocalStorage", {val: localStorage}, () => {
-        cb();
+        if (cb) {
+            cb();
+        }
     });
 };

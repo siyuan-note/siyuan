@@ -992,11 +992,6 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 		return
 	}
 
-	if depth := strings.Count(toPath, "/"); 6 < depth && !Conf.FileTree.AllowCreateDeeper {
-		err = errors.New(Conf.Language(118))
-		return
-	}
-
 	fromDir := strings.TrimSuffix(fromPath, ".sy")
 	if strings.HasPrefix(toPath, fromDir) {
 		err = errors.New(Conf.Language(87))
@@ -1013,6 +1008,12 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 	tree, err := LoadTree(fromBoxID, fromPath)
 	if nil != err {
 		err = ErrBlockNotFound
+		return
+	}
+
+	childDepth := util.GetChildDocDepth(filepath.Join(util.DataDir, fromBoxID, fromPath))
+	if depth := strings.Count(toPath, "/") + childDepth; 6 < depth && !Conf.FileTree.AllowCreateDeeper {
+		err = errors.New(Conf.Language(118))
 		return
 	}
 

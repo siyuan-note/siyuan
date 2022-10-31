@@ -261,7 +261,9 @@ export class Breadcrumb {
                     }
                 }).element);
             }
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            if (window.siyuan.menus.menu.element.childElementCount > 0) {
+                window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            }
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconRefresh",
                 accelerator: window.siyuan.config.keymap.editor.general.refresh.custom,

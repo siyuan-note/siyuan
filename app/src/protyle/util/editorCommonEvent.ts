@@ -575,8 +575,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         document.onmouseup = null;
     });
     editorElement.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
-        if (event.dataTransfer.getData(Constants.SIYUAN_DROP_EDITOR)) {
-            // 编辑器内选中文字拖拽
+        if (protyle.disabled || event.dataTransfer.getData(Constants.SIYUAN_DROP_EDITOR)) {
+            // 只读模式/编辑器内选中文字拖拽
             event.preventDefault();
             event.stopPropagation();
             return;

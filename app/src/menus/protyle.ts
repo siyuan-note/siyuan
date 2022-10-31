@@ -441,7 +441,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
         }
     }
     if (window.siyuan.mobileEditor) {
-        window.localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({
+        localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({
             id,
             action: id === protyle.block.rootID ? [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT] : [Constants.CB_GET_ALL]
         }));
@@ -451,7 +451,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
     }
     fetchPost("/api/filetree/getDoc", {
         id,
-        size: id === protyle.block.rootID ? Constants.SIZE_GET : Constants.SIZE_GET_MAX,
+        size: id === protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,
     }, getResponse => {
         if (isPushBack) {
             onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_HTML]);
@@ -468,7 +468,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
                 fetchPost("/api/filetree/getDoc", {
                     id: focusId,
                     mode: 3,
-                    size: Constants.SIZE_GET,
+                    size: window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getFocusResponse => {
                     onGet(getFocusResponse, protyle, isPushBack ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO]);
                 });

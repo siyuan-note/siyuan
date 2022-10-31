@@ -40,7 +40,7 @@ export const bazaar = {
 <div class="fn__flex-1">
     <div data-type="theme" class="bazaarPanel" data-init="true">
         <div class="fn__hr"></div>
-        <div class="fn__flex">
+        <div class="fn__flex fn__flex-wrap">
             <div class="fn__space"></div>
             <div class="fn__space"></div>
             <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>

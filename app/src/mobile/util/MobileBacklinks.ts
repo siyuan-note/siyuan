@@ -144,7 +144,7 @@ export class MobileBacklinks {
             if (response.data.refRootID === window.siyuan.mobileEditor.protyle.block.rootID) {
                 fetchPost("/api/filetree/getDoc", {
                     id: window.siyuan.mobileEditor.protyle.block.id,
-                    size: Constants.SIZE_GET,
+                    size: window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getResponse => {
                     onGet(getResponse, window.siyuan.mobileEditor.protyle);
                 });

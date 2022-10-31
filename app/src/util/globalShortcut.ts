@@ -816,7 +816,7 @@ const editKeydown = (event: KeyboardEvent) => {
         protyle.scroll.lastScrollTop = 0;
         fetchPost("/api/filetree/getDoc", {
             id: protyle.block.parentID,
-            size: Constants.SIZE_GET,
+            size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
             onGet(getResponse, protyle);
         });

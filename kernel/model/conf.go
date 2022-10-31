@@ -257,9 +257,18 @@ func InitConf() {
 	if 1 > Conf.Editor.HistoryRetentionDays {
 		Conf.Editor.HistoryRetentionDays = 7
 	}
+	if 48 > Conf.Editor.DynamicLoadBlocks {
+		Conf.Editor.DynamicLoadBlocks = 48
+	}
+	if 1024 < Conf.Editor.DynamicLoadBlocks {
+		Conf.Editor.DynamicLoadBlocks = 1024
+	}
 
 	if nil == Conf.Search {
 		Conf.Search = conf.NewSearch()
+	}
+	if 1 > Conf.Search.Limit {
+		Conf.Search.Limit = 64
 	}
 
 	if nil == Conf.Stat {

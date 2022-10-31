@@ -69,7 +69,7 @@ export class Breadcrumb {
                         fetchPost("/api/filetree/getDoc", {
                             id: protyle.options.blockId,
                             mode: 0,
-                            size: Constants.SIZE_GET,
+                            size: window.siyuan.config.editor.dynamicLoadBlocks,
                         }, getResponse => {
                             onGet(getResponse, protyle);
                         });
@@ -78,7 +78,7 @@ export class Breadcrumb {
                         fetchPost("/api/filetree/getDoc", {
                             id: protyle.options.blockId,
                             mode: 3,
-                            size: Constants.SIZE_GET,
+                            size: window.siyuan.config.editor.dynamicLoadBlocks,
                         }, getResponse => {
                             onGet(getResponse, protyle, [Constants.CB_GET_HL]);
                         });
@@ -231,7 +231,7 @@ export class Breadcrumb {
                             fetchPost("/api/filetree/getDoc", {
                                 id: protyle.block.id,
                                 mode: 0,
-                                size: Constants.SIZE_GET,
+                                size: window.siyuan.config.editor.dynamicLoadBlocks,
                             }, getResponse => {
                                 onGet(getResponse, protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
                             });
@@ -241,7 +241,7 @@ export class Breadcrumb {
                                     fetchPost("/api/filetree/getDoc", {
                                         id: item.editor.protyle.block.rootID,
                                         mode: 0,
-                                        size: Constants.SIZE_GET,
+                                        size: window.siyuan.config.editor.dynamicLoadBlocks,
                                     }, getResponse => {
                                         onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
                                     });
@@ -270,7 +270,7 @@ export class Breadcrumb {
                     fetchPost("/api/filetree/getDoc", {
                         id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
                         mode: 0,
-                        size: protyle.block.showAll ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
+                        size: protyle.block.showAll ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                     }, getResponse => {
                         onGet(getResponse, protyle, protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS], saveScroll(protyle, true), true);
                     });
@@ -296,7 +296,7 @@ export class Breadcrumb {
                     protyle.scroll.lastScrollTop = 0;
                     fetchPost("/api/filetree/getDoc", {
                         id: protyle.block.rootID,
-                        size: Constants.SIZE_GET,
+                        size: window.siyuan.config.editor.dynamicLoadBlocks,
                     }, getResponse => {
                         onGet(getResponse, protyle);
                         window.siyuan.menus.menu.remove();

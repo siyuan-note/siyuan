@@ -48,6 +48,10 @@
     &-shrink {
       flex-shrink: 0;
     }
+
+    &-wrap {
+      flex-wrap: wrap;
+    }
   }
 
   &__pointer {
@@ -101,15 +105,15 @@
   }
 
   &__code {
-      padding: 0.2em 0.4em;
-      margin: 0;
-      font-size: 85%;
-      border-radius: 3px;
-      font-family: var(--b3-font-family-code);
-      word-break: break-word;
-      background-size: 20px 20px;
-      white-space: pre-wrap;
-      background-color: var(--b3-protyle-code-background);
+    padding: 0.2em 0.4em;
+    margin: 0;
+    font-size: 85%;
+    border-radius: 3px;
+    font-family: var(--b3-font-family-code);
+    word-break: break-word;
+    background-size: 20px 20px;
+    white-space: pre-wrap;
+    background-color: var(--b3-protyle-code-background);
   }
 }
 

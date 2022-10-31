@@ -77,9 +77,9 @@ export const initConfigSearch = (element: HTMLElement) => {
             "useFixedPort", "useFixedPortTip", "googleAnalytics", "googleAnalyticsTip"]),
     ];
     const inputElement = element.querySelector(".b3-form__icon input") as HTMLInputElement;
-    if (window.siyuan.config.system.container !== "ios") {
-        inputElement.focus();
-    }
+    /// #if !BROWSER
+    inputElement.focus();
+    /// #endif
     const updateTab = () => {
         const indexList: number[] = [];
         const inputValue = inputElement.value;

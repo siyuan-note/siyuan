@@ -26,6 +26,8 @@ type TBazaarType = "templates" | "icons" | "widgets" | "themes"
 declare module "blueimp-md5"
 
 interface Window {
+    __localStorage__removeItem: (key: string) => void
+    __localStorage__setItem: (key: string, value: string) => void
     dataLayer: any[]
     siyuan: ISiyuan
     webkit: any
@@ -248,6 +250,7 @@ declare interface IEditor {
     katexMacros: string;
     fullWidth: boolean;
     floatWindowMode: number;
+    dynamicLoadBlocks: number;
     fontSize: number;
     generateHistoryInterval: number;
     historyRetentionDays: number;

@@ -1,4 +1,4 @@
-## v2.4.8 / 2022-10-30
+## v2.4.8 / 2022-10-31
 
 ### 改进功能
 
@@ -15,6 +15,15 @@
 * [鉴权兼容 IPv6 本机回环地址](https://github.com/siyuan-note/siyuan/pull/6400)
 * [明显区分折叠和非折叠状态颜色](https://github.com/siyuan-note/siyuan/issues/6402)
 * [支持关闭 Google Analytics](https://github.com/siyuan-note/siyuan/issues/6403)
+* [每个工作空间单独持久化 localStorage](https://github.com/siyuan-note/siyuan/issues/6404)
+* [支持 `HEVC` 编码视频播放](https://github.com/siyuan-note/siyuan/pull/6406)
+* [`网络图片转换为本地图片` 遵循笔记本级资源文件设置](https://github.com/siyuan-note/siyuan/issues/6407)
+* [编辑器动态加载块数由定值改为可配置](https://github.com/siyuan-note/siyuan/issues/6415)
+* [优化 Pad 竖屏显示](https://github.com/siyuan-note/siyuan/issues/6417)
+
+### 文档相关
+
+* [听说思源笔记会通过用户电脑挖矿](https://github.com/siyuan-note/siyuan/issues/6416)
 
 ### 移除功能
 

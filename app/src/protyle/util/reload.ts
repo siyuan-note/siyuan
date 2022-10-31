@@ -28,7 +28,7 @@ export const reloadProtyle = (protyle: IProtyle) => {
         fetchPost("/api/filetree/getDoc", {
             id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
             mode: 0,
-            size: protyle.block.showAll ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
+            size: protyle.block.showAll ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
             onGet(getResponse, protyle, protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS], saveScroll(protyle, true), true);
         });

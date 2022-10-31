@@ -45,7 +45,7 @@ export class Scroll {
             index: parseInt(this.inputElement.value),
             id: protyle.block.parentID,
             mode: 0,
-            size: Constants.SIZE_GET,
+            size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
             onGet(getResponse, protyle, [Constants.CB_GET_FOCUSFIRST, Constants.CB_GET_UNCHANGEID]);
         });
@@ -59,7 +59,7 @@ export class Scroll {
         if (protyle.block.showAll) {
             this.element.classList.add("fn__none");
         } else {
-            if (protyle.block.childBlockCount > Constants.SIZE_GET) {
+            if (protyle.block.childBlockCount > window.siyuan.config.editor.dynamicLoadBlocks) {
                 this.element.classList.remove("fn__none");
             } else {
                 this.element.classList.add("fn__none");

@@ -99,7 +99,7 @@ export class Protyle {
                                 if (this.protyle.block.showAll && data.cmd === "heading2doc" && !this.protyle.options.backlinkData) {
                                     fetchPost("/api/filetree/getDoc", {
                                         id: this.protyle.block.rootID,
-                                        size: Constants.SIZE_GET,
+                                        size: window.siyuan.config.editor.dynamicLoadBlocks,
                                     }, getResponse => {
                                         onGet(getResponse, this.protyle);
                                     });
@@ -167,7 +167,7 @@ export class Protyle {
                 id: options.blockId,
                 k: options.key || "",
                 mode: (mergedOptions.action && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0, // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后
-                size: mergedOptions.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : Constants.SIZE_GET,
+                size: mergedOptions.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
             }, getResponse => {
                 onGet(getResponse, this.protyle, mergedOptions.action, options.scrollAttr);
                 if (this.protyle.model) {

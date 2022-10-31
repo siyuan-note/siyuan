@@ -134,19 +134,36 @@ export const hotKey2Electron = (key: string) => {
 };
 
 export const setLocalStorage = () => {
-    fetchPost("/api/system/getLocalStorage", undefined, (response) => {
+    fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
         if (response.data) {
+            localStorage.clear();
             Object.keys(response.data).forEach(item => {
-                window.localStorage.setItem(item, response.data[item]);
+                if (item !== "setItem" && item !== "removeItem") {
+                    localStorage.setItem(item, response.data[item]);
+                }
             });
         } else {
-            localStorage.clear();
+            exportLocalStorage();
         }
     });
+
+    // 复写 localStorage
+    window.__localStorage__setItem = localStorage.setItem;
+    window.__localStorage__removeItem = localStorage.removeItem;
+    localStorage.setItem = function (key, val) {
+        window.__localStorage__setItem.call(this, key, val);
+        fetchPost("/api/storage/setLocalStorageVal", {key, val});
+    };
+    localStorage.removeItem = function (key) {
+        window.__localStorage__removeItem.call(this, key);
+        fetchPost("/api/storage/removeLocalStorageVal", {key});
+    };
 };
 
-export const exportLocalStorage = (cb: () => void) => {
-    fetchPost("/api/system/setLocalStorage", {val: window.localStorage}, () => {
-        cb();
+export const exportLocalStorage = (cb?: () => void) => {
+    fetchPost("/api/storage/setLocalStorage", {val: localStorage}, () => {
+        if (cb) {
+            cb();
+        }
     });
 };

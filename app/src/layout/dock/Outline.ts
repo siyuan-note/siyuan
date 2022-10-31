@@ -142,7 +142,7 @@ export class Outline extends Model {
                                 fetchPost("/api/filetree/getDoc", {
                                     id: item.editor.protyle.block.rootID,
                                     mode: 0,
-                                    size: Constants.SIZE_GET,
+                                    size: window.siyuan.config.editor.dynamicLoadBlocks,
                                 }, getResponse => {
                                     onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
                                 });

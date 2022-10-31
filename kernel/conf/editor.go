@@ -39,6 +39,7 @@ type Editor struct {
 	EmbedBlockBreadcrumb            bool     `json:"embedBlockBreadcrumb"`            // 嵌入块是否显示面包屑
 	ListLogicalOutdent              bool     `json:"listLogicalOutdent"`              // 列表逻辑反向缩进
 	FloatWindowMode                 int      `json:"floatWindowMode"`                 // 浮窗触发模式，0：光标悬停，1：按住 Ctrl 悬停
+	DynamicLoadBlocks               int      `json:"dynamicLoadBlocks"`               // 块动态数，可配置区间 [128, 1024]
 }
 
 func NewEditor() *Editor {
@@ -62,5 +63,6 @@ func NewEditor() *Editor {
 		EmbedBlockBreadcrumb:            false,
 		ListLogicalOutdent:              false,
 		FloatWindowMode:                 0,
+		DynamicLoadBlocks:               128,
 	}
 }

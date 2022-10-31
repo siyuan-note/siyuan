@@ -271,7 +271,7 @@ const initBar = () => {
                                         notebook: item.id,
                                         app: Constants.SIYUAN_APPID,
                                     });
-                                    window.localStorage.setItem(Constants.LOCAL_DAILYNOTEID, item.id);
+                                    localStorage.setItem(Constants.LOCAL_DAILYNOTEID, item.id);
                                 }
                             }).element);
                         }

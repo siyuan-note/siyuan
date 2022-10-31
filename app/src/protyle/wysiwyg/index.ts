@@ -1212,7 +1212,7 @@ export class WYSIWYG {
                     id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
                     mode: 1,
                     k: protyle.options.key || "",
-                    size: Constants.SIZE_GET,
+                    size: window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getResponse => {
                     preventGetTopHTML = false;
                     onGet(getResponse, protyle, [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID]);

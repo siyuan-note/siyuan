@@ -21,7 +21,7 @@ export const netImg2LocalAssets = (protyle: IProtyle) => {
         fetchPost("/api/filetree/getDoc", {
             id: protyle.block.id,
             mode: 0,
-            size: Constants.SIZE_GET,
+            size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
             onGet(getResponse, protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
         });
@@ -31,7 +31,7 @@ export const netImg2LocalAssets = (protyle: IProtyle) => {
                 fetchPost("/api/filetree/getDoc", {
                     id: item.editor.protyle.block.rootID,
                     mode: 0,
-                    size: Constants.SIZE_GET,
+                    size: window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getResponse => {
                     onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
                 });

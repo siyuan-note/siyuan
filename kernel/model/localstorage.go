@@ -74,7 +74,7 @@ func setLocalStorage(val interface{}) (err error) {
 		return
 	}
 
-	data, err := gulu.JSON.MarshalJSON(val)
+	data, err := gulu.JSON.MarshalIndentJSON(val, "", "  ")
 	if nil != err {
 		logging.LogErrorf("marshal local storage failed: %s", err)
 		return

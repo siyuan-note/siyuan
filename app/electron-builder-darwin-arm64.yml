@@ -18,6 +18,8 @@ mac:
   gatekeeperAssess: false
   hardenedRuntime: true
   entitlements: "../../entitlements.mas.plist"
+  extendInfo:
+    - NSMicrophoneUsageDescription: "This app requires microphone access to record audio."
   entitlementsInherit: "../../entitlements.mas.plist"
   extraResources:
     - from: "kernel-darwin-arm64"

@@ -1,4 +1,6 @@
 {
+  "microphoneDenied": "Need to allow Siyuan to access the microphone in System Preferences",
+  "microphoneNotAccess": "Access to the microphone is denied, go to System Preferences to reset",
   "dynamicLoadBlocks": "Number of dynamically loaded blocks",
   "dynamicLoadBlocksTip": "This value contains the number of subblocks. If there are many code blocks, formula blocks or chart blocks that need to be rendered, it is recommended not to set too large",
   "googleAnalytics": "Google Analytics",

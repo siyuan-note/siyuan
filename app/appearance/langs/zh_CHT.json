@@ -1,4 +1,6 @@
 {
+  "microphoneDenied": "需在系統偏好設置中允許思源訪問麥克風",
+  "microphoneNotAccess": "麥克風被拒絕訪問，可前往系統偏好設置中重新設置",
   "dynamicLoadBlocks": "動態加載塊數",
   "dynamicLoadBlocksTip": "該值包含了子塊數。如果需要渲染的代碼塊、公式塊或圖表塊較多，建議不要設置過大",
   "googleAnalytics": "Google Analytics",

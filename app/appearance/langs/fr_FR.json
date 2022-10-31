@@ -1,4 +1,6 @@
 {
+  "microphoneDenied": "Vous devez autoriser Siyuan à accéder au microphone dans les Préférences Système",
+  "microphoneNotAccess": "L'accès au microphone est refusé, allez dans les Préférences Système pour réinitialiser",
   "dynamicLoadBlocks": "Nombre de blocs chargés dynamiquement",
   "dynamicLoadBlocksTip": "Cette valeur contient le nombre de sous-blocs. S'il y a beaucoup de blocs de code, de blocs de formule ou de blocs de graphique qui doivent être rendus, il est recommandé de ne pas définir trop grand",
   "googleAnalytics": "Google Analytics",

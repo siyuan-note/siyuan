@@ -378,6 +378,7 @@ func TagSnapshot(id, name string) (err error) {
 		return
 	}
 
+	name = strings.TrimSpace(name)
 	name = gulu.Str.RemoveInvisible(name)
 	if "" == name {
 		err = errors.New(Conf.Language(142))
@@ -413,6 +414,7 @@ func IndexRepo(memo string) (err error) {
 		return
 	}
 
+	memo = strings.TrimSpace(memo)
 	memo = gulu.Str.RemoveInvisible(memo)
 	if "" == memo {
 		err = errors.New(Conf.Language(142))

@@ -98,17 +98,11 @@ func Themes() (ret []*Theme) {
 
 func InstalledThemes() (ret []*Theme) {
 	ret = []*Theme{}
-	dir, err := os.Open(util.ThemesPath)
-	if nil != err {
-		logging.LogWarnf("open appearance themes folder [%s] failed: %s", util.ThemesPath, err)
-		return
-	}
-	themeDirs, err := dir.Readdir(-1)
+	themeDirs, err := os.ReadDir(util.ThemesPath)
 	if nil != err {
 		logging.LogWarnf("read appearance themes folder failed: %s", err)
 		return
 	}
-	dir.Close()
 
 	bazaarThemes := Themes()
 

@@ -97,17 +97,11 @@ func Widgets() (widgets []*Widget) {
 
 func InstalledWidgets() (ret []*Widget) {
 	ret = []*Widget{}
-	dir, err := os.Open(filepath.Join(util.DataDir, "widgets"))
-	if nil != err {
-		logging.LogWarnf("open widgets folder [%s] failed: %s", util.ThemesPath, err)
-		return
-	}
-	widgetDirs, err := dir.Readdir(-1)
+	widgetDirs, err := os.ReadDir(filepath.Join(util.DataDir, "widgets"))
 	if nil != err {
 		logging.LogWarnf("read widgets folder failed: %s", err)
 		return
 	}
-	dir.Close()
 
 	bazaarWidgets := Widgets()
 

@@ -150,13 +150,7 @@
     --b3-pdf-background5: #f5539e;
     --b3-pdf-background6: var(--b3-theme-primary);
     --b3-pdf-background7: #944194;
-}
-
-/* PDF */
-.textLayer,
-.pdf__resize {
-    /* dark 蓝色、紫色背景显示不清楚，文档位于 https://github.com/siyuan-note/siyuan/issues/5351 */
-    mix-blend-mode: multiply;
+    --b3-pdf-dark: #212224;
 }
 
 .b3-typography div.hljs, .protyle-wysiwyg div.hljs {

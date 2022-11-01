@@ -150,12 +150,7 @@
     --b3-pdf-background5: #f5539e;
     --b3-pdf-background6: var(--b3-theme-primary);
     --b3-pdf-background7: #944194;
-}
-
-/* PDF */
-.textLayer,
-.pdf__resize {
-    mix-blend-mode: screen;
+    --b3-pdf-dark: #212224;
 }
 
 .b3-text-field::-webkit-calendar-picker-indicator {

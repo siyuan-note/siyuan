@@ -245,6 +245,8 @@ declare interface IExport {
 }
 
 declare interface IEditor {
+    justify: boolean;
+    rtl: boolean;
     readOnly: boolean;
     listLogicalOutdent: boolean;
     katexMacros: string;

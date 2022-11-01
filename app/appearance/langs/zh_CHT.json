@@ -116,6 +116,7 @@
   "justify": "兩側對齊",
   "justifyTip": "將內容以兩側對齊的方式進行渲染",
   "rtl": "從右到左（RTL）",
+  "ltr": "從左到右（LTR）",
   "rtlTip": "將內容以從右到左的方式進行渲染",
   "height": "高度",
   "deactivateUser": "註銷賬號",

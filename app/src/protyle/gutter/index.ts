@@ -1478,6 +1478,35 @@ export class Gutter {
                         e.style.textAlign = "justify";
                     });
                 }
+            }, {
+                type: "separator"
+            }, {
+                label: window.siyuan.languages.ltr,
+                icon: "iconRtl",
+                click: () => {
+                    this.genClick(nodeElements, protyle, (e: HTMLElement) => {
+                        e.style.direction = "ltr";
+                    });
+                }
+            }, {
+                label: window.siyuan.languages.rtl,
+                icon: "iconRtl",
+                click: () => {
+                    this.genClick(nodeElements, protyle, (e: HTMLElement) => {
+                        e.style.direction = "rtl";
+                    });
+                }
+            }, {
+                type: "separator"
+            }, {
+                label: window.siyuan.languages.clearFontStyle,
+                icon: "iconTrashcan",
+                click: () => {
+                    this.genClick(nodeElements, protyle, (e: HTMLElement) => {
+                        e.style.textAlign = "";
+                        e.style.direction = "";
+                    });
+                }
             }]
         }).element);
     }
@@ -1662,7 +1691,7 @@ export class Gutter {
         }]);
     }
 
-    public render(protyle:IProtyle, element: Element, wysiwyg: HTMLElement) {
+    public render(protyle: IProtyle, element: Element, wysiwyg: HTMLElement) {
         // https://github.com/siyuan-note/siyuan/issues/4659
         const titleElement = wysiwyg.parentElement.querySelector(".protyle-title__input");
         if (titleElement && titleElement.getAttribute("data-render") !== "true") {

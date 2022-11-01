@@ -116,6 +116,7 @@
   "justify": "Justify",
   "justifyTip": "Render content side-aligned",
   "rtl": "Right to Left (RTL)",
+  "ltr": "Left to Right (LTR)",
   "rtlTip": "Render content from right to left",
   "height": "Height",
   "deactivateUser": "Deactivate Account",

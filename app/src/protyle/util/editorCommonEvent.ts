@@ -697,6 +697,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         if (!window.siyuan.dragElement) {
+            // https://github.com/siyuan-note/siyuan/issues/6436
+            event.preventDefault();
             return;
         }
         if (event.shiftKey || event.altKey) {

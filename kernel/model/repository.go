@@ -815,7 +815,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	}
 
 	// TODO: 数据同步支持接入第三方对象存储服务 https://github.com/siyuan-note/siyuan/issues/6426
-	cloudSiYuan := &cloud.SiYuan{Conf: cloudConf}
+	cloudSiYuan := &cloud.SiYuan{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
 
 	ignoreLines := getIgnoreLines()
 	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置

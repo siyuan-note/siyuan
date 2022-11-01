@@ -78,17 +78,11 @@ func unloadThemes() {
 		return
 	}
 
-	dir, err := os.Open(util.ThemesPath)
-	if nil != err {
-		logging.LogErrorf("open appearance themes folder [%s] failed: %s", util.ThemesPath, err)
-		return
-	}
-	themeDirs, err := dir.Readdir(-1)
+	themeDirs, err := os.ReadDir(util.ThemesPath)
 	if nil != err {
 		logging.LogErrorf("read appearance themes folder failed: %s", err)
 		return
 	}
-	dir.Close()
 
 	for _, themeDir := range themeDirs {
 		if !themeDir.IsDir() {
@@ -99,15 +93,10 @@ func unloadThemes() {
 }
 
 func loadThemes() {
-	dir, err := os.Open(util.ThemesPath)
-	if nil != err {
-		logging.LogFatalf("open appearance themes folder [%s] failed: %s", util.ThemesPath, err)
-	}
-	themeDirs, err := dir.Readdir(-1)
+	themeDirs, err := os.ReadDir(util.ThemesPath)
 	if nil != err {
 		logging.LogFatalf("read appearance themes folder failed: %s", err)
 	}
-	dir.Close()
 
 	Conf.Appearance.DarkThemes = nil
 	Conf.Appearance.LightThemes = nil
@@ -213,15 +202,10 @@ func widgetJSON(widgetName string) (ret map[string]interface{}, err error) {
 }
 
 func loadIcons() {
-	dir, err := os.Open(util.IconsPath)
-	if nil != err {
-		logging.LogFatalf("open appearance icons folder [%s] failed: %s", util.IconsPath, err)
-	}
-	iconDirs, err := dir.Readdir(-1)
+	iconDirs, err := os.ReadDir(util.IconsPath)
 	if nil != err {
 		logging.LogFatalf("read appearance icons folder failed: %s", err)
 	}
-	dir.Close()
 
 	Conf.Appearance.Icons = nil
 	for _, iconDir := range iconDirs {

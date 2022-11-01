@@ -62,12 +62,12 @@ func getNewVerInstallPkgPath() string {
 		return ""
 	}
 
-	downloadPkgURL, checksum, err := getUpdatePkg()
-	if nil != err || "" == downloadPkgURL || "" == checksum {
+	downloadPkgURLs, checksum, err := getUpdatePkg()
+	if nil != err || 1 > len(downloadPkgURLs) || "" == checksum {
 		return ""
 	}
 
-	pkg := path.Base(downloadPkgURL)
+	pkg := path.Base(downloadPkgURLs[0])
 	ret := filepath.Join(util.TempDir, "install", pkg)
 	localChecksum, _ := sha256Hash(ret)
 	if checksum != localChecksum {
@@ -92,21 +92,32 @@ func checkDownloadInstallPkg() {
 	checkDownloadInstallPkgLock.Lock()
 	defer checkDownloadInstallPkgLock.Unlock()
 
-	downloadPkgURL, checksum, err := getUpdatePkg()
-	if nil != err || "" == downloadPkgURL || "" == checksum {
+	downloadPkgURLs, checksum, err := getUpdatePkg()
+	if nil != err || 1 > len(downloadPkgURLs) || "" == checksum {
 		return
 	}
 
-	downloadInstallPkg(downloadPkgURL, checksum)
+	msgId := util.PushMsg(Conf.Language(103), 60*1000*10)
+	succ := false
+	for _, downloadPkgURL := range downloadPkgURLs {
+		err = downloadInstallPkg(downloadPkgURL, checksum)
+		if nil == err {
+			succ = true
+			break
+
+		}
+	}
+	if !succ {
+		util.PushUpdateMsg(msgId, Conf.Language(104), 7000)
+	}
 }
 
-func getUpdatePkg() (downloadPkgURL, checksum string, err error) {
+func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 	result, err := util.GetRhyResult(false)
 	if nil != err {
 		return
 	}
 
-	installPkgSite := result["installPkg"].(string)
 	ver := result["ver"].(string)
 	if isVersionUpToDate(ver) {
 		return
@@ -125,13 +136,20 @@ func getUpdatePkg() (downloadPkgURL, checksum string, err error) {
 		suffix = "linux.AppImage"
 	}
 	pkg := "siyuan-" + ver + "-" + suffix
-	downloadPkgURL = installPkgSite + "siyuan/" + pkg
+
+	url := "https://github.com/siyuan-note/siyuan/releases/download/v" + ver + "/" + pkg
+	downloadPkgURLs = append(downloadPkgURLs, url)
+	url = "https://ghproxy.com/" + url
+	downloadPkgURLs = append(downloadPkgURLs, url)
+	url = "https://release.b3log.org/siyuan/" + pkg
+	downloadPkgURLs = append(downloadPkgURLs, url)
+
 	checksums := result["checksums"].(map[string]interface{})
 	checksum = checksums[pkg].(string)
 	return
 }
 
-func downloadInstallPkg(pkgURL, checksum string) {
+func downloadInstallPkg(pkgURL, checksum string) (err error) {
 	if "" == pkgURL || "" == checksum {
 		return
 	}
@@ -145,22 +163,20 @@ func downloadInstallPkg(pkgURL, checksum string) {
 		}
 	}
 
-	err := os.MkdirAll(filepath.Join(util.TempDir, "install"), 0755)
+	err = os.MkdirAll(filepath.Join(util.TempDir, "install"), 0755)
 	if nil != err {
 		logging.LogErrorf("create temp install dir failed: %s", err)
 		return
 	}
 
 	logging.LogInfof("downloading install package [%s]", pkgURL)
-	msgId := util.PushMsg(Conf.Language(103), 60*1000*10)
 	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(10 * time.Minute)
 	callback := func(info req.DownloadInfo) {
 		//logging.LogDebugf("downloading install package [%s %.2f%%]", pkgURL, float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
 	}
 	_, err = client.R().SetOutputFile(savePath).SetDownloadCallback(callback).Get(pkgURL)
 	if nil != err {
-		logging.LogErrorf("download install package failed: %s", err)
-		util.PushUpdateMsg(msgId, Conf.Language(104), 7000)
+		logging.LogErrorf("download install package [%s] failed: %s", pkgURL, err)
 		return
 	}
 
@@ -170,6 +186,7 @@ func downloadInstallPkg(pkgURL, checksum string) {
 		return
 	}
 	logging.LogInfof("downloaded install package [%s] to [%s]", pkgURL, savePath)
+	return
 }
 
 func sha256Hash(filename string) (ret string, err error) {

@@ -21,6 +21,7 @@ import (
 	"net"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -136,5 +137,25 @@ func TimeFromID(id string) (ret string) {
 		return time.Now().Format("20060102150405")
 	}
 	ret = id[:14]
+	return
+}
+
+func GetChildDocDepth(treeAbsPath string) (ret int) {
+	dir := strings.TrimSuffix(treeAbsPath, ".sy")
+	if !gulu.File.IsDir(dir) {
+		return
+	}
+
+	baseDepth := strings.Count(filepath.ToSlash(treeAbsPath), "/")
+	depth := 1
+	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		p := filepath.ToSlash(path)
+		currentDepth := strings.Count(p, "/")
+		if depth < currentDepth {
+			depth = currentDepth
+		}
+		return nil
+	})
+	ret = depth - baseDepth
 	return
 }

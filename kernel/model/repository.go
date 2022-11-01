@@ -34,8 +34,8 @@ import (
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/dejavu/entity"
-	"github.com/siyuan-note/dejavu/transport"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/httpclient"
@@ -378,6 +378,7 @@ func TagSnapshot(id, name string) (err error) {
 		return
 	}
 
+	name = strings.TrimSpace(name)
 	name = gulu.Str.RemoveInvisible(name)
 	if "" == name {
 		err = errors.New(Conf.Language(142))
@@ -413,6 +414,7 @@ func IndexRepo(memo string) (err error) {
 		return
 	}
 
+	memo = strings.TrimSpace(memo)
 	memo = gulu.Str.RemoveInvisible(memo)
 	if "" == memo {
 		err = errors.New(Conf.Language(142))
@@ -809,17 +811,17 @@ func resetRepository(repo *dejavu.Repo) (index *entity.Index, err error) {
 }
 
 func newRepository() (ret *dejavu.Repo, err error) {
-	transportConf, err := buildRepoTransportConf()
+	cloudConf, err := buildCloudConf()
 	if nil != err {
 		return
 	}
 
 	// TODO: 数据同步支持接入第三方对象存储服务 https://github.com/siyuan-note/siyuan/issues/6426
-	siyuanTransport := &transport.SiYuan{Conf: transportConf}
+	cloudSiYuan := &cloud.SiYuan{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
 
 	ignoreLines := getIgnoreLines()
 	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置
-	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines, siyuanTransport)
+	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines, cloudSiYuan)
 	if nil != err {
 		logging.LogErrorf("init data repo failed: %s", err)
 	}
@@ -998,7 +1000,7 @@ func subscribeEvents() {
 	})
 }
 
-func buildRepoTransportConf() (ret *transport.Conf, err error) {
+func buildCloudConf() (ret *cloud.Conf, err error) {
 	if !IsValidCloudDirName(Conf.Sync.CloudName) {
 		logging.LogWarnf("invalid cloud repo name, rename it to [main]")
 		Conf.Sync.CloudName = "main"
@@ -1011,7 +1013,7 @@ func buildRepoTransportConf() (ret *transport.Conf, err error) {
 		token = Conf.User.UserToken
 	}
 
-	ret = &transport.Conf{
+	ret = &cloud.Conf{
 		Dir:       Conf.Sync.CloudName,
 		UserID:    userId,
 		Token:     token,

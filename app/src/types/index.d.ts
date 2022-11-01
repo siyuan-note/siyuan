@@ -46,8 +46,6 @@ interface Window {
     showKeyboardToolbar(bottom?: number): void
 
     hideKeyboardToolbar(): void
-
-    gtag(name: string, key: string | Date, value?: IObject): void;
 }
 
 interface ITextOption {

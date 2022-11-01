@@ -126,10 +126,11 @@ export const addGA = () => {
     if (!window.siyuan.config.system.disableGoogleAnalytics) {
         addScript("https://www.googletagmanager.com/gtag/js?id=G-L7WEXVQCR9", "gaScript");
         window.dataLayer = window.dataLayer || [];
+        /*eslint-disable */
         const gtag = function (...args: any[]) {
-            // eslint-disable-next-line prefer-rest-params
             window.dataLayer.push(arguments);
         };
+        /*eslint-enable */
         gtag("js", new Date());
         gtag("config", "G-L7WEXVQCR9");
         const para = {

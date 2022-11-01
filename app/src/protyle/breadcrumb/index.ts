@@ -181,12 +181,12 @@ export class Breadcrumb {
                         click: async () => {
                             /// #if !BROWSER
                             if (window.siyuan.config.system.os === "darwin") {
-                                const status = systemPreferences.getMediaAccessStatus('microphone')
+                                const status = systemPreferences.getMediaAccessStatus("microphone");
                                 if (["denied", "restricted", "unknown"].includes(status)) {
                                     showMessage(window.siyuan.languages.microphoneDenied);
                                     return;
                                 } else if (status === "not-determined") {
-                                    const isAccess = await systemPreferences.askForMediaAccess('microphone')
+                                    const isAccess = await systemPreferences.askForMediaAccess("microphone");
                                     if (!isAccess) {
                                         showMessage(window.siyuan.languages.microphoneNotAccess);
                                         return;
@@ -223,7 +223,7 @@ export class Breadcrumb {
                                 uploadFiles(protyle, [file]);
                             } else {
                                 hideMessage(this.messageId);
-                                this.startRecord(protyle)
+                                this.startRecord(protyle);
                             }
                         }
                     }).element);

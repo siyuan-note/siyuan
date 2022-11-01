@@ -314,7 +314,7 @@ func RemoveCloudRepoTag(tag string) (err error) {
 		return
 	}
 
-	err = repo.RemoveCloudRepoTag(tag, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
+	err = repo.RemoveCloudRepoTag(tag)
 	if nil != err {
 		return
 	}

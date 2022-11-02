@@ -44,6 +44,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/studio-b12/gowebdav"
 )
 
 func init() {
@@ -822,6 +823,13 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		cloudRepo = &cloud.SiYuan{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
 	case conf.ProviderQiniu:
 		cloudRepo = &cloud.Qiniu{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
+	case conf.ProviderWebDAV:
+		webdavClient := gowebdav.NewClient(cloudConf.Endpoint, cloudConf.Username, cloudConf.Password)
+		a := cloudConf.Username + ":" + cloudConf.Password
+		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(a))
+		webdavClient.SetHeader("Authorization", auth)
+		webdavClient.SetTimeout(30 * time.Second)
+		cloudRepo = &cloud.WebDAV{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}, Client: webdavClient}
 	default:
 		err = fmt.Errorf("unknown cloud provider [%d]", Conf.Sync.Provider)
 		return
@@ -832,6 +840,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines, cloudRepo)
 	if nil != err {
 		logging.LogErrorf("init data repo failed: %s", err)
+		return
 	}
 	return
 }
@@ -1029,14 +1038,29 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		AvailableSize: availableSize,
 		Server:        util.AliyunServer,
 
-		Endpoint:  Conf.Sync.OSS.Endpoint,
-		AccessKey: Conf.Sync.OSS.AccessKey,
-		SecretKey: Conf.Sync.OSS.SecretKey,
-		Bucket:    Conf.Sync.OSS.Bucket,
-		Region:    Conf.Sync.OSS.Region,
+		// S3
+		AccessKey: Conf.Sync.S3.AccessKey,
+		SecretKey: Conf.Sync.S3.SecretKey,
+		Bucket:    Conf.Sync.S3.Bucket,
+		Region:    Conf.Sync.S3.Region,
+
+		// WebDAV
+		Username: Conf.Sync.WebDAV.Username,
+		Password: Conf.Sync.WebDAV.Password,
 	}
-	if conf.ProviderSiYuan == Conf.Sync.Provider {
+
+	switch Conf.Sync.Provider {
+	case conf.ProviderSiYuan:
 		ret.Endpoint = "https://siyuan-data.b3logfile.com/"
+	case conf.ProviderQiniu:
+		ret.Endpoint = Conf.Sync.Qiniu.Endpoint
+	case conf.ProviderS3:
+		ret.Endpoint = Conf.Sync.S3.Endpoint
+	case conf.ProviderWebDAV:
+		ret.Endpoint = Conf.Sync.WebDAV.Endpoint
+	default:
+		err = fmt.Errorf("invalid provider [%d]", Conf.Sync.Provider)
+		return
 	}
 	return
 }

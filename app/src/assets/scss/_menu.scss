@@ -119,6 +119,12 @@
   &__label {
     flex: 1;
     min-width: 84px;
+    @include text-clamp(1);
+    max-width: 30vw;
+    white-space: nowrap;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0, #000 12px);
+    max-width: 30vw;
   }
 
   &__icon {

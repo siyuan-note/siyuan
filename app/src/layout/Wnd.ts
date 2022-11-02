@@ -483,6 +483,8 @@ export class Wnd {
 
     private renderTabList(event: MouseEvent) {
         window.siyuan.menus.menu.remove();
+        window.siyuan.menus.menu.element.style.maxHeight = "70vh";
+        window.siyuan.menus.menu.element.style.overflow = "auto";
         Array.from(this.headersElement.children).forEach((item: HTMLElement) => {
             const iconElement = item.querySelector(".item__icon");
             const graphicElement = item.querySelector(".item__graphic");
@@ -513,7 +515,7 @@ export class Wnd {
             }).element);
         });
         window.siyuan.menus.menu.popup({
-            x: event.clientX,
+            x: event.clientX -  16,
             y: event.clientY,
         });
     }

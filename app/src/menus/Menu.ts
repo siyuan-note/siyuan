@@ -76,7 +76,7 @@ export class Menu {
         this.element.innerHTML = "";
         this.element.removeAttribute("data-filetreeid"); // 用于标记文档数右键所选文档 https://ld246.com/article/1667311960383
         this.element.classList.add("fn__none");
-        this.element.style.zIndex = "";
+        this.element.removeAttribute("style")
     }
 
     public append(element?: HTMLElement) {

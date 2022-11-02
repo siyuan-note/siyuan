@@ -168,7 +168,7 @@ export const downSelect = (options: {
     options.event.preventDefault();
 };
 
-export const getStartEndElement = (selectElements: NodeListOf<Element>) => {
+export const getStartEndElement = (selectElements: NodeListOf<Element> | Element[]) => {
     let startElement;
     let endElement;
     selectElements.forEach(item => {

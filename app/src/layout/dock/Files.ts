@@ -259,6 +259,8 @@ export class Files extends Model {
                             this.getLeaf(target, notebookId);
                             this.setCurrent(target, false);
                         }
+                        this.element.querySelector('[select-end="true"]')?.removeAttribute("select-end");
+                        this.element.querySelector('[select-start="true"]')?.removeAttribute("select-start");
                         window.siyuan.menus.menu.remove();
                         event.stopPropagation();
                         event.preventDefault();

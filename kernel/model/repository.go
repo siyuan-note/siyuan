@@ -38,7 +38,6 @@ import (
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
-	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -1054,69 +1053,54 @@ type Sync struct {
 	SaveDir   string `json:"saveDir"`   // 本地同步数据存放目录路径
 }
 
-func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize string, err error) {
-	sync, backup, assetSize, err := getCloudSpaceOSS()
+func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hTrafficUploadSize, hTrafficDownloadSize string, err error) {
+	stat, err := getCloudSpaceOSS()
 	if nil != err {
 		err = errors.New(Conf.Language(30) + " " + err.Error())
 		return
 	}
 
-	var totalSize, syncSize, backupSize int64
-	var syncUpdated, backupUpdated string
-	if nil != sync {
-		syncSize = int64(sync["size"].(float64))
-		syncUpdated = sync["updated"].(string)
-	}
+	syncSize := stat.Sync.Size
+	syncUpdated := stat.Sync.Updated
 	s = &Sync{
 		Size:    syncSize,
 		HSize:   humanize.Bytes(uint64(syncSize)),
 		Updated: syncUpdated,
 	}
 
-	if nil != backup {
-		backupSize = int64(backup["size"].(float64))
-		backupUpdated = backup["updated"].(string)
-	}
+	backupSize := stat.Backup.Size
+	backupUpdated := stat.Backup.Updated
 	b = &Backup{
 		Size:    backupSize,
 		HSize:   humanize.Bytes(uint64(backupSize)),
 		Updated: backupUpdated,
 	}
-	totalSize = syncSize + backupSize + assetSize
+
+	assetSize := stat.AssetSize
+	totalSize := syncSize + backupSize + assetSize
 	hAssetSize = humanize.Bytes(uint64(assetSize))
 	hSize = humanize.Bytes(uint64(totalSize))
-	hTotalSize = humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize))
+	hTotalSize = "-"
+	hTrafficUploadSize = "-"
+	hTrafficDownloadSize = "-"
+	if conf.ProviderSiYuan == Conf.Sync.Provider {
+		hTotalSize = humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize))
+		hTrafficUploadSize = humanize.Bytes(uint64(Conf.User.UserTrafficUpload))
+		hTrafficDownloadSize = humanize.Bytes(uint64(Conf.User.UserTrafficDownload))
+	}
 	return
 }
 
-func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, err error) {
-	result := map[string]interface{}{}
-	resp, err := httpclient.NewCloudRequest().
-		SetResult(&result).
-		SetBody(map[string]string{"token": Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/dejavu/getRepoStat?uid=" + Conf.User.UserId)
-
+func getCloudSpaceOSS() (stat *cloud.Stat, err error) {
+	repo, err := newRepository()
 	if nil != err {
-		logging.LogErrorf("get cloud space failed: %s", err)
-		err = ErrFailedToConnectCloudServer
 		return
 	}
 
-	if 401 == resp.StatusCode {
-		err = errors.New(Conf.Language(31))
+	stat, err = repo.GetCloudRepoStat()
+	if nil != err {
+		logging.LogErrorf("get cloud repo stat failed: %s", err)
 		return
 	}
-
-	code := result["code"].(float64)
-	if 0 != code {
-		logging.LogErrorf("get cloud space failed: %s", result["msg"])
-		err = errors.New(result["msg"].(string))
-		return
-	}
-
-	data := result["data"].(map[string]interface{})
-	sync = data["sync"].(map[string]interface{})
-	backup = data["backup"].(map[string]interface{})
-	assetSize = int64(data["assetSize"].(float64))
 	return
 }

@@ -1009,7 +1009,7 @@ func subscribeEvents() {
 }
 
 func buildCloudConf() (ret *cloud.Conf, err error) {
-	if !IsValidCloudDirName(Conf.Sync.CloudName) {
+	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
 		logging.LogWarnf("invalid cloud repo name, rename it to [main]")
 		Conf.Sync.CloudName = "main"
 		Conf.Save()

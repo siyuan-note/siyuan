@@ -483,8 +483,7 @@ export class Wnd {
 
     private renderTabList(event: MouseEvent) {
         window.siyuan.menus.menu.remove();
-        window.siyuan.menus.menu.element.style.maxHeight = "70vh";
-        window.siyuan.menus.menu.element.style.overflow = "auto";
+        window.siyuan.menus.menu.element.classList.add("b3-menu--list")
         Array.from(this.headersElement.children).forEach((item: HTMLElement) => {
             const iconElement = item.querySelector(".item__icon");
             const graphicElement = item.querySelector(".item__graphic");

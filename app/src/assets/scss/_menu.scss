@@ -6,6 +6,19 @@
   padding: 8px;
   z-index: 210;
 
+  &--list {
+    overflow: auto;
+    max-height: 70vh;
+
+    .b3-menu__label {
+      @include text-clamp(1);
+      max-width: 30vw;
+      white-space: nowrap;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0, #000 12px);
+    }
+  }
+
   &__item {
     padding: 0 16px 0 8px;
     border-radius: 4px;
@@ -119,12 +132,6 @@
   &__label {
     flex: 1;
     min-width: 84px;
-    @include text-clamp(1);
-    max-width: 30vw;
-    white-space: nowrap;
-    overflow: hidden;
-    -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0, #000 12px);
-    max-width: 30vw;
   }
 
   &__icon {

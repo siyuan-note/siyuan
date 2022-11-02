@@ -76,7 +76,8 @@ export class Menu {
         this.element.innerHTML = "";
         this.element.removeAttribute("data-filetreeid"); // 用于标记文档数右键所选文档 https://ld246.com/article/1667311960383
         this.element.classList.add("fn__none");
-        this.element.removeAttribute("style");  // 页签下拉需要设置 overflow 和 max-height
+        this.element.classList.remove("b3-menu--list");
+        this.element.removeAttribute("style");  // zIndex
     }
 
     public append(element?: HTMLElement) {

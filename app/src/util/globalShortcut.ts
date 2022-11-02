@@ -865,23 +865,23 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     if (!files.element.parentElement.classList.contains("layout__tab--active")) {
         return false;
     }
-    let liElement
+    let liElements: Element[] = []
     const menuId = window.siyuan.menus.menu.element.getAttribute("data-filetreeid")
     if (menuId) {
-        liElement = files.element.querySelector(`li[data-node-id="${menuId}"]`)
+        let liElement = files.element.querySelector(`li[data-node-id="${menuId}"]`)
         if (!liElement) {
             liElement = files.element.querySelector(`ul[data-url="${menuId}"] > li`)
         }
         if (!liElement) {
             return;
         }
-        window.siyuan.menus.menu.remove();
+        liElements.push(liElement)
     } else {
-        liElement = files.element.querySelector(".b3-list-item--focus");
+        liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"));
     }
-    if (!liElement) {
+    if (liElements.length === 0) {
         if (event.key.startsWith("Arrow")) {
-            liElement = files.element.querySelector(".b3-list-item");
+            const liElement = files.element.querySelector(".b3-list-item");
             if (liElement) {
                 liElement.classList.add("b3-list-item--focus");
             }
@@ -889,18 +889,19 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         }
         return false;
     }
-    const topULElement = hasTopClosestByTag(liElement, "UL");
+    const topULElement = hasTopClosestByTag(liElements[0], "UL");
     if (!topULElement) {
         return false;
     }
     const notebookId = topULElement.getAttribute("data-url");
-    const pathString = liElement.getAttribute("data-path");
-    const isFile = liElement.getAttribute("data-type") === "navigation-file";
+    const pathString = liElements[0].getAttribute("data-path");
+    const isFile = liElements[0].getAttribute("data-type") === "navigation-file";
     if (matchHotKey(window.siyuan.config.keymap.editor.general.rename.custom, event)) {
+        window.siyuan.menus.menu.remove();
         rename({
             notebookId,
             path: pathString,
-            name: isFile ? getDisplayName(liElement.getAttribute("data-name"), false, true) : getNotebookName(notebookId),
+            name: isFile ? getDisplayName(liElements[0].getAttribute("data-name"), false, true) : getNotebookName(notebookId),
             type: isFile ? "file" : "notebook",
         });
         event.preventDefault();
@@ -908,18 +909,19 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         return true;
     }
     if (matchHotKey("⌘/", event)) {
-        const liRect = liElement.getBoundingClientRect();
+        const liRect = liElements[0].getBoundingClientRect();
         if (isFile) {
-            initFileMenu(notebookId, pathString, liElement).popup({
+            initFileMenu(notebookId, pathString, liElements[0]).popup({
                 x: liRect.right - 15,
                 y: liRect.top + 15
             });
         } else {
-            initNavigationMenu(liElement as HTMLElement).popup({x: liRect.right - 15, y: liRect.top + 15});
+            initNavigationMenu(liElements[0] as HTMLElement).popup({x: liRect.right - 15, y: liRect.top + 15});
         }
         return true;
     }
     if (isFile && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
+        window.siyuan.menus.menu.remove();
         movePathTo(notebookId, pathString, false);
         event.preventDefault();
         event.stopPropagation();
@@ -932,6 +934,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         searchKey = window.siyuan.config.keymap.general.search.custom;
     }
     if (searchKey) {
+        window.siyuan.menus.menu.remove();
         if (isFile) {
             openSearch(searchKey, undefined, notebookId, getDisplayName(pathString, false, true));
         } else {
@@ -950,20 +953,27 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if ((event.key === "ArrowRight" && !liElement.querySelector(".b3-list-item__arrow--open") && !liElement.querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||
-        (event.key === "ArrowLeft" && liElement.querySelector(".b3-list-item__arrow--open"))) {
-        files.getLeaf(liElement, notebookId);
+    if ((event.key === "ArrowRight" && !liElements[0].querySelector(".b3-list-item__arrow--open") && !liElements[0].querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||
+        (event.key === "ArrowLeft" && liElements[0].querySelector(".b3-list-item__arrow--open"))) {
+        files.getLeaf(liElements[0], notebookId);
+        liElements.forEach((item, index) => {
+            if (index !== 0) {
+                item.classList.remove("b3-list-item--focus")
+            }
+        })
         event.preventDefault();
         return true;
     }
     const fileRect = files.element.getBoundingClientRect();
     if (event.key === "ArrowLeft") {
-        let parentElement = liElement.parentElement.previousElementSibling;
+        let parentElement = liElements[0].parentElement.previousElementSibling;
         if (parentElement) {
             if (parentElement.tagName !== "LI") {
                 parentElement = files.element.querySelector(".b3-list-item");
             }
-            liElement.classList.remove("b3-list-item--focus");
+            liElements.forEach((item, index) => {
+                item.classList.remove("b3-list-item--focus")
+            })
             parentElement.classList.add("b3-list-item--focus");
             const parentRect = parentElement.getBoundingClientRect();
             if (parentRect.top < fileRect.top || parentRect.bottom > fileRect.bottom) {
@@ -974,7 +984,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         return true;
     }
     if (event.key === "ArrowDown" || event.key === "ArrowRight") {
-        let nextElement = liElement;
+        let nextElement = liElements[0];
         while (nextElement) {
             if (nextElement.nextElementSibling) {
                 if (nextElement.nextElementSibling.tagName === "UL") {
@@ -992,7 +1002,9 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             }
         }
         if (nextElement.classList.contains("b3-list-item")) {
-            liElement.classList.remove("b3-list-item--focus");
+            liElements.forEach((item, index) => {
+                item.classList.remove("b3-list-item--focus")
+            })
             nextElement.classList.add("b3-list-item--focus");
             const nextRect = nextElement.getBoundingClientRect();
             if (nextRect.top < fileRect.top || nextRect.bottom > fileRect.bottom) {
@@ -1003,7 +1015,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         return true;
     }
     if (event.key === "ArrowUp") {
-        let previousElement = liElement;
+        let previousElement = liElements[0];
         while (previousElement) {
             if (previousElement.previousElementSibling) {
                 if (previousElement.previousElementSibling.tagName === "LI") {
@@ -1022,7 +1034,9 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             }
         }
         if (previousElement.classList.contains("b3-list-item")) {
-            liElement.classList.remove("b3-list-item--focus");
+            liElements.forEach((item, index) => {
+                item.classList.remove("b3-list-item--focus")
+            })
             previousElement.classList.add("b3-list-item--focus");
             const previousRect = previousElement.getBoundingClientRect();
             if (previousRect.top < fileRect.top || previousRect.bottom > fileRect.bottom) {
@@ -1033,25 +1047,38 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         return true;
     }
     if (event.key === "Delete" || (event.key === "Backspace" && isMac())) {
-        if (isFile) {
-            deleteFile(notebookId, pathString, getDisplayName(liElement.getAttribute("data-name"), false, true));
-        } else {
-            confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(getNotebookName(notebookId))}</b>?`, () => {
-                    fetchPost("/api/notebook/removeNotebook", {
-                        notebook: notebookId,
-                        callback: Constants.CB_MOUNT_REMOVE
-                    });
-                });
-        }
+        window.siyuan.menus.menu.remove();
+        liElements.forEach(item => {
+            const itemTopULElement = hasTopClosestByTag(item, "UL");
+            if (itemTopULElement) {
+                const itemNotebookId = itemTopULElement.getAttribute("data-url")
+                if (item.getAttribute("data-type") === "navigation-file") {
+                    deleteFile(itemNotebookId, item.getAttribute("data-path"), getDisplayName(item.getAttribute("data-name"), false, true));
+                } else {
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm,
+                        `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(getNotebookName(itemNotebookId))}</b>?`, () => {
+                            fetchPost("/api/notebook/removeNotebook", {
+                                notebook: itemNotebookId,
+                                callback: Constants.CB_MOUNT_REMOVE
+                            });
+                        });
+                }
+            }
+        })
         return true;
     }
     if (event.key === "Enter") {
-        if (isFile) {
-            openFileById({id: liElement.getAttribute("data-node-id"), action: [Constants.CB_GET_FOCUS]});
-        } else {
-            files.getLeaf(liElement, notebookId);
-        }
+        window.siyuan.menus.menu.remove();
+        liElements.forEach(item => {
+            if (item.getAttribute("data-type") === "navigation-file") {
+                openFileById({id: item.getAttribute("data-node-id"), action: [Constants.CB_GET_FOCUS]});
+            } else {
+                const itemTopULElement = hasTopClosestByTag(item, "UL");
+                if (itemTopULElement) {
+                    files.getLeaf(item, itemTopULElement.getAttribute("data-url"));
+                }
+            }
+        })
         return true;
     }
 };

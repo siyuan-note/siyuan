@@ -230,23 +230,28 @@ export class Files extends Model {
                         if (event.detail === 1) {
                             needFocus = false;
                             clickTimeout = window.setTimeout(() => {
-                                this.setCurrent(target, false);
-                                if (target.getAttribute("data-type") === "navigation-file") {
-                                    if (window.siyuan.altIsPressed) {
-                                        openFileById({
-                                            id: target.getAttribute("data-node-id"),
-                                            position: "right",
-                                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
-                                        });
-                                    } else {
-                                        openFileById({
-                                            id: target.getAttribute("data-node-id"),
-                                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
-                                        });
+                                if (!window.siyuan.ctrlIsPressed) {
+                                    this.setCurrent(target, false);
+                                    if (target.getAttribute("data-type") === "navigation-file") {
+                                        if (window.siyuan.altIsPressed) {
+                                            openFileById({
+                                                id: target.getAttribute("data-node-id"),
+                                                position: "right",
+                                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                            });
+                                        } else {
+                                            openFileById({
+                                                id: target.getAttribute("data-node-id"),
+                                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                            });
+                                        }
+                                    } else if (target.getAttribute("data-type") === "navigation-root") {
+                                        this.getLeaf(target, notebookId);
+                                        setPanelFocus(this.element.parentElement);
                                     }
-                                } else if (target.getAttribute("data-type") === "navigation-root") {
-                                    this.getLeaf(target, notebookId);
+                                } else {
                                     setPanelFocus(this.element.parentElement);
+                                    target.classList.toggle("b3-list-item--focus");
                                 }
                             }, Constants.TIMEOUT_DBLCLICK);
                         } else if (event.detail === 2) {

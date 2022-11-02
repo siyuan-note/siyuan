@@ -41,8 +41,8 @@ type OSS struct {
 	Endpoint  string `json:"endpoint"`  // 服务端点
 	AccessKey string `json:"accessKey"` // Access Key
 	SecretKey string `json:"secretKey"` // Secret Key
-	Regin     string `json:"regin"`     // 存储区域
 	Bucket    string `json:"bucket"`    // 存储空间
+	Region    string `json:"region"`    // 存储区域
 }
 
 const (

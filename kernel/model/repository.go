@@ -1035,6 +1035,9 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		Bucket:    Conf.Sync.OSS.Bucket,
 		Region:    Conf.Sync.OSS.Region,
 	}
+	if conf.ProviderSiYuan == Conf.Sync.Provider {
+		ret.Endpoint = "https://siyuan-data.b3logfile.com/"
+	}
 	return
 }
 

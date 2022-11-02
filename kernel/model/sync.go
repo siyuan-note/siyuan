@@ -30,6 +30,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -69,7 +70,11 @@ func BootSyncData() {
 	util.IncBootProgress(3, "Syncing data from the cloud...")
 	BootSyncSucc = 0
 
-	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName || !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+	if !Conf.Sync.Enabled || !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+		return
+	}
+
+	if !IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider {
 		return
 	}
 
@@ -123,14 +128,22 @@ func SyncData(boot, exit, byHand bool) {
 	if exit {
 		ExitSyncSucc = 0
 	}
-	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName {
+
+	if !Conf.Sync.Enabled {
 		if byHand {
-			if "" == Conf.Sync.CloudName {
-				util.PushMsg(Conf.Language(123), 5000)
-			} else if !Conf.Sync.Enabled {
-				util.PushMsg(Conf.Language(124), 5000)
-			}
+			util.PushMsg(Conf.Language(124), 5000)
 		}
+		return
+	}
+
+	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+		if byHand {
+			util.PushMsg(Conf.Language(123), 5000)
+		}
+		return
+	}
+
+	if !IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider {
 		return
 	}
 

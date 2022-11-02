@@ -159,3 +159,17 @@ func GetChildDocDepth(treeAbsPath string) (ret int) {
 	ret = depth - baseDepth
 	return
 }
+
+func NormalizeEndpoint(endpoint string) string {
+	endpoint = strings.TrimSpace(endpoint)
+	if "" == endpoint {
+		return ""
+	}
+	if !strings.HasPrefix(endpoint, "http://") && !strings.HasPrefix(endpoint, "https://") {
+		endpoint = "http://" + endpoint
+	}
+	if !strings.HasSuffix(endpoint, "/") {
+		endpoint = endpoint + "/"
+	}
+	return endpoint
+}

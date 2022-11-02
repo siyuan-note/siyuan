@@ -242,18 +242,18 @@ func InitConf() {
 	if 0 == Conf.Sync.Mode {
 		Conf.Sync.Mode = 1
 	}
-	if nil == Conf.Sync.OSS {
-		Conf.Sync.OSS = &conf.OSS{}
+	if nil == Conf.Sync.Qiniu {
+		Conf.Sync.Qiniu = &conf.Qiniu{}
 	}
-	endpoint := Conf.Sync.OSS.Endpoint
-	endpoint = strings.TrimSpace(endpoint)
-	if !strings.HasPrefix(endpoint, "http://") && !strings.HasPrefix(endpoint, "https://") {
-		endpoint = "http://" + endpoint
+	Conf.Sync.Qiniu.Endpoint = util.NormalizeEndpoint(Conf.Sync.Qiniu.Endpoint)
+	if nil == Conf.Sync.S3 {
+		Conf.Sync.S3 = &conf.S3{}
 	}
-	if !strings.HasSuffix(endpoint, "/") {
-		endpoint = endpoint + "/"
+	Conf.Sync.S3.Endpoint = util.NormalizeEndpoint(Conf.Sync.S3.Endpoint)
+	if nil == Conf.Sync.WebDAV {
+		Conf.Sync.WebDAV = &conf.WebDAV{}
 	}
-	Conf.Sync.OSS.Endpoint = endpoint
+	Conf.Sync.WebDAV.Endpoint = util.NormalizeEndpoint(Conf.Sync.WebDAV.Endpoint)
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()

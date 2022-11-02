@@ -342,6 +342,8 @@ export const keymap = {
                 } else {
                     keymapStr += Constants.KEYCODE[event.keyCode][0];
                 }
+            } else if (["/", ".", "+", "-", "*"].includes(event.key)) {
+                keymapStr += event.key;
             } else if (event.code.startsWith("Digit") || event.code.startsWith("Key") || event.code.startsWith("Numpad")) {
                 // 新版 Electron 可以支持 Alt["I", "E", "N", "U"]，故移除原有判断
                 keymapStr += event.code.substring(event.code.length - 1).toUpperCase();

@@ -132,6 +132,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             }
         }]
     }).element);
+    window.siyuan.menus.menu.element.setAttribute("data-filetreeid", notebookId);
     return window.siyuan.menus.menu;
 };
 
@@ -283,6 +284,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
     /// #endif
     genImportMenu(notebookId, pathString);
     window.siyuan.menus.menu.append(exportMd(id));
+    window.siyuan.menus.menu.element.setAttribute("data-filetreeid", id);
     return window.siyuan.menus.menu;
 };
 

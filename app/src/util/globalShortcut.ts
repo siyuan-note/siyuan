@@ -865,7 +865,20 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     if (!files.element.parentElement.classList.contains("layout__tab--active")) {
         return false;
     }
-    let liElement = files.element.querySelector(".b3-list-item--focus");
+    let liElement
+    const menuId = window.siyuan.menus.menu.element.getAttribute("data-filetreeid")
+    if (menuId) {
+        liElement = files.element.querySelector(`li[data-node-id="${menuId}"]`)
+        if (!liElement) {
+            liElement = files.element.querySelector(`ul[data-url="${menuId}"] > li`)
+        }
+        if (!liElement) {
+            return;
+        }
+        window.siyuan.menus.menu.remove();
+    } else {
+        liElement = files.element.querySelector(".b3-list-item--focus");
+    }
     if (!liElement) {
         if (event.key.startsWith("Arrow")) {
             liElement = files.element.querySelector(".b3-list-item");
@@ -1020,7 +1033,6 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         return true;
     }
     if (event.key === "Delete" || (event.key === "Backspace" && isMac())) {
-        window.siyuan.menus.menu.remove();
         if (isFile) {
             deleteFile(notebookId, pathString, getDisplayName(liElement.getAttribute("data-name"), false, true));
         } else {

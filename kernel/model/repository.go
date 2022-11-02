@@ -1007,18 +1007,19 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		Conf.Save()
 	}
 
-	userId, token := "0", ""
+	userId, token, availableSize := "0", "", int64(1024*1024*1024*1024*2)
 	if nil != Conf.User {
 		userId = Conf.User.UserId
 		token = Conf.User.UserToken
+		availableSize = Conf.User.GetCloudRepoAvailableSize()
 	}
 
 	ret = &cloud.Conf{
-		Dir:       Conf.Sync.CloudName,
-		UserID:    userId,
-		Token:     token,
-		LimitSize: int64(Conf.User.UserSiYuanRepoSize - Conf.User.UserSiYuanAssetSize),
-		Server:    util.AliyunServer,
+		Dir:           Conf.Sync.CloudName,
+		UserID:        userId,
+		Token:         token,
+		AvailableSize: availableSize,
+		Server:        util.AliyunServer,
 	}
 	return
 }

@@ -23,8 +23,8 @@ type Sync struct {
 	Synced              int64  `json:"synced"`              // 最近同步时间
 	Stat                string `json:"stat"`                // 最近同步统计信息
 	GenerateConflictDoc bool   `json:"generateConflictDoc"` // 云端同步冲突时是否生成冲突文档
-	Provider            int    `json:"provider"`            // 云端存储服务提供者，0：思源官方，1：S3 协议对象存储服务
-	S3                  *S3    `json:"s3"`                  // S3 协议对象存储服务配置
+	Provider            int    `json:"provider"`            // 云端存储服务提供者，0：思源官方，1：第三方对象存储服务
+	OSS                 *OSS   `json:"oss"`                 // 对象存储服务配置
 }
 
 func NewSync() *Sync {
@@ -37,10 +37,10 @@ func NewSync() *Sync {
 	}
 }
 
-type S3 struct {
-	Endpoint  string // 服务端点
-	AccessKey string // Access Key
-	SecretKey string // Secret Key
-	Regin     string // 存储区域
-	Bucket    string // 存储空间
+type OSS struct {
+	Endpoint  string `json:"endpoint"`  // 服务端点
+	AccessKey string `json:"accessKey"` // Access Key
+	SecretKey string `json:"secretKey"` // Secret Key
+	Regin     string `json:"regin"`     // 存储区域
+	Bucket    string `json:"bucket"`    // 存储空间
 }

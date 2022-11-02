@@ -25,12 +25,12 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -70,7 +70,11 @@ func BootSyncData() {
 	util.IncBootProgress(3, "Syncing data from the cloud...")
 	BootSyncSucc = 0
 
-	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName || !IsValidCloudDirName(Conf.Sync.CloudName) {
+	if !Conf.Sync.Enabled || !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+		return
+	}
+
+	if !IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider {
 		return
 	}
 
@@ -124,18 +128,26 @@ func SyncData(boot, exit, byHand bool) {
 	if exit {
 		ExitSyncSucc = 0
 	}
-	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName {
+
+	if !Conf.Sync.Enabled {
 		if byHand {
-			if "" == Conf.Sync.CloudName {
-				util.PushMsg(Conf.Language(123), 5000)
-			} else if !Conf.Sync.Enabled {
-				util.PushMsg(Conf.Language(124), 5000)
-			}
+			util.PushMsg(Conf.Language(124), 5000)
 		}
 		return
 	}
 
-	if !IsValidCloudDirName(Conf.Sync.CloudName) {
+	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+		if byHand {
+			util.PushMsg(Conf.Language(123), 5000)
+		}
+		return
+	}
+
+	if !IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider {
+		return
+	}
+
+	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
 		return
 	}
 
@@ -297,7 +309,7 @@ func CreateCloudSyncDir(name string) (err error) {
 
 	name = strings.TrimSpace(name)
 	name = gulu.Str.RemoveInvisible(name)
-	if !IsValidCloudDirName(name) {
+	if !cloud.IsValidCloudDirName(name) {
 		return errors.New(Conf.Language(37))
 	}
 
@@ -403,24 +415,6 @@ func formatErrorMsg(err error) string {
 	}
 	msg = msg + " v" + util.Ver
 	return msg
-}
-
-func IsValidCloudDirName(cloudDirName string) bool {
-	if 16 < utf8.RuneCountInString(cloudDirName) || 1 > utf8.RuneCountInString(cloudDirName) {
-		return false
-	}
-
-	chars := []byte{'~', '`', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '=',
-		'[', ']', '{', '}', '\\', '|', ';', ':', '\'', '"', '<', ',', '>', '.', '?', '/', ' '}
-	var charsStr string
-	for _, char := range chars {
-		charsStr += string(char)
-	}
-
-	if strings.ContainsAny(cloudDirName, charsStr) {
-		return false
-	}
-	return true
 }
 
 func getIgnoreLines() (ret []string) {

@@ -242,6 +242,9 @@ func InitConf() {
 	if 0 == Conf.Sync.Mode {
 		Conf.Sync.Mode = 1
 	}
+	if nil == Conf.Sync.OSS {
+		Conf.Sync.OSS = &conf.OSS{}
+	}
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()

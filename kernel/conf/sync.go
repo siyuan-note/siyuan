@@ -23,7 +23,7 @@ type Sync struct {
 	Synced              int64  `json:"synced"`              // 最近同步时间
 	Stat                string `json:"stat"`                // 最近同步统计信息
 	GenerateConflictDoc bool   `json:"generateConflictDoc"` // 云端同步冲突时是否生成冲突文档
-	Provider            int    `json:"provider"`            // 云端存储服务提供者，0：思源官方，1：第三方对象存储服务
+	Provider            int    `json:"provider"`            // 云端存储服务提供者，0：思源官方，1：第三方七牛云，2：S3 协议对象存储
 	OSS                 *OSS   `json:"oss"`                 // 对象存储服务配置
 }
 
@@ -33,7 +33,7 @@ func NewSync() *Sync {
 		Enabled:             false,
 		Mode:                1,
 		GenerateConflictDoc: false,
-		Provider:            0,
+		Provider:            ProviderSiYuan,
 	}
 }
 
@@ -41,6 +41,12 @@ type OSS struct {
 	Endpoint  string `json:"endpoint"`  // 服务端点
 	AccessKey string `json:"accessKey"` // Access Key
 	SecretKey string `json:"secretKey"` // Secret Key
-	Regin     string `json:"regin"`     // 存储区域
 	Bucket    string `json:"bucket"`    // 存储空间
+	Region    string `json:"region"`    // 存储区域
 }
+
+const (
+	ProviderSiYuan = 0
+	ProviderQiniu  = 1
+	ProviderS3     = 2
+)

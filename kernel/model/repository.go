@@ -41,6 +41,7 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -816,12 +817,20 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		return
 	}
 
-	// TODO: 数据同步支持接入第三方对象存储服务 https://github.com/siyuan-note/siyuan/issues/6426
-	cloudSiYuan := &cloud.SiYuan{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
+	var cloudRepo cloud.Cloud
+	switch Conf.Sync.Provider {
+	case conf.ProviderSiYuan:
+		cloudRepo = &cloud.SiYuan{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
+	case conf.ProviderQiniu:
+		cloudRepo = &cloud.Qiniu{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
+	default:
+		err = fmt.Errorf("unknown cloud provider [%d]", Conf.Sync.Provider)
+		return
+	}
 
 	ignoreLines := getIgnoreLines()
 	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置
-	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines, cloudSiYuan)
+	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines, cloudRepo)
 	if nil != err {
 		logging.LogErrorf("init data repo failed: %s", err)
 	}
@@ -1008,7 +1017,7 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 	}
 
 	userId, token, availableSize := "0", "", int64(1024*1024*1024*1024*2)
-	if nil != Conf.User {
+	if nil != Conf.User && conf.ProviderSiYuan == Conf.Sync.Provider {
 		userId = Conf.User.UserId
 		token = Conf.User.UserToken
 		availableSize = Conf.User.GetCloudRepoAvailableSize()
@@ -1020,6 +1029,12 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		Token:         token,
 		AvailableSize: availableSize,
 		Server:        util.AliyunServer,
+
+		Endpoint:  Conf.Sync.OSS.Endpoint,
+		AccessKey: Conf.Sync.OSS.AccessKey,
+		SecretKey: Conf.Sync.OSS.SecretKey,
+		Bucket:    Conf.Sync.OSS.Bucket,
+		Region:    Conf.Sync.OSS.Region,
 	}
 	return
 }

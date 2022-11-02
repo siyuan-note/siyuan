@@ -245,6 +245,15 @@ func InitConf() {
 	if nil == Conf.Sync.OSS {
 		Conf.Sync.OSS = &conf.OSS{}
 	}
+	endpoint := Conf.Sync.OSS.Endpoint
+	endpoint = strings.TrimSpace(endpoint)
+	if !strings.HasPrefix(endpoint, "http://") && !strings.HasPrefix(endpoint, "https://") {
+		endpoint = "http://" + endpoint
+	}
+	if !strings.HasSuffix(endpoint, "/") {
+		endpoint = endpoint + "/"
+	}
+	Conf.Sync.OSS.Endpoint = endpoint
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()

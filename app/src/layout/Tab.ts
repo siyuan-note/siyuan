@@ -8,6 +8,7 @@ import {escapeHtml} from "../util/escape";
 import {unicode2Emoji} from "../emoji";
 import {fetchPost} from "../util/fetch";
 import {showTooltip} from "../dialog/tooltip";
+import {isTouchDevice} from "../util/functions";
 
 export class Tab {
     public parent: Wnd;
@@ -47,8 +48,8 @@ export class Tab {
                 let id = "";
                 if (this.model instanceof Editor && this.model.editor?.protyle?.block?.rootID) {
                     id = (this.model as Editor).editor.protyle.block.rootID;
-                } else if (!this.model){
-                    const initData = JSON.parse(this.headElement.getAttribute("data-initdata")||"{}");
+                } else if (!this.model) {
+                    const initData = JSON.parse(this.headElement.getAttribute("data-initdata") || "{}");
                     if (initData) {
                         id = initData.blockId;
                     }
@@ -65,6 +66,11 @@ export class Tab {
                 }
             });
             this.headElement.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
+                if (isTouchDevice()) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
                 window.getSelection().removeAllRanges();
                 const tabElement = hasClosestByTag(event.target, "LI");
                 if (tabElement) {

@@ -2,6 +2,10 @@ export const isMobile = () => {
     return !document.getElementById("dockBottom");
 };
 
+export const isTouchDevice = () => {
+    return ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
+};
+
 export const isArrayEqual = (arr1: string[], arr2: string[]) => {
     return arr1.length === arr2.length && arr1.every((item) => arr2.includes(item));
 };

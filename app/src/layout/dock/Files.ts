@@ -16,6 +16,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
+import {isTouchDevice} from "../../util/functions";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -268,6 +269,11 @@ export class Files extends Model {
         // b3-list-item--focus 样式会遮挡拖拽排序的上下线条
         let focusElement: HTMLElement;
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
+            if (isTouchDevice()) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             window.getSelection().removeAllRanges();
             focusElement = this.element.querySelector(".b3-list-item--focus");
             if (focusElement) {

@@ -266,7 +266,9 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                         });
                     }
                     window.siyuan.menus.menu.element.style.zIndex = "310";
-                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
+                    window.siyuan.menus.menu.element.style.overflow = "auto";
+                    window.siyuan.menus.menu.element.style.maxHeight = "60vh";
+                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16, w: 16});
                 });
                 break;
         }
@@ -471,7 +473,9 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                             });
                         }
                         window.siyuan.menus.menu.element.style.zIndex = "310";
-                        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
+                        window.siyuan.menus.menu.element.style.overflow = "auto";
+                        window.siyuan.menus.menu.element.style.maxHeight = "60vh";
+                        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16, w: 16});
                     });
                     break;
             }

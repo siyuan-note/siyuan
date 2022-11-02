@@ -76,7 +76,7 @@ export class Menu {
         this.element.innerHTML = "";
         this.element.removeAttribute("data-filetreeid"); // 用于标记文档数右键所选文档 https://ld246.com/article/1667311960383
         this.element.classList.add("fn__none");
-        this.element.removeAttribute("style")
+        this.element.removeAttribute("style");  // 页签下拉需要设置 overflow 和 max-height
     }
 
     public append(element?: HTMLElement) {
@@ -86,7 +86,7 @@ export class Menu {
         this.element.append(element);
     }
 
-    public popup(options: { x: number, y: number, h?: number }, isLeft = false) {
+    public popup(options: { x: number, y: number, h?: number , w?: number }, isLeft = false) {
         if (this.element.innerHTML === "") {
             return;
         }
@@ -97,7 +97,7 @@ export class Menu {
         }
 
         this.element.classList.remove("fn__none");
-        setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h);
+        setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h, options.w);
     }
 }
 

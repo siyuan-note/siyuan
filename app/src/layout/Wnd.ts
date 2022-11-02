@@ -515,8 +515,9 @@ export class Wnd {
             }).element);
         });
         window.siyuan.menus.menu.popup({
-            x: event.clientX -  16,
+            x: event.clientX,
             y: event.clientY,
+            w: 16
         });
     }
 

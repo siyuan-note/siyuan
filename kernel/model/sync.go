@@ -343,7 +343,7 @@ func RemoveCloudSyncDir(name string) (err error) {
 
 func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 	syncDirs = []*Sync{}
-	var dirs []map[string]interface{}
+	var dirs []*cloud.Repo
 	var size int64
 
 	repo, err := newRepository()
@@ -357,20 +357,20 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 		return
 	}
 	if 1 > len(dirs) {
-		dirs = append(dirs, map[string]interface{}{
-			"name":    "main",
-			"size":    float64(0),
-			"updated": time.Now().Format("2006-01-02 15:04:05"),
+		dirs = append(dirs, &cloud.Repo{
+			Name:    "main",
+			Size:    0,
+			Updated: time.Now().Format("2006-01-02 15:04:05"),
 		})
 	}
 
 	for _, d := range dirs {
-		dirSize := int64(d["size"].(float64))
+		dirSize := d.Size
 		syncDirs = append(syncDirs, &Sync{
 			Size:      dirSize,
 			HSize:     humanize.Bytes(uint64(dirSize)),
-			Updated:   d["updated"].(string),
-			CloudName: d["name"].(string),
+			Updated:   d.Updated,
+			CloudName: d.Name,
 		})
 	}
 	hSize = humanize.Bytes(uint64(size))

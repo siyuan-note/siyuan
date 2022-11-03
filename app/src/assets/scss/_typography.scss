@@ -116,7 +116,7 @@
 
   u,
   span[data-type~="u"] {
-    border-bottom: 1px solid var(--b3-theme-on-background);
+    border-bottom: 1px solid;
   }
 
   span[data-type~="inline-memo"] {

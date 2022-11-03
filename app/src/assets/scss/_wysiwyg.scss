@@ -153,7 +153,7 @@
     }
 
     span[data-type~="tag"] {
-      border-bottom: 1px solid var(--b3-protyle-inline-tag-color);
+      border-bottom: 1px solid;
       color: var(--b3-protyle-inline-tag-color);
       transition: var(--b3-transition);
     }
@@ -164,7 +164,7 @@
       transition: var(--b3-transition);
 
       &:hover {
-        border-bottom: 1px solid var(--b3-protyle-inline-link-color);
+        border-bottom: 1px solid;
       }
     }
 

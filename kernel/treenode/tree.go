@@ -19,7 +19,9 @@ package treenode
 import (
 	"crypto/sha256"
 	"fmt"
+	"io/fs"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -107,4 +109,27 @@ func IALStr(n *ast.Node) string {
 		return ""
 	}
 	return string(parse.IAL2Tokens(n.KramdownIAL))
+}
+
+func RootChildIDs(rootID string) (ret []string) {
+	root := GetBlockTree(rootID)
+	if nil == root {
+		return
+	}
+
+	ret = append(ret, rootID)
+	boxLocalPath := filepath.Join(util.DataDir, root.BoxID)
+	subFolder := filepath.Join(boxLocalPath, strings.TrimSuffix(root.Path, ".sy"))
+	if !gulu.File.IsDir(subFolder) {
+		return
+	}
+	filepath.Walk(subFolder, func(path string, info fs.FileInfo, err error) error {
+		if strings.HasSuffix(path, ".sy") {
+			name := filepath.Base(path)
+			id := strings.TrimSuffix(name, ".sy")
+			ret = append(ret, id)
+		}
+		return nil
+	})
+	return
 }

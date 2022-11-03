@@ -19,7 +19,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"io/fs"
 	"math"
 	"os"
 	"path"
@@ -1227,7 +1226,7 @@ func removeDoc(box *Box, p string) (err error) {
 	copyDocAssetsToDataAssets(box.ID, p)
 
 	var removeIDs []string
-	ids := rootChildIDs(tree.ID)
+	ids := treenode.RootChildIDs(tree.ID)
 	removeIDs = append(removeIDs, ids...)
 
 	dir := path.Dir(p)
@@ -1487,7 +1486,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 	}
 
 	fromRootSorts := map[string]int{}
-	ids := rootChildIDs(rootID)
+	ids := treenode.RootChildIDs(rootID)
 	fromConfPath := filepath.Join(util.DataDir, fromBox, ".siyuan", "sort.json")
 	fromFullSortIDs := map[string]int{}
 	if gulu.File.IsExist(fromConfPath) {
@@ -1533,29 +1532,6 @@ func moveSorts(rootID, fromBox, toBox string) {
 		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
-}
-
-func rootChildIDs(rootID string) (ret []string) {
-	root := treenode.GetBlockTree(rootID)
-	if nil == root {
-		return
-	}
-
-	ret = append(ret, rootID)
-	boxLocalPath := filepath.Join(util.DataDir, root.BoxID)
-	subFolder := filepath.Join(boxLocalPath, strings.TrimSuffix(root.Path, ".sy"))
-	if !gulu.File.IsDir(subFolder) {
-		return
-	}
-	filepath.Walk(subFolder, func(path string, info fs.FileInfo, err error) error {
-		if strings.HasSuffix(path, ".sy") {
-			name := filepath.Base(path)
-			id := strings.TrimSuffix(name, ".sy")
-			ret = append(ret, id)
-		}
-		return nil
-	})
-	return
 }
 
 func ChangeFileTreeSort(boxID string, paths []string) {

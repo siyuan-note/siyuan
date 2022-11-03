@@ -1263,7 +1263,7 @@ func removeDoc(box *Box, p string) (err error) {
 
 	cache.RemoveDocIAL(p)
 
-	evt := util.NewCmdResult("remove", 0, util.PushModeBroadcast, util.PushModeNone)
+	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast, util.PushModeNone)
 	evt.Data = map[string]interface{}{
 		"ids": removeIDs,
 	}

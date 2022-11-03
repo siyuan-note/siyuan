@@ -80,7 +80,7 @@ export class Files extends Model {
     <span class="fn__space"></span>
     <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
-<div class="fn__flex-1" data-type="navigation"></div>
+<div class="fn__flex-1"></div>
 <ul class="b3-list fn__flex-column" style="min-height: auto;transition: var(--b3-transition)">
     <li class="b3-list-item" data-type="toggle">
         <span class="b3-list-item__toggle">

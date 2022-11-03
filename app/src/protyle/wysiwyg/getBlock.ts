@@ -223,7 +223,8 @@ export const getPreviousFileLi = (current: Element) => {
         } else if (previousElement.previousElementSibling.tagName === "LI") {
             return previousElement.previousElementSibling;
         } else if (previousElement.previousElementSibling.tagName === "UL") {
-            return previousElement.previousElementSibling.lastElementChild;
+            const liElements = previousElement.previousElementSibling.querySelectorAll(".b3-list-item")
+            return liElements[liElements.length - 1];
         }
     }
     return false;

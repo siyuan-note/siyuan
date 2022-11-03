@@ -23,8 +23,20 @@ import {openFileById} from "../editor/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
 import {newFile} from "../util/newFile";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 export const initNavigationMenu = (liElement: HTMLElement) => {
+    if (!liElement.classList.contains("b3-list-item--focus")) {
+        const fileElement = hasClosestByClassName(liElement, "sy__file")
+        if (fileElement) {
+            fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
+                item.classList.remove("b3-list-item--focus");
+                item.removeAttribute("select-end")
+                item.removeAttribute("select-start")
+            })
+        }
+        liElement.classList.add("b3-list-item--focus");
+    }
     const notebookId = liElement.parentElement.getAttribute("data-url");
     const name = getNotebookName(notebookId);
     window.siyuan.menus.menu.remove();
@@ -132,11 +144,21 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             }
         }]
     }).element);
-    window.siyuan.menus.menu.element.setAttribute("data-filetreeid", notebookId);
     return window.siyuan.menus.menu;
 };
 
 export const initFileMenu = (notebookId: string, pathString: string, liElement: Element) => {
+    if (!liElement.classList.contains("b3-list-item--focus")) {
+        const fileElement = hasClosestByClassName(liElement, "sy__file")
+        if (fileElement) {
+            fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
+                item.classList.remove("b3-list-item--focus");
+                item.removeAttribute("select-end")
+                item.removeAttribute("select-start")
+            })
+        }
+        liElement.classList.add("b3-list-item--focus");
+    }
     const id = liElement.getAttribute("data-node-id");
     let name = liElement.getAttribute("data-name");
     window.siyuan.menus.menu.remove();
@@ -284,7 +306,6 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
     /// #endif
     genImportMenu(notebookId, pathString);
     window.siyuan.menus.menu.append(exportMd(id));
-    window.siyuan.menus.menu.element.setAttribute("data-filetreeid", id);
     return window.siyuan.menus.menu;
 };
 

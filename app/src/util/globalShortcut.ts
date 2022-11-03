@@ -867,20 +867,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     if (!files.element.parentElement.classList.contains("layout__tab--active")) {
         return false;
     }
-    let liElements: Element[] = []
-    const menuId = window.siyuan.menus.menu.element.getAttribute("data-filetreeid")
-    if (menuId) {
-        let liElement = files.element.querySelector(`li[data-node-id="${menuId}"]`)
-        if (!liElement) {
-            liElement = files.element.querySelector(`ul[data-url="${menuId}"] > li`)
-        }
-        if (!liElement) {
-            return;
-        }
-        liElements.push(liElement)
-    } else {
-        liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"));
-    }
+    const liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"))
     if (liElements.length === 0) {
         if (event.key.startsWith("Arrow")) {
             const liElement = files.element.querySelector(".b3-list-item");
@@ -958,47 +945,52 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     if (event.shiftKey) {
         if (event.key === "ArrowUp") {
             const startEndElement = getStartEndElement(liElements);
+            let previousElement: Element;
             if (startEndElement.startElement.getBoundingClientRect().top >= startEndElement.endElement.getBoundingClientRect().top) {
-                const previousElement = getPreviousFileLi(startEndElement.endElement)
+                previousElement = getPreviousFileLi(startEndElement.endElement) as Element;
                 if (previousElement) {
                     previousElement.classList.add("b3-list-item--focus");
                     previousElement.setAttribute("select-end", "true");
                     startEndElement.endElement.removeAttribute("select-end");
-
-                    const previousRect = previousElement.getBoundingClientRect();
-                    const fileRect = files.element.getBoundingClientRect();
-                    if (previousRect.top < fileRect.top || previousRect.bottom > fileRect.bottom) {
-                        previousElement.scrollIntoView(previousRect.top < fileRect.top);
-                    }
                 }
             } else {
                 startEndElement.endElement.classList.remove("b3-list-item--focus");
                 startEndElement.endElement.removeAttribute("select-end");
-                const previousElement = getPreviousFileLi(startEndElement.endElement);
+                previousElement = getPreviousFileLi(startEndElement.endElement) as Element;
                 if (previousElement) {
                     previousElement.setAttribute("select-end", "true");
                 }
             }
+            if (previousElement) {
+                const previousRect = previousElement.getBoundingClientRect();
+                const fileRect = files.element.getBoundingClientRect();
+                if (previousRect.top < fileRect.top || previousRect.bottom > fileRect.bottom) {
+                    previousElement.scrollIntoView(previousRect.top < fileRect.top);
+                }
+            }
         } else if (event.key === "ArrowDown") {
             const startEndElement = getStartEndElement(liElements);
+            let nextElement: Element;
             if (startEndElement.startElement.getBoundingClientRect().top <= startEndElement.endElement.getBoundingClientRect().top) {
-                const nextElement = getNextFileLi(startEndElement.endElement);
+                nextElement = getNextFileLi(startEndElement.endElement) as Element;
                 if (nextElement) {
                     nextElement.classList.add("b3-list-item--focus");
                     nextElement.setAttribute("select-end", "true");
                     startEndElement.endElement.removeAttribute("select-end");
-                    const nextRect = nextElement.getBoundingClientRect();
-                    const fileRect = files.element.getBoundingClientRect();
-                    if (nextRect.top < fileRect.top || nextRect.bottom > fileRect.bottom) {
-                        nextElement.scrollIntoView(nextRect.top < fileRect.top);
-                    }
                 }
             } else {
                 startEndElement.endElement.classList.remove("b3-list-item--focus");
                 startEndElement.endElement.removeAttribute("select-end");
-                const nextElement = getNextFileLi(startEndElement.endElement);
+                nextElement = getNextFileLi(startEndElement.endElement) as Element;
                 if (nextElement) {
                     nextElement.setAttribute("select-end", "true");
+                }
+            }
+            if (nextElement) {
+                const nextRect = nextElement.getBoundingClientRect();
+                const fileRect = files.element.getBoundingClientRect();
+                if (nextRect.top < fileRect.top || nextRect.bottom > fileRect.bottom) {
+                    nextElement.scrollIntoView(nextRect.top < fileRect.top);
                 }
             }
         }

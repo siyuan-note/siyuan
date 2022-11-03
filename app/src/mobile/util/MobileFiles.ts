@@ -68,7 +68,7 @@ export class MobileFiles extends Model {
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
     <svg data-type="sort" class="toolbar__icon${window.siyuan.config.readonly ? " fn__none" : ""}"><use xlink:href="#iconSort"></use></svg>
 </div>
-<div class="fn__flex-1" data-type="navigation"></div>
+<div class="fn__flex-1"></div>
 <ul class="b3-list b3-list--background fn__flex-column" style="min-height: auto;transition: var(--b3-transition)">
     <li class="b3-list-item" data-type="toggle">
         <span class="b3-list-item__toggle">

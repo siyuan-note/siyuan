@@ -1240,6 +1240,39 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
+        // 一键将多个连续文本转换为标签
+        if (matchHotKey(window.siyuan.config.keymap.editor.insert.text2tag.custom, event)
+            && ["NodeParagraph","NodeHeading"].includes(nodeElement.getAttribute("data-type"))
+        )
+        {
+            console.log("ctrl+sdsds")
+            const id = nodeElement.getAttribute("data-node-id");
+            const html = nodeElement.outerHTML;
+            const editElement = getContenteditableElement(nodeElement);
+            let origText = editElement.textContent;
+            if(!origText){
+                event.preventDefault();
+                event.stopPropagation();
+                return true;
+            }
+            //将每个连续字符串用##包围
+            let newText = origText.replace(/\S+/g, "#$&#");
+            if (newText===origText){
+                event.preventDefault();
+                event.stopPropagation();
+                return true;
+            }
+
+            editElement.innerHTML = newText;
+            const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
+            nodeElement.outerHTML = newHTML;
+            const newNodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+            updateTransaction(protyle, id, newHTML, html);
+            highlightRender(newNodeElement);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
 
         if (!nodeElement.classList.contains("code-block")) {
             const findToolbar = protyle.options.toolbar.find((menuItem: IMenuItem) => {

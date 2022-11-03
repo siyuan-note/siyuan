@@ -1218,12 +1218,7 @@ func RemoveDocs(paths []string) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
 
 	paths = filterSelfChildDocs(paths)
-	var ids []string
-	for _, p := range paths {
-		ids = append(ids, strings.TrimSuffix(path.Base(p), ".sy"))
-	}
-
-	pathsBoxes := getBoxesByPaths(ids)
+	pathsBoxes := getBoxesByPaths(paths)
 	WaitForWritingFiles()
 	for p, box := range pathsBoxes {
 		err = removeDoc(box, p)

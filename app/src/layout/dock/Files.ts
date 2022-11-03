@@ -16,6 +16,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
+import {isTouchDevice} from "../../util/functions";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -79,7 +80,7 @@ export class Files extends Model {
     <span class="fn__space"></span>
     <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
-<div class="fn__flex-1" data-type="navigation"></div>
+<div class="fn__flex-1"></div>
 <ul class="b3-list fn__flex-column" style="min-height: auto;transition: var(--b3-transition)">
     <li class="b3-list-item" data-type="toggle">
         <span class="b3-list-item__toggle">
@@ -229,23 +230,28 @@ export class Files extends Model {
                         if (event.detail === 1) {
                             needFocus = false;
                             clickTimeout = window.setTimeout(() => {
-                                this.setCurrent(target, false);
-                                if (target.getAttribute("data-type") === "navigation-file") {
-                                    if (window.siyuan.altIsPressed) {
-                                        openFileById({
-                                            id: target.getAttribute("data-node-id"),
-                                            position: "right",
-                                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
-                                        });
-                                    } else {
-                                        openFileById({
-                                            id: target.getAttribute("data-node-id"),
-                                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
-                                        });
+                                if (!window.siyuan.ctrlIsPressed) {
+                                    this.setCurrent(target, false);
+                                    if (target.getAttribute("data-type") === "navigation-file") {
+                                        if (window.siyuan.altIsPressed) {
+                                            openFileById({
+                                                id: target.getAttribute("data-node-id"),
+                                                position: "right",
+                                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                            });
+                                        } else {
+                                            openFileById({
+                                                id: target.getAttribute("data-node-id"),
+                                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                            });
+                                        }
+                                    } else if (target.getAttribute("data-type") === "navigation-root") {
+                                        this.getLeaf(target, notebookId);
+                                        setPanelFocus(this.element.parentElement);
                                     }
-                                } else if (target.getAttribute("data-type") === "navigation-root") {
-                                    this.getLeaf(target, notebookId);
+                                } else {
                                     setPanelFocus(this.element.parentElement);
+                                    target.classList.toggle("b3-list-item--focus");
                                 }
                             }, Constants.TIMEOUT_DBLCLICK);
                         } else if (event.detail === 2) {
@@ -253,6 +259,8 @@ export class Files extends Model {
                             this.getLeaf(target, notebookId);
                             this.setCurrent(target, false);
                         }
+                        this.element.querySelector('[select-end="true"]')?.removeAttribute("select-end");
+                        this.element.querySelector('[select-start="true"]')?.removeAttribute("select-start");
                         window.siyuan.menus.menu.remove();
                         event.stopPropagation();
                         event.preventDefault();
@@ -268,6 +276,11 @@ export class Files extends Model {
         // b3-list-item--focus 样式会遮挡拖拽排序的上下线条
         let focusElement: HTMLElement;
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
+            if (isTouchDevice()) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             window.getSelection().removeAllRanges();
             focusElement = this.element.querySelector(".b3-list-item--focus");
             if (focusElement) {
@@ -494,7 +507,7 @@ export class Files extends Model {
     <span data-type="more-root" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </span>
-    <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newFile}">
+    <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newSubDoc}">
         <svg><use xlink:href="#iconAdd"></use></svg>
     </span>
 </li></ul>`;
@@ -852,7 +865,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </span>
-    <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__nw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newFile}">
+    <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__nw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newSubDoc}">
         <svg><use xlink:href="#iconAdd"></use></svg>
     </span>
     ${countHTML}

@@ -29,6 +29,12 @@
     width: 100%;
     height: 100%;
     position: relative;
+
+    .textLayer,
+    .pdf__resize {
+      /* dark 蓝色、紫色背景显示不清楚，文档位于 https://github.com/siyuan-note/siyuan/issues/5351 */
+      mix-blend-mode: multiply;
+    }
   }
 
   &__util {
@@ -75,10 +81,22 @@
   }
 }
 
-.pdf__outer--dark .pdfViewer .page canvas,
-.pdf__outer--dark .thumbnailImage {
-  filter: grayscale(0%) invert(100%) contrast(100%) brightness(100%) hue-rotate(180deg);
+.pdf__outer--dark {
+  .pdfViewer .page canvas,
+  .thumbnailImage {
+    filter: grayscale(0%) invert(100%) contrast(100%) brightness(100%) hue-rotate(180deg);
+  }
+
+  .textLayer {
+    background-color: var(--b3-pdf-dark);
+  }
+
+  .textLayer,
+  .pdf__resize {
+    mix-blend-mode: screen;
+  }
 }
+
 .annotationLayer section:not(.linkAnnotation) {
   display: none;
 }

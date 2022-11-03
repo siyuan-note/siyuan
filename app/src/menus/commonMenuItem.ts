@@ -266,7 +266,8 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                         });
                     }
                     window.siyuan.menus.menu.element.style.zIndex = "310";
-                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
+                    window.siyuan.menus.menu.element.classList.add("b3-menu--list")
+                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16, w: 16});
                 });
                 break;
         }
@@ -471,7 +472,8 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                             });
                         }
                         window.siyuan.menus.menu.element.style.zIndex = "310";
-                        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
+                        window.siyuan.menus.menu.element.classList.add("b3-menu--list")
+                        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16, w: 16});
                     });
                     break;
             }
@@ -774,17 +776,6 @@ export const openMenu = (src: string, onlyMenu: boolean, showAccelerator: boolea
         label: window.siyuan.languages.openBy,
         submenu
     }).element);
-};
-
-export const deleteMenu = (notebookId: string, name: string, pathString: string) => {
-    return new MenuItem({
-        icon: "iconTrashcan",
-        label: window.siyuan.languages.delete,
-        accelerator: "⌦",
-        click: () => {
-            deleteFile(notebookId, pathString, name);
-        }
-    }).element;
 };
 
 export const renameMenu = (options: {

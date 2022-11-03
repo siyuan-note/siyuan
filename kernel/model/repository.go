@@ -33,17 +33,18 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
-	"github.com/qiniu/go-sdk/v7/storage"
 	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
-	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/studio-b12/gowebdav"
 )
 
 func init() {
@@ -259,13 +260,8 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-
 	defer util.PushClearProgress()
-	downloadFileCount, downloadChunkCount, downloadBytes, err := repo.DownloadTagIndex(tag, id, cloudInfo, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	downloadFileCount, downloadChunkCount, downloadBytes, err := repo.DownloadTagIndex(tag, id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
 		return
 	}
@@ -286,14 +282,9 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-
 	util.PushEndlessProgress(Conf.Language(116))
 	defer util.PushClearProgress()
-	uploadFileCount, uploadChunkCount, uploadBytes, err := repo.UploadTagIndex(tag, id, cloudInfo, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	uploadFileCount, uploadChunkCount, uploadBytes, err := repo.UploadTagIndex(tag, id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
 		if errors.Is(err, dejavu.ErrCloudBackupCountExceeded) {
 			err = fmt.Errorf(Conf.Language(84), Conf.Language(154))
@@ -324,12 +315,7 @@ func RemoveCloudRepoTag(tag string) (err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-
-	err = repo.RemoveCloudRepoTag(tag, cloudInfo, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
+	err = repo.RemoveCloudRepoTag(tag)
 	if nil != err {
 		return
 	}
@@ -347,11 +333,7 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-	ret, err = repo.GetCloudRepoTagLogs(cloudInfo, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
+	ret, err = repo.GetCloudRepoTagLogs(map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
 	if 1 > len(ret) {
 		ret = []*dejavu.Log{}
 	}
@@ -397,6 +379,7 @@ func TagSnapshot(id, name string) (err error) {
 		return
 	}
 
+	name = strings.TrimSpace(name)
 	name = gulu.Str.RemoveInvisible(name)
 	if "" == name {
 		err = errors.New(Conf.Language(142))
@@ -432,6 +415,7 @@ func IndexRepo(memo string) (err error) {
 		return
 	}
 
+	memo = strings.TrimSpace(memo)
 	memo = gulu.Str.RemoveInvisible(memo)
 	if "" == memo {
 		err = errors.New(Conf.Language(142))
@@ -509,17 +493,12 @@ func bootSyncRepo() (err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	fetchedFiles, err := repo.GetSyncCloudFiles(cloudInfo, syncContext)
+	fetchedFiles, err := repo.GetSyncCloudFiles(syncContext)
 	if errors.Is(err, dejavu.ErrRepoFatalErr) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
-			fetchedFiles, err = repo.GetSyncCloudFiles(cloudInfo, syncContext)
+			fetchedFiles, err = repo.GetSyncCloudFiles(syncContext)
 		}
 	}
 
@@ -601,17 +580,12 @@ func syncRepo(exit, byHand bool) (err error) {
 		return
 	}
 
-	cloudInfo, err := buildCloudInfo()
-	if nil != err {
-		return
-	}
-
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	mergeResult, trafficStat, err := repo.Sync(cloudInfo, syncContext)
+	mergeResult, trafficStat, err := repo.Sync(syncContext)
 	if errors.Is(err, dejavu.ErrRepoFatalErr) {
 		// 重置仓库并再次尝试同步
 		if _, resetErr := resetRepository(repo); nil == resetErr {
-			mergeResult, trafficStat, err = repo.Sync(cloudInfo, syncContext)
+			mergeResult, trafficStat, err = repo.Sync(syncContext)
 		}
 	}
 	elapsed := time.Since(start)
@@ -838,11 +812,35 @@ func resetRepository(repo *dejavu.Repo) (index *entity.Index, err error) {
 }
 
 func newRepository() (ret *dejavu.Repo, err error) {
+	cloudConf, err := buildCloudConf()
+	if nil != err {
+		return
+	}
+
+	var cloudRepo cloud.Cloud
+	switch Conf.Sync.Provider {
+	case conf.ProviderSiYuan:
+		cloudRepo = &cloud.SiYuan{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
+	case conf.ProviderQiniu:
+		cloudRepo = &cloud.Qiniu{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
+	case conf.ProviderWebDAV:
+		webdavClient := gowebdav.NewClient(cloudConf.Endpoint, cloudConf.Username, cloudConf.Password)
+		a := cloudConf.Username + ":" + cloudConf.Password
+		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(a))
+		webdavClient.SetHeader("Authorization", auth)
+		webdavClient.SetTimeout(30 * time.Second)
+		cloudRepo = &cloud.WebDAV{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}, Client: webdavClient}
+	default:
+		err = fmt.Errorf("unknown cloud provider [%d]", Conf.Sync.Provider)
+		return
+	}
+
 	ignoreLines := getIgnoreLines()
 	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置
-	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines)
+	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines, cloudRepo)
 	if nil != err {
 		logging.LogErrorf("init data repo failed: %s", err)
+		return
 	}
 	return
 }
@@ -1019,25 +1017,50 @@ func subscribeEvents() {
 	})
 }
 
-func buildCloudInfo() (ret *dejavu.CloudInfo, err error) {
-	if !IsValidCloudDirName(Conf.Sync.CloudName) {
+func buildCloudConf() (ret *cloud.Conf, err error) {
+	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
 		logging.LogWarnf("invalid cloud repo name, rename it to [main]")
 		Conf.Sync.CloudName = "main"
 		Conf.Save()
 	}
 
-	if nil == Conf.User {
-		err = errors.New("user auth failed")
-		return
+	userId, token, availableSize := "0", "", int64(1024*1024*1024*1024*2)
+	if nil != Conf.User && conf.ProviderSiYuan == Conf.Sync.Provider {
+		userId = Conf.User.UserId
+		token = Conf.User.UserToken
+		availableSize = Conf.User.GetCloudRepoAvailableSize()
 	}
 
-	ret = &dejavu.CloudInfo{
-		Dir:       Conf.Sync.CloudName,
-		UserID:    Conf.User.UserId,
-		Token:     Conf.User.UserToken,
-		LimitSize: int64(Conf.User.UserSiYuanRepoSize - Conf.User.UserSiYuanAssetSize),
-		Server:    util.AliyunServer,
-		Zone:      &storage.ZoneHuadong, // TODO: 海外版需要条件编译
+	ret = &cloud.Conf{
+		Dir:           Conf.Sync.CloudName,
+		UserID:        userId,
+		Token:         token,
+		AvailableSize: availableSize,
+		Server:        util.AliyunServer,
+
+		// S3
+		AccessKey: Conf.Sync.S3.AccessKey,
+		SecretKey: Conf.Sync.S3.SecretKey,
+		Bucket:    Conf.Sync.S3.Bucket,
+		Region:    Conf.Sync.S3.Region,
+
+		// WebDAV
+		Username: Conf.Sync.WebDAV.Username,
+		Password: Conf.Sync.WebDAV.Password,
+	}
+
+	switch Conf.Sync.Provider {
+	case conf.ProviderSiYuan:
+		ret.Endpoint = "https://siyuan-data.b3logfile.com/"
+	case conf.ProviderQiniu:
+		ret.Endpoint = Conf.Sync.Qiniu.Endpoint
+	case conf.ProviderS3:
+		ret.Endpoint = Conf.Sync.S3.Endpoint
+	case conf.ProviderWebDAV:
+		ret.Endpoint = Conf.Sync.WebDAV.Endpoint
+	default:
+		err = fmt.Errorf("invalid provider [%d]", Conf.Sync.Provider)
+		return
 	}
 	return
 }
@@ -1057,69 +1080,54 @@ type Sync struct {
 	SaveDir   string `json:"saveDir"`   // 本地同步数据存放目录路径
 }
 
-func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize string, err error) {
-	sync, backup, assetSize, err := getCloudSpaceOSS()
+func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hTrafficUploadSize, hTrafficDownloadSize string, err error) {
+	stat, err := getCloudSpaceOSS()
 	if nil != err {
 		err = errors.New(Conf.Language(30) + " " + err.Error())
 		return
 	}
 
-	var totalSize, syncSize, backupSize int64
-	var syncUpdated, backupUpdated string
-	if nil != sync {
-		syncSize = int64(sync["size"].(float64))
-		syncUpdated = sync["updated"].(string)
-	}
+	syncSize := stat.Sync.Size
+	syncUpdated := stat.Sync.Updated
 	s = &Sync{
 		Size:    syncSize,
 		HSize:   humanize.Bytes(uint64(syncSize)),
 		Updated: syncUpdated,
 	}
 
-	if nil != backup {
-		backupSize = int64(backup["size"].(float64))
-		backupUpdated = backup["updated"].(string)
-	}
+	backupSize := stat.Backup.Size
+	backupUpdated := stat.Backup.Updated
 	b = &Backup{
 		Size:    backupSize,
 		HSize:   humanize.Bytes(uint64(backupSize)),
 		Updated: backupUpdated,
 	}
-	totalSize = syncSize + backupSize + assetSize
+
+	assetSize := stat.AssetSize
+	totalSize := syncSize + backupSize + assetSize
 	hAssetSize = humanize.Bytes(uint64(assetSize))
 	hSize = humanize.Bytes(uint64(totalSize))
-	hTotalSize = humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize))
+	hTotalSize = "-"
+	hTrafficUploadSize = "-"
+	hTrafficDownloadSize = "-"
+	if conf.ProviderSiYuan == Conf.Sync.Provider {
+		hTotalSize = humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize))
+		hTrafficUploadSize = humanize.Bytes(uint64(Conf.User.UserTrafficUpload))
+		hTrafficDownloadSize = humanize.Bytes(uint64(Conf.User.UserTrafficDownload))
+	}
 	return
 }
 
-func getCloudSpaceOSS() (sync, backup map[string]interface{}, assetSize int64, err error) {
-	result := map[string]interface{}{}
-	resp, err := httpclient.NewCloudRequest().
-		SetResult(&result).
-		SetBody(map[string]string{"token": Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/dejavu/getRepoStat?uid=" + Conf.User.UserId)
-
+func getCloudSpaceOSS() (stat *cloud.Stat, err error) {
+	repo, err := newRepository()
 	if nil != err {
-		logging.LogErrorf("get cloud space failed: %s", err)
-		err = ErrFailedToConnectCloudServer
 		return
 	}
 
-	if 401 == resp.StatusCode {
-		err = errors.New(Conf.Language(31))
+	stat, err = repo.GetCloudRepoStat()
+	if nil != err {
+		logging.LogErrorf("get cloud repo stat failed: %s", err)
 		return
 	}
-
-	code := result["code"].(float64)
-	if 0 != code {
-		logging.LogErrorf("get cloud space failed: %s", result["msg"])
-		err = errors.New(result["msg"].(string))
-		return
-	}
-
-	data := result["data"].(map[string]interface{})
-	sync = data["sync"].(map[string]interface{})
-	backup = data["backup"].(map[string]interface{})
-	assetSize = int64(data["assetSize"].(float64))
 	return
 }

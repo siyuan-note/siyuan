@@ -25,12 +25,12 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
-	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -70,7 +70,11 @@ func BootSyncData() {
 	util.IncBootProgress(3, "Syncing data from the cloud...")
 	BootSyncSucc = 0
 
-	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName || !IsValidCloudDirName(Conf.Sync.CloudName) {
+	if !Conf.Sync.Enabled || !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+		return
+	}
+
+	if !IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider {
 		return
 	}
 
@@ -124,18 +128,26 @@ func SyncData(boot, exit, byHand bool) {
 	if exit {
 		ExitSyncSucc = 0
 	}
-	if !IsSubscriber() || !Conf.Sync.Enabled || "" == Conf.Sync.CloudName {
+
+	if !Conf.Sync.Enabled {
 		if byHand {
-			if "" == Conf.Sync.CloudName {
-				util.PushMsg(Conf.Language(123), 5000)
-			} else if !Conf.Sync.Enabled {
-				util.PushMsg(Conf.Language(124), 5000)
-			}
+			util.PushMsg(Conf.Language(124), 5000)
 		}
 		return
 	}
 
-	if !IsValidCloudDirName(Conf.Sync.CloudName) {
+	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+		if byHand {
+			util.PushMsg(Conf.Language(123), 5000)
+		}
+		return
+	}
+
+	if !IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider {
+		return
+	}
+
+	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
 		return
 	}
 
@@ -297,17 +309,16 @@ func CreateCloudSyncDir(name string) (err error) {
 
 	name = strings.TrimSpace(name)
 	name = gulu.Str.RemoveInvisible(name)
-	if !IsValidCloudDirName(name) {
+	if !cloud.IsValidCloudDirName(name) {
 		return errors.New(Conf.Language(37))
 	}
 
-	var cloudInfo *dejavu.CloudInfo
-	cloudInfo, err = buildCloudInfo()
+	repo, err := newRepository()
 	if nil != err {
 		return
 	}
 
-	err = dejavu.CreateCloudRepo(name, cloudInfo)
+	err = repo.CreateCloudRepo(name)
 	return
 }
 
@@ -321,13 +332,12 @@ func RemoveCloudSyncDir(name string) (err error) {
 		return
 	}
 
-	var cloudInfo *dejavu.CloudInfo
-	cloudInfo, err = buildCloudInfo()
+	repo, err := newRepository()
 	if nil != err {
 		return
 	}
 
-	err = dejavu.RemoveCloudRepo(name, cloudInfo)
+	err = repo.RemoveCloudRepo(name)
 	if nil != err {
 		err = errors.New(formatErrorMsg(err))
 		return
@@ -345,35 +355,34 @@ func RemoveCloudSyncDir(name string) (err error) {
 
 func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 	syncDirs = []*Sync{}
-	var dirs []map[string]interface{}
+	var dirs []*cloud.Repo
 	var size int64
 
-	var cloudInfo *dejavu.CloudInfo
-	cloudInfo, err = buildCloudInfo()
+	repo, err := newRepository()
 	if nil != err {
 		return
 	}
 
-	dirs, size, err = dejavu.GetCloudRepos(cloudInfo)
+	dirs, size, err = repo.GetCloudRepos()
 	if nil != err {
 		err = errors.New(formatErrorMsg(err))
 		return
 	}
 	if 1 > len(dirs) {
-		dirs = append(dirs, map[string]interface{}{
-			"name":    "main",
-			"size":    float64(0),
-			"updated": time.Now().Format("2006-01-02 15:04:05"),
+		dirs = append(dirs, &cloud.Repo{
+			Name:    "main",
+			Size:    0,
+			Updated: time.Now().Format("2006-01-02 15:04:05"),
 		})
 	}
 
 	for _, d := range dirs {
-		dirSize := int64(d["size"].(float64))
+		dirSize := d.Size
 		syncDirs = append(syncDirs, &Sync{
 			Size:      dirSize,
 			HSize:     humanize.Bytes(uint64(dirSize)),
-			Updated:   d["updated"].(string),
-			CloudName: d["name"].(string),
+			Updated:   d.Updated,
+			CloudName: d.Name,
 		})
 	}
 	hSize = humanize.Bytes(uint64(size))
@@ -381,7 +390,7 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 }
 
 func formatErrorMsg(err error) string {
-	if errors.Is(err, dejavu.ErrCloudAuthFailed) {
+	if errors.Is(err, cloud.ErrCloudAuthFailed) {
 		return Conf.Language(31) + " v" + util.Ver
 	}
 
@@ -406,24 +415,6 @@ func formatErrorMsg(err error) string {
 	}
 	msg = msg + " v" + util.Ver
 	return msg
-}
-
-func IsValidCloudDirName(cloudDirName string) bool {
-	if 16 < utf8.RuneCountInString(cloudDirName) || 1 > utf8.RuneCountInString(cloudDirName) {
-		return false
-	}
-
-	chars := []byte{'~', '`', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '=',
-		'[', ']', '{', '}', '\\', '|', ';', ':', '\'', '"', '<', ',', '>', '.', '?', '/', ' '}
-	var charsStr string
-	for _, char := range chars {
-		charsStr += string(char)
-	}
-
-	if strings.ContainsAny(cloudDirName, charsStr) {
-		return false
-	}
-	return true
 }
 
 func getIgnoreLines() (ret []string) {

@@ -317,8 +317,7 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []*History
 	}
 
 	pageSize := 32
-	from := (page - 1) * pageSize
-	to := page * pageSize
+	offset := (page - 1) * pageSize
 
 	table := "histories_fts_case_insensitive"
 	stmt := "SELECT * FROM " + table + " WHERE "
@@ -341,7 +340,7 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []*History
 		stmt += " AND path LIKE '%/assets/%'"
 	}
 	countStmt := strings.ReplaceAll(stmt, "SELECT *", "SELECT COUNT(*) AS total")
-	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(from) + ", " + strconv.Itoa(to)
+	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa(offset)
 	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
 	ret = fromSQLHistories(sqlHistories)
 	result, err := sql.QueryHistory(countStmt)
@@ -660,12 +659,9 @@ func fromSQLHistories(sqlHistories []*sql.History) (ret []*History) {
 	}
 
 	var items []*HistoryItem
-	var tmpTime int64
+	tmpTime, _ := strconv.ParseInt(sqlHistories[0].Created, 10, 64)
 	for _, sqlHistory := range sqlHistories {
 		unixSec, _ := strconv.ParseInt(sqlHistory.Created, 10, 64)
-		if 0 == tmpTime {
-			tmpTime = unixSec
-		}
 		if tmpTime == unixSec {
 			item := &HistoryItem{
 				Title: sqlHistory.Title,
@@ -691,6 +687,7 @@ func fromSQLHistories(sqlHistories []*sql.History) (ret []*History) {
 			items = []*HistoryItem{}
 			items = append(items, item)
 		}
+		tmpTime = unixSec
 	}
 	if 0 < len(items) {
 		ret = append(ret, &History{

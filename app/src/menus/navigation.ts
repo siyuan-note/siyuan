@@ -1,6 +1,5 @@
 import {
     copySubMenu,
-    deleteMenu,
     exportMd,
     movePathToMenu,
     openFileAttr,
@@ -23,19 +22,24 @@ import {openFileById} from "../editor/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
 import {newFile} from "../util/newFile";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {deleteFile, deleteFiles} from "../editor/deleteFile";
 
 export const initNavigationMenu = (liElement: HTMLElement) => {
+    if (!liElement.classList.contains("b3-list-item--focus")) {
+        const fileElement = hasClosestByClassName(liElement, "sy__file")
+        if (fileElement) {
+            fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
+                item.classList.remove("b3-list-item--focus");
+                item.removeAttribute("select-end")
+                item.removeAttribute("select-start")
+            })
+        }
+        liElement.classList.add("b3-list-item--focus");
+    }
     const notebookId = liElement.parentElement.getAttribute("data-url");
     const name = getNotebookName(notebookId);
     window.siyuan.menus.menu.remove();
-    window.siyuan.menus.menu.append(new MenuItem({
-        icon: "iconFile",
-        label: window.siyuan.languages.newFile,
-        click: () => {
-            newFile(notebookId, "/", true);
-        }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(renameMenu({
             path: "/",
@@ -144,18 +148,23 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
 };
 
 export const initFileMenu = (notebookId: string, pathString: string, liElement: Element) => {
+    const fileElement = hasClosestByClassName(liElement, "sy__file")
+    if (!fileElement) {
+        return;
+    }
+    if (!liElement.classList.contains("b3-list-item--focus")) {
+        fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
+            item.classList.remove("b3-list-item--focus");
+            item.removeAttribute("select-end")
+            item.removeAttribute("select-start")
+        })
+        liElement.classList.add("b3-list-item--focus");
+    }
     const id = liElement.getAttribute("data-node-id");
     let name = liElement.getAttribute("data-name");
     window.siyuan.menus.menu.remove();
     name = getDisplayName(name, false, true);
     if (!window.siyuan.config.readonly) {
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconFile",
-            label: window.siyuan.languages.newSubDoc,
-            click: () => {
-                newFile(notebookId, pathString, true);
-            }
-        }).element);
         if (window.siyuan.config.fileTree.sort === 6) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconBefore",
@@ -189,8 +198,8 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                     newFile(notebookId, pathPosix().dirname(pathString), true, paths);
                 }
             }).element);
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.copy,
             type: "submenu",
@@ -205,7 +214,14 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
             }])
         }).element);
         window.siyuan.menus.menu.append(movePathToMenu(notebookId, pathString));
-        window.siyuan.menus.menu.append(deleteMenu(notebookId, name, pathString));
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconTrashcan",
+            label: window.siyuan.languages.delete,
+            accelerator: "⌦",
+            click: () => {
+                deleteFiles(Array.from(fileElement.querySelectorAll(".b3-list-item--focus")))
+            }
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(renameMenu({
             path: pathString,

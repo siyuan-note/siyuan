@@ -75,7 +75,8 @@ export class Menu {
 
         this.element.innerHTML = "";
         this.element.classList.add("fn__none");
-        this.element.style.zIndex = "";
+        this.element.classList.remove("b3-menu--list");
+        this.element.removeAttribute("style");  // zIndex
     }
 
     public append(element?: HTMLElement) {
@@ -85,7 +86,7 @@ export class Menu {
         this.element.append(element);
     }
 
-    public popup(options: { x: number, y: number, h?: number }, isLeft = false) {
+    public popup(options: { x: number, y: number, h?: number , w?: number }, isLeft = false) {
         if (this.element.innerHTML === "") {
             return;
         }
@@ -96,7 +97,7 @@ export class Menu {
         }
 
         this.element.classList.remove("fn__none");
-        setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h);
+        setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h, options.w);
     }
 }
 

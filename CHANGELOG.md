@@ -1,3 +1,28 @@
+## v2.4.9 / 2022-11-01
+
+### 改进功能
+
+* [编辑器设置支持两侧对齐布局](https://github.com/siyuan-note/siyuan/issues/4203)
+* [编辑器设置及块布局支持文本从右到左显示](https://github.com/siyuan-note/siyuan/issues/6422)
+* [保存 `data/storage/local.json` 时格式化](https://github.com/siyuan-note/siyuan/pull/6424)
+* [改进 `网络图片转换为本地图片` 微信图片拉取](https://github.com/siyuan-note/siyuan/issues/6431)
+* [自动更新下载安装包时优先使用 GitHub Releases](https://github.com/siyuan-note/siyuan/issues/6435)
+* [Android 端禁用文本拖拽](https://github.com/siyuan-note/siyuan/issues/6436)
+
+### 开发重构
+
+* [重构数据仓库同步](https://github.com/siyuan-note/siyuan/issues/6427)
+* [用 `os.ReadDir` 替换 `Readdir(-1)`](https://github.com/siyuan-note/siyuan/pull/6447)
+
+### 修复缺陷
+
+* [代码块内注释无法剪切](https://github.com/siyuan-note/siyuan/issues/6419)
+* [只读模式下禁止粘贴操作和拖拽插入资源文件](https://github.com/siyuan-note/siyuan/issues/6421)
+* [macOS 端录音无声音](https://github.com/siyuan-note/siyuan/issues/6423)
+* [安装时无法在工作空间覆盖警告弹框处取消安装](https://github.com/siyuan-note/siyuan/issues/6425)
+* [有序列表折叠后不显示数字](https://github.com/siyuan-note/siyuan/issues/6440)
+* [暗黑模式下 PDF 使用明亮模式导致标注显示异常 ](https://github.com/siyuan-note/siyuan/issues/6442)
+
 ## v2.4.8 / 2022-10-31
 
 ### 改进功能

@@ -46,8 +46,6 @@ interface Window {
     showKeyboardToolbar(bottom?: number): void
 
     hideKeyboardToolbar(): void
-
-    gtag(name: string, key: string | Date, value?: IObject): void;
 }
 
 interface ITextOption {
@@ -245,6 +243,8 @@ declare interface IExport {
 }
 
 declare interface IEditor {
+    justify: boolean;
+    rtl: boolean;
     readOnly: boolean;
     listLogicalOutdent: boolean;
     katexMacros: string;

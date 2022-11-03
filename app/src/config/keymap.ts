@@ -342,13 +342,11 @@ export const keymap = {
                 } else {
                     keymapStr += Constants.KEYCODE[event.keyCode][0];
                 }
+            } else if (["/", ".", "+", "-", "*"].includes(event.key)) {
+                keymapStr += event.key;
             } else if (event.code.startsWith("Digit") || event.code.startsWith("Key") || event.code.startsWith("Numpad")) {
-                const codeKey = event.code.substring(event.code.length - 1).toUpperCase();
-                if (!event.altKey ||
-                    (event.altKey && !["I", "E", "N", "U"].includes(codeKey))   // Mac 编辑器中 alt+I 等字符无法清空
-                ) {
-                    keymapStr += event.code.substring(event.code.length - 1).toUpperCase();
-                }
+                // 新版 Electron 可以支持 Alt["I", "E", "N", "U"]，故移除原有判断
+                keymapStr += event.code.substring(event.code.length - 1).toUpperCase();
             } else {
                 keymapStr += event.key === "Unidentified" ? "" : (event.key.length > 1 ? event.key : event.key.toUpperCase());
             }

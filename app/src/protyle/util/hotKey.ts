@@ -48,7 +48,7 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     if (hotKey.startsWith("⇧") && hotKeys.length === 2) {
         if (!event.ctrlKey && !isCtrl(event) && !event.altKey && event.shiftKey) {
             if (event.code.startsWith("Digit") || event.code.startsWith("Numpad")) {
-                if (hotKeys[1] === event.code.slice(-1)) {
+                if (hotKeys[1] === event.code.slice(-1) || event.key === hotKeys[1]) {
                     return true;
                 }
             } else if (event.key === hotKeys[1]) {
@@ -65,7 +65,8 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
         }
 
         let isMatchKey = (/^[0-9]$/.test(keyCode) ? (event.code === "Digit" + keyCode || event.code === "Numpad" + keyCode) : event.code === "Key" + keyCode) ||
-            event.code === keyCode;
+            event.code === keyCode ||
+            event.key === keyCode;  // 小键盘上的 /*-+.
         if (Constants.KEYCODE[event.keyCode]) {
             if (event.shiftKey) {
                 isMatchKey = Constants.KEYCODE[event.keyCode][1] === keyCode;

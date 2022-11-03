@@ -242,6 +242,18 @@ func InitConf() {
 	if 0 == Conf.Sync.Mode {
 		Conf.Sync.Mode = 1
 	}
+	if nil == Conf.Sync.Qiniu {
+		Conf.Sync.Qiniu = &conf.Qiniu{}
+	}
+	Conf.Sync.Qiniu.Endpoint = util.NormalizeEndpoint(Conf.Sync.Qiniu.Endpoint)
+	if nil == Conf.Sync.S3 {
+		Conf.Sync.S3 = &conf.S3{}
+	}
+	Conf.Sync.S3.Endpoint = util.NormalizeEndpoint(Conf.Sync.S3.Endpoint)
+	if nil == Conf.Sync.WebDAV {
+		Conf.Sync.WebDAV = &conf.WebDAV{}
+	}
+	Conf.Sync.WebDAV.Endpoint = util.NormalizeEndpoint(Conf.Sync.WebDAV.Endpoint)
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()

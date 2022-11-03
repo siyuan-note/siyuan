@@ -44,3 +44,7 @@ type UserTitle struct {
 	Desc string `json:"desc"`
 	Icon string `json:"icon"`
 }
+
+func (user *User) GetCloudRepoAvailableSize() int64 {
+	return int64(user.UserSiYuanRepoSize - user.UserSiYuanAssetSize)
+}

@@ -1023,6 +1023,7 @@ export class WYSIWYG {
                 } else if (selectImgElement) {
                     tempElement.append(selectImgElement);
                 } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN" &&
+                    range.startContainer.parentElement.getAttribute("data-type") &&
                     range.startContainer.parentElement.isSameNode(range.endContainer.parentElement)) {
                     // 剪切粗体等字体中的一部分
                     const spanElement = range.startContainer.parentElement;
@@ -1266,6 +1267,11 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("paste", (event: ClipboardEvent & { target: HTMLElement }) => {
+            if (protyle.disabled) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             // https://github.com/siyuan-note/siyuan/issues/4600
             if (event.target.tagName === "PROTYLE-HTML") {

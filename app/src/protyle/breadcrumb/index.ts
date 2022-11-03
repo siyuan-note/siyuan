@@ -19,7 +19,7 @@ import {openFileById} from "../../editor/util";
 import {getAllModels} from "../../layout/getAll";
 /// #endif
 /// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
+import {getCurrentWindow, systemPreferences} from "@electron/remote";
 /// #endif
 import {onGet} from "../util/onGet";
 import {saveScroll} from "../scroll/saveScroll";
@@ -130,6 +130,20 @@ export class Breadcrumb {
         /// #endif
     }
 
+    private startRecord(protyle: IProtyle) {
+        this.messageId = showMessage(`<div class="fn__flex fn__flex-wrap">
+<span class="fn__flex-center">${window.siyuan.languages.recording}</span><span class="fn__space"></span>
+<button class="b3-button b3-button--white">${window.siyuan.languages.endRecord}</button></div>`, -1);
+        document.querySelector(`#message [data-id="${this.messageId}"] button`).addEventListener("click", () => {
+            this.mediaRecorder.stopRecording();
+            hideMessage(this.messageId);
+            const file: File = new File([this.mediaRecorder.buildWavFileBlob()],
+                `record${(new Date()).getTime()}.wav`, {type: "video/webm"});
+            uploadFiles(protyle, [file]);
+        });
+        this.mediaRecorder.startRecordingNewWavFile();
+    }
+
     private showMenu(protyle: IProtyle, position: { x: number, y: number }) {
         let id;
         const cursorNodeElement = hasClosestBlock(getEditorRange(protyle.element).startContainer);
@@ -164,7 +178,23 @@ export class Breadcrumb {
                         current: this.mediaRecorder && this.mediaRecorder.isRecording,
                         icon: "iconRecord",
                         label: this.mediaRecorder?.isRecording ? window.siyuan.languages.endRecord : window.siyuan.languages.startRecord,
-                        click: () => {
+                        click: async () => {
+                            /// #if !BROWSER
+                            if (window.siyuan.config.system.os === "darwin") {
+                                const status = systemPreferences.getMediaAccessStatus("microphone");
+                                if (["denied", "restricted", "unknown"].includes(status)) {
+                                    showMessage(window.siyuan.languages.microphoneDenied);
+                                    return;
+                                } else if (status === "not-determined") {
+                                    const isAccess = await systemPreferences.askForMediaAccess("microphone");
+                                    if (!isAccess) {
+                                        showMessage(window.siyuan.languages.microphoneNotAccess);
+                                        return;
+                                    }
+                                }
+                            }
+                            /// #endif
+
                             if (!this.mediaRecorder) {
                                 navigator.mediaDevices.getUserMedia({audio: true}).then((mediaStream: MediaStream) => {
                                     this.mediaRecorder = new RecordMedia(mediaStream);
@@ -178,8 +208,7 @@ export class Breadcrumb {
                                         const right = e.inputBuffer.getChannelData(1);
                                         this.mediaRecorder.cloneChannelData(left, right);
                                     };
-                                    this.mediaRecorder.startRecordingNewWavFile();
-                                    this.messageId = showMessage(window.siyuan.languages.recording, -1);
+                                    this.startRecord(protyle);
                                 }).catch(() => {
                                     showMessage(window.siyuan.languages["record-tip"]);
                                 });
@@ -194,8 +223,7 @@ export class Breadcrumb {
                                 uploadFiles(protyle, [file]);
                             } else {
                                 hideMessage(this.messageId);
-                                this.messageId = showMessage(window.siyuan.languages.recording, -1);
-                                this.mediaRecorder.startRecordingNewWavFile();
+                                this.startRecord(protyle);
                             }
                         }
                     }).element);
@@ -261,7 +289,9 @@ export class Breadcrumb {
                     }
                 }).element);
             }
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            if (window.siyuan.menus.menu.element.childElementCount > 0) {
+                window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            }
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconRefresh",
                 accelerator: window.siyuan.config.keymap.editor.general.refresh.custom,

@@ -35,10 +35,12 @@ import {showMessage} from "../dialog/message";
 import {openHistory} from "./history";
 import {Dialog} from "../dialog";
 import {unicode2Emoji} from "../emoji";
-import {deleteFile} from "../editor/deleteFile";
+import {deleteFile, deleteFiles} from "../editor/deleteFile";
 import {escapeHtml} from "./escape";
 import {syncGuide} from "../sync/syncGuide";
 import {showPopover} from "../block/popover";
+import {getStartEndElement} from "../protyle/wysiwyg/commonHotkey";
+import {getNextFileLi, getPreviousFileLi} from "../protyle/wysiwyg/getBlock";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -865,10 +867,10 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     if (!files.element.parentElement.classList.contains("layout__tab--active")) {
         return false;
     }
-    let liElement = files.element.querySelector(".b3-list-item--focus");
-    if (!liElement) {
+    const liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"))
+    if (liElements.length === 0) {
         if (event.key.startsWith("Arrow")) {
-            liElement = files.element.querySelector(".b3-list-item");
+            const liElement = files.element.querySelector(".b3-list-item");
             if (liElement) {
                 liElement.classList.add("b3-list-item--focus");
             }
@@ -876,18 +878,19 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         }
         return false;
     }
-    const topULElement = hasTopClosestByTag(liElement, "UL");
+    const topULElement = hasTopClosestByTag(liElements[0], "UL");
     if (!topULElement) {
         return false;
     }
     const notebookId = topULElement.getAttribute("data-url");
-    const pathString = liElement.getAttribute("data-path");
-    const isFile = liElement.getAttribute("data-type") === "navigation-file";
+    const pathString = liElements[0].getAttribute("data-path");
+    const isFile = liElements[0].getAttribute("data-type") === "navigation-file";
     if (matchHotKey(window.siyuan.config.keymap.editor.general.rename.custom, event)) {
+        window.siyuan.menus.menu.remove();
         rename({
             notebookId,
             path: pathString,
-            name: isFile ? getDisplayName(liElement.getAttribute("data-name"), false, true) : getNotebookName(notebookId),
+            name: isFile ? getDisplayName(liElements[0].getAttribute("data-name"), false, true) : getNotebookName(notebookId),
             type: isFile ? "file" : "notebook",
         });
         event.preventDefault();
@@ -895,18 +898,19 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         return true;
     }
     if (matchHotKey("⌘/", event)) {
-        const liRect = liElement.getBoundingClientRect();
+        const liRect = liElements[0].getBoundingClientRect();
         if (isFile) {
-            initFileMenu(notebookId, pathString, liElement).popup({
+            initFileMenu(notebookId, pathString, liElements[0]).popup({
                 x: liRect.right - 15,
                 y: liRect.top + 15
             });
         } else {
-            initNavigationMenu(liElement as HTMLElement).popup({x: liRect.right - 15, y: liRect.top + 15});
+            initNavigationMenu(liElements[0] as HTMLElement).popup({x: liRect.right - 15, y: liRect.top + 15});
         }
         return true;
     }
     if (isFile && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
+        window.siyuan.menus.menu.remove();
         movePathTo(notebookId, pathString, false);
         event.preventDefault();
         event.stopPropagation();
@@ -919,6 +923,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         searchKey = window.siyuan.config.keymap.general.search.custom;
     }
     if (searchKey) {
+        window.siyuan.menus.menu.remove();
         if (isFile) {
             openSearch(searchKey, undefined, notebookId, getDisplayName(pathString, false, true));
         } else {
@@ -937,109 +942,175 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if ((event.key === "ArrowRight" && !liElement.querySelector(".b3-list-item__arrow--open") && !liElement.querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||
-        (event.key === "ArrowLeft" && liElement.querySelector(".b3-list-item__arrow--open"))) {
-        files.getLeaf(liElement, notebookId);
-        event.preventDefault();
-        return true;
-    }
-    const fileRect = files.element.getBoundingClientRect();
-    if (event.key === "ArrowLeft") {
-        let parentElement = liElement.parentElement.previousElementSibling;
-        if (parentElement) {
-            if (parentElement.tagName !== "LI") {
-                parentElement = files.element.querySelector(".b3-list-item");
+    if (event.shiftKey) {
+        if (event.key === "ArrowUp") {
+            const startEndElement = getStartEndElement(liElements);
+            let previousElement: Element;
+            if (startEndElement.startElement.getBoundingClientRect().top >= startEndElement.endElement.getBoundingClientRect().top) {
+                previousElement = getPreviousFileLi(startEndElement.endElement) as Element;
+                if (previousElement) {
+                    previousElement.classList.add("b3-list-item--focus");
+                    previousElement.setAttribute("select-end", "true");
+                    startEndElement.endElement.removeAttribute("select-end");
+                }
+            } else {
+                startEndElement.endElement.classList.remove("b3-list-item--focus");
+                startEndElement.endElement.removeAttribute("select-end");
+                previousElement = getPreviousFileLi(startEndElement.endElement) as Element;
+                if (previousElement) {
+                    previousElement.setAttribute("select-end", "true");
+                }
             }
-            liElement.classList.remove("b3-list-item--focus");
-            parentElement.classList.add("b3-list-item--focus");
-            const parentRect = parentElement.getBoundingClientRect();
-            if (parentRect.top < fileRect.top || parentRect.bottom > fileRect.bottom) {
-                parentElement.scrollIntoView(parentRect.top < fileRect.top);
+            if (previousElement) {
+                const previousRect = previousElement.getBoundingClientRect();
+                const fileRect = files.element.getBoundingClientRect();
+                if (previousRect.top < fileRect.top || previousRect.bottom > fileRect.bottom) {
+                    previousElement.scrollIntoView(previousRect.top < fileRect.top);
+                }
+            }
+        } else if (event.key === "ArrowDown") {
+            const startEndElement = getStartEndElement(liElements);
+            let nextElement: Element;
+            if (startEndElement.startElement.getBoundingClientRect().top <= startEndElement.endElement.getBoundingClientRect().top) {
+                nextElement = getNextFileLi(startEndElement.endElement) as Element;
+                if (nextElement) {
+                    nextElement.classList.add("b3-list-item--focus");
+                    nextElement.setAttribute("select-end", "true");
+                    startEndElement.endElement.removeAttribute("select-end");
+                }
+            } else {
+                startEndElement.endElement.classList.remove("b3-list-item--focus");
+                startEndElement.endElement.removeAttribute("select-end");
+                nextElement = getNextFileLi(startEndElement.endElement) as Element;
+                if (nextElement) {
+                    nextElement.setAttribute("select-end", "true");
+                }
+            }
+            if (nextElement) {
+                const nextRect = nextElement.getBoundingClientRect();
+                const fileRect = files.element.getBoundingClientRect();
+                if (nextRect.top < fileRect.top || nextRect.bottom > fileRect.bottom) {
+                    nextElement.scrollIntoView(nextRect.top < fileRect.top);
+                }
             }
         }
-        event.preventDefault();
-        return true;
-    }
-    if (event.key === "ArrowDown" || event.key === "ArrowRight") {
-        let nextElement = liElement;
-        while (nextElement) {
-            if (nextElement.nextElementSibling) {
-                if (nextElement.nextElementSibling.tagName === "UL") {
-                    nextElement = nextElement.nextElementSibling.firstElementChild;
-                } else {
-                    nextElement = nextElement.nextElementSibling;
+        return;
+    } else {
+        files.element.querySelector('[select-end="true"]')?.removeAttribute("select-end");
+        files.element.querySelector('[select-start="true"]')?.removeAttribute("select-start");
+        if ((event.key === "ArrowRight" && !liElements[0].querySelector(".b3-list-item__arrow--open") && !liElements[0].querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||
+            (event.key === "ArrowLeft" && liElements[0].querySelector(".b3-list-item__arrow--open"))) {
+            files.getLeaf(liElements[0], notebookId);
+            liElements.forEach((item, index) => {
+                if (index !== 0) {
+                    item.classList.remove("b3-list-item--focus")
                 }
-                break;
-            } else {
-                if (nextElement.parentElement.classList.contains("fn__flex-1")) {
+            })
+            event.preventDefault();
+            return true;
+        }
+        if (event.key === "ArrowLeft") {
+            let parentElement = liElements[0].parentElement.previousElementSibling;
+            if (parentElement) {
+                if (parentElement.tagName !== "LI") {
+                    parentElement = files.element.querySelector(".b3-list-item");
+                }
+                liElements.forEach((item) => {
+                    item.classList.remove("b3-list-item--focus")
+                })
+                parentElement.classList.add("b3-list-item--focus");
+                const parentRect = parentElement.getBoundingClientRect();
+                const fileRect = files.element.getBoundingClientRect();
+                if (parentRect.top < fileRect.top || parentRect.bottom > fileRect.bottom) {
+                    parentElement.scrollIntoView(parentRect.top < fileRect.top);
+                }
+            }
+            event.preventDefault();
+            return true;
+        }
+        if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+            let nextElement = liElements[0];
+            while (nextElement) {
+                if (nextElement.nextElementSibling) {
+                    if (nextElement.nextElementSibling.tagName === "UL") {
+                        nextElement = nextElement.nextElementSibling.firstElementChild;
+                    } else {
+                        nextElement = nextElement.nextElementSibling;
+                    }
                     break;
                 } else {
-                    nextElement = nextElement.parentElement;
+                    if (nextElement.parentElement.classList.contains("fn__flex-1")) {
+                        break;
+                    } else {
+                        nextElement = nextElement.parentElement;
+                    }
                 }
             }
-        }
-        if (nextElement.classList.contains("b3-list-item")) {
-            liElement.classList.remove("b3-list-item--focus");
-            nextElement.classList.add("b3-list-item--focus");
-            const nextRect = nextElement.getBoundingClientRect();
-            if (nextRect.top < fileRect.top || nextRect.bottom > fileRect.bottom) {
-                nextElement.scrollIntoView(nextRect.top < fileRect.top);
-            }
-        }
-        event.preventDefault();
-        return true;
-    }
-    if (event.key === "ArrowUp") {
-        let previousElement = liElement;
-        while (previousElement) {
-            if (previousElement.previousElementSibling) {
-                if (previousElement.previousElementSibling.tagName === "LI") {
-                    previousElement = previousElement.previousElementSibling;
-                } else {
-                    const liElements = previousElement.previousElementSibling.querySelectorAll(".b3-list-item");
-                    previousElement = liElements[liElements.length - 1];
+            if (nextElement.classList.contains("b3-list-item")) {
+                liElements.forEach((item) => {
+                    item.classList.remove("b3-list-item--focus")
+                })
+                nextElement.classList.add("b3-list-item--focus");
+                const nextRect = nextElement.getBoundingClientRect();
+                const fileRect = files.element.getBoundingClientRect();
+                if (nextRect.top < fileRect.top || nextRect.bottom > fileRect.bottom) {
+                    nextElement.scrollIntoView(nextRect.top < fileRect.top);
                 }
-                break;
-            } else {
-                if (previousElement.parentElement.classList.contains("fn__flex-1")) {
+            }
+            event.preventDefault();
+            return true;
+        }
+        if (event.key === "ArrowUp") {
+            let previousElement = liElements[0];
+            while (previousElement) {
+                if (previousElement.previousElementSibling) {
+                    if (previousElement.previousElementSibling.tagName === "LI") {
+                        previousElement = previousElement.previousElementSibling;
+                    } else {
+                        const liElements = previousElement.previousElementSibling.querySelectorAll(".b3-list-item");
+                        previousElement = liElements[liElements.length - 1];
+                    }
                     break;
                 } else {
-                    previousElement = previousElement.parentElement;
+                    if (previousElement.parentElement.classList.contains("fn__flex-1")) {
+                        break;
+                    } else {
+                        previousElement = previousElement.parentElement;
+                    }
                 }
             }
-        }
-        if (previousElement.classList.contains("b3-list-item")) {
-            liElement.classList.remove("b3-list-item--focus");
-            previousElement.classList.add("b3-list-item--focus");
-            const previousRect = previousElement.getBoundingClientRect();
-            if (previousRect.top < fileRect.top || previousRect.bottom > fileRect.bottom) {
-                previousElement.scrollIntoView(previousRect.top < fileRect.top);
+            if (previousElement.classList.contains("b3-list-item")) {
+                liElements.forEach((item) => {
+                    item.classList.remove("b3-list-item--focus")
+                })
+                previousElement.classList.add("b3-list-item--focus");
+                const previousRect = previousElement.getBoundingClientRect();
+                const fileRect = files.element.getBoundingClientRect();
+                if (previousRect.top < fileRect.top || previousRect.bottom > fileRect.bottom) {
+                    previousElement.scrollIntoView(previousRect.top < fileRect.top);
+                }
             }
+            event.preventDefault();
+            return true;
         }
-        event.preventDefault();
-        return true;
     }
     if (event.key === "Delete" || (event.key === "Backspace" && isMac())) {
         window.siyuan.menus.menu.remove();
-        if (isFile) {
-            deleteFile(notebookId, pathString, getDisplayName(liElement.getAttribute("data-name"), false, true));
-        } else {
-            confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(getNotebookName(notebookId))}</b>?`, () => {
-                    fetchPost("/api/notebook/removeNotebook", {
-                        notebook: notebookId,
-                        callback: Constants.CB_MOUNT_REMOVE
-                    });
-                });
-        }
+        deleteFiles(liElements)
         return true;
     }
     if (event.key === "Enter") {
-        if (isFile) {
-            openFileById({id: liElement.getAttribute("data-node-id"), action: [Constants.CB_GET_FOCUS]});
-        } else {
-            files.getLeaf(liElement, notebookId);
-        }
+        window.siyuan.menus.menu.remove();
+        liElements.forEach(item => {
+            if (item.getAttribute("data-type") === "navigation-file") {
+                openFileById({id: item.getAttribute("data-node-id"), action: [Constants.CB_GET_FOCUS]});
+            } else {
+                const itemTopULElement = hasTopClosestByTag(item, "UL");
+                if (itemTopULElement) {
+                    files.getLeaf(item, itemTopULElement.getAttribute("data-url"));
+                }
+            }
+        })
         return true;
     }
 };

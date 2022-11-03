@@ -182,3 +182,50 @@ export const hasPreviousSibling = (element: Node) => {
     }
     return false;
 };
+
+export const getNextFileLi = (current: Element) => {
+    let nextElement = current.nextElementSibling
+    if (nextElement) {
+        if (nextElement.tagName === "LI") {
+            return nextElement
+        } else if (nextElement.tagName === "UL") {
+            return nextElement.firstElementChild
+        }
+        return false;
+    }
+    nextElement = current.parentElement
+    while (nextElement.tagName === "UL") {
+        if (!nextElement.nextElementSibling) {
+            nextElement = nextElement.parentElement
+        } else if (nextElement.nextElementSibling.tagName === "LI") {
+            return nextElement.nextElementSibling
+        } else  if (nextElement.nextElementSibling.tagName === "UL") {
+            return nextElement.nextElementSibling.firstElementChild;
+        }
+    }
+    return false;
+}
+
+export const getPreviousFileLi = (current: Element) => {
+    let previousElement = current.previousElementSibling
+    if (previousElement) {
+        if (previousElement.tagName === "LI") {
+            return previousElement
+        } else if (previousElement.tagName === "UL") {
+            return previousElement.lastElementChild
+        }
+        return false;
+    }
+    previousElement = current.parentElement
+    while (previousElement.tagName === "UL") {
+        if (!previousElement.previousElementSibling) {
+            previousElement = previousElement.parentElement
+        } else if (previousElement.previousElementSibling.tagName === "LI") {
+            return previousElement.previousElementSibling;
+        } else if (previousElement.previousElementSibling.tagName === "UL") {
+            const liElements = previousElement.previousElementSibling.querySelectorAll(".b3-list-item")
+            return liElements[liElements.length - 1];
+        }
+    }
+    return false;
+}

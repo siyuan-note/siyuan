@@ -71,6 +71,22 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.justify}
+        <div class="b3-label__text">${window.siyuan.languages.justifyTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="justify" type="checkbox"${window.siyuan.config.editor.justify ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.rtl}
+        <div class="b3-label__text">${window.siyuan.languages.rtlTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="rtl" type="checkbox"${window.siyuan.config.editor.rtl ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.editReadonly}
         <div class="b3-label__text">${window.siyuan.languages.editReadonlyTip}</div>
     </div>
@@ -273,6 +289,8 @@ export const editor = {
 
             fetchPost("/api/setting/setEditor", {
                 fullWidth: (editor.element.querySelector("#fullWidth") as HTMLInputElement).checked,
+                justify: (editor.element.querySelector("#justify") as HTMLInputElement).checked,
+                rtl: (editor.element.querySelector("#rtl") as HTMLInputElement).checked,
                 readOnly: (editor.element.querySelector("#readOnly") as HTMLInputElement).checked,
                 displayBookmarkIcon: (editor.element.querySelector("#displayBookmarkIcon") as HTMLInputElement).checked,
                 displayNetImgMark: (editor.element.querySelector("#displayNetImgMark") as HTMLInputElement).checked,

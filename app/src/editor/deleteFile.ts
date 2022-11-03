@@ -1,6 +1,9 @@
 import {fetchPost} from "../util/fetch";
-import {getDisplayName} from "../util/pathName";
+import {getDisplayName, getNotebookName} from "../util/pathName";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {hasTopClosestByTag} from "../protyle/util/hasClosest";
+import {Constants} from "../constants";
+import {showMessage} from "../dialog/message";
 
 export const deleteFile = (notebookId: string, pathString: string, name: string) => {
     if (window.siyuan.config.fileTree.removeDocWithoutConfirm) {
@@ -25,3 +28,38 @@ export const deleteFile = (notebookId: string, pathString: string, name: string)
         });
     });
 };
+
+export const deleteFiles = (liElements: Element[]) => {
+    if (liElements.length === 1) {
+        const itemTopULElement = hasTopClosestByTag(liElements[0], "UL");
+        if (itemTopULElement) {
+            const itemNotebookId = itemTopULElement.getAttribute("data-url")
+            if (liElements[0].getAttribute("data-type") === "navigation-file") {
+                deleteFile(itemNotebookId, liElements[0].getAttribute("data-path"), getDisplayName(liElements[0].getAttribute("data-name"), false, true));
+            } else {
+                confirmDialog(window.siyuan.languages.deleteOpConfirm,
+                    `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(getNotebookName(itemNotebookId))}</b>?`, () => {
+                        fetchPost("/api/notebook/removeNotebook", {
+                            notebook: itemNotebookId,
+                            callback: Constants.CB_MOUNT_REMOVE
+                        });
+                    });
+            }
+        }
+    } else {
+        const paths: string[] = []
+        liElements.forEach(item => {
+            paths.push(item.getAttribute("data-path"));
+        })
+        if (paths.includes("/")) {
+            showMessage(window.siyuan.languages.notBatchRemove);
+            return;
+        }
+        confirmDialog(window.siyuan.languages.deleteOpConfirm,
+            window.siyuan.languages.confirmRemove.replace("${count}", liElements.length), () => {
+                fetchPost("/api/notebook/removeDocs", {
+                    paths
+                });
+            });
+    }
+}

@@ -140,6 +140,10 @@
         &--full {
           max-width: none;
           flex: 1;
+
+          &.item--focus:after {
+            background-color: var(--b3-theme-primary);
+          }
         }
 
         &:hover:not(.item--focus):not(.item--readonly) .item__text {

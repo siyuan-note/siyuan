@@ -1075,8 +1075,8 @@ func filterSelfChildDocs(paths []string) (ret []string) {
 	for _, fromPath := range paths {
 		dir := strings.TrimSuffix(fromPath, ".sy")
 		existParent := false
-		for _, d := range dirs {
-			if strings.HasPrefix(d, fromPath) {
+		for d, _ := range dirs {
+			if strings.HasPrefix(fromPath, d) {
 				existParent = true
 				break
 			}
@@ -1218,12 +1218,7 @@ func RemoveDocs(paths []string) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
 
 	paths = filterSelfChildDocs(paths)
-	var ids []string
-	for _, p := range paths {
-		ids = append(ids, strings.TrimSuffix(path.Base(p), ".sy"))
-	}
-
-	pathsBoxes := getBoxesByPaths(ids)
+	pathsBoxes := getBoxesByPaths(paths)
 	WaitForWritingFiles()
 	for p, box := range pathsBoxes {
 		err = removeDoc(box, p)

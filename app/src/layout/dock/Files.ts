@@ -191,7 +191,7 @@ export class Files extends Model {
             if (ulElement) {
                 const notebookId = ulElement.getAttribute("data-url");
                 while (target && !target.isEqualNode(this.element)) {
-                    if (target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
+                    if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
                         event.preventDefault();
                         event.stopPropagation();
                         if (target.parentElement.getAttribute("data-type") === "navigation-file") {
@@ -200,14 +200,14 @@ export class Files extends Model {
                             openEmojiPanel(target.parentElement.parentElement.getAttribute("data-url"), target, true);
                         }
                         break;
-                    } else if (target.classList.contains("b3-list-item__toggle")) {
+                    } else if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__toggle")) {
                         this.getLeaf(target.parentElement, notebookId);
                         this.setCurrent(target.parentElement);
                         event.preventDefault();
                         event.stopPropagation();
                         window.siyuan.menus.menu.remove();
                         break;
-                    } else if (target.classList.contains("b3-list-item__action")) {
+                    } else if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__action")) {
                         const type = target.getAttribute("data-type");
                         const pathString = target.parentElement.getAttribute("data-path");
                         if (!window.siyuan.config.readonly) {
@@ -230,7 +230,7 @@ export class Files extends Model {
                         if (event.detail === 1) {
                             needFocus = false;
                             clickTimeout = window.setTimeout(() => {
-                                if (!window.siyuan.ctrlIsPressed) {
+                                if (!event.metaKey && !event.ctrlKey) {
                                     this.setCurrent(target, false);
                                     if (target.getAttribute("data-type") === "navigation-file") {
                                         if (window.siyuan.altIsPressed) {
@@ -254,7 +254,7 @@ export class Files extends Model {
                                     target.classList.toggle("b3-list-item--focus");
                                 }
                             }, Constants.TIMEOUT_DBLCLICK);
-                        } else if (event.detail === 2) {
+                        } else if (!event.metaKey && !event.ctrlKey && event.detail === 2) {
                             clearTimeout(clickTimeout);
                             this.getLeaf(target, notebookId);
                             this.setCurrent(target, false);

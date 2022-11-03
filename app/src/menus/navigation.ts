@@ -26,15 +26,16 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {deleteFile, deleteFiles} from "../editor/deleteFile";
 
 export const initNavigationMenu = (liElement: HTMLElement) => {
+    const fileElement = hasClosestByClassName(liElement, "sy__file")
+    if (!fileElement) {
+        return;
+    }
     if (!liElement.classList.contains("b3-list-item--focus")) {
-        const fileElement = hasClosestByClassName(liElement, "sy__file")
-        if (fileElement) {
-            fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
-                item.classList.remove("b3-list-item--focus");
-                item.removeAttribute("select-end")
-                item.removeAttribute("select-start")
-            })
-        }
+        fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
+            item.classList.remove("b3-list-item--focus");
+            item.removeAttribute("select-end")
+            item.removeAttribute("select-start")
+        })
         liElement.classList.add("b3-list-item--focus");
     }
     const notebookId = liElement.parentElement.getAttribute("data-url");
@@ -92,13 +93,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             label: window.siyuan.languages.delete,
             accelerator: "⌦",
             click: () => {
-                confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                    `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(name)}</b>?`, () => {
-                        fetchPost("/api/notebook/removeNotebook", {
-                            notebook: notebookId,
-                            callback: Constants.CB_MOUNT_REMOVE
-                        });
-                    });
+                deleteFiles(Array.from(fileElement.querySelectorAll(".b3-list-item--focus")))
             }
         }).element);
     }

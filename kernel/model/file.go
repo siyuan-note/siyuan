@@ -1241,16 +1241,17 @@ func removeDoc(box *Box, p string) (err error) {
 	}
 	indexHistoryDir(filepath.Base(historyDir), NewLute())
 
-	box.removeSort(rootID, p)
+	if existChildren {
+		ids := util.GetChildDocIDs(filepath.Join(util.DataDir, tree.Box, childrenDir))
+		removeIDs = append(removeIDs, ids...)
+		if err = box.Remove(childrenDir); nil != err {
+			return
+		}
+	}
 	if err = box.Remove(p); nil != err {
 		return
 	}
-
-	if existChildren {
-		box.Remove(childrenDir)
-		ids := util.GetChildDocIDs(filepath.Join(util.DataDir, tree.Box, childrenDir))
-		removeIDs = append(removeIDs, ids...)
-	}
+	box.removeSort(removeIDs)
 
 	treenode.RemoveBlockTreesByPathPrefix(childrenDir)
 	sql.RemoveTreePathQueue(box.ID, childrenDir)
@@ -1659,30 +1660,7 @@ func (box *Box) fillSort(files *[]*File) {
 	}
 }
 
-func (box *Box) removeSort(rootID, path string) {
-	absRoot := filepath.Join(util.DataDir, box.ID, path)
-	absRootDir := strings.TrimSuffix(absRoot, ".sy")
-	toRemoves := map[string]bool{rootID: true}
-	filepath.Walk(absRootDir, func(path string, info fs.FileInfo, err error) error {
-		if nil == info {
-			return nil
-		}
-		name := info.Name()
-		isDir := info.IsDir()
-		if util.IsReservedFilename(name) {
-			if isDir {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-
-		if !isDir && strings.HasSuffix(name, ".sy") {
-			id := strings.TrimSuffix(name, ".sy")
-			toRemoves[id] = true
-		}
-		return nil
-	})
-
+func (box *Box) removeSort(ids []string) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
 	if !gulu.File.IsExist(confPath) {
 		return
@@ -1700,7 +1678,7 @@ func (box *Box) removeSort(rootID, path string) {
 		return
 	}
 
-	for toRemove := range toRemoves {
+	for _, toRemove := range ids {
 		delete(fullSortIDs, toRemove)
 	}
 

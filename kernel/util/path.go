@@ -208,14 +208,14 @@ func GetChildDocIDs(parentDocDirAbsPath string) (ret []string) {
 		return
 	}
 
-	filepath.Walk(parentDocDirAbsPath, func(path string, info os.FileInfo, err error) error {
+	filepath.Walk(parentDocDirAbsPath, func(p string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
-		if !strings.HasSuffix(path, ".sy") {
+		if !strings.HasSuffix(p, ".sy") {
 			return nil
 		}
-		id := path[len(parentDocDirAbsPath)+1 : len(path)-3]
+		id := strings.TrimSuffix(filepath.Base(p), ".sy")
 		ret = append(ret, id)
 		return nil
 	})

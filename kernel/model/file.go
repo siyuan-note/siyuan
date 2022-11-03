@@ -1032,7 +1032,7 @@ func MoveDocs(fromPaths []string, toPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
 
 	WaitForWritingFiles()
-	fromPaths = util.FilterFromPaths(fromPaths, toPath)
+	fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
 	pathsBoxes := getBoxesByPaths(fromPaths)
 
 	toID := strings.TrimSuffix(path.Base(toPath), ".sy")

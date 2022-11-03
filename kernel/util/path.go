@@ -175,7 +175,7 @@ func NormalizeEndpoint(endpoint string) string {
 	return endpoint
 }
 
-func FilterFromPaths(fromPaths []string, toPath string) (retFromPaths []string) {
+func FilterMoveDocFromPaths(fromPaths []string, toPath string) (retFromPaths []string) {
 	fromPaths = append(fromPaths, toPath)
 	retFromPaths = FilterSelfChildDocs(fromPaths)
 	return

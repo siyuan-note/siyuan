@@ -1,6 +1,5 @@
 import {
     copySubMenu,
-    deleteMenu,
     exportMd,
     movePathToMenu,
     openFileAttr,
@@ -24,6 +23,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
 import {newFile} from "../util/newFile";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {deleteFile, deleteFiles} from "../editor/deleteFile";
 
 export const initNavigationMenu = (liElement: HTMLElement) => {
     if (!liElement.classList.contains("b3-list-item--focus")) {
@@ -148,15 +148,16 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
 };
 
 export const initFileMenu = (notebookId: string, pathString: string, liElement: Element) => {
+    const fileElement = hasClosestByClassName(liElement, "sy__file")
+    if (!fileElement) {
+        return;
+    }
     if (!liElement.classList.contains("b3-list-item--focus")) {
-        const fileElement = hasClosestByClassName(liElement, "sy__file")
-        if (fileElement) {
-            fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
-                item.classList.remove("b3-list-item--focus");
-                item.removeAttribute("select-end")
-                item.removeAttribute("select-start")
-            })
-        }
+        fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
+            item.classList.remove("b3-list-item--focus");
+            item.removeAttribute("select-end")
+            item.removeAttribute("select-start")
+        })
         liElement.classList.add("b3-list-item--focus");
     }
     const id = liElement.getAttribute("data-node-id");
@@ -213,7 +214,14 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
             }])
         }).element);
         window.siyuan.menus.menu.append(movePathToMenu(notebookId, pathString));
-        window.siyuan.menus.menu.append(deleteMenu(notebookId, name, pathString));
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconTrashcan",
+            label: window.siyuan.languages.delete,
+            accelerator: "⌦",
+            click: () => {
+                deleteFiles(Array.from(fileElement.querySelectorAll(".b3-list-item--focus")))
+            }
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(renameMenu({
             path: pathString,

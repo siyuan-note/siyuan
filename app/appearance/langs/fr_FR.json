@@ -1,4 +1,6 @@
 {
+  "notBatchRemove": "Les blocs-notes ne prennent pas en charge la suppression par lots",
+  "confirmRemove": "Êtes-vous sûr de vouloir supprimer les ${count} fichiers sélectionnés ?",
   "microphoneDenied": "Vous devez autoriser Siyuan à accéder au microphone dans les Préférences Système",
   "microphoneNotAccess": "L'accès au microphone est refusé, allez dans les Préférences Système pour réinitialiser",
   "dynamicLoadBlocks": "Nombre de blocs chargés dynamiquement",

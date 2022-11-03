@@ -1,4 +1,6 @@
 {
+  "notBatchRemove": "笔记本不支持批量删除",
+  "confirmRemove": "确定删除选中的 ${count} 个文件？",
   "microphoneDenied": "需在系统偏好设置中允许思源访问麦克风",
   "microphoneNotAccess": "麦克风被拒绝访问，可前往系统偏好设置中重新设置",
   "dynamicLoadBlocks": "动态加载块数",

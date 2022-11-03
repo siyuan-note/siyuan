@@ -778,17 +778,6 @@ export const openMenu = (src: string, onlyMenu: boolean, showAccelerator: boolea
     }).element);
 };
 
-export const deleteMenu = (notebookId: string, name: string, pathString: string) => {
-    return new MenuItem({
-        icon: "iconTrashcan",
-        label: window.siyuan.languages.delete,
-        accelerator: "⌦",
-        click: () => {
-            deleteFile(notebookId, pathString, name);
-        }
-    }).element;
-};
-
 export const renameMenu = (options: {
     path: string
     notebookId: string

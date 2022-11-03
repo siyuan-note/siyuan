@@ -35,7 +35,7 @@ import {showMessage} from "../dialog/message";
 import {openHistory} from "./history";
 import {Dialog} from "../dialog";
 import {unicode2Emoji} from "../emoji";
-import {deleteFile} from "../editor/deleteFile";
+import {deleteFile, deleteFiles} from "../editor/deleteFile";
 import {escapeHtml} from "./escape";
 import {syncGuide} from "../sync/syncGuide";
 import {showPopover} from "../block/popover";
@@ -1094,26 +1094,9 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             return true;
         }
     }
-
     if (event.key === "Delete" || (event.key === "Backspace" && isMac())) {
         window.siyuan.menus.menu.remove();
-        liElements.forEach(item => {
-            const itemTopULElement = hasTopClosestByTag(item, "UL");
-            if (itemTopULElement) {
-                const itemNotebookId = itemTopULElement.getAttribute("data-url")
-                if (item.getAttribute("data-type") === "navigation-file") {
-                    deleteFile(itemNotebookId, item.getAttribute("data-path"), getDisplayName(item.getAttribute("data-name"), false, true));
-                } else {
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                        `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(getNotebookName(itemNotebookId))}</b>?`, () => {
-                            fetchPost("/api/notebook/removeNotebook", {
-                                notebook: itemNotebookId,
-                                callback: Constants.CB_MOUNT_REMOVE
-                            });
-                        });
-                }
-            }
-        })
+        deleteFiles(liElements)
         return true;
     }
     if (event.key === "Enter") {

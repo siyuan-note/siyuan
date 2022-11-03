@@ -1028,6 +1028,68 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 	return
 }
 
+func MoveDocs(fromPaths []string, toPath string) (err error) {
+	util.PushEndlessProgress(Conf.Language(116))
+
+	fromPaths = filterFromPaths(fromPaths, toPath)
+	pathsBoxes := getBoxesByPaths(fromPaths)
+
+	toID := strings.TrimSuffix(path.Base(toPath), ".sy")
+	toBlock := treenode.GetBlockTree(toID)
+	if nil == toBlock {
+		err = ErrBlockNotFound
+		return
+	}
+
+	toBox := Conf.Box(toBlock.BoxID)
+	if nil == toBox {
+		err = errors.New(Conf.Language(0))
+		return
+	}
+
+	for fromPath, fromBox := range pathsBoxes {
+		_, err = moveDoc(fromBox, fromPath, toBox, toPath)
+		if nil != err {
+			return
+		}
+	}
+	cache.ClearDocsIAL()
+	IncSync()
+
+	util.PushEndlessProgress(Conf.Language(113))
+	sql.WaitForWritingDatabase()
+	util.ReloadUI()
+	return
+}
+
+func filterFromPaths(fromPaths []string, toPath string) (retFromPaths []string) {
+	fromPaths = append(fromPaths, toPath)
+	retFromPaths = filterSelfChildDocs(fromPaths)
+	return
+}
+
+func filterSelfChildDocs(paths []string) (ret []string) {
+	sort.Slice(paths, func(i, j int) bool { return len(paths[i]) < len(paths[j]) })
+
+	dirs := map[string]string{}
+	for _, fromPath := range paths {
+		dir := strings.TrimSuffix(fromPath, ".sy")
+		existParent := false
+		for _, d := range dirs {
+			if strings.HasPrefix(d, fromPath) {
+				existParent = true
+				break
+			}
+		}
+		if existParent {
+			continue
+		}
+		dirs[dir] = fromPath
+		ret = append(ret, fromPath)
+	}
+	return
+}
+
 func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath string, err error) {
 	isSameBox := fromBox.ID == toBox.ID
 
@@ -1133,44 +1195,6 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath 
 		moveTree(tree)
 		moveSorts(tree.ID, fromBox.ID, toBox.ID)
 	}
-
-	return
-}
-
-func MoveDocs(fromPaths []string, toPath string) (err error) {
-	util.PushEndlessProgress(Conf.Language(116))
-
-	util.PushEndlessProgress(Conf.Language(113))
-	sql.WaitForWritingDatabase()
-	util.ReloadUI()
-	return
-}
-
-func filterFromPaths(fromPaths []string, toPath string) (retFromPaths []string) {
-	fromPaths = append(fromPaths, toPath)
-	retFromPaths = filterSelfChildDocs(fromPaths)
-	return
-}
-
-func filterSelfChildDocs(paths []string) (ret []string) {
-	sort.Slice(paths, func(i, j int) bool { return len(paths[i]) < len(paths[j]) })
-
-	dirs := map[string]string{}
-	for _, fromPath := range paths {
-		dir := strings.TrimSuffix(fromPath, ".sy")
-		existParent := false
-		for _, d := range dirs {
-			if strings.HasPrefix(d, fromPath) {
-				existParent = true
-				break
-			}
-		}
-		if existParent {
-			continue
-		}
-		dirs[dir] = fromPath
-		ret = append(ret, fromPath)
-	}
 	return
 }
 
@@ -1199,9 +1223,9 @@ func RemoveDocs(paths []string) (err error) {
 		ids = append(ids, strings.TrimSuffix(path.Base(p), ".sy"))
 	}
 
-	boxes := getBoxesByPaths(ids)
+	pathsBoxes := getBoxesByPaths(ids)
 	WaitForWritingFiles()
-	for p, box := range boxes {
+	for p, box := range pathsBoxes {
 		err = removeDoc(box, p)
 		if nil != err {
 			return

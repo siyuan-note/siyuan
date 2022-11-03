@@ -49,14 +49,17 @@ export const deleteFiles = (liElements: Element[]) => {
     } else {
         const paths: string[] = []
         liElements.forEach(item => {
-            paths.push(item.getAttribute("data-path"));
+            const dataPath = item.getAttribute("data-path")
+            if(dataPath !== "/") {
+                paths.push(item.getAttribute("data-path"));
+            }
         })
-        if (paths.includes("/")) {
+        if (paths.length === 0) {
             showMessage(window.siyuan.languages.notBatchRemove);
             return;
         }
         confirmDialog(window.siyuan.languages.deleteOpConfirm,
-            window.siyuan.languages.confirmRemove.replace("${count}", liElements.length), () => {
+            window.siyuan.languages.confirmRemoveAll, () => {
                 fetchPost("/api/notebook/removeDocs", {
                     paths
                 });

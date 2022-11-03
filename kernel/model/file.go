@@ -1188,6 +1188,7 @@ func RemoveDoc(boxID, p string) (err error) {
 
 func RemoveDocs(paths []string) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
+	defer util.PushClearProgress()
 
 	paths = util.FilterSelfChildDocs(paths)
 	pathsBoxes := getBoxesByPaths(paths)
@@ -1198,10 +1199,6 @@ func RemoveDocs(paths []string) (err error) {
 			return
 		}
 	}
-
-	util.PushEndlessProgress(Conf.Language(113))
-	sql.WaitForWritingDatabase()
-	util.ReloadUI()
 	return
 }
 

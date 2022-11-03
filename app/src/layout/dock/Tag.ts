@@ -35,7 +35,7 @@ export class Tag extends Model {
                             });
                             break;
                         case "unmount":
-                        case "remove":
+                        case "removeDoc":
                         case "mount":
                             if (data.cmd !== "mount" || data.code !== 1) {
                                 this.update();

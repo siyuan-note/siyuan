@@ -148,9 +148,8 @@ export class Protyle {
                                 this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
                             }
                             break;
-                        case "remove":
-                            if (this.protyle.model && (this.protyle.notebookId === data.data.box &&
-                                (!data.data.path || this.protyle.path.indexOf(getDisplayName(data.data.path, false, true)) === 0))) {
+                        case "removeDoc":
+                            if (this.protyle.model && data.data.ids.includes(this.protyle.block.rootID)) {
                                 this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
                             }
                             break;

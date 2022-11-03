@@ -50,7 +50,7 @@ export const deleteFiles = (liElements: Element[]) => {
         const paths: string[] = []
         liElements.forEach(item => {
             const dataPath = item.getAttribute("data-path")
-            if(dataPath !== "/") {
+            if (dataPath !== "/") {
                 paths.push(item.getAttribute("data-path"));
             }
         })

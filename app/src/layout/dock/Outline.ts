@@ -61,6 +61,11 @@ export class Outline extends Model {
                                 });
                             }
                             break;
+                        case "removeDoc":
+                            if (data.data.ids.includes(this.blockId) && this.type === "local") {
+                                this.parent.parent.removeTab(this.parent.id);
+                            }
+                            break;
                     }
                 }
             }

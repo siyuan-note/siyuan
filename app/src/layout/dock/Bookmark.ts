@@ -38,7 +38,7 @@ export class Bookmark extends Model {
                             });
                             break;
                         case "unmount":
-                        case "remove":
+                        case "removeDoc":
                         case "mount":
                             if (data.cmd !== "mount" || data.code !== 1) {
                                 fetchPost("/api/bookmark/getBookmark", {}, response => {

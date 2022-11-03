@@ -38,7 +38,7 @@ export class MobileFiles extends Model {
                             this.element.insertAdjacentHTML("beforeend", this.genNotebook(data.data.box));
                             break;
                         case "unmount":
-                        case "remove":
+                        case "removeDoc":
                             this.onRemove(data);
                             break;
                         case "createdailynote":

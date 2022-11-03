@@ -310,13 +310,6 @@ func removeDoc(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-
-	evt := util.NewCmdResult("remove", 0, util.PushModeBroadcast, util.PushModeNone)
-	evt.Data = map[string]interface{}{
-		"box":  notebook,
-		"path": p,
-	}
-	util.PushEvent(evt)
 }
 
 func removeDocs(c *gin.Context) {

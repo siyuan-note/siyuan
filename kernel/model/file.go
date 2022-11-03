@@ -1227,6 +1227,8 @@ func removeDoc(box *Box, p string) (err error) {
 	copyDocAssetsToDataAssets(box.ID, p)
 
 	rootID := tree.ID
+	var removeIDs []string
+	removeIDs = append(removeIDs, rootID)
 	dir := path.Dir(p)
 	childrenDir := path.Join(dir, rootID)
 	existChildren := box.Exist(childrenDir)
@@ -1246,6 +1248,8 @@ func removeDoc(box *Box, p string) (err error) {
 
 	if existChildren {
 		box.Remove(childrenDir)
+		ids := util.GetChildDocIDs(filepath.Join(util.DataDir, tree.Box, childrenDir))
+		removeIDs = append(removeIDs, ids...)
 	}
 
 	treenode.RemoveBlockTreesByPathPrefix(childrenDir)
@@ -1259,6 +1263,12 @@ func removeDoc(box *Box, p string) (err error) {
 	}
 
 	cache.RemoveDocIAL(p)
+
+	evt := util.NewCmdResult("remove", 0, util.PushModeBroadcast, util.PushModeNone)
+	evt.Data = map[string]interface{}{
+		"ids": removeIDs,
+	}
+	util.PushEvent(evt)
 	return
 }
 

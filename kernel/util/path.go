@@ -202,3 +202,22 @@ func FilterSelfChildDocs(paths []string) (ret []string) {
 	}
 	return
 }
+
+func GetChildDocIDs(parentDocDirAbsPath string) (ret []string) {
+	if !gulu.File.IsDir(parentDocDirAbsPath) {
+		return
+	}
+
+	filepath.Walk(parentDocDirAbsPath, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		if !strings.HasSuffix(path, ".sy") {
+			return nil
+		}
+		id := path[len(parentDocDirAbsPath)+1 : len(path)-3]
+		ret = append(ret, id)
+		return nil
+	})
+	return
+}

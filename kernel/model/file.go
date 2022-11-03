@@ -1226,11 +1226,12 @@ func removeDoc(box *Box, p string) (err error) {
 
 	copyDocAssetsToDataAssets(box.ID, p)
 
-	rootID := tree.ID
 	var removeIDs []string
-	removeIDs = append(removeIDs, rootID)
+	ids := rootChildIDs(tree.ID)
+	removeIDs = append(removeIDs, ids...)
+
 	dir := path.Dir(p)
-	childrenDir := path.Join(dir, rootID)
+	childrenDir := path.Join(dir, tree.ID)
 	existChildren := box.Exist(childrenDir)
 	if existChildren {
 		absChildrenDir := filepath.Join(util.DataDir, tree.Box, childrenDir)
@@ -1242,8 +1243,6 @@ func removeDoc(box *Box, p string) (err error) {
 	indexHistoryDir(filepath.Base(historyDir), NewLute())
 
 	if existChildren {
-		ids := util.GetChildDocIDs(filepath.Join(util.DataDir, tree.Box, childrenDir))
-		removeIDs = append(removeIDs, ids...)
 		if err = box.Remove(childrenDir); nil != err {
 			return
 		}

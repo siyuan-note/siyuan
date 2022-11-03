@@ -267,6 +267,31 @@ func moveDoc(c *gin.Context) {
 	util.PushEvent(evt)
 }
 
+func moveDocs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var fromPaths []string
+	fromPathsArg := arg["fromPaths"].([]interface{})
+	for _, fromPath := range fromPathsArg {
+		fromPaths = append(fromPaths, fromPath.(string))
+	}
+	toPath := arg["toPath"].(string)
+
+	err := model.MoveDocs(fromPaths, toPath)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+}
+
 func removeDoc(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -292,6 +317,28 @@ func removeDoc(c *gin.Context) {
 		"path": p,
 	}
 	util.PushEvent(evt)
+}
+
+func removeDocs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	pathsArg := arg["paths"].([]interface{})
+	var paths []string
+	for _, path := range pathsArg {
+		paths = append(paths, path.(string))
+	}
+	err := model.RemoveDocs(paths)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 }
 
 func renameDoc(c *gin.Context) {

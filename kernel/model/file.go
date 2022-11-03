@@ -988,6 +988,8 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 }
 
 func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err error) {
+	WaitForWritingFiles()
+
 	if fromBoxID == toBoxID && fromPath == toPath {
 		return
 	}
@@ -1004,13 +1006,6 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 		return
 	}
 
-	WaitForWritingFiles()
-	tree, err := LoadTree(fromBoxID, fromPath)
-	if nil != err {
-		err = ErrBlockNotFound
-		return
-	}
-
 	childDepth := util.GetChildDocDepth(filepath.Join(util.DataDir, fromBoxID, fromPath))
 	if depth := strings.Count(toPath, "/") + childDepth; 6 < depth && !Conf.FileTree.AllowCreateDeeper {
 		err = errors.New(Conf.Language(118))
@@ -1022,7 +1017,81 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 		err = errors.New(Conf.Language(0))
 		return
 	}
-	isSameBox := fromBoxID == toBoxID
+
+	newPath, err = moveDoc(fromBox, fromPath, toBox, toPath)
+	if nil != err {
+		return
+	}
+
+	cache.ClearDocsIAL()
+	IncSync()
+	return
+}
+
+func MoveDocs(fromPaths []string, toPath string) (err error) {
+	util.PushEndlessProgress(Conf.Language(116))
+
+	fromPaths = filterFromPaths(fromPaths, toPath)
+	pathsBoxes := getBoxesByPaths(fromPaths)
+
+	toID := strings.TrimSuffix(path.Base(toPath), ".sy")
+	toBlock := treenode.GetBlockTree(toID)
+	if nil == toBlock {
+		err = ErrBlockNotFound
+		return
+	}
+
+	toBox := Conf.Box(toBlock.BoxID)
+	if nil == toBox {
+		err = errors.New(Conf.Language(0))
+		return
+	}
+
+	for fromPath, fromBox := range pathsBoxes {
+		_, err = moveDoc(fromBox, fromPath, toBox, toPath)
+		if nil != err {
+			return
+		}
+	}
+	cache.ClearDocsIAL()
+	IncSync()
+
+	util.PushEndlessProgress(Conf.Language(113))
+	sql.WaitForWritingDatabase()
+	util.ReloadUI()
+	return
+}
+
+func filterFromPaths(fromPaths []string, toPath string) (retFromPaths []string) {
+	fromPaths = append(fromPaths, toPath)
+	retFromPaths = filterSelfChildDocs(fromPaths)
+	return
+}
+
+func filterSelfChildDocs(paths []string) (ret []string) {
+	sort.Slice(paths, func(i, j int) bool { return len(paths[i]) < len(paths[j]) })
+
+	dirs := map[string]string{}
+	for _, fromPath := range paths {
+		dir := strings.TrimSuffix(fromPath, ".sy")
+		existParent := false
+		for _, d := range dirs {
+			if strings.HasPrefix(d, fromPath) {
+				existParent = true
+				break
+			}
+		}
+		if existParent {
+			continue
+		}
+		dirs[dir] = fromPath
+		ret = append(ret, fromPath)
+	}
+	return
+}
+
+func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath string, err error) {
+	isSameBox := fromBox.ID == toBox.ID
 
 	if isSameBox {
 		if !fromBox.Exist(toPath) {
@@ -1036,6 +1105,12 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 		}
 	}
 
+	tree, err := LoadTree(fromBox.ID, fromPath)
+	if nil != err {
+		err = ErrBlockNotFound
+		return
+	}
+
 	moveToRoot := "/" == toPath
 	toBlockID := tree.ID
 	fromFolder := path.Join(path.Dir(fromPath), tree.ID)
@@ -1043,9 +1118,9 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 	if !moveToRoot {
 		var toTree *parse.Tree
 		if isSameBox {
-			toTree, err = LoadTree(fromBoxID, toPath)
+			toTree, err = LoadTree(fromBox.ID, toPath)
 		} else {
-			toTree, err = LoadTree(toBoxID, toPath)
+			toTree, err = LoadTree(toBox.ID, toPath)
 		}
 		if nil != err {
 			err = ErrBlockNotFound
@@ -1075,14 +1150,14 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 				return
 			}
 		} else {
-			absFromPath := filepath.Join(util.DataDir, fromBoxID, fromFolder)
-			absToPath := filepath.Join(util.DataDir, toBoxID, newFolder)
+			absFromPath := filepath.Join(util.DataDir, fromBox.ID, fromFolder)
+			absToPath := filepath.Join(util.DataDir, toBox.ID, newFolder)
 			if gulu.File.IsExist(absToPath) {
 				filelock.Remove(absToPath)
 			}
 			if err = filelock.Move(absFromPath, absToPath); nil != err {
 				msg := fmt.Sprintf(Conf.Language(5), fromBox.Name, fromPath, err)
-				logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBoxID, err)
+				logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBox.ID, err)
 				err = errors.New(msg)
 				return
 			}
@@ -1096,32 +1171,30 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 			return
 		}
 
-		tree, err = LoadTree(fromBoxID, newPath)
+		tree, err = LoadTree(fromBox.ID, newPath)
 		if nil != err {
 			return
 		}
 
 		moveTree(tree)
 	} else {
-		absFromPath := filepath.Join(util.DataDir, fromBoxID, fromPath)
-		absToPath := filepath.Join(util.DataDir, toBoxID, newPath)
+		absFromPath := filepath.Join(util.DataDir, fromBox.ID, fromPath)
+		absToPath := filepath.Join(util.DataDir, toBox.ID, newPath)
 		if err = filelock.Move(absFromPath, absToPath); nil != err {
 			msg := fmt.Sprintf(Conf.Language(5), fromBox.Name, fromPath, err)
-			logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBoxID, err)
+			logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBox.ID, err)
 			err = errors.New(msg)
 			return
 		}
 
-		tree, err = LoadTree(toBoxID, newPath)
+		tree, err = LoadTree(toBox.ID, newPath)
 		if nil != err {
 			return
 		}
 
 		moveTree(tree)
-		moveSorts(tree.ID, fromBoxID, toBoxID)
+		moveSorts(tree.ID, fromBox.ID, toBox.ID)
 	}
-	cache.ClearDocsIAL()
-	IncSync()
 	return
 }
 
@@ -1133,7 +1206,40 @@ func RemoveDoc(boxID, p string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	tree, err := LoadTree(boxID, p)
+	err = removeDoc(box, p)
+	if nil != err {
+		return
+	}
+	IncSync()
+	return
+}
+
+func RemoveDocs(paths []string) (err error) {
+	util.PushEndlessProgress(Conf.Language(116))
+
+	paths = filterSelfChildDocs(paths)
+	var ids []string
+	for _, p := range paths {
+		ids = append(ids, strings.TrimSuffix(path.Base(p), ".sy"))
+	}
+
+	pathsBoxes := getBoxesByPaths(ids)
+	WaitForWritingFiles()
+	for p, box := range pathsBoxes {
+		err = removeDoc(box, p)
+		if nil != err {
+			return
+		}
+	}
+
+	util.PushEndlessProgress(Conf.Language(113))
+	sql.WaitForWritingDatabase()
+	util.ReloadUI()
+	return
+}
+
+func removeDoc(box *Box, p string) (err error) {
+	tree, err := LoadTree(box.ID, p)
 	if nil != err {
 		return
 	}
@@ -1144,13 +1250,13 @@ func RemoveDoc(boxID, p string) (err error) {
 		return
 	}
 
-	historyPath := filepath.Join(historyDir, boxID, p)
-	absPath := filepath.Join(util.DataDir, boxID, p)
+	historyPath := filepath.Join(historyDir, box.ID, p)
+	absPath := filepath.Join(util.DataDir, box.ID, p)
 	if err = filelock.Copy(absPath, historyPath); nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(70), box.Name, absPath, err))
 	}
 
-	copyDocAssetsToDataAssets(boxID, p)
+	copyDocAssetsToDataAssets(box.ID, p)
 
 	rootID := tree.ID
 	dir := path.Dir(p)
@@ -1178,7 +1284,7 @@ func RemoveDoc(boxID, p string) (err error) {
 	sql.RemoveTreePathQueue(box.ID, childrenDir)
 
 	if "/" != dir {
-		others, err := os.ReadDir(filepath.Join(util.DataDir, boxID, dir))
+		others, err := os.ReadDir(filepath.Join(util.DataDir, box.ID, dir))
 		if nil == err && 1 > len(others) {
 			box.Remove(dir)
 		}

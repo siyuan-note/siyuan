@@ -282,7 +282,7 @@ export class Title {
                 submenu: copySubMenu(protyle.block.rootID)
             }).element);
             if (!protyle.disabled) {
-                window.siyuan.menus.menu.append(movePathToMenu(protyle.notebookId, protyle.path));
+                window.siyuan.menus.menu.append(movePathToMenu([protyle.path]));
                 window.siyuan.menus.menu.append(new MenuItem({
                     icon: "iconTrashcan",
                     label: window.siyuan.languages.delete,

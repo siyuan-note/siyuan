@@ -22,8 +22,7 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "./fetch";
 import {goBack, goForward} from "./backForward";
 import {onGet} from "../protyle/util/onGet";
-import {getDisplayName, getNotebookName, movePathTo} from "./pathName";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {getDisplayName, getNotebookName, getTopPaths, movePathTo} from "./pathName";
 import {openFileById} from "../editor/util";
 import {getAllDocks, getAllModels, getAllTabs} from "../layout/getAll";
 import {openGlobalSearch} from "../search/util";
@@ -35,7 +34,7 @@ import {showMessage} from "../dialog/message";
 import {openHistory} from "./history";
 import {Dialog} from "../dialog";
 import {unicode2Emoji} from "../emoji";
-import {deleteFile, deleteFiles} from "../editor/deleteFile";
+import {deleteFiles} from "../editor/deleteFile";
 import {escapeHtml} from "./escape";
 import {syncGuide} from "../sync/syncGuide";
 import {showPopover} from "../block/popover";
@@ -797,7 +796,7 @@ const editKeydown = (event: KeyboardEvent) => {
         if (nodeElement && range && protyle.element.contains(range.startContainer)) {
             protyle.toolbar.showFile(protyle, [nodeElement], range);
         } else {
-            movePathTo(protyle.notebookId, protyle.path);
+            movePathTo([protyle.path]);
         }
         event.preventDefault();
         event.stopPropagation();
@@ -911,7 +910,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     }
     if (isFile && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
         window.siyuan.menus.menu.remove();
-        movePathTo(notebookId, pathString, false);
+        movePathTo(getTopPaths(liElements), false);
         event.preventDefault();
         event.stopPropagation();
         return true;

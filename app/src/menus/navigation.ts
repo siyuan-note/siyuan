@@ -11,7 +11,7 @@ import {dialog as remoteDialog} from "@electron/remote";
 import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
-import {getDisplayName, getNotebookName, pathPosix} from "../util/pathName";
+import {getDisplayName, getNotebookName, getTopPaths, pathPosix} from "../util/pathName";
 import {hideMessage, showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {onGetnotebookconf} from "./onGetnotebookconf";
@@ -208,7 +208,9 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                 }
             }])
         }).element);
-        window.siyuan.menus.menu.append(movePathToMenu(notebookId, pathString));
+        window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(
+            Array.from(fileElement.querySelectorAll(".b3-list-item--focus"))
+        )));
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,

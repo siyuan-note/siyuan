@@ -793,13 +793,13 @@ export const renameMenu = (options: {
     }).element;
 };
 
-export const movePathToMenu = (notebookId: string, path: string) => {
+export const movePathToMenu = (paths: string[]) => {
     return new MenuItem({
         label: window.siyuan.languages.move,
         icon: "iconMove",
         accelerator: window.siyuan.config.keymap.general.move.custom,
         click() {
-            movePathTo(notebookId, path);
+            movePathTo(paths);
         }
     }).element;
 };

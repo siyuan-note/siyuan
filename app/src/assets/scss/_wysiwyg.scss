@@ -149,6 +149,10 @@
         .sb {
           margin: 0;
         }
+
+        & > div .protyle-attr--refcount {
+          position: initial;
+        }
       }
     }
 

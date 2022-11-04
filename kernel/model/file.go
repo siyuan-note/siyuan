@@ -1005,47 +1005,6 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 	return
 }
 
-func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err error) {
-	WaitForWritingFiles()
-
-	if fromBoxID == toBoxID && fromPath == toPath {
-		return
-	}
-
-	fromDir := strings.TrimSuffix(fromPath, ".sy")
-	if strings.HasPrefix(toPath, fromDir) {
-		err = errors.New(Conf.Language(87))
-		return
-	}
-
-	fromBox := Conf.Box(fromBoxID)
-	if nil == fromBox {
-		err = errors.New(Conf.Language(0))
-		return
-	}
-
-	childDepth := util.GetChildDocDepth(filepath.Join(util.DataDir, fromBoxID, fromPath))
-	if depth := strings.Count(toPath, "/") + childDepth; 6 < depth && !Conf.FileTree.AllowCreateDeeper {
-		err = errors.New(Conf.Language(118))
-		return
-	}
-
-	toBox := Conf.Box(toBoxID)
-	if nil == toBox {
-		err = errors.New(Conf.Language(0))
-		return
-	}
-
-	newPath, err = moveDoc(fromBox, fromPath, toBox, toPath)
-	if nil != err {
-		return
-	}
-
-	cache.ClearDocsIAL()
-	IncSync()
-	return
-}
-
 func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
 	toBox := Conf.Box(toBoxID)
 	if nil == toBox {
@@ -1060,6 +1019,16 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
 		fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
 	}
 	pathsBoxes := getBoxesByPaths(fromPaths)
+
+	// 检查路径深度是否超过限制
+	for fromPath, fromBox := range pathsBoxes {
+		childDepth := util.GetChildDocDepth(filepath.Join(util.DataDir, fromBox.ID, fromPath))
+		if depth := strings.Count(toPath, "/") + childDepth; 6 < depth && !Conf.FileTree.AllowCreateDeeper {
+			err = errors.New(Conf.Language(118))
+			return
+		}
+	}
+
 	needShowProgress := 32 < len(fromPaths)
 	if needShowProgress {
 		util.PushEndlessProgress(Conf.Language(116))

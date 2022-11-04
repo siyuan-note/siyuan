@@ -46,6 +46,18 @@ type BlockTree struct {
 	HPath    string // 文档逻辑路径
 }
 
+func GetBlockTreeByPath(path string) *BlockTree {
+	blockTreesLock.Lock()
+	defer blockTreesLock.Unlock()
+
+	for _, b := range blockTrees {
+		if b.Path == path {
+			return b
+		}
+	}
+	return nil
+}
+
 func CountTrees() (ret int) {
 	roots := map[string]bool{}
 	for _, b := range blockTrees {

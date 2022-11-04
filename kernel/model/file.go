@@ -962,6 +962,25 @@ func GetHPathByPath(boxID, p string) (hPath string, err error) {
 	return
 }
 
+func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
+	pathsBoxes := getBoxesByPaths(paths)
+	for p, box := range pathsBoxes {
+		if nil == box {
+			logging.LogWarnf("box not found by path [%s]", p)
+			continue
+		}
+
+		bt := treenode.GetBlockTreeByPath(p)
+		if nil == bt {
+			logging.LogWarnf("block tree not found by path [%s]", p)
+			continue
+		}
+
+		hPaths = append(hPaths, box.Name+bt.HPath)
+	}
+	return
+}
+
 func GetHPathByID(id string) (hPath string, err error) {
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {

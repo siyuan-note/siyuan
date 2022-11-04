@@ -193,6 +193,29 @@ func getHPathByPath(c *gin.Context) {
 	ret.Data = hPath
 }
 
+func getHPathsByPaths(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	pathsArg := arg["paths"].([]interface{})
+	var paths []string
+	for _, p := range pathsArg {
+		paths = append(paths, p.(string))
+	}
+	hPath, err := model.GetHPathsByPaths(paths)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = hPath
+}
+
 func getHPathByID(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

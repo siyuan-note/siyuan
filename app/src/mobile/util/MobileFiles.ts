@@ -713,8 +713,7 @@ export class MobileFiles extends Model {
         if (item.count && item.count > 0) {
             countHTML = `<span class="counter">${item.count}</span>`;
         }
-        return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" 
-data-type="navigation-file" 
+        return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" data-type="navigation-file" 
 class="b3-list-item" data-path="${item.path}">
     <span style="padding-left: ${(item.path.split("/").length - 2) * 18 + 22}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>

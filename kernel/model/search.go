@@ -207,6 +207,17 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))
 				}
 			case ast.NodeTextMark:
+				if n.IsTextMarkType("code") {
+					escapedKey := html.EscapeString(keyword)
+					if strings.Contains(n.TextMarkTextContent, escapedKey) {
+						n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, replacement)
+					}
+				} else {
+					if bytes.Contains(n.Tokens, []byte(keyword)) {
+						n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+					}
+				}
+
 				if strings.Contains(n.TextMarkTextContent, keyword) {
 					n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
 				}

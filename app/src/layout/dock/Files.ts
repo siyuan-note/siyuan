@@ -408,7 +408,7 @@ export class Files extends Model {
                 fromPaths.push(item.getAttribute("data-path"))
             })
             if (newElement.classList.contains("dragover")) {
-                await fetchPost("/api/filetree/moveDoc", {
+                await fetchPost("/api/filetree/moveDocs", {
                     fromPaths,
                     toPath,
                 });

@@ -1028,12 +1028,6 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 }
 
 func MoveDocs(fromPaths []string, toPath string) (err error) {
-	util.PushEndlessProgress(Conf.Language(116))
-
-	WaitForWritingFiles()
-	fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
-	pathsBoxes := getBoxesByPaths(fromPaths)
-
 	toID := strings.TrimSuffix(path.Base(toPath), ".sy")
 	toBlock := treenode.GetBlockTree(toID)
 	if nil == toBlock {
@@ -1047,6 +1041,14 @@ func MoveDocs(fromPaths []string, toPath string) (err error) {
 		return
 	}
 
+	fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
+	pathsBoxes := getBoxesByPaths(fromPaths)
+	needShowProgress := 32 < len(fromPaths)
+	if needShowProgress {
+		util.PushEndlessProgress(Conf.Language(116))
+	}
+
+	WaitForWritingFiles()
 	for fromPath, fromBox := range pathsBoxes {
 		_, err = moveDoc(fromBox, fromPath, toBox, toPath)
 		if nil != err {
@@ -1056,9 +1058,11 @@ func MoveDocs(fromPaths []string, toPath string) (err error) {
 	cache.ClearDocsIAL()
 	IncSync()
 
-	util.PushEndlessProgress(Conf.Language(113))
-	sql.WaitForWritingDatabase()
-	util.ReloadUI()
+	if needShowProgress {
+		util.PushEndlessProgress(Conf.Language(113))
+		sql.WaitForWritingDatabase()
+		util.ReloadUI()
+	}
 	return
 }
 
@@ -1167,6 +1171,16 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath 
 		moveTree(tree)
 		moveSorts(tree.ID, fromBox.ID, toBox.ID)
 	}
+
+	evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast, util.PushModeNone)
+	evt.Data = map[string]interface{}{
+		"fromNotebook": fromBox.ID,
+		"fromPath":     fromPath,
+		"toNotebook":   toBox.ID,
+		"toPath":       toPath,
+		"newPath":      newPath,
+	}
+	util.PushEvent(evt)
 	return
 }
 

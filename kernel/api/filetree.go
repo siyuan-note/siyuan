@@ -257,39 +257,6 @@ func getFullHPathByID(c *gin.Context) {
 	ret.Data = hPath
 }
 
-func moveDoc(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	fromNotebook := arg["fromNotebook"].(string)
-	toNotebook := arg["toNotebook"].(string)
-	fromPath := arg["fromPath"].(string)
-	toPath := arg["toPath"].(string)
-
-	newPath, err := model.MoveDoc(fromNotebook, fromPath, toNotebook, toPath)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
-		return
-	}
-
-	evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast, util.PushModeNone)
-	evt.Data = map[string]interface{}{
-		"fromNotebook": fromNotebook,
-		"toNotebook":   toNotebook,
-		"fromPath":     fromPath,
-		"toPath":       toPath,
-		"newPath":      newPath,
-	}
-	util.PushEvent(evt)
-}
-
 func moveDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -1,6 +1,5 @@
 import {Tab} from "../Tab";
 import {Model} from "../Model";
-import {getDisplayName} from "../../util/pathName";
 import {Tree} from "../../util/Tree";
 import {getDockByType, setPanelFocus} from "../util";
 import {fetchPost} from "../../util/fetch";

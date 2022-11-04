@@ -60,22 +60,22 @@ export const pathPosix = () => {
 };
 
 export const getTopPaths = (liElements:Element[]) => {
-    const fromPaths:string[] = []
+    const fromPaths:string[] = [];
     liElements.forEach((item: HTMLElement) => {
         if (item.getAttribute("data-type") !== "navigation-root") {
-            const dataPath = item.getAttribute("data-path")
+            const dataPath = item.getAttribute("data-path");
             const isChild = fromPaths.find(item => {
                 if (dataPath.startsWith(item.replace(".sy", ""))) {
                     return true;
                 }
-            })
+            });
             if (!isChild) {
-                fromPaths.push(dataPath)
+                fromPaths.push(dataPath);
             }
         }
     });
-    return fromPaths
-}
+    return fromPaths;
+};
 
 const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string, dialog: Dialog) => {
     fetchPost("/api/filetree/moveDocs", {

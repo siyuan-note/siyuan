@@ -866,7 +866,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     if (!files.element.parentElement.classList.contains("layout__tab--active")) {
         return false;
     }
-    const liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"))
+    const liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"));
     if (liElements.length === 0) {
         if (event.key.startsWith("Arrow")) {
             const liElement = files.element.querySelector(".b3-list-item");
@@ -1002,9 +1002,9 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             files.getLeaf(liElements[0], notebookId);
             liElements.forEach((item, index) => {
                 if (index !== 0) {
-                    item.classList.remove("b3-list-item--focus")
+                    item.classList.remove("b3-list-item--focus");
                 }
-            })
+            });
             event.preventDefault();
             return true;
         }
@@ -1015,8 +1015,8 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
                     parentElement = files.element.querySelector(".b3-list-item");
                 }
                 liElements.forEach((item) => {
-                    item.classList.remove("b3-list-item--focus")
-                })
+                    item.classList.remove("b3-list-item--focus");
+                });
                 parentElement.classList.add("b3-list-item--focus");
                 const parentRect = parentElement.getBoundingClientRect();
                 const fileRect = files.element.getBoundingClientRect();
@@ -1047,8 +1047,8 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             }
             if (nextElement.classList.contains("b3-list-item")) {
                 liElements.forEach((item) => {
-                    item.classList.remove("b3-list-item--focus")
-                })
+                    item.classList.remove("b3-list-item--focus");
+                });
                 nextElement.classList.add("b3-list-item--focus");
                 const nextRect = nextElement.getBoundingClientRect();
                 const fileRect = files.element.getBoundingClientRect();
@@ -1080,8 +1080,8 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             }
             if (previousElement.classList.contains("b3-list-item")) {
                 liElements.forEach((item) => {
-                    item.classList.remove("b3-list-item--focus")
-                })
+                    item.classList.remove("b3-list-item--focus");
+                });
                 previousElement.classList.add("b3-list-item--focus");
                 const previousRect = previousElement.getBoundingClientRect();
                 const fileRect = files.element.getBoundingClientRect();
@@ -1095,7 +1095,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     }
     if (event.key === "Delete" || (event.key === "Backspace" && isMac())) {
         window.siyuan.menus.menu.remove();
-        deleteFiles(liElements)
+        deleteFiles(liElements);
         return true;
     }
     if (event.key === "Enter") {
@@ -1109,7 +1109,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
                     files.getLeaf(item, itemTopULElement.getAttribute("data-url"));
                 }
             }
-        })
+        });
         return true;
     }
 };

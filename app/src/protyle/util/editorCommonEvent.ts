@@ -644,7 +644,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             && targetElement && !protyle.options.backlinkData) {
             // 文件树拖拽
             const scrollTop = protyle.contentElement.scrollTop;
-            const ids =  event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",")
+            const ids =  event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",");
             for (let i = 0; i < ids.length; i++) {
                 if (ids[i]) {
                     const response = await fetchSyncPost("/api/filetree/doc2Heading", {

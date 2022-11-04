@@ -33,7 +33,7 @@ export const deleteFiles = (liElements: Element[]) => {
     if (liElements.length === 1) {
         const itemTopULElement = hasTopClosestByTag(liElements[0], "UL");
         if (itemTopULElement) {
-            const itemNotebookId = itemTopULElement.getAttribute("data-url")
+            const itemNotebookId = itemTopULElement.getAttribute("data-url");
             if (liElements[0].getAttribute("data-type") === "navigation-file") {
                 deleteFile(itemNotebookId, liElements[0].getAttribute("data-path"), getDisplayName(liElements[0].getAttribute("data-name"), false, true));
             } else {
@@ -47,13 +47,13 @@ export const deleteFiles = (liElements: Element[]) => {
             }
         }
     } else {
-        const paths: string[] = []
+        const paths: string[] = [];
         liElements.forEach(item => {
-            const dataPath = item.getAttribute("data-path")
+            const dataPath = item.getAttribute("data-path");
             if (dataPath !== "/") {
                 paths.push(item.getAttribute("data-path"));
             }
-        })
+        });
         if (paths.length === 0) {
             showMessage(window.siyuan.languages.notBatchRemove);
             return;
@@ -65,4 +65,4 @@ export const deleteFiles = (liElements: Element[]) => {
                 });
             });
     }
-}
+};

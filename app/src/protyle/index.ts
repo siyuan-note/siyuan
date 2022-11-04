@@ -22,7 +22,6 @@ import {updatePanelByEditor} from "../editor/util";
 import {setPanelFocus} from "../layout/util";
 /// #endif
 import {Background} from "./header/Background";
-import {getDisplayName} from "../util/pathName";
 import {onGet} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";

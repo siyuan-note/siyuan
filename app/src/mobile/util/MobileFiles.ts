@@ -10,7 +10,6 @@ import {genUUID} from "../../util/genID";
 import {openMobileFileById} from "../editor";
 import {unicode2Emoji} from "../../emoji";
 import {newNotebook} from "../../util/mount";
-import {setEmpty} from "./setEmpty";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {MenuItem} from "../../menus/Menu";
 import {newFile} from "../../util/newFile";
@@ -525,7 +524,7 @@ export class MobileFiles extends Model {
                     targetElement.remove();
                 }
             }
-        })
+        });
     }
 
     public onRename(data: { path: string, title: string, box: string }) {

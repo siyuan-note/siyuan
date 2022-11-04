@@ -6,7 +6,6 @@ import { flowchartRender } from "./markdown/flowchartRender";
 import { chartRender } from "./markdown/chartRender";
 import { abcRender } from "./markdown/abcRender";
 import { mindmapRender } from "./markdown/mindmapRender";
-import { mediaRender } from "./markdown/mediaRender";
 import { plantumlRender } from "./markdown/plantumlRender";
 import "../assets/scss/export.scss";
 
@@ -30,8 +29,6 @@ class Protyle {
     public static mindmapRender = mindmapRender;
     /** UML 渲染 */
     public static plantumlRender = plantumlRender;
-    /** 为[特定链接](https://github.com/Vanessa219/vditor/issues/7)分别渲染为视频、音频、嵌入的 iframe */
-    public static mediaRender = mediaRender;
 }
 
 export default Protyle;

@@ -1027,21 +1027,19 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 	return
 }
 
-func MoveDocs(fromPaths []string, toPath string) (err error) {
-	toID := strings.TrimSuffix(path.Base(toPath), ".sy")
-	toBlock := treenode.GetBlockTree(toID)
-	if nil == toBlock {
-		err = ErrBlockNotFound
-		return
-	}
-
-	toBox := Conf.Box(toBlock.BoxID)
+func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
+	toBox := Conf.Box(toBoxID)
 	if nil == toBox {
 		err = errors.New(Conf.Language(0))
 		return
 	}
 
-	fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
+	if "/" == toPath {
+		// 移动到根目录下时不需要根据目标路径去重，所以这里传入一个不可能存在的随机笔记本名称
+		fromPaths = util.FilterMoveDocFromPaths(fromPaths, ast.NewNodeID())
+	} else {
+		fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
+	}
 	pathsBoxes := getBoxesByPaths(fromPaths)
 	needShowProgress := 32 < len(fromPaths)
 	if needShowProgress {

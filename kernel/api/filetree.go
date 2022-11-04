@@ -282,8 +282,9 @@ func moveDocs(c *gin.Context) {
 		fromPaths = append(fromPaths, fromPath.(string))
 	}
 	toPath := arg["toPath"].(string)
+	toNotebook := arg["toNotebook"].(string)
 
-	err := model.MoveDocs(fromPaths, toPath)
+	err := model.MoveDocs(fromPaths, toNotebook, toPath)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

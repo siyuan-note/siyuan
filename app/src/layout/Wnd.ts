@@ -135,8 +135,7 @@ export class Wnd {
                 it.style.opacity = ".1";
                 return;
             }
-            if (!event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB) ||
-                (!window.siyuan.dragElement && event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB))) {
+            if (!event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB) || !window.siyuan.dragElement) {
                 return;
             }
             event.preventDefault();

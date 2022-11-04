@@ -583,7 +583,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         const targetElement = editorElement.querySelector(".dragover__bottom") || editorElement.querySelector(".dragover__top") || editorElement.querySelector(".dragover__left") || editorElement.querySelector(".dragover__right");
         if (window.siyuan.dragElement && (
-            window.siyuan.dragElement.parentElement.classList.contains("protyle-gutters") ||
+            window.siyuan.dragElement.parentElement?.classList.contains("protyle-gutters") ||
             window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem")) {
             // gutter 或反链面板拖拽
             const sourceElements: Element[] = [];
@@ -640,34 +640,38 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                 }
             }
-        } else if (window.siyuan.dragElement && window.siyuan.dragElement.getAttribute("data-type") === "navigation-file"
+        } else if (event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE)?.split("-").length > 1
             && targetElement && !protyle.options.backlinkData) {
             // 文件树拖拽
-            fetchPost("/api/filetree/doc2Heading", {
-                srcID: window.siyuan.dragElement.getAttribute("data-node-id"),
-                after: targetElement.classList.contains("dragover__bottom"),
-                targetID: targetElement.getAttribute("data-node-id"),
-            }, response => {
-                const scrollTop = protyle.contentElement.scrollTop;
-                fetchPost("/api/filetree/removeDoc", {
-                    notebook: response.data.srcTreeBox,
-                    path: response.data.srcTreePath,
-                });
-                fetchPost("/api/filetree/getDoc", {
-                    id: protyle.block.id,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    onGet(getResponse, protyle);
-                    /// #if !MOBILE
-                    // 文档标题互转后，需更新大纲
-                    updatePanelByEditor(protyle, false, false, true);
-                    /// #endif
-                    // 文档标题互转后，编辑区会跳转到开头 https://github.com/siyuan-note/siyuan/issues/2939
-                    setTimeout(() => {
-                        protyle.contentElement.scrollTop = scrollTop;
-                        protyle.scroll.lastScrollTop = scrollTop - 1;
-                    }, Constants.TIMEOUT_BLOCKLOAD);
-                });
+            const scrollTop = protyle.contentElement.scrollTop;
+            const ids =  event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",")
+            for (let i = 0; i < ids.length; i++) {
+                if (ids[i]) {
+                    const response = await fetchSyncPost("/api/filetree/doc2Heading", {
+                        srcID: ids[i],
+                        after: targetElement.classList.contains("dragover__bottom"),
+                        targetID: targetElement.getAttribute("data-node-id"),
+                    });
+                    fetchPost("/api/filetree/removeDoc", {
+                        notebook: response.data.srcTreeBox,
+                        path: response.data.srcTreePath,
+                    });
+                }
+            }
+            fetchPost("/api/filetree/getDoc", {
+                id: protyle.block.id,
+                size: window.siyuan.config.editor.dynamicLoadBlocks,
+            }, getResponse => {
+                onGet(getResponse, protyle);
+                /// #if !MOBILE
+                // 文档标题互转后，需更新大纲
+                updatePanelByEditor(protyle, false, false, true);
+                /// #endif
+                // 文档标题互转后，编辑区会跳转到开头 https://github.com/siyuan-note/siyuan/issues/2939
+                setTimeout(() => {
+                    protyle.contentElement.scrollTop = scrollTop;
+                    protyle.scroll.lastScrollTop = scrollTop - 1;
+                }, Constants.TIMEOUT_BLOCKLOAD);
             });
             targetElement.classList.remove("dragover__bottom", "dragover__top");
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
@@ -715,12 +719,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!targetElement) {
             return;
         }
+        const fileTreeIds = window.siyuan.dragElement.innerText;
         if (targetElement && dragoverElement && targetElement.isSameNode(dragoverElement)) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
             targetElement.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
 
-            if (targetElement.getAttribute("data-type") === "NodeListItem" || window.siyuan.dragElement.getAttribute("data-type") === "navigation-file") {
+            if (targetElement.getAttribute("data-type") === "NodeListItem" || fileTreeIds.indexOf("-") > -1) {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
                     targetElement.classList.add("dragover__bottom", "protyle-wysiwyg--select");
                 } else {
@@ -742,12 +747,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             return;
         }
-        if (window.siyuan.dragElement.getAttribute("data-type") === "navigation-file" && window.siyuan.dragElement.getAttribute("data-node-id") !== protyle.block.rootID) {
+        if (fileTreeIds.indexOf("-") > -1 && !fileTreeIds.split(",").includes(protyle.block.rootID)) {
             dragoverElement = targetElement;
             return;
         }
 
-        if (window.siyuan.dragElement.parentElement.classList.contains("protyle-gutters") ||
+        if (window.siyuan.dragElement.parentElement?.classList.contains("protyle-gutters") ||
             // 列表项之前的点
             window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem") {
             // gutter 文档内拖拽限制

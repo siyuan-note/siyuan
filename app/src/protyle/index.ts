@@ -138,7 +138,7 @@ export class Protyle {
                             });
                             break;
                         case "moveDoc":
-                            if (data.data.fromNotebook === this.protyle.notebookId && this.protyle.path === data.data.fromPath) {
+                            if (this.protyle.path === data.data.fromPath) {
                                 this.protyle.path = data.data.newPath;
                                 this.protyle.notebookId = data.data.toNotebook;
                             }

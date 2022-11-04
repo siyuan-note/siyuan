@@ -420,6 +420,7 @@ export class Files extends Model {
             });
             if (newElement.classList.contains("dragover")) {
                 await fetchPost("/api/filetree/moveDocs", {
+                    toNotebook: toURL,
                     fromPaths,
                     toPath,
                 });
@@ -447,6 +448,7 @@ export class Files extends Model {
                     const toDir = pathPosix().dirname(toPath);
                     if (fromPaths.length > 0) {
                         await fetchPost("/api/filetree/moveDocs", {
+                            toNotebook: toURL,
                             fromPaths,
                             toPath: toDir === "/" ? "/" : toDir + ".sy",
                         });

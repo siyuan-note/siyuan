@@ -118,7 +118,7 @@ export const keymap = {
 </div>`;
     },
     _setkeymap() {
-        const data: IKeymap = Object.assign({}, Constants.SIYUAN_KEYMAP);
+        const data: IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
         keymap.element.querySelectorAll("label.b3-list-item input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
             if (keys[0] === "general") {
@@ -214,7 +214,6 @@ export const keymap = {
         });
         keymap.element.querySelector("#keymapResetBtn").addEventListener("click", () => {
             confirmDialog(window.siyuan.languages.reset, window.siyuan.languages.confirmReset, () => {
-                window.siyuan.config.keymap = Constants.SIYUAN_KEYMAP;
                 fetchPost("/api/setting/setKeymap", {
                     data: Constants.SIYUAN_KEYMAP,
                 }, () => {

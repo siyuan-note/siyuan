@@ -175,6 +175,18 @@ func NormalizeEndpoint(endpoint string) string {
 	return endpoint
 }
 
+func FilterMoveDocFromPaths(fromPaths []string, toPath string) (ret []string) {
+	tmp := FilterSelfChildDocs(fromPaths)
+	for _, fromPath := range tmp {
+		fromDir := strings.TrimSuffix(fromPath, ".sy")
+		if strings.HasPrefix(toPath, fromDir) {
+			continue
+		}
+		ret = append(ret, fromPath)
+	}
+	return
+}
+
 func FilterSelfChildDocs(paths []string) (ret []string) {
 	sort.Slice(paths, func(i, j int) bool { return strings.Count(paths[i], "/") < strings.Count(paths[j], "/") })
 

@@ -1012,7 +1012,11 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
 		return
 	}
 
-	fromPaths = util.FilterSelfChildDocs(fromPaths)
+	fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
+	if 1 > len(fromPaths) {
+		return
+	}
+
 	pathsBoxes := getBoxesByPaths(fromPaths)
 
 	// 检查路径深度是否超过限制
@@ -1024,7 +1028,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
 		}
 	}
 
-	needShowProgress := 32 < len(fromPaths)
+	needShowProgress := 16 < len(fromPaths)
 	if needShowProgress {
 		util.PushEndlessProgress(Conf.Language(116))
 	}

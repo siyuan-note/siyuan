@@ -1012,12 +1012,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
 		return
 	}
 
-	if "/" == toPath {
-		// 移动到根目录下时不需要根据目标路径去重，所以这里传入一个不可能存在的随机笔记本名称
-		fromPaths = util.FilterMoveDocFromPaths(fromPaths, ast.NewNodeID())
-	} else {
-		fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
-	}
+	fromPaths = util.FilterSelfChildDocs(fromPaths)
 	pathsBoxes := getBoxesByPaths(fromPaths)
 
 	// 检查路径深度是否超过限制

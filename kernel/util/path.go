@@ -175,13 +175,6 @@ func NormalizeEndpoint(endpoint string) string {
 	return endpoint
 }
 
-func FilterMoveDocFromPaths(fromPaths []string, toPath string) (retFromPaths []string) {
-	fromPaths = append(fromPaths, toPath)
-	retFromPaths = FilterSelfChildDocs(fromPaths)
-	retFromPaths = gulu.Str.ExcludeElem(retFromPaths, []string{toPath})
-	return
-}
-
 func FilterSelfChildDocs(paths []string) (ret []string) {
 	sort.Slice(paths, func(i, j int) bool { return strings.Count(paths[i], "/") < strings.Count(paths[j], "/") })
 

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226120349-rbkmozu",
 		"title": "在内容塊中遨遊",
-		"updated": "20221026222236"
+		"updated": "20221105220040"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Properties": {
 				"fold": "0",
 				"id": "20211226120415-fqj39l7",
-				"updated": "20211228125040"
+				"updated": "20221105220040"
 			},
 			"Children": [
 				{
@@ -84,7 +84,7 @@
 					},
 					"Properties": {
 						"id": "20211226120415-e5u2lvx",
-						"updated": "20211226153430"
+						"updated": "20221105220040"
 					},
 					"Children": [
 						{
@@ -92,21 +92,23 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120415-0k71jr7",
-								"updated": "20211226153430"
+								"updated": "20221105220040"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "通過 "
+									"Data": "通過"
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "((id))"
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226120247-63nd8y5",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "引用"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 建立的內容塊連結，用於在思源內部進行雙連"
+									"Data": "建立的內容塊連結，用於在思源內部進行雙連"
 								}
 							]
 						}

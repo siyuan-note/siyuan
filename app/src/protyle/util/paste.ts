@@ -29,34 +29,6 @@ const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
     }
 };
 
-export const pasteAsPlainText = async (protyle: IProtyle) => {
-    /// #if !BROWSER && !MOBILE
-    let localFiles: string[] = [];
-    if ("darwin" === window.siyuan.config.system.os) {
-        const xmlString = clipboard.read("NSFilenamesPboardType");
-        const domParser = new DOMParser();
-        const xmlDom = domParser.parseFromString(xmlString, "application/xml");
-        Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
-            localFiles.push(item.childNodes[0].nodeValue);
-        });
-    } else {
-        const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
-        if (xmlString.data.length > 0) {
-            localFiles = xmlString.data;
-        }
-    }
-    if (localFiles.length > 0) {
-        uploadLocalFiles(localFiles, protyle, false);
-        writeText("");
-    } else {
-        protyle.lute.SetHTMLTag2TextMark(true); // 临时设置 Lute 解析参数，行级元素键盘和下划线无法粘贴为纯文本 https://github.com/siyuan-note/siyuan/issues/6220
-        const dom = protyle.lute.InlineMd2BlockDOM(clipboard.readText());
-        protyle.lute.SetHTMLTag2TextMark(false);
-        insertHTML(protyle.lute.BlockDOM2Content(dom), protyle);
-    }
-    /// #endif
-};
-
 export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element) => {
     const range = getEditorRange(protyle.wysiwyg.element);
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {

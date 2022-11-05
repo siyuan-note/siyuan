@@ -147,8 +147,6 @@ declare class Lute {
 
     public BlockDOM2Content(text: string): string;
 
-    public InlineMd2BlockDOM(text: string): string;
-
     public SetTextMark(enable: boolean): void;
 
     public SetHeadingID(enable: boolean): void;
@@ -214,8 +212,6 @@ declare class Lute {
     public Md2BlockDOM(html: string): string;
 
     public SetProtyleWYSIWYG(wysiwyg: boolean): void;
-
-    public SetHTMLTag2TextMark(enable: boolean): void;
 
     public MarkdownStr(name: string, md: string): string;
 

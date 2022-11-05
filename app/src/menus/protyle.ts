@@ -23,9 +23,12 @@ import {readText, writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
-import {pasteAsPlainText, pasteText} from "../protyle/util/paste";
+import {pasteText} from "../protyle/util/paste";
 /// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
+/// #endif
+/// #if !BROWSER
+import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {isMobile} from "../util/functions";
 import {removeFoldHeading} from "../protyle/util/heading";
@@ -358,10 +361,10 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     /// #if !BROWSER && !MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.pasteAsPlainText,
-        accelerator: window.siyuan.config.keymap.editor.general.pasteAsPlainText.custom,
+        accelerator: "⇧⌘V",
         click() {
             focusByRange(getEditorRange(nodeElement));
-            pasteAsPlainText(protyle);
+            getCurrentWindow().webContents.pasteAndMatchStyle();
         }
     }).element);
     /// #endif

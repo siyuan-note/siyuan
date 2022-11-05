@@ -4,6 +4,7 @@ import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {ipcRenderer} from "electron";
 import {exportLayout} from "../layout/util";
+import {confirmDialog} from "../dialog/confirmDialog";
 
 export const keymap = {
     element: undefined as Element,
@@ -212,14 +213,16 @@ export const keymap = {
             keymap._search("", "");
         });
         keymap.element.querySelector("#keymapResetBtn").addEventListener("click", () => {
-            window.siyuan.config.keymap = Constants.SIYUAN_KEYMAP;
-            fetchPost("/api/setting/setKeymap", {
-                data: Constants.SIYUAN_KEYMAP,
-            }, () => {
-                window.location.reload();
-                /// #if !BROWSER
-                ipcRenderer.send(Constants.SIYUAN_HOTKEY, hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom));
-                /// #endif
+            confirmDialog(window.siyuan.languages.reset, window.siyuan.languages.confirmReset, () => {
+                window.siyuan.config.keymap = Constants.SIYUAN_KEYMAP;
+                fetchPost("/api/setting/setKeymap", {
+                    data: Constants.SIYUAN_KEYMAP,
+                }, () => {
+                    window.location.reload();
+                    /// #if !BROWSER
+                    ipcRenderer.send(Constants.SIYUAN_HOTKEY, hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom));
+                    /// #endif
+                });
             });
         });
         const keymapListElement = keymap.element.querySelector("#keymapList");

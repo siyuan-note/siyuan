@@ -1,4 +1,5 @@
 {
+  "confirmReset": "¿Está seguro de que desea restablecer todos los atajos de teclado a la configuración predeterminada?",
   "notBatchRemove": "Los portátiles no admiten la eliminación por lotes",
   "confirmRemoveAll": "¿Está seguro de que desea eliminar todos los archivos seleccionados?",
   "microphoneDenied": "Necesito permitir que Siyuan acceda al micrófono en Preferencias del Sistema",

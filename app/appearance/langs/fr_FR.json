@@ -1,4 +1,5 @@
 {
+  "confirmReset": "Voulez-vous vraiment réinitialiser tous les raccourcis clavier aux paramètres par défaut ?",
   "notBatchRemove": "Les blocs-notes ne prennent pas en charge la suppression par lots",
   "confirmRemoveAll": "Êtes-vous sûr de vouloir supprimer tous les fichiers sélectionnés ?",
   "microphoneDenied": "Vous devez autoriser Siyuan à accéder au microphone dans les Préférences Système",

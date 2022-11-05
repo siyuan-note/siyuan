@@ -1,4 +1,5 @@
 {
+  "confirmReset": "确定将所有快捷键都恢复为默认设置？",
   "notBatchRemove": "笔记本不支持批量删除",
   "confirmRemoveAll": "确定删除选中的所有文件？",
   "microphoneDenied": "需在系统偏好设置中允许思源访问麦克风",

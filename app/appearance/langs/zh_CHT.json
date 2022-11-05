@@ -1,6 +1,6 @@
 {
   "confirmReset": "確定將所有快捷鍵都恢復為默認設置？",
-  "notBatchRemove": "筆記本不支持批量刪除",
+  "notBatchRemove": "不支持筆記本批量刪除",
   "confirmRemoveAll": "确定删除选中的所有文件？",
   "microphoneDenied": "需在系統偏好設置中允許思源訪問麥克風",
   "microphoneNotAccess": "麥克風被拒絕訪問，可前往系統偏好設置中重新設置",

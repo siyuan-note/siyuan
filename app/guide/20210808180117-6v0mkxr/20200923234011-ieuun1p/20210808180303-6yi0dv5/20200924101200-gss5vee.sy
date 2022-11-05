@@ -6,7 +6,7 @@
 		"id": "20200924101200-gss5vee",
 		"title": "Navigate in the Content Block",
 		"type": "doc",
-		"updated": "20221026222138"
+		"updated": "20221105220127"
 	},
 	"Children": [
 		{
@@ -60,7 +60,8 @@
 				"Num": -1
 			},
 			"Properties": {
-				"id": "20210428224834-ten8yt5"
+				"id": "20210428224834-ten8yt5",
+				"updated": "20221105220127"
 			},
 			"Children": [
 				{
@@ -105,7 +106,8 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20210428224834-dn1cwlq"
+						"id": "20210428224834-dn1cwlq",
+						"updated": "20221105220127"
 					},
 					"Children": [
 						{
@@ -113,7 +115,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210428224834-3i7y0fu",
-								"updated": "20210428224925"
+								"updated": "20221105220127"
 							},
 							"Children": [
 								{
@@ -122,8 +124,10 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "((id))"
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200924101256-f8b1sbi",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "ref"
 								},
 								{
 									"Type": "NodeText",

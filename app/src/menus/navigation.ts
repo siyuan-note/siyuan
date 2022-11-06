@@ -21,11 +21,11 @@ import {openFileById} from "../editor/util";
 /// #endif
 import {Constants} from "../constants";
 import {newFile} from "../util/newFile";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {deleteFiles} from "../editor/deleteFile";
 
 export const initNavigationMenu = (liElement: HTMLElement) => {
-    const fileElement = hasClosestByClassName(liElement, "sy__file");
+    const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
         return;
     }
@@ -142,7 +142,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
 };
 
 export const initFileMenu = (notebookId: string, pathString: string, liElement: Element) => {
-    const fileElement = hasClosestByClassName(liElement, "sy__file");
+    const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
         return;
     }

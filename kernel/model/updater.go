@@ -118,13 +118,6 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 		return
 	}
 
-	logging.LogInfof("rhy result [%+v]", result)
-
-	if nil == result["checksums"] {
-		logging.LogWarnf("get update pkg checksums failed")
-		return
-	}
-
 	ver := result["ver"].(string)
 	if isVersionUpToDate(ver) {
 		return

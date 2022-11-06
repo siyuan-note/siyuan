@@ -265,6 +265,7 @@ func CheckUpdate(showMsg bool) {
 	if showMsg {
 		util.PushMsg(msg, timeout)
 		go func() {
+			defer logging.Recover()
 			checkDownloadInstallPkg()
 			if "" != getNewVerInstallPkgPath() {
 				util.PushMsg(Conf.Language(62), 0)

@@ -113,6 +113,7 @@ func checkDownloadInstallPkg() {
 }
 
 func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
+	defer logging.Recover()
 	result, err := util.GetRhyResult(false)
 	if nil != err {
 		return

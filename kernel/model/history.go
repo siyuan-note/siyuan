@@ -310,7 +310,7 @@ type HistoryItem struct {
 	Path  string `json:"path"`
 }
 
-func FullTextSearchHistory(query, box, op string, typ, page int) (ret []*History, pageCount, totalCount int) {
+func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, pageCount, totalCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	if "" != query {
 		query = stringQuery(query)
@@ -320,7 +320,7 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []*History
 	offset := (page - 1) * pageSize
 
 	table := "histories_fts_case_insensitive"
-	stmt := "SELECT * FROM " + table + " WHERE "
+	stmt := "SELECT DISTINCT created FROM " + table + " WHERE "
 	if "" != query {
 		stmt += table + " MATCH '{title content}:(" + query + ")'"
 	} else {
@@ -339,11 +339,16 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []*History
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"
 	}
-	countStmt := strings.ReplaceAll(stmt, "SELECT *", "SELECT COUNT(*) AS total")
+	countStmt := strings.ReplaceAll(stmt, "SELECT DISTINCT created", "SELECT COUNT(DISTINCT created) AS total")
 	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa(offset)
-	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
-	ret = fromSQLHistories(sqlHistories)
-	result, err := sql.QueryHistory(countStmt)
+	result, err := sql.QueryHistory(stmt)
+	if nil != err {
+		return
+	}
+	for _, row := range result {
+		ret = append(ret, row["created"].(string))
+	}
+	result, err = sql.QueryHistory(countStmt)
 	if nil != err {
 		return
 	}
@@ -648,52 +653,6 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 	if err := sql.CommitTx(tx); nil != err {
 		logging.LogErrorf("commit transaction failed: %s", err)
 		return
-	}
-	return
-}
-
-func fromSQLHistories(sqlHistories []*sql.History) (ret []*History) {
-	if 1 > len(sqlHistories) {
-		ret = []*History{}
-		return
-	}
-
-	var items []*HistoryItem
-	tmpTime, _ := strconv.ParseInt(sqlHistories[0].Created, 10, 64)
-	for _, sqlHistory := range sqlHistories {
-		unixSec, _ := strconv.ParseInt(sqlHistory.Created, 10, 64)
-		if tmpTime == unixSec {
-			item := &HistoryItem{
-				Title: sqlHistory.Title,
-				Path:  filepath.Join(util.HistoryDir, sqlHistory.Path),
-			}
-			if HistoryTypeAsset == sqlHistory.Type {
-				item.Path = filepath.ToSlash(strings.TrimPrefix(item.Path, util.WorkspaceDir))
-			}
-			items = append(items, item)
-		} else {
-			ret = append(ret, &History{
-				HCreated: time.Unix(unixSec, 0).Format("2006-01-02 15:04:05"),
-				Items:    items,
-			})
-
-			item := &HistoryItem{
-				Title: sqlHistory.Title,
-				Path:  filepath.Join(util.HistoryDir, sqlHistory.Path),
-			}
-			if HistoryTypeAsset == sqlHistory.Type {
-				item.Path = filepath.ToSlash(strings.TrimPrefix(item.Path, util.WorkspaceDir))
-			}
-			items = []*HistoryItem{}
-			items = append(items, item)
-		}
-		tmpTime = unixSec
-	}
-	if 0 < len(items) {
-		ret = append(ret, &History{
-			HCreated: time.Unix(tmpTime, 0).Format("2006-01-02 15:04:05"),
-			Items:    items,
-		})
 	}
 	return
 }

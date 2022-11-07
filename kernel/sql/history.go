@@ -77,31 +77,6 @@ func queryHistory(query string, args ...interface{}) (*sql.Rows, error) {
 	return historyDB.Query(query, args...)
 }
 
-func SelectHistoriesRawStmt(stmt string) (ret []*History) {
-	rows, err := historyDB.Query(stmt)
-	if nil != err {
-		logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		if history := scanHistoryRows(rows); nil != history {
-			ret = append(ret, history)
-		}
-	}
-	return
-}
-
-func scanHistoryRows(rows *sql.Rows) (ret *History) {
-	var history History
-	if err := rows.Scan(&history.Type, &history.Op, &history.Title, &history.Content, &history.Path, &history.Created); nil != err {
-		logging.LogErrorf("query scan field failed: %s\n%s", err, logging.ShortStack())
-		return
-	}
-	ret = &history
-	return
-}
-
 func DeleteHistoriesByPathPrefix(tx *sql.Tx, pathPrefix string) (err error) {
 	stmt := "DELETE FROM histories_fts_case_insensitive WHERE path LIKE ?"
 	if err = execStmtTx(tx, stmt, pathPrefix+"%"); nil != err {

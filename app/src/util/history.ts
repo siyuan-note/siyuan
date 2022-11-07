@@ -401,7 +401,6 @@ export const openHistory = () => {
                             type: parseInt(typeElement.value),
                             created: target.getAttribute("data-created")
                         }, (response) => {
-                            target.nextElementSibling.classList.remove("fn__none");
                             iconElement.classList.add("b3-list-item__arrow--open");
                             let html = "";
                             response.data.items.forEach((docItem: { title: string, path: string }) => {

@@ -15,7 +15,7 @@ body:
           required: true
   - type: checkboxes
     attributes:
-      label: 该问题是否能够在默认主题下重现？ Can the issue be reproduced with the default theme?
+      label: 该问题是否能够在默认主题（daylight/midnight）下重现？ Can the issue be reproduced with the default theme (daylight/midnight)?
       description: |
         请确认该问题能够在默认主题下重现。
         Please confirm that the issue can be reproduced with the default theme.

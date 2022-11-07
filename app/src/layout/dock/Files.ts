@@ -437,7 +437,7 @@ export class Files extends Model {
                 });
             }
             if ((newElement.classList.contains("dragover__bottom") || newElement.classList.contains("dragover__top")) && window.siyuan.config.fileTree.sort === 6) {
-                if (selectRootElements.length === fromPaths.length) {
+                if (selectRootElements.length > 0 && newElement.getAttribute("data-path") === "/") {
                     if (newElement.classList.contains("dragover__top")) {
                         selectRootElements.forEach(item => {
                             newElement.parentElement.before(item.parentElement);

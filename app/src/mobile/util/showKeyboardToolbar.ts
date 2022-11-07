@@ -22,17 +22,19 @@ export const showKeyboardToolbar = (bottom = 0) => {
     toolbarElement.classList.remove("fn__none");
     toolbarElement.style.bottom = bottom + "px";
 
-    const contentElement = window.siyuan.mobileEditor.protyle.contentElement
-    const cursorTop = getSelectionPosition(contentElement).top - contentElement.getBoundingClientRect().top;
-    if (cursorTop < window.innerHeight - 96) {
-        return;
-    }
-    contentElement.scroll({
-        top: contentElement.scrollTop + cursorTop - ((window.outerHeight - 65) / 2 - 30),
-        left: contentElement.scrollLeft,
-        behavior: "smooth"
-    });
-    alert(cursorTop + "," + window.innerHeight);
+    setTimeout(() => {
+        const contentElement = window.siyuan.mobileEditor.protyle.contentElement
+        const cursorTop = getSelectionPosition(contentElement).top - contentElement.getBoundingClientRect().top;
+        if (cursorTop < window.innerHeight - 96) {
+            return;
+        }
+        contentElement.scroll({
+            top: contentElement.scrollTop + cursorTop - ((window.outerHeight - 65) / 2 - 30),
+            left: contentElement.scrollLeft,
+            behavior: "smooth"
+        });
+        alert(cursorTop + "," + window.innerHeight);
+    })
     // if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
     //     // Android 端事件需要滞后一些，所以这里延迟一下
     //     setTimeout(() => {

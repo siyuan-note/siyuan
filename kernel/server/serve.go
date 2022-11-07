@@ -24,8 +24,10 @@ import (
 	"net/http/pprof"
 	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -34,6 +36,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	goPS "github.com/mitchellh/go-ps"
 	"github.com/mssola/user_agent"
 	"github.com/olahol/melody"
 	"github.com/siyuan-note/logging"
@@ -73,6 +76,11 @@ func Serve(fastMode bool) {
 	serveEmojis(ginServer)
 	serveTemplates(ginServer)
 	api.ServeAPI(ginServer)
+
+	if !fastMode {
+		// 杀掉占用 6806 的已有内核进程
+		killByPort(util.FixedPort)
+	}
 
 	var host string
 	if model.Conf.System.NetworkServe || util.ContainerDocker == util.Container {
@@ -450,4 +458,92 @@ func corsMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func killByPort(port string) {
+	if !isPortOpen(port) {
+		return
+	}
+
+	portJSON := filepath.Join(util.HomeDir, ".config", "siyuan", "port.json")
+	os.RemoveAll(portJSON)
+
+	pid := pidByPort(port)
+	if "" == pid {
+		return
+	}
+
+	pidInt, _ := strconv.Atoi(pid)
+	proc, _ := goPS.FindProcess(pidInt)
+	var name string
+	if nil != proc {
+		name = proc.Executable()
+	}
+	kill(pid)
+	logging.LogInfof("killed process [name=%s, pid=%s]", name, pid)
+}
+
+func isPortOpen(port string) bool {
+	timeout := time.Second
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", port), timeout)
+	if nil != err {
+		return false
+	}
+	if nil != conn {
+		conn.Close()
+		return true
+	}
+	return false
+}
+
+func kill(pid string) {
+	var kill *exec.Cmd
+	if gulu.OS.IsWindows() {
+		kill = exec.Command("cmd", "/c", "TASKKILL /F /PID "+pid)
+	} else {
+		kill = exec.Command("kill", "-9", pid)
+	}
+	gulu.CmdAttr(kill)
+	kill.CombinedOutput()
+}
+
+func pidByPort(port string) (ret string) {
+	if gulu.OS.IsWindows() {
+		cmd := exec.Command("cmd", "/c", "netstat -ano | findstr "+port)
+		gulu.CmdAttr(cmd)
+		data, err := cmd.CombinedOutput()
+		if nil != err {
+			logging.LogErrorf("netstat failed: %s", err)
+			return
+		}
+		output := string(data)
+		lines := strings.Split(output, "\n")
+		for _, l := range lines {
+			if strings.Contains(l, "LISTENING") {
+				l = l[strings.Index(l, "LISTENING")+len("LISTENING"):]
+				l = strings.TrimSpace(l)
+				ret = l
+				return
+			}
+		}
+		return
+	}
+
+	cmd := exec.Command("lsof", "-Fp", "-i", ":"+port)
+	gulu.CmdAttr(cmd)
+	data, err := cmd.CombinedOutput()
+	if nil != err {
+		logging.LogErrorf("lsof failed: %s", err)
+		return
+	}
+	output := string(data)
+	lines := strings.Split(output, "\n")
+	for _, l := range lines {
+		if strings.HasPrefix(l, "p") {
+			l = l[1:]
+			ret = l
+			return
+		}
+	}
+	return
 }

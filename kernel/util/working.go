@@ -32,7 +32,6 @@ import (
 
 	"github.com/88250/gulu"
 	figure "github.com/common-nighthawk/go-figure"
-	goPS "github.com/mitchellh/go-ps"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
@@ -345,71 +344,6 @@ func initMime() {
 	mime.AddExtensionType(".dxf", "image/x-dxf")
 	mime.AddExtensionType(".dwf", "drawing/x-dwf")
 	mime.AddExtensionType(".pdf", "application/pdf")
-}
-
-func KillByPort(port string) {
-	if pid := PidByPort(port); "" != pid {
-		pidInt, _ := strconv.Atoi(pid)
-		proc, _ := goPS.FindProcess(pidInt)
-		var name string
-		if nil != proc {
-			name = proc.Executable()
-		}
-		Kill(pid)
-		logging.LogInfof("killed process [name=%s, pid=%s]", name, pid)
-	}
-}
-
-func Kill(pid string) {
-	var kill *exec.Cmd
-	if gulu.OS.IsWindows() {
-		kill = exec.Command("cmd", "/c", "TASKKILL /F /PID "+pid)
-	} else {
-		kill = exec.Command("kill", "-9", pid)
-	}
-	gulu.CmdAttr(kill)
-	kill.CombinedOutput()
-}
-
-func PidByPort(port string) (ret string) {
-	if gulu.OS.IsWindows() {
-		cmd := exec.Command("cmd", "/c", "netstat -ano | findstr "+port)
-		gulu.CmdAttr(cmd)
-		data, err := cmd.CombinedOutput()
-		if nil != err {
-			logging.LogErrorf("netstat failed: %s", err)
-			return
-		}
-		output := string(data)
-		lines := strings.Split(output, "\n")
-		for _, l := range lines {
-			if strings.Contains(l, "LISTENING") {
-				l = l[strings.Index(l, "LISTENING")+len("LISTENING"):]
-				l = strings.TrimSpace(l)
-				ret = l
-				return
-			}
-		}
-		return
-	}
-
-	cmd := exec.Command("lsof", "-Fp", "-i", ":"+port)
-	gulu.CmdAttr(cmd)
-	data, err := cmd.CombinedOutput()
-	if nil != err {
-		logging.LogErrorf("lsof failed: %s", err)
-		return
-	}
-	output := string(data)
-	lines := strings.Split(output, "\n")
-	for _, l := range lines {
-		if strings.HasPrefix(l, "p") {
-			l = l[1:]
-			ret = l
-			return
-		}
-	}
-	return
 }
 
 func initPandoc() {

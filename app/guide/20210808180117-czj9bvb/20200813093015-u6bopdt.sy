@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20221031001420"
+		"updated": "20221107103424"
 	},
 	"Children": [
 		{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221031001314-v5a3pa8",
-				"updated": "20221031001420"
+				"updated": "20221107103424"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "详情请看"
+					"Data": "以前没有、现在没有，将来也不会有。详情请看"
 				},
 				{
 					"Type": "NodeTextMark",

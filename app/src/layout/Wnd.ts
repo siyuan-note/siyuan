@@ -576,7 +576,7 @@ export class Wnd {
         model.send("closews", {});
     }
 
-    private removeTabAction = (id: string, closeAll = false, hasSaveScroll = true) => {
+    private removeTabAction = (id: string, closeAll = false, hasSaveScroll = true, animate = true) => {
         clearCounter();
         this.children.find((item, index) => {
             if (item.id === id) {
@@ -616,10 +616,14 @@ export class Wnd {
                             this.switchTab(this.children[currentIndex].headElement, true);
                         }
                     }
-                    item.headElement.setAttribute("style", "max-width: 0px;");
-                    setTimeout(() => {
+                    if (animate) {
+                        item.headElement.setAttribute("style", "max-width: 0px;");
+                        setTimeout(() => {
+                            item.headElement.remove();
+                        }, Constants.TIMEOUT_TRANSITION);
+                    } else {
                         item.headElement.remove();
-                    }, Constants.TIMEOUT_TRANSITION);
+                    }
                 }
                 item.panelElement.remove();
                 this.destroyModel(item.model);
@@ -643,7 +647,7 @@ export class Wnd {
         /// #endif
     };
 
-    public removeTab(id: string, closeAll = false, needSaveScroll = true) {
+    public removeTab(id: string, closeAll = false, needSaveScroll = true, animate = true) {
         for (let index = 0; index < this.children.length; index++) {
             const item = this.children[index];
             if (item.id === id) {
@@ -652,9 +656,9 @@ export class Wnd {
                         showMessage(window.siyuan.languages.uploading);
                         return;
                     }
-                    this.removeTabAction(id, closeAll, needSaveScroll);
+                    this.removeTabAction(id, closeAll, needSaveScroll, animate);
                 } else {
-                    this.removeTabAction(id, closeAll, needSaveScroll);
+                    this.removeTabAction(id, closeAll, needSaveScroll, animate);
                 }
                 return;
             }

@@ -228,6 +228,9 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
         (layout as Wnd).addTab(child);
         (layout as Wnd).showHeading();
     } else if (json.instance === "Editor" && json.blockId) {
+        if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
+            (layout as Tab).headElement.classList.add("item--unupdate");
+        }
         (layout as Tab).headElement.setAttribute("data-initdata", JSON.stringify(json));
     } else if (json.instance === "Asset") {
         (layout as Tab).addModel(new Asset({

@@ -13,12 +13,23 @@ body:
             我已经搜索了 Issues，没有发现类似问题 
             I have searched the existing issues
           required: true
+  - type: checkboxes
+    attributes:
+      label: 该问题是否能够在默认主题下重现？ Can the issue be reproduced with the default theme?
+      description: |
+        请确认该问题能够在默认主题下重现。
+        Please confirm that the issue can be reproduced with the default theme.
+      options:
+        - label: |
+            我能够在默认主题下重现该问题
+            I was able to reproduce the issue with the default theme
+          required: true
   - type: textarea
     attributes:
       label: 描述问题 Describe the problem
       description: |
-        请尽量清晰地描述你遇到的问题，并确认能够在默认主题下重现该问题。
-        Please describe the problem you are experiencing as clearly as possible and confirm that you can reproduce the problem with the default theme.
+        请尽量清晰地描述你遇到的问题。
+        Please describe the problem you are experiencing as clearly as possible.
     validations:
       required: true
   - type: textarea

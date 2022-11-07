@@ -183,8 +183,11 @@ export class Files extends Model {
             }
             setPanelFocus(this.element.parentElement);
         });
-        let clickTimeout: number;
         this.element.addEventListener("click", (event) => {
+            if (event.detail !== 1) {
+                setPanelFocus(this.element.parentElement);
+                return;
+            }
             let target = event.target as HTMLElement;
             const ulElement = hasTopClosestByTag(target, "UL");
             let needFocus = true;
@@ -227,37 +230,29 @@ export class Files extends Model {
                         event.stopPropagation();
                         break;
                     } else if (target.tagName === "LI") {
-                        if (event.detail === 1) {
-                            needFocus = false;
-                            clickTimeout = window.setTimeout(() => {
-                                if (!event.metaKey && !event.ctrlKey) {
-                                    this.setCurrent(target, false);
-                                    if (target.getAttribute("data-type") === "navigation-file") {
-                                        if (window.siyuan.altIsPressed) {
-                                            openFileById({
-                                                id: target.getAttribute("data-node-id"),
-                                                position: "right",
-                                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
-                                            });
-                                        } else {
-                                            openFileById({
-                                                id: target.getAttribute("data-node-id"),
-                                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
-                                            });
-                                        }
-                                    } else if (target.getAttribute("data-type") === "navigation-root") {
-                                        this.getLeaf(target, notebookId);
-                                        setPanelFocus(this.element.parentElement);
-                                    }
-                                } else {
-                                    setPanelFocus(this.element.parentElement);
-                                    target.classList.toggle("b3-list-item--focus");
-                                }
-                            }, Constants.TIMEOUT_DBLCLICK);
-                        } else if (!event.metaKey && !event.ctrlKey && event.detail === 2) {
-                            clearTimeout(clickTimeout);
-                            this.getLeaf(target, notebookId);
+                        needFocus = false;
+                        if (!event.metaKey && !event.ctrlKey) {
                             this.setCurrent(target, false);
+                            if (target.getAttribute("data-type") === "navigation-file") {
+                                if (window.siyuan.altIsPressed) {
+                                    openFileById({
+                                        id: target.getAttribute("data-node-id"),
+                                        position: "right",
+                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                    });
+                                } else {
+                                    openFileById({
+                                        id: target.getAttribute("data-node-id"),
+                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                    });
+                                }
+                            } else if (target.getAttribute("data-type") === "navigation-root") {
+                                this.getLeaf(target, notebookId);
+                                setPanelFocus(this.element.parentElement);
+                            }
+                        } else {
+                            setPanelFocus(this.element.parentElement);
+                            target.classList.toggle("b3-list-item--focus");
                         }
                         this.element.querySelector('[select-end="true"]')?.removeAttribute("select-end");
                         this.element.querySelector('[select-start="true"]')?.removeAttribute("select-start");

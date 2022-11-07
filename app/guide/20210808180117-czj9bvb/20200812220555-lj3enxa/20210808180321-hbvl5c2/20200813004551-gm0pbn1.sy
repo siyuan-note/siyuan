@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20221107215100"
+		"updated": "20221107220925"
 	},
 	"Children": [
 		{
@@ -8238,7 +8238,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619001217-e9cwukj",
-				"updated": "20221107215100"
+				"updated": "20221107220925"
 			},
 			"Children": [
 				{
@@ -8508,7 +8508,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ / 鼠标中键"
 								}
 							]
 						},
@@ -8529,10 +8529,10 @@
 		{
 			"ID": "20221107214439-v40c6qz",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20221107214439-v40c6qz",
-				"updated": "20221107214442"
+				"updated": "20221107220850"
 			},
 			"Children": [
 				{

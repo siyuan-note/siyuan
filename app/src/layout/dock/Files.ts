@@ -183,6 +183,26 @@ export class Files extends Model {
             }
             setPanelFocus(this.element.parentElement);
         });
+        this.element.addEventListener("mousedown", (event) => {
+            // 点击鼠标滚轮关闭
+            if (event.button !== 1 || !window.siyuan.config.fileTree.openFilesUseCurrentTab) {
+                return;
+            }
+            let target = event.target as HTMLElement;
+            while (target && !target.isEqualNode(this.element)) {
+                if (target.tagName === "LI") {
+                    openFileById({
+                        removeCurrentTab: false,
+                        id: target.getAttribute("data-node-id"),
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                    });
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                }
+                target = target.parentElement;
+            }
+        })
         this.element.addEventListener("click", (event) => {
             if (event.detail !== 1) {
                 setPanelFocus(this.element.parentElement);
@@ -249,9 +269,15 @@ export class Files extends Model {
                                         position: "bottom",
                                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                                     });
+                                } else if (window.siyuan.config.fileTree.openFilesUseCurrentTab &&
+                                    event.altKey && (event.metaKey || event.ctrlKey) && !event.shiftKey) {
+                                    openFileById({
+                                        removeCurrentTab: false,
+                                        id: target.getAttribute("data-node-id"),
+                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                    });
                                 } else {
                                     openFileById({
-                                        removeCurrentTab: !((event.altKey && (event.metaKey || event.ctrlKey) && !event.shiftKey)),
                                         id: target.getAttribute("data-node-id"),
                                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                                     });

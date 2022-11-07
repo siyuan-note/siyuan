@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20221107215308"
+		"updated": "20221107221232"
 	},
 	"Children": [
 		{
@@ -8293,7 +8293,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619002135-s399g7e",
-				"updated": "20221107215308"
+				"updated": "20221107221232"
 			},
 			"Children": [
 				{
@@ -8571,7 +8571,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ / Middle mouse button"
 								}
 							]
 						},

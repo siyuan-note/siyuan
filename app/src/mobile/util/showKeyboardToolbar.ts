@@ -33,16 +33,7 @@ export const showKeyboardToolbar = (bottom = 0) => {
             left: contentElement.scrollLeft,
             behavior: "smooth"
         });
-        alert(cursorTop + "," + window.innerHeight);
     }, Constants.TIMEOUT_TRANSITION);
-    // if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
-    //     // Android 端事件需要滞后一些，所以这里延迟一下
-    //     setTimeout(() => {
-    //         scrollCenter(window.siyuan.mobileEditor.protyle, undefined, false, (window.outerHeight - 65) / 2 - 30);
-    //     }, 100);
-    // } else {
-    //     scrollCenter(window.siyuan.mobileEditor.protyle, undefined, false, (window.outerHeight - 65) / 2 - 30);
-    // }
 };
 
 export const hideKeyboardToolbar = () => {

@@ -50,8 +50,12 @@ func killRunningKernel() {
 		return
 	}
 
+	currentPid := os.Getpid()
 	killed := false
 	for _, process := range processes {
+		if process.Pid() == currentPid {
+			continue
+		}
 		procName := strings.ToLower(process.Executable())
 		if strings.Contains(procName, "siyuan-kernel") {
 			kill(fmt.Sprintf("%d", process.Pid()))

@@ -70,7 +70,7 @@ export class Toolbar {
 
     public render(protyle: IProtyle, range: Range, event?: KeyboardEvent) {
         this.range = range;
-        const nodeElement = hasClosestBlock(range.startContainer);
+        let nodeElement = hasClosestBlock(range.startContainer);
         if (!nodeElement || protyle.disabled) {
             this.element.classList.add("fn__none");
             return;
@@ -100,8 +100,17 @@ export class Toolbar {
             if (event) { // 在 keyup 中使用 shift+方向键选中
                 if (event.key === "ArrowLeft") {
                     this.range = setLastNodeRange(getContenteditableElement(startElement), range, false);
-                } else {
+                } else if (event.key === "ArrowRight") {
                     this.range = setFirstNodeRange(getContenteditableElement(endElement), range);
+                    this.range.collapse(false);
+                } else if (event.key === "ArrowUp") {
+                    this.range = setFirstNodeRange(getContenteditableElement(endElement), range);
+                    nodeElement = hasClosestBlock(endElement)
+                    if (!nodeElement) {
+                        return;
+                    }
+                } else if (event.key === "ArrowDown") {
+                    this.range = setLastNodeRange(getContenteditableElement(startElement), range, false);
                 }
             } else {
                 this.range = setLastNodeRange(getContenteditableElement(nodeElement), range, false);

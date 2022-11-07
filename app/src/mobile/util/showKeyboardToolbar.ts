@@ -34,7 +34,7 @@ export const showKeyboardToolbar = (bottom = 0) => {
             behavior: "smooth"
         });
         alert(cursorTop + "," + window.innerHeight);
-    })
+    }, Constants.TIMEOUT_TRANSITION);
     // if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
     //     // Android 端事件需要滞后一些，所以这里延迟一下
     //     setTimeout(() => {

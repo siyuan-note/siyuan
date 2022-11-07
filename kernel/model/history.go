@@ -360,6 +360,38 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, 
 	return
 }
 
+func FullTextSearchHistoryItems(created, query, box, op string, typ int) (ret []*HistoryItem) {
+	query = gulu.Str.RemoveInvisible(query)
+	if "" != query {
+		query = stringQuery(query)
+	}
+
+	table := "histories_fts_case_insensitive"
+	stmt := "SELECT * FROM " + table + " WHERE "
+	if "" != query {
+		stmt += table + " MATCH '{title content}:(" + query + ")'"
+	} else {
+		stmt += "1=1"
+	}
+
+	if HistoryTypeDocName == typ {
+		stmt = strings.ReplaceAll(stmt, "{title content}", "{title}")
+	}
+
+	if HistoryTypeDocName == typ || HistoryTypeDoc == typ {
+		if "all" != op {
+			stmt += " AND op = '" + op + "'"
+		}
+		stmt += " AND path LIKE '%/" + box + "/%' AND path LIKE '%.sy'"
+	} else if HistoryTypeAsset == typ {
+		stmt += " AND path LIKE '%/assets/%'"
+	}
+	stmt += " AND created = '" + created + "' ORDER BY created DESC LIMIT " + fmt.Sprintf("%d", Conf.Search.Limit)
+	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
+	ret = fromSQLHistories(sqlHistories)
+	return
+}
+
 func GetNotebookHistory() (ret []*History, err error) {
 	ret = []*History{}
 
@@ -653,6 +685,25 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 	if err := sql.CommitTx(tx); nil != err {
 		logging.LogErrorf("commit transaction failed: %s", err)
 		return
+	}
+	return
+}
+
+func fromSQLHistories(sqlHistories []*sql.History) (ret []*HistoryItem) {
+	if 1 > len(sqlHistories) {
+		ret = []*HistoryItem{}
+		return
+	}
+
+	for _, sqlHistory := range sqlHistories {
+		item := &HistoryItem{
+			Title: sqlHistory.Title,
+			Path:  filepath.Join(util.HistoryDir, sqlHistory.Path),
+		}
+		if HistoryTypeAsset == sqlHistory.Type {
+			item.Path = filepath.ToSlash(strings.TrimPrefix(item.Path, util.WorkspaceDir))
+		}
+		ret = append(ret, item)
 	}
 	return
 }

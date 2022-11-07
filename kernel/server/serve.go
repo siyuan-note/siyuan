@@ -460,6 +460,8 @@ func corsMiddleware() gin.HandlerFunc {
 }
 
 func killRunningKernel() {
+	defer logging.Recover()
+
 	if "dev" == util.Mode {
 		return
 	}

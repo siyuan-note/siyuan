@@ -266,6 +266,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
     }, {
         icon: "iconLayoutBottom",
         label: window.siyuan.languages.insertBottom,
+        accelerator: "⇧Click",
         click: () => {
             openFileById({id, position: "bottom", action: [Constants.CB_GET_FOCUS]});
         }
@@ -273,14 +274,12 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
     if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
         openSubmenus.push({
             label: window.siyuan.languages.openInNewTab,
-            accelerator: "⌘Click",
+            accelerator: "⌥⌘Click",
             click: () => {
-                window.siyuan.ctrlIsPressed = true;
-                openFileById({id, action: [Constants.CB_GET_FOCUS]});
-                setTimeout(() => {
-                    // 勾选在当前页签中打开后，右键在新页签中打开，不重置的话后续点击都会打开新页签
-                    window.siyuan.ctrlIsPressed = false;
-                }, Constants.TIMEOUT_INPUT);
+                openFileById({
+                    id, action: [Constants.CB_GET_FOCUS],
+                    removeCurrentTab: false
+                });
             }
         });
     }

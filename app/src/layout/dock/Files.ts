@@ -231,17 +231,27 @@ export class Files extends Model {
                         break;
                     } else if (target.tagName === "LI") {
                         needFocus = false;
-                        if (!event.metaKey && !event.ctrlKey) {
+                        if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey) {
+                            setPanelFocus(this.element.parentElement);
+                            target.classList.toggle("b3-list-item--focus");
+                        } else {
                             this.setCurrent(target, false);
                             if (target.getAttribute("data-type") === "navigation-file") {
-                                if (window.siyuan.altIsPressed) {
+                                if (event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
                                     openFileById({
                                         id: target.getAttribute("data-node-id"),
                                         position: "right",
                                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                                     });
+                                } else if (!event.altKey && !event.metaKey && !event.ctrlKey && event.shiftKey) {
+                                    openFileById({
+                                        id: target.getAttribute("data-node-id"),
+                                        position: "bottom",
+                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                    });
                                 } else {
                                     openFileById({
+                                        removeCurrentTab: !((event.altKey && (event.metaKey || event.ctrlKey) && !event.shiftKey)),
                                         id: target.getAttribute("data-node-id"),
                                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                                     });
@@ -250,9 +260,6 @@ export class Files extends Model {
                                 this.getLeaf(target, notebookId);
                                 setPanelFocus(this.element.parentElement);
                             }
-                        } else {
-                            setPanelFocus(this.element.parentElement);
-                            target.classList.toggle("b3-list-item--focus");
                         }
                         this.element.querySelector('[select-end="true"]')?.removeAttribute("select-end");
                         this.element.querySelector('[select-start="true"]')?.removeAttribute("select-start");

@@ -78,8 +78,7 @@ func Serve(fastMode bool) {
 	api.ServeAPI(ginServer)
 
 	if !fastMode {
-		// 杀掉占用 6806 的已有内核进程
-		killByPort(util.FixedPort)
+		killRunningKernel()
 	}
 
 	var host string
@@ -460,6 +459,37 @@ func corsMiddleware() gin.HandlerFunc {
 	}
 }
 
+func killRunningKernel() {
+	if "dev" == util.Mode {
+		return
+	}
+
+	if util.ContainerStd != util.Container {
+		return
+	}
+
+	processes, err := goPS.Processes()
+	if nil != err {
+		logging.LogErrorf("get processes failed: %s", err)
+		killByPort(util.FixedPort)
+		return
+	}
+
+	killed := false
+	for _, process := range processes {
+		procName := strings.ToLower(process.Executable())
+		if strings.Contains(procName, "siyuan-kernel") {
+			kill(fmt.Sprintf("%d", process.Pid()))
+			killed = true
+		}
+	}
+
+	if killed {
+		portJSON := filepath.Join(util.HomeDir, ".config", "siyuan", "port.json")
+		os.RemoveAll(portJSON)
+	}
+}
+
 func killByPort(port string) {
 	if !isPortOpen(port) {
 		return
@@ -497,14 +527,14 @@ func isPortOpen(port string) bool {
 }
 
 func kill(pid string) {
-	var kill *exec.Cmd
+	var killCmd *exec.Cmd
 	if gulu.OS.IsWindows() {
-		kill = exec.Command("cmd", "/c", "TASKKILL /F /PID "+pid)
+		killCmd = exec.Command("cmd", "/c", "TASKKILL /F /PID "+pid)
 	} else {
-		kill = exec.Command("kill", "-9", pid)
+		killCmd = exec.Command("kill", "-9", pid)
 	}
-	gulu.CmdAttr(kill)
-	kill.CombinedOutput()
+	gulu.CmdAttr(killCmd)
+	killCmd.CombinedOutput()
 }
 
 func pidByPort(port string) (ret string) {

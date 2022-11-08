@@ -4,6 +4,7 @@ import {processPasteCode, processRender} from "./processCode";
 import {writeText} from "./compatibility";
 /// #if !BROWSER
 import {clipboard} from "electron";
+import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {hasClosestBlock} from "./hasClosest";
 import {focusByWbr, getEditorRange} from "./selection";
@@ -27,6 +28,31 @@ const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
     if (needRender) {
         protyle.hint.render(protyle);
     }
+};
+
+export const pasteAsPlainText = async (protyle: IProtyle) => {
+    /// #if !BROWSER && !MOBILE
+    let localFiles: string[] = [];
+    if ("darwin" === window.siyuan.config.system.os) {
+        const xmlString = clipboard.read("NSFilenamesPboardType");
+        const domParser = new DOMParser();
+        const xmlDom = domParser.parseFromString(xmlString, "application/xml");
+        Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
+            localFiles.push(item.childNodes[0].nodeValue);
+        });
+    } else {
+        const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
+        if (xmlString.data.length > 0) {
+            localFiles = xmlString.data;
+        }
+    }
+    if (localFiles.length > 0) {
+        uploadLocalFiles(localFiles, protyle, false);
+        writeText("");
+    } else {
+        getCurrentWindow().webContents.pasteAndMatchStyle();
+    }
+    /// #endif
 };
 
 export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element) => {

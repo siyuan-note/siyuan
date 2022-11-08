@@ -23,12 +23,9 @@ import {readText, writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
-import {pasteText} from "../protyle/util/paste";
+import {pasteAsPlainText, pasteText} from "../protyle/util/paste";
 /// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
-/// #endif
-/// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {isMobile} from "../util/functions";
 import {removeFoldHeading} from "../protyle/util/heading";
@@ -364,7 +361,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         accelerator: "⇧⌘V",
         click() {
             focusByRange(getEditorRange(nodeElement));
-            getCurrentWindow().webContents.pasteAndMatchStyle();
+            pasteAsPlainText(protyle);
         }
     }).element);
     /// #endif

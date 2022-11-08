@@ -173,7 +173,7 @@ func downloadInstallPkg(pkgURL, checksum string) (err error) {
 	}
 
 	logging.LogInfof("downloading install package [%s]", pkgURL)
-	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(30 * time.Minute)
+	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(10 * time.Minute)
 	callback := func(info req.DownloadInfo) {
 		//logging.LogDebugf("downloading install package [%s %.2f%%]", pkgURL, float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
 	}

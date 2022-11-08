@@ -35,14 +35,6 @@ import (
 func killRunningKernel() {
 	defer logging.Recover()
 
-	if "dev" == util.Mode {
-		return
-	}
-
-	if util.ContainerStd != util.Container {
-		return
-	}
-
 	processes, err := goPS.Processes()
 	if nil != err {
 		logging.LogErrorf("get processes failed: %s", err)

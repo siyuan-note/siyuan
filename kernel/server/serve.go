@@ -74,7 +74,7 @@ func Serve(fastMode bool) {
 	serveTemplates(ginServer)
 	api.ServeAPI(ginServer)
 
-	if !fastMode {
+	if !fastMode && "prod" == util.Mode && util.ContainerStd == util.Container {
 		killRunningKernel()
 	}
 

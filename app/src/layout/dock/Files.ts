@@ -250,13 +250,12 @@ export class Files extends Model {
                         event.stopPropagation();
                         break;
                     } else if (target.tagName === "LI") {
-                        needFocus = false;
                         if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey) {
-                            setPanelFocus(this.element.parentElement);
                             target.classList.toggle("b3-list-item--focus");
                         } else {
                             this.setCurrent(target, false);
                             if (target.getAttribute("data-type") === "navigation-file") {
+                                needFocus = false;
                                 if (event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
                                     openFileById({
                                         id: target.getAttribute("data-node-id"),
@@ -284,7 +283,6 @@ export class Files extends Model {
                                 }
                             } else if (target.getAttribute("data-type") === "navigation-root") {
                                 this.getLeaf(target, notebookId);
-                                setPanelFocus(this.element.parentElement);
                             }
                         }
                         this.element.querySelector('[select-end="true"]')?.removeAttribute("select-end");

@@ -1326,13 +1326,13 @@ export class WYSIWYG {
             if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRedo") {
                 return;
             }
-            /// #if !BROWSER
             if (event.inputType === "historyUndo") {
+                /// #if !BROWSER
                 getCurrentWindow().webContents.redo();
+                /// #endif
                 window.siyuan.menus.menu.remove();
                 return;
             }
-            /// #endif
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
             if (!blockElement) {

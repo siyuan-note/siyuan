@@ -39,6 +39,9 @@ export const openFileById = (options: {
             lockFile(data.data);
             return;
         }
+        if (typeof options.removeCurrentTab === "undefined") {
+            options.removeCurrentTab = true;
+        }
         openFile({
             fileName: data.data.rootTitle,
             rootIcon: data.data.rootIcon,
@@ -58,7 +61,8 @@ export const openAsset = (assetPath: string, page: number | string, position?: s
     openFile({
         assetPath,
         page,
-        position
+        position,
+        removeCurrentTab: true
     });
 };
 

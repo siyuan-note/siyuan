@@ -820,16 +820,17 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	var cloudRepo cloud.Cloud
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
-		cloudRepo = &cloud.SiYuan{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
+		cloudRepo = cloud.NewSiYuan(&cloud.BaseCloud{Conf: cloudConf})
 	case conf.ProviderQiniu:
-		cloudRepo = &cloud.Qiniu{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
+		cloudRepo = cloud.NewQiniu(&cloud.BaseCloud{Conf: cloudConf})
 	case conf.ProviderWebDAV:
 		webdavClient := gowebdav.NewClient(cloudConf.Endpoint, cloudConf.Username, cloudConf.Password)
 		a := cloudConf.Username + ":" + cloudConf.Password
 		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(a))
 		webdavClient.SetHeader("Authorization", auth)
+		webdavClient.SetHeader("User-Agent", util.UserAgent)
 		webdavClient.SetTimeout(30 * time.Second)
-		cloudRepo = &cloud.WebDAV{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}, Client: webdavClient}
+		cloudRepo = cloud.NewWebDAV(&cloud.BaseCloud{Conf: cloudConf}, webdavClient)
 	default:
 		err = fmt.Errorf("unknown cloud provider [%d]", Conf.Sync.Provider)
 		return

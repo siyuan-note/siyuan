@@ -142,6 +142,8 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 	downloadPkgURLs = append(downloadPkgURLs, url)
 	url = "https://ghproxy.com/" + url
 	downloadPkgURLs = append(downloadPkgURLs, url)
+	url = "https://release-r2.b3log.org/siyuan/" + pkg
+	downloadPkgURLs = append(downloadPkgURLs, url)
 	url = "https://release.b3log.org/siyuan/" + pkg
 	downloadPkgURLs = append(downloadPkgURLs, url)
 

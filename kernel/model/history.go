@@ -352,6 +352,9 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, 
 	if nil != err {
 		return
 	}
+	if 1 > len(ret) {
+		ret = []string{}
+	}
 	if 1 > len(result) {
 		return
 	}

@@ -204,10 +204,6 @@ export class Files extends Model {
             }
         });
         this.element.addEventListener("click", (event) => {
-            if (event.detail !== 1) {
-                setPanelFocus(this.element.parentElement);
-                return;
-            }
             let target = event.target as HTMLElement;
             const ulElement = hasTopClosestByTag(target, "UL");
             let needFocus = true;

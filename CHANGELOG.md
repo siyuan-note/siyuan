@@ -1,3 +1,32 @@
+## v2.4.11 / 2022-11-08
+
+### 改进功能
+
+* [文档树移除笔记本双击操作并优化点击笔记本展开速度](https://github.com/siyuan-note/siyuan/issues/6500)
+* [改进鼠标移动到空文档名处光标状态](https://github.com/siyuan-note/siyuan/issues/6503)
+* [移动端后退页面包含嵌入块时定位不准确](https://github.com/siyuan-note/siyuan/issues/6505)
+* [在 `新页签中打开` 快捷键更改为 `Ctrl+Alt+Click` 或鼠标中键](https://github.com/siyuan-note/siyuan/issues/6510)
+* [优化在当前页签中打开的交互](https://github.com/siyuan-note/siyuan/issues/6512)
+* [开源数据同步 WebDAV 实现](https://github.com/siyuan-note/siyuan/issues/6513)
+* [移动端弹起键盘时减少抖动](https://github.com/siyuan-note/siyuan/issues/6514)
+* [iPad 端外接键盘底部不留空](https://github.com/siyuan-note/siyuan/issues/6515)
+* [iOS/iPad 端系统版本最低要求从 13.6 提升到 14.0](https://github.com/siyuan-note/siyuan/issues/6521)
+* [隐藏 iPad 顶部状态栏](https://github.com/siyuan-note/siyuan/issues/6522)
+
+### 开发重构
+
+* [重构 `文件历史` 查询](https://github.com/siyuan-note/siyuan/issues/6504)
+
+### 修复缺陷
+
+* [macOS 端报错 `内核连接中断` 以及 `数据库被锁定`](https://github.com/siyuan-note/siyuan/issues/6492)
+* [移动端文档树菜单点击无效](https://github.com/siyuan-note/siyuan/issues/6493)
+* [行内备注无法被搜索到](https://github.com/siyuan-note/siyuan/issues/6494)
+* [块末尾为数学公式时 `Shift+↓` 选中范围错误](https://github.com/siyuan-note/siyuan/issues/6495)
+* [文档树中笔记本无法进行排序](https://github.com/siyuan-note/siyuan/issues/6499)
+* [通过 `Shift+Click` 多选块移动时丢失块](https://github.com/siyuan-note/siyuan/issues/6511)
+* [`Ctrl+Shift+V` 外链资源文件失效](https://github.com/siyuan-note/siyuan/issues/6520)
+
 ## v2.4.10 / 2022-11-05
 
 ### 改进功能

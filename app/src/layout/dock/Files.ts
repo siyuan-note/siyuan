@@ -202,7 +202,7 @@ export class Files extends Model {
                 }
                 target = target.parentElement;
             }
-        })
+        });
         this.element.addEventListener("click", (event) => {
             if (event.detail !== 1) {
                 setPanelFocus(this.element.parentElement);
@@ -319,14 +319,14 @@ export class Files extends Model {
                     selectElements = [liElement];
                 }
                 let ids = "";
-                const ghostElement = document.createElement("ul")
+                const ghostElement = document.createElement("ul");
                 selectElements.forEach((item: HTMLElement) => {
                     ghostElement.append(item.cloneNode(true));
                     item.style.opacity = "0.1";
                     ids += (item.getAttribute("data-node-id") || "") + ",";
                 });
-                ghostElement.setAttribute("style", `width: 219px;position: fixed;top:-${selectElements.length * 30}px`)
-                ghostElement.setAttribute("class", "b3-list b3-list--background")
+                ghostElement.setAttribute("style", `width: 219px;position: fixed;top:-${selectElements.length * 30}px`);
+                ghostElement.setAttribute("class", "b3-list b3-list--background");
                 document.body.append(ghostElement);
                 event.dataTransfer.setDragImage(ghostElement, 16, 16);
                 event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, ids);
@@ -335,7 +335,7 @@ export class Files extends Model {
                 window.siyuan.dragElement.innerText = ids;
                 setTimeout(() => {
                     ghostElement.remove();
-                })
+                });
             }
         });
         this.element.addEventListener("dragend", () => {

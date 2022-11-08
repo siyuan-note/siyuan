@@ -105,7 +105,7 @@ export class Toolbar {
                     this.range.collapse(false);
                 } else if (event.key === "ArrowUp") {
                     this.range = setFirstNodeRange(getContenteditableElement(endElement), range);
-                    nodeElement = hasClosestBlock(endElement)
+                    nodeElement = hasClosestBlock(endElement);
                     if (!nodeElement) {
                         return;
                     }

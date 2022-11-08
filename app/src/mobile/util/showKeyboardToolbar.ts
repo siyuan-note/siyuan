@@ -23,7 +23,7 @@ export const showKeyboardToolbar = (bottom = 0) => {
     toolbarElement.style.bottom = bottom + "px";
 
     setTimeout(() => {
-        const contentElement = window.siyuan.mobileEditor.protyle.contentElement
+        const contentElement = window.siyuan.mobileEditor.protyle.contentElement;
         const cursorTop = getSelectionPosition(contentElement).top - contentElement.getBoundingClientRect().top;
         if (cursorTop < window.innerHeight - 96) {
             return;

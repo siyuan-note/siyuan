@@ -1931,7 +1931,7 @@ export class WYSIWYG {
                             // 清除选中的子块 https://ld246.com/article/1667826582251
                             item.querySelectorAll(".protyle-wysiwyg--select").forEach(subItem => {
                                 subItem.classList.remove("protyle-wysiwyg--select");
-                            })
+                            });
                         });
                         countBlockWord(ids);
                         if (toDown) {

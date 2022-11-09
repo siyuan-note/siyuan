@@ -111,12 +111,19 @@ export const fontMenu = (protyle: IProtyle) => {
         <option ${fontSize === "40px" ? "selected" : ""} value="40px">40px</option>
         <option ${fontSize === "48px" ? "selected" : ""} value="48px">48px</option>
     </select>
-</div>`;
+</div>
+<div class="fn__hr"></div>
+<button class="b3-button b3-button--cancel" data-type="clear"><svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.clearFontStyle}</button>`;
     element.addEventListener(getEventName(), function (event: Event) {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(element)) {
+            const dataType = target.getAttribute("data-type")
             if (target.tagName === "BUTTON") {
-                fontEvent(protyle, target.getAttribute("data-type"), target.style.backgroundColor || target.textContent);
+                if (dataType === "clear") {
+                    protyle.toolbar.setInlineMark(protyle, "clear", "range", {type:"text"});
+                } else {
+                    fontEvent(protyle, dataType, target.style.backgroundColor || target.textContent);
+                }
                 break;
             }
             target = target.parentElement;
@@ -282,4 +289,5 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             textObj.color === sideElement.style.fontSize &&
             backgroundColor === sideElement.style.backgroundColor;
     }
+    return true; // 清除字体样式会使用 "text" 作为标识
 };

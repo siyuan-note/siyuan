@@ -338,9 +338,16 @@ export class Toolbar {
                     const types = item.getAttribute("data-type").split(" ");
                     if (type === "clear") {
                         for (let i = 0; i < types.length; i++) {
-                            if (["kbd", "text", "strong", "em", "u", "s", "mark", "sup", "sub", "code"].includes(types[i])) {
-                                types.splice(i, 1);
-                                i--;
+                            if (textObj.type === "text") {
+                                if ("text" === types[i]) {
+                                    types.splice(i, 1);
+                                    i--;
+                                }
+                            } else {
+                                if (["kbd", "text", "strong", "em", "u", "s", "mark", "sup", "sub", "code"].includes(types[i])) {
+                                    types.splice(i, 1);
+                                    i--;
+                                }
                             }
                         }
                     } else {

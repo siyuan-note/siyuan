@@ -1965,8 +1965,8 @@ export class WYSIWYG {
                         item.removeAttribute("select-start");
                         item.removeAttribute("select-end");
                     });
-                    const ctrlParentElement = hasClosestByClassName(ctrlElement, "protyle-wysiwyg--select");
-                    if (ctrlParentElement && !ctrlElement.isSameNode(ctrlParentElement)) {
+                    const ctrlParentElement = hasClosestByClassName(ctrlElement.parentElement, "protyle-wysiwyg--select");
+                    if (ctrlParentElement) {
                         ctrlParentElement.classList.remove("protyle-wysiwyg--select");
                         ctrlParentElement.removeAttribute("select-start");
                         ctrlParentElement.removeAttribute("select-end");

@@ -378,14 +378,21 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 
 	for _, d := range dirs {
 		dirSize := d.Size
-		syncDirs = append(syncDirs, &Sync{
+		sync := &Sync{
 			Size:      dirSize,
-			HSize:     humanize.Bytes(uint64(dirSize)),
+			HSize:     "-",
 			Updated:   d.Updated,
 			CloudName: d.Name,
-		})
+		}
+		if conf.ProviderSiYuan == Conf.Sync.Provider {
+			sync.HSize = humanize.Bytes(uint64(dirSize))
+		}
+		syncDirs = append(syncDirs, sync)
 	}
-	hSize = humanize.Bytes(uint64(size))
+	hSize = "-"
+	if conf.ProviderSiYuan == Conf.Sync.Provider {
+		hSize = humanize.Bytes(uint64(size))
+	}
 	return
 }
 

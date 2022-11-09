@@ -338,7 +338,7 @@ export class Toolbar {
                     const types = item.getAttribute("data-type").split(" ");
                     if (type === "clear") {
                         for (let i = 0; i < types.length; i++) {
-                            if (Constants.INLINE_TYPE.includes(types[i])) {
+                            if (["kbd", "text", "strong", "em", "u", "s", "mark", "sup", "sub", "code"].includes(types[i])) {
                                 types.splice(i, 1);
                                 i--;
                             }

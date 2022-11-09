@@ -21,7 +21,6 @@ import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../
 import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {cancelSB, insertEmptyBlock, jumpToParentNext} from "../../block/util";
-import {scrollCenter} from "../../util/highlightById";
 import {countBlockWord} from "../../layout/status";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
@@ -29,6 +28,7 @@ import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {openMobileFileById} from "../../mobile/editor";
 import {mathRender} from "../markdown/mathRender";
+import {duplicateBlock} from "../wysiwyg/commonHotkey";
 
 export class Gutter {
     public element: HTMLElement;
@@ -543,46 +543,55 @@ export class Gutter {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
-            accelerator: "⌘C",
-            click() {
-                if (isNotEditBlock(selectsElement[0])) {
+            type: "submenu",
+            submenu: [{
+                label: window.siyuan.languages.copy,
+                accelerator: "⌘C",
+                click() {
+                    if (isNotEditBlock(selectsElement[0])) {
+                        let html = "";
+                        selectsElement.forEach(item => {
+                            html += removeEmbed(item);
+                        });
+                        writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
+                    } else {
+                        focusByRange(getEditorRange(selectsElement[0]));
+                        document.execCommand("copy");
+                    }
+                }
+            }, {
+                label: window.siyuan.languages.copyPlainText,
+                accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
+                click() {
                     let html = "";
                     selectsElement.forEach(item => {
-                        html += removeEmbed(item);
-                    });
-                    writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
-                } else {
-                    focusByRange(getEditorRange(selectsElement[0]));
-                    document.execCommand("copy");
-                }
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.copyPlainText,
-            accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
-            click() {
-                let html = "";
-                selectsElement.forEach(item => {
-                    item.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
-                        const cloneNode = editItem.cloneNode(true) as HTMLElement;
-                        cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
-                            slashItem.firstElementChild.remove();
+                        item.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
+                            const cloneNode = editItem.cloneNode(true) as HTMLElement;
+                            cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
+                                slashItem.firstElementChild.remove();
+                            });
+                            html += cloneNode.textContent + "\n";
                         });
-                        html += cloneNode.textContent + "\n";
                     });
-                });
-                writeText(html.trimEnd());
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.copy + " HTML",
-            click() {
-                let html = "";
-                selectsElement.forEach(item => {
-                    html += item.outerHTML;
-                });
-                writeText(protyle.lute.BlockDOM2HTML(html));
-            }
+                    writeText(html.trimEnd());
+                }
+            }, {
+                label: window.siyuan.languages.copy + " HTML",
+                click() {
+                    let html = "";
+                    selectsElement.forEach(item => {
+                        html += item.outerHTML;
+                    });
+                    writeText(protyle.lute.BlockDOM2HTML(html));
+                }
+            }, {
+                label: window.siyuan.languages.duplicate,
+                accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
+                disabled: protyle.disabled,
+                click() {
+                    duplicateBlock(selectsElement, protyle);
+                }
+            }]
         }).element);
         if (protyle.disabled) {
             return;
@@ -948,26 +957,10 @@ export class Gutter {
                 }
             }, {
                 label: window.siyuan.languages.duplicate,
+                accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
                 disabled: protyle.disabled,
                 click() {
-                    const tempElement = nodeElement.cloneNode(true) as HTMLElement;
-                    const newId = Lute.NewNodeID();
-                    tempElement.setAttribute("data-node-id", newId);
-                    tempElement.querySelectorAll("[data-node-id]").forEach(item => {
-                        item.setAttribute("data-node-id", Lute.NewNodeID());
-                    });
-                    nodeElement.after(tempElement);
-                    scrollCenter(protyle);
-                    transaction(protyle, [{
-                        action: "insert",
-                        data: nodeElement.nextElementSibling.outerHTML,
-                        id: newId,
-                        previousID: id,
-                    }], [{
-                        action: "delete",
-                        id: newId,
-                    }]);
-                    focusBlock(tempElement);
+                    duplicateBlock([nodeElement], protyle);
                 }
             }])
         }).element);

@@ -42,7 +42,7 @@ import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
-import {commonHotkey, downSelect, getStartEndElement, upSelect} from "./commonHotkey";
+import {commonHotkey, downSelect, duplicateBlock, getStartEndElement, upSelect} from "./commonHotkey";
 import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
@@ -1443,6 +1443,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 type: "BlocksMergeSuperBlock",
                 level: "col"
             });
+            return;
+        }
+
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.duplicate.custom, event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectsElement.length === 0) {
+                selectsElement = [nodeElement];
+            }
+            duplicateBlock(selectsElement, protyle);
             return;
         }
 

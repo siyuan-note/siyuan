@@ -2,6 +2,7 @@ import {matchHotKey} from "../util/hotKey";
 import {fetchPost} from "../../util/fetch";
 import {writeText} from "../util/compatibility";
 import {
+    focusBlock,
     focusByOffset,
     getSelectionOffset,
     setFirstNodeRange,
@@ -16,6 +17,8 @@ import {getContenteditableElement} from "./getBlock";
 import {hasClosestByMatchTag} from "../util/hasClosest";
 import {hideElements} from "../ui/hideElements";
 import {countBlockWord} from "../../layout/status";
+import {scrollCenter} from "../../util/highlightById";
+import {transaction} from "./transaction";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
@@ -100,7 +103,7 @@ export const upSelect = (options: {
                     options.event.preventDefault();
                     return;
                 }
-            } else{
+            } else {
                 // 选中上一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
                 return;
             }
@@ -180,3 +183,35 @@ export const getStartEndElement = (selectElements: NodeListOf<Element> | Element
         endElement
     };
 };
+
+export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
+    let focusElement
+    const doOperations: IOperation[] = []
+    const undoOperations: IOperation[] = []
+    nodeElements.forEach((item, index) => {
+        const tempElement = item.cloneNode(true) as HTMLElement;
+        if (index === nodeElements.length - 1) {
+            focusElement = tempElement
+        }
+        const newId = Lute.NewNodeID();
+        tempElement.setAttribute("data-node-id", newId);
+        tempElement.querySelectorAll("[data-node-id]").forEach(childItem => {
+            childItem.setAttribute("data-node-id", Lute.NewNodeID());
+        });
+        item.classList.remove("protyle-wysiwyg--select");
+        item.after(tempElement);
+        doOperations.push({
+            action: "insert",
+            data: tempElement.outerHTML,
+            id: newId,
+            previousID: item.getAttribute("data-node-id"),
+        })
+        undoOperations.push({
+            action: "delete",
+            id: newId,
+        })
+    })
+    transaction(protyle, doOperations, undoOperations);
+    focusBlock(focusElement);
+    scrollCenter(protyle);
+}

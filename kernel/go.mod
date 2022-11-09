@@ -36,7 +36,7 @@ require (
 	github.com/panjf2000/ants/v2 v2.6.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20221109114140-2ac964c740a5
+	github.com/siyuan-note/dejavu v0.0.0-20221109135319-2ce1b3b9f80d
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da
 	github.com/siyuan-note/filelock v0.0.0-20221007163134-7e64809023ef
@@ -114,7 +114,7 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/exp v0.0.0-20221108223516-5d533826c662 // indirect
+	golang.org/x/exp v0.0.0-20221109134031-9ce248df8de5 // indirect
 	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect

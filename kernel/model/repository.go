@@ -1086,7 +1086,7 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hTraffi
 	syncUpdated := stat.Sync.Updated
 	s = &Sync{
 		Size:    syncSize,
-		HSize:   humanize.Bytes(uint64(syncSize)),
+		HSize:   "-",
 		Updated: syncUpdated,
 	}
 
@@ -1094,18 +1094,22 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hTraffi
 	backupUpdated := stat.Backup.Updated
 	b = &Backup{
 		Size:    backupSize,
-		HSize:   humanize.Bytes(uint64(backupSize)),
+		HSize:   "-",
 		Updated: backupUpdated,
 	}
 
 	assetSize := stat.AssetSize
 	totalSize := syncSize + backupSize + assetSize
-	hAssetSize = humanize.Bytes(uint64(assetSize))
-	hSize = humanize.Bytes(uint64(totalSize))
+	hAssetSize = "-"
+	hSize = "-"
 	hTotalSize = "-"
 	hTrafficUploadSize = "-"
 	hTrafficDownloadSize = "-"
 	if conf.ProviderSiYuan == Conf.Sync.Provider {
+		s.HSize = humanize.Bytes(uint64(syncSize))
+		b.HSize = humanize.Bytes(uint64(backupSize))
+		hAssetSize = humanize.Bytes(uint64(assetSize))
+		hSize = humanize.Bytes(uint64(totalSize))
 		hTotalSize = humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize))
 		hTrafficUploadSize = humanize.Bytes(uint64(Conf.User.UserTrafficUpload))
 		hTrafficDownloadSize = humanize.Bytes(uint64(Conf.User.UserTrafficDownload))

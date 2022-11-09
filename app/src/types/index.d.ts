@@ -332,6 +332,7 @@ declare interface IConfig {
         stat: string
         interval: number
         cloudName: string
+        provider: number
     },
     lang: string
     api: {

@@ -823,6 +823,8 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		cloudRepo = cloud.NewSiYuan(&cloud.BaseCloud{Conf: cloudConf})
 	case conf.ProviderQiniu:
 		cloudRepo = cloud.NewQiniu(&cloud.BaseCloud{Conf: cloudConf})
+	case conf.ProviderS3:
+		cloudRepo = cloud.NewS3(&cloud.BaseCloud{Conf: cloudConf})
 	case conf.ProviderWebDAV:
 		webdavClient := gowebdav.NewClient(cloudConf.Endpoint, cloudConf.Username, cloudConf.Password)
 		a := cloudConf.Username + ":" + cloudConf.Password
@@ -831,6 +833,8 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		webdavClient.SetHeader("User-Agent", util.UserAgent)
 		webdavClient.SetTimeout(30 * time.Second)
 		cloudRepo = cloud.NewWebDAV(&cloud.BaseCloud{Conf: cloudConf}, webdavClient)
+	case conf.ProviderOSS:
+		cloudRepo = cloud.NewOSS(&cloud.BaseCloud{Conf: cloudConf})
 	default:
 		err = fmt.Errorf("unknown cloud provider [%d]", Conf.Sync.Provider)
 		return
@@ -1038,16 +1042,6 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		Token:         token,
 		AvailableSize: availableSize,
 		Server:        util.AliyunServer,
-
-		// S3
-		AccessKey: Conf.Sync.S3.AccessKey,
-		SecretKey: Conf.Sync.S3.SecretKey,
-		Bucket:    Conf.Sync.S3.Bucket,
-		Region:    Conf.Sync.S3.Region,
-
-		// WebDAV
-		Username: Conf.Sync.WebDAV.Username,
-		Password: Conf.Sync.WebDAV.Password,
 	}
 
 	switch Conf.Sync.Provider {
@@ -1055,10 +1049,24 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		ret.Endpoint = "https://siyuan-data.b3logfile.com/"
 	case conf.ProviderQiniu:
 		ret.Endpoint = Conf.Sync.Qiniu.Endpoint
+		ret.AccessKey = Conf.Sync.Qiniu.AccessKey
+		ret.SecretKey = Conf.Sync.Qiniu.SecretKey
+		ret.Bucket = Conf.Sync.Qiniu.Bucket
 	case conf.ProviderS3:
 		ret.Endpoint = Conf.Sync.S3.Endpoint
+		ret.AccessKey = Conf.Sync.S3.AccessKey
+		ret.SecretKey = Conf.Sync.S3.SecretKey
+		ret.Bucket = Conf.Sync.S3.Bucket
+		ret.Region = Conf.Sync.S3.Region
 	case conf.ProviderWebDAV:
 		ret.Endpoint = Conf.Sync.WebDAV.Endpoint
+		ret.Username = Conf.Sync.WebDAV.Username
+		ret.Password = Conf.Sync.WebDAV.Password
+	case conf.ProviderOSS:
+		ret.Endpoint = Conf.Sync.OSS.Endpoint
+		ret.AccessKey = Conf.Sync.OSS.AccessKey
+		ret.SecretKey = Conf.Sync.OSS.SecretKey
+		ret.Bucket = Conf.Sync.OSS.Bucket
 	default:
 		err = fmt.Errorf("invalid provider [%d]", Conf.Sync.Provider)
 		return

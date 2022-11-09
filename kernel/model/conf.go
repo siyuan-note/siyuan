@@ -254,6 +254,10 @@ func InitConf() {
 		Conf.Sync.WebDAV = &conf.WebDAV{}
 	}
 	Conf.Sync.WebDAV.Endpoint = util.NormalizeEndpoint(Conf.Sync.WebDAV.Endpoint)
+	if nil == Conf.Sync.OSS {
+		Conf.Sync.OSS = &conf.OSS{}
+	}
+	Conf.Sync.OSS.Endpoint = util.NormalizeEndpoint(Conf.Sync.OSS.Endpoint)
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()

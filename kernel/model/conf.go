@@ -242,10 +242,6 @@ func InitConf() {
 	if 0 == Conf.Sync.Mode {
 		Conf.Sync.Mode = 1
 	}
-	if nil == Conf.Sync.Qiniu {
-		Conf.Sync.Qiniu = &conf.Qiniu{}
-	}
-	Conf.Sync.Qiniu.Endpoint = util.NormalizeEndpoint(Conf.Sync.Qiniu.Endpoint)
 	if nil == Conf.Sync.S3 {
 		Conf.Sync.S3 = &conf.S3{}
 	}

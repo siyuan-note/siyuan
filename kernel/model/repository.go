@@ -821,8 +821,8 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
 		cloudRepo = cloud.NewSiYuan(&cloud.BaseCloud{Conf: cloudConf})
-	case conf.ProviderQiniu:
-		cloudRepo = cloud.NewQiniu(&cloud.BaseCloud{Conf: cloudConf})
+	case conf.ProviderS3:
+		cloudRepo = cloud.NewS3(&cloud.BaseCloud{Conf: cloudConf})
 	case conf.ProviderWebDAV:
 		webdavClient := gowebdav.NewClient(cloudConf.Endpoint, cloudConf.Username, cloudConf.Password)
 		a := cloudConf.Username + ":" + cloudConf.Password
@@ -1038,27 +1038,21 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		Token:         token,
 		AvailableSize: availableSize,
 		Server:        util.AliyunServer,
-
-		// S3
-		AccessKey: Conf.Sync.S3.AccessKey,
-		SecretKey: Conf.Sync.S3.SecretKey,
-		Bucket:    Conf.Sync.S3.Bucket,
-		Region:    Conf.Sync.S3.Region,
-
-		// WebDAV
-		Username: Conf.Sync.WebDAV.Username,
-		Password: Conf.Sync.WebDAV.Password,
 	}
 
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
 		ret.Endpoint = "https://siyuan-data.b3logfile.com/"
-	case conf.ProviderQiniu:
-		ret.Endpoint = Conf.Sync.Qiniu.Endpoint
 	case conf.ProviderS3:
 		ret.Endpoint = Conf.Sync.S3.Endpoint
+		ret.AccessKey = Conf.Sync.S3.AccessKey
+		ret.SecretKey = Conf.Sync.S3.SecretKey
+		ret.Bucket = Conf.Sync.S3.Bucket
+		ret.Region = Conf.Sync.S3.Region
 	case conf.ProviderWebDAV:
 		ret.Endpoint = Conf.Sync.WebDAV.Endpoint
+		ret.Username = Conf.Sync.WebDAV.Username
+		ret.Password = Conf.Sync.WebDAV.Password
 	default:
 		err = fmt.Errorf("invalid provider [%d]", Conf.Sync.Provider)
 		return
@@ -1092,7 +1086,7 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hTraffi
 	syncUpdated := stat.Sync.Updated
 	s = &Sync{
 		Size:    syncSize,
-		HSize:   humanize.Bytes(uint64(syncSize)),
+		HSize:   "-",
 		Updated: syncUpdated,
 	}
 
@@ -1100,18 +1094,22 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hTraffi
 	backupUpdated := stat.Backup.Updated
 	b = &Backup{
 		Size:    backupSize,
-		HSize:   humanize.Bytes(uint64(backupSize)),
+		HSize:   "-",
 		Updated: backupUpdated,
 	}
 
 	assetSize := stat.AssetSize
 	totalSize := syncSize + backupSize + assetSize
-	hAssetSize = humanize.Bytes(uint64(assetSize))
-	hSize = humanize.Bytes(uint64(totalSize))
+	hAssetSize = "-"
+	hSize = "-"
 	hTotalSize = "-"
 	hTrafficUploadSize = "-"
 	hTrafficDownloadSize = "-"
 	if conf.ProviderSiYuan == Conf.Sync.Provider {
+		s.HSize = humanize.Bytes(uint64(syncSize))
+		b.HSize = humanize.Bytes(uint64(backupSize))
+		hAssetSize = humanize.Bytes(uint64(assetSize))
+		hSize = humanize.Bytes(uint64(totalSize))
 		hTotalSize = humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize))
 		hTrafficUploadSize = humanize.Bytes(uint64(Conf.User.UserTrafficUpload))
 		hTrafficDownloadSize = humanize.Bytes(uint64(Conf.User.UserTrafficDownload))

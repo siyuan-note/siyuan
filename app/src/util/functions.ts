@@ -3,7 +3,7 @@ export const isMobile = () => {
 };
 
 export const isTouchDevice = () => {
-    return ("ontouchstart" in window) || navigator.maxTouchPoints > 1;
+    return ("ontouchstart" in window) && navigator.maxTouchPoints > 1;
 };
 
 export const isArrayEqual = (arr1: string[], arr2: string[]) => {

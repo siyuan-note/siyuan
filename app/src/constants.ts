@@ -137,6 +137,7 @@ export abstract class Constants {
         },
         editor: {
             general: {
+                duplicate: {default: "⌘D", custom: "⌘D"},
                 expandDown: {default: "⌥⇧↓", custom: "⌥⇧↓"},
                 expandUp: {default: "⌥⇧↑", custom: "⌥⇧↑"},
                 copyPlainText: {default: "", custom: ""},
@@ -192,7 +193,7 @@ export abstract class Constants {
                 italic: {default: "⌘I", custom: "⌘I"},
                 mark: {default: "⌘E", custom: "⌘E"},
                 tag: {default: "⌘T", custom: "⌘T"},
-                strike: {default: "⌘D", custom: "⌘D"},
+                strike: {default: "⇧⌘S", custom: "⇧⌘S"},
                 "inline-code": {default: "⌘G", custom: "⌘G"},
                 link: {default: "⌘K", custom: "⌘K"},
                 check: {default: "⌘L", custom: "⌘L"},

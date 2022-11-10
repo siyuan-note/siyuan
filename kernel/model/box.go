@@ -52,13 +52,19 @@ type Box struct {
 }
 
 func AutoStat() {
+	autoStat()
 	for range time.Tick(10 * time.Minute) {
 		autoStat()
 	}
 }
 
 func autoStat() {
-	Conf.Stat.DocCount = sql.CountAllDoc()
+	Conf.Stat.TreeCount = treenode.CountTrees()
+	Conf.Stat.CTreeCount = treenode.CeilCount(Conf.Stat.TreeCount)
+	Conf.Stat.BlockCount = treenode.CountBlocks()
+	Conf.Stat.BlockCount = treenode.CeilCount(Conf.Stat.BlockCount)
+	Conf.Stat.DataSize, _ = util.SizeOfDirectory(util.DataDir)
+	Conf.Stat.CDataSize = util.CeilSize(Conf.Stat.DataSize)
 	Conf.Save()
 }
 

@@ -209,6 +209,19 @@ func SizeOfDirectory(path string) (size int64, err error) {
 	return
 }
 
+func CeilSize(size int64) int64 {
+	if 100*1024*1024 > size {
+		return 100 * 1024 * 1024
+	}
+
+	for i := int64(1); i < 40; i++ {
+		if 1024*1024*200*i > size {
+			return 1024 * 1024 * int64(i)
+		}
+	}
+	return 1024*1024*200*40 + 1
+}
+
 func IsReservedFilename(baseName string) bool {
 	return "assets" == baseName || "templates" == baseName || "widgets" == baseName || "emojis" == baseName || ".siyuan" == baseName || strings.HasPrefix(baseName, ".")
 }

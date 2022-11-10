@@ -405,6 +405,14 @@ declare interface IConfig {
         virtualRefAlias: boolean
         virtualRefAnchor: boolean
         virtualRefDoc: boolean
+    },
+    stat: {
+        treeCount: number
+        cTreeCount: number
+        blockCount: number
+        cBlockCount: number
+        dataSize: number
+        cDataSize: number
     }
 }
 

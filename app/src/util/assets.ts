@@ -142,6 +142,9 @@ export const addGA = () => {
             subscriptionType: -1,
             syncEnabled: false,
             syncProvider: -1,
+            cTreeCount: window.siyuan.config.stat.cTreeCount,
+            cBlockCount: window.siyuan.config.stat.cBlockCount,
+            cDataSize: window.siyuan.config.stat.cDataSize,
         };
         if (window.siyuan.user) {
             para.isLoggedIn = true;

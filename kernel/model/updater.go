@@ -97,7 +97,7 @@ func checkDownloadInstallPkg() {
 		return
 	}
 
-	msgId := util.PushMsg(Conf.Language(103), 60*1000*10)
+	msgId := util.PushMsg(Conf.Language(103), 1000*7)
 	succ := false
 	for _, downloadPkgURL := range downloadPkgURLs {
 		err = downloadInstallPkg(downloadPkgURL, checksum)

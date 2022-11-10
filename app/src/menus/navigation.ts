@@ -24,10 +24,34 @@ import {newFile} from "../util/newFile";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {deleteFiles} from "../editor/deleteFile";
 
+const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
+    const fileItemElement = Array.from(selectItemElements).find(item => {
+        if (item.getAttribute("data-type") === "navigation-file") {
+            return true
+        }
+    })
+    if (!fileItemElement) {
+        return window.siyuan.menus.menu;
+    }
+    window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(
+        Array.from(selectItemElements)
+    )));
+    window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconTrashcan",
+        label: window.siyuan.languages.delete,
+        accelerator: "⌦",
+        click: () => {
+            deleteFiles(Array.from(selectItemElements));
+        }
+    }).element);
+    return window.siyuan.menus.menu;
+}
+
 export const initNavigationMenu = (liElement: HTMLElement) => {
+    window.siyuan.menus.menu.remove();
     const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
-        return;
+        return window.siyuan.menus.menu;
     }
     if (!liElement.classList.contains("b3-list-item--focus")) {
         fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
@@ -37,9 +61,12 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
         });
         liElement.classList.add("b3-list-item--focus");
     }
+    const selectItemElements = fileElement.querySelectorAll(".b3-list-item--focus")
+    if (selectItemElements.length > 1) {
+        return initMultiMenu(selectItemElements);
+    }
     const notebookId = liElement.parentElement.getAttribute("data-url");
     const name = getNotebookName(notebookId);
-    window.siyuan.menus.menu.remove();
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(renameMenu({
             path: "/",
@@ -142,9 +169,10 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
 };
 
 export const initFileMenu = (notebookId: string, pathString: string, liElement: Element) => {
+    window.siyuan.menus.menu.remove();
     const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
-        return;
+        return  window.siyuan.menus.menu;
     }
     if (!liElement.classList.contains("b3-list-item--focus")) {
         fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
@@ -154,9 +182,12 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
         });
         liElement.classList.add("b3-list-item--focus");
     }
+    const selectItemElements = fileElement.querySelectorAll(".b3-list-item--focus")
+    if (selectItemElements.length > 1) {
+        return initMultiMenu(selectItemElements);
+    }
     const id = liElement.getAttribute("data-node-id");
     let name = liElement.getAttribute("data-name");
-    window.siyuan.menus.menu.remove();
     name = getDisplayName(name, false, true);
     if (!window.siyuan.config.readonly) {
         if (window.siyuan.config.fileTree.sort === 6) {

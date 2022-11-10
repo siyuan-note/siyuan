@@ -614,7 +614,12 @@ export class Toolbar {
                 this.range.collapse(true);
             } else {
                 if (lastNewNode.lastChild) {
-                    this.range.setEnd(lastNewNode.lastChild, lastNewNode.lastChild.textContent.length);
+                    if (lastNewNode.lastChild.textContent === Constants.ZWSP) {
+                        // 新建元素时光标消失 https://github.com/siyuan-note/siyuan/issues/6481
+                        this.range.collapse();
+                    } else {
+                        this.range.setEnd(lastNewNode.lastChild, lastNewNode.lastChild.textContent.length);
+                    }
                 } else if (lastNewNode.nodeType === 3) {
                     this.range.setEnd(lastNewNode, lastNewNode.textContent.length);
                     if (lastNewNode.textContent === Constants.ZWSP) {

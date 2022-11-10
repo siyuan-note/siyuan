@@ -117,7 +117,7 @@ export const fontMenu = (protyle: IProtyle) => {
     element.addEventListener(getEventName(), function (event: Event) {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(element)) {
-            const dataType = target.getAttribute("data-type")
+            const dataType = target.getAttribute("data-type");
             if (target.tagName === "BUTTON") {
                 if (dataType === "clear") {
                     protyle.toolbar.setInlineMark(protyle, "clear", "range", {type:"text"});

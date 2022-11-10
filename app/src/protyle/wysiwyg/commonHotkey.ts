@@ -185,13 +185,13 @@ export const getStartEndElement = (selectElements: NodeListOf<Element> | Element
 };
 
 export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
-    let focusElement
-    const doOperations: IOperation[] = []
-    const undoOperations: IOperation[] = []
+    let focusElement;
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
     nodeElements.forEach((item, index) => {
         const tempElement = item.cloneNode(true) as HTMLElement;
         if (index === nodeElements.length - 1) {
-            focusElement = tempElement
+            focusElement = tempElement;
         }
         const newId = Lute.NewNodeID();
         tempElement.setAttribute("data-node-id", newId);
@@ -205,13 +205,13 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
             data: tempElement.outerHTML,
             id: newId,
             previousID: item.getAttribute("data-node-id"),
-        })
+        });
         undoOperations.push({
             action: "delete",
             id: newId,
-        })
-    })
+        });
+    });
     transaction(protyle, doOperations, undoOperations);
     focusBlock(focusElement);
     scrollCenter(protyle);
-}
+};

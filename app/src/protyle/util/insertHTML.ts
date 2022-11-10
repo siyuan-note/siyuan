@@ -183,7 +183,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         } else {
             if (item.classList.contains("li") && !blockElement.parentElement.classList.contains("list")) {
                 // https://github.com/siyuan-note/siyuan/issues/6534
-                addId = Lute.NewNodeID()
+                addId = Lute.NewNodeID();
                 const liElement = document.createElement("div");
                 liElement.setAttribute("data-subtype", item.getAttribute("data-subtype"));
                 liElement.setAttribute("data-node-id", addId);

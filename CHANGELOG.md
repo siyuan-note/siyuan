@@ -1,3 +1,28 @@
+## v2.4.12 / 2022-11-10
+
+### 改进功能
+
+* [光标位于段落块首的图片前时无法显示](https://github.com/siyuan-note/siyuan/issues/6136)
+* [为块重复添加快捷键 `Ctrl+D` 删除线快捷键修改为 `Ctrl+Shift+S`](https://github.com/siyuan-note/siyuan/issues/6477)
+* [快捷键新建行内元素后光标消失](https://github.com/siyuan-note/siyuan/issues/6481)
+* [行级清除样式不再清除备注、链接、标签、公式、PDF 标注和引用](https://github.com/siyuan-note/siyuan/issues/6501)
+* [为字体添加恢复默认功能](https://github.com/siyuan-note/siyuan/issues/6502)
+* [改进 WebDAV 数据同步创建目录实现](https://github.com/siyuan-note/siyuan/issues/6525)
+* [数据同步接入 S3 协议兼容的对象存储服务](https://github.com/siyuan-note/siyuan/issues/6528)
+* [行级代码、标签和键盘元素在块首时光标无法移动到元素前](https://github.com/siyuan-note/siyuan/issues/6529)
+* [调整数据同步接入第三方存储服务](https://github.com/siyuan-note/siyuan/issues/6530)
+* [文档树多选后右键菜单仅显示可操作的项](https://github.com/siyuan-note/siyuan/issues/6531)
+* [支持跨块及多选块重复](https://github.com/siyuan-note/siyuan/issues/6532)
+* [`Ctrl+Click` 选块应禁止嵌套选中](https://github.com/siyuan-note/siyuan/issues/6533)
+* [改进 WebDAV 上传数据性能](https://github.com/siyuan-note/siyuan/issues/6535)
+
+### 修复缺陷
+
+* [文档树上的文档无法拖动](https://github.com/siyuan-note/siyuan/issues/6497)
+* [设置在当前页签中打开失效](https://github.com/siyuan-note/siyuan/issues/6524)
+* [浏览器端数学公式内撤销导致状态异常](https://github.com/siyuan-note/siyuan/issues/6526)
+* [选中段落块和列表项块后粘贴会出现独立的列表项块](https://github.com/siyuan-note/siyuan/issues/6534)
+
 ## v2.4.11 / 2022-11-08
 
 ### 改进功能

@@ -1,4 +1,7 @@
 {
+  "syncProviderIntro": "该特性目前处于免费公测阶段，支持 Amazon S3 协议兼容的云端服务。<br>在使用该特性前，请注意第三方云端存储服务的技术限制和计费项目等条款：<ul><li>接口调用频率、带宽等技术限制</li><li>存储空间和流量等计费项目</li><li>使用条款和可用性保障等条款</li></ul><br>免责声明：请参考思源笔记 AGPLv3 中的条款。",
+  "syncProvider": "云端存储服务提供商",
+  "syncProviderTip": "选择后将使用该提供商的云端存储服务实现云端同步和备份功能",
   "confirmReset": "确定将所有快捷键都恢复为默认设置？",
   "notBatchRemove": "不支持笔记本批量删除",
   "confirmRemoveAll": "确定删除选中的所有文件？",

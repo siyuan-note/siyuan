@@ -65,7 +65,7 @@ const renderProvider = (provider: number) => {
 </div>`;
         }
         return `<div class="b3-label b3-label--noborder">
-    正在使用官方同步啦啦啦
+    ${window.siyuan.languages.syncProviderIntro}
 </div>`;
     } else if (provider === 2) {
         return `<label class="b3-label b3-label--noborder fn__flex">

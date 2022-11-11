@@ -60,7 +60,7 @@ export const initConfigSearch = (element: HTMLElement) => {
         // 云端
         getLang(["cloudStorage", "trafficStat", "sync", "backup", "cdn", "total", "sizeLimit", "cloudBackup",
             "cloudBackupTip", "updatePath", "cloudSync", "upload", "download", "syncMode", "syncModeTip",
-            "generateConflictDoc", "generateConflictDocTip",
+            "generateConflictDoc", "generateConflictDocTip", "syncProvider", "syncProviderTip",
             "syncMode1", "syncMode2", "reposTip", "openSyncTip1", "openSyncTip2", "cloudSyncDir", "config"]),
 
         // 账号

@@ -98,7 +98,8 @@
     overflow: hidden !important;
   }
 
-  &:last-child {
+  &:last-child,
+  &--noborder {
     border-bottom: 0;
   }
 }

@@ -36,12 +36,11 @@ const renderCloudBackup = () => {
     });
 };
 
-export const repos = {
-    element: undefined as Element,
-    genHTML: () => {
-        if (needSubscribe("")) {
-            return `<div class="b3-label">${window.siyuan.config.system.container === "ios" ? window.siyuan.languages._kernel[122] : window.siyuan.languages._kernel[29]}</div>
-<div class="b3-label">
+const renderProvider = (provider: number) => {
+    if (provider === 0) {
+        if (needSubscribe()) {
+            return `<div class="b3-label b3-label--noborder">${window.siyuan.config.system.container === "ios" ? window.siyuan.languages._kernel[122] : window.siyuan.languages._kernel[29]}</div>
+<div class="b3-label b3-label--noborder">
     ${window.siyuan.languages.cloudIntro1}
     <div class="b3-label__text">
         <ul style="padding-left: 2em">
@@ -55,7 +54,7 @@ export const repos = {
         </ul>
     </div>
 </div>
-<div class="b3-label">
+<div class="b3-label b3-label--noborder">
     ${window.siyuan.languages.cloudIntro9}
     <div class="b3-label__text">
         <ul style="padding-left: 2em">
@@ -63,19 +62,17 @@ export const repos = {
             <li>${window.siyuan.languages.cloudIntro11}</li>
         </ul>
     </div>
-</div>`;
+</div>`
         }
-        let syncModeHTML = `<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.syncMode}
-        <div class="b3-label__text">${window.siyuan.languages.syncModeTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <select id="syncMode" class="b3-select fn__flex-center fn__size200">
-        <option value="1" ${window.siyuan.config.sync.mode === 1 ? "selected" : ""}>${window.siyuan.languages.syncMode1}</option>
-        <option value="2" ${window.siyuan.config.sync.mode === 2 ? "selected" : ""}>${window.siyuan.languages.syncMode2}</option>
-    </select>
-</label>`;
+    }
+    return "";
+}
+
+export const repos = {
+    element: undefined as Element,
+    genHTML: () => {
+        let syncModeHTML = "";
+        let syncProviderHTML = "";
         if (isMobile()) {
             syncModeHTML = `<div class="b3-label">
     ${window.siyuan.languages.syncMode}
@@ -86,9 +83,47 @@ export const repos = {
     </select>
     <div class="b3-label__text">${window.siyuan.languages.syncModeTip}</div>
 </div>`;
+            syncProviderHTML = `<div class="b3-label">
+    ${window.siyuan.languages.syncProvider}
+    <div class="fn__hr"></div>
+    <select id="syncProvider" class="b3-select fn__block">
+        <option value="0" ${window.siyuan.config.sync.provider === 0 ? "selected" : ""}>SiYuan</option>
+        <option value="2" ${window.siyuan.config.sync.provider === 2 ? "selected" : ""}>S3</option>
+        <option value="3" ${window.siyuan.config.sync.provider === 3 ? "selected" : ""}>WebDAV </option>
+    </select>
+    <div class="b3-label__text">${window.siyuan.languages.syncProviderTip}</div>
+</div>`;
+        } else {
+            syncModeHTML = `<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.syncMode}
+        <div class="b3-label__text">${window.siyuan.languages.syncModeTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <select id="syncMode" class="b3-select fn__flex-center fn__size200">
+        <option value="1" ${window.siyuan.config.sync.mode === 1 ? "selected" : ""}>${window.siyuan.languages.syncMode1}</option>
+        <option value="2" ${window.siyuan.config.sync.mode === 2 ? "selected" : ""}>${window.siyuan.languages.syncMode2}</option>
+    </select>
+</label>`;
+            syncProviderHTML = `<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.syncProvider}
+        <div class="b3-label__text">${window.siyuan.languages.syncProviderTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <select id="syncProvider" class="b3-select fn__flex-center fn__size200">
+        <option value="0" ${window.siyuan.config.sync.provider === 0 ? "selected" : ""}>SiYuan</option>
+        <option value="2" ${window.siyuan.config.sync.provider === 2 ? "selected" : ""}>S3</option>
+        <option value="3" ${window.siyuan.config.sync.provider === 3 ? "selected" : ""}>WebDAV </option>
+    </select>
+</label>`;
         }
         return `<div><div style="position: fixed;width: 800px;height: 434px;box-sizing: border-box;text-align: center;display: flex;align-items: center;justify-content: center;z-index: 1;" id="reposLoading">
     <img src="/stage/loading-pure.svg">
+</div>
+${syncProviderHTML}
+<div id="repoProviderPanel" class="b3-label">
+    ${renderProvider(window.siyuan.config.sync.provider)}
 </div>
 <div id="reposData" class="b3-label">
     <div class="fn__flex">

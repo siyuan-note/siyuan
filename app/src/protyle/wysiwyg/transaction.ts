@@ -121,6 +121,13 @@ const promiseTransaction = () => {
             if (gutterFoldElement) {
                 gutterFoldElement.removeAttribute("disabled");
             }
+            // 仅在 alt+click 箭头折叠时才会触发
+            protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
+                if (item.querySelector(`[data-node-id="${doOperations[0].id}"]`)) {
+                    item.removeAttribute("data-render")
+                    blockRender(protyle, item);
+                }
+            });
             return;
         }
 

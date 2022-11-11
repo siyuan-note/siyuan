@@ -104,8 +104,8 @@ export class Gutter {
                             }
                         }
                     });
-                    const doOperations: IOperation[] = []
-                    const undoOperations: IOperation[] = []
+                    const doOperations: IOperation[] = [];
+                    const undoOperations: IOperation[] = [];
                     Array.from(foldElement.children).forEach((ulElement) => {
                         if (ulElement.classList.contains("list")) {
                             Array.from(ulElement.children).forEach((listItemElement) => {
@@ -120,12 +120,12 @@ export class Gutter {
                                         action: "setAttrs",
                                         id: listId,
                                         data: JSON.stringify({fold: hasFold ? "0" : "1"})
-                                    })
+                                    });
                                     undoOperations.push({
                                         action: "setAttrs",
                                         id: listId,
                                         data: JSON.stringify({fold: hasFold ? "1" : "0"})
-                                    })
+                                    });
                                 }
                             });
                         }
@@ -169,8 +169,8 @@ export class Gutter {
                             }
                         }
                     });
-                    const doOperations: IOperation[] = []
-                    const undoOperations: IOperation[] = []
+                    const doOperations: IOperation[] = [];
+                    const undoOperations: IOperation[] = [];
                     Array.from(foldElement.parentElement.children).find((listItemElement) => {
                         if (listItemElement.classList.contains("li")) {
                             if (hasFold) {
@@ -183,12 +183,12 @@ export class Gutter {
                                 action: "setAttrs",
                                 id: listId,
                                 data: JSON.stringify({fold: hasFold ? "0" : "1"})
-                            })
+                            });
                             undoOperations.push({
                                 action: "setAttrs",
                                 id: listId,
                                 data: JSON.stringify({fold: hasFold ? "1" : "0"})
-                            })
+                            });
                         }
                     });
                     transaction(protyle, doOperations, undoOperations);

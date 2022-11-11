@@ -92,14 +92,14 @@ const renderProvider = (provider: number) => {
 };
 
 const bindProviderEvent = () => {
-    const reposDataElement = repos.element.querySelector("#reposData")
-    const loadingElement =   repos.element.querySelector("#reposLoading")
+    const reposDataElement = repos.element.querySelector("#reposData");
+    const loadingElement =   repos.element.querySelector("#reposLoading");
     if (window.siyuan.config.sync.provider === 0) {
         if (needSubscribe("")) {
             loadingElement.classList.add("fn__none");
-            let nextElement = reposDataElement
+            let nextElement = reposDataElement;
             while (nextElement) {
-                nextElement.classList.add("fn__none")
+                nextElement.classList.add("fn__none");
                 nextElement = nextElement.nextElementSibling;
             }
             return;
@@ -133,16 +133,16 @@ const bindProviderEvent = () => {
 </div>`;
             }
         });
-        reposDataElement.classList.remove("fn__none")
+        reposDataElement.classList.remove("fn__none");
         return;
     }
     loadingElement.classList.add("fn__none");
-    let nextElement = reposDataElement.nextElementSibling
+    let nextElement = reposDataElement.nextElementSibling;
     while (nextElement) {
-        nextElement.classList.remove("fn__none")
+        nextElement.classList.remove("fn__none");
         nextElement = nextElement.nextElementSibling;
     }
-    reposDataElement.classList.add("fn__none")
+    reposDataElement.classList.add("fn__none");
     const providerPanelElement = repos.element.querySelector("#syncProviderPanel");
     providerPanelElement.querySelectorAll(".b3-text-field").forEach(item => {
         item.addEventListener("blur", () => {
@@ -319,7 +319,7 @@ ${syncModeHTML}
                 }
                 repos.element.querySelector("#syncProviderPanel").innerHTML = renderProvider(window.siyuan.config.sync.provider);
                 bindProviderEvent();
-                syncConfigElement.innerHTML = ""
+                syncConfigElement.innerHTML = "";
             });
         });
         const loadingElement = repos.element.querySelector("#reposLoading") as HTMLElement;

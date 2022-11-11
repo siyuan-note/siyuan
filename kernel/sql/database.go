@@ -582,7 +582,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 
 		// assetsLinkDestsInTree
 
-		if !IsAssetLinkDest(destNode.Tokens) {
+		if !util.IsAssetLinkDest(destNode.Tokens) {
 			return
 		}
 
@@ -690,7 +690,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			return
 		}
 
-		if !IsAssetLinkDest(src) {
+		if !util.IsAssetLinkDest(src) {
 			walkStatus = ast.WalkContinue
 			return
 		}
@@ -1245,10 +1245,6 @@ func ialAttr(ial, name string) (ret string) {
 	ret = ial[idx+len(name)+2:]
 	ret = ret[:strings.Index(ret, "\"")]
 	return
-}
-
-func IsAssetLinkDest(dest []byte) bool {
-	return bytes.HasPrefix(dest, []byte("assets/"))
 }
 
 func removeDatabaseFile() (err error) {

@@ -208,3 +208,7 @@ func FilterSelfChildDocs(paths []string) (ret []string) {
 	}
 	return
 }
+
+func IsAssetLinkDest(dest []byte) bool {
+	return bytes.HasPrefix(dest, []byte("assets/"))
+}

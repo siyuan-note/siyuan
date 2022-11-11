@@ -92,7 +92,33 @@ func NetImg2LocalAssets(rootID string) (err error) {
 		if ast.NodeImage == n.Type {
 			linkDest := n.ChildByType(ast.NodeLinkDest)
 			dest := linkDest.Tokens
-			if !sql.IsAssetLinkDest(dest) && (bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://"))) {
+			if util.IsAssetLinkDest(dest) {
+				return ast.WalkSkipChildren
+			}
+
+			if bytes.HasPrefix(bytes.ToLower(dest), []byte("file://")) {
+				// `网络图片转换为本地图片` 支持处理 `file://` 本地路径图片 https://github.com/siyuan-note/siyuan/issues/6546
+
+				u := string(dest)[7:]
+				if !gulu.File.IsExist(u) {
+					return ast.WalkSkipChildren
+				}
+
+				name := filepath.Base(u)
+				name = "net-img-" + name
+				name = util.AssetName(name)
+				writePath := filepath.Join(assetsDirPath, name)
+				if err = gulu.File.Copy(u, writePath); nil != err {
+					logging.LogErrorf("copy [%s] to [%s] failed: %s", u, writePath, err)
+					return ast.WalkSkipChildren
+				}
+
+				linkDest.Tokens = []byte("assets/" + name)
+				files++
+				return ast.WalkSkipChildren
+			}
+
+			if bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://")) {
 				u := string(dest)
 				if strings.Contains(u, "qpic.cn") {
 					// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/5052
@@ -592,7 +618,7 @@ func UnusedAssets() (ret []string) {
 
 				if titleImgPath := treenode.GetDocTitleImgPath(tree.Root); "" != titleImgPath {
 					// 题头图计入
-					if !sql.IsAssetLinkDest([]byte(titleImgPath)) {
+					if !util.IsAssetLinkDest([]byte(titleImgPath)) {
 						continue
 					}
 					dests[titleImgPath] = true

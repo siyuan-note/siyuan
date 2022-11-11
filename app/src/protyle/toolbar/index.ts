@@ -338,7 +338,7 @@ export class Toolbar {
                     const types = item.getAttribute("data-type").split(" ");
                     if (type === "clear") {
                         for (let i = 0; i < types.length; i++) {
-                            if (textObj.type === "text") {
+                            if (textObj && textObj.type === "text") {
                                 if ("text" === types[i]) {
                                     types.splice(i, 1);
                                     i--;

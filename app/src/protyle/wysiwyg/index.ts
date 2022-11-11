@@ -912,6 +912,9 @@ export class WYSIWYG {
 
         this.element.addEventListener("cut", (event: ClipboardEvent & { target: HTMLElement }) => {
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
+            if (protyle.disabled) {
+                return;
+            }
             if (event.target.tagName === "PROTYLE-HTML") {
                 event.stopPropagation();
                 return;

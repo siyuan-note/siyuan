@@ -163,7 +163,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(srcTree.Root.IALAttr("title"))})
 	heading.Box = targetTree.Box
 	heading.Path = targetTree.Path
-	if 0 < len(tags) {
+	if "" != tagIAL && 0 < len(tags) {
 		// 带标签的文档块转换为标题块时将标签移动到标题块下方 https://github.com/siyuan-note/siyuan/issues/6550
 
 		tagPara := parse.NewParagraph()
@@ -177,7 +177,9 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 				tagPara.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(" ")})
 			}
 		}
-		srcTree.Root.PrependChild(tagPara)
+		if nil != tagPara.FirstChild {
+			srcTree.Root.PrependChild(tagPara)
+		}
 	}
 
 	var nodes []*ast.Node

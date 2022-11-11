@@ -17,6 +17,7 @@ import {updateListOrder} from "../wysiwyg/list";
 import {escapeHtml} from "../../util/escape";
 import {zoomOut} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
+import {genAssetHTML} from "../../asset/renderAssets";
 
 export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
@@ -428,17 +429,7 @@ export const hintRenderAssets = (value: string, protyle: IProtyle) => {
     focusByRange(protyle.toolbar.range);
     const type = pathPosix().extname(value).toLowerCase();
     const filename = value.startsWith("assets/") ? getAssetName(value) : value;
-    let fileMD = "";
-    if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
-        fileMD += `<audio controls="controls" src="${value}"></audio>`;
-    } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-        fileMD += `![${filename}](${value})`;
-    } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
-        fileMD += `<video controls="controls" src="${value}"></video>`;
-    } else {
-        fileMD += `[${value.startsWith("assets/") ? filename + type : value}](${value})`;
-    }
-    insertHTML(protyle.lute.SpinBlockDOM(fileMD), protyle);
+    insertHTML(genAssetHTML(type, value, filename, value.startsWith("assets/") ? filename + type : value), protyle);
     hideElements(["util"], protyle);
 };
 

@@ -754,7 +754,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 html = nodeElement.outerHTML;
             });
             inputElement.addEventListener("compositionend", () => {
-                linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value) || "";
+                linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value || "");
             });
             inputElement.addEventListener("input", (event: KeyboardEvent) => {
                 if (!event.isComposing) {

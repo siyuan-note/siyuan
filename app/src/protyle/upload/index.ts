@@ -103,7 +103,7 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         const path = response.data.succMap[key];
         const type = pathPosix().extname(key).toLowerCase();
         const filename = protyle.options.upload.filename(key);
-        succFileText += genAssetHTML(type, path, filename.substring(0, filename.length - type.length), filename)
+        succFileText += genAssetHTML(type, path, filename.substring(0, filename.length - type.length), filename);
         if (!Constants.SIYUAN_ASSETS_AUDIO.includes(type) && !Constants.SIYUAN_ASSETS_VIDEO.includes(type) &&
             keys.length - 1 !== index) {
             succFileText += "\n";

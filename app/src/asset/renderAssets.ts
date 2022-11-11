@@ -47,13 +47,13 @@ export const pdfResize = () => {
 };
 
 export const genAssetHTML = (type: string, pathString: string, imgName: string, linkName: string) => {
-    let html = ""
+    let html = "";
     if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
         html = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeAudio" class="iframe" updated="${dayjs().format("YYYYMMDDHHmmss")}"><div class="iframe-content"><audio controls="controls" src="${pathString}" data-src="${pathString}"></audio>${Constants.ZWSP}</div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
     } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-        let netHTML = ""
+        let netHTML = "";
         if (!pathString.startsWith("assets/")) {
-            netHTML = '<span class="img__net"><svg><use xlink:href="#iconLanguage"></use></svg></span>'
+            netHTML = '<span class="img__net"><svg><use xlink:href="#iconLanguage"></use></svg></span>';
         }
         html = `<span contenteditable="false" data-type="img" class="img"><span> </span><span><span class="protyle-action protyle-icons"><span class="protyle-icon protyle-icon--only"><svg class="svg"><use xlink:href="#iconMore"></use></svg></span></span><img src="${pathString}" data-src="${pathString}" alt="${imgName}" /><span class="protyle-action__drag"></span>${netHTML}<span class="protyle-action__title"></span></span><span> </span></span>`;
     } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
@@ -62,4 +62,4 @@ export const genAssetHTML = (type: string, pathString: string, imgName: string, 
         html = `<span data-type="a" data-href="${pathString}">${linkName}</span>`;
     }
     return html;
-}
+};

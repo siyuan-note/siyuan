@@ -120,7 +120,6 @@ const bindProviderEvent = () => {
     const providerPanelElement = repos.element.querySelector("#syncProviderPanel");
     providerPanelElement.querySelectorAll(".b3-text-field").forEach(item => {
         item.addEventListener("blur", () => {
-            const provider = window.siyuan.config.sync.provider;
             if (window.siyuan.config.sync.provider === 2) {
                 const s3 = {
                     endpoint: (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value,

@@ -747,8 +747,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             return;
         }
-        if (fileTreeIds.indexOf("-") > -1 && !fileTreeIds.split(",").includes(protyle.block.rootID)) {
-            dragoverElement = targetElement;
+        if (fileTreeIds.indexOf("-") > -1) {
+            if (fileTreeIds.split(",").includes(protyle.block.rootID)) {
+                dragoverElement = undefined;
+            } else {
+                dragoverElement = targetElement;
+            }
             return;
         }
 

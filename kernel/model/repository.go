@@ -20,10 +20,12 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
+	"crypto/tls"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"math"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -830,6 +832,8 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		webdavClient.SetHeader("Authorization", auth)
 		webdavClient.SetHeader("User-Agent", util.UserAgent)
 		webdavClient.SetTimeout(30 * time.Second)
+		// WebDAV 数据同步跳过 HTTPS 证书校验 https://github.com/siyuan-note/siyuan/issues/6556
+		webdavClient.SetTransport(&http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}})
 		cloudRepo = cloud.NewWebDAV(&cloud.BaseCloud{Conf: cloudConf}, webdavClient)
 	default:
 		err = fmt.Errorf("unknown cloud provider [%d]", Conf.Sync.Provider)

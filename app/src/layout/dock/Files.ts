@@ -343,7 +343,7 @@ export class Files extends Model {
                 return;
             }
             const liElement = hasClosestByTag(event.target, "LI");
-            if (!liElement || !window.siyuan.dragElement || liElement.classList.contains("b3-list-item--focus")) {
+            if (!liElement || !window.siyuan.dragElement) {
                 event.preventDefault();
                 return;
             }
@@ -354,6 +354,10 @@ export class Files extends Model {
                     liElement.classList.add("dragover");
                 }
                 event.preventDefault();
+                return;
+            }
+            // 允许标题拖拽到文档树的选中文档上 https://github.com/siyuan-note/siyuan/issues/6552
+            if (liElement.classList.contains("b3-list-item--focus")) {
                 return;
             }
             let sourceOnlyRoot = true;

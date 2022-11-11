@@ -43,7 +43,7 @@ const renderProvider = (provider: number) => {
 <div class="b3-label b3-label--noborder">
     ${window.siyuan.languages.cloudIntro1}
     <div class="b3-label__text">
-        <ul style="padding-left: 2em">
+        <ul class="fn__list">
             <li>${window.siyuan.languages.cloudIntro2}</li>
             <li>${window.siyuan.languages.cloudIntro3}</li>
             <li>${window.siyuan.languages.cloudIntro4}</li>

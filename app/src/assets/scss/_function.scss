@@ -115,6 +115,10 @@
     white-space: pre-wrap;
     background-color: var(--b3-protyle-code-background);
   }
+
+  &__list {
+    padding-left: 2em;
+  }
 }
 
 .ft {

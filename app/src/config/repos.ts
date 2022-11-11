@@ -64,6 +64,9 @@ const renderProvider = (provider: number) => {
     </div>
 </div>`
         }
+        return `<div class="b3-label b3-label--noborder">
+    正在使用官方同步啦啦啦
+</div>`
     } else if (provider === 2) {
         return `<label class="b3-label b3-label--noborder fn__flex">
     <div class="fn__flex-1">endpoint</div>

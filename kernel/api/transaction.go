@@ -63,17 +63,23 @@ func performTransactions(c *gin.Context) {
 		return
 	}
 
-	if op := model.IsSetAttrs(&transactions); nil != op {
+	setAttrsOps := model.ExtractSetAttrsOps(&transactions)
+	for _, setAttrsOp := range setAttrsOps {
 		attrs := map[string]string{}
-		if err = gulu.JSON.UnmarshalJSON([]byte(op.Data.(string)), &attrs); nil != err {
+		if err = gulu.JSON.UnmarshalJSON([]byte(setAttrsOp.Data.(string)), &attrs); nil != err {
 			return
 		}
-		err = model.SetBlockAttrs(op.ID, attrs)
-	} else {
-		err = model.PerformTransactions(&transactions)
+		if err = model.SetBlockAttrs(setAttrsOp.ID, attrs); nil != err {
+			if errors.Is(err, filelock.ErrUnableAccessFile) {
+				ret.Code = 1
+				return
+			}
+			logging.LogFatalf("set block attrs failed: %s", err)
+			return
+		}
 	}
 
-	if errors.Is(err, filelock.ErrUnableAccessFile) {
+	if err = model.PerformTransactions(&transactions); errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 1
 		return
 	}

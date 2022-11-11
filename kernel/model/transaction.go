@@ -56,13 +56,20 @@ func IsUnfoldHeading(transactions *[]*Transaction) bool {
 	return false
 }
 
-func IsSetAttrs(transactions *[]*Transaction) *Operation {
-	if 1 == len(*transactions) && 1 == len((*transactions)[0].DoOperations) {
-		if op := (*transactions)[0].DoOperations[0]; "setAttrs" == op.Action {
-			return op
+func ExtractSetAttrsOps(transactions *[]*Transaction) (ret []*Operation) {
+	for _, tx := range *transactions {
+		var setAttrsOps, tmp []*Operation
+		for _, op := range tx.DoOperations {
+			if "setAttrs" == op.Action {
+				setAttrsOps = append(setAttrsOps, op)
+			} else {
+				tmp = append(tmp, op)
+			}
 		}
+		ret = append(ret, setAttrsOps...)
+		tx.DoOperations = tmp
 	}
-	return nil
+	return
 }
 
 const txFixDelay = 10

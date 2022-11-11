@@ -156,10 +156,29 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	}
 
 	srcTree.Root.RemoveIALAttr("type")
+	tagIAL := srcTree.Root.IALAttr("tags")
+	tags := strings.Split(tagIAL, ",")
+	srcTree.Root.RemoveIALAttr("tags")
 	heading := &ast.Node{ID: srcTree.Root.ID, Type: ast.NodeHeading, HeadingLevel: headingLevel, KramdownIAL: srcTree.Root.KramdownIAL}
 	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(srcTree.Root.IALAttr("title"))})
 	heading.Box = targetTree.Box
 	heading.Path = targetTree.Path
+	if 0 < len(tags) {
+		// 带标签的文档块转换为标题块时将标签移动到标题块下方 https://github.com/siyuan-note/siyuan/issues/6550
+
+		tagPara := parse.NewParagraph()
+		for i, tag := range tags {
+			if "" == tag {
+				continue
+			}
+
+			tagPara.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "tag", TextMarkTextContent: tag})
+			if i < len(tags)-1 {
+				tagPara.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(" ")})
+			}
+		}
+		srcTree.Root.PrependChild(tagPara)
+	}
 
 	var nodes []*ast.Node
 	if after {
@@ -306,6 +325,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+	newTree.Root.Spec = "1"
 	if err = indexWriteJSONQueue(newTree); nil != err {
 		return "", "", err
 	}

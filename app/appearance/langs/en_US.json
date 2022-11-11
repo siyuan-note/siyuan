@@ -954,7 +954,7 @@
     "128": "Subscription has expired, cloud data will be completely deleted after expiration. To renew, please visit <a target='_blank' href='https://ld246.com/subscribe/siyuan'>here</a> , if you don't need to renew, please log out of your account to close the reminder",
     "129": "Cloud data has been corrupted, please refer to <a href=\"https://ld246.com/article/1658499492287\" target=\"_blank\">here</a> to resolve the issue",
     "130": "Starting new version installer...",
-    "131": "TODO",
+    "131": "This operation is not supported, please go to the cloud storage provider management console to operate",
     "132": "TODO",
     "133": "TODO",
     "134": "In order to prevent the newly restored data from being overwritten by synchronization, the data synchronization function has been automatically suspended",

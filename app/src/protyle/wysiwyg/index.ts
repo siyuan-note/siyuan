@@ -214,7 +214,9 @@ export class WYSIWYG {
             let html = "";
             let textPlain = "";
             if (selectElements.length > 0) {
-                if (selectElements[0].getAttribute("data-type") === "NodeListItem" && selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
+                if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
+                    selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
+                    selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
                     html = selectElements[0].parentElement.outerHTML;
                 } else {
                     selectElements.forEach(item => {
@@ -939,7 +941,9 @@ export class WYSIWYG {
             }
             let html = "";
             if (selectElements.length > 0) {
-                if (selectElements[0].getAttribute("data-type") === "NodeListItem" && selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
+                if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
+                    selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
+                    selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
                     html = selectElements[0].parentElement.outerHTML;
                 } else {
                     selectElements.forEach(item => {

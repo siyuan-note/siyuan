@@ -39,7 +39,7 @@ const renderCloudBackup = () => {
 const renderProvider = (provider: number) => {
     if (provider === 0) {
         if (needSubscribe()) {
-            return `<div class="b3-label b3-label--noborder">${window.siyuan.config.system.container === "ios" ? window.siyuan.languages._kernel[122] : window.siyuan.languages._kernel[29]}</div>
+            return `<div class="b3-label b3-label--inner">${window.siyuan.config.system.container === "ios" ? window.siyuan.languages._kernel[122] : window.siyuan.languages._kernel[29]}</div>
 <div class="b3-label b3-label--noborder">
     ${window.siyuan.languages.cloudIntro1}
     <div class="b3-label__text">
@@ -64,60 +64,60 @@ const renderProvider = (provider: number) => {
     </div>
 </div>`;
         }
-        return `<div class="b3-label b3-label--noborder">
+        return `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncOfficialProviderIntro}
 </div>`;
     } else if (provider === 2) {
-        return `<div class="b3-label b3-label--noborder">
+        return `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderS3Intro}
     <div class="fn__hr"></div>
     ${window.siyuan.languages.syncThirdPartyProviderTip}
 </div>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">Endpoint</div>
+    <div class="fn__flex-center fn__size200">Endpoint</div>
     <div class="fn__space"></div>
-    <input id="endpoint" class="b3-text-field" value="${window.siyuan.config.sync.s3.endpoint}">
+    <input id="endpoint" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.s3.endpoint}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">Access Key</div>
+    <div class="fn__flex-center fn__size200">Access Key</div>
     <div class="fn__space"></div>
-    <input id="accessKey" class="b3-text-field" value="${window.siyuan.config.sync.s3.accessKey}">
+    <input id="accessKey" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.s3.accessKey}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">Secret Key</div>
+    <div class="fn__flex-center fn__size200">Secret Key</div>
     <div class="fn__space"></div>
-    <input id="secretKey" class="b3-text-field" value="${window.siyuan.config.sync.s3.secretKey}">
+    <input id="secretKey" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.s3.secretKey}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">Bucket</div>
+    <div class="fn__flex-center fn__size200">Bucket</div>
     <div class="fn__space"></div>
-    <input id="bucket" class="b3-text-field" value="${window.siyuan.config.sync.s3.bucket}">
+    <input id="bucket" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.s3.bucket}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">Region</div>
+    <div class="fn__flex-center fn__size200">Region</div>
     <div class="fn__space"></div>
-    <input id="region" class="b3-text-field" value="${window.siyuan.config.sync.s3.region}">
+    <input id="region" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.s3.region}">
 </label>`;
     } else if (provider === 3) {
-        return `<div class="b3-label b3-label--noborder">
+        return `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderWebDAVIntro}
         <div class="fn__hr"></div>
     ${window.siyuan.languages.syncThirdPartyProviderTip}
 </div>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">Endpoint</div>
+    <div class="fn__flex-center fn__size200">Endpoint</div>
     <div class="fn__space"></div>
-    <input id="endpoint" class="b3-text-field" value="${window.siyuan.config.sync.webdav.endpoint}">
+    <input id="endpoint" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.webdav.endpoint}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">Username</div>
+    <div class="fn__flex-center fn__size200">Username</div>
     <div class="fn__space"></div>
-    <input id="username" class="b3-text-field" value="${window.siyuan.config.sync.webdav.username}">
+    <input id="username" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.webdav.username}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">Password</div>
+    <div class="fn__flex-center fn__size200">Password</div>
     <div class="fn__space"></div>
-    <input id="password" class="b3-text-field" value="${window.siyuan.config.sync.webdav.password}">
+    <input id="password" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.webdav.password}">
 </label>`;
     }
     return "";
@@ -125,8 +125,10 @@ const renderProvider = (provider: number) => {
 
 const bindProviderEvent = () => {
     if (window.siyuan.config.sync.provider === 0) {
+        repos.element.querySelector("#reposData").classList.remove("fn__none")
         return;
     }
+    repos.element.querySelector("#reposData").classList.add("fn__none")
     const providerPanelElement = repos.element.querySelector("#syncProviderPanel");
     providerPanelElement.querySelectorAll(".b3-text-field").forEach(item => {
         item.addEventListener("blur", () => {
@@ -291,6 +293,7 @@ ${syncModeHTML}
                 }
             });
         });
+        const syncConfigElement = repos.element.querySelector("#reposCloudSyncList");
         const syncProviderElement = repos.element.querySelector("#syncProvider") as HTMLSelectElement;
         syncProviderElement.addEventListener("change", () => {
             fetchPost("/api/sync/setSyncProvider", {provider: parseInt(syncProviderElement.value, 10)}, (response) => {
@@ -303,16 +306,19 @@ ${syncModeHTML}
                 }
                 repos.element.querySelector("#syncProviderPanel").innerHTML = renderProvider(window.siyuan.config.sync.provider);
                 bindProviderEvent();
+                if (window.siyuan.config.sync.provider === 0) {
+                    renderCloudBackup();
+                }
+                syncConfigElement.innerHTML = ""
             });
         });
         const loadingElement = repos.element.querySelector("#reposLoading") as HTMLElement;
         loadingElement.style.width = repos.element.clientWidth + "px";
         loadingElement.style.height = repos.element.clientHeight + "px";
-        const syncConfigElement = repos.element.querySelector("#reposCloudSyncList");
         bindSyncCloudListEvent(syncConfigElement);
         repos.element.querySelector('[data-type="config"]').addEventListener("click", () => {
             if (syncConfigElement.classList.contains("fn__none")) {
-                getSyncCloudList(syncConfigElement);
+                getSyncCloudList(syncConfigElement, true);
                 syncConfigElement.classList.remove("fn__none");
             } else {
                 syncConfigElement.classList.add("fn__none");

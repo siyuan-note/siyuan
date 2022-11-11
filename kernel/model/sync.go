@@ -301,6 +301,33 @@ func SetSyncMode(mode int) (err error) {
 	return
 }
 
+func SetSyncProvider(provider int) (err error) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	Conf.Sync.Provider = provider
+	Conf.Save()
+	return
+}
+
+func SetSyncProviderS3(s3 *conf.S3) (err error) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	Conf.Sync.S3 = s3
+	Conf.Save()
+	return
+}
+
+func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	Conf.Sync.WebDAV = webdav
+	Conf.Save()
+	return
+}
+
 var syncLock = sync.Mutex{}
 
 func CreateCloudSyncDir(name string) (err error) {

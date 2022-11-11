@@ -331,6 +331,11 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 var syncLock = sync.Mutex{}
 
 func CreateCloudSyncDir(name string) (err error) {
+	if conf.ProviderSiYuan != Conf.Sync.Provider {
+		err = errors.New(Conf.Language(131))
+		return
+	}
+
 	syncLock.Lock()
 	defer syncLock.Unlock()
 
@@ -346,10 +351,19 @@ func CreateCloudSyncDir(name string) (err error) {
 	}
 
 	err = repo.CreateCloudRepo(name)
+	if nil != err {
+		err = errors.New(formatErrorMsg(err))
+		return
+	}
 	return
 }
 
 func RemoveCloudSyncDir(name string) (err error) {
+	if conf.ProviderSiYuan != Conf.Sync.Provider {
+		err = errors.New(Conf.Language(131))
+		return
+	}
+
 	msgId := util.PushMsg(Conf.Language(116), 15000)
 
 	syncLock.Lock()

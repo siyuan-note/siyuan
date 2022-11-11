@@ -62,11 +62,11 @@ const renderProvider = (provider: number) => {
             <li>${window.siyuan.languages.cloudIntro11}</li>
         </ul>
     </div>
-</div>`
+</div>`;
         }
         return `<div class="b3-label b3-label--noborder">
     正在使用官方同步啦啦啦
-</div>`
+</div>`;
     } else if (provider === 2) {
         return `<label class="b3-label b3-label--noborder fn__flex">
     <div class="fn__flex-1">endpoint</div>
@@ -92,7 +92,7 @@ const renderProvider = (provider: number) => {
     <div class="fn__flex-1">region</div>
     <div class="fn__space"></div>
     <input id="region" class="b3-text-field" value="${window.siyuan.config.sync.s3.region}">
-</label>`
+</label>`;
     } else if (provider === 3) {
         return `<label class="b3-label b3-label--noborder fn__flex">
     <div class="fn__flex-1">endpoint</div>
@@ -108,41 +108,43 @@ const renderProvider = (provider: number) => {
     <div class="fn__flex-1">password</div>
     <div class="fn__space"></div>
     <input id="password" class="b3-text-field" value="${window.siyuan.config.sync.webdav.password}">
-</label>`
+</label>`;
     }
     return "";
-}
+};
 
 const bindProviderEvent = () => {
     if (window.siyuan.config.sync.provider === 0) {
         return;
     }
-    const providerPanelElement = repos.element.querySelector("#syncProviderPanel")
+    const providerPanelElement = repos.element.querySelector("#syncProviderPanel");
     providerPanelElement.querySelectorAll(".b3-text-field").forEach(item => {
         item.addEventListener("blur", () => {
             const provider = window.siyuan.config.sync.provider;
             if (window.siyuan.config.sync.provider === 2) {
-                fetchPost("/api/sync/setSyncProviderS3", {
-                    s3: {
-                        endpoint: (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value,
-                        accessKey: (providerPanelElement.querySelector("#accessKey") as HTMLInputElement).value,
-                        secretKey: (providerPanelElement.querySelector("#secretKey") as HTMLInputElement).value,
-                        bucket: (providerPanelElement.querySelector("#bucket") as HTMLInputElement).value,
-                        region: (providerPanelElement.querySelector("#region") as HTMLInputElement).value,
-                    }
-                })
+                const s3 = {
+                    endpoint: (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value,
+                    accessKey: (providerPanelElement.querySelector("#accessKey") as HTMLInputElement).value,
+                    secretKey: (providerPanelElement.querySelector("#secretKey") as HTMLInputElement).value,
+                    bucket: (providerPanelElement.querySelector("#bucket") as HTMLInputElement).value,
+                    region: (providerPanelElement.querySelector("#region") as HTMLInputElement).value,
+                };
+                fetchPost("/api/sync/setSyncProviderS3", {s3}, () => {
+                    window.siyuan.config.sync.s3 = s3;
+                });
             } else if (window.siyuan.config.sync.provider === 3) {
-                fetchPost("/api/sync/setSyncProviderWebDAV", {
-                    webdav: {
-                        endpoint: (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value,
-                        username: (providerPanelElement.querySelector("#username") as HTMLInputElement).value,
-                        password: (providerPanelElement.querySelector("#password") as HTMLInputElement).value,
-                    }
-                })
+                const webdav = {
+                    endpoint: (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value,
+                    username: (providerPanelElement.querySelector("#username") as HTMLInputElement).value,
+                    password: (providerPanelElement.querySelector("#password") as HTMLInputElement).value,
+                };
+                fetchPost("/api/sync/setSyncProviderWebDAV", {webdav}, () => {
+                    window.siyuan.config.sync.webdav = webdav;
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 export const repos = {
     element: undefined as Element,
@@ -286,10 +288,11 @@ ${syncModeHTML}
                 if (response.code === 1) {
                     showMessage(response.msg);
                     syncProviderElement.value = "0";
+                    window.siyuan.config.sync.provider = 0;
                 } else {
-                    window.siyuan.config.sync.mode = parseInt(syncProviderElement.value, 10);
+                    window.siyuan.config.sync.provider = parseInt(syncProviderElement.value, 10);
                 }
-                repos.element.querySelector("#syncProviderPanel").innerHTML = renderProvider(parseInt(syncProviderElement.value, 10));
+                repos.element.querySelector("#syncProviderPanel").innerHTML = renderProvider(window.siyuan.config.sync.provider);
                 bindProviderEvent();
             });
         });

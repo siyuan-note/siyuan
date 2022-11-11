@@ -89,7 +89,6 @@ export class Gutter {
                 if (event.altKey) {
                     // 折叠所有子集
                     let hasFold = true;
-                    const oldHTML = foldElement.outerHTML;
                     Array.from(foldElement.children).find((ulElement) => {
                         if (ulElement.classList.contains("list")) {
                             const foldElement = Array.from(ulElement.children).find((listItemElement) => {
@@ -105,6 +104,8 @@ export class Gutter {
                             }
                         }
                     });
+                    const doOperations: IOperation[] = []
+                    const undoOperations: IOperation[] = []
                     Array.from(foldElement.children).forEach((ulElement) => {
                         if (ulElement.classList.contains("list")) {
                             Array.from(ulElement.children).forEach((listItemElement) => {
@@ -114,12 +115,22 @@ export class Gutter {
                                     } else if (listItemElement.childElementCount > 3) {
                                         listItemElement.setAttribute("fold", "1");
                                     }
-
+                                    const listId = listItemElement.getAttribute("data-node-id");
+                                    doOperations.push({
+                                        action: "setAttrs",
+                                        id: listId,
+                                        data: JSON.stringify({fold: hasFold ? "0" : "1"})
+                                    })
+                                    undoOperations.push({
+                                        action: "setAttrs",
+                                        id: listId,
+                                        data: JSON.stringify({fold: hasFold ? "1" : "0"})
+                                    })
                                 }
                             });
                         }
                     });
-                    updateTransaction(protyle, foldElement.getAttribute("data-node-id"), foldElement.outerHTML, oldHTML);
+                    transaction(protyle, doOperations, undoOperations);
                     buttonElement.removeAttribute("disabled");
                 } else {
                     const foldStatus = setFold(protyle, foldElement);
@@ -150,7 +161,6 @@ export class Gutter {
                 if (buttonElement.getAttribute("data-type") === "NodeListItem" && foldElement.parentElement.getAttribute("data-node-id")) {
                     // 折叠同级
                     let hasFold = true;
-                    const oldHTML = foldElement.parentElement.outerHTML;
                     Array.from(foldElement.parentElement.children).find((listItemElement) => {
                         if (listItemElement.classList.contains("li")) {
                             if (listItemElement.getAttribute("fold") !== "1" && listItemElement.childElementCount > 3) {
@@ -159,6 +169,8 @@ export class Gutter {
                             }
                         }
                     });
+                    const doOperations: IOperation[] = []
+                    const undoOperations: IOperation[] = []
                     Array.from(foldElement.parentElement.children).find((listItemElement) => {
                         if (listItemElement.classList.contains("li")) {
                             if (hasFold) {
@@ -166,9 +178,20 @@ export class Gutter {
                             } else if (listItemElement.childElementCount > 3) {
                                 listItemElement.setAttribute("fold", "1");
                             }
+                            const listId = listItemElement.getAttribute("data-node-id");
+                            doOperations.push({
+                                action: "setAttrs",
+                                id: listId,
+                                data: JSON.stringify({fold: hasFold ? "0" : "1"})
+                            })
+                            undoOperations.push({
+                                action: "setAttrs",
+                                id: listId,
+                                data: JSON.stringify({fold: hasFold ? "1" : "0"})
+                            })
                         }
                     });
-                    updateTransaction(protyle, foldElement.parentElement.getAttribute("data-node-id"), foldElement.parentElement.outerHTML, oldHTML);
+                    transaction(protyle, doOperations, undoOperations);
                 } else {
                     setFold(protyle, foldElement);
                 }

@@ -3,7 +3,6 @@ Caption "${PRODUCT_NAME} ${VERSION}"
 !macro preInit
     nsExec::Exec 'TASKKILL /F /IM "SiYuan.exe"'
     nsExec::Exec 'TASKKILL /F /IM "SiYuan-Kernel.exe"'
-    nsExec::Exec 'TASKKILL /F /IM "SiYuan Kernel.exe"'
 !macroend
 
 !macro customInstallMode

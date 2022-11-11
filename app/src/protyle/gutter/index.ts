@@ -71,68 +71,63 @@ export class Gutter {
             event.stopPropagation();
             const id = buttonElement.getAttribute("data-node-id");
             if (!id) {
-                const gutterFold = () => {
-                    buttonElement.setAttribute("disabled", "disabled");
-                    let foldElement: Element;
-                    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${(buttonElement.previousElementSibling || buttonElement.nextElementSibling).getAttribute("data-node-id")}"]`)).find(item => {
-                        if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
-                            this.isMatchNode(item)) {
-                            foldElement = item;
-                            return true;
-                        }
-                    });
-                    if (!foldElement) {
-                        return;
-                    }
-                    if (window.siyuan.altIsPressed) {
-                        // 折叠所有子集
-                        let hasFold = true;
-                        const oldHTML = foldElement.outerHTML;
-                        Array.from(foldElement.children).find((ulElement) => {
-                            if (ulElement.classList.contains("list")) {
-                                const foldElement = Array.from(ulElement.children).find((listItemElement) => {
-                                    if (listItemElement.classList.contains("li")) {
-                                        if (listItemElement.getAttribute("fold") !== "1" && listItemElement.childElementCount > 3) {
-                                            hasFold = false;
-                                            return true;
-                                        }
-                                    }
-                                });
-                                if (foldElement) {
-                                    return true;
-                                }
-                            }
-                        });
-                        Array.from(foldElement.children).forEach((ulElement) => {
-                            if (ulElement.classList.contains("list")) {
-                                Array.from(ulElement.children).forEach((listItemElement) => {
-                                    if (listItemElement.classList.contains("li")) {
-                                        if (hasFold) {
-                                            listItemElement.removeAttribute("fold");
-                                        } else if (listItemElement.childElementCount > 3) {
-                                            listItemElement.setAttribute("fold", "1");
-                                        }
-
-                                    }
-                                });
-                            }
-                        });
-                        updateTransaction(protyle, foldElement.getAttribute("data-node-id"), foldElement.outerHTML, oldHTML);
-                        buttonElement.removeAttribute("disabled");
-                    } else {
-                        const foldStatus = setFold(protyle, foldElement);
-                        if (foldStatus === "1") {
-                            (buttonElement.firstElementChild as HTMLElement).style.transform = "";
-                        } else if (foldStatus === "0") {
-                            (buttonElement.firstElementChild as HTMLElement).style.transform = "rotate(90deg)";
-                        }
-                    }
-                };
                 if (buttonElement.getAttribute("disabled")) {
                     return;
                 }
-                if (!protyle.disabled) {
-                    gutterFold();
+                buttonElement.setAttribute("disabled", "disabled");
+                let foldElement: Element;
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${(buttonElement.previousElementSibling || buttonElement.nextElementSibling).getAttribute("data-node-id")}"]`)).find(item => {
+                    if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
+                        this.isMatchNode(item)) {
+                        foldElement = item;
+                        return true;
+                    }
+                });
+                if (!foldElement) {
+                    return;
+                }
+                if (event.altKey) {
+                    // 折叠所有子集
+                    let hasFold = true;
+                    const oldHTML = foldElement.outerHTML;
+                    Array.from(foldElement.children).find((ulElement) => {
+                        if (ulElement.classList.contains("list")) {
+                            const foldElement = Array.from(ulElement.children).find((listItemElement) => {
+                                if (listItemElement.classList.contains("li")) {
+                                    if (listItemElement.getAttribute("fold") !== "1" && listItemElement.childElementCount > 3) {
+                                        hasFold = false;
+                                        return true;
+                                    }
+                                }
+                            });
+                            if (foldElement) {
+                                return true;
+                            }
+                        }
+                    });
+                    Array.from(foldElement.children).forEach((ulElement) => {
+                        if (ulElement.classList.contains("list")) {
+                            Array.from(ulElement.children).forEach((listItemElement) => {
+                                if (listItemElement.classList.contains("li")) {
+                                    if (hasFold) {
+                                        listItemElement.removeAttribute("fold");
+                                    } else if (listItemElement.childElementCount > 3) {
+                                        listItemElement.setAttribute("fold", "1");
+                                    }
+
+                                }
+                            });
+                        }
+                    });
+                    updateTransaction(protyle, foldElement.getAttribute("data-node-id"), foldElement.outerHTML, oldHTML);
+                    buttonElement.removeAttribute("disabled");
+                } else {
+                    const foldStatus = setFold(protyle, foldElement);
+                    if (foldStatus === "1") {
+                        (buttonElement.firstElementChild as HTMLElement).style.transform = "";
+                    } else if (foldStatus === "0") {
+                        (buttonElement.firstElementChild as HTMLElement).style.transform = "rotate(90deg)";
+                    }
                 }
                 hideElements(["select"], protyle);
                 window.siyuan.menus.menu.remove();

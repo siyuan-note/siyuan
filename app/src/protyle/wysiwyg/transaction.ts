@@ -73,7 +73,7 @@ const promiseTransaction = () => {
             return;
         }
         countBlockWord([], protyle.block.rootID, true);
-        if (doOperations.length === 1 && (doOperations[0].action === "unfoldHeading" || doOperations[0].action === "foldHeading" || doOperations[0].action === "setAttrs")) {
+        if (doOperations.length === 1 && (doOperations[0].action === "unfoldHeading" || doOperations[0].action === "foldHeading")) {
             const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
             if (gutterFoldElement) {
                 gutterFoldElement.removeAttribute("disabled");
@@ -113,6 +113,13 @@ const promiseTransaction = () => {
                         onGet(getResponse, protyle, [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]);
                     });
                 }
+            }
+            return;
+        }
+        if (doOperations[0].action === "setAttrs") {
+            const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
+            if (gutterFoldElement) {
+                gutterFoldElement.removeAttribute("disabled");
             }
             return;
         }

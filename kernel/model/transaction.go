@@ -28,6 +28,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
+	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/filelock"
@@ -54,22 +55,6 @@ func IsUnfoldHeading(transactions *[]*Transaction) bool {
 		}
 	}
 	return false
-}
-
-func ExtractSetAttrsOps(transactions *[]*Transaction) (ret []*Operation) {
-	for _, tx := range *transactions {
-		var setAttrsOps, tmp []*Operation
-		for _, op := range tx.DoOperations {
-			if "setAttrs" == op.Action {
-				setAttrsOps = append(setAttrsOps, op)
-			} else {
-				tmp = append(tmp, op)
-			}
-		}
-		ret = append(ret, setAttrsOps...)
-		tx.DoOperations = tmp
-	}
-	return
 }
 
 const txFixDelay = 10
@@ -241,6 +226,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doFoldHeading(op)
 		case "unfoldHeading":
 			ret = tx.doUnfoldHeading(op)
+		case "setAttrs":
+			ret = tx.setAttrs(op)
 		}
 
 		if nil != ret {
@@ -964,6 +951,54 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
 	tree := operation.Data.(*parse.Tree)
 	tx.writeTree(tree)
+	return
+}
+
+func (tx *Transaction) setAttrs(operation *Operation) (ret *TxErr) {
+	id := operation.ID
+	tree, err := tx.loadTree(id)
+	if nil != err {
+		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		logging.LogErrorf("get node [%s] in tree [%s] failed", id, tree.Root.ID)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+	}
+
+	attrs := map[string]string{}
+	if err = gulu.JSON.UnmarshalJSON([]byte(operation.Data.(string)), &attrs); nil != err {
+		logging.LogErrorf("unmarshal attrs failed: %s", err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+	}
+
+	var invalidNames []string
+	for name := range attrs {
+		for i := 0; i < len(name); i++ {
+			if !lex.IsASCIILetterNumHyphen(name[i]) {
+				logging.LogWarnf("invalid attr name [%s]", name)
+				invalidNames = append(invalidNames, name)
+			}
+		}
+	}
+	for _, name := range invalidNames {
+		delete(attrs, name)
+	}
+
+	for name, value := range attrs {
+		if "" == value {
+			node.RemoveIALAttr(name)
+		} else {
+			node.SetIALAttr(name, value)
+		}
+	}
+
+	if err = indexWriteJSONQueue(tree); nil != err {
+		return
+	}
+	cache.PutBlockIAL(id, parse.IAL2Map(node.KramdownIAL))
 	return
 }
 

@@ -1,4 +1,10 @@
 {
+  "syncOfficialProviderIntro": "Actualmente seleccionado es el servicio de almacenamiento en la nube proporcionado oficialmente por SiYuan, que solo admite usuarios de suscripción paga",
+  "syncThirdPartyProviderS3Intro": "El actual seleccionado es un servicio de almacenamiento en la nube de terceros compatible con el protocolo Amazon S3. El soporte de esta característica se encuentra actualmente en la etapa beta pública gratuita",
+  "syncThirdPartyProviderWebDAVIntro": "El seleccionado actualmente es un servicio de almacenamiento en la nube de terceros con el protocolo WebDAV. El soporte de esta función se encuentra actualmente en la etapa beta pública gratuita",
+  "syncThirdPartyProviderTip": "Antes de usar esta función, preste atención a las limitaciones técnicas y los elementos de facturación del servicio de almacenamiento en la nube de terceros: <ul><li>Limitaciones técnicas, como la frecuencia de llamada de la interfaz y el ancho de banda</li><li >Artículos de facturación como espacio de almacenamiento y tráfico</li><li>Términos de uso y garantía de disponibilidad</li></ul><br>Descargo de responsabilidad: para obtener más información, consulte los términos relevantes en la licencia de código abierto AGPLv3 utilizado por SiYuan",
+  "syncProvider": "Proveedor de servicios de almacenamiento en la nube",
+  "syncProviderTip": "Si se selecciona, el servicio de almacenamiento en la nube de este proveedor se usará para lograr funciones de sincronización y copia de seguridad en la nube",
   "confirmReset": "¿Está seguro de que desea restablecer todos los atajos de teclado a la configuración predeterminada?",
   "notBatchRemove": "No se admite la eliminación por lotes de blocs de notas",
   "confirmRemoveAll": "¿Está seguro de que desea eliminar todos los archivos seleccionados?",

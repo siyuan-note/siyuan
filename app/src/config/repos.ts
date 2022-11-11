@@ -74,27 +74,27 @@ const renderProvider = (provider: number) => {
     ${window.siyuan.languages.syncThirdPartyProviderTip}
 </div>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">endpoint</div>
+    <div class="fn__flex-1">Endpoint</div>
     <div class="fn__space"></div>
     <input id="endpoint" class="b3-text-field" value="${window.siyuan.config.sync.s3.endpoint}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">accessKey</div>
+    <div class="fn__flex-1">Access Key</div>
     <div class="fn__space"></div>
     <input id="accessKey" class="b3-text-field" value="${window.siyuan.config.sync.s3.accessKey}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">secretKey</div>
+    <div class="fn__flex-1">Secret Key</div>
     <div class="fn__space"></div>
     <input id="secretKey" class="b3-text-field" value="${window.siyuan.config.sync.s3.secretKey}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">bucket</div>
+    <div class="fn__flex-1">Bucket</div>
     <div class="fn__space"></div>
     <input id="bucket" class="b3-text-field" value="${window.siyuan.config.sync.s3.bucket}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">region</div>
+    <div class="fn__flex-1">Region</div>
     <div class="fn__space"></div>
     <input id="region" class="b3-text-field" value="${window.siyuan.config.sync.s3.region}">
 </label>`;
@@ -105,17 +105,17 @@ const renderProvider = (provider: number) => {
     ${window.siyuan.languages.syncThirdPartyProviderTip}
 </div>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">endpoint</div>
+    <div class="fn__flex-1">Endpoint</div>
     <div class="fn__space"></div>
     <input id="endpoint" class="b3-text-field" value="${window.siyuan.config.sync.webdav.endpoint}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">username</div>
+    <div class="fn__flex-1">Username</div>
     <div class="fn__space"></div>
     <input id="username" class="b3-text-field" value="${window.siyuan.config.sync.webdav.username}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
-    <div class="fn__flex-1">password</div>
+    <div class="fn__flex-1">Password</div>
     <div class="fn__space"></div>
     <input id="password" class="b3-text-field" value="${window.siyuan.config.sync.webdav.password}">
 </label>`;

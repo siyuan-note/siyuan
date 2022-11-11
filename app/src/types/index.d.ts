@@ -333,6 +333,18 @@ declare interface IConfig {
         interval: number
         cloudName: string
         provider: number
+        s3: {
+            endpoint: string
+            accessKey: string
+            secretKey: string
+            bucket: string
+            region: string
+        }
+        webdav: {
+            endpoint: string
+            username: string
+            password: string
+        }
     },
     lang: string
     api: {

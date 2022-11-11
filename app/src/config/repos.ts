@@ -64,6 +64,48 @@ const renderProvider = (provider: number) => {
     </div>
 </div>`
         }
+    } else if (provider === 2) {
+        return `<label class="b3-label b3-label--noborder fn__flex">
+    <div class="fn__flex-1">endpoint</div>
+    <div class="fn__space"></div>
+    <input class="b3-text-field" value="${window.siyuan.config.sync.s3.endpoint}">
+</label>
+<label class="b3-label b3-label--noborder fn__flex">
+    <div class="fn__flex-1">accessKey</div>
+    <div class="fn__space"></div>
+    <input class="b3-text-field" value="${window.siyuan.config.sync.s3.accessKey}">
+</label>
+<label class="b3-label b3-label--noborder fn__flex">
+    <div class="fn__flex-1">secretKey</div>
+    <div class="fn__space"></div>
+    <input class="b3-text-field" value="${window.siyuan.config.sync.s3.secretKey}">
+</label>
+<label class="b3-label b3-label--noborder fn__flex">
+    <div class="fn__flex-1">bucket</div>
+    <div class="fn__space"></div>
+    <input class="b3-text-field" value="${window.siyuan.config.sync.s3.bucket}">
+</label>
+<label class="b3-label b3-label--noborder fn__flex">
+    <div class="fn__flex-1">region</div>
+    <div class="fn__space"></div>
+    <input class="b3-text-field" value="${window.siyuan.config.sync.s3.region}">
+</label>`
+    } else if (provider === 3) {
+        return `<label class="b3-label b3-label--noborder fn__flex">
+    <div class="fn__flex-1">endpoint</div>
+    <div class="fn__space"></div>
+    <input class="b3-text-field" value="${window.siyuan.config.sync.webdav.endpoint}">
+</label>
+<label class="b3-label b3-label--noborder fn__flex">
+    <div class="fn__flex-1">username</div>
+    <div class="fn__space"></div>
+    <input class="b3-text-field" value="${window.siyuan.config.sync.webdav.username}">
+</label>
+<label class="b3-label b3-label--noborder fn__flex">
+    <div class="fn__flex-1">password</div>
+    <div class="fn__space"></div>
+    <input class="b3-text-field" value="${window.siyuan.config.sync.webdav.password}">
+</label>`
     }
     return "";
 }
@@ -122,7 +164,7 @@ export const repos = {
     <img src="/stage/loading-pure.svg">
 </div>
 ${syncProviderHTML}
-<div id="repoProviderPanel" class="b3-label">
+<div id="syncProviderPanel" class="b3-label">
     ${renderProvider(window.siyuan.config.sync.provider)}
 </div>
 <div id="reposData" class="b3-label">
@@ -204,6 +246,18 @@ ${syncModeHTML}
                 } else {
                     window.siyuan.config.sync.mode = parseInt(syncModeElement.value, 10);
                 }
+            });
+        });
+        const syncProviderElement = repos.element.querySelector("#syncProvider") as HTMLSelectElement;
+        syncProviderElement.addEventListener("change", () => {
+            fetchPost("/api/sync/setSyncProvider", {provider: parseInt(syncProviderElement.value, 10)}, (response) => {
+                if (response.code === 1) {
+                    showMessage(response.msg);
+                    syncProviderElement.value = "0";
+                } else {
+                    window.siyuan.config.sync.mode = parseInt(syncProviderElement.value, 10);
+                }
+                repos.element.querySelector("#syncProviderPanel").innerHTML = renderProvider(parseInt(syncProviderElement.value, 10));
             });
         });
         const loadingElement = repos.element.querySelector("#reposLoading") as HTMLElement;

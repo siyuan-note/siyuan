@@ -17,11 +17,14 @@
 package conf
 
 type Stat struct {
-	DocCount int `json:"docCount"` // 总文档计数
+	TreeCount   int   `json:"treeCount"`
+	CTreeCount  int   `json:"cTreeCount"`
+	BlockCount  int   `json:"blockCount"`
+	CBlockCount int   `json:"cBlockCount"`
+	DataSize    int64 `json:"dataSize"`
+	CDataSize   int64 `json:"cDataSize"`
 }
 
 func NewStat() *Stat {
-	return &Stat{
-		DocCount: 0,
-	}
+	return &Stat{}
 }

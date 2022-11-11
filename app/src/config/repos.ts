@@ -4,41 +4,9 @@ import {isMobile} from "../util/functions";
 import {showMessage} from "../dialog/message";
 import {bindSyncCloudListEvent, getSyncCloudList} from "../sync/syncGuide";
 
-const renderCloudBackup = () => {
-    fetchPost("/api/cloud/getCloudSpace", {}, (response) => {
-        repos.element.querySelector("#reposLoading").classList.add("fn__none");
-        if (response.code === 1) {
-            repos.element.querySelector("#reposData").innerHTML = response.msg;
-            return;
-        } else {
-            repos.element.querySelector("#reposData").innerHTML = `<div class="fn__flex">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.cloudStorage}
-        <div class="fn__hr"></div>
-        <ul class="b3-list">
-            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.sync}<span class="b3-list-item__meta">${response.data.sync ? response.data.sync.hSize : "0B"}</span></li>
-            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.backup}<span class="b3-list-item__meta">${response.data.backup ? response.data.backup.hSize : "0B"}</span></li>
-            <li class="b3-list-item" style="cursor: auto;"><a href="https://ld246.com/settings/file?type=3" target="_blank">${window.siyuan.languages.cdn}</a><span class="b3-list-item__meta">${response.data.hAssetSize}</span></li>
-            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.total}<span class="b3-list-item__meta">${response.data.hSize}</span></li>
-            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.sizeLimit}<span class="b3-list-item__meta">${response.data.hTotalSize}</span></li>
-        </ul>
-    </div>
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.trafficStat}
-        <div class="fn__hr"></div>
-        <ul class="b3-list">
-            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.upload}<span class="fn__space"></span><span class="ft__on-surface">${response.data.hTrafficUploadSize}</span></li>
-            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.download}<span class="fn__space"></span><span class="ft__on-surface">${response.data.hTrafficDownloadSize}</span></li>
-        </ul>
-    </div>
-</div>`;
-        }
-    });
-};
-
 const renderProvider = (provider: number) => {
     if (provider === 0) {
-        if (needSubscribe()) {
+        if (needSubscribe("")) {
             return `<div class="b3-label b3-label--inner">${window.siyuan.config.system.container === "ios" ? window.siyuan.languages._kernel[122] : window.siyuan.languages._kernel[29]}</div>
 <div class="b3-label b3-label--noborder">
     ${window.siyuan.languages.cloudIntro1}
@@ -124,11 +92,57 @@ const renderProvider = (provider: number) => {
 };
 
 const bindProviderEvent = () => {
+    const reposDataElement = repos.element.querySelector("#reposData")
+    const loadingElement =   repos.element.querySelector("#reposLoading")
     if (window.siyuan.config.sync.provider === 0) {
-        repos.element.querySelector("#reposData").classList.remove("fn__none")
+        if (needSubscribe("")) {
+            loadingElement.classList.add("fn__none");
+            let nextElement = reposDataElement
+            while (nextElement) {
+                nextElement.classList.add("fn__none")
+                nextElement = nextElement.nextElementSibling;
+            }
+            return;
+        }
+        fetchPost("/api/cloud/getCloudSpace", {}, (response) => {
+            loadingElement.classList.add("fn__none");
+            if (response.code === 1) {
+                reposDataElement.innerHTML = response.msg;
+                return;
+            } else {
+                reposDataElement.innerHTML = `<div class="fn__flex">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.cloudStorage}
+        <div class="fn__hr"></div>
+        <ul class="b3-list">
+            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.sync}<span class="b3-list-item__meta">${response.data.sync ? response.data.sync.hSize : "0B"}</span></li>
+            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.backup}<span class="b3-list-item__meta">${response.data.backup ? response.data.backup.hSize : "0B"}</span></li>
+            <li class="b3-list-item" style="cursor: auto;"><a href="https://ld246.com/settings/file?type=3" target="_blank">${window.siyuan.languages.cdn}</a><span class="b3-list-item__meta">${response.data.hAssetSize}</span></li>
+            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.total}<span class="b3-list-item__meta">${response.data.hSize}</span></li>
+            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.sizeLimit}<span class="b3-list-item__meta">${response.data.hTotalSize}</span></li>
+        </ul>
+    </div>
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.trafficStat}
+        <div class="fn__hr"></div>
+        <ul class="b3-list">
+            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.upload}<span class="fn__space"></span><span class="ft__on-surface">${response.data.hTrafficUploadSize}</span></li>
+            <li class="b3-list-item" style="cursor: auto;">${window.siyuan.languages.download}<span class="fn__space"></span><span class="ft__on-surface">${response.data.hTrafficDownloadSize}</span></li>
+        </ul>
+    </div>
+</div>`;
+            }
+        });
+        reposDataElement.classList.remove("fn__none")
         return;
     }
-    repos.element.querySelector("#reposData").classList.add("fn__none")
+    loadingElement.classList.add("fn__none");
+    let nextElement = reposDataElement.nextElementSibling
+    while (nextElement) {
+        nextElement.classList.remove("fn__none")
+        nextElement = nextElement.nextElementSibling;
+    }
+    reposDataElement.classList.add("fn__none")
     const providerPanelElement = repos.element.querySelector("#syncProviderPanel");
     providerPanelElement.querySelectorAll(".b3-text-field").forEach(item => {
         item.addEventListener("blur", () => {
@@ -259,7 +273,6 @@ ${syncModeHTML}
     },
     bindEvent: () => {
         bindProviderEvent();
-        renderCloudBackup();
         const switchElement = repos.element.querySelector("#reposCloudSyncSwitch") as HTMLInputElement;
         switchElement.addEventListener("change", () => {
             if (switchElement.checked && window.siyuan.config.sync.cloudName === "") {
@@ -306,9 +319,6 @@ ${syncModeHTML}
                 }
                 repos.element.querySelector("#syncProviderPanel").innerHTML = renderProvider(window.siyuan.config.sync.provider);
                 bindProviderEvent();
-                if (window.siyuan.config.sync.provider === 0) {
-                    renderCloudBackup();
-                }
                 syncConfigElement.innerHTML = ""
             });
         });

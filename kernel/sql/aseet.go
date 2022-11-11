@@ -64,7 +64,7 @@ func docTagSpans(n *ast.Node) (ret []*Span) {
 
 func docTitleImgAsset(root *ast.Node) *Asset {
 	if p := treenode.GetDocTitleImgPath(root); "" != p {
-		if !IsAssetLinkDest([]byte(p)) {
+		if !util.IsAssetLinkDest([]byte(p)) {
 			return nil
 		}
 

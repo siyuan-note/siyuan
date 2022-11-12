@@ -90,8 +90,12 @@ export const setPadding = (protyle: IProtyle) => {
     let min16 = 16;
     let min24 = 24;
     if (!isMobile()) {
-        const padding = (protyle.element.clientWidth - Constants.SIZE_EDITOR_WIDTH) / 2;
+        let padding = (protyle.element.clientWidth - Constants.SIZE_EDITOR_WIDTH) / 2;
         if (!window.siyuan.config.editor.fullWidth && padding > 96) {
+            if (padding > Constants.SIZE_EDITOR_WIDTH) {
+                // 超宽屏调整 https://ld246.com/article/1668266637363
+                padding = protyle.element.clientWidth / 3
+            }
             min16 = padding;
             min24 = padding;
         } else if (protyle.element.clientWidth > Constants.SIZE_EDITOR_WIDTH) {

@@ -52,13 +52,14 @@ All local features are free.
   * Icons
   * Templates
   * Widgets
-* End-to-end encrypted data sync and backup via the third-party cloud storage services
+* End-to-end encrypted data sync and backup via the third-party cloud storage services (This feature is currently in the free public beta stage)
   * S3
   * WebDAV
 * Hierarchical tag
 * Multi-tab, drag and drop to split screen
 * Fulltext search
 * Template snippet
+* JavaScript/CSS snippet
 * Keymap
 * Themes and icons
 * Android/iOS APP

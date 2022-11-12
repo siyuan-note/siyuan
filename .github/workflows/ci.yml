@@ -161,11 +161,6 @@ jobs:
       with:
         path: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app/kernel-linux
 
-    - name: Remove Kernel Directory for Windows 32bit 
-      uses: JesseTG/rm@v1.0.2
-      with:
-        path: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app/kernel32
-
     - name: Remove Kernel Directory for Windows
       uses: JesseTG/rm@v1.0.2
       with:

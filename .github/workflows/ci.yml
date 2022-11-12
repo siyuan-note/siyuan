@@ -166,12 +166,12 @@ jobs:
       with:
         path: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app/kernel
 
-    - name: Remove Kernel Directory for Mac
+    - name: Remove Kernel Directory for macOS
       uses: JesseTG/rm@v1.0.2
       with:
         path: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app/kernel-darwin
 
-    - name: Remove Kernel Directory for Mac M1
+    - name: Remove Kernel Directory for macOS ARM64
       uses: JesseTG/rm@v1.0.2
       with:
         path: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app/kernel-darwin-arm64

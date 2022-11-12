@@ -1053,6 +1053,7 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		ret.SecretKey = Conf.Sync.S3.SecretKey
 		ret.Bucket = Conf.Sync.S3.Bucket
 		ret.Region = Conf.Sync.S3.Region
+		ret.PathStyle = Conf.Sync.S3.PathStyle
 	case conf.ProviderWebDAV:
 		ret.Endpoint = Conf.Sync.WebDAV.Endpoint
 		ret.Username = Conf.Sync.WebDAV.Username

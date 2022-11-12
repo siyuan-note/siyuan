@@ -44,6 +44,7 @@ type S3 struct {
 	SecretKey string `json:"secretKey"` // Secret Key
 	Bucket    string `json:"bucket"`    // 存储空间
 	Region    string `json:"region"`    // 存储区域
+	PathStyle bool   `json:"pathStyle"` // 是否使用路径风格
 }
 
 type WebDAV struct {

@@ -52,10 +52,14 @@ All local features are free.
   * Icons
   * Templates
   * Widgets
+* End-to-end encrypted data sync and backup via the third-party cloud storage services (this feature is currently in the free public beta stage)
+  * S3
+  * WebDAV
 * Hierarchical tag
 * Multi-tab, drag and drop to split screen
 * Fulltext search
 * Template snippet
+* JavaScript/CSS snippet
 * Keymap
 * Themes and icons
 * Android/iOS APP
@@ -67,8 +71,7 @@ All local features are free.
 Cloud services require a paid subscription.
 
 * VIP identity
-* End-to-end encrypted data synchronization
-* End-to-end encrypted data backup
+* End-to-end encrypted data sync and backup
 * Cloud assets serving
 * WeChat notification
 * Cloud inbox

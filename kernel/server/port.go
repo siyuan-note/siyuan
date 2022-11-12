@@ -35,6 +35,9 @@ import (
 func killRunningKernel() {
 	defer logging.Recover()
 
+	now := time.Now()
+	defer logging.LogInfof("check running kernel elapsed [%dms]", time.Since(now).Milliseconds())
+
 	processes, err := goPS.Processes()
 	if nil != err {
 		logging.LogErrorf("get processes failed: %s", err)

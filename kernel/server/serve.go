@@ -85,6 +85,7 @@ func Serve(fastMode bool) {
 		host = "127.0.0.1"
 	}
 
+	now := time.Now()
 	ln, err := net.Listen("tcp", host+":"+util.ServerPort)
 	if nil != err {
 		if !fastMode {
@@ -104,6 +105,7 @@ func Serve(fastMode bool) {
 		}
 	}
 	util.ServerPort = port
+	logging.LogInfof("listen port elapsed [%dms]", time.Since(now).Milliseconds())
 
 	pid := fmt.Sprintf("%d", os.Getpid())
 	if !fastMode {

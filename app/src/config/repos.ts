@@ -72,8 +72,8 @@ const renderProvider = (provider: number) => {
     <div>Addressing</div>
     <div class="fn__hr"></div>
     <select class="b3-select fn__block" id="pathStyle">
-        <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="${window.siyuan.config.sync.s3.pathStyle}">Path-style</option>
-        <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="${window.siyuan.config.sync.s3.pathStyle}">Virtual-hosted-style</option>
+        <option ${window.siyuan.config.sync.s3.pathStyle ? "" : "selected"} value="false">Virtual-hosted-style</option>
+        <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="true">Path-style</option>
     </select>
 </div>`;
         }
@@ -107,8 +107,8 @@ const renderProvider = (provider: number) => {
     <div class="fn__flex-center fn__size200">Addressing</div>
     <div class="fn__space"></div>
     <select class="b3-select fn__flex-1" id="pathStyle">
-        <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="${window.siyuan.config.sync.s3.pathStyle}">Path-style</option>
-        <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="${window.siyuan.config.sync.s3.pathStyle}">Virtual-hosted-style</option>
+        <option ${window.siyuan.config.sync.s3.pathStyle ? "" : "selected"} value="false">Virtual-hosted-style</option>
+        <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="true">Path-style</option>
     </select>
 </label>`;
     } else if (provider === 3) {
@@ -208,7 +208,7 @@ const bindProviderEvent = () => {
     }
     reposDataElement.classList.add("fn__none");
     const providerPanelElement = repos.element.querySelector("#syncProviderPanel");
-    providerPanelElement.querySelectorAll(".b3-text-field").forEach(item => {
+    providerPanelElement.querySelectorAll(".b3-text-field, .b3-select").forEach(item => {
         item.addEventListener("blur", () => {
             if (window.siyuan.config.sync.provider === 2) {
                 const s3 = {

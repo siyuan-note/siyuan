@@ -33,7 +33,7 @@ import {lineNumberRender} from "../protyle/markdown/highlightRender";
 import * as dayjs from "dayjs";
 import {blockRender} from "../protyle/markdown/blockRender";
 import {renameAsset} from "../editor/rename";
-import {hasNextSibling} from "../protyle/wysiwyg/getBlock";
+import {hasNextSibling, hasPreviousSibling} from "../protyle/wysiwyg/getBlock";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
 import {exportAsset} from "./util";
@@ -640,6 +640,17 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     break;
                 }
             }
+            let previous = assetElement.previousSibling;
+            while (previous) {
+                if (previous.textContent === "") {
+                    previous = previous.previousSibling;
+                } else if (previous.textContent === Constants.ZWSP) {
+                    previous.textContent = "";
+                    break;
+                } else {
+                    break;
+                }
+            }
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
         }
     }).element);
@@ -652,6 +663,9 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             assetElement.style.display = "";
             if (!hasNextSibling(assetElement)) {
                 assetElement.insertAdjacentText("afterend", Constants.ZWSP);
+            }
+            if (!hasPreviousSibling(assetElement)) {
+                assetElement.insertAdjacentText("beforebegin", Constants.ZWSP);
             }
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
         }

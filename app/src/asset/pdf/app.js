@@ -2757,7 +2757,7 @@ function webViewerUpdateFindControlState ({
                                             rawQuery,
                                             source,
                                           }) {
-  const pdfInstance = getPdfInstance(source.state.source.bar)
+  const pdfInstance = getPdfInstance(source._linkService.pdfViewer.container)
   if (!pdfInstance) {
     return
   }

@@ -335,6 +335,7 @@ declare interface IConfig {
         provider: number
         s3: {
             endpoint: string
+            pathStyle: boolean
             accessKey: string
             secretKey: string
             bucket: string

@@ -435,15 +435,13 @@ ${accountHTML}
                     event.stopPropagation();
                     break;
                 } else if (target.id === "menuSync") {
-                    if (!needSubscribe()) {
-                        closePanel();
-                        modelElement.style.top = "0";
-                        modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconCloud"></use>';
-                        modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.cloud;
-                        modelMainElement.innerHTML = repos.genHTML();
-                        repos.element = modelMainElement;
-                        repos.bindEvent();
-                    }
+                    closePanel();
+                    modelElement.style.top = "0";
+                    modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconCloud"></use>';
+                    modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.cloud;
+                    modelMainElement.innerHTML = repos.genHTML();
+                    repos.element = modelMainElement;
+                    repos.bindEvent();
                     event.preventDefault();
                     event.stopPropagation();
                     break;

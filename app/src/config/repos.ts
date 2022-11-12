@@ -67,6 +67,14 @@ const renderProvider = (provider: number) => {
     <div>Region</div>
     <div class="fn__hr"></div>
     <input id="region" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.region}">
+</div>
+<div class="b3-label b3-label--noborder">
+    <div>Addressing</div>
+    <div class="fn__hr"></div>
+    <select class="b3-select fn__block" id="pathStyle">
+        <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="${window.siyuan.config.sync.s3.pathStyle}">Path-style</option>
+        <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="${window.siyuan.config.sync.s3.pathStyle}">Virtual-hosted-style</option>
+    </select>
 </div>`;
         }
         return `${tip}
@@ -94,13 +102,21 @@ const renderProvider = (provider: number) => {
     <div class="fn__flex-center fn__size200">Region</div>
     <div class="fn__space"></div>
     <input id="region" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.s3.region}">
+</label>
+<label class="b3-label b3-label--noborder fn__flex">
+    <div class="fn__flex-center fn__size200">Addressing</div>
+    <div class="fn__space"></div>
+    <select class="b3-select fn__flex-1" id="pathStyle">
+        <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="${window.siyuan.config.sync.s3.pathStyle}">Path-style</option>
+        <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="${window.siyuan.config.sync.s3.pathStyle}">Virtual-hosted-style</option>
+    </select>
 </label>`;
     } else if (provider === 3) {
         const tip = `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderWebDAVIntro}
         <div class="fn__hr"></div>
     ${window.siyuan.languages.syncThirdPartyProviderTip}
-</div>`
+</div>`;
         if (isMobile()) {
             return `${tip}
 <div class="b3-label b3-label--noborder">
@@ -200,6 +216,7 @@ const bindProviderEvent = () => {
                     accessKey: (providerPanelElement.querySelector("#accessKey") as HTMLInputElement).value,
                     secretKey: (providerPanelElement.querySelector("#secretKey") as HTMLInputElement).value,
                     bucket: (providerPanelElement.querySelector("#bucket") as HTMLInputElement).value,
+                    pathStyle: (providerPanelElement.querySelector("#pathStyle") as HTMLInputElement).value === "true",
                     region: (providerPanelElement.querySelector("#region") as HTMLInputElement).value,
                 };
                 fetchPost("/api/sync/setSyncProviderS3", {s3}, () => {

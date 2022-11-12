@@ -36,11 +36,40 @@ const renderProvider = (provider: number) => {
     ${window.siyuan.languages.syncOfficialProviderIntro}
 </div>`;
     } else if (provider === 2) {
-        return `<div class="b3-label b3-label--inner">
+        const tip = `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderS3Intro}
     <div class="fn__hr"></div>
     ${window.siyuan.languages.syncThirdPartyProviderTip}
+</div>`
+        if (isMobile()) {
+            return `${tip}
+<div class="b3-label b3-label--noborder">
+    <div>Endpoint</div>
+    <div class="fn__hr"></div>
+    <input id="endpoint" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.endpoint}">
 </div>
+<div class="b3-label b3-label--noborder">
+    <div>Access Key</div>
+    <div class="fn__hr"></div>
+    <input id="accessKey" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.accessKey}">
+</div>
+<div class="b3-label b3-label--noborder">
+    <div>Secret Key</div>
+    <div class="fn__hr"></div>
+    <input id="secretKey" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.secretKey}">
+</div>
+<div class="b3-label b3-label--noborder">
+    <div>Bucket</div>
+    <div class="fn__hr"></div>
+    <input id="bucket" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.bucket}">
+</div>
+<div class="b3-label b3-label--noborder">
+    <div>Region</div>
+    <div class="fn__hr"></div>
+    <input id="region" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.region}">
+</div>`;
+        }
+        return `${tip}
 <label class="b3-label b3-label--noborder fn__flex">
     <div class="fn__flex-center fn__size200">Endpoint</div>
     <div class="fn__space"></div>
@@ -67,11 +96,30 @@ const renderProvider = (provider: number) => {
     <input id="region" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.s3.region}">
 </label>`;
     } else if (provider === 3) {
-        return `<div class="b3-label b3-label--inner">
+        const tip = `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderWebDAVIntro}
         <div class="fn__hr"></div>
     ${window.siyuan.languages.syncThirdPartyProviderTip}
+</div>`
+        if (isMobile()) {
+            return `${tip}
+<div class="b3-label b3-label--noborder">
+    <div>Endpoint</div>
+    <div class="fn__hr"></div>
+    <input id="endpoint" class="b3-text-field fn__block" value="${window.siyuan.config.sync.webdav.endpoint}">
 </div>
+<div class="b3-label b3-label--noborder">
+    <div>Username</div>
+    <div class="fn__hr"></div>
+    <input id="username" class="b3-text-field fn__block" value="${window.siyuan.config.sync.webdav.username}">
+</div>
+<div class="b3-label b3-label--noborder">
+    <div>Password</div>
+    <div class="fn__hr"></div>
+    <input id="password" class="b3-text-field fn__block" value="${window.siyuan.config.sync.webdav.password}">
+</div>`;
+        }
+        return `${tip}
 <label class="b3-label b3-label--noborder fn__flex">
     <div class="fn__flex-center fn__size200">Endpoint</div>
     <div class="fn__space"></div>
@@ -93,7 +141,7 @@ const renderProvider = (provider: number) => {
 
 const bindProviderEvent = () => {
     const reposDataElement = repos.element.querySelector("#reposData");
-    const loadingElement =   repos.element.querySelector("#reposLoading");
+    const loadingElement = repos.element.querySelector("#reposLoading");
     if (window.siyuan.config.sync.provider === 0) {
         if (needSubscribe("")) {
             loadingElement.classList.add("fn__none");

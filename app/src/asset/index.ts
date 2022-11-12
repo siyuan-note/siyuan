@@ -315,9 +315,8 @@ export class Asset extends Model {
           <textarea id="errorMoreInfo" hidden='true' readonly="readonly"></textarea>
         </div>
       </div>
-      <div id="overlayContainer" class="fn__hidden">
-        <div id="passwordDialog" class="container fn__hidden">
-          <div class="dialog">
+      <div id="dialogContainer">
+        <dialog id="passwordDialog">
             <div class="row">
               <p id="passwordText" data-l10n-id="password_label">Enter the password to open this PDF file:</p>
             </div>
@@ -328,10 +327,8 @@ export class Asset extends Model {
               <button id="passwordCancel" class="overlayButton"><span data-l10n-id="password_cancel">Cancel</span></button>
               <button id="passwordSubmit" class="overlayButton"><span data-l10n-id="password_ok">OK</span></button>
             </div>
-          </div>
-        </div>
-        <div id="documentPropertiesDialog" class="container fn__hidden">
-          <div class="dialog b3-menu">
+        </dialog>
+        <dialog id="documentPropertiesDialog">
             <div class="row">
               <span>${window.siyuan.languages.fileName}</span> <p id="fileNameField">-</p>
             </div>
@@ -380,10 +377,8 @@ export class Asset extends Model {
             <div class="buttonRow">
               <button id="documentPropertiesClose" class="b3-button"><span>${window.siyuan.languages.close}</span></button>
             </div>
-          </div>
-        </div>
-        <div id="printServiceOverlay" class="container fn__hidden">
-          <div class="dialog">
+        </dialog>
+        <dialog id="printServiceOverlay">
             <div class="row">
               <span data-l10n-id="print_progress_message">Preparing document for printing…</span>
             </div>
@@ -394,8 +389,7 @@ export class Asset extends Model {
             <div class="buttonRow">
               <button id="printCancel" class="overlayButton"><span data-l10n-id="print_progress_close">Cancel</span></button>
             </div>
-          </div>
-        </div>
+        </dialog>
       </div>
       <div class="pdf__util b3-menu fn__none pdf__util--hide">
         <div class="fn__flex" style="padding: 0 4px">

@@ -16,7 +16,8 @@ export class InlineMemo extends ToolbarItem {
                 return;
             }
             const memoElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-memo");
-            if (memoElement) {
+            if (memoElement && memoElement.textContent === range.toString()) {
+                // https://github.com/siyuan-note/siyuan/issues/6569
                 protyle.toolbar.showRender(protyle, memoElement);
                 return;
             }

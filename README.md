@@ -52,7 +52,7 @@ All local features are free.
   * Icons
   * Templates
   * Widgets
-* End-to-end encrypted data sync and backup via the third-party cloud storage services (this feature is currently in the free public beta stage)
+* End-to-end encrypted data sync and backup via the third-party cloud storage services
   * S3
   * WebDAV
 * Hierarchical tag

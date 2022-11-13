@@ -592,7 +592,7 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://s.qiniu.com/VbQfeu",
-									"TextMarkTextContent": "Qiniu Cloud"
+									"TextMarkTextContent": "Qiniu"
 								},
 								{
 									"Type": "NodeText",
@@ -602,7 +602,7 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://www.aliyun.com/product/oss?userCode=yqovuas2",
-									"TextMarkTextContent": "Alibaba Cloud OSS"
+									"TextMarkTextContent": "Aliyun OSS"
 								},
 								{
 									"Type": "NodeText",
@@ -613,10 +613,6 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://www.cloudflare.com/",
 									"TextMarkTextContent": "Cloudflare R2"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", etc."
 								}
 							]
 						}
@@ -661,10 +657,6 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://koofr.eu/",
 									"TextMarkTextContent": "Koofr"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", etc."
 								}
 							]
 						}

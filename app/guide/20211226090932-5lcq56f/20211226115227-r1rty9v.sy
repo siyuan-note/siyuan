@@ -607,10 +607,6 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://www.cloudflare.com/",
 									"TextMarkTextContent": "Cloudflare R2"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 等"
 								}
 							]
 						}
@@ -655,10 +651,6 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://koofr.eu/",
 									"TextMarkTextContent": "Koofr"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 等"
 								}
 							]
 						}

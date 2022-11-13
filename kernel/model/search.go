@@ -117,11 +117,8 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, ne
 			if nil == block {
 				continue
 			}
-			block.Content = maxContent(block.Content, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
-			block.RefText = block.Content
-			if block.IsContainerBlock() {
-				block.RefText = block.FContent // `((` 引用列表项时使用第一个子块作为动态锚文本 https://github.com/siyuan-note/siyuan/issues/4536
-			}
+			block.RefText = sql.GetRefText(block.ID)
+			block.RefText = maxContent(block.RefText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 			ret = append(ret, block)
 		}
 		if 1 > len(ret) {
@@ -135,9 +132,9 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, ne
 	trees := map[string]*parse.Tree{}
 	for _, b := range ret {
 		hitFirstChildID := false
-		b.RefText = b.Content
+		b.RefText = sql.GetRefText(b.ID)
+		b.RefText = maxContent(b.RefText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 		if b.IsContainerBlock() {
-			b.RefText = b.FContent // `((` 引用列表项时使用第一个子块作为动态锚文本 https://github.com/siyuan-note/siyuan/issues/4536
 
 			// `((` 引用候选中排除当前块的父块 https://github.com/siyuan-note/siyuan/issues/4538
 			tree := trees[b.RootID]
@@ -154,7 +151,6 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, ne
 		}
 
 		if b.ID != id && !hitFirstChildID && b.ID != rootID {
-			b.Content = maxContent(b.Content, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 			tmp = append(tmp, b)
 		}
 	}

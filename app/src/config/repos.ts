@@ -39,6 +39,8 @@ const renderProvider = (provider: number) => {
         const tip = `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderS3Intro}
     <div class="fn__hr"></div>
+    ${window.siyuan.languages.featureBetaStage}
+    <div class="fn__hr"></div>
     ${window.siyuan.languages.syncThirdPartyProviderTip}
 </div>`
         if (isMobile()) {

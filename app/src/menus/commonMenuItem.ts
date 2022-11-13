@@ -23,6 +23,7 @@ import {rename} from "../editor/rename";
 import {matchHotKey} from "../protyle/util/hotKey";
 import * as dayjs from "dayjs";
 import {Constants} from "../constants";
+import {exportImage} from "../protyle/export/util";
 
 const bindAttrInput = (inputElement: HTMLInputElement, confirmElement: Element) => {
     inputElement.addEventListener("keydown", (event) => {
@@ -668,6 +669,12 @@ export const exportMd = (id: string) => {
                     hideMessage(msgId);
                     openByMobile(response.data.zip);
                 });
+            }
+        }, {
+            label: window.siyuan.languages.image,
+            icon: "iconImage",
+            click: () => {
+                exportImage(id);
             }
         },
             /// #if !BROWSER

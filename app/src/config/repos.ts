@@ -116,7 +116,9 @@ const renderProvider = (provider: number) => {
     } else if (provider === 3) {
         const tip = `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderWebDAVIntro}
-        <div class="fn__hr"></div>
+    <div class="fn__hr"></div>
+    ${window.siyuan.languages.featureBetaStage}
+    <div class="fn__hr"></div>    
     ${window.siyuan.languages.syncThirdPartyProviderTip}
 </div>`;
         if (isMobile()) {

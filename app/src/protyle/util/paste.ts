@@ -230,7 +230,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     if (e.getAttribute("updated")) {
                         e.setAttribute("updated", newId.split("-")[0]);
                     }
-                    isBlock = true
+                    isBlock = true;
                 });
                 if (nodeElement.classList.contains("table")) {
                     isBlock = false;

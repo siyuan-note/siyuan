@@ -14,7 +14,6 @@ import {upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
-import {genEmptyBlock} from "../../block/util";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../markdown/highlightRender";
 import {imgMenu} from "../../menus/protyle";

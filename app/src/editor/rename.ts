@@ -4,7 +4,6 @@ import {focusByRange} from "../protyle/util/selection";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {removeEmbed} from "../protyle/wysiwyg/removeEmbed";
 import {insertHTML} from "../protyle/util/insertHTML";
-import {genEmptyBlock} from "../block/util";
 import {isMobile} from "../util/functions";
 import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
 import {fetchPost} from "../util/fetch";

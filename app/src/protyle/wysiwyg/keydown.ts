@@ -76,6 +76,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (!event.repeat) {
             hideElements(["toolbar"], protyle);
         }
+        console.log(event)
         const range = getEditorRange(protyle.wysiwyg.element);
         const nodeElement = hasClosestBlock(range.startContainer);
         if (!nodeElement) {

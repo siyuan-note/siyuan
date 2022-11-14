@@ -25,7 +25,6 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -330,8 +329,8 @@ func exportAsFile(c *gin.Context) {
 		return
 	}
 
-	ext := filepath.Ext(file.Filename)
-	name := "save-as-file-" + ast.NewNodeID() + ext
+	name := "export-file-" + file.Filename
+	name = util.FilterFileName(name)
 	tmpDir := filepath.Join(util.TempDir, "export")
 	if err = os.MkdirAll(tmpDir, 0755); nil != err {
 		logging.LogErrorf("export as file failed: %s", err)

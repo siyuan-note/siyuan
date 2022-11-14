@@ -1,3 +1,47 @@
+## v2.5.0 / 2022-11-15
+
+### 引入特性
+
+* [导出为长图](https://github.com/siyuan-note/siyuan/issues/2919)
+* [数据同步和备份支持接入第三方 S3 协议对象存储服务](https://github.com/siyuan-note/siyuan/issues/6426)
+* [数据同步和备份支持接入第三方 WebDAV 服务](https://github.com/siyuan-note/siyuan/issues/6446)
+
+### 改进功能
+
+* [编辑器右侧加入滚动到顶部和底部按钮](https://github.com/siyuan-note/siyuan/issues/6536)
+* [插入资源文件时不再去除 `[`、`(` 等符号](https://github.com/siyuan-note/siyuan/issues/6542)
+* [桌面端退出拉起更新安装时有时需要重启两次](https://github.com/siyuan-note/siyuan/issues/6544)
+* [`网络图片转换为本地图片` 支持处理 `file://` 本地路径图片](https://github.com/siyuan-note/siyuan/issues/6546)
+* [文档块转换为标题块时将文档标签移动到标题块下方](https://github.com/siyuan-note/siyuan/issues/6550)
+* [只读模式下不应该能够剪切](https://github.com/siyuan-note/siyuan/issues/6553)
+* [WebDAV 数据同步跳过 HTTPS 证书校验](https://github.com/siyuan-note/siyuan/issues/6556)
+* [S3 云端存储支持设置使用路径风格寻址](https://github.com/siyuan-note/siyuan/issues/6559)
+* [超宽屏幕优化](https://github.com/siyuan-note/siyuan/issues/6564)
+* [当有其他软件带有划选弹出功能时浮动工具栏消失](https://github.com/siyuan-note/siyuan/issues/6573)
+* [改进数据量较大时的启动速度](https://github.com/siyuan-note/siyuan/issues/6574)
+
+### 开发重构
+
+* [改进更新集市包的发布流程](https://github.com/siyuan-note/siyuan/issues/6579)
+
+### 修复缺陷
+
+* [清除样式导致误删文本](https://github.com/siyuan-note/siyuan/issues/6540)
+* [无法删除云端标记快照](https://github.com/siyuan-note/siyuan/issues/6549)
+* [标题块无法转换为被选中文档的子文档](https://github.com/siyuan-note/siyuan/issues/6552)
+* [只读模式下列表前的箭头无法折叠](https://github.com/siyuan-note/siyuan/issues/6554)
+* [反向链接面板复制问题](https://github.com/siyuan-note/siyuan/issues/6555)
+* [只读模式下多项折叠会导致数据类型错误](https://github.com/siyuan-note/siyuan/issues/6557)
+* [图片居中顶部有空行](https://github.com/siyuan-note/siyuan/issues/6561)
+* [PDF 页签中查看属性报错](https://github.com/siyuan-note/siyuan/issues/6562)
+* [PDF 页签中点击搜索再点击其他地方报错](https://github.com/siyuan-note/siyuan/issues/6563)
+* [`F2` 重命名文档后编辑器内未跟随改变](https://github.com/siyuan-note/siyuan/issues/6565)
+* [`[[` 引用动态锚文本长度限制无效](https://github.com/siyuan-note/siyuan/issues/6566)
+* [选中备注及其后文本无法将其后文本设置为备注](https://github.com/siyuan-note/siyuan/issues/6569)
+* [禁止文档历史内容可编辑](https://github.com/siyuan-note/siyuan/issues/6580)
+* [对没有渲染的文档进行重命名、移除、关闭，页签没有对应的变化](https://github.com/siyuan-note/siyuan/issues/6581)
+* [复制单个块时无法复制属性](https://github.com/siyuan-note/siyuan/issues/6585)
+
 ## v2.4.12 / 2022-11-10
 
 ### 改进功能

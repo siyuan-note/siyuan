@@ -46,7 +46,7 @@ export const exportImage = (id: string) => {
         id,
         keepFold: false,
     }, (response) => {
-        const previewElement = exportDialog.element.querySelector("#preview")
+        const previewElement = exportDialog.element.querySelector("#preview");
         previewElement.innerHTML = response.data.content;
         processRender(previewElement);
         highlightRender(previewElement);
@@ -70,14 +70,13 @@ export const exportImage = (id: string) => {
                             const formData = new FormData();
                             formData.append("file", blob, response.data.name + ".png");
                             formData.append("type", "image/png");
-                            fetchPost("/api/export/exportAsFile", formData, () => {
-                                hideMessage(msgId);
-                                exportDialog.destroy();
-                            });
+                            fetchPost("/api/export/exportAsFile", formData);
+                            hideMessage(msgId);
+                            exportDialog.destroy();
                         });
                     });
                 });
-            }, Constants.TIMEOUT_TRANSITION)
+            }, Constants.TIMEOUT_TRANSITION);
         });
     });
-}
+};

@@ -50,9 +50,9 @@ class App {
                             case "rename":
                                 getAllTabs().forEach((tab) => {
                                     if (tab.headElement) {
-                                        const initTab = tab.headElement.getAttribute("data-initdata")
+                                        const initTab = tab.headElement.getAttribute("data-initdata");
                                         if (initTab) {
-                                            const initTabData = JSON.parse(initTab)
+                                            const initTabData = JSON.parse(initTab);
                                             if (initTabData.rootId === data.data.id) {
                                                 tab.updateTitle(data.data.title);
                                             }
@@ -63,9 +63,9 @@ class App {
                             case "unmount":
                                 getAllTabs().forEach((tab) => {
                                     if (tab.headElement) {
-                                        const initTab = tab.headElement.getAttribute("data-initdata")
+                                        const initTab = tab.headElement.getAttribute("data-initdata");
                                         if (initTab) {
-                                            const initTabData = JSON.parse(initTab)
+                                            const initTabData = JSON.parse(initTab);
                                             if (data.data.box === initTabData.notebookId) {
                                                 tab.parent.removeTab(tab.id);
                                             }
@@ -76,9 +76,9 @@ class App {
                             case "removeDoc":
                                 getAllTabs().forEach((tab) => {
                                     if (tab.headElement) {
-                                        const initTab = tab.headElement.getAttribute("data-initdata")
+                                        const initTab = tab.headElement.getAttribute("data-initdata");
                                         if (initTab) {
-                                            const initTabData = JSON.parse(initTab)
+                                            const initTabData = JSON.parse(initTab);
                                             if (data.data.ids.includes(initTabData.rootId)) {
                                                 tab.parent.removeTab(tab.id);
                                             }

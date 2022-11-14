@@ -234,7 +234,7 @@ export const goHome = (protyle:IProtyle) => {
             onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
         });
     }
-}
+};
 
 export const goEnd = (protyle:IProtyle) => {
     if (!protyle.scroll.element.classList.contains("fn__none") &&
@@ -251,4 +251,4 @@ export const goEnd = (protyle:IProtyle) => {
         protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
         focusBlock(protyle.wysiwyg.element.lastElementChild, undefined, false);
     }
-}
+};

@@ -6,7 +6,6 @@ import {closePanel} from "./closePanel";
 import {Constants} from "../../constants";
 import {setAccessAuthCode} from "../../config/util/setAccessAuthCode";
 import {mountHelp, newDailyNote, newNotebook} from "../../util/mount";
-import {needSubscribe} from "../../util/needSubscribe";
 import {repos} from "../../config/repos";
 import * as md5 from "blueimp-md5";
 import {showMessage} from "../../dialog/message";

@@ -42,7 +42,7 @@ const renderProvider = (provider: number) => {
     ${window.siyuan.languages.featureBetaStage}
     <div class="fn__hr"></div>
     ${window.siyuan.languages.syncThirdPartyProviderTip}
-</div>`
+</div>`;
         if (isMobile()) {
             return `${tip}
 <div class="b3-label b3-label--noborder">

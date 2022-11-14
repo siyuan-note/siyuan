@@ -544,7 +544,7 @@ export class Toolbar {
                 currentNewNode.style.fontSize === nextNewNode.style.fontSize &&
                 currentNewNode.style.backgroundColor === nextNewNode.style.backgroundColor) {
                 // 合并相同的 node
-                const currentType = currentNewNode.getAttribute("data-type")
+                const currentType = currentNewNode.getAttribute("data-type");
                 if (currentType.indexOf("inline-math") > -1) {
                     // 数学公式合并 data-content https://github.com/siyuan-note/siyuan/issues/6028
                     nextNewNode.setAttribute("data-content", currentNewNode.getAttribute("data-content") + nextNewNode.getAttribute("data-content"));

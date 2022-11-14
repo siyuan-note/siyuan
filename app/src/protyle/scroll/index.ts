@@ -23,7 +23,7 @@ export class Scroll {
 </div>
 <div class="b3-tooltips b3-tooltips__sw protyle-scroll__down" aria-label="${updateHotkeyTip("⌘End")}">
     <svg><use xlink:href="#iconDown"></use></svg>
-</div>`
+</div>`;
 
         this.element = this.parentElement.querySelector(".protyle-scroll__bar");
         this.keepLazyLoad = false;
@@ -44,11 +44,11 @@ export class Scroll {
         });
         /// #endif
         this.parentElement.addEventListener("click", (event) => {
-            const target = event.target as HTMLElement
+            const target = event.target as HTMLElement;
             if (hasClosestByClassName(target, "protyle-scroll__up")) {
-                goHome(protyle)
+                goHome(protyle);
             } else if (hasClosestByClassName(target, "protyle-scroll__down")) {
-                goEnd(protyle)
+                goEnd(protyle);
             } else if (target.classList.contains("b3-slider")) {
                 this.setIndex(protyle);
             }

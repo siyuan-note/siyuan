@@ -10,14 +10,7 @@ import {addScript} from "../util/addScript";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {highlightRender} from "../markdown/highlightRender";
-import {mathRender} from "../markdown/mathRender";
-import {mermaidRender} from "../markdown/mermaidRender";
-import {flowchartRender} from "../markdown/flowchartRender";
-import {graphvizRender} from "../markdown/graphvizRender";
-import {chartRender} from "../markdown/chartRender";
-import {mindmapRender} from "../markdown/mindmapRender";
-import {abcRender} from "../markdown/abcRender";
-import {plantumlRender} from "../markdown/plantumlRender";
+import {processRender} from "../util/processCode";
 
 declare const html2canvas: (element: Element) => Promise<any>;
 export const afterExport = (exportPath: string, msgId: string) => {
@@ -35,8 +28,8 @@ export const afterExport = (exportPath: string, msgId: string) => {
 export const exportImage = (id: string) => {
     const exportDialog = new Dialog({
         title: window.siyuan.languages.exportAsImage,
-        content: `<div class="b3-dialog__content" style="max-height: 70vh;overflow: auto;${isMobile()?"padding:8px;":""}">
-    <div style="${isMobile()?"padding: 16px;margin: 16px 0":"padding: 48px;margin: 8px 0 24px"};border: 1px solid var(--b3-border-color);border-radius: 10px;" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview">
+        content: `<div class="b3-dialog__content" style="max-height: 70vh;overflow: auto;${isMobile() ? "padding:8px;" : ""}">
+    <div style="${isMobile() ? "padding: 16px;margin: 16px 0" : "padding: 48px;margin: 8px 0 24px"};border: 1px solid var(--b3-border-color);border-radius: 10px;" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview">
         <div class="fn__loading" style="left:0"><img height="128px" width="128px" src="stage/loading-pure.svg"></div>
     </div>
     <div class="ft__smaller ft__on-surface fn__flex"><img style="height: 18px;margin: 0 8px" src="stage/icon.png">${window.siyuan.languages.exportBySiYuan}</div>
@@ -55,16 +48,8 @@ export const exportImage = (id: string) => {
     }, (response) => {
         const previewElement = exportDialog.element.querySelector("#preview")
         previewElement.innerHTML = response.data.content;
-
+        processRender(previewElement);
         highlightRender(previewElement);
-        mathRender(previewElement);
-        mermaidRender(previewElement);
-        flowchartRender(previewElement);
-        graphvizRender(previewElement);
-        chartRender(previewElement);
-        mindmapRender(previewElement);
-        abcRender(previewElement);
-        plantumlRender(previewElement);
         previewElement.querySelectorAll("table").forEach((item: HTMLElement) => {
             if (item.clientWidth > item.parentElement.clientWidth) {
                 // @ts-ignore
@@ -81,13 +66,15 @@ export const exportImage = (id: string) => {
             setTimeout(() => {
                 addScript("stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
                     html2canvas(previewElement.parentElement).then((canvas) => {
-                        const link = document.createElement("a");
-                        link.download = response.data.name + ".png";
-                        link.href = "data:" + canvas.toDataURL("image/png");
-                        link.click();
-                        link.remove();
-                        hideMessage(msgId);
-                        exportDialog.destroy();
+                        canvas.toBlob((blob: Blob) => {
+                            const formData = new FormData();
+                            formData.append("file", blob, response.data.name + ".png");
+                            formData.append("type", "image/png");
+                            fetchPost("/api/export/exportAsFile", formData, () => {
+                                hideMessage(msgId);
+                                exportDialog.destroy();
+                            });
+                        });
                     });
                 });
             }, Constants.TIMEOUT_TRANSITION)

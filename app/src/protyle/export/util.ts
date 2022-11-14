@@ -11,6 +11,7 @@ import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {highlightRender} from "../markdown/highlightRender";
 import {processRender} from "../util/processCode";
+import {openByMobile} from "../util/compatibility";
 
 declare const html2canvas: (element: Element) => Promise<any>;
 export const afterExport = (exportPath: string, msgId: string) => {
@@ -70,7 +71,9 @@ export const exportImage = (id: string) => {
                             const formData = new FormData();
                             formData.append("file", blob, response.data.name + ".png");
                             formData.append("type", "image/png");
-                            fetchPost("/api/export/exportAsFile", formData);
+                            fetchPost("/api/export/exportAsFile", formData, (response) => {
+                                openByMobile(response.data.file);
+                            });
                             hideMessage(msgId);
                             exportDialog.destroy();
                         });

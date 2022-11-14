@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226121326-v5kpxfp",
 		"title": "主题",
-		"updated": "20220806105512"
+		"updated": "20221114173638"
 	},
 	"Children": [
 		{
@@ -1192,333 +1192,36 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121625-3wjcf6l",
-				"updated": "20211226121625"
+				"updated": "20221114173638"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "上架主题集市"
+					"Data": "上架社區集市"
 				}
 			]
 		},
 		{
-			"ID": "20211226121625-yzmbk9w",
+			"ID": "20221114173540-jb1qizj",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226121625-yzmbk9w",
-				"updated": "20211226004659"
+				"id": "20221114173540-jb1qizj",
+				"updated": "20221114173540"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "上架前請確認你的主題倉庫根路徑下至少包含以下文件（"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/88250/Comfortably-Numb",
-					"TextMarkTextContent": "倉庫示例"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "）："
-				}
-			]
-		},
-		{
-			"ID": "20211226121625-ibsu6nz",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20211226121625-ibsu6nz",
-				"updated": "20211226004659"
-			},
-			"Children": [
-				{
-					"ID": "20211226121625-clqenvq",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226121625-clqenvq"
-					},
-					"Children": [
-						{
-							"ID": "20211226121625-beceji7",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121625-beceji7"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "theme.css"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226121625-ktc6k8d",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226121625-ktc6k8d"
-					},
-					"Children": [
-						{
-							"ID": "20211226121625-qd51gv2",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121625-qd51gv2"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "theme.json（請確保 JSON 格式正確）"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226121625-lvogdjn",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226121625-lvogdjn"
-					},
-					"Children": [
-						{
-							"ID": "20211226121625-lo5z4a5",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121625-lo5z4a5"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "preview.png（請壓縮圖片大小在 512 KB 以內）"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226121625-955qeqd",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226121625-955qeqd"
-					},
-					"Children": [
-						{
-							"ID": "20211226121625-sito1j0",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121625-sito1j0"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "README.md（請註意大小寫）"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20211226121625-tp5dvzc",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226121625-tp5dvzc",
-				"updated": "20211226004659"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "確認無誤以後請通過對"
+					"Data": "請參考"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "社區集市"
+					"TextMarkTextContent": "社區集市 README"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "倉庫"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://docs.github.com/cn/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request",
-					"TextMarkTextContent": "發起 pull request"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，修改 themes.json 文件。該文件是所有社區主題倉庫的索引，格式為："
-				}
-			]
-		},
-		{
-			"ID": "20211226121625-efr795j",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"Properties": {
-				"id": "20211226121625-efr795j",
-				"updated": "20211226004659"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "anNvbg=="
-				},
-				{
-					"ID": "20220307092237-ehn29d0",
-					"Type": "NodeCodeBlockCode",
-					"Data": "{\n  \"repos\": [\n    \"username/reponame@commithash\"\n  ]\n}\n",
-					"Properties": {
-						"id": "20220307092237-ehn29d0"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
-				}
-			]
-		},
-		{
-			"ID": "20211226121625-1ptob4k",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226121625-1ptob4k",
-				"updated": "20211226004659"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "其中 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "commithash"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 請填寫你的主題倉庫上最近一次發布版本的 Git 提交hash values，請使用完整hash values，不要使用 7 位短值。"
-				}
-			]
-		},
-		{
-			"ID": "20211226121625-ld48j2c",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20211226121625-ld48j2c",
-				"updated": "20211226121625"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "更新"
-				}
-			]
-		},
-		{
-			"ID": "20211226121625-q6woswv",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226121625-q6woswv",
-				"updated": "20211226004659"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果你開發的主題更新了版本，請記得："
-				}
-			]
-		},
-		{
-			"ID": "20211226121625-smkufnh",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20211226121625-smkufnh",
-				"updated": "20211228134327"
-			},
-			"Children": [
-				{
-					"ID": "20211226121625-9dnttlt",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226121625-9dnttlt",
-						"updated": "20211228134327"
-					},
-					"Children": [
-						{
-							"ID": "20211226121625-184ldd8",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121625-184ldd8",
-								"updated": "20211228134327"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "更新你的主題配置 theme.json 中的 version 欄位"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226121625-6z8lsor",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226121625-6z8lsor"
-					},
-					"Children": [
-						{
-							"ID": "20211226121625-2ayqciv",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121625-2ayqciv"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "再次對社區集市發起 Pull Request"
-								}
-							]
-						}
-					]
+					"Data": "。"
 				}
 			]
 		},

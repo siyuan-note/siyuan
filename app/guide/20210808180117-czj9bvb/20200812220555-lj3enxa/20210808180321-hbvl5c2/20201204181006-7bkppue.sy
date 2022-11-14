@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20220605170311"
+		"updated": "20221114172718"
 	},
 	"Children": [
 		{
@@ -685,324 +685,32 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
 					"Data": "上架模板集市"
 				}
 			]
 		},
 		{
-			"ID": "20210131162925-ececb6c",
+			"ID": "20221114172717-fu9oalt",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210131162925-ececb6c",
-				"updated": "20211222094858"
+				"id": "20221114172717-fu9oalt",
+				"updated": "20221114172718"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "上架前请确认你的模板仓库根路径下至少包含以下文件（"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/88250/November-Rain",
-					"TextMarkTextContent": "仓库示例"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "）："
-				}
-			]
-		},
-		{
-			"ID": "20210131162925-lyyl9sm",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20210131162925-lyyl9sm",
-				"updated": "20211222094908"
-			},
-			"Children": [
-				{
-					"ID": "20210131162925-mzvnu0y",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210131162925-mzvnu0y"
-					},
-					"Children": [
-						{
-							"ID": "20210131162925-owpf9yl",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131162925-owpf9yl"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "template.json（请确保 JSON 格式正确）"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210131162925-kvgwgr7",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210131162925-kvgwgr7"
-					},
-					"Children": [
-						{
-							"ID": "20210131162925-m5sxpc7",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131162925-m5sxpc7",
-								"updated": "20211222094852"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "preview.png（请压缩图片大小在 512 KB 以内）"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211222094908-l3yznj7",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211222094908-l3yznj7",
-						"updated": "20211222094908"
-					},
-					"Children": [
-						{
-							"ID": "20211222094908-xiw0ti2",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211222094908-xiw0ti2",
-								"updated": "20211222094908"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "README.md（请注意大小写）"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20210131162925-ld2wv38",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210131162925-ld2wv38"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "确认无误以后请通过对"
+					"Data": "请参考"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "社区集市"
+					"TextMarkTextContent": "社区集市 README"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "仓库"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://docs.github.com/cn/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request",
-					"TextMarkTextContent": "发起 pull request"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，修改 templates.json 文件。该文件是所有社区模板仓库的索引，格式为："
-				}
-			]
-		},
-		{
-			"ID": "20210131162925-01ixzvb",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"CodeBlockFenceChar": 96,
-			"CodeBlockFenceLen": 3,
-			"CodeBlockOpenFence": "YGBg",
-			"CodeBlockInfo": "anNvbg==",
-			"CodeBlockCloseFence": "YGBg",
-			"Properties": {
-				"id": "20210131162925-01ixzvb"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "anNvbg=="
-				},
-				{
-					"ID": "20220307091943-dgkvjic",
-					"Type": "NodeCodeBlockCode",
-					"Data": "{\n  \"repos\": [\n    \"username/reponame@commithash\"\n  ]\n}\n",
-					"Properties": {
-						"id": "20220307091943-dgkvjic"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
-				}
-			]
-		},
-		{
-			"ID": "20210131162925-tos2g00",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210131162925-tos2g00"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "其中 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "commithash"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 请填写你的模板仓库上最近一次发布版本的 Git 提交哈希值，请使用完整哈希值，不要使用 7 位短值。"
-				}
-			]
-		},
-		{
-			"ID": "20210131162925-e2aq6sa",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210131162925-e2aq6sa",
-				"updated": "20210131162925"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "更新"
-				}
-			]
-		},
-		{
-			"ID": "20210131162925-1q8zsu9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210131162925-1q8zsu9"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果你开发的模板更新了版本，请记得："
-				}
-			]
-		},
-		{
-			"ID": "20210131162925-z512z4z",
-			"Type": "NodeList",
-			"ListData": {
-				"Tight": true,
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
-			"Properties": {
-				"id": "20210131162925-z512z4z"
-			},
-			"Children": [
-				{
-					"ID": "20210131162925-kxy0t2r",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20210131162925-kxy0t2r"
-					},
-					"Children": [
-						{
-							"ID": "20210131162925-vg6sggf",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131162925-vg6sggf"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "更新你的模板配置 template.json 中的 version 字段"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210131162925-g7efau2",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20210131162925-g7efau2"
-					},
-					"Children": [
-						{
-							"ID": "20210131162925-3qgjytc",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131162925-3qgjytc"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "再次对社区集市发起 Pull Request"
-								}
-							]
-						}
-					]
+					"Data": "。"
 				}
 			]
 		}

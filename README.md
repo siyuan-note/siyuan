@@ -161,7 +161,7 @@ We release insider preview before major updates, please visit [https://github.co
 
 ### Is SiYuan right for me? Or how should I choose note-taking software?
 
-This question varies from person to person and is difficult to answer uniformly. If you're not sure if Siyuan is right for you, here are some suggestions:
+This question varies from person to person and is difficult to answer uniformly. If you're not sure if SiYuan is right for you, here are some suggestions:
 
 * If you need to frequently share notes or edit collaboratively with others, and need the data table function, it is recommended to use:
 
@@ -175,11 +175,27 @@ This question varies from person to person and is difficult to answer uniformly.
 
 The data is saved in the workspace folder (the default is in the user's home directory Documents/SiYuan, which can be modified in <kbd>Settings</kbd> - <kbd>About</kbd>), in the workspace data folder:
 
-* `assets` are used to save all inserted asset files
+* `assets` are used to save all inserted assets
 * `templates` are used to save template snippets
 * `widgets` are used to save widgets
 * `emojis` are used to save emoji images
 * The rest of the folders are the notebook folders created by the user, files with the suffix of `.sy` in the notebook folder are used to save the document data, and the data format is JSON
+
+### Does it support data synchronization through a third-party sync disk?
+
+Data synchronization through third-party synchronization disks is not supported, otherwise data may be corrupted.
+
+Although it does not support third-party sync disks, it supports third-party cloud storage services, which can be configured in <kbd>Settings</kbd> - <kbd>Cloud</kbd> - <kbd>Cloud Storage Provider</kbd>, currently supported:
+
+* S3 compatible object storage services, such as [Qiniu](https://s.qiniu.com/VbQfeu), [Aliyun OSS](https://www.aliyun.com/product/oss?userCode=yqovuas2), [Cloudflare R2](https://www.cloudflare.com/)
+* WebDAV protocol, such as [TeraCLOUD](https://teracloud.jp/), [Koofr](https://koofr.eu/)
+
+Synchronizing data through third-party cloud storage services is also ((20210721112229-fp97j3c "end-to-end encrypted")), and third-party cloud storage service providers cannot obtain our plaintext data.
+
+In addition, you can also consider manually exporting and importing data to achieve data synchronization:
+
+* Desktop: <kbd>Settings</kbd> - <kbd>Export</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
+* Mobile: <kbd>Right column</kbd> - <kbd>About</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
 
 ### Is SiYuan open source?
 
@@ -200,13 +216,13 @@ For more details, please refer to [Development Guide](https://github.com/siyuan-
 * If it is installed through the installation package on the desktop, you can open the option of <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Automatically download update installation package</kbd>, so that SiYuan will automatically download The latest version of the installation package and prompts to install
 * If it is installed by manual installation package, please download the installation package again to install
 
-You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or by following [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) or [SiYuan Announcement](https://ld246.com/tag/siyuan-announcement) to get the new version.
+You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or by following [GitHub Releases](https ://github.com/siyuan-note/siyuan/releases) or [SiYuan Announcement](https://ld246.com/tag/siyuan-announcement) to get the new version.
 
 **Note**: Do not place the workspace in the installation directory, because the updated version will clear all files in the installation directory
 
-### Is there any note for deleting docs?
+### Is there any #Note# for deleting docs?
 
-After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate edit history.
+After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate ((20210615213222-vs5tzbd "data history")).
 
 ### How can I just wrap and not start a new paragraph?
 
@@ -214,7 +230,7 @@ Please use <kbd>Shift+Enter</kbd>.
 
 ### How to move the heading and blocks below it?
 
-Fold the heading and move it later.
+Fold the heading and move it later. Please note that it is a move, not a cut, and a folded heading cut will not move the blocks below it.
 
 ### How to select multiple blocks across pages?
 
@@ -224,9 +240,17 @@ Click at the beginning, hold down <kbd>Shift</kbd> and click at the end after sc
 
 Press <kbd>Ctrl+R</kbd> after selecting the keyword in the editor.
 
+### How to insert the same inline element to the left of an existing inline element?
+
+Ambiguity may occur when using Markdown markers to insert, please refer to [here](https://github.com/siyuan-note/siyuan/issues/5372) for details. Please use `/` or the corresponding shortcut key for inline elements to insert.
+
 ### What if some blocks (such as paragraph blocks in list items) cannot find the block icon?
 
 The first sub-block under the list item is the block icon omitted. You can move the cursor into this block and trigger its block menu with <kbd>Ctrl+/</kbd> .
+
+### Why can't some online pictures be viewed?
+
+In order to avoid some potential security problems, SiYuan will not bypass the security header verification (such as security policy header and anti-leech verification) of the target site when initiating Internet service requests. You can try the `Convert network images to local images` function in the `...` in the upper right corner of the editor to pull the network image to the local, so that even if the target site changes the security policy or the local image is unavailable later, it will not be affected.
 
 ### How to share notes?
 
@@ -236,13 +260,6 @@ The first sub-block under the list item is the block icon omitted. You can move 
 * <kbd>Export Preview</kbd> to copy to third-party online services
 
 The first two methods can guarantee the original semantics of the data.
-
-### Does it support data synchronization through a third-party sync disk?
-
-Data synchronization through third-party synchronization disks is not supported, otherwise data may be damaged. Consider manually exporting and importing Data for data synchronization:
-
-* Desktop: <kbd>Settings</kbd> - <kbd>Export</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
-* Mobile: <kbd>Right column</kbd> - <kbd>About</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
 
 ### What should I do if the data repo key is lost?
 
@@ -259,7 +276,7 @@ Data synchronization through third-party synchronization disks is not supported,
 
 Local functions are completely free to use, [Cloud services](https://b3log.org/siyuan/en/pricing.html) requires annual subscription.
 
-Currently, only users in mainland China are supported to subscribe. For users in non-mainland China regions, please follow [Cloud service supports non-mainland China regions](https://github.com/siyuan-note/siyuan/issues/5331).
+Currently, only users in mainland China are supported to subscribe, and users who are not in mainland China should not subscribe.
 
 ## 🙏 Acknowledgement
 

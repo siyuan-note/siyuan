@@ -17,6 +17,7 @@
 package api
 
 import (
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -295,4 +297,38 @@ func exportPreview(c *gin.Context) {
 	ret.Data = map[string]interface{}{
 		"html": stdHTML,
 	}
+}
+
+func exportAsFile(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	form, err := c.MultipartForm()
+	if nil != err {
+		logging.LogErrorf("export as file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	typ := form.Value["type"][0]
+	file := form.File["file"][0]
+	reader, err := file.Open()
+	if nil != err {
+		logging.LogErrorf("export as file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	defer reader.Close()
+
+	data, err := io.ReadAll(reader)
+	if nil != err {
+		logging.LogErrorf("export as file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	c.Data(http.StatusOK, typ, data)
 }

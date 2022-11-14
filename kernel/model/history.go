@@ -202,6 +202,8 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 		historyTree = renderTree
 	}
 
+	// 禁止文档历史内容可编辑 https://github.com/siyuan-note/siyuan/issues/6580
+	luteEngine.RenderOptions.ProtyleContenteditable = false
 	if isLargeDoc {
 		util.PushMsg(Conf.Language(36), 5000)
 		formatRenderer := render.NewFormatRenderer(historyTree, luteEngine.RenderOptions)

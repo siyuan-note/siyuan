@@ -6,7 +6,7 @@
 		"id": "20200924100110-vcg96wy",
 		"title": "Icon",
 		"type": "doc",
-		"updated": "20220806105213"
+		"updated": "20221114173333"
 	},
 	"Children": [
 		{
@@ -1369,324 +1369,26 @@
 			]
 		},
 		{
-			"ID": "20210601103837-895y8x4",
+			"ID": "20221114173333-rfx8ewj",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210601103837-895y8x4",
-				"updated": "20211222095758"
+				"id": "20221114173333-rfx8ewj",
+				"updated": "20221114173333"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Please make sure that the root path of your icon repository contains at least the following files before listing:"
-				}
-			]
-		},
-		{
-			"ID": "20210601103837-jcdussf",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20210601103837-jcdussf",
-				"updated": "20211222095802"
-			},
-			"Children": [
-				{
-					"ID": "20210601103837-t2w9lfe",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210601103837-t2w9lfe",
-						"updated": "20210601103858"
-					},
-					"Children": [
-						{
-							"ID": "20210601103837-yccdguo",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210601103837-yccdguo",
-								"updated": "20210601103858"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "icon.js"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210601103837-1fer3gl",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210601103837-1fer3gl",
-						"updated": "20210601103900"
-					},
-					"Children": [
-						{
-							"ID": "20210601103837-ndmidbx",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210601103837-ndmidbx",
-								"updated": "20210601103900"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "icon.json (please make sure the JSON format is correct)"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210601103837-dsc7ww4",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210601103837-dsc7ww4"
-					},
-					"Children": [
-						{
-							"ID": "20210601103837-80g8m6h",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210601103837-80g8m6h",
-								"updated": "20211222095801"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "preview.png (please compress the image size within 512 KB)"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211222095802-9zc9r12",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211222095802-9zc9r12",
-						"updated": "20211222095802"
-					},
-					"Children": [
-						{
-							"ID": "20211222095802-bp2xrjr",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211222095802-bp2xrjr",
-								"updated": "20211222095802"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "README.md (please note the case)"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20210601103837-li5jnve",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210601103837-li5jnve",
-				"updated": "20210601103918"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "After confirmation, please "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request",
-					"TextMarkTextContent": "create a pull request"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to the "
+					"Data": "Please refer to "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "Community Bazaar"
+					"TextMarkTextContent": "Community Bazaar README"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " repository and modify the consi.json file in it. This file is the index of all community icon repositories, the format is:"
-				}
-			]
-		},
-		{
-			"ID": "20210601103837-opzxesl",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"Properties": {
-				"id": "20210601103837-opzxesl",
-				"updated": "20210601103837"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "anNvbg=="
-				},
-				{
-					"ID": "20220307092214-uxoniwd",
-					"Type": "NodeCodeBlockCode",
-					"Data": "{\n   \"repos\": [\n     \"username/reponame@commithash\"\n   ]\n}\n",
-					"Properties": {
-						"id": "20220307092214-uxoniwd"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
-				}
-			]
-		},
-		{
-			"ID": "20210601103837-f0cmnwa",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210601103837-f0cmnwa",
-				"updated": "20210601103923"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Among them, "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "commithash"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ", please fill in the Git commit hash of the latest released version on your icon repository, please use the full hash value instead of the 7-digit short value."
-				}
-			]
-		},
-		{
-			"ID": "20210601103837-h88kvay",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210601103837-h88kvay",
-				"updated": "20210601103837"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Update"
-				}
-			]
-		},
-		{
-			"ID": "20210601103837-fm3agi0",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210601103837-fm3agi0",
-				"updated": "20210601103927"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "If the icon you developed has an updated version, please remember:"
-				}
-			]
-		},
-		{
-			"ID": "20210601103837-s7rxj93",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20210601103837-s7rxj93",
-				"updated": "20210601103932"
-			},
-			"Children": [
-				{
-					"ID": "20210601103837-3m8buph",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210601103837-3m8buph",
-						"updated": "20210601103932"
-					},
-					"Children": [
-						{
-							"ID": "20210601103837-2f5ovn7",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210601103837-2f5ovn7",
-								"updated": "20210601103932"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Update the version field in your icon.json"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210601103837-3fiu7qs",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210601103837-3fiu7qs"
-					},
-					"Children": [
-						{
-							"ID": "20210601103837-v0lkvnm",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210601103837-v0lkvnm"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Create a Pull Request to the community bazaar"
-								}
-							]
-						}
-					]
+					"Data": "."
 				}
 			]
 		}

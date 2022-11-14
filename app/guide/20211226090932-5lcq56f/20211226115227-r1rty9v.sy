@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20221112211107"
+		"updated": "20221114173816"
 	},
 	"Children": [
 		{
@@ -842,12 +842,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226115356-iecet3h",
-				"updated": "20211226161246"
+				"updated": "20221114173815"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源是開原的嗎？"
+					"Data": "思源是開源的嗎？"
 				}
 			]
 		},
@@ -856,12 +856,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220526112905-720doo3",
-				"updated": "20220526112913"
+				"updated": "20221114173816"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源筆記是完全開原的，歡迎參與貢獻："
+					"Data": "思源筆記是完全開源的，歡迎參與貢獻："
 				}
 			]
 		},

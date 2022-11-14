@@ -311,7 +311,6 @@ export const openHistory = () => {
             background: false,
             title: false,
             gutter: false,
-            scroll: false,
             breadcrumb: false,
             breadcrumbDocName: false,
             breadcrumbContext: false,

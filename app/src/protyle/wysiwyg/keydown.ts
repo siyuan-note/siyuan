@@ -42,14 +42,13 @@ import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
-import {commonHotkey, downSelect, duplicateBlock, getStartEndElement, upSelect} from "./commonHotkey";
+import {commonHotkey, downSelect, duplicateBlock, getStartEndElement, goEnd, goHome, upSelect} from "./commonHotkey";
 import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {bindMenuKeydown} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
-import {onGet} from "../util/onGet";
 import {scrollCenter} from "../../util/highlightById";
 import {BlockPanel} from "../../block/Panel";
 import * as dayjs from "dayjs";
@@ -452,41 +451,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // ctrl+home 光标移动到顶
         if (!event.altKey && !event.shiftKey && isCtrl(event) && event.key === "Home") {
-            if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0" ||
-                protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||
-                protyle.options.backlinkData) {
-                focusBlock(protyle.wysiwyg.element.firstElementChild);
-                protyle.contentElement.scrollTop = 0;
-                protyle.scroll.lastScrollTop = 1;
-            } else {
-                fetchPost("/api/filetree/getDoc", {
-                    id: protyle.block.rootID,
-                    mode: 0,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
-                });
-            }
+            goHome(protyle);
             event.stopPropagation();
             event.preventDefault();
             return;
         }
         // ctrl+end 光标移动到尾
         if (!event.altKey && !event.shiftKey && isCtrl(event) && event.key === "End") {
-            if (!protyle.scroll.element.classList.contains("fn__none") &&
-                protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true") {
-                fetchPost("/api/filetree/getDoc", {
-                    id: protyle.block.rootID,
-                    mode: 4,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
-                });
-            } else {
-                protyle.contentElement.scrollTop = protyle.contentElement.scrollHeight;
-                protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
-                focusBlock(protyle.wysiwyg.element.lastElementChild, undefined, false);
-            }
+            goEnd(protyle);
             event.stopPropagation();
             event.preventDefault();
             return;

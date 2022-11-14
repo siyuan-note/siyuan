@@ -19,6 +19,8 @@ import {hideElements} from "../ui/hideElements";
 import {countBlockWord} from "../../layout/status";
 import {scrollCenter} from "../../util/highlightById";
 import {transaction} from "./transaction";
+import {onGet} from "../util/onGet";
+import {Constants} from "../../constants";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
@@ -215,3 +217,38 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
     focusBlock(focusElement);
     scrollCenter(protyle);
 };
+
+export const goHome = (protyle:IProtyle) => {
+    if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0" ||
+        protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||
+        protyle.options.backlinkData) {
+        focusBlock(protyle.wysiwyg.element.firstElementChild);
+        protyle.contentElement.scrollTop = 0;
+        protyle.scroll.lastScrollTop = 1;
+    } else {
+        fetchPost("/api/filetree/getDoc", {
+            id: protyle.block.rootID,
+            mode: 0,
+            size: window.siyuan.config.editor.dynamicLoadBlocks,
+        }, getResponse => {
+            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+        });
+    }
+}
+
+export const goEnd = (protyle:IProtyle) => {
+    if (!protyle.scroll.element.classList.contains("fn__none") &&
+        protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true") {
+        fetchPost("/api/filetree/getDoc", {
+            id: protyle.block.rootID,
+            mode: 4,
+            size: window.siyuan.config.editor.dynamicLoadBlocks,
+        }, getResponse => {
+            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+        });
+    } else {
+        protyle.contentElement.scrollTop = protyle.contentElement.scrollHeight;
+        protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
+        focusBlock(protyle.wysiwyg.element.lastElementChild, undefined, false);
+    }
+}

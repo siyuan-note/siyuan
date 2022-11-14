@@ -329,7 +329,7 @@ func exportAsFile(c *gin.Context) {
 		return
 	}
 
-	name := "export-file-" + file.Filename
+	name := "file-" + file.Filename
 	name = util.FilterFileName(name)
 	tmpDir := filepath.Join(util.TempDir, "export")
 	if err = os.MkdirAll(tmpDir, 0755); nil != err {

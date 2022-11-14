@@ -1,4 +1,5 @@
 {
+  "exportBySiYuan": "由思源笔记导出",
   "featureBetaStage": "该特性支持目前处于免费公测阶段，目前尚未有明确的收费计划，请悉知",
   "syncOfficialProviderIntro": "当前选择的是 SiYuan 官方提供的云端存储服务，仅支持付费订阅用户使用",
   "syncThirdPartyProviderS3Intro": "当前选择的是 Amazon S3 协议兼容的第三方云端存储服务（比如<a href=\"https://s.qiniu.com/VbQfeu\" target=\"_blank\">七牛云</a>、<a href=\"https://www.aliyun.com/product/oss?userCode=yqovuas2\" target=\"_blank\">阿里云 OSS</a>、<a href=\"https://www.cloudflare.com/\" target=\"_blank\">Cloudflare R2</a>）",

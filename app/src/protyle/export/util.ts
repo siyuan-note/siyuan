@@ -41,7 +41,7 @@ export const exportImage = (id: string) => {
     margin: 8px 0 24px;" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview">
         <div class="fn__loading" style="left:0"><img height="48px" width="48px" src="stage/loading-pure.svg"></div>
     </div>
-    <div class="ft__smaller ft__on-surface fn__flex"><img style="height: 18px;margin: 0 8px" src="stage/icon.png">由思源笔记导出</div>
+    <div class="ft__smaller ft__on-surface fn__flex"><img style="height: 18px;margin: 0 8px" src="stage/icon.png">${window.siyuan.languages.exportBySiYuan}</div>
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>
 </div>

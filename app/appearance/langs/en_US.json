@@ -1,4 +1,5 @@
 {
+  "exportBySiYuan": "Export by SiYuan",
   "featureBetaStage": "This feature support is currently in the free public beta stage, and there is no clear charging plan yet, please know",
   "syncOfficialProviderIntro": "Currently selected is the cloud storage service officially provided by SiYuan, which only supports paid subscription users",
   "syncThirdPartyProviderS3Intro": "The current selected is a third-party cloud storage service compatible with the Amazon S3 protocol (eg <a href=\"https://s.qiniu.com/VbQfeu\" target=\"_blank\">Qiniu</a>, <a href=\"https://www.aliyun.com/product/ oss?userCode=yqovuas2\" target=\"_blank\">Aliyun OSS</a>, <a href=\"https://www.cloudflare.com/\" target=\"_blank\">Cloudflare R2</a>)",

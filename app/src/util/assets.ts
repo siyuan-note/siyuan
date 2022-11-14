@@ -145,6 +145,7 @@ export const addGA = () => {
             cTreeCount: window.siyuan.config.stat.cTreeCount,
             cBlockCount: window.siyuan.config.stat.cBlockCount,
             cDataSize: window.siyuan.config.stat.cDataSize,
+            cAssetsSize: window.siyuan.config.stat.cAssetsSize,
         };
         if (window.siyuan.user) {
             para.isLoggedIn = true;

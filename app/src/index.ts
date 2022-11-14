@@ -22,6 +22,7 @@ import {promiseTransactions} from "./protyle/wysiwyg/transaction";
 import {initMessage} from "./dialog/message";
 import {resizeDrag} from "./layout/util";
 import {setLocalStorage} from "./protyle/util/compatibility";
+import {getAllTabs} from "./layout/getAll";
 
 class App {
     constructor() {
@@ -45,6 +46,45 @@ class App {
                         switch (data.cmd) {
                             case"progress":
                                 progressLoading(data);
+                                break;
+                            case "rename":
+                                getAllTabs().forEach((tab) => {
+                                    if (tab.headElement) {
+                                        const initTab = tab.headElement.getAttribute("data-initdata")
+                                        if (initTab) {
+                                            const initTabData = JSON.parse(initTab)
+                                            if (initTabData.rootId === data.data.id) {
+                                                tab.updateTitle(data.data.title);
+                                            }
+                                        }
+                                    }
+                                });
+                                break;
+                            case "unmount":
+                                getAllTabs().forEach((tab) => {
+                                    if (tab.headElement) {
+                                        const initTab = tab.headElement.getAttribute("data-initdata")
+                                        if (initTab) {
+                                            const initTabData = JSON.parse(initTab)
+                                            if (data.data.box === initTabData.notebookId) {
+                                                tab.parent.removeTab(tab.id);
+                                            }
+                                        }
+                                    }
+                                });
+                                break;
+                            case "removeDoc":
+                                getAllTabs().forEach((tab) => {
+                                    if (tab.headElement) {
+                                        const initTab = tab.headElement.getAttribute("data-initdata")
+                                        if (initTab) {
+                                            const initTabData = JSON.parse(initTab)
+                                            if (data.data.ids.includes(initTabData.rootId)) {
+                                                tab.parent.removeTab(tab.id);
+                                            }
+                                        }
+                                    }
+                                });
                                 break;
                             case"statusbar":
                                 progressStatus(data);

@@ -23,6 +23,8 @@ type Stat struct {
 	CBlockCount int   `json:"cBlockCount"`
 	DataSize    int64 `json:"dataSize"`
 	CDataSize   int64 `json:"cDataSize"`
+	AssetsSize  int64 `json:"assetsSize"`
+	CAssetsSize int64 `json:"cAssetsSize"`
 }
 
 func NewStat() *Stat {

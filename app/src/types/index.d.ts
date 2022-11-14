@@ -426,6 +426,8 @@ declare interface IConfig {
         cBlockCount: number
         dataSize: number
         cDataSize: number
+        assetsSize: number
+        cAssetsSize: number
     }
 }
 

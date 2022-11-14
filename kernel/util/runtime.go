@@ -25,7 +25,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/denisbrodbeck/machineid"
-	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/logging"
 )
 
@@ -41,9 +40,6 @@ const (
 )
 
 func logBootInfo() {
-	s, _ := SizeOfDirectory(DataDir)
-	dataDirSize := humanize.Bytes(uint64(s))
-
 	logging.LogInfof("kernel is booting:\n"+
 		"    * ver [%s]\n"+
 		"    * arch [%s]\n"+
@@ -53,8 +49,8 @@ func logBootInfo() {
 		"    * read only [%v]\n"+
 		"    * container [%s]\n"+
 		"    * database [ver=%s]\n"+
-		"    * workspace directory [%s, data %s]",
-		Ver, runtime.GOARCH, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir, dataDirSize)
+		"    * workspace directory [%s]",
+		Ver, runtime.GOARCH, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir)
 }
 
 func IsMutexLocked(m *sync.Mutex) bool {

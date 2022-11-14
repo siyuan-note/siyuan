@@ -17,6 +17,7 @@
 package util
 
 import (
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -191,6 +192,27 @@ func SizeOfDirectory(path string) (size int64, err error) {
 	if nil != err {
 		logging.LogErrorf("size of dir [%s] failed: %s", path, err)
 	}
+	return
+}
+
+func DataSize() (dataSize, assetsSize int64) {
+	filepath.Walk(DataDir, func(path string, info os.FileInfo, err error) error {
+		if nil != err {
+			logging.LogErrorf("size of data failed: %s", err)
+			return io.EOF
+		}
+		if !info.IsDir() {
+			s := info.Size()
+			dataSize += s
+
+			if strings.Contains(strings.TrimPrefix(path, DataDir), "assets") {
+				assetsSize += s
+			}
+		} else {
+			dataSize += 4096
+		}
+		return nil
+	})
 	return
 }
 

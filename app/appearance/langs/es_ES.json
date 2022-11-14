@@ -1,4 +1,6 @@
 {
+  "exportAsImage": "Exportar como imagen",
+  "exportBySiYuan": "Exportar por SiYuan",
   "featureBetaStage": "El soporte de esta función se encuentra actualmente en la etapa beta pública gratuita, y aún no hay un plan de carga claro, tenga en cuenta",
   "syncOfficialProviderIntro": "Actualmente seleccionado es el servicio de almacenamiento en la nube proporcionado oficialmente por SiYuan, que solo admite usuarios de suscripción paga",
   "syncThirdPartyProviderS3Intro": "El actual seleccionado es un servicio de almacenamiento en la nube de terceros compatible con el protocolo Amazon S3",

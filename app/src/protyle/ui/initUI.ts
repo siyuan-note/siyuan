@@ -28,7 +28,7 @@ export const initUI = (protyle: IProtyle) => {
     if (protyle.upload) {
         protyle.element.appendChild(protyle.upload.element);
     }
-    if (protyle.options.render) {
+    if (protyle.options.render.scroll) {
         protyle.element.appendChild(protyle.scroll.element.parentElement);
     }
     if (protyle.gutter) {

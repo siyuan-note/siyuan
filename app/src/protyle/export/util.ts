@@ -33,7 +33,7 @@ declare const html2canvas: (element: Element) => Promise<any>;
 
 export const exportImage = (id: string) => {
     const exportDialog = new Dialog({
-        title: window.siyuan.languages.export,
+        title: window.siyuan.languages.exportAsImage,
         content: `<div class="b3-dialog__content" style="max-height: 70vh;overflow: auto">
     <div style="padding: 48px;
     border: 1px solid var(--b3-border-color);

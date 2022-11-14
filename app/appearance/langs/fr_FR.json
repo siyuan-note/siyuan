@@ -1,4 +1,5 @@
 {
+  "exportAsImage": "Exporter en tant qu'image",
   "exportBySiYuan": "Exporter par SiYuan",
   "featureBetaStage": "La prise en charge de cette fonctionnalité est actuellement en phase de bêta publique gratuite et il n'y a pas encore de plan de facturation clair, veuillez savoir",
   "syncOfficialProviderIntro": "Actuellement sélectionné est le service de stockage en nuage officiellement fourni par SiYuan, qui ne prend en charge que les utilisateurs d'abonnement payant",

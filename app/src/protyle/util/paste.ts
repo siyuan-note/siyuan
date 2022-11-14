@@ -222,6 +222,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             } else if (textHTML.endsWith(Constants.ZWSP)) {
                 // 编辑器内部粘贴
                 tempElement.innerHTML = textHTML.substr(0, textHTML.length - 1).replace('<meta charset="utf-8">', "");
+                let isBlock = false;
                 tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
                     const newId = Lute.NewNodeID();
                     e.setAttribute("data-node-id", newId);
@@ -229,13 +230,17 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     if (e.getAttribute("updated")) {
                         e.setAttribute("updated", newId.split("-")[0]);
                     }
+                    isBlock = true
                 });
+                if (nodeElement.classList.contains("table")) {
+                    isBlock = false;
+                }
                 // 从历史中复制后粘贴
                 tempElement.querySelectorAll('[spellcheck="false"][contenteditable="false"]').forEach((e) => {
                     e.setAttribute("contenteditable", "true");
                 });
                 const tempInnerHTML = tempElement.innerHTML;
-                insertHTML(tempInnerHTML, protyle);
+                insertHTML(tempInnerHTML, protyle, isBlock);
                 filterClipboardHint(protyle, tempInnerHTML);
             } else {
                 tempElement.innerHTML = textHTML;

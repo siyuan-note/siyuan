@@ -177,6 +177,6 @@ export const newFileBySelect = (fileName: string, protyle: IProtyle) => {
         title: newName,
         md: ""
     }, () => {
-        insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${id}" data-subtype="d">${escapeHtml(newName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`), protyle);
+        insertHTML(`<span data-type="block-ref" data-id="${id}" data-subtype="d">${escapeHtml(newName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`, protyle);
     });
 };

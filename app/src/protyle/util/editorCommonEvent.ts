@@ -620,7 +620,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 selectedIds.forEach(item => {
                     html += `{{select * from blocks where id='${item}'}}\n`;
                 });
-                insertHTML(protyle.lute.SpinBlockDOM(html), protyle);
+                insertHTML(protyle.lute.SpinBlockDOM(html), protyle, true);
                 blockRender(protyle, protyle.wysiwyg.element);
             } else if (targetElement) {
                 const targetClass = targetElement.className.split(" ");

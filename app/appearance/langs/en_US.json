@@ -700,7 +700,7 @@
   "back": "Back",
   "mount": "Open Notebook",
   "newNotebook": "New Notebook",
-  "fileNameRule": "Not Allow /",
+  "fileNameRule": "Document title cannot contain / character",
   "slogan": "Build Your Eternal Digital Garden",
   "showInFolder": "Show in Folder",
   "search": "Search",

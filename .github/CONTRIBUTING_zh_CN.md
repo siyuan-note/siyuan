@@ -14,20 +14,20 @@
 
 设置 Electron 镜像环境变量并安装 Electron：
 
-* macOS/Linux: `ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@21.2.0 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@21.2.3 -D`
 * Windows:
     * `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
-    * `pnpm install electron@21.2.0 -D`
+    * `pnpm install electron@21.2.3 -D`
 
 NPM 镜像：
 
-* 使用镜像仓库 `pnpm --registry https://r.cnpmjs.org/ i`
+* 使用 npmmirror 中国镜像仓库 `pnpm --registry https://r.cnpmjs.org/ i`
 * 恢复使用官方仓库 `pnpm --registry https://registry.npmjs.org i`
 </details>
 
 桌面端进入 app 文件夹运行：
 
-* `pnpm install electron@21.2.0 -D`
+* `pnpm install electron@21.2.3 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

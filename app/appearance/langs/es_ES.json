@@ -700,7 +700,7 @@
   "back": "Atrás",
   "mount": "Abrir cuaderno de notas",
   "newNotebook": "Nuevo cuaderno de notas",
-  "fileNameRule": "No se permite /",
+  "fileNameRule": "El título del documento no puede contener / caracteres",
   "slogan": "Construye tu jardín digital eterno",
   "showInFolder": "Mostrar en la carpeta",
   "search": "Buscar",

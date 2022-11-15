@@ -1293,6 +1293,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 	if "" == title {
 		title = "Untitled"
 	}
+	title = strings.ReplaceAll(title, "/", "")
 
 	oldHPath := tree.HPath
 	tree.HPath = path.Join(path.Dir(tree.HPath), title)
@@ -1398,6 +1399,7 @@ func createDoc(boxID, p, title, dom string) (err error) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		return errors.New(Conf.Language(106))
 	}
+	title = strings.ReplaceAll(title, "/", "")
 
 	baseName := strings.TrimSpace(path.Base(p))
 	if "" == strings.TrimSuffix(baseName, ".sy") {

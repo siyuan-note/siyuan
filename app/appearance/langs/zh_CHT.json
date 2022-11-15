@@ -700,7 +700,7 @@
   "back": "返回上一層",
   "mount": "打開筆記本",
   "newNotebook": "新建筆記本",
-  "fileNameRule": "不能包含 / 字元",
+  "fileNameRule": "文檔標題不能包含 / 字符",
   "slogan": "構建你永恆的數字花園",
   "showInFolder": "打開文件位置",
   "search": "搜索",

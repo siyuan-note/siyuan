@@ -700,7 +700,7 @@
   "back": "Retour",
   "mount": "Ouvrir le carnet de notes",
   "newNotebook": "Nouveau carnet de notes",
-  "fileNameRule": "Non autorisé /",
+  "fileNameRule": "Le titre du document ne peut pas contenir de caractères /",
   "slogan": "Construisez votre jardin numérique éternel",
   "showInFolder": "Afficher dans le dossier",
   "search": "Recherche",

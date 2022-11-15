@@ -15,6 +15,10 @@
   animation-duration: 150ms;
   animation-fill-mode: both;
   animation-name: zoomIn;
+
+  &--error {
+    background: var(--b3-theme-error);
+  }
 }
 
 .b3-tooltips {

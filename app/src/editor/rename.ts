@@ -9,14 +9,23 @@ import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/
 import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {Constants} from "../constants";
+import {showTooltip} from "../dialog/tooltip";
 
-export const validateName = (name: string) => {
+export const validateName = (name: string, targetElement?: HTMLElement) => {
     if (/\r\n|\r|\n|\u2028|\u2029|\t|\//.test(name)) {
-        showMessage(window.siyuan.languages.fileNameRule);
+        if (targetElement) {
+            showTooltip(window.siyuan.languages.fileNameRule, targetElement, true);
+        } else {
+            showMessage(window.siyuan.languages.fileNameRule);
+        }
         return false;
     }
     if (name.length > Constants.SIZE_TITLE) {
-        showMessage(window.siyuan.languages["_kernel"]["106"]);
+        if (targetElement) {
+            showTooltip(window.siyuan.languages["_kernel"]["106"], targetElement, true);
+        } else {
+            showMessage(window.siyuan.languages["_kernel"]["106"]);
+        }
         return false;
     }
     return true;

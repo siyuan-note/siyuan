@@ -23,6 +23,7 @@
     opacity: 0;
     cursor: pointer;
     color: var(--b3-border-color);
+    margin-left: -0.5px;
 
     &:hover {
       color: var(--b3-theme-on-surface);

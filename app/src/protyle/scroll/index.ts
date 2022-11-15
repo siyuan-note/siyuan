@@ -4,6 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {updateHotkeyTip} from "../util/compatibility";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {goEnd, goHome} from "../wysiwyg/commonHotkey";
+import {isMobile} from "../../util/functions";
 
 export class Scroll {
     public element: HTMLElement;
@@ -15,6 +16,9 @@ export class Scroll {
     constructor(protyle: IProtyle) {
         this.parentElement = document.createElement("div");
         this.parentElement.classList.add("protyle-scroll");
+        if (!isMobile()) {
+            this.parentElement.style.right = "10px";
+        }
         this.parentElement.innerHTML = `<div class="b3-tooltips b3-tooltips__nw protyle-scroll__up" aria-label="${updateHotkeyTip("⌘Home")}">
     <svg><use xlink:href="#iconUp"></use></svg>
 </div>

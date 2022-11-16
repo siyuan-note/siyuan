@@ -340,11 +340,13 @@ declare interface IConfig {
             secretKey: string
             bucket: string
             region: string
+            skipTlsVerify: boolean
         }
         webdav: {
             endpoint: string
             username: string
             password: string
+            skipTlsVerify: boolean
         }
     },
     lang: string

@@ -77,6 +77,14 @@ const renderProvider = (provider: number) => {
         <option ${window.siyuan.config.sync.s3.pathStyle ? "" : "selected"} value="false">Virtual-hosted-style</option>
         <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="true">Path-style</option>
     </select>
+</div>
+<div class="b3-label b3-label--noborder">
+    <div>TLS verify</div>
+    <div class="fn__hr"></div>
+    <select class="b3-select fn__block" id="s3SkipTlsVerify">
+        <option ${window.siyuan.config.sync.s3.skipTlsVerify ? "" : "selected"} value="false">Verify</option>
+        <option ${window.siyuan.config.sync.s3.skipTlsVerify ? "selected" : ""} value="true">Skip</option>
+    </select>
 </div>`;
         }
         return `${tip}
@@ -112,6 +120,14 @@ const renderProvider = (provider: number) => {
         <option ${window.siyuan.config.sync.s3.pathStyle ? "" : "selected"} value="false">Virtual-hosted-style</option>
         <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="true">Path-style</option>
     </select>
+</label>
+<label class="b3-label b3-label--noborder fn__flex">
+    <div class="fn__flex-center fn__size200">TLS Verify</div>
+    <div class="fn__space"></div>
+    <select class="b3-select fn__flex-1" id="s3SkipTlsVerify">
+        <option ${window.siyuan.config.sync.s3.skipTlsVerify ? "" : "selected"} value="false">Verify</option>
+        <option ${window.siyuan.config.sync.s3.skipTlsVerify ? "selected" : ""} value="true">Skip</option>
+    </select>
 </label>`;
     } else if (provider === 3) {
         const tip = `<div class="b3-label b3-label--inner">
@@ -137,6 +153,14 @@ const renderProvider = (provider: number) => {
     <div>Password</div>
     <div class="fn__hr"></div>
     <input id="password" class="b3-text-field fn__block" value="${window.siyuan.config.sync.webdav.password}">
+</div>
+<div class="b3-label b3-label--noborder">
+    <div>TLS verify</div>
+    <div class="fn__hr"></div>
+    <select class="b3-select fn__block" id="webdavSkipTlsVerify">
+        <option ${window.siyuan.config.sync.webdav.skipTlsVerify ? "" : "selected"} value="false">Verify</option>
+        <option ${window.siyuan.config.sync.webdav.skipTlsVerify ? "selected" : ""} value="true">Skip</option>
+    </select>
 </div>`;
         }
         return `${tip}
@@ -154,6 +178,14 @@ const renderProvider = (provider: number) => {
     <div class="fn__flex-center fn__size200">Password</div>
     <div class="fn__space"></div>
     <input id="password" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.webdav.password}">
+</label>
+<label class="b3-label b3-label--noborder fn__flex">
+    <div class="fn__flex-center fn__size200">TLS Verify</div>
+    <div class="fn__space"></div>
+    <select class="b3-select fn__flex-1" id="webdavSkipTlsVerify">
+        <option ${window.siyuan.config.sync.webdav.skipTlsVerify ? "" : "selected"} value="false">Verify</option>
+        <option ${window.siyuan.config.sync.webdav.skipTlsVerify ? "selected" : ""} value="true">Skip</option>
+    </select>
 </label>`;
     }
     return "";
@@ -222,6 +254,7 @@ const bindProviderEvent = () => {
                     bucket: (providerPanelElement.querySelector("#bucket") as HTMLInputElement).value,
                     pathStyle: (providerPanelElement.querySelector("#pathStyle") as HTMLInputElement).value === "true",
                     region: (providerPanelElement.querySelector("#region") as HTMLInputElement).value,
+                    skipTlsVerify: (providerPanelElement.querySelector("#s3SkipTlsVerify") as HTMLInputElement).value === "true",
                 };
                 fetchPost("/api/sync/setSyncProviderS3", {s3}, () => {
                     window.siyuan.config.sync.s3 = s3;
@@ -231,6 +264,7 @@ const bindProviderEvent = () => {
                     endpoint: (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value,
                     username: (providerPanelElement.querySelector("#username") as HTMLInputElement).value,
                     password: (providerPanelElement.querySelector("#password") as HTMLInputElement).value,
+                    skipTlsVerify: (providerPanelElement.querySelector("#webdavSkipTlsVerify") as HTMLInputElement).value === "true",
                 };
                 fetchPost("/api/sync/setSyncProviderWebDAV", {webdav}, () => {
                     window.siyuan.config.sync.webdav = webdav;

@@ -828,7 +828,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		s3HTTPClient.Timeout = 30 * time.Second
 		cloudRepo = cloud.NewS3(&cloud.BaseCloud{Conf: cloudConf}, s3HTTPClient)
 	case conf.ProviderWebDAV:
-		webdavClient := gowebdav.NewClient(cloudConf.Endpoint, cloudConf.WebDAV.Username, cloudConf.WebDAV.Password)
+		webdavClient := gowebdav.NewClient(cloudConf.WebDAV.Endpoint, cloudConf.WebDAV.Username, cloudConf.WebDAV.Password)
 		a := cloudConf.WebDAV.Username + ":" + cloudConf.WebDAV.Password
 		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(a))
 		webdavClient.SetHeader("Authorization", auth)
@@ -1049,18 +1049,22 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 	case conf.ProviderSiYuan:
 		ret.Endpoint = "https://siyuan-data.b3logfile.com/"
 	case conf.ProviderS3:
-		ret.Endpoint = Conf.Sync.S3.Endpoint
-		ret.S3.AccessKey = Conf.Sync.S3.AccessKey
-		ret.S3.SecretKey = Conf.Sync.S3.SecretKey
-		ret.S3.Bucket = Conf.Sync.S3.Bucket
-		ret.S3.Region = Conf.Sync.S3.Region
-		ret.S3.PathStyle = Conf.Sync.S3.PathStyle
-		ret.S3.SkipTlsVerify = Conf.Sync.S3.SkipTlsVerify
+		ret.S3 = &cloud.ConfS3{
+			Endpoint:      Conf.Sync.S3.Endpoint,
+			AccessKey:     Conf.Sync.S3.AccessKey,
+			SecretKey:     Conf.Sync.S3.SecretKey,
+			Bucket:        Conf.Sync.S3.Bucket,
+			Region:        Conf.Sync.S3.Region,
+			PathStyle:     Conf.Sync.S3.PathStyle,
+			SkipTlsVerify: Conf.Sync.S3.SkipTlsVerify,
+		}
 	case conf.ProviderWebDAV:
-		ret.Endpoint = Conf.Sync.WebDAV.Endpoint
-		ret.WebDAV.Username = Conf.Sync.WebDAV.Username
-		ret.WebDAV.Password = Conf.Sync.WebDAV.Password
-		ret.WebDAV.SkipTlsVerify = Conf.Sync.WebDAV.SkipTlsVerify
+		ret.WebDAV = &cloud.ConfWebDAV{
+			Endpoint:      Conf.Sync.WebDAV.Endpoint,
+			Username:      Conf.Sync.WebDAV.Username,
+			Password:      Conf.Sync.WebDAV.Password,
+			SkipTlsVerify: Conf.Sync.WebDAV.SkipTlsVerify,
+		}
 	default:
 		err = fmt.Errorf("invalid provider [%d]", Conf.Sync.Provider)
 		return

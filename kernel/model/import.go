@@ -190,9 +190,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			logging.LogErrorf("unmarshal sort conf failed: %s", sortErr)
 		}
 
-		sortPath = filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
-		if gulu.File.IsExist(sortPath) {
-			sortData, sortErr = filelock.ReadFile(sortPath)
+		boxSortPath := filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
+		if gulu.File.IsExist(boxSortPath) {
+			sortData, sortErr = filelock.ReadFile(boxSortPath)
 			if nil != sortErr {
 				logging.LogErrorf("read box sort conf failed: %s", sortErr)
 			}
@@ -210,11 +210,11 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 		sortData, sortErr = gulu.JSON.MarshalJSON(fullSortIDs)
 		if nil != sortErr {
-			logging.LogErrorf("marshal box sort conf failed: %s", sortErr)
+			logging.LogErrorf("marshal temp full sort conf failed: %s", sortErr)
 		} else {
 			sortErr = filelock.WriteFile(sortPath, sortData)
 			if nil != sortErr {
-				logging.LogErrorf("write box sort conf failed: %s", sortErr)
+				logging.LogErrorf("write temp full sort conf failed: %s", sortErr)
 			}
 		}
 	}

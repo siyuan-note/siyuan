@@ -824,16 +824,17 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	case conf.ProviderSiYuan:
 		cloudRepo = cloud.NewSiYuan(&cloud.BaseCloud{Conf: cloudConf})
 	case conf.ProviderS3:
-		cloudRepo = cloud.NewS3(&cloud.BaseCloud{Conf: cloudConf})
+		s3HTTPClient := &http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: cloudConf.S3.SkipTlsVerify}}}
+		s3HTTPClient.Timeout = 30 * time.Second
+		cloudRepo = cloud.NewS3(&cloud.BaseCloud{Conf: cloudConf}, s3HTTPClient)
 	case conf.ProviderWebDAV:
-		webdavClient := gowebdav.NewClient(cloudConf.Endpoint, cloudConf.Username, cloudConf.Password)
-		a := cloudConf.Username + ":" + cloudConf.Password
+		webdavClient := gowebdav.NewClient(cloudConf.Endpoint, cloudConf.WebDAV.Username, cloudConf.WebDAV.Password)
+		a := cloudConf.WebDAV.Username + ":" + cloudConf.WebDAV.Password
 		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(a))
 		webdavClient.SetHeader("Authorization", auth)
 		webdavClient.SetHeader("User-Agent", util.UserAgent)
 		webdavClient.SetTimeout(30 * time.Second)
-		// WebDAV 数据同步跳过 HTTPS 证书校验 https://github.com/siyuan-note/siyuan/issues/6556
-		webdavClient.SetTransport(&http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}})
+		webdavClient.SetTransport(&http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: cloudConf.WebDAV.SkipTlsVerify}})
 		cloudRepo = cloud.NewWebDAV(&cloud.BaseCloud{Conf: cloudConf}, webdavClient)
 	default:
 		err = fmt.Errorf("unknown cloud provider [%d]", Conf.Sync.Provider)
@@ -1049,15 +1050,17 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		ret.Endpoint = "https://siyuan-data.b3logfile.com/"
 	case conf.ProviderS3:
 		ret.Endpoint = Conf.Sync.S3.Endpoint
-		ret.AccessKey = Conf.Sync.S3.AccessKey
-		ret.SecretKey = Conf.Sync.S3.SecretKey
-		ret.Bucket = Conf.Sync.S3.Bucket
-		ret.Region = Conf.Sync.S3.Region
-		ret.PathStyle = Conf.Sync.S3.PathStyle
+		ret.S3.AccessKey = Conf.Sync.S3.AccessKey
+		ret.S3.SecretKey = Conf.Sync.S3.SecretKey
+		ret.S3.Bucket = Conf.Sync.S3.Bucket
+		ret.S3.Region = Conf.Sync.S3.Region
+		ret.S3.PathStyle = Conf.Sync.S3.PathStyle
+		ret.S3.SkipTlsVerify = Conf.Sync.S3.SkipTlsVerify
 	case conf.ProviderWebDAV:
 		ret.Endpoint = Conf.Sync.WebDAV.Endpoint
-		ret.Username = Conf.Sync.WebDAV.Username
-		ret.Password = Conf.Sync.WebDAV.Password
+		ret.WebDAV.Username = Conf.Sync.WebDAV.Username
+		ret.WebDAV.Password = Conf.Sync.WebDAV.Password
+		ret.WebDAV.SkipTlsVerify = Conf.Sync.WebDAV.SkipTlsVerify
 	default:
 		err = fmt.Errorf("invalid provider [%d]", Conf.Sync.Provider)
 		return

@@ -29,7 +29,7 @@ export const afterExport = (exportPath: string, msgId: string) => {
 export const exportImage = (id: string) => {
     const exportDialog = new Dialog({
         title: window.siyuan.languages.exportAsImage,
-        content: `<div class="b3-dialog__content" style="max-height: 70vh;overflow: auto;${isMobile() ? "padding:8px;" : ""}">
+        content: `<div class="b3-dialog__content" style="max-height: 70vh;overflow: auto;${isMobile() ? "padding:8px;" : ""};background-color: var(--b3-theme-background)">
     <div style="${isMobile() ? "padding: 16px;margin: 16px 0" : "padding: 48px;margin: 8px 0 24px"};border: 1px solid var(--b3-border-color);border-radius: 10px;" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview">
         <div class="fn__loading" style="left:0"><img height="128px" width="128px" src="stage/loading-pure.svg"></div>
     </div>

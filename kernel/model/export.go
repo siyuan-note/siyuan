@@ -354,26 +354,6 @@ func ExportHTML(id, savePath string, pdf, keepFold bool) (name, dom string) {
 	}
 
 	tree = exportTree(tree, true, true, keepFold)
-	//if pdf { // TODO: 导出 PDF 时块引转换脚注使用书签跳转 https://github.com/siyuan-note/siyuan/issues/5761
-	//	var footnotesDefs []*ast.Node
-	//	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-	//		if entering && ast.NodeFootnotesDef == n.Type {
-	//			footnotesDefs = append(footnotesDefs, n)
-	//		}
-	//		return ast.WalkContinue
-	//	})
-	//	for _, f := range footnotesDefs {
-	//		link := &ast.Node{Type: ast.NodeLink}
-	//		link.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
-	//		link.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(" ")})
-	//		link.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
-	//		link.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-	//		link.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte("pdf-outline://footnotes-def-" + f.FootnotesRefId)})
-	//		link.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
-	//		f.PrependChild(link)
-	//	}
-	//}
-
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
@@ -504,15 +484,6 @@ func AddPDFOutline(id, p string) (err error) {
 	footnotes := map[string]*pdfcpu.Bookmark{}
 	for _, link := range links {
 		linkID := link.URI[strings.LastIndex(link.URI, "/")+1:]
-		//if strings.HasPrefix(linkID, "footnotes-def-") { // 导出 PDF 时块引转换脚注使用书签跳转 https://github.com/siyuan-note/siyuan/issues/5761
-		//	footnotes[linkID] = &pdfcpu.Bookmark{
-		//		Title:    "Footnote [^" + linkID + "]",
-		//		PageFrom: link.Page,
-		//		AbsPos:   link.Rect.UR.Y,
-		//		Level:    7,
-		//	}
-		//	continue
-		//}
 
 		title := sql.GetBlock(linkID).Content
 		title, _ = url.QueryUnescape(title)
@@ -1469,9 +1440,9 @@ func collectFootnotesDefs0(node *ast.Node, refFootnotes *[]*refAsFootnotes, tree
 		}
 
 		if treenode.IsBlockRef(n) {
-			defID, _, _ := treenode.GetBlockRef(n)
+			defID, refText, _ := treenode.GetBlockRef(n)
 			if nil == getRefAsFootnotes(defID, refFootnotes) {
-				anchorText := sql.GetRefText(defID)
+				anchorText := refText
 				if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(anchorText) {
 					anchorText = gulu.Str.SubStr(anchorText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
 				}

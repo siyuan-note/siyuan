@@ -53,16 +53,11 @@ class App {
                 document.title = window.siyuan.languages.siyuanNote;
                 bootSync();
                 loadAssets(confResponse.data.conf.appearance);
+                initMessage();
                 initAssets();
                 fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                     window.siyuan.emojis = emojiResponse.data as IEmoji[];
                     initFramework();
-                    if (window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) {
-                        window.webkit.messageHandlers.changeStatusBar.postMessage(getComputedStyle(document.body).getPropertyValue("--b3-theme-background") + " " + window.siyuan.config.appearance.mode);
-                    } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
-                        window.JSAndroid.changeStatusBarColor(getComputedStyle(document.body).getPropertyValue("--b3-theme-background"), window.siyuan.config.appearance.mode);
-                    }
-                    initMessage();
                 });
                 addGA();
             });

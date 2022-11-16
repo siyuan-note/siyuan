@@ -120,9 +120,9 @@ export const initAssets = () => {
             loadingElement.remove();
         }, 160);
     }
-    watchTheme({init: true, theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"});
+    watchTheme({init: true, OSTheme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"});
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", event => {
-        watchTheme({init: false, theme: event.matches ? "dark" : "light"});
+        watchTheme({init: false, OSTheme: event.matches ? "dark" : "light"});
     });
 };
 
@@ -246,15 +246,33 @@ export const setMode = (modeElementValue: number) => {
     /// #endif
 };
 
-
-export const watchTheme = (data: { init: boolean, theme: string }) => {
+const watchTheme = (data: { init: boolean, OSTheme: string }) => {
+    if ((window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) ||
+        (window.siyuan.config.system.container === "android" && window.JSAndroid)) {
+        setTimeout(() => {
+            const backgroundColor = getComputedStyle(document.body).getPropertyValue("--b3-theme-background")
+            let mode = window.siyuan.config.appearance.mode;
+            if (window.siyuan.config.appearance.modeOS) {
+                if (data.OSTheme === "dark") {
+                    mode = 1;
+                } else {
+                    mode = 0;
+                }
+            }
+            if (window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) {
+                window.webkit.messageHandlers.changeStatusBar.postMessage(backgroundColor + " " + mode);
+            } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
+                window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
+            }
+        }, Constants.TIMEOUT_BLOCKLOAD); // 移动端需要加载完才可以获取到颜色
+    }
     if (data.init) {
         if (window.siyuan.config.appearance.modeOS && (
-            (window.siyuan.config.appearance.mode === 1 && data.theme === "light") ||
-            (window.siyuan.config.appearance.mode === 0 && data.theme === "dark")
+            (window.siyuan.config.appearance.mode === 1 && data.OSTheme === "light") ||
+            (window.siyuan.config.appearance.mode === 0 && data.OSTheme === "dark")
         )) {
             fetchPost("/api/system/setAppearanceMode", {
-                mode: data.theme === "light" ? 0 : 1
+                mode: data.OSTheme === "light" ? 0 : 1
             }, response => {
                 window.siyuan.config.appearance = response.data.appearance;
                 loadAssets(response.data.appearance);
@@ -267,12 +285,12 @@ export const watchTheme = (data: { init: boolean, theme: string }) => {
     if (!window.siyuan.config.appearance.modeOS) {
         return;
     }
-    if ((window.siyuan.config.appearance.mode === 0 && data.theme === "light") ||
-        (window.siyuan.config.appearance.mode === 1 && data.theme === "dark")) {
+    if ((window.siyuan.config.appearance.mode === 0 && data.OSTheme === "light") ||
+        (window.siyuan.config.appearance.mode === 1 && data.OSTheme === "dark")) {
         return;
     }
     fetchPost("/api/system/setAppearanceMode", {
-        mode: data.theme === "light" ? 0 : 1
+        mode: data.OSTheme === "light" ? 0 : 1
     }, response => {
         if (window.siyuan.config.appearance.themeJS) {
             /// #if !MOBILE

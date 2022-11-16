@@ -57,6 +57,7 @@ import {countBlockWord} from "../../layout/status";
 import {openMobileFileById} from "../../mobile/editor";
 import {moveToDown, moveToUp} from "./move";
 import {pasteAsPlainText} from "../util/paste";
+import {preventScroll} from "../scroll/preventScroll";
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
@@ -359,6 +360,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const previousElement = getPreviousBlock(startEndElement.endElement);
                         if (previousElement) {
                             previousElement.setAttribute("select-end", "true");
+                            if (previousElement.getBoundingClientRect().top <= protyle.contentElement.getBoundingClientRect().top) {
+                                preventScroll(protyle)
+                                previousElement.scrollIntoView(true)
+                            }
                         }
                     }
                 }
@@ -392,6 +397,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const nextElement = getNextBlock(startEndElement.endElement);
                         if (nextElement) {
                             nextElement.setAttribute("select-end", "true");
+                            if (nextElement.getBoundingClientRect().bottom >= protyle.contentElement.getBoundingClientRect().bottom) {
+                                preventScroll(protyle)
+                                nextElement.scrollIntoView(false)
+                            }
                         }
                     }
                 }

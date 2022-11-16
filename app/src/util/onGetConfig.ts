@@ -15,7 +15,7 @@ import {globalShortcut} from "./globalShortcut";
 import {fetchPost} from "./fetch";
 import {mountHelp, newDailyNote} from "./mount";
 import {MenuItem} from "../menus/Menu";
-import {addGA, initAssets, loadAssets, setInlineStyle, setMode} from "./assets";
+import {addGA, initAssets, loadAssets, setInlineStyle, setMode, watchTheme} from "./assets";
 import {renderSnippet} from "../config/util/snippets";
 import {getOpenNotebookCount} from "./pathName";
 import {openFileById} from "../editor/util";
@@ -143,7 +143,7 @@ export const onGetConfig = (isStart: boolean) => {
     initBar();
     initStatus();
     initWindow();
-    appearance.onSetappearance(window.siyuan.config.appearance, isBrowser());
+    appearance.onSetappearance(window.siyuan.config.appearance);
     initAssets();
     renderSnippet();
     setInlineStyle();
@@ -341,41 +341,6 @@ const initWindow = () => {
             id: url.substr(16, 22),
             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
             zoomIn: getSearch("focus", url) === "1"
-        });
-    });
-    ipcRenderer.on(Constants.SIYUAN_UPDATE_THEME, (event, data) => {
-        if (data.init) {
-            if (window.siyuan.config.appearance.modeOS && (
-                (window.siyuan.config.appearance.mode === 1 && data.theme === "light") ||
-                (window.siyuan.config.appearance.mode === 0 && data.theme === "dark")
-            )) {
-                fetchPost("/api/system/setAppearanceMode", {
-                    mode: data.theme === "light" ? 0 : 1
-                }, response => {
-                    window.siyuan.config.appearance = response.data.appearance;
-                    loadAssets(response.data.appearance);
-                });
-            } else {
-                loadAssets(window.siyuan.config.appearance);
-            }
-            return;
-        }
-        if (!window.siyuan.config.appearance.modeOS) {
-            return;
-        }
-        if ((window.siyuan.config.appearance.mode === 0 && data.theme === "light") ||
-            (window.siyuan.config.appearance.mode === 1 && data.theme === "dark")) {
-            return;
-        }
-        fetchPost("/api/system/setAppearanceMode", {
-            mode: data.theme === "light" ? 0 : 1
-        }, response => {
-            if (window.siyuan.config.appearance.themeJS) {
-                exportLayout(true);
-                return;
-            }
-            window.siyuan.config.appearance = response.data.appearance;
-            loadAssets(response.data.appearance);
         });
     });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {

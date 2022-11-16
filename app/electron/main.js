@@ -349,12 +349,6 @@ const boot = () => {
     }
     event.preventDefault()
   })
-  nativeTheme.on('updated', () => {
-    mainWindow.webContents.send('siyuan-update-theme', {
-      theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
-      init: false,
-    })
-  })
   // 监听主题切换
   ipcMain.on('siyuan-config-theme', (event, theme) => {
     nativeTheme.themeSource = theme
@@ -400,10 +394,6 @@ const boot = () => {
     writeLog('exited ui')
   })
   ipcMain.on('siyuan-init', async () => {
-    mainWindow.webContents.send('siyuan-update-theme', {
-      theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
-      init: true,
-    })
     await fetch(getServer() + '/api/system/uiproc?pid=' + process.pid,
       {method: 'POST'})
   })

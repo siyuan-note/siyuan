@@ -120,6 +120,10 @@ export const initAssets = () => {
             loadingElement.remove();
         }, 160);
     }
+    watchTheme({init: true, theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"});
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", event => {
+        watchTheme({init: false, theme: event.matches ? "dark" : "light"});
+    });
 };
 
 export const addGA = () => {
@@ -241,3 +245,44 @@ export const setMode = (modeElementValue: number) => {
     });
     /// #endif
 };
+
+
+export const watchTheme = (data: { init: boolean, theme: string }) => {
+    if (data.init) {
+        if (window.siyuan.config.appearance.modeOS && (
+            (window.siyuan.config.appearance.mode === 1 && data.theme === "light") ||
+            (window.siyuan.config.appearance.mode === 0 && data.theme === "dark")
+        )) {
+            fetchPost("/api/system/setAppearanceMode", {
+                mode: data.theme === "light" ? 0 : 1
+            }, response => {
+                window.siyuan.config.appearance = response.data.appearance;
+                loadAssets(response.data.appearance);
+            });
+        } else {
+            loadAssets(window.siyuan.config.appearance);
+        }
+        return;
+    }
+    if (!window.siyuan.config.appearance.modeOS) {
+        return;
+    }
+    if ((window.siyuan.config.appearance.mode === 0 && data.theme === "light") ||
+        (window.siyuan.config.appearance.mode === 1 && data.theme === "dark")) {
+        return;
+    }
+    fetchPost("/api/system/setAppearanceMode", {
+        mode: data.theme === "light" ? 0 : 1
+    }, response => {
+        if (window.siyuan.config.appearance.themeJS) {
+            /// #if !MOBILE
+            exportLayout(true);
+            /// #else
+            window.location.reload();
+            /// #endif
+            return;
+        }
+        window.siyuan.config.appearance = response.data.appearance;
+        loadAssets(response.data.appearance);
+    });
+}

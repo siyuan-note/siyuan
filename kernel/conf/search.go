@@ -45,15 +45,17 @@ type Search struct {
 	Memo   bool `json:"memo"`
 	Custom bool `json:"custom"`
 
-	BacklinkMentionName   bool `json:"backlinkMentionName"`
-	BacklinkMentionAlias  bool `json:"backlinkMentionAlias"`
-	BacklinkMentionAnchor bool `json:"backlinkMentionAnchor"`
-	BacklinkMentionDoc    bool `json:"backlinkMentionDoc"`
+	BacklinkMentionName          bool `json:"backlinkMentionName"`
+	BacklinkMentionAlias         bool `json:"backlinkMentionAlias"`
+	BacklinkMentionAnchor        bool `json:"backlinkMentionAnchor"`
+	BacklinkMentionDoc           bool `json:"backlinkMentionDoc"`
+	BacklinkMentionKeywordsLimit int  `json:"backlinkMentionKeywordsLimit"`
 
-	VirtualRefName   bool `json:"virtualRefName"`
-	VirtualRefAlias  bool `json:"virtualRefAlias"`
-	VirtualRefAnchor bool `json:"virtualRefAnchor"`
-	VirtualRefDoc    bool `json:"virtualRefDoc"`
+	VirtualRefName          bool `json:"virtualRefName"`
+	VirtualRefAlias         bool `json:"virtualRefAlias"`
+	VirtualRefAnchor        bool `json:"virtualRefAnchor"`
+	VirtualRefDoc           bool `json:"virtualRefDoc"`
+	VirtualRefKeywordsLimit int  `json:"virtualRefKeywordsLimit"`
 }
 
 func NewSearch() *Search {
@@ -78,15 +80,17 @@ func NewSearch() *Search {
 		Memo:   true,
 		Custom: false,
 
-		BacklinkMentionName:   true,
-		BacklinkMentionAlias:  false,
-		BacklinkMentionAnchor: true,
-		BacklinkMentionDoc:    true,
+		BacklinkMentionName:          true,
+		BacklinkMentionAlias:         false,
+		BacklinkMentionAnchor:        true,
+		BacklinkMentionDoc:           true,
+		BacklinkMentionKeywordsLimit: 512,
 
-		VirtualRefName:   true,
-		VirtualRefAlias:  false,
-		VirtualRefAnchor: true,
-		VirtualRefDoc:    true,
+		VirtualRefName:          true,
+		VirtualRefAlias:         false,
+		VirtualRefAnchor:        true,
+		VirtualRefDoc:           true,
+		VirtualRefKeywordsLimit: 512,
 	}
 }
 

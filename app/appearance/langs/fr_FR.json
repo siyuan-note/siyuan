@@ -1,4 +1,5 @@
 {
+  "keywordsLimit": "Limite de mots clés",
   "exportAsImage": "Exporter en tant qu'image",
   "exportBySiYuan": "Exporter par SiYuan",
   "featureBetaStage": "La prise en charge de cette fonctionnalité est actuellement en phase de bêta publique gratuite et il n'y a pas encore de plan de facturation clair, veuillez savoir",
@@ -864,7 +865,7 @@
     "35": "Recréation de l'index, veuillez patienter...",
     "36": "Il y a trop de contenu dans le document historique, afin de ne pas affecter les performances, il a été basculé sur l'affichage en texte brut",
     "37": "N'incluez pas d'espaces et de symboles spéciaux dans le nom du répertoire de synchronisation cloud",
-    "38": "Le nombre de mots-clés mentionnés [%d] est trop élevé, ne prend actuellement en charge que jusqu'à [512] mots-clés",
+    "38": "Trop de mots-clés mentionnés [%d], ajustez si nécessaire [Paramètres - Recherche - Mentions de backlink - Limite de mots-clés]",
     "39": "Suppression de l'index %s",
     "40": "Insertion de l'index %s",
     "41": "Transfert complété",

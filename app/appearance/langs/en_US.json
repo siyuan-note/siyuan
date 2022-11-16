@@ -1,4 +1,5 @@
 {
+  "keywordsLimit": "Keywords Limit",
   "exportAsImage": "Export as image",
   "exportBySiYuan": "Export by SiYuan",
   "featureBetaStage": "This feature support is currently in the free public beta stage, and there is no clear charging plan yet, please know",
@@ -864,7 +865,7 @@
     "35": "Rebuilding index, please wait...",
     "36": "There is too much content in the historical document, in order not to affect performance, it has been switched to plain text display",
     "37": "Do not include spaces and special symbols in the name of the cloud sync directory",
-    "38": "The number of mentioned keywords [%d] is too many, currently only supports up to [512] keywords",
+    "38": "Too many keywords mentioned [%d], adjust if necessary [Settings - Search - Backlink Mentions - Keyword Limit]",
     "39": "Deleting index %s",
     "40": "Inserting index %s",
     "41": "Upload completed",

@@ -737,7 +737,7 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 	buf := bytes.Buffer{}
 	buf.WriteString("SELECT * FROM " + table + " WHERE " + table + " MATCH '{content}:(")
 	for i, mentionKeyword := range mentionKeywords {
-		if 511 < i { // 提及搜索最大限制 https://github.com/siyuan-note/siyuan/issues/3715
+		if Conf.Search.BacklinkMentionKeywordsLimit < i {
 			util.PushMsg(fmt.Sprintf(Conf.Language(38), len(mentionKeywords)), 5000)
 			mentionKeyword = strings.ReplaceAll(mentionKeyword, "\"", "\"\"")
 			buf.WriteString("\"" + mentionKeyword + "\"")

@@ -110,8 +110,8 @@ func getVirtualRefKeywords(docName string) (ret []string) {
 	ret = gulu.Str.ExcludeElem(ret, []string{docName})
 	ret = prepareMarkKeywords(ret)
 
-	if Conf.Search.VirtualRefLimit < len(ret) {
-		ret = ret[:Conf.Search.VirtualRefLimit]
+	if Conf.Search.VirtualRefKeywordsLimit < len(ret) {
+		ret = ret[:Conf.Search.VirtualRefKeywordsLimit]
 	}
 	return
 }

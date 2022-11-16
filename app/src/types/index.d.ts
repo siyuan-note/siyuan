@@ -414,10 +414,12 @@ declare interface IConfig {
         backlinkMentionAlias: boolean
         backlinkMentionAnchor: boolean
         backlinkMentionDoc: boolean
+        backlinkMentionKeywordsLimit: boolean
         virtualRefName: boolean
         virtualRefAlias: boolean
         virtualRefAnchor: boolean
         virtualRefDoc: boolean
+        virtualRefKeywordsLimit: boolean
     },
     stat: {
         treeCount: number

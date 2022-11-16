@@ -1,6 +1,6 @@
 import {showMessage} from "../dialog/message";
 import {getAllModels} from "../layout/getAll";
-import {hasTopClosestByTag} from "../protyle/util/hasClosest";
+import {hasClosestByClassName, hasTopClosestByTag} from "../protyle/util/hasClosest";
 import {getDockByType} from "../layout/util";
 /// #if !MOBILE
 import {Files} from "../layout/dock/Files";
@@ -23,7 +23,7 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
             if (currentElement.classList.contains("item--focus")) {
                 notebookId = item.editor.protyle.notebookId;
                 currentPath = pathPosix().dirname(item.editor.protyle.path);
-                if (currentElement.parentElement.parentElement.classList.contains("layout__wnd--active")) {
+                if (hasClosestByClassName(currentElement, "layout__wnd--active")) {
                     return true;
                 }
             }

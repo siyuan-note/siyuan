@@ -57,6 +57,16 @@ export const exportImage = (id: string) => {
                 item.style.zoom = item.parentElement.clientWidth / item.clientWidth;
             }
         });
+        previewElement.querySelectorAll(".li > .protyle-action > svg").forEach(item => {
+            const id = item.firstElementChild.getAttribute("xlink:href")
+            const symbolElements = document.querySelectorAll(id)
+            let viewBox = "0 0 32 32";
+            if (id === "#iconDot") {
+                viewBox = "0 0 20 20";
+            }
+            item.setAttribute("viewBox", viewBox);
+            item.innerHTML = symbolElements[symbolElements.length - 1].innerHTML;
+        });
         const btnsElement = exportDialog.element.querySelectorAll(".b3-button");
         btnsElement[0].addEventListener("click", () => {
             exportDialog.destroy();

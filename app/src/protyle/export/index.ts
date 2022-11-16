@@ -209,7 +209,7 @@ const renderPDF = (id: string) => {
 <script>
     let pdfLeft = 0;
     let pdfTop = 0;
-    const setPadding = () => {
+    const setPadding = (previewElement) => {
         const isLandscape = document.querySelector("#landscape").checked;
         switch (document.querySelector("#marginsType").value) { // none
             case "0":
@@ -241,6 +241,18 @@ const renderPDF = (id: string) => {
                 break;
         }
         document.getElementById('preview').style.padding = pdfTop + "in " + pdfLeft + "in";
+        setTimeout(() => {
+            previewElement.querySelectorAll("table").forEach(item => {
+                if (item.clientWidth > item.parentElement.clientWidth) {
+                    item.style.zoom = (item.parentElement.clientWidth / item.clientWidth).toFixed(2) - 0.01;
+                    item.parentElement.style.overflow = "hidden";
+                }
+            })
+            previewElement.querySelectorAll('.hljs.protyle-linenumber').forEach((item) => {
+                item.removeAttribute('data-render');
+            })
+            Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
+        }, 300);
     }
     const fetchPost = (url, data, cb) => {
         fetch("${servePath}" + url, {
@@ -254,7 +266,6 @@ const renderPDF = (id: string) => {
     }
     const renderPreview = (previewElement, html) => {
         previewElement.innerHTML = html;
-        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
         Protyle.mathRender(previewElement, "${servePath}/stage/protyle", true);
         Protyle.mermaidRender(previewElement, "${servePath}/stage/protyle");
         Protyle.flowchartRender(previewElement, "${servePath}/stage/protyle");
@@ -263,11 +274,6 @@ const renderPDF = (id: string) => {
         Protyle.mindmapRender(previewElement, "${servePath}/stage/protyle");
         Protyle.abcRender(previewElement, "${servePath}/stage/protyle");
         Protyle.plantumlRender(previewElement, "${servePath}/stage/protyle");
-        previewElement.querySelectorAll("table").forEach(item => {
-            if (item.clientWidth > item.parentElement.clientWidth) {
-                item.style.zoom = item.parentElement.clientWidth / item.clientWidth;
-            }
-        })
     }
     fetchPost("/api/export/exportPreviewHTML", {
         id: "${id}",
@@ -292,7 +298,6 @@ const renderPDF = (id: string) => {
           languages: {copy:"${window.siyuan.languages.copy}"}
         };
         const previewElement = document.getElementById('preview');
-        renderPreview(previewElement, response.data.content);
         previewElement.addEventListener("click", (event) => {
             let target = event.target;
             while (target && !target.isEqualNode(previewElement)) {
@@ -326,6 +331,7 @@ const renderPDF = (id: string) => {
                     alert(response2.msg)
                     return;
                 }
+                setPadding(previewElement);
                 renderPreview(previewElement, response2.data.content);
             })
         })
@@ -333,10 +339,10 @@ const renderPDF = (id: string) => {
             actionElement.querySelector("#scaleTip").innerText = actionElement.querySelector("#scale").value;
         })
         actionElement.querySelector("#marginsType").addEventListener('change', () => {
-            setPadding();
+            setPadding(previewElement);
         });
         actionElement.querySelector("#landscape").addEventListener('change', () => {
-            setPadding();
+            setPadding(previewElement);
         });
         actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
@@ -368,7 +374,8 @@ const renderPDF = (id: string) => {
             previewElement.style.paddingTop = "0";
             previewElement.style.paddingBottom = "0";
         });
-        setPadding()
+        setPadding(previewElement);
+        renderPreview(previewElement, response.data.content);
     });
 </script></body></html>`;
     const mainWindow = getCurrentWindow();

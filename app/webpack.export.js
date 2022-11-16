@@ -23,19 +23,19 @@ module.exports = (env, argv) => {
     entry: {
       'protyle-method': './src/protyle/method.ts',
     },
-    optimization: {
-      minimize: true,
-      minimizer: [
-        new TerserPlugin({
-          terserOptions: {
-            format: {
-              comments: false,
-            },
-          },
-          extractComments: false,
-        }),
-      ],
-    },
+    // optimization: {
+    //   minimize: true,
+    //   minimizer: [
+    //     new TerserPlugin({
+    //       terserOptions: {
+    //         format: {
+    //           comments: false,
+    //         },
+    //       },
+    //       extractComments: false,
+    //     }),
+    //   ],
+    // },
     resolve: {
       fallback: {
         'path': require.resolve('path-browserify'),

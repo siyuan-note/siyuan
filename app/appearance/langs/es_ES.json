@@ -864,7 +864,7 @@
     "35": "Reconstruyendo el índice, por favor espere...",
     "36": "Hay demasiado contenido en el documento historico, para no afectar el rendimiento, se ha cambiado a visualizacion de texto sin formato",
     "37": "No incluyas espacios ni símbolos especiales en el nombre del directorio de sincronización con la nube",
-    "38": "El número de palabras clave mencionadas [%d] son demasiados, actualmente solo admite hasta [512] palabras clave",
+    "38": "Demasiadas palabras clave mencionadas [%d], ajústelas si es necesario [Configuración - Búsqueda - Menciones de backlinks - Límite de palabras clave]",
     "39": "Eliminando índice %s",
     "40": "Insertando índice %s",
     "41": "Carga completada",

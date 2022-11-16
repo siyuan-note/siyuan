@@ -109,9 +109,9 @@ func getVirtualRefKeywords(docName string) (ret []string) {
 	// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
 	ret = gulu.Str.ExcludeElem(ret, []string{docName})
 	ret = prepareMarkKeywords(ret)
-	// 虚拟引用搜索关键字最多支持 `搜索结果显示数` 的 8 倍 https://github.com/siyuan-note/siyuan/issues/6603
-	if Conf.Search.Limit*8 < len(ret) {
-		ret = ret[:Conf.Search.Limit*8]
+
+	if Conf.Search.VirtualRefLimit < len(ret) {
+		ret = ret[:Conf.Search.VirtualRefLimit]
 	}
 	return
 }

@@ -49,7 +49,7 @@ func QueryVirtualRefKeywords(name, alias, anchor, doc bool) (ret []string) {
 
 func queryRefTexts() (ret []string) {
 	ret = []string{}
-	sqlStmt := "SELECT DISTINCT content FROM refs LIMIT 1024"
+	sqlStmt := "SELECT DISTINCT content FROM refs LIMIT 10240"
 	rows, err := query(sqlStmt)
 	if nil != err {
 		logging.LogErrorf("sql query failed: %s", sqlStmt, err)

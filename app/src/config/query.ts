@@ -187,13 +187,9 @@ export const query = {
             <input class="b3-switch fn__flex-center" id="virtualRefDoc" type="checkbox"${window.siyuan.config.search.virtualRefDoc ? " checked" : ""}/>
         </label>
         
-        <label class="fn__flex">
-            <div class="fn__flex-1 b3-label__text">
-                ${window.siyuan.languages.keywordsLimit}
-            </div>
-            <span class="fn__space"></span>
-            <input class="b3-text-field fn__flex-center fn__size200" id="virtualRefKeywordsLimit" type="number" min="1" max="10240" value="${window.siyuan.config.search.virtualRefKeywordsLimit}">
-        </label>
+        ${window.siyuan.languages.keywordsLimit}
+        <span class="fn__space"></span>
+        <input class="b3-text-field fn__flex-center fn__size200" id="virtualRefKeywordsLimit" type="number" min="1" max="10240" value="${window.siyuan.config.search.virtualRefKeywordsLimit}">
 </div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">

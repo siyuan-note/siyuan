@@ -13,8 +13,9 @@ export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTML
     ${window.siyuan.languages.appearance4}
     <div class="fn__hr"></div>
     <select class="b3-select fn__block" id="mode">
-      <option value="0" ${window.siyuan.config.appearance.mode === 0 ? "selected" : ""}>${window.siyuan.languages.themeLight}</option>
-      <option value="1" ${window.siyuan.config.appearance.mode === 1 ? "selected" : ""}>${window.siyuan.languages.themeDark}</option>
+      <option value="0" ${(window.siyuan.config.appearance.mode === 0 && !window.siyuan.config.appearance.modeOS) ? "selected" : ""}>${window.siyuan.languages.themeLight}</option>
+      <option value="1" ${(window.siyuan.config.appearance.mode === 1 && !window.siyuan.config.appearance.modeOS) ? "selected" : ""}>${window.siyuan.languages.themeDark}</option>
+      <option value="2" ${window.siyuan.config.appearance.modeOS ? "selected" : ""}>${window.siyuan.languages.themeOS}</option>
     </select>
     <div class="b3-label__text">${window.siyuan.languages.appearance5}</div>
 </div>
@@ -62,22 +63,15 @@ export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTML
     });
     modelMainElement.querySelectorAll("select").forEach(item => {
         item.addEventListener("change", () => {
-            fetchPost("/api/setting/setAppearance", {
+            const modeElementValue = parseInt((modelMainElement.querySelector("#mode") as HTMLSelectElement).value);
+            fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
                 icon: (modelMainElement.querySelector("#icon") as HTMLSelectElement).value,
-                mode: parseInt((modelMainElement.querySelector("#mode") as HTMLSelectElement).value),
-                modeOS: window.siyuan.config.appearance.modeOS,
-                codeBlockThemeDark: window.siyuan.config.appearance.codeBlockThemeDark,
-                codeBlockThemeLight: window.siyuan.config.appearance.codeBlockThemeLight,
+                mode: modeElementValue === 2 ? window.siyuan.config.appearance.mode : modeElementValue,
+                modeOS: modeElementValue === 2,
                 themeDark: (modelMainElement.querySelector("#themeDark") as HTMLSelectElement).value,
                 themeLight: (modelMainElement.querySelector("#themeLight") as HTMLSelectElement).value,
-                darkThemes: window.siyuan.config.appearance.darkThemes,
-                lightThemes: window.siyuan.config.appearance.lightThemes,
-                icons: window.siyuan.config.appearance.icons,
                 lang: (modelMainElement.querySelector("#lang") as HTMLSelectElement).value,
-                customCSS: window.siyuan.config.appearance.customCSS,
-                closeButtonBehavior: window.siyuan.config.appearance.closeButtonBehavior,
-                nativeEmoji: window.siyuan.config.appearance.nativeEmoji,
-            }, () => {
+            }), () => {
                 window.location.reload();
             });
         });

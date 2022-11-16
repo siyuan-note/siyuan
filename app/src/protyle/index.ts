@@ -122,9 +122,12 @@ export class Protyle {
                                     this.protyle.background.ial.title = data.data.title;
                                 }
                             }
-                            if (this.protyle.options.render.title && this.protyle.block.parentID === data.data.id &&
-                                this.protyle.title.editElement.textContent !== data.data.title) {
-                                this.protyle.title.setTitle(data.data.title);
+                            if (this.protyle.options.render.title && this.protyle.block.parentID === data.data.id) {
+                                if (getSelection().rangeCount > 0 && this.protyle.title.editElement.contains(getSelection().getRangeAt(0).startContainer)) {
+                                    // 标题编辑中的不用更新 https://github.com/siyuan-note/siyuan/issues/6565
+                                } else {
+                                    this.protyle.title.setTitle(data.data.title);
+                                }
                             }
                             // update ref
                             this.protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${data.data.id}"]`).forEach(item => {

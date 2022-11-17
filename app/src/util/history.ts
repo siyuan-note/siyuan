@@ -8,6 +8,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {Protyle} from "../protyle";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import * as dayjs from "dayjs";
 
 let historyEditor: Protyle;
 const renderDoc = (element: HTMLElement, currentPage: number) => {
@@ -57,24 +58,11 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
             return;
         }
         let logsHTML = "";
-        response.data.histories.forEach((item: { items: { path: string, title: string }[], hCreated: string }, index: number) => {
-            logsHTML += `<li class="b3-list-item" data-type="toggle">
-    <span class="b3-list-item__toggle b3-list-item__toggle--hl"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
-    <span style="padding-left: 4px" class="b3-list-item__text">${item.hCreated}</span>
+        response.data.histories.forEach((item: string) => {
+            logsHTML += `<li class="b3-list-item" data-type="toggle" data-created="${item}">
+    <span class="b3-list-item__toggle b3-list-item__toggle--hl"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
+    <span style="padding-left: 4px" class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span>
 </li>`;
-            if (item.items.length > 0) {
-                logsHTML += `<ul class="${index === 0 ? "" : "fn__none"}">`;
-                item.items.forEach((docItem) => {
-                    logsHTML += `<li title="${escapeHtml(docItem.title)}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 44px">
-    <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
-    <span class="fn__space"></span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
-        <svg><use xlink:href="#iconUndo"></use></svg>
-    </span>
-</li>`;
-                });
-                logsHTML += "</ul>";
-            }
         });
         element.lastElementChild.firstElementChild.innerHTML = logsHTML;
     });
@@ -179,7 +167,7 @@ const renderRmNotebook = (element: HTMLElement) => {
         }
         let logsHTML = "";
         response.data.histories.forEach((item: { items: { path: string, title: string }[], hCreated: string }, index: number) => {
-            logsHTML += `<li class="b3-list-item" style="padding-left: 0" data-type="toggle">
+            logsHTML += `<li class="b3-list-item" style="padding-left: 0" data-type="rmtoggle">
     <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
     <span class="b3-list-item__text">${item.hCreated}</span>
 </li>`;
@@ -393,6 +381,43 @@ export const openHistory = () => {
                 });
                 break;
             } else if (type === "toggle") {
+                const iconElement = target.firstElementChild.firstElementChild
+                if (iconElement.classList.contains("b3-list-item__arrow--open")) {
+                    target.nextElementSibling.classList.add("fn__none");
+                    iconElement.classList.remove("b3-list-item__arrow--open");
+                } else {
+                    if (target.nextElementSibling && target.nextElementSibling.tagName === "UL") {
+                        target.nextElementSibling.classList.remove("fn__none");
+                        iconElement.classList.add("b3-list-item__arrow--open");
+                    } else {
+                        const inputElement = firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement;
+                        const opElement = firstPanelElement.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
+                        const typeElement = firstPanelElement.querySelector('.b3-select[data-type="typeselect"]') as HTMLSelectElement;
+                        const notebookElement = firstPanelElement.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement;
+                        fetchPost("/api/history/getHistoryItems", {
+                            notebook: notebookElement.value,
+                            query: inputElement.value,
+                            op: opElement.value,
+                            type: parseInt(typeElement.value),
+                            created: target.getAttribute("data-created")
+                        }, (response) => {
+                            iconElement.classList.add("b3-list-item__arrow--open");
+                            let html = "";
+                            response.data.items.forEach((docItem: { title: string, path: string }) => {
+                                html += `<li title="${escapeHtml(docItem.title)}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 44px">
+    <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
+    <span class="fn__space"></span>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
+        <svg><use xlink:href="#iconUndo"></use></svg>
+    </span>
+</li>`;
+                            });
+                            target.insertAdjacentHTML("afterend", `<ul>${html}</ul>`);
+                        });
+                    }
+                }
+                break;
+            } else if (type === "rmtoggle") {
                 target.nextElementSibling.classList.toggle("fn__none");
                 target.firstElementChild.firstElementChild.classList.toggle("b3-list-item__arrow--open");
                 break;

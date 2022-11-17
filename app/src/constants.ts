@@ -105,7 +105,7 @@ export abstract class Constants {
         "222": ["'", '"'],
     };
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "⌃I", "⌃E", "⌃N", "⌃U" 不可自定义
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {
             syncNow: {default: "F9", custom: "F9"},
@@ -157,7 +157,6 @@ export abstract class Constants {
                 copyProtocol: {default: "⇧⌘H", custom: "⇧⌘H"},
                 copyBlockEmbed: {default: "⇧⌘E", custom: "⇧⌘E"},
                 copyHPath: {default: "⇧⌘P", custom: "⇧⌘P"},
-                pasteAsPlainText: {default: "⇧⌘V", custom: "⇧⌘V"},
                 undo: {default: "⌘Z", custom: "⌘Z"},
                 redo: {default: "⌘Y", custom: "⌘Y"},
                 rename: {default: "F2", custom: "F2"},

@@ -140,6 +140,10 @@
         &--full {
           max-width: none;
           flex: 1;
+
+          &.item--focus:after {
+            background-color: var(--b3-theme-primary);
+          }
         }
 
         &:hover:not(.item--focus):not(.item--readonly) .item__text {
@@ -230,7 +234,7 @@
         }
 
         &__close {
-          padding: 13px 13px 13px 0;
+          padding: 13px 8px 13px 0;
           display: flex;
           align-items: center;
 

@@ -19,7 +19,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"io/fs"
 	"math"
 	"os"
 	"path"
@@ -963,6 +962,25 @@ func GetHPathByPath(boxID, p string) (hPath string, err error) {
 	return
 }
 
+func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
+	pathsBoxes := getBoxesByPaths(paths)
+	for p, box := range pathsBoxes {
+		if nil == box {
+			logging.LogWarnf("box not found by path [%s]", p)
+			continue
+		}
+
+		bt := treenode.GetBlockTreeByPath(p)
+		if nil == bt {
+			logging.LogWarnf("block tree not found by path [%s]", p)
+			continue
+		}
+
+		hPaths = append(hPaths, box.Name+bt.HPath)
+	}
+	return
+}
+
 func GetHPathByID(id string) (hPath string, err error) {
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {
@@ -987,42 +1005,54 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 	return
 }
 
-func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err error) {
-	if fromBoxID == toBoxID && fromPath == toPath {
-		return
-	}
-
-	fromDir := strings.TrimSuffix(fromPath, ".sy")
-	if strings.HasPrefix(toPath, fromDir) {
-		err = errors.New(Conf.Language(87))
-		return
-	}
-
-	fromBox := Conf.Box(fromBoxID)
-	if nil == fromBox {
-		err = errors.New(Conf.Language(0))
-		return
-	}
-
-	WaitForWritingFiles()
-	tree, err := LoadTree(fromBoxID, fromPath)
-	if nil != err {
-		err = ErrBlockNotFound
-		return
-	}
-
-	childDepth := util.GetChildDocDepth(filepath.Join(util.DataDir, fromBoxID, fromPath))
-	if depth := strings.Count(toPath, "/") + childDepth; 6 < depth && !Conf.FileTree.AllowCreateDeeper {
-		err = errors.New(Conf.Language(118))
-		return
-	}
-
+func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
 	toBox := Conf.Box(toBoxID)
 	if nil == toBox {
 		err = errors.New(Conf.Language(0))
 		return
 	}
-	isSameBox := fromBoxID == toBoxID
+
+	fromPaths = util.FilterMoveDocFromPaths(fromPaths, toPath)
+	if 1 > len(fromPaths) {
+		return
+	}
+
+	pathsBoxes := getBoxesByPaths(fromPaths)
+
+	// 检查路径深度是否超过限制
+	for fromPath, fromBox := range pathsBoxes {
+		childDepth := util.GetChildDocDepth(filepath.Join(util.DataDir, fromBox.ID, fromPath))
+		if depth := strings.Count(toPath, "/") + childDepth; 6 < depth && !Conf.FileTree.AllowCreateDeeper {
+			err = errors.New(Conf.Language(118))
+			return
+		}
+	}
+
+	needShowProgress := 16 < len(fromPaths)
+	if needShowProgress {
+		util.PushEndlessProgress(Conf.Language(116))
+	}
+
+	WaitForWritingFiles()
+	for fromPath, fromBox := range pathsBoxes {
+		_, err = moveDoc(fromBox, fromPath, toBox, toPath)
+		if nil != err {
+			return
+		}
+	}
+	cache.ClearDocsIAL()
+	IncSync()
+
+	if needShowProgress {
+		util.PushEndlessProgress(Conf.Language(113))
+		sql.WaitForWritingDatabase()
+		util.ReloadUI()
+	}
+	return
+}
+
+func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath string, err error) {
+	isSameBox := fromBox.ID == toBox.ID
 
 	if isSameBox {
 		if !fromBox.Exist(toPath) {
@@ -1036,6 +1066,12 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 		}
 	}
 
+	tree, err := LoadTree(fromBox.ID, fromPath)
+	if nil != err {
+		err = ErrBlockNotFound
+		return
+	}
+
 	moveToRoot := "/" == toPath
 	toBlockID := tree.ID
 	fromFolder := path.Join(path.Dir(fromPath), tree.ID)
@@ -1043,9 +1079,9 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 	if !moveToRoot {
 		var toTree *parse.Tree
 		if isSameBox {
-			toTree, err = LoadTree(fromBoxID, toPath)
+			toTree, err = LoadTree(fromBox.ID, toPath)
 		} else {
-			toTree, err = LoadTree(toBoxID, toPath)
+			toTree, err = LoadTree(toBox.ID, toPath)
 		}
 		if nil != err {
 			err = ErrBlockNotFound
@@ -1075,14 +1111,14 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 				return
 			}
 		} else {
-			absFromPath := filepath.Join(util.DataDir, fromBoxID, fromFolder)
-			absToPath := filepath.Join(util.DataDir, toBoxID, newFolder)
+			absFromPath := filepath.Join(util.DataDir, fromBox.ID, fromFolder)
+			absToPath := filepath.Join(util.DataDir, toBox.ID, newFolder)
 			if gulu.File.IsExist(absToPath) {
 				filelock.Remove(absToPath)
 			}
 			if err = filelock.Move(absFromPath, absToPath); nil != err {
 				msg := fmt.Sprintf(Conf.Language(5), fromBox.Name, fromPath, err)
-				logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBoxID, err)
+				logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBox.ID, err)
 				err = errors.New(msg)
 				return
 			}
@@ -1096,32 +1132,40 @@ func MoveDoc(fromBoxID, fromPath, toBoxID, toPath string) (newPath string, err e
 			return
 		}
 
-		tree, err = LoadTree(fromBoxID, newPath)
+		tree, err = LoadTree(fromBox.ID, newPath)
 		if nil != err {
 			return
 		}
 
 		moveTree(tree)
 	} else {
-		absFromPath := filepath.Join(util.DataDir, fromBoxID, fromPath)
-		absToPath := filepath.Join(util.DataDir, toBoxID, newPath)
+		absFromPath := filepath.Join(util.DataDir, fromBox.ID, fromPath)
+		absToPath := filepath.Join(util.DataDir, toBox.ID, newPath)
 		if err = filelock.Move(absFromPath, absToPath); nil != err {
 			msg := fmt.Sprintf(Conf.Language(5), fromBox.Name, fromPath, err)
-			logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBoxID, err)
+			logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, fromBox.ID, err)
 			err = errors.New(msg)
 			return
 		}
 
-		tree, err = LoadTree(toBoxID, newPath)
+		tree, err = LoadTree(toBox.ID, newPath)
 		if nil != err {
 			return
 		}
 
 		moveTree(tree)
-		moveSorts(tree.ID, fromBoxID, toBoxID)
+		moveSorts(tree.ID, fromBox.ID, toBox.ID)
 	}
-	cache.ClearDocsIAL()
-	IncSync()
+
+	evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast, util.PushModeNone)
+	evt.Data = map[string]interface{}{
+		"fromNotebook": fromBox.ID,
+		"fromPath":     fromPath,
+		"toNotebook":   toBox.ID,
+		"toPath":       toPath,
+		"newPath":      newPath,
+	}
+	util.PushEvent(evt)
 	return
 }
 
@@ -1133,7 +1177,32 @@ func RemoveDoc(boxID, p string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	tree, err := LoadTree(boxID, p)
+	err = removeDoc(box, p)
+	if nil != err {
+		return
+	}
+	IncSync()
+	return
+}
+
+func RemoveDocs(paths []string) (err error) {
+	util.PushEndlessProgress(Conf.Language(116))
+	defer util.PushClearProgress()
+
+	paths = util.FilterSelfChildDocs(paths)
+	pathsBoxes := getBoxesByPaths(paths)
+	WaitForWritingFiles()
+	for p, box := range pathsBoxes {
+		err = removeDoc(box, p)
+		if nil != err {
+			return
+		}
+	}
+	return
+}
+
+func removeDoc(box *Box, p string) (err error) {
+	tree, err := LoadTree(box.ID, p)
 	if nil != err {
 		return
 	}
@@ -1144,17 +1213,20 @@ func RemoveDoc(boxID, p string) (err error) {
 		return
 	}
 
-	historyPath := filepath.Join(historyDir, boxID, p)
-	absPath := filepath.Join(util.DataDir, boxID, p)
+	historyPath := filepath.Join(historyDir, box.ID, p)
+	absPath := filepath.Join(util.DataDir, box.ID, p)
 	if err = filelock.Copy(absPath, historyPath); nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(70), box.Name, absPath, err))
 	}
 
-	copyDocAssetsToDataAssets(boxID, p)
+	copyDocAssetsToDataAssets(box.ID, p)
 
-	rootID := tree.ID
+	var removeIDs []string
+	ids := treenode.RootChildIDs(tree.ID)
+	removeIDs = append(removeIDs, ids...)
+
 	dir := path.Dir(p)
-	childrenDir := path.Join(dir, rootID)
+	childrenDir := path.Join(dir, tree.ID)
 	existChildren := box.Exist(childrenDir)
 	if existChildren {
 		absChildrenDir := filepath.Join(util.DataDir, tree.Box, childrenDir)
@@ -1165,26 +1237,33 @@ func RemoveDoc(boxID, p string) (err error) {
 	}
 	indexHistoryDir(filepath.Base(historyDir), NewLute())
 
-	box.removeSort(rootID, p)
+	if existChildren {
+		if err = box.Remove(childrenDir); nil != err {
+			return
+		}
+	}
 	if err = box.Remove(p); nil != err {
 		return
 	}
-
-	if existChildren {
-		box.Remove(childrenDir)
-	}
+	box.removeSort(removeIDs)
 
 	treenode.RemoveBlockTreesByPathPrefix(childrenDir)
 	sql.RemoveTreePathQueue(box.ID, childrenDir)
 
 	if "/" != dir {
-		others, err := os.ReadDir(filepath.Join(util.DataDir, boxID, dir))
+		others, err := os.ReadDir(filepath.Join(util.DataDir, box.ID, dir))
 		if nil == err && 1 > len(others) {
 			box.Remove(dir)
 		}
 	}
 
 	cache.RemoveDocIAL(p)
+
+	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast, util.PushModeNone)
+	evt.Data = map[string]interface{}{
+		"ids": removeIDs,
+	}
+	util.PushEvent(evt)
 	return
 }
 
@@ -1403,7 +1482,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 	}
 
 	fromRootSorts := map[string]int{}
-	ids := rootChildIDs(rootID)
+	ids := treenode.RootChildIDs(rootID)
 	fromConfPath := filepath.Join(util.DataDir, fromBox, ".siyuan", "sort.json")
 	fromFullSortIDs := map[string]int{}
 	if gulu.File.IsExist(fromConfPath) {
@@ -1449,29 +1528,6 @@ func moveSorts(rootID, fromBox, toBox string) {
 		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
-}
-
-func rootChildIDs(rootID string) (ret []string) {
-	root := treenode.GetBlockTree(rootID)
-	if nil == root {
-		return
-	}
-
-	ret = append(ret, rootID)
-	boxLocalPath := filepath.Join(util.DataDir, root.BoxID)
-	subFolder := filepath.Join(boxLocalPath, strings.TrimSuffix(root.Path, ".sy"))
-	if !gulu.File.IsDir(subFolder) {
-		return
-	}
-	filepath.Walk(subFolder, func(path string, info fs.FileInfo, err error) error {
-		if strings.HasSuffix(path, ".sy") {
-			name := filepath.Base(path)
-			id := strings.TrimSuffix(name, ".sy")
-			ret = append(ret, id)
-		}
-		return nil
-	})
-	return
 }
 
 func ChangeFileTreeSort(boxID string, paths []string) {
@@ -1575,30 +1631,7 @@ func (box *Box) fillSort(files *[]*File) {
 	}
 }
 
-func (box *Box) removeSort(rootID, path string) {
-	absRoot := filepath.Join(util.DataDir, box.ID, path)
-	absRootDir := strings.TrimSuffix(absRoot, ".sy")
-	toRemoves := map[string]bool{rootID: true}
-	filepath.Walk(absRootDir, func(path string, info fs.FileInfo, err error) error {
-		if nil == info {
-			return nil
-		}
-		name := info.Name()
-		isDir := info.IsDir()
-		if util.IsReservedFilename(name) {
-			if isDir {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-
-		if !isDir && strings.HasSuffix(name, ".sy") {
-			id := strings.TrimSuffix(name, ".sy")
-			toRemoves[id] = true
-		}
-		return nil
-	})
-
+func (box *Box) removeSort(ids []string) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
 	if !gulu.File.IsExist(confPath) {
 		return
@@ -1616,7 +1649,7 @@ func (box *Box) removeSort(rootID, path string) {
 		return
 	}
 
-	for toRemove := range toRemoves {
+	for _, toRemove := range ids {
 		delete(fullSortIDs, toRemove)
 	}
 

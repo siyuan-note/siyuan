@@ -6,7 +6,7 @@
 		"id": "20200813131152-0wk5akh",
 		"title": "在内容块中遨游",
 		"type": "doc",
-		"updated": "20210104090757"
+		"updated": "20221105215950"
 	},
 	"Children": [
 		{
@@ -47,7 +47,8 @@
 				"Num": -1
 			},
 			"Properties": {
-				"id": "20210104090757-w6to47w"
+				"id": "20210104090757-w6to47w",
+				"updated": "20221105215950"
 			},
 			"Children": [
 				{
@@ -93,7 +94,8 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20210104090757-z6d1fdd"
+						"id": "20210104090757-z6d1fdd",
+						"updated": "20221105215950"
 					},
 					"Children": [
 						{
@@ -101,21 +103,23 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210205172718-uuj8gsc",
-								"updated": "20210428224949"
+								"updated": "20221105215950"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "通过 "
+									"Data": "通过"
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "((id))"
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200813013559-sgbzl5k",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "引用"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 建立的内容块链接，用于在思源内部进行双链"
+									"Data": "建立的内容块链接，用于在思源内部进行双链"
 								}
 							]
 						}

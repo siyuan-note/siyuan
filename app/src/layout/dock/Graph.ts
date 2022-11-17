@@ -2,7 +2,6 @@ import {Tab} from "../Tab";
 import {getDockByType, setPanelFocus} from "../util";
 import {Model} from "../Model";
 import {Constants} from "../../constants";
-import {getDisplayName} from "../../util/pathName";
 import {addScript} from "../../protyle/util/addScript";
 import {BlockPanel} from "../../block/Panel";
 import {fullscreen} from "../../protyle/breadcrumb/action";
@@ -54,7 +53,7 @@ export class Graph extends Model {
                             }
                             break;
                         case "rename":
-                            if (this.graphData && data.data.box === this.graphData.box && this.path === data.data.path) {
+                            if (this.graphData && data.data.box === this.graphData.box && this.rootId === data.data.id) {
                                 this.searchGraph(false);
                                 if (this.type === "local") {
                                     this.parent.updateTitle(data.data.title);
@@ -64,22 +63,13 @@ export class Graph extends Model {
                                 this.searchGraph(false);
                             }
                             break;
-                        case "moveDoc":
-                            if (this.type === "global") {
-                                this.searchGraph(false);
-                            } else if (this.graphData && (data.data.fromNotebook === this.graphData.box || data.data.toNotebook === this.graphData.box) &&
-                                this.path === data.data.fromPath) {
-                                this.path = data.data.newPath;
-                                this.graphData.box = data.data.toNotebook;
-                                this.searchGraph(false);
+                        case "unmount":
+                            if (this.type === "local" && this.graphData && this.graphData.box === data.data.box) {
+                                this.parent.parent.removeTab(this.parent.id);
                             }
                             break;
-                        case "unmount":
-                        case "remove":
-                            if (this.type === "global") {
-                                this.searchGraph(false);
-                            } else if (this.graphData && this.graphData.box === data.data.box &&
-                                (!data.data.path || this.path.indexOf(getDisplayName(data.data.path, false, true)) === 0)) {
+                        case "removeDoc":
+                            if (this.type === "local" && data.data.ids.includes(this.rootId)) {
                                 this.parent.parent.removeTab(this.parent.id);
                             }
                             break;
@@ -453,6 +443,7 @@ export class Graph extends Model {
             });
         } else {
             fetchPost("/api/graph/getLocalGraph", {
+                type: this.type, // 用于如下场景：当打开文档A的关系图、关系图、文档A后刷新，由于防止请求重复处理，文档A关系图无法渲染。
                 k: this.inputElement.value,
                 id: id || this.blockId,
                 conf: {

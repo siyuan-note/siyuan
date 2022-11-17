@@ -22,7 +22,6 @@ import {updatePanelByEditor} from "../editor/util";
 import {setPanelFocus} from "../layout/util";
 /// #endif
 import {Background} from "./header/Background";
-import {getDisplayName} from "../util/pathName";
 import {onGet} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
@@ -138,7 +137,7 @@ export class Protyle {
                             });
                             break;
                         case "moveDoc":
-                            if (data.data.fromNotebook === this.protyle.notebookId && this.protyle.path === data.data.fromPath) {
+                            if (this.protyle.path === data.data.fromPath) {
                                 this.protyle.path = data.data.newPath;
                                 this.protyle.notebookId = data.data.toNotebook;
                             }
@@ -148,9 +147,8 @@ export class Protyle {
                                 this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
                             }
                             break;
-                        case "remove":
-                            if (this.protyle.model && (this.protyle.notebookId === data.data.box &&
-                                (!data.data.path || this.protyle.path.indexOf(getDisplayName(data.data.path, false, true)) === 0))) {
+                        case "removeDoc":
+                            if (this.protyle.model && data.data.ids.includes(this.protyle.block.rootID)) {
                                 this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
                             }
                             break;

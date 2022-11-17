@@ -23,7 +23,6 @@ import {rename} from "../editor/rename";
 import {matchHotKey} from "../protyle/util/hotKey";
 import * as dayjs from "dayjs";
 import {Constants} from "../constants";
-import {deleteFile} from "../editor/deleteFile";
 
 const bindAttrInput = (inputElement: HTMLInputElement, confirmElement: Element) => {
     inputElement.addEventListener("keydown", (event) => {
@@ -266,7 +265,7 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                         });
                     }
                     window.siyuan.menus.menu.element.style.zIndex = "310";
-                    window.siyuan.menus.menu.element.classList.add("b3-menu--list")
+                    window.siyuan.menus.menu.element.classList.add("b3-menu--list");
                     window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16, w: 16});
                 });
                 break;
@@ -472,7 +471,7 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                             });
                         }
                         window.siyuan.menus.menu.element.style.zIndex = "310";
-                        window.siyuan.menus.menu.element.classList.add("b3-menu--list")
+                        window.siyuan.menus.menu.element.classList.add("b3-menu--list");
                         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16, w: 16});
                     });
                     break;
@@ -793,13 +792,13 @@ export const renameMenu = (options: {
     }).element;
 };
 
-export const movePathToMenu = (notebookId: string, path: string) => {
+export const movePathToMenu = (paths: string[]) => {
     return new MenuItem({
         label: window.siyuan.languages.move,
         icon: "iconMove",
         accelerator: window.siyuan.config.keymap.general.move.custom,
         click() {
-            movePathTo(notebookId, path);
+            movePathTo(paths);
         }
     }).element;
 };

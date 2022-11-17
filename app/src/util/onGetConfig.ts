@@ -39,7 +39,7 @@ const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "edi
         }
     } else {
         if (!window.siyuan.config.keymap[key1]) {
-            window.siyuan.config.keymap[key1] = Constants.SIYUAN_KEYMAP.editor;
+            window.siyuan.config.keymap[key1] = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP.editor));
             return false;
         }
         if (!window.siyuan.config.keymap[key1][key2]) {

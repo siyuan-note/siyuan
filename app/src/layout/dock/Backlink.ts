@@ -1,6 +1,5 @@
 import {Tab} from "../Tab";
 import {Model} from "../Model";
-import {getDisplayName} from "../../util/pathName";
 import {Tree} from "../../util/Tree";
 import {getDockByType, setPanelFocus} from "../util";
 import {fetchPost} from "../../util/fetch";
@@ -53,17 +52,17 @@ export class Backlink extends Model {
                 if (data && this.type === "local") {
                     switch (data.cmd) {
                         case "rename":
-                            if (this.blockId === data.data.id) {
+                            if (this.rootId === data.data.id) {
                                 this.parent.updateTitle(data.data.title);
                             }
                             break;
                         case "unmount":
-                            if (this.notebookId === data.data.box) {
+                            if (this.notebookId === data.data.box && this.type === "local") {
                                 this.parent.parent.removeTab(this.parent.id);
                             }
                             break;
-                        case "remove":
-                            if (this.path?.indexOf(getDisplayName(data.data.path, false, true)) === 0) {
+                        case "removeDoc":
+                            if (data.data.ids.includes(this.rootId) && this.type === "local") {
                                 this.parent.parent.removeTab(this.parent.id);
                             }
                             break;

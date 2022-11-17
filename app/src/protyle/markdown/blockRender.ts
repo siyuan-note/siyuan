@@ -5,7 +5,7 @@ import {highlightRender} from "./highlightRender";
 import {Constants} from "../../constants";
 import {genBreadcrumb} from "../wysiwyg/renderBacklink";
 
-export const blockRender = (protyle: IProtyle, element: Element) => {
+export const blockRender = (protyle: IProtyle, element: Element, top?: number) => {
     let blockElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeBlockQueryEmbed") {
         // 编辑器内代码块编辑渲染
@@ -64,6 +64,10 @@ export const blockRender = (protyle: IProtyle, element: Element) => {
 
             processRender(item);
             highlightRender(item);
+            if (top) {
+                // 前进后退定位 https://ld246.com/article/1667652729995
+                protyle.contentElement.scrollTop = top;
+            }
             let maxDeep = 0;
             let deepEmbedElement: false | HTMLElement = item;
             while (maxDeep < 4 && deepEmbedElement) {

@@ -113,6 +113,7 @@ func checkDownloadInstallPkg() {
 }
 
 func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
+	defer logging.Recover()
 	result, err := util.GetRhyResult(false)
 	if nil != err {
 		return
@@ -140,6 +141,8 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 	url := "https://github.com/siyuan-note/siyuan/releases/download/v" + ver + "/" + pkg
 	downloadPkgURLs = append(downloadPkgURLs, url)
 	url = "https://ghproxy.com/" + url
+	downloadPkgURLs = append(downloadPkgURLs, url)
+	url = "https://release-r2.b3log.org/siyuan/" + pkg
 	downloadPkgURLs = append(downloadPkgURLs, url)
 	url = "https://release.b3log.org/siyuan/" + pkg
 	downloadPkgURLs = append(downloadPkgURLs, url)
@@ -265,6 +268,7 @@ func CheckUpdate(showMsg bool) {
 	if showMsg {
 		util.PushMsg(msg, timeout)
 		go func() {
+			defer logging.Recover()
 			checkDownloadInstallPkg()
 			if "" != getNewVerInstallPkgPath() {
 				util.PushMsg(Conf.Language(62), 0)

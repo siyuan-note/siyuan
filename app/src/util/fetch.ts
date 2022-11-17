@@ -12,7 +12,11 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
     if (data) {
         if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph"].includes(url)) {
             window.siyuan.reqIds[url] = new Date().getTime();
-            data.reqId = window.siyuan.reqIds[url];
+            if (data.type === "local" && url === "/api/graph/getLocalGraph") {
+                // 当打开文档A的关系图、关系图、文档A后刷新，由于防止请求重复处理，文档A关系图无法渲染。
+            } else {
+                data.reqId = window.siyuan.reqIds[url];
+            }
         }
         if (data instanceof FormData) {
             init.body = data;

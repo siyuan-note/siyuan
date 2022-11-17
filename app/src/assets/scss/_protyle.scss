@@ -405,6 +405,7 @@
     &:empty:after {
       content: attr(data-tip);
       color: var(--b3-theme-on-surface);
+      cursor: text;
     }
 
     &:focus {

@@ -1,6 +1,7 @@
 {
-  "notBatchRemove": "Los portátiles no admiten la eliminación por lotes",
-  "confirmRemove": "¿Está seguro de que desea eliminar los ${count} archivos seleccionados?",
+  "confirmReset": "¿Está seguro de que desea restablecer todos los atajos de teclado a la configuración predeterminada?",
+  "notBatchRemove": "No se admite la eliminación por lotes de blocs de notas",
+  "confirmRemoveAll": "¿Está seguro de que desea eliminar todos los archivos seleccionados?",
   "microphoneDenied": "Necesito permitir que Siyuan acceda al micrófono en Preferencias del Sistema",
   "microphoneNotAccess": "Acceso al micrófono denegado, ve a Preferencias del Sistema para reiniciar",
   "dynamicLoadBlocks": "Número de bloques cargados dinámicamente",

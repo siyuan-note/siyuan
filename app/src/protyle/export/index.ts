@@ -516,7 +516,6 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     Protyle.mindmapRender(previewElement, "stage/protyle");
     Protyle.abcRender(previewElement, "stage/protyle");
     Protyle.plantumlRender(previewElement, "stage/protyle");
-    Protyle.mediaRender(previewElement);
     document.querySelectorAll(".protyle-action__copy").forEach((item) => {
       item.addEventListener("click", (event) => {
             navigator.clipboard.writeText(item.parentElement.nextElementSibling.textContent.trimEnd());

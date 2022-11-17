@@ -31,6 +31,7 @@ export const openFileById = (options: {
     action?: string[]
     keepCursor?: boolean
     zoomIn?: boolean
+    removeCurrentTab?: boolean
 }) => {
     fetchPost("/api/block/getBlockInfo", {id: options.id}, (data) => {
         if (data.code === 2) {
@@ -41,13 +42,14 @@ export const openFileById = (options: {
         openFile({
             fileName: data.data.rootTitle,
             rootIcon: data.data.rootIcon,
-            id: options.id,
             rootID: data.data.rootID,
+            id: options.id,
             position: options.position,
             mode: options.mode,
             action: options.action,
             zoomIn: options.zoomIn,
-            keepCursor: options.keepCursor
+            keepCursor: options.keepCursor,
+            removeCurrentTab: options.removeCurrentTab
         });
     });
 };
@@ -178,8 +180,8 @@ const openFile = (options: IOpenFileOptions) => {
                 }
             });
             wnd.addTab(newTab(options));
-            if (unUpdateTab && !window.siyuan.ctrlIsPressed) {
-                wnd.removeTab(unUpdateTab.id);
+            if (unUpdateTab && options.removeCurrentTab) {
+                wnd.removeTab(unUpdateTab.id, false, true, false);
             }
         } else {
             wnd.addTab(newTab(options));

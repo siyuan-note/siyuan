@@ -69,14 +69,6 @@ func QueryHistory(stmt string) (ret []map[string]interface{}, err error) {
 	return
 }
 
-func queryHistory(query string, args ...interface{}) (*sql.Rows, error) {
-	query = strings.TrimSpace(query)
-	if "" == query {
-		return nil, errors.New("statement is empty")
-	}
-	return historyDB.Query(query, args...)
-}
-
 func SelectHistoriesRawStmt(stmt string) (ret []*History) {
 	rows, err := historyDB.Query(stmt)
 	if nil != err {
@@ -100,6 +92,14 @@ func scanHistoryRows(rows *sql.Rows) (ret *History) {
 	}
 	ret = &history
 	return
+}
+
+func queryHistory(query string, args ...interface{}) (*sql.Rows, error) {
+	query = strings.TrimSpace(query)
+	if "" == query {
+		return nil, errors.New("statement is empty")
+	}
+	return historyDB.Query(query, args...)
 }
 
 func DeleteHistoriesByPathPrefix(tx *sql.Tx, pathPrefix string) (err error) {

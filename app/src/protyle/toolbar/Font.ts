@@ -153,9 +153,10 @@ export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
 export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) => {
     const setBlockRef = (blockRefOption: string) => {
         const blockRefData = blockRefOption.split(Constants.ZWSP);
-        textElement.setAttribute("data-id", blockRefData[0]);
-        textElement.setAttribute("data-subtype", blockRefData[1]);
-        textElement.innerText = blockRefData[2];
+        // 标签等元素中包含 ZWSP，需移除后拼接 https://github.com/siyuan-note/siyuan/issues/6466
+        textElement.setAttribute("data-id", blockRefData.splice(0, 1)[0]);
+        textElement.setAttribute("data-subtype", blockRefData.splice(0, 1)[0]);
+        textElement.innerText = blockRefData.join("");
     };
     const setLink = (textOption: string) => {
         const options = textOption.split(Constants.ZWSP);

@@ -118,10 +118,10 @@
   right: -100vw;
   position: fixed;
   background-color: var(--b3-theme-surface);
-  height: 100%;
+  height: 100vh;
   width: 80vw;
   z-index: 220;
-  transition: var(--b3-transition);
+  transition: top .15s cubic-bezier(0, 0, .2, 1) 0ms, left .15s cubic-bezier(0, 0, .2, 1) 0ms, right .15s cubic-bezier(0, 0, .2, 1) 0ms;
 
   &--left {
     left: -100vw;
@@ -131,7 +131,7 @@
   &--all {
     width: 100vw;
     right: 0;
-    top: -100vh;
+    top: -200vh;
   }
 }
 

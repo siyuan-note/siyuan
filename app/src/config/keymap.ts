@@ -4,6 +4,7 @@ import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {ipcRenderer} from "electron";
 import {exportLayout} from "../layout/util";
+import {confirmDialog} from "../dialog/confirmDialog";
 
 export const keymap = {
     element: undefined as Element,
@@ -117,7 +118,7 @@ export const keymap = {
 </div>`;
     },
     _setkeymap() {
-        const data: IKeymap = Object.assign({}, Constants.SIYUAN_KEYMAP);
+        const data: IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
         keymap.element.querySelectorAll("label.b3-list-item input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
             if (keys[0] === "general") {
@@ -212,14 +213,15 @@ export const keymap = {
             keymap._search("", "");
         });
         keymap.element.querySelector("#keymapResetBtn").addEventListener("click", () => {
-            window.siyuan.config.keymap = Constants.SIYUAN_KEYMAP;
-            fetchPost("/api/setting/setKeymap", {
-                data: Constants.SIYUAN_KEYMAP,
-            }, () => {
-                window.location.reload();
-                /// #if !BROWSER
-                ipcRenderer.send(Constants.SIYUAN_HOTKEY, hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom));
-                /// #endif
+            confirmDialog(window.siyuan.languages.reset, window.siyuan.languages.confirmReset, () => {
+                fetchPost("/api/setting/setKeymap", {
+                    data: Constants.SIYUAN_KEYMAP,
+                }, () => {
+                    window.location.reload();
+                    /// #if !BROWSER
+                    ipcRenderer.send(Constants.SIYUAN_HOTKEY, hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom));
+                    /// #endif
+                });
             });
         });
         const keymapListElement = keymap.element.querySelector("#keymapList");
@@ -276,7 +278,7 @@ export const keymap = {
                     }
 
                     if (["⌘", "⇧", "⌥", "⌃"].includes(keymapStr.substr(keymapStr.length - 1, 1)) ||
-                        ["⌘A", "⌘X", "⌘C", "⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦"].includes(keymapStr)) {
+                        ["⌘A", "⌘X", "⌘C", "⌘V", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦"].includes(keymapStr)) {
                         showMessage(tip + "] " + window.siyuan.languages.invalid);
                         return;
                     }

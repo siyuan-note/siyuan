@@ -129,20 +129,16 @@ export class Wnd {
             }
         });
         this.headersElement.addEventListener("dragover", function (event: DragEvent & { target: HTMLElement }) {
-            if (!window.siyuan.dragElement ||
-                (!event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB) && !event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE))) {
-                return;
-            }
-            if (window.siyuan.dragElement.getAttribute("data-type") === "navigation-root") {
-                // 文档数中笔记本不能拖拽打开
-                return;
-            }
-            event.preventDefault();
             const it = this as HTMLElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
+                event.preventDefault();
                 it.style.opacity = ".1";
                 return;
             }
+            if (!event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB) || !window.siyuan.dragElement) {
+                return;
+            }
+            event.preventDefault();
             const newTabHeaderElement = hasClosestByTag(event.target, "LI");
             let oldTabHeaderElement = window.siyuan.dragElement;
             let exitDrag = false;
@@ -197,9 +193,13 @@ export class Wnd {
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 // 文档树拖拽
                 setPanelFocus(it.parentElement.parentElement);
-                openFileById({
-                    id: window.siyuan.dragElement.getAttribute("data-node-id"),
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",").forEach(item => {
+                    if (item) {
+                        openFileById({
+                            id: item,
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                        });
+                    }
                 });
                 window.siyuan.dragElement = undefined;
                 it.style.opacity = "";
@@ -483,7 +483,7 @@ export class Wnd {
 
     private renderTabList(event: MouseEvent) {
         window.siyuan.menus.menu.remove();
-        window.siyuan.menus.menu.element.classList.add("b3-menu--list")
+        window.siyuan.menus.menu.element.classList.add("b3-menu--list");
         Array.from(this.headersElement.children).forEach((item: HTMLElement) => {
             const iconElement = item.querySelector(".item__icon");
             const graphicElement = item.querySelector(".item__graphic");
@@ -576,7 +576,7 @@ export class Wnd {
         model.send("closews", {});
     }
 
-    private removeTabAction = (id: string, closeAll = false, hasSaveScroll = true) => {
+    private removeTabAction = (id: string, closeAll = false, hasSaveScroll = true, animate = true) => {
         clearCounter();
         this.children.find((item, index) => {
             if (item.id === id) {
@@ -616,10 +616,14 @@ export class Wnd {
                             this.switchTab(this.children[currentIndex].headElement, true);
                         }
                     }
-                    item.headElement.setAttribute("style", "max-width: 0px;");
-                    setTimeout(() => {
+                    if (animate) {
+                        item.headElement.setAttribute("style", "max-width: 0px;");
+                        setTimeout(() => {
+                            item.headElement.remove();
+                        }, Constants.TIMEOUT_TRANSITION);
+                    } else {
                         item.headElement.remove();
-                    }, Constants.TIMEOUT_TRANSITION);
+                    }
                 }
                 item.panelElement.remove();
                 this.destroyModel(item.model);
@@ -643,7 +647,7 @@ export class Wnd {
         /// #endif
     };
 
-    public removeTab(id: string, closeAll = false, needSaveScroll = true) {
+    public removeTab(id: string, closeAll = false, needSaveScroll = true, animate = true) {
         for (let index = 0; index < this.children.length; index++) {
             const item = this.children[index];
             if (item.id === id) {
@@ -652,9 +656,9 @@ export class Wnd {
                         showMessage(window.siyuan.languages.uploading);
                         return;
                     }
-                    this.removeTabAction(id, closeAll, needSaveScroll);
+                    this.removeTabAction(id, closeAll, needSaveScroll, animate);
                 } else {
-                    this.removeTabAction(id, closeAll, needSaveScroll);
+                    this.removeTabAction(id, closeAll, needSaveScroll, animate);
                 }
                 return;
             }

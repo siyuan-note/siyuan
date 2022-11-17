@@ -18,20 +18,7 @@ export class Asset extends Model {
     public pdfObject: any;
 
     constructor(options: { tab: Tab, path: string, page?: number | string }) {
-        super({
-            id: options.tab.id,
-            msgCallback(data) {
-                if (data) {
-                    switch (data.cmd) {
-                        case "remove":
-                            if (data.data.path === this.path) {
-                                this.parent.parent.removeTab(this.parent.id);
-                            }
-                            break;
-                    }
-                }
-            }
-        });
+        super({id: options.tab.id});
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             options.tab.headElement.classList.add("item--unupdate");
         }

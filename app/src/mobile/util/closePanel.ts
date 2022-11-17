@@ -5,6 +5,6 @@ export const closePanel = () => {
     const modelElement = document.getElementById("model");
     menuElement.style.right = "-100vw";
     sidebarElement.style.left = "-100vw";
-    modelElement.style.top = "-100vh";
+    modelElement.style.top = "-200vh";
     scrimElement.classList.add("fn__none");
 };

@@ -184,48 +184,48 @@ export const hasPreviousSibling = (element: Node) => {
 };
 
 export const getNextFileLi = (current: Element) => {
-    let nextElement = current.nextElementSibling
+    let nextElement = current.nextElementSibling;
     if (nextElement) {
         if (nextElement.tagName === "LI") {
-            return nextElement
+            return nextElement;
         } else if (nextElement.tagName === "UL") {
-            return nextElement.firstElementChild
+            return nextElement.firstElementChild;
         }
         return false;
     }
-    nextElement = current.parentElement
+    nextElement = current.parentElement;
     while (nextElement.tagName === "UL") {
         if (!nextElement.nextElementSibling) {
-            nextElement = nextElement.parentElement
+            nextElement = nextElement.parentElement;
         } else if (nextElement.nextElementSibling.tagName === "LI") {
-            return nextElement.nextElementSibling
+            return nextElement.nextElementSibling;
         } else  if (nextElement.nextElementSibling.tagName === "UL") {
             return nextElement.nextElementSibling.firstElementChild;
         }
     }
     return false;
-}
+};
 
 export const getPreviousFileLi = (current: Element) => {
-    let previousElement = current.previousElementSibling
+    let previousElement = current.previousElementSibling;
     if (previousElement) {
         if (previousElement.tagName === "LI") {
-            return previousElement
+            return previousElement;
         } else if (previousElement.tagName === "UL") {
-            return previousElement.lastElementChild
+            return previousElement.lastElementChild;
         }
         return false;
     }
-    previousElement = current.parentElement
+    previousElement = current.parentElement;
     while (previousElement.tagName === "UL") {
         if (!previousElement.previousElementSibling) {
-            previousElement = previousElement.parentElement
+            previousElement = previousElement.parentElement;
         } else if (previousElement.previousElementSibling.tagName === "LI") {
             return previousElement.previousElementSibling;
         } else if (previousElement.previousElementSibling.tagName === "UL") {
-            const liElements = previousElement.previousElementSibling.querySelectorAll(".b3-list-item")
+            const liElements = previousElement.previousElementSibling.querySelectorAll(".b3-list-item");
             return liElements[liElements.length - 1];
         }
     }
     return false;
-}
+};

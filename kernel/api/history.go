@@ -61,6 +61,37 @@ func searchHistory(c *gin.Context) {
 	}
 }
 
+func getHistoryItems(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	created := arg["created"].(string)
+
+	notebook := ""
+	if nil != arg["notebook"] {
+		notebook = arg["notebook"].(string)
+	}
+	typ := model.HistoryTypeDoc
+	if nil != arg["type"] {
+		typ = int(arg["type"].(float64))
+	}
+
+	query := arg["query"].(string)
+	op := "all"
+	if nil != arg["op"] {
+		op = arg["op"].(string)
+	}
+	histories := model.FullTextSearchHistoryItems(created, query, notebook, op, typ)
+	ret.Data = map[string]interface{}{
+		"items": histories,
+	}
+}
+
 func reindexHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

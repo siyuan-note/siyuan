@@ -1,3 +1,35 @@
+## v2.4.10 / 2022-11-05
+
+### 改进功能
+
+* [文档树支持 `Ctrl+Click` 和 `Shift+↑/↓` 进行多选](https://github.com/siyuan-note/siyuan/issues/1359)
+* [开源云端同步服务实现](https://github.com/siyuan-note/siyuan/issues/6445)
+* [页签下拉和属性书签下拉面板优化](https://github.com/siyuan-note/siyuan/issues/6450)
+* [支持 `Alt+I/E/N/U` 配置](https://github.com/siyuan-note/siyuan/issues/6457)
+* [支持小键盘中的 `/*-+.`](https://github.com/siyuan-note/siyuan/issues/6458)
+* [导出 HTML 和预览时不再将视频链接转换为 IFrame](https://github.com/siyuan-note/siyuan/issues/6460)
+* [行内元素的下划线颜色继承当前元素前景颜色](https://github.com/siyuan-note/siyuan/pull/6464)
+* [Windows 端退出拉起更新安装时有时需要重启两次](https://github.com/siyuan-note/siyuan/issues/6467)
+* [导出 Markdown 行级元素改进](https://github.com/siyuan-note/siyuan/issues/6472)
+* [快捷键设置页面左右抖动](https://github.com/siyuan-note/siyuan/issues/6478)
+* [改进导入 Markdown 时 `<img>` 标签的处理](https://github.com/siyuan-note/siyuan/issues/6480)
+* [超级块下的子块被引用数会被后一个块遮挡](https://github.com/siyuan-note/siyuan/issues/6483)
+* [调整页签文字居中](https://github.com/siyuan-note/siyuan/issues/6484)
+* [快捷键重置需弹框确认](https://github.com/siyuan-note/siyuan/issues/6486)
+* [Android 端键盘收起头部会闪一下](https://github.com/siyuan-note/siyuan/issues/6487)
+* [`Ctrl+Shift+V` 调用浏览器原生功能，不再支持配置](https://github.com/siyuan-note/siyuan/issues/6489)
+
+### 修复缺陷
+
+* [移动端长按拖拽导致界面透明度异常](https://github.com/siyuan-note/siyuan/issues/6405)
+* [未登录情况下创建数据快照失败](https://github.com/siyuan-note/siyuan/issues/6448)
+* [文档树更多操作对应的是上一次选中的文档而非当前文档](https://github.com/siyuan-note/siyuan/issues/6453)
+* [数据历史每页最后一条记录时间异常](https://github.com/siyuan-note/siyuan/issues/6455)
+* [无法引用标签开头的块](https://github.com/siyuan-note/siyuan/issues/6466)
+* [删除文档后应关闭该文档的关系图、大纲和反链页签](https://github.com/siyuan-note/siyuan/issues/6468)
+* [删除父文档时子文档排序配置未清理干净](https://github.com/siyuan-note/siyuan/issues/6469)
+* [无法替换包含 HTML 转义的代码内容](https://github.com/siyuan-note/siyuan/issues/6476)
+
 ## v2.4.9 / 2022-11-01
 
 ### 改进功能

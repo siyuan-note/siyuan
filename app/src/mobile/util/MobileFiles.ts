@@ -10,7 +10,6 @@ import {genUUID} from "../../util/genID";
 import {openMobileFileById} from "../editor";
 import {unicode2Emoji} from "../../emoji";
 import {newNotebook} from "../../util/mount";
-import {setEmpty} from "./setEmpty";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {MenuItem} from "../../menus/Menu";
 import {newFile} from "../../util/newFile";
@@ -38,7 +37,7 @@ export class MobileFiles extends Model {
                             this.element.insertAdjacentHTML("beforeend", this.genNotebook(data.data.box));
                             break;
                         case "unmount":
-                        case "remove":
+                        case "removeDoc":
                             this.onRemove(data);
                             break;
                         case "createdailynote":
@@ -477,9 +476,9 @@ export class MobileFiles extends Model {
 
     private onRemove(data: IWebSocketData) {
         // "doc2heading" 后删除文件或挂载帮助文档前的 unmount
-        const targetElement = this.element.querySelector(`ul[data-url="${data.data.box}"] li[data-path="${data.data.path || "/"}"]`);
         if (data.cmd === "unmount") {
             setNoteBook((notebooks) => {
+                const targetElement = this.element.querySelector(`ul[data-url="${data.data.box}"] li[data-path="${"/"}"]`);
                 if (targetElement) {
                     targetElement.parentElement.remove();
                     if (Constants.CB_MOUNT_REMOVE !== data.callback) {
@@ -493,45 +492,39 @@ export class MobileFiles extends Model {
                     }
                 }
             });
-            if (window.siyuan.mobileEditor) {
-                fetchPost("/api/block/checkBlockExist", {id: window.siyuan.mobileEditor.protyle.block.rootID}, existResponse => {
-                    if (!existResponse.data) {
-                        setEmpty();
-                    }
-                });
-            }
             if (Constants.CB_MOUNT_REMOVE === data.callback) {
                 const removeElement = this.closeElement.querySelector(`li[data-url="${data.data.box}"]`);
                 if (removeElement) {
                     removeElement.remove();
                 }
             }
-        } else if (targetElement) {
-            // 子节点展开则删除
-            if (targetElement.nextElementSibling?.tagName === "UL") {
-                targetElement.nextElementSibling.remove();
-            }
-            // 移除当前节点
-            const parentElement = targetElement.parentElement.previousElementSibling as HTMLElement;
-            if (targetElement.parentElement.childElementCount === 1) {
-                if (parentElement) {
-                    const iconElement = parentElement.querySelector("svg");
-                    iconElement.classList.remove("b3-list-item__arrow--open");
-                    iconElement.parentElement.classList.add("fn__hidden");
-                    const emojiElement = iconElement.parentElement.nextElementSibling;
-                    if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
-                        emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);
-                    }
-                }
-                targetElement.parentElement.remove();
-            } else {
-                targetElement.remove();
-            }
-
-            if (window.siyuan.mobileEditor && window.siyuan.mobileEditor.protyle.path === data.data.path) {
-                setEmpty();
-            }
+            return;
         }
+        data.data.ids.forEach((item: string) => {
+            const targetElement = this.element.querySelector(`li.b3-list-item[data-node-id="${item}"]`);
+            if (targetElement) {
+                // 子节点展开则删除
+                if (targetElement.nextElementSibling?.tagName === "UL") {
+                    targetElement.nextElementSibling.remove();
+                }
+                // 移除当前节点
+                const parentElement = targetElement.parentElement.previousElementSibling as HTMLElement;
+                if (targetElement.parentElement.childElementCount === 1) {
+                    if (parentElement) {
+                        const iconElement = parentElement.querySelector("svg");
+                        iconElement.classList.remove("b3-list-item__arrow--open");
+                        iconElement.parentElement.classList.add("fn__hidden");
+                        const emojiElement = iconElement.parentElement.nextElementSibling;
+                        if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
+                            emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);
+                        }
+                    }
+                    targetElement.parentElement.remove();
+                } else {
+                    targetElement.remove();
+                }
+            }
+        });
     }
 
     public onRename(data: { path: string, title: string, box: string }) {
@@ -719,8 +712,7 @@ export class MobileFiles extends Model {
         if (item.count && item.count > 0) {
             countHTML = `<span class="counter">${item.count}</span>`;
         }
-        return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" 
-data-type="navigation-file" 
+        return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" data-type="navigation-file" 
 class="b3-list-item" data-path="${item.path}">
     <span style="padding-left: ${(item.path.split("/").length - 2) * 18 + 22}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>

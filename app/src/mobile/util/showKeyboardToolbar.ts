@@ -3,8 +3,7 @@ import {hasClosestBlock, hasClosestByMatchTag} from "../../protyle/util/hasClose
 import {insertEmptyBlock} from "../../block/util";
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
-import {focusByRange} from "../../protyle/util/selection";
-import {scrollCenter} from "../../util/highlightById";
+import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 
 export const showKeyboardToolbar = (bottom = 0) => {
     if (getSelection().rangeCount > 0) {
@@ -22,14 +21,19 @@ export const showKeyboardToolbar = (bottom = 0) => {
     }
     toolbarElement.classList.remove("fn__none");
     toolbarElement.style.bottom = bottom + "px";
-    if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
-        // Android 端事件需要滞后一些，所以这里延迟一下
-        setTimeout(() => {
-            scrollCenter(window.siyuan.mobileEditor.protyle, undefined, false, (window.outerHeight - 65) / 2 - 30);
-        }, 100);
-    } else {
-        scrollCenter(window.siyuan.mobileEditor.protyle, undefined, false, (window.outerHeight - 65) / 2 - 30);
-    }
+
+    setTimeout(() => {
+        const contentElement = window.siyuan.mobileEditor.protyle.contentElement
+        const cursorTop = getSelectionPosition(contentElement).top - contentElement.getBoundingClientRect().top;
+        if (cursorTop < window.innerHeight - 96) {
+            return;
+        }
+        contentElement.scroll({
+            top: contentElement.scrollTop + cursorTop - ((window.outerHeight - 65) / 2 - 30),
+            left: contentElement.scrollLeft,
+            behavior: "smooth"
+        });
+    }, Constants.TIMEOUT_TRANSITION);
 };
 
 export const hideKeyboardToolbar = () => {

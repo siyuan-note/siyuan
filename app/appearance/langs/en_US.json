@@ -1,6 +1,7 @@
 {
-  "notBatchRemove": "Notebooks do not support batch deletion",
-  "confirmRemove": "Are you sure you want to delete the ${count} selected files?",
+  "confirmReset": "Are you sure want to reset all keyboard shortcuts to default settings?",
+  "notBatchRemove": "Notebook batch deletion is not supported",
+  "confirmRemoveAll": "Are you sure you want to delete all selected files?",
   "microphoneDenied": "Need to allow Siyuan to access the microphone in System Preferences",
   "microphoneNotAccess": "Access to the microphone is denied, go to System Preferences to reset",
   "dynamicLoadBlocks": "Number of dynamically loaded blocks",

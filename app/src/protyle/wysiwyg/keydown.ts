@@ -42,6 +42,9 @@ import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
+/// #if !BROWSER
+import {getCurrentWindow} from "@electron/remote";
+/// #endif
 import {commonHotkey, downSelect, getStartEndElement, upSelect} from "./commonHotkey";
 import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import {removeEmbed} from "./removeEmbed";
@@ -56,7 +59,6 @@ import * as dayjs from "dayjs";
 import {highlightRender} from "../markdown/highlightRender";
 import {countBlockWord} from "../../layout/status";
 import {openMobileFileById} from "../../mobile/editor";
-import {pasteAsPlainText} from "../util/paste";
 import {moveToDown, moveToUp} from "./move";
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
@@ -1577,11 +1579,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         /// #endif
 
         /// #if !BROWSER && !MOBILE
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.pasteAsPlainText.custom, event)) {
+        if (matchHotKey("⇧⌘V", event)) {
             event.returnValue = false;
             event.preventDefault();
             event.stopPropagation();
-            pasteAsPlainText(protyle);
+            getCurrentWindow().webContents.pasteAndMatchStyle();
             return;
         }
 

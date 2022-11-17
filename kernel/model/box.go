@@ -545,3 +545,15 @@ func TryAccessFileByBlockID(id string) (ok bool) {
 	}
 	return true
 }
+
+func getBoxesByPaths(paths []string) (ret map[string]*Box) {
+	ret = map[string]*Box{}
+	for _, p := range paths {
+		id := strings.TrimSuffix(path.Base(p), ".sy")
+		bt := treenode.GetBlockTree(id)
+		if nil != bt {
+			ret[p] = Conf.Box(bt.BoxID)
+		}
+	}
+	return
+}

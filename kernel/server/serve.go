@@ -74,6 +74,10 @@ func Serve(fastMode bool) {
 	serveTemplates(ginServer)
 	api.ServeAPI(ginServer)
 
+	if !fastMode {
+		killRunningKernel()
+	}
+
 	var host string
 	if model.Conf.System.NetworkServe || util.ContainerDocker == util.Container {
 		host = "0.0.0.0"
@@ -116,7 +120,7 @@ func Serve(fastMode bool) {
 			proxy := httputil.NewSingleHostReverseProxy(serverURL)
 			logging.LogInfof("kernel reverse proxy server [%s] is booting", util.FixedPort)
 			if proxyErr := http.ListenAndServe(host+":"+util.FixedPort, proxy); nil != proxyErr {
-				logging.LogErrorf("boot kernel reverse proxy server failed: %s", serverURL, proxyErr)
+				logging.LogErrorf("boot kernel reverse proxy server [%s] failed: %s", serverURL, proxyErr)
 			}
 			// 反代服务器启动失败不影响核心服务器启动
 		}

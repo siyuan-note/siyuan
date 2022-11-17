@@ -11,7 +11,7 @@ import {dialog as remoteDialog} from "@electron/remote";
 import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
-import {getDisplayName, getNotebookName, pathPosix} from "../util/pathName";
+import {getDisplayName, getNotebookName, getTopPaths, pathPosix} from "../util/pathName";
 import {hideMessage, showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {onGetnotebookconf} from "./onGetnotebookconf";
@@ -19,22 +19,22 @@ import {onGetnotebookconf} from "./onGetnotebookconf";
 import {openSearch} from "../search/spread";
 import {openFileById} from "../editor/util";
 /// #endif
-import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
 import {newFile} from "../util/newFile";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {deleteFile, deleteFiles} from "../editor/deleteFile";
+import {hasClosestByTag} from "../protyle/util/hasClosest";
+import {deleteFiles} from "../editor/deleteFile";
 
 export const initNavigationMenu = (liElement: HTMLElement) => {
+    const fileElement = hasClosestByTag(liElement, "DIV");
+    if (!fileElement) {
+        return;
+    }
     if (!liElement.classList.contains("b3-list-item--focus")) {
-        const fileElement = hasClosestByClassName(liElement, "sy__file")
-        if (fileElement) {
-            fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
-                item.classList.remove("b3-list-item--focus");
-                item.removeAttribute("select-end")
-                item.removeAttribute("select-start")
-            })
-        }
+        fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
+            item.classList.remove("b3-list-item--focus");
+            item.removeAttribute("select-end");
+            item.removeAttribute("select-start");
+        });
         liElement.classList.add("b3-list-item--focus");
     }
     const notebookId = liElement.parentElement.getAttribute("data-url");
@@ -92,13 +92,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             label: window.siyuan.languages.delete,
             accelerator: "⌦",
             click: () => {
-                confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                    `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(name)}</b>?`, () => {
-                        fetchPost("/api/notebook/removeNotebook", {
-                            notebook: notebookId,
-                            callback: Constants.CB_MOUNT_REMOVE
-                        });
-                    });
+                deleteFiles(Array.from(fileElement.querySelectorAll(".b3-list-item--focus")));
             }
         }).element);
     }
@@ -148,16 +142,16 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
 };
 
 export const initFileMenu = (notebookId: string, pathString: string, liElement: Element) => {
-    const fileElement = hasClosestByClassName(liElement, "sy__file")
+    const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
         return;
     }
     if (!liElement.classList.contains("b3-list-item--focus")) {
         fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
             item.classList.remove("b3-list-item--focus");
-            item.removeAttribute("select-end")
-            item.removeAttribute("select-start")
-        })
+            item.removeAttribute("select-end");
+            item.removeAttribute("select-start");
+        });
         liElement.classList.add("b3-list-item--focus");
     }
     const id = liElement.getAttribute("data-node-id");
@@ -213,13 +207,15 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                 }
             }])
         }).element);
-        window.siyuan.menus.menu.append(movePathToMenu(notebookId, pathString));
+        window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(
+            Array.from(fileElement.querySelectorAll(".b3-list-item--focus"))
+        )));
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
             accelerator: "⌦",
             click: () => {
-                deleteFiles(Array.from(fileElement.querySelectorAll(".b3-list-item--focus")))
+                deleteFiles(Array.from(fileElement.querySelectorAll(".b3-list-item--focus")));
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -270,6 +266,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
     }, {
         icon: "iconLayoutBottom",
         label: window.siyuan.languages.insertBottom,
+        accelerator: "⇧Click",
         click: () => {
             openFileById({id, position: "bottom", action: [Constants.CB_GET_FOCUS]});
         }
@@ -277,14 +274,12 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
     if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
         openSubmenus.push({
             label: window.siyuan.languages.openInNewTab,
-            accelerator: "⌘Click",
+            accelerator: "⌥⌘Click",
             click: () => {
-                window.siyuan.ctrlIsPressed = true;
-                openFileById({id, action: [Constants.CB_GET_FOCUS]});
-                setTimeout(() => {
-                    // 勾选在当前页签中打开后，右键在新页签中打开，不重置的话后续点击都会打开新页签
-                    window.siyuan.ctrlIsPressed = false;
-                }, Constants.TIMEOUT_INPUT);
+                openFileById({
+                    id, action: [Constants.CB_GET_FOCUS],
+                    removeCurrentTab: false
+                });
             }
         });
     }

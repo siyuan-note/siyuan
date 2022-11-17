@@ -42,7 +42,7 @@ export class Files extends Model {
                             this.element.insertAdjacentHTML("beforeend", this.genNotebook(data.data.box));
                             break;
                         case "unmount":
-                        case "remove":
+                        case "removeDoc":
                             this.onRemove(data);
                             break;
                         case "createdailynote":
@@ -183,15 +183,38 @@ export class Files extends Model {
             }
             setPanelFocus(this.element.parentElement);
         });
-        let clickTimeout: number;
+        this.element.addEventListener("mousedown", (event) => {
+            // 点击鼠标滚轮关闭
+            if (event.button !== 1 || !window.siyuan.config.fileTree.openFilesUseCurrentTab) {
+                return;
+            }
+            let target = event.target as HTMLElement;
+            while (target && !target.isEqualNode(this.element)) {
+                if (target.tagName === "LI") {
+                    openFileById({
+                        removeCurrentTab: false,
+                        id: target.getAttribute("data-node-id"),
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                    });
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                }
+                target = target.parentElement;
+            }
+        })
         this.element.addEventListener("click", (event) => {
+            if (event.detail !== 1) {
+                setPanelFocus(this.element.parentElement);
+                return;
+            }
             let target = event.target as HTMLElement;
             const ulElement = hasTopClosestByTag(target, "UL");
             let needFocus = true;
             if (ulElement) {
                 const notebookId = ulElement.getAttribute("data-url");
                 while (target && !target.isEqualNode(this.element)) {
-                    if (target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
+                    if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
                         event.preventDefault();
                         event.stopPropagation();
                         if (target.parentElement.getAttribute("data-type") === "navigation-file") {
@@ -200,14 +223,14 @@ export class Files extends Model {
                             openEmojiPanel(target.parentElement.parentElement.getAttribute("data-url"), target, true);
                         }
                         break;
-                    } else if (target.classList.contains("b3-list-item__toggle")) {
+                    } else if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__toggle")) {
                         this.getLeaf(target.parentElement, notebookId);
                         this.setCurrent(target.parentElement);
                         event.preventDefault();
                         event.stopPropagation();
                         window.siyuan.menus.menu.remove();
                         break;
-                    } else if (target.classList.contains("b3-list-item__action")) {
+                    } else if (!event.metaKey && !event.ctrlKey && target.classList.contains("b3-list-item__action")) {
                         const type = target.getAttribute("data-type");
                         const pathString = target.parentElement.getAttribute("data-path");
                         if (!window.siyuan.config.readonly) {
@@ -227,37 +250,42 @@ export class Files extends Model {
                         event.stopPropagation();
                         break;
                     } else if (target.tagName === "LI") {
-                        if (event.detail === 1) {
-                            needFocus = false;
-                            clickTimeout = window.setTimeout(() => {
-                                if (!window.siyuan.ctrlIsPressed) {
-                                    this.setCurrent(target, false);
-                                    if (target.getAttribute("data-type") === "navigation-file") {
-                                        if (window.siyuan.altIsPressed) {
-                                            openFileById({
-                                                id: target.getAttribute("data-node-id"),
-                                                position: "right",
-                                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
-                                            });
-                                        } else {
-                                            openFileById({
-                                                id: target.getAttribute("data-node-id"),
-                                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
-                                            });
-                                        }
-                                    } else if (target.getAttribute("data-type") === "navigation-root") {
-                                        this.getLeaf(target, notebookId);
-                                        setPanelFocus(this.element.parentElement);
-                                    }
-                                } else {
-                                    setPanelFocus(this.element.parentElement);
-                                    target.classList.toggle("b3-list-item--focus");
-                                }
-                            }, Constants.TIMEOUT_DBLCLICK);
-                        } else if (event.detail === 2) {
-                            clearTimeout(clickTimeout);
-                            this.getLeaf(target, notebookId);
+                        needFocus = false;
+                        if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey) {
+                            setPanelFocus(this.element.parentElement);
+                            target.classList.toggle("b3-list-item--focus");
+                        } else {
                             this.setCurrent(target, false);
+                            if (target.getAttribute("data-type") === "navigation-file") {
+                                if (event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
+                                    openFileById({
+                                        id: target.getAttribute("data-node-id"),
+                                        position: "right",
+                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                    });
+                                } else if (!event.altKey && !event.metaKey && !event.ctrlKey && event.shiftKey) {
+                                    openFileById({
+                                        id: target.getAttribute("data-node-id"),
+                                        position: "bottom",
+                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                    });
+                                } else if (window.siyuan.config.fileTree.openFilesUseCurrentTab &&
+                                    event.altKey && (event.metaKey || event.ctrlKey) && !event.shiftKey) {
+                                    openFileById({
+                                        removeCurrentTab: false,
+                                        id: target.getAttribute("data-node-id"),
+                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                    });
+                                } else {
+                                    openFileById({
+                                        id: target.getAttribute("data-node-id"),
+                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                                    });
+                                }
+                            } else if (target.getAttribute("data-type") === "navigation-root") {
+                                this.getLeaf(target, notebookId);
+                                setPanelFocus(this.element.parentElement);
+                            }
                         }
                         this.element.querySelector('[select-end="true"]')?.removeAttribute("select-end");
                         this.element.querySelector('[select-start="true"]')?.removeAttribute("select-start");
@@ -273,8 +301,6 @@ export class Files extends Model {
                 setPanelFocus(this.element.parentElement);
             }
         });
-        // b3-list-item--focus 样式会遮挡拖拽排序的上下线条
-        let focusElement: HTMLElement;
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
             if (isTouchDevice()) {
                 event.stopPropagation();
@@ -282,31 +308,40 @@ export class Files extends Model {
                 return;
             }
             window.getSelection().removeAllRanges();
-            focusElement = this.element.querySelector(".b3-list-item--focus");
-            if (focusElement) {
-                focusElement.classList.remove("b3-list-item--focus");
-            }
             const liElement = hasClosestByTag(event.target, "LI");
             if (liElement) {
-                const ulElement = hasTopClosestByTag(liElement, "UL");
-                event.dataTransfer.setData("text/html", liElement.outerHTML);
-                if (ulElement) {
-                    event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, ulElement.getAttribute("data-url"));
+                let selectElements: Element[] = Array.from(this.element.querySelectorAll(".b3-list-item--focus"));
+                if (!liElement.classList.contains("b3-list-item--focus")) {
+                    selectElements.forEach((item) => {
+                        item.classList.remove("b3-list-item--focus");
+                    });
+                    liElement.classList.add("b3-list-item--focus");
+                    selectElements = [liElement];
                 }
+                let ids = "";
+                const ghostElement = document.createElement("ul")
+                selectElements.forEach((item: HTMLElement) => {
+                    ghostElement.append(item.cloneNode(true));
+                    item.style.opacity = "0.1";
+                    ids += (item.getAttribute("data-node-id") || "") + ",";
+                });
+                ghostElement.setAttribute("style", `width: 219px;position: fixed;top:-${selectElements.length * 30}px`)
+                ghostElement.setAttribute("class", "b3-list b3-list--background")
+                document.body.append(ghostElement);
+                event.dataTransfer.setDragImage(ghostElement, 16, 16);
+                event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, ids);
                 event.dataTransfer.dropEffect = "move";
-                liElement.style.opacity = "0.1";
-                window.siyuan.dragElement = liElement;
+                window.siyuan.dragElement = document.createElement("div");
+                window.siyuan.dragElement.innerText = ids;
+                setTimeout(() => {
+                    ghostElement.remove();
+                })
             }
         });
-        this.element.addEventListener("dragend", (event: DragEvent & { target: HTMLElement }) => {
-            const liElement = hasClosestByTag(event.target, "LI");
-            if (liElement) {
-                liElement.style.opacity = "1";
-            }
-            if (focusElement) {
-                focusElement.classList.add("b3-list-item--focus");
-                focusElement = undefined;
-            }
+        this.element.addEventListener("dragend", () => {
+            this.element.querySelectorAll(".b3-list-item--focus").forEach((item: HTMLElement) => {
+                item.style.opacity = "";
+            });
             window.siyuan.dragElement = undefined;
         });
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
@@ -314,29 +349,34 @@ export class Files extends Model {
                 return;
             }
             const liElement = hasClosestByTag(event.target, "LI");
-            if (!liElement || !window.siyuan.dragElement || liElement.isSameNode(window.siyuan.dragElement)) {
+            if (!liElement || !window.siyuan.dragElement || liElement.classList.contains("b3-list-item--focus")) {
                 event.preventDefault();
                 return;
             }
             liElement.classList.remove("dragover__top", "dragover__bottom", "dragover");
-            const sourceType = window.siyuan.dragElement.getAttribute("data-type");
-            if (window.siyuan.dragElement.parentElement?.classList.contains("protyle-gutters")) {
-                if (["NodeListItem", "NodeHeading"].includes(sourceType)) {
-                    // 编辑器情景菜单拖拽
+            if (window.siyuan.dragElement?.parentElement?.classList.contains("protyle-gutters")) {
+                if (["NodeListItem", "NodeHeading"].includes(window.siyuan.dragElement.getAttribute("data-type"))) {
+                    // 块标拖拽
                     liElement.classList.add("dragover");
                 }
                 event.preventDefault();
                 return;
             }
-
+            let sourceOnlyRoot = true;
+            Array.from(this.element.querySelectorAll(".b3-list-item--focus")).find((item: HTMLElement) => {
+                if (item.getAttribute("data-type") === "navigation-file") {
+                    sourceOnlyRoot = false;
+                    return true;
+                }
+            });
             const targetType = liElement.getAttribute("data-type");
-            if (sourceType === "navigation-root" && targetType !== "navigation-root") {
+            if (sourceOnlyRoot && targetType !== "navigation-root") {
                 event.preventDefault();
                 return;
             }
             if (window.siyuan.config.fileTree.sort === 6 &&
                 // 防止文档拖拽到笔记本外
-                !(sourceType === "navigation-file" && targetType === "navigation-root")) {
+                !(!sourceOnlyRoot && targetType === "navigation-root")) {
                 const nodeRect = liElement.getBoundingClientRect();
                 if (event.clientY > nodeRect.top + 20) {
                     liElement.classList.add("dragover__bottom");
@@ -347,7 +387,7 @@ export class Files extends Model {
                 }
             }
             if (liElement.classList.contains("dragover__top") || liElement.classList.contains("dragover__bottom") ||
-                (targetType === "navigation-root" && sourceType === "navigation-root")) {
+                (targetType === "navigation-root" && sourceOnlyRoot)) {
                 event.preventDefault();
                 return;
             }
@@ -371,10 +411,10 @@ export class Files extends Model {
             }
             const toURL = newUlElement.getAttribute("data-url");
             const toPath = newElement.getAttribute("data-path");
-            const fromType = window.siyuan.dragElement.getAttribute("data-type");
-            if (newElement.classList.contains("dragover") && ["NodeListItem", "NodeHeading"].includes(fromType)) {
-                // 编辑器情景菜单拖拽
-                if (fromType === "NodeHeading") {
+            const gutterType = window.siyuan.dragElement?.getAttribute("data-type");
+            if (newElement.classList.contains("dragover") && ["NodeListItem", "NodeHeading"].includes(gutterType)) {
+                // 块标拖拽
+                if (gutterType === "NodeHeading") {
                     fetchPost("/api/filetree/heading2Doc", {
                         targetNoteBook: toURL,
                         srcHeadingID: window.siyuan.dragElement.getAttribute("data-node-id"),
@@ -390,29 +430,50 @@ export class Files extends Model {
                     });
                 }
                 newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                window.siyuan.dragElement = undefined;
                 return;
             }
-
-            const fromURL = event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE);
-            const fromPath = window.siyuan.dragElement.getAttribute("data-path");
-            if ((!fromURL || !fromPath || fromPath === toPath) && fromType !== "navigation-root") {
+            window.siyuan.dragElement = undefined;
+            if (!event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE)) {
                 newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
                 return;
             }
+            const selectRootElements: HTMLElement[] = [];
+            const selectFileElements: HTMLElement[] = [];
+            const fromPaths: string[] = [];
+            this.element.querySelectorAll(".b3-list-item--focus").forEach((item: HTMLElement) => {
+                if (item.getAttribute("data-type") === "navigation-root") {
+                    selectRootElements.push(item);
+                } else {
+                    const dataPath = item.getAttribute("data-path");
+                    const isChild = fromPaths.find(item => {
+                        if (dataPath.startsWith(item.replace(".sy", ""))) {
+                            return true;
+                        }
+                    });
+                    if (!isChild) {
+                        selectFileElements.push(item);
+                        fromPaths.push(dataPath);
+                    }
+                }
+            });
             if (newElement.classList.contains("dragover")) {
-                await fetchPost("/api/filetree/moveDoc", {
-                    fromNotebook: fromURL,
+                await fetchPost("/api/filetree/moveDocs", {
                     toNotebook: toURL,
-                    fromPath,
+                    fromPaths,
                     toPath,
                 });
             }
             if ((newElement.classList.contains("dragover__bottom") || newElement.classList.contains("dragover__top")) && window.siyuan.config.fileTree.sort === 6) {
-                if (fromType === "navigation-root") {
+                if (selectRootElements.length > 0 && newElement.getAttribute("data-path") === "/") {
                     if (newElement.classList.contains("dragover__top")) {
-                        newElement.parentElement.before(window.siyuan.dragElement.parentElement);
+                        selectRootElements.forEach(item => {
+                            newElement.parentElement.before(item.parentElement);
+                        });
                     } else {
-                        newElement.parentElement.after(window.siyuan.dragElement.parentElement);
+                        selectRootElements.reverse().forEach(item => {
+                            newElement.parentElement.after(item.parentElement);
+                        });
                     }
                     const notebooks: string[] = [];
                     Array.from(this.element.children).forEach(item => {
@@ -424,31 +485,43 @@ export class Files extends Model {
                 } else {
                     let hasMove = false;
                     const toDir = pathPosix().dirname(toPath);
-                    if (fromType !== "navigation-root" && (toDir !== pathPosix().dirname(fromPath) || fromURL !== toURL)) {
-                        await fetchPost("/api/filetree/moveDoc", {
-                            fromNotebook: fromURL,
+                    if (fromPaths.length > 0) {
+                        await fetchPost("/api/filetree/moveDocs", {
                             toNotebook: toURL,
-                            fromPath,
+                            fromPaths,
                             toPath: toDir === "/" ? "/" : toDir + ".sy",
                         });
-                        window.siyuan.dragElement.setAttribute("data-path", pathPosix().join(toDir, window.siyuan.dragElement.getAttribute("data-node-id") + ".sy"));
+                        selectFileElements.forEach(item => {
+                            item.setAttribute("data-path", pathPosix().join(toDir, item.getAttribute("data-node-id") + ".sy"));
+                        });
                         hasMove = true;
                     }
-                    let nextULElement;
-                    if (window.siyuan.dragElement.nextElementSibling && window.siyuan.dragElement.nextElementSibling.tagName === "UL") {
-                        nextULElement = window.siyuan.dragElement.nextElementSibling;
-                    }
-                    if (newElement.classList.contains("dragover__bottom")) {
-                        if (newElement.nextElementSibling && newElement.nextElementSibling.tagName === "UL") {
-                            newElement.nextElementSibling.after(window.siyuan.dragElement);
-                        } else {
-                            newElement.after(window.siyuan.dragElement);
-                        }
-                    } else if (newElement.classList.contains("dragover__top")) {
-                        newElement.before(window.siyuan.dragElement);
-                    }
-                    if (nextULElement) {
-                        window.siyuan.dragElement.after(nextULElement);
+                    if (newElement.classList.contains("dragover__top")) {
+                        selectFileElements.forEach(item => {
+                            let nextULElement;
+                            if (item.nextElementSibling && item.nextElementSibling.tagName === "UL") {
+                                nextULElement = item.nextElementSibling;
+                            }
+                            newElement.before(item);
+                            if (nextULElement) {
+                                item.after(nextULElement);
+                            }
+                        });
+                    } else if (newElement.classList.contains("dragover__bottom")) {
+                        selectFileElements.reverse().forEach(item => {
+                            let nextULElement;
+                            if (item.nextElementSibling && item.nextElementSibling.tagName === "UL") {
+                                nextULElement = item.nextElementSibling;
+                            }
+                            if (newElement.nextElementSibling && newElement.nextElementSibling.tagName === "UL") {
+                                newElement.nextElementSibling.after(item);
+                            } else {
+                                newElement.after(item);
+                            }
+                            if (nextULElement) {
+                                item.after(nextULElement);
+                            }
+                        });
                     }
                     const paths: string[] = [];
                     Array.from(newElement.parentElement.children).forEach(item => {
@@ -579,9 +652,9 @@ export class Files extends Model {
 
     private onRemove(data: IWebSocketData) {
         // "doc2heading" 后删除文件或挂载帮助文档前的 unmount
-        const targetElement = this.element.querySelector(`ul[data-url="${data.data.box}"] li[data-path="${data.data.path || "/"}"]`);
         if (data.cmd === "unmount") {
             setNoteBook((notebooks) => {
+                const targetElement = this.element.querySelector(`ul[data-url="${data.data.box}"] li[data-path="${"/"}"]`);
                 if (targetElement) {
                     targetElement.parentElement.remove();
                     if (Constants.CB_MOUNT_REMOVE !== data.callback) {
@@ -601,28 +674,33 @@ export class Files extends Model {
                     removeElement.remove();
                 }
             }
-        } else if (targetElement) {
-            // 子节点展开则删除
-            if (targetElement.nextElementSibling?.tagName === "UL") {
-                targetElement.nextElementSibling.remove();
-            }
-            // 移除当前节点
-            const parentElement = targetElement.parentElement.previousElementSibling as HTMLElement;
-            if (targetElement.parentElement.childElementCount === 1) {
-                if (parentElement) {
-                    const iconElement = parentElement.querySelector("svg");
-                    iconElement.classList.remove("b3-list-item__arrow--open");
-                    iconElement.parentElement.classList.add("fn__hidden");
-                    const emojiElement = iconElement.parentElement.nextElementSibling;
-                    if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
-                        emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);
-                    }
-                }
-                targetElement.parentElement.remove();
-            } else {
-                targetElement.remove();
-            }
+            return;
         }
+        data.data.ids.forEach((item: string) => {
+            const targetElement = this.element.querySelector(`li.b3-list-item[data-node-id="${item}"]`);
+            if (targetElement) {
+                // 子节点展开则删除
+                if (targetElement.nextElementSibling?.tagName === "UL") {
+                    targetElement.nextElementSibling.remove();
+                }
+                // 移除当前节点
+                const parentElement = targetElement.parentElement.previousElementSibling as HTMLElement;
+                if (targetElement.parentElement.childElementCount === 1) {
+                    if (parentElement) {
+                        const iconElement = parentElement.querySelector("svg");
+                        iconElement.classList.remove("b3-list-item__arrow--open");
+                        iconElement.parentElement.classList.add("fn__hidden");
+                        const emojiElement = iconElement.parentElement.nextElementSibling;
+                        if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
+                            emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);
+                        }
+                    }
+                    targetElement.parentElement.remove();
+                } else {
+                    targetElement.remove();
+                }
+            }
+        });
     }
 
     private onMount(data: { data: { box: INotebook, existed?: boolean }, callback?: string }) {

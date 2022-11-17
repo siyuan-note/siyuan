@@ -657,8 +657,12 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 			if 1 > len(htmlNodes) {
 				return ast.WalkContinue
 			}
-			if atom.Img == htmlNodes[0].DataAtom {
-				imgHtmlBlocks[n] = htmlNodes[0]
+
+			for _, htmlNode := range htmlNodes {
+				if atom.Img == htmlNode.DataAtom {
+					imgHtmlBlocks[n] = htmlNode
+					break
+				}
 			}
 		}
 		return ast.WalkContinue

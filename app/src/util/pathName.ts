@@ -59,17 +59,34 @@ export const pathPosix = () => {
     return path;
 };
 
-const moveToPath = (notebookId: string, path: string, toNotebookId: string, toFolderPath: string, dialog: Dialog) => {
-    fetchPost("/api/filetree/moveDoc", {
-        fromNotebook: notebookId,
-        toNotebook: toNotebookId,
-        fromPath: path,
-        toPath: toFolderPath,
+export const getTopPaths = (liElements:Element[]) => {
+    const fromPaths:string[] = [];
+    liElements.forEach((item: HTMLElement) => {
+        if (item.getAttribute("data-type") !== "navigation-root") {
+            const dataPath = item.getAttribute("data-path");
+            const isChild = fromPaths.find(item => {
+                if (dataPath.startsWith(item.replace(".sy", ""))) {
+                    return true;
+                }
+            });
+            if (!isChild) {
+                fromPaths.push(dataPath);
+            }
+        }
+    });
+    return fromPaths;
+};
+
+const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string, dialog: Dialog) => {
+    fetchPost("/api/filetree/moveDocs", {
+        toNotebook,
+        fromPaths,
+        toPath,
     });
     dialog.destroy();
 };
 
-export const movePathTo = async (notebookId: string, path: string, focus = true) => {
+export const movePathTo = async (paths: string[], focus = true) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#foldList")) {
             item.destroy();
@@ -79,16 +96,15 @@ export const movePathTo = async (notebookId: string, path: string, focus = true)
     if (exitDialog) {
         return;
     }
-    const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
-        notebook: notebookId,
-        path
+    const response = await fetchSyncPost("/api/filetree/getHPathsByPaths", {
+        paths
     });
     let range: Range;
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
     }
     const dialog = new Dialog({
-        title: `${window.siyuan.languages.move} <span class="ft__smaller ft__on-surface">${escapeHtml(pathPosix().join(getNotebookName(notebookId), response.data))}</span>`,
+        title: `${window.siyuan.languages.move} <span class="ft__smaller ft__on-surface">${escapeHtml(response.data.join(", "))}</span>`,
         content: `<div class="b3-form__icon b3-form__space">
     <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
     <input class="b3-text-field fn__block b3-form__icon-input" value="" placeholder="${window.siyuan.languages.search}">
@@ -115,7 +131,7 @@ export const movePathTo = async (notebookId: string, path: string, focus = true)
         }, (data) => {
             let fileHTML = "";
             data.data.forEach((item: { boxIcon: string, box: string, hPath: string, path: string }) => {
-                if (item.path === pathPosix().dirname(path) + "/" || item.path === path) {
+                if (paths.includes(item.path)) {
                     return;
                 }
                 fileHTML += `<li class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}">
@@ -167,7 +183,7 @@ export const movePathTo = async (notebookId: string, path: string, focus = true)
             }
             event.preventDefault();
         } else if (event.key === "Enter") {
-            moveToPath(notebookId, path, currentList.getAttribute("data-box"), currentList.getAttribute("data-path"), dialog);
+            moveToPath(paths, currentList.getAttribute("data-box"), currentList.getAttribute("data-path"), dialog);
             event.preventDefault();
         }
     });
@@ -175,7 +191,7 @@ export const movePathTo = async (notebookId: string, path: string, focus = true)
         const target = event.target as HTMLElement;
         const liElement = hasClosestByClassName(target, "b3-list-item");
         if (liElement) {
-            moveToPath(notebookId, path, liElement.getAttribute("data-box"), liElement.getAttribute("data-path"), dialog);
+            moveToPath(paths, liElement.getAttribute("data-box"), liElement.getAttribute("data-path"), dialog);
         }
     });
 };

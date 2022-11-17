@@ -193,6 +193,29 @@ func getHPathByPath(c *gin.Context) {
 	ret.Data = hPath
 }
 
+func getHPathsByPaths(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	pathsArg := arg["paths"].([]interface{})
+	var paths []string
+	for _, p := range pathsArg {
+		paths = append(paths, p.(string))
+	}
+	hPath, err := model.GetHPathsByPaths(paths)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = hPath
+}
+
 func getHPathByID(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -234,7 +257,7 @@ func getFullHPathByID(c *gin.Context) {
 	ret.Data = hPath
 }
 
-func moveDoc(c *gin.Context) {
+func moveDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -243,28 +266,21 @@ func moveDoc(c *gin.Context) {
 		return
 	}
 
-	fromNotebook := arg["fromNotebook"].(string)
-	toNotebook := arg["toNotebook"].(string)
-	fromPath := arg["fromPath"].(string)
+	var fromPaths []string
+	fromPathsArg := arg["fromPaths"].([]interface{})
+	for _, fromPath := range fromPathsArg {
+		fromPaths = append(fromPaths, fromPath.(string))
+	}
 	toPath := arg["toPath"].(string)
+	toNotebook := arg["toNotebook"].(string)
 
-	newPath, err := model.MoveDoc(fromNotebook, fromPath, toNotebook, toPath)
+	err := model.MoveDocs(fromPaths, toNotebook, toPath)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
 		return
 	}
-
-	evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast, util.PushModeNone)
-	evt.Data = map[string]interface{}{
-		"fromNotebook": fromNotebook,
-		"toNotebook":   toNotebook,
-		"fromPath":     fromPath,
-		"toPath":       toPath,
-		"newPath":      newPath,
-	}
-	util.PushEvent(evt)
 }
 
 func removeDoc(c *gin.Context) {
@@ -285,13 +301,28 @@ func removeDoc(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+}
 
-	evt := util.NewCmdResult("remove", 0, util.PushModeBroadcast, util.PushModeNone)
-	evt.Data = map[string]interface{}{
-		"box":  notebook,
-		"path": p,
+func removeDocs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
 	}
-	util.PushEvent(evt)
+
+	pathsArg := arg["paths"].([]interface{})
+	var paths []string
+	for _, path := range pathsArg {
+		paths = append(paths, path.(string))
+	}
+	err := model.RemoveDocs(paths)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 }
 
 func renameDoc(c *gin.Context) {

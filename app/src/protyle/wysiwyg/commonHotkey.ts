@@ -1,7 +1,11 @@
 import {matchHotKey} from "../util/hotKey";
 import {fetchPost} from "../../util/fetch";
 import {writeText} from "../util/compatibility";
-import {focusByOffset, getSelectionOffset, setFirstNodeRange, setLastNodeRange} from "../util/selection";
+import {
+    focusByOffset,
+    getSelectionOffset,
+    setFirstNodeRange,
+} from "../util/selection";
 import {fullscreen, netImg2LocalAssets} from "../breadcrumb/action";
 import {setPadding} from "../ui/initUI";
 /// #if !MOBILE
@@ -86,8 +90,7 @@ export const upSelect = (options: {
         options.event.stopPropagation();
         options.event.preventDefault();
     } else {
-        const start = getSelectionOffset(options.nodeElement, options.editorElement, options.range).start;
-        if (start !== 0) {
+        if (getSelectionOffset(options.nodeElement, options.editorElement, options.range).start !== 0) {
             const editElement = getContenteditableElement(options.nodeElement);
             if (editElement.tagName === "TABLE") {
                 const cellElement = hasClosestByMatchTag(options.range.startContainer, "TH") || hasClosestByMatchTag(options.range.startContainer, "TD") || editElement.querySelector("th, td");
@@ -97,16 +100,9 @@ export const upSelect = (options: {
                     options.event.preventDefault();
                     return;
                 }
-            } else {
-                const firstIndex = editElement.textContent.indexOf("\n");
-                if (firstIndex === -1 || start <= firstIndex || start === editElement.textContent.replace("\n", " ").indexOf("\n")) {
-                    setFirstNodeRange(editElement, options.range);
-                    options.event.stopPropagation();
-                    options.event.preventDefault();
-                    return;
-                } else {
-                    return;
-                }
+            } else{
+                // 选中上一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
+                return;
             }
         }
     }
@@ -139,17 +135,9 @@ export const downSelect = (options: {
         options.event.stopPropagation();
         options.event.preventDefault();
     } else {
-        const editElement = getContenteditableElement(options.nodeElement);
-        const end = getSelectionOffset(options.nodeElement, options.editorElement, options.range).end;
-        if (end < editElement.textContent.length) {
-            if (end > editElement.textContent.lastIndexOf("\n")) {
-                setLastNodeRange(editElement, options.range, false);
-                options.event.stopPropagation();
-                options.event.preventDefault();
-                return;
-            } else {
-                return;
-            }
+        if (getSelectionOffset(options.nodeElement, options.editorElement, options.range).end < getContenteditableElement(options.nodeElement).textContent.length) {
+            // 选中下一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
+            return;
         }
     }
     options.range.collapse(false);

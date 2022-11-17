@@ -47,7 +47,7 @@ export const openSetting = () => {
   <div class="b3-tab-container fn__none" style="height:${height}px" data-name="appearance"></div>
   <div class="b3-tab-container fn__none" style="height:${height}px" data-name="bazaar"></div>
   <div class="b3-tab-container fn__none" style="height:${height}px" data-name="search"></div>
-  <div class="b3-tab-container fn__none" style="height:${height}px" data-name="keymap"></div>
+  <div class="b3-tab-container fn__none" style="height:${height}px;overflow: scroll" data-name="keymap"></div>
   <div class="b3-tab-container fn__none" style="height:${height}px" data-name="account"></div>
   <div class="b3-tab-container fn__none" style="height:${height}px" data-name="repos"></div>
   <div class="b3-tab-container fn__none" style="height:${height}px" data-name="about"></div>

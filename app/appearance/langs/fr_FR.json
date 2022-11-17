@@ -1,6 +1,7 @@
 {
-  "notBatchRemove": "Les blocs-notes ne prennent pas en charge la suppression par lots",
-  "confirmRemove": "Êtes-vous sûr de vouloir supprimer les ${count} fichiers sélectionnés ?",
+  "confirmReset": "Voulez-vous vraiment réinitialiser tous les raccourcis clavier aux paramètres par défaut ?",
+  "notBatchRemove": "La suppression par lots de bloc-notes n'est pas prise en charge",
+  "confirmRemoveAll": "Êtes-vous sûr de vouloir supprimer tous les fichiers sélectionnés ?",
   "microphoneDenied": "Vous devez autoriser Siyuan à accéder au microphone dans les Préférences Système",
   "microphoneNotAccess": "L'accès au microphone est refusé, allez dans les Préférences Système pour réinitialiser",
   "dynamicLoadBlocks": "Nombre de blocs chargés dynamiquement",

@@ -22,6 +22,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -172,4 +173,38 @@ func NormalizeEndpoint(endpoint string) string {
 		endpoint = endpoint + "/"
 	}
 	return endpoint
+}
+
+func FilterMoveDocFromPaths(fromPaths []string, toPath string) (ret []string) {
+	tmp := FilterSelfChildDocs(fromPaths)
+	for _, fromPath := range tmp {
+		fromDir := strings.TrimSuffix(fromPath, ".sy")
+		if strings.HasPrefix(toPath, fromDir) {
+			continue
+		}
+		ret = append(ret, fromPath)
+	}
+	return
+}
+
+func FilterSelfChildDocs(paths []string) (ret []string) {
+	sort.Slice(paths, func(i, j int) bool { return strings.Count(paths[i], "/") < strings.Count(paths[j], "/") })
+
+	dirs := map[string]string{}
+	for _, fromPath := range paths {
+		dir := strings.TrimSuffix(fromPath, ".sy")
+		existParent := false
+		for d, _ := range dirs {
+			if strings.HasPrefix(fromPath, d) {
+				existParent = true
+				break
+			}
+		}
+		if existParent {
+			continue
+		}
+		dirs[dir] = fromPath
+		ret = append(ret, fromPath)
+	}
+	return
 }

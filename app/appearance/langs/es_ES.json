@@ -338,6 +338,7 @@
   "keymapTip2": "Usar teclas de acceso directo por defecto",
   "searchLimit": "El número de resultados de búsqueda mostrados",
   "searchLimit1": "Si la cantidad de datos es grande, no configure el valor demasiado grande, el valor por defecto es <code class='fn__code'>64</code>",
+  "searchLimit2": "Este elemento de configuración afecta a todas las funciones diseñadas para buscar, tales como: búsqueda, historial de archivos, consulta de bloques incrustados, paneles de pestañas y funciones de plantilla queryBlocks/querySpans",
   "searchCaseSensitive": "Distingue mayúsculas y minúsculas",
   "searchCaseSensitive1": "Después de habilitarlo, todas las funciones relacionadas con la búsqueda distinguirán entre mayúsculas y minúsculas",
   "toggleWin": "Ocultar/Mostrar Ventana",

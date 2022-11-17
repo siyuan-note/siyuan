@@ -377,7 +377,6 @@ declare interface IConfig {
         downloadInstallPkg: boolean
         networkServe: boolean
         fixedPort: boolean
-        useExistingDB: boolean
     }
     localIPs: string[]
     readonly: boolean

@@ -140,6 +140,7 @@ export const addGA = () => {
         const para = {
             version: Constants.SIYUAN_VERSION,
             container: window.siyuan.config.system.container,
+            os: window.siyuan.config.system.os,
             isLoggedIn: false,
             subscriptionStatus: -1,
             subscriptionPlan: -1,

@@ -365,8 +365,8 @@ github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da h1:/jNhl7LC+9BhkWvNxuJDdsNfA/2wvfuj9mqWx4CbV90=
 github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da/go.mod h1:Sqo4FYX5lAXu7gWkbEdJF0e6P57tNNVV4WDKYDctokI=
-github.com/siyuan-note/filelock v0.0.0-20221007163134-7e64809023ef h1:mbDOxW0N2OHE710oEd9pRE0HxNHQbKzgxKRazQD3/1E=
-github.com/siyuan-note/filelock v0.0.0-20221007163134-7e64809023ef/go.mod h1:NmpSIVtIGy8eNWapjDIiiCw5+5r5wxC76k40oG+WRXQ=
+github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e h1:i3RKrdrddr4AuaHJtoWYAEVNuR7Y9wIsEqPmuFFbJC4=
+github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e/go.mod h1:NmpSIVtIGy8eNWapjDIiiCw5+5r5wxC76k40oG+WRXQ=
 github.com/siyuan-note/httpclient v0.0.0-20221019094331-c904ac9be571 h1:AclwUOWgJQt1F8AXc2s6l/J+Edp/GYIgbI2/RoNlKU0=
 github.com/siyuan-note/httpclient v0.0.0-20221019094331-c904ac9be571/go.mod h1:FTPEFG3q0LAn33zON47HeRbLOWNk7HM+OPafmQgq4hU=
 github.com/siyuan-note/logging v0.0.0-20221031125421-9b7234d79d8a h1:b9VJCE8IccYjsadwNBI11he+Wn25hI9lCma4uYoIYEM=

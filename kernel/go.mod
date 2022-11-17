@@ -39,7 +39,7 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20221117053005-50a9e56b2934
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da
-	github.com/siyuan-note/filelock v0.0.0-20221007163134-7e64809023ef
+	github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e
 	github.com/siyuan-note/httpclient v0.0.0-20221019094331-c904ac9be571
 	github.com/siyuan-note/logging v0.0.0-20221031125421-9b7234d79d8a
 	github.com/steambap/captcha v1.4.1

@@ -71,7 +71,7 @@ func CountBlocks() (ret int) {
 	return len(blockTrees)
 }
 
-func CeilCount(count int) int {
+func CeilTreeCount(count int) int {
 	if 100 > count {
 		return 100
 	}
@@ -82,6 +82,19 @@ func CeilCount(count int) int {
 		}
 	}
 	return 500*40 + 1
+}
+
+func CeilBlockCount(count int) int {
+	if 5000 > count {
+		return 5000
+	}
+
+	for i := 1; i < 100; i++ {
+		if count < i*10000 {
+			return i * 10000
+		}
+	}
+	return 10000*100 + 1
 }
 
 func GetBlockTreeRootByPath(boxID, path string) *BlockTree {

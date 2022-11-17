@@ -68,9 +68,9 @@ func autoStat() {
 	defer statLock.Unlock()
 
 	Conf.Stat.TreeCount = treenode.CountTrees()
-	Conf.Stat.CTreeCount = treenode.CeilCount(Conf.Stat.TreeCount)
+	Conf.Stat.CTreeCount = treenode.CeilTreeCount(Conf.Stat.TreeCount)
 	Conf.Stat.BlockCount = treenode.CountBlocks()
-	Conf.Stat.CBlockCount = treenode.CeilCount(Conf.Stat.BlockCount)
+	Conf.Stat.CBlockCount = treenode.CeilBlockCount(Conf.Stat.BlockCount)
 	Conf.Stat.DataSize, Conf.Stat.AssetsSize = util.DataSize()
 	Conf.Stat.CDataSize = util.CeilSize(Conf.Stat.DataSize)
 	Conf.Stat.CAssetsSize = util.CeilSize(Conf.Stat.AssetsSize)

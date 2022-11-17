@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/css v0.1.2
-	github.com/88250/gulu v1.2.3-0.20221021091528-70e533d91a88
+	github.com/88250/gulu v1.2.3-0.20221117052724-cd06804db798
 	github.com/88250/lute v1.7.5-0.20221112140857-4ed13af8b26c
 	github.com/88250/pdfcpu v0.3.13
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
@@ -36,7 +36,7 @@ require (
 	github.com/panjf2000/ants/v2 v2.6.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
-	github.com/siyuan-note/dejavu v0.0.0-20221116143309-83d22f0d8f05
+	github.com/siyuan-note/dejavu v0.0.0-20221117053005-50a9e56b2934
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da
 	github.com/siyuan-note/filelock v0.0.0-20221007163134-7e64809023ef
@@ -58,7 +58,7 @@ require (
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.44.138 // indirect
+	github.com/aws/aws-sdk-go v1.44.139 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
@@ -90,7 +90,7 @@ require (
 	github.com/juju/errors v1.0.0 // indirect
 	github.com/klauspost/compress v1.15.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/lucas-clemente/quic-go v0.30.0 // indirect
+	github.com/lucas-clemente/quic-go v0.31.0 // indirect
 	github.com/marten-seemann/qpack v0.3.0 // indirect
 	github.com/marten-seemann/qtls-go1-16 v0.1.5 // indirect
 	github.com/marten-seemann/qtls-go1-17 v0.1.2 // indirect
@@ -113,7 +113,7 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/crypto v0.2.0 // indirect
+	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/exp v0.0.0-20221114191408-850992195362 // indirect
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/net v0.2.0 // indirect

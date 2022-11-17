@@ -57,6 +57,10 @@ func init() {
 }
 
 func InitDatabase(forceRebuild bool) (err error) {
+	ClearBlockCache()
+	DisableCache()
+	defer EnableCache()
+
 	util.IncBootProgress(2, "Initializing database...")
 
 	if forceRebuild {

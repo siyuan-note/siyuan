@@ -373,12 +373,12 @@ export class Toolbar {
                             item.style.fontSize = "";
                         }
                         if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
-                            isArrayEqual(types, previousElement.getAttribute("data-type").split(" ")) &&
+                            isArrayEqual(types, (previousElement.getAttribute("data-type") || "").split(" ")) &&
                             hasSameTextStyle(item, previousElement, textObj)) {
                             previousIndex = previousElement.textContent.length;
                             previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
                         } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
-                            isArrayEqual(types, nextElement.getAttribute("data-type").split(" ")) &&
+                            isArrayEqual(types, (nextElement.getAttribute("data-type") || "").split(" ")) &&
                             hasSameTextStyle(item, nextElement, textObj)) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
@@ -490,12 +490,12 @@ export class Toolbar {
                         }
                         types = [...new Set(types)];
                         if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
-                            isArrayEqual(types, previousElement.getAttribute("data-type").split(" ")) &&
+                            isArrayEqual(types, (previousElement.getAttribute("data-type") || "").split(" ")) &&
                             hasSameTextStyle(item, previousElement, textObj)) {
                             previousIndex = previousElement.textContent.length;
                             previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
                         } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
-                            isArrayEqual(types, nextElement.getAttribute("data-type").split(" ")) &&
+                            isArrayEqual(types, (nextElement.getAttribute("data-type") || "").split(" ")) &&
                             hasSameTextStyle(item, nextElement, textObj)) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;

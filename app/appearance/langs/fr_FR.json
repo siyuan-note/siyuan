@@ -38,7 +38,7 @@
   "generateConflictDoc": "Générer une documentation sur les conflits lors de la synchronisation des conflits",
   "generateConflictDocTip": "Lorsqu'il est activé, un document de conflit sera généré lorsqu'un conflit de synchronisation se produit, afin qu'il puisse être ouvert et visualisé directement. Qu'il soit activé ou non, l'historique des données enregistrera le document de conflit",
   "deleteOpConfirm": "⚠️ Supprimer la confirmation de l'opération",
-  "filterDocNameEnter": "Filtre doc name Enter",
+  "filterKeywordEnter": "Filtrage des mots-clés Entrée",
   "defBlock": "Définir le bloc",
   "defBlockChildren": "Définir le bloc et ses enfants",
   "filter": "Filtre",

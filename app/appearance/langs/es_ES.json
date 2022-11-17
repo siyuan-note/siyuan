@@ -38,7 +38,7 @@
   "generateConflictDoc": "Generar documentación de conflicto al sincronizar conflictos",
   "generateConflictDocTip": "Cuando está habilitado, se generará un documento de conflicto cuando ocurra un conflicto de sincronización, para que pueda abrirse y verse directamente. Ya sea que esté habilitado o no, el historial de datos registrará el documento de conflicto",
   "deleteOpConfirm": "⚠️ Confirmación de operación de eliminación",
-  "filterDocNameEnter": "Filtrar doc name Enter",
+  "filterKeywordEnter": "Filtrado de palabras clave Entrar",
   "defBlock": "Definir bloque",
   "defBlockChildren": "Definir bloque y sus hijos",
   "filter": "Filtro",

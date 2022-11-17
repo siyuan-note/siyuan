@@ -178,7 +178,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 	refs := sql.QueryRefsByDefID(defID, true)
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
-	linkRefs, _, excludeBacklinkIDs := buildLinkRefs(rootID, refs)
+	linkRefs, _, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
 	tmpMentions, mentionKeywords := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
 	luteEngine := NewLute()
 	treeCache := map[string]*parse.Tree{}
@@ -206,7 +206,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 	return
 }
 
-func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
+func GetBacklinkDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 	ret = []*Backlink{}
 	sqlBlock := sql.GetBlock(defID)
 	if nil == sqlBlock {
@@ -223,7 +223,7 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 	}
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
-	linkRefs, _, _ := buildLinkRefs(rootID, refs)
+	linkRefs, _, _ := buildLinkRefs(rootID, refs, keyword)
 	refTree, err := loadTreeByBlockID(refTreeID)
 	if nil != err {
 		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
@@ -353,16 +353,11 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	refs := sql.QueryRefsByDefID(id, true)
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
-	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs)
+	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
 	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink")
 
 	for _, l := range tmpBacklinks {
 		l.Blocks = nil
-		if "" != keyword {
-			if !strings.Contains(l.Name, keyword) {
-				continue
-			}
-		}
 		backlinks = append(backlinks, l)
 	}
 
@@ -558,7 +553,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID strin
 	return
 }
 
-func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set) {
+func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set) {
 	// 为了减少查询，组装好 IDs 后一次查出
 	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
 	var queryBlockIDs []string
@@ -627,8 +622,13 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, refsCount i
 	paragraphParents := sql.GetBlocks(paragraphParentIDs)
 	for _, p := range paragraphParents {
 		if "i" == p.Type || "h" == p.Type {
-			ret = append(ret, fromSQLBlock(p, "", 12))
 			processedParagraphs.Add(p.ID)
+
+			if !strings.Contains(p.Content, keyword) {
+				refsCount--
+				continue
+			}
+			ret = append(ret, fromSQLBlock(p, "", 12))
 		}
 	}
 	for _, link := range links {
@@ -637,6 +637,11 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, refsCount i
 				if processedParagraphs.Contains(ref.ParentID) {
 					continue
 				}
+			}
+
+			if !strings.Contains(ref.Content, keyword) {
+				refsCount--
+				continue
 			}
 
 			ref.DefID = link.ID

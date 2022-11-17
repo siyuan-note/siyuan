@@ -387,11 +387,6 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink")
 	for _, l := range tmpBackmentions {
 		l.Blocks = nil
-		if "" != mentionKeyword {
-			if !strings.Contains(l.Name, mentionKeyword) {
-				continue
-			}
-		}
 		backmentions = append(backmentions, l)
 	}
 

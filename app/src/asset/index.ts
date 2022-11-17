@@ -185,15 +185,15 @@ export class Asset extends Model {
 
             <button id="cursorSelectTool" class="secondaryToolbarButton b3-menu__item selectTool toggled" tabindex="60">
                <svg class="b3-menu__icon"><use xlink:href="#iconSelectText"></use></svg> 
-              <span class="b3-menu__label">${window.siyuan.languages.cursorText}</span>
+               <span class="b3-menu__label">${window.siyuan.languages.cursorText}</span>
+               <span class="b3-menu__accelerator">S</span>
             </button>
             <button id="cursorHandTool" class="secondaryToolbarButton b3-menu__item handTool" tabindex="61">
               <svg class="b3-menu__icon"><use xlink:href="#iconHand"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.cursorHand}</span>
+              <span class="b3-menu__accelerator">H</span>
             </button>
-
             <div class="horizontalToolbarSeparator b3-menu__separator"></div>
-
             <button id="scrollVertical" class="secondaryToolbarButton b3-menu__item scrollModeButtons scrollVertical toggled" tabindex="62">
              <svg class="b3-menu__icon"><use xlink:href="#iconSplitTB"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.scrollVertical}</span>

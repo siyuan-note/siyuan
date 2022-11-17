@@ -70,8 +70,15 @@ func removeBlockCache(id string) {
 	removeRefCacheByDefID(id)
 }
 
+var virtualRefKeywordsCacheTime = time.Now()
+
 func getVirtualRefKeywordsCache() ([]string, bool) {
 	if disabled {
+		return nil, false
+	}
+
+	if 10 < time.Now().Sub(virtualRefKeywordsCacheTime).Minutes() {
+		ClearVirtualRefKeywords()
 		return nil, false
 	}
 

@@ -35,8 +35,9 @@ def generate_msg_from_repo(repo_name, tag_name):
     milestone = find_milestone(repo, tag_name)
 
     for issue in repo.get_issues(state="closed", milestone=milestone):
+        # REF https://pygithub.readthedocs.io/en/latest/github_objects/Issue.html#github.Issue.Issue
         desc_mapping[get_issue_first_label(issue)].append(
-            {"title": issue.title, "url": issue.url}
+            {"title": issue.title, "url": issue.html_url}
         )
     generate_msg(desc_mapping)
 

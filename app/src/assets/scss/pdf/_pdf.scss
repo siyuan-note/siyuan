@@ -602,66 +602,50 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
   border: 0 none !important;
 }
 
-#overlayContainer {
-  display: table;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.2);
-  z-index: 40000;
+#dialogContainer > dialog {
+  padding: 8px;
+  box-shadow: var(--b3-dialog-shadow);
+  background-color: var(--b3-menu-background);
+  border-radius: 4px;
+  width: 520px;
+  border: 0;
+
+  & > .row {
+    display: table-row;
+
+    & > span {
+      white-space: nowrap;
+    }
+  }
+
+  & > .row > * {
+    display: table-cell;
+  }
+
+  .toolbarField {
+    margin: 5px 0;
+  }
+
+  .separator {
+    display: block;
+    margin: 4px 0;
+    height: 1px;
+    width: 100%;
+    background-color: var(--b3-theme-surface-lighter);
+  }
+
+  .buttonRow {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  :link {
+    color: rgba(255, 255, 255, 1);
+  }
 }
 
-#overlayContainer > * {
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-}
 
-#overlayContainer > .container {
-  position: absolute;
-  top: 10%;
-  left: 10%;
-  height: 80%;
-  width: 80%;
-}
-
-#overlayContainer > .container > .dialog {
-  padding: 16px;
-  position: inherit;
-  overflow: auto;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.dialog > .row {
-  display: table-row;
-}
-
-.dialog > .row > * {
-  display: table-cell;
-}
-
-.dialog .toolbarField {
-  margin: 5px 0;
-}
-
-.dialog .separator {
-  display: block;
-  margin: 4px 0;
-  height: 1px;
-  width: 100%;
-  background-color: var(--b3-theme-surface-lighter);
-}
-
-.dialog .buttonRow {
-  text-align: center;
-  vertical-align: middle;
-}
-
-.dialog :link {
-  color: rgba(255, 255, 255, 1);
-}
-
-#passwordOverlay > .dialog {
+#passwordOverlay > dialog {
   text-align: center;
 }
 
@@ -669,7 +653,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
   width: 200px;
 }
 
-#documentPropertiesOverlay > .dialog {
+#documentPropertiesOverlay > dialog {
   text-align: left;
 }
 

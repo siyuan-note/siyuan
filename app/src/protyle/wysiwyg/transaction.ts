@@ -73,7 +73,7 @@ const promiseTransaction = () => {
             return;
         }
         countBlockWord([], protyle.block.rootID, true);
-        if (doOperations.length === 1 && (doOperations[0].action === "unfoldHeading" || doOperations[0].action === "foldHeading" || doOperations[0].action === "setAttrs")) {
+        if (doOperations.length === 1 && (doOperations[0].action === "unfoldHeading" || doOperations[0].action === "foldHeading")) {
             const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
             if (gutterFoldElement) {
                 gutterFoldElement.removeAttribute("disabled");
@@ -114,6 +114,20 @@ const promiseTransaction = () => {
                     });
                 }
             }
+            return;
+        }
+        if (doOperations[0].action === "setAttrs") {
+            const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
+            if (gutterFoldElement) {
+                gutterFoldElement.removeAttribute("disabled");
+            }
+            // 仅在 alt+click 箭头折叠时才会触发
+            protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
+                if (item.querySelector(`[data-node-id="${doOperations[0].id}"]`)) {
+                    item.removeAttribute("data-render");
+                    blockRender(protyle, item);
+                }
+            });
             return;
         }
 

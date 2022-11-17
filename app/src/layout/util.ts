@@ -345,6 +345,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         }
         json.instance = "Tab";
     } else if (layout instanceof Editor) {
+        json.notebookId = layout.editor.protyle.notebookId;
         json.blockId = layout.editor.protyle.block.id;
         json.rootId = layout.editor.protyle.block.rootID;
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
@@ -427,9 +428,9 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
 export const resizeDrag = () => {
     const dragElement = document.getElementById("drag");
     const width = dragElement.clientWidth;
-    const left = dragElement.getBoundingClientRect().left;
-    const windowWidth = document.querySelector("#windowControls").clientWidth;
-    const right = (windowWidth ? windowWidth : 5) + document.querySelector("#barSearch").clientWidth * 4;
+    const dragRect = dragElement.getBoundingClientRect()
+    const left = dragRect.left;
+    const right = window.innerWidth - dragRect.right;
     if (left > right && left - right < width) {
         dragElement.style.paddingRight = (left - right) + "px";
     } else if (left < right && right - left < width) {

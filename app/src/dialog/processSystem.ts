@@ -9,6 +9,7 @@ import {hideMessage, showMessage} from "./message";
 import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
+import {getCurrentWindow} from "@electron/remote";
 
 export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>
@@ -110,8 +111,16 @@ export const exitSiYuan = () => {
                     execInstallPkg: 2 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
                 }, () => {
                     /// #if !BROWSER
-                    ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);
-                    ipcRenderer.send(Constants.SIYUAN_QUIT);
+                    // 桌面端退出拉起更新安装时有时需要重启两次 https://github.com/siyuan-note/siyuan/issues/6544
+                    // 这里先将主界面隐藏
+                    setTimeout(() => {
+                        getCurrentWindow().hide();
+                    }, 2000);
+                    // 然后等待一段时间后再退出，避免界面主进程退出以后内核子进程被杀死
+                    setTimeout(() => {
+                        ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSETRAY);
+                        ipcRenderer.send(Constants.SIYUAN_QUIT);
+                    }, 4000);
                     /// #endif
                 });
             }, () => {

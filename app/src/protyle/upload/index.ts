@@ -5,6 +5,7 @@ import {destroy} from "../util/destroy";
 import {fetchPost} from "../../util/fetch";
 import {getEditorRange} from "../util/selection";
 import {pathPosix} from "../../util/pathName";
+import {genAssetHTML} from "../../asset/renderAssets";
 
 export class Upload {
     public element: HTMLElement;
@@ -102,16 +103,9 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         const path = response.data.succMap[key];
         const type = pathPosix().extname(key).toLowerCase();
         const filename = protyle.options.upload.filename(key);
-        if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
-            succFileText += `<audio controls="controls" src="${path}"></audio>`;
-        } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-            succFileText += `![${filename.substring(0, filename.length - type.length)}](${path})`;
-        } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
-            succFileText += `<video controls="controls" src="${path}"></video>`;
-        } else {
-            succFileText += `[${filename}](${path})`;
-        }
-        if (keys.length - 1 !== index) {
+        succFileText += genAssetHTML(type, path, filename.substring(0, filename.length - type.length), filename);
+        if (!Constants.SIYUAN_ASSETS_AUDIO.includes(type) && !Constants.SIYUAN_ASSETS_VIDEO.includes(type) &&
+            keys.length - 1 !== index) {
             succFileText += "\n";
         }
     });
@@ -121,10 +115,10 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         range.setEndAfter(range.startContainer.parentElement);
         range.collapse(false);
     }
-    insertHTML(protyle.lute.SpinBlockDOM(succFileText), protyle);
+    insertHTML(succFileText, protyle);
 };
 
-export const uploadLocalFiles = (files: string[], protyle: IProtyle, isUpload:boolean) => {
+export const uploadLocalFiles = (files: string[], protyle: IProtyle, isUpload: boolean) => {
     const msgId = showMessage(window.siyuan.languages.uploading, 0);
     fetchPost("/api/asset/insertLocalAssets", {
         assetPaths: files,

@@ -35,13 +35,8 @@ import (
 func killRunningKernel() {
 	defer logging.Recover()
 
-	if "dev" == util.Mode {
-		return
-	}
-
-	if util.ContainerStd != util.Container {
-		return
-	}
+	now := time.Now()
+	defer logging.LogInfof("check running kernel elapsed [%dms]", time.Since(now).Milliseconds())
 
 	processes, err := goPS.Processes()
 	if nil != err {

@@ -98,7 +98,13 @@
     overflow: hidden !important;
   }
 
-  &:last-child {
+  &--inner {
+    border-bottom: 0;
+    padding: 0 !important;
+  }
+
+  &:last-child,
+  &--noborder {
     border-bottom: 0;
   }
 }

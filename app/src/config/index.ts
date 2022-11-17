@@ -57,7 +57,7 @@ export const openSetting = () => {
     });
 
     initConfigSearch(dialog.element);
-
+    (dialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.maxWidth = "1280px";
     dialog.element.querySelectorAll(".b3-tab-bar .b3-list-item").forEach(item => {
         item.addEventListener("click", () => {
             const type = item.getAttribute("data-name");

@@ -244,7 +244,7 @@ export const appearance = {
             });
         });
     },
-    onSetappearance(data: IAppearance, needLoadAsset = true) {
+    onSetappearance(data: IAppearance) {
         if (data.lang !== window.siyuan.config.appearance.lang || data.nativeEmoji !== window.siyuan.config.appearance.nativeEmoji) {
             exportLayout(true);
             return;
@@ -276,9 +276,6 @@ export const appearance = {
         ipcRenderer.send(Constants.SIYUAN_CONFIG_THEME, data.modeOS ? "system" : (data.mode === 1 ? "dark" : "light"));
         ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, data.closeButtonBehavior);
         /// #endif
-        if (needLoadAsset) {
-            loadAssets(data);
-        }
         document.querySelector("#barMode use").setAttribute("xlink:href", `#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}`);
     }
 };

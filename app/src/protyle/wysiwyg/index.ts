@@ -214,7 +214,9 @@ export class WYSIWYG {
             let html = "";
             let textPlain = "";
             if (selectElements.length > 0) {
-                if (selectElements[0].getAttribute("data-type") === "NodeListItem" && selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
+                if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
+                    selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
+                    selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
                     html = selectElements[0].parentElement.outerHTML;
                 } else {
                     selectElements.forEach(item => {
@@ -912,6 +914,9 @@ export class WYSIWYG {
 
         this.element.addEventListener("cut", (event: ClipboardEvent & { target: HTMLElement }) => {
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
+            if (protyle.disabled) {
+                return;
+            }
             if (event.target.tagName === "PROTYLE-HTML") {
                 event.stopPropagation();
                 return;
@@ -936,7 +941,9 @@ export class WYSIWYG {
             }
             let html = "";
             if (selectElements.length > 0) {
-                if (selectElements[0].getAttribute("data-type") === "NodeListItem" && selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
+                if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
+                    selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
+                    selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
                     html = selectElements[0].parentElement.outerHTML;
                 } else {
                     selectElements.forEach(item => {
@@ -1326,13 +1333,13 @@ export class WYSIWYG {
             if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRedo") {
                 return;
             }
-            /// #if !BROWSER
             if (event.inputType === "historyUndo") {
+                /// #if !BROWSER
                 getCurrentWindow().webContents.redo();
+                /// #endif
                 window.siyuan.menus.menu.remove();
                 return;
             }
-            /// #endif
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
             if (!blockElement) {
@@ -1931,7 +1938,7 @@ export class WYSIWYG {
                             // 清除选中的子块 https://ld246.com/article/1667826582251
                             item.querySelectorAll(".protyle-wysiwyg--select").forEach(subItem => {
                                 subItem.classList.remove("protyle-wysiwyg--select");
-                            })
+                            });
                         });
                         countBlockWord(ids);
                         if (toDown) {
@@ -1965,8 +1972,8 @@ export class WYSIWYG {
                         item.removeAttribute("select-start");
                         item.removeAttribute("select-end");
                     });
-                    const ctrlParentElement = hasClosestByClassName(ctrlElement, "protyle-wysiwyg--select");
-                    if (ctrlParentElement && !ctrlElement.isSameNode(ctrlParentElement)) {
+                    const ctrlParentElement = hasClosestByClassName(ctrlElement.parentElement, "protyle-wysiwyg--select");
+                    if (ctrlParentElement) {
                         ctrlParentElement.classList.remove("protyle-wysiwyg--select");
                         ctrlParentElement.removeAttribute("select-start");
                         ctrlParentElement.removeAttribute("select-end");

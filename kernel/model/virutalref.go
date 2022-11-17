@@ -109,20 +109,17 @@ func getVirtualRefKeywords(docName string) (ret []string) {
 	// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
 	ret = gulu.Str.ExcludeElem(ret, []string{docName})
 	ret = prepareMarkKeywords(ret)
+
+	if Conf.Search.VirtualRefKeywordsLimit < len(ret) {
+		ret = ret[:Conf.Search.VirtualRefKeywordsLimit]
+	}
 	return
 }
 
 func prepareMarkKeywords(keywords []string) (ret []string) {
-	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
-	for _, k := range keywords {
-		if strings.ContainsAny(k, "?*!@#$%^&()[]{}\\|;:'\",.<>~`") {
-			continue
-		}
-		ret = append(ret, k)
-	}
-
+	ret = gulu.Str.RemoveDuplicatedElem(keywords)
 	sort.SliceStable(ret, func(i, j int) bool {
-		return len(ret[i]) < len(ret[j])
+		return len(ret[i]) > len(ret[j])
 	})
 	return
 }

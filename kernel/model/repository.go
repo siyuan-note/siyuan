@@ -20,10 +20,12 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
+	"crypto/tls"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"math"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -614,8 +616,8 @@ func syncRepo(exit, byHand bool) (err error) {
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
 	Conf.Sync.Stat = msg
 	syncDownloadErrCount = 0
-	logging.LogInfof("synced data repo [ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs]",
-		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)), elapsed.Seconds())
+	logging.LogInfof("synced data repo [provider=%d, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs]",
+		Conf.Sync.Provider, trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)), elapsed.Seconds())
 
 	logSyncMergeResult(mergeResult)
 
@@ -820,16 +822,20 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	var cloudRepo cloud.Cloud
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
-		cloudRepo = &cloud.SiYuan{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
-	case conf.ProviderQiniu:
-		cloudRepo = &cloud.Qiniu{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}}
+		cloudRepo = cloud.NewSiYuan(&cloud.BaseCloud{Conf: cloudConf})
+	case conf.ProviderS3:
+		s3HTTPClient := &http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: cloudConf.S3.SkipTlsVerify}}}
+		s3HTTPClient.Timeout = 30 * time.Second
+		cloudRepo = cloud.NewS3(&cloud.BaseCloud{Conf: cloudConf}, s3HTTPClient)
 	case conf.ProviderWebDAV:
-		webdavClient := gowebdav.NewClient(cloudConf.Endpoint, cloudConf.Username, cloudConf.Password)
-		a := cloudConf.Username + ":" + cloudConf.Password
+		webdavClient := gowebdav.NewClient(cloudConf.WebDAV.Endpoint, cloudConf.WebDAV.Username, cloudConf.WebDAV.Password)
+		a := cloudConf.WebDAV.Username + ":" + cloudConf.WebDAV.Password
 		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(a))
 		webdavClient.SetHeader("Authorization", auth)
+		webdavClient.SetHeader("User-Agent", util.UserAgent)
 		webdavClient.SetTimeout(30 * time.Second)
-		cloudRepo = &cloud.WebDAV{BaseCloud: &cloud.BaseCloud{Conf: cloudConf}, Client: webdavClient}
+		webdavClient.SetTransport(&http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: cloudConf.WebDAV.SkipTlsVerify}})
+		cloudRepo = cloud.NewWebDAV(&cloud.BaseCloud{Conf: cloudConf}, webdavClient)
 	default:
 		err = fmt.Errorf("unknown cloud provider [%d]", Conf.Sync.Provider)
 		return
@@ -1037,27 +1043,28 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		Token:         token,
 		AvailableSize: availableSize,
 		Server:        util.AliyunServer,
-
-		// S3
-		AccessKey: Conf.Sync.S3.AccessKey,
-		SecretKey: Conf.Sync.S3.SecretKey,
-		Bucket:    Conf.Sync.S3.Bucket,
-		Region:    Conf.Sync.S3.Region,
-
-		// WebDAV
-		Username: Conf.Sync.WebDAV.Username,
-		Password: Conf.Sync.WebDAV.Password,
 	}
 
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
 		ret.Endpoint = "https://siyuan-data.b3logfile.com/"
-	case conf.ProviderQiniu:
-		ret.Endpoint = Conf.Sync.Qiniu.Endpoint
 	case conf.ProviderS3:
-		ret.Endpoint = Conf.Sync.S3.Endpoint
+		ret.S3 = &cloud.ConfS3{
+			Endpoint:      Conf.Sync.S3.Endpoint,
+			AccessKey:     Conf.Sync.S3.AccessKey,
+			SecretKey:     Conf.Sync.S3.SecretKey,
+			Bucket:        Conf.Sync.S3.Bucket,
+			Region:        Conf.Sync.S3.Region,
+			PathStyle:     Conf.Sync.S3.PathStyle,
+			SkipTlsVerify: Conf.Sync.S3.SkipTlsVerify,
+		}
 	case conf.ProviderWebDAV:
-		ret.Endpoint = Conf.Sync.WebDAV.Endpoint
+		ret.WebDAV = &cloud.ConfWebDAV{
+			Endpoint:      Conf.Sync.WebDAV.Endpoint,
+			Username:      Conf.Sync.WebDAV.Username,
+			Password:      Conf.Sync.WebDAV.Password,
+			SkipTlsVerify: Conf.Sync.WebDAV.SkipTlsVerify,
+		}
 	default:
 		err = fmt.Errorf("invalid provider [%d]", Conf.Sync.Provider)
 		return
@@ -1091,7 +1098,7 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hTraffi
 	syncUpdated := stat.Sync.Updated
 	s = &Sync{
 		Size:    syncSize,
-		HSize:   humanize.Bytes(uint64(syncSize)),
+		HSize:   "-",
 		Updated: syncUpdated,
 	}
 
@@ -1099,18 +1106,22 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hTraffi
 	backupUpdated := stat.Backup.Updated
 	b = &Backup{
 		Size:    backupSize,
-		HSize:   humanize.Bytes(uint64(backupSize)),
+		HSize:   "-",
 		Updated: backupUpdated,
 	}
 
 	assetSize := stat.AssetSize
 	totalSize := syncSize + backupSize + assetSize
-	hAssetSize = humanize.Bytes(uint64(assetSize))
-	hSize = humanize.Bytes(uint64(totalSize))
+	hAssetSize = "-"
+	hSize = "-"
 	hTotalSize = "-"
 	hTrafficUploadSize = "-"
 	hTrafficDownloadSize = "-"
 	if conf.ProviderSiYuan == Conf.Sync.Provider {
+		s.HSize = humanize.Bytes(uint64(syncSize))
+		b.HSize = humanize.Bytes(uint64(backupSize))
+		hAssetSize = humanize.Bytes(uint64(assetSize))
+		hSize = humanize.Bytes(uint64(totalSize))
 		hTotalSize = humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize))
 		hTrafficUploadSize = humanize.Bytes(uint64(Conf.User.UserTrafficUpload))
 		hTrafficDownloadSize = humanize.Bytes(uint64(Conf.User.UserTrafficDownload))

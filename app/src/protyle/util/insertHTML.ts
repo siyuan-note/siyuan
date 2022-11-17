@@ -55,7 +55,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         if (inlineMathElement) {
             // 表格内选中数学公式 https://ld246.com/article/1631708573504
             inlineMathElement.remove();
-        } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.getAttribute("data-type")?.indexOf("block-ref")>-1) {
+        } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.getAttribute("data-type")?.indexOf("block-ref") > -1) {
             // ref 选中处理 https://ld246.com/article/1629214377537
             range.startContainer.parentElement.remove();
             // 选中 ref**bbb** 后 alt+[
@@ -89,8 +89,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
                 tempElement.innerHTML = tempElement.content.firstElementChild.firstElementChild.innerHTML.trim();
             }
             // 粘贴带样式的行内元素到另一个行内元素中需进行切割
-            const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement: range.startContainer as HTMLElement;
-            if (spanElement.tagName === "SPAN" && spanElement.isSameNode( range.endContainer.nodeType === 3 ? range.endContainer.parentElement: range.endContainer) &&
+            const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer as HTMLElement;
+            if (spanElement.tagName === "SPAN" && spanElement.isSameNode(range.endContainer.nodeType === 3 ? range.endContainer.parentElement : range.endContainer) &&
                 tempElement.content.querySelector("span") // 粘贴纯文本不需切割 https://ld246.com/article/1665556907936
             ) {
                 const afterElement = document.createElement("span");
@@ -168,7 +168,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
     }
     let lastElement: Element;
     Array.from(tempElement.content.children).reverse().forEach((item) => {
-        const addId = item.getAttribute("data-node-id");
+        let addId = item.getAttribute("data-node-id");
         if (addId === id) {
             doOperation.push({
                 action: "update",
@@ -181,6 +181,18 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
                 data: oldHTML,
             });
         } else {
+            if (item.classList.contains("li") && !blockElement.parentElement.classList.contains("list")) {
+                // https://github.com/siyuan-note/siyuan/issues/6534
+                addId = Lute.NewNodeID();
+                const liElement = document.createElement("div");
+                liElement.setAttribute("data-subtype", item.getAttribute("data-subtype"));
+                liElement.setAttribute("data-node-id", addId);
+                liElement.setAttribute("data-type", "NodeList");
+                liElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                liElement.classList.add("list");
+                liElement.append(item);
+                item = liElement;
+            }
             doOperation.push({
                 action: "insert",
                 data: item.outerHTML,

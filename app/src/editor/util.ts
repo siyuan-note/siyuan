@@ -39,6 +39,9 @@ export const openFileById = (options: {
             lockFile(data.data);
             return;
         }
+        if (typeof options.removeCurrentTab === "undefined") {
+            options.removeCurrentTab = true;
+        }
         openFile({
             fileName: data.data.rootTitle,
             rootIcon: data.data.rootIcon,
@@ -58,7 +61,8 @@ export const openAsset = (assetPath: string, page: number | string, position?: s
     openFile({
         assetPath,
         page,
-        position
+        position,
+        removeCurrentTab: true
     });
 };
 
@@ -99,25 +103,7 @@ const openFile = (options: IOpenFileOptions) => {
             return true;
         }
         // 没有初始化的页签无法检测到
-        const hasEditor = getAllTabs().find(item => {
-            const initData = item.headElement?.getAttribute("data-initdata");
-            if (initData) {
-                const initObj = JSON.parse(initData);
-                if (initObj.rootId === options.rootID || initObj.blockId === options.rootID) {
-                    initObj.blockId = options.id;
-                    initObj.mode = options.mode;
-                    if (options.zoomIn) {
-                        initObj.action = [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS];
-                    } else {
-                        initObj.action = options.action;
-                    }
-                    delete initObj.scrollAttr;
-                    item.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
-                    item.parent.switchTab(item.headElement);
-                    return true;
-                }
-            }
-        });
+        const hasEditor =  getUnInitTab(options);
         if (hasEditor) {
             return;
         }
@@ -151,12 +137,15 @@ const openFile = (options: IOpenFileOptions) => {
             }
             if (targetWnd) {
                 // 在右侧/下侧打开已有页签将进行页签切换 https://github.com/siyuan-note/siyuan/issues/5366
-                const hasEditor = targetWnd.children.find(item => {
+                let hasEditor = targetWnd.children.find(item => {
                     if (item.model && item.model instanceof Editor && item.model.editor.protyle.block.rootID === options.rootID) {
                         switchEditor(item.model, options, allModels);
                         return true;
                     }
                 });
+                if (!hasEditor) {
+                    hasEditor = getUnInitTab(options);
+                }
                 if (!hasEditor) {
                     targetWnd.addTab(newTab(options));
                 }
@@ -189,6 +178,29 @@ const openFile = (options: IOpenFileOptions) => {
         wnd.showHeading();
     }
 };
+
+// 没有初始化的页签无法检测到
+const getUnInitTab = (options: IOpenFileOptions) => {
+    return getAllTabs().find(item => {
+        const initData = item.headElement?.getAttribute("data-initdata");
+        if (initData) {
+            const initObj = JSON.parse(initData);
+            if (initObj.rootId === options.rootID || initObj.blockId === options.rootID) {
+                initObj.blockId = options.id;
+                initObj.mode = options.mode;
+                if (options.zoomIn) {
+                    initObj.action = [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS];
+                } else {
+                    initObj.action = options.action;
+                }
+                delete initObj.scrollAttr;
+                item.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
+                item.parent.switchTab(item.headElement);
+                return true;
+            }
+        }
+    });
+}
 
 const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IModels) => {
     allModels.editor.forEach((item) => {

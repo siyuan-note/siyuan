@@ -117,11 +117,8 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, ne
 			if nil == block {
 				continue
 			}
-			block.Content = maxContent(block.Content, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
-			block.RefText = block.Content
-			if block.IsContainerBlock() {
-				block.RefText = block.FContent // `((` 引用列表项时使用第一个子块作为动态锚文本 https://github.com/siyuan-note/siyuan/issues/4536
-			}
+			block.RefText = sql.GetRefText(block.ID)
+			block.RefText = maxContent(block.RefText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 			ret = append(ret, block)
 		}
 		if 1 > len(ret) {
@@ -135,9 +132,9 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, ne
 	trees := map[string]*parse.Tree{}
 	for _, b := range ret {
 		hitFirstChildID := false
-		b.RefText = b.Content
+		b.RefText = sql.GetRefText(b.ID)
+		b.RefText = maxContent(b.RefText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 		if b.IsContainerBlock() {
-			b.RefText = b.FContent // `((` 引用列表项时使用第一个子块作为动态锚文本 https://github.com/siyuan-note/siyuan/issues/4536
 
 			// `((` 引用候选中排除当前块的父块 https://github.com/siyuan-note/siyuan/issues/4538
 			tree := trees[b.RootID]
@@ -154,7 +151,6 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, ne
 		}
 
 		if b.ID != id && !hitFirstChildID && b.ID != rootID {
-			b.Content = maxContent(b.Content, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 			tmp = append(tmp, b)
 		}
 	}
@@ -676,52 +672,25 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, text string, keywords []
 
 // markReplaceSpanWithSplit 用于处理虚拟引用和反链提及高亮。
 func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, replacementEnd string) (ret string) {
-	// 调用该函数前参数 keywords 必须使用 prepareMarkKeywords 函数进行预处理
+	tmp := search.EncloseHighlighting(text, keywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive)
+	parts := strings.Split(tmp, replacementEnd)
+	buf := bytes.Buffer{}
+	for i := 0; i < len(parts); i++ {
+		if i >= len(parts)-1 {
+			buf.WriteString(parts[i])
+			break
+		}
 
-	parts := strings.Split(text, " ")
-	for i, part := range parts {
-		if "" == part {
+		if nextPart := parts[i+1]; 0 < len(nextPart) && lex.IsASCIILetter(nextPart[0]) {
+			// 取消已经高亮的部分
+			part := strings.ReplaceAll(parts[i], replacementStart, "")
+			buf.WriteString(part)
 			continue
 		}
 
-		var hitKeywords []string
-		for _, k := range keywords {
-			tmpPart := part
-			tmpK := k
-			if !Conf.Search.CaseSensitive {
-				tmpPart = strings.ToLower(part)
-				tmpK = strings.ToLower(k)
-			}
-
-			if gulu.Str.IsASCII(tmpK) {
-				if gulu.Str.IsASCII(tmpPart) {
-					if tmpPart == tmpK {
-						hitKeywords = append(hitKeywords, k)
-					}
-				} else {
-					if strings.Contains(tmpPart, tmpK) {
-						hitKeywords = append(hitKeywords, k)
-					}
-				}
-			} else {
-				if strings.Contains(tmpPart, tmpK) {
-					hitKeywords = append(hitKeywords, k)
-				}
-			}
-		}
-		if 0 < len(hitKeywords) {
-			parts[i] = search.EncloseHighlighting(part, hitKeywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive)
-		}
+		buf.WriteString(parts[i])
+		buf.WriteString(replacementEnd)
 	}
-
-	ret = strings.Join(parts, " ")
-	if ret != text {
-		return
-	}
-
-	// 非 ASCII 文本并且不包含空格时再试试不分词匹配
-	if !gulu.Str.IsASCII(text) && !strings.Contains(text, " ") {
-		ret = search.EncloseHighlighting(text, keywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive)
-	}
+	ret = buf.String()
 	return
 }

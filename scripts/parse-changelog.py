@@ -6,12 +6,12 @@ from collections import defaultdict
 import github
 
 docmap = {
+    "Feature": "引入特性",
     "Enhancement": "改进功能",
+    "Bug": "修复缺陷",
     "Document": "文档相关",
     "Refactor": "开发重构",
-    "Bug": "修复缺陷",
-    "Features": "引入特性",
-    "Abolishments": "移除功能"
+    "Abolishment": "移除功能"
 }
 
 

@@ -116,10 +116,10 @@ export const syncGuide = (element?: Element) => {
         return;
     }
     if (isMobile()) {
-        if (needSubscribe()) {
+        if (0 === window.siyuan.config.sync.provider && needSubscribe()) {
             return;
         }
-    } else if (needSubscribe("")) {
+    } else if (0 === window.siyuan.config.sync.provider && needSubscribe("")) {
         const dialog = new Dialog({
             title: window.siyuan.languages.account,
             content: `<div class="account" style="background-color: var(--b3-theme-background)">${account.genHTML()}</div>`,

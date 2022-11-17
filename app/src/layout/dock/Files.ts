@@ -202,12 +202,8 @@ export class Files extends Model {
                 }
                 target = target.parentElement;
             }
-        })
+        });
         this.element.addEventListener("click", (event) => {
-            if (event.detail !== 1) {
-                setPanelFocus(this.element.parentElement);
-                return;
-            }
             let target = event.target as HTMLElement;
             const ulElement = hasTopClosestByTag(target, "UL");
             let needFocus = true;
@@ -250,13 +246,12 @@ export class Files extends Model {
                         event.stopPropagation();
                         break;
                     } else if (target.tagName === "LI") {
-                        needFocus = false;
                         if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey) {
-                            setPanelFocus(this.element.parentElement);
                             target.classList.toggle("b3-list-item--focus");
                         } else {
                             this.setCurrent(target, false);
                             if (target.getAttribute("data-type") === "navigation-file") {
+                                needFocus = false;
                                 if (event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
                                     openFileById({
                                         id: target.getAttribute("data-node-id"),
@@ -284,7 +279,6 @@ export class Files extends Model {
                                 }
                             } else if (target.getAttribute("data-type") === "navigation-root") {
                                 this.getLeaf(target, notebookId);
-                                setPanelFocus(this.element.parentElement);
                             }
                         }
                         this.element.querySelector('[select-end="true"]')?.removeAttribute("select-end");
@@ -319,14 +313,14 @@ export class Files extends Model {
                     selectElements = [liElement];
                 }
                 let ids = "";
-                const ghostElement = document.createElement("ul")
+                const ghostElement = document.createElement("ul");
                 selectElements.forEach((item: HTMLElement) => {
                     ghostElement.append(item.cloneNode(true));
                     item.style.opacity = "0.1";
                     ids += (item.getAttribute("data-node-id") || "") + ",";
                 });
-                ghostElement.setAttribute("style", `width: 219px;position: fixed;top:-${selectElements.length * 30}px`)
-                ghostElement.setAttribute("class", "b3-list b3-list--background")
+                ghostElement.setAttribute("style", `width: 219px;position: fixed;top:-${selectElements.length * 30}px`);
+                ghostElement.setAttribute("class", "b3-list b3-list--background");
                 document.body.append(ghostElement);
                 event.dataTransfer.setDragImage(ghostElement, 16, 16);
                 event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, ids);
@@ -335,7 +329,7 @@ export class Files extends Model {
                 window.siyuan.dragElement.innerText = ids;
                 setTimeout(() => {
                     ghostElement.remove();
-                })
+                });
             }
         });
         this.element.addEventListener("dragend", () => {
@@ -349,7 +343,7 @@ export class Files extends Model {
                 return;
             }
             const liElement = hasClosestByTag(event.target, "LI");
-            if (!liElement || !window.siyuan.dragElement || liElement.classList.contains("b3-list-item--focus")) {
+            if (!liElement || !window.siyuan.dragElement) {
                 event.preventDefault();
                 return;
             }
@@ -360,6 +354,10 @@ export class Files extends Model {
                     liElement.classList.add("dragover");
                 }
                 event.preventDefault();
+                return;
+            }
+            // 允许标题拖拽到文档树的选中文档上 https://github.com/siyuan-note/siyuan/issues/6552
+            if (liElement.classList.contains("b3-list-item--focus")) {
                 return;
             }
             let sourceOnlyRoot = true;

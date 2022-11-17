@@ -332,6 +332,22 @@ declare interface IConfig {
         stat: string
         interval: number
         cloudName: string
+        provider: number
+        s3: {
+            endpoint: string
+            pathStyle: boolean
+            accessKey: string
+            secretKey: string
+            bucket: string
+            region: string
+            skipTlsVerify: boolean
+        }
+        webdav: {
+            endpoint: string
+            username: string
+            password: string
+            skipTlsVerify: boolean
+        }
     },
     lang: string
     api: {
@@ -400,10 +416,22 @@ declare interface IConfig {
         backlinkMentionAlias: boolean
         backlinkMentionAnchor: boolean
         backlinkMentionDoc: boolean
+        backlinkMentionKeywordsLimit: boolean
         virtualRefName: boolean
         virtualRefAlias: boolean
         virtualRefAnchor: boolean
         virtualRefDoc: boolean
+        virtualRefKeywordsLimit: boolean
+    },
+    stat: {
+        treeCount: number
+        cTreeCount: number
+        blockCount: number
+        cBlockCount: number
+        dataSize: number
+        cDataSize: number
+        assetsSize: number
+        cAssetsSize: number
     }
 }
 

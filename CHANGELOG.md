@@ -1,3 +1,101 @@
+## v2.5.0 / 2022-11-15
+
+### 引入特性
+
+* [导出为长图](https://github.com/siyuan-note/siyuan/issues/2919)
+* [数据同步和备份支持接入第三方 S3 协议对象存储服务](https://github.com/siyuan-note/siyuan/issues/6426)
+* [数据同步和备份支持接入第三方 WebDAV 服务](https://github.com/siyuan-note/siyuan/issues/6446)
+
+### 改进功能
+
+* [编辑器右侧加入滚动到顶部和底部按钮](https://github.com/siyuan-note/siyuan/issues/6536)
+* [插入资源文件时不再去除 `[`、`(` 等符号](https://github.com/siyuan-note/siyuan/issues/6542)
+* [桌面端退出拉起更新安装时有时需要重启两次](https://github.com/siyuan-note/siyuan/issues/6544)
+* [`网络图片转换为本地图片` 支持处理 `file://` 本地路径图片](https://github.com/siyuan-note/siyuan/issues/6546)
+* [文档块转换为标题块时将文档标签移动到标题块下方](https://github.com/siyuan-note/siyuan/issues/6550)
+* [只读模式下不应该能够剪切](https://github.com/siyuan-note/siyuan/issues/6553)
+* [WebDAV 数据同步跳过 HTTPS 证书校验](https://github.com/siyuan-note/siyuan/issues/6556)
+* [S3 云端存储支持设置使用路径风格寻址](https://github.com/siyuan-note/siyuan/issues/6559)
+* [超宽屏幕优化](https://github.com/siyuan-note/siyuan/issues/6564)
+* [当有其他软件带有划选弹出功能时浮动工具栏消失](https://github.com/siyuan-note/siyuan/issues/6573)
+* [改进数据量较大时的启动速度](https://github.com/siyuan-note/siyuan/issues/6574)
+
+### 开发重构
+
+* [改进更新集市包的发布流程](https://github.com/siyuan-note/siyuan/issues/6579)
+
+### 修复缺陷
+
+* [清除样式导致误删文本](https://github.com/siyuan-note/siyuan/issues/6540)
+* [无法删除云端标记快照](https://github.com/siyuan-note/siyuan/issues/6549)
+* [标题块无法转换为被选中文档的子文档](https://github.com/siyuan-note/siyuan/issues/6552)
+* [只读模式下列表前的箭头无法折叠](https://github.com/siyuan-note/siyuan/issues/6554)
+* [反向链接面板复制问题](https://github.com/siyuan-note/siyuan/issues/6555)
+* [只读模式下多项折叠会导致数据类型错误](https://github.com/siyuan-note/siyuan/issues/6557)
+* [图片居中顶部有空行](https://github.com/siyuan-note/siyuan/issues/6561)
+* [PDF 页签中查看属性报错](https://github.com/siyuan-note/siyuan/issues/6562)
+* [PDF 页签中点击搜索再点击其他地方报错](https://github.com/siyuan-note/siyuan/issues/6563)
+* [`F2` 重命名文档后编辑器内未跟随改变](https://github.com/siyuan-note/siyuan/issues/6565)
+* [`[[` 引用动态锚文本长度限制无效](https://github.com/siyuan-note/siyuan/issues/6566)
+* [选中备注及其后文本无法将其后文本设置为备注](https://github.com/siyuan-note/siyuan/issues/6569)
+* [禁止文档历史内容可编辑](https://github.com/siyuan-note/siyuan/issues/6580)
+* [对没有渲染的文档进行重命名、移除、关闭，页签没有对应的变化](https://github.com/siyuan-note/siyuan/issues/6581)
+* [复制单个块时无法复制属性](https://github.com/siyuan-note/siyuan/issues/6585)
+
+## v2.4.12 / 2022-11-10
+
+### 改进功能
+
+* [光标位于段落块首的图片前时无法显示](https://github.com/siyuan-note/siyuan/issues/6136)
+* [为块重复添加快捷键 `Ctrl+D` 删除线快捷键修改为 `Ctrl+Shift+S`](https://github.com/siyuan-note/siyuan/issues/6477)
+* [快捷键新建行内元素后光标消失](https://github.com/siyuan-note/siyuan/issues/6481)
+* [行级清除样式不再清除备注、链接、标签、公式、PDF 标注和引用](https://github.com/siyuan-note/siyuan/issues/6501)
+* [为字体添加恢复默认功能](https://github.com/siyuan-note/siyuan/issues/6502)
+* [改进 WebDAV 数据同步创建目录实现](https://github.com/siyuan-note/siyuan/issues/6525)
+* [数据同步接入 S3 协议兼容的对象存储服务](https://github.com/siyuan-note/siyuan/issues/6528)
+* [行级代码、标签和键盘元素在块首时光标无法移动到元素前](https://github.com/siyuan-note/siyuan/issues/6529)
+* [调整数据同步接入第三方存储服务](https://github.com/siyuan-note/siyuan/issues/6530)
+* [文档树多选后右键菜单仅显示可操作的项](https://github.com/siyuan-note/siyuan/issues/6531)
+* [支持跨块及多选块重复](https://github.com/siyuan-note/siyuan/issues/6532)
+* [`Ctrl+Click` 选块应禁止嵌套选中](https://github.com/siyuan-note/siyuan/issues/6533)
+* [改进 WebDAV 上传数据性能](https://github.com/siyuan-note/siyuan/issues/6535)
+
+### 修复缺陷
+
+* [文档树上的文档无法拖动](https://github.com/siyuan-note/siyuan/issues/6497)
+* [设置在当前页签中打开失效](https://github.com/siyuan-note/siyuan/issues/6524)
+* [浏览器端数学公式内撤销导致状态异常](https://github.com/siyuan-note/siyuan/issues/6526)
+* [选中段落块和列表项块后粘贴会出现独立的列表项块](https://github.com/siyuan-note/siyuan/issues/6534)
+
+## v2.4.11 / 2022-11-08
+
+### 改进功能
+
+* [文档树移除笔记本双击操作并优化点击笔记本展开速度](https://github.com/siyuan-note/siyuan/issues/6500)
+* [改进鼠标移动到空文档名处光标状态](https://github.com/siyuan-note/siyuan/issues/6503)
+* [移动端后退页面包含嵌入块时定位不准确](https://github.com/siyuan-note/siyuan/issues/6505)
+* [在 `新页签中打开` 快捷键更改为 `Ctrl+Alt+Click` 或鼠标中键](https://github.com/siyuan-note/siyuan/issues/6510)
+* [优化在当前页签中打开的交互](https://github.com/siyuan-note/siyuan/issues/6512)
+* [开源数据同步 WebDAV 实现](https://github.com/siyuan-note/siyuan/issues/6513)
+* [移动端弹起键盘时减少抖动](https://github.com/siyuan-note/siyuan/issues/6514)
+* [iPad 端外接键盘底部不留空](https://github.com/siyuan-note/siyuan/issues/6515)
+* [iOS/iPad 端系统版本最低要求从 13.6 提升到 14.0](https://github.com/siyuan-note/siyuan/issues/6521)
+* [隐藏 iPad 顶部状态栏](https://github.com/siyuan-note/siyuan/issues/6522)
+
+### 开发重构
+
+* [重构 `文件历史` 查询](https://github.com/siyuan-note/siyuan/issues/6504)
+
+### 修复缺陷
+
+* [macOS 端报错 `内核连接中断` 以及 `数据库被锁定`](https://github.com/siyuan-note/siyuan/issues/6492)
+* [移动端文档树菜单点击无效](https://github.com/siyuan-note/siyuan/issues/6493)
+* [行内备注无法被搜索到](https://github.com/siyuan-note/siyuan/issues/6494)
+* [块末尾为数学公式时 `Shift+↓` 选中范围错误](https://github.com/siyuan-note/siyuan/issues/6495)
+* [文档树中笔记本无法进行排序](https://github.com/siyuan-note/siyuan/issues/6499)
+* [通过 `Shift+Click` 多选块移动时丢失块](https://github.com/siyuan-note/siyuan/issues/6511)
+* [`Ctrl+Shift+V` 外链资源文件失效](https://github.com/siyuan-note/siyuan/issues/6520)
+
 ## v2.4.10 / 2022-11-05
 
 ### 改进功能

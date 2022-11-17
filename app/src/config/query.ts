@@ -109,7 +109,7 @@ export const query = {
             <span class="fn__space"></span>
             <input class="b3-switch fn__flex-center" id="memo" type="checkbox"${window.siyuan.config.search.memo ? " checked" : ""}/>
         </label>
-                <label class="fn__flex">
+        <label class="fn__flex">
             <div class="fn__flex-1 b3-label__text">
                 ${window.siyuan.languages.custom}
             </div>
@@ -149,6 +149,13 @@ export const query = {
             <span class="fn__space"></span>
             <input class="b3-switch fn__flex-center" id="backlinkMentionDoc" type="checkbox"${window.siyuan.config.search.backlinkMentionDoc ? " checked" : ""}/>
         </label>
+        <label class="fn__flex" style="flex: 2">
+            <div class="b3-label__text">
+                ${window.siyuan.languages.keywordsLimit}
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-text-field fn__flex-center" id="backlinkMentionKeywordsLimit" type="number" min="1" max="10240" value="${window.siyuan.config.search.backlinkMentionKeywordsLimit}">
+        </label>
     </div>
 </div>
 <div class="b3-label">
@@ -182,12 +189,20 @@ export const query = {
             <span class="fn__space"></span>
             <input class="b3-switch fn__flex-center" id="virtualRefDoc" type="checkbox"${window.siyuan.config.search.virtualRefDoc ? " checked" : ""}/>
         </label>
+        <label class="fn__flex" style="flex: 2">
+            <div class="b3-label__text">
+                ${window.siyuan.languages.keywordsLimit}
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-text-field fn__flex-center" id="virtualRefKeywordsLimit" type="number" min="1" max="10240" value="${window.siyuan.config.search.virtualRefKeywordsLimit}">
+        </label>
     </div>
 </div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.searchLimit}
          <div class="b3-label__text">${window.siyuan.languages.searchLimit1}</div>
+         <div class="b3-label__text">${window.siyuan.languages.searchLimit2}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="limit" type="number" min="1" max="10240" value="${window.siyuan.config.search.limit}">
@@ -226,10 +241,12 @@ export const query = {
                     backlinkMentionAlias: (query.element.querySelector("#backlinkMentionAlias") as HTMLInputElement).checked,
                     backlinkMentionAnchor: (query.element.querySelector("#backlinkMentionAnchor") as HTMLInputElement).checked,
                     backlinkMentionDoc: (query.element.querySelector("#backlinkMentionDoc") as HTMLInputElement).checked,
+                    backlinkMentionKeywordsLimit: parseInt((query.element.querySelector("#backlinkMentionKeywordsLimit") as HTMLInputElement).value),
                     virtualRefName: (query.element.querySelector("#virtualRefName") as HTMLInputElement).checked,
                     virtualRefAlias: (query.element.querySelector("#virtualRefAlias") as HTMLInputElement).checked,
                     virtualRefAnchor: (query.element.querySelector("#virtualRefAnchor") as HTMLInputElement).checked,
                     virtualRefDoc: (query.element.querySelector("#virtualRefDoc") as HTMLInputElement).checked,
+                    virtualRefKeywordsLimit: parseInt((query.element.querySelector("#virtualRefKeywordsLimit") as HTMLInputElement).value),
                 }, response => {
                     window.siyuan.config.search = response.data;
                 });

@@ -301,9 +301,41 @@ func SetSyncMode(mode int) (err error) {
 	return
 }
 
+func SetSyncProvider(provider int) (err error) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	Conf.Sync.Provider = provider
+	Conf.Save()
+	return
+}
+
+func SetSyncProviderS3(s3 *conf.S3) (err error) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	Conf.Sync.S3 = s3
+	Conf.Save()
+	return
+}
+
+func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	Conf.Sync.WebDAV = webdav
+	Conf.Save()
+	return
+}
+
 var syncLock = sync.Mutex{}
 
 func CreateCloudSyncDir(name string) (err error) {
+	if conf.ProviderSiYuan != Conf.Sync.Provider {
+		err = errors.New(Conf.Language(131))
+		return
+	}
+
 	syncLock.Lock()
 	defer syncLock.Unlock()
 
@@ -319,10 +351,19 @@ func CreateCloudSyncDir(name string) (err error) {
 	}
 
 	err = repo.CreateCloudRepo(name)
+	if nil != err {
+		err = errors.New(formatErrorMsg(err))
+		return
+	}
 	return
 }
 
 func RemoveCloudSyncDir(name string) (err error) {
+	if conf.ProviderSiYuan != Conf.Sync.Provider {
+		err = errors.New(Conf.Language(131))
+		return
+	}
+
 	msgId := util.PushMsg(Conf.Language(116), 15000)
 
 	syncLock.Lock()
@@ -378,14 +419,21 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 
 	for _, d := range dirs {
 		dirSize := d.Size
-		syncDirs = append(syncDirs, &Sync{
+		sync := &Sync{
 			Size:      dirSize,
-			HSize:     humanize.Bytes(uint64(dirSize)),
+			HSize:     "-",
 			Updated:   d.Updated,
 			CloudName: d.Name,
-		})
+		}
+		if conf.ProviderSiYuan == Conf.Sync.Provider {
+			sync.HSize = humanize.Bytes(uint64(dirSize))
+		}
+		syncDirs = append(syncDirs, sync)
 	}
-	hSize = humanize.Bytes(uint64(size))
+	hSize = "-"
+	if conf.ProviderSiYuan == Conf.Sync.Provider {
+		hSize = humanize.Bytes(uint64(size))
+	}
 	return
 }
 

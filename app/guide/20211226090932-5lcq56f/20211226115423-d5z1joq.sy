@@ -456,7 +456,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20211226115745-1yev4ow",
-				"updated": "20211228132231"
+				"updated": "20211226115745"
 			},
 			"Children": [
 				{
@@ -472,7 +472,7 @@
 					"Properties": {
 						"id": "20211226115745-7bnqf8y",
 						"style": "width: 70%; flex: 0 0 auto;",
-						"updated": "20211225212702"
+						"updated": "20211226115745"
 					},
 					"Children": [
 						{
@@ -504,7 +504,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20211226115745-kp5hzo0",
-								"updated": "20211225212739"
+								"updated": "20211226115745"
 							},
 							"Children": [
 								{
@@ -516,7 +516,7 @@
 									},
 									"Properties": {
 										"id": "20211226115745-atoavxu",
-										"updated": "20211225212717"
+										"updated": "20211226115745"
 									},
 									"Children": [
 										{
@@ -532,66 +532,6 @@
 													"TextMarkType": "a",
 													"TextMarkAHref": "https://ld246.com/domain/siyuan",
 													"TextMarkTextContent": "鏈滴（中文討論區）"
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20211226115745-hqp8reu",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20211226115745-hqp8reu",
-										"updated": "20210601234224"
-									},
-									"Children": [
-										{
-											"ID": "20211226115745-bn89n1y",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20211226115745-bn89n1y",
-												"updated": "20210601234224"
-											},
-											"Children": [
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "a",
-													"TextMarkAHref": "https://github.com/siyuan-note/siyuan/issues",
-													"TextMarkTextContent": "GitHub Issues"
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20211226115745-b5s69f5",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20211226115745-b5s69f5",
-										"updated": "20211225212725"
-									},
-									"Children": [
-										{
-											"ID": "20211226115745-r7cfdv4",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20211226115745-r7cfdv4",
-												"updated": "20211225212725"
-											},
-											"Children": [
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "a",
-													"TextMarkAHref": "https://qun.qq.com/qqweb/qunpro/share?_wv=3\u0026_wwv=128\u0026inviteCode=EGKPc\u0026from=246610\u0026biz=ka",
-													"TextMarkTextContent": "QQ 頻道"
 												}
 											]
 										}
@@ -639,7 +579,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20211226115745-gllrx2n",
-						"updated": "20211228132231"
+						"updated": "20221114173758"
 					},
 					"Children": [
 						{
@@ -670,7 +610,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20211226115745-rx1tyat",
-								"updated": "20211228132231"
+								"updated": "20221114173758"
 							},
 							"Children": [
 								{
@@ -682,7 +622,7 @@
 									},
 									"Properties": {
 										"id": "20211226115745-h94uwtn",
-										"updated": "20211227210343"
+										"updated": "20221114173758"
 									},
 									"Children": [
 										{
@@ -690,196 +630,45 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226115745-luaw9af",
-												"updated": "20211227210343"
+												"updated": "20221114173758"
 											},
 											"Children": [
 												{
-													"Type": "NodeBlockRef",
-													"Data": "span",
-													"Children": [
-														{
-															"Type": "NodeOpenParen"
-														},
-														{
-															"Type": "NodeOpenParen"
-														},
-														{
-															"Type": "NodeBlockRefID",
-															"Data": "20211226121625-3wjcf6l"
-														},
-														{
-															"Type": "NodeBlockRefSpace"
-														},
-														{
-															"Type": "NodeBlockRefText",
-															"Data": "上架主题集市"
-														},
-														{
-															"Type": "NodeCloseParen"
-														},
-														{
-															"Type": "NodeCloseParen"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20211226115356-iecet3h",
+													"TextMarkBlockRefSubtype": "s",
+													"TextMarkTextContent": "思源筆記完全開源"
 												}
 											]
 										}
 									]
 								},
 								{
-									"ID": "20211226115745-yqhbic2",
+									"ID": "20221114173649-jg9t3nk",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20211226115745-yqhbic2",
-										"updated": "20211228104446"
+										"id": "20221114173649-jg9t3nk",
+										"updated": "20221114173707"
 									},
 									"Children": [
 										{
-											"ID": "20211226115745-69etymo",
+											"ID": "20221114173649-umu8m0b",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20211226115745-69etymo",
-												"updated": "20211228104446"
+												"id": "20221114173649-umu8m0b",
+												"updated": "20221114173707"
 											},
 											"Children": [
 												{
-													"Type": "NodeBlockRef",
-													"Data": "span",
-													"Children": [
-														{
-															"Type": "NodeOpenParen"
-														},
-														{
-															"Type": "NodeOpenParen"
-														},
-														{
-															"Type": "NodeBlockRefID",
-															"Data": "20211226123024-4ihq4sa"
-														},
-														{
-															"Type": "NodeBlockRefSpace"
-														},
-														{
-															"Type": "NodeBlockRefText",
-															"Data": "上架範本集市"
-														},
-														{
-															"Type": "NodeCloseParen"
-														},
-														{
-															"Type": "NodeCloseParen"
-														}
-													]
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20211226115745-marjndt",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20211226115745-marjndt",
-										"updated": "20211228132231"
-									},
-									"Children": [
-										{
-											"ID": "20211226115745-ho382vy",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20211226115745-ho382vy",
-												"updated": "20211228132231"
-											},
-											"Children": [
-												{
-													"Type": "NodeBlockRef",
-													"Data": "span",
-													"Children": [
-														{
-															"Type": "NodeOpenParen"
-														},
-														{
-															"Type": "NodeOpenParen"
-														},
-														{
-															"Type": "NodeBlockRefID",
-															"Data": "20211226121706-yo7ar0b"
-														},
-														{
-															"Type": "NodeBlockRefSpace"
-														},
-														{
-															"Type": "NodeBlockRefText",
-															"Data": "上架圖示集市"
-														},
-														{
-															"Type": "NodeCloseParen"
-														},
-														{
-															"Type": "NodeCloseParen"
-														}
-													]
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20211226115745-5878e3q",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20211226115745-5878e3q",
-										"updated": "20211227210355"
-									},
-									"Children": [
-										{
-											"ID": "20211226115745-fi7oapl",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20211226115745-fi7oapl",
-												"updated": "20211227210355"
-											},
-											"Children": [
-												{
-													"Type": "NodeBlockRef",
-													"Data": "span",
-													"Children": [
-														{
-															"Type": "NodeOpenParen"
-														},
-														{
-															"Type": "NodeOpenParen"
-														},
-														{
-															"Type": "NodeBlockRefID",
-															"Data": "20211226123118-9luabq8"
-														},
-														{
-															"Type": "NodeBlockRefSpace"
-														},
-														{
-															"Type": "NodeBlockRefText",
-															"Data": "上架小工具集市"
-														},
-														{
-															"Type": "NodeCloseParen"
-														},
-														{
-															"Type": "NodeCloseParen"
-														}
-													]
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
+													"TextMarkTextContent": "社區集市"
 												}
 											]
 										}

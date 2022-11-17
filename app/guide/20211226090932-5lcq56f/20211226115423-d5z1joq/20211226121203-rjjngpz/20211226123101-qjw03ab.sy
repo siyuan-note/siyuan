@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123101-qjw03ab",
 		"title": "小工具",
-		"updated": "20220108011151"
+		"updated": "20221114173622"
 	},
 	"Children": [
 		{
@@ -81,341 +81,36 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123118-9luabq8",
-				"updated": "20211226005304"
+				"updated": "20221114173622"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "上架小工具集市"
+					"Data": "上架社區集市"
 				}
 			]
 		},
 		{
-			"ID": "20211226123118-rouesan",
+			"ID": "20221114173603-zms87ks",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226123118-rouesan",
-				"updated": "20211228104600"
+				"id": "20221114173603-zms87ks",
+				"updated": "20221114173603"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "上架前請確認你的範本倉庫根路徑下至少包含以下文件（"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/88250/Stairway-To-Heaven",
-					"TextMarkTextContent": "倉庫示例"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "）："
-				}
-			]
-		},
-		{
-			"ID": "20211226123118-kr7j4we",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20211226123118-kr7j4we",
-				"updated": "20211226005738"
-			},
-			"Children": [
-				{
-					"ID": "20211226123118-8vrjqht",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226123118-8vrjqht"
-					},
-					"Children": [
-						{
-							"ID": "20211226123118-zxvdts0",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226123118-zxvdts0"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "widget.json（請確保 JSON 格式正確）"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226123118-mskdks1",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226123118-mskdks1"
-					},
-					"Children": [
-						{
-							"ID": "20211226123118-1awh7rx",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226123118-1awh7rx"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "index.html"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226123118-cy8pfsa",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226123118-cy8pfsa"
-					},
-					"Children": [
-						{
-							"ID": "20211226123118-uuhew2f",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226123118-uuhew2f"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "preview.png（請壓縮圖片大小在 512 KB 以內）"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226123118-uhuwmjk",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226123118-uhuwmjk"
-					},
-					"Children": [
-						{
-							"ID": "20211226123118-tasbnyk",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226123118-tasbnyk"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "README.md（請註意大小寫）"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20211226123118-y8auswj",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226123118-y8auswj",
-				"updated": "20211228104623"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "確認無誤以後請通過對"
+					"Data": "請參考"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "社區集市"
+					"TextMarkTextContent": "社區集市 README"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "倉庫"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://docs.github.com/cn/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request",
-					"TextMarkTextContent": "發起 pull request"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，修改 widgets.json 文件。該文件是所有社區範本倉庫的索引，格式為："
-				}
-			]
-		},
-		{
-			"ID": "20211226123118-0q9irs9",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"Properties": {
-				"id": "20211226123118-0q9irs9",
-				"updated": "20211226005738"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "anNvbg=="
-				},
-				{
-					"ID": "20220307092237-q5fb791",
-					"Type": "NodeCodeBlockCode",
-					"Data": "{\n  \"repos\": [\n    \"username/reponame@commithash\"\n  ]\n}\n",
-					"Properties": {
-						"id": "20220307092237-q5fb791"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
-				}
-			]
-		},
-		{
-			"ID": "20211226123118-h1yv8i2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226123118-h1yv8i2",
-				"updated": "20211228104605"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "其中 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "commithash"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 請填寫你的範本倉庫上最近一次發布版本的 Git 提交hash values，請使用完整hash values，不要使用 7 位短值。"
-				}
-			]
-		},
-		{
-			"ID": "20220108011151-drslpt9",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20220108011151-drslpt9",
-				"updated": "20220108011151"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "更新"
-				}
-			]
-		},
-		{
-			"ID": "20220108011151-75zyj5c",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220108011151-75zyj5c",
-				"updated": "20220108011159"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果你開發的小工具更新了版本，請記得："
-				}
-			]
-		},
-		{
-			"ID": "20220108011151-f9281id",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220108011151-f9281id",
-				"updated": "20220108011204"
-			},
-			"Children": [
-				{
-					"ID": "20220108011151-g9jl2qs",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220108011151-g9jl2qs",
-						"updated": "20220108011204"
-					},
-					"Children": [
-						{
-							"ID": "20220108011151-3ufdiae",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220108011151-3ufdiae",
-								"updated": "20220108011204"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "更新你的小工具配置 widget.json 中的 version 欄位"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220108011151-ajwx27a",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220108011151-ajwx27a"
-					},
-					"Children": [
-						{
-							"ID": "20220108011151-4p3o3z0",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220108011151-4p3o3z0"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "再次對"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "社區"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "集市發起 Pull Request"
-								}
-							]
-						}
-					]
+					"Data": "。"
 				}
 			]
 		}

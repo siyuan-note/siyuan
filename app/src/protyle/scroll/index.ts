@@ -1,25 +1,41 @@
 import {Constants} from "../../constants";
 import {onGet} from "../util/onGet";
 import {fetchPost} from "../../util/fetch";
+import {updateHotkeyTip} from "../util/compatibility";
+import {hasClosestByClassName} from "../util/hasClosest";
+import {goEnd, goHome} from "../wysiwyg/commonHotkey";
+import {isMobile} from "../../util/functions";
 
 export class Scroll {
     public element: HTMLElement;
+    private parentElement: HTMLElement;
     private inputElement: HTMLInputElement;
     public lastScrollTop: number;
     public keepLazyLoad: boolean;
 
     constructor(protyle: IProtyle) {
-        const divElement = document.createElement("div");
-        divElement.innerHTML = "<input class='b3-slider' type='range' max='1' min='1' step='1' value='1' />";
-        divElement.className = "fn__none protyle-scroll b3-tooltips b3-tooltips__s";
-        divElement.setAttribute("aria-label", "Blocks 1/1");
-        this.element = divElement;
-        this.keepLazyLoad =  false;
+        this.parentElement = document.createElement("div");
+        this.parentElement.classList.add("protyle-scroll");
+        if (!isMobile()) {
+            this.parentElement.style.right = "10px";
+        }
+        this.parentElement.innerHTML = `<div class="b3-tooltips b3-tooltips__nw protyle-scroll__up" aria-label="${updateHotkeyTip("⌘Home")}">
+    <svg><use xlink:href="#iconUp"></use></svg>
+</div>
+<div class="fn__none protyle-scroll__bar b3-tooltips b3-tooltips__s" aria-label="Blocks 1/1">
+    <input class="b3-slider" type="range" max="1" min="1" step="1" value="1" />
+</div>
+<div class="b3-tooltips b3-tooltips__sw protyle-scroll__down" aria-label="${updateHotkeyTip("⌘End")}">
+    <svg><use xlink:href="#iconDown"></use></svg>
+</div>`;
+
+        this.element = this.parentElement.querySelector(".protyle-scroll__bar");
+        this.keepLazyLoad = false;
         if (!protyle.options.render.scroll) {
-            this.element.classList.add("fn__none");
+            this.parentElement.classList.add("fn__none");
         }
         this.lastScrollTop = 0;
-        this.inputElement = divElement.firstElementChild as HTMLInputElement;
+        this.inputElement = this.element.firstElementChild as HTMLInputElement;
         this.inputElement.addEventListener("input", () => {
             this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
         });
@@ -31,13 +47,20 @@ export class Scroll {
             this.setIndex(protyle);
         });
         /// #endif
-        this.inputElement.addEventListener("click", () => {
-            this.setIndex(protyle);
+        this.parentElement.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement;
+            if (hasClosestByClassName(target, "protyle-scroll__up")) {
+                goHome(protyle);
+            } else if (hasClosestByClassName(target, "protyle-scroll__down")) {
+                goEnd(protyle);
+            } else if (target.classList.contains("b3-slider")) {
+                this.setIndex(protyle);
+            }
         });
     }
 
     private setIndex(protyle: IProtyle) {
-        if (protyle.wysiwyg.element.getAttribute("data-top") || !protyle.model) {
+        if (protyle.wysiwyg.element.getAttribute("data-top")) {
             return;
         }
         protyle.wysiwyg.element.setAttribute("data-top", protyle.wysiwyg.element.scrollTop.toString());

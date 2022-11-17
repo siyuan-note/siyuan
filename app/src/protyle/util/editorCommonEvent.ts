@@ -620,7 +620,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 selectedIds.forEach(item => {
                     html += `{{select * from blocks where id='${item}'}}\n`;
                 });
-                insertHTML(protyle.lute.SpinBlockDOM(html), protyle);
+                insertHTML(protyle.lute.SpinBlockDOM(html), protyle, true);
                 blockRender(protyle, protyle.wysiwyg.element);
             } else if (targetElement) {
                 const targetClass = targetElement.className.split(" ");
@@ -747,8 +747,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             return;
         }
-        if (fileTreeIds.indexOf("-") > -1 && !fileTreeIds.split(",").includes(protyle.block.rootID)) {
-            dragoverElement = targetElement;
+        if (fileTreeIds.indexOf("-") > -1) {
+            if (fileTreeIds.split(",").includes(protyle.block.rootID)) {
+                dragoverElement = undefined;
+            } else {
+                dragoverElement = targetElement;
+            }
             return;
         }
 

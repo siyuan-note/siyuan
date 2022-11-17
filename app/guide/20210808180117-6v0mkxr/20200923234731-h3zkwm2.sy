@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20220909101124"
+		"updated": "20221112211041"
 	},
 	"Children": [
 		{
@@ -299,42 +299,24 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "assets"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " are used to save all inserted "
+									"Data": "​ are used to save all inserted "
 								},
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20200924100744-br924ar"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "assets"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200924100744-br924ar",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "assets"
 								}
 							]
 						}
@@ -361,42 +343,24 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "templates"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " are used to save "
+									"Data": "​ are used to save "
 								},
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20201204184532-3qm9l8n"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "template snippets"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20201204184532-3qm9l8n",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "template snippets"
 								}
 							]
 						}
@@ -423,42 +387,24 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "widgets"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " are used to save "
+									"Data": "​ are used to save "
 								},
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20210824202056-udkf7wg"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "widgets"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210824202056-udkf7wg",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "widgets"
 								}
 							]
 						}
@@ -485,13 +431,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "emojis"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " are used to save emoji images"
+									"Data": "​ are used to save emoji images"
 								}
 							]
 						}
@@ -527,7 +477,364 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " in the notebook folder are used to save the document data, and the data format is JSON"
+									"Data": "​ in the notebook folder are used to save the document data, and the data format is JSON"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220808181753-3ligpvz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220808181753-3ligpvz",
+				"updated": "20220808181753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Does it support data synchronization through a third-party sync disk?"
+				}
+			]
+		},
+		{
+			"ID": "20220808181718-tcv74v2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220808181718-tcv74v2",
+				"updated": "20220808181719"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data synchronization through third-party synchronization disks is not supported, otherwise data may be corrupted. "
+				}
+			]
+		},
+		{
+			"ID": "20221112205611-eafvvel",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221112205611-eafvvel",
+				"updated": "20221112205652"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Although it does not support third-party sync disks, it supports third-party cloud storage services, which can be configured in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cloud"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cloud Storage Provider"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, currently supported:"
+				}
+			]
+		},
+		{
+			"ID": "20221112205611-b4zhc8p",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221112205611-b4zhc8p",
+				"updated": "20221112205611"
+			},
+			"Children": [
+				{
+					"ID": "20221112205611-97prfc9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221112205611-97prfc9",
+						"updated": "20221112205611"
+					},
+					"Children": [
+						{
+							"ID": "20221112205611-uzrdaj3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221112205611-uzrdaj3",
+								"updated": "20221112210327"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "S3 compatible object storage services, such as "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://s.qiniu.com/VbQfeu",
+									"TextMarkTextContent": "Qiniu"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.aliyun.com/product/oss?userCode=yqovuas2",
+									"TextMarkTextContent": "Aliyun OSS"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.cloudflare.com/",
+									"TextMarkTextContent": "Cloudflare R2"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221112205611-2igreuz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221112205611-2igreuz",
+						"updated": "20221112205611"
+					},
+					"Children": [
+						{
+							"ID": "20221112205611-j3l9b8r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221112205611-j3l9b8r",
+								"updated": "20221112210118"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "WebDAV protocol, such as "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://teracloud.jp/",
+									"TextMarkTextContent": "TeraCLOUD"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://koofr.eu/",
+									"TextMarkTextContent": "Koofr"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221112205611-5r7862d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221112205611-5r7862d",
+				"updated": "20221112211041"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Synchronizing data through third-party cloud storage services is also "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210721112229-fp97j3c",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "end-to-end encrypted"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and third-party cloud storage service providers cannot obtain our plaintext data."
+				}
+			]
+		},
+		{
+			"ID": "20221112210525-icjpxq3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221112210525-icjpxq3",
+				"updated": "20221112210600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition, you can also consider manually exporting and importing data to achieve data synchronization:"
+				}
+			]
+		},
+		{
+			"ID": "20220619172044-z4myy48",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220619172044-z4myy48",
+				"updated": "20220619172044"
+			},
+			"Children": [
+				{
+					"ID": "20220619172044-451fqpf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220619172044-451fqpf",
+						"updated": "20220619172044"
+					},
+					"Children": [
+						{
+							"ID": "20220619172044-bx4v3iz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220619172044-bx4v3iz",
+								"updated": "20220619172044"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Desktop: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Export"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Export Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Import Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220619172044-r6xfdvm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220619172044-r6xfdvm",
+						"updated": "20220619172044"
+					},
+					"Children": [
+						{
+							"ID": "20220619172044-ccusmko",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220619172044-ccusmko",
+								"updated": "20220619172044"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mobile: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Right column"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "About"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Export Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Import Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​"
 								}
 							]
 						}
@@ -1556,166 +1863,6 @@
 			]
 		},
 		{
-			"ID": "20220808181753-3ligpvz",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20220808181753-3ligpvz",
-				"updated": "20220808181753"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Does it support data synchronization through a third-party sync disk?"
-				}
-			]
-		},
-		{
-			"ID": "20220808181718-tcv74v2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220808181718-tcv74v2",
-				"updated": "20220808181719"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Data synchronization through third-party synchronization disks is not supported, otherwise data may be corrupted. Consider manually exporting and importing Data for data synchronization:"
-				}
-			]
-		},
-		{
-			"ID": "20220619172044-z4myy48",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220619172044-z4myy48",
-				"updated": "20220619172044"
-			},
-			"Children": [
-				{
-					"ID": "20220619172044-451fqpf",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220619172044-451fqpf",
-						"updated": "20220619172044"
-					},
-					"Children": [
-						{
-							"ID": "20220619172044-bx4v3iz",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220619172044-bx4v3iz",
-								"updated": "20220619172044"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Desktop: "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Settings"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Export"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Export Data"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Import Data"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220619172044-r6xfdvm",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220619172044-r6xfdvm",
-						"updated": "20220619172044"
-					},
-					"Children": [
-						{
-							"ID": "20220619172044-ccusmko",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220619172044-ccusmko",
-								"updated": "20220619172044"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Mobile: "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Right column"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "About"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Export Data"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Import Data"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
 			"ID": "20220708111435-xmj42q4",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -2075,7 +2222,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/pricing.html",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/pricing.html",
 					"TextMarkTextContent": "Cloud services"
 				},
 				{
@@ -2089,22 +2236,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220703000434-rpabrb5",
-				"updated": "20220820000523"
+				"updated": "20221112210752"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Currently, only users in mainland China are supported to subscribe. For users in non-mainland China regions, please follow "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/issues/5331",
-					"TextMarkTextContent": "Cloud service supports non-mainland China regions"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "."
+					"Data": "Currently, only users in mainland China are supported to subscribe, and users who are not in mainland China should not subscribe."
 				}
 			]
 		}

@@ -1,7 +1,7 @@
 import {setPosition} from "../util/setPosition";
 import {isMobile} from "../util/functions";
 
-export const showTooltip = (message: string, target: Element) => {
+export const showTooltip = (message: string, target: Element, error = false) => {
     if (isMobile()) {
         return;
     }
@@ -17,7 +17,12 @@ export const showTooltip = (message: string, target: Element) => {
     } else {
         messageElement.innerHTML = message;
     }
-    if(target.getAttribute("data-inline-memo-content")) {
+    if (error) {
+        messageElement.classList.add("tooltip--error");
+    } else {
+        messageElement.classList.remove("tooltip--error");
+    }
+    if (target.getAttribute("data-inline-memo-content")) {
         messageElement.classList.add("tooltip--memo"); // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
     }
     let left = targetRect.left;

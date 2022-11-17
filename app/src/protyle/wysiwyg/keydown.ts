@@ -42,17 +42,13 @@ import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
-/// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
-/// #endif
-import {commonHotkey, downSelect, getStartEndElement, upSelect} from "./commonHotkey";
+import {commonHotkey, downSelect, duplicateBlock, getStartEndElement, goEnd, goHome, upSelect} from "./commonHotkey";
 import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {bindMenuKeydown} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
-import {onGet} from "../util/onGet";
 import {scrollCenter} from "../../util/highlightById";
 import {BlockPanel} from "../../block/Panel";
 import * as dayjs from "dayjs";
@@ -60,6 +56,8 @@ import {highlightRender} from "../markdown/highlightRender";
 import {countBlockWord} from "../../layout/status";
 import {openMobileFileById} from "../../mobile/editor";
 import {moveToDown, moveToUp} from "./move";
+import {pasteAsPlainText} from "../util/paste";
+import {preventScroll} from "../scroll/preventScroll";
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
@@ -76,7 +74,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         hideElements(["util"], protyle);
         if (event.shiftKey && event.key.indexOf("Arrow") > -1) {
             // 防止连续选中的时候抖动 https://github.com/siyuan-note/insider/issues/657#issuecomment-851391217
-        } else if (!event.repeat) {
+        } else if (!event.repeat &&
+            event.code !== "") { // 悬浮工具会触发但 code 为空 https://github.com/siyuan-note/siyuan/issues/6573
             hideElements(["toolbar"], protyle);
         }
         const range = getEditorRange(protyle.wysiwyg.element);
@@ -361,6 +360,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const previousElement = getPreviousBlock(startEndElement.endElement);
                         if (previousElement) {
                             previousElement.setAttribute("select-end", "true");
+                            if (previousElement.getBoundingClientRect().top <= protyle.contentElement.getBoundingClientRect().top) {
+                                preventScroll(protyle)
+                                previousElement.scrollIntoView(true)
+                            }
                         }
                     }
                 }
@@ -394,6 +397,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const nextElement = getNextBlock(startEndElement.endElement);
                         if (nextElement) {
                             nextElement.setAttribute("select-end", "true");
+                            if (nextElement.getBoundingClientRect().bottom >= protyle.contentElement.getBoundingClientRect().bottom) {
+                                preventScroll(protyle)
+                                nextElement.scrollIntoView(false)
+                            }
                         }
                     }
                 }
@@ -454,41 +461,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // ctrl+home 光标移动到顶
         if (!event.altKey && !event.shiftKey && isCtrl(event) && event.key === "Home") {
-            if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0" ||
-                protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||
-                protyle.options.backlinkData) {
-                focusBlock(protyle.wysiwyg.element.firstElementChild);
-                protyle.contentElement.scrollTop = 0;
-                protyle.scroll.lastScrollTop = 1;
-            } else {
-                fetchPost("/api/filetree/getDoc", {
-                    id: protyle.block.rootID,
-                    mode: 0,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
-                });
-            }
+            goHome(protyle);
             event.stopPropagation();
             event.preventDefault();
             return;
         }
         // ctrl+end 光标移动到尾
         if (!event.altKey && !event.shiftKey && isCtrl(event) && event.key === "End") {
-            if (!protyle.scroll.element.classList.contains("fn__none") &&
-                protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true") {
-                fetchPost("/api/filetree/getDoc", {
-                    id: protyle.block.rootID,
-                    mode: 4,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
-                });
-            } else {
-                protyle.contentElement.scrollTop = protyle.contentElement.scrollHeight;
-                protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
-                focusBlock(protyle.wysiwyg.element.lastElementChild, undefined, false);
-            }
+            goEnd(protyle);
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -1448,6 +1428,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.duplicate.custom, event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectsElement.length === 0) {
+                selectsElement = [nodeElement];
+            }
+            duplicateBlock(selectsElement, protyle);
+            return;
+        }
+
         // tab 需等待 list 和 table 处理完成
         if (event.key === "Tab" && !event.ctrlKey && !isCtrl(event) && !event.altKey) {
             event.preventDefault();
@@ -1583,7 +1574,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.returnValue = false;
             event.preventDefault();
             event.stopPropagation();
-            getCurrentWindow().webContents.pasteAndMatchStyle();
+            pasteAsPlainText(protyle);
             return;
         }
 

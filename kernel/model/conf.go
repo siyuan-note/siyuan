@@ -242,10 +242,6 @@ func InitConf() {
 	if 0 == Conf.Sync.Mode {
 		Conf.Sync.Mode = 1
 	}
-	if nil == Conf.Sync.Qiniu {
-		Conf.Sync.Qiniu = &conf.Qiniu{}
-	}
-	Conf.Sync.Qiniu.Endpoint = util.NormalizeEndpoint(Conf.Sync.Qiniu.Endpoint)
 	if nil == Conf.Sync.S3 {
 		Conf.Sync.S3 = &conf.S3{}
 	}
@@ -281,6 +277,12 @@ func InitConf() {
 	}
 	if 1 > Conf.Search.Limit {
 		Conf.Search.Limit = 64
+	}
+	if 1 > Conf.Search.BacklinkMentionKeywordsLimit {
+		Conf.Search.BacklinkMentionKeywordsLimit = 512
+	}
+	if 1 > Conf.Search.VirtualRefKeywordsLimit {
+		Conf.Search.VirtualRefKeywordsLimit = 512
 	}
 
 	if nil == Conf.Stat {
@@ -433,12 +435,10 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	go func() {
 		time.Sleep(500 * time.Millisecond)
 		if waitSecondForExecInstallPkg {
-			time.Sleep(2 * time.Second)
-			if gulu.OS.IsWindows() {
-				// Windows 端退出拉起更新安装时有时需要重启两次 https://github.com/siyuan-note/siyuan/issues/6467
-				// 这里多等待一段时间，等待安装程序启动后时会在 NSIS 自定义脚本中 Kill SiYuan 进程，详见 install.nsh
-				time.Sleep(5 * time.Second)
-			}
+			util.PushMsg(Conf.Language(130), 1000*5)
+			// 桌面端退出拉起更新安装时有时需要重启两次 https://github.com/siyuan-note/siyuan/issues/6544
+			// 这里多等待一段时间，等待安装程序启动
+			time.Sleep(4 * time.Second)
 		}
 		logging.LogInfof("exited kernel")
 		util.WebSocketServer.Close()

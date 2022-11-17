@@ -26,11 +26,13 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/dustin/go-humanize"
 	"github.com/facette/natsort"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -52,14 +54,29 @@ type Box struct {
 }
 
 func AutoStat() {
-	for range time.Tick(10 * time.Minute) {
+	time.Sleep(time.Minute)
+	autoStat()
+	for range time.Tick(2 * time.Hour) {
 		autoStat()
 	}
 }
 
+var statLock = sync.Mutex{}
+
 func autoStat() {
-	Conf.Stat.DocCount = sql.CountAllDoc()
+	statLock.Lock()
+	defer statLock.Unlock()
+
+	Conf.Stat.TreeCount = treenode.CountTrees()
+	Conf.Stat.CTreeCount = treenode.CeilTreeCount(Conf.Stat.TreeCount)
+	Conf.Stat.BlockCount = treenode.CountBlocks()
+	Conf.Stat.CBlockCount = treenode.CeilBlockCount(Conf.Stat.BlockCount)
+	Conf.Stat.DataSize, Conf.Stat.AssetsSize = util.DataSize()
+	Conf.Stat.CDataSize = util.CeilSize(Conf.Stat.DataSize)
+	Conf.Stat.CAssetsSize = util.CeilSize(Conf.Stat.AssetsSize)
 	Conf.Save()
+
+	logging.LogInfof("auto stat [trees=%d, blocks=%d, dataSize=%s, assetsSize=%s]", Conf.Stat.TreeCount, Conf.Stat.BlockCount, humanize.Bytes(uint64(Conf.Stat.DataSize)), humanize.Bytes(uint64(Conf.Stat.AssetsSize)))
 }
 
 func ListNotebooks() (ret []*Box, err error) {

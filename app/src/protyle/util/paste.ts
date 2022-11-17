@@ -4,6 +4,7 @@ import {processPasteCode, processRender} from "./processCode";
 import {writeText} from "./compatibility";
 /// #if !BROWSER
 import {clipboard} from "electron";
+import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {hasClosestBlock} from "./hasClosest";
 import {focusByWbr, getEditorRange} from "./selection";
@@ -27,6 +28,31 @@ const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
     if (needRender) {
         protyle.hint.render(protyle);
     }
+};
+
+export const pasteAsPlainText = async (protyle: IProtyle) => {
+    /// #if !BROWSER && !MOBILE
+    let localFiles: string[] = [];
+    if ("darwin" === window.siyuan.config.system.os) {
+        const xmlString = clipboard.read("NSFilenamesPboardType");
+        const domParser = new DOMParser();
+        const xmlDom = domParser.parseFromString(xmlString, "application/xml");
+        Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
+            localFiles.push(item.childNodes[0].nodeValue);
+        });
+    } else {
+        const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
+        if (xmlString.data.length > 0) {
+            localFiles = xmlString.data;
+        }
+    }
+    if (localFiles.length > 0) {
+        uploadLocalFiles(localFiles, protyle, false);
+        writeText("");
+    } else {
+        getCurrentWindow().webContents.pasteAndMatchStyle();
+    }
+    /// #endif
 };
 
 export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element) => {
@@ -196,6 +222,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             } else if (textHTML.endsWith(Constants.ZWSP)) {
                 // 编辑器内部粘贴
                 tempElement.innerHTML = textHTML.substr(0, textHTML.length - 1).replace('<meta charset="utf-8">', "");
+                let isBlock = false;
                 tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
                     const newId = Lute.NewNodeID();
                     e.setAttribute("data-node-id", newId);
@@ -203,13 +230,17 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     if (e.getAttribute("updated")) {
                         e.setAttribute("updated", newId.split("-")[0]);
                     }
+                    isBlock = true;
                 });
+                if (nodeElement.classList.contains("table")) {
+                    isBlock = false;
+                }
                 // 从历史中复制后粘贴
                 tempElement.querySelectorAll('[spellcheck="false"][contenteditable="false"]').forEach((e) => {
                     e.setAttribute("contenteditable", "true");
                 });
                 const tempInnerHTML = tempElement.innerHTML;
-                insertHTML(tempInnerHTML, protyle);
+                insertHTML(tempInnerHTML, protyle, isBlock);
                 filterClipboardHint(protyle, tempInnerHTML);
             } else {
                 tempElement.innerHTML = textHTML;

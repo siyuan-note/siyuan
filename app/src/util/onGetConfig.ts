@@ -15,14 +15,14 @@ import {globalShortcut} from "./globalShortcut";
 import {fetchPost} from "./fetch";
 import {mountHelp, newDailyNote} from "./mount";
 import {MenuItem} from "../menus/Menu";
-import {addGA, initAssets, loadAssets, setInlineStyle, setMode} from "./assets";
+import {addGA, initAssets, setInlineStyle, setMode} from "./assets";
 import {renderSnippet} from "../config/util/snippets";
 import {getOpenNotebookCount} from "./pathName";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
 import {openSetting} from "../config";
-import {getSearch, isBrowser} from "./functions";
+import {getSearch} from "./functions";
 import {openHistory} from "./history";
 import {initStatus} from "../layout/status";
 import {syncGuide} from "../sync/syncGuide";
@@ -143,7 +143,7 @@ export const onGetConfig = (isStart: boolean) => {
     initBar();
     initStatus();
     initWindow();
-    appearance.onSetappearance(window.siyuan.config.appearance, isBrowser());
+    appearance.onSetappearance(window.siyuan.config.appearance);
     initAssets();
     renderSnippet();
     setInlineStyle();
@@ -190,6 +190,9 @@ const initBar = () => {
 </div>
 <div id="barSetting" class="toolbar__item b3-tooltips b3-tooltips__sw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.config} ${updateHotkeyTip(window.siyuan.config.keymap.general.config.custom)}">
     <svg><use xlink:href="#iconSettings"></use></svg>
+</div>
+<div id="barTopHelp" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openBy} ${window.siyuan.languages.help}">
+    <svg><use xlink:href="#iconHelp"></use></svg>
 </div>
 <div class="fn__flex" id="windowControls"></div>`;
     document.querySelector(".toolbar").addEventListener("click", (event: MouseEvent) => {
@@ -246,6 +249,10 @@ const initBar = () => {
                 break;
             } else if (target.id === "barSetting") {
                 openSetting();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barTopHelp") {
+                mountHelp();
                 event.stopPropagation();
                 break;
             } else if (target.id === "toolbarVIP") {
@@ -341,41 +348,6 @@ const initWindow = () => {
             id: url.substr(16, 22),
             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
             zoomIn: getSearch("focus", url) === "1"
-        });
-    });
-    ipcRenderer.on(Constants.SIYUAN_UPDATE_THEME, (event, data) => {
-        if (data.init) {
-            if (window.siyuan.config.appearance.modeOS && (
-                (window.siyuan.config.appearance.mode === 1 && data.theme === "light") ||
-                (window.siyuan.config.appearance.mode === 0 && data.theme === "dark")
-            )) {
-                fetchPost("/api/system/setAppearanceMode", {
-                    mode: data.theme === "light" ? 0 : 1
-                }, response => {
-                    window.siyuan.config.appearance = response.data.appearance;
-                    loadAssets(response.data.appearance);
-                });
-            } else {
-                loadAssets(window.siyuan.config.appearance);
-            }
-            return;
-        }
-        if (!window.siyuan.config.appearance.modeOS) {
-            return;
-        }
-        if ((window.siyuan.config.appearance.mode === 0 && data.theme === "light") ||
-            (window.siyuan.config.appearance.mode === 1 && data.theme === "dark")) {
-            return;
-        }
-        fetchPost("/api/system/setAppearanceMode", {
-            mode: data.theme === "light" ? 0 : 1
-        }, response => {
-            if (window.siyuan.config.appearance.themeJS) {
-                exportLayout(true);
-                return;
-            }
-            window.siyuan.config.appearance = response.data.appearance;
-            loadAssets(response.data.appearance);
         });
     });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {

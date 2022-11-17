@@ -485,22 +485,9 @@ export const bazaar = {
                     }
 
                     if (bazaarType === "icons") {
-                        fetchPost("/api/setting/setAppearance", {
+                        fetchPost("/api/setting/setAppearance",  Object.assign({}, window.siyuan.config.appearance, {
                             icon: packageName,
-                            mode: window.siyuan.config.appearance.mode,
-                            modeOS: window.siyuan.config.appearance.modeOS,
-                            codeBlockThemeDark: window.siyuan.config.appearance.codeBlockThemeDark,
-                            codeBlockThemeLight: window.siyuan.config.appearance.codeBlockThemeLight,
-                            themeDark: window.siyuan.config.appearance.themeDark,
-                            themeLight: window.siyuan.config.appearance.themeLight,
-                            darkThemes: window.siyuan.config.appearance.darkThemes,
-                            lightThemes: window.siyuan.config.appearance.lightThemes,
-                            icons: window.siyuan.config.appearance.icons,
-                            lang: window.siyuan.config.appearance.lang,
-                            customCSS: window.siyuan.config.appearance.customCSS,
-                            closeButtonBehavior: window.siyuan.config.appearance.closeButtonBehavior,
-                            nativeEmoji: window.siyuan.config.appearance.nativeEmoji,
-                        }, response => {
+                        }), response => {
                             bazaar.element.querySelectorAll(`[data-name="${window.siyuan.config.appearance.icon}"]`).forEach(item => {
                                 item.parentElement.classList.remove("b3-card--current");
                                 const switchElement = item.querySelector('[data-type="switch"]');
@@ -516,22 +503,12 @@ export const bazaar = {
                             appearance.onSetappearance(response.data);
                         });
                     } else if (bazaarType === "themes") {
-                        fetchPost("/api/setting/setAppearance", {
-                            icon: window.siyuan.config.appearance.icon,
+                        fetchPost("/api/setting/setAppearance",  Object.assign({}, window.siyuan.config.appearance, {
                             mode,
                             modeOS: false,
-                            codeBlockThemeDark: window.siyuan.config.appearance.codeBlockThemeDark,
-                            codeBlockThemeLight: window.siyuan.config.appearance.codeBlockThemeLight,
                             themeDark: mode === 1 ? packageName : window.siyuan.config.appearance.themeDark,
                             themeLight: mode === 0 ? packageName : window.siyuan.config.appearance.themeLight,
-                            darkThemes: window.siyuan.config.appearance.darkThemes,
-                            lightThemes: window.siyuan.config.appearance.lightThemes,
-                            icons: window.siyuan.config.appearance.icons,
-                            lang: window.siyuan.config.appearance.lang,
-                            customCSS: window.siyuan.config.appearance.customCSS,
-                            closeButtonBehavior: window.siyuan.config.appearance.closeButtonBehavior,
-                            nativeEmoji: window.siyuan.config.appearance.nativeEmoji,
-                        }, response => {
+                        }), response => {
                             if ((mode !== window.siyuan.config.appearance.mode ||
                                     (mode === 1 && window.siyuan.config.appearance.themeDark !== packageName) ||
                                     (mode === 0 && window.siyuan.config.appearance.themeLight !== packageName)) &&

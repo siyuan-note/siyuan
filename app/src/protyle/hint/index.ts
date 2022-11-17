@@ -14,7 +14,6 @@ import {upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
-import {genEmptyBlock} from "../../block/util";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../markdown/highlightRender";
 import {imgMenu} from "../../menus/protyle";
@@ -517,7 +516,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     title: "Untitled",
                     md: ""
                 }, () => {
-                    insertHTML(genEmptyBlock(false, false, `<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">Untitled</span>`), protyle);
+                    insertHTML(`<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">Untitled</span>`, protyle);
                     /// #if MOBILE
                     openMobileFileById(newSubDocId, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                     /// #else

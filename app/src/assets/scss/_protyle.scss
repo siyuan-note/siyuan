@@ -5,12 +5,56 @@
 
 .protyle-scroll {
   position: absolute;
-  right: -80px;
-  top: 50%;
-  transform: rotate(90deg);
+  right: 0;
+  height: 100%;
+  top: 0;
+  width: 16px;
+  padding: 0 8px;
 
-  .b3-slider {
-    width: 200px;
+  svg {
+    height: 16px;
+    width: 16px;
+  }
+
+  &__down,
+  &__up {
+    transition: var(--b3-transition);
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    color: var(--b3-border-color);
+    margin-left: -0.5px;
+
+    &:hover {
+      color: var(--b3-theme-on-surface);
+    }
+  }
+
+  &__up {
+    top: calc(50% - 114px);
+  }
+
+  &__down {
+    bottom: calc(50% - 135px);
+  }
+
+  &:hover {
+    .protyle-scroll__down,
+    .protyle-scroll__up {
+      opacity: 1;
+    }
+  }
+
+  &__bar {
+    position: absolute;
+    right: -89px;
+    top: 50%;
+    transform: rotate(90deg);
+    z-index: 1;
+
+    .b3-slider {
+      width: 200px;
+    }
   }
 }
 
@@ -110,6 +154,7 @@
   flex-shrink: 0;
   box-sizing: border-box;
   min-height: 30px;
+  z-index: 1;
 
   &__space {
     flex: 1;

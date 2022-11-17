@@ -17,6 +17,7 @@
 package api
 
 import (
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -294,5 +296,60 @@ func exportPreview(c *gin.Context) {
 	stdHTML := model.Preview(id)
 	ret.Data = map[string]interface{}{
 		"html": stdHTML,
+	}
+}
+
+func exportAsFile(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	form, err := c.MultipartForm()
+	if nil != err {
+		logging.LogErrorf("export as file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	file := form.File["file"][0]
+	reader, err := file.Open()
+	if nil != err {
+		logging.LogErrorf("export as file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	defer reader.Close()
+
+	data, err := io.ReadAll(reader)
+	if nil != err {
+		logging.LogErrorf("export as file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	name := "file-" + file.Filename
+	name = util.FilterFileName(name)
+	tmpDir := filepath.Join(util.TempDir, "export")
+	if err = os.MkdirAll(tmpDir, 0755); nil != err {
+		logging.LogErrorf("export as file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp := filepath.Join(tmpDir, name)
+	err = os.WriteFile(tmp, data, 0644)
+	if nil != err {
+		logging.LogErrorf("export as file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"name": name,
+		"file": path.Join("/export/", name),
 	}
 }

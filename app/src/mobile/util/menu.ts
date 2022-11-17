@@ -6,7 +6,6 @@ import {closePanel} from "./closePanel";
 import {Constants} from "../../constants";
 import {setAccessAuthCode} from "../../config/util/setAccessAuthCode";
 import {mountHelp, newDailyNote, newNotebook} from "../../util/mount";
-import {needSubscribe} from "../../util/needSubscribe";
 import {repos} from "../../config/repos";
 import * as md5 from "blueimp-md5";
 import {showMessage} from "../../dialog/message";
@@ -154,8 +153,8 @@ ${accountHTML}
 <div class="b3-list-item b3-list-item--big" id="menuSafeQuit">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconQuit"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.safeQuit}</span>
 </div>`;
-
-        menuElement.addEventListener(getEventName(), (event) => {
+        // 只能用 click，否则无法上下滚动 https://github.com/siyuan-note/siyuan/issues/6628
+        menuElement.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(menuElement)) {
                 if (target.id === "menuSearch") {
@@ -435,15 +434,13 @@ ${accountHTML}
                     event.stopPropagation();
                     break;
                 } else if (target.id === "menuSync") {
-                    if (!needSubscribe()) {
-                        closePanel();
-                        modelElement.style.top = "0";
-                        modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconCloud"></use>';
-                        modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.cloud;
-                        modelMainElement.innerHTML = repos.genHTML();
-                        repos.element = modelMainElement;
-                        repos.bindEvent();
-                    }
+                    closePanel();
+                    modelElement.style.top = "0";
+                    modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconCloud"></use>';
+                    modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.cloud;
+                    modelMainElement.innerHTML = repos.genHTML();
+                    repos.element = modelMainElement;
+                    repos.bindEvent();
                     event.preventDefault();
                     event.stopPropagation();
                     break;

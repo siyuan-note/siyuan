@@ -59,6 +59,7 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) =
                 blockId: id,
                 action,
                 render: {
+                    scroll: true,
                     background: true,
                     gutter: true,
                 },

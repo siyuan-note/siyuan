@@ -31,7 +31,6 @@ export abstract class Constants {
     public static readonly SIYUAN_SAVE_CLOSE: string = "siyuan-save-close";
     public static readonly SIYUAN_EXPORT_PDF: string = "siyuan-export-pdf";
     public static readonly SIYUAN_EXPORT_CLOSE: string = "siyuan-export-close";
-    public static readonly SIYUAN_UPDATE_THEME: string = "siyuan-update-theme";
 
     // size
     public static readonly SIZE_TOOLBAR_HEIGHT: number = 42;
@@ -137,6 +136,7 @@ export abstract class Constants {
         },
         editor: {
             general: {
+                duplicate: {default: "⌘D", custom: "⌘D"},
                 expandDown: {default: "⌥⇧↓", custom: "⌥⇧↓"},
                 expandUp: {default: "⌥⇧↑", custom: "⌥⇧↑"},
                 copyPlainText: {default: "", custom: ""},
@@ -192,7 +192,7 @@ export abstract class Constants {
                 italic: {default: "⌘I", custom: "⌘I"},
                 mark: {default: "⌘E", custom: "⌘E"},
                 tag: {default: "⌘T", custom: "⌘T"},
-                strike: {default: "⌘D", custom: "⌘D"},
+                strike: {default: "⇧⌘S", custom: "⇧⌘S"},
                 "inline-code": {default: "⌘G", custom: "⌘G"},
                 link: {default: "⌘K", custom: "⌘K"},
                 check: {default: "⌘L", custom: "⌘L"},

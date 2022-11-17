@@ -97,7 +97,7 @@ func checkDownloadInstallPkg() {
 		return
 	}
 
-	msgId := util.PushMsg(Conf.Language(103), 60*1000*10)
+	msgId := util.PushMsg(Conf.Language(103), 1000*7)
 	succ := false
 	for _, downloadPkgURL := range downloadPkgURLs {
 		err = downloadInstallPkg(downloadPkgURL, checksum)
@@ -141,8 +141,6 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 	url := "https://github.com/siyuan-note/siyuan/releases/download/v" + ver + "/" + pkg
 	downloadPkgURLs = append(downloadPkgURLs, url)
 	url = "https://ghproxy.com/" + url
-	downloadPkgURLs = append(downloadPkgURLs, url)
-	url = "https://release-r2.b3log.org/siyuan/" + pkg
 	downloadPkgURLs = append(downloadPkgURLs, url)
 	url = "https://release.b3log.org/siyuan/" + pkg
 	downloadPkgURLs = append(downloadPkgURLs, url)

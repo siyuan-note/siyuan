@@ -2,6 +2,7 @@ import {matchHotKey} from "../util/hotKey";
 import {fetchPost} from "../../util/fetch";
 import {writeText} from "../util/compatibility";
 import {
+    focusBlock,
     focusByOffset,
     getSelectionOffset,
     setFirstNodeRange,
@@ -16,6 +17,10 @@ import {getContenteditableElement} from "./getBlock";
 import {hasClosestByMatchTag} from "../util/hasClosest";
 import {hideElements} from "../ui/hideElements";
 import {countBlockWord} from "../../layout/status";
+import {scrollCenter} from "../../util/highlightById";
+import {transaction} from "./transaction";
+import {onGet} from "../util/onGet";
+import {Constants} from "../../constants";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
@@ -100,7 +105,7 @@ export const upSelect = (options: {
                     options.event.preventDefault();
                     return;
                 }
-            } else{
+            } else {
                 // 选中上一个节点的处理在 toolbar/index.ts 中 `shift+方向键或三击选中`
                 return;
             }
@@ -179,4 +184,71 @@ export const getStartEndElement = (selectElements: NodeListOf<Element> | Element
         startElement,
         endElement
     };
+};
+
+export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
+    let focusElement;
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    nodeElements.forEach((item, index) => {
+        const tempElement = item.cloneNode(true) as HTMLElement;
+        if (index === nodeElements.length - 1) {
+            focusElement = tempElement;
+        }
+        const newId = Lute.NewNodeID();
+        tempElement.setAttribute("data-node-id", newId);
+        tempElement.querySelectorAll("[data-node-id]").forEach(childItem => {
+            childItem.setAttribute("data-node-id", Lute.NewNodeID());
+        });
+        item.classList.remove("protyle-wysiwyg--select");
+        item.after(tempElement);
+        doOperations.push({
+            action: "insert",
+            data: tempElement.outerHTML,
+            id: newId,
+            previousID: item.getAttribute("data-node-id"),
+        });
+        undoOperations.push({
+            action: "delete",
+            id: newId,
+        });
+    });
+    transaction(protyle, doOperations, undoOperations);
+    focusBlock(focusElement);
+    scrollCenter(protyle);
+};
+
+export const goHome = (protyle:IProtyle) => {
+    if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0" ||
+        protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||
+        protyle.options.backlinkData) {
+        focusBlock(protyle.wysiwyg.element.firstElementChild);
+        protyle.contentElement.scrollTop = 0;
+        protyle.scroll.lastScrollTop = 1;
+    } else {
+        fetchPost("/api/filetree/getDoc", {
+            id: protyle.block.rootID,
+            mode: 0,
+            size: window.siyuan.config.editor.dynamicLoadBlocks,
+        }, getResponse => {
+            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+        });
+    }
+};
+
+export const goEnd = (protyle:IProtyle) => {
+    if (!protyle.scroll.element.classList.contains("fn__none") &&
+        protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true") {
+        fetchPost("/api/filetree/getDoc", {
+            id: protyle.block.rootID,
+            mode: 4,
+            size: window.siyuan.config.editor.dynamicLoadBlocks,
+        }, getResponse => {
+            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+        });
+    } else {
+        protyle.contentElement.scrollTop = protyle.contentElement.scrollHeight;
+        protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
+        focusBlock(protyle.wysiwyg.element.lastElementChild, undefined, false);
+    }
 };

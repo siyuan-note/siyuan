@@ -17,6 +17,7 @@
 package util
 
 import (
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -123,21 +124,6 @@ func IsCorruptedSYData(data []byte) bool {
 
 func FilterUploadFileName(name string) string {
 	ret := FilterFileName(name)
-	ret = strings.ReplaceAll(ret, "~", "")
-	//ret = strings.ReplaceAll(ret, "_", "") // 插入资源文件时允许下划线 https://github.com/siyuan-note/siyuan/issues/3534
-	ret = strings.ReplaceAll(ret, "[", "")
-	ret = strings.ReplaceAll(ret, "]", "")
-	ret = strings.ReplaceAll(ret, "(", "")
-	ret = strings.ReplaceAll(ret, ")", "")
-	ret = strings.ReplaceAll(ret, "!", "")
-	ret = strings.ReplaceAll(ret, "`", "")
-	ret = strings.ReplaceAll(ret, "&", "")
-	ret = strings.ReplaceAll(ret, "{", "")
-	ret = strings.ReplaceAll(ret, "}", "")
-	ret = strings.ReplaceAll(ret, "=", "")
-	ret = strings.ReplaceAll(ret, "#", "")
-	ret = strings.ReplaceAll(ret, "%", "")
-	ret = strings.ReplaceAll(ret, "$", "")
 	return ret
 }
 
@@ -207,6 +193,40 @@ func SizeOfDirectory(path string) (size int64, err error) {
 		logging.LogErrorf("size of dir [%s] failed: %s", path, err)
 	}
 	return
+}
+
+func DataSize() (dataSize, assetsSize int64) {
+	filepath.Walk(DataDir, func(path string, info os.FileInfo, err error) error {
+		if nil != err {
+			logging.LogErrorf("size of data failed: %s", err)
+			return io.EOF
+		}
+		if !info.IsDir() {
+			s := info.Size()
+			dataSize += s
+
+			if strings.Contains(strings.TrimPrefix(path, DataDir), "assets") {
+				assetsSize += s
+			}
+		} else {
+			dataSize += 4096
+		}
+		return nil
+	})
+	return
+}
+
+func CeilSize(size int64) int64 {
+	if 100*1024*1024 > size {
+		return 100 * 1024 * 1024
+	}
+
+	for i := int64(1); i < 40; i++ {
+		if 1024*1024*200*i > size {
+			return 1024 * 1024 * int64(i)
+		}
+	}
+	return 1024*1024*200*40 + 1
 }
 
 func IsReservedFilename(baseName string) bool {

@@ -46,7 +46,7 @@ export const initConfigSearch = (element: HTMLElement) => {
         getLang(["bazaar", "theme", "template", "icon", "widget"]),
 
         // 搜索
-        getLang(["search", "searchLimit", "searchLimit1", "memo", "name", "alias",
+        getLang(["search", "searchLimit", "searchLimit1", "memo", "name", "alias","keywordsLimit",
             "doc", "headings", "list1", "listItem", "code", "math", "table", "quote", "superBlock", "paragraph"]),
 
         // 快捷键
@@ -60,7 +60,7 @@ export const initConfigSearch = (element: HTMLElement) => {
         // 云端
         getLang(["cloudStorage", "trafficStat", "sync", "backup", "cdn", "total", "sizeLimit", "cloudBackup",
             "cloudBackupTip", "updatePath", "cloudSync", "upload", "download", "syncMode", "syncModeTip",
-            "generateConflictDoc", "generateConflictDocTip",
+            "generateConflictDoc", "generateConflictDocTip", "syncProvider", "syncProviderTip",
             "syncMode1", "syncMode2", "reposTip", "openSyncTip1", "openSyncTip2", "cloudSyncDir", "config"]),
 
         // 账号

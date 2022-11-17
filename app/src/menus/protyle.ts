@@ -23,12 +23,9 @@ import {readText, writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
-import {pasteText} from "../protyle/util/paste";
+import {pasteAsPlainText, pasteText} from "../protyle/util/paste";
 /// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
-/// #endif
-/// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {isMobile} from "../util/functions";
 import {removeFoldHeading} from "../protyle/util/heading";
@@ -36,7 +33,7 @@ import {lineNumberRender} from "../protyle/markdown/highlightRender";
 import * as dayjs from "dayjs";
 import {blockRender} from "../protyle/markdown/blockRender";
 import {renameAsset} from "../editor/rename";
-import {hasNextSibling} from "../protyle/wysiwyg/getBlock";
+import {hasNextSibling, hasPreviousSibling} from "../protyle/wysiwyg/getBlock";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
 import {exportAsset} from "./util";
@@ -364,7 +361,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         accelerator: "⇧⌘V",
         click() {
             focusByRange(getEditorRange(nodeElement));
-            getCurrentWindow().webContents.pasteAndMatchStyle();
+            pasteAsPlainText(protyle);
         }
     }).element);
     /// #endif
@@ -643,6 +640,17 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     break;
                 }
             }
+            let previous = assetElement.previousSibling;
+            while (previous) {
+                if (previous.textContent === "") {
+                    previous = previous.previousSibling;
+                } else if (previous.textContent === Constants.ZWSP) {
+                    previous.textContent = "";
+                    break;
+                } else {
+                    break;
+                }
+            }
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
         }
     }).element);
@@ -655,6 +663,9 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             assetElement.style.display = "";
             if (!hasNextSibling(assetElement)) {
                 assetElement.insertAdjacentText("afterend", Constants.ZWSP);
+            }
+            if (!hasPreviousSibling(assetElement)) {
+                assetElement.insertAdjacentText("beforebegin", Constants.ZWSP);
             }
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
         }
@@ -757,12 +768,12 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 html = nodeElement.outerHTML;
             });
             inputElement.addEventListener("compositionend", () => {
-                linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value) || "";
+                linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value || "");
             });
             inputElement.addEventListener("input", (event: KeyboardEvent) => {
                 if (!event.isComposing) {
                     // https://github.com/siyuan-note/siyuan/issues/4511
-                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value).replace(/\\]/g, '<span data-type="backslash"><span>\\</span>]</span>').replace(/\\\[/g, '<span data-type="backslash"><span>\\</span>[</span>') || "";
+                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElement.value) || "";
                 }
             });
             inputElement.addEventListener("keydown", (event) => {

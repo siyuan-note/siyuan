@@ -72,7 +72,7 @@ export class Protyle {
         this.protyle.undo = new Undo();
         this.protyle.wysiwyg = new WYSIWYG(this.protyle);
         this.protyle.toolbar = new Toolbar(this.protyle);
-        this.protyle.scroll = new Scroll(this.protyle);
+        this.protyle.scroll = new Scroll(this.protyle); // 不能使用 render.scroll 来判读是否初始化，除非重构后面用到的相关变量
         if (this.protyle.options.render.gutter) {
             this.protyle.gutter = new Gutter(this.protyle);
         }
@@ -123,8 +123,8 @@ export class Protyle {
                                 }
                             }
                             if (this.protyle.options.render.title && this.protyle.block.parentID === data.data.id) {
-                                if (getSelection().rangeCount > 0 && this.protyle.element.contains(getSelection().getRangeAt(0).startContainer)) {
-                                    // 编辑中的不用更新
+                                if (getSelection().rangeCount > 0 && this.protyle.title.editElement.contains(getSelection().getRangeAt(0).startContainer)) {
+                                    // 标题编辑中的不用更新 https://github.com/siyuan-note/siyuan/issues/6565
                                 } else {
                                     this.protyle.title.setTitle(data.data.title);
                                 }

@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20210131162806"
+		"updated": "20221114173406"
 	},
 	"Children": [
 		{
@@ -672,324 +672,32 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
 					"Data": "Push to template bazaar"
 				}
 			]
 		},
 		{
-			"ID": "20210131162806-wuttf37",
+			"ID": "20221114173406-3h4imbx",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210131162806-wuttf37",
-				"updated": "20211222095741"
+				"id": "20221114173406-3h4imbx",
+				"updated": "20221114173406"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Please make sure that the root path of your template repository contains at least the following files before listing ("
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/88250/November-Rain",
-					"TextMarkTextContent": "repo example"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "):"
-				}
-			]
-		},
-		{
-			"ID": "20210131162806-vsk0d2y",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20210131162806-vsk0d2y",
-				"updated": "20211222095707"
-			},
-			"Children": [
-				{
-					"ID": "20210131162806-v0untr5",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210131162806-v0untr5"
-					},
-					"Children": [
-						{
-							"ID": "20210131162806-lyudtae",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131162806-lyudtae"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "template.json (please make sure the JSON format is correct)"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210131162806-vruviwi",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210131162806-vruviwi"
-					},
-					"Children": [
-						{
-							"ID": "20210131162806-v86lig4",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131162806-v86lig4",
-								"updated": "20211222095705"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "preview.png (please compress the image size within 512 KB)"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211222095706-yc21k1e",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211222095706-yc21k1e",
-						"updated": "20211222095707"
-					},
-					"Children": [
-						{
-							"ID": "20211222095706-kpo2rd5",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211222095706-kpo2rd5",
-								"updated": "20211222095707"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "README.md (please note the case)"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20210131162806-j35q2kr",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210131162806-j35q2kr"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "After confirmation, please "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request",
-					"TextMarkTextContent": "create a pull request"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to the "
+					"Data": "Please refer to "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "Community Bazaar"
+					"TextMarkTextContent": "Community Bazaar README"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " repository and modify the themes.json file in it. This file is the index file of all community template repositories, the format is:"
-				}
-			]
-		},
-		{
-			"ID": "20210131162806-bmhjqma",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"CodeBlockFenceChar": 96,
-			"CodeBlockFenceLen": 3,
-			"CodeBlockOpenFence": "YGBg",
-			"CodeBlockInfo": "anNvbg==",
-			"CodeBlockCloseFence": "YGBg",
-			"Properties": {
-				"id": "20210131162806-bmhjqma"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "anNvbg=="
-				},
-				{
-					"ID": "20220307092214-tpodbuh",
-					"Type": "NodeCodeBlockCode",
-					"Data": "{\n   \"repos\": [\n     \"username/reponame@commithash\"\n   ]\n}\n",
-					"Properties": {
-						"id": "20220307092214-tpodbuh"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
-				}
-			]
-		},
-		{
-			"ID": "20210131162806-0jwldvf",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210131162806-0jwldvf"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Among them, "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "commithash"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ", please fill in the Git commit hash of the latest released version on your template repository, please use the full hash value instead of the 7-digit short value."
-				}
-			]
-		},
-		{
-			"ID": "20210131162806-pccuk3l",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20210131162806-pccuk3l",
-				"updated": "20210131162806"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Update"
-				}
-			]
-		},
-		{
-			"ID": "20210131162806-0gkw7xr",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210131162806-0gkw7xr"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "If the template you developed has an updated version, please remember:"
-				}
-			]
-		},
-		{
-			"ID": "20210131162806-aijnkan",
-			"Type": "NodeList",
-			"ListData": {
-				"Tight": true,
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
-			"Properties": {
-				"id": "20210131162806-aijnkan"
-			},
-			"Children": [
-				{
-					"ID": "20210131162806-h1928oc",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20210131162806-h1928oc"
-					},
-					"Children": [
-						{
-							"ID": "20210131162806-eqoftxj",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131162806-eqoftxj"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Update the version field in your template.json"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210131162806-4ldtdqg",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20210131162806-4ldtdqg"
-					},
-					"Children": [
-						{
-							"ID": "20210131162806-kix2koc",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131162806-kix2koc"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Create a Pull Request to the community bazaar"
-								}
-							]
-						}
-					]
+					"Data": "."
 				}
 			]
 		},

@@ -311,7 +311,6 @@ export const openHistory = () => {
             background: false,
             title: false,
             gutter: false,
-            scroll: false,
             breadcrumb: false,
             breadcrumbDocName: false,
             breadcrumbContext: false,
@@ -381,7 +380,7 @@ export const openHistory = () => {
                 });
                 break;
             } else if (type === "toggle") {
-                const iconElement = target.firstElementChild.firstElementChild
+                const iconElement = target.firstElementChild.firstElementChild;
                 if (iconElement.classList.contains("b3-list-item__arrow--open")) {
                     target.nextElementSibling.classList.add("fn__none");
                     iconElement.classList.remove("b3-list-item__arrow--open");

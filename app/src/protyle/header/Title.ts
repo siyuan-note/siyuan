@@ -28,6 +28,7 @@ import {code160to32} from "../util/code160to32";
 import {deleteFile} from "../../editor/deleteFile";
 import {genEmptyElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
+import {hideTooltip} from "../../dialog/tooltip";
 
 export class Title {
     public element: HTMLElement;
@@ -41,7 +42,7 @@ export class Title {
             this.element.classList.add("protyle-wysiwyg--attr");
         }
         this.element.innerHTML = `<span aria-label="${window.siyuan.languages.gutterTip2}" class="protyle-title__icon" data-type="a" data-position="right"><svg><use xlink:href="#iconFile"></use></svg></span>
-<div contenteditable="true" spellcheck="false" class="protyle-title__input" data-tip="${window.siyuan.languages._kernel[16]}"></div><div class="protyle-attr"></div>`;
+<div contenteditable="true" data-position="center" spellcheck="false" class="protyle-title__input" data-tip="${window.siyuan.languages._kernel[16]}"></div><div class="protyle-attr"></div>`;
         this.editElement = this.element.querySelector(".protyle-title__input");
         this.editElement.addEventListener("paste", (event: ClipboardEvent) => {
             event.stopPropagation();
@@ -251,13 +252,14 @@ export class Title {
 
     private rename(protyle: IProtyle) {
         clearTimeout(this.timeout);
-        if (!validateName(this.editElement.textContent)) {
+        if (!validateName(this.editElement.textContent, this.editElement)) {
             // 字数过长会导致滚动
             const offset = getSelectionOffset(this.editElement);
             this.setTitle(this.editElement.textContent.substring(0, Constants.SIZE_TITLE));
             focusByOffset(this.editElement, offset.start, offset.end);
             return false;
         }
+        hideTooltip();
         this.timeout = window.setTimeout(() => {
             const fileName = replaceFileName(this.editElement.textContent);
             fetchPost("/api/filetree/renameDoc", {

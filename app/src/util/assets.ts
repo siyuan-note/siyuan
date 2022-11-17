@@ -120,6 +120,10 @@ export const initAssets = () => {
             loadingElement.remove();
         }, 160);
     }
+    watchTheme({init: true, OSTheme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"});
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", event => {
+        watchTheme({init: false, OSTheme: event.matches ? "dark" : "light"});
+    });
 };
 
 export const addGA = () => {
@@ -136,16 +140,26 @@ export const addGA = () => {
         const para = {
             version: Constants.SIYUAN_VERSION,
             container: window.siyuan.config.system.container,
-            isLoggedIn: "false",
-            subscriptionStatus: "-1",
-            subscriptionPlan: "-1",
-            subscriptionType: "-1",
+            isLoggedIn: false,
+            subscriptionStatus: -1,
+            subscriptionPlan: -1,
+            subscriptionType: -1,
+            syncEnabled: false,
+            syncProvider: -1,
+            cTreeCount: window.siyuan.config.stat.cTreeCount,
+            cBlockCount: window.siyuan.config.stat.cBlockCount,
+            cDataSize: window.siyuan.config.stat.cDataSize,
+            cAssetsSize: window.siyuan.config.stat.cAssetsSize,
         };
         if (window.siyuan.user) {
-            para.isLoggedIn = "true";
-            para.subscriptionStatus = window.siyuan.user.userSiYuanSubscriptionStatus.toString();
-            para.subscriptionPlan = window.siyuan.user.userSiYuanSubscriptionPlan.toString();
-            para.subscriptionType = window.siyuan.user.userSiYuanSubscriptionType.toString();
+            para.isLoggedIn = true;
+            para.subscriptionStatus = window.siyuan.user.userSiYuanSubscriptionStatus;
+            para.subscriptionPlan = window.siyuan.user.userSiYuanSubscriptionPlan;
+            para.subscriptionType = window.siyuan.user.userSiYuanSubscriptionType;
+        }
+        if (window.siyuan.config.sync) {
+            para.syncEnabled = window.siyuan.config.sync.enabled;
+            para.syncProvider = window.siyuan.config.sync.provider;
         }
         gtag("event", Constants.ANALYTICS_EVT_ON_GET_CONFIG, para);
     }
@@ -231,3 +245,62 @@ export const setMode = (modeElementValue: number) => {
     });
     /// #endif
 };
+
+const watchTheme = (data: { init: boolean, OSTheme: string }) => {
+    if ((window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) ||
+        (window.siyuan.config.system.container === "android" && window.JSAndroid)) {
+        setTimeout(() => {
+            const backgroundColor = getComputedStyle(document.body).getPropertyValue("--b3-theme-background")
+            let mode = window.siyuan.config.appearance.mode;
+            if (window.siyuan.config.appearance.modeOS) {
+                if (data.OSTheme === "dark") {
+                    mode = 1;
+                } else {
+                    mode = 0;
+                }
+            }
+            if (window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) {
+                window.webkit.messageHandlers.changeStatusBar.postMessage(backgroundColor + " " + mode);
+            } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
+                window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
+            }
+        }, Constants.TIMEOUT_BLOCKLOAD); // 移动端需要加载完才可以获取到颜色
+    }
+    if (data.init) {
+        if (window.siyuan.config.appearance.modeOS && (
+            (window.siyuan.config.appearance.mode === 1 && data.OSTheme === "light") ||
+            (window.siyuan.config.appearance.mode === 0 && data.OSTheme === "dark")
+        )) {
+            fetchPost("/api/system/setAppearanceMode", {
+                mode: data.OSTheme === "light" ? 0 : 1
+            }, response => {
+                window.siyuan.config.appearance = response.data.appearance;
+                loadAssets(response.data.appearance);
+            });
+        } else {
+            loadAssets(window.siyuan.config.appearance);
+        }
+        return;
+    }
+    if (!window.siyuan.config.appearance.modeOS) {
+        return;
+    }
+    if ((window.siyuan.config.appearance.mode === 0 && data.OSTheme === "light") ||
+        (window.siyuan.config.appearance.mode === 1 && data.OSTheme === "dark")) {
+        return;
+    }
+    fetchPost("/api/system/setAppearanceMode", {
+        mode: data.OSTheme === "light" ? 0 : 1
+    }, response => {
+        if (window.siyuan.config.appearance.themeJS) {
+            /// #if !MOBILE
+            exportLayout(true);
+            /// #else
+            window.location.reload();
+            /// #endif
+            return;
+        }
+        window.siyuan.config.appearance = response.data.appearance;
+        loadAssets(response.data.appearance);
+    });
+}

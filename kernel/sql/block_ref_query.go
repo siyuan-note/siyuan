@@ -28,6 +28,11 @@ import (
 )
 
 func QueryVirtualRefKeywords(name, alias, anchor, doc bool) (ret []string) {
+	ret, ok := getVirtualRefKeywordsCache()
+	if ok {
+		return ret
+	}
+
 	if name {
 		ret = append(ret, queryNames()...)
 	}
@@ -44,6 +49,7 @@ func QueryVirtualRefKeywords(name, alias, anchor, doc bool) (ret []string) {
 	sort.SliceStable(ret, func(i, j int) bool {
 		return len(ret[i]) >= len(ret[j])
 	})
+	setVirtualRefKeywords(ret)
 	return
 }
 

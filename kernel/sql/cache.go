@@ -70,6 +70,29 @@ func removeBlockCache(id string) {
 	removeRefCacheByDefID(id)
 }
 
+func getVirtualRefKeywordsCache() ([]string, bool) {
+	if disabled {
+		return nil, false
+	}
+
+	if val, ok := memCache.Get("virtual_ref"); ok {
+		return val.([]string), true
+	}
+	return nil, false
+}
+
+func setVirtualRefKeywords(keywords []string) {
+	if disabled {
+		return
+	}
+
+	memCache.Set("virtual_ref", keywords, 1)
+}
+
+func ClearVirtualRefKeywords() {
+	memCache.Del("virtual_ref")
+}
+
 var defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute) // [defBlockID]map[refBlockID]*Ref
 
 func GetRefsCacheByDefID(defID string) (ret []*Ref) {

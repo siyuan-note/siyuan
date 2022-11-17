@@ -153,8 +153,8 @@ ${accountHTML}
 <div class="b3-list-item b3-list-item--big" id="menuSafeQuit">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconQuit"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.safeQuit}</span>
 </div>`;
-
-        menuElement.addEventListener(getEventName(), (event) => {
+        // 只能用 click，否则无法上下滚动 https://github.com/siyuan-note/siyuan/issues/6628
+        menuElement.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(menuElement)) {
                 if (target.id === "menuSearch") {

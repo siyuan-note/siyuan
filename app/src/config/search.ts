@@ -46,7 +46,7 @@ export const initConfigSearch = (element: HTMLElement) => {
         getLang(["bazaar", "theme", "template", "icon", "widget"]),
 
         // 搜索
-        getLang(["search", "searchLimit", "searchLimit1", "memo", "name", "alias",
+        getLang(["search", "searchLimit", "searchLimit1", "memo", "name", "alias","keywordsLimit",
             "doc", "headings", "list1", "listItem", "code", "math", "table", "quote", "superBlock", "paragraph"]),
 
         // 快捷键

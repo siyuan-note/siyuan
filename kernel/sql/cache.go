@@ -77,6 +77,7 @@ func getVirtualRefKeywordsCache() ([]string, bool) {
 		return nil, false
 	}
 
+	// 虚拟引用关键字缓存调整为 10 分钟 https://github.com/siyuan-note/siyuan/issues/6602
 	if 10 < time.Now().Sub(virtualRefKeywordsCacheTime).Minutes() {
 		ClearVirtualRefKeywords()
 		return nil, false

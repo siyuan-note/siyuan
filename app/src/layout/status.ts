@@ -9,6 +9,7 @@ import {mountHelp} from "../util/mount";
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
 /// #endif
+import {isBrowser} from "../util/functions";
 
 export const initStatus = () => {
     /// #if !MOBILE
@@ -33,7 +34,7 @@ export const initStatus = () => {
     <div class="b3-menu fn__none" style="bottom: 32px;right: 5px">
         <button id="barFeedback" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconHeart"></use></svg><span class="b3-menu__label">${window.siyuan.languages.feedback}</span></button>
         <button id="barLock" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconLock"></use></svg><span class="b3-menu__label">${window.siyuan.languages.lockScreen}</span><span class="b3-menu__accelerator">${updateHotkeyTip(window.siyuan.config.keymap.general.lockScreen.custom)}</span></button>
-        <button id="barDebug" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconBug"></use></svg><span class="b3-menu__label">${window.siyuan.languages.debug}</span></button>
+        <button id="barDebug" class="b3-menu__item${isBrowser() ? " fn__none" : ""}"><svg class="b3-menu__icon""><use xlink:href="#iconBug"></use></svg><span class="b3-menu__label">${window.siyuan.languages.debug}</span></button>
     </div>
 </div>`;
     const dockElement = document.getElementById("barDock");

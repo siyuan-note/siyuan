@@ -265,7 +265,7 @@ const watchTheme = (data: { init: boolean, OSTheme: string }) => {
             } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
                 window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
             }
-        }, Constants.TIMEOUT_BLOCKLOAD); // 移动端需要加载完才可以获取到颜色
+        }, 500); // 移动端需要加载完才可以获取到颜色
     }
     if (data.init) {
         if (window.siyuan.config.appearance.modeOS && (

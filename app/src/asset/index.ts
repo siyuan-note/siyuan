@@ -316,7 +316,7 @@ export class Asset extends Model {
         </div>
       </div>
       <div id="dialogContainer">
-        <dialog id="passwordDialog">
+        <div class="dialog" id="passwordDialog">
             <div class="row">
               <p id="passwordText" data-l10n-id="password_label">Enter the password to open this PDF file:</p>
             </div>
@@ -327,8 +327,8 @@ export class Asset extends Model {
               <button id="passwordCancel" class="overlayButton"><span data-l10n-id="password_cancel">Cancel</span></button>
               <button id="passwordSubmit" class="overlayButton"><span data-l10n-id="password_ok">OK</span></button>
             </div>
-        </dialog>
-        <dialog id="documentPropertiesDialog">
+        </div>
+        <div class="dialog" id="documentPropertiesDialog">
             <div class="row">
               <span>${window.siyuan.languages.fileName}</span> <p id="fileNameField">-</p>
             </div>
@@ -377,8 +377,8 @@ export class Asset extends Model {
             <div class="buttonRow">
               <button id="documentPropertiesClose" class="b3-button"><span>${window.siyuan.languages.close}</span></button>
             </div>
-        </dialog>
-        <dialog id="printServiceOverlay">
+        </div>
+        <div class="dialog" id="printServiceOverlay">
             <div class="row">
               <span data-l10n-id="print_progress_message">Preparing document for printing…</span>
             </div>
@@ -389,7 +389,7 @@ export class Asset extends Model {
             <div class="buttonRow">
               <button id="printCancel" class="overlayButton"><span data-l10n-id="print_progress_close">Cancel</span></button>
             </div>
-        </dialog>
+        </div>
       </div>
       <div class="pdf__util b3-menu fn__none pdf__util--hide">
         <div class="fn__flex" style="padding: 0 4px">

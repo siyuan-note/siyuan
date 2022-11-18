@@ -610,14 +610,19 @@ export class Toolbar {
             this.range.setEnd(nextElement.lastChild, nextIndex);
         } else if (newNodes.length > 0) {
             const lastNewNode = newNodes[newNodes.length - 1];
-            if (lastNewNode.nodeType !== 3 && (lastNewNode as HTMLElement).getAttribute("data-type") === "inline-math") {
-                const mathNextSibling = hasNextSibling(lastNewNode);
-                if (mathNextSibling) { // https://github.com/siyuan-note/siyuan/issues/6065
-                    this.range.setStart(mathNextSibling, 0);
+            if (lastNewNode.nodeType !== 3 && (lastNewNode as HTMLElement).getAttribute("data-type").indexOf("inline-math") > -1) {
+                const mathPreviousSibling = hasPreviousSibling(lastNewNode);
+                if (mathPreviousSibling && mathPreviousSibling.nodeType === 3) {
+                    this.range.setStart(mathPreviousSibling, mathPreviousSibling.textContent.length);
                 } else {
-                    this.range.setStartAfter(lastNewNode);
+                    this.range.setStartBefore(lastNewNode);
                 }
-                this.range.collapse(true);
+                const mathNextSibling = hasNextSibling(lastNewNode);
+                if (mathNextSibling && mathNextSibling.nodeType === 3) { // https://github.com/siyuan-note/siyuan/issues/6065
+                    this.range.setEnd(mathNextSibling, 0);
+                } else {
+                    this.range.setEndAfter(lastNewNode);
+                }
             } else {
                 if (lastNewNode.lastChild) {
                     if (lastNewNode.lastChild.textContent === Constants.ZWSP) {

@@ -85,7 +85,7 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 	}
 	re := ic + "("
 	for i, k := range keywords {
-		k = keyword2regexp(k)
+		k = regexp.QuoteMeta(k)
 		re += "(" + k + ")"
 		if i < len(keywords)-1 {
 			re += "|"
@@ -98,7 +98,7 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 		})
 	} else {
 		for _, k := range keywords {
-			k = keyword2regexp(k)
+			k = regexp.QuoteMeta(k)
 			var repls, words []string
 			if re, err := regexp.Compile(ic + k); nil == err {
 				words = re.FindAllString(text, -1)
@@ -114,13 +114,4 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 		}
 	}
 	return text
-}
-
-func keyword2regexp(k string) string {
-	k = strings.ReplaceAll(k, "*", ".*")
-	k = strings.ReplaceAll(k, "?", ".")
-	k = strings.ReplaceAll(k, "%", ".*")
-	k = strings.ReplaceAll(k, "_", ".")
-	k = strings.ReplaceAll(k, "\\\\", "\\")
-	return k
 }

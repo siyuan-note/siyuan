@@ -70,8 +70,16 @@ func removeBlockCache(id string) {
 	removeRefCacheByDefID(id)
 }
 
+var virtualRefKeywordsCacheTime = time.Now()
+
 func getVirtualRefKeywordsCache() ([]string, bool) {
 	if disabled {
+		return nil, false
+	}
+
+	// 虚拟引用关键字缓存调整为 10 分钟 https://github.com/siyuan-note/siyuan/issues/6602
+	if 10 < time.Now().Sub(virtualRefKeywordsCacheTime).Minutes() {
+		ClearVirtualRefKeywords()
 		return nil, false
 	}
 

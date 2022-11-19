@@ -58,8 +58,8 @@ export const exportImage = (id: string) => {
             }
         });
         previewElement.querySelectorAll(".li > .protyle-action > svg").forEach(item => {
-            const id = item.firstElementChild.getAttribute("xlink:href")
-            const symbolElements = document.querySelectorAll(id)
+            const id = item.firstElementChild.getAttribute("xlink:href");
+            const symbolElements = document.querySelectorAll(id);
             let viewBox = "0 0 32 32";
             if (id === "#iconDot") {
                 viewBox = "0 0 20 20";

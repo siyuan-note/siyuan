@@ -6,7 +6,6 @@ import {Constants} from "../constants";
 import {exportLayout, resetLayout} from "../layout/util";
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
-import {loadAssets} from "../util/assets";
 import {genOptions} from "../util/genOptions";
 import {openSnippets} from "./util/snippets";
 import {openColorPicker} from "./util/colorPicker";

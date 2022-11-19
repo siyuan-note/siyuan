@@ -200,7 +200,7 @@ const getUnInitTab = (options: IOpenFileOptions) => {
             }
         }
     });
-}
+};
 
 const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IModels) => {
     allModels.editor.forEach((item) => {

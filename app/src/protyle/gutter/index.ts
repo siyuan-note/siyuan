@@ -3,7 +3,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
-import {isCtrl, updateHotkeyTip, writeText} from "../util/compatibility";
+import {updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     transaction,
     turnsIntoOneTransaction, turnsIntoTransaction,

@@ -251,7 +251,7 @@ const watchTheme = (data: { init: boolean, OSTheme: string }) => {
     if ((window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) ||
         (window.siyuan.config.system.container === "android" && window.JSAndroid)) {
         setTimeout(() => {
-            const backgroundColor = getComputedStyle(document.body).getPropertyValue("--b3-theme-background")
+            const backgroundColor = getComputedStyle(document.body).getPropertyValue("--b3-theme-background");
             let mode = window.siyuan.config.appearance.mode;
             if (window.siyuan.config.appearance.modeOS) {
                 if (data.OSTheme === "dark") {
@@ -304,4 +304,4 @@ const watchTheme = (data: { init: boolean, OSTheme: string }) => {
         window.siyuan.config.appearance = response.data.appearance;
         loadAssets(response.data.appearance);
     });
-}
+};

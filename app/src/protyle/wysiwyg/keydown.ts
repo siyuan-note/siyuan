@@ -361,8 +361,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         if (previousElement) {
                             previousElement.setAttribute("select-end", "true");
                             if (previousElement.getBoundingClientRect().top <= protyle.contentElement.getBoundingClientRect().top) {
-                                preventScroll(protyle)
-                                previousElement.scrollIntoView(true)
+                                preventScroll(protyle);
+                                previousElement.scrollIntoView(true);
                             }
                         }
                     }
@@ -398,8 +398,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         if (nextElement) {
                             nextElement.setAttribute("select-end", "true");
                             if (nextElement.getBoundingClientRect().bottom >= protyle.contentElement.getBoundingClientRect().bottom) {
-                                preventScroll(protyle)
-                                nextElement.scrollIntoView(false)
+                                preventScroll(protyle);
+                                nextElement.scrollIntoView(false);
                             }
                         }
                     }

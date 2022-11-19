@@ -296,7 +296,8 @@ export class WYSIWYG {
             const documentSelf = document;
             const rect = protyle.element.getBoundingClientRect();
             const mostLeft = rect.left + parseInt(protyle.wysiwyg.element.style.paddingLeft) + 1;
-            const mostRight = mostLeft + protyle.wysiwyg.element.firstElementChild.clientWidth - 1;
+            // 不能用 firstElement，否则 https://ld246.com/article/1668758661338
+            const mostRight = mostLeft + (protyle.wysiwyg.element.clientWidth - parseInt(protyle.wysiwyg.element.style.paddingLeft) - parseInt(protyle.wysiwyg.element.style.paddingRight)) - 1;
             const mostBottom = rect.bottom;
             const y = event.clientY;
             // 图片、iframe、video 缩放

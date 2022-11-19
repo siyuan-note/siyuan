@@ -1076,8 +1076,9 @@ export class WYSIWYG {
                             if (parentElement) {
                                 // 引用文本剪切 https://ld246.com/article/1647689760545
                                 // 表格多行剪切 https://ld246.com/article/1652603836350
+                                // 自定义表情的段落剪切后表情丢失 https://ld246.com/article/1668781478724
                                 Array.from(parentElement.children).forEach(item => {
-                                    if (item.textContent === "" && (item.nodeType === 1 && item.tagName !== "BR")) {
+                                    if (item.textContent === "" && (item.nodeType === 1 && !["BR", "IMG"].includes(item.tagName))) {
                                         item.remove();
                                     }
                                 });

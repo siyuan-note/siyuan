@@ -89,7 +89,9 @@ export class Toolbar {
                 return true;
             }
         });
-        if (hasImg && noText) {
+        if ((hasImg && noText) ||
+            // 拖拽图片到最右侧
+            (range.commonAncestorContainer.nodeType !== 3 && (range.commonAncestorContainer as HTMLElement).classList.contains("img"))) {
             this.element.classList.add("fn__none");
             return;
         }

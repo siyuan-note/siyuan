@@ -489,6 +489,7 @@ func scanBlockRows(rows *sql.Rows) (ret *Block) {
 		return
 	}
 	ret = &block
+	putBlockCache(ret)
 	return
 }
 

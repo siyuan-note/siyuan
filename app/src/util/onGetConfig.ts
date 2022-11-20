@@ -143,7 +143,7 @@ export const onGetConfig = (isStart: boolean) => {
     initBar();
     initStatus();
     initWindow();
-    appearance.onSetappearance(window.siyuan.config.appearance);
+    appearance.onSetappearance(window.siyuan.config.appearance, false);
     initAssets();
     renderSnippet();
     setInlineStyle();

@@ -172,7 +172,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ref/getBacklink2", model.CheckAuth, getBacklink2)
 	ginServer.Handle("POST", "/api/ref/getBacklinkDoc", model.CheckAuth, getBacklinkDoc)
 	ginServer.Handle("POST", "/api/ref/getBackmentionDoc", model.CheckAuth, getBackmentionDoc)
-	ginServer.Handle("POST", "/api/ref/createBacklink", model.CheckAuth, model.CheckReadonly, createBacklink)
 
 	ginServer.Handle("POST", "/api/attr/getBookmarkLabels", model.CheckAuth, getBookmarkLabels)
 	ginServer.Handle("POST", "/api/attr/resetBlockAttrs", model.CheckAuth, model.CheckReadonly, resetBlockAttrs)

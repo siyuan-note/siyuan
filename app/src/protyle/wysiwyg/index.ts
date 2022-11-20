@@ -1411,7 +1411,7 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("dblclick", (event: MouseEvent & { target: HTMLElement }) => {
-            if (event.target.tagName === "IMG") {
+            if (event.target.tagName === "IMG" && !event.target.classList.contains("emoji")) {
                 previewImage((event.target as HTMLImageElement).src, protyle.block.rootID);
                 return;
             }

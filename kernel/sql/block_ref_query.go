@@ -25,6 +25,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/search"
 )
 
 func QueryVirtualRefKeywords(name, alias, anchor, doc bool) (ret []string) {
@@ -149,7 +150,14 @@ func QueryRefRootBlocksByDefRootID(defRootID string) (ret []*Block) {
 	return
 }
 
-func GetRefText(defBlockID string) string {
+func GetRefText(defBlockID string) (ret string) {
+	ret = getRefText(defBlockID)
+	ret = strings.ReplaceAll(ret, search.SearchMarkLeft, "")
+	ret = strings.ReplaceAll(ret, search.SearchMarkRight, "")
+	return
+}
+
+func getRefText(defBlockID string) string {
 	block := GetBlock(defBlockID)
 	if nil == block {
 		if strings.HasPrefix(defBlockID, "assets") {

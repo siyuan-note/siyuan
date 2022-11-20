@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"fmt"
 	"path"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -62,102 +61,6 @@ func RefreshBacklink(id string) {
 			sql.UpsertRefs(tx, tree)
 		}
 	}
-}
-
-func CreateBacklink(defID, refID, refText string, isDynamic bool) (refRootID string, err error) {
-	refTree, err := loadTreeByBlockID(refID)
-	if nil != err {
-		return "", err
-	}
-	refNode := treenode.GetNodeInTree(refTree, refID)
-	if nil == refNode {
-		return
-	}
-	refRootID = refTree.Root.ID
-
-	defBlockTree := treenode.GetBlockTree(defID)
-	if nil == defBlockTree {
-		return
-	}
-	defRoot := sql.GetBlock(defBlockTree.RootID)
-	if nil == defRoot {
-		return
-	}
-
-	refTextLower := strings.ToLower(refText)
-	defBlock := sql.QueryBlockByNameOrAlias(defRoot.ID, refText)
-	if nil == defBlock {
-		if strings.ToLower(defRoot.Content) == refTextLower {
-			// 如果命名别名没有命中，但文档名和提及关键字匹配，则使用文档作为定义块
-			defBlock = defRoot
-		}
-		if nil == defBlock {
-			// 使用锚文本进行搜索，取第一个匹配的定义块
-			if defIDs := sql.QueryBlockDefIDsByRefText(refTextLower, nil); 0 < len(defIDs) {
-				if defBlock = sql.GetBlock(defIDs[0]); nil != defBlock {
-					goto OK
-				}
-			}
-		}
-		if nil == defBlock {
-			defBlock = sql.GetBlock(defBlockTree.ID)
-		}
-		if nil == defBlock {
-			return
-		}
-		if strings.ToLower(defBlock.Content) != refTextLower {
-			return
-		}
-	}
-
-OK:
-	luteEngine := NewLute()
-	found := false
-	var toRemove []*ast.Node
-	ast.Walk(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if ast.NodeText != n.Type {
-			return ast.WalkContinue
-		}
-
-		text := gulu.Str.FromBytes(n.Tokens)
-		re := regexp.MustCompile("(?i)" + refText)
-		if strings.Contains(strings.ToLower(text), refTextLower) {
-			if isDynamic {
-				text = re.ReplaceAllString(text, "(("+defBlock.ID+" '"+refText+"'))")
-			} else {
-				text = re.ReplaceAllString(text, "(("+defBlock.ID+" \""+refText+"\"))")
-			}
-			found = true
-			subTree := parse.Inline("", []byte(text), luteEngine.ParseOptions)
-			var toInsert []*ast.Node
-			for newNode := subTree.Root.FirstChild.FirstChild; nil != newNode; newNode = newNode.Next {
-				toInsert = append(toInsert, newNode)
-			}
-			for _, insert := range toInsert {
-				n.InsertBefore(insert)
-			}
-			toRemove = append(toRemove, n)
-		}
-		return ast.WalkContinue
-	})
-
-	for _, n := range toRemove {
-		n.Unlink()
-	}
-
-	if found {
-		refTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-		if err = indexWriteJSONQueue(refTree); nil != err {
-			return "", err
-		}
-		IncSync()
-	}
-	sql.WaitForWritingDatabase()
-	return
 }
 
 type Backlink struct {

@@ -267,7 +267,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
                     addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id);
                     updateFileEmoji(unicode, id);
-                    updateOutlineEmoji(unicode);
+                    updateOutlineEmoji(unicode, id);
                 });
             }
             event.preventDefault();
@@ -357,7 +357,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     window.siyuan.menus.menu.remove();
                     updateFileTreeEmoji("", id);
                     updateFileEmoji("", id);
-                    updateOutlineEmoji("");
+                    updateOutlineEmoji("", id);
                 });
             }
             return;
@@ -387,7 +387,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id);
                     updateFileEmoji(unicode, id);
-                    updateOutlineEmoji(unicode);
+                    updateOutlineEmoji(unicode, id);
                 });
             }
             return;
@@ -395,10 +395,12 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
     });
 };
 
-export const updateOutlineEmoji = (unicode: string) => {
+export const updateOutlineEmoji = (unicode: string, id:string) => {
     /// #if !MOBILE
     getAllModels().outline.forEach(model => {
-        model.headerElement.nextElementSibling.firstElementChild.innerHTML = unicode2Emoji(unicode || Constants.SIYUAN_IMAGE_FILE);
+        if (model.blockId === id) {
+            model.headerElement.nextElementSibling.firstElementChild.innerHTML = unicode2Emoji(unicode || Constants.SIYUAN_IMAGE_FILE);
+        }
     });
     /// #endif
 };

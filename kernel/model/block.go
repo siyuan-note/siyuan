@@ -262,9 +262,8 @@ func GetHeadingChildrenIDs(id string) (ret []string) {
 		return
 	}
 
-	nodes := append([]*ast.Node{}, heading)
 	children := treenode.HeadingChildren(heading)
-	nodes = append(nodes, children...)
+	nodes := append([]*ast.Node{}, children...)
 	for _, n := range nodes {
 		ret = append(ret, n.ID)
 	}

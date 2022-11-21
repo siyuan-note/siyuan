@@ -23,7 +23,9 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/dgraph-io/ristretto"
+	"github.com/jinzhu/copier"
 	gcache "github.com/patrickmn/go-cache"
+	"github.com/siyuan-note/logging"
 )
 
 var memCache, _ = ristretto.NewCache(&ristretto.Config{
@@ -50,7 +52,13 @@ func putBlockCache(block *Block) {
 	if disabled {
 		return
 	}
-	memCache.Set(block.ID, block, 1)
+
+	cloned := &Block{}
+	if err := copier.Copy(cloned, block); nil != err {
+		logging.LogErrorf("clone block failed: %v", err)
+		return
+	}
+	memCache.Set(cloned.ID, cloned, 1)
 }
 
 func getBlockCache(id string) (ret *Block) {

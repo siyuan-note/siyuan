@@ -278,7 +278,7 @@ func buildBlockBreadcrumb(node *ast.Node) (ret []*BlockPath) {
 		for prev := parent.Previous; nil != prev; prev = prev.Previous {
 			b := prev
 			if ast.NodeSuperBlock == prev.Type {
-				// 超级块下方块面包屑计算不正确 https://github.com/siyuan-note/siyuan/issues/6675
+				// 超级块中包含标题块时下方块面包屑计算不正确 https://github.com/siyuan-note/siyuan/issues/6675
 				b = treenode.SuperBlockLastHeading(prev)
 			}
 

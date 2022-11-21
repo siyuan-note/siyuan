@@ -1,10 +1,7 @@
 import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
-import {hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {onGet} from "../../protyle/util/onGet";
 import {openMobileFileById} from "../editor";
-import {MenuItem} from "../../menus/Menu";
 
 export class MobileBacklinks {
     public element: HTMLElement;
@@ -52,10 +49,9 @@ export class MobileBacklinks {
         this.mTree = new Tree({
             element: this.element.querySelector(".backlinkMList") as HTMLElement,
             data: null,
-            click: (element, event) => {
+            click: (element) => {
                 openMobileFileById(element.getAttribute("data-node-id"), [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
             },
-            blockExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>'
         });
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;

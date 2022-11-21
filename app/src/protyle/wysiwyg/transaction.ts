@@ -476,6 +476,15 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                 }
             });
         }
+        if (updateElements.length === 0) {
+            // 页签拖入浮窗 https://github.com/siyuan-note/siyuan/issues/6647
+            window.siyuan.blockPanels.forEach((item) => {
+                const updateCloneElement = item.element.querySelector(`[data-node-id="${operation.id}"]`)
+                if (updateCloneElement) {
+                    updateElements.push(updateCloneElement.cloneNode(true) as Element);
+                }
+            });
+        }
         /// #endif
         let hasFind = false;
         if (operation.previousID && updateElements.length > 0) {
@@ -525,7 +534,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         }
         // 更新 ws 嵌入块
         protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-            if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
+            if (item.querySelector(`[data-node-id="${operation.id}"],[data-node-id="${operation.parentID}"],[data-node-id="${operation.previousID}"]`)) {
                 item.removeAttribute("data-render");
                 blockRender(protyle, item);
             }

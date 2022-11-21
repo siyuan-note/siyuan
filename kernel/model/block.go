@@ -371,8 +371,11 @@ func GetBlockKramdown(id string) (ret string) {
 
 	addBlockIALNodes(tree, false)
 	node := treenode.GetNodeInTree(tree, id)
+	root := &ast.Node{Type: ast.NodeDocument}
+	root.AppendChild(node.Next) // IAL
+	root.PrependChild(node)
 	luteEngine := NewLute()
-	ret = treenode.ExportNodeStdMd(node, luteEngine)
+	ret = treenode.ExportNodeStdMd(root, luteEngine)
 	return
 }
 

@@ -22,9 +22,6 @@ export const account = {
         <div class="fn__hr"></div>
         <span class="ft__smaller">${window.siyuan.languages.account4}</span>
         <div class="fn__hr--small"></div>
-        <big class="ft__secondary">${window.siyuan.languages.priceAnnual}</big>
-        <span class="ft__on-background">/${window.siyuan.languages.year}</span>
-        <div class="fn__hr--small"></div>
         <span class="ft__smaller ft__on-surface">${window.siyuan.languages.account1}</span>
         <div class="fn__hr"></div>
     </span>

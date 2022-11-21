@@ -117,8 +117,6 @@
   "custom": "自定义",
   "feedback": "反馈",
   "inbox": "收集箱",
-  "turnToStaticRef": "静态锚文本引用",
-  "turnToDynamicRef": "动态锚文本引用",
   "turnToStatic": "静态锚文本",
   "turnToDynamic": "动态锚文本",
   "sizeLimit": "上限",

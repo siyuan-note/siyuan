@@ -117,8 +117,6 @@
   "custom": "Personalizado",
   "feedback": "Comentarios",
   "inbox": "Bandeja de entrada",
-  "turnToStaticRef": "Texto de anclaje estático ref",
-  "turnToDynamicRef": "Texto de anclaje dinámico ref",
   "turnToStatic": "Texto de anclaje estático",
   "turnToDynamic": "Texto de anclaje dinámico",
   "sizeLimit": "Límite",

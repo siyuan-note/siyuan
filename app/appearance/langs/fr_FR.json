@@ -117,8 +117,6 @@
   "custom": "Personnalisé",
   "feedback": "Commentaires",
   "inbox": "Boîte de réception",
-  "turnToStaticRef": "Référence de texte d'ancre statique",
-  "turnToDynamicRef": "Référence de texte d'ancre dynamique",
   "turnToStatic": "Texte d'ancrage statique",
   "turnToDynamic": "Texte d'ancrage dynamique",
   "sizeLimit": "Limite",

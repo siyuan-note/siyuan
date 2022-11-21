@@ -117,8 +117,6 @@
   "custom": "自定義",
   "feedback": "反饋",
   "inbox": "收件箱",
-  "turnToStaticRef": "靜態錨文本引用",
-  "turnToDynamicRef": "動態錨文本引用",
   "turnToStatic": "靜態錨文本",
   "turnToDynamic": "動態錨文本",
   "sizeLimit": "上限",

@@ -117,8 +117,6 @@
   "custom": "Custom",
   "feedback": "Feedback",
   "inbox": "Inbox",
-  "turnToStaticRef": "Static anchor text ref",
-  "turnToDynamicRef": "Dynamic anchor text ref",
   "turnToStatic": "Static anchor text",
   "turnToDynamic": "Dynamic anchor text",
   "sizeLimit": "Limit",

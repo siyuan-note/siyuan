@@ -252,6 +252,25 @@ func GetHeadingDeleteTransaction(id string) (transaction *Transaction, err error
 	return
 }
 
+func GetHeadingChildrenIDs(id string) (ret []string) {
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+	heading := treenode.GetNodeInTree(tree, id)
+	if nil == heading || ast.NodeHeading != heading.Type {
+		return
+	}
+
+	nodes := append([]*ast.Node{}, heading)
+	children := treenode.HeadingChildren(heading)
+	nodes = append(nodes, children...)
+	for _, n := range nodes {
+		ret = append(ret, n.ID)
+	}
+	return
+}
+
 func GetHeadingChildrenDOM(id string) (ret string) {
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {

@@ -242,7 +242,7 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
     focusBlock(sourceElements[0]);
 };
 
-const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean) => {
+const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean) => {
     const isSameDoc = protyle.element.contains(sourceElements[0]);
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
@@ -258,6 +258,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
     }
     let topSourceElement: Element;
     let oldSourceParentElement = sourceElements[0].parentElement;
+    const targetId = targetElement.getAttribute("data-node-id")
     if (isBottom) {
         if (newSourceElement) {
             targetElement.insertAdjacentElement("afterend", newSourceElement);
@@ -265,7 +266,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                 action: "insert",
                 data: newSourceElement.outerHTML,
                 id: newSourceElement.getAttribute("data-node-id"),
-                previousID: targetElement.getAttribute("data-node-id"),
+                previousID: targetId,
             });
             sourceElements.reverse().forEach((item, index) => {
                 if (index === sourceElements.length - 1) {
@@ -313,8 +314,13 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                 id: newSourceElement.getAttribute("data-node-id"),
             });
         } else {
-            sourceElements.reverse().forEach((item, index) => {
-                if (index === sourceElements.length - 1) {
+            const foldHeadingIds: string[] = []
+            for (let i = sourceElements.length - 1; i >= 0; i--) {
+                const item = sourceElements[i];
+                const id = item.getAttribute("data-node-id");
+                const previousID = item.previousElementSibling?.getAttribute("data-node-id");
+                const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID
+                if (i === 0) {
                     topSourceElement = getTopAloneElement(item);
                     if (topSourceElement.isSameNode(item)) {
                         topSourceElement = undefined;
@@ -323,15 +329,32 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                         topSourceElement = targetElement;
                     }
                 }
+                if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+                    foldHeadingIds.push(id);
+                    const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id})
+                    headingIds.data.reverse().forEach((headingId: string) => {
+                        undoOperations.push({
+                            action: "move",
+                            id,
+                            previousID,
+                            parentID,
+                        });
+                        doOperations.push({
+                            action: "move",
+                            id:headingId,
+                            previousID: targetId,
+                        });
+                    })
+                }
                 undoOperations.push({
                     action: "move",
-                    id: item.getAttribute("data-node-id"),
-                    previousID: item.previousElementSibling?.getAttribute("data-node-id"),
-                    parentID: item.parentElement.getAttribute("data-node-id") || protyle.block.rootID,
+                    id,
+                    previousID,
+                    parentID,
                 });
                 if (!isSameDoc) {
                     // 打开两个相同的文档
-                    const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${item.getAttribute("data-node-id")}"]`);
+                    const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
                     if (sameElement) {
                         sameElement.remove();
                     }
@@ -339,11 +362,22 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                 targetElement.insertAdjacentElement("afterend", item);
                 doOperations.push({
                     action: "move",
-                    id: item.getAttribute("data-node-id"),
-                    previousID: targetElement.getAttribute("data-node-id"),
+                    id,
+                    previousID: targetId,
                 });
-            });
+            }
             undoOperations.reverse();
+            foldHeadingIds.forEach(id => {
+                undoOperations.push({
+                    action: "foldHeading",
+                    id,
+                    data: "remove"
+                });
+                doOperations.push({
+                    action: "unfoldHeading",
+                    id,
+                });
+            })
         }
     } else {
         if (newSourceElement) {
@@ -352,7 +386,7 @@ const dragSame = (protyle: IProtyle, sourceElements: Element[], targetElement: E
                 action: "insert",
                 data: newSourceElement.outerHTML,
                 id: newSourceElement.getAttribute("data-node-id"),
-                nextID: targetElement.getAttribute("data-node-id"),
+                nextID: targetId,
             });
             sourceElements.reverse().forEach((item, index) => {
                 if (index === sourceElements.length - 1) {
@@ -644,7 +678,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             && targetElement && !protyle.options.backlinkData) {
             // 文件树拖拽
             const scrollTop = protyle.contentElement.scrollTop;
-            const ids =  event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",");
+            const ids = event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",");
             for (let i = 0; i < ids.length; i++) {
                 if (ids[i]) {
                     const response = await fetchSyncPost("/api/filetree/doc2Heading", {

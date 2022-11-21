@@ -336,13 +336,13 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
                     headingIds.data.reverse().forEach((headingId: string) => {
                         undoOperations.push({
                             action: "move",
-                            id,
+                            id: headingId,
                             previousID,
                             parentID,
                         });
                         doOperations.push({
                             action: "move",
-                            id:headingId,
+                            id: headingId,
                             previousID: targetId,
                         });
                     })

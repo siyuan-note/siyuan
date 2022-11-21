@@ -40,9 +40,11 @@ import (
 )
 
 func IsFoldHeading(transactions *[]*Transaction) bool {
-	if 1 == len(*transactions) && 1 == len((*transactions)[0].DoOperations) {
-		if op := (*transactions)[0].DoOperations[0]; "foldHeading" == op.Action {
-			return true
+	for _, tx := range *transactions {
+		for _, op := range tx.DoOperations {
+			if "foldHeading" == op.Action {
+				return true
+			}
 		}
 	}
 	return false

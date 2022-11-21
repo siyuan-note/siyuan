@@ -19,7 +19,7 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {readText, writeText} from "../protyle/util/compatibility";
+import {copyPlainText, readText, writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
@@ -296,7 +296,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                 cloneContents.querySelectorAll('[data-type="backslash"]').forEach(item => {
                     item.firstElementChild.remove();
                 });
-                writeText(cloneContents.textContent);
+                copyPlainText(cloneContents.textContent);
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({

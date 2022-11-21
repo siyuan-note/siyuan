@@ -38,6 +38,7 @@ import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
 import {exportAsset} from "./util";
 import {removeLink} from "../protyle/toolbar/Link";
+import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -627,31 +628,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         label: window.siyuan.languages.alignCenter,
         accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
         click() {
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            assetElement.style.display = "block";
-            let nextSibling = assetElement.nextSibling;
-            while (nextSibling) {
-                if (nextSibling.textContent === "") {
-                    nextSibling = nextSibling.nextSibling;
-                } else if (nextSibling.textContent === Constants.ZWSP) {
-                    nextSibling.textContent = "";
-                    break;
-                } else {
-                    break;
-                }
-            }
-            let previous = assetElement.previousSibling;
-            while (previous) {
-                if (previous.textContent === "") {
-                    previous = previous.previousSibling;
-                } else if (previous.textContent === Constants.ZWSP) {
-                    previous.textContent = "";
-                    break;
-                } else {
-                    break;
-                }
-            }
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+            alignImgCenter(protyle, nodeElement, [assetElement], id, html);
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
@@ -659,15 +636,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         label: window.siyuan.languages.alignLeft,
         accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
         click() {
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            assetElement.style.display = "";
-            if (!hasNextSibling(assetElement)) {
-                assetElement.insertAdjacentText("afterend", Constants.ZWSP);
-            }
-            if (!hasPreviousSibling(assetElement)) {
-                assetElement.insertAdjacentText("beforebegin", Constants.ZWSP);
-            }
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+            alignImgLeft(protyle, nodeElement, [assetElement], id, html)
         }
     }).element);
     const width = parseInt(assetElement.style.width || "0");

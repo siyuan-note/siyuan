@@ -13,14 +13,15 @@ import {setPadding} from "../ui/initUI";
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
 /// #endif
 import {reloadProtyle} from "../util/reload";
-import {getContenteditableElement} from "./getBlock";
+import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "./getBlock";
 import {hasClosestByMatchTag} from "../util/hasClosest";
 import {hideElements} from "../ui/hideElements";
 import {countBlockWord} from "../../layout/status";
 import {scrollCenter} from "../../util/highlightById";
-import {transaction} from "./transaction";
+import {transaction, updateTransaction} from "./transaction";
 import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
+import * as dayjs from "dayjs";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
@@ -218,7 +219,7 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
     scrollCenter(protyle);
 };
 
-export const goHome = (protyle:IProtyle) => {
+export const goHome = (protyle: IProtyle) => {
     if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0" ||
         protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||
         protyle.options.backlinkData) {
@@ -236,7 +237,7 @@ export const goHome = (protyle:IProtyle) => {
     }
 };
 
-export const goEnd = (protyle:IProtyle) => {
+export const goEnd = (protyle: IProtyle) => {
     if (!protyle.scroll.element.classList.contains("fn__none") &&
         protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true") {
         fetchPost("/api/filetree/getDoc", {
@@ -252,3 +253,47 @@ export const goEnd = (protyle:IProtyle) => {
         focusBlock(protyle.wysiwyg.element.lastElementChild, undefined, false);
     }
 };
+
+export const alignImgCenter = (protyle: IProtyle, nodeElement: Element, assetElements: Element[], id: string, html: string) => {
+    nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+    assetElements.forEach((item: HTMLElement) => {
+        item.style.display = "block";
+        let nextSibling = item.nextSibling;
+        while (nextSibling) {
+            if (nextSibling.textContent === "") {
+                nextSibling = nextSibling.nextSibling;
+            } else if (nextSibling.textContent === Constants.ZWSP) {
+                nextSibling.textContent = "";
+                break;
+            } else {
+                break;
+            }
+        }
+        let previous = item.previousSibling;
+        while (previous) {
+            if (previous.textContent === "") {
+                previous = previous.previousSibling;
+            } else if (previous.textContent === Constants.ZWSP) {
+                previous.textContent = "";
+                break;
+            } else {
+                break;
+            }
+        }
+    });
+    updateTransaction(protyle, id, nodeElement.outerHTML, html);
+}
+
+export const alignImgLeft = (protyle: IProtyle, nodeElement: Element, assetElements: Element[], id: string, html: string) => {
+    nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+    assetElements.forEach((item: HTMLElement) => {
+        item.style.display = "";
+        if (!hasNextSibling(item)) {
+            item.insertAdjacentText("afterend", Constants.ZWSP);
+        }
+        if (!hasPreviousSibling(item)) {
+            item.insertAdjacentText("beforebegin", Constants.ZWSP);
+        }
+    });
+    updateTransaction(protyle, id, nodeElement.outerHTML, html);
+}

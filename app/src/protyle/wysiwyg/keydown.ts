@@ -1,5 +1,5 @@
 import {hideElements} from "../ui/hideElements";
-import {getEventName, isCtrl, isMac, writeText} from "../util/compatibility";
+import {copyPlainText, getEventName, isCtrl, isMac, writeText} from "../util/compatibility";
 import {
     focusBlock,
     focusByRange,
@@ -1372,7 +1372,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         html += cloneNode.textContent + "\n";
                     });
                 });
-                writeText(html.trimEnd());
+                copyPlainText(html.trimEnd());
             } else {
                 const cloneContents = range.cloneContents();
                 cloneContents.querySelectorAll('[data-type="backslash"]').forEach(item => {

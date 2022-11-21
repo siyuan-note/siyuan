@@ -73,14 +73,14 @@ const promiseTransaction = () => {
             return;
         }
         countBlockWord([], protyle.block.rootID, true);
-        if (doOperations[0].action === "setAttrs") {
+        if (response.data[0].doOperations[0].action === "setAttrs") {
             const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
             if (gutterFoldElement) {
                 gutterFoldElement.removeAttribute("disabled");
             }
             // 仅在 alt+click 箭头折叠时才会触发
             protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-                if (item.querySelector(`[data-node-id="${doOperations[0].id}"]`)) {
+                if (item.querySelector(`[data-node-id="${response.data[0].doOperations[0].id}"]`)) {
                     item.removeAttribute("data-render");
                     blockRender(protyle, item);
                 }
@@ -92,7 +92,7 @@ const promiseTransaction = () => {
         if (getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
         }
-        doOperations.forEach(operation => {
+        response.data[0].doOperations.forEach((operation: IOperation) => {
             if (operation.action === "unfoldHeading" || operation.action === "foldHeading") {
                 const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
                 if (gutterFoldElement) {

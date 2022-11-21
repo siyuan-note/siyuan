@@ -330,6 +330,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
                     }
                 }
                 if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+                    item.removeAttribute("fold");
                     foldHeadingIds.push(id);
                     const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id})
                     headingIds.data.reverse().forEach((headingId: string) => {

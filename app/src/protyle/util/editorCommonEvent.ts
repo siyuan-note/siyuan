@@ -333,13 +333,15 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
                     item.removeAttribute("fold");
                     foldHeadingIds.push(id);
                     const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id})
-                    headingIds.data.reverse().forEach((headingId: string) => {
+                    headingIds.data.forEach((headingId: string) => {
                         undoOperations.push({
                             action: "move",
                             id: headingId,
-                            previousID,
+                            previousID: id,
                             parentID,
                         });
+                    })
+                    headingIds.data.reverse().forEach((headingId: string) => {
                         doOperations.push({
                             action: "move",
                             id: headingId,

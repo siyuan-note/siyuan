@@ -378,7 +378,12 @@ func fullTextSearchCount(query, box, path, filter string) (matchedBlockCount, ma
 		return
 	}
 
-	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks_fts` WHERE `blocks_fts` MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + filter
+	table := "blocks_fts" // 大小写敏感
+	if !Conf.Search.CaseSensitive {
+		table = "blocks_fts_case_insensitive"
+	}
+
+	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE `" + table + "` MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + filter
 	if "" != box {
 		stmt += " AND box = '" + box + "'"
 	}

@@ -145,30 +145,3 @@ func getBacklink(c *gin.Context) {
 	}
 	util.RandomSleep(200, 500)
 }
-
-func createBacklink(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	defID := arg["defID"].(string)
-	refID := arg["refID"].(string)
-	refText := arg["refText"].(string)
-	isDynamic := arg["isDynamic"].(bool)
-	refRootID, err := model.CreateBacklink(defID, refID, refText, isDynamic)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	ret.Data = map[string]interface{}{
-		"defID":     defID,
-		"refID":     refID,
-		"refRootID": refRootID,
-		"refText":   refText,
-	}
-}

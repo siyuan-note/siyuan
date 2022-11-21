@@ -78,7 +78,7 @@ func SplitKeyword(keyword string) (keywords []string) {
 	return
 }
 
-func EncloseHighlighting(text string, keywords []string, openMark, closeMark string, caseSensitive bool) string {
+func EncloseHighlighting(text string, keywords []string, openMark, closeMark string, caseSensitive bool) (ret string) {
 	ic := "(?i)"
 	if caseSensitive {
 		ic = "(?)"
@@ -92,26 +92,10 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 		}
 	}
 	re += ")"
+	ret = text
+
 	if reg, err := regexp.Compile(re); nil == err {
-		text = reg.ReplaceAllStringFunc(text, func(s string) string {
-			return openMark + s + closeMark
-		})
-	} else {
-		for _, k := range keywords {
-			k = regexp.QuoteMeta(k)
-			var repls, words []string
-			if re, err := regexp.Compile(ic + k); nil == err {
-				words = re.FindAllString(text, -1)
-			} else {
-				re, _ := regexp.Compile(ic + regexp.QuoteMeta(k))
-				words = re.FindAllString(text, -1)
-			}
-			for _, word := range words {
-				repls = append(repls, word, openMark+word+closeMark)
-			}
-			replacer := strings.NewReplacer(repls...)
-			text = replacer.Replace(text)
-		}
+		ret = reg.ReplaceAllStringFunc(text, func(s string) string { return openMark + s + closeMark })
 	}
-	return text
+	return
 }

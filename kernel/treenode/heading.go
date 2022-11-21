@@ -117,6 +117,14 @@ func SuperBlockHeading(sb *ast.Node) *ast.Node {
 	return nil
 }
 
+func SuperBlockLastHeading(sb *ast.Node) *ast.Node {
+	headings := sb.ChildrenByType(ast.NodeHeading)
+	if 0 < len(headings) {
+		return headings[len(headings)-1]
+	}
+	return nil
+}
+
 func HeadingParent(node *ast.Node) *ast.Node {
 	if nil == node {
 		return nil

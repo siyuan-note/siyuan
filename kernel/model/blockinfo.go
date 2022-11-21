@@ -276,15 +276,21 @@ func buildBlockBreadcrumb(node *ast.Node) (ret []*BlockPath) {
 		}
 
 		for prev := parent.Previous; nil != prev; prev = prev.Previous {
-			if ast.NodeHeading == prev.Type && headingLevel > prev.HeadingLevel {
-				name = gulu.Str.SubStr(renderBlockText(prev), maxNameLen)
+			b := prev
+			if ast.NodeSuperBlock == prev.Type {
+				// 超级块下方块面包屑计算不正确 https://github.com/siyuan-note/siyuan/issues/6675
+				b = treenode.SuperBlockLastHeading(prev)
+			}
+
+			if ast.NodeHeading == b.Type && headingLevel > b.HeadingLevel {
+				name = gulu.Str.SubStr(renderBlockText(b), maxNameLen)
 				ret = append([]*BlockPath{{
-					ID:      prev.ID,
+					ID:      b.ID,
 					Name:    name,
-					Type:    prev.Type.String(),
-					SubType: treenode.SubTypeAbbr(prev),
+					Type:    b.Type.String(),
+					SubType: treenode.SubTypeAbbr(b),
 				}}, ret...)
-				headingLevel = prev.HeadingLevel
+				headingLevel = b.HeadingLevel
 			}
 		}
 	}

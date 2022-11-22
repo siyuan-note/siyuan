@@ -33,7 +33,6 @@ import {lineNumberRender} from "../protyle/markdown/highlightRender";
 import * as dayjs from "dayjs";
 import {blockRender} from "../protyle/markdown/blockRender";
 import {renameAsset} from "../editor/rename";
-import {hasNextSibling, hasPreviousSibling} from "../protyle/wysiwyg/getBlock";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
 import {exportAsset} from "./util";
@@ -636,7 +635,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         label: window.siyuan.languages.alignLeft,
         accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
         click() {
-            alignImgLeft(protyle, nodeElement, [assetElement], id, html)
+            alignImgLeft(protyle, nodeElement, [assetElement], id, html);
         }
     }).element);
     const width = parseInt(assetElement.style.width || "0");

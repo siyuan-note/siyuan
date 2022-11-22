@@ -479,7 +479,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         if (updateElements.length === 0) {
             // 页签拖入浮窗 https://github.com/siyuan-note/siyuan/issues/6647
             window.siyuan.blockPanels.forEach((item) => {
-                const updateCloneElement = item.element.querySelector(`[data-node-id="${operation.id}"]`)
+                const updateCloneElement = item.element.querySelector(`[data-node-id="${operation.id}"]`);
                 if (updateCloneElement) {
                     updateElements.push(updateCloneElement.cloneNode(true) as Element);
                 }

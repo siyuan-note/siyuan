@@ -14,7 +14,10 @@
 
 设置 Electron 镜像环境变量并安装 Electron：
 
-* macOS/Linux: `ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@21.3.0 -D`
+* macOS/Linux: 
+ ```
+ ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@21.3.0 -D
+ ```
 * Windows:
     * `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
     * `pnpm install electron@21.3.0 -D`

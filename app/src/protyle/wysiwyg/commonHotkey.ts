@@ -282,7 +282,7 @@ export const alignImgCenter = (protyle: IProtyle, nodeElement: Element, assetEle
         }
     });
     updateTransaction(protyle, id, nodeElement.outerHTML, html);
-}
+};
 
 export const alignImgLeft = (protyle: IProtyle, nodeElement: Element, assetElements: Element[], id: string, html: string) => {
     nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
@@ -296,4 +296,4 @@ export const alignImgLeft = (protyle: IProtyle, nodeElement: Element, assetEleme
         }
     });
     updateTransaction(protyle, id, nodeElement.outerHTML, html);
-}
+};

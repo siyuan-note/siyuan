@@ -21,15 +21,15 @@ import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isSameDoc: boolean, position: InsertPosition) => {
-    let topSourceElement
-    const doOperations: IOperation[] = []
-    const undoOperations: IOperation[] = []
-    const foldHeadingIds: { id: string, parentID: string }[] = []
-    const targetId = targetElement.getAttribute("data-node-id")
-    let tempTargetElement = targetElement
+    let topSourceElement;
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    const foldHeadingIds: { id: string, parentID: string }[] = [];
+    const targetId = targetElement.getAttribute("data-node-id");
+    let tempTargetElement = targetElement;
     sourceElements.reverse().forEach((item, index) => {
         const id = item.getAttribute("data-node-id");
-        const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID
+        const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID;
         if (index === sourceElements.length - 1) {
             topSourceElement = getTopAloneElement(item);
             if (topSourceElement.isSameNode(item)) {
@@ -66,7 +66,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         if (position !== "afterend") {
             tempTargetElement = item;
         }
-    })
+    });
     undoOperations.reverse();
     for (let j = 0; j < foldHeadingIds.length; j++) {
         const childrenItem = foldHeadingIds[j];
@@ -78,7 +78,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 previousID: childrenItem.id,
                 parentID: childrenItem.parentID,
             });
-        })
+        });
         undoOperations.push({
             action: "foldHeading",
             id: childrenItem.id,
@@ -93,8 +93,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         doOperations,
         undoOperations,
         topSourceElement,
-    }
-}
+    };
+};
 
 const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, direct: "col" | "row") => {
     const isSameDoc = protyle.element.contains(sourceElements[0]);
@@ -184,11 +184,11 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             id: newSourceElement.getAttribute("data-node-id"),
         });
     } else {
-        const foldHeadingIds: { id: string, parentID: string }[] = []
-        let afterPreviousID
+        const foldHeadingIds: { id: string, parentID: string }[] = [];
+        let afterPreviousID;
         sourceElements.reverse().forEach((item, index) => {
             const id = item.getAttribute("data-node-id");
-            const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID
+            const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID;
             if (index === sourceElements.length - 1) {
                 topSourceElement = getTopAloneElement(item);
                 if (topSourceElement.isSameNode(item)) {
@@ -233,9 +233,9 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     previousID: childrenItem.id,
                     parentID: childrenItem.parentID,
                 });
-            })
+            });
             if (j === 0) {
-                afterPreviousID = headingIds.data[0]
+                afterPreviousID = headingIds.data[0];
             }
             undoOperations.push({
                 action: "foldHeading",
@@ -369,7 +369,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     }
     let topSourceElement: Element;
     let oldSourceParentElement = sourceElements[0].parentElement;
-    const targetId = targetElement.getAttribute("data-node-id")
+    const targetId = targetElement.getAttribute("data-node-id");
     if (isBottom) {
         if (newSourceElement) {
             targetElement.insertAdjacentElement("afterend", newSourceElement);
@@ -680,7 +680,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 insertHTML(protyle.lute.SpinBlockDOM(html), protyle, true);
                 blockRender(protyle, protyle.wysiwyg.element);
             } else if (targetElement) {
-                hideElements(["gutter"], protyle)
+                hideElements(["gutter"], protyle);
                 const targetClass = targetElement.className.split(" ");
                 targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right", "protyle-wysiwyg--select");
                 if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&

@@ -50,7 +50,7 @@ export class Undo {
     }
 
     private render(protyle: IProtyle, state: IOperations, redo: boolean) {
-        hideElements(["hint"], protyle);
+        hideElements(["hint", "gutter"], protyle);
         protyle.wysiwyg.lastHTMLs = {};
         if (!redo) {
             state.undoOperations.forEach(item => {

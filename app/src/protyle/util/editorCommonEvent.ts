@@ -18,6 +18,7 @@ import {blockRender} from "../markdown/blockRender";
 import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
+import {hideElements} from "../ui/hideElements";
 
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isSameDoc: boolean, position: InsertPosition) => {
     let topSourceElement
@@ -183,6 +184,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         });
     } else {
         const foldHeadingIds: { id: string, parentID: string }[] = []
+        let afterPreviousID
         sourceElements.reverse().forEach((item, index) => {
             const id = item.getAttribute("data-node-id");
             const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID
@@ -191,6 +193,9 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 if (topSourceElement.isSameNode(item)) {
                     topSourceElement = undefined;
                 }
+            }
+            if (index === 0) {
+                afterPreviousID = id;
             }
             if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                 item.removeAttribute("fold");
@@ -217,7 +222,6 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             });
         });
         undoOperations.reverse();
-        let afterPreviousID
         for (let j = 0; j < foldHeadingIds.length; j++) {
             const childrenItem = foldHeadingIds[j];
             const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id: childrenItem.id});
@@ -250,11 +254,11 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 parentID: sbElement.getAttribute("data-node-id")
             });
         } else {
-            sbElement.insertAdjacentElement("beforeend", targetElement);
+            sbElement.lastElementChild.insertAdjacentElement("beforebegin", targetElement);
             doOperations.push({
                 action: "move",
                 id: targetElement.getAttribute("data-node-id"),
-                previousID: afterPreviousID || doOperations[0].id
+                previousID: afterPreviousID
             });
         }
     }
@@ -675,6 +679,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 insertHTML(protyle.lute.SpinBlockDOM(html), protyle, true);
                 blockRender(protyle, protyle.wysiwyg.element);
             } else if (targetElement) {
+                hideElements(["gutter"], protyle)
                 const targetClass = targetElement.className.split(" ");
                 targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right", "protyle-wysiwyg--select");
                 if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&

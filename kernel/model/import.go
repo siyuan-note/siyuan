@@ -18,9 +18,13 @@ package model
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"io"
 	"io/fs"
 	"math/rand"
@@ -403,6 +407,9 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	}
 	boxLocalPath = filepath.Join(util.DataDir, boxID)
 
+	base64TmpDir := filepath.Join(util.TempDir, "base64")
+	os.MkdirAll(base64TmpDir, 0755)
+
 	luteEngine := NewLute()
 	if gulu.File.IsDir(localPath) {
 		// 收集所有资源文件
@@ -419,8 +426,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			}
 
 			if !strings.HasSuffix(info.Name(), ".md") && !strings.HasSuffix(info.Name(), ".markdown") {
-				dest := currentPath
-				assets[dest] = currentPath
+				assets[currentPath] = currentPath
 				return nil
 			}
 			return nil
@@ -480,7 +486,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return io.EOF
 			}
 
-			tree = parseKTree(data)
+			tree = parseStdMd(data)
 			if nil == tree {
 				logging.LogErrorf("parse tree [%s] failed", currentPath)
 				return nil
@@ -507,6 +513,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				}
 
 				dest := n.TokensStr()
+				if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
+					processBase64Img(n, dest, base64TmpDir, assetDirPath, err)
+					return ast.WalkContinue
+				}
+
 				if !util.IsRelativePath(dest) || "" == dest {
 					return ast.WalkContinue
 				}
@@ -570,7 +581,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		if nil != err {
 			return err
 		}
-		tree := parseKTree(data)
+		tree := parseStdMd(data)
 		if nil == tree {
 			msg := fmt.Sprintf("parse tree [%s] failed", localPath)
 			logging.LogErrorf(msg)
@@ -595,6 +606,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			}
 
 			dest := n.TokensStr()
+			if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
+				processBase64Img(n, dest, base64TmpDir, assetDirPath, err)
+				return ast.WalkContinue
+			}
+
 			if !util.IsRelativePath(dest) {
 				return ast.WalkContinue
 			}
@@ -639,6 +655,71 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	debug.FreeOSMemory()
 	IncSync()
 	return
+}
+
+func processBase64Img(n *ast.Node, dest string, base64TmpDir string, assetDirPath string, err error) {
+	sep := strings.Index(dest, ";base64,")
+	var decodeErr error
+	unbased, decodeErr := base64.StdEncoding.DecodeString(dest[sep+8:])
+	if nil != decodeErr {
+		logging.LogErrorf("decode base64 image failed: %s", decodeErr)
+		return
+	}
+	dataReader := bytes.NewReader(unbased)
+	var img image.Image
+	var ext string
+	typ := dest[5:sep]
+	switch typ {
+	case "image/png":
+		img, decodeErr = png.Decode(dataReader)
+		ext = ".png"
+	case "image/jpeg":
+		img, decodeErr = jpeg.Decode(dataReader)
+		ext = ".jpg"
+	default:
+		logging.LogWarnf("unsupported base64 image type [%s]", typ)
+		return
+	}
+	if nil != decodeErr {
+		logging.LogErrorf("decode base64 image failed: %s", decodeErr)
+		return
+	}
+
+	name := "image" + ext
+	alt := n.Parent.ChildByType(ast.NodeLinkText)
+	if nil != alt {
+		name = alt.TokensStr() + ext
+	}
+	name = util.FilterFileName(name)
+	name = util.AssetName(name)
+
+	tmp := filepath.Join(base64TmpDir, name)
+	tmpFile, openErr := os.OpenFile(tmp, os.O_RDWR|os.O_CREATE, 0644)
+	if nil != openErr {
+		logging.LogErrorf("open temp file [%s] failed: %s", tmp, openErr)
+		return
+	}
+
+	var encodeErr error
+	switch typ {
+	case "image/png":
+		encodeErr = png.Encode(tmpFile, img)
+	case "image/jpeg":
+		encodeErr = jpeg.Encode(tmpFile, img, &jpeg.Options{Quality: 100})
+	}
+	if nil != encodeErr {
+		logging.LogErrorf("encode base64 image failed: %s", encodeErr)
+		tmpFile.Close()
+		return
+	}
+	tmpFile.Close()
+
+	assetTargetPath := filepath.Join(assetDirPath, name)
+	if err = filelock.Copy(tmp, assetTargetPath); nil != err {
+		logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", tmp, assetTargetPath, err)
+		return
+	}
+	n.Tokens = []byte("assets/" + name)
 }
 
 func imgHtmlBlock2InlineImg(tree *parse.Tree) {
@@ -691,7 +772,6 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 		n.InsertBefore(p)
 		n.Unlink()
 	}
-
 	return
 }
 

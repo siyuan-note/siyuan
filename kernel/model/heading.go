@@ -34,7 +34,7 @@ import (
 
 func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 	headingID := operation.ID
-	tree, err := loadTreeByBlockID(headingID)
+	tree, err := tx.loadTree(headingID)
 	if nil != err {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
@@ -69,7 +69,7 @@ func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	headingID := operation.ID
 
-	tree, err := loadTreeByBlockID(headingID)
+	tree, err := tx.loadTree(headingID)
 	if nil != err {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}

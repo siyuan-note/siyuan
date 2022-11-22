@@ -233,7 +233,11 @@ type Tags []*Tag
 
 func BuildTags() (ret *Tags) {
 	WaitForWritingFiles()
-	sql.WaitForWritingDatabase()
+	if !sql.IsEmptyQueue() {
+		sql.WaitForWritingDatabase()
+	} else {
+		util.RandomSleep(200, 500)
+	}
 
 	ret = &Tags{}
 	labels := labelTags()

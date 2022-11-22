@@ -50,7 +50,7 @@ func getBackmentionDoc(c *gin.Context) {
 
 	defID := arg["defID"].(string)
 	refTreeID := arg["refTreeID"].(string)
-	keyword := ""
+	keyword := arg["keyword"].(string)
 	backlinks := model.GetBackmentionDoc(defID, refTreeID, keyword)
 	ret.Data = map[string]interface{}{
 		"backmentions": backlinks,
@@ -68,7 +68,8 @@ func getBacklinkDoc(c *gin.Context) {
 
 	defID := arg["defID"].(string)
 	refTreeID := arg["refTreeID"].(string)
-	backlinks := model.GetBacklinkDoc(defID, refTreeID)
+	keyword := arg["keyword"].(string)
+	backlinks := model.GetBacklinkDoc(defID, refTreeID, keyword)
 	ret.Data = map[string]interface{}{
 		"backlinks": backlinks,
 	}
@@ -143,31 +144,4 @@ func getBacklink(c *gin.Context) {
 		"box":           boxID,
 	}
 	util.RandomSleep(200, 500)
-}
-
-func createBacklink(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	defID := arg["defID"].(string)
-	refID := arg["refID"].(string)
-	refText := arg["refText"].(string)
-	isDynamic := arg["isDynamic"].(bool)
-	refRootID, err := model.CreateBacklink(defID, refID, refText, isDynamic)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	ret.Data = map[string]interface{}{
-		"defID":     defID,
-		"refID":     refID,
-		"refRootID": refRootID,
-		"refText":   refText,
-	}
 }

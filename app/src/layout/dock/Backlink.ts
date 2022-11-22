@@ -84,7 +84,7 @@ export class Backlink extends Model {
     <span class="fn__space"></span>
     <label class="b3-form__icon b3-form__icon--small search__label">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconFilter"></use></svg>
-        <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="${window.siyuan.languages.filterDocNameEnter}" />
+        <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
     </label>
     <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
@@ -107,7 +107,7 @@ export class Backlink extends Model {
     <span class="fn__space"></span>
     <label class="b3-form__icon b3-form__icon--small search__label">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconFilter"></use></svg>
-        <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="${window.siyuan.languages.filterDocNameEnter}" />
+        <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
     </label>
     <span class="fn__space"></span>
     <span data-type="mSort" data-sort="3" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
@@ -385,7 +385,8 @@ export class Backlink extends Model {
         } else {
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: this.blockId,
-                refTreeID: docId
+                refTreeID: docId,
+                keyword: isMention ? this.inputsElement[1].value : this.inputsElement[0].value
             }, (response) => {
                 svgElement.removeAttribute("disabled");
                 svgElement.classList.add("b3-list-item__arrow--open");

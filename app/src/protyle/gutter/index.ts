@@ -3,7 +3,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
-import {isCtrl, updateHotkeyTip, writeText} from "../util/compatibility";
+import {copyPlainText, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     transaction,
     turnsIntoOneTransaction, turnsIntoTransaction,
@@ -591,7 +591,7 @@ export class Gutter {
                             html += cloneNode.textContent + "\n";
                         });
                     });
-                    writeText(html.trimEnd());
+                    copyPlainText(html.trimEnd());
                 }
             }, {
                 label: window.siyuan.languages.copy + " HTML",
@@ -966,7 +966,7 @@ export class Gutter {
                         });
                         text += cloneNode.textContent + "\n";
                     });
-                    writeText(text.trimEnd());
+                    copyPlainText(text.trimEnd());
                 }
             }, {
                 label: window.siyuan.languages.copy + " HTML",

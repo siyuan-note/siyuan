@@ -78,49 +78,24 @@ func SplitKeyword(keyword string) (keywords []string) {
 	return
 }
 
-func EncloseHighlighting(text string, keywords []string, openMark, closeMark string, caseSensitive bool) string {
+func EncloseHighlighting(text string, keywords []string, openMark, closeMark string, caseSensitive bool) (ret string) {
 	ic := "(?i)"
 	if caseSensitive {
 		ic = "(?)"
 	}
 	re := ic + "("
 	for i, k := range keywords {
-		k = keyword2regexp(k)
+		k = regexp.QuoteMeta(k)
 		re += "(" + k + ")"
 		if i < len(keywords)-1 {
 			re += "|"
 		}
 	}
 	re += ")"
-	if reg, err := regexp.Compile(re); nil == err {
-		text = reg.ReplaceAllStringFunc(text, func(s string) string {
-			return openMark + s + closeMark
-		})
-	} else {
-		for _, k := range keywords {
-			k = keyword2regexp(k)
-			var repls, words []string
-			if re, err := regexp.Compile(ic + k); nil == err {
-				words = re.FindAllString(text, -1)
-			} else {
-				re, _ := regexp.Compile(ic + regexp.QuoteMeta(k))
-				words = re.FindAllString(text, -1)
-			}
-			for _, word := range words {
-				repls = append(repls, word, openMark+word+closeMark)
-			}
-			replacer := strings.NewReplacer(repls...)
-			text = replacer.Replace(text)
-		}
-	}
-	return text
-}
+	ret = text
 
-func keyword2regexp(k string) string {
-	k = strings.ReplaceAll(k, "*", ".*")
-	k = strings.ReplaceAll(k, "?", ".")
-	k = strings.ReplaceAll(k, "%", ".*")
-	k = strings.ReplaceAll(k, "_", ".")
-	k = strings.ReplaceAll(k, "\\\\", "\\")
-	return k
+	if reg, err := regexp.Compile(re); nil == err {
+		ret = reg.ReplaceAllStringFunc(text, func(s string) string { return openMark + s + closeMark })
+	}
+	return
 }

@@ -140,6 +140,7 @@ export const addGA = () => {
         const para = {
             version: Constants.SIYUAN_VERSION,
             container: window.siyuan.config.system.container,
+            os: window.siyuan.config.system.os,
             isLoggedIn: false,
             subscriptionStatus: -1,
             subscriptionPlan: -1,
@@ -250,7 +251,7 @@ const watchTheme = (data: { init: boolean, OSTheme: string }) => {
     if ((window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) ||
         (window.siyuan.config.system.container === "android" && window.JSAndroid)) {
         setTimeout(() => {
-            const backgroundColor = getComputedStyle(document.body).getPropertyValue("--b3-theme-background")
+            const backgroundColor = getComputedStyle(document.body).getPropertyValue("--b3-theme-background");
             let mode = window.siyuan.config.appearance.mode;
             if (window.siyuan.config.appearance.modeOS) {
                 if (data.OSTheme === "dark") {
@@ -264,7 +265,7 @@ const watchTheme = (data: { init: boolean, OSTheme: string }) => {
             } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
                 window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
             }
-        }, Constants.TIMEOUT_BLOCKLOAD); // 移动端需要加载完才可以获取到颜色
+        }, 500); // 移动端需要加载完才可以获取到颜色
     }
     if (data.init) {
         if (window.siyuan.config.appearance.modeOS && (
@@ -303,4 +304,4 @@ const watchTheme = (data: { init: boolean, OSTheme: string }) => {
         window.siyuan.config.appearance = response.data.appearance;
         loadAssets(response.data.appearance);
     });
-}
+};

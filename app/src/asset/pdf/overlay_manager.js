@@ -93,7 +93,8 @@ class OverlayManager {
       }
     }
     this.#active = dialog;
-    dialog.showModal();
+    // NOTE
+    dialog.classList.add("dialog--open")
   }
 
   /**
@@ -109,7 +110,8 @@ class OverlayManager {
     } else if (this.#active !== dialog) {
       throw new Error("Another overlay is currently active.");
     }
-    dialog.close();
+    // NOTE
+    dialog.classList.remove("dialog--open")
     this.#active = null;
   }
 }

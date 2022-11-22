@@ -296,7 +296,8 @@ export class WYSIWYG {
             const documentSelf = document;
             const rect = protyle.element.getBoundingClientRect();
             const mostLeft = rect.left + parseInt(protyle.wysiwyg.element.style.paddingLeft) + 1;
-            const mostRight = mostLeft + protyle.wysiwyg.element.firstElementChild.clientWidth - 1;
+            // 不能用 firstElement，否则 https://ld246.com/article/1668758661338
+            const mostRight = mostLeft + (protyle.wysiwyg.element.clientWidth - parseInt(protyle.wysiwyg.element.style.paddingLeft) - parseInt(protyle.wysiwyg.element.style.paddingRight)) - 1;
             const mostBottom = rect.bottom;
             const y = event.clientY;
             // 图片、iframe、video 缩放
@@ -1075,8 +1076,9 @@ export class WYSIWYG {
                             if (parentElement) {
                                 // 引用文本剪切 https://ld246.com/article/1647689760545
                                 // 表格多行剪切 https://ld246.com/article/1652603836350
+                                // 自定义表情的段落剪切后表情丢失 https://ld246.com/article/1668781478724
                                 Array.from(parentElement.children).forEach(item => {
-                                    if (item.textContent === "" && (item.nodeType === 1 && item.tagName !== "BR")) {
+                                    if (item.textContent === "" && (item.nodeType === 1 && !["BR", "IMG"].includes(item.tagName))) {
                                         item.remove();
                                     }
                                 });
@@ -1409,7 +1411,7 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("dblclick", (event: MouseEvent & { target: HTMLElement }) => {
-            if (event.target.tagName === "IMG") {
+            if (event.target.tagName === "IMG" && !event.target.classList.contains("emoji")) {
                 previewImage((event.target as HTMLImageElement).src, protyle.block.rootID);
                 return;
             }

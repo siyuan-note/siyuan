@@ -1,10 +1,7 @@
 import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
-import {hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {onGet} from "../../protyle/util/onGet";
 import {openMobileFileById} from "../editor";
-import {MenuItem} from "../../menus/Menu";
 
 export class MobileBacklinks {
     public element: HTMLElement;
@@ -52,31 +49,9 @@ export class MobileBacklinks {
         this.mTree = new Tree({
             element: this.element.querySelector(".backlinkMList") as HTMLElement,
             data: null,
-            click: (element, event) => {
-                const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
-                if (actionElement) {
-                    if (actionElement.firstElementChild.classList.contains("fn__rotate")) {
-                        return;
-                    }
-                    window.siyuan.menus.menu.remove();
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        label: window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToStaticRef,
-                        click: () => {
-                            this.turnToRef(element, false);
-                        }
-                    }).element);
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        label: window.siyuan.languages.turnInto + " " + window.siyuan.languages.turnToDynamicRef,
-                        click: () => {
-                            this.turnToRef(element, true);
-                        }
-                    }).element);
-                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
-                } else {
-                    openMobileFileById(element.getAttribute("data-node-id"), [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
-                }
+            click: (element) => {
+                openMobileFileById(element.getAttribute("data-node-id"), [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
             },
-            blockExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>'
         });
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
@@ -127,29 +102,6 @@ export class MobileBacklinks {
         });
 
         this.update();
-    }
-
-    private turnToRef(element: HTMLElement, isDynamic:boolean) {
-        element.querySelector(".b3-list-item__action").innerHTML = '<svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg>';
-        fetchPost("/api/ref/createBacklink", {
-            refID: element.getAttribute("data-node-id"),
-            refText: decodeURIComponent(element.getAttribute("data-ref-text")),
-            defID: window.siyuan.mobileEditor.protyle.block.id,
-            pushMode: 0,
-            isDynamic
-        }, response => {
-            if (response.data.defID === window.siyuan.mobileEditor.protyle.block.id) {
-                this.update();
-            }
-            if (response.data.refRootID === window.siyuan.mobileEditor.protyle.block.rootID) {
-                fetchPost("/api/filetree/getDoc", {
-                    id: window.siyuan.mobileEditor.protyle.block.id,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    onGet(getResponse, window.siyuan.mobileEditor.protyle);
-                });
-            }
-        });
     }
 
     public update() {

@@ -185,15 +185,15 @@ export class Asset extends Model {
 
             <button id="cursorSelectTool" class="secondaryToolbarButton b3-menu__item selectTool toggled" tabindex="60">
                <svg class="b3-menu__icon"><use xlink:href="#iconSelectText"></use></svg> 
-              <span class="b3-menu__label">${window.siyuan.languages.cursorText}</span>
+               <span class="b3-menu__label">${window.siyuan.languages.cursorText}</span>
+               <span class="b3-menu__accelerator">S</span>
             </button>
             <button id="cursorHandTool" class="secondaryToolbarButton b3-menu__item handTool" tabindex="61">
               <svg class="b3-menu__icon"><use xlink:href="#iconHand"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.cursorHand}</span>
+              <span class="b3-menu__accelerator">H</span>
             </button>
-
             <div class="horizontalToolbarSeparator b3-menu__separator"></div>
-
             <button id="scrollVertical" class="secondaryToolbarButton b3-menu__item scrollModeButtons scrollVertical toggled" tabindex="62">
              <svg class="b3-menu__icon"><use xlink:href="#iconSplitTB"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.scrollVertical}</span>
@@ -316,7 +316,7 @@ export class Asset extends Model {
         </div>
       </div>
       <div id="dialogContainer">
-        <dialog id="passwordDialog">
+        <div class="dialog" id="passwordDialog">
             <div class="row">
               <p id="passwordText" data-l10n-id="password_label">Enter the password to open this PDF file:</p>
             </div>
@@ -327,8 +327,8 @@ export class Asset extends Model {
               <button id="passwordCancel" class="overlayButton"><span data-l10n-id="password_cancel">Cancel</span></button>
               <button id="passwordSubmit" class="overlayButton"><span data-l10n-id="password_ok">OK</span></button>
             </div>
-        </dialog>
-        <dialog id="documentPropertiesDialog">
+        </div>
+        <div class="dialog" id="documentPropertiesDialog">
             <div class="row">
               <span>${window.siyuan.languages.fileName}</span> <p id="fileNameField">-</p>
             </div>
@@ -377,8 +377,8 @@ export class Asset extends Model {
             <div class="buttonRow">
               <button id="documentPropertiesClose" class="b3-button"><span>${window.siyuan.languages.close}</span></button>
             </div>
-        </dialog>
-        <dialog id="printServiceOverlay">
+        </div>
+        <div class="dialog" id="printServiceOverlay">
             <div class="row">
               <span data-l10n-id="print_progress_message">Preparing document for printing…</span>
             </div>
@@ -389,7 +389,7 @@ export class Asset extends Model {
             <div class="buttonRow">
               <button id="printCancel" class="overlayButton"><span data-l10n-id="print_progress_close">Cancel</span></button>
             </div>
-        </dialog>
+        </div>
       </div>
       <div class="pdf__util b3-menu fn__none pdf__util--hide">
         <div class="fn__flex" style="padding: 0 4px">

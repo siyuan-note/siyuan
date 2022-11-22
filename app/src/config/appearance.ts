@@ -6,10 +6,10 @@ import {Constants} from "../constants";
 import {exportLayout, resetLayout} from "../layout/util";
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
-import {loadAssets} from "../util/assets";
 import {genOptions} from "../util/genOptions";
 import {openSnippets} from "./util/snippets";
 import {openColorPicker} from "./util/colorPicker";
+import {loadAssets} from "../util/assets";
 
 export const appearance = {
     element: undefined as Element,
@@ -244,7 +244,7 @@ export const appearance = {
             });
         });
     },
-    onSetappearance(data: IAppearance) {
+    onSetappearance(data: IAppearance, needLoadAsset = true) {
         if (data.lang !== window.siyuan.config.appearance.lang || data.nativeEmoji !== window.siyuan.config.appearance.nativeEmoji) {
             exportLayout(true);
             return;
@@ -276,6 +276,9 @@ export const appearance = {
         ipcRenderer.send(Constants.SIYUAN_CONFIG_THEME, data.modeOS ? "system" : (data.mode === 1 ? "dark" : "light"));
         ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, data.closeButtonBehavior);
         /// #endif
+        if (needLoadAsset) {
+            loadAssets(data);
+        }
         document.querySelector("#barMode use").setAttribute("xlink:href", `#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}`);
     }
 };

@@ -252,6 +252,24 @@ func GetHeadingDeleteTransaction(id string) (transaction *Transaction, err error
 	return
 }
 
+func GetHeadingChildrenIDs(id string) (ret []string) {
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+	heading := treenode.GetNodeInTree(tree, id)
+	if nil == heading || ast.NodeHeading != heading.Type {
+		return
+	}
+
+	children := treenode.HeadingChildren(heading)
+	nodes := append([]*ast.Node{}, children...)
+	for _, n := range nodes {
+		ret = append(ret, n.ID)
+	}
+	return
+}
+
 func GetHeadingChildrenDOM(id string) (ret string) {
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {
@@ -352,8 +370,11 @@ func GetBlockKramdown(id string) (ret string) {
 
 	addBlockIALNodes(tree, false)
 	node := treenode.GetNodeInTree(tree, id)
+	root := &ast.Node{Type: ast.NodeDocument}
+	root.AppendChild(node.Next) // IAL
+	root.PrependChild(node)
 	luteEngine := NewLute()
-	ret = treenode.ExportNodeStdMd(node, luteEngine)
+	ret = treenode.ExportNodeStdMd(root, luteEngine)
 	return
 }
 

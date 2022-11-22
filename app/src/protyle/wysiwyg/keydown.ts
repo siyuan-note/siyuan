@@ -1,5 +1,5 @@
 import {hideElements} from "../ui/hideElements";
-import {getEventName, isCtrl, isMac, writeText} from "../util/compatibility";
+import {copyPlainText, getEventName, isCtrl, isMac, writeText} from "../util/compatibility";
 import {
     focusBlock,
     focusByRange,
@@ -42,7 +42,16 @@ import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
-import {commonHotkey, downSelect, duplicateBlock, getStartEndElement, goEnd, goHome, upSelect} from "./commonHotkey";
+import {
+    alignImgCenter, alignImgLeft,
+    commonHotkey,
+    downSelect,
+    duplicateBlock,
+    getStartEndElement,
+    goEnd,
+    goHome,
+    upSelect
+} from "./commonHotkey";
 import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
@@ -361,8 +370,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         if (previousElement) {
                             previousElement.setAttribute("select-end", "true");
                             if (previousElement.getBoundingClientRect().top <= protyle.contentElement.getBoundingClientRect().top) {
-                                preventScroll(protyle)
-                                previousElement.scrollIntoView(true)
+                                preventScroll(protyle);
+                                previousElement.scrollIntoView(true);
                             }
                         }
                     }
@@ -398,8 +407,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         if (nextElement) {
                             nextElement.setAttribute("select-end", "true");
                             if (nextElement.getBoundingClientRect().bottom >= protyle.contentElement.getBoundingClientRect().bottom) {
-                                preventScroll(protyle)
-                                nextElement.scrollIntoView(false)
+                                preventScroll(protyle);
+                                nextElement.scrollIntoView(false);
                             }
                         }
                     }
@@ -1033,14 +1042,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.alignLeft.custom, event)) {
             const imgSelectElements = nodeElement.querySelectorAll(".img--select");
             if (imgSelectElements.length > 0) {
-                const oldHTML = nodeElement.outerHTML;
-                imgSelectElements.forEach((item: HTMLElement) => {
-                    item.style.display = "";
-                    if (!hasNextSibling(item)) {
-                        item.insertAdjacentText("afterend", Constants.ZWSP);
-                    }
-                });
-                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                alignImgLeft(protyle, nodeElement, Array.from(imgSelectElements), nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML)
             } else {
                 let selectElements: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 if (selectElements.length === 0) {
@@ -1057,22 +1059,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.alignCenter.custom, event)) {
             const imgSelectElements = nodeElement.querySelectorAll(".img--select");
             if (imgSelectElements.length > 0) {
-                const oldHTML = nodeElement.outerHTML;
-                imgSelectElements.forEach((item: HTMLElement) => {
-                    item.style.display = "block";
-                    let nextSibling = item.nextSibling;
-                    while (nextSibling) {
-                        if (nextSibling.textContent === "") {
-                            nextSibling = nextSibling.nextSibling;
-                        } else if (nextSibling.textContent === Constants.ZWSP) {
-                            nextSibling.textContent = "";
-                            break;
-                        } else {
-                            break;
-                        }
-                    }
-                });
-                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                alignImgCenter(protyle, nodeElement, Array.from(imgSelectElements), nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML);
             } else {
                 let selectElements: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 if (selectElements.length === 0) {
@@ -1385,7 +1372,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         html += cloneNode.textContent + "\n";
                     });
                 });
-                writeText(html.trimEnd());
+                copyPlainText(html.trimEnd());
             } else {
                 const cloneContents = range.cloneContents();
                 cloneContents.querySelectorAll('[data-type="backslash"]').forEach(item => {

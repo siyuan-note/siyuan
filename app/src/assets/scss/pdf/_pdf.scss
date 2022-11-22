@@ -321,9 +321,6 @@
   top: 36px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-}
-
-#secondaryToolbarButtonContainer {
   max-width: 220px;
   max-height: 60vh;
 }
@@ -602,24 +599,46 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
   border: 0 none !important;
 }
 
-#dialogContainer > dialog {
+#dialogContainer > .dialog {
   padding: 8px;
   box-shadow: var(--b3-dialog-shadow);
   background-color: var(--b3-menu-background);
   border-radius: 4px;
   width: 520px;
   border: 0;
+  position: absolute;
+  inset-inline-start: 0px;
+  inset-inline-end: 0px;
+  height: fit-content;
+  margin: auto;
+  display: none;
+
+
+  &--open {
+    position: fixed;
+    inset-block-start: 0px;
+    inset-block-end: 0px;
+    max-width: calc((100% - 6px) - 2em);
+    max-height: calc((100% - 6px) - 2em);
+    user-select: text;
+    display: block;
+    z-index: 100;
+    overflow: auto;
+  }
 
   & > .row {
     display: table-row;
 
     & > span {
       white-space: nowrap;
+      color: var(--b3-theme-on-surface);
+      padding-right: 8px;
     }
   }
 
   & > .row > * {
     display: table-cell;
+    color: var(--b3-theme-on-background);
   }
 
   .toolbarField {
@@ -643,7 +662,6 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
     color: rgba(255, 255, 255, 1);
   }
 }
-
 
 #passwordOverlay > dialog {
   text-align: center;

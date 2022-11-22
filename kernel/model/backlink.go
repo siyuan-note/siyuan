@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"fmt"
 	"path"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -64,102 +63,6 @@ func RefreshBacklink(id string) {
 	}
 }
 
-func CreateBacklink(defID, refID, refText string, isDynamic bool) (refRootID string, err error) {
-	refTree, err := loadTreeByBlockID(refID)
-	if nil != err {
-		return "", err
-	}
-	refNode := treenode.GetNodeInTree(refTree, refID)
-	if nil == refNode {
-		return
-	}
-	refRootID = refTree.Root.ID
-
-	defBlockTree := treenode.GetBlockTree(defID)
-	if nil == defBlockTree {
-		return
-	}
-	defRoot := sql.GetBlock(defBlockTree.RootID)
-	if nil == defRoot {
-		return
-	}
-
-	refTextLower := strings.ToLower(refText)
-	defBlock := sql.QueryBlockByNameOrAlias(defRoot.ID, refText)
-	if nil == defBlock {
-		if strings.ToLower(defRoot.Content) == refTextLower {
-			// 如果命名别名没有命中，但文档名和提及关键字匹配，则使用文档作为定义块
-			defBlock = defRoot
-		}
-		if nil == defBlock {
-			// 使用锚文本进行搜索，取第一个匹配的定义块
-			if defIDs := sql.QueryBlockDefIDsByRefText(refTextLower, nil); 0 < len(defIDs) {
-				if defBlock = sql.GetBlock(defIDs[0]); nil != defBlock {
-					goto OK
-				}
-			}
-		}
-		if nil == defBlock {
-			defBlock = sql.GetBlock(defBlockTree.ID)
-		}
-		if nil == defBlock {
-			return
-		}
-		if strings.ToLower(defBlock.Content) != refTextLower {
-			return
-		}
-	}
-
-OK:
-	luteEngine := NewLute()
-	found := false
-	var toRemove []*ast.Node
-	ast.Walk(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if ast.NodeText != n.Type {
-			return ast.WalkContinue
-		}
-
-		text := gulu.Str.FromBytes(n.Tokens)
-		re := regexp.MustCompile("(?i)" + refText)
-		if strings.Contains(strings.ToLower(text), refTextLower) {
-			if isDynamic {
-				text = re.ReplaceAllString(text, "(("+defBlock.ID+" '"+refText+"'))")
-			} else {
-				text = re.ReplaceAllString(text, "(("+defBlock.ID+" \""+refText+"\"))")
-			}
-			found = true
-			subTree := parse.Inline("", []byte(text), luteEngine.ParseOptions)
-			var toInsert []*ast.Node
-			for newNode := subTree.Root.FirstChild.FirstChild; nil != newNode; newNode = newNode.Next {
-				toInsert = append(toInsert, newNode)
-			}
-			for _, insert := range toInsert {
-				n.InsertBefore(insert)
-			}
-			toRemove = append(toRemove, n)
-		}
-		return ast.WalkContinue
-	})
-
-	for _, n := range toRemove {
-		n.Unlink()
-	}
-
-	if found {
-		refTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-		if err = indexWriteJSONQueue(refTree); nil != err {
-			return "", err
-		}
-		IncSync()
-	}
-	sql.WaitForWritingDatabase()
-	return
-}
-
 type Backlink struct {
 	DOM        string       `json:"dom"`
 	BlockPaths []*BlockPath `json:"blockPaths"`
@@ -178,7 +81,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 	refs := sql.QueryRefsByDefID(defID, true)
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
-	linkRefs, _, excludeBacklinkIDs := buildLinkRefs(rootID, refs)
+	linkRefs, _, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
 	tmpMentions, mentionKeywords := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
 	luteEngine := NewLute()
 	treeCache := map[string]*parse.Tree{}
@@ -206,7 +109,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 	return
 }
 
-func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
+func GetBacklinkDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 	ret = []*Backlink{}
 	sqlBlock := sql.GetBlock(defID)
 	if nil == sqlBlock {
@@ -223,7 +126,7 @@ func GetBacklinkDoc(defID, refTreeID string) (ret []*Backlink) {
 	}
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
-	linkRefs, _, _ := buildLinkRefs(rootID, refs)
+	linkRefs, _, _ := buildLinkRefs(rootID, refs, keyword)
 	refTree, err := loadTreeByBlockID(refTreeID)
 	if nil != err {
 		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
@@ -353,16 +256,11 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	refs := sql.QueryRefsByDefID(id, true)
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
-	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs)
+	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
 	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink")
 
 	for _, l := range tmpBacklinks {
 		l.Blocks = nil
-		if "" != keyword {
-			if !strings.Contains(l.Name, keyword) {
-				continue
-			}
-		}
 		backlinks = append(backlinks, l)
 	}
 
@@ -392,11 +290,6 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink")
 	for _, l := range tmpBackmentions {
 		l.Blocks = nil
-		if "" != mentionKeyword {
-			if !strings.Contains(l.Name, mentionKeyword) {
-				continue
-			}
-		}
 		backmentions = append(backmentions, l)
 	}
 
@@ -558,7 +451,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID strin
 	return
 }
 
-func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set) {
+func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set) {
 	// 为了减少查询，组装好 IDs 后一次查出
 	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
 	var queryBlockIDs []string
@@ -627,8 +520,13 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, refsCount i
 	paragraphParents := sql.GetBlocks(paragraphParentIDs)
 	for _, p := range paragraphParents {
 		if "i" == p.Type || "h" == p.Type {
-			ret = append(ret, fromSQLBlock(p, "", 12))
 			processedParagraphs.Add(p.ID)
+
+			if !strings.Contains(p.Content, keyword) {
+				refsCount--
+				continue
+			}
+			ret = append(ret, fromSQLBlock(p, "", 12))
 		}
 	}
 	for _, link := range links {
@@ -637,6 +535,11 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref) (ret []*Block, refsCount i
 				if processedParagraphs.Contains(ref.ParentID) {
 					continue
 				}
+			}
+
+			if !strings.Contains(ref.Content, keyword) {
+				refsCount--
+				continue
 			}
 
 			ref.DefID = link.ID

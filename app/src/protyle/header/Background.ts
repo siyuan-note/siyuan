@@ -262,7 +262,7 @@ export class Background {
                         this.ial.icon = emoji;
                         this.render(this.ial, protyle.block.rootID);
                         updateFileTreeEmoji(emoji, protyle.block.rootID);
-                        updateOutlineEmoji(emoji);
+                        updateOutlineEmoji(emoji, protyle.block.rootID);
                         fetchPost("/api/attr/setBlockAttrs", {
                             id: protyle.block.rootID,
                             attrs: {"icon": emoji}

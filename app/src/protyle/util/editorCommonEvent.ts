@@ -19,7 +19,82 @@ import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 
-const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, direct: "col" | "row") => {
+const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isSameDoc: boolean, position: InsertPosition) => {
+    let topSourceElement
+    const doOperations: IOperation[] = []
+    const undoOperations: IOperation[] = []
+    const foldHeadingIds: { id: string, parentID: string }[] = []
+    const targetId = targetElement.getAttribute("data-node-id")
+    if (position === "afterend") {
+        sourceElements.reverse();
+    }
+    sourceElements.forEach((item, index) => {
+        const id = item.getAttribute("data-node-id");
+        const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID
+        if (index === sourceElements.length - 1) {
+            topSourceElement = getTopAloneElement(item);
+            if (topSourceElement.isSameNode(item)) {
+                topSourceElement = undefined;
+            } else if (topSourceElement.contains(item) && topSourceElement.contains(targetElement)) {
+                // * * 1 列表项拖拽到父级列表项下 https://ld246.com/article/1665448570858
+                topSourceElement = targetElement;
+            }
+        }
+        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+            item.removeAttribute("fold");
+            foldHeadingIds.push({id, parentID});
+        }
+        undoOperations.push({
+            action: "move",
+            id,
+            previousID: item.previousElementSibling?.getAttribute("data-node-id"),
+            parentID,
+        });
+        if (!isSameDoc) {
+            // 打开两个相同的文档
+            const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+            if (sameElement) {
+                sameElement.remove();
+            }
+        }
+        targetElement.insertAdjacentElement(position, item);
+        doOperations.push({
+            action: "move",
+            id,
+            previousID: position === "afterend" ? targetId : item.previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
+            parentID: item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
+        });
+    })
+    undoOperations.reverse();
+    for (let j = 0; j < foldHeadingIds.length; j++) {
+        const childrenItem = foldHeadingIds[j];
+        const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id: childrenItem.id});
+        headingIds.data.reverse().forEach((headingId: string) => {
+            undoOperations.push({
+                action: "move",
+                id: headingId,
+                previousID: childrenItem.id,
+                parentID: childrenItem.parentID,
+            });
+        })
+        undoOperations.push({
+            action: "foldHeading",
+            id: childrenItem.id,
+            data: "remove"
+        });
+        doOperations.push({
+            action: "unfoldHeading",
+            id: childrenItem.id,
+        });
+    }
+    return {
+        doOperations,
+        undoOperations,
+        topSourceElement,
+    }
+}
+
+const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, direct: "col" | "row") => {
     const isSameDoc = protyle.element.contains(sourceElements[0]);
 
     let newSourceElement: HTMLElement;
@@ -107,30 +182,29 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
             id: newSourceElement.getAttribute("data-node-id"),
         });
     } else {
-        if (!isBottom) {
-            sbElement.insertAdjacentElement("afterbegin", targetElement);
-            doOperations.push({
-                action: "move",
-                id: targetElement.getAttribute("data-node-id"),
-                parentID: sbElement.getAttribute("data-node-id")
-            });
-        }
+        const foldHeadingIds: { id: string, parentID: string }[] = []
         sourceElements.reverse().forEach((item, index) => {
+            const id = item.getAttribute("data-node-id");
+            const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID
             if (index === sourceElements.length - 1) {
                 topSourceElement = getTopAloneElement(item);
                 if (topSourceElement.isSameNode(item)) {
                     topSourceElement = undefined;
                 }
             }
+            if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+                item.removeAttribute("fold");
+                foldHeadingIds.push({id, parentID});
+            }
             undoOperations.push({
                 action: "move",
-                id: item.getAttribute("data-node-id"),
+                id,
                 previousID: item.previousElementSibling?.getAttribute("data-node-id"),
-                parentID: item.parentElement.getAttribute("data-node-id") || protyle.block.rootID,
+                parentID
             });
             if (!isSameDoc) {
                 // 打开两个相同的文档
-                const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${item.getAttribute("data-node-id")}"]`);
+                const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
                 if (sameElement) {
                     sameElement.remove();
                 }
@@ -138,17 +212,49 @@ const dragSb = (protyle: IProtyle, sourceElements: Element[], targetElement: Ele
             sbElement.insertAdjacentElement("afterbegin", item);
             doOperations.push({
                 action: "move",
-                id: item.getAttribute("data-node-id"),
+                id,
                 parentID: sbElement.getAttribute("data-node-id"),
             });
         });
         undoOperations.reverse();
+        let afterPreviousID
+        for (let j = 0; j < foldHeadingIds.length; j++) {
+            const childrenItem = foldHeadingIds[j];
+            const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id: childrenItem.id});
+            headingIds.data.reverse().forEach((headingId: string) => {
+                undoOperations.push({
+                    action: "move",
+                    id: headingId,
+                    previousID: childrenItem.id,
+                    parentID: childrenItem.parentID,
+                });
+            })
+            if (j === 0) {
+                afterPreviousID = headingIds.data[0]
+            }
+            undoOperations.push({
+                action: "foldHeading",
+                id: childrenItem.id,
+                data: "remove"
+            });
+            doOperations.push({
+                action: "unfoldHeading",
+                id: childrenItem.id,
+            });
+        }
         if (isBottom) {
             sbElement.insertAdjacentElement("afterbegin", targetElement);
             doOperations.push({
                 action: "move",
                 id: targetElement.getAttribute("data-node-id"),
                 parentID: sbElement.getAttribute("data-node-id")
+            });
+        } else {
+            sbElement.insertAdjacentElement("beforeend", targetElement);
+            doOperations.push({
+                action: "move",
+                id: targetElement.getAttribute("data-node-id"),
+                previousID: afterPreviousID || doOperations[0].id
             });
         }
     }
@@ -314,73 +420,10 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
                 id: newSourceElement.getAttribute("data-node-id"),
             });
         } else {
-            const foldHeadingIds: string[] = []
-            for (let i = sourceElements.length - 1; i >= 0; i--) {
-                const item = sourceElements[i];
-                const id = item.getAttribute("data-node-id");
-                const previousID = item.previousElementSibling?.getAttribute("data-node-id");
-                const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID
-                if (i === 0) {
-                    topSourceElement = getTopAloneElement(item);
-                    if (topSourceElement.isSameNode(item)) {
-                        topSourceElement = undefined;
-                    } else if (topSourceElement.contains(item) && topSourceElement.contains(targetElement)) {
-                        // * * 1 列表项拖拽到父级列表项下 https://ld246.com/article/1665448570858
-                        topSourceElement = targetElement;
-                    }
-                }
-                if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-                    item.removeAttribute("fold");
-                    foldHeadingIds.push(id);
-                    const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id})
-                    headingIds.data.forEach((headingId: string) => {
-                        undoOperations.push({
-                            action: "move",
-                            id: headingId,
-                            previousID: id,
-                            parentID,
-                        });
-                    })
-                    headingIds.data.reverse().forEach((headingId: string) => {
-                        doOperations.push({
-                            action: "move",
-                            id: headingId,
-                            previousID: targetId,
-                        });
-                    })
-                }
-                undoOperations.push({
-                    action: "move",
-                    id,
-                    previousID,
-                    parentID,
-                });
-                if (!isSameDoc) {
-                    // 打开两个相同的文档
-                    const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
-                    if (sameElement) {
-                        sameElement.remove();
-                    }
-                }
-                targetElement.insertAdjacentElement("afterend", item);
-                doOperations.push({
-                    action: "move",
-                    id,
-                    previousID: targetId,
-                });
-            }
-            undoOperations.reverse();
-            foldHeadingIds.forEach(id => {
-                undoOperations.push({
-                    action: "foldHeading",
-                    id,
-                    data: "remove"
-                });
-                doOperations.push({
-                    action: "unfoldHeading",
-                    id,
-                });
-            })
+            const moveToResult = await moveTo(protyle, sourceElements, targetElement, isSameDoc, "afterend");
+            doOperations.push(...moveToResult.doOperations);
+            undoOperations.push(...moveToResult.undoOperations);
+            topSourceElement = moveToResult.topSourceElement;
         }
     } else {
         if (newSourceElement) {
@@ -437,38 +480,10 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
                 id: newSourceElement.getAttribute("data-node-id"),
             });
         } else {
-            sourceElements.forEach((item, index) => {
-                if (index === sourceElements.length - 1) {
-                    topSourceElement = getTopAloneElement(item);
-                    if (topSourceElement.isSameNode(item)) {
-                        topSourceElement = undefined;
-                    } else if (topSourceElement.contains(item) && topSourceElement.contains(targetElement)) {
-                        // * * 1 列表项拖拽到父级列表项上 https://ld246.com/article/1665448570858
-                        topSourceElement = targetElement;
-                    }
-                }
-                undoOperations.push({
-                    action: "move",
-                    id: item.getAttribute("data-node-id"),
-                    previousID: item.previousElementSibling?.getAttribute("data-node-id"),
-                    parentID: item.parentElement.getAttribute("data-node-id") || protyle.block.rootID,
-                });
-                if (!isSameDoc) {
-                    // 打开两个相同的文档
-                    const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${item.getAttribute("data-node-id")}"]`);
-                    if (sameElement) {
-                        sameElement.remove();
-                    }
-                }
-                targetElement.insertAdjacentElement("beforebegin", item);
-                doOperations.push({
-                    action: "move",
-                    id: item.getAttribute("data-node-id"),
-                    previousID: item.previousElementSibling?.getAttribute("data-node-id"),
-                    parentID: item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
-                });
-            });
-            undoOperations.reverse();
+            const moveToResult = await moveTo(protyle, sourceElements, targetElement, isSameDoc, "beforebegin");
+            doOperations.push(...moveToResult.doOperations);
+            undoOperations.push(...moveToResult.undoOperations);
+            topSourceElement = moveToResult.topSourceElement;
         }
     }
     if (targetElement.getAttribute("data-type") === "NodeListItem" && targetElement.getAttribute("data-subtype") === "o") {

@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
@@ -439,10 +440,30 @@ func moveTree(tree *parse.Tree) {
 	}
 }
 
+func parseStdMd(markdown []byte) (ret *parse.Tree) {
+	luteEngine := lute.New()
+	luteEngine.SetFootnotes(false)
+	luteEngine.SetToC(false)
+	luteEngine.SetIndentCodeBlock(false)
+	luteEngine.SetAutoSpace(false)
+	luteEngine.SetHeadingID(false)
+	luteEngine.SetSetext(false)
+	luteEngine.SetYamlFrontMatter(false)
+	luteEngine.SetLinkRef(false)
+	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
+	genTreeID(ret)
+	return
+}
+
 func parseKTree(kramdown []byte) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret = parse.Parse("", kramdown, luteEngine.ParseOptions)
-	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	genTreeID(ret)
+	return
+}
+
+func genTreeID(tree *parse.Tree) {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -475,7 +496,7 @@ func parseKTree(kramdown []byte) (ret *parse.Tree) {
 		}
 		return ast.WalkContinue
 	})
-	ret.Root.KramdownIAL = parse.Tokens2IAL(ret.Root.LastChild.Tokens)
+	tree.Root.KramdownIAL = parse.Tokens2IAL(tree.Root.LastChild.Tokens)
 	return
 }
 

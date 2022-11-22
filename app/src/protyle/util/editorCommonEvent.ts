@@ -26,10 +26,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     const undoOperations: IOperation[] = []
     const foldHeadingIds: { id: string, parentID: string }[] = []
     const targetId = targetElement.getAttribute("data-node-id")
-    if (position === "afterend") {
-        sourceElements.reverse();
-    }
-    sourceElements.forEach((item, index) => {
+    let tempTargetElement = targetElement
+    sourceElements.reverse().forEach((item, index) => {
         const id = item.getAttribute("data-node-id");
         const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID
         if (index === sourceElements.length - 1) {
@@ -58,13 +56,16 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 sameElement.remove();
             }
         }
-        targetElement.insertAdjacentElement(position, item);
+        tempTargetElement.insertAdjacentElement(position, item);
         doOperations.push({
             action: "move",
             id,
             previousID: position === "afterend" ? targetId : item.previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
             parentID: item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
         });
+        if (position !== "afterend") {
+            tempTargetElement = item;
+        }
     })
     undoOperations.reverse();
     for (let j = 0; j < foldHeadingIds.length; j++) {

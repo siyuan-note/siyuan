@@ -81,6 +81,10 @@ func isWritingDatabase() bool {
 	return false
 }
 
+func IsEmptyQueue() bool {
+	return 1 > len(operationQueue) && !util.IsMutexLocked(&txLock)
+}
+
 func flushTreeQueue() {
 	ops := mergeUpsertTrees()
 	if 1 > len(ops) {

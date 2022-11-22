@@ -160,7 +160,9 @@ func BookmarkLabels() (ret []string) {
 
 func BuildBookmark() (ret *Bookmarks) {
 	WaitForWritingFiles()
-	sql.WaitForWritingDatabase()
+	if !sql.IsEmptyQueue() {
+		sql.WaitForWritingDatabase()
+	}
 
 	ret = &Bookmarks{}
 	sqlBlocks := sql.QueryBookmarkBlocks()

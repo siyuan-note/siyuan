@@ -1,3 +1,79 @@
+## v2.5.1 / 2022-11-22
+
+### 改进功能
+
+* [PDF 中按下 `h` 为手型工具 `s` 为文本工具](https://github.com/siyuan-note/siyuan/issues/3559)
+* [反链面板支持关键字过滤](https://github.com/siyuan-note/siyuan/issues/6178)
+* [优化文档标题不支持 `/` 提示信息位置](https://github.com/siyuan-note/siyuan/issues/6516)
+* [浏览器端支持外观模式 `跟随系统`](https://github.com/siyuan-note/siyuan/issues/6590)
+* [改进导出长图](https://github.com/siyuan-note/siyuan/issues/6593)
+* [改进虚拟引用和反链提及搜索匹配](https://github.com/siyuan-note/siyuan/issues/6600)
+* [移动端支持外观模式 `跟随系统`](https://github.com/siyuan-note/siyuan/issues/6601)
+* [虚拟引用关键字缓存调整为 10 分钟](https://github.com/siyuan-note/siyuan/issues/6602)
+* [在 设置 - 搜索 中分别增加虚拟引用和反链提及 `关键字数量限制`](https://github.com/siyuan-note/siyuan/issues/6603)
+* [S3/WebDAV 数据同步支持设置跳过 HTTPS 证书验证](https://github.com/siyuan-note/siyuan/issues/6609)
+* [S3/WebDAV 数据同步单个请求默认超时 30s](https://github.com/siyuan-note/siyuan/issues/6610)
+* [`Shift+↑/↓` 被取消的块应在可视区域](https://github.com/siyuan-note/siyuan/issues/6613)
+* [改进导出时引用嵌套锚文本的渲染](https://github.com/siyuan-note/siyuan/issues/6614)
+* [加一个用户指南入口按钮在顶栏 `设置` 按钮右侧](https://github.com/siyuan-note/siyuan/issues/6616)
+* [改进 S3 上传标记快照性能](https://github.com/siyuan-note/siyuan/issues/6617)
+* [导出 PDF 时过长的表格显示不全](https://github.com/siyuan-note/siyuan/issues/6618)
+* [调整边距后代码块行号错位](https://github.com/siyuan-note/siyuan/issues/6619)
+* [在右侧打开已存在但未初始化的文档时会重复打开该文档](https://github.com/siyuan-note/siyuan/issues/6621)
+* [升级五线谱 abcjs 到 6.1.7](https://github.com/siyuan-note/siyuan/issues/6625)
+* [同步时忽略 .git 文件夹清理空目录](https://github.com/siyuan-note/siyuan/issues/6626)
+* [移动端右侧菜单滚动时会触发菜单功能](https://github.com/siyuan-note/siyuan/issues/6628)
+* [改进粘贴 HTML 时 `<mark>` 标签的解析处理](https://github.com/siyuan-note/siyuan/issues/6632)
+* [减少嵌入块抖动](https://github.com/siyuan-note/siyuan/issues/6635)
+* [支持插入 `.sh` 域名超链接](https://github.com/siyuan-note/siyuan/issues/6644)
+* [iPad 端中 PDF 无法正常显示](https://github.com/siyuan-note/siyuan/issues/6646)
+* [块从页签拖入悬浮窗后自动更新页签](https://github.com/siyuan-note/siyuan/issues/6647)
+* [图片缩放受限第一个块的长度](https://github.com/siyuan-note/siyuan/issues/6649)
+* [自定义表情右键添加复制选项](https://github.com/siyuan-note/siyuan/issues/6653)
+* [改进搜索性能](https://github.com/siyuan-note/siyuan/issues/6655)
+* [设置 - 账号中不再显示订阅价格](https://github.com/siyuan-note/siyuan/issues/6669)
+* [使用 API `/api/block/getBlockKramdown` 查询时返回 IAL](https://github.com/siyuan-note/siyuan/issues/6670)
+* [导入 Markdown 时将 Base64 编码的图片转换为文件](https://github.com/siyuan-note/siyuan/issues/6671)
+* [移动折叠标题后自动展开](https://github.com/siyuan-note/siyuan/issues/6673)
+* [`复制纯文本` 时移除所有零宽空格](https://github.com/siyuan-note/siyuan/issues/6674)
+* [改进书签和标签面板加载速度](https://github.com/siyuan-note/siyuan/issues/6677)
+
+### 文档相关
+
+* [增加 设置 - 搜索 - 搜索结果显示数 影响说明](https://github.com/siyuan-note/siyuan/issues/6608)
+* [更新 CI/CD 发布变更中的链接地址](https://github.com/siyuan-note/siyuan/pull/6633)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/6584)
+* [移除不再使用的创建反链接口](https://github.com/siyuan-note/siyuan/issues/6662)
+
+### 修复缺陷
+
+* [编辑器滚动条无法拖拽](https://github.com/siyuan-note/siyuan/issues/6588)
+* [文档标题快速输入中文光标位置异常](https://github.com/siyuan-note/siyuan/issues/6594)
+* [S3 本地标记快照上传报错](https://github.com/siyuan-note/siyuan/issues/6604)
+* [S3/WebDAV 本地标记快照上传未增量上传文件对象](https://github.com/siyuan-note/siyuan/issues/6606)
+* [导入 `.sy.zip` 后丢失自定义排序](https://github.com/siyuan-note/siyuan/issues/6611)
+* [S3 无法删除云端标记快照](https://github.com/siyuan-note/siyuan/issues/6620)
+* [新建文档没有建立在当前页签的同级](https://github.com/siyuan-note/siyuan/issues/6622)
+* [表格内设置字体格式报错](https://github.com/siyuan-note/siyuan/issues/6627)
+* [macOS、Linux 和移动端移动父文档排序时报错](https://github.com/siyuan-note/siyuan/issues/6634)
+* [数据库层缓存失效](https://github.com/siyuan-note/siyuan/issues/6637)
+* [全局搜索结果路径展现转义问题](https://github.com/siyuan-note/siyuan/issues/6642)
+* [数学公式染色后无法保存](https://github.com/siyuan-note/siyuan/issues/6643)
+* [导出 ECharts 图表块时被转义的符号未恢复](https://github.com/siyuan-note/siyuan/issues/6645)
+* [折叠标题移动后再撤销导致内容丢失和触发状态异常](https://github.com/siyuan-note/siyuan/issues/6648)
+* [剪藏时列表下方块缩进不正确](https://github.com/siyuan-note/siyuan/issues/6650)
+* [WebDAV 删除云端标记快照报错](https://github.com/siyuan-note/siyuan/issues/6651)
+* [含有自定义表情的段落剪切后表情丢失](https://github.com/siyuan-note/siyuan/issues/6652)
+* [特定情况下主题切换无效](https://github.com/siyuan-note/siyuan/issues/6656)
+* [包含 `\"` 的行级公式解析问题](https://github.com/siyuan-note/siyuan/issues/6661)
+* [搜索设置忽略大小写时结果统计不正确](https://github.com/siyuan-note/siyuan/issues/6664)
+* [使用居中快捷键导致图片上有空行](https://github.com/siyuan-note/siyuan/issues/6666)
+* [更新任意文档图标后大纲都会更新](https://github.com/siyuan-note/siyuan/issues/6668)
+* [超级块中包含标题块时下方块面包屑计算不正确](https://github.com/siyuan-note/siyuan/issues/6675)
+
 ## v2.5.0 / 2022-11-15
 
 ### 引入特性

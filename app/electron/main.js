@@ -583,10 +583,6 @@ const initKernel = (initData) => {
       })
     }
 
-    const sleep = (ms) => {
-      return new Promise(resolve => setTimeout(resolve, ms))
-    }
-
     const getKernelPort = async () => {
       if (isDevEnv) {
         return kernelPort
@@ -797,15 +793,31 @@ app.on('before-quit', (event) => {
 })
 
 const {powerMonitor} = require('electron')
-const cp = require("child_process");
 
 powerMonitor.on('suspend', () => {
   writeLog('system suspend')
-  fetch(getServer() + '/api/sync/performSync', {method: 'POST'})
 })
 
-powerMonitor.on('resume', () => {
+powerMonitor.on('resume', async () => {
   writeLog('system resume')
+  let online = false
+  for (let i = 0; i < 7; i++) {
+    if (await isOnline()) {
+      online = true
+      break;
+    }
+
+    writeLog("network is offline")
+    await sleep(1000)
+  }
+
+  if (!online) {
+    writeLog("network is offline, do not sync after system resume")
+    return;
+  }
+
+  writeLog("sync after system resume")
+  // 桌面端系统休眠唤醒后同步延时 7s 后再执行 https://github.com/siyuan-note/siyuan/issues/6687
   fetch(getServer() + '/api/sync/performSync', {method: 'POST'})
 })
 
@@ -813,3 +825,16 @@ powerMonitor.on('shutdown', () => {
   writeLog('system shutdown')
   fetch(getServer() + '/api/system/exit', {method: 'POST'})
 })
+
+const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+const isOnline = async () => {
+  try {
+    const result = await fetch("https://icanhazip.com", {timeout: 1000})
+    return 200 === result.status
+  } catch (e) {
+    return false;
+  }
+}

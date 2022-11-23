@@ -447,7 +447,8 @@ const getExportPath = (option: { type: string, id: string }, removeAssets?: bool
                 } else if (option.type === "word") {
                     url = "/api/export/exportDocx";
                 }
-                const savePath = result.filePaths[0].endsWith(response.data.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(response.data.rootTitle));
+                let savePath = result.filePaths[0].endsWith(response.data.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(response.data.rootTitle));
+                savePath = savePath.trim();
                 fetchPost(url, {
                     id: option.id,
                     pdf: option.type === "pdf",

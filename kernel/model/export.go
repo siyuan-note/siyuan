@@ -244,6 +244,7 @@ func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
 	tree = exportTree(tree, true, true, false)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
+	savePath = strings.TrimSpace(savePath)
 
 	if err := os.MkdirAll(savePath, 0755); nil != err {
 		logging.LogErrorf("mkdir [%s] failed: %s", savePath, err)
@@ -330,6 +331,7 @@ func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
 }
 
 func ExportHTML(id, savePath string, pdf, keepFold bool) (name, dom string) {
+	savePath = strings.TrimSpace(savePath)
 	tree, _ := loadTreeByBlockID(id)
 	var headings []*ast.Node
 	if pdf { // 导出 PDF 需要标记目录书签

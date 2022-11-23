@@ -330,7 +330,7 @@
   "moveToLeft": "向左移",
   "moveToRight": "向右移",
   "copyProtocol": "复制块超链接",
-  "uploadAssets2CDN": "上传资源文件到云端",
+  "uploadAssets2CDN": "上传资源文件到图床",
   "notSupport1": "不支持跨笔记本进行拖拽",
   "keymapTip": "部分快捷键修改后需点击刷新按钮后才能生效",
   "keymapTip2": "使用默认快捷键",

@@ -227,9 +227,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     const newId = Lute.NewNodeID();
                     e.setAttribute("data-node-id", newId);
                     e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
-                    if (e.getAttribute("updated")) {
-                        e.setAttribute("updated", newId.split("-")[0]);
-                    }
+                    e.setAttribute("updated", newId.split("-")[0]);
                     isBlock = true;
                 });
                 if (nodeElement.classList.contains("table")) {

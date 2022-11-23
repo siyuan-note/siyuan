@@ -72,7 +72,9 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         // 子列表下的段落块回车 https://ld246.com/article/1623919354587
         blockElement.nextElementSibling.isSameNode(subListElement)) {
         // 含有子列表的换行
-        if (position.end >= editableElement.textContent.length) {
+        if (position.end >= editableElement.textContent.length -
+            // 数学公式结尾会有 zwsp https://github.com/siyuan-note/siyuan/issues/6679
+            (editableElement.textContent.endsWith(Constants.ZWSP) ? 1 : 0)) {
             // 段末换行，在子列表中插入
             range.insertNode(document.createElement("wbr"));
             const html = subListElement.outerHTML;

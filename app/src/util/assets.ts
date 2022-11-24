@@ -136,7 +136,7 @@ export const addGA = () => {
         };
         /*eslint-enable */
         gtag("js", new Date());
-        gtag("config", "G-L7WEXVQCR9");
+        gtag("config", "G-L7WEXVQCR9", {send_page_view: false});
         const para = {
             version: Constants.SIYUAN_VERSION,
             container: window.siyuan.config.system.container,

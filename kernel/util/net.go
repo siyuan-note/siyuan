@@ -17,7 +17,12 @@
 package util
 
 import (
+	"context"
+	"crypto/tls"
+	"net"
+	"net/http"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -47,4 +52,24 @@ func JsonArg(c *gin.Context, result *gulu.Result) (arg map[string]interface{}, o
 
 	ok = true
 	return
+}
+
+func NewTransport(skipTlsVerify bool) *http.Transport {
+	return &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: defaultTransportDialContext(&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}),
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTlsVerify}}
+}
+
+func defaultTransportDialContext(dialer *net.Dialer) func(context.Context, string, string) (net.Conn, error) {
+	return dialer.DialContext
 }

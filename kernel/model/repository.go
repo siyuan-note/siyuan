@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
-	"crypto/tls"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -824,7 +823,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	case conf.ProviderSiYuan:
 		cloudRepo = cloud.NewSiYuan(&cloud.BaseCloud{Conf: cloudConf})
 	case conf.ProviderS3:
-		s3HTTPClient := &http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: cloudConf.S3.SkipTlsVerify}}}
+		s3HTTPClient := &http.Client{Transport: util.NewTransport(cloudConf.S3.SkipTlsVerify)}
 		s3HTTPClient.Timeout = 30 * time.Second
 		cloudRepo = cloud.NewS3(&cloud.BaseCloud{Conf: cloudConf}, s3HTTPClient)
 	case conf.ProviderWebDAV:
@@ -834,7 +833,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		webdavClient.SetHeader("Authorization", auth)
 		webdavClient.SetHeader("User-Agent", util.UserAgent)
 		webdavClient.SetTimeout(30 * time.Second)
-		webdavClient.SetTransport(&http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: cloudConf.WebDAV.SkipTlsVerify}})
+		webdavClient.SetTransport(util.NewTransport(cloudConf.WebDAV.SkipTlsVerify))
 		cloudRepo = cloud.NewWebDAV(&cloud.BaseCloud{Conf: cloudConf}, webdavClient)
 	default:
 		err = fmt.Errorf("unknown cloud provider [%d]", Conf.Sync.Provider)

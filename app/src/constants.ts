@@ -103,10 +103,12 @@ export abstract class Constants {
         "221": ["]", "}"],
         "222": ["'", '"'],
     };
+    // 冲突不使用 "⌘S/Q"
     // "⌘", "⇧", "⌥", "⌃"
     // "⌘A", "⌘X", "⌘C", "⌘V", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {
+            editMode: {default: "⌘.", custom: "⌘."},
             syncNow: {default: "F9", custom: "F9"},
             enterBack: {default: "⌥←", custom: "⌥←"},
             enter: {default: "⌥→", custom: "⌥→"},

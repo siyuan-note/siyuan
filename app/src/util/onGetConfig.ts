@@ -182,7 +182,7 @@ const initBar = () => {
 <div id="barSearch" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
     <svg><use xlink:href="#iconSearch"></use></svg>
 </div>
-<div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly}">
+<div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}">
     <svg><use xlink:href="#icon${window.siyuan.config.editor.readOnly ? "Preview" : "Edit"}"></use></svg>
 </div>
 <div id="barMode" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.appearanceMode}">

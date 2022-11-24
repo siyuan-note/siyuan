@@ -40,6 +40,7 @@ import {syncGuide} from "../sync/syncGuide";
 import {showPopover} from "../block/popover";
 import {getStartEndElement} from "../protyle/wysiwyg/commonHotkey";
 import {getNextFileLi, getPreviousFileLi} from "../protyle/wysiwyg/getBlock";
+import {editor} from "../config/editor";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -420,6 +421,12 @@ export const globalShortcut = () => {
             event.preventDefault();
             event.stopPropagation();
             syncGuide(document.querySelector("#barSync"));
+            return;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.general.editMode.custom, event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            editor.setMode();
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {

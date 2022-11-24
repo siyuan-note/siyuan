@@ -450,6 +450,7 @@ func parseStdMd(markdown []byte) (ret *parse.Tree) {
 	luteEngine.SetSetext(false)
 	luteEngine.SetYamlFrontMatter(false)
 	luteEngine.SetLinkRef(false)
+	luteEngine.SetImgPathAllowSpace(true)
 	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
 	genTreeID(ret)
 	return

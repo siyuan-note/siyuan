@@ -518,7 +518,14 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					return ast.WalkContinue
 				}
 
-				if !util.IsRelativePath(dest) || "" == dest {
+				dest = strings.ReplaceAll(dest, "%20", " ")
+				dest = strings.ReplaceAll(dest, "%5C", "/")
+				n.Tokens = []byte(dest)
+				if !util.IsRelativePath(dest) {
+					return ast.WalkContinue
+				}
+				dest = filepath.ToSlash(dest)
+				if "" == dest {
 					return ast.WalkContinue
 				}
 
@@ -611,10 +618,12 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return ast.WalkContinue
 			}
 
+			dest = strings.ReplaceAll(dest, "%20", " ")
+			dest = strings.ReplaceAll(dest, "%5C", "/")
+			n.Tokens = []byte(dest)
 			if !util.IsRelativePath(dest) {
 				return ast.WalkContinue
 			}
-
 			dest = filepath.ToSlash(dest)
 			if "" == dest {
 				return ast.WalkContinue

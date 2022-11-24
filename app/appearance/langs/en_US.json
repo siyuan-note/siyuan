@@ -723,7 +723,7 @@
   "about12": "After enabling, other devices in the same LAN will be allowed to access. The application will be closed automatically after modification, please restart manually",
   "about13": "API token",
   "about14": "The token needs to be authenticated when calling the API",
-  "about17": "Do not enable proxy when set to <code class='fn__code'>Direct connection</code>. The application will be closed automatically after modification, please restart manually",
+  "about17": "Do not enable proxy when set to <code class='fn__code'>Direct connection</code>",
   "checkUpdate": "Check update",
   "currentVer": "Current version",
   "visitAnnouncements": "<a href=\"https://github.com/siyuan-note/siyuan/releases\" target=\"_blank\">View system announcements</a>",

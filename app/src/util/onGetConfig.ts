@@ -90,12 +90,18 @@ const hasKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "edito
 
 export const setProxy = () => {
     /// #if !BROWSER
-    const session = getCurrentWindow().webContents.session;
-    if (window.siyuan.config.system.networkProxy.scheme) {
-        session.closeAllConnections().then(() => {
-            session.setProxy({proxyRules: `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`}).then();
-        });
+    if ("" === window.siyuan.config.system.networkProxy.scheme) {
+        console.log("network proxy [system]");
+        return
     }
+
+    const session = getCurrentWindow().webContents.session;
+    session.closeAllConnections().then(() => {
+        const proxyURL = `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`
+        session.setProxy({proxyRules: proxyURL}).then(
+            () => console.log("network proxy [" + proxyURL + "]"),
+        );
+    });
     /// #endif
 };
 

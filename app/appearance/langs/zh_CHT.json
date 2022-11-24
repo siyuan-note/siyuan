@@ -723,7 +723,7 @@
   "about12": "啟用後將允許同一區域網內的其他設備進行存取。修改後會自動關閉應用，請手動重啟",
   "about13": "API token",
   "about14": "調用 API 時需要通過該 token 進行鑒權",
-  "about17": "設置為 <code class='fn__code'>直接連接</code> 時不啟用代理。修改後會自動關閉應用，請手動重啟",
+  "about17": "設置為 <code class='fn__code'>直接連接</code> 時不啟用代理",
   "checkUpdate": "檢查更新",
   "currentVer": "當前版本",
   "visitAnnouncements": "<a href=\"https://ld246.com/tag/siyuan-announcement\" target=\"_blank\">瀏覽系統公告</a>",

@@ -366,8 +366,8 @@ func setNetworkProxy(c *gin.Context) {
 	}
 	model.Conf.Save()
 
-	util.PushMsg(model.Conf.Language(42), 1000*15)
-	time.Sleep(time.Second * 3)
+	proxyURL := model.Conf.System.NetworkProxy.String()
+	util.SetNetworkProxy(proxyURL)
 }
 
 func addUIProcess(c *gin.Context) {

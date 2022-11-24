@@ -723,7 +723,7 @@
   "about12": "Después de habilitarla, se permitirá el acceso a otros dispositivos de la misma LAN. La aplicación se cerrará automáticamente después de la modificación, por favor reinicie manualmente",
   "about13": "Token API",
   "about14": "El token debe ser autentificado al llamar a la API",
-  "about17": "No habilite el proxy cuando esté configurado como <code class='fn__code'>Conexión directa</code>. La aplicación se cerrará automáticamente después de la modificación, por favor reinicie manualmente",
+  "about17": "No habilite el proxy cuando esté configurado como <code class='fn__code'>Conexión directa</code>",
   "checkUpdate": "Comprobar actualización",
   "currentVer": "Versión actual",
   "visitAnnouncements": "<a href=\"https://github.com/siyuan-note/siyuan/releases\" target=\"_blank\">Ver los anuncios del sistema</a>",

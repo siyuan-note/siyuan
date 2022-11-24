@@ -809,6 +809,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         return;
                     }
                 }
+            } else if (nodeElement.classList.contains("code-block") && getContenteditableElement(nodeElement).textContent === "\n") {
+                // 空代码块全选删除异常 https://github.com/siyuan-note/siyuan/issues/6706
+                range.collapse(true);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
             }
         }
 

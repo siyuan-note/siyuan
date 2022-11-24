@@ -17,6 +17,7 @@
 package model
 
 import (
+	"regexp"
 	"sort"
 	"strings"
 
@@ -97,13 +98,29 @@ func getVirtualRefKeywords(docName string) (ret []string) {
 	if "" != strings.TrimSpace(Conf.Editor.VirtualBlockRefExclude) {
 		exclude := strings.ReplaceAll(Conf.Editor.VirtualBlockRefExclude, "\\,", "__comma@sep__")
 		excludes := strings.Split(exclude, ",")
-		var tmp []string
+		var tmp, regexps []string
 		for _, e := range excludes {
 			e = strings.ReplaceAll(e, "__comma@sep__", ",")
-			tmp = append(tmp, e)
+			if strings.HasPrefix(e, "/") && strings.HasSuffix(e, "/") {
+				regexps = append(regexps, e[1:len(e)-1])
+			} else {
+				tmp = append(tmp, e)
+			}
 		}
 		excludes = tmp
 		ret = gulu.Str.ExcludeElem(ret, excludes)
+		if 0 < len(regexps) {
+			tmp = nil
+			for _, re := range regexps {
+				for _, str := range ret {
+					if ok, regErr := regexp.MatchString(re, str); !ok && nil == regErr {
+						tmp = append(tmp, str)
+						break
+					}
+				}
+			}
+			ret = tmp
+		}
 	}
 
 	// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537

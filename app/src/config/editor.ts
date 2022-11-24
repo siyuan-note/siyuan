@@ -177,6 +177,7 @@ export const editor = {
     <div class="fn__flex-1">
         ${window.siyuan.languages.md35}
         <div class="b3-label__text">${window.siyuan.languages.md36}</div>
+        <div class="b3-label__text">${window.siyuan.languages.md41}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="virtualBlockRefExclude" value="${window.siyuan.config.editor.virtualBlockRefExclude}" />

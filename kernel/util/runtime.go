@@ -84,6 +84,8 @@ func SetNetworkProxy(proxyURL string) {
 
 	if "" != proxyURL {
 		logging.LogInfof("use network proxy [%s]", proxyURL)
+	} else {
+		logging.LogInfof("use network proxy [system]")
 	}
 }
 

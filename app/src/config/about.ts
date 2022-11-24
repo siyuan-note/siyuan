@@ -12,6 +12,7 @@ import {openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {setProxy} from "../util/onGetConfig";
 
 export const about = {
     element: undefined as Element,
@@ -170,7 +171,7 @@ export const about = {
         <span class="fn__space"></span>
         <input id="aboutPort" placeholder="Port" class="b3-text-field fn__flex-1 fn__block" value="${window.siyuan.config.system.networkProxy.port}" type="number"/>
         <span class="fn__space"></span>
-        <button id="aboutConfim" class="b3-button b3-button--outline">${window.siyuan.languages.confirm}</button>
+        <button id="aboutConfirm" class="b3-button b3-button--outline">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
 <div class="b3-label">
@@ -388,15 +389,15 @@ export const about = {
                 window.siyuan.config.system.downloadInstallPkg = downloadInstallPkgElement.checked;
             });
         });
-        about.element.querySelector("#aboutConfim").addEventListener("click", () => {
-            fetchPost("/api/system/setNetworkProxy", {
-                scheme: (about.element.querySelector("#aboutScheme") as HTMLInputElement).value,
-                host: (about.element.querySelector("#aboutHost") as HTMLInputElement).value,
-                port: (about.element.querySelector("#aboutPort") as HTMLInputElement).value
-            }, () => {
-                exportLayout(false, () => {
-                    exitSiYuan();
-                });
+        about.element.querySelector("#aboutConfirm").addEventListener("click", () => {
+            const scheme = (about.element.querySelector("#aboutScheme") as HTMLInputElement).value;
+            const host = (about.element.querySelector("#aboutHost") as HTMLInputElement).value
+            const port = (about.element.querySelector("#aboutPort") as HTMLInputElement).value;
+            fetchPost("/api/system/setNetworkProxy", {scheme, host, port}, () => {
+                window.siyuan.config.system.networkProxy.scheme = scheme
+                window.siyuan.config.system.networkProxy.host = host
+                window.siyuan.config.system.networkProxy.port = port
+                setProxy()
             });
         });
     }

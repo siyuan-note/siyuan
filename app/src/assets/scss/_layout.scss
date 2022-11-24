@@ -1,4 +1,6 @@
 .layout {
+  overflow-y: hidden; // https://github.com/siyuan-note/siyuan/issues/6706
+
   &__wnd--active .layout-tab-bar .item--focus {
     &:after {
       background-color: var(--b3-theme-primary);

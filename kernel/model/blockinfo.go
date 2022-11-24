@@ -280,6 +280,10 @@ func buildBlockBreadcrumb(node *ast.Node) (ret []*BlockPath) {
 			if ast.NodeSuperBlock == prev.Type {
 				// 超级块中包含标题块时下方块面包屑计算不正确 https://github.com/siyuan-note/siyuan/issues/6675
 				b = treenode.SuperBlockLastHeading(prev)
+				if nil == b {
+					// 超级块下方块被作为嵌入块时设置显示面包屑后不渲染 https://github.com/siyuan-note/siyuan/issues/6690
+					b = prev
+				}
 			}
 
 			if ast.NodeHeading == b.Type && headingLevel > b.HeadingLevel {

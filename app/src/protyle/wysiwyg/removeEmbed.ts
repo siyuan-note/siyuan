@@ -1,3 +1,5 @@
+import {hasClosestByClassName} from "../util/hasClosest";
+
 export const removeEmbed = (element: Element, type: "outerHTML" | "innerHTML" = "outerHTML") => {
     // 防止内容块引用嵌入的标签打断 lute 渲染
     // :zap:
@@ -11,3 +13,14 @@ export const removeEmbed = (element: Element, type: "outerHTML" | "innerHTML" = 
     });
     return cloneElement[type];
 };
+
+export const getEnableHTML = (html: string) => {
+    const tempElement = document.createElement("template");
+    tempElement.innerHTML = html;
+    tempElement.content.querySelectorAll('[contenteditable="false"][spellcheck="false"]').forEach(item => {
+        if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
+            item.setAttribute("contenteditable", "true");
+        }
+    });
+    return tempElement.innerHTML;
+}

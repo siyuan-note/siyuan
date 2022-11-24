@@ -37,7 +37,7 @@ import {hideElements} from "../ui/hideElements";
 import {shell} from "electron";
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
-import {removeEmbed} from "./removeEmbed";
+import {getEnableHTML, removeEmbed} from "./removeEmbed";
 import {keydown} from "./keydown";
 import {openMobileFileById} from "../../mobile/editor";
 import {removeBlock} from "./remove";
@@ -276,6 +276,9 @@ export class WYSIWYG {
                         textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
                     }
                 }
+            }
+            if (protyle.disabled) {
+                html = getEnableHTML(html)
             }
             event.clipboardData.setData("text/plain", textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd());
             event.clipboardData.setData("text/html", html + Constants.ZWSP);

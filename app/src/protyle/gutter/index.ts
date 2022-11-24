@@ -1,4 +1,9 @@
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByMatchTag, hasClosestByTag} from "../util/hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByMatchTag,
+    hasClosestByTag
+} from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
 import {iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
@@ -16,7 +21,7 @@ import {hideElements} from "../ui/hideElements";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {blockRender} from "../markdown/blockRender";
-import {removeEmbed} from "../wysiwyg/removeEmbed";
+import {getEnableHTML, removeEmbed} from "../wysiwyg/removeEmbed";
 import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -583,7 +588,7 @@ export class Gutter {
                 click() {
                     let html = "";
                     selectsElement.forEach(item => {
-                        item.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
+                        item.querySelectorAll('[spellcheck="false"]').forEach(editItem => {
                             const cloneNode = editItem.cloneNode(true) as HTMLElement;
                             cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
                                 slashItem.firstElementChild.remove();
@@ -600,6 +605,9 @@ export class Gutter {
                     selectsElement.forEach(item => {
                         html += item.outerHTML;
                     });
+                    if (protyle.disabled) {
+                        html = getEnableHTML(html)
+                    }
                     writeText(protyle.lute.BlockDOM2HTML(html));
                 }
             }, {
@@ -959,7 +967,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
                 click() {
                     let text = "";
-                    nodeElement.querySelectorAll('[contenteditable="true"]').forEach(item => {
+                    nodeElement.querySelectorAll('[spellcheck="false"]').forEach(item => {
                         const cloneNode = item.cloneNode(true) as HTMLElement;
                         cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
                             slashItem.firstElementChild.remove();
@@ -971,7 +979,11 @@ export class Gutter {
             }, {
                 label: window.siyuan.languages.copy + " HTML",
                 click() {
-                    writeText(protyle.lute.BlockDOM2HTML(nodeElement.outerHTML));
+                    let html = nodeElement.outerHTML
+                    if (protyle.disabled) {
+                      html =  getEnableHTML(html)
+                    }
+                    writeText(protyle.lute.BlockDOM2HTML(html));
                 }
             }, {
                 label: window.siyuan.languages.duplicate,

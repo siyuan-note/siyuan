@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20221123220150"
+		"updated": "20221124121957"
 	},
 	"Children": [
 		{
@@ -39,7 +39,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154101-qrojg1b",
-				"updated": "20220904093631"
+				"updated": "20221124121957"
 			},
 			"Children": [
 				{
@@ -103,18 +103,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+N"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘N"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -143,18 +151,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+P"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘P"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -183,18 +199,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+F"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘F"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -223,18 +247,74 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+R"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘R"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Toggle edit mode"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+."
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘."
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -263,18 +343,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+W"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘W"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -303,18 +391,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+Tab"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌃Tab"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -343,18 +439,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+Shift+Tab"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌃⇧Tab"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -383,18 +487,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+1"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥1"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -423,18 +535,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+2"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -463,18 +583,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+3"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥3"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -503,18 +631,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+4"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥4"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -543,18 +679,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+5"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥5"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -583,18 +727,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+6"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥6"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -623,18 +775,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+7"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥7"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -663,18 +823,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+8"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥8"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -703,18 +871,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+9"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -743,18 +919,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+P"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥P"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -783,18 +967,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+0"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘0"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -823,18 +1015,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+="
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘="
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -863,18 +1063,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Ctrl+-"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘-"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -903,18 +1111,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+M"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥M"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -943,18 +1159,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt+N"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥N"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -983,18 +1207,26 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "↑"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "↓"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -1029,9 +1261,17 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -1086,7 +1326,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " to configure"
+									"Data": "​ to configure"
 								}
 							]
 						}
@@ -1131,7 +1371,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " to configure"
+									"Data": "​ to configure"
 								}
 							]
 						}

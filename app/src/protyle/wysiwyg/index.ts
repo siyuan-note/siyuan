@@ -1137,11 +1137,8 @@ export class WYSIWYG {
                 window.siyuan.menus.menu.popup({x, y});
                 return false;
             }
-            if (protyle.disabled) {
-                return false;
-            }
             protyle.toolbar.range = getEditorRange(protyle.element);
-            if (target.tagName === "SPAN") { // https://ld246.com/article/1665141518103
+            if (target.tagName === "SPAN" && !protyle.disabled) { // https://ld246.com/article/1665141518103
                 const types = protyle.toolbar.getCurrentType(protyle.toolbar.range);
                 if (types.includes("block-ref")) {
                     refMenu(protyle, target);
@@ -1172,7 +1169,7 @@ export class WYSIWYG {
                     return false;
                 }
             }
-            if (target.tagName === "IMG" && hasClosestByClassName(target, "img")) {
+            if (!protyle.disabled && target.tagName === "IMG" && hasClosestByClassName(target, "img")) {
                 imgMenu(protyle, protyle.toolbar.range, target.parentElement.parentElement, {
                     clientX: x + 4,
                     clientY: y

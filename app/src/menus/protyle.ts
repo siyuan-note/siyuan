@@ -1,6 +1,12 @@
 import {hasClosestBlock, hasClosestByMatchTag} from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
-import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll} from "../protyle/util/selection";
+import {
+    focusBlock,
+    focusByRange,
+    focusByWbr,
+    getEditorRange,
+    selectAll,
+} from "../protyle/util/selection";
 import {
     deleteColumn,
     deleteRow,
@@ -38,6 +44,8 @@ import {pushBack} from "../mobile/util/MobileBackFoward";
 import {exportAsset} from "./util";
 import {removeLink} from "../protyle/toolbar/Link";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
+import {getEnableHTML} from "../protyle/wysiwyg/removeEmbed";
+import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -310,11 +318,17 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                         html += (item as Element).outerHTML;
                     }
                 });
+                if (protyle.disabled) {
+                    html = getEnableHTML(html)
+                }
                 const tempElement = document.createElement("template");
                 tempElement.innerHTML = protyle.lute.BlockDOM2HTML(html);
                 writeText(tempElement.content.firstElementChild.innerHTML);
             }
         }).element);
+        if (protyle.disabled) {
+            return;
+        }
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconCut",
             accelerator: "⌘X",

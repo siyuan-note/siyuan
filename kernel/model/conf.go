@@ -602,8 +602,6 @@ func InitBoxes() {
 		if !initialized {
 			box.Index(true)
 		}
-
-		ListDocTree(box.ID, "/", Conf.FileTree.Sort) // 缓存根一级的文档树展开
 	}
 
 	if !initialized {

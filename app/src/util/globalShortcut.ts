@@ -804,9 +804,9 @@ const editKeydown = (event: KeyboardEvent) => {
         if (protyle.title?.editElement.contains(range.startContainer)) {
             movePathTo([protyle.path], range);
         } else if (nodeElement && range && protyle.element.contains(range.startContainer)) {
-            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"))
+            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
-                selectElements = [nodeElement]
+                selectElements = [nodeElement];
             }
             movePathTo([], undefined, (toPath) => {
                 hintMoveBlock(toPath, selectElements, protyle);

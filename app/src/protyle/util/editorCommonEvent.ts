@@ -24,7 +24,7 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
     let topSourceElement;
     const targetId = targetElement.getAttribute("data-node-id");
-    const newSourceId = newSourceElement.getAttribute("data-node-id")
+    const newSourceId = newSourceElement.getAttribute("data-node-id");
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     targetElement.insertAdjacentElement(isBottom ? "afterend" : "beforebegin", newSourceElement);
@@ -34,24 +34,24 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
             data: newSourceElement.outerHTML,
             id: newSourceId,
             previousID: targetId,
-        })
+        });
     } else {
         doOperations.push({
             action: "insert",
             data: newSourceElement.outerHTML,
             id: newSourceId,
             nextID: targetId,
-        })
+        });
     }
     sourceElements.reverse().forEach((item, index) => {
-        const itemId = item.getAttribute("data-node-id")
+        const itemId = item.getAttribute("data-node-id");
         if (index === sourceElements.length - 1) {
             topSourceElement = getTopAloneElement(item);
             if (topSourceElement.isSameNode(item)) {
                 topSourceElement = undefined;
             }
         }
-        const copyId = Lute.NewNodeID()
+        const copyId = Lute.NewNodeID();
         if (isCopy) {
             undoOperations.push({
                 action: "delete",
@@ -119,7 +119,7 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
         undoOperations,
         topSourceElement,
     };
-}
+};
 
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,
                       isSameDoc: boolean, position: InsertPosition, isCopy: boolean) => {
@@ -147,8 +147,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 foldHeadingIds.push({id, parentID});
             }
         }
-        let copyId
-        let copyElement
+        let copyId;
+        let copyElement;
         if (isCopy) {
             copyId = Lute.NewNodeID();
             undoOperations.push({
@@ -262,7 +262,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         parentID: sbElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     }];
     if (newSourceElement) {
-        const newSourceId = newSourceElement.getAttribute("data-node-id")
+        const newSourceId = newSourceElement.getAttribute("data-node-id");
         sbElement.insertAdjacentElement("afterbegin", targetElement);
         doOperations.push({
             action: "move",
@@ -293,7 +293,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     topSourceElement = undefined;
                 }
             }
-            const copyId = Lute.NewNodeID()
+            const copyId = Lute.NewNodeID();
             if (isCopy) {
                 undoOperations.push({
                     action: "delete",
@@ -355,7 +355,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     topSourceElement = undefined;
                 }
             }
-            const copyId = Lute.NewNodeID()
+            const copyId = Lute.NewNodeID();
             if (index === 0) {
                 afterPreviousID = isCopy ? copyId : id;
             }

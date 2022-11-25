@@ -23,4 +23,4 @@ export const getEnableHTML = (html: string) => {
         }
     });
     return tempElement.innerHTML;
-}
+};

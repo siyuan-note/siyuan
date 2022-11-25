@@ -608,7 +608,7 @@ export class Gutter {
                         html += item.outerHTML;
                     });
                     if (protyle.disabled) {
-                        html = getEnableHTML(html)
+                        html = getEnableHTML(html);
                     }
                     writeText(protyle.lute.BlockDOM2HTML(html));
                 }
@@ -983,9 +983,9 @@ export class Gutter {
             }, {
                 label: window.siyuan.languages.copy + " HTML",
                 click() {
-                    let html = nodeElement.outerHTML
+                    let html = nodeElement.outerHTML;
                     if (protyle.disabled) {
-                        html = getEnableHTML(html)
+                        html = getEnableHTML(html);
                     }
                     writeText(protyle.lute.BlockDOM2HTML(html));
                 }

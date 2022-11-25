@@ -21,7 +21,7 @@ import {highlightRender} from "../markdown/highlightRender";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {processRender} from "../util/processCode";
 import {BlockRef} from "./BlockRef";
-import {hintMoveBlock, hintRenderAssets, hintRenderTemplate, hintRenderWidget} from "../hint/extend";
+import {hintRenderAssets, hintRenderTemplate, hintRenderWidget} from "../hint/extend";
 import {blockRender} from "../markdown/blockRender";
 /// #if !BROWSER
 import {clipboard, nativeImage, NativeImage} from "electron";
@@ -33,8 +33,6 @@ import {isArrayEqual, isBrowser, isMobile} from "../../util/functions";
 import * as dayjs from "dayjs";
 import {insertEmptyBlock} from "../../block/util";
 import {matchHotKey} from "../util/hotKey";
-import {unicode2Emoji} from "../../emoji";
-import {escapeHtml} from "../../util/escape";
 import {hideElements} from "../ui/hideElements";
 import {renderAssetsPreview} from "../../asset/renderAssets";
 import {electronUndo} from "../undo";

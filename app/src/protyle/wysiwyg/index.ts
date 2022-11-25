@@ -278,7 +278,7 @@ export class WYSIWYG {
                 }
             }
             if (protyle.disabled) {
-                html = getEnableHTML(html)
+                html = getEnableHTML(html);
             }
             event.clipboardData.setData("text/plain", textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd());
             event.clipboardData.setData("text/html", html + Constants.ZWSP);

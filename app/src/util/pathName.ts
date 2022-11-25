@@ -119,7 +119,7 @@ export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath:string)
     });
     if (paths.length) {
         fetchPost("/api/filetree/getHPathsByPaths", {paths}, (response) => {
-            dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(", "))
+            dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(", "));
         });
     }
     const searchListElement = dialog.element.querySelector("#foldList");
@@ -151,7 +151,7 @@ export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath:string)
         }
         searchTreeElement.classList.add("fn__none");
         searchListElement.classList.remove("fn__none");
-        searchListElement.scrollTo(0, 0)
+        searchListElement.scrollTo(0, 0);
         fetchPost("/api/filetree/searchDocs", {
             k: inputElement.value
         }, (data) => {
@@ -352,14 +352,14 @@ export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath:string)
                     return;
                 }
                 currentItemElement.classList.remove("b3-list-item--focus");
-                target.classList.add("b3-list-item--focus")
+                target.classList.add("b3-list-item--focus");
                 event.preventDefault();
                 event.stopPropagation();
                 break;
             }
             target = target.parentElement;
         }
-        inputElement.focus()
+        inputElement.focus();
     });
 };
 
@@ -378,7 +378,7 @@ const getLeaf = (liElement: HTMLElement) => {
         return;
     }
 
-    const notebookId = liElement.getAttribute("data-box")
+    const notebookId = liElement.getAttribute("data-box");
     fetchPost("/api/filetree/listDocsByPath", {
         notebook: notebookId,
         path: liElement.getAttribute("data-path"),
@@ -418,7 +418,7 @@ data-box="${notebookId}" class="b3-list-item" data-path="${item.path}">
             }, 120);
         }, 2);
     });
-}
+};
 
 export const getNotebookName = (id: string) => {
     let rootPath = "";

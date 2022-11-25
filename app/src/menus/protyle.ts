@@ -45,7 +45,6 @@ import {exportAsset} from "./util";
 import {removeLink} from "../protyle/toolbar/Link";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {getEnableHTML} from "../protyle/wysiwyg/removeEmbed";
-import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -319,7 +318,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                     }
                 });
                 if (protyle.disabled) {
-                    html = getEnableHTML(html)
+                    html = getEnableHTML(html);
                 }
                 const tempElement = document.createElement("template");
                 tempElement.innerHTML = protyle.lute.BlockDOM2HTML(html);

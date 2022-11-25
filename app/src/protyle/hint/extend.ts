@@ -434,12 +434,21 @@ export const hintRenderAssets = (value: string, protyle: IProtyle) => {
 };
 
 export const hintMoveBlock = (pathString: string, sourceElements: Element[], protyle: IProtyle) => {
+    if (pathString === "/") {
+        return;
+    }
+    const parentID = getDisplayName(pathString, true, true)
+    if (protyle.block.rootID === parentID) {
+        return;
+    }
     const doOperations: IOperation[] = [];
     let topSourceElement: Element;
     const parentElement = sourceElements[0].parentElement;
     let sideElement;
     sourceElements.forEach((item, index) => {
-        if (index === sourceElements.length - 1) {
+        if (index === sourceElements.length - 1 &&
+            // 动态加载过慢，导致 item 被移除
+            item.parentElement) {
             topSourceElement = getTopAloneElement(item);
             sideElement = topSourceElement.nextElementSibling || topSourceElement.previousElementSibling;
             if (topSourceElement.isSameNode(item)) {
@@ -449,7 +458,7 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
         doOperations.push({
             action: "append",
             id: item.getAttribute("data-node-id"),
-            parentID: getDisplayName(pathString, true, true)
+            parentID,
         });
         item.remove();
     });
@@ -494,8 +503,6 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
     } else if (sideElement) {
         focusBlock(sideElement);
     }
-
     // 跨文档不支持撤销
     transaction(protyle, doOperations);
-    hideElements(["util"], protyle);
 };

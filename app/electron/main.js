@@ -783,6 +783,11 @@ app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
     newWindowEvent.preventDefault()
     shell.openExternal(url)
   })
+
+  contents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url)
+    return {action: 'deny',}
+  })
 })
 
 app.on('before-quit', (event) => {

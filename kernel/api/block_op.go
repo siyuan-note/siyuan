@@ -296,7 +296,7 @@ func broadcastTransactions(transactions []*model.Transaction) {
 func dataBlockDOM(data string, luteEngine *lute.Lute) (ret string) {
 	luteEngine.SetHTMLTag2TextMark(true) // API `/api/block/**` 无法使用 `<u>foo</u>` 与 `<kbd>bar</kbd>` 插入/更新行内元素 https://github.com/siyuan-note/siyuan/issues/6039
 
-	ret = luteEngine.Md2BlockDOM(data)
+	ret = luteEngine.Md2BlockDOM(data, true)
 	if "" == ret {
 		// 使用 API 插入空字符串出现错误 https://github.com/siyuan-note/siyuan/issues/3931
 		blankParagraph := parse.NewParagraph()

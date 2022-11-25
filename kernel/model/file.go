@@ -924,7 +924,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (err error) {
 	}
 
 	luteEngine := NewLute()
-	dom := luteEngine.Md2BlockDOM(md)
+	dom := luteEngine.Md2BlockDOM(md, false)
 	err = createDoc(box.ID, p, title, dom)
 	if nil != err {
 		return
@@ -943,7 +943,7 @@ func CreateWithMarkdown(boxID, hPath, md string) (id string, err error) {
 
 	WaitForWritingFiles()
 	luteEngine := NewLute()
-	dom := luteEngine.Md2BlockDOM(md)
+	dom := luteEngine.Md2BlockDOM(md, false)
 	id, _, err = createDocsByHPath(box.ID, hPath, dom)
 	return
 }

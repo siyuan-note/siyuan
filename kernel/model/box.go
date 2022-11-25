@@ -469,7 +469,7 @@ func genTreeID(tree *parse.Tree) {
 			return ast.WalkContinue
 		}
 
-		if treenode.IsEmptyBlockIAL(n) {
+		if n.IsEmptyBlockIAL() {
 			// 空段落保留
 			p := &ast.Node{Type: ast.NodeParagraph}
 			p.KramdownIAL = parse.Tokens2IAL(n.Tokens)
@@ -540,10 +540,6 @@ func FullReindex() {
 		openedBox.Index(true)
 	}
 	IndexRefs()
-	// 缓存根一级的文档树展开
-	for _, openedBox := range openedBoxes {
-		ListDocTree(openedBox.ID, "/", Conf.FileTree.Sort)
-	}
 	treenode.SaveBlockTree()
 	util.PushEndlessProgress(Conf.Language(58))
 	go func() {

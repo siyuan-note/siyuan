@@ -605,9 +605,8 @@ const initKernel = (initData) => {
         } finally {
           count++
           if (64 < count) {
-            writeLog('get kernel port failed [pid=' + kernelProcessPid + ']')
-            bootWindow.destroy()
-            resolve(false)
+            writeLog('get kernel port failed [pid=' + kernelProcessPid + '], try to use 6806')
+            return kernelPort
           }
         }
       }

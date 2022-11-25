@@ -34,6 +34,8 @@ import {Constants} from "../../constants";
 import {openMobileFileById} from "../../mobile/editor";
 import {mathRender} from "../markdown/mathRender";
 import {duplicateBlock} from "../wysiwyg/commonHotkey";
+import {movePathTo} from "../../util/pathName";
+import {hintMoveBlock} from "../hint/extend";
 
 export class Gutter {
     public element: HTMLElement;
@@ -646,7 +648,9 @@ export class Gutter {
             accelerator: window.siyuan.config.keymap.general.move.custom,
             icon: "iconMove",
             click: () => {
-                protyle.toolbar.showFile(protyle, selectsElement, getEditorRange(selectsElement[0]));
+                movePathTo([], undefined, (toPath) => {
+                    hintMoveBlock(toPath, selectsElement, protyle);
+                });
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -981,7 +985,7 @@ export class Gutter {
                 click() {
                     let html = nodeElement.outerHTML
                     if (protyle.disabled) {
-                      html =  getEnableHTML(html)
+                        html = getEnableHTML(html)
                     }
                     writeText(protyle.lute.BlockDOM2HTML(html));
                 }
@@ -1015,7 +1019,9 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.general.move.custom,
                 icon: "iconMove",
                 click: () => {
-                    protyle.toolbar.showFile(protyle, [nodeElement], getEditorRange(nodeElement));
+                    movePathTo([], undefined, (toPath) => {
+                        hintMoveBlock(toPath, [nodeElement], protyle);
+                    });
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

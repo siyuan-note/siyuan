@@ -77,16 +77,15 @@ export const getTopPaths = (liElements: Element[]) => {
     return fromPaths;
 };
 
-const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string, dialog: Dialog) => {
+const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string) => {
     fetchPost("/api/filetree/moveDocs", {
         toNotebook,
         fromPaths,
         toPath,
     });
-    dialog.destroy();
 };
 
-export const movePathTo = (paths: string[], focus = true) => {
+export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath:string) => void) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#foldList")) {
             item.destroy();
@@ -95,11 +94,6 @@ export const movePathTo = (paths: string[], focus = true) => {
     });
     if (exitDialog) {
         return;
-    }
-
-    let range: Range;
-    if (getSelection().rangeCount > 0) {
-        range = getSelection().getRangeAt(0);
     }
     const dialog = new Dialog({
         title: `${window.siyuan.languages.move} <span class="ft__smaller ft__on-surface"></span>`,
@@ -118,14 +112,16 @@ export const movePathTo = (paths: string[], focus = true) => {
 </div>`,
         width: isMobile() ? "80vw" : "50vw",
         destroyCallback() {
-            if (range && focus) {
+            if (range) {
                 focusByRange(range);
             }
         }
     });
-    fetchPost("/api/filetree/getHPathsByPaths", {paths}, (response) => {
-        dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(", "))
-    });
+    if (paths.length) {
+        fetchPost("/api/filetree/getHPathsByPaths", {paths}, (response) => {
+            dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(", "))
+        });
+    }
     const searchListElement = dialog.element.querySelector("#foldList");
     const searchTreeElement = dialog.element.querySelector("#foldTree");
     let html = "";
@@ -161,9 +157,6 @@ export const movePathTo = (paths: string[], focus = true) => {
         }, (data) => {
             let fileHTML = "";
             data.data.forEach((item: { boxIcon: string, box: string, hPath: string, path: string }) => {
-                if (paths.includes(item.path)) {
-                    return;
-                }
                 fileHTML += `<li style="padding: 4px" class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}">
     <span class="b3-list-item__graphic">${unicode2Emoji(item.boxIcon || Constants.SIYUAN_IMAGE_NOTE)}</span>
     <span class="b3-list-item__showall">${escapeHtml(item.hPath)}</span>
@@ -315,7 +308,12 @@ export const movePathTo = (paths: string[], focus = true) => {
             }
         }
         if (event.key === "Enter") {
-            moveToPath(paths, currentItemElement.getAttribute("data-box"), currentItemElement.getAttribute("data-path"), dialog);
+            if (cb) {
+                cb(currentItemElement.getAttribute("data-path"));
+            } else {
+                moveToPath(paths, currentItemElement.getAttribute("data-box"), currentItemElement.getAttribute("data-path"));
+            }
+            dialog.destroy();
             event.preventDefault();
         }
     });
@@ -333,7 +331,12 @@ export const movePathTo = (paths: string[], focus = true) => {
                 if (!currentItemElement) {
                     return;
                 }
-                moveToPath(paths, currentItemElement.getAttribute("data-box"), currentItemElement.getAttribute("data-path"), dialog);
+                if (cb) {
+                    cb(currentItemElement.getAttribute("data-path"));
+                } else {
+                    moveToPath(paths, currentItemElement.getAttribute("data-box"), currentItemElement.getAttribute("data-path"));
+                }
+                dialog.destroy();
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -356,6 +359,7 @@ export const movePathTo = (paths: string[], focus = true) => {
             }
             target = target.parentElement;
         }
+        inputElement.focus()
     });
 };
 

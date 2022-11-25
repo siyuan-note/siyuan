@@ -41,6 +41,7 @@ import {showPopover} from "../block/popover";
 import {getStartEndElement} from "../protyle/wysiwyg/commonHotkey";
 import {getNextFileLi, getPreviousFileLi} from "../protyle/wysiwyg/getBlock";
 import {editor} from "../config/editor";
+import {hintMoveBlock} from "../protyle/hint/extend";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -800,10 +801,16 @@ const editKeydown = (event: KeyboardEvent) => {
             range = getSelection().getRangeAt(0);
             nodeElement = hasClosestBlock(range.startContainer);
         }
-        if (nodeElement && range && protyle.element.contains(range.startContainer)) {
-            protyle.toolbar.showFile(protyle, [nodeElement], range);
-        } else {
-            movePathTo([protyle.path]);
+        if (protyle.title?.editElement.contains(range.startContainer)) {
+            movePathTo([protyle.path], range);
+        } else if (nodeElement && range && protyle.element.contains(range.startContainer)) {
+            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"))
+            if (selectElements.length === 0) {
+                selectElements = [nodeElement]
+            }
+            movePathTo([], undefined, (toPath) => {
+                hintMoveBlock(toPath, selectElements, protyle);
+            });
         }
         event.preventDefault();
         event.stopPropagation();
@@ -917,7 +924,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     }
     if (isFile && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
         window.siyuan.menus.menu.remove();
-        movePathTo(getTopPaths(liElements), false);
+        movePathTo(getTopPaths(liElements));
         event.preventDefault();
         event.stopPropagation();
         return true;

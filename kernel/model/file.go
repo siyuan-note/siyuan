@@ -37,6 +37,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/facette/natsort"
 	"github.com/gin-gonic/gin"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -143,7 +144,7 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 		return nil
 	}
 	ret = readDocIAL(data)
-	if nil == ret {
+	if 1 > len(ret) {
 		logging.LogWarnf("tree [%s] is corrupted", filePath)
 		box.moveCorruptedData(filePath)
 		return nil
@@ -167,22 +168,8 @@ func (box *Box) moveCorruptedData(filePath string) {
 }
 
 func readDocIAL(data []byte) (ret map[string]string) {
-	doc := map[string]interface{}{}
-	if err := gulu.JSON.UnmarshalJSON(data, &doc); nil != err {
-		logging.LogErrorf("unmarshal data failed: %s", err)
-		return nil
-	}
-
-	propsArg := doc["Properties"]
-	if nil == propsArg {
-		return nil
-	}
-
-	props := propsArg.(map[string]interface{})
 	ret = map[string]string{}
-	for k, v := range props {
-		ret[k] = v.(string)
-	}
+	jsoniter.Get(data, "Properties").ToVal(&ret)
 	return
 }
 
@@ -240,6 +227,11 @@ type FileInfo struct {
 }
 
 func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err error) {
+	//os.MkdirAll("pprof", 0755)
+	//cpuProfile, _ := os.Create("pprof/cpu_profile_list_doc_tree")
+	//pprof.StartCPUProfile(cpuProfile)
+	//defer pprof.StopCPUProfile()
+
 	ret = []*File{}
 
 	box := Conf.Box(boxID)

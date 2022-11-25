@@ -786,7 +786,7 @@ app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
 
   contents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
-    return {action: 'deny',}
+    return {action: 'deny'}
   })
 })
 

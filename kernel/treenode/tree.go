@@ -29,7 +29,6 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	util2 "github.com/88250/lute/util"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -84,24 +83,6 @@ func NewTree(boxID, p, hp, title string) *parse.Tree {
 	newPara.SetIALAttr("updated", util.TimeFromID(newPara.ID))
 	ret.Root.AppendChild(newPara)
 	return ret
-}
-
-func IsEmptyBlockIAL(n *ast.Node) bool {
-	if ast.NodeKramdownBlockIAL != n.Type {
-		return false
-	}
-
-	if util2.IsDocIAL(n.Tokens) {
-		return false
-	}
-
-	if nil != n.Previous {
-		if ast.NodeKramdownBlockIAL == n.Previous.Type {
-			return true
-		}
-		return false
-	}
-	return true
 }
 
 func IALStr(n *ast.Node) string {

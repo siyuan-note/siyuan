@@ -1,12 +1,12 @@
 import * as path from "path";
-import {fetchPost, fetchSyncPost} from "./fetch";
+import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
 import {escapeHtml} from "./escape";
 import {isMobile} from "./functions";
 import {focusByRange} from "../protyle/util/selection";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {unicode2Emoji} from "../emoji";
 import {Constants} from "../constants";
+import {showMessage} from "../dialog/message";
 
 export const addBaseURL = () => {
     let baseURLElement = document.getElementById("baseURL");
@@ -59,8 +59,8 @@ export const pathPosix = () => {
     return path;
 };
 
-export const getTopPaths = (liElements:Element[]) => {
-    const fromPaths:string[] = [];
+export const getTopPaths = (liElements: Element[]) => {
+    const fromPaths: string[] = [];
     liElements.forEach((item: HTMLElement) => {
         if (item.getAttribute("data-type") !== "navigation-root") {
             const dataPath = item.getAttribute("data-path");
@@ -86,7 +86,7 @@ const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string, dia
     dialog.destroy();
 };
 
-export const movePathTo = async (paths: string[], focus = true) => {
+export const movePathTo = (paths: string[], focus = true) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#foldList")) {
             item.destroy();
@@ -96,21 +96,26 @@ export const movePathTo = async (paths: string[], focus = true) => {
     if (exitDialog) {
         return;
     }
-    const response = await fetchSyncPost("/api/filetree/getHPathsByPaths", {
-        paths
-    });
+
     let range: Range;
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
     }
     const dialog = new Dialog({
-        title: `${window.siyuan.languages.move} <span class="ft__smaller ft__on-surface">${escapeHtml(response.data.join(", "))}</span>`,
-        content: `<div class="b3-form__icon b3-form__space">
-    <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-    <input class="b3-text-field fn__block b3-form__icon-input" value="" placeholder="${window.siyuan.languages.search}">
+        title: `${window.siyuan.languages.move} <span class="ft__smaller ft__on-surface"></span>`,
+        content: `<div>
+    <div class="b3-form__icon" style="margin: 8px">
+        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+        <input class="b3-text-field fn__block b3-form__icon-input" value="" placeholder="${window.siyuan.languages.search}">
+    </div>
+    <ul id="foldList" class="fn__none b3-list b3-list--background" style="height: 50vh;overflow: auto;position: relative"></ul>
+    <div id="foldTree" style="height: 50vh;overflow: auto;position: relative"></div>
+    <div class="fn__hr"></div>
 </div>
-<ul id="foldList" class="b3-list b3-list--background" style="height: 50vh;overflow: auto;position: relative"></ul>
-<div class="fn__hr"></div>`,
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
         width: isMobile() ? "80vw" : "50vw",
         destroyCallback() {
             if (range && focus) {
@@ -118,14 +123,39 @@ export const movePathTo = async (paths: string[], focus = true) => {
             }
         }
     });
-
-    const searchPanelElement = dialog.element.querySelector("#foldList");
+    fetchPost("/api/filetree/getHPathsByPaths", {paths}, (response) => {
+        dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(", "))
+    });
+    const searchListElement = dialog.element.querySelector("#foldList");
+    const searchTreeElement = dialog.element.querySelector("#foldTree");
+    let html = "";
+    window.siyuan.notebooks.forEach((item) => {
+        if (!item.closed) {
+            html += `<ul class="b3-list b3-list--background">
+<li class="b3-list-item${html === "" ? " b3-list-item--focus" : ""}" data-path="/" data-box="${item.id}">
+    <span class="b3-list-item__toggle b3-list-item__toggle--hl">
+        <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
+    </span>
+    <span class="b3-list-item__graphic">${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE)}</span>
+    <span class="b3-list-item__text">${escapeHtml(item.name)}</span>
+</li></ul>`;
+        }
+    });
+    searchTreeElement.innerHTML = html;
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
     inputElement.focus();
     const inputEvent = (event?: InputEvent) => {
         if (event && event.isComposing) {
             return;
         }
+        if (inputElement.value.trim() === "") {
+            searchListElement.classList.add("fn__none");
+            searchTreeElement.classList.remove("fn__none");
+            return;
+        }
+        searchTreeElement.classList.add("fn__none");
+        searchListElement.classList.remove("fn__none");
+        searchListElement.scrollTo(0, 0)
         fetchPost("/api/filetree/searchDocs", {
             k: inputElement.value
         }, (data) => {
@@ -134,12 +164,12 @@ export const movePathTo = async (paths: string[], focus = true) => {
                 if (paths.includes(item.path)) {
                     return;
                 }
-                fileHTML += `<li class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}">
-    <span class="b3-list-item__icon">${unicode2Emoji(item.boxIcon || Constants.SIYUAN_IMAGE_NOTE)}</span>
+                fileHTML += `<li style="padding: 4px" class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}">
+    <span class="b3-list-item__graphic">${unicode2Emoji(item.boxIcon || Constants.SIYUAN_IMAGE_NOTE)}</span>
     <span class="b3-list-item__showall">${escapeHtml(item.hPath)}</span>
 </li>`;
             });
-            searchPanelElement.innerHTML = fileHTML;
+            searchListElement.innerHTML = fileHTML;
         });
     };
     inputEvent();
@@ -151,50 +181,240 @@ export const movePathTo = async (paths: string[], focus = true) => {
     });
     const lineHeight = 28;
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        let currentList: HTMLElement = dialog.element.querySelector(".b3-list-item--focus");
-        if (!currentList) {
+        if (event.isComposing) {
             return;
         }
-        if (event.key === "ArrowDown") {
-            currentList.classList.remove("b3-list-item--focus");
-            if (!currentList.nextElementSibling) {
-                searchPanelElement.children[0].classList.add("b3-list-item--focus");
-            } else {
-                currentList.nextElementSibling.classList.add("b3-list-item--focus");
+        const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;
+        let currentItemElement: HTMLElement = currentPanelElement.querySelector(".b3-list-item--focus");
+        if (!currentItemElement) {
+            return;
+        }
+        if (searchListElement.classList.contains("fn__none")) {
+            if ((event.key === "ArrowRight" && !currentItemElement.querySelector(".b3-list-item__arrow--open") && !currentItemElement.querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||
+                (event.key === "ArrowLeft" && currentItemElement.querySelector(".b3-list-item__arrow--open"))) {
+                getLeaf(currentItemElement);
+                event.preventDefault();
+                return;
             }
-            currentList = searchPanelElement.querySelector(".b3-list-item--focus");
-            if (searchPanelElement.scrollTop < currentList.offsetTop - searchPanelElement.clientHeight + lineHeight ||
-                searchPanelElement.scrollTop > currentList.offsetTop) {
-                searchPanelElement.scrollTop = currentList.offsetTop - searchPanelElement.clientHeight + lineHeight;
+            if (event.key === "ArrowLeft") {
+                let parentElement = currentItemElement.parentElement.previousElementSibling;
+                if (parentElement) {
+                    if (parentElement.tagName !== "LI") {
+                        parentElement = currentPanelElement.querySelector(".b3-list-item");
+                    }
+                    currentItemElement.classList.remove("b3-list-item--focus");
+                    parentElement.classList.add("b3-list-item--focus");
+                    const parentRect = parentElement.getBoundingClientRect();
+                    const fileRect = currentPanelElement.getBoundingClientRect();
+                    if (parentRect.top < fileRect.top || parentRect.bottom > fileRect.bottom) {
+                        parentElement.scrollIntoView(parentRect.top < fileRect.top);
+                    }
+                }
+                event.preventDefault();
+                return true;
             }
-            event.preventDefault();
-        } else if (event.key === "ArrowUp") {
-            currentList.classList.remove("b3-list-item--focus");
-            if (!currentList.previousElementSibling) {
-                const length = searchPanelElement.children.length;
-                searchPanelElement.children[length - 1].classList.add("b3-list-item--focus");
-            } else {
-                currentList.previousElementSibling.classList.add("b3-list-item--focus");
+            if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+                let nextElement = currentItemElement;
+                while (nextElement) {
+                    if (nextElement.nextElementSibling) {
+                        if (nextElement.nextElementSibling.classList.contains("fn__none")) {
+                            nextElement = nextElement.nextElementSibling as HTMLElement;
+                        } else {
+                            if (nextElement.nextElementSibling.tagName === "UL") {
+                                nextElement = nextElement.nextElementSibling.firstElementChild as HTMLElement;
+                            } else {
+                                nextElement = nextElement.nextElementSibling as HTMLElement;
+                            }
+                            break;
+                        }
+                    } else {
+                        if (nextElement.parentElement.id === "foldTree") {
+                            break;
+                        } else {
+                            nextElement = nextElement.parentElement;
+                        }
+                    }
+                }
+                if (nextElement.classList.contains("b3-list-item")) {
+                    currentItemElement.classList.remove("b3-list-item--focus");
+                    nextElement.classList.add("b3-list-item--focus");
+                    const nextRect = nextElement.getBoundingClientRect();
+                    const fileRect = searchTreeElement.getBoundingClientRect();
+                    if (nextRect.top < fileRect.top || nextRect.bottom > fileRect.bottom) {
+                        nextElement.scrollIntoView(nextRect.top < fileRect.top);
+                    }
+                }
+                event.preventDefault();
+                return true;
             }
-            currentList = searchPanelElement.querySelector(".b3-list-item--focus");
-            if (searchPanelElement.scrollTop < currentList.offsetTop - searchPanelElement.clientHeight + lineHeight ||
-                searchPanelElement.scrollTop > currentList.offsetTop - lineHeight * 2) {
-                searchPanelElement.scrollTop = currentList.offsetTop - lineHeight * 2;
+            if (event.key === "ArrowUp") {
+                let previousElement = currentItemElement;
+                while (previousElement) {
+                    if (previousElement.previousElementSibling) {
+                        if (previousElement.previousElementSibling.classList.contains("fn__none")) {
+                            previousElement = previousElement.previousElementSibling as HTMLElement;
+                        } else {
+                            if (previousElement.previousElementSibling.tagName === "LI") {
+                                previousElement = previousElement.previousElementSibling as HTMLElement;
+                            } else {
+                                const liElements = previousElement.previousElementSibling.querySelectorAll(".b3-list-item");
+                                previousElement = liElements[liElements.length - 1] as HTMLElement;
+                            }
+                            break;
+                        }
+                    } else {
+                        if (previousElement.parentElement.id === "foldTree") {
+                            break;
+                        } else {
+                            previousElement = previousElement.parentElement;
+                        }
+                    }
+                }
+                if (previousElement.classList.contains("b3-list-item")) {
+                    currentItemElement.classList.remove("b3-list-item--focus");
+                    previousElement.classList.add("b3-list-item--focus");
+                    const previousRect = previousElement.getBoundingClientRect();
+                    const fileRect = searchTreeElement.getBoundingClientRect();
+                    if (previousRect.top < fileRect.top || previousRect.bottom > fileRect.bottom) {
+                        previousElement.scrollIntoView(previousRect.top < fileRect.top);
+                    }
+                }
+                event.preventDefault();
             }
-            event.preventDefault();
-        } else if (event.key === "Enter") {
-            moveToPath(paths, currentList.getAttribute("data-box"), currentList.getAttribute("data-path"), dialog);
+        } else {
+            if (event.key === "ArrowDown") {
+                currentItemElement.classList.remove("b3-list-item--focus");
+                if (!currentItemElement.nextElementSibling) {
+                    currentPanelElement.children[0].classList.add("b3-list-item--focus");
+                } else {
+                    currentItemElement.nextElementSibling.classList.add("b3-list-item--focus");
+                }
+                currentItemElement = currentPanelElement.querySelector(".b3-list-item--focus");
+                if (currentPanelElement.scrollTop < currentItemElement.offsetTop - currentPanelElement.clientHeight + lineHeight ||
+                    currentPanelElement.scrollTop > currentItemElement.offsetTop) {
+                    currentPanelElement.scrollTop = currentItemElement.offsetTop - currentPanelElement.clientHeight + lineHeight;
+                }
+                event.preventDefault();
+                return;
+            }
+            if (event.key === "ArrowUp") {
+                currentItemElement.classList.remove("b3-list-item--focus");
+                if (!currentItemElement.previousElementSibling) {
+                    const length = currentPanelElement.children.length;
+                    currentPanelElement.children[length - 1].classList.add("b3-list-item--focus");
+                } else {
+                    currentItemElement.previousElementSibling.classList.add("b3-list-item--focus");
+                }
+                currentItemElement = currentPanelElement.querySelector(".b3-list-item--focus");
+                if (currentPanelElement.scrollTop < currentItemElement.offsetTop - currentPanelElement.clientHeight + lineHeight ||
+                    currentPanelElement.scrollTop > currentItemElement.offsetTop - lineHeight * 2) {
+                    currentPanelElement.scrollTop = currentItemElement.offsetTop - lineHeight * 2;
+                }
+                event.preventDefault();
+                return;
+            }
+        }
+        if (event.key === "Enter") {
+            moveToPath(paths, currentItemElement.getAttribute("data-box"), currentItemElement.getAttribute("data-path"), dialog);
             event.preventDefault();
         }
     });
     dialog.element.addEventListener("click", (event) => {
-        const target = event.target as HTMLElement;
-        const liElement = hasClosestByClassName(target, "b3-list-item");
-        if (liElement) {
-            moveToPath(paths, liElement.getAttribute("data-box"), liElement.getAttribute("data-path"), dialog);
+        let target = event.target as HTMLElement;
+        while (target && !target.isEqualNode(dialog.element)) {
+            if (target.classList.contains("b3-list-item__toggle")) {
+                getLeaf(target.parentElement);
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.classList.contains("b3-button--text")) {
+                const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;
+                const currentItemElement: HTMLElement = currentPanelElement.querySelector(".b3-list-item--focus");
+                if (!currentItemElement) {
+                    return;
+                }
+                moveToPath(paths, currentItemElement.getAttribute("data-box"), currentItemElement.getAttribute("data-path"), dialog);
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.classList.contains("b3-button--cancel")) {
+                dialog.destroy();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.classList.contains("b3-list-item")) {
+                const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;
+                const currentItemElement: HTMLElement = currentPanelElement.querySelector(".b3-list-item--focus");
+                if (!currentItemElement) {
+                    return;
+                }
+                currentItemElement.classList.remove("b3-list-item--focus");
+                target.classList.add("b3-list-item--focus")
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            }
+            target = target.parentElement;
         }
     });
 };
+
+const getLeaf = (liElement: HTMLElement) => {
+    const toggleElement = liElement.querySelector(".b3-list-item__arrow");
+    if (toggleElement.classList.contains("b3-list-item__arrow--open")) {
+        toggleElement.classList.remove("b3-list-item__arrow--open");
+        if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "UL") {
+            liElement.nextElementSibling.classList.add("fn__none");
+        }
+        return;
+    }
+    if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "UL") {
+        toggleElement.classList.add("b3-list-item__arrow--open");
+        liElement.nextElementSibling.classList.remove("fn__none");
+        return;
+    }
+
+    const notebookId = liElement.getAttribute("data-box")
+    fetchPost("/api/filetree/listDocsByPath", {
+        notebook: notebookId,
+        path: liElement.getAttribute("data-path"),
+        sort: window.siyuan.config.fileTree.sort,
+    }, response => {
+        if (response.data.path === "/" && response.data.files.length === 0) {
+            showMessage(window.siyuan.languages.emptyContent);
+            return;
+        }
+        let fileHTML = "";
+        response.data.files.forEach((item: IFile) => {
+            let countHTML = "";
+            if (item.count && item.count > 0) {
+                countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.blockRef}">${item.count}</span>`;
+            }
+            fileHTML += `<li title="${getDisplayName(item.name, true, true)} ${item.hSize}${item.bookmark ? "\n" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "\n" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "\n" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "\n" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}\n${window.siyuan.languages.modifiedAt} ${item.hMtime}\n${window.siyuan.languages.createdAt} ${item.hCtime}" 
+data-box="${notebookId}" class="b3-list-item" data-path="${item.path}">
+    <span style="padding-left: ${(item.path.split("/").length - 2) * 18 + 22}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
+        <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
+    </span>
+    <span class="b3-list-item__graphic">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER))}</span>
+    <span class="b3-list-item__text">${getDisplayName(item.name, true, true)}</span>
+    ${countHTML}
+</li>`;
+        });
+        if (fileHTML === "") {
+            return;
+        }
+        toggleElement.classList.add("b3-list-item__arrow--open");
+        liElement.insertAdjacentHTML("afterend", `<ul class="file-tree__sliderDown">${fileHTML}</ul>`);
+        const nextElement = liElement.nextElementSibling;
+        setTimeout(() => {
+            nextElement.setAttribute("style", `height:${nextElement.childElementCount * liElement.clientHeight}px;`);
+            setTimeout(() => {
+                nextElement.classList.remove("file-tree__sliderDown");
+                nextElement.removeAttribute("style");
+            }, 120);
+        }, 2);
+    });
+}
 
 export const getNotebookName = (id: string) => {
     let rootPath = "";

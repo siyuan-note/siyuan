@@ -111,8 +111,8 @@ func getVirtualRefKeywords(docName string) (ret []string) {
 		ret = gulu.Str.ExcludeElem(ret, excludes)
 		if 0 < len(regexps) {
 			tmp = nil
-			for _, re := range regexps {
-				for _, str := range ret {
+			for _, str := range ret {
+				for _, re := range regexps {
 					if ok, regErr := regexp.MatchString(re, str); !ok && nil == regErr {
 						tmp = append(tmp, str)
 						break

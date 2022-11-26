@@ -212,7 +212,12 @@ func fullTextSearchBlock(c *gin.Context) {
 	if nil != querySyntaxArg {
 		querySyntax = querySyntaxArg.(bool)
 	}
-	blocks, matchedBlockCount, matchedRootCount := model.FullTextSearchBlock(query, box, path, types, querySyntax)
+	groupByArg := arg["groupBy"]
+	var groupBy int // 0：不分组，1：按文档分组
+	if nil != groupByArg {
+		groupBy = int(groupByArg.(float64))
+	}
+	blocks, matchedBlockCount, matchedRootCount := model.FullTextSearchBlock(query, box, path, types, querySyntax, groupBy)
 	ret.Data = map[string]interface{}{
 		"blocks":            blocks,
 		"matchedBlockCount": matchedBlockCount,

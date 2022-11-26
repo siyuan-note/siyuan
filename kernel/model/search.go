@@ -253,13 +253,41 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 	return
 }
 
-func FullTextSearchBlock(query, box, path string, types map[string]bool, querySyntax bool) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func FullTextSearchBlock(query, box, path string, types map[string]bool, querySyntax bool, groupBy int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = strings.TrimSpace(query)
+	beforeLen := 36
+	var blocks []*Block
 	if queryStrLower := strings.ToLower(query); strings.Contains(queryStrLower, "select ") && strings.Contains(queryStrLower, " * ") && strings.Contains(queryStrLower, " from ") {
-		ret, matchedBlockCount, matchedRootCount = searchBySQL(query, 36)
+		blocks, matchedBlockCount, matchedRootCount = searchBySQL(query, beforeLen)
 	} else {
 		filter := searchFilter(types)
-		ret, matchedBlockCount, matchedRootCount = fullTextSearch(query, box, path, filter, 36, querySyntax)
+		blocks, matchedBlockCount, matchedRootCount = fullTextSearch(query, box, path, filter, beforeLen, querySyntax)
+	}
+
+	switch groupBy {
+	case 0: // 不分组
+		ret = blocks
+	case 1: // 按文档分组
+		rootMap := map[string]bool{}
+		var rootIDs []string
+		for _, b := range blocks {
+			if _, ok := rootMap[b.RootID]; !ok {
+				rootMap[b.RootID] = true
+				rootIDs = append(rootIDs, b.RootID)
+			}
+		}
+		sqlRoots := sql.GetBlocks(rootIDs)
+		roots := fromSQLBlocks(&sqlRoots, "", beforeLen)
+		for _, root := range roots {
+			for _, b := range blocks {
+				if b.RootID == root.ID {
+					root.Children = append(root.Children, b)
+				}
+			}
+		}
+		ret = roots
+	default:
+		ret = blocks
 	}
 	return
 }

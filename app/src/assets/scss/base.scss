@@ -479,21 +479,6 @@ progressLoading: 400
   }
 }
 
-.spread-search {
-  &__preview {
-    background-color: var(--b3-theme-background);
-    border-top: 1px solid var(--b3-theme-surface-lighter);
-  }
-
-  &__filter {
-    padding: 16px;
-
-    .b3-label__text {
-      white-space: nowrap;
-    }
-  }
-}
-
 .asset {
   overflow: auto;
   box-sizing: border-box;

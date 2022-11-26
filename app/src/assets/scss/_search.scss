@@ -5,18 +5,23 @@
     position: relative;
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
 
+    &:hover .block__icon {
+      opacity: 1;
+    }
+
     .b3-text-field--text {
       font-size: 18px;
-      height: 48px;
+      height: 42px;
       line-height: 32px;
       border-radius: 0;
-      padding: 8px 8px 8px 48px !important;
+      padding: 5px 8px 5px 44px !important;
       box-shadow: none;
+      width: 100%;
     }
 
     .b3-form__icon-icon {
-      top: 16px;
-      left: 12px;
+      top: 13px;
+      left: 8px;
     }
 
     .b3-menu {
@@ -33,8 +38,8 @@
     position: absolute;
     height: 10px;
     width: 10px;
-    left: 30px;
-    top: 20px;
+    left: 26px;
+    top: 17px;
   }
 
   &__label {
@@ -60,59 +65,9 @@
       }
     }
   }
-}
 
-.protyle-search {
-  display: flex;
-  background-color: var(--b3-theme-surface);
-  transition: var(--b3-transition);
-  height: 0;
-  overflow: hidden;
-  flex-direction: column;
-  box-sizing: border-box;
-
-  &__item {
-    margin: 8px 16px 0 16px;
-    display: flex;
-    align-items: center;
-  }
-
-  &--open {
-    height: 36px;
-  }
-
-  &__mark {
-    background-color: var(--b3-protyle-search-background);
-    box-shadow: 0 0 1px var(--b3-protyle-search-border-color);
-
-    &--current {
-      background-color: var(--b3-protyle-search-current-background);
-      box-shadow: 0 0 1px var(--b3-theme-on-background);
-    }
-  }
-
-  &__text {
-    color: var(--b3-theme-on-surface);
-    font-size: 12px;
-    line-height: 22px;
-    height: 22px;
-    padding: 0 8px 0 16px;
-  }
-
-  .b3-tooltips {
-    display: flex;
-    align-items: center;
-  }
-
-  svg {
-    cursor: pointer;
-    color: var(--b3-theme-on-background);
-    padding: 6px 8px;
-    height: 10px;
-    width: 10px;
-
-    &:hover {
-      color: var(--b3-theme-on-surface);
-    }
+  &__preview {
+    background-color: var(--b3-theme-background);
+    border-top: 1px solid var(--b3-theme-surface-lighter);
   }
 }

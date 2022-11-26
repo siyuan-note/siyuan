@@ -48,6 +48,31 @@ interface Window {
     hideKeyboardToolbar(): void
 }
 
+interface ISearchOption {
+    hasReplace: boolean,
+    querySyntax: boolean,
+    hPath: string
+    notebookId: string
+    idPath: string
+    k: string
+    r: string
+    replaceList?: string[]
+    list?: string[]
+    types: {
+        mathBlock: boolean
+        table: boolean
+        blockquote: boolean
+        superBlock: boolean
+        paragraph: boolean
+        document: boolean
+        heading: boolean
+        list: boolean
+        listItem: boolean
+        codeBlock: boolean
+        htmlBlock: boolean
+    }
+}
+
 interface ITextOption {
     color?: string,
     type: string

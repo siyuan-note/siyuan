@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {Hint} from "./hint";
 import {setLute} from "./markdown/setLute";
 import {Preview} from "./preview";
-import {initUI, setPadding} from "./ui/initUI";
+import {initUI, removeLoading, setPadding} from "./ui/initUI";
 import {Undo} from "./undo";
 import {Upload} from "./upload";
 import {Options} from "./util/Options";
@@ -159,6 +159,11 @@ export class Protyle {
             if (options.backlinkData) {
                 this.protyle.block.rootID = options.blockId;
                 renderBacklink(this.protyle, options.backlinkData);
+                return;
+            }
+            if (!options.blockId) {
+                // 搜索页签需提前初始化
+                removeLoading(this.protyle);
                 return;
             }
             fetchPost("/api/filetree/getDoc", {

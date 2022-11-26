@@ -141,7 +141,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         </span>
     </div>
     <div id="searchList" style="position:relative;height:calc(50% - 69px);overflow: auto;padding-bottom: 8px" class="b3-list b3-list--background search__list"></div>
-    <div id="searchPreview" class="fn__flex-1 spread-search__preview"></div></div>
+    <div id="searchPreview" class="fn__flex-1 search__preview"></div></div>
     <div id="searchFilterPanel" class="fn__none spread-search__filter">
         <label class="fn__flex">
             <div class="fn__flex-1 b3-label__text">

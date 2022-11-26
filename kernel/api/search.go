@@ -213,7 +213,7 @@ func fullTextSearchBlock(c *gin.Context) {
 		querySyntax = querySyntaxArg.(bool)
 	}
 	groupByArg := arg["groupBy"]
-	var groupBy int // 0：不分组，1：按文档分组，2：按文档树结构分组
+	var groupBy int // 0：不分组，1：按文档分组
 	if nil != groupByArg {
 		groupBy = int(groupByArg.(float64))
 	}

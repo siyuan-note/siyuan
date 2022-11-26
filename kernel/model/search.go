@@ -286,9 +286,6 @@ func FullTextSearchBlock(query, box, path string, types map[string]bool, querySy
 			}
 		}
 		ret = roots
-	case 2: // 按文档树结构分组
-		// TODO
-		ret = blocks
 	default:
 		ret = blocks
 	}

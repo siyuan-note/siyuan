@@ -598,11 +598,29 @@ func GetAllRootBlocks() (ret []*Block) {
 }
 
 func GetBlocks(ids []string) (ret []*Block) {
-	length := len(ids)
+	var notHitIDs []string
+	cached := map[string]*Block{}
+	for _, id := range ids {
+		b := getBlockCache(id)
+		if nil != b {
+			cached[id] = b
+		} else {
+			notHitIDs = append(notHitIDs, id)
+		}
+	}
+
+	if 1 > len(notHitIDs) {
+		for _, id := range ids {
+			ret = append(ret, cached[id])
+		}
+		return
+	}
+
+	length := len(notHitIDs)
 	stmtBuilder := bytes.Buffer{}
 	stmtBuilder.WriteString("SELECT * FROM blocks WHERE id IN (")
 	var args []interface{}
-	for i, id := range ids {
+	for i, id := range notHitIDs {
 		args = append(args, id)
 		stmtBuilder.WriteByte('?')
 		if i < length-1 {
@@ -619,9 +637,12 @@ func GetBlocks(ids []string) (ret []*Block) {
 	defer rows.Close()
 	for rows.Next() {
 		if block := scanBlockRows(rows); nil != block {
-			ret = append(ret, block)
 			putBlockCache(block)
+			cached[block.ID] = block
 		}
+	}
+	for _, id := range ids {
+		ret = append(ret, cached[id])
 	}
 	return
 }

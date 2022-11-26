@@ -87,6 +87,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 	listItemNode.SetIALAttr("type", "doc")
 	listItemNode.SetIALAttr("id", srcListItemID)
 	listItemNode.SetIALAttr("title", listItemText)
+	listItemNode.RemoveIALAttr("fold")
 	newTree.Root.KramdownIAL = listItemNode.KramdownIAL
 	srcLiParent := listItemNode.Parent
 	listItemNode.Unlink()
@@ -103,6 +104,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+	newTree.Root.Spec = "1"
 	if err = indexWriteJSONQueue(newTree); nil != err {
 		return "", "", err
 	}

@@ -595,7 +595,13 @@ export class Toolbar {
                 // 数学公式后面处理
             } else {
                 if (newNodes[0].firstChild) {
-                    this.range.setStart(newNodes[0].firstChild, 0);
+                    if (newNodes[0].firstChild.textContent === Constants.ZWSP) {
+                        // 新建元素时光标消失 https://github.com/siyuan-note/siyuan/issues/6481
+                        // 新建元素粘贴后元素消失 https://ld246.com/article/1665556907936
+                        this.range.setStart(newNodes[0].firstChild, 1);
+                    } else {
+                        this.range.setStart(newNodes[0].firstChild, 0);
+                    }
                 } else if (newNodes[0].nodeType === 3) {
                     this.range.setStart(newNodes[0], 0);
                 } else {
@@ -627,7 +633,8 @@ export class Toolbar {
                 if (lastNewNode.lastChild) {
                     if (lastNewNode.lastChild.textContent === Constants.ZWSP) {
                         // 新建元素时光标消失 https://github.com/siyuan-note/siyuan/issues/6481
-                        this.range.collapse();
+                        // 新建元素粘贴后元素消失 https://ld246.com/article/1665556907936
+                        this.range.collapse(true);
                     } else {
                         this.range.setEnd(lastNewNode.lastChild, lastNewNode.lastChild.textContent.length);
                     }

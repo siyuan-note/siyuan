@@ -42,9 +42,9 @@ export const editor = {
             });
             allModels.search.forEach(search => {
                 if (readOnly) {
-                    disabledProtyle(search.protyle.protyle);
+                    disabledProtyle(search.edit.protyle);
                 } else {
-                    enableProtyle(search.protyle.protyle);
+                    enableProtyle(search.edit.protyle);
                 }
             });
             window.siyuan.blockPanels.forEach(item => {

@@ -563,8 +563,8 @@ export class Wnd {
             return;
         }
         if (model instanceof Search) {
-            if (model.protyle) {
-                model.protyle.destroy();
+            if (model.edit) {
+                model.edit.destroy();
             }
             return;
         }

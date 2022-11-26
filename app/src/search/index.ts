@@ -1,242 +1,20 @@
 import {Model} from "../layout/Model";
 import {Tab} from "../layout/Tab";
 import {Protyle} from "../protyle";
-import {Constants} from "../constants";
-import {getIconByType} from "../editor/getIcon";
-import {getDisplayName, getNotebookName} from "../util/pathName";
-import {escapeHtml} from "../util/escape";
-import {fetchPost} from "../util/fetch";
-import {disabledProtyle, onGet} from "../protyle/util/onGet";
-import {addLoading} from "../protyle/ui/initUI";
-import {unicode2Emoji} from "../emoji";
 import {genSearch} from "./util";
 
 export class Search extends Model {
-    public text: string;
     private element: HTMLElement;
-    public protyle: Protyle;
-    private inputTimeout: number;
-    private config: ISearchOption;
+    public config: ISearchOption;
+    public edit: Protyle;
 
-    constructor(options: { tab: Tab, text: string }) {
+    constructor(options: { tab: Tab, config: ISearchOption }) {
         super({
             id: options.tab.id,
         });
         this.element = options.tab.panelElement as HTMLElement;
-        options.tab.updateTitle(options.text || "");
-        genSearch({
-            k: options.text,
-            r: "",
-            hasReplace: false,
-            querySyntax: false,
-            hPath: "",
-            notebookId: "",
-            idPath: "",
-            types: {
-                mathBlock: true,
-                table: true,
-                blockquote: true,
-                superBlock: true,
-                paragraph: true,
-                document: true,
-                heading: true,
-                list: true,
-                listItem: true,
-                codeBlock: true,
-                htmlBlock: true,
-            }
-        }, this.element)
-
-        // const historyElement = this.element.querySelector("#searchHistoryList") as HTMLInputElement;
-        // const lineHeight = 30;
-        // const searchPanelElement = this.element.querySelector("#globalSearchList");
-        // inputElement.addEventListener("keydown", (event) => {
-        //     let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
-        //     if (!currentList || event.isComposing) {
-        //         return;
-        //     }
-        //
-        //     if (event.key === "ArrowDown") {
-        //         currentList.classList.remove("b3-list-item--focus");
-        //         if (!currentList.nextElementSibling) {
-        //             searchPanelElement.children[0].classList.add("b3-list-item--focus");
-        //         } else {
-        //             currentList.nextElementSibling.classList.add("b3-list-item--focus");
-        //         }
-        //         currentList = searchPanelElement.querySelector(".b3-list-item--focus");
-        //         if (searchPanelElement.scrollTop < currentList.offsetTop - searchPanelElement.clientHeight + lineHeight ||
-        //             searchPanelElement.scrollTop > currentList.offsetTop) {
-        //             searchPanelElement.scrollTop = currentList.offsetTop - searchPanelElement.clientHeight + lineHeight;
-        //         }
-        //         this.getArticle(currentList.getAttribute("data-node-id"), inputElement.value);
-        //         event.preventDefault();
-        //     } else if (event.key === "ArrowUp") {
-        //         currentList.classList.remove("b3-list-item--focus");
-        //         if (!currentList.previousElementSibling) {
-        //             const length = searchPanelElement.children.length;
-        //             searchPanelElement.children[length - 1].classList.add("b3-list-item--focus");
-        //         } else {
-        //             currentList.previousElementSibling.classList.add("b3-list-item--focus");
-        //         }
-        //         currentList = searchPanelElement.querySelector(".b3-list-item--focus");
-        //         if (searchPanelElement.scrollTop < currentList.offsetTop - searchPanelElement.clientHeight + lineHeight ||
-        //             searchPanelElement.scrollTop > currentList.offsetTop - lineHeight * 2) {
-        //             searchPanelElement.scrollTop = currentList.offsetTop - lineHeight * 2;
-        //         }
-        //         this.getArticle(currentList.getAttribute("data-node-id"), inputElement.value);
-        //         event.preventDefault();
-        //     }
-        // });
-        // inputElement.select();
-        // this.inputEvent(inputElement);
-        // let clickTimeout: number;
-        // this.element.addEventListener("click", (event: MouseEvent) => {
-        //     setPanelFocus(this.element.parentElement.parentElement);
-        //     let target = event.target as HTMLElement;
-        //     let hideList = true;
-        //     while (target && !target.isEqualNode(this.element)) {
-        //         if (target.id === "globalSearchReload") {
-        //             this.inputEvent(inputElement);
-        //         } else if (target.classList.contains("b3-list-item")) {
-        //             if (target.getAttribute("data-node-id")) {
-        //                 if (event.detail === 1) {
-        //                     clickTimeout = window.setTimeout(() => {
-        //                         if (window.siyuan.altIsPressed) {
-        //                             const id = target.getAttribute("data-node-id");
-        //                             fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-        //                                 openFileById({
-        //                                     id,
-        //                                     action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-        //                                     zoomIn: foldResponse.data,
-        //                                     position: "right",
-        //                                 });
-        //                             });
-        //                         } else {
-        //                             this.element.querySelectorAll(".b3-list-item--focus").forEach((item) => {
-        //                                 item.classList.remove("b3-list-item--focus");
-        //                             });
-        //                             target.classList.add("b3-list-item--focus");
-        //                             this.getArticle(target.getAttribute("data-node-id"), inputElement.value);
-        //                         }
-        //                     }, Constants.TIMEOUT_DBLCLICK);
-        //                 } else if (event.detail === 2) {
-        //                     clearTimeout(clickTimeout);
-        //                     const id = target.getAttribute("data-node-id");
-        //                     fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-        //                         openFileById({
-        //                             id,
-        //                             action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-        //                             zoomIn: foldResponse.data
-        //                         });
-        //                     });
-        //                 }
-        //                 window.siyuan.menus.menu.remove();
-        //             } else {
-        //                 this.text = target.textContent;
-        //                 this.parent.updateTitle(this.text);
-        //                 inputElement.value = this.text;
-        //                 inputElement.select();
-        //                 this.inputEvent(inputElement);
-        //             }
-        //             event.preventDefault();
-        //             event.stopPropagation();
-        //             break;
-        //         } else if (target.id === "searchHistoryBtn") {
-        //             hideList = false;
-        //             let html = "";
-        //             const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHETABDATA) || "[]");
-        //             data.forEach((s: string) => {
-        //                 if (s !== inputElement.value) {
-        //                     html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
-        //                 }
-        //             });
-        //             historyElement.classList.remove("fn__none");
-        //             historyElement.innerHTML = html;
-        //             event.preventDefault();
-        //             event.stopPropagation();
-        //             break;
-        //         }
-        //         target = target.parentElement;
-        //     }
-        //     if (hideList) {
-        //         historyElement.classList.add("fn__none");
-        //     }
-        // }, false);
-    }
-
-    private getArticle(id: string, value: string) {
-        fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-            if (this.protyle) {
-                this.protyle.protyle.element.classList.remove("fn__none");
-                this.protyle.protyle.scroll.lastScrollTop = 0;
-                addLoading(this.protyle.protyle);
-
-                fetchPost("/api/filetree/getDoc", {
-                    id,
-                    k: value,
-                    mode: foldResponse.data ? 0 : 3,
-                    size: foldResponse.data ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    onGet(getResponse, this.protyle.protyle, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML]);
-                    const matchElement = this.protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${id}"] span[data-type="search-mark"]`);
-                    if (matchElement) {
-                        matchElement.scrollIntoView();
-                    }
-                });
-            } else {
-                this.protyle = new Protyle(this.element.querySelector("#searchPreview") as HTMLElement, {
-                    blockId: id,
-                    action: foldResponse.data ? [Constants.CB_GET_HL, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
-                    key: value,
-                    render: {
-                        gutter: true,
-                        breadcrumbDocName: true,
-                    },
-                    after: (editor) => {
-                        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
-                            disabledProtyle(editor.protyle);
-                        }
-                        setTimeout(() => {
-                            const matchElement = this.protyle.protyle.wysiwyg.element.querySelector(`div[data-node-id="${id}"] span[data-type="search-mark"]`);
-                            if (matchElement) {
-                                matchElement.scrollIntoView();
-                            }
-                        }, Constants.TIMEOUT_SEARCH);
-                    }
-                });
-            }
-        });
-    }
-
-    private setLocalStorage(value: string) {
-        if (!value) {
-            return;
-        }
-        let searches: string[] = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHETABDATA) || "[]");
-        searches.splice(0, 0, value);
-        searches = Array.from(new Set(searches));
-        if (searches.length > window.siyuan.config.search.limit) {
-            searches.splice(window.siyuan.config.search.limit, searches.length - window.siyuan.config.search.limit);
-        }
-        localStorage.setItem(Constants.LOCAL_SEARCHETABDATA, JSON.stringify(searches));
-    }
-
-    private inputEvent(inputElement: HTMLInputElement, event?: InputEvent) {
-        if (event && event.isComposing) {
-            return;
-        }
-        clearTimeout(this.inputTimeout);
-        const loadElement = this.element.querySelector(".fn__loading--top");
-        this.inputTimeout = window.setTimeout(() => {
-            this.text = inputElement.value;
-            this.parent.updateTitle(this.text);
-            loadElement.classList.remove("fn__none");
-            fetchPost("/api/search/fullTextSearchBlock", {query: this.text}, (response) => {
-                this.onSearch(response.data.blocks);
-                this.element.querySelector("#globalSearchResult").innerHTML = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
-                loadElement.classList.add("fn__none");
-            });
-        }, Constants.TIMEOUT_SEARCH);
+        this.config = options.config;
+        this.edit = genSearch(this.config, this.element)
     }
 
     public updateSearch(text: string, replace: boolean) {
@@ -256,31 +34,8 @@ export class Search extends Model {
                 text = oldText + " " + text;
             }
         }
-        this.text = text;
-        this.parent.updateTitle(this.text);
-        inputElement.value = this.text;
+        inputElement.value = text;
         inputElement.select();
-        this.inputEvent(inputElement);
-        this.setLocalStorage(text);
-    }
-
-    private onSearch(data: IBlock[]) {
-        let resultHTML = "";
-        data.forEach((item, index) => {
-            const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
-            resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-url="${item.box}" data-path="${item.path}" data-node-id="${item.id}">
-    <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
-    <span class="b3-list-item__text">${unicode2Emoji(item.ial.icon)}${item.ial.icon ? "&nbsp;" : ""}${item.content}</span>
-    <span class="b3-list-item__meta b3-list-item__meta--ellipsis" title="${title}">${title}</span>
-</div>`;
-        });
-        this.element.querySelector("#globalSearchList").innerHTML = resultHTML || `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
-        if (data.length === 0) {
-            if (this.protyle) {
-                this.protyle.protyle.element.classList.add("fn__none");
-            }
-            return;
-        }
-        this.getArticle(data[0].id, (this.element.querySelector(".b3-text-field") as HTMLInputElement).value);
+        inputElement.dispatchEvent(new CustomEvent("input"));
     }
 }

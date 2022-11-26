@@ -268,7 +268,7 @@ const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
     } else if (json.instance === "Search") {
         (layout as Tab).addModel(new Search({
             tab: (layout as Tab),
-            text: json.text
+            config: json.config
         }));
     }
     if (json.children) {
@@ -377,7 +377,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         json.instance = "Tag";
     } else if (layout instanceof Search) {
         json.instance = "Search";
-        json.text = layout.text;
+        json.config = layout.config;
     }
 
     if (layout instanceof Layout || layout instanceof Wnd) {
@@ -524,7 +524,7 @@ export const copyTab = (tab: Tab) => {
             } else if (tab.model instanceof Search) {
                 model = new Search({
                     tab: newTab,
-                    text: tab.model.text
+                    config: tab.model.config
                 });
             } else if (!tab.model && tab.headElement) {
                 const initData = JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}");

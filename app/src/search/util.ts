@@ -38,9 +38,34 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
         icon: "iconSearch",
         title: text,
         callback(tab) {
+            const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEDATA) || "{}");
+            if (!localData.types) {
+                localData.types = {
+                    document: window.siyuan.config.search.document,
+                    heading: window.siyuan.config.search.heading,
+                    list: window.siyuan.config.search.list,
+                    listItem: window.siyuan.config.search.listItem,
+                    codeBlock: window.siyuan.config.search.codeBlock,
+                    htmlBlock: window.siyuan.config.search.htmlBlock,
+                    mathBlock: window.siyuan.config.search.mathBlock,
+                    table: window.siyuan.config.search.table,
+                    blockquote: window.siyuan.config.search.blockquote,
+                    superBlock: window.siyuan.config.search.superBlock,
+                    paragraph: window.siyuan.config.search.paragraph,
+                };
+            }
             const asset = new Search({
                 tab,
-                text
+                config: {
+                    k: text,
+                    r: "",
+                    hasReplace: false,
+                    querySyntax: localData.querySyntax || false,
+                    hPath: "",
+                    notebookId: "",
+                    idPath: "",
+                    types: localData.types
+                }
             });
             tab.addModel(asset);
             resizeTabs();
@@ -151,17 +176,17 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 break;
             } else if (target.id === "searchFilter") {
                 window.siyuan.menus.menu.remove();
-                addConfigMenu(config, window.siyuan.languages.math, "mathBlock", edit, element);
-                addConfigMenu(config, window.siyuan.languages.table, "table", edit, element);
-                addConfigMenu(config, window.siyuan.languages.quote, "blockquote", edit, element);
-                addConfigMenu(config, window.siyuan.languages.superBlock, "superBlock", edit, element);
-                addConfigMenu(config, window.siyuan.languages.paragraph, "paragraph", edit, element);
-                addConfigMenu(config, window.siyuan.languages.doc, "document", edit, element);
-                addConfigMenu(config, window.siyuan.languages.headings, "heading", edit, element);
-                addConfigMenu(config, window.siyuan.languages.list1, "list", edit, element);
-                addConfigMenu(config, window.siyuan.languages.listItem, "listItem", edit, element);
-                addConfigMenu(config, window.siyuan.languages.code, "codeBlock", edit, element);
-                addConfigMenu(config, "HTML", "htmlBlock", edit, element);
+                addConfigMenu(config, window.siyuan.languages.math, "mathBlock", edit, element, closeCB);
+                addConfigMenu(config, window.siyuan.languages.table, "table", edit, element, closeCB);
+                addConfigMenu(config, window.siyuan.languages.quote, "blockquote", edit, element, closeCB);
+                addConfigMenu(config, window.siyuan.languages.superBlock, "superBlock", edit, element, closeCB);
+                addConfigMenu(config, window.siyuan.languages.paragraph, "paragraph", edit, element, closeCB);
+                addConfigMenu(config, window.siyuan.languages.doc, "document", edit, element, closeCB);
+                addConfigMenu(config, window.siyuan.languages.headings, "heading", edit, element, closeCB);
+                addConfigMenu(config, window.siyuan.languages.list1, "list", edit, element, closeCB);
+                addConfigMenu(config, window.siyuan.languages.listItem, "listItem", edit, element, closeCB);
+                addConfigMenu(config, window.siyuan.languages.code, "codeBlock", edit, element, closeCB);
+                addConfigMenu(config, "HTML", "htmlBlock", edit, element, closeCB);
                 window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
                 event.stopPropagation();
                 event.preventDefault();
@@ -184,7 +209,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                     }
                 }
                 if (reload) {
-                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+                    if (closeCB) {
+                        localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+                    }
                     inputTimeout = inputEvent(element, config, inputTimeout, edit);
                 }
                 event.stopPropagation();
@@ -194,7 +221,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 target.classList.toggle("b3-button--cancel");
                 config.querySyntax = !target.classList.contains("b3-button--cancel");
                 inputTimeout = inputEvent(element, config, inputTimeout, edit);
-                localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+                if (closeCB) {
+                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -226,11 +255,17 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 return;
             } else if (target.id === "replaceAllBtn") {
                 replace(element, config, edit, true);
+                if (closeCB) {
+                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "replaceBtn") {
                 replace(element, config, edit, false);
+                if (closeCB) {
+                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -242,6 +277,14 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 } else if (target.parentElement.id === "replaceHistoryList") {
                     replaceInputElement.value = target.textContent;
                     replaceHistoryElement.classList.add("fn__none");
+                } else if (target.parentElement.id === "searchList" && !target.classList.contains("b3-list-item--focus")) {
+                    target.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus")
+                    target.classList.add("b3-list-item--focus")
+                    getArticle({
+                        id: target.getAttribute("data-node-id"),
+                        k: getKey(target),
+                        edit
+                    });
                 }
                 event.stopPropagation();
                 event.preventDefault();
@@ -313,7 +356,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         }
         config.list = searches;
         config.k = searchInputElement.value;
-        localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+        if (closeCB) {
+            localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+        }
     });
     searchInputElement.addEventListener("focus", () => {
         historyElement.classList.add("fn__none");
@@ -385,13 +430,17 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             return;
         }
         replace(element, config, edit, false);
+        if (closeCB) {
+            localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+        }
         event.preventDefault();
     });
     inputTimeout = inputEvent(element, config, inputTimeout, edit);
+    return edit;
 }
 
 const addConfigMenu = (config: ISearchOption, lang: string, key: "mathBlock" | "table" | "blockquote" | "superBlock" | "paragraph" | "document" | "heading" | "list" | "listItem" | "codeBlock" | "htmlBlock",
-                       edit: Protyle, element: Element) => {
+                       edit: Protyle, element: Element, closeCB?: () => void) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${lang}</span><span class="fn__space fn__flex-1"></span>
 <input type="checkbox" class="b3-switch fn__flex-center"${config.types[key] ? " checked" : ""}></div>`,
@@ -403,7 +452,9 @@ const addConfigMenu = (config: ISearchOption, lang: string, key: "mathBlock" | "
                 }
                 config.types[key] = inputElement.checked;
                 inputEvent(element, config, undefined, edit);
-                localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+                if (closeCB) {
+                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+                }
                 window.siyuan.menus.menu.remove();
             });
         }
@@ -458,7 +509,6 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
     }
     config.replaceList = searches;
     config.r = replaceInputElement.value;
-    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
 
     let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
     if (!currentList) {

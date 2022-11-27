@@ -77,4 +77,29 @@
     overflow: auto;
     padding-bottom: 8px;
   }
+
+  &__path {
+    white-space: nowrap;
+    position: relative;
+    padding-right: 20px;
+  }
+
+  &__rmpath {
+    position: absolute;
+    height: 8px;
+    width: 8px;
+    padding: 4px;
+    border-radius: 10px;
+    color: var(--b3-theme-on-surface);
+    background-color: var(--b3-theme-surface);
+    transition: var(--b3-transition);
+    top: 1px;
+    right: 0px;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--b3-theme-on-background);
+      background-color: var(--b3-theme-background-light);
+    }
+  }
 }

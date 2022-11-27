@@ -1,5 +1,5 @@
 import {getAllModels} from "../layout/getAll";
-import {getWndByLayout, resizeTabs} from "../layout/util";
+import {getInstanceById, getWndByLayout, resizeTabs} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {Search} from "./index";
 import {Wnd} from "../layout/Wnd";
@@ -77,7 +77,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
 };
 
 export const genSearch = (config: ISearchOption, element: Element, closeCB?: () => void) => {
-    element.innerHTML = `<div class="fn__flex-column" style="height: 100%">
+    element.innerHTML = `<div class="fn__flex-column" style="height: 100%;${closeCB ? "border-radius: 4px;overflow: hidden;" : ""}">
     <div class="b3-form__icon search__header">
         <span class="fn__a" id="searchHistoryBtn">
             <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
@@ -102,8 +102,11 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 <svg><use xlink:href="#iconFiles"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon b3-tooltips b3-tooltips__w">
+            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="${closeCB ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__w">
                 <svg><use xlink:href="#iconRefresh"></use></svg>
+            </span>
+            <span id="searchOpen" aria-label="${window.siyuan.languages.stickSearch}" class="${closeCB ? "" : "fn__none "}block__icon b3-tooltips b3-tooltips__w">
+                <svg><use xlink:href="#iconLayoutRight"></use></svg>
             </span>
         </div>
     </div>
@@ -124,7 +127,10 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         <span id="searchResult" style="white-space: nowrap;"></span>
         <span class="fn__space"></span>
         <span class="fn__flex-1"></span>
-        <span id="searchPathInput" class="ft__on-surface fn__flex-center ft__smaller fn__ellipsis" style="white-space: nowrap;" title="${config.hPath}">${config.hPath}</span>
+        <span id="searchPathInput" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis" title="${config.hPath}">
+            ${config.hPath}
+            <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconClose"></use></svg>
+        </span>
         <span class="fn__space"></span>
         <button id="includeChildCheck" class="b3-button b3-button--small${(config.idPath && config.idPath.endsWith(".sy")) ? " b3-button--cancel" : ""}">${window.siyuan.languages.includeChildDoc}</button>
         <span class="fn__space"></span>
@@ -158,18 +164,26 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement
         while (target && !target.isSameNode(element)) {
-            if (target.id === "searchPath") {
+            if (target.classList.contains("search__rmpath")) {
+                config.idPath = "";
+                config.hPath = "";
+                element.querySelector("#searchPathInput").innerHTML = config.hPath;
+                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "searchPath") {
                 movePathTo([], undefined, (toPath, toNotebook) => {
                     if (toPath === "/") {
                         config.idPath = toNotebook;
                         config.hPath = escapeHtml(getNotebookName(toNotebook));
-                        element.querySelector("#searchPathInput").innerHTML = config.hPath;
+                        element.querySelector("#searchPathInput").innerHTML = `${config.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
                         inputTimeout = inputEvent(element, config, inputTimeout, edit);
                     } else {
                         config.idPath = pathPosix().join(toNotebook, toPath);
                         fetchPost("/api/filetree/getHPathsByPaths", {paths: [toPath]}, (response) => {
                             config.hPath = escapeHtml(response.data ? response.data[0] : "");
-                            element.querySelector("#searchPathInput").innerHTML = config.hPath;
+                            element.querySelector("#searchPathInput").innerHTML = `${config.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
                             inputTimeout = inputEvent(element, config, inputTimeout, edit);
                         });
                     }
@@ -181,6 +195,34 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 // ctrl+P 不需要保存
                 config.hasReplace = !config.hasReplace;
                 element.querySelector("#replaceHistoryBtn").parentElement.classList.toggle("fn__none");
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "searchOpen") {
+                let wnd: Wnd;
+                const element = document.querySelector(".layout__wnd--active");
+                if (element) {
+                    wnd = getInstanceById(element.getAttribute("data-id")) as Wnd;
+                }
+                if (!wnd) {
+                    wnd = getWndByLayout(window.siyuan.layout.centerLayout);
+                }
+                const tab = new Tab({
+                    icon: "iconSearch",
+                    title: "",
+                    callback(tab) {
+                        const asset = new Search({
+                            tab,
+                            config
+                        });
+                        tab.addModel(asset);
+                        resizeTabs();
+                    }
+                });
+                wnd.addTab(tab);
+                if (closeCB) {
+                    closeCB();
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -574,7 +616,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
     });
 };
 
-const inputEvent = (element: Element, config: ISearchOption, inputTimeout: number, edit: Protyle, saveConfig = true,event?: InputEvent) => {
+const inputEvent = (element: Element, config: ISearchOption, inputTimeout: number, edit: Protyle, saveConfig = true, event?: InputEvent) => {
     if (event && event.isComposing) {
         return;
     }

@@ -686,7 +686,9 @@ const onSearch = (data: IBlock[], dialog: Dialog) => {
         const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
         resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${item.id}" data-root-id="${item.rootID}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
-<span class="b3-list-item__text">${unicode2Emoji(item.ial.icon)}${item.ial.icon ? "&nbsp;" : ""}${item.content}</span>
+<svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
+${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
+<span class="b3-list-item__text">${item.content}</span>
 <span class="b3-list-item__meta b3-list-item__meta--ellipsis" title="${title}">${title}</span>
 </div>`;
     });

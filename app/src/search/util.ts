@@ -626,7 +626,8 @@ ${unicode2Emoji(getNotebookIcon(item.box) || Constants.SIYUAN_IMAGE_NOTE, false,
             item.children.forEach((childItem, childIndex) => {
                 resultHTML += `<div style="padding-left: 22px" data-type="search-item" class="b3-list-item${childIndex === 0 && index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(childItem.type)}"></use></svg>
-<span class="b3-list-item__text">${unicode2Emoji(childItem.ial.icon)}${childItem.ial.icon ? "&nbsp;" : ""}${childItem.content}</span>
+${unicode2Emoji(childItem.ial.icon, false, "b3-list-item__graphic", true)}
+<span class="b3-list-item__text">${childItem.content}</span>
 </div>`;
             })
             resultHTML += "</div>";
@@ -634,7 +635,8 @@ ${unicode2Emoji(getNotebookIcon(item.box) || Constants.SIYUAN_IMAGE_NOTE, false,
             const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
             resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${item.id}" data-root-id="${item.rootID}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
-<span class="b3-list-item__text">${unicode2Emoji(item.ial.icon)}${item.ial.icon ? "&nbsp;" : ""}${item.content}</span>
+${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
+<span class="b3-list-item__text">${item.content}</span>
 <span class="b3-list-item__meta b3-list-item__meta--ellipsis" title="${title}">${title}</span>
 </div>`;
         }

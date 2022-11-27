@@ -289,6 +289,9 @@ func FullTextSearchBlock(query, box, path string, types map[string]bool, querySy
 	default:
 		ret = blocks
 	}
+	if 1 > len(ret) {
+		ret = []*Block{}
+	}
 	return
 }
 

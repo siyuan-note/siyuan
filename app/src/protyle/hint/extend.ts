@@ -437,7 +437,7 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
     if (pathString === "/") {
         return;
     }
-    const parentID = getDisplayName(pathString, true, true)
+    const parentID = getDisplayName(pathString, true, true);
     if (protyle.block.rootID === parentID) {
         return;
     }

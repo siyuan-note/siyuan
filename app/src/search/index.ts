@@ -14,7 +14,7 @@ export class Search extends Model {
         });
         this.element = options.tab.panelElement as HTMLElement;
         this.config = options.config;
-        this.edit = genSearch(this.config, this.element)
+        this.edit = genSearch(this.config, this.element);
     }
 
     public updateSearch(text: string, replace: boolean) {

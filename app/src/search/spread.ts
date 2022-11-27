@@ -1,8 +1,6 @@
 import {escapeHtml} from "../util/escape";
-import {getIconByType} from "../editor/getIcon";
-import {getDisplayName, getNotebookName, pathPosix} from "../util/pathName";
+import {getNotebookName, pathPosix} from "../util/pathName";
 import {Constants} from "../constants";
-import {Protyle} from "../protyle";
 import {Dialog} from "../dialog";
 import {fetchSyncPost} from "../util/fetch";
 import {focusByRange} from "../protyle/util/selection";
@@ -108,6 +106,6 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         types: localData.types
     }, dialog.element.querySelector(".b3-dialog__container").lastElementChild, () => {
         dialog.destroy();
-    })
+    });
     dialog.element.firstElementChild.setAttribute("style", "z-index:199"); // https://github.com/siyuan-note/siyuan/issues/3515
 };

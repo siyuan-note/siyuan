@@ -139,7 +139,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     <div id="searchList" class="search__list b3-list b3-list--background search__list"></div>
     <div id="searchPreview" class="fn__flex-1 search__preview"></div>
 </div>
-<div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`
+<div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;
     const searchPanelElement = element.querySelector("#searchList");
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
@@ -162,7 +162,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     searchInputElement.select();
 
     element.addEventListener("click", (event: MouseEvent) => {
-        let target = event.target as HTMLElement
+        let target = event.target as HTMLElement;
         while (target && !target.isSameNode(element)) {
             if (target.classList.contains("search__rmpath")) {
                 config.idPath = "";
@@ -227,7 +227,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchRefresh") {
-                inputTimeout = inputEvent(element, config, inputTimeout, edit, false)
+                inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -486,7 +486,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     });
     inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
     return edit;
-}
+};
 
 const addConfigMenu = (config: ISearchOption, lang: string, key: "mathBlock" | "table" | "blockquote" | "superBlock" | "paragraph" | "document" | "heading" | "list" | "listItem" | "codeBlock" | "htmlBlock",
                        edit: Protyle, element: Element) => {
@@ -505,7 +505,7 @@ const addConfigMenu = (config: ISearchOption, lang: string, key: "mathBlock" | "
             });
         }
     }).element);
-}
+};
 
 const getKey = (element: HTMLElement) => {
     const keys: string[] = [];
@@ -647,7 +647,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
             });
         }
         if (saveConfig) {
-            config.k = inputValue
+            config.k = inputValue;
             if (!element.parentElement.getAttribute("data-id")) {
                 localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
             }
@@ -673,7 +673,7 @@ ${unicode2Emoji(getNotebookIcon(item.box) || Constants.SIYUAN_IMAGE_NOTE, false,
 ${unicode2Emoji(childItem.ial.icon, false, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${childItem.content}</span>
 </div>`;
-            })
+            });
             resultHTML += "</div>";
         } else {
             const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);

@@ -290,7 +290,7 @@ export const globalShortcut = () => {
                 }
                 const originalElement = switchDialog.element.querySelector('[data-original="true"]');
                 if (originalElement) {
-                    originalElement.removeAttribute("data-original")
+                    originalElement.removeAttribute("data-original");
                 }
             } else if (event.key === "Control") {
                 let currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
@@ -391,7 +391,7 @@ export const globalShortcut = () => {
                 }).forEach(item => {
                     let icon = `<svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>`;
                     let rootId = "";
-                    const initData = item.headElement.getAttribute("data-initdata")
+                    const initData = item.headElement.getAttribute("data-initdata");
                     if (item.model instanceof Editor) {
                         rootId = ` data-node-id="${item.model.editor.protyle.block.rootID}"`;
                         icon = unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true);

@@ -36,9 +36,8 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
     }
     const tab = new Tab({
         icon: "iconSearch",
-        title: text,
+        title: "",
         callback(tab) {
-            // ctrl+p 仅保存 types, querySyntax, 搜索/替换历史和文本, group
             const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEDATA) || "{}");
             if (!localData.types) {
                 localData.types = {
@@ -64,6 +63,8 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
                     querySyntax: localData.querySyntax || false,
                     hPath: "",
                     idPath: "",
+                    list: [],
+                    replaceList: [],
                     group: localData.group || 0,
                     types: localData.types
                 }
@@ -177,13 +178,14 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchReplace") {
+                // ctrl+P 不需要保存
                 config.hasReplace = !config.hasReplace;
                 element.querySelector("#replaceHistoryBtn").parentElement.classList.toggle("fn__none");
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "searchRefresh") {
-                inputTimeout = inputEvent(element, config, inputTimeout, edit)
+                inputTimeout = inputEvent(element, config, inputTimeout, edit, false)
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -195,17 +197,17 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 break;
             } else if (target.id === "searchFilter") {
                 window.siyuan.menus.menu.remove();
-                addConfigMenu(config, window.siyuan.languages.math, "mathBlock", edit, element, closeCB);
-                addConfigMenu(config, window.siyuan.languages.table, "table", edit, element, closeCB);
-                addConfigMenu(config, window.siyuan.languages.quote, "blockquote", edit, element, closeCB);
-                addConfigMenu(config, window.siyuan.languages.superBlock, "superBlock", edit, element, closeCB);
-                addConfigMenu(config, window.siyuan.languages.paragraph, "paragraph", edit, element, closeCB);
-                addConfigMenu(config, window.siyuan.languages.doc, "document", edit, element, closeCB);
-                addConfigMenu(config, window.siyuan.languages.headings, "heading", edit, element, closeCB);
-                addConfigMenu(config, window.siyuan.languages.list1, "list", edit, element, closeCB);
-                addConfigMenu(config, window.siyuan.languages.listItem, "listItem", edit, element, closeCB);
-                addConfigMenu(config, window.siyuan.languages.code, "codeBlock", edit, element, closeCB);
-                addConfigMenu(config, "HTML", "htmlBlock", edit, element, closeCB);
+                addConfigMenu(config, window.siyuan.languages.math, "mathBlock", edit, element);
+                addConfigMenu(config, window.siyuan.languages.table, "table", edit, element);
+                addConfigMenu(config, window.siyuan.languages.quote, "blockquote", edit, element);
+                addConfigMenu(config, window.siyuan.languages.superBlock, "superBlock", edit, element);
+                addConfigMenu(config, window.siyuan.languages.paragraph, "paragraph", edit, element);
+                addConfigMenu(config, window.siyuan.languages.doc, "document", edit, element);
+                addConfigMenu(config, window.siyuan.languages.headings, "heading", edit, element);
+                addConfigMenu(config, window.siyuan.languages.list1, "list", edit, element);
+                addConfigMenu(config, window.siyuan.languages.listItem, "listItem", edit, element);
+                addConfigMenu(config, window.siyuan.languages.code, "codeBlock", edit, element);
+                addConfigMenu(config, "HTML", "htmlBlock", edit, element);
                 window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
                 event.stopPropagation();
                 event.preventDefault();
@@ -234,9 +236,6 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 target.classList.toggle("b3-button--cancel");
                 config.querySyntax = !target.classList.contains("b3-button--cancel");
                 inputTimeout = inputEvent(element, config, inputTimeout, edit);
-                if (closeCB) {
-                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -268,17 +267,11 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 return;
             } else if (target.id === "replaceAllBtn") {
                 replace(element, config, edit, true);
-                if (closeCB) {
-                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "replaceBtn") {
                 replace(element, config, edit, false);
-                if (closeCB) {
-                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -291,8 +284,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             } else if (target.classList.contains("b3-list-item")) {
                 if (target.parentElement.id === "searchHistoryList") {
                     searchInputElement.value = target.textContent;
-                    searchInputElement.dispatchEvent(new CustomEvent("blur"));
-                    inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                    inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
                 } else if (target.parentElement.id === "replaceHistoryList") {
                     replaceInputElement.value = target.textContent;
                     replaceHistoryElement.classList.add("fn__none");
@@ -353,10 +345,10 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     }, false);
 
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
-        inputTimeout = inputEvent(element, config, inputTimeout, edit, event);
+        inputTimeout = inputEvent(element, config, inputTimeout, edit, false, event);
     });
     searchInputElement.addEventListener("input", (event: InputEvent) => {
-        inputTimeout = inputEvent(element, config, inputTimeout, edit, event);
+        inputTimeout = inputEvent(element, config, inputTimeout, edit, false, event);
     });
     searchInputElement.addEventListener("blur", () => {
         let searches: string[] = config.list || [];
@@ -367,13 +359,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         }
         config.list = searches;
         config.k = searchInputElement.value;
-        if (closeCB) {
+        if (!element.parentElement.getAttribute("data-id")) {
             localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
         }
-    });
-    searchInputElement.addEventListener("focus", () => {
-        historyElement.classList.add("fn__none");
-        replaceHistoryElement.classList.add("fn__none");
     });
     searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
@@ -447,26 +435,19 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             event.preventDefault();
         }
     });
-    replaceInputElement.addEventListener("focus", () => {
-        historyElement.classList.add("fn__none");
-        replaceHistoryElement.classList.add("fn__none");
-    });
     replaceInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing || event.key !== "Enter") {
             return;
         }
         replace(element, config, edit, false);
-        if (closeCB) {
-            localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-        }
         event.preventDefault();
     });
-    inputTimeout = inputEvent(element, config, inputTimeout, edit);
+    inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
     return edit;
 }
 
 const addConfigMenu = (config: ISearchOption, lang: string, key: "mathBlock" | "table" | "blockquote" | "superBlock" | "paragraph" | "document" | "heading" | "list" | "listItem" | "codeBlock" | "htmlBlock",
-                       edit: Protyle, element: Element, closeCB?: () => void) => {
+                       edit: Protyle, element: Element) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${lang}</span><span class="fn__space fn__flex-1"></span>
 <input type="checkbox" class="b3-switch fn__flex-center"${config.types[key] ? " checked" : ""}></div>`,
@@ -478,9 +459,6 @@ const addConfigMenu = (config: ISearchOption, lang: string, key: "mathBlock" | "
                 }
                 config.types[key] = inputElement.checked;
                 inputEvent(element, config, undefined, edit);
-                if (closeCB) {
-                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-                }
                 window.siyuan.menus.menu.remove();
             });
         }
@@ -534,7 +512,9 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
     }
     config.replaceList = searches;
     config.r = replaceInputElement.value;
-
+    if (!element.parentElement.getAttribute("data-id")) {
+        localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+    }
     let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
     if (!currentList) {
         return;
@@ -594,14 +574,14 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
     });
 };
 
-const inputEvent = (element: Element, config: ISearchOption, inputTimeout: number, edit: Protyle, event?: InputEvent) => {
+const inputEvent = (element: Element, config: ISearchOption, inputTimeout: number, edit: Protyle, saveConfig = true,event?: InputEvent) => {
     if (event && event.isComposing) {
         return;
     }
-    const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
-    const loadingElement = element.querySelector(".fn__loading--top");
     clearTimeout(inputTimeout);
     inputTimeout = window.setTimeout(() => {
+        const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
+        const loadingElement = element.querySelector(".fn__loading--top");
         loadingElement.classList.remove("fn__none");
         const inputValue = searchInputElement.value;
         element.querySelector("#searchList").scrollTo(0, 0);
@@ -623,6 +603,12 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 element.querySelector("#searchResult").innerHTML = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
                 loadingElement.classList.add("fn__none");
             });
+        }
+        if (saveConfig) {
+            config.k = inputValue
+            if (!element.parentElement.getAttribute("data-id")) {
+                localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+            }
         }
     }, Constants.TIMEOUT_SEARCH);
     return inputTimeout;

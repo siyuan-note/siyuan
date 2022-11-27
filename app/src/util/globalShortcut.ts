@@ -281,6 +281,10 @@ export const globalShortcut = () => {
                         currentLiElement.parentElement.parentElement.nextElementSibling.innerHTML = currentLiElement.querySelector(".b3-list-item__text").innerHTML;
                     }
                 }
+                const originalElement = switchDialog.element.querySelector('[data-original="true"]');
+                if (originalElement) {
+                    originalElement.removeAttribute("data-original")
+                }
             } else if (event.key === "Control") {
                 let currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
                 // 快速切换时，不触发 Tab

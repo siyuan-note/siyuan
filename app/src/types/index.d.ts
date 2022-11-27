@@ -49,6 +49,7 @@ interface Window {
 }
 
 interface ISearchOption {
+    group: number,
     hasReplace: boolean,
     querySyntax: boolean,
     hPath: string

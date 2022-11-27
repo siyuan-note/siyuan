@@ -431,6 +431,17 @@ export const getNotebookName = (id: string) => {
     return rootPath;
 };
 
+export const getNotebookIcon = (id: string) => {
+    let rootPath = "";
+    window.siyuan.notebooks.find((item) => {
+        if (item.id === id) {
+            rootPath = item.icon;
+            return true;
+        }
+    });
+    return rootPath;
+};
+
 export const setNotebookName = (id: string, name: string) => {
     window.siyuan.notebooks.find((item) => {
         if (item.id === id) {

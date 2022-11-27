@@ -383,7 +383,15 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         if (event.key === "ArrowDown") {
             currentList.classList.remove("b3-list-item--focus");
             if (!currentList.nextElementSibling) {
-                searchPanelElement.children[0].classList.add("b3-list-item--focus");
+                if (config.group === 1) {
+                    if (currentList.parentElement.nextElementSibling) {
+                        currentList.parentElement.nextElementSibling.nextElementSibling.firstElementChild.classList.add("b3-list-item--focus");
+                    } else {
+                        searchPanelElement.children[1].firstElementChild.classList.add("b3-list-item--focus");
+                    }
+                } else {
+                    searchPanelElement.firstElementChild.classList.add("b3-list-item--focus");
+                }
             } else {
                 currentList.nextElementSibling.classList.add("b3-list-item--focus");
             }
@@ -401,8 +409,15 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         } else if (event.key === "ArrowUp") {
             currentList.classList.remove("b3-list-item--focus");
             if (!currentList.previousElementSibling) {
-                const length = searchPanelElement.children.length;
-                searchPanelElement.children[length - 1].classList.add("b3-list-item--focus");
+                if (config.group === 1) {
+                    if (currentList.parentElement.previousElementSibling.previousElementSibling) {
+                        currentList.parentElement.previousElementSibling.previousElementSibling.lastElementChild.classList.add("b3-list-item--focus");
+                    } else {
+                        searchPanelElement.lastElementChild.lastElementChild.classList.add("b3-list-item--focus");
+                    }
+                } else {
+                    searchPanelElement.lastElementChild.classList.add("b3-list-item--focus");
+                }
             } else {
                 currentList.previousElementSibling.classList.add("b3-list-item--focus");
             }
@@ -589,6 +604,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
     inputTimeout = window.setTimeout(() => {
         loadingElement.classList.remove("fn__none");
         const inputValue = searchInputElement.value;
+        element.querySelector("#searchList").scrollTo(0, 0);
         if (inputValue === "") {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                 onSearch(response.data, edit, element);

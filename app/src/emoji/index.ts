@@ -17,13 +17,13 @@ export const getRandomEmoji = () => {
     return emojis.items[getRandom(0, emojis.items.length - 1)].unicode;
 };
 
-export const unicode2Emoji = (unicode: string, assic = false) => {
+export const unicode2Emoji = (unicode: string, assic = false, className = "", needSpan = false) => {
     if (!unicode) {
         return "";
     }
     let emoji = "";
     if (unicode.indexOf(".") > -1) {
-        emoji = `<img src="/emojis/${unicode}"/>`;
+        emoji = `<img class="${className}" src="/emojis/${unicode}"/>`;
     } else if (isMobile() || window.siyuan.config.appearance.nativeEmoji || assic) {
         try {
             unicode.split("-").forEach(item => {
@@ -33,12 +33,15 @@ export const unicode2Emoji = (unicode: string, assic = false) => {
                     emoji += String.fromCodePoint(parseInt(item, 16));
                 }
             });
+            if (needSpan) {
+                emoji = `<span class="${className}">${emoji}</span>`
+            }
         } catch (e) {
             // 自定义表情搜索报错 https://github.com/siyuan-note/siyuan/issues/5883
             // 这里忽略错误不做处理
         }
     } else {
-        emoji = `<svg class="custom-icon"><use xlink:href="#icon-${unicode}"></use></svg>`;
+        emoji = `<svg class="${className || "custom-icon"}"><use xlink:href="#icon-${unicode}"></use></svg>`;
     }
     return emoji;
 };
@@ -395,11 +398,11 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
     });
 };
 
-export const updateOutlineEmoji = (unicode: string, id:string) => {
+export const updateOutlineEmoji = (unicode: string, id: string) => {
     /// #if !MOBILE
     getAllModels().outline.forEach(model => {
         if (model.blockId === id) {
-            model.headerElement.nextElementSibling.firstElementChild.innerHTML = unicode2Emoji(unicode || Constants.SIYUAN_IMAGE_FILE);
+            model.headerElement.nextElementSibling.firstElementChild.outerHTML = unicode2Emoji(unicode || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true);
         }
     });
     /// #endif

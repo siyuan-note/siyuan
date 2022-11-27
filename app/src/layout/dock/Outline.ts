@@ -175,7 +175,7 @@ export class Outline extends Model {
     public updateDocTitle(ial?: IObject) {
         if (this.type === "pin") {
             if (ial) {
-                let iconHTML = `<span class="b3-list-item__graphic">${unicode2Emoji(ial.icon || Constants.SIYUAN_IMAGE_FILE)}</span>`;
+                let iconHTML = `${unicode2Emoji(ial.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true)}`;
                 if (ial.icon === Constants.ZWSP && this.headerElement.nextElementSibling.firstElementChild) {
                     iconHTML = this.headerElement.nextElementSibling.firstElementChild.outerHTML;
                 }

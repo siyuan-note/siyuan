@@ -382,7 +382,7 @@ export const globalShortcut = () => {
                     let rootId = "";
                     if (item.model instanceof Editor) {
                         rootId = ` data-node-id="${item.model.editor.protyle.block.rootID}"`;
-                        icon = `<span class="b3-list-item__graphic">${unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE)}</span>`;
+                        icon = unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true);
                     }
                     tabHtml += `<li data-id="${item.id}"${rootId} class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${escapeHtml(item.title)}</span></li>`;
                 });

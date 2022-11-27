@@ -129,7 +129,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         <span class="fn__space"></span>
         <button id="searchSyntaxCheck" class="b3-button b3-button--small${config.querySyntax ? "" : " b3-button--cancel"}">${window.siyuan.languages.querySyntax}</button>
     </div>
-    <div id="searchList" style="position:relative;height:calc(50% - 69px);overflow: auto;padding-bottom: 8px" class="b3-list b3-list--background search__list"></div>
+    <div id="searchList" class="search__list b3-list b3-list--background search__list"></div>
     <div id="searchPreview" class="fn__flex-1 search__preview"></div>
 </div>
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`
@@ -284,7 +284,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 break;
             } else if (target.classList.contains("b3-list-item__toggle")) {
                 target.parentElement.nextElementSibling.classList.toggle("fn__none");
-                target.firstElementChild.classList.toggle("b3-list-item__arrow");
+                target.firstElementChild.classList.toggle("b3-list-item__arrow--open");
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -338,6 +338,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         });
                     }
                     window.siyuan.menus.menu.remove();
+                } else if (target.querySelector(".b3-list-item__toggle")) {
+                    target.nextElementSibling.classList.toggle("fn__none");
+                    target.firstElementChild.firstElementChild.classList.toggle("b3-list-item__arrow--open");
                 }
                 event.stopPropagation();
                 event.preventDefault();
@@ -617,10 +620,11 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element) => {
 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
-<span class="b3-list-item__text ft__on-surface">${unicode2Emoji(getNotebookIcon(item.box) || Constants.SIYUAN_IMAGE_NOTE)}${escapeHtml(getNotebookName(item.box))}/${unicode2Emoji(item.ial.icon)}${item.ial.icon ? "&nbsp;" : ""}${item.content}</span>
+${unicode2Emoji(getNotebookIcon(item.box) || Constants.SIYUAN_IMAGE_NOTE, false, "b3-list-item__graphic")}
+<span class="b3-list-item__text">${escapeHtml(getNotebookName(item.box))}${item.hPath}</span>
 </div><div>`;
             item.children.forEach((childItem, childIndex) => {
-                resultHTML += `<div style="padding-left: 22px" data-type="search-item" class="b3-list-item${childIndex === 0 ? " b3-list-item--focus" : ""}" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}">
+                resultHTML += `<div style="padding-left: 22px" data-type="search-item" class="b3-list-item${childIndex === 0 && index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(childItem.type)}"></use></svg>
 <span class="b3-list-item__text">${unicode2Emoji(childItem.ial.icon)}${childItem.ial.icon ? "&nbsp;" : ""}${childItem.content}</span>
 </div>`;

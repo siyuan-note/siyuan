@@ -280,6 +280,13 @@ export const globalShortcut = () => {
                     } else {
                         currentLiElement.parentElement.parentElement.nextElementSibling.innerHTML = currentLiElement.querySelector(".b3-list-item__text").innerHTML;
                     }
+                    const currentRect = currentLiElement.getBoundingClientRect();
+                    const currentParentRect = currentLiElement.parentElement.getBoundingClientRect();
+                    if (currentRect.top < currentParentRect.top) {
+                        currentLiElement.scrollIntoView(true);
+                    } else if (currentRect.bottom > currentParentRect.bottom) {
+                        currentLiElement.scrollIntoView(false);
+                    }
                 }
                 const originalElement = switchDialog.element.querySelector('[data-original="true"]');
                 if (originalElement) {
@@ -407,8 +414,8 @@ export const globalShortcut = () => {
                 content: `<div class="fn__flex-column b3-dialog--switch">
     <div class="fn__hr"></div>
     <div class="fn__flex">
-        <ul class="b3-list b3-list--background">${dockHtml}</ul>
-        <ul class="b3-list b3-list--background">${tabHtml}</ul>
+        <ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">${dockHtml}</ul>
+        <ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">${tabHtml}</ul>
     </div>
     <div class="dialog__path"></div>
 </div>`,

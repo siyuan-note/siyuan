@@ -10,9 +10,9 @@ import {openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
 import {MenuItem} from "../menus/Menu";
-import {getDisplayName, getNotebookName, movePathTo} from "../util/pathName";
+import {getDisplayName, getNotebookName, movePathTo, pathPosix} from "../util/pathName";
 import {Protyle} from "../protyle";
-import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import {onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
@@ -38,6 +38,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
         icon: "iconSearch",
         title: text,
         callback(tab) {
+            // ctrl+p 仅保存 types, querySyntax, 搜索/替换历史和文本
             const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEDATA) || "{}");
             if (!localData.types) {
                 localData.types = {
@@ -62,7 +63,6 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
                     hasReplace: false,
                     querySyntax: localData.querySyntax || false,
                     hPath: "",
-                    notebookId: "",
                     idPath: "",
                     types: localData.types
                 }
@@ -120,7 +120,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         <span class="fn__flex-1"></span>
         <span id="searchPathInput" class="ft__on-surface fn__flex-center ft__smaller fn__ellipsis" style="white-space: nowrap;" title="${config.hPath}">${config.hPath}</span>
         <span class="fn__space"></span>
-        <button id="includeChildCheck" class="b3-button b3-button--small${(config.notebookId && config.idPath && !config.idPath.endsWith(".sy")) ? "" : " b3-button--cancel"}">${window.siyuan.languages.includeChildDoc}</button>
+        <button id="includeChildCheck" class="b3-button b3-button--small${(config.idPath && config.idPath.endsWith(".sy")) ? " b3-button--cancel" : ""}">${window.siyuan.languages.includeChildDoc}</button>
         <span class="fn__space"></span>
         <button id="searchSyntaxCheck" class="b3-button b3-button--small${config.querySyntax ? "" : " b3-button--cancel"}">${window.siyuan.languages.querySyntax}</button>
     </div>
@@ -153,18 +153,26 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         let target = event.target as HTMLElement
         while (target && !target.isSameNode(element)) {
             if (target.id === "searchPath") {
-                movePathTo([], undefined, (toPath) => {
-                    config.idPath = toPath;
-                    fetchPost("/api/filetree/getHPathsByPaths", {paths: [toPath]}, (response) => {
-                        config.hPath = escapeHtml(response.data.join(", "));
-                        element.querySelector("#searchPathInput").innerHTML = escapeHtml(response.data.join(", "));
-                    });
-                    inputTimeout = inputEvent(element, config, inputTimeout, edit);
-                });
+                movePathTo([], undefined, (toPath, toNotebook) => {
+                    if (toPath === "/") {
+                        config.idPath = toNotebook;
+                        config.hPath = escapeHtml(getNotebookName(toNotebook));
+                        element.querySelector("#searchPathInput").innerHTML = config.hPath;
+                        inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                    } else {
+                        config.idPath = pathPosix().join(toNotebook, toPath);
+                        fetchPost("/api/filetree/getHPathsByPaths", {paths: [toPath]}, (response) => {
+                            config.hPath = escapeHtml(response.data ? response.data[0] : "");
+                            element.querySelector("#searchPathInput").innerHTML = config.hPath;
+                            inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                        });
+                    }
+                }, window.siyuan.languages.specifyPath);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "searchReplace") {
+                config.hasReplace = !config.hasReplace;
                 element.querySelector("#replaceHistoryBtn").parentElement.classList.toggle("fn__none");
                 event.stopPropagation();
                 event.preventDefault();
@@ -195,23 +203,17 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 target.classList.toggle("b3-button--cancel");
                 let reload = false;
                 if (target.classList.contains("b3-button--cancel")) {
-                    if (!config.idPath.endsWith(".sy")) {
+                    if (!config.idPath.endsWith(".sy") && config.idPath.split("/").length > 1) {
                         config.idPath = config.idPath + ".sy";
                         reload = true;
                     }
                 } else {
-                    if (config.hPath) {
-                        reload = true;
-                    }
                     if (config.idPath.endsWith(".sy")) {
                         config.idPath = config.idPath.replace(".sy", "");
                         reload = true;
                     }
                 }
                 if (reload) {
-                    if (closeCB) {
-                        localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-                    }
                     inputTimeout = inputEvent(element, config, inputTimeout, edit);
                 }
                 event.stopPropagation();
@@ -474,7 +476,6 @@ const getArticle = (options: {
     k: string,
     edit: Protyle
 }) => {
-    console.log(options.edit);
     fetchPost("/api/block/checkBlockFold", {id: options.id}, (foldResponse) => {
         options.edit.protyle.scroll.lastScrollTop = 0;
         addLoading(options.edit.protyle);
@@ -590,7 +591,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 query: inputValue,
                 querySyntax: config.querySyntax,
                 types: config.types,
-                path: config.hPath ? config.idPath : ""
+                path: config.idPath || ""
             }, (response) => {
                 onSearch(response.data.blocks, edit, element);
                 element.querySelector("#searchResult").innerHTML = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);

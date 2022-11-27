@@ -52,7 +52,6 @@ interface ISearchOption {
     hasReplace: boolean,
     querySyntax: boolean,
     hPath: string
-    notebookId: string
     idPath: string
     k: string
     r: string

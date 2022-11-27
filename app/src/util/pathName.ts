@@ -85,7 +85,7 @@ const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string) => 
     });
 };
 
-export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath:string) => void) => {
+export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath: string, toNotebook:string) => void, title?: string) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#foldList")) {
             item.destroy();
@@ -96,7 +96,7 @@ export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath:string)
         return;
     }
     const dialog = new Dialog({
-        title: `${window.siyuan.languages.move} <span class="ft__smaller ft__on-surface"></span>`,
+        title: `${title || window.siyuan.languages.move} <span class="ft__smaller ft__on-surface"></span>`,
         content: `<div>
     <div class="b3-form__icon" style="margin: 8px">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
@@ -309,7 +309,7 @@ export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath:string)
         }
         if (event.key === "Enter") {
             if (cb) {
-                cb(currentItemElement.getAttribute("data-path"));
+                cb(currentItemElement.getAttribute("data-path"), currentItemElement.getAttribute("data-box"));
             } else {
                 moveToPath(paths, currentItemElement.getAttribute("data-box"), currentItemElement.getAttribute("data-path"));
             }
@@ -332,7 +332,7 @@ export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath:string)
                     return;
                 }
                 if (cb) {
-                    cb(currentItemElement.getAttribute("data-path"));
+                    cb(currentItemElement.getAttribute("data-path"), currentItemElement.getAttribute("data-box"));
                 } else {
                     moveToPath(paths, currentItemElement.getAttribute("data-box"), currentItemElement.getAttribute("data-path"));
                 }

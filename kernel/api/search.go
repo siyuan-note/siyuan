@@ -52,7 +52,7 @@ func findReplace(c *gin.Context) {
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 3000}
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
 	}
 	return

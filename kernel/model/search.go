@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"errors"
 	"path"
 	"regexp"
 	"strconv"
@@ -169,7 +170,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, ne
 func FindReplace(keyword, replacement string, ids []string, method int) (err error) {
 	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
 	if 1 == method || 2 == method {
-		util.PushMsg(Conf.Language(132), 5000)
+		err = errors.New(Conf.Language(132))
 		return
 	}
 

@@ -94,7 +94,7 @@ export const setPadding = (protyle: IProtyle) => {
         if (!window.siyuan.config.editor.fullWidth && padding > 96) {
             if (padding > Constants.SIZE_EDITOR_WIDTH) {
                 // 超宽屏调整 https://ld246.com/article/1668266637363
-                padding = protyle.element.clientWidth / 3;
+                padding = protyle.element.clientWidth * .382 / 1.382;
             }
             min16 = padding;
             min24 = padding;

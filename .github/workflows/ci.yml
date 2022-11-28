@@ -128,7 +128,6 @@ jobs:
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/kernel
       env:
         GO111MODULE: on
-        GOPROXY: https://goproxy.io
         CGO_ENABLED: 1
         GOOS: ${{ matrix.config.goos }}
         GOPATH: ${{ github.workspace }}/go
@@ -186,7 +185,6 @@ jobs:
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/kernel
       env:
         GO111MODULE: on
-        GOPROXY: https://goproxy.io
         CGO_ENABLED: 1
         GOOS: ${{ matrix.config.goos }}
         GOPATH: ${{ github.workspace }}/go

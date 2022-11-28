@@ -207,17 +207,17 @@ func fullTextSearchBlock(c *gin.Context) {
 			types[t] = b.(bool)
 		}
 	}
-	querySyntaxArg := arg["querySyntax"]
-	var querySyntax bool
-	if nil != querySyntaxArg {
-		querySyntax = querySyntaxArg.(bool)
+	methodArg := arg["method"]
+	var method int // 0：文本，1：查询语法，2：SQL，3：正则表达式
+	if nil != methodArg {
+		method = int(methodArg.(float64))
 	}
 	groupByArg := arg["groupBy"]
 	var groupBy int // 0：不分组，1：按文档分组
 	if nil != groupByArg {
 		groupBy = int(groupByArg.(float64))
 	}
-	blocks, matchedBlockCount, matchedRootCount := model.FullTextSearchBlock(query, box, path, types, querySyntax, groupBy)
+	blocks, matchedBlockCount, matchedRootCount := model.FullTextSearchBlock(query, box, path, types, method, groupBy)
 	ret.Data = map[string]interface{}{
 		"blocks":            blocks,
 		"matchedBlockCount": matchedBlockCount,

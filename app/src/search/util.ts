@@ -77,6 +77,14 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
 };
 
 export const genSearch = (config: ISearchOption, element: Element, closeCB?: () => void) => {
+    let methodText = window.siyuan.languages.text;
+    if (config.method === 1) {
+        methodText = window.siyuan.languages.querySyntax
+    }else if (config.method === 2) {
+        methodText = "SQL"
+    }else if (config.method === 3) {
+        methodText = window.siyuan.languages.regex
+    }
     element.innerHTML = `<div class="fn__flex-column" style="height: 100%;${closeCB ? "border-radius: 4px;overflow: hidden;" : ""}">
     <div class="b3-form__icon search__header">
         <span class="fn__a" id="searchHistoryBtn">
@@ -90,7 +98,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 <svg><use xlink:href="#iconEdit"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchSyntaxCheck" aria-label="${window.siyuan.languages.searchMethod}" class="block__icon b3-tooltips b3-tooltips__w">
+            <span id="searchSyntaxCheck" aria-label="${window.siyuan.languages.searchMethod} ${methodText}" class="block__icon b3-tooltips b3-tooltips__w">
                 <svg><use xlink:href="#iconRegex"></use></svg>
             </span>
             <span class="fn__space"></span>
@@ -132,11 +140,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconClose"></use></svg>
         </span>
         <span class="fn__space"></span>
-        <div class="block__icons">
-            <span id="searchPath" aria-label="${window.siyuan.languages.specifyPath}" class="block__icon b3-tooltips b3-tooltips__w">
-                <svg><use xlink:href="#iconFolder"></use></svg>
-            </span>
-        </div>
+        <span id="searchPath" style="opacity: 1;padding: 3px 4px;" aria-label="${window.siyuan.languages.specifyPath}" class="block__icon b3-tooltips b3-tooltips__w">
+            <svg><use xlink:href="#iconFolder"></use></svg>
+        </span>
     </div>
     <div id="searchList" class="search__list b3-list b3-list--background search__list"></div>
     <div id="searchPreview" class="fn__flex-1 search__preview"></div>
@@ -518,11 +524,13 @@ const addConfigMenu = (config: ISearchOption, lang: string, key: "mathBlock" | "
 };
 
 const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
+    const searchSyntaxCheckElement = element.querySelector("#searchSyntaxCheck")
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.text,
         current: config.method === 0,
         click() {
             config.method = 0;
+            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod} ${window.siyuan.languages.text}`);
             inputEvent(element, config, undefined, edit);
         }
     }).element);
@@ -531,6 +539,7 @@ const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) =>
         current: config.method === 1,
         click() {
             config.method = 1;
+            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod} ${window.siyuan.languages.querySyntax}`);
             inputEvent(element, config, undefined, edit);
         }
     }).element);
@@ -539,6 +548,7 @@ const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) =>
         current: config.method === 2,
         click() {
             config.method = 2;
+            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod} SQL`);
             inputEvent(element, config, undefined, edit);
         }
     }).element);
@@ -547,6 +557,7 @@ const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) =>
         current: config.method === 3,
         click() {
             config.method = 3;
+            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod} ${window.siyuan.languages.regex}`);
             inputEvent(element, config, undefined, edit);
         }
     }).element);

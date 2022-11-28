@@ -1,3 +1,56 @@
+## v2.5.2 / 2022-11-28
+
+### 改进功能
+
+* [搜索支持按文档分组展现搜索结果](https://github.com/siyuan-note/siyuan/issues/4772)
+* [搜索页签支持过滤条件](https://github.com/siyuan-note/siyuan/issues/6639)
+* [搜索 `指定路径` 支持按文档树选择](https://github.com/siyuan-note/siyuan/issues/6640)
+* [块 `移动` 框支持可按文档树选择](https://github.com/siyuan-note/siyuan/issues/6641)
+* [拖拽移动块支持 `重复`](https://github.com/siyuan-note/siyuan/issues/6665)
+* [光标位于列表项末尾的行内公式后时回车表现异常](https://github.com/siyuan-note/siyuan/issues/6679)
+* [设置代理切换时不再需要重启](https://github.com/siyuan-note/siyuan/issues/6680)
+* [桌面端系统休眠唤醒后判断网络连通性后再执行数据同步](https://github.com/siyuan-note/siyuan/issues/6687)
+* [导入 Markdown 时支持图片路径包含空格](https://github.com/siyuan-note/siyuan/issues/6688)
+* [支持快捷键切换只读模式 `Ctrl+Shift+G`/`⇧⌘G`](https://github.com/siyuan-note/siyuan/issues/6693)
+* [`虚拟引用关键字排除列表` 支持正则表达式](https://github.com/siyuan-note/siyuan/issues/6696)
+* [改进 S3/WebDAV 同步设置时参数校验](https://github.com/siyuan-note/siyuan/issues/6705)
+* [GA 统计不发送浏览数据](https://github.com/siyuan-note/siyuan/issues/6707)
+* [插入资源文件时去除 `[`、`(` 等符号](https://github.com/siyuan-note/siyuan/issues/6708)
+* [Android 端只读模式下长按支持复制](https://github.com/siyuan-note/siyuan/issues/6709)
+* [API `/api/block/*` 支持插入或更新带有块级 IAL 的空段落块](https://github.com/siyuan-note/siyuan/issues/6713)
+* [改进某些网络环境下无法启动](https://github.com/siyuan-note/siyuan/issues/6716)
+* [启动时不再缓存笔记本根一级文档树](https://github.com/siyuan-note/siyuan/issues/6717)
+* [改进文档树展开性能](https://github.com/siyuan-note/siyuan/issues/6718)
+* [折叠列表项转换为文档时自动展开子块](https://github.com/siyuan-note/siyuan/issues/6719)
+* [改进反链面板加载性能](https://github.com/siyuan-note/siyuan/issues/6724)
+* [全局搜索和搜索页签统一界面呈现](https://github.com/siyuan-note/siyuan/issues/6726)
+* [快捷键切换页签时为初始化的文档无图标](https://github.com/siyuan-note/siyuan/issues/6728)
+* [页签过多时页签切换界面优化](https://github.com/siyuan-note/siyuan/issues/6730)
+* [改进搜索方式选项](https://github.com/siyuan-note/siyuan/issues/6731)
+* [当前块被选中后右键优化为弹出块菜单](https://github.com/siyuan-note/siyuan/issues/6733)
+* [带鱼屏边距比例调整](https://github.com/siyuan-note/siyuan/issues/6734)
+* [改进图标最右侧区域点击范围](https://github.com/siyuan-note/siyuan/issues/6735)
+
+### 开发重构
+
+* [升级 highlight.js 至 11.7 并添加 panda-syntax-light 主题](https://github.com/siyuan-note/siyuan/issues/6692)
+
+### 修复缺陷
+
+* [文档标题以空格结尾时导出 HTML 报错](https://github.com/siyuan-note/siyuan/issues/6686)
+* [超级块下方块被作为嵌入块时设置显示面包屑后不渲染](https://github.com/siyuan-note/siyuan/issues/6690)
+* [S3/WebDAV 数据同步无法使用代理](https://github.com/siyuan-note/siyuan/issues/6695)
+* [收集箱渲染自定义协议超链接问题](https://github.com/siyuan-note/siyuan/issues/6698)
+* [从其他软件复制图片后无法解析粘贴](https://github.com/siyuan-note/siyuan/issues/6703)
+* [只读模式块标复制内容错误](https://github.com/siyuan-note/siyuan/issues/6704)
+* [在空的代码块中使用快捷键 `Ctrl + A` 选择并删除后出现异常](https://github.com/siyuan-note/siyuan/issues/6706)
+* [数据库 `markdown` 字段与 API `getBlockKramdown` 中行级元素 IAL 前存在零宽空格](https://github.com/siyuan-note/siyuan/issues/6712)
+* [使用 API 插入行级元素嵌套 HTML 实体时丢失实体内容](https://github.com/siyuan-note/siyuan/issues/6714)
+* [快捷键新建行内元素粘贴后行内元素消失](https://github.com/siyuan-note/siyuan/issues/6720)
+* [查找替换中使用正则表达式后替换不正确](https://github.com/siyuan-note/siyuan/issues/6722)
+* [使用 API `/api/block/updateBlock` 更新时 IAL 设置错误](https://github.com/siyuan-note/siyuan/issues/6725)
+* [Ctrl+Tab 后 Ctrl+Shift+Tab 后切换页签错误](https://github.com/siyuan-note/siyuan/issues/6729)
+
 ## v2.5.1 / 2022-11-22
 
 ### 改进功能

@@ -543,6 +543,7 @@ func fullTextSearch(query, box, path, typeFilter string, beforeLen int, querySyn
 
 func fullTextSearchByRegexp(exp, box, path, typeFilter string, beforeLen int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	exp = gulu.Str.RemoveInvisible(exp)
+	exp = regexp.QuoteMeta(exp)
 
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT * FROM `blocks` WHERE (" + fieldFilter + ") AND type IN " + typeFilter

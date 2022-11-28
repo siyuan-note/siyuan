@@ -960,7 +960,7 @@
     "129": "Cloud data has been corrupted, please refer to <a href=\"https://ld246.com/article/1658499492287\" target=\"_blank\">here</a> to resolve the issue",
     "130": "Starting new version installer...",
     "131": "This operation is not supported, please go to the cloud storage provider management console to operate",
-    "132": "TODO",
+    "132": "The current search method does not support the replace operation, please use the [Text] or [Regex] search method",
     "133": "TODO",
     "134": "In order to prevent the newly restored data from being overwritten by synchronization, the data synchronization function has been automatically suspended",
     "135": "Unable to decrypt data. Make sure to use the same key on multiple devices, then create a new cloud directory to sync",

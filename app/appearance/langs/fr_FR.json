@@ -960,7 +960,7 @@
     "129": "Les données cloud ont été corrompues, veuillez vous référer à <a href=\"https://ld246.com/article/1658499492287\" target=\"_blank\">ici</a> pour résoudre le problème",
     "130": "Démarrage du programme d'installation de la nouvelle version...",
     "131": "Cette opération n'est pas prise en charge, veuillez vous rendre sur la console de gestion du fournisseur de stockage cloud pour opérer",
-    "132": "TODO",
+    "132": "La méthode de recherche actuelle ne prend pas en charge l'opération de remplacement, veuillez utiliser la méthode de recherche [Texte] ou [Regex]",
     "133": "TODO",
     "134": "Afin d'éviter que les données nouvellement restaurées ne soient écrasées par la synchronisation, la fonction de synchronisation des données a été automatiquement suspendue",
     "135": "Impossible de déchiffrer les données. Assurez-vous d'utiliser la même clé sur plusieurs appareils, puis créez un nouveau répertoire cloud à synchroniser",

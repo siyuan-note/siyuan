@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -165,8 +166,13 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, ne
 	return
 }
 
-func FindReplace(keyword, replacement string, ids []string) (err error) {
-	keyword = strings.Trim(keyword, "\"") // FTS 字符串需要去除双引号
+func FindReplace(keyword, replacement string, ids []string, method int) (err error) {
+	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
+	if 1 == method || 2 == method {
+		util.PushMsg(Conf.Language(132), 5000)
+		return
+	}
+
 	if keyword == replacement {
 		return
 	}
@@ -194,40 +200,90 @@ func FindReplace(keyword, replacement string, ids []string) (err error) {
 			switch n.Type {
 			case ast.NodeDocument:
 				title := n.IALAttr("title")
-				if strings.Contains(title, keyword) {
-					renameRootTitles[n.ID] = strings.ReplaceAll(title, keyword, replacement)
-					renameRoots = append(renameRoots, n)
+				if 0 == method {
+					if strings.Contains(title, keyword) {
+						renameRootTitles[n.ID] = strings.ReplaceAll(title, keyword, replacement)
+						renameRoots = append(renameRoots, n)
+					}
+				} else if 3 == method {
+					r, _ := regexp.Compile(keyword)
+					if nil != r && r.MatchString(title) {
+						renameRootTitles[n.ID] = r.ReplaceAllString(title, replacement)
+						renameRoots = append(renameRoots, n)
+					}
 				}
 			case ast.NodeText, ast.NodeLinkDest, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeCodeSpanContent, ast.NodeCodeBlockCode, ast.NodeInlineMathContent, ast.NodeMathBlockContent:
-				if bytes.Contains(n.Tokens, []byte(keyword)) {
-					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))
+				if 0 == method {
+					if bytes.Contains(n.Tokens, []byte(keyword)) {
+						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))
+					}
+				} else if 3 == method {
+					r, _ := regexp.Compile(keyword)
+					if nil != r && r.MatchString(string(n.Tokens)) {
+						n.Tokens = []byte(r.ReplaceAllString(string(n.Tokens), replacement))
+					}
 				}
 			case ast.NodeTextMark:
 				if n.IsTextMarkType("code") {
 					escapedKey := html.EscapeString(keyword)
-					if strings.Contains(n.TextMarkTextContent, escapedKey) {
-						n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, replacement)
+					if 0 == method {
+						if strings.Contains(n.TextMarkTextContent, escapedKey) {
+							n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, replacement)
+						}
+					} else if 3 == method {
+						r, _ := regexp.Compile(escapedKey)
+						if nil != r && r.MatchString(n.TextMarkTextContent) {
+							n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
+						}
 					}
 				} else {
-					if bytes.Contains(n.Tokens, []byte(keyword)) {
-						n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+					if 0 == method {
+						if bytes.Contains(n.Tokens, []byte(keyword)) {
+							n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+						}
+					} else if 3 == method {
+						r, _ := regexp.Compile(keyword)
+						if nil != r && r.MatchString(n.TextMarkTextContent) {
+							n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
+						}
 					}
 				}
 
-				if strings.Contains(n.TextMarkTextContent, keyword) {
-					n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
-				}
-				if strings.Contains(n.TextMarkInlineMathContent, keyword) {
-					n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, keyword, replacement)
-				}
-				if strings.Contains(n.TextMarkInlineMemoContent, keyword) {
-					n.TextMarkInlineMemoContent = strings.ReplaceAll(n.TextMarkInlineMemoContent, keyword, replacement)
-				}
-				if strings.Contains(n.TextMarkATitle, keyword) {
-					n.TextMarkATitle = strings.ReplaceAll(n.TextMarkATitle, keyword, replacement)
-				}
-				if strings.Contains(n.TextMarkAHref, keyword) {
-					n.TextMarkAHref = strings.ReplaceAll(n.TextMarkAHref, keyword, replacement)
+				if 0 == method {
+					if strings.Contains(n.TextMarkTextContent, keyword) {
+						n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+					}
+					if strings.Contains(n.TextMarkInlineMathContent, keyword) {
+						n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, keyword, replacement)
+					}
+					if strings.Contains(n.TextMarkInlineMemoContent, keyword) {
+						n.TextMarkInlineMemoContent = strings.ReplaceAll(n.TextMarkInlineMemoContent, keyword, replacement)
+					}
+					if strings.Contains(n.TextMarkATitle, keyword) {
+						n.TextMarkATitle = strings.ReplaceAll(n.TextMarkATitle, keyword, replacement)
+					}
+					if strings.Contains(n.TextMarkAHref, keyword) {
+						n.TextMarkAHref = strings.ReplaceAll(n.TextMarkAHref, keyword, replacement)
+					}
+				} else if 3 == method {
+					r, _ := regexp.Compile(keyword)
+					if nil != r {
+						if r.MatchString(n.TextMarkTextContent) {
+							n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
+						}
+						if r.MatchString(n.TextMarkInlineMathContent) {
+							n.TextMarkInlineMathContent = r.ReplaceAllString(n.TextMarkInlineMathContent, replacement)
+						}
+						if r.MatchString(n.TextMarkInlineMemoContent) {
+							n.TextMarkInlineMemoContent = r.ReplaceAllString(n.TextMarkInlineMemoContent, replacement)
+						}
+						if r.MatchString(n.TextMarkATitle) {
+							n.TextMarkATitle = r.ReplaceAllString(n.TextMarkATitle, replacement)
+						}
+						if r.MatchString(n.TextMarkAHref) {
+							n.TextMarkAHref = r.ReplaceAllString(n.TextMarkAHref, replacement)
+						}
+					}
 				}
 			}
 			return ast.WalkContinue

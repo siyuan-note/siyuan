@@ -545,7 +545,7 @@ func fullTextSearchByRegexp(exp, box, path, typeFilter string, beforeLen int) (r
 	exp = gulu.Str.RemoveInvisible(exp)
 
 	fieldFilter := fieldRegexp(exp)
-	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
+	stmt := "SELECT * FROM `blocks` WHERE (" + fieldFilter + ") AND type IN " + typeFilter
 	if "" != box {
 		stmt += " AND box = '" + box + "'"
 	}
@@ -767,30 +767,30 @@ func fieldRegexp(regexp string) string {
 	buf := bytes.Buffer{}
 	buf.WriteString("content REGEXP '")
 	buf.WriteString(regexp)
-	buf.WriteString("' ")
+	buf.WriteString("'")
 	if Conf.Search.Name {
 		buf.WriteString(" OR name REGEXP '")
 		buf.WriteString(regexp)
-		buf.WriteString("' ")
+		buf.WriteString("'")
 	}
 	if Conf.Search.Alias {
 		buf.WriteString(" OR alias REGEXP '")
 		buf.WriteString(regexp)
-		buf.WriteString("' ")
+		buf.WriteString("'")
 	}
 	if Conf.Search.Memo {
 		buf.WriteString(" OR memo REGEXP '")
 		buf.WriteString(regexp)
-		buf.WriteString("' ")
+		buf.WriteString("'")
 	}
 	if Conf.Search.Custom {
 		buf.WriteString(" OR ial REGEXP '")
 		buf.WriteString(regexp)
-		buf.WriteString("' ")
+		buf.WriteString("'")
 	}
 	buf.WriteString(" OR tag REGEXP '")
 	buf.WriteString(regexp)
-	buf.WriteString("' ")
+	buf.WriteString("'")
 	return buf.String()
 }
 

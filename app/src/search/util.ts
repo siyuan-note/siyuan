@@ -634,6 +634,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
         r: replaceInputElement.value,
         ids,
         types: config.types,
+        method: config.method,
     }, (response) => {
         loadElement.classList.add("fn__none");
         if (response.code === 1) {

@@ -563,16 +563,16 @@ func fullTextSearchByRegexp(exp, box, path, typeFilter string, beforeLen int) (r
 	return
 }
 
-func fullTextSearchCountByRegexp(exp, box, path, filter string) (matchedBlockCount, matchedRootCount int) {
+func fullTextSearchCountByRegexp(exp, box, path, typeFilter string) (matchedBlockCount, matchedRootCount int) {
 	fieldFilter := fieldRegexp(exp)
-	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE " + fieldFilter + " AND type IN " + filter
+	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
 	if "" != box {
 		stmt += " AND box = '" + box + "'"
 	}
 	if "" != path {
 		stmt += " AND path LIKE '" + path + "%'"
 	}
-	stmt += " ORDER BY sort ASC LIMIT " + strconv.Itoa(Conf.Search.Limit)
+	stmt += " LIMIT " + strconv.Itoa(Conf.Search.Limit)
 	result, _ := sql.Query(stmt)
 	if 1 > len(result) {
 		return

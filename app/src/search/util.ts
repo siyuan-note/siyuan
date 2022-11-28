@@ -79,11 +79,11 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
 export const genSearch = (config: ISearchOption, element: Element, closeCB?: () => void) => {
     let methodText = window.siyuan.languages.keyword;
     if (config.method === 1) {
-        methodText = window.siyuan.languages.querySyntax
+        methodText = window.siyuan.languages.querySyntax;
     } else if (config.method === 2) {
-        methodText = "SQL"
+        methodText = "SQL";
     } else if (config.method === 3) {
-        methodText = window.siyuan.languages.regex
+        methodText = window.siyuan.languages.regex;
     }
     element.innerHTML = `<div class="fn__flex-column" style="height: 100%;${closeCB ? "border-radius: 4px;overflow: hidden;" : ""}">
     <div class="b3-form__icon search__header">
@@ -524,7 +524,7 @@ const addConfigMenu = (config: ISearchOption, lang: string, key: "mathBlock" | "
 };
 
 const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
-    const searchSyntaxCheckElement = element.querySelector("#searchSyntaxCheck")
+    const searchSyntaxCheckElement = element.querySelector("#searchSyntaxCheck");
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.keyword,
         current: config.method === 0,

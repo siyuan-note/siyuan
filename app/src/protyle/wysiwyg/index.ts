@@ -1180,7 +1180,7 @@ export class WYSIWYG {
             if (!nodeElement) {
                 return false;
             }
-            if (!isNotEditBlock(nodeElement) &&
+            if (!isNotEditBlock(nodeElement) && !nodeElement.classList.contains("protyle-wysiwyg--select") &&
                 (isMobile() || event.detail.target || (beforeContextmenuRange && nodeElement.contains(beforeContextmenuRange.startContainer)))
             ) {
                 if (!isMobile() || protyle.toolbar?.element.classList.contains("fn__none")) {

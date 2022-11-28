@@ -36,7 +36,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
     }
     const tab = new Tab({
         icon: "iconSearch",
-        title: "",
+        title: window.siyuan.languages.search,
         callback(tab) {
             const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEDATA) || "{}");
             if (!localData.types) {
@@ -217,7 +217,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 }
                 const tab = new Tab({
                     icon: "iconSearch",
-                    title: "",
+                    title: window.siyuan.languages.search,
                     callback(tab) {
                         const asset = new Search({
                             tab,

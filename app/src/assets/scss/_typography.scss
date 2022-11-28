@@ -316,7 +316,7 @@
   [data-subtype="mindmap"] {
     z-index: 1;
 
-    & > div {
+    & > div:not(.protyle-icons):not(.protyle-attr) {
       overflow: hidden;
       height: 420px;
     }

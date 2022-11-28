@@ -1,4 +1,5 @@
 {
+  "keyword": "Palabra clave",
   "searchMethod": "método de búsqueda",
   "regex": "Regex",
   "groupBy": "Agrupar por",
@@ -960,7 +961,7 @@
     "129": "Los datos de la nube se han dañado, consulte <a href=\"https://ld246.com/article/1658499492287\" target=\"_blank\">aquí</a> para resolver el problema",
     "130": "Iniciando instalador de nueva versión...",
     "131": "Esta solicitud no es compatible, vaya a la consola de administración del proveedor de almacenamiento en la nube para operar",
-    "132": "El método de búsqueda actual no admite la operación de reemplazo, utilice el método de búsqueda [Texto] o [Regex]",
+    "132": "El método de búsqueda actual no admite la operación de reemplazo, utilice el método de búsqueda [Palabra clave] o [Regex]",
     "133": "TODO",
     "134": "Para evitar que los datos recién restaurados sean sobrescritos por la sincronización, se ha suspendido automáticamente la función de sincronización de datos",
     "135": "No se pueden descifrar los datos. Asegúrese de usar la misma clave en varios dispositivos, luego cree un nuevo directorio en la nube para sincronizar",

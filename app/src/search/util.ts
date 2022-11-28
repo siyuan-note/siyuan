@@ -77,7 +77,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
 };
 
 export const genSearch = (config: ISearchOption, element: Element, closeCB?: () => void) => {
-    let methodText = window.siyuan.languages.text;
+    let methodText = window.siyuan.languages.keyword;
     if (config.method === 1) {
         methodText = window.siyuan.languages.querySyntax
     }else if (config.method === 2) {
@@ -526,11 +526,11 @@ const addConfigMenu = (config: ISearchOption, lang: string, key: "mathBlock" | "
 const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
     const searchSyntaxCheckElement = element.querySelector("#searchSyntaxCheck")
     window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.text,
+        label: window.siyuan.languages.keyword,
         current: config.method === 0,
         click() {
             config.method = 0;
-            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod} ${window.siyuan.languages.text}`);
+            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod} ${window.siyuan.languages.keyword}`);
             inputEvent(element, config, undefined, edit);
         }
     }).element);

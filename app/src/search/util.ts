@@ -80,9 +80,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     let methodText = window.siyuan.languages.keyword;
     if (config.method === 1) {
         methodText = window.siyuan.languages.querySyntax
-    }else if (config.method === 2) {
+    } else if (config.method === 2) {
         methodText = "SQL"
-    }else if (config.method === 3) {
+    } else if (config.method === 3) {
         methodText = window.siyuan.languages.regex
     }
     element.innerHTML = `<div class="fn__flex-column" style="height: 100%;${closeCB ? "border-radius: 4px;overflow: hidden;" : ""}">
@@ -595,6 +595,10 @@ const getArticle = (options: {
 };
 
 const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: boolean) => {
+    if (config.method === 1 || config.method === 2) {
+        showMessage(window.siyuan.languages._kernel[132]);
+        return;
+    }
     const searchPanelElement = element.querySelector("#searchList");
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
 
@@ -621,7 +625,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
     let ids: string[] = [];
     let rootIds: string[] = [];
     if (isAll) {
-        searchPanelElement.querySelectorAll(".b3-list-item").forEach(item => {
+        searchPanelElement.querySelectorAll('.b3-list-item[data-type="search-item"]').forEach(item => {
             ids.push(item.getAttribute("data-node-id"));
             rootIds.push(item.getAttribute("data-root-id"));
         });
@@ -630,7 +634,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
         rootIds = [currentList.getAttribute("data-root-id")];
     }
     fetchPost("/api/search/findReplace", {
-        k: getKey(currentList),
+        k: config.method === 0 ? getKey(currentList) : (element.querySelector("#searchInput") as HTMLInputElement).value,
         r: replaceInputElement.value,
         ids,
         types: config.types,
@@ -721,7 +725,7 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element) => {
 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
-${unicode2Emoji(getNotebookIcon(item.box) || Constants.SIYUAN_IMAGE_NOTE, false, "b3-list-item__graphic")}
+${unicode2Emoji(getNotebookIcon(item.box) || Constants.SIYUAN_IMAGE_NOTE, false, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${escapeHtml(getNotebookName(item.box))}${item.hPath}</span>
 </div><div>`;
             item.children.forEach((childItem, childIndex) => {

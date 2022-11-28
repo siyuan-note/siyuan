@@ -98,7 +98,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 <svg><use xlink:href="#iconEdit"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchSyntaxCheck" aria-label="${window.siyuan.languages.searchMethod} ${methodText}" class="block__icon b3-tooltips b3-tooltips__w">
+            <span id="searchSyntaxCheck" aria-label="${window.siyuan.languages.searchMethod}: ${methodText}" class="block__icon b3-tooltips b3-tooltips__w">
                 <svg><use xlink:href="#iconRegex"></use></svg>
             </span>
             <span class="fn__space"></span>
@@ -530,7 +530,7 @@ const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) =>
         current: config.method === 0,
         click() {
             config.method = 0;
-            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod} ${window.siyuan.languages.text}`);
+            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod}: ${window.siyuan.languages.text}`);
             inputEvent(element, config, undefined, edit);
         }
     }).element);
@@ -539,7 +539,7 @@ const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) =>
         current: config.method === 1,
         click() {
             config.method = 1;
-            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod} ${window.siyuan.languages.querySyntax}`);
+            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod}: ${window.siyuan.languages.querySyntax}`);
             inputEvent(element, config, undefined, edit);
         }
     }).element);
@@ -548,7 +548,7 @@ const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) =>
         current: config.method === 2,
         click() {
             config.method = 2;
-            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod} SQL`);
+            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod}: SQL`);
             inputEvent(element, config, undefined, edit);
         }
     }).element);
@@ -557,7 +557,7 @@ const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) =>
         current: config.method === 3,
         click() {
             config.method = 3;
-            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod} ${window.siyuan.languages.regex}`);
+            searchSyntaxCheckElement.setAttribute("aria-label", `${window.siyuan.languages.searchMethod}: ${window.siyuan.languages.regex}`);
             inputEvent(element, config, undefined, edit);
         }
     }).element);

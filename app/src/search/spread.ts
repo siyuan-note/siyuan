@@ -97,7 +97,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         k: key || localData.k,
         r: localData.r || "",
         hasReplace: hotkey === window.siyuan.config.keymap.general.replace.custom,
-        querySyntax: localData.querySyntax || false,
+        method: localData.method || 0,
         hPath: localData.hPath || "",
         idPath: localData.idPath || "",
         list: localData.list || [],

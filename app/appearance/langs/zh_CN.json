@@ -1,4 +1,6 @@
 {
+  "searchMethod":"搜索方式",
+  "regex":"正则表达式",
   "groupBy": "分组",
   "keywordsLimit": "关键字数量限制",
   "exportAsImage": "导出为图片",

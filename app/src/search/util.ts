@@ -60,7 +60,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
                     k: text,
                     r: "",
                     hasReplace: false,
-                    querySyntax: localData.querySyntax || false,
+                    method: localData.method || 0,
                     hPath: "",
                     idPath: "",
                     list: [],
@@ -90,8 +90,8 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 <svg><use xlink:href="#iconEdit"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchPath" aria-label="${window.siyuan.languages.specifyPath}" class="block__icon b3-tooltips b3-tooltips__w">
-                <svg><use xlink:href="#iconFolder"></use></svg>
+            <span id="searchSyntaxCheck" aria-label="${window.siyuan.languages.searchMethod}" class="block__icon b3-tooltips b3-tooltips__w">
+                <svg><use xlink:href="#iconRegex"></use></svg>
             </span>
             <span class="fn__space"></span>
             <span id="searchFilter" aria-label="${window.siyuan.languages.type}" class="block__icon b3-tooltips b3-tooltips__w">
@@ -132,9 +132,11 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconClose"></use></svg>
         </span>
         <span class="fn__space"></span>
-        <button id="includeChildCheck" class="b3-button b3-button--small${(config.idPath && config.idPath.endsWith(".sy")) ? " b3-button--cancel" : ""}">${window.siyuan.languages.includeChildDoc}</button>
-        <span class="fn__space"></span>
-        <button id="searchSyntaxCheck" class="b3-button b3-button--small${config.querySyntax ? "" : " b3-button--cancel"}">${window.siyuan.languages.querySyntax}</button>
+        <div class="block__icons">
+            <span id="searchPath" aria-label="${window.siyuan.languages.specifyPath}" class="block__icon b3-tooltips b3-tooltips__w">
+                <svg><use xlink:href="#iconFolder"></use></svg>
+            </span>
+        </div>
     </div>
     <div id="searchList" class="search__list b3-list b3-list--background search__list"></div>
     <div id="searchPreview" class="fn__flex-1 search__preview"></div>
@@ -239,6 +241,34 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 break;
             } else if (target.id === "searchFilter") {
                 window.siyuan.menus.menu.remove();
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.includeChildDoc}</span><span class="fn__space fn__flex-1"></span>
+<input type="checkbox" class="b3-switch fn__flex-center"${(config.idPath && config.idPath.endsWith(".sy")) ? " checked" : ""}></div>`,
+                    bind(menuItemElement) {
+                        menuItemElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+                            const inputElement = menuItemElement.querySelector("input");
+                            if (event.target.tagName !== "INPUT") {
+                                inputElement.checked = !inputElement.checked;
+                            }
+                            let reload = false;
+                            if (!inputElement.checked) {
+                                if (!config.idPath.endsWith(".sy") && config.idPath.split("/").length > 1) {
+                                    config.idPath = config.idPath + ".sy";
+                                    reload = true;
+                                }
+                            } else {
+                                if (config.idPath.endsWith(".sy")) {
+                                    config.idPath = config.idPath.replace(".sy", "");
+                                    reload = true;
+                                }
+                            }
+                            if (reload) {
+                                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                            }
+                            window.siyuan.menus.menu.remove();
+                        });
+                    }
+                }).element);
                 addConfigMenu(config, window.siyuan.languages.math, "mathBlock", edit, element);
                 addConfigMenu(config, window.siyuan.languages.table, "table", edit, element);
                 addConfigMenu(config, window.siyuan.languages.quote, "blockquote", edit, element);
@@ -254,30 +284,10 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.id === "includeChildCheck") {
-                target.classList.toggle("b3-button--cancel");
-                let reload = false;
-                if (target.classList.contains("b3-button--cancel")) {
-                    if (!config.idPath.endsWith(".sy") && config.idPath.split("/").length > 1) {
-                        config.idPath = config.idPath + ".sy";
-                        reload = true;
-                    }
-                } else {
-                    if (config.idPath.endsWith(".sy")) {
-                        config.idPath = config.idPath.replace(".sy", "");
-                        reload = true;
-                    }
-                }
-                if (reload) {
-                    inputTimeout = inputEvent(element, config, inputTimeout, edit);
-                }
-                event.stopPropagation();
-                event.preventDefault();
-                break;
             } else if (target.id === "searchSyntaxCheck") {
-                target.classList.toggle("b3-button--cancel");
-                config.querySyntax = !target.classList.contains("b3-button--cancel");
-                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                window.siyuan.menus.menu.remove();
+                addQueryMenu(config, edit, element);
+                window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -507,6 +517,41 @@ const addConfigMenu = (config: ISearchOption, lang: string, key: "mathBlock" | "
     }).element);
 };
 
+const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.text,
+        current: config.method === 0,
+        click() {
+            config.method = 0;
+            inputEvent(element, config, undefined, edit);
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.querySyntax,
+        current: config.method === 1,
+        click() {
+            config.method = 1;
+            inputEvent(element, config, undefined, edit);
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: "SQL",
+        current: config.method === 2,
+        click() {
+            config.method = 2;
+            inputEvent(element, config, undefined, edit);
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.regex,
+        current: config.method === 3,
+        click() {
+            config.method = 3;
+            inputEvent(element, config, undefined, edit);
+        }
+    }).element);
+};
+
 const getKey = (element: HTMLElement) => {
     const keys: string[] = [];
     element.querySelectorAll("mark").forEach(item => {
@@ -636,7 +681,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
         } else {
             fetchPost("/api/search/fullTextSearchBlock", {
                 query: inputValue,
-                querySyntax: config.querySyntax,
+                method: config.method,
                 types: config.types,
                 path: config.idPath || "",
                 groupBy: config.group, // 0：不分组，1：按文档分组

@@ -1,4 +1,6 @@
 {
+  "searchMethod": "método de búsqueda",
+  "regex": "regex",
   "groupBy": "Agrupar por",
   "keywordsLimit": "Límite de palabras clave",
   "exportAsImage": "Exportar como imagen",

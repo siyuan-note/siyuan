@@ -212,17 +212,17 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 break;
             } else if (target.id === "searchPath") {
                 movePathTo((toPath, toNotebook) => {
-                    config.idPath = []
-                    const hPathList: string[] = []
-                    toPath.forEach((item, index) => {
-                        if (item === "/") {
-                            config.idPath.push(toNotebook[index])
-                            hPathList.push(escapeHtml(getNotebookName(toNotebook[index])))
-                        } else {
-                            config.idPath.push(pathPosix().join(toNotebook[index], item));
-                        }
-                    })
                     fetchPost("/api/filetree/getHPathsByPaths", {paths: toPath}, (response) => {
+                        config.idPath = []
+                        const hPathList: string[] = []
+                        toPath.forEach((item, index) => {
+                            if (item === "/") {
+                                config.idPath.push(toNotebook[index])
+                                hPathList.push(escapeHtml(getNotebookName(toNotebook[index])))
+                            } else {
+                                config.idPath.push(pathPosix().join(toNotebook[index], item));
+                            }
+                        })
                         if (response.data) {
                             hPathList.push(...response.data);
                         }

@@ -340,6 +340,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchHistoryBtn") {
+                if (!config.list || config.list.length === 0) {
+                    return;
+                }
                 let html = "";
                 (config.list || []).forEach((s: string) => {
                     if (s !== searchInputElement.value) {
@@ -353,6 +356,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 return;
             } else if (target.id === "replaceHistoryBtn") {
+                if (!config.replaceList || config.replaceList.length === 0) {
+                    return;
+                }
                 let html = "";
                 (config.replaceList || []).forEach((s: string) => {
                     if (s !== replaceInputElement.value) {

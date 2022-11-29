@@ -144,7 +144,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
     </div>
-    <div id="searchList" class="search__list b3-list b3-list--background search__list"></div>
+    <div id="searchList" class="search__list b3-list b3-list--background"></div>
     <div id="searchPreview" class="fn__flex-1 search__preview"></div>
 </div>
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;

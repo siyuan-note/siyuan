@@ -131,8 +131,8 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         <div class="fn__space"></div>
         <div id="replaceHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
     </div>
-    <div class="fn__flex b3-form__space--small">
-        <span id="searchResult" style="white-space: nowrap;"></span>
+    <div class="fn__flex" style="margin: 8px">
+        <span id="searchResult" style="white-space: nowrap;margin-left: 9px"></span>
         <span class="fn__space"></span>
         <span class="fn__flex-1"></span>
         <span id="searchPathInput" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis" title="${config.hPath}">

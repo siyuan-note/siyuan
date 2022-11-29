@@ -41,7 +41,7 @@ func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeyword
 	}
 
 	content := string(n.Tokens)
-	newContent := markReplaceSpanWithSplit(content, virtualBlockRefKeywords, virtualBlockRefSpanStart, virtualBlockRefSpanEnd)
+	newContent := markReplaceSpanWithSplit(content, virtualBlockRefKeywords, getMarkSpanStart(virtualBlockRefDataType), getMarkSpanEnd())
 	if content != newContent {
 		// 虚拟引用排除命中自身块命名和别名的情况 https://github.com/siyuan-note/siyuan/issues/3185
 		var blockKeys []string
@@ -52,7 +52,7 @@ func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeyword
 			blockKeys = append(blockKeys, alias)
 		}
 		if 0 < len(blockKeys) {
-			keys := gulu.Str.SubstringsBetween(newContent, virtualBlockRefSpanStart, virtualBlockRefSpanEnd)
+			keys := gulu.Str.SubstringsBetween(newContent, getMarkSpanStart(virtualBlockRefDataType), getMarkSpanEnd())
 			for _, k := range keys {
 				if gulu.Str.Contains(k, blockKeys) {
 					return true

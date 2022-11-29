@@ -830,21 +830,26 @@ func stringQuery(query string) string {
 }
 
 // markReplaceSpan 用于处理搜索高亮。
-func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, text string, keywords []string, replacementStart, replacementEnd string, luteEngine *lute.Lute) bool {
-	text = search.EncloseHighlighting(text, keywords, searchMarkSpanStart, searchMarkSpanEnd, Conf.Search.CaseSensitive)
-	n.Tokens = gulu.Str.ToBytes(text)
-	if bytes.Contains(n.Tokens, []byte("search-mark")) {
-		n.Tokens = lex.EscapeMarkers(n.Tokens)
-		linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
-		var children []*ast.Node
-		for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
-			children = append(children, c)
+func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markSpanDataType string, luteEngine *lute.Lute) bool {
+	text := n.Content()
+	if ast.NodeText == n.Type {
+		text = search.EncloseHighlighting(text, keywords, getMarkSpanStart(markSpanDataType), getMarkSpanEnd(), Conf.Search.CaseSensitive)
+		n.Tokens = gulu.Str.ToBytes(text)
+		if bytes.Contains(n.Tokens, []byte("search-mark")) {
+			n.Tokens = lex.EscapeMarkers(n.Tokens)
+			linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
+			var children []*ast.Node
+			for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+				children = append(children, c)
+			}
+			for _, c := range children {
+				n.InsertBefore(c)
+			}
+			*unlinks = append(*unlinks, n)
+			return true
 		}
-		for _, c := range children {
-			n.InsertBefore(c)
-		}
-		*unlinks = append(*unlinks, n)
-		return true
+	} else if ast.NodeTextMark == n.Type {
+		// 搜索结果高亮支持大部分行级元素 https://github.com/siyuan-note/siyuan/issues/6745
 	}
 	return false
 }

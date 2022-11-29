@@ -194,15 +194,18 @@ func fullTextSearchBlock(c *gin.Context) {
 	}
 
 	query := arg["query"].(string)
-	pathArg := arg["path"]
-	var path string
-	if nil != pathArg {
-		path = pathArg.(string)
-	}
-	var box string
-	if "" != path {
-		box = strings.Split(path, "/")[0]
-		path = strings.TrimPrefix(path, box)
+	pathsArg := arg["paths"]
+	var paths, boxes []string
+	if nil != pathsArg {
+		for _, p := range pathsArg.([]interface{}) {
+			path := p.(string)
+			box := strings.Split(path, "/")[0]
+			boxes = append(boxes, box)
+			path = strings.TrimPrefix(path, box)
+			paths = append(paths, path)
+		}
+		paths = gulu.Str.RemoveDuplicatedElem(paths)
+		boxes = gulu.Str.RemoveDuplicatedElem(boxes)
 	}
 	var types map[string]bool
 	if nil != arg["types"] {
@@ -222,7 +225,7 @@ func fullTextSearchBlock(c *gin.Context) {
 	if nil != groupByArg {
 		groupBy = int(groupByArg.(float64))
 	}
-	blocks, matchedBlockCount, matchedRootCount := model.FullTextSearchBlock(query, box, path, types, method, groupBy)
+	blocks, matchedBlockCount, matchedRootCount := model.FullTextSearchBlock(query, boxes, paths, types, method, groupBy)
 	ret.Data = map[string]interface{}{
 		"blocks":            blocks,
 		"matchedBlockCount": matchedBlockCount,

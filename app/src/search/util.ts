@@ -143,6 +143,16 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         <span id="searchPath" style="opacity: 1;padding: 3px 4px;" aria-label="${window.siyuan.languages.specifyPath}" class="block__icon b3-tooltips b3-tooltips__w">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
+        <div class="fn__flex${config.group === 0 ? " fn__none" : ""}">
+            <span class="fn__space"></span>
+            <span id="searchExpand" style="opacity: 1;padding: 3px 4px;" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.expand}">
+                <svg><use xlink:href="#iconFullscreen"></use></svg>
+            </span>
+            <span class="fn__space"></span>
+            <span id="searchCollapse" style="opacity: 1;padding: 3px 4px;" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.collapse}">
+                <svg><use xlink:href="#iconContract"></use></svg>
+            </span>
+        </div>
     </div>
     <div id="searchList" class="search__list b3-list b3-list--background"></div>
     <div id="searchPreview" class="fn__flex-1 search__preview"></div>
@@ -177,6 +187,26 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 config.hPath = "";
                 element.querySelector("#searchPathInput").innerHTML = config.hPath;
                 inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "searchExpand") {
+                Array.from(searchPanelElement.children).forEach(item => {
+                    if (item.classList.contains("b3-list-item")) {
+                        item.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
+                        item.nextElementSibling.classList.remove("fn__none");
+                    }
+                })
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "searchCollapse") {
+                Array.from(searchPanelElement.children).forEach(item => {
+                    if (item.classList.contains("b3-list-item")) {
+                        item.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
+                        item.nextElementSibling.classList.add("fn__none");
+                    }
+                })
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -240,6 +270,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchGroup") {
+                element.querySelector("#searchCollapse").parentElement.classList.toggle("fn__none")
                 config.group = config.group === 0 ? 1 : 0;
                 inputTimeout = inputEvent(element, config, inputTimeout, edit);
                 event.stopPropagation();

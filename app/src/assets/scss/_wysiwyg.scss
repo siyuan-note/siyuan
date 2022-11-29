@@ -172,7 +172,7 @@
       }
     }
 
-    span[data-type="search-mark"] {
+    span[data-type~="search-mark"] {
       background-color: var(--b3-protyle-inline-mark-background);
       color: var(--b3-protyle-inline-mark-color);
     }

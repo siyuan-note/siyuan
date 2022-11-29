@@ -61,18 +61,19 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             paragraph: window.siyuan.config.search.paragraph,
         };
     }
+    let hPath = ""
+    let idPath = ""
     if (notebookId) {
-        localData.hPath = escapeHtml(getNotebookName(notebookId));
-        localData.idPath = notebookId;
+        hPath = escapeHtml(getNotebookName(notebookId));
+        idPath = notebookId;
         if (searchPath && searchPath !== "/") {
             const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
                 notebook: notebookId,
                 path: searchPath.endsWith(".sy") ? searchPath : searchPath + ".sy"
             });
-            localData.hPath = pathPosix().join(localData.hPath, escapeHtml(response.data));
-            localData.idPath = pathPosix().join(localData.idPath, searchPath);
+            hPath = pathPosix().join(hPath, escapeHtml(response.data));
+            idPath = pathPosix().join(idPath, searchPath);
         }
-        localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(localData));
     }
 
     let range: Range;
@@ -98,8 +99,8 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         r: localData.r || "",
         hasReplace: hotkey === window.siyuan.config.keymap.general.replace.custom,
         method: localData.method || 0,
-        hPath: localData.hPath || "",
-        idPath: localData.idPath || "",
+        hPath,
+        idPath,
         list: localData.list || [],
         replaceList: localData.replaceList || [],
         group: localData.group || 0,

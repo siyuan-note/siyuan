@@ -176,7 +176,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 config.idPath = "";
                 config.hPath = "";
                 element.querySelector("#searchPathInput").innerHTML = config.hPath;
-                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -186,13 +186,13 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         config.idPath = toNotebook;
                         config.hPath = escapeHtml(getNotebookName(toNotebook));
                         element.querySelector("#searchPathInput").innerHTML = `${config.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
-                        inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                        inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
                     } else {
                         config.idPath = pathPosix().join(toNotebook, toPath);
                         fetchPost("/api/filetree/getHPathsByPaths", {paths: [toPath]}, (response) => {
                             config.hPath = escapeHtml(response.data ? response.data[0] : "");
                             element.querySelector("#searchPathInput").innerHTML = `${config.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
-                            inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                            inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
                         });
                     }
                 }, window.siyuan.languages.specifyPath);

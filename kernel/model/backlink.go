@@ -204,7 +204,7 @@ func buildBacklink(refID string, refTree *parse.Tree, mentionKeywords []string, 
 				}
 				if ast.NodeText == n.Type {
 					text := string(n.Tokens)
-					newText := markReplaceSpanWithSplit(text, mentionKeywords, searchMarkSpanStart, searchMarkSpanEnd)
+					newText := markReplaceSpanWithSplit(text, mentionKeywords, getMarkSpanStart(searchMarkDataType), getMarkSpanEnd())
 					if text == newText {
 						return ast.WalkContinue
 					}
@@ -627,7 +627,6 @@ func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword st
 
 func searchBackmention(mentionKeywords []string, keyword string, excludeBacklinkIDs *hashset.Set, rootID string, beforeLen int) (ret []*Block) {
 	ret = []*Block{}
-
 	if 1 > len(mentionKeywords) {
 		return
 	}
@@ -696,7 +695,7 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 			continue
 		}
 
-		newText := markReplaceSpanWithSplit(text, mentionKeywords, searchMarkSpanStart, searchMarkSpanEnd)
+		newText := markReplaceSpanWithSplit(text, mentionKeywords, getMarkSpanStart(searchMarkDataType), getMarkSpanEnd())
 		if text != newText {
 			tmp = append(tmp, b)
 		}

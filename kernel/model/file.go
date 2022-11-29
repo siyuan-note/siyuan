@@ -440,11 +440,17 @@ func StatTree(id string) (ret *util.BlockStatResult) {
 }
 
 const (
-	searchMarkSpanStart      = "<span data-type=\"search-mark\">"
-	searchMarkSpanEnd        = "</span>"
-	virtualBlockRefSpanStart = "<span data-type=\"virtual-block-ref\">"
-	virtualBlockRefSpanEnd   = "</span>"
+	searchMarkDataType      = "search-mark"
+	virtualBlockRefDataType = "virtual-block-ref"
 )
+
+func getMarkSpanStart(dataType string) string {
+	return fmt.Sprintf("<span data-type=\"%s\">", dataType)
+}
+
+func getMarkSpanEnd() string {
+	return "</span>"
+}
 
 func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int) (blockCount, childBlockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, err error) {
 	WaitForWritingFiles() // 写入数据时阻塞，避免获取到的数据不一致
@@ -631,7 +637,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 						}
 					}
 					if hitBlock {
-						if markReplaceSpan(n, &unlinks, string(n.Tokens), keywords, searchMarkSpanStart, searchMarkSpanEnd, luteEngine) {
+						if markReplaceSpan(n, &unlinks, keywords, searchMarkDataType, luteEngine) {
 							return ast.WalkContinue
 						}
 					}

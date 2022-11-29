@@ -179,7 +179,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 
 			if ast.NodeText == n.Type {
 				if 0 < len(keywords) {
-					if markReplaceSpan(n, &unlinks, string(n.Tokens), keywords, searchMarkSpanStart, searchMarkSpanEnd, luteEngine) {
+					if markReplaceSpan(n, &unlinks, keywords, searchMarkDataType, luteEngine) {
 						return ast.WalkContinue
 					}
 				}

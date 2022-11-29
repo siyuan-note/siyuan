@@ -62,17 +62,17 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         };
     }
     let hPath = ""
-    let idPath = ""
+    const idPath: string[] = []
     if (notebookId) {
         hPath = escapeHtml(getNotebookName(notebookId));
-        idPath = notebookId;
+        idPath.push(notebookId);
         if (searchPath && searchPath !== "/") {
             const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
                 notebook: notebookId,
                 path: searchPath.endsWith(".sy") ? searchPath : searchPath + ".sy"
             });
             hPath = pathPosix().join(hPath, escapeHtml(response.data));
-            idPath = pathPosix().join(idPath, searchPath);
+            idPath[0] = pathPosix().join(idPath[0], searchPath);
         }
     }
 

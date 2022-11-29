@@ -648,8 +648,8 @@ export class Gutter {
             accelerator: window.siyuan.config.keymap.general.move.custom,
             icon: "iconMove",
             click: () => {
-                movePathTo([], undefined, (toPath) => {
-                    hintMoveBlock(toPath, selectsElement, protyle);
+                movePathTo((toPath) => {
+                    hintMoveBlock(toPath[0], selectsElement, protyle);
                 });
             }
         }).element);
@@ -1019,8 +1019,8 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.general.move.custom,
                 icon: "iconMove",
                 click: () => {
-                    movePathTo([], undefined, (toPath) => {
-                        hintMoveBlock(toPath, [nodeElement], protyle);
+                    movePathTo((toPath) => {
+                        hintMoveBlock(toPath[0], [nodeElement], protyle);
                     });
                 }
             }).element);

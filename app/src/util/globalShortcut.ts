@@ -22,7 +22,7 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "./fetch";
 import {goBack, goForward} from "./backForward";
 import {onGet} from "../protyle/util/onGet";
-import {getDisplayName, getNotebookName, getTopPaths, movePathTo} from "./pathName";
+import {getDisplayName, getNotebookName, getTopPaths, movePathTo, moveToPath} from "./pathName";
 import {openFileById} from "../editor/util";
 import {getAllDocks, getAllModels, getAllTabs} from "../layout/getAll";
 import {openGlobalSearch} from "../search/util";
@@ -817,14 +817,16 @@ const editKeydown = (event: KeyboardEvent) => {
             nodeElement = hasClosestBlock(range.startContainer);
         }
         if (protyle.title?.editElement.contains(range.startContainer)) {
-            movePathTo([protyle.path], range);
+            movePathTo((toPath, toNotebook) => {
+                moveToPath([protyle.path], toNotebook[0], toPath[0]);
+            }, [protyle.path], range);
         } else if (nodeElement && range && protyle.element.contains(range.startContainer)) {
             let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
                 selectElements = [nodeElement];
             }
-            movePathTo([], undefined, (toPath) => {
-                hintMoveBlock(toPath, selectElements, protyle);
+            movePathTo((toPath) => {
+                hintMoveBlock(toPath[0], selectElements, protyle);
             });
         }
         event.preventDefault();
@@ -939,7 +941,10 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     }
     if (isFile && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
         window.siyuan.menus.menu.remove();
-        movePathTo(getTopPaths(liElements));
+        const pathes = getTopPaths(liElements)
+        movePathTo((toPath, toNotebook) => {
+            moveToPath(pathes, toNotebook[0], toPath[0]);
+        }, pathes);
         event.preventDefault();
         event.stopPropagation();
         return true;

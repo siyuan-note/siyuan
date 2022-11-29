@@ -53,7 +53,7 @@ interface ISearchOption {
     hasReplace: boolean,
     method: number //  0：文本，1：查询语法，2：SQL，3：正则表达式
     hPath: string
-    idPath: string
+    idPath: string[]
     k: string
     r: string
     replaceList: string[]

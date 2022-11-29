@@ -62,7 +62,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
                     hasReplace: false,
                     method: localData.method || 0,
                     hPath: "",
-                    idPath: "",
+                    idPath: [],
                     list: [],
                     replaceList: [],
                     group: localData.group || 0,
@@ -183,7 +183,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         let target = event.target as HTMLElement;
         while (target && !target.isSameNode(element)) {
             if (target.classList.contains("search__rmpath")) {
-                config.idPath = "";
+                config.idPath = [];
                 config.hPath = "";
                 element.querySelector("#searchPathInput").innerHTML = config.hPath;
                 inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
@@ -211,21 +211,17 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchPath") {
-                movePathTo([], undefined, (toPath, toNotebook) => {
-                    if (toPath === "/") {
-                        config.idPath = toNotebook;
-                        config.hPath = escapeHtml(getNotebookName(toNotebook));
+                movePathTo((toPath, toNotebook) => {
+                    fetchPost("/api/filetree/getHPathsByPaths", {paths: toPath}, (response) => {
+                        config.idPath = []
+                        toNotebook.forEach((item, index) => {
+                            config.idPath.push(pathPosix().join(item, toPath[index]));
+                        })
+                        config.hPath = escapeHtml(response.data ? response.data.join(", ") : "");
                         element.querySelector("#searchPathInput").innerHTML = `${config.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
                         inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
-                    } else {
-                        config.idPath = pathPosix().join(toNotebook, toPath);
-                        fetchPost("/api/filetree/getHPathsByPaths", {paths: [toPath]}, (response) => {
-                            config.hPath = escapeHtml(response.data ? response.data[0] : "");
-                            element.querySelector("#searchPathInput").innerHTML = `${config.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
-                            inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
-                        });
-                    }
-                }, window.siyuan.languages.specifyPath);
+                    });
+                }, [], undefined, window.siyuan.languages.specifyPath);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -278,30 +274,36 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 break;
             } else if (target.id === "searchFilter") {
                 window.siyuan.menus.menu.remove();
+                let includeChild = true
+                config.idPath.find(item => {
+                    if (!item.endsWith(".sy")) {
+                        includeChild = false
+                        return true;
+                    }
+                });
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.includeChildDoc}</span><span class="fn__space fn__flex-1"></span>
-<input type="checkbox" class="b3-switch fn__flex-center"${(config.idPath && config.idPath.endsWith(".sy")) ? " checked" : ""}></div>`,
+<input type="checkbox" class="b3-switch fn__flex-center"${includeChild ? " checked" : ""}></div>`,
                     bind(menuItemElement) {
                         menuItemElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
                             const inputElement = menuItemElement.querySelector("input");
                             if (event.target.tagName !== "INPUT") {
                                 inputElement.checked = !inputElement.checked;
                             }
-                            let reload = false;
                             if (!inputElement.checked) {
-                                if (!config.idPath.endsWith(".sy") && config.idPath.split("/").length > 1) {
-                                    config.idPath = config.idPath + ".sy";
-                                    reload = true;
-                                }
+                                config.idPath.forEach((item, index) => {
+                                    if (!item.endsWith(".sy") && item.split("/").length > 1) {
+                                        config.idPath[index] = item + ".sy";
+                                    }
+                                });
                             } else {
-                                if (config.idPath.endsWith(".sy")) {
-                                    config.idPath = config.idPath.replace(".sy", "");
-                                    reload = true;
-                                }
+                                config.idPath.forEach((item, index) => {
+                                    if (item.endsWith(".sy")) {
+                                        config.idPath[index] = item.replace(".sy", "");
+                                    }
+                                });
                             }
-                            if (reload) {
-                                inputTimeout = inputEvent(element, config, inputTimeout, edit);
-                            }
+                            inputTimeout = inputEvent(element, config, inputTimeout, edit);
                             window.siyuan.menus.menu.remove();
                         });
                     }
@@ -730,7 +732,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 query: inputValue,
                 method: config.method,
                 types: config.types,
-                path: config.idPath || "",
+                paths: config.idPath || [],
                 groupBy: config.group, // 0：不分组，1：按文档分组
             }, (response) => {
                 onSearch(response.data.blocks, edit, element);

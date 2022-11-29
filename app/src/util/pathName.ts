@@ -77,7 +77,7 @@ export const getTopPaths = (liElements: Element[]) => {
     return fromPaths;
 };
 
-const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string) => {
+export const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string) => {
     fetchPost("/api/filetree/moveDocs", {
         toNotebook,
         fromPaths,
@@ -85,7 +85,7 @@ const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string) => 
     });
 };
 
-export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath: string, toNotebook:string) => void, title?: string) => {
+export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void, paths?: string[], range?: Range, title?: string) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#foldList")) {
             item.destroy();
@@ -178,9 +178,17 @@ export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath: string
             return;
         }
         const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;
-        let currentItemElement: HTMLElement = currentPanelElement.querySelector(".b3-list-item--focus");
-        if (!currentItemElement) {
+        const currentItemElements = currentPanelElement.querySelectorAll(".b3-list-item--focus");
+        if (currentItemElements.length === 0) {
             return;
+        }
+        let currentItemElement: HTMLElement = currentItemElements[0] as HTMLElement;
+        if (event.key.startsWith("Arrow")) {
+            currentItemElements.forEach((item, index) => {
+                if (index !== 0) {
+                    item.classList.remove("b3-list-item--focus")
+                }
+            })
         }
         if (searchListElement.classList.contains("fn__none")) {
             if ((event.key === "ArrowRight" && !currentItemElement.querySelector(".b3-list-item__arrow--open") && !currentItemElement.querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||
@@ -308,11 +316,17 @@ export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath: string
             }
         }
         if (event.key === "Enter") {
-            if (cb) {
-                cb(currentItemElement.getAttribute("data-path"), currentItemElement.getAttribute("data-box"));
-            } else {
-                moveToPath(paths, currentItemElement.getAttribute("data-box"), currentItemElement.getAttribute("data-path"));
+            const currentItemElements = currentPanelElement.querySelectorAll(".b3-list-item--focus");
+            if (currentItemElements.length === 0) {
+                return;
             }
+            const pathList: string[] = []
+            const notebookIdList: string[] = []
+            currentItemElements.forEach(item => {
+                pathList.push(item.getAttribute("data-path"))
+                notebookIdList.push(item.getAttribute("data-box"))
+            })
+            cb(pathList, notebookIdList);
             dialog.destroy();
             event.preventDefault();
         }
@@ -327,15 +341,17 @@ export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath: string
                 break;
             } else if (target.classList.contains("b3-button--text")) {
                 const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;
-                const currentItemElement: HTMLElement = currentPanelElement.querySelector(".b3-list-item--focus");
-                if (!currentItemElement) {
+                const currentItemElements = currentPanelElement.querySelectorAll(".b3-list-item--focus");
+                if (currentItemElements.length === 0) {
                     return;
                 }
-                if (cb) {
-                    cb(currentItemElement.getAttribute("data-path"), currentItemElement.getAttribute("data-box"));
-                } else {
-                    moveToPath(paths, currentItemElement.getAttribute("data-box"), currentItemElement.getAttribute("data-path"));
-                }
+                const pathList: string[] = []
+                const notebookIdList: string[] = []
+                currentItemElements.forEach(item => {
+                    pathList.push(item.getAttribute("data-path"))
+                    notebookIdList.push(item.getAttribute("data-box"))
+                })
+                cb(pathList, notebookIdList);
                 dialog.destroy();
                 event.preventDefault();
                 event.stopPropagation();
@@ -347,12 +363,20 @@ export const movePathTo = (paths?: string[], range?: Range, cb?: (toPath: string
                 break;
             } else if (target.classList.contains("b3-list-item")) {
                 const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;
-                const currentItemElement: HTMLElement = currentPanelElement.querySelector(".b3-list-item--focus");
-                if (!currentItemElement) {
+                const currentItemElements = currentPanelElement.querySelectorAll(".b3-list-item--focus");
+                if (currentItemElements.length === 0) {
                     return;
                 }
-                currentItemElement.classList.remove("b3-list-item--focus");
-                target.classList.add("b3-list-item--focus");
+                if (title === window.siyuan.languages.specifyPath && (event.ctrlKey || event.metaKey)) {
+                    if (currentItemElements.length === 1 && currentItemElements[0].isSameNode(target)) {
+                        // 至少需选中一个
+                    } else {
+                        target.classList.toggle("b3-list-item--focus");
+                    }
+                } else {
+                    currentItemElements[0].classList.remove("b3-list-item--focus");
+                    target.classList.add("b3-list-item--focus");
+                }
                 event.preventDefault();
                 event.stopPropagation();
                 break;

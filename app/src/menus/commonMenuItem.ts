@@ -4,7 +4,7 @@ import {shell} from "electron";
 import {getDockByType} from "../layout/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile} from "../util/functions";
-import {isLocalPath, movePathTo, pathPosix} from "../util/pathName";
+import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {saveExport} from "../protyle/export";
@@ -805,7 +805,9 @@ export const movePathToMenu = (paths: string[]) => {
         icon: "iconMove",
         accelerator: window.siyuan.config.keymap.general.move.custom,
         click() {
-            movePathTo(paths);
+            movePathTo((toPath, toNotebook) =>{
+                moveToPath(paths, toNotebook[0], toPath[0]);
+            }, paths);
         }
     }).element;
 };

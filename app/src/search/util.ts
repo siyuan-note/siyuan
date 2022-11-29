@@ -226,7 +226,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         if (response.data) {
                             hPathList.push(...response.data);
                         }
-                        config.hPath = escapeHtml(hPathList.join(", "));
+                        config.hPath = escapeHtml(hPathList.join(" "));
                         element.querySelector("#searchPathInput").innerHTML = `${config.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
                         inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
                     });

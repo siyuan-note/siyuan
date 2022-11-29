@@ -119,7 +119,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     });
     if (paths.length) {
         fetchPost("/api/filetree/getHPathsByPaths", {paths}, (response) => {
-            dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(", "));
+            dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(" "));
         });
     }
     const searchListElement = dialog.element.querySelector("#foldList");

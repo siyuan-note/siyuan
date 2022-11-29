@@ -208,7 +208,7 @@ func SearchAssetsByName(keyword string) (ret []*cache.Asset) {
 	ret = []*cache.Asset{}
 
 	count := 0
-	for _, asset := range cache.Assets {
+	for _, asset := range cache.GetAssets() {
 		if !strings.Contains(strings.ToLower(asset.HName), strings.ToLower(keyword)) {
 			continue
 		}
@@ -471,13 +471,14 @@ func RemoveUnusedAssets() (ret []string) {
 	}
 
 	indexHistoryDir(filepath.Base(historyDir), NewLute())
+	cache.LoadAssets()
 	return
 }
 
 func RemoveUnusedAsset(p string) (ret string) {
-	p = filepath.Join(util.DataDir, p)
-	if !gulu.File.IsExist(p) {
-		return p
+	absPath := filepath.Join(util.DataDir, p)
+	if !gulu.File.IsExist(absPath) {
+		return absPath
 	}
 
 	historyDir, err := GetHistoryDir(HistoryOpClean)
@@ -486,24 +487,25 @@ func RemoveUnusedAsset(p string) (ret string) {
 		return
 	}
 
-	newP := strings.TrimPrefix(p, util.DataDir)
+	newP := strings.TrimPrefix(absPath, util.DataDir)
 	historyPath := filepath.Join(historyDir, newP)
-	if gulu.File.IsExist(p) {
-		if err = gulu.File.Copy(p, historyPath); nil != err {
+	if gulu.File.IsExist(absPath) {
+		if err = gulu.File.Copy(absPath, historyPath); nil != err {
 			return
 		}
 
-		hash, _ := util.GetEtag(p)
+		hash, _ := util.GetEtag(absPath)
 		sql.DeleteAssetsByHashes([]string{hash})
 	}
 
-	if err = os.RemoveAll(p); nil != err {
-		logging.LogErrorf("remove unused asset [%s] failed: %s", p, err)
+	if err = os.RemoveAll(absPath); nil != err {
+		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 	}
-	ret = p
+	ret = absPath
 	IncSync()
 
 	indexHistoryDir(filepath.Base(historyDir), NewLute())
+	cache.RemoveAsset(p)
 	return
 }
 

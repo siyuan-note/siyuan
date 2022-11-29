@@ -212,12 +212,21 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 break;
             } else if (target.id === "searchPath") {
                 movePathTo((toPath, toNotebook) => {
+                    config.idPath = []
+                    const hPathList: string[] = []
+                    toPath.forEach((item, index) => {
+                        if (item === "/") {
+                            config.idPath.push(toNotebook[index])
+                            hPathList.push(escapeHtml(getNotebookName(toNotebook[index])))
+                        } else {
+                            config.idPath.push(pathPosix().join(toNotebook[index], item));
+                        }
+                    })
                     fetchPost("/api/filetree/getHPathsByPaths", {paths: toPath}, (response) => {
-                        config.idPath = []
-                        toNotebook.forEach((item, index) => {
-                            config.idPath.push(pathPosix().join(item, toPath[index]));
-                        })
-                        config.hPath = escapeHtml(response.data ? response.data.join(", ") : "");
+                        if (response.data) {
+                            hPathList.push(...response.data);
+                        }
+                        config.hPath = escapeHtml(hPathList.join(", "));
                         element.querySelector("#searchPathInput").innerHTML = `${config.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
                         inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
                     });

@@ -95,7 +95,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         <div id="searchHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
         <div class="block__icons">
             <span id="searchReplace" aria-label="${window.siyuan.languages.replace}" class="block__icon b3-tooltips b3-tooltips__w">
-                <svg><use xlink:href="#iconEdit"></use></svg>
+                <svg><use xlink:href="#iconReplace"></use></svg>
             </span>
             <span class="fn__space"></span>
             <span id="searchSyntaxCheck" aria-label="${window.siyuan.languages.searchMethod} ${methodText}" class="block__icon b3-tooltips b3-tooltips__w">
@@ -120,7 +120,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     </div>
     <div class="b3-form__icon search__header${config.hasReplace ? "" : " fn__none"}">
         <span class="fn__a" id="replaceHistoryBtn">
-            <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+            <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconReplace"></use></svg>
             <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
         </span>
         <input id="replaceInput" class="b3-text-field b3-text-field--text">

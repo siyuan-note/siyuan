@@ -61,8 +61,8 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             paragraph: window.siyuan.config.search.paragraph,
         };
     }
-    let hPath = ""
-    const idPath: string[] = []
+    let hPath = "";
+    const idPath: string[] = [];
     if (notebookId) {
         hPath = escapeHtml(getNotebookName(notebookId));
         idPath.push(notebookId);

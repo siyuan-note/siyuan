@@ -186,9 +186,9 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         if (event.key.startsWith("Arrow")) {
             currentItemElements.forEach((item, index) => {
                 if (index !== 0) {
-                    item.classList.remove("b3-list-item--focus")
+                    item.classList.remove("b3-list-item--focus");
                 }
-            })
+            });
         }
         if (searchListElement.classList.contains("fn__none")) {
             if ((event.key === "ArrowRight" && !currentItemElement.querySelector(".b3-list-item__arrow--open") && !currentItemElement.querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||
@@ -320,12 +320,12 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             if (currentItemElements.length === 0) {
                 return;
             }
-            const pathList: string[] = []
-            const notebookIdList: string[] = []
+            const pathList: string[] = [];
+            const notebookIdList: string[] = [];
             currentItemElements.forEach(item => {
-                pathList.push(item.getAttribute("data-path"))
-                notebookIdList.push(item.getAttribute("data-box"))
-            })
+                pathList.push(item.getAttribute("data-path"));
+                notebookIdList.push(item.getAttribute("data-box"));
+            });
             cb(pathList, notebookIdList);
             dialog.destroy();
             event.preventDefault();
@@ -345,12 +345,12 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
                 if (currentItemElements.length === 0) {
                     return;
                 }
-                const pathList: string[] = []
-                const notebookIdList: string[] = []
+                const pathList: string[] = [];
+                const notebookIdList: string[] = [];
                 currentItemElements.forEach(item => {
-                    pathList.push(item.getAttribute("data-path"))
-                    notebookIdList.push(item.getAttribute("data-box"))
-                })
+                    pathList.push(item.getAttribute("data-path"));
+                    notebookIdList.push(item.getAttribute("data-box"));
+                });
                 cb(pathList, notebookIdList);
                 dialog.destroy();
                 event.preventDefault();

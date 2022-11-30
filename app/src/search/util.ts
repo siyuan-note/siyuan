@@ -199,7 +199,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         item.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
                         item.nextElementSibling.classList.remove("fn__none");
                     }
-                })
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -209,23 +209,23 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         item.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
                         item.nextElementSibling.classList.add("fn__none");
                     }
-                })
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "searchPath") {
                 movePathTo((toPath, toNotebook) => {
                     fetchPost("/api/filetree/getHPathsByPaths", {paths: toPath}, (response) => {
-                        config.idPath = []
-                        const hPathList: string[] = []
+                        config.idPath = [];
+                        const hPathList: string[] = [];
                         toPath.forEach((item, index) => {
                             if (item === "/") {
-                                config.idPath.push(toNotebook[index])
-                                hPathList.push(escapeHtml(getNotebookName(toNotebook[index])))
+                                config.idPath.push(toNotebook[index]);
+                                hPathList.push(escapeHtml(getNotebookName(toNotebook[index])));
                             } else {
                                 config.idPath.push(pathPosix().join(toNotebook[index], item));
                             }
-                        })
+                        });
                         if (response.data) {
                             hPathList.push(...response.data);
                         }
@@ -285,10 +285,10 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 break;
             } else if (target.id === "searchFilter") {
                 window.siyuan.menus.menu.remove();
-                let includeChild = true
+                let includeChild = true;
                 config.idPath.find(item => {
                     if (!item.endsWith(".sy")) {
-                        includeChild = false
+                        includeChild = false;
                         return true;
                     }
                 });
@@ -555,12 +555,12 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
 };
 
 const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
-    window.siyuan.menus.menu.remove()
+    window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.list1,
         current: config.group === 0,
         click() {
-            element.querySelector("#searchCollapse").parentElement.classList.add("fn__none")
+            element.querySelector("#searchCollapse").parentElement.classList.add("fn__none");
             config.group = 0;
             inputEvent(element, config, undefined, edit);
         }
@@ -569,7 +569,7 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
         label: window.siyuan.languages.doc,
         current: config.group === 1,
         click() {
-            element.querySelector("#searchCollapse").parentElement.classList.remove("fn__none")
+            element.querySelector("#searchCollapse").parentElement.classList.remove("fn__none");
             config.group = 1;
             inputEvent(element, config, undefined, edit);
         }
@@ -579,7 +579,7 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
         current: config.layout === 0,
         click() {
             element.querySelector("#searchList").parentElement.style.flexDirection = "column";
-            setPadding(edit.protyle)
+            setPadding(edit.protyle);
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
@@ -587,7 +587,7 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
         current: config.layout === 1,
         click() {
             element.querySelector("#searchList").parentElement.style.flexDirection = "row";
-            setPadding(edit.protyle)
+            setPadding(edit.protyle);
         }
     }).element);
 };

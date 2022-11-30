@@ -941,7 +941,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     }
     if (isFile && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
         window.siyuan.menus.menu.remove();
-        const pathes = getTopPaths(liElements)
+        const pathes = getTopPaths(liElements);
         movePathTo((toPath, toNotebook) => {
             moveToPath(pathes, toNotebook[0], toPath[0]);
         }, pathes);

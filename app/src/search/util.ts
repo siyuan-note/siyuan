@@ -574,11 +574,12 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
             inputEvent(element, config, undefined, edit);
         }
     }).element);
+    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.topBottomLayout,
         current: config.layout === 0,
         click() {
-            element.querySelector(".search__layout").classList.remove("search__layout--row")
+            element.querySelector(".search__layout").classList.remove("search__layout--row");
             setPadding(edit.protyle);
             config.layout = 0;
             if (!element.parentElement.getAttribute("data-id")) {
@@ -590,7 +591,7 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
         label: window.siyuan.languages.leftRightLayout,
         current: config.layout === 1,
         click() {
-            element.querySelector(".search__layout").classList.add("search__layout--row")
+            element.querySelector(".search__layout").classList.add("search__layout--row");
             setPadding(edit.protyle);
             config.layout = 1;
             if (!element.parentElement.getAttribute("data-id")) {

@@ -1,4 +1,20 @@
 .search {
+  &__layout {
+    display: flex;
+    flex: 1;
+    min-height: 0.1px;
+    flex-direction: column;
+
+    &--row {
+      flex-direction: row;
+
+      .search__preview {
+        border-top: 0;
+        border-left: 1px solid var(--b3-theme-surface-lighter);
+      }
+    }
+  }
+
   &__header {
     display: flex;
     background: var(--b3-theme-background);
@@ -75,7 +91,7 @@
     position: relative;
     flex: 1;
     overflow: auto;
-    padding-bottom: 8px;
+    padding: 8px 0;
   }
 
   &__path {

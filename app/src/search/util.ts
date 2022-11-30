@@ -141,21 +141,21 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconClose"></use></svg>
         </span>
         <span class="fn__space"></span>
-        <span id="searchPath" style="opacity: 1;padding: 3px 4px;" aria-label="${window.siyuan.languages.specifyPath}" class="block__icon b3-tooltips b3-tooltips__w">
+        <span id="searchPath" aria-label="${window.siyuan.languages.specifyPath}" class="block__icon b3-tooltips b3-tooltips__w">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         <div class="fn__flex${config.group === 0 ? " fn__none" : ""}">
             <span class="fn__space"></span>
-            <span id="searchExpand" style="opacity: 1;padding: 3px 4px;" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.expand}">
+            <span id="searchExpand" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.expand}">
                 <svg><use xlink:href="#iconFullscreen"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchCollapse" style="opacity: 1;padding: 3px 4px;" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.collapse}">
+            <span id="searchCollapse" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.collapse}">
                 <svg><use xlink:href="#iconContract"></use></svg>
             </span>
         </div>
     </div>
-    <div class="fn__flex-1 fn__flex" style="flex-direction: ${config.layout === 0 ? "column" : "row"}">
+    <div class="search__layout${config.layout === 1 ? " search__layout--row" : ""}">
         <div id="searchList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
         <div id="searchPreview" class="fn__flex-1 search__preview"></div>
     </div>
@@ -578,7 +578,7 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
         label: window.siyuan.languages.document_properties_page_size_orientation_portrait,
         current: config.layout === 0,
         click() {
-            element.querySelector("#searchList").parentElement.style.flexDirection = "column";
+            element.querySelector(".search__layout").classList.remove("search__layout--row")
             setPadding(edit.protyle);
             config.layout = 0;
             if (!element.parentElement.getAttribute("data-id")) {
@@ -590,7 +590,7 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
         label: window.siyuan.languages.document_properties_page_size_orientation_landscape,
         current: config.layout === 1,
         click() {
-            element.querySelector("#searchList").parentElement.style.flexDirection = "row";
+            element.querySelector(".search__layout").classList.add("search__layout--row")
             setPadding(edit.protyle);
             config.layout = 1;
             if (!element.parentElement.getAttribute("data-id")) {

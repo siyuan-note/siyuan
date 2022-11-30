@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"path"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -344,20 +345,39 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 	case 1: // 按文档分组
 		rootMap := map[string]bool{}
 		var rootIDs []string
+		sorts := map[string]int{}
 		for _, b := range blocks {
 			if _, ok := rootMap[b.RootID]; !ok {
 				rootMap[b.RootID] = true
 				rootIDs = append(rootIDs, b.RootID)
+				tree, _ := loadTreeByBlockID(b.RootID)
+				if nil == tree {
+					continue
+				}
+
+				sort := 0
+				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if !entering || !n.IsBlock() {
+						return ast.WalkContinue
+					}
+
+					sorts[n.ID] = sort
+					sort++
+					return ast.WalkContinue
+				})
 			}
 		}
+
 		sqlRoots := sql.GetBlocks(rootIDs)
 		roots := fromSQLBlocks(&sqlRoots, "", beforeLen)
 		for _, root := range roots {
 			for _, b := range blocks {
+				b.Sort = sorts[b.ID]
 				if b.RootID == root.ID {
 					root.Children = append(root.Children, b)
 				}
 			}
+			sort.Slice(root.Children, func(i, j int) bool { return root.Children[i].Sort < root.Children[j].Sort })
 		}
 		ret = roots
 	default:
@@ -729,6 +749,7 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 		Markdown: markdown,
 		Type:     treenode.FromAbbrType(sqlBlock.Type),
 		SubType:  sqlBlock.SubType,
+		Sort:     sqlBlock.Sort,
 	}
 	if "" != sqlBlock.IAL {
 		block.IAL = map[string]string{}

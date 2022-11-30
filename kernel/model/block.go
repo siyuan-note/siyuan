@@ -55,6 +55,7 @@ type Block struct {
 	Children []*Block          `json:"children"`
 	Depth    int               `json:"depth"`
 	Count    int               `json:"count"`
+	Sort     int               `json:"sort"`
 }
 
 func (block *Block) IsContainerBlock() bool {

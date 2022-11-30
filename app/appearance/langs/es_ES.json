@@ -1,4 +1,8 @@
 {
+  "noGroupBy": "Sin agrupar",
+  "groupByDoc": "Agrupar por documento",
+  "leftRightLayout": "Disposición izquierda y derecha",
+  "topBottomLayout": "Diseño superior e inferior",
   "keyword": "Palabra clave",
   "searchMethod": "método de búsqueda",
   "regex": "Regex",

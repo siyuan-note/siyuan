@@ -1,4 +1,8 @@
 {
+  "noGroupBy": "不分组",
+  "groupByDoc": "按文档分组",
+  "leftRightLayout": "左右布局",
+  "topBottomLayout": "上下布局",
   "keyword": "关键字",
   "searchMethod":"搜索方式",
   "regex":"正则表达式",

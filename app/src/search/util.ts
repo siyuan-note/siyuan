@@ -557,7 +557,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
 const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.list1,
+        label: window.siyuan.languages.noGroupBy,
         current: config.group === 0,
         click() {
             element.querySelector("#searchCollapse").parentElement.classList.add("fn__none");
@@ -566,7 +566,7 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.doc,
+        label: window.siyuan.languages.groupByDoc,
         current: config.group === 1,
         click() {
             element.querySelector("#searchCollapse").parentElement.classList.remove("fn__none");
@@ -575,7 +575,7 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.document_properties_page_size_orientation_portrait,
+        label: window.siyuan.languages.topBottomLayout,
         current: config.layout === 0,
         click() {
             element.querySelector(".search__layout").classList.remove("search__layout--row")
@@ -587,7 +587,7 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.document_properties_page_size_orientation_landscape,
+        label: window.siyuan.languages.leftRightLayout,
         current: config.layout === 1,
         click() {
             element.querySelector(".search__layout").classList.add("search__layout--row")

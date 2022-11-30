@@ -80,7 +80,8 @@ const renderPDF = (id: string) => {
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="baseStyle" href="${servePath}/stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/appearance/themes/daylight/theme.css?${Constants.SIYUAN_VERSION}"/>
     <link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>
     <title>${window.siyuan.languages.export} PDF</title>
     <style>
@@ -487,7 +488,8 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="baseStyle" href="stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="appearance/themes/daylight/theme.css?${Constants.SIYUAN_VERSION}"/>
     <link rel="stylesheet" type="text/css" id="themeStyle" href="appearance/themes/${themeName}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>
     <title>${pathPosix().basename(filePath)} - ${window.siyuan.languages.siyuanNote}  v${Constants.SIYUAN_VERSION}</title>
     <style>

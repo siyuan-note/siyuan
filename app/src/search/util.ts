@@ -265,7 +265,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         resizeTabs();
                     }
                 });
-                wnd.addTab(tab);
+                wnd.split("lr").addTab(tab);
                 if (closeCB) {
                     closeCB();
                 }

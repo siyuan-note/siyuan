@@ -49,7 +49,8 @@ interface Window {
 }
 
 interface ISearchOption {
-    group: number,
+    group: number,  // 0：不分组，1：按文档分组
+    layout: number  // 0：上下，1：左右
     hasReplace: boolean,
     method: number //  0：文本，1：查询语法，2：SQL，3：正则表达式
     hPath: string

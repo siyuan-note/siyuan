@@ -2,7 +2,7 @@
   "keyword": "关键字",
   "searchMethod":"搜索方式",
   "regex":"正则表达式",
-  "groupBy": "分组",
+  "groupBy": "分组及布局",
   "keywordsLimit": "关键字数量限制",
   "exportAsImage": "导出为图片",
   "exportBySiYuan": "由思源笔记导出",

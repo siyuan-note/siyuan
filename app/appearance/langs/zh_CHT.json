@@ -2,7 +2,7 @@
   "keyword": "關鍵字",
   "searchMethod":"搜索方式",
   "regex":"正則表達式",
-  "groupBy": "分組",
+  "groupBy": "分組及佈局",
   "keywordsLimit": "關鍵字數量限制",
   "exportAsImage": "導出為圖片",
   "exportBySiYuan": "由思源筆記導出",

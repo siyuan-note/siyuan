@@ -13,7 +13,7 @@ import {MenuItem} from "../menus/Menu";
 import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix} from "../util/pathName";
 import {Protyle} from "../protyle";
 import {onGet} from "../protyle/util/onGet";
-import {addLoading} from "../protyle/ui/initUI";
+import {addLoading, setPadding} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 
@@ -66,6 +66,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
                     list: [],
                     replaceList: [],
                     group: localData.group || 0,
+                    layout: localData.layout || 0,
                     types: localData.types
                 }
             });
@@ -154,8 +155,10 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             </span>
         </div>
     </div>
-    <div id="searchList" class="search__list b3-list b3-list--background"></div>
-    <div id="searchPreview" class="fn__flex-1 search__preview"></div>
+    <div class="fn__flex-1 fn__flex" style="flex-direction: ${config.layout === 0 ? "column" : "row"}">
+        <div id="searchList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
+        <div id="searchPreview" class="fn__flex-1 search__preview"></div>
+    </div>
 </div>
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;
     const searchPanelElement = element.querySelector("#searchList");
@@ -275,9 +278,8 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchGroup") {
-                element.querySelector("#searchCollapse").parentElement.classList.toggle("fn__none")
-                config.group = config.group === 0 ? 1 : 0;
-                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                addConfigGroupMenu(config, edit, element);
+                window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -552,6 +554,44 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     return edit;
 };
 
+const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
+    window.siyuan.menus.menu.remove()
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.list1,
+        current: config.group === 0,
+        click() {
+            element.querySelector("#searchCollapse").parentElement.classList.add("fn__none")
+            config.group = 0;
+            inputEvent(element, config, undefined, edit);
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.doc,
+        current: config.group === 1,
+        click() {
+            element.querySelector("#searchCollapse").parentElement.classList.remove("fn__none")
+            config.group = 1;
+            inputEvent(element, config, undefined, edit);
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.document_properties_page_size_orientation_portrait,
+        current: config.layout === 0,
+        click() {
+            element.querySelector("#searchList").parentElement.style.flexDirection = "column";
+            setPadding(edit.protyle)
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.document_properties_page_size_orientation_landscape,
+        current: config.layout === 1,
+        click() {
+            element.querySelector("#searchList").parentElement.style.flexDirection = "row";
+            setPadding(edit.protyle)
+        }
+    }).element);
+};
+
 const addConfigMenu = (config: ISearchOption, lang: string, key: "mathBlock" | "table" | "blockquote" | "superBlock" | "paragraph" | "document" | "heading" | "list" | "listItem" | "codeBlock" | "htmlBlock",
                        edit: Protyle, element: Element) => {
     window.siyuan.menus.menu.append(new MenuItem({
@@ -748,7 +788,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 method: config.method,
                 types: config.types,
                 paths: config.idPath || [],
-                groupBy: config.group, // 0：不分组，1：按文档分组
+                groupBy: config.group,
             }, (response) => {
                 onSearch(response.data.blocks, edit, element);
                 element.querySelector("#searchResult").innerHTML = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);

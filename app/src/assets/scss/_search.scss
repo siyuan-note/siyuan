@@ -73,7 +73,7 @@
 
   &__list {
     position: relative;
-    height: calc(50% - 69px);
+    flex: 1;
     overflow: auto;
     padding-bottom: 8px;
   }

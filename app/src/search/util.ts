@@ -580,6 +580,10 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
         click() {
             element.querySelector("#searchList").parentElement.style.flexDirection = "column";
             setPadding(edit.protyle);
+            config.layout = 0;
+            if (!element.parentElement.getAttribute("data-id")) {
+                localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+            }
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
@@ -588,6 +592,10 @@ const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Eleme
         click() {
             element.querySelector("#searchList").parentElement.style.flexDirection = "row";
             setPadding(edit.protyle);
+            config.layout = 1;
+            if (!element.parentElement.getAttribute("data-id")) {
+                localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+            }
         }
     }).element);
 };

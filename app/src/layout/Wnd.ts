@@ -43,6 +43,9 @@ export class Wnd {
         this.resize = resize;
         this.element = document.createElement("div");
         this.element.classList.add("fn__flex-1", "fn__flex");
+        if (resize === "tb") {
+            this.element.style.minHeight = "64px"
+        }
         let dragHTML = '<div class="layout-tab-container__drag fn__none"></div>';
         if (parentType === "left" || parentType === "right" || parentType === "top" || parentType === "bottom") {
             dragHTML = "";

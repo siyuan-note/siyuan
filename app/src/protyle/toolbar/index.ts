@@ -1019,7 +1019,14 @@ export class Toolbar {
             }
             let inlineLastNode: Element;
             if (types.includes("NodeHTMLBlock")) {
-                renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
+                // 需 div 包裹，否则行内元素会解析错误 https://github.com/siyuan-note/siyuan/issues/6764
+                let html = textElement.value;
+                if (!html.startsWith("<div>\n")) {
+                    html = `<div>
+${html}
+</div>`;
+                }
+                renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(html));
             } else if (isInlineMemo) {
                 let inlineMemoElements;
                 if (updateElements) {

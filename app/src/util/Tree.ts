@@ -76,8 +76,9 @@ export class Tree {
             }
             const hasChild = (item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0);
             html += `<li class="b3-list-item" 
-${(item.nodeType !== "NodeDocument" && item.type === "backlink") ? 'draggable="true"' : ""}
+${(item.nodeType !== "NodeDocument" && item.type === "backlink") ? 'draggable="true" ' : ""}
 ${item.id ? 'data-node-id="' + item.id + '"' : ""} 
+${item.box ? 'data-notebook-id="' + item.box + '"' : ""} 
 data-treetype="${item.type}" 
 data-type="${item.nodeType}" 
 data-subtype="${item.subType}" 

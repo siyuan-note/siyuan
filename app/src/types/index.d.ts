@@ -513,6 +513,7 @@ declare interface IFile {
 }
 
 declare interface IBlockTree {
+    box: string,
     nodeType: string,
     hPath: string,
     subType: string,

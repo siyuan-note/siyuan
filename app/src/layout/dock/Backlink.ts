@@ -406,6 +406,7 @@ export class Backlink extends Model {
                         breadcrumb: false,
                     }
                 });
+                editor.protyle.notebookId = liElement.getAttribute("data-notebook-id");
                 this.editors.push(editor);
             });
         }

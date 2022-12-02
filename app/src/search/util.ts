@@ -90,7 +90,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     let includeChild = true;
     let enableIncludeChild = false;
     config.idPath.forEach(item => {
-        if (!item.endsWith(".sy") && item.split("/").length > 1) {
+        if (item.endsWith(".sy")) {
             includeChild = false;
         }
         if (item.split("/").length > 1) {

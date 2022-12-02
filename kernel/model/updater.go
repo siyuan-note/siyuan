@@ -138,12 +138,12 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 	}
 	pkg := "siyuan-" + ver + "-" + suffix
 
-	url := "https://github.com/siyuan-note/siyuan/releases/download/v" + ver + "/" + pkg
-	downloadPkgURLs = append(downloadPkgURLs, url)
-	url = "https://ghproxy.com/" + url
-	downloadPkgURLs = append(downloadPkgURLs, url)
-	url = "https://release.b3log.org/siyuan/" + pkg
-	downloadPkgURLs = append(downloadPkgURLs, url)
+	b3logURL := "https://release.b3log.org/siyuan/" + pkg
+	downloadPkgURLs = append(downloadPkgURLs, b3logURL)
+	githubURL := "https://github.com/siyuan-note/siyuan/releases/download/v" + ver + "/" + pkg
+	ghproxyURL := "https://ghproxy.com/" + githubURL
+	downloadPkgURLs = append(downloadPkgURLs, ghproxyURL)
+	downloadPkgURLs = append(downloadPkgURLs, githubURL)
 
 	checksums := result["checksums"].(map[string]interface{})
 	checksum = checksums[pkg].(string)
@@ -173,9 +173,11 @@ func downloadInstallPkg(pkgURL, checksum string) (err error) {
 	logging.LogInfof("downloading install package [%s]", pkgURL)
 	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(10 * time.Minute)
 	callback := func(info req.DownloadInfo) {
-		//logging.LogDebugf("downloading install package [%s %.2f%%]", pkgURL, float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
+		progress := fmt.Sprintf("%.2f%%", float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
+		// logging.LogDebugf("downloading install package [%s %s]", pkgURL, progress)
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(133), progress))
 	}
-	_, err = client.R().SetOutputFile(savePath).SetDownloadCallback(callback).Get(pkgURL)
+	_, err = client.R().SetOutputFile(savePath).SetDownloadCallbackWithInterval(callback, 1*time.Second).Get(pkgURL)
 	if nil != err {
 		logging.LogErrorf("download install package [%s] failed: %s", pkgURL, err)
 		return
@@ -187,6 +189,7 @@ func downloadInstallPkg(pkgURL, checksum string) (err error) {
 		return
 	}
 	logging.LogInfof("downloaded install package [%s] to [%s]", pkgURL, savePath)
+	util.PushStatusBar(Conf.Language(62))
 	return
 }
 

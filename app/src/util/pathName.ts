@@ -97,7 +97,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     }
     const dialog = new Dialog({
         title: `${title || window.siyuan.languages.move}
-<div style="max-height: 14px;overflow: auto;line-height: 14px;-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0, #000 6px);padding-bottom: 4px;margin-bottom: -4px" class="ft__smaller ft__on-surface fn__hidescrollbar"></div>`,
+<div style="max-height: 16px;overflow: auto;line-height: 14px;-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0, #000 6px);padding-bottom: 4px;margin-bottom: -4px" class="ft__smaller ft__on-surface fn__hidescrollbar"></div>`,
         content: `<div>
     <div class="b3-form__icon" style="margin: 8px">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
@@ -118,7 +118,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             }
         }
     });
-    if (paths.length) {
+    if (paths && paths.length > 0) {
         fetchPost("/api/filetree/getHPathsByPaths", {paths}, (response) => {
             dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(" "));
         });

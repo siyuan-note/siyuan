@@ -175,10 +175,12 @@ This question varies from person to person and is difficult to answer uniformly.
 
 The data is saved in the workspace folder (the default is in the user's home directory Documents/SiYuan, which can be modified in <kbd>Settings</kbd> - <kbd>About</kbd>), in the workspace data folder:
 
-* `assets` are used to save all inserted assets
-* `templates` are used to save template snippets
-* `widgets` are used to save widgets
-* `emojis` are used to save emoji images
+* `assets` is used to save all inserted assets
+* `emojis` is used to save emoji images
+* `snippets` is used to save code snippets
+* `storage` is used to save browser localStorage and flashcards, etc.
+* `templates` is used to save template snippets
+* `widgets` is used to save widgets
 * The rest of the folders are the notebook folders created by the user, files with the suffix of `.sy` in the notebook folder are used to save the document data, and the data format is JSON
 
 ### Does it support data synchronization through a third-party sync disk?

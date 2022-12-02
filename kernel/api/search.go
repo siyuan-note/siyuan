@@ -220,12 +220,17 @@ func fullTextSearchBlock(c *gin.Context) {
 	if nil != methodArg {
 		method = int(methodArg.(float64))
 	}
+	orderByArg := arg["orderBy"]
+	var orderBy int // 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时）
+	if nil != orderByArg {
+		orderBy = int(orderByArg.(float64))
+	}
 	groupByArg := arg["groupBy"]
 	var groupBy int // 0：不分组，1：按文档分组
 	if nil != groupByArg {
 		groupBy = int(groupByArg.(float64))
 	}
-	blocks, matchedBlockCount, matchedRootCount := model.FullTextSearchBlock(query, boxes, paths, types, method, groupBy)
+	blocks, matchedBlockCount, matchedRootCount := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy)
 	ret.Data = map[string]interface{}{
 		"blocks":            blocks,
 		"matchedBlockCount": matchedBlockCount,

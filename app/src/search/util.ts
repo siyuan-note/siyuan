@@ -203,9 +203,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 config.hPath = "";
                 element.querySelector("#searchPathInput").innerHTML = config.hPath;
                 inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
-                const includeElement = element.querySelector("#searchInclude")
-                includeElement.classList.remove("b3-button--cancel")
-                includeElement.setAttribute("disabled", "disabled")
+                const includeElement = element.querySelector("#searchInclude");
+                includeElement.classList.remove("b3-button--cancel");
+                includeElement.setAttribute("disabled", "disabled");
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -249,12 +249,12 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         }
                         config.hPath = escapeHtml(hPathList.join(" "));
                         element.querySelector("#searchPathInput").innerHTML = `${config.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
-                        const includeElement = element.querySelector("#searchInclude")
-                        includeElement.classList.remove("b3-button--cancel")
+                        const includeElement = element.querySelector("#searchInclude");
+                        includeElement.classList.remove("b3-button--cancel");
                         if (enableIncludeChild) {
-                            includeElement.removeAttribute("disabled")
+                            includeElement.removeAttribute("disabled");
                         } else {
-                            includeElement.setAttribute("disabled", "disabled")
+                            includeElement.setAttribute("disabled", "disabled");
                         }
                         inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
                     });
@@ -263,7 +263,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchInclude") {
-                target.classList.toggle("b3-button--cancel")
+                target.classList.toggle("b3-button--cancel");
                 if (target.classList.contains("b3-button--cancel")) {
                     config.idPath.forEach((item, index) => {
                         if (!item.endsWith(".sy") && item.split("/").length > 1) {
@@ -686,7 +686,7 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         width: "520px",
-    })
+    });
     const btnsElement = filterDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         filterDialog.destroy();
@@ -694,7 +694,7 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
     btnsElement[1].addEventListener("click", () => {
         filterDialog.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
             config.types[item.getAttribute("data-type") as TSearchFilter] = item.checked;
-        })
+        });
         inputEvent(element, config, undefined, edit);
         filterDialog.destroy();
     });

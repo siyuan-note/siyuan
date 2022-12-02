@@ -1,4 +1,7 @@
 .fn {
+  &__hidescrollbar::-webkit-scrollbar {
+    display: none;
+  }
 
   &__ellipsis {
     @include text-clamp(1);

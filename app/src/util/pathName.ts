@@ -96,7 +96,8 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         return;
     }
     const dialog = new Dialog({
-        title: `${title || window.siyuan.languages.move} <span class="ft__smaller ft__on-surface"></span>`,
+        title: `${title || window.siyuan.languages.move}
+<div style="max-height: 14px;overflow: auto;line-height: 14px;-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0, #000 6px);padding-bottom: 4px;margin-bottom: -4px" class="ft__smaller ft__on-surface fn__hidescrollbar"></div>`,
         content: `<div>
     <div class="b3-form__icon" style="margin: 8px">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>

@@ -590,7 +590,7 @@ const addConfigMoreMenu = (config: ISearchOption, edit: Protyle, element: Elemen
             config.sort = 4;
             inputEvent(element, config, undefined, edit);
         }
-    }]
+    }];
     if (config.group === 1) {
         sortMenu.push({
             label: window.siyuan.languages.context,
@@ -599,7 +599,7 @@ const addConfigMoreMenu = (config: ISearchOption, edit: Protyle, element: Elemen
                 config.sort = 5;
                 inputEvent(element, config, undefined, edit);
             }
-        })
+        });
     }
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.sort,

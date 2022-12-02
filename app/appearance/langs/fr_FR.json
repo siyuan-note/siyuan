@@ -1,4 +1,5 @@
 {
+  "groupe": "Groupe",
   "noGroupBy": "Aucun regroupement",
   "groupByDoc": "Regrouper par document",
   "leftRightLayout": "Disposition gauche et droite",
@@ -6,7 +7,6 @@
   "keyword": "Mot-clé",
   "searchMethod": "méthode de recherche",
   "regex": "Regex",
-  "groupBy": "Regroupement et mise en page",
   "keywordsLimit": "Limite de mots clés",
   "exportAsImage": "Exporter en tant qu'image",
   "exportBySiYuan": "Exporter par SiYuan",

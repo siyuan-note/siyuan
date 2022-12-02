@@ -68,6 +68,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
                     replaceList: [],
                     group: localData.group || 0,
                     layout: localData.layout || 0,
+                    sort: localData.sort || 0,
                     types: localData.types
                 }
             });
@@ -118,8 +119,8 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchGroup" aria-label="${window.siyuan.languages.groupBy}" class="block__icon b3-tooltips b3-tooltips__w">
-                <svg><use xlink:href="#iconFiles"></use></svg>
+            <span id="searchMore" aria-label="${window.siyuan.languages.more}" class="block__icon b3-tooltips b3-tooltips__w">
+                <svg><use xlink:href="#iconMore"></use></svg>
             </span>
             <span class="fn__space"></span>
             <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="${closeCB ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__w">
@@ -321,8 +322,8 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.id === "searchGroup") {
-                addConfigGroupMenu(config, edit, element);
+            } else if (target.id === "searchMore") {
+                addConfigMoreMenu(config, edit, element);
                 window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
                 event.stopPropagation();
                 event.preventDefault();
@@ -552,50 +553,109 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     return edit;
 };
 
-const addConfigGroupMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
+const addConfigMoreMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
     window.siyuan.menus.menu.remove();
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.noGroupBy,
-        current: config.group === 0,
+    const sortMenu = [{
+        label: window.siyuan.languages.type,
+        current: config.sort === 0,
         click() {
-            element.querySelector("#searchCollapse").parentElement.classList.add("fn__none");
             config.group = 0;
             inputEvent(element, config, undefined, edit);
         }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.groupByDoc,
-        current: config.group === 1,
+    }, {
+        label: window.siyuan.languages.createdASC,
+        current: config.sort === 1,
         click() {
-            element.querySelector("#searchCollapse").parentElement.classList.remove("fn__none");
             config.group = 1;
             inputEvent(element, config, undefined, edit);
         }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.topBottomLayout,
-        current: config.layout === 0,
+    }, {
+        label: window.siyuan.languages.createdDESC,
+        current: config.sort === 2,
         click() {
-            element.querySelector(".search__layout").classList.remove("search__layout--row");
-            setPadding(edit.protyle);
-            config.layout = 0;
-            if (!element.parentElement.getAttribute("data-id")) {
-                localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-            }
+            config.group = 2;
+            inputEvent(element, config, undefined, edit);
         }
+    }, {
+        label: window.siyuan.languages.modifiedASC,
+        current: config.sort === 3,
+        click() {
+            config.group = 3;
+            inputEvent(element, config, undefined, edit);
+        }
+    }, {
+        label: window.siyuan.languages.modifiedDESC,
+        current: config.sort === 4,
+        click() {
+            config.group = 4;
+            inputEvent(element, config, undefined, edit);
+        }
+    }]
+    if (config.group === 1) {
+        sortMenu.push({
+            label: window.siyuan.languages.context,
+            current: config.sort === 5,
+            click() {
+                config.sort = 5;
+                inputEvent(element, config, undefined, edit);
+            }
+        })
+    }
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.sort,
+        type: "submenu",
+        submenu: sortMenu,
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.leftRightLayout,
-        current: config.layout === 1,
-        click() {
-            element.querySelector(".search__layout").classList.add("search__layout--row");
-            setPadding(edit.protyle);
-            config.layout = 1;
-            if (!element.parentElement.getAttribute("data-id")) {
-                localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+        label: window.siyuan.languages.group,
+        type: "submenu",
+        submenu: [{
+            label: window.siyuan.languages.noGroupBy,
+            current: config.group === 0,
+            click() {
+                element.querySelector("#searchCollapse").parentElement.classList.add("fn__none");
+                config.group = 0;
+                if (config.sort === 5) {
+                    config.sort = 0;
+                }
+                inputEvent(element, config, undefined, edit);
             }
-        }
+        }, {
+            label: window.siyuan.languages.groupByDoc,
+            current: config.group === 1,
+            click() {
+                element.querySelector("#searchCollapse").parentElement.classList.remove("fn__none");
+                config.group = 1;
+                inputEvent(element, config, undefined, edit);
+            }
+        }]
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.layout,
+        type: "submenu",
+        submenu: [{
+            label: window.siyuan.languages.topBottomLayout,
+            current: config.layout === 0,
+            click() {
+                element.querySelector(".search__layout").classList.remove("search__layout--row");
+                setPadding(edit.protyle);
+                config.layout = 0;
+                if (!element.parentElement.getAttribute("data-id")) {
+                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+                }
+            }
+        }, {
+            label: window.siyuan.languages.leftRightLayout,
+            current: config.layout === 1,
+            click() {
+                element.querySelector(".search__layout").classList.add("search__layout--row");
+                setPadding(edit.protyle);
+                config.layout = 1;
+                if (!element.parentElement.getAttribute("data-id")) {
+                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+                }
+            }
+        }]
     }).element);
 };
 
@@ -878,6 +938,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 types: config.types,
                 paths: config.idPath || [],
                 groupBy: config.group,
+                orderBy: config.sort,
             }, (response) => {
                 onSearch(response.data.blocks, edit, element);
                 element.querySelector("#searchResult").innerHTML = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);

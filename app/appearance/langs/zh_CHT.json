@@ -1,4 +1,5 @@
 {
+  "group": "分組",
   "noGroupBy": "不分組",
   "groupByDoc": "按文檔分組",
   "leftRightLayout": "左右佈局",
@@ -6,7 +7,6 @@
   "keyword": "關鍵字",
   "searchMethod":"搜索方式",
   "regex":"正則表達式",
-  "groupBy": "分組及佈局",
   "keywordsLimit": "關鍵字數量限制",
   "exportAsImage": "導出為圖片",
   "exportBySiYuan": "由思源筆記導出",

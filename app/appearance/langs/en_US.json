@@ -1,4 +1,5 @@
 {
+  "group": "Group",
   "noGroupBy": "No grouping",
   "groupByDoc": "Group by document",
   "leftRightLayout": "Left and right layout",
@@ -6,7 +7,6 @@
   "keyword": "Keyword",
   "searchMethod": "Search Method",
   "regex": "Regex",
-  "groupBy": "Grouping and Layout",
   "keywordsLimit": "Keywords Limit",
   "exportAsImage": "Export as image",
   "exportBySiYuan": "Export by SiYuan",

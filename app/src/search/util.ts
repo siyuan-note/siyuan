@@ -559,35 +559,35 @@ const addConfigMoreMenu = (config: ISearchOption, edit: Protyle, element: Elemen
         label: window.siyuan.languages.type,
         current: config.sort === 0,
         click() {
-            config.group = 0;
+            config.sort = 0;
             inputEvent(element, config, undefined, edit);
         }
     }, {
         label: window.siyuan.languages.createdASC,
         current: config.sort === 1,
         click() {
-            config.group = 1;
+            config.sort = 1;
             inputEvent(element, config, undefined, edit);
         }
     }, {
         label: window.siyuan.languages.createdDESC,
         current: config.sort === 2,
         click() {
-            config.group = 2;
+            config.sort = 2;
             inputEvent(element, config, undefined, edit);
         }
     }, {
         label: window.siyuan.languages.modifiedASC,
         current: config.sort === 3,
         click() {
-            config.group = 3;
+            config.sort = 3;
             inputEvent(element, config, undefined, edit);
         }
     }, {
         label: window.siyuan.languages.modifiedDESC,
         current: config.sort === 4,
         click() {
-            config.group = 4;
+            config.sort = 4;
             inputEvent(element, config, undefined, edit);
         }
     }]

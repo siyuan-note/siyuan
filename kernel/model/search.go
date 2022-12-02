@@ -312,8 +312,9 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 	return
 }
 
-func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method int, groupBy int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
+	// orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时）
 	// groupBy：0：不分组，1：按文档分组
 	query = strings.TrimSpace(query)
 	beforeLen := 36
@@ -324,7 +325,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		filter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearch(query, boxFilter, pathFilter, filter, beforeLen, true)
+		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, filter, beforeLen)
 	case 2: // SQL
 		blocks, matchedBlockCount, matchedRootCount = searchBySQL(query, beforeLen)
 	case 3: // 正则表达式
@@ -336,7 +337,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		filter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearch(query, boxFilter, pathFilter, filter, beforeLen, false)
+		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByKeyword(query, boxFilter, pathFilter, filter, beforeLen)
 	}
 
 	switch groupBy {
@@ -523,68 +524,23 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
 	return
 }
 
-func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (matchedBlockCount, matchedRootCount int) {
-	query = gulu.Str.RemoveInvisible(query)
-	if util.IsIDPattern(query) {
-		ret, _ := sql.Query("SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE `id` = '" + query + "'")
-		if 1 > len(ret) {
-			return
-		}
-		matchedBlockCount = int(ret[0]["matches"].(int64))
-		matchedRootCount = int(ret[0]["docs"].(int64))
-		return
-	}
-
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
-
-	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE `" + table + "` MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + typeFilter
-	stmt += boxFilter + pathFilter
-	result, _ := sql.Query(stmt)
-	if 1 > len(result) {
-		return
-	}
-	matchedBlockCount = int(result[0]["matches"].(int64))
-	matchedRootCount = int(result[0]["docs"].(int64))
-	return
-}
-
-func fullTextSearch(query, boxFilter, pathFilter, typeFilter string, beforeLen int, querySyntax bool) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter string, beforeLen int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	if util.IsIDPattern(query) {
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen)
 		return
 	}
+	return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, beforeLen)
+}
 
-	if !querySyntax {
-		query = stringQuery(query)
+func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter string, beforeLen int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	query = gulu.Str.RemoveInvisible(query)
+	if util.IsIDPattern(query) {
+		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen)
+		return
 	}
-
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
-	projections := "id, parent_id, root_id, hash, box, path, " +
-		"highlight(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS hpath, " +
-		"highlight(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS name, " +
-		"highlight(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS alias, " +
-		"highlight(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS memo, " +
-		"tag, " +
-		"highlight(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS content, " +
-		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + typeFilter
-	stmt += boxFilter + pathFilter
-	stmt += " ORDER BY sort ASC, rank ASC LIMIT " + strconv.Itoa(Conf.Search.Limit)
-	blocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
-	ret = fromSQLBlocks(&blocks, "", beforeLen)
-	if 1 > len(ret) {
-		ret = []*Block{}
-	}
-
-	matchedBlockCount, matchedRootCount = fullTextSearchCount(query, boxFilter, pathFilter, typeFilter)
-	return
+	query = stringQuery(query)
+	return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, beforeLen)
 }
 
 func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter string, beforeLen int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
@@ -619,65 +575,57 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter string) 
 	return
 }
 
-func query2Stmt(queryStr string) (ret string) {
-	buf := bytes.Buffer{}
-	if util.IsIDPattern(queryStr) {
-		buf.WriteString("id = '" + queryStr + "'")
-	} else {
-		var tags []string
-		luteEngine := NewLute()
-		t := parse.Inline("", []byte(queryStr), luteEngine.ParseOptions)
-		ast.Walk(t.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
-				return ast.WalkContinue
-			}
-			if ast.NodeTag == n.Type || (n.IsTextMarkType("tag")) {
-				tags = append(tags, n.Text())
-			}
-			return ast.WalkContinue
-		})
-
-		for _, tag := range tags {
-			queryStr = strings.ReplaceAll(queryStr, "#"+tag+"#", "")
-		}
-		parts := strings.Split(queryStr, " ")
-
-		for i, part := range parts {
-			if "" == part {
-				continue
-			}
-			part = strings.ReplaceAll(part, "'", "''")
-			buf.WriteString("(content LIKE '%" + part + "%'")
-			buf.WriteString(Conf.Search.NAMFilter(part))
-			buf.WriteString(")")
-			if i < len(parts)-1 {
-				buf.WriteString(" AND ")
-			}
-		}
-
-		if 0 < len(tags) {
-			if 0 < buf.Len() {
-				buf.WriteString(" OR ")
-			}
-			for i, tag := range tags {
-				buf.WriteString("(content LIKE '%#" + tag + "#%')")
-				if i < len(tags)-1 {
-					buf.WriteString(" AND ")
-				}
-			}
-			buf.WriteString(" OR ")
-			for i, tag := range tags {
-				buf.WriteString("ial LIKE '%tags=\"%" + tag + "%\"%'")
-				if i < len(tags)-1 {
-					buf.WriteString(" AND ")
-				}
-			}
-		}
+func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter string, beforeLen int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	table := "blocks_fts" // 大小写敏感
+	if !Conf.Search.CaseSensitive {
+		table = "blocks_fts_case_insensitive"
 	}
-	if 1 > buf.Len() {
-		buf.WriteString("1=1")
+	projections := "id, parent_id, root_id, hash, box, path, " +
+		"highlight(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS hpath, " +
+		"highlight(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS name, " +
+		"highlight(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS alias, " +
+		"highlight(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS memo, " +
+		"tag, " +
+		"highlight(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS content, " +
+		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + typeFilter
+	stmt += boxFilter + pathFilter
+	stmt += " ORDER BY sort ASC, rank ASC LIMIT " + strconv.Itoa(Conf.Search.Limit)
+	blocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
+	ret = fromSQLBlocks(&blocks, "", beforeLen)
+	if 1 > len(ret) {
+		ret = []*Block{}
 	}
-	ret = buf.String()
+
+	matchedBlockCount, matchedRootCount = fullTextSearchCount(query, boxFilter, pathFilter, typeFilter)
+	return
+}
+
+func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (matchedBlockCount, matchedRootCount int) {
+	query = gulu.Str.RemoveInvisible(query)
+	if util.IsIDPattern(query) {
+		ret, _ := sql.Query("SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE `id` = '" + query + "'")
+		if 1 > len(ret) {
+			return
+		}
+		matchedBlockCount = int(ret[0]["matches"].(int64))
+		matchedRootCount = int(ret[0]["docs"].(int64))
+		return
+	}
+
+	table := "blocks_fts" // 大小写敏感
+	if !Conf.Search.CaseSensitive {
+		table = "blocks_fts_case_insensitive"
+	}
+
+	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE `" + table + "` MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + typeFilter
+	stmt += boxFilter + pathFilter
+	result, _ := sql.Query(stmt)
+	if 1 > len(result) {
+		return
+	}
+	matchedBlockCount = int(result[0]["matches"].(int64))
+	matchedRootCount = int(result[0]["docs"].(int64))
 	return
 }
 

@@ -18,6 +18,8 @@ package model
 
 import (
 	"bytes"
+	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/util"
 	"math"
 	"strings"
 	"unicode/utf8"
@@ -684,4 +686,66 @@ func nodeTitleLabel(node *GraphNode, blockContent string) {
 	} else {
 		node.Label = blockContent
 	}
+}
+
+func query2Stmt(queryStr string) (ret string) {
+	buf := bytes.Buffer{}
+	if util.IsIDPattern(queryStr) {
+		buf.WriteString("id = '" + queryStr + "'")
+	} else {
+		var tags []string
+		luteEngine := NewLute()
+		t := parse.Inline("", []byte(queryStr), luteEngine.ParseOptions)
+		ast.Walk(t.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+			if ast.NodeTag == n.Type || (n.IsTextMarkType("tag")) {
+				tags = append(tags, n.Text())
+			}
+			return ast.WalkContinue
+		})
+
+		for _, tag := range tags {
+			queryStr = strings.ReplaceAll(queryStr, "#"+tag+"#", "")
+		}
+		parts := strings.Split(queryStr, " ")
+
+		for i, part := range parts {
+			if "" == part {
+				continue
+			}
+			part = strings.ReplaceAll(part, "'", "''")
+			buf.WriteString("(content LIKE '%" + part + "%'")
+			buf.WriteString(Conf.Search.NAMFilter(part))
+			buf.WriteString(")")
+			if i < len(parts)-1 {
+				buf.WriteString(" AND ")
+			}
+		}
+
+		if 0 < len(tags) {
+			if 0 < buf.Len() {
+				buf.WriteString(" OR ")
+			}
+			for i, tag := range tags {
+				buf.WriteString("(content LIKE '%#" + tag + "#%')")
+				if i < len(tags)-1 {
+					buf.WriteString(" AND ")
+				}
+			}
+			buf.WriteString(" OR ")
+			for i, tag := range tags {
+				buf.WriteString("ial LIKE '%tags=\"%" + tag + "%\"%'")
+				if i < len(tags)-1 {
+					buf.WriteString(" AND ")
+				}
+			}
+		}
+	}
+	if 1 > buf.Len() {
+		buf.WriteString("1=1")
+	}
+	ret = buf.String()
+	return
 }

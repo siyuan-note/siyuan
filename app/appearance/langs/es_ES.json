@@ -966,7 +966,7 @@
     "130": "Iniciando instalador de nueva versión...",
     "131": "Esta solicitud no es compatible, vaya a la consola de administración del proveedor de almacenamiento en la nube para operar",
     "132": "El método de búsqueda actual no admite la operación de reemplazo, utilice el método de búsqueda [Palabra clave] o [Regex]",
-    "133": "TODO",
+    "133": "Descargando paquete de instalación de actualización [%s]",
     "134": "Para evitar que los datos recién restaurados sean sobrescritos por la sincronización, se ha suspendido automáticamente la función de sincronización de datos",
     "135": "No se pueden descifrar los datos. Asegúrese de usar la misma clave en varios dispositivos, luego cree un nuevo directorio en la nube para sincronizar",
     "136": "Inicializando la clave del repositorio de datos...",

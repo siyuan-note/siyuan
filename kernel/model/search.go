@@ -319,21 +319,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 	query = strings.TrimSpace(query)
 	beforeLen := 36
 	var blocks []*Block
-
-	var orderByClause string
-	switch orderBy {
-	case 1:
-		orderByClause = "ORDER BY created ASC"
-	case 2:
-		orderByClause = "ORDER BY created DESC"
-	case 3:
-		orderByClause = "ORDER BY updated ASC"
-	case 4:
-		orderByClause = "ORDER BY updated DESC"
-	default:
-		orderByClause = "ORDER BY sort ASC"
-	}
-
+	orderByClause := buildOrderBy(orderBy)
 	switch method {
 	case 1: // 查询语法
 		filter := buildTypeFilter(types)
@@ -434,6 +420,21 @@ func buildPathsFilter(paths []string) string {
 	}
 	builder.WriteString(")")
 	return builder.String()
+}
+
+func buildOrderBy(orderBy int) string {
+	switch orderBy {
+	case 1:
+		return "ORDER BY created ASC"
+	case 2:
+		return "ORDER BY created DESC"
+	case 3:
+		return "ORDER BY updated ASC"
+	case 4:
+		return "ORDER BY updated DESC"
+	default:
+		return "ORDER BY sort ASC"
+	}
 }
 
 func buildTypeFilter(types map[string]bool) string {

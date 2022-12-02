@@ -15,7 +15,11 @@ class ProtyleHtml extends HTMLElement {
     if (name === 'data-content') {
       const dataContent = Lute.UnEscapeHTMLStr(
         this.getAttribute('data-content'))
-      this.display.innerHTML = dataContent
+      if (dataContent.startsWith('<div')) {
+        this.display.innerHTML = dataContent
+      } else {
+        this.display.innerHTML = `<div>${dataContent}</div>`
+      }
 
       const el = document.createElement('div')
       el.innerHTML = dataContent

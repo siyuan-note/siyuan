@@ -1,4 +1,6 @@
 {
+  "saveSearch": "Save query conditions",
+  "useSearch": "Use query conditions",
   "group": "Group",
   "noGroupBy": "No grouping",
   "groupByDoc": "Group by document",

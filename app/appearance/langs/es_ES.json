@@ -1,4 +1,6 @@
 {
+  "saveSearch": "Guardar condiciones de consulta",
+  "useSearch": "Usar condiciones de consulta",
   "grupo": "Grupo",
   "noGroupBy": "Sin agrupar",
   "groupByDoc": "Agrupar por documento",

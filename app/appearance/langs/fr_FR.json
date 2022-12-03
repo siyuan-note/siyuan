@@ -1,4 +1,6 @@
 {
+  "saveSearch": "Enregistrer les conditions de la requête",
+  "useSearch": "Utiliser les conditions de requête",
   "groupe": "Groupe",
   "noGroupBy": "Aucun regroupement",
   "groupByDoc": "Regrouper par document",

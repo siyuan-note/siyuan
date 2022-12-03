@@ -5,7 +5,7 @@ import {Search} from "./index";
 import {Wnd} from "../layout/Wnd";
 import {Constants} from "../constants";
 import {escapeHtml} from "../util/escape";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
@@ -323,8 +323,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchMore") {
-                addConfigMoreMenu(config, edit, element);
-                window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
+                addConfigMoreMenu(config, edit, element, event);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -559,7 +558,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     return edit;
 };
 
-const addConfigMoreMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
+const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: Element, event: MouseEvent) => {
     window.siyuan.menus.menu.remove();
     const sortMenu = [{
         label: window.siyuan.languages.type,
@@ -683,14 +682,15 @@ const addConfigMoreMenu = (config: ISearchOption, edit: Protyle, element: Elemen
                 saveDialog.destroy();
             });
             btnsElement[1].addEventListener("click", () => {
-                fetchPost("/api/setting/setCriterion", {criterion: Object.assign({name: saveDialog.element.querySelector("input").value}, config)}, () => {
+                fetchPost("/api/storage/setCriterion", {criterion: Object.assign({name: saveDialog.element.querySelector("input").value}, config)}, () => {
                     saveDialog.destroy();
-                })
+                });
             });
         }
-    }).element)
-    const searchSubMenu: IMenu[] = []
-    window.siyuan.config.criteria.forEach(item => {
+    }).element);
+    const criteria = await fetchSyncPost("/api/storage/getCriteria");
+    const searchSubMenu: IMenu[] = [];
+    criteria.data.forEach((item: ISearchOption) => {
         searchSubMenu.push({
             label: item.name,
             click() {
@@ -738,23 +738,24 @@ const addConfigMoreMenu = (config: ISearchOption, edit: Protyle, element: Elemen
                     searchIncludeElement.classList.add("b3-button--cancel");
                 }
                 if (enableIncludeChild) {
-                    searchIncludeElement.removeAttribute("disabled")
+                    searchIncludeElement.removeAttribute("disabled");
                 } else {
-                    searchIncludeElement.setAttribute("disabled", "disabled")
+                    searchIncludeElement.setAttribute("disabled", "disabled");
                 }
                 (element.querySelector("#searchInput") as HTMLInputElement).value = item.k;
                 (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
                 inputEvent(element, Object.assign({}, item), undefined, edit);
             }
-        })
-    })
+        });
+    });
     if (searchSubMenu.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.useSearch,
             type: "submenu",
             submenu: searchSubMenu
-        }).element)
+        }).element);
     }
+    window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
 };
 
 const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Element) => {

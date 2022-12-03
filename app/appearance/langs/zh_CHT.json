@@ -1,4 +1,6 @@
 {
+  "saveSearch": "保存查詢條件",
+  "useSearch": "使用查詢條件",
   "group": "分組",
   "noGroupBy": "不分組",
   "groupByDoc": "按文檔分組",

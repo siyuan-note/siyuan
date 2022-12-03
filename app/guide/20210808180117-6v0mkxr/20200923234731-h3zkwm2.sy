@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20221112211041"
+		"updated": "20221202215048"
 	},
 	"Children": [
 		{
@@ -275,7 +275,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210428222603-moih9fe",
-				"updated": "20220329160456"
+				"updated": "20221202215048"
 			},
 			"Children": [
 				{
@@ -287,7 +287,7 @@
 					},
 					"Properties": {
 						"id": "20210428222603-gxgx3vi",
-						"updated": "20220329160450"
+						"updated": "20221202215029"
 					},
 					"Children": [
 						{
@@ -295,7 +295,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210428222603-0goch51",
-								"updated": "20220329160450"
+								"updated": "20221202215029"
 							},
 							"Children": [
 								{
@@ -309,7 +309,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ are used to save all inserted "
+									"Data": "​ is used to save all inserted "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -317,6 +317,117 @@
 									"TextMarkBlockRefID": "20200924100744-br924ar",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "assets"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221202214756-6a5qi9y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221202214756-6a5qi9y",
+						"updated": "20221202215034"
+					},
+					"Children": [
+						{
+							"ID": "20221202214756-polklnd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221202214756-polklnd",
+								"updated": "20221202215034"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "emojis"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save emoji images"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221202214758-dtqv6vc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221202214758-dtqv6vc",
+						"updated": "20221202215043"
+					},
+					"Children": [
+						{
+							"ID": "20221202214758-5u6jitp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221202214758-5u6jitp",
+								"updated": "20221202215043"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "snippets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save code snippets"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221202214811-2s26txl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221202214811-2s26txl",
+						"updated": "20221202215022"
+					},
+					"Children": [
+						{
+							"ID": "20221202214811-p1eevpi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221202214811-p1eevpi",
+								"updated": "20221202215022"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "storage"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save browser localStorage and flashcards, etc."
 								}
 							]
 						}
@@ -331,7 +442,7 @@
 					},
 					"Properties": {
 						"id": "20210428222603-vtr89xq",
-						"updated": "20210824200933"
+						"updated": "20221202215047"
 					},
 					"Children": [
 						{
@@ -339,7 +450,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210428222603-criebuv",
-								"updated": "20210824200933"
+								"updated": "20221202215047"
 							},
 							"Children": [
 								{
@@ -353,7 +464,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ are used to save "
+									"Data": "​ is used to save "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -375,7 +486,7 @@
 					},
 					"Properties": {
 						"id": "20210428222603-456vgdh",
-						"updated": "20220329160456"
+						"updated": "20221202215048"
 					},
 					"Children": [
 						{
@@ -383,7 +494,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210428222603-m3djncm",
-								"updated": "20220329160456"
+								"updated": "20221202215048"
 							},
 							"Children": [
 								{
@@ -397,7 +508,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ are used to save "
+									"Data": "​ is used to save "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -405,43 +516,6 @@
 									"TextMarkBlockRefID": "20210824202056-udkf7wg",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "widgets"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210826092337-pt1yd7r",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210826092337-pt1yd7r",
-						"updated": "20220226130622"
-					},
-					"Children": [
-						{
-							"ID": "20210826092337-swh0gdd",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210826092337-swh0gdd",
-								"updated": "20220226130622"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "emojis"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ are used to save emoji images"
 								}
 							]
 						}
@@ -477,7 +551,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ in the notebook folder are used to save the document data, and the data format is JSON"
+									"Data": "​​ in the notebook folder are used to save the document data, and the data format is JSON"
 								}
 							]
 						}
@@ -877,7 +951,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220526112843-xbvl2ni",
-				"updated": "20220808132857"
+				"updated": "20221202214406"
 			},
 			"Children": [
 				{
@@ -911,110 +985,58 @@
 					]
 				},
 				{
-					"ID": "20220526112843-br8thvh",
+					"ID": "20221202214345-gctwcoa",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220526112843-br8thvh",
-						"updated": "20220526112843"
+						"id": "20221202214345-gctwcoa",
+						"updated": "20221202214406"
 					},
 					"Children": [
 						{
-							"ID": "20220526112843-q3ckr5q",
+							"ID": "20221202214345-4p4zmco",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220526112843-q3ckr5q",
-								"updated": "20220615152158"
+								"id": "20221202214345-4p4zmco",
+								"updated": "20221202214406"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/user-guide-en_US",
-									"TextMarkTextContent": "User Guide"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " and "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/appearance",
-									"TextMarkTextContent": "Appearance"
+									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-android",
+									"TextMarkTextContent": "Android"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220526112843-rnr85gt",
+					"ID": "20221202214348-poddvse",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220526112843-rnr85gt",
-						"updated": "20220808132857"
+						"id": "20221202214348-poddvse"
 					},
 					"Children": [
 						{
-							"ID": "20220526112843-mj4iy0b",
+							"ID": "20221202214348-tk7i2le",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220526112843-mj4iy0b",
-								"updated": "20220808132857"
+								"id": "20221202214348-tk7i2le"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/88250/lute",
-									"TextMarkTextContent": "Editor Engine"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112843-dh5azqr",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112843-dh5azqr",
-						"updated": "20220526112843"
-					},
-					"Children": [
-						{
-							"ID": "20220526112843-p1pn0w7",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112843-p1pn0w7",
-								"updated": "20220615152221"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/encryption",
-									"TextMarkTextContent": "End-to-end encryption"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " and "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/dejavu",
-									"TextMarkTextContent": "Data repo"
+									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-ios",
+									"TextMarkTextContent": "iOS"
 								}
 							]
 						}
@@ -1045,46 +1067,6 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-chrome",
 									"TextMarkTextContent": "Chrome Clipping Extension"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112843-qwi3jan",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112843-qwi3jan",
-						"updated": "20220615152228"
-					},
-					"Children": [
-						{
-							"ID": "20220526112843-lvjzpyf",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112843-lvjzpyf",
-								"updated": "20220615152228"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-android",
-									"TextMarkTextContent": "Android"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " and "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-ios",
-									"TextMarkTextContent": "iOS"
 								}
 							]
 						}

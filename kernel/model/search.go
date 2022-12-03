@@ -312,10 +312,12 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 	return
 }
 
+// FullTextSearchBlock 搜索内容块。
+//
+// method：0：文本，1：查询语法，2：SQL，3：正则表达式
+// orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时）
+// groupBy：0：不分组，1：按文档分组
 func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
-	// orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时）
-	// groupBy：0：不分组，1：按文档分组
 	query = strings.TrimSpace(query)
 	beforeLen := 36
 	var blocks []*Block
@@ -346,7 +348,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 	case 1: // 按文档分组
 		rootMap := map[string]bool{}
 		var rootIDs []string
-		sorts := map[string]int{}
+		contentSorts := map[string]int{}
 		for _, b := range blocks {
 			if _, ok := rootMap[b.RootID]; !ok {
 				rootMap[b.RootID] = true
@@ -356,16 +358,18 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 					continue
 				}
 
-				sort := 0
-				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-					if !entering || !n.IsBlock() {
-						return ast.WalkContinue
-					}
+				if 5 == orderBy { // 按内容顺序（仅在按文档分组时）
+					sort := 0
+					ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+						if !entering || !n.IsBlock() {
+							return ast.WalkContinue
+						}
 
-					sorts[n.ID] = sort
-					sort++
-					return ast.WalkContinue
-				})
+						contentSorts[n.ID] = sort
+						sort++
+						return ast.WalkContinue
+					})
+				}
 			}
 		}
 
@@ -373,12 +377,43 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		roots := fromSQLBlocks(&sqlRoots, "", beforeLen)
 		for _, root := range roots {
 			for _, b := range blocks {
-				b.Sort = sorts[b.ID]
+				if 5 == orderBy { // 按内容顺序（仅在按文档分组时）
+					b.Sort = contentSorts[b.ID]
+				}
 				if b.RootID == root.ID {
 					root.Children = append(root.Children, b)
 				}
 			}
-			sort.Slice(root.Children, func(i, j int) bool { return root.Children[i].Sort < root.Children[j].Sort })
+
+			switch orderBy {
+			case 1: //按创建时间升序
+				sort.Slice(root.Children, func(i, j int) bool { return root.Children[i].Created < root.Children[j].Created })
+			case 2: // 按创建时间降序
+				sort.Slice(root.Children, func(i, j int) bool { return root.Children[i].Created > root.Children[j].Created })
+			case 3: // 按更新时间升序
+				sort.Slice(root.Children, func(i, j int) bool { return root.Children[i].Updated < root.Children[j].Updated })
+			case 4: // 按更新时间降序
+				sort.Slice(root.Children, func(i, j int) bool { return root.Children[i].Updated > root.Children[j].Updated })
+			case 5: // 按内容顺序（仅在按文档分组时）
+				sort.Slice(root.Children, func(i, j int) bool { return root.Children[i].Sort < root.Children[j].Sort })
+			default: // 按块类型（默认）
+				sort.Slice(root.Children, func(i, j int) bool { return root.Children[i].Sort < root.Children[j].Sort })
+			}
+		}
+
+		switch orderBy {
+		case 1: //按创建时间升序
+			sort.Slice(roots, func(i, j int) bool { return roots[i].Created < roots[j].Created })
+		case 2: // 按创建时间降序
+			sort.Slice(roots, func(i, j int) bool { return roots[i].Created > roots[j].Created })
+		case 3: // 按更新时间升序
+			sort.Slice(roots, func(i, j int) bool { return roots[i].Updated < roots[j].Updated })
+		case 4: // 按更新时间降序
+			sort.Slice(roots, func(i, j int) bool { return roots[i].Updated > roots[j].Updated })
+		case 5: // 按内容顺序（仅在按文档分组时）
+			// 都是文档，不需要再次排序
+		default: // 按块类型（默认）
+			// 都是文档，不需要再次排序
 		}
 		ret = roots
 	default:

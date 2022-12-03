@@ -188,9 +188,11 @@
 数据保存在工作空间文件夹下（默认位于用户家目录 Documents/SiYuan，可在 <kbd>设置</kbd> - <kbd>关于</kbd> 中进行修改），在工作空间 data 文件夹下：
 
 * `assets` 用于保存所有插入的资源文件
+* `emojis` 用于保存自定义图标表情图片
+* `snippets` 用于保存代码片段
+* `storage` 用于保存浏览器 localStorage 以及闪卡数据等
 * `templates` 用于保存模板片段
 * `widgets` 用于保存挂件
-* `emojis` 用于保存 Emoji 图片
 * 其余文件夹就是用户自己创建的笔记本文件夹，笔记本文件夹下 `.sy` 后缀的文件用于保存文档数据，数据格式为 JSON
 
 ### 支持通过第三方同步盘进行数据同步吗？
@@ -214,11 +216,9 @@
 思源笔记是完全开源的，欢迎参与贡献：
 
 * [界面和内核](https://github.com/siyuan-note/siyuan)
-* [用户指南](https://github.com/siyuan-note/user-guide-zh_CN)和[外观](https://github.com/siyuan-note/appearance)
-* [编辑器引擎](https://github.com/88250/lute)
-* [端到端加密](https://github.com/siyuan-note/encryption)和[数据仓库](https://github.com/siyuan-note/dejavu)
+* [Android 端](https://github.com/siyuan-note/siyuan-android)
+* [iOS 端](https://github.com/siyuan-note/siyuan-ios)
 * [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
-* [Android 端](https://github.com/siyuan-note/siyuan-android)和 [iOS 端](https://github.com/siyuan-note/siyuan-ios)
 
 更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
 

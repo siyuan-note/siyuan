@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20221112211001"
+		"updated": "20221202215129"
 	},
 	"Children": [
 		{
@@ -372,7 +372,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210428213927-rbcfx2y",
-				"updated": "20220329160344"
+				"updated": "20221202215129"
 			},
 			"Children": [
 				{
@@ -406,7 +406,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 用于保存所有插入的"
+									"Data": "​​ 用于保存所有插入的"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -414,6 +414,116 @@
 									"TextMarkBlockRefID": "20200915214115-42b8zma",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "资源文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221202214520-u96zbhq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221202214520-u96zbhq",
+						"updated": "20221202215129"
+					},
+					"Children": [
+						{
+							"ID": "20221202214520-k8zqbno",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221202214520-k8zqbno",
+								"updated": "20221202215129"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "emojis"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用于保存自定义图标表情图片"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221202214533-6s8dyno",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221202214533-6s8dyno"
+					},
+					"Children": [
+						{
+							"ID": "20221202214533-jfy92ef",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221202214533-jfy92ef",
+								"updated": "20221202214549"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "snippets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用于保存代码片段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221202214653-s19pmcp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221202214653-s19pmcp",
+						"updated": "20221202214912"
+					},
+					"Children": [
+						{
+							"ID": "20221202214653-trmmieq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221202214653-trmmieq",
+								"updated": "20221202214912"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "storage"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用于保存浏览器 localStorage 以及闪卡数据等"
 								}
 							]
 						}
@@ -449,7 +559,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 用于保存"
+									"Data": "​​ 用于保存"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -493,7 +603,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 用于保存"
+									"Data": "​​ 用于保存"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -501,43 +611,6 @@
 									"TextMarkBlockRefID": "20210824201257-cy7icrc",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "挂件"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20210826092236-9cre4ae",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20210826092236-9cre4ae",
-						"updated": "20210826092321"
-					},
-					"Children": [
-						{
-							"ID": "20210826092236-r5kusqv",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210826092236-r5kusqv",
-								"updated": "20210826092321"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "emojis"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ 用于保存 Emoji 图片"
 								}
 							]
 						}
@@ -574,7 +647,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 后缀的文件用于保存文档数据，数据格式为 JSON"
+									"Data": "​​ 后缀的文件用于保存文档数据，数据格式为 JSON"
 								}
 							]
 						}
@@ -970,7 +1043,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220526112824-mw30a1z",
-				"updated": "20220808132829"
+				"updated": "20221202214109"
 			},
 			"Children": [
 				{
@@ -1004,110 +1077,58 @@
 					]
 				},
 				{
-					"ID": "20220526112824-r9uu71u",
+					"ID": "20221202214106-cbq0omo",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220526112824-r9uu71u",
-						"updated": "20220526112824"
+						"id": "20221202214106-cbq0omo"
 					},
 					"Children": [
 						{
-							"ID": "20220526112824-fxlsr6k",
+							"ID": "20221202214106-cpfwdrq",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220526112824-fxlsr6k",
-								"updated": "20220615151915"
+								"id": "20221202214106-cpfwdrq",
+								"updated": "20221202214109"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/user-guide-zh_CN",
-									"TextMarkTextContent": "用户指南"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "和"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/appearance",
-									"TextMarkTextContent": "外观"
+									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-android",
+									"TextMarkTextContent": "Android 端"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220526112824-w23ystc",
+					"ID": "20221202214109-8fu6oix",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220526112824-w23ystc",
-						"updated": "20220808132829"
+						"id": "20221202214109-8fu6oix",
+						"updated": "20221202214109"
 					},
 					"Children": [
 						{
-							"ID": "20220526112824-8p1ws46",
+							"ID": "20221202214109-wx29l27",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220526112824-8p1ws46",
-								"updated": "20220808132829"
+								"id": "20221202214109-wx29l27"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/88250/lute",
-									"TextMarkTextContent": "编辑器引擎"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112824-2s9lzl6",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112824-2s9lzl6",
-						"updated": "20220526112824"
-					},
-					"Children": [
-						{
-							"ID": "20220526112824-ib9nppy",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112824-ib9nppy",
-								"updated": "20220615151946"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/encryption",
-									"TextMarkTextContent": "端到端加密"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "和"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/dejavu",
-									"TextMarkTextContent": "数据仓库"
+									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-ios",
+									"TextMarkTextContent": "iOS 端"
 								}
 							]
 						}
@@ -1138,46 +1159,6 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-chrome",
 									"TextMarkTextContent": "Chrome 剪藏扩展"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112824-zp2o0bd",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112824-zp2o0bd",
-						"updated": "20220615151956"
-					},
-					"Children": [
-						{
-							"ID": "20220526112824-f3e6e6n",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112824-f3e6e6n",
-								"updated": "20220615151956"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-android",
-									"TextMarkTextContent": "Android 端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "和 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-ios",
-									"TextMarkTextContent": "iOS 端"
 								}
 							]
 						}

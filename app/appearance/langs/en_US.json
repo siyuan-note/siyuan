@@ -1,6 +1,6 @@
 {
-  "saveSearch": "Save query conditions",
-  "useSearch": "Use query conditions",
+  "saveCriterion": "Save named criterion",
+  "useCriterion": "Use named criterion",
   "group": "Group",
   "noGroupBy": "No grouping",
   "groupByDoc": "Group by document",

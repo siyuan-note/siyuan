@@ -1,6 +1,6 @@
 {
-  "saveSearch": "Enregistrer les conditions de la requête",
-  "useSearch": "Utiliser les conditions de requête",
+  "saveCriterion": "Enregistrer le critère nommé",
+  "useCriterion": "Utiliser le critère nommé",
   "groupe": "Groupe",
   "noGroupBy": "Aucun regroupement",
   "groupByDoc": "Regrouper par document",

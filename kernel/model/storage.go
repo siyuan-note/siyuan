@@ -59,6 +59,26 @@ type CriterionTypes struct {
 
 var criteriaLock = sync.Mutex{}
 
+func RemoveCriterion(name string) (err error) {
+	criteriaLock.Lock()
+	defer criteriaLock.Unlock()
+
+	criteria, err := getCriteria()
+	if nil != err {
+		return
+	}
+
+	for i, c := range criteria {
+		if c.Name == name {
+			criteria = append(criteria[:i], criteria[i+1:]...)
+			break
+		}
+	}
+
+	err = setCriteria(criteria)
+	return
+}
+
 func SetCriterion(criterion *Criterion) (err error) {
 	criteriaLock.Lock()
 	defer criteriaLock.Unlock()

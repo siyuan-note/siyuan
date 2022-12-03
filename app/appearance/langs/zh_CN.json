@@ -1,6 +1,6 @@
 {
-  "saveSearch": "保存查询条件",
-  "useSearch": "使用查询条件",
+  "saveCriterion": "保存命名查询",
+  "useCriterion": "使用命名查询",
   "group": "分组",
   "noGroupBy": "不分组",
   "groupByDoc": "按文档分组",

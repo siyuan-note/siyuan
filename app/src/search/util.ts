@@ -701,8 +701,8 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
     <span class="fn__space"></span>
     <svg class="b3-menu__icon" style="width: 8px"><use xlink:href="#iconClose"></use></svg>
 </div>`,
-            bind(element) {
-                element.addEventListener("click", (event) => {
+            bind(menuElement) {
+                menuElement.addEventListener("click", (event) => {
                     if (hasClosestByMatchTag(event.target as HTMLElement, "svg")) {
                         fetchPost("/api/storage/removeCriterion", {name: element.textContent.trim()});
                         window.siyuan.menus.menu.remove();

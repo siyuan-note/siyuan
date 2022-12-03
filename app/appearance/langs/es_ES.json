@@ -82,6 +82,7 @@
   "snapshotMemo": "Memo de Instantánea",
   "snapshotMemoTip": "Ingrese la nota instantánea",
   "tagSnapshot": "Instantánea de la etiqueta",
+  "tagSnapshotUpload": "Etiquetar instantánea y cargar",
   "tagSnapshotTip": "No incluir símbolos \\ / : * ? &quot; &#039; &lt; &gt; |",
   "dataRepo": "Repositorio de datos",
   "newSubDoc": "Crear subdocumento",

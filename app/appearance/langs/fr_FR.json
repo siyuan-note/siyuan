@@ -82,6 +82,7 @@
   "snapshotMemo": "Mémo d'instantané",
   "snapshotMemoTip": "Veuillez entrer le mémo instantané",
   "tagSnapshot": "Instantané de balise",
+  "tagSnapshotUpload": "Tag instantané et téléchargement",
   "tagSnapshotTip": "Ne pas inclure les symboles \\ / : * ? &quot; &#039; &lt; &gt; |",
   "dataRepo": "Dépôt de données",
   "newSubDoc": "Créer un sous-doc",

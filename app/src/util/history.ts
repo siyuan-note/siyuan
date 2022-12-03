@@ -501,22 +501,34 @@ export const openHistory = () => {
                 const genTagDialog = new Dialog({
                     title: window.siyuan.languages.tagSnapshot,
                     content: `<div class="b3-dialog__content">
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.tagSnapshotTip}">
+    <input class="b3-text-field fn__block" value="${dayjs().format("YYYYMMDDHHmmss")}" placeholder="${window.siyuan.languages.tagSnapshotTip}">
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.tagSnapshot}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.tagSnapshotUpload}</button>
 </div>`,
                     width: isMobile() ? "80vw" : "520px",
                 });
                 const inputElement = genTagDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
-                inputElement.focus();
+                inputElement.select();
                 const btnsElement = genTagDialog.element.querySelectorAll(".b3-button");
                 btnsElement[0].addEventListener("click", () => {
                     genTagDialog.destroy();
                 });
-                genTagDialog.bindInput(inputElement, () => {
-                    (btnsElement[1] as HTMLButtonElement).click();
+                btnsElement[2].addEventListener("click", () => {
+                    fetchPost("/api/repo/tagSnapshot", {
+                        id: target.parentElement.getAttribute("data-id"),
+                        name: inputElement.value
+                    }, () => {
+                        fetchPost("/api/repo/uploadCloudSnapshot", {
+                            tag: inputElement.value,
+                            id: target.parentElement.getAttribute("data-id")
+                        }, () => {
+                            renderRepo(repoElement, 1);
+                        });
+                    });
+                    genTagDialog.destroy();
                 });
                 btnsElement[1].addEventListener("click", () => {
                     fetchPost("/api/repo/tagSnapshot", {

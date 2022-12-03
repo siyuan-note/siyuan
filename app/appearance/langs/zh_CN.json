@@ -82,6 +82,7 @@
   "snapshotMemo": "快照备注",
   "snapshotMemoTip": "请输入快照备注",
   "tagSnapshot": "标记快照",
+  "tagSnapshotUpload": "标记快照并上传",
   "tagSnapshotTip": "请勿包含符号 \\ / : * ? &quot; &#039; &lt; &gt; |",
   "dataRepo": "数据仓库",
   "newSubDoc": "新建子文档",

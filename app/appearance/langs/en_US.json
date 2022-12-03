@@ -82,6 +82,7 @@
   "snapshotMemo": "Snapshot Memo",
   "snapshotMemoTip": "Please enter the snapshot memo",
   "tagSnapshot": "Tag Snapshot",
+  "tagSnapshotUpload": "Tag snapshot and upload",
   "tagSnapshotTip": "Do not include symbols \\ / : * ? &quot; &#039; &lt; &gt; |",
   "dataRepo": "Data repo",
   "newSubDoc": "Create sub doc",

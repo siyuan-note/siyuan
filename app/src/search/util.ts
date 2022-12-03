@@ -699,7 +699,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             label: `<div class="fn__flex">
     <span class="fn__flex-1">${item.name}</span>
     <span class="fn__space"></span>
-    <svg class="b3-menu__icon" style="width: 8px"><use xlink:href="#iconClose"></use></svg>
+    <svg class="b3-menu__icon fn__a" style="width: 8px"><use xlink:href="#iconClose"></use></svg>
 </div>`,
             bind(menuElement) {
                 menuElement.addEventListener("click", (event) => {

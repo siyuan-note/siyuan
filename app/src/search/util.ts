@@ -17,6 +17,7 @@ import {addLoading, setPadding} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {Dialog} from "../dialog";
+import {hasClosestByMatchTag} from "../protyle/util/hasClosest";
 
 export const openGlobalSearch = (text: string, replace: boolean) => {
     text = text.trim();
@@ -695,60 +696,72 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
     const searchSubMenu: IMenu[] = [];
     criteria.data.forEach((item: ISearchOption) => {
         searchSubMenu.push({
-            label: item.name,
-            click() {
-                if (config.layout !== item.layout) {
-                    if (item.layout === 0) {
-                        element.querySelector(".search__layout").classList.remove("search__layout--row");
+            label: `<div class="fn__flex">
+    <span class="fn__flex-1">${item.name}</span>
+    <span class="fn__space"></span>
+    <svg class="b3-menu__icon" style="width: 8px"><use xlink:href="#iconClose"></use></svg>
+</div>`,
+            bind(element) {
+                element.addEventListener("click", (event) => {
+                    if (hasClosestByMatchTag(event.target as HTMLElement, "svg")) {
+                        fetchPost("/api/storage/removeCriterion", {name: element.textContent.trim()});
+                        window.siyuan.menus.menu.remove();
+                        return;
+                    }
+                    if (config.layout !== item.layout) {
+                        if (item.layout === 0) {
+                            element.querySelector(".search__layout").classList.remove("search__layout--row");
+                        } else {
+                            element.querySelector(".search__layout").classList.add("search__layout--row");
+                        }
+                        setPadding(edit.protyle);
+                    }
+                    if (config.hasReplace !== item.hasReplace) {
+                        if (item.hasReplace) {
+                            element.querySelector("#replaceHistoryBtn").parentElement.classList.remove("fn__none");
+                        } else {
+                            element.querySelector("#replaceHistoryBtn").parentElement.classList.add("fn__none");
+                        }
+                    }
+                    if (item.hPath) {
+                        element.querySelector("#searchPathInput").innerHTML = `${item.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
                     } else {
-                        element.querySelector(".search__layout").classList.add("search__layout--row");
+                        element.querySelector("#searchPathInput").innerHTML = "";
                     }
-                    setPadding(edit.protyle);
-                }
-                if (config.hasReplace !== item.hasReplace) {
-                    if (item.hasReplace) {
-                        element.querySelector("#replaceHistoryBtn").parentElement.classList.remove("fn__none");
+                    if (config.group !== item.group) {
+                        if (item.group === 0) {
+                            element.querySelector("#searchExpand").parentElement.classList.add("fn__none");
+                        } else {
+                            element.querySelector("#searchExpand").parentElement.classList.remove("fn__none");
+                        }
+                    }
+                    let includeChild = true;
+                    let enableIncludeChild = false;
+                    item.idPath.forEach(item => {
+                        if (item.endsWith(".sy")) {
+                            includeChild = false;
+                        }
+                        if (item.split("/").length > 1) {
+                            enableIncludeChild = true;
+                        }
+                    });
+                    const searchIncludeElement = element.querySelector("#searchInclude");
+                    if (includeChild) {
+                        searchIncludeElement.classList.remove("b3-button--cancel");
                     } else {
-                        element.querySelector("#replaceHistoryBtn").parentElement.classList.add("fn__none");
+                        searchIncludeElement.classList.add("b3-button--cancel");
                     }
-                }
-                if (item.hPath) {
-                    element.querySelector("#searchPathInput").innerHTML = `${item.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
-                } else {
-                    element.querySelector("#searchPathInput").innerHTML = "";
-                }
-                if (config.group !== item.group) {
-                    if (item.group === 0) {
-                        element.querySelector("#searchExpand").parentElement.classList.add("fn__none");
+                    if (enableIncludeChild) {
+                        searchIncludeElement.removeAttribute("disabled");
                     } else {
-                        element.querySelector("#searchExpand").parentElement.classList.remove("fn__none");
+                        searchIncludeElement.setAttribute("disabled", "disabled");
                     }
-                }
-                let includeChild = true;
-                let enableIncludeChild = false;
-                item.idPath.forEach(item => {
-                    if (item.endsWith(".sy")) {
-                        includeChild = false;
-                    }
-                    if (item.split("/").length > 1) {
-                        enableIncludeChild = true;
-                    }
-                });
-                const searchIncludeElement = element.querySelector("#searchInclude");
-                if (includeChild) {
-                    searchIncludeElement.classList.remove("b3-button--cancel");
-                } else {
-                    searchIncludeElement.classList.add("b3-button--cancel");
-                }
-                if (enableIncludeChild) {
-                    searchIncludeElement.removeAttribute("disabled");
-                } else {
-                    searchIncludeElement.setAttribute("disabled", "disabled");
-                }
-                (element.querySelector("#searchInput") as HTMLInputElement).value = item.k;
-                (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
-                Object.assign(config, item);
-                inputEvent(element, config, undefined, edit);
+                    (element.querySelector("#searchInput") as HTMLInputElement).value = item.k;
+                    (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
+                    Object.assign(config, item);
+                    inputEvent(element, config, undefined, edit);
+                    window.siyuan.menus.menu.remove();
+                })
             }
         });
     });

@@ -669,7 +669,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             const saveDialog = new Dialog({
                 title: window.siyuan.languages.saveSearch,
                 content: `<div class="b3-dialog__content">
-        <input class="fn__flex-center" placeholder="${window.siyuan.languages.memo}">
+        <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.memo}">
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -678,6 +678,9 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 width: "520px",
             });
             const btnsElement = saveDialog.element.querySelectorAll(".b3-button");
+            saveDialog.bindInput(saveDialog.element.querySelector("input"), () => {
+                btnsElement[1].dispatchEvent(new CustomEvent("click"));
+            })
             btnsElement[0].addEventListener("click", () => {
                 saveDialog.destroy();
             });
@@ -744,7 +747,8 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 }
                 (element.querySelector("#searchInput") as HTMLInputElement).value = item.k;
                 (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
-                inputEvent(element, Object.assign({}, item), undefined, edit);
+                Object.assign(config, item);
+                inputEvent(element, config, undefined, edit);
             }
         });
     });

@@ -113,6 +113,7 @@ func setCriteria(criteria []*Criterion) (err error) {
 }
 
 func getCriteria() (ret []*Criterion, err error) {
+	ret = []*Criterion{}
 	dataPath := filepath.Join(util.DataDir, "storage/criteria.json")
 	if !gulu.File.IsExist(dataPath) {
 		return

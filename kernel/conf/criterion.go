@@ -33,15 +33,15 @@ type Criterion struct {
 }
 
 type CriterionTypes struct {
-	mathBlock  bool
-	table      bool
-	blockquote bool
-	superBlock bool
-	paragraph  bool
-	document   bool
-	heading    bool
-	list       bool
-	listItem   bool
-	codeBlock  bool
-	htmlBlock  bool
+	MathBlock  bool `json:"mathBlock"`
+	Table      bool `json:"table"`
+	Blockquote bool `json:"blockquote"`
+	SuperBlock bool `json:"superBlock"`
+	Paragraph  bool `json:"paragraph"`
+	Document   bool `json:"document"`
+	Heading    bool `json:"heading"`
+	List       bool `json:"list"`
+	ListItem   bool `json:"listItem"`
+	CodeBlock  bool `json:"codeBlock"`
+	HtmlBlock  bool `json:"htmlBlock"`
 }

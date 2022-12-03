@@ -245,6 +245,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/setting/setExport", model.CheckAuth, setExport)
 	ginServer.Handle("POST", "/api/setting/setFiletree", model.CheckAuth, setFiletree)
 	ginServer.Handle("POST", "/api/setting/setSearch", model.CheckAuth, setSearch)
+	ginServer.Handle("POST", "/api/setting/setCriterion", model.CheckAuth, setCriterion)
 	ginServer.Handle("POST", "/api/setting/setKeymap", model.CheckAuth, setKeymap)
 	ginServer.Handle("POST", "/api/setting/setAppearance", model.CheckAuth, setAppearance)
 	ginServer.Handle("POST", "/api/setting/getCloudUser", model.CheckAuth, getCloudUser)

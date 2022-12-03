@@ -1,12 +1,30 @@
 type TLayout = "normal" | "top" | "bottom" | "left" | "right" | "center"
-type TSearchFilter =  "mathBlock" | "table" | "blockquote" | "superBlock" | "paragraph" | "document" | "heading"
+type TSearchFilter = "mathBlock" | "table" | "blockquote" | "superBlock" | "paragraph" | "document" | "heading"
     | "list" | "listItem" | "codeBlock" | "htmlBlock"
 type TDirection = "lr" | "tb"
-type TDockType = "file" | "outline" | "bookmark" | "tag" | "graph" | "globalGraph" | "backlink" | "backlinkOld" | "inbox"
+type TDockType =
+    "file"
+    | "outline"
+    | "bookmark"
+    | "tag"
+    | "graph"
+    | "globalGraph"
+    | "backlink"
+    | "backlinkOld"
+    | "inbox"
 type TDockPosition = "Left" | "Right" | "Top" | "Bottom"
 type TWS = "main" | "filetree" | "protyle"
 type TEditorMode = "preview" | "wysiwyg"
-type TOperation = "insert" | "update" | "delete" | "move" | "foldHeading" | "unfoldHeading" | "setAttrs" | "updateAttrs" | "append"
+type TOperation =
+    "insert"
+    | "update"
+    | "delete"
+    | "move"
+    | "foldHeading"
+    | "unfoldHeading"
+    | "setAttrs"
+    | "updateAttrs"
+    | "append"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes"
 declare module "blueimp-md5"
 
@@ -34,6 +52,7 @@ interface Window {
 }
 
 interface ISearchOption {
+    name?: string
     sort: number,  //  0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时）
     group: number,  // 0：不分组，1：按文档分组
     layout: number  // 0：上下，1：左右

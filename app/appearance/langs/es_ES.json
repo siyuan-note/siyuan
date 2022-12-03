@@ -1,6 +1,6 @@
 {
-  "saveSearch": "Guardar condiciones de consulta",
-  "useSearch": "Usar condiciones de consulta",
+  "saveCriterion": "Guardar criterio nombrado",
+  "useCriterion": "Usar criterio con nombre",
   "grupo": "Grupo",
   "noGroupBy": "Sin agrupar",
   "groupByDoc": "Agrupar por documento",

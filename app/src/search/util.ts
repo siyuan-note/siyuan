@@ -664,10 +664,10 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.saveSearch,
+        label: window.siyuan.languages.saveCriterion,
         click() {
             const saveDialog = new Dialog({
-                title: window.siyuan.languages.saveSearch,
+                title: window.siyuan.languages.saveCriterion,
                 content: `<div class="b3-dialog__content">
         <input class="fn__flex-center" placeholder="${window.siyuan.languages.memo}">
 </div>
@@ -750,7 +750,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
     });
     if (searchSubMenu.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.useSearch,
+            label: window.siyuan.languages.useCriterion,
             type: "submenu",
             submenu: searchSubMenu
         }).element);

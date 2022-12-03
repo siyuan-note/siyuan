@@ -60,6 +60,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/storage/removeLocalStorageVal", model.CheckAuth, removeLocalStorageVal)
 	ginServer.Handle("POST", "/api/storage/setCriterion", model.CheckAuth, setCriterion)
 	ginServer.Handle("POST", "/api/storage/getCriteria", model.CheckAuth, getCriteria)
+	ginServer.Handle("POST", "/api/storage/removeCriterion", model.CheckAuth, removeCriterion)
 
 	ginServer.Handle("POST", "/api/account/login", model.CheckAuth, login)
 	ginServer.Handle("POST", "/api/account/checkActivationcode", model.CheckAuth, checkActivationcode)

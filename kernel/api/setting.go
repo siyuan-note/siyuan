@@ -219,43 +219,6 @@ func setSearch(c *gin.Context) {
 	ret.Data = s
 }
 
-func setCriterion(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	param, err := gulu.JSON.MarshalJSON(arg["criterion"])
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	criterion := &conf.Criterion{}
-	if err = gulu.JSON.UnmarshalJSON(param, criterion); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	update := false
-	for i, criteria := range model.Conf.Criteria {
-		if criteria.Name == criterion.Name {
-			model.Conf.Criteria[i] = criterion
-			update = true
-			break
-		}
-	}
-	if !update {
-		model.Conf.Criteria = append(model.Conf.Criteria, criterion)
-	}
-	model.Conf.Save()
-}
-
 func setKeymap(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -58,6 +58,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/storage/getLocalStorage", model.CheckAuth, getLocalStorage)
 	ginServer.Handle("POST", "/api/storage/setLocalStorageVal", model.CheckAuth, setLocalStorageVal)
 	ginServer.Handle("POST", "/api/storage/removeLocalStorageVal", model.CheckAuth, removeLocalStorageVal)
+	ginServer.Handle("POST", "/api/storage/setCriterion", model.CheckAuth, setCriterion)
+	ginServer.Handle("POST", "/api/storage/getCriteria", model.CheckAuth, getCriteria)
 
 	ginServer.Handle("POST", "/api/account/login", model.CheckAuth, login)
 	ginServer.Handle("POST", "/api/account/checkActivationcode", model.CheckAuth, checkActivationcode)
@@ -245,7 +247,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/setting/setExport", model.CheckAuth, setExport)
 	ginServer.Handle("POST", "/api/setting/setFiletree", model.CheckAuth, setFiletree)
 	ginServer.Handle("POST", "/api/setting/setSearch", model.CheckAuth, setSearch)
-	ginServer.Handle("POST", "/api/setting/setCriterion", model.CheckAuth, setCriterion)
 	ginServer.Handle("POST", "/api/setting/setKeymap", model.CheckAuth, setKeymap)
 	ginServer.Handle("POST", "/api/setting/setAppearance", model.CheckAuth, setAppearance)
 	ginServer.Handle("POST", "/api/setting/getCloudUser", model.CheckAuth, getCloudUser)

@@ -686,7 +686,9 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 saveDialog.destroy();
             });
             btnsElement[1].addEventListener("click", () => {
-                fetchPost("/api/storage/setCriterion", {criterion: Object.assign({name: saveDialog.element.querySelector("input").value}, config)}, () => {
+                let criterion = config;
+                criterion.name = saveDialog.element.querySelector("input").value;
+                fetchPost("/api/storage/setCriterion", {criterion}, () => {
                     saveDialog.destroy();
                 });
             });
@@ -704,7 +706,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             bind(menuElement) {
                 menuElement.addEventListener("click", (event) => {
                     if (hasClosestByMatchTag(event.target as HTMLElement, "svg")) {
-                        fetchPost("/api/storage/removeCriterion", {name: element.textContent.trim()});
+                        fetchPost("/api/storage/removeCriterion", {name: item.name.trim()});
                         window.siyuan.menus.menu.remove();
                         return;
                     }

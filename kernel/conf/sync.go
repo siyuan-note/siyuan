@@ -46,6 +46,7 @@ type S3 struct {
 	Region        string `json:"region"`        // 存储区域
 	PathStyle     bool   `json:"pathStyle"`     // 是否使用路径风格
 	SkipTlsVerify bool   `json:"skipTlsVerify"` // 是否跳过 TLS 验证
+	Timeout       int    `json:"timeout"`       // 超时时间，单位：秒
 }
 
 type WebDAV struct {
@@ -53,6 +54,7 @@ type WebDAV struct {
 	Username      string `json:"username"`      // 用户名
 	Password      string `json:"password"`      // 密码
 	SkipTlsVerify bool   `json:"skipTlsVerify"` // 是否跳过 TLS 验证
+	Timeout       int    `json:"timeout"`       // 超时时间，单位：秒
 }
 
 const (

@@ -246,10 +246,12 @@ func InitConf() {
 		Conf.Sync.S3 = &conf.S3{}
 	}
 	Conf.Sync.S3.Endpoint = util.NormalizeEndpoint(Conf.Sync.S3.Endpoint)
+	Conf.Sync.S3.Timeout = util.NormalizeTimeout(Conf.Sync.S3.Timeout)
 	if nil == Conf.Sync.WebDAV {
 		Conf.Sync.WebDAV = &conf.WebDAV{}
 	}
 	Conf.Sync.WebDAV.Endpoint = util.NormalizeEndpoint(Conf.Sync.WebDAV.Endpoint)
+	Conf.Sync.WebDAV.Timeout = util.NormalizeTimeout(Conf.Sync.WebDAV.Timeout)
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()

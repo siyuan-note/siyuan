@@ -320,6 +320,7 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	s3.SecretKey = strings.TrimSpace(s3.SecretKey)
 	s3.Bucket = strings.TrimSpace(s3.Bucket)
 	s3.Region = strings.TrimSpace(s3.Region)
+	s3.Timeout = util.NormalizeTimeout(s3.Timeout)
 
 	Conf.Sync.S3 = s3
 	Conf.Save()
@@ -334,6 +335,7 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	webdav.Endpoint = util.NormalizeEndpoint(webdav.Endpoint)
 	webdav.Username = strings.TrimSpace(webdav.Username)
 	webdav.Password = strings.TrimSpace(webdav.Password)
+	webdav.Timeout = util.NormalizeTimeout(webdav.Timeout)
 
 	Conf.Sync.WebDAV = webdav
 	Conf.Save()

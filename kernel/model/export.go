@@ -1223,18 +1223,21 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 			}
 		}
 
-		if ast.NodeParagraph == n.Type {
+		switch n.Type {
+		case ast.NodeParagraph:
 			if nil == n.FirstChild {
 				// 空的段落块需要补全文本展位，否则后续格式化后再解析树会语义不一致 https://github.com/siyuan-note/siyuan/issues/5806
 				emptyParagraphs = append(emptyParagraphs, n)
 			}
-		}
-
-		if expandKaTexMacros && (ast.NodeInlineMathContent == n.Type || ast.NodeMathBlockContent == n.Type || (ast.NodeTextMark == n.Type && n.IsTextMarkType("inline-math"))) {
-			processKaTexMacros(n)
-		}
-
-		if ast.NodeWidget == n.Type {
+		case ast.NodeInlineMathContent, ast.NodeMathBlockContent:
+			if expandKaTexMacros {
+				processKaTexMacros(n)
+			}
+		case ast.NodeTextMark:
+			if expandKaTexMacros && n.IsTextMarkType("inline-math") {
+				processKaTexMacros(n)
+			}
+		case ast.NodeWidget:
 			// 挂件块导出 https://github.com/siyuan-note/siyuan/issues/3834 https://github.com/siyuan-note/siyuan/issues/6188
 
 			if wysiwyg {
@@ -1262,12 +1265,16 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 				}
 				unlinks = append(unlinks, n)
 			}
-			return ast.WalkContinue
+		case ast.NodeSuperBlockOpenMarker, ast.NodeSuperBlockLayoutMarker, ast.NodeSuperBlockCloseMarker:
+			if !wysiwyg {
+				unlinks = append(unlinks, n)
+			}
 		}
 
 		if ast.NodeText != n.Type {
 			return ast.WalkContinue
 		}
+
 		// Shift+Enter 换行在导出为 Markdown 时使用硬换行 https://github.com/siyuan-note/siyuan/issues/3458
 		n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\n"), []byte("  \n"))
 		return ast.WalkContinue

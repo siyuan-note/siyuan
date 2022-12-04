@@ -257,6 +257,7 @@ const bindProviderEvent = () => {
         reposDataElement.classList.remove("fn__none");
         return;
     }
+
     loadingElement.classList.add("fn__none");
     let nextElement = reposDataElement.nextElementSibling;
     while (nextElement) {

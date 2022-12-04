@@ -707,6 +707,8 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 menuElement.addEventListener("click", (event) => {
                     if (hasClosestByMatchTag(event.target as HTMLElement, "svg")) {
                         fetchPost("/api/storage/removeCriterion", {name: item.name.trim()});
+                        event.preventDefault();
+                        event.stopPropagation();
                         menuElement.remove();
                         return;
                     }

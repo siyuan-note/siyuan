@@ -58,7 +58,7 @@ const renderProvider = (provider: number) => {
 <div class="b3-label b3-label--noborder">
     <div>Secret Key</div>
     <div class="fn__hr"></div>
-    <input id="secretKey" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.secretKey}">
+    <input id="secretKey" type="password" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.secretKey}">
 </div>
 <div class="b3-label b3-label--noborder">
     <div>Bucket</div>
@@ -107,7 +107,7 @@ const renderProvider = (provider: number) => {
 <label class="b3-label b3-label--noborder fn__flex">
     <div class="fn__flex-center fn__size200">Secret Key</div>
     <div class="fn__space"></div>
-    <input id="secretKey" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.s3.secretKey}">
+    <input id="secretKey" type="password" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.s3.secretKey}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
     <div class="fn__flex-center fn__size200">Bucket</div>
@@ -163,7 +163,7 @@ const renderProvider = (provider: number) => {
 <div class="b3-label b3-label--noborder">
     <div>Password</div>
     <div class="fn__hr"></div>
-    <input id="password" class="b3-text-field fn__block" value="${window.siyuan.config.sync.webdav.password}">
+    <input id="password" type="password" class="b3-text-field fn__block" value="${window.siyuan.config.sync.webdav.password}">
 </div>
 <div class="b3-label b3-label--noborder">
     <div>TLS verify</div>
@@ -193,7 +193,7 @@ const renderProvider = (provider: number) => {
 <label class="b3-label b3-label--noborder fn__flex">
     <div class="fn__flex-center fn__size200">Password</div>
     <div class="fn__space"></div>
-    <input id="password" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.webdav.password}">
+    <input id="password" type="password" class="b3-text-field fn__flex-1" value="${window.siyuan.config.sync.webdav.password}">
 </label>
 <label class="b3-label b3-label--noborder fn__flex">
     <div class="fn__flex-center fn__size200">TLS Verify</div>

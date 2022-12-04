@@ -681,12 +681,12 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             const btnsElement = saveDialog.element.querySelectorAll(".b3-button");
             saveDialog.bindInput(saveDialog.element.querySelector("input"), () => {
                 btnsElement[1].dispatchEvent(new CustomEvent("click"));
-            })
+            });
             btnsElement[0].addEventListener("click", () => {
                 saveDialog.destroy();
             });
             btnsElement[1].addEventListener("click", () => {
-                let criterion = config;
+                const criterion = config;
                 criterion.name = saveDialog.element.querySelector("input").value;
                 fetchPost("/api/storage/setCriterion", {criterion}, () => {
                     saveDialog.destroy();
@@ -707,7 +707,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 menuElement.addEventListener("click", (event) => {
                     if (hasClosestByMatchTag(event.target as HTMLElement, "svg")) {
                         fetchPost("/api/storage/removeCriterion", {name: item.name.trim()});
-                        window.siyuan.menus.menu.remove();
+                        menuElement.remove();
                         return;
                     }
                     if (config.layout !== item.layout) {
@@ -763,7 +763,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                     Object.assign(config, item);
                     inputEvent(element, config, undefined, edit);
                     window.siyuan.menus.menu.remove();
-                })
+                });
             }
         });
     });

@@ -824,7 +824,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		cloudRepo = cloud.NewSiYuan(&cloud.BaseCloud{Conf: cloudConf})
 	case conf.ProviderS3:
 		s3HTTPClient := &http.Client{Transport: util.NewTransport(cloudConf.S3.SkipTlsVerify)}
-		s3HTTPClient.Timeout = 30 * time.Second
+		s3HTTPClient.Timeout = time.Duration(cloudConf.S3.Timeout) * time.Second
 		cloudRepo = cloud.NewS3(&cloud.BaseCloud{Conf: cloudConf}, s3HTTPClient)
 	case conf.ProviderWebDAV:
 		webdavClient := gowebdav.NewClient(cloudConf.WebDAV.Endpoint, cloudConf.WebDAV.Username, cloudConf.WebDAV.Password)
@@ -832,7 +832,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(a))
 		webdavClient.SetHeader("Authorization", auth)
 		webdavClient.SetHeader("User-Agent", util.UserAgent)
-		webdavClient.SetTimeout(30 * time.Second)
+		webdavClient.SetTimeout(time.Duration(cloudConf.WebDAV.Timeout) * time.Second)
 		webdavClient.SetTransport(util.NewTransport(cloudConf.WebDAV.SkipTlsVerify))
 		cloudRepo = cloud.NewWebDAV(&cloud.BaseCloud{Conf: cloudConf}, webdavClient)
 	default:
@@ -1056,6 +1056,7 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 			Region:        Conf.Sync.S3.Region,
 			PathStyle:     Conf.Sync.S3.PathStyle,
 			SkipTlsVerify: Conf.Sync.S3.SkipTlsVerify,
+			Timeout:       Conf.Sync.S3.Timeout,
 		}
 	case conf.ProviderWebDAV:
 		ret.WebDAV = &cloud.ConfWebDAV{
@@ -1063,6 +1064,7 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 			Username:      Conf.Sync.WebDAV.Username,
 			Password:      Conf.Sync.WebDAV.Password,
 			SkipTlsVerify: Conf.Sync.WebDAV.SkipTlsVerify,
+			Timeout:       Conf.Sync.WebDAV.Timeout,
 		}
 	default:
 		err = fmt.Errorf("invalid provider [%d]", Conf.Sync.Provider)

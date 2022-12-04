@@ -161,6 +161,19 @@ func GetChildDocDepth(treeAbsPath string) (ret int) {
 	return
 }
 
+func NormalizeTimeout(timeout int) int {
+	if 7 > timeout {
+		if 1 > timeout {
+			return 30
+		}
+		return 7
+	}
+	if 300 < timeout {
+		return 300
+	}
+	return timeout
+}
+
 func NormalizeEndpoint(endpoint string) string {
 	endpoint = strings.TrimSpace(endpoint)
 	if "" == endpoint {

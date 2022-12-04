@@ -372,12 +372,14 @@ declare interface IConfig {
             bucket: string
             region: string
             skipTlsVerify: boolean
+            timeout: number
         }
         webdav: {
             endpoint: string
             username: string
             password: string
             skipTlsVerify: boolean
+            timeout: number
         }
     },
     lang: string

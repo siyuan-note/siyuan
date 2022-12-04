@@ -17,11 +17,6 @@
       top: 6px;
       height: 16px;
       width: 16px;
-
-      &--current {
-        color: var(--b3-theme-primary);
-        background-color: var(--b3-theme-surface);
-      }
     }
 
     &-action {
@@ -55,6 +50,33 @@
       .b3-form__icon-input {
         padding-left: 25px !important;
       }
+    }
+  }
+
+  &__icona {
+    position: relative;
+    color: var(--b3-theme-on-surface);
+    flex: 1;
+
+    &-icon {
+      position: absolute;
+      right: 1px;
+      top: 1px;
+      height: 16px;
+      width: 16px;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 2px;
+
+      &:hover {
+        color: var(--b3-theme-on-background);
+        background-color: var(--b3-list-icon-hover);
+      }
+    }
+
+    &-input {
+      width: 100%;
+      padding-right: 35px !important;
     }
   }
 

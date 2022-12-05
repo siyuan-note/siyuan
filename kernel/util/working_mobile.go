@@ -32,6 +32,7 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	IncBootProgress(3, "Booting...")
 	rand.Seed(time.Now().UTC().UnixNano())
 	initMime()
+	initHttpClient()
 
 	HomeDir = filepath.Join(workspaceDir, "home")
 	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")

@@ -17,6 +17,8 @@
 package util
 
 import (
+	"github.com/siyuan-note/httpclient"
+	"net/http"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -47,4 +49,9 @@ func JsonArg(c *gin.Context, result *gulu.Result) (arg map[string]interface{}, o
 
 	ok = true
 	return
+}
+
+func initHttpClient() {
+	http.DefaultClient = httpclient.GetCloudFileClient2Min()
+	http.DefaultTransport = httpclient.NewTransport(false)
 }

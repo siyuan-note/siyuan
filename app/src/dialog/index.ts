@@ -53,6 +53,8 @@ export class Dialog {
                 this.element.classList.add("b3-dialog--open");
             });
         }
+        // https://github.com/siyuan-note/siyuan/issues/6783
+        window.siyuan.menus.menu.remove();
     }
 
     public destroy() {

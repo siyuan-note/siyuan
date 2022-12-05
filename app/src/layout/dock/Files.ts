@@ -80,7 +80,7 @@ export class Files extends Model {
     <span class="fn__space"></span>
     <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
-<div class="fn__flex-1"></div>
+<div class="fn__flex-1 file-tree__content"></div>
 <ul class="b3-list fn__flex-column" style="min-height: auto;transition: var(--b3-transition)">
     <li class="b3-list-item" data-type="toggle">
         <span class="b3-list-item__toggle">
@@ -861,10 +861,19 @@ export class Files extends Model {
             liItem.classList.remove("b3-list-item--focus");
         });
         target.classList.add("b3-list-item--focus");
-        if (isScroll) {
-            this.element.scrollTop = target.offsetTop - this.element.clientHeight / 2 - this.actionsElement.clientHeight;
+        if (isScroll && !this.isInViewPort(target)) {
+            this.element.scrollTop = target.offsetTop - this.element.clientHeight / 2;
         }
-    }
+    }  
+    /**
+    * 判断元素是否在文件树的可见视图中
+    * @param el 
+    * @returns 
+    */
+    private isInViewPort(target: HTMLElement) {
+         const pos = target.offsetTop - this.element.scrollTop;
+         return pos > 0 && pos < this.element.clientHeight - target.clientHeight;
+     }
 
     public getLeaf(liElement: Element, notebookId: string) {
         const toggleElement = liElement.querySelector(".b3-list-item__arrow");

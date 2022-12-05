@@ -508,6 +508,10 @@ progressLoading: 400
       box-shadow: 0 2px 0 var(--b3-theme-primary-lighter), inset 0px -2px 0 var(--b3-theme-primary-lighter);
     }
   }
+  
+  &__content {
+    position: relative;
+  }
 
   &:hover .block__icons .block__icon:not([disabled]) {
     opacity: 1;

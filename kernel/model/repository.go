@@ -154,7 +154,7 @@ func InitRepoKeyFromPassphrase(passphrase string) (err error) {
 
 	var key []byte
 	base64Data, base64Err := base64.StdEncoding.DecodeString(passphrase)
-	if nil == base64Err {
+	if nil == base64Err && 32 == len(base64Data) {
 		// 改进数据仓库 `通过密码生成密钥` https://github.com/siyuan-note/siyuan/issues/6782
 		logging.LogInfof("passphrase is base64 encoded, use it as key directly")
 		key = base64Data

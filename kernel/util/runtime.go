@@ -25,6 +25,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/denisbrodbeck/machineid"
+	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
 
@@ -87,6 +88,8 @@ func SetNetworkProxy(proxyURL string) {
 	} else {
 		logging.LogInfof("use network proxy [system]")
 	}
+
+	httpclient.CloseIdleConnections()
 }
 
 const (

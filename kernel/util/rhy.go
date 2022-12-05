@@ -37,7 +37,7 @@ func GetRhyResult(force bool) (map[string]interface{}, error) {
 		return cachedRhyResult, nil
 	}
 
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	_, err := request.SetResult(&cachedRhyResult).Get(AliyunServer + "/apis/siyuan/version?ver=" + Ver)
 	if nil != err {
 		logging.LogErrorf("get version info failed: %s", err)

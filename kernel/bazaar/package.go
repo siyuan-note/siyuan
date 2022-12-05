@@ -305,14 +305,14 @@ func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (da
 	repoURLHash = strings.TrimPrefix(repoURLHash, "https://github.com/")
 	u := util.BazaarOSSServer + "/package/" + repoURLHash
 	buf := &bytes.Buffer{}
-	resp, err := httpclient.NewBrowserDownloadRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+	resp, err := httpclient.NewBrowserRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 		if pushProgress {
 			util.PushDownloadProgress(pushID, float32(info.DownloadedSize)/float32(info.Response.ContentLength))
 		}
 	}).Get(u)
 	if nil != err {
 		u = util.BazaarOSSServer + "/package/" + repoURLHash
-		resp, err = httpclient.NewBrowserDownloadRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+		resp, err = httpclient.NewBrowserRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 			if pushProgress {
 				util.PushDownloadProgress(pushID, float32(info.DownloadedSize)/float32(info.Response.ContentLength))
 			}
@@ -339,7 +339,7 @@ func incPackageDownloads(repoURLHash, systemID string) {
 
 	repo := strings.Split(repoURLHash, "@")[0]
 	u := util.AliyunServer + "/apis/siyuan/bazaar/addBazaarPackageDownloadCount"
-	httpclient.NewCloudRequest().SetBody(
+	httpclient.NewCloudRequest30s().SetBody(
 		map[string]interface{}{
 			"systemID": systemID,
 			"repo":     repo,

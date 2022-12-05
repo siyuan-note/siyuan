@@ -42,7 +42,7 @@ func StartFreeTrial() (err error) {
 	}
 
 	requestResult := gulu.Ret.NewResult()
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	_, err = request.
 		SetResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
@@ -59,7 +59,7 @@ func StartFreeTrial() (err error) {
 
 func DeactivateUser() (err error) {
 	requestResult := gulu.Ret.NewResult()
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
@@ -84,7 +84,7 @@ func DeactivateUser() (err error) {
 func SetCloudBlockReminder(id, data string, timed int64) (err error) {
 	requestResult := gulu.Ret.NewResult()
 	payload := map[string]interface{}{"dataId": id, "data": data, "timed": timed}
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetResult(requestResult).
 		SetBody(payload).
@@ -117,7 +117,7 @@ func LoadUploadToken() (err error) {
 	}
 
 	requestResult := gulu.Ret.NewResult()
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
@@ -333,7 +333,7 @@ func loadUserFromConf() *conf.User {
 
 func RemoveCloudShorthands(ids []string) (err error) {
 	result := map[string]interface{}{}
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	body := map[string]interface{}{
 		"ids": ids,
 	}
@@ -364,7 +364,7 @@ func RemoveCloudShorthands(ids []string) (err error) {
 
 func GetCloudShorthand(id string) (ret map[string]interface{}, err error) {
 	result := map[string]interface{}{}
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetResult(&result).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
@@ -395,7 +395,7 @@ func GetCloudShorthand(id string) (ret map[string]interface{}, err error) {
 
 func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 	result = map[string]interface{}{}
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetResult(&result).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
@@ -432,7 +432,7 @@ var errInvalidUser = errors.New("invalid user")
 
 func getUser(token string) (*conf.User, error) {
 	result := map[string]interface{}{}
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	_, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"token": token}).
@@ -465,7 +465,7 @@ func UseActivationcode(code string) (err error) {
 	code = strings.TrimSpace(code)
 	code = gulu.Str.RemoveInvisible(code)
 	requestResult := gulu.Ret.NewResult()
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	_, err = request.
 		SetResult(requestResult).
 		SetBody(map[string]string{"data": code}).
@@ -486,7 +486,7 @@ func CheckActivationcode(code string) (retCode int, msg string) {
 	code = gulu.Str.RemoveInvisible(code)
 	retCode = 1
 	requestResult := gulu.Ret.NewResult()
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	_, err := request.
 		SetResult(requestResult).
 		SetBody(map[string]string{"data": code}).
@@ -506,7 +506,7 @@ func CheckActivationcode(code string) (retCode int, msg string) {
 
 func Login(userName, password, captcha string) (ret *gulu.Result, err error) {
 	result := map[string]interface{}{}
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	_, err = request.
 		SetResult(&result).
 		SetBody(map[string]string{"userName": userName, "userPassword": password, "captcha": captcha}).
@@ -532,7 +532,7 @@ func Login(userName, password, captcha string) (ret *gulu.Result, err error) {
 
 func Login2fa(token, code string) (map[string]interface{}, error) {
 	result := map[string]interface{}{}
-	request := httpclient.NewCloudRequest()
+	request := httpclient.NewCloudRequest30s()
 	_, err := request.
 		SetResult(&result).
 		SetBody(map[string]string{"twofactorAuthCode": code}).

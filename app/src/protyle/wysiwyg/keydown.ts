@@ -689,7 +689,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             // https://github.com/siyuan-note/siyuan/issues/5547
             const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
             if (range.startOffset === 1 && range.startContainer.textContent === Constants.ZWSP &&
-                previousSibling && previousSibling.nodeType !== 3) {
+                previousSibling && previousSibling.nodeType !== 3 &&
+                event.key === "Backspace" // https://github.com/siyuan-note/siyuan/issues/6786
+            ) {
                 if (previousSibling.classList.contains("img")) {
                     previousSibling.classList.add("img--select");
                 } else if (previousSibling.getAttribute("data-type")?.indexOf("inline-math") > -1) {

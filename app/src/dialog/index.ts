@@ -59,6 +59,8 @@ export class Dialog {
 
     public destroy() {
         this.element.remove();
+        // https://github.com/siyuan-note/siyuan/issues/6783
+        window.siyuan.menus.menu.remove();
         if (this.destroyCallback) {
             this.destroyCallback();
         }

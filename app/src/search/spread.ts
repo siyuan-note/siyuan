@@ -91,7 +91,6 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             if (edit) {
                 edit.destroy();
             }
-            window.siyuan.menus.menu.remove();
         }
     });
     dialog.element.setAttribute("data-key", hotkey);

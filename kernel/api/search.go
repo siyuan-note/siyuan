@@ -83,6 +83,9 @@ func searchTag(c *gin.Context) {
 
 	k := arg["k"].(string)
 	tags := model.SearchTags(k)
+	if 1 > len(tags) {
+		tags = []string{}
+	}
 	ret.Data = map[string]interface{}{
 		"tags": tags,
 		"k":    k,

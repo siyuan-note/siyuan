@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/siyuan-note/logging"
 	"sort"
 	"strings"
 
@@ -282,6 +283,7 @@ func sortTags(tags Tags) {
 
 func SearchTags(keyword string) (ret []string) {
 	ret = []string{}
+	defer logging.Recover() // TODO: 定位 无法添加题头图标签 https://github.com/siyuan-note/siyuan/issues/6756
 
 	labels := labelBlocksByKeyword(keyword)
 	for label, _ := range labels {

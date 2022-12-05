@@ -709,7 +709,11 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                         fetchPost("/api/storage/removeCriterion", {name: item.name.trim()});
                         event.preventDefault();
                         event.stopPropagation();
-                        menuElement.remove();
+                        if (!menuElement.previousElementSibling && !menuElement.nextElementSibling) {
+                            menuElement.parentElement.parentElement.remove();
+                        } else {
+                            menuElement.remove();
+                        }
                         return;
                     }
                     if (config.layout !== item.layout) {

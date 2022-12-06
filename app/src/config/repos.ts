@@ -284,7 +284,7 @@ const bindProviderEvent = () => {
                 let timeout = parseInt((providerPanelElement.querySelector("#timeout") as HTMLInputElement).value, 10);
                 if (7 > timeout) {
                     if (1 > timeout) {
-                        timeout = 30
+                        timeout = 30;
                     } else {
                         timeout = 7;
                     }
@@ -307,7 +307,7 @@ const bindProviderEvent = () => {
                     window.siyuan.config.sync.s3 = s3;
                 });
             } else if (window.siyuan.config.sync.provider === 3) {
-                let timeout = parseInt((providerPanelElement.querySelector("#timeout") as HTMLInputElement).value, 10)
+                let timeout = parseInt((providerPanelElement.querySelector("#timeout") as HTMLInputElement).value, 10);
                 if (7 > timeout) {
                     timeout = 7;
                 }

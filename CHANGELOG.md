@@ -1,3 +1,46 @@
+## v2.5.3 / 2022-12-06
+
+### 改进功能
+
+* [搜索支持命名查询](https://github.com/siyuan-note/siyuan/issues/6589)
+* [Ctrl+F 和 Ctrl+P 不再共用指定路径](https://github.com/siyuan-note/siyuan/issues/6739)
+* [分组后的搜索结果支持一键展开/折叠](https://github.com/siyuan-note/siyuan/issues/6740)
+* [搜索 `指定路径` 支持多选](https://github.com/siyuan-note/siyuan/issues/6743)
+* [搜索界面支持左右布局](https://github.com/siyuan-note/siyuan/issues/6744)
+* [更新搜索替换图标](https://github.com/siyuan-note/siyuan/issues/6746)
+* [搜索转换为 `固定搜索` 时向右分屏](https://github.com/siyuan-note/siyuan/issues/6747)
+* [搜索设置固定显示](https://github.com/siyuan-note/siyuan/issues/6748)
+* [搜索结果按文档分组时支持按块在文档中的先后排序](https://github.com/siyuan-note/siyuan/issues/6749)
+* [iPad 端文本菜单有时不会显示](https://github.com/siyuan-note/siyuan/issues/6752)
+* [链接取消后导致 `Ctrl+K` 无法识别出链接](https://github.com/siyuan-note/siyuan/issues/6753)
+* [优化本地标记快照交互](https://github.com/siyuan-note/siyuan/issues/6754)
+* [构建 Docker linux/arm64/v8 镜像](https://github.com/siyuan-note/siyuan/issues/6755)
+* [iOS 端支持打开 `zotero://`](https://github.com/siyuan-note/siyuan/issues/6757)
+* [新增百度网盘下载渠道](https://github.com/siyuan-note/siyuan/issues/6758)
+* [搜索类型选项加入确定按钮](https://github.com/siyuan-note/siyuan/issues/6759)
+* [优化窗口大小调整时上下面板的布局](https://github.com/siyuan-note/siyuan/issues/6761)
+* [自动下载更新包时在状态栏显示下载进度](https://github.com/siyuan-note/siyuan/issues/6763)
+* [HTML 块自动使用 `<div>` 包裹](https://github.com/siyuan-note/siyuan/issues/6764)
+* [优化选择过多后的移动界面](https://github.com/siyuan-note/siyuan/issues/6765)
+* [搜索支持排序](https://github.com/siyuan-note/siyuan/issues/6766)
+* [导出 Markdown 时引用的超级块转脚注移除超级块标记符](https://github.com/siyuan-note/siyuan/issues/6777)
+* [S3/WebDAV 设置界面中隐藏密钥/密码](https://github.com/siyuan-note/siyuan/issues/6779)
+* [S3/WebDAV 数据同步支持设置超时时间](https://github.com/siyuan-note/siyuan/issues/6781)
+* [改进数据仓库 `通过密码生成密钥`](https://github.com/siyuan-note/siyuan/issues/6782)
+* [弹窗或关闭窗口应关闭无关的菜单](https://github.com/siyuan-note/siyuan/issues/6783)
+* [设置代理切换时不再需要重启](https://github.com/siyuan-note/siyuan/issues/6787)
+* [调整网络请求超时为 30s](https://github.com/siyuan-note/siyuan/issues/6791)
+
+### 修复缺陷
+
+* [删除未引用资源后已删除的资源仍能搜索到](https://github.com/siyuan-note/siyuan/issues/6737)
+* [使用第三方主题时默认配色失效问题](https://github.com/siyuan-note/siyuan/pull/6741)
+* [反链面板 `Alt+[` 无法新建文档](https://github.com/siyuan-note/siyuan/issues/6760)
+* [Ctrl+F 时 `包含子文档` 失效](https://github.com/siyuan-note/siyuan/issues/6769)
+* [`复制 HTML` 无法复制非文本行级元素](https://github.com/siyuan-note/siyuan/issues/6776)
+* [向后删除遇到行级公式会删除公式](https://github.com/siyuan-note/siyuan/issues/6786)
+* [搜索结果命中代码块后定位异常](https://github.com/siyuan-note/siyuan/issues/6790)
+
 ## v2.5.2 / 2022-11-28
 
 ### 改进功能

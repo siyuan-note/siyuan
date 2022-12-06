@@ -563,7 +563,8 @@ export class Toolbar {
                 this.range.insertNode(currentNewNode);
                 // https://github.com/siyuan-note/siyuan/issues/6155
                 if (currentNewNode.nodeType !== 3 && ["code", "tag", "kbd"].includes(type)) {
-                    if (!hasPreviousSibling(currentNewNode)) {
+                    const previousSibling = hasPreviousSibling(currentNewNode)
+                    if (!previousSibling || previousSibling.textContent.endsWith("\n")) {
                         currentNewNode.before(document.createTextNode(Constants.ZWSP));
                     }
                     if (!currentNewNode.textContent.startsWith(Constants.ZWSP)) {

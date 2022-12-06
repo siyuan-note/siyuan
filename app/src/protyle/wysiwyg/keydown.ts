@@ -686,8 +686,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.preventDefault();
                 return;
             }
-            // https://github.com/siyuan-note/siyuan/issues/5547
+            // https://github.com/siyuan-note/siyuan/issues/6796
             const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
+            if (range.toString() === "" && event.key === "Backspace" &&
+                range.startOffset === range.startContainer.textContent.length &&
+                range.startContainer.textContent.endsWith("\n"+Constants.ZWSP)) {
+                range.setStart(range.startContainer, range.startOffset - 1);
+                range.collapse(true);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+            // https://github.com/siyuan-note/siyuan/issues/5547
             if (range.startOffset === 1 && range.startContainer.textContent === Constants.ZWSP &&
                 previousSibling && previousSibling.nodeType !== 3 &&
                 event.key === "Backspace" // https://github.com/siyuan-note/siyuan/issues/6786

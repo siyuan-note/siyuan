@@ -1055,7 +1055,7 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
-		ret.Endpoint = "https://siyuan-data.b3logfile.com/"
+		ret.Endpoint = util.SiYuanSyncServer
 	case conf.ProviderS3:
 		ret.S3 = &cloud.ConfS3{
 			Endpoint:      Conf.Sync.S3.Endpoint,

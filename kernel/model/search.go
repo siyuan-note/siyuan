@@ -886,7 +886,7 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markS
 			return true
 		}
 	} else if ast.NodeTextMark == n.Type {
-		// 搜索结果高亮支持大部分行级元素 https://github.com/siyuan-note/siyuan/issues/6745
+		// TODO 搜索结果高亮支持大部分行级元素 https://github.com/siyuan-note/siyuan/issues/6745
 	}
 	return false
 }

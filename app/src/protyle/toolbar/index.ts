@@ -15,7 +15,7 @@ import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
-import {getEventName} from "../util/compatibility";
+import {getEventName, openByMobile} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../markdown/highlightRender";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
@@ -24,8 +24,6 @@ import {BlockRef} from "./BlockRef";
 import {hintRenderAssets, hintRenderTemplate, hintRenderWidget} from "../hint/extend";
 import {blockRender} from "../markdown/blockRender";
 /// #if !BROWSER
-import {clipboard, nativeImage, NativeImage} from "electron";
-import {getCurrentWindow} from "@electron/remote";
 import {openBy} from "../../editor/util";
 /// #endif
 import {fetchPost} from "../../util/fetch";
@@ -37,11 +35,12 @@ import {hideElements} from "../ui/hideElements";
 import {renderAssetsPreview} from "../../asset/renderAssets";
 import {electronUndo} from "../undo";
 import {previewTemplate} from "./util";
-import {showMessage} from "../../dialog/message";
+import {hideMessage, showMessage} from "../../dialog/message";
 import {InlineMath} from "./InlineMath";
 import {InlineMemo} from "./InlineMemo";
 import {mathRender} from "../markdown/mathRender";
 import {linkMenu} from "../../menus/protyle";
+import {addScript} from "../util/addScript";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -828,7 +827,7 @@ export class Toolbar {
     <span class="fn__space"></span>
     <button data-type="after" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages["insert-after"]}"><svg><use xlink:href="#iconAfter"></use></svg></button>
     <span class="fn__space"></span>
-    <button data-type="copy" class="block__icon b3-tooltips b3-tooltips__nw${(isBrowser() || isInlineMemo) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.copy} PNG"><svg><use xlink:href="#iconCopy"></use></svg></button>
+    <button data-type="export" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.export} ${window.siyuan.languages.image}"><svg><use xlink:href="#iconImage"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="pin" class="block__icon b3-tooltips b3-tooltips__nw${isPin ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
     <span class="fn__space"></span>
@@ -902,24 +901,29 @@ export class Toolbar {
                     insertEmptyBlock(protyle, "afterend", id);
                     hideElements(["util"], protyle);
                     break;
-                case "copy":
-                    /// #if !BROWSER
-                    hideElements(["util"], protyle);
-                    setTimeout(() => {
-                        const rect = renderElement.getBoundingClientRect();
-                        getCurrentWindow().webContents.capturePage({
-                            x: Math.floor(rect.x),
-                            y: Math.floor(rect.y) - 4, // 行内数学公式头部截不到
-                            width: Math.floor(rect.width),
-                            height: Math.floor(rect.height) + 4
-                        }).then((image: NativeImage) => {
-                            clipboard.writeImage(nativeImage.createFromBuffer(image.toPNG()));
-                        });
-                    }, 100);
-                    /// #endif
+                case "export":
+                    exportImg();
                     break;
             }
         });
+        const exportImg = () => {
+            const msgId = showMessage(window.siyuan.languages.exporting, 0);
+            setTimeout(() => {
+                addScript("stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
+                    window.html2canvas(renderElement).then((canvas) => {
+                        canvas.toBlob((blob: Blob) => {
+                            const formData = new FormData();
+                            formData.append("file", blob);
+                            formData.append("type", "image/png");
+                            fetchPost("/api/export/exportAsFile", formData, (response) => {
+                                openByMobile(response.data.file);
+                                hideMessage(msgId);
+                            });
+                        });
+                    });
+                });
+            }, Constants.TIMEOUT_TRANSITION);
+        }
         headerElement.addEventListener("mousedown", (event: MouseEvent) => {
             if (hasClosestByClassName(event.target as HTMLElement, "block__icon")) {
                 return;

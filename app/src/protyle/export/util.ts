@@ -13,7 +13,6 @@ import {highlightRender} from "../markdown/highlightRender";
 import {processRender} from "../util/processCode";
 import {openByMobile} from "../util/compatibility";
 
-declare const html2canvas: (element: Element) => Promise<any>;
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
     showMessage(`${window.siyuan.languages.exported}${escapeHtml(exportPath)}
@@ -76,7 +75,7 @@ export const exportImage = (id: string) => {
             previewElement.parentElement.style.maxHeight = "none";
             setTimeout(() => {
                 addScript("stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
-                    html2canvas(previewElement.parentElement).then((canvas) => {
+                    window.html2canvas(previewElement.parentElement).then((canvas) => {
                         canvas.toBlob((blob: Blob) => {
                             const formData = new FormData();
                             formData.append("file", blob, response.data.name + ".png");

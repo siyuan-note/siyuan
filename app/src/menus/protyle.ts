@@ -740,7 +740,16 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         label: `<div class="fn__hr--small"></div><input class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.anchor}"><div class="fn__hr--small"></div>`,
         bind(element) {
             const inputElement = element.querySelector("input");
-            inputElement.value = linkElement.textContent.replace(Constants.ZWSP, "");
+            // https://github.com/siyuan-note/siyuan/issues/6798
+            let anchor = linkElement.textContent.replace(Constants.ZWSP, "");
+            if (!anchor && linkAddress) {
+                anchor = linkAddress.replace("https://", "").replace("http://", "");
+                if (anchor.length > 16) {
+                    anchor = anchor.substring(0, 16) + "...";
+                }
+                linkElement.innerHTML = Lute.EscapeHTMLStr(anchor);
+            }
+            inputElement.value = anchor;
             inputElement.addEventListener("change", () => {
                 if (!inputElement.value) {
                     linkElement.remove();

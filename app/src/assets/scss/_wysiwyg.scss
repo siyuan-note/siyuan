@@ -78,6 +78,7 @@
         justify-content: center;
         display: flex;
         align-items: center;
+        word-break: keep-all;
 
         & ~ .h1,
         & ~ .h2,

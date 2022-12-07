@@ -744,8 +744,8 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             let anchor = linkElement.textContent.replace(Constants.ZWSP, "");
             if (!anchor && linkAddress) {
                 anchor = linkAddress.replace("https://", "").replace("http://", "");
-                if (anchor.length > 16) {
-                    anchor = anchor.substring(0, 16) + "...";
+                if (anchor.length > 24) {
+                    anchor = anchor.substring(0, 24) + "...";
                 }
                 linkElement.innerHTML = Lute.EscapeHTMLStr(anchor);
             }

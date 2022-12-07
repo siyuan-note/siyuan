@@ -41,12 +41,15 @@ func exportDataInFolder(c *gin.Context) {
 	}
 
 	exportFolder := arg["folder"].(string)
-	err := model.ExportDataInFolder(exportFolder)
+	name, err := model.ExportDataInFolder(exportFolder)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
 		return
+	}
+	ret.Data = map[string]interface{}{
+		"name": name,
 	}
 }
 

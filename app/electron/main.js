@@ -778,11 +778,6 @@ app.on('activate', () => {
 
 // 在编辑器内打开链接的处理，比如 iframe 上的打开链接。
 app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
-  contents.on('new-window', (newWindowEvent, url) => {
-    newWindowEvent.preventDefault()
-    shell.openExternal(url)
-  })
-
   contents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return {action: 'deny'}

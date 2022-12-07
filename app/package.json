@@ -4,7 +4,7 @@
   "description": "Build Your Eternal Digital Garden",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
-  "packageManager": "pnpm@7.11.0",
+  "packageManager": "pnpm@7.18.1",
   "scripts": {
     "lint": "eslint . --fix --ext .ts",
     "dev": "webpack --mode development",
@@ -36,12 +36,12 @@
     {
       "name": "Liang Ding",
       "email": "845765@qq.com",
-      "url": "http://88250.b3log.org"
+      "url": "https://ld246.com/member/88250"
     },
     {
       "name": "Liyuan Li",
       "email": "84588990@qq.com",
-      "url": "http://vanessa.b3log.org"
+      "url": "https://ld246.com/member/Vanessa"
     }
   ],
   "devDependencies": {
@@ -58,7 +58,7 @@
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.7.1",
     "dayjs": "^1.11.5",
-    "electron": "21.3.0",
+    "electron": "22.0.0",
     "electron-builder": "^23.3.3",
     "encoding": "^0.1.13",
     "eslint": "^8.19.0",

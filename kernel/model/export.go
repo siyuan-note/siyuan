@@ -120,17 +120,18 @@ func ExportSY(id string) (name, zipPath string) {
 	return
 }
 
-func ExportDataInFolder(exportFolder string) (err error) {
+func ExportDataInFolder(exportFolder string) (name string, err error) {
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
 
 	WaitForWritingFiles()
 
 	exportFolder = filepath.Join(exportFolder, util.CurrentTimeSecondsStr())
-	err = exportData(exportFolder)
+	zipPath, err := exportData(exportFolder)
 	if nil != err {
 		return
 	}
+	name = filepath.Base(zipPath)
 	return
 }
 
@@ -140,10 +141,8 @@ func ExportData() (zipPath string) {
 
 	WaitForWritingFiles()
 
-	baseFolderName := "data-" + util.CurrentTimeSecondsStr()
-	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName)
-	zipPath = exportFolder + ".zip"
-	err := exportData(exportFolder)
+	exportFolder := filepath.Join(util.TempDir, "export", util.CurrentTimeSecondsStr())
+	zipPath, err := exportData(exportFolder)
 	if nil != err {
 		return
 	}
@@ -151,7 +150,7 @@ func ExportData() (zipPath string) {
 	return
 }
 
-func exportData(exportFolder string) (err error) {
+func exportData(exportFolder string) (zipPath string, err error) {
 	baseFolderName := "data-" + util.CurrentTimeSecondsStr()
 	if err = os.MkdirAll(exportFolder, 0755); nil != err {
 		logging.LogErrorf("create export temp folder failed: %s", err)
@@ -165,7 +164,7 @@ func exportData(exportFolder string) (err error) {
 		return
 	}
 
-	zipPath := exportFolder + ".zip"
+	zipPath = exportFolder + ".zip"
 	zip, err := gulu.Zip.Create(zipPath)
 	if nil != err {
 		logging.LogErrorf("create export data zip [%s] failed: %s", exportFolder, err)

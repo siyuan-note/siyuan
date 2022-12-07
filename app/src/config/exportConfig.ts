@@ -1,8 +1,9 @@
 import {fetchPost} from "../util/fetch";
 /// #if !BROWSER
 import {dialog} from "@electron/remote";
-import {SaveDialogReturnValue, shell} from "electron";
+import {shell} from "electron";
 import {afterExport} from "../protyle/export/util";
+import * as path from "path";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {showMessage} from "../dialog/message";
@@ -157,19 +158,20 @@ export const exportConfig = {
                 window.location.href = response.data.zip;
             });
             /// #else
-            dialog.showSaveDialog({
-                defaultPath: "data",
-                properties: ["showOverwriteConfirmation"],
-            }).then((result: SaveDialogReturnValue) => {
-                if (!result.canceled) {
-                    const msgId = showMessage(window.siyuan.languages.exporting, -1);
-                    fetchPost("/api/export/exportDataInFolder", {
-                        folder: result.filePath
-                    }, () => {
-                        afterExport(result.filePath, msgId);
-                    });
-                }
-            });
+            let filePaths = dialog.showOpenDialogSync({
+                title: window.siyuan.languages.export + " " + "Data",
+                properties: ["createDirectory", "openDirectory"],
+            })
+            if (filePaths && 0 < filePaths.length) {
+                const savePath = filePaths[0];
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                fetchPost("/api/export/exportDataInFolder", {
+                    folder: savePath,
+                }, response => {
+                    afterExport(path.join(savePath, response.data.name), msgId);
+                });
+            }
+
             /// #endif
         });
         /// #if !BROWSER

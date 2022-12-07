@@ -113,6 +113,12 @@ const renderPDF = (id: string) => {
           left: 0;
         }
         
+        #preview > .code-block {
+           margin-left: auto;
+           margin-right: auto;
+           width: 800px;
+        }
+        
         #preview.exporting {
           position: inherit;
           max-width: none;

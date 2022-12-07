@@ -116,7 +116,6 @@ const renderPDF = (id: string) => {
         #preview > .code-block {
            margin-left: auto;
            margin-right: auto;
-           width: 800px;
         }
         
         #preview.exporting {
@@ -221,7 +220,34 @@ const renderPDF = (id: string) => {
 <script>
     let pdfLeft = 0;
     let pdfTop = 0;
-    const setPadding = (previewElement) => {
+    const previewElement = document.getElementById('preview');
+    const setLineNumberWidth = (element) => {
+        let width = 800
+        switch (element.value) {
+            case "A3":
+              width = 842
+              break;
+            case "A4":
+              width = 595
+              break;
+            case "A5":
+              width = 420
+              break;
+            case "Legal":
+            case "Letter":
+              width = 612
+              break;
+            case "Tabloid":
+              width = 792
+              break;
+        }
+        previewElement.querySelectorAll('.hljs.protyle-linenumber').forEach((item) => {
+            item.parentElement.style.width = width + "px";
+            item.removeAttribute('data-render');
+        })
+        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
+    }
+    const setPadding = () => {
         const isLandscape = document.querySelector("#landscape").checked;
         switch (document.querySelector("#marginsType").value) { // none
             case "0":
@@ -260,10 +286,6 @@ const renderPDF = (id: string) => {
                     item.parentElement.style.overflow = "hidden";
                 }
             })
-            previewElement.querySelectorAll('.hljs.protyle-linenumber').forEach((item) => {
-                item.removeAttribute('data-render');
-            })
-            Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
         }, 300);
     }
     const fetchPost = (url, data, cb) => {
@@ -276,7 +298,7 @@ const renderPDF = (id: string) => {
             cb(response);
         })
     }
-    const renderPreview = (previewElement, html) => {
+    const renderPreview = (html) => {
         previewElement.innerHTML = html;
         Protyle.mathRender(previewElement, "${servePath}/stage/protyle", true);
         Protyle.mermaidRender(previewElement, "${servePath}/stage/protyle");
@@ -286,6 +308,10 @@ const renderPDF = (id: string) => {
         Protyle.mindmapRender(previewElement, "${servePath}/stage/protyle");
         Protyle.abcRender(previewElement, "${servePath}/stage/protyle");
         Protyle.plantumlRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
+        setTimeout(() => {
+            setLineNumberWidth(document.querySelector("#action #pageSize"));
+        }, 600);
     }
     fetchPost("/api/export/exportPreviewHTML", {
         id: "${id}",
@@ -309,7 +335,6 @@ const renderPDF = (id: string) => {
           },
           languages: {copy:"${window.siyuan.languages.copy}"}
         };
-        const previewElement = document.getElementById('preview');
         previewElement.addEventListener("click", (event) => {
             let target = event.target;
             while (target && !target.isEqualNode(previewElement)) {
@@ -343,18 +368,22 @@ const renderPDF = (id: string) => {
                     alert(response2.msg)
                     return;
                 }
-                setPadding(previewElement);
-                renderPreview(previewElement, response2.data.content);
+                setPadding();
+                renderPreview(response2.data.content);
             })
         })
         actionElement.querySelector("#scale").addEventListener("input", () => {
             actionElement.querySelector("#scaleTip").innerText = actionElement.querySelector("#scale").value;
         })
+        const pageSizeElement = actionElement.querySelector("#pageSize")
+        pageSizeElement.addEventListener('change', () => {
+            setLineNumberWidth(pageSizeElement);
+        });
         actionElement.querySelector("#marginsType").addEventListener('change', () => {
-            setPadding(previewElement);
+            setPadding();
         });
         actionElement.querySelector("#landscape").addEventListener('change', () => {
-            setPadding(previewElement);
+            setPadding();
         });
         actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
@@ -386,8 +415,8 @@ const renderPDF = (id: string) => {
             previewElement.style.paddingTop = "0";
             previewElement.style.paddingBottom = "0";
         });
-        setPadding(previewElement);
-        renderPreview(previewElement, response.data.content);
+        setPadding();
+        renderPreview(response.data.content);
     });
 </script></body></html>`;
     const mainWindow = getCurrentWindow();

@@ -606,13 +606,19 @@ const initKernel = (initData) => {
           count++
           if (64 < count) {
             writeLog('get kernel port failed [pid=' + kernelProcessPid + '], try to use 6806')
-            return kernelPort
+            return
           }
         }
       }
     }
 
     kernelPort = await getKernelPort()
+    if (!kernelPort) {
+      showErrorWindow('⚠️ 获取内核服务端口失败 Failed to get kernel serve port',
+        '<div>获取内核服务端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to get kernel serve port, please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>')
+      bootWindow.destroy()
+      resolve(false)
+    }
     writeLog("got kernel port [" + kernelPort + "]")
 
     let gotVersion = false
@@ -713,7 +719,7 @@ app.whenReady().then(() => {
 
     // 改进桌面端初始化时使用的外观语言 https://github.com/siyuan-note/siyuan/issues/6803
     let languages = app.getPreferredSystemLanguages();
-    let language = languages && 0 < languages.length && "zh-Hans-CN" === languages[0] ? "zh_CN": "en_US";
+    let language = languages && 0 < languages.length && "zh-Hans-CN" === languages[0] ? "zh_CN" : "en_US";
     firstOpenWindow.loadFile(
       initHTMLPath, {
         query: {

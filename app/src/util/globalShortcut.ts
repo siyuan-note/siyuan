@@ -1145,7 +1145,7 @@ const panelTreeKeydown = (event: KeyboardEvent) => {
         });
     }
     if (!activePanelElement) {
-        return false
+        return false;
     }
     if (activePanelElement.className.indexOf("sy__") === -1) {
         return false;
@@ -1175,25 +1175,25 @@ const panelTreeKeydown = (event: KeyboardEvent) => {
     if (!model) {
         return false;
     }
-    let activeItemElement = activePanelElement.querySelector(".b3-list-item--focus")
+    let activeItemElement = activePanelElement.querySelector(".b3-list-item--focus");
     if (!activeItemElement) {
         activeItemElement = activePanelElement.querySelector(".b3-list .b3-list-item");
         if (activeItemElement) {
-            activeItemElement.classList.add("b3-list-item--focus")
+            activeItemElement.classList.add("b3-list-item--focus");
         }
         return false;
     }
 
-    let tree = (model as Backlink).tree
+    let tree = (model as Backlink).tree;
     if (activeItemElement.parentElement.parentElement.classList.contains("backlinkMList")) {
-        tree = (model as Backlink).mTree
+        tree = (model as Backlink).mTree;
     }
     if (event.key === "Enter") {
         tree.click(activeItemElement);
         event.preventDefault();
         return true;
     }
-    const arrowElement = activeItemElement.querySelector(".b3-list-item__arrow")
+    const arrowElement = activeItemElement.querySelector(".b3-list-item__arrow");
     if ((event.key === "ArrowRight" && !arrowElement.classList.contains("b3-list-item__arrow--open") && !arrowElement.parentElement.classList.contains("fn__hidden")) ||
         (event.key === "ArrowLeft" && arrowElement.classList.contains("b3-list-item__arrow--open") && !arrowElement.parentElement.classList.contains("fn__hidden"))) {
         tree.toggleBlocks(activeItemElement);
@@ -1290,6 +1290,6 @@ const panelTreeKeydown = (event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    return false
-}
+    return false;
+};
 

@@ -158,10 +158,10 @@ export const exportConfig = {
                 window.location.href = response.data.zip;
             });
             /// #else
-            let filePaths = dialog.showOpenDialogSync({
+            const filePaths = dialog.showOpenDialogSync({
                 title: window.siyuan.languages.export + " " + "Data",
                 properties: ["createDirectory", "openDirectory"],
-            })
+            });
             if (filePaths && 0 < filePaths.length) {
                 const savePath = filePaths[0];
                 const msgId = showMessage(window.siyuan.languages.exporting, -1);

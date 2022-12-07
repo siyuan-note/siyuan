@@ -562,7 +562,7 @@ export class Toolbar {
                 this.range.insertNode(currentNewNode);
                 // https://github.com/siyuan-note/siyuan/issues/6155
                 if (currentNewNode.nodeType !== 3 && ["code", "tag", "kbd"].includes(type)) {
-                    const previousSibling = hasPreviousSibling(currentNewNode)
+                    const previousSibling = hasPreviousSibling(currentNewNode);
                     if (!previousSibling || previousSibling.textContent.endsWith("\n")) {
                         currentNewNode.before(document.createTextNode(Constants.ZWSP));
                     }
@@ -923,7 +923,7 @@ export class Toolbar {
                     });
                 });
             }, Constants.TIMEOUT_TRANSITION);
-        }
+        };
         headerElement.addEventListener("mousedown", (event: MouseEvent) => {
             if (hasClosestByClassName(event.target as HTMLElement, "block__icon")) {
                 return;

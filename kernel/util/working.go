@@ -32,6 +32,7 @@ import (
 
 	"github.com/88250/gulu"
 	figure "github.com/common-nighthawk/go-figure"
+	"github.com/gofrs/flock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
@@ -95,6 +96,10 @@ func Boot() {
 	SSL = *ssl
 	LogPath = filepath.Join(TempDir, "siyuan.log")
 	logging.SetLogPath(LogPath)
+
+	// 工作空间仅允许被一个内核进程伺服
+	tryLockWorkspace()
+
 	AppearancePath = filepath.Join(ConfDir, "appearance")
 	if "dev" == Mode {
 		ThemesPath = filepath.Join(WorkingDir, "appearance", "themes")
@@ -154,6 +159,7 @@ var (
 	WorkingDir, _ = os.Getwd()
 
 	WorkspaceDir   string        // 工作空间目录路径
+	WorkspaceLock  *flock.Flock  // 工作空间锁
 	ConfDir        string        // 配置目录路径
 	DataDir        string        // 数据目录路径
 	RepoDir        string        // 仓库目录路径
@@ -436,4 +442,28 @@ func GetDataAssetsAbsPath() (ret string) {
 		}
 	}
 	return
+}
+
+func tryLockWorkspace() {
+	WorkspaceLock = flock.New(filepath.Join(WorkspaceDir, ".lock"))
+	if err := WorkspaceLock.Lock(); nil != err {
+		logging.LogErrorf("lock workspace [%s] failed: %s", WorkspaceDir, err)
+		os.Exit(ExitCodeWorkspaceLocked)
+	}
+}
+
+func UnlockWorkspace() {
+	if nil == WorkspaceLock {
+		return
+	}
+
+	if err := WorkspaceLock.Unlock(); nil != err {
+		logging.LogErrorf("unlock workspace [%s] failed: %s", WorkspaceDir, err)
+		return
+	}
+
+	if err := os.Remove(filepath.Join(WorkspaceDir, ".lock")); nil != err {
+		logging.LogErrorf("remove workspace lock failed: %s", err)
+		return
+	}
 }

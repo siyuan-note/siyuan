@@ -12,7 +12,7 @@ import {escapeHtml} from "../../util/escape";
 
 export class Tag extends Model {
     private openNodes: string[];
-    private tree: Tree;
+    public tree: Tree;
     private element: Element;
 
     constructor(tab: Tab) {

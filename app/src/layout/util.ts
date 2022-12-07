@@ -541,7 +541,7 @@ export const copyTab = (tab: Tab) => {
     });
 };
 
-export const getInstanceById = (id: string) => {
+export const getInstanceById = (id: string, layout =window.siyuan.layout.centerLayout) => {
     const _getInstanceById = (item: Layout | Wnd, id: string) => {
         if (item.id === id) {
             return item;
@@ -557,7 +557,7 @@ export const getInstanceById = (id: string) => {
             }
         }
     };
-    return _getInstanceById(window.siyuan.layout.centerLayout, id);
+    return _getInstanceById(layout, id);
 };
 
 export const addResize = (obj: Layout | Wnd) => {

@@ -13,7 +13,7 @@ import {escapeHtml} from "../../util/escape";
 
 export class Bookmark extends Model {
     private openNodes: string[];
-    private tree: Tree;
+    public tree: Tree;
     private element: Element;
 
     constructor(tab: Tab) {

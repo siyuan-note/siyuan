@@ -13,7 +13,7 @@ import {unicode2Emoji} from "../../emoji";
 import {onGet} from "../../protyle/util/onGet";
 
 export class Outline extends Model {
-    private tree: Tree;
+    public tree: Tree;
     public element: HTMLElement;
     public headerElement: HTMLElement;
     public type: "pin" | "local";

@@ -42,6 +42,8 @@ import {getStartEndElement} from "../protyle/wysiwyg/commonHotkey";
 import {getNextFileLi, getPreviousFileLi} from "../protyle/wysiwyg/getBlock";
 import {editor} from "../config/editor";
 import {hintMoveBlock} from "../protyle/hint/extend";
+import {Outline} from "../layout/dock/Outline";
+import {Backlink} from "../layout/dock/Backlink";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -599,33 +601,6 @@ export const globalShortcut = () => {
             return;
         }
 
-        // 面板折叠展开操作
-        if (!event.repeat && (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) || matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event))) {
-            let activePanelElement = document.querySelector(".layout__tab--active");
-            if (!activePanelElement) {
-                Array.from(document.querySelectorAll(".layout__wnd--active .layout-tab-container > div")).forEach(item => {
-                    if (!item.classList.contains("fn__none")) {
-                        activePanelElement = item;
-                        return true;
-                    }
-                });
-            }
-            if (activePanelElement) {
-                if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event)) {
-                    if (activePanelElement.querySelector('.block__icon[data-type="collapse"]')) {
-                        activePanelElement.querySelector('.block__icon[data-type="collapse"]').dispatchEvent(new CustomEvent("click"));
-                    }
-                } else if (matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event)) {
-                    if (activePanelElement.querySelector('.block__icon[data-type="expand"]')) {
-                        activePanelElement.querySelector('.block__icon[data-type="expand"]').dispatchEvent(new CustomEvent("click"));
-                    }
-                }
-            }
-            event.stopPropagation();
-            event.preventDefault();
-            return;
-        }
-
         // close tab
         if (matchHotKey(window.siyuan.config.keymap.general.closeTab.custom, event) && !event.repeat) {
             event.preventDefault();
@@ -677,6 +652,11 @@ export const globalShortcut = () => {
 
         // 文件树的操作
         if (fileTreeKeydown(event)) {
+            return;
+        }
+
+        // 面板的操作
+        if (panelTreeKeydown(event)) {
             return;
         }
 
@@ -1147,3 +1127,169 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         return true;
     }
 };
+
+const panelTreeKeydown = (event: KeyboardEvent) => {
+    // 面板折叠展开操作
+    if (!matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) &&
+        !matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event) &&
+        !event.key.startsWith("Arrow") && event.key !== "Enter") {
+        return false;
+    }
+    let activePanelElement = document.querySelector(".layout__tab--active");
+    if (!activePanelElement) {
+        Array.from(document.querySelectorAll(".layout__wnd--active .layout-tab-container > div")).find(item => {
+            if (!item.classList.contains("fn__none") && item.className.indexOf("sy__") > -1) {
+                activePanelElement = item;
+                return true;
+            }
+        });
+    }
+    if (!activePanelElement) {
+        return false
+    }
+    if (activePanelElement.className.indexOf("sy__") === -1) {
+        return false;
+    }
+    if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event)) {
+        const collapseElement = activePanelElement.querySelector('.block__icon[data-type="collapse"]');
+        if (collapseElement) {
+            collapseElement.dispatchEvent(new CustomEvent("click"));
+            event.preventDefault();
+            return true;
+        }
+    }
+    if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event)) {
+        const expandElement = activePanelElement.querySelector('.block__icon[data-type="expand"]');
+        if (expandElement) {
+            expandElement.dispatchEvent(new CustomEvent("click"));
+            event.preventDefault();
+            return true;
+        }
+    }
+    if (activePanelElement.classList.contains("sy__inbox") ||
+        activePanelElement.classList.contains("sy__globalGraph") ||
+        activePanelElement.classList.contains("sy__graph")) {
+        return false;
+    }
+    const model = (getInstanceById(activePanelElement.getAttribute("data-id"), window.siyuan.layout.layout) as Tab)?.model;
+    if (!model) {
+        return false;
+    }
+    let activeItemElement = activePanelElement.querySelector(".b3-list-item--focus")
+    if (!activeItemElement) {
+        activeItemElement = activePanelElement.querySelector(".b3-list .b3-list-item");
+        if (activeItemElement) {
+            activeItemElement.classList.add("b3-list-item--focus")
+        }
+        return false;
+    }
+
+    let tree = (model as Backlink).tree
+    if (activeItemElement.parentElement.parentElement.classList.contains("backlinkMList")) {
+        tree = (model as Backlink).mTree
+    }
+    if (event.key === "Enter") {
+        tree.click(activeItemElement);
+        event.preventDefault();
+        return true;
+    }
+    const arrowElement = activeItemElement.querySelector(".b3-list-item__arrow")
+    if ((event.key === "ArrowRight" && !arrowElement.classList.contains("b3-list-item__arrow--open") && !arrowElement.parentElement.classList.contains("fn__hidden")) ||
+        (event.key === "ArrowLeft" && arrowElement.classList.contains("b3-list-item__arrow--open") && !arrowElement.parentElement.classList.contains("fn__hidden"))) {
+        tree.toggleBlocks(activeItemElement);
+        event.preventDefault();
+        return true;
+    }
+    const ulElement = hasClosestByClassName(activeItemElement, "b3-list");
+    if (!ulElement) {
+        return false;
+    }
+    if (event.key === "ArrowLeft") {
+        let parentElement = activeItemElement.parentElement.previousElementSibling;
+        if (parentElement) {
+            if (parentElement.tagName !== "LI") {
+                parentElement = ulElement.querySelector(".b3-list-item");
+            }
+            activeItemElement.classList.remove("b3-list-item--focus");
+            parentElement.classList.add("b3-list-item--focus");
+            const parentRect = parentElement.getBoundingClientRect();
+            const scrollRect = ulElement.parentElement.getBoundingClientRect();
+            if (parentRect.top < scrollRect.top || parentRect.bottom > scrollRect.bottom) {
+                parentElement.scrollIntoView(parentRect.top < scrollRect.top);
+            }
+        }
+        event.preventDefault();
+        return true;
+    }
+    if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+        let nextElement = activeItemElement;
+        while (nextElement) {
+            if (nextElement.nextElementSibling) {
+                if (nextElement.nextElementSibling.tagName === "UL") {
+                    nextElement = nextElement.nextElementSibling.firstElementChild;
+                } else if (nextElement.nextElementSibling.classList.contains("protyle")) {
+                    if (nextElement.nextElementSibling.nextElementSibling) {
+                        nextElement = nextElement.nextElementSibling.nextElementSibling;
+                    }
+                } else {
+                    nextElement = nextElement.nextElementSibling;
+                }
+                break;
+            } else {
+                if (nextElement.parentElement.classList.contains("fn__flex-1")) {
+                    break;
+                } else {
+                    nextElement = nextElement.parentElement;
+                }
+            }
+        }
+        if (nextElement.classList.contains("b3-list-item") && !nextElement.classList.contains("b3-list-item--focus")) {
+            activeItemElement.classList.remove("b3-list-item--focus");
+            nextElement.classList.add("b3-list-item--focus");
+            const nextRect = nextElement.getBoundingClientRect();
+            const scrollRect = ulElement.parentElement.getBoundingClientRect();
+            if (nextRect.top < scrollRect.top || nextRect.bottom > scrollRect.bottom) {
+                nextElement.scrollIntoView(nextRect.top < scrollRect.top);
+            }
+        }
+        event.preventDefault();
+        return true;
+    }
+    if (event.key === "ArrowUp") {
+        let previousElement = activeItemElement;
+        while (previousElement) {
+            if (previousElement.previousElementSibling) {
+                if (previousElement.previousElementSibling.tagName === "LI") {
+                    previousElement = previousElement.previousElementSibling;
+                } else if (previousElement.previousElementSibling.classList.contains("protyle")) {
+                    if (previousElement.previousElementSibling.previousElementSibling) {
+                        previousElement = previousElement.previousElementSibling.previousElementSibling;
+                    }
+                } else {
+                    const liElements = previousElement.previousElementSibling.querySelectorAll(".b3-list-item");
+                    previousElement = liElements[liElements.length - 1];
+                }
+                break;
+            } else {
+                if (previousElement.parentElement.classList.contains("fn__flex-1")) {
+                    break;
+                } else {
+                    previousElement = previousElement.parentElement;
+                }
+            }
+        }
+        if (previousElement.classList.contains("b3-list-item") && !previousElement.classList.contains("b3-list-item--focus")) {
+            activeItemElement.classList.remove("b3-list-item--focus");
+            previousElement.classList.add("b3-list-item--focus");
+            const previousRect = previousElement.getBoundingClientRect();
+            const scrollRect = ulElement.parentElement.getBoundingClientRect();
+            if (previousRect.top < scrollRect.top || previousRect.bottom > scrollRect.bottom) {
+                previousElement.scrollIntoView(previousRect.top < scrollRect.top);
+            }
+        }
+        event.preventDefault();
+        return true;
+    }
+    return false
+}
+

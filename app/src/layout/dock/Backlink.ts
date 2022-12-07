@@ -15,9 +15,9 @@ export class Backlink extends Model {
     public type: "pin" | "local";
     public blockId: string;
     public rootId: string; // "local" 必传
-    private tree: Tree;
+    public tree: Tree;
     private notebookId: string;
-    private mTree: Tree;
+    public mTree: Tree;
     public editors: Protyle[] = [];
     public status: {
         [key: string]: {
@@ -143,12 +143,15 @@ export class Backlink extends Model {
             data: null,
             click: (element) => {
                 this.toggleItem(element, false);
+                this.setFocus();
+                this.mTree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
             ctrlClick(element) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     action: [Constants.CB_GET_CONTEXT]
                 });
+                this.mTree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
             altClick(element) {
                 openFileById({
@@ -156,6 +159,7 @@ export class Backlink extends Model {
                     position: "right",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
+                this.mTree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
             shiftClick(element) {
                 openFileById({
@@ -163,9 +167,12 @@ export class Backlink extends Model {
                     position: "bottom",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
+                this.mTree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
             toggleClick: (liElement) => {
                 this.toggleItem(liElement, false);
+                this.setFocus();
+                this.mTree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             }
         });
         this.mTree = new Tree({
@@ -173,12 +180,15 @@ export class Backlink extends Model {
             data: null,
             click: (element) => {
                 this.toggleItem(element, true);
+                this.setFocus();
+                this.tree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
             ctrlClick(element) {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     action: [Constants.CB_GET_CONTEXT]
                 });
+                this.tree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
             altClick(element) {
                 openFileById({
@@ -186,6 +196,7 @@ export class Backlink extends Model {
                     position: "right",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
+                this.tree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
             shiftClick(element) {
                 openFileById({
@@ -193,9 +204,12 @@ export class Backlink extends Model {
                     position: "bottom",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
+                this.tree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
             toggleClick: (liElement) => {
                 this.toggleItem(liElement, true);
+                this.setFocus();
+                this.tree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
             blockExtHTML: `<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`
         });
@@ -227,11 +241,7 @@ export class Backlink extends Model {
             });
         });
         this.element.addEventListener("click", (event) => {
-            if (this.type === "local") {
-                setPanelFocus(this.element.parentElement.parentElement);
-            } else {
-                setPanelFocus(this.element);
-            }
+            this.setFocus();
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
                 if (target.classList.contains("block__icon") && target.parentElement.parentElement.isSameNode(this.element)) {
@@ -295,6 +305,14 @@ export class Backlink extends Model {
         this.searchBacklinks(true);
 
         if (this.type === "pin") {
+            setPanelFocus(this.element);
+        }
+    }
+
+    private setFocus() {
+        if (this.type === "local") {
+            setPanelFocus(this.element.parentElement.parentElement);
+        } else {
             setPanelFocus(this.element);
         }
     }

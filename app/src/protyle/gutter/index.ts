@@ -1842,7 +1842,8 @@ export class Gutter {
         this.element.style.left = `${left}px`;
         if (left < this.element.parentElement.getBoundingClientRect().left) {
             this.element.style.width = "24px";
-            this.element.style.left = `${rect.left - this.element.clientWidth - space / 2}px`;
+            // 需加 2，否则和折叠标题无法对齐
+            this.element.style.left = `${rect.left - this.element.clientWidth - space / 2 + 3}px`;
             html = "";
             Array.from(this.element.children).reverse().forEach((item, index) => {
                 if (index !== 0) {

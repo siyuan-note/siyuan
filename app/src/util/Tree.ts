@@ -11,10 +11,9 @@ export class Tree {
     private blockExtHTML: string;
     private topExtHTML: string;
 
-    private click: (element: HTMLElement, event: MouseEvent) => void;
-
+    public click: (element: Element, event?: MouseEvent) => void;
     private ctrlClick: (element: HTMLElement) => void;
-    private toggleClick: (element: HTMLElement) => void;
+    private toggleClick: (element: Element) => void;
     private shiftClick: (element: HTMLElement) => void;
     private altClick: (element: HTMLElement) => void;
     private rightClick: (element: HTMLElement, event: MouseEvent) => void;
@@ -83,8 +82,8 @@ data-treetype="${item.type}"
 data-type="${item.nodeType}" 
 data-subtype="${item.subType}" 
 ${item.label ? "data-label='" + item.label + "'" : ""}>
-    <span style="padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px" class="b3-list-item__toggle${(item.type === "backlink" || hasChild) ? " b3-list-item__toggle--hl" : ""}">
-        <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow ${hasChild ? "b3-list-item__arrow--open" : (item.type === "backlink" ? "" : "fn__hidden")}"><use xlink:href="#iconRight"></use></svg>
+    <span style="padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px" class="b3-list-item__toggle${(item.type === "backlink" || hasChild) ? " b3-list-item__toggle--hl" : ""}${hasChild||item.type === "backlink" ? "" : " fn__hidden"}">
+        <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow${hasChild ? " b3-list-item__arrow--open" : ""}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
     <span class="b3-list-item__text"${titleTip}>${item.name}</span>
@@ -129,8 +128,8 @@ data-type="${item.type}"
 data-subtype="${item.subType}" 
 data-treetype="${type}"
 data-def-path="${item.defPath}">
-    <span style="padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px" class="b3-list-item__toggle${item.children ? " b3-list-item__toggle--hl" : ""}">
-        <svg data-id="${item.id}" class="b3-list-item__arrow${item.children ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg>
+    <span style="padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px" class="b3-list-item__toggle${item.children ? " b3-list-item__toggle--hl" : ""}${item.children ? "" : " fn__hidden"}">
+        <svg data-id="${item.id}" class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
     <span class="b3-list-item__text" ${type === "outline" ? ' title="' + Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
@@ -144,7 +143,7 @@ data-def-path="${item.defPath}">
         return html;
     }
 
-    private toggleBlocks(liElement: HTMLElement) {
+    public toggleBlocks(liElement: Element) {
         if (this.toggleClick) {
             this.toggleClick(liElement);
             return;
@@ -194,7 +193,7 @@ data-def-path="${item.defPath}">
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
-                if (target.classList.contains("b3-list-item__toggle") && !target.firstElementChild.classList.contains("fn__hidden")) {
+                if (target.classList.contains("b3-list-item__toggle") && !target.classList.contains("fn__hidden")) {
                     this.toggleBlocks(target.parentElement);
                     this.setCurrent(target.parentElement);
                     event.preventDefault();

@@ -1,5 +1,5 @@
 import {getAllModels} from "../layout/getAll";
-import {getInstanceById, getWndByLayout, resizeTabs} from "../layout/util";
+import {getInstanceById, getWndByLayout, resizeTabs, setPanelFocus} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {Search} from "./index";
 import {Wnd} from "../layout/Wnd";
@@ -78,6 +78,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
         }
     });
     wnd.split("lr").addTab(tab);
+    setPanelFocus(tab.panelElement);
 };
 
 export const genSearch = (config: ISearchOption, element: Element, closeCB?: () => void) => {

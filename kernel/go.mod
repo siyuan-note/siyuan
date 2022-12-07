@@ -27,6 +27,7 @@ require (
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.8.1
+	github.com/gofrs/flock v0.8.1
 	github.com/imroc/req/v3 v3.26.4
 	github.com/jinzhu/copier v0.3.5
 	github.com/json-iterator/go v1.1.12

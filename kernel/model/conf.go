@@ -434,6 +434,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	treenode.SaveBlockTree()
 	clearWorkspaceTemp()
 	clearPortJSON()
+	util.UnlockWorkspace()
 
 	go func() {
 		time.Sleep(500 * time.Millisecond)

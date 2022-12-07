@@ -1511,7 +1511,7 @@ export class Gutter {
                 type: "separator"
             }, {
                 label: window.siyuan.languages.ltr,
-                icon: "iconRtl",
+                icon: "iconLtr",
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         e.style.direction = "ltr";

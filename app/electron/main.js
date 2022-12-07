@@ -550,7 +550,7 @@ const initKernel = (initData) => {
           switch (code) {
             case 20:
               showErrorWindow('⚠️ 数据库被锁定 The database is locked',
-                `<div>数据库文件正在被其他进程占用，请检查是否同时存在多个内核进程（SiYuan Kernel）。</div><div>The database file is being occupied by other processes, please check whether there are multiple kernel processes (SiYuan Kernel) at the same time.</div>`)
+                `<div>数据库文件正在被其他进程占用，请检查是否同时存在多个内核进程（SiYuan Kernel）服务相同的工作空间。</div><div>The database file is being occupied by other processes, please check whether there are multiple kernel processes (SiYuan Kernel) serving the same workspace at the same time.</div>`)
               break
             case 21:
               showErrorWindow('⚠️ 监听端口 ' + kernelPort + ' 失败 Failed to listen to port ' + kernelPort,

@@ -530,7 +530,7 @@ func FullReindex() {
 	WaitForWritingFiles()
 
 	if err := sql.InitDatabase(true); nil != err {
-		util.PushErrMsg(fmt.Sprintf(Conf.Language(85), err), 5000)
+		os.Exit(util.ExitCodeReadOnlyDatabase)
 		return
 	}
 	treenode.InitBlockTree(true)

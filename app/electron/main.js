@@ -710,9 +710,19 @@ app.whenReady().then(() => {
     if (isDevEnv) {
       initHTMLPath = path.join(appDir, 'electron', 'init.html')
     }
+
+    let languages = app.getPreferredSystemLanguages();
+    let language = "en_US";
+    if (languages && 0 < languages.length) {
+      if ("zh-Hans-CN" === languages[0]) {
+        language = "zh_CN"
+      }
+    }
+
     firstOpenWindow.loadFile(
       initHTMLPath, {
         query: {
+          lang: language,
           home: app.getPath('home'),
           v: appVer,
           icon: path.join(appDir, 'stage', 'icon-large.png'),

@@ -711,14 +711,9 @@ app.whenReady().then(() => {
       initHTMLPath = path.join(appDir, 'electron', 'init.html')
     }
 
+    // 改进桌面端初始化时使用的外观语言 https://github.com/siyuan-note/siyuan/issues/6803
     let languages = app.getPreferredSystemLanguages();
-    let language = "en_US";
-    if (languages && 0 < languages.length) {
-      if ("zh-Hans-CN" === languages[0]) {
-        language = "zh_CN"
-      }
-    }
-
+    let language = languages && 0 < languages.length && "zh-Hans-CN" === languages[0] ? "zh_CN": "en_US";
     firstOpenWindow.loadFile(
       initHTMLPath, {
         query: {

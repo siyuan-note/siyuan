@@ -429,7 +429,7 @@ func resolveRefContent0(node *ast.Node, anchors *map[string]string, depth *int, 
 			buf.WriteString(n.IALAttr("title"))
 			return ast.WalkStop
 		case ast.NodeText, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
-			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
+			ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			buf.Write(n.Tokens)
 		case ast.NodeTextMark:
 			if n.IsTextMarkType("tag") {
@@ -618,21 +618,9 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		}
 		assets = append(assets, asset)
 		return
-	case ast.NodeInlineMath, ast.NodeCodeSpan, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline, ast.NodeTextMark:
-		typ := treenode.TypeAbbr(n.Type.String())
-		var text string
-		switch n.Type {
-		case ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline:
-			text = n.Text()
-		case ast.NodeInlineMath:
-			text = n.ChildByType(ast.NodeInlineMathContent).TokensStr()
-		case ast.NodeCodeSpan:
-			text = n.ChildByType(ast.NodeCodeSpanContent).TokensStr()
-		case ast.NodeTextMark:
-			text = n.Content()
-			typ = typ + " " + n.TextMarkType
-		}
-
+	case ast.NodeTextMark:
+		typ := treenode.TypeAbbr(n.Type.String()) + " " + n.TextMarkType
+		text := n.Content()
 		markdown := treenode.ExportNodeStdMd(n, luteEngine)
 		parentBlock := treenode.ParentBlock(n)
 		span := &Span{

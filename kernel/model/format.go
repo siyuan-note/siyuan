@@ -46,8 +46,6 @@ func AutoSpace(rootID string) (err error) {
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering {
 			switch n.Type {
-			case ast.NodeStrong, ast.NodeEmphasis, ast.NodeStrikethrough, ast.NodeUnderline:
-				luteEngine.MergeSameSpan(n)
 			case ast.NodeTextMark:
 				luteEngine.MergeSameTextMark(n)
 			}

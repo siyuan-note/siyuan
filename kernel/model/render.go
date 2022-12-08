@@ -55,7 +55,7 @@ func renderOutline(node *ast.Node, luteEngine *lute.Lute) (ret string) {
 			buf.Write(tokens)
 		case ast.NodeBackslashContent:
 			buf.Write(n.Tokens)
-		case ast.NodeInlineMath, ast.NodeStrong, ast.NodeEmphasis, ast.NodeCodeSpan, ast.NodeTextMark, ast.NodeMark:
+		case ast.NodeTextMark:
 			dom := lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions)
 			buf.WriteString(dom)
 			return ast.WalkSkipChildren

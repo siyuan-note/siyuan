@@ -657,7 +657,7 @@ func GetContainerText(container *ast.Node) string {
 		}
 		switch n.Type {
 		case ast.NodeText, ast.NodeLinkText, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
-			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
+			ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			buf.Write(n.Tokens)
 		case ast.NodeTextMark:
 			buf.WriteString(n.Content())

@@ -215,7 +215,7 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 						renameRoots = append(renameRoots, n)
 					}
 				}
-			case ast.NodeText, ast.NodeLinkDest, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeCodeSpanContent, ast.NodeCodeBlockCode, ast.NodeInlineMathContent, ast.NodeMathBlockContent:
+			case ast.NodeText, ast.NodeLinkDest, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 				if 0 == method {
 					if bytes.Contains(n.Tokens, []byte(keyword)) {
 						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))

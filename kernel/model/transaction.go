@@ -892,15 +892,10 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeInlineMath == n.Type {
-			content := n.ChildByType(ast.NodeInlineMathContent)
-			if nil == content || 1 > len(content.Tokens) {
-				// 剔除空白的行级公式
-				unlinks = append(unlinks, n)
-			}
-		} else if ast.NodeTextMark == n.Type {
+		if ast.NodeTextMark == n.Type {
 			if n.IsTextMarkType("inline-math") {
 				if "" == strings.TrimSpace(n.TextMarkInlineMathContent) {
+					// 剔除空白的行级公式
 					unlinks = append(unlinks, n)
 				}
 			} else if n.IsTextMarkType("block-ref") {

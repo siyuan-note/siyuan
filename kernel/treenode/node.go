@@ -138,8 +138,7 @@ func NodeStaticContent(node *ast.Node) string {
 			buf.WriteByte(' ')
 		case ast.NodeLinkTitle:
 			buf.Write(n.Tokens)
-		case ast.NodeText, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
-			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
+		case ast.NodeText, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
 			tokens := n.Tokens
 			if IsChartCodeBlockCode(n) {
 				// 图表块的内容在数据库 `blocks` 表 `content` 字段中被转义 https://github.com/siyuan-note/siyuan/issues/6326
@@ -284,24 +283,13 @@ var typeAbbrMap = map[string]string{
 	"NodeThematicBreak":    "tb",
 	"NodeVideo":            "video",
 	"NodeAudio":            "audio",
-	// 行级元素
-	"NodeText":          "text",
-	"NodeImage":         "img",
-	"NodeLinkText":      "link_text",
-	"NodeLinkDest":      "link_dest",
-	"NodeTag":           "tag",
-	"NodeCodeSpan":      "code_span",
-	"NodeInlineMath":    "inline_math",
-	"NodeBlockRefID":    "ref_id",
-	"NodeEmphasis":      "em",
-	"NodeStrong":        "strong",
-	"NodeStrikethrough": "strikethrough",
-	"NodeMark":          "mark",
-	"NodeSup":           "sup",
-	"NodeSub":           "sub",
-	"NodeKbd":           "kbd",
-	"NodeUnderline":     "underline",
-	"NodeTextMark":      "textmark",
+	// 行级元素 TODO: 移除旧版中的行级元素实现代码 https://github.com/siyuan-note/siyuan/issues/6819
+	"NodeText":       "text",
+	"NodeImage":      "img",
+	"NodeLinkText":   "link_text",
+	"NodeLinkDest":   "link_dest",
+	"NodeBlockRefID": "ref_id",
+	"NodeTextMark":   "textmark",
 }
 
 var abbrTypeMap = map[string]string{}

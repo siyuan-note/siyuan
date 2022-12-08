@@ -36,30 +36,10 @@ func GetBlockRef(n *ast.Node) (blockRefID, blockRefText, blockRefSubtype string)
 	if !IsBlockRef(n) {
 		return
 	}
-	if ast.NodeBlockRef == n.Type {
-		id := n.ChildByType(ast.NodeBlockRefID)
-		if nil == id {
-			return
-		}
-		blockRefID = id.TokensStr()
-		text := n.ChildByType(ast.NodeBlockRefText)
-		if nil != text {
-			blockRefText = text.Text()
-			blockRefSubtype = "s"
-			return
-		}
-		text = n.ChildByType(ast.NodeBlockRefDynamicText)
-		if nil != text {
-			blockRefText = text.Text()
-			blockRefSubtype = "d"
-			return
-		}
-	}
-	if ast.NodeTextMark == n.Type {
-		blockRefID = n.TextMarkBlockRefID
-		blockRefText = n.TextMarkTextContent
-		blockRefSubtype = n.TextMarkBlockRefSubtype
-	}
+
+	blockRefID = n.TextMarkBlockRefID
+	blockRefText = n.TextMarkTextContent
+	blockRefSubtype = n.TextMarkBlockRefSubtype
 	return
 }
 
@@ -67,13 +47,7 @@ func IsBlockRef(n *ast.Node) bool {
 	if nil == n {
 		return false
 	}
-	if ast.NodeBlockRef == n.Type {
-		return true
-	}
-	if ast.NodeTextMark == n.Type {
-		return n.IsTextMarkType("block-ref")
-	}
-	return false
+	return ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref")
 }
 
 func NodeStaticMdContent(node *ast.Node, luteEngine *lute.Lute) (md, content string) {
@@ -126,10 +100,6 @@ func NodeStaticContent(node *ast.Node) string {
 		}
 
 		switch n.Type {
-		case ast.NodeBlockRef:
-			buf.WriteString(GetDynamicBlockRefText(n))
-			lastSpace = false
-			return ast.WalkSkipChildren
 		case ast.NodeLinkText:
 			buf.Write(n.Tokens)
 			buf.WriteByte(' ')
@@ -138,7 +108,7 @@ func NodeStaticContent(node *ast.Node) string {
 			buf.WriteByte(' ')
 		case ast.NodeLinkTitle:
 			buf.Write(n.Tokens)
-		case ast.NodeText, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
+		case ast.NodeText, ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeHTMLBlock:
 			tokens := n.Tokens
 			if IsChartCodeBlockCode(n) {
 				// 图表块的内容在数据库 `blocks` 表 `content` 字段中被转义 https://github.com/siyuan-note/siyuan/issues/6326
@@ -284,12 +254,11 @@ var typeAbbrMap = map[string]string{
 	"NodeVideo":            "video",
 	"NodeAudio":            "audio",
 	// 行级元素 TODO: 移除旧版中的行级元素实现代码 https://github.com/siyuan-note/siyuan/issues/6819
-	"NodeText":       "text",
-	"NodeImage":      "img",
-	"NodeLinkText":   "link_text",
-	"NodeLinkDest":   "link_dest",
-	"NodeBlockRefID": "ref_id",
-	"NodeTextMark":   "textmark",
+	"NodeText":     "text",
+	"NodeImage":    "img",
+	"NodeLinkText": "link_text",
+	"NodeLinkDest": "link_dest",
+	"NodeTextMark": "textmark",
 }
 
 var abbrTypeMap = map[string]string{}
@@ -343,43 +312,10 @@ func SubTypeAbbr(n *ast.Node) string {
 	return ""
 }
 
-func GetLegacyDynamicBlockRefDefIDs(node *ast.Node) (ret []string) {
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-		if ast.NodeBlockRefID == n.Type && ast.NodeCloseParen == n.Next.Type {
-			ret = append(ret, n.TokensStr())
-			return ast.WalkSkipChildren
-		}
-		return ast.WalkContinue
-	})
-	return
-}
-
 var DynamicRefTexts = sync.Map{}
 
 func SetDynamicBlockRefText(blockRef *ast.Node, refText string) {
 	if !IsBlockRef(blockRef) {
-		return
-	}
-
-	if ast.NodeBlockRef == blockRef.Type {
-		idNode := blockRef.ChildByType(ast.NodeBlockRefID)
-		if nil == idNode {
-			return
-		}
-
-		var spacesRefTexts []*ast.Node // 可能会有多个空格，或者遗留错误插入的锚文本节点，这里做一次订正
-		for n := idNode.Next; ast.NodeCloseParen != n.Type; n = n.Next {
-			spacesRefTexts = append(spacesRefTexts, n)
-		}
-		for _, toRemove := range spacesRefTexts {
-			toRemove.Unlink()
-		}
-		refText = strings.TrimSpace(refText)
-		idNode.InsertAfter(&ast.Node{Type: ast.NodeBlockRefDynamicText, Tokens: []byte(refText)})
-		idNode.InsertAfter(&ast.Node{Type: ast.NodeBlockRefSpace})
 		return
 	}
 
@@ -388,18 +324,6 @@ func SetDynamicBlockRefText(blockRef *ast.Node, refText string) {
 
 	// 偶发编辑文档标题后引用处的动态锚文本不更新 https://github.com/siyuan-note/siyuan/issues/5891
 	DynamicRefTexts.Store(blockRef.TextMarkBlockRefID, refText)
-}
-
-func GetDynamicBlockRefText(blockRef *ast.Node) string {
-	refText := blockRef.ChildByType(ast.NodeBlockRefText)
-	if nil != refText {
-		return refText.Text()
-	}
-	refText = blockRef.ChildByType(ast.NodeBlockRefDynamicText)
-	if nil != refText {
-		return refText.Text()
-	}
-	return "ref resolve failed"
 }
 
 func IsChartCodeBlockCode(code *ast.Node) bool {

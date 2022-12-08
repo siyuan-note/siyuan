@@ -276,34 +276,6 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 		if treenode.IsBlockRef(n) {
 			ref := buildRef(tree, n)
 			refs = append(refs, ref)
-		} else if ast.NodeFileAnnotationRefID == n.Type {
-			pathID := n.TokensStr()
-			idx := strings.LastIndex(pathID, "/")
-			if -1 == idx {
-				return ast.WalkContinue
-			}
-
-			filePath := pathID[:idx]
-			annotationID := pathID[idx+1:]
-
-			anchor := n.Parent.ChildByType(ast.NodeFileAnnotationRefText)
-			text := filePath
-			if nil != anchor {
-				text = anchor.Text()
-			}
-			parentBlock := treenode.ParentBlock(n)
-			ref := &FileAnnotationRef{
-				ID:           ast.NewNodeID(),
-				FilePath:     filePath,
-				AnnotationID: annotationID,
-				BlockID:      parentBlock.ID,
-				RootID:       tree.ID,
-				Box:          tree.Box,
-				Path:         tree.Path,
-				Content:      text,
-				Type:         treenode.TypeAbbr(n.Type.String()),
-			}
-			fileAnnotationRefs = append(fileAnnotationRefs, ref)
 		} else if ast.NodeTextMark == n.Type && n.IsTextMarkType("file-annotation-ref") {
 			pathID := n.TextMarkFileAnnotationRefID
 			idx := strings.LastIndex(pathID, "/")
@@ -363,99 +335,6 @@ func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
 		Markdown:         markdown,
 		Type:             treenode.TypeAbbr(refNode.Type.String()),
 	}
-}
-
-func ResolveRefContent(block *Block, anchors *map[string]string) (ret string) {
-	if "d" == block.Type {
-		(*anchors)[block.ID] = block.Content
-		return block.Content
-	}
-
-	tree := parse.Parse("", []byte(block.Markdown), luteEngine.ParseOptions)
-	depth := 0
-	var stack []string
-	c := treenode.FirstLeafBlock(tree.Root)
-	ret = resolveRefContent0(c, anchors, &depth, &stack)
-	return
-}
-
-func resolveRefContent0(node *ast.Node, anchors *map[string]string, depth *int, stack *[]string) (ret string) {
-	*depth++
-	if 7 < *depth {
-		return ""
-	}
-	if ast.NodeBlockRefID == node.Type {
-		id := node.TokensStr()
-		var ok bool
-		if ret, ok = (*anchors)[id]; ok {
-			return ret
-		}
-
-		if gulu.Str.Contains(id, *stack) {
-			return ""
-		}
-
-		defBlock := GetBlock(id)
-		if nil == defBlock {
-			return "block not found"
-		}
-
-		if "" != defBlock.Name {
-			(*anchors)[id] = defBlock.Name
-			return defBlock.Name
-		}
-
-		if "d" == defBlock.Type {
-			(*anchors)[id] = defBlock.Content
-			return defBlock.Content
-		}
-
-		tree := parse.Parse("", gulu.Str.ToBytes(defBlock.Markdown), luteEngine.ParseOptions)
-		c := treenode.FirstLeafBlock(tree.Root)
-		*stack = append(*stack, id)
-		ret = resolveRefContent0(c, anchors, depth, stack)
-		(*anchors)[id] = ret
-		return
-	}
-
-	buf := &bytes.Buffer{}
-	buf.Grow(4096)
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-		switch n.Type {
-		case ast.NodeDocument:
-			buf.WriteString(n.IALAttr("title"))
-			return ast.WalkStop
-		case ast.NodeText, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
-			ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
-			buf.Write(n.Tokens)
-		case ast.NodeTextMark:
-			if n.IsTextMarkType("tag") {
-				buf.WriteByte('#')
-			}
-			buf.WriteString(n.Content())
-			if n.IsTextMarkType("tag") {
-				buf.WriteByte('#')
-			}
-		case ast.NodeBlockRef:
-			if anchor := n.ChildByType(ast.NodeBlockRefText); nil != anchor {
-				buf.WriteString(anchor.Text())
-				return ast.WalkSkipChildren
-			} else if anchor = n.ChildByType(ast.NodeBlockRefDynamicText); nil != anchor {
-				buf.WriteString(anchor.Text())
-				return ast.WalkSkipChildren
-			}
-
-			defID := n.ChildByType(ast.NodeBlockRefID)
-			anchor := resolveRefContent0(defID, anchors, depth, stack)
-			(*anchors)[defID.TokensStr()] = anchor
-			buf.WriteString(anchor)
-		}
-		return ast.WalkContinue
-	})
-	return buf.String()
 }
 
 func fromTree(node *ast.Node, tree *parse.Tree) (blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute) {

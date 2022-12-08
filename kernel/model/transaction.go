@@ -909,8 +909,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 					}
 				}
 			}
-		} else if ast.NodeBlockRef == n.Type {
-			sql.CacheRef(subTree, n)
 		}
 		return ast.WalkContinue
 	})

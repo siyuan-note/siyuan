@@ -1100,15 +1100,6 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 					return ast.WalkContinue
 				}
 			}
-		case ast.NodeFileAnnotationRef:
-			refIDNode := n.ChildByType(ast.NodeFileAnnotationRefID)
-			if nil == refIDNode {
-				return ast.WalkSkipChildren
-			}
-			refID := refIDNode.TokensStr()
-			status := processFileAnnotationRef(refID, n)
-			unlinks = append(unlinks, n)
-			return status
 		}
 
 		if !treenode.IsBlockRef(n) {
@@ -1534,16 +1525,7 @@ func processFileAnnotationRef(refID string, n *ast.Node) ast.WalkStatus {
 	page := int(pages[0].(map[string]interface{})["index"].(float64)) + 1
 	pageStr := strconv.Itoa(page)
 
-	var refText string
-	if ast.NodeTextMark == n.Type {
-		refText = n.TextMarkTextContent
-	} else {
-		refTextNode := n.ChildByType(ast.NodeFileAnnotationRefText)
-		if nil == refTextNode {
-			return ast.WalkSkipChildren
-		}
-		refText = refTextNode.TokensStr()
-	}
+	refText := n.TextMarkTextContent
 	ext := filepath.Ext(p)
 	file := p[7:len(p)-23-len(ext)] + ext
 	fileAnnotationRefLink := &ast.Node{Type: ast.NodeLink}

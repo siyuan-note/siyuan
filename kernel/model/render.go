@@ -46,10 +46,7 @@ func renderOutline(node *ast.Node, luteEngine *lute.Lute) (ret string) {
 			return ast.WalkContinue
 		}
 		switch n.Type {
-		case ast.NodeBlockRef:
-			buf.WriteString(html.EscapeString(treenode.GetDynamicBlockRefText(n)))
-			return ast.WalkSkipChildren
-		case ast.NodeText, ast.NodeLinkText, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
+		case ast.NodeText, ast.NodeLinkText, ast.NodeFootnotesRef, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			tokens := html.EscapeHTML(n.Tokens)
 			tokens = bytes.ReplaceAll(tokens, []byte(" "), []byte("&nbsp;")) // 大纲面板条目中无法显示多个空格 https://github.com/siyuan-note/siyuan/issues/4370
 			buf.Write(tokens)

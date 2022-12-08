@@ -20,15 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/fs"
-	"os"
-	"path/filepath"
-	"sort"
-	"strings"
-	"text/template"
-	"time"
-	"unicode/utf8"
-
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
@@ -36,6 +27,13 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+	"text/template"
+	"time"
 
 	"github.com/88250/gulu"
 	sprig "github.com/Masterminds/sprig/v3"
@@ -224,15 +222,6 @@ func renderTemplate(p, id string) (string, error) {
 					unlinks = append(unlinks, n)
 				}
 			}
-		} else if ast.NodeBlockRef == n.Type {
-			if idNode := n.ChildByType(ast.NodeBlockRefID); nil != idNode {
-				refText := sql.GetRefText(idNode.TokensStr())
-				if "" != refText {
-					treenode.SetDynamicBlockRefText(n, refText)
-				} else {
-					unlinks = append(unlinks, n)
-				}
-			}
 		}
 		return ast.WalkContinue
 	})
@@ -258,25 +247,6 @@ func renderTemplate(p, id string) (string, error) {
 	luteEngine := NewLute()
 	dom := luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
 	return dom, nil
-}
-
-func appendRefTextRenderResultForBlockRef(blockRef *ast.Node) {
-	if !treenode.IsBlockRef(blockRef) {
-		return
-	}
-
-	refID, text, _ := treenode.GetBlockRef(blockRef)
-	if "" != text {
-		return
-	}
-
-	// 动态解析渲染 ((id)) 的锚文本
-	// 现行版本已经不存在该语法情况，这里保留是为了迁移历史数据
-	text = sql.GetRefText(refID)
-	if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(text) {
-		text = gulu.Str.SubStr(text, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
-	}
-	blockRef.AppendChild(&ast.Node{Type: ast.NodeBlockRefDynamicText, Tokens: gulu.Str.ToBytes(text)})
 }
 
 func addBlockIALNodes(tree *parse.Tree, removeUpdated bool) {

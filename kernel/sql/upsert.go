@@ -27,7 +27,6 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -473,30 +472,6 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (e
 	if err = insertBlocks(tx, blocks, context); nil != err {
 		return
 	}
-	anchors := map[string]string{}
-	var refIDs []string
-	for _, block := range blocks {
-		if "" != block.Content {
-			// content 不为空的话说明是定值，不需要解析引用内容
-			continue
-		}
-		subTree := parse.Parse("", []byte(block.Markdown), luteEngine.ParseOptions)
-		if nil == subTree {
-			logging.LogErrorf("parse temp block [%s] failed: %s", block.ID, err)
-			continue
-		}
-		if 0 < len(treenode.GetLegacyDynamicBlockRefDefIDs(subTree.Root)) {
-			refIDs = append(refIDs, block.ID)
-		}
-	}
-	// 先删除再插入会快很多
-	refBlocks := GetBlocks(refIDs)
-	for _, refBlock := range refBlocks {
-		blockContent := ResolveRefContent(refBlock, &anchors)
-		refBlock.Content = blockContent
-	}
-	deleteBlocksByIDs(tx, refIDs)
-	insertBlocks(tx, refBlocks, context)
 
 	refs, fileAnnotationRefs := refsFromTree(tree)
 	if err = insertRefs(tx, refs); nil != err {

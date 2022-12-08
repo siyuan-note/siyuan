@@ -377,6 +377,29 @@ export const globalShortcut = () => {
             }
         }
 
+        if (switchDialog && event.ctrlKey && !event.metaKey && event.key.startsWith("Arrow")) {
+            const currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
+            if (currentLiElement) {
+                currentLiElement.classList.remove("b3-list-item--focus");
+                if (event.key === "ArrowUp") {
+                    if (currentLiElement.previousElementSibling) {
+                        currentLiElement.previousElementSibling.classList.add("b3-list-item--focus");
+                    } else {
+                        currentLiElement.parentElement.lastElementChild.classList.add("b3-list-item--focus");
+                    }
+                } else if (event.key === "ArrowDown") {
+                    if (currentLiElement.nextElementSibling) {
+                        currentLiElement.nextElementSibling.classList.add("b3-list-item--focus");
+                    } else {
+                        currentLiElement.parentElement.firstElementChild.classList.add("b3-list-item--focus");
+                    }
+                } else {
+                    const sideElement = currentLiElement.parentElement.previousElementSibling|| currentLiElement.parentElement.nextElementSibling;
+                    (sideElement.querySelector(`[data-index="${currentLiElement.getAttribute("data-index")}"]`)|| sideElement.lastElementChild).classList.add("b3-list-item--focus");
+                }
+            }
+            return;
+        }
         if (event.ctrlKey && !event.metaKey && event.key === "Tab") {
             if (switchDialog && switchDialog.element.parentElement) {
                 return;
@@ -390,7 +413,7 @@ export const globalShortcut = () => {
                 const currentId = currentTabElement.getAttribute("data-id");
                 getAllTabs().sort((itemA, itemB) => {
                     return itemA.headElement.getAttribute("data-activetime") > itemB.headElement.getAttribute("data-activetime") ? -1 : 1;
-                }).forEach(item => {
+                }).forEach((item, index) => {
                     let icon = `<svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>`;
                     let rootId = "";
                     const initData = item.headElement.getAttribute("data-initdata");
@@ -401,12 +424,12 @@ export const globalShortcut = () => {
                         rootId = ` data-node-id="${JSON.parse(initData).rootId}"`;
                         icon = unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true);
                     }
-                    tabHtml += `<li data-id="${item.id}"${rootId} class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${escapeHtml(item.title)}</span></li>`;
+                    tabHtml += `<li data-index="${index}" data-id="${item.id}"${rootId} class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${escapeHtml(item.title)}</span></li>`;
                 });
             }
             let dockHtml = "";
-            getAllDocks().forEach(item => {
-                dockHtml += `<li data-type="${item.type}" class="b3-list-item${(!tabHtml && !dockHtml) ? " b3-list-item--focus" : ""}">
+            getAllDocks().forEach((item, index) => {
+                dockHtml += `<li data-type="${item.type}" data-index="${index}" class="b3-list-item${(!tabHtml && !dockHtml) ? " b3-list-item--focus" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>
     <span class="b3-list-item__text">${window.siyuan.languages[item.hotkeyLangId]}</span>
     <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span>

@@ -189,7 +189,7 @@ export const appearance = {
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
         }, response => {
             if ((
-                    window.siyuan.config.appearance.themeJS && !response.data.modeOS &&
+                    window.siyuan.config.appearance.themeJS &&
                     (
                         response.data.mode !== window.siyuan.config.appearance.mode ||
                         window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
@@ -217,7 +217,7 @@ export const appearance = {
             openColorPicker();
         });
         appearance.element.querySelector("#resetLayout").addEventListener("click", () => {
-           resetLayout();
+            resetLayout();
         });
         /// #if !BROWSER
         appearance.element.querySelector("#appearanceOpenIcon").addEventListener("click", () => {

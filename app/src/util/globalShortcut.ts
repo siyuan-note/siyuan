@@ -448,6 +448,7 @@ export const globalShortcut = () => {
                 disableAnimation: true,
                 transparent: true,
             });
+            getSelection().removeAllRanges();
             if (isMac()) {
                 switchDialog.element.addEventListener("contextmenu", (event) => {
                     switchDialogEvent(event, switchDialog);

@@ -128,17 +128,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if !entering {
 				return ast.WalkContinue
 			}
+
 			if treenode.IsBlockRef(n) {
 				defID, _, _ := treenode.GetBlockRef(n)
 				newDefID := blockIDs[defID]
 				if "" != newDefID {
-					if ast.NodeBlockRef == n.Type {
-						if id := n.ChildByType(ast.NodeBlockRefID); nil != id {
-							id.Tokens = []byte(newDefID)
-						}
-					} else {
-						n.TextMarkBlockRefID = newDefID
-					}
+					n.TextMarkBlockRefID = newDefID
 				}
 			} else if ast.NodeBlockQueryEmbedScript == n.Type {
 				for oldID, newID := range blockIDs {

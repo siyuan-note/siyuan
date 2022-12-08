@@ -25,7 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
 	"github.com/emirpasic/gods/sets/hashset"
@@ -249,10 +248,6 @@ func IndexRefs() {
 		}
 	}
 	logging.LogInfof("resolved refs [%d] in [%dms]", len(refBlocks), time.Now().Sub(start).Milliseconds())
-}
-
-func isLegacyDynamicBlockRef(blockRef *ast.Node) bool {
-	return nil == blockRef.ChildByType(ast.NodeBlockRefText) && nil == blockRef.ChildByType(ast.NodeBlockRefDynamicText)
 }
 
 func init() {

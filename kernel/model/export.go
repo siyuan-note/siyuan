@@ -943,7 +943,7 @@ func exportMarkdownContent(id string) (hPath, exportedMd string) {
 }
 
 func processKaTexMacros(n *ast.Node) {
-	if ast.NodeInlineMathContent != n.Type && ast.NodeMathBlockContent != n.Type && ast.NodeTextMark != n.Type {
+	if ast.NodeMathBlockContent != n.Type && ast.NodeTextMark != n.Type {
 		return
 	}
 	if ast.NodeTextMark == n.Type && !n.IsTextMarkType("inline-math") {
@@ -1081,7 +1081,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 		case ast.NodeHeading:
 			n.HeadingNormalizedID = n.IALAttr("id")
 			n.ID = n.HeadingNormalizedID
-		case ast.NodeInlineMathContent, ast.NodeMathBlockContent:
+		case ast.NodeMathBlockContent:
 			n.Tokens = bytes.TrimSpace(n.Tokens) // 导出 Markdown 时去除公式内容中的首尾空格 https://github.com/siyuan-note/siyuan/issues/4666
 			return ast.WalkContinue
 		case ast.NodeTextMark:
@@ -1100,15 +1100,6 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 					return ast.WalkContinue
 				}
 			}
-		case ast.NodeFileAnnotationRef:
-			refIDNode := n.ChildByType(ast.NodeFileAnnotationRefID)
-			if nil == refIDNode {
-				return ast.WalkSkipChildren
-			}
-			refID := refIDNode.TokensStr()
-			status := processFileAnnotationRef(refID, n)
-			unlinks = append(unlinks, n)
-			return status
 		}
 
 		if !treenode.IsBlockRef(n) {
@@ -1216,7 +1207,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 				// 空的段落块需要补全文本展位，否则后续格式化后再解析树会语义不一致 https://github.com/siyuan-note/siyuan/issues/5806
 				emptyParagraphs = append(emptyParagraphs, n)
 			}
-		case ast.NodeInlineMathContent, ast.NodeMathBlockContent:
+		case ast.NodeMathBlockContent:
 			if expandKaTexMacros {
 				processKaTexMacros(n)
 			}
@@ -1534,16 +1525,7 @@ func processFileAnnotationRef(refID string, n *ast.Node) ast.WalkStatus {
 	page := int(pages[0].(map[string]interface{})["index"].(float64)) + 1
 	pageStr := strconv.Itoa(page)
 
-	var refText string
-	if ast.NodeTextMark == n.Type {
-		refText = n.TextMarkTextContent
-	} else {
-		refTextNode := n.ChildByType(ast.NodeFileAnnotationRefText)
-		if nil == refTextNode {
-			return ast.WalkSkipChildren
-		}
-		refText = refTextNode.TokensStr()
-	}
+	refText := n.TextMarkTextContent
 	ext := filepath.Ext(p)
 	file := p[7:len(p)-23-len(ext)] + ext
 	fileAnnotationRefLink := &ast.Node{Type: ast.NodeLink}

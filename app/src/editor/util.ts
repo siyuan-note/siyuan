@@ -103,7 +103,7 @@ const openFile = (options: IOpenFileOptions) => {
             return true;
         }
         // 没有初始化的页签无法检测到
-        const hasEditor =  getUnInitTab(options);
+        const hasEditor = getUnInitTab(options);
         if (hasEditor) {
             return;
         }
@@ -345,8 +345,11 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
         }
         if (window.siyuan.config.fileTree.alwaysSelectOpenedFile && protyle) {
             const fileModel = getDockByType("file")?.data.file;
-            if (fileModel instanceof Files && !fileModel.isSelected(protyle.path)) {
-                fileModel.selectItem(protyle.notebookId, protyle.path);
+            if (fileModel instanceof Files) {
+                const target = fileModel.element.querySelector(`li[data-path="${protyle.path}"]`);
+                if (!target || (target && !target.classList.contains("b3-list-item--focus"))) {
+                    fileModel.selectItem(protyle.notebookId, protyle.path);
+                }
             }
         }
     }

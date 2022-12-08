@@ -852,21 +852,6 @@ export class Files extends Model {
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
         this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
     }
-    /**
-     * 判断文件树中当前选中的是否是此文件
-     * @param filePath 要判断的文件路径
-     * @returns 
-     */
-    public isSelected(filePath: string): boolean {
-        if(!filePath) {
-            return false;
-        }
-        const target = this.element.querySelector(`li[data-path="${filePath}"]`);
-        if(target) {
-            return target.classList.contains("b3-list-item--focus");
-        }
-        return false;
-    }
 
     private setCurrent(target: HTMLElement, isScroll = true) {
         if (!target) {

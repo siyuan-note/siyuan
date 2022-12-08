@@ -432,7 +432,7 @@ export const globalShortcut = () => {
     <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span>
 </li>`;
             });
-            let range: Range
+            let range: Range;
             if (getSelection().rangeCount > 0) {
                 range = getSelection().getRangeAt(0).cloneRange();
             }
@@ -450,7 +450,7 @@ export const globalShortcut = () => {
                 transparent: true,
                 destroyCallback: () => {
                     if (range && range.getBoundingClientRect().height !== 0) {
-                        focusByRange(range)
+                        focusByRange(range);
                     }
                 }
             });
@@ -1260,7 +1260,7 @@ const panelTreeKeydown = (event: KeyboardEvent) => {
                 if (nextElement.nextElementSibling.tagName === "UL") {
                     if (nextElement.nextElementSibling.classList.contains("fn__none")) {   // 遇到折叠内容
                         if (nextElement.nextElementSibling.nextElementSibling) {
-                            nextElement = nextElement.nextElementSibling.nextElementSibling
+                            nextElement = nextElement.nextElementSibling.nextElementSibling;
                         }
                     } else {
                         nextElement = nextElement.nextElementSibling.firstElementChild;

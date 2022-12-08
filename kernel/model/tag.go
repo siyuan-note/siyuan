@@ -17,10 +17,8 @@
 package model
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"github.com/siyuan-note/logging"
 	"sort"
 	"strings"
 
@@ -29,6 +27,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/facette/natsort"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -83,16 +82,7 @@ func RemoveTag(label string) (err error) {
 				continue
 			}
 
-			nodeTags := node.ChildrenByType(ast.NodeTag)
-			for _, nodeTag := range nodeTags {
-				nodeLabels := nodeTag.ChildrenByType(ast.NodeText)
-				for _, nodeLabel := range nodeLabels {
-					if bytes.Equal(nodeLabel.Tokens, []byte(label)) {
-						unlinks = append(unlinks, nodeTag)
-					}
-				}
-			}
-			nodeTags = node.ChildrenByType(ast.NodeTextMark)
+			nodeTags := node.ChildrenByType(ast.NodeTextMark)
 			for _, nodeTag := range nodeTags {
 				if nodeTag.IsTextMarkType("tag") {
 					if label == nodeTag.TextMarkTextContent {
@@ -181,19 +171,10 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 				continue
 			}
 
-			nodeTags := node.ChildrenByType(ast.NodeTag)
-			for _, nodeTag := range nodeTags {
-				nodeLabels := nodeTag.ChildrenByType(ast.NodeText)
-				for _, nodeLabel := range nodeLabels {
-					if bytes.Equal(nodeLabel.Tokens, []byte(oldLabel)) {
-						nodeLabel.Tokens = bytes.ReplaceAll(nodeLabel.Tokens, []byte(oldLabel), []byte(newLabel))
-					}
-				}
-			}
-			nodeTags = node.ChildrenByType(ast.NodeTextMark)
+			nodeTags := node.ChildrenByType(ast.NodeTextMark)
 			for _, nodeTag := range nodeTags {
 				if nodeTag.IsTextMarkType("tag") {
-					if oldLabel == nodeTag.TextMarkTextContent {
+					if strings.HasPrefix(nodeTag.TextMarkTextContent, oldLabel+"/") || nodeTag.TextMarkTextContent == oldLabel {
 						nodeTag.TextMarkTextContent = strings.ReplaceAll(nodeTag.TextMarkTextContent, oldLabel, newLabel)
 					}
 				}

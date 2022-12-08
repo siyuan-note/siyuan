@@ -993,9 +993,3 @@
   ```
 
     * `data`: 精度为毫秒
-
-## Webhook
-
-TBD
-
-https://ld246.com/article/1627956688432

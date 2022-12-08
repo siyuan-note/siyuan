@@ -69,6 +69,7 @@ const switchDialogEvent = (event: MouseEvent, switchDialog: Dialog) => {
                 getAllTabs().find(item => {
                     if (item.id === currentId) {
                         item.parent.switchTab(item.headElement);
+                        item.parent.showHeading();
                         return true;
                     }
                 });
@@ -328,6 +329,7 @@ export const globalShortcut = () => {
                     getAllTabs().find(item => {
                         if (item.id === currentId) {
                             item.parent.switchTab(item.headElement);
+                            item.parent.showHeading();
                             return true;
                         }
                     });

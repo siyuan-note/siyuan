@@ -428,8 +428,6 @@ func resolveRefContent0(node *ast.Node, anchors *map[string]string, depth *int, 
 		case ast.NodeDocument:
 			buf.WriteString(n.IALAttr("title"))
 			return ast.WalkStop
-		case ast.NodeTagOpenMarker, ast.NodeTagCloseMarker:
-			buf.WriteByte('#')
 		case ast.NodeText, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeFileAnnotationRefText, ast.NodeFootnotesRef,
 			ast.NodeCodeSpanContent, ast.NodeInlineMathContent, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			buf.Write(n.Tokens)
@@ -620,11 +618,11 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		}
 		assets = append(assets, asset)
 		return
-	case ast.NodeTag, ast.NodeInlineMath, ast.NodeCodeSpan, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline, ast.NodeTextMark:
+	case ast.NodeInlineMath, ast.NodeCodeSpan, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline, ast.NodeTextMark:
 		typ := treenode.TypeAbbr(n.Type.String())
 		var text string
 		switch n.Type {
-		case ast.NodeTag, ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline:
+		case ast.NodeEmphasis, ast.NodeStrong, ast.NodeStrikethrough, ast.NodeMark, ast.NodeSup, ast.NodeSub, ast.NodeKbd, ast.NodeUnderline:
 			text = n.Text()
 		case ast.NodeInlineMath:
 			text = n.ChildByType(ast.NodeInlineMathContent).TokensStr()
@@ -843,7 +841,7 @@ func tagFromNode(node *ast.Node) (ret string) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeTag == n.Type || n.IsTextMarkType("tag") {
+		if n.IsTextMarkType("tag") {
 			tagBuilder.WriteString("#")
 			tagBuilder.WriteString(n.Text())
 			tagBuilder.WriteString("# ")

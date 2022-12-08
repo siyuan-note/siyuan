@@ -438,7 +438,7 @@ export const globalShortcut = () => {
             }
             switchDialog = new Dialog({
                 content: `<div class="fn__flex-column b3-dialog--switch">
-    <div class="fn__hr"></div>
+    <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
     <div class="fn__flex">
         <ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">${dockHtml}</ul>
         <ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">${tabHtml}</ul>
@@ -454,9 +454,8 @@ export const globalShortcut = () => {
                     }
                 }
             });
-            if (range) {
-                getSelection().removeAllRanges();
-            }
+            // 需移走光标，否则编辑器会继续监听并执行按键操作
+            switchDialog.element.querySelector("input").focus();
             if (isMac()) {
                 switchDialog.element.addEventListener("contextmenu", (event) => {
                     switchDialogEvent(event, switchDialog);

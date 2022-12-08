@@ -20,7 +20,7 @@
     &.emoji {
       cursor: auto;
       max-width: none;
-      vertical-align: text-top;
+      vertical-align: sub; // text-top windows 不兼容
     }
   }
 

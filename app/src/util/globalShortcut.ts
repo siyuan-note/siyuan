@@ -42,7 +42,6 @@ import {getStartEndElement} from "../protyle/wysiwyg/commonHotkey";
 import {getNextFileLi, getPreviousFileLi} from "../protyle/wysiwyg/getBlock";
 import {editor} from "../config/editor";
 import {hintMoveBlock} from "../protyle/hint/extend";
-import {Outline} from "../layout/dock/Outline";
 import {Backlink} from "../layout/dock/Backlink";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
@@ -70,7 +69,6 @@ const switchDialogEvent = (event: MouseEvent, switchDialog: Dialog) => {
                 getAllTabs().find(item => {
                     if (item.id === currentId) {
                         item.parent.switchTab(item.headElement);
-                        setPanelFocus(item.headElement.parentElement.parentElement);
                         return true;
                     }
                 });
@@ -330,7 +328,6 @@ export const globalShortcut = () => {
                     getAllTabs().find(item => {
                         if (item.id === currentId) {
                             item.parent.switchTab(item.headElement);
-                            setPanelFocus(item.headElement.parentElement.parentElement);
                             return true;
                         }
                     });
@@ -394,8 +391,8 @@ export const globalShortcut = () => {
                         currentLiElement.parentElement.firstElementChild.classList.add("b3-list-item--focus");
                     }
                 } else {
-                    const sideElement = currentLiElement.parentElement.previousElementSibling|| currentLiElement.parentElement.nextElementSibling;
-                    (sideElement.querySelector(`[data-index="${currentLiElement.getAttribute("data-index")}"]`)|| sideElement.lastElementChild).classList.add("b3-list-item--focus");
+                    const sideElement = currentLiElement.parentElement.previousElementSibling || currentLiElement.parentElement.nextElementSibling;
+                    (sideElement.querySelector(`[data-index="${currentLiElement.getAttribute("data-index")}"]`) || sideElement.lastElementChild).classList.add("b3-list-item--focus");
                 }
             }
             return;
@@ -435,6 +432,10 @@ export const globalShortcut = () => {
     <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span>
 </li>`;
             });
+            let range: Range
+            if (getSelection().rangeCount > 0) {
+                range = getSelection().getRangeAt(0).cloneRange();
+            }
             switchDialog = new Dialog({
                 content: `<div class="fn__flex-column b3-dialog--switch">
     <div class="fn__hr"></div>
@@ -447,8 +448,15 @@ export const globalShortcut = () => {
                 disableClose: true,
                 disableAnimation: true,
                 transparent: true,
+                destroyCallback: () => {
+                    if (range && range.getBoundingClientRect().height !== 0) {
+                        focusByRange(range)
+                    }
+                }
             });
-            getSelection().removeAllRanges();
+            if (range) {
+                getSelection().removeAllRanges();
+            }
             if (isMac()) {
                 switchDialog.element.addEventListener("contextmenu", (event) => {
                     switchDialogEvent(event, switchDialog);

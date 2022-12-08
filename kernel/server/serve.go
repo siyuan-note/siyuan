@@ -282,6 +282,8 @@ func serveCheckAuth(c *gin.Context) {
 		"l1": model.Conf.Language(174),
 		"l2": template.HTML(model.Conf.Language(172)),
 		"l3": model.Conf.Language(175),
+		"l4": model.Conf.Language(176),
+		"l5": model.Conf.Language(177),
 	}
 	buf := &bytes.Buffer{}
 	if err = tpl.Execute(buf, model); nil != err {

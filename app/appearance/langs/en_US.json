@@ -1011,6 +1011,8 @@
     "172": " If you forget the authorization code, you can search<br>for <code class=\"b3-code\">accessAuthCode</code> in the workspace conf/conf.json",
     "173": "Please enter the access auth code",
     "174": "Unlock access",
-    "175": "Please enter the verification code"
+    "175": "Please enter the verification code",
+    "176": "SiYuan",
+    "177": "Exit application"
   }
 }

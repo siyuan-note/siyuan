@@ -1011,6 +1011,8 @@
     "172": "Si vous oubliez le code d'autorisation, vous pouvez rechercher <code class=\"b3-code\">accessAuthCode</code> dans le fichier <br>conf/conf.json de l'espace de travail",
     "173": "Veuillez entrer le code d'autorisation d'accès",
     "174": "Déverrouiller l'accès",
-    "175": "Veuillez entrer le code de vérification"
+    "175": "Veuillez entrer le code de vérification",
+    "176": "SiYuan",
+    "177": "Quitter l'application"
   }
 }

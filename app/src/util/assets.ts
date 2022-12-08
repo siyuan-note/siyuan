@@ -6,7 +6,7 @@ import {ipcRenderer} from "electron";
 import {getAllModels} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
 /// #endif
-import {isMobile} from "./functions";
+import {isBrowser, isMobile} from "./functions";
 import {fetchPost} from "./fetch";
 
 const loadThirdIcon = (iconURL: string, data: IAppearance) => {
@@ -231,7 +231,8 @@ export const setMode = (modeElementValue: number) => {
                     window.siyuan.config.appearance.themeDark !== response.data.themeDark
                 )
             ) ||
-            (response.data.modeOS && !window.siyuan.config.appearance.modeOS)
+            // Electron 中 ipcRenderer 会触发 nativeTheme.themeSource 从而触发 window.matchMedia 中的 watchTheme
+            (response.data.modeOS && !window.siyuan.config.appearance.modeOS && isBrowser())
         ) {
             exportLayout(true);
             return;

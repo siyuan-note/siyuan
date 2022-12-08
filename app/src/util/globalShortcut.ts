@@ -1226,8 +1226,14 @@ const panelTreeKeydown = (event: KeyboardEvent) => {
         while (nextElement) {
             if (nextElement.nextElementSibling) {
                 if (nextElement.nextElementSibling.tagName === "UL") {
-                    nextElement = nextElement.nextElementSibling.firstElementChild;
-                } else if (nextElement.nextElementSibling.classList.contains("protyle")) {
+                    if (nextElement.nextElementSibling.classList.contains("fn__none")) {   // 遇到折叠内容
+                        if (nextElement.nextElementSibling.nextElementSibling) {
+                            nextElement = nextElement.nextElementSibling.nextElementSibling
+                        }
+                    } else {
+                        nextElement = nextElement.nextElementSibling.firstElementChild;
+                    }
+                } else if (nextElement.nextElementSibling.classList.contains("protyle")) { // backlink
                     if (nextElement.nextElementSibling.nextElementSibling) {
                         nextElement = nextElement.nextElementSibling.nextElementSibling;
                     }
@@ -1262,6 +1268,10 @@ const panelTreeKeydown = (event: KeyboardEvent) => {
                 if (previousElement.previousElementSibling.tagName === "LI") {
                     previousElement = previousElement.previousElementSibling;
                 } else if (previousElement.previousElementSibling.classList.contains("protyle")) {
+                    if (previousElement.previousElementSibling.previousElementSibling) {
+                        previousElement = previousElement.previousElementSibling.previousElementSibling;
+                    }
+                } else if (previousElement.previousElementSibling.tagName === "UL" && previousElement.previousElementSibling.classList.contains("fn__none")) {   // 遇到折叠内容
                     if (previousElement.previousElementSibling.previousElementSibling) {
                         previousElement = previousElement.previousElementSibling.previousElementSibling;
                     }

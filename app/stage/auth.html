@@ -137,16 +137,16 @@
         }
 
         .b3-code {
-             padding: 0.2em 0.4em;
-             margin: 0;
-             font-size: 85%;
-             border-radius: 3px;
-             font-family: "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
-             word-break: break-word;
-             background-size: 20px 20px;
-             white-space: pre-wrap;
-             background-color: rgba(27, 31, 35, .05);
-         }
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+            font-family: "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+            word-break: break-word;
+            background-size: 20px 20px;
+            white-space: pre-wrap;
+            background-color: rgba(27, 31, 35, .05);
+        }
     </style>
 </head>
 <body style="margin: 0;
@@ -507,7 +507,7 @@
   }
 
   // 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
-  new WebSocket(`${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws?app=siyuan&id=auth`);
+  new WebSocket(window.location.protocol === "https:" ? "wss" : "ws" + "://" + window.location.host + "/ws?app=siyuan&id=auth");
 </script>
 </body>
 </html>

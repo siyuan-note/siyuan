@@ -1007,6 +1007,10 @@
     "168": "Uploading data repo snapshot %s",
     "169": "Uploading data repo file %v",
     "170": "Uploading data repo chunk %v",
-    "171": "Uploading data repo reference %s"
+    "171": "Uploading data repo reference %s",
+    "172": " If you forget the authorization code, you can search<br>for <code class=\"b3-code\">accessAuthCode</code> in the workspace conf/conf.json",
+    "173": "Please enter the access auth code",
+    "174": "Unlock access",
+    "175": "Please enter the verification code"
   }
 }

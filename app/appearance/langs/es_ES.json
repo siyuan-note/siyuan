@@ -1007,6 +1007,10 @@
     "168": "Cargando instantánea de repositorio de datos %s",
     "169": "Cargando archivo de repositorio de datos %v",
     "170": "Cargando fragmento de repositorio de datos %v",
-    "171": "Cargando referencia de repositorio de datos %s"
+    "171": "Cargando referencia de repositorio de datos %s",
+    "172": "Si olvida el código de autorización, puede buscar <code class=\"b3-code\">accessAuthCode</code> en el archivo <br>conf/conf.json del espacio de trabajo",
+    "173": "Por favor ingrese el codigo de autorizacion de acceso",
+    "174": "Desbloquear acceso",
+    "175": "Por favor ingrese el código de verificación"
   }
 }

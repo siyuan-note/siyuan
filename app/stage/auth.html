@@ -157,16 +157,15 @@
 ">
 <div style="-webkit-app-region: drag;height: 32px;width: 100%;position: absolute;top: 0;"></div>
 <div style="position: relative;z-index: 2;text-align: center">
-    <h1 style="margin-bottom: 48px;">思源 SiYuan</h1>
-    <input class="b3-text-filed" id="authCode" type="password" placeholder="授权码 Auth code"/><br>
+    <h1 style="margin-bottom: 48px;">SiYuan</h1>
+    <input class="b3-text-filed" id="authCode" type="password" placeholder="{{.l0}}"/><br>
     <div style="position: relative;width: 240px;margin: 8px auto 0;display: none">
         <img id="captchaImg" style="top: 1px;position: absolute;height: 28px;right: 1px;cursor: pointer">
-        <input id="captcha" class="b3-text-filed" placeholder="验证码 Captcha">
+        <input id="captcha" class="b3-text-filed" placeholder="{{.l3}}">
     </div>
-    <button class="b3-button" onclick="submitAuth()">解锁 Unlock</button>
+    <button class="b3-button" onclick="submitAuth()">{{.l1}}</button>
     <div style="color: #5f6368;font-size: 14px;margin: 16px 0;">
-        如果你忘记了授权码，可在工作空间<br>conf/conf.json 文件中搜索 <code class="b3-code">accessAuthCode</code><br><br>
-        If you forget the authorization code, you can search<br>for <code class="b3-code">accessAuthCode</code> in the workspace conf/conf.json
+        {{.l2}}
     </div>
     <button class="b3-button b3-button--white" onclick="exitSiYuan()">退出 Exit</button>
 </div>

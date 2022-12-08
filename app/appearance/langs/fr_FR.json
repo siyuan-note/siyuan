@@ -1007,6 +1007,10 @@
     "168": "Téléchargement de l'instantané du référentiel de données %s",
     "169": "Téléchargement du fichier de référentiel de données %v",
     "170": "Téléchargement du bloc de dépôt de données %v",
-    "171": "Téléchargement de la référence de référentiel de données %s"
+    "171": "Téléchargement de la référence de référentiel de données %s",
+    "172": "Si vous oubliez le code d'autorisation, vous pouvez rechercher <code class=\"b3-code\">accessAuthCode</code> dans le fichier <br>conf/conf.json de l'espace de travail",
+    "173": "Veuillez entrer le code d'autorisation d'accès",
+    "174": "Déverrouiller l'accès",
+    "175": "Veuillez entrer le code de vérification"
   }
 }

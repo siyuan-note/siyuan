@@ -17,7 +17,9 @@
 package server
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -267,6 +269,27 @@ func serveCheckAuth(c *gin.Context) {
 		c.Status(500)
 		return
 	}
+
+	tpl, err := template.New("auth").Parse(string(data))
+	if nil != err {
+		logging.LogErrorf("parse auth page failed: %s", err)
+		c.Status(500)
+		return
+	}
+
+	model := map[string]interface{}{
+		"l0": model.Conf.Language(173),
+		"l1": model.Conf.Language(174),
+		"l2": template.HTML(model.Conf.Language(172)),
+		"l3": model.Conf.Language(175),
+	}
+	buf := &bytes.Buffer{}
+	if err = tpl.Execute(buf, model); nil != err {
+		logging.LogErrorf("execute auth page failed: %s", err)
+		c.Status(500)
+		return
+	}
+	data = buf.Bytes()
 	c.Data(http.StatusOK, "text/html; charset=utf-8", data)
 }
 

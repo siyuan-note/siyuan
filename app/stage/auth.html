@@ -135,6 +135,18 @@
         a:hover {
             text-decoration: underline;
         }
+
+        .b3-code {
+             padding: 0.2em 0.4em;
+             margin: 0;
+             font-size: 85%;
+             border-radius: 3px;
+             font-family: var(--b3-font-family-code);
+             word-break: break-word;
+             background-size: 20px 20px;
+             white-space: pre-wrap;
+             background-color: var(--b3-protyle-code-background);
+         }
     </style>
 </head>
 <body style="margin: 0;
@@ -153,9 +165,8 @@
     </div>
     <button class="b3-button" onclick="submitAuth()">解锁 Unlock</button>
     <div style="color: #5f6368;font-size: 14px;margin: 16px 0;">
-        如果你在使用中遇到问题，请到<a href="https://ld246.com/article/1649901726096" target="_blank">这里</a>反馈<br>
-        If you encounter problems, please report it on <a href="https://github.com/siyuan-note/siyuan/issues"
-                                                          target="_blank">GitHub</a>
+        如果你忘记了授权码，可在工作空间<br>conf/conf.json 文件中搜索 <code class="b3-code">accessAuthCode</code><br><br>
+        If you forget the authorization code, you can search<br>for <code class="b3-code">accessAuthCode</code> in the workspace conf/conf.json
     </div>
     <button class="b3-button b3-button--white" onclick="exitSiYuan()">退出 Exit</button>
 </div>

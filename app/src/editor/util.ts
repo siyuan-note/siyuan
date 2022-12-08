@@ -345,7 +345,7 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
         }
         if (window.siyuan.config.fileTree.alwaysSelectOpenedFile && protyle) {
             const fileModel = getDockByType("file")?.data.file;
-            if (fileModel instanceof Files) {
+            if (fileModel instanceof Files && !fileModel.isSelected(protyle.path)) {
                 fileModel.selectItem(protyle.notebookId, protyle.path);
             }
         }

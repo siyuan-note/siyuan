@@ -126,8 +126,6 @@ func NodeStaticContent(node *ast.Node) string {
 		}
 
 		switch n.Type {
-		case ast.NodeTagOpenMarker, ast.NodeTagCloseMarker:
-			buf.WriteByte('#')
 		case ast.NodeBlockRef:
 			buf.WriteString(GetDynamicBlockRefText(n))
 			lastSpace = false

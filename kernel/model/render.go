@@ -46,8 +46,6 @@ func renderOutline(node *ast.Node, luteEngine *lute.Lute) (ret string) {
 			return ast.WalkContinue
 		}
 		switch n.Type {
-		case ast.NodeTagOpenMarker, ast.NodeTagCloseMarker:
-			buf.WriteByte('#')
 		case ast.NodeBlockRef:
 			buf.WriteString(html.EscapeString(treenode.GetDynamicBlockRefText(n)))
 			return ast.WalkSkipChildren

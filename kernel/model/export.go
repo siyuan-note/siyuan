@@ -1073,18 +1073,6 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 		}
 
 		switch n.Type {
-		case ast.NodeTagOpenMarker: // 配置标签开始标记符
-			if !wysiwyg {
-				n.Type = ast.NodeText
-				n.Tokens = []byte(Conf.Export.TagOpenMarker)
-				return ast.WalkContinue
-			}
-		case ast.NodeTagCloseMarker: // 配置标记结束标记符
-			if !wysiwyg {
-				n.Type = ast.NodeText
-				n.Tokens = []byte(Conf.Export.TagCloseMarker)
-				return ast.WalkContinue
-			}
 		case ast.NodeSuperBlockOpenMarker, ast.NodeSuperBlockLayoutMarker, ast.NodeSuperBlockCloseMarker:
 			if !wysiwyg {
 				unlinks = append(unlinks, n)

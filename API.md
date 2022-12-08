@@ -999,9 +999,3 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   ```
 
     * `data`: Precision in milliseconds
-
-## Webhook
-
-TBD
-
-https://ld246.com/article/1627956688432

@@ -700,7 +700,7 @@ func query2Stmt(queryStr string) (ret string) {
 			if !entering {
 				return ast.WalkContinue
 			}
-			if ast.NodeTag == n.Type || (n.IsTextMarkType("tag")) {
+			if n.IsTextMarkType("tag") {
 				tags = append(tags, n.Text())
 			}
 			return ast.WalkContinue

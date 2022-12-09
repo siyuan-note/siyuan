@@ -284,6 +284,7 @@ func serveCheckAuth(c *gin.Context) {
 		"l3":               model.Conf.Language(175),
 		"l4":               model.Conf.Language(176),
 		"l5":               model.Conf.Language(177),
+		"l6":               model.Conf.Language(178),
 		"appearanceMode":   model.Conf.Appearance.Mode,
 		"appearanceModeOS": model.Conf.Appearance.ModeOS,
 	}

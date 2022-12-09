@@ -377,7 +377,7 @@ export const globalShortcut = () => {
         }
 
         if (switchDialog && event.ctrlKey && !event.metaKey && event.key.startsWith("Arrow")) {
-            const currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
+            let currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
             if (currentLiElement) {
                 currentLiElement.classList.remove("b3-list-item--focus");
                 if (event.key === "ArrowUp") {
@@ -396,7 +396,8 @@ export const globalShortcut = () => {
                     const sideElement = currentLiElement.parentElement.previousElementSibling || currentLiElement.parentElement.nextElementSibling;
                     (sideElement.querySelector(`[data-index="${currentLiElement.getAttribute("data-index")}"]`) || sideElement.lastElementChild).classList.add("b3-list-item--focus");
                 }
-                const currentRect = switchDialog.element.querySelector(".b3-list-item--focus").getBoundingClientRect();
+                currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus")
+                const currentRect = currentLiElement.getBoundingClientRect();
                 const currentParentRect = currentLiElement.parentElement.getBoundingClientRect();
                 if (currentRect.top < currentParentRect.top) {
                     currentLiElement.scrollIntoView(true);

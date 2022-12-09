@@ -82,6 +82,7 @@ export const openSnippets = () => {
             const contentElement = dialog.element.querySelector(`[data-id="${item.id}"] textarea`) as HTMLTextAreaElement;
             contentElement.textContent = item.content;
         });
+        const removeIds: string[] = [];
         dialog.element.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
             if (target.id === "addCodeSnippetCSS" || target.id === "addCodeSnippetJS") {
@@ -109,6 +110,12 @@ export const openSnippets = () => {
                     });
                 });
                 fetchPost("/api/snippet/setSnippet", {snippets}, () => {
+                    removeIds.forEach(item => {
+                        const rmElement = document.querySelector(item)
+                        if (rmElement) {
+                            rmElement.remove()
+                        }
+                    });
                     renderSnippet();
                     dialog.destroy();
                 });
@@ -131,8 +138,10 @@ export const openSnippets = () => {
             }
             const removeElement = hasClosestByClassName(target, "b3-tooltips");
             if (removeElement) {
-                removeElement.parentElement.parentElement.nextElementSibling.remove();
-                removeElement.parentElement.parentElement.remove();
+                const itemElement = removeElement.parentElement.parentElement
+                removeIds.push("#snippet" + (itemElement.getAttribute("data-type") === "css" ? "CSS" : "JS") + itemElement.getAttribute("data-id"))
+                itemElement.nextElementSibling.remove();
+                itemElement.remove();
             }
         });
     });

@@ -124,8 +124,6 @@ export class MenuItem {
                     return;
                 }
                 options.click(this.element);
-                this.element.parentElement.classList.add("fn__none");
-                this.element.parentElement.innerHTML = "";
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 event.stopPropagation();

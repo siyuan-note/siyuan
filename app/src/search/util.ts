@@ -17,7 +17,7 @@ import {addLoading, setPadding} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {Dialog} from "../dialog";
-import {hasClosestByMatchTag} from "../protyle/util/hasClosest";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 export const openGlobalSearch = (text: string, replace: boolean) => {
     text = text.trim();
@@ -720,7 +720,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
 </div>`,
             bind(menuElement) {
                 menuElement.addEventListener("click", (event) => {
-                    if (hasClosestByMatchTag(event.target as HTMLElement, "svg")) {
+                    if (hasClosestByClassName(event.target as HTMLElement, "fn__a")) {
                         fetchPost("/api/storage/removeCriterion", {name: item.name.trim()});
                         event.preventDefault();
                         event.stopPropagation();
@@ -730,6 +730,12 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                             menuElement.remove();
                         }
                         return;
+                    }
+                    const dialogElement = hasClosestByClassName(element, "b3-dialog--open")
+                    if (dialogElement && dialogElement.getAttribute("data-key") === window.siyuan.config.keymap.general.search.custom) {
+                        // https://github.com/siyuan-note/siyuan/issues/6828
+                        item.hPath = config.hPath;
+                        item.idPath = config.idPath.join(",").split(",");
                     }
                     if (config.layout !== item.layout) {
                         if (item.layout === 0) {

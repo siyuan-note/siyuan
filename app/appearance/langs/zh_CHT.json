@@ -1,4 +1,6 @@
 {
+  "autoLaunch": "開機自動啟動",
+  "autoLaunchTip": "啟用後會在登錄操作系統後自動啟動應用",
   "sortByRankDesc": "按相關度降序",
   "sortByRankAsc": "按相關度升序",
   "saveCriterion": "保存命名查詢",

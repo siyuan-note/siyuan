@@ -1,6 +1,6 @@
 import {Constants} from "../constants";
 /// #if !BROWSER
-import {shell} from "electron";
+import {app, shell} from "electron";
 import {dialog} from "@electron/remote";
 /// #endif
 import {isBrowser} from "../util/functions";
@@ -17,7 +17,15 @@ import {setProxy} from "../util/onGetConfig";
 export const about = {
     element: undefined as Element,
     genHTML: () => {
-        return `<label class="fn__flex b3-label${isBrowser() || window.siyuan.config.system.isMicrosoftStore ? " fn__none" : ""}">
+        return `<label class="fn__flex b3-label${isBrowser() || "std" !== window.siyuan.config.system.container || "linux" === window.siyuan.config.system.os ? " fn__none" : ""}">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.autoLaunch}
+        <div class="b3-label__text">${window.siyuan.languages.autoLaunchTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <input class="b3-switch fn__flex-center" id="autoLaunch" type="checkbox"${window.siyuan.config.system.autoLaunch ? " checked" : ""}>
+</label>
+<label class="fn__flex b3-label${isBrowser() || window.siyuan.config.system.isMicrosoftStore ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.autoDownloadUpdatePkg}
         <div class="b3-label__text">${window.siyuan.languages.autoDownloadUpdatePkgTip}</div>
@@ -387,6 +395,13 @@ export const about = {
         downloadInstallPkgElement.addEventListener("change", () => {
             fetchPost("/api/system/setDownloadInstallPkg", {downloadInstallPkg: downloadInstallPkgElement.checked}, () => {
                 window.siyuan.config.system.downloadInstallPkg = downloadInstallPkgElement.checked;
+            });
+        });
+        const autoLaunchElement = about.element.querySelector("#autoLaunch") as HTMLInputElement;
+        autoLaunchElement.addEventListener("change", () => {
+            fetchPost("/api/system/setAutoLaunch", {autoLaunch: autoLaunchElement.checked}, () => {
+                window.siyuan.config.system.autoLaunch = autoLaunchElement.checked;
+                app.setLoginItemSettings({openAtLogin: autoLaunchElement.checked});
             });
         });
         about.element.querySelector("#aboutConfirm").addEventListener("click", () => {

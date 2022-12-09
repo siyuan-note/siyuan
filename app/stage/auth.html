@@ -3,10 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-    <title>SiYuan Auth</title>
+    <title>{{.l6}}</title>
     <style>
         body {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            justify-content: center;
             font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+            --b3-theme-on-surface: #5f6368;
+            --b3-protyle-code-background: rgba(27, 31, 35, .05);
+            --b3-protyle-inline-link-color: #4285f4;
+            --b3-theme-primary: #3573f0;
+            --b3-theme-primary-lighter: rgba(53, 115, 240, 0.38);
+            --b3-theme-primary-lightest: rgba(53, 115, 240, 0.12);
+            --b3-theme-background: #fff;
+            --b3-theme-on-background: #202124;
+            --b3-theme-on-primary: #fff;
+        }
+
+        .dark {
+            --b3-theme-on-surface: #9aa0a6;
+            --b3-protyle-code-background: rgba(240, 246, 252, .15);
+            --b3-protyle-inline-link-color: #8ab4f8;
+            --b3-theme-primary: #3573f0;
+            --b3-theme-primary-lighter: rgba(53, 115, 240, 0.48);
+            --b3-theme-primary-lightest: rgba(53, 115, 240, 0.24);
+            --b3-theme-background: #212224;
+            --b3-theme-on-background: #c9d1d9;
+            --b3-theme-on-primary: #fff;
+            background-color: var(--b3-theme-background);
         }
 
         .b3-button {
@@ -17,7 +44,6 @@
             border-radius: 4px;
             line-height: 20px;
             padding: 4px 8px;
-            background-color: #4285f4;
             white-space: nowrap;
             display: inline-flex;
             align-items: center;
@@ -27,6 +53,7 @@
             box-sizing: border-box;
             text-align: center;
             font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+            background-color: var(--b3-theme-primary);
         }
 
         .b3-button svg {
@@ -38,51 +65,51 @@
         .b3-button:hover, .b3-button:focus {
             outline: none;
             text-decoration: none;
-            box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+            box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, .12);
         }
 
         .b3-button:active {
             outline: none;
-            box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+            box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, .12);
         }
 
         .b3-button--white {
-            color: #0969da;
-            box-shadow: inset 0 0 0 1px #0969da;
+            color: var(--b3-theme-primary);
+            box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
             background-color: transparent;
         }
 
         .b3-button--white:hover,
         .b3-button--white:focus {
-            background-color: rgba(9, 105, 218, 0.12);
-            box-shadow: inset 0 0 0 1px #0969da;
+            background-color: var(--b3-theme-primary-lightest);
+            box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
         }
 
         .b3-button--white:active {
-            background-color: rgba(9, 105, 218, 0.38);
-            box-shadow: inset 0 0 0 1px #0969da;
-        }
+             background-color: var(--b3-theme-primary-lighter);
+             box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
+         }
 
         .b3-text-filed {
             width: 240px;
-            border: 1px solid #5f6368;
+            border: 0;
             border-radius: 4px;
+            box-shadow: inset 0 0 0 1px var(--b3-theme-on-surface);
             padding: 4px 8px;
             line-height: 20px;
             box-sizing: border-box;
-            color: #202124;
-            transition: border-color 120ms 0ms cubic-bezier(0, 0, 0.2, 1), box-shadow 120ms 0ms cubic-bezier(0, 0, 0.2, 1);
-            background-color: #f8f9fa;
+            color: var(--b3-theme-on-background);
+            transition: box-shadow 120ms 0ms cubic-bezier(0, 0, 0.2, 1);
+            background-color: var(--b3-theme-background);
         }
 
         .b3-text-filed:hover {
-            border-color: #202124;
+            border-color: var(--b3-theme-on-background);
         }
 
         .b3-text-filed:focus {
             outline: none;
-            border-color: #4285f4;
-            box-shadow: 0 0 0 3px rgb(66 133 244 / 12%);
+            box-shadow: inset 0 0 0 1px var(--b3-theme-primary), 0 0 0 3px var(--b3-theme-primary-lightest);
         }
 
         .b3-snackbar {
@@ -113,23 +140,22 @@
             line-height: 20px;
             border-radius: 4px;
             padding: 8px 16px;
-            color: #fff;
             font-size: inherit;
-            background-color: #4285F4;
+            background-color: var(--b3-theme-primary);
             box-sizing: border-box;
-            box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12);
             transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
             transform: scale(0.8);
             top: 16px;
             position: absolute;
             word-break: break-word;
-            max-width: 80vw;
+            color: var(--b3-theme-on-primary);
+            box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%), 0 6px 10px 0 rgb(0 0 0 / 14%), 0 1px 18px 0 rgb(0 0 0 / 12%);
         }
 
         a {
             outline: 0;
             text-decoration: none;
-            color: #4285f4;
+            color: var(--b3-protyle-inline-link-color);
         }
 
         a:hover {
@@ -145,43 +171,33 @@
             word-break: break-word;
             background-size: 20px 20px;
             white-space: pre-wrap;
-            background-color: rgba(27, 31, 35, .05);
+            background-color: var(--b3-protyle-code-background);
+        }
+
+        .ft__on-surface {
+            color: var(--b3-theme-on-surface);
+            font-size: 14px;
+            margin: 16px 0;
         }
     </style>
 </head>
-<body style="margin: 0;
-    display: flex;
-    align-items: center;
-    height: 100%;
-    justify-content: center;
-">
+<body>
 <div style="-webkit-app-region: drag;height: 32px;width: 100%;position: absolute;top: 0;"></div>
 <div style="position: relative;z-index: 2;text-align: center">
-    <h1 style="margin-bottom: 48px;">{{.l4}}</h1>
+    <h1 style="margin-bottom: 48px;color:var(--b3-theme-on-background)">{{.l4}}</h1>
     <input class="b3-text-filed" id="authCode" type="password" placeholder="{{.l0}}"/><br>
     <div style="position: relative;width: 240px;margin: 8px auto 0;display: none">
         <img id="captchaImg" style="top: 1px;position: absolute;height: 28px;right: 1px;cursor: pointer">
         <input id="captcha" class="b3-text-filed" placeholder="{{.l3}}">
     </div>
     <button class="b3-button" onclick="submitAuth()">{{.l1}}</button>
-    <div style="color: #5f6368;font-size: 14px;margin: 16px 0;">
+    <div class="ft__on-surface">
         {{.l2}}
     </div>
     <button class="b3-button b3-button--white" onclick="exitSiYuan()">{{.l5}}</button>
 </div>
-<div style="overflow: hidden;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    left: 0;">
-    <svg style="
-    top: 50%;
-    left: 50%;
-    width: 200%;
-    transform: translate(-50%, -50%);
-    position: absolute;
-    z-index: 1;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" height="1602"
+<div style="overflow: hidden;position: absolute;height: 100%;width: 100%;top: 0;left: 0;">
+    <svg style="top: 50%;left: 50%;width: 200%;transform: translate(-50%, -50%);position: absolute;z-index: 1;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" height="1602"
          viewBox="0 0 2769 1602" width="2769">
         <filter id="a" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse" height="1044" width="1044"
                 x="1682" y="558">
@@ -397,6 +413,9 @@
     <div class="b3-snackbar__content"></div>
 </div>
 <script>
+  if ({{.appearanceModeOS}} && window.matchMedia('(prefers-color-scheme: dark)').matches || {{.appearanceMode}} === 1) {
+    document.body.classList.add('dark')
+  }
   if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     document.querySelector('.b3-button--white').remove()
   }
@@ -507,7 +526,7 @@
   }
 
   // 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
-  new WebSocket(window.location.protocol === "https:" ? "wss" : "ws" + "://" + window.location.host + "/ws?app=siyuan&id=auth");
+  new WebSocket(window.location.protocol === 'https:' ? 'wss' : 'ws' + '://' + window.location.host + '/ws?app=siyuan&id=auth')
 </script>
 </body>
 </html>

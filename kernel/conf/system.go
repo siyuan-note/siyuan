@@ -41,6 +41,7 @@ type System struct {
 	UploadErrLog           bool `json:"uploadErrLog"`
 	DisableGoogleAnalytics bool `json:"disableGoogleAnalytics"`
 	DownloadInstallPkg     bool `json:"downloadInstallPkg"`
+	AutoLaunch             bool `json:"autoLaunch"`
 }
 
 func NewSystem() *System {

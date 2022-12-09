@@ -333,6 +333,20 @@ func setUploadErrLog(c *gin.Context) {
 	time.Sleep(time.Second * 3)
 }
 
+func setAutoLaunch(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	autoLaunch := arg["autoLaunch"].(bool)
+	model.Conf.System.AutoLaunch = autoLaunch
+	model.Conf.Save()
+}
+
 func setDownloadInstallPkg(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

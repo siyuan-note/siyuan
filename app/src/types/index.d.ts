@@ -410,6 +410,7 @@ declare interface IConfig {
         downloadInstallPkg: boolean
         networkServe: boolean
         fixedPort: boolean
+        autoLaunch: boolean
     }
     localIPs: string[]
     readonly: boolean

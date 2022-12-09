@@ -278,12 +278,14 @@ func serveCheckAuth(c *gin.Context) {
 	}
 
 	model := map[string]interface{}{
-		"l0": model.Conf.Language(173),
-		"l1": model.Conf.Language(174),
-		"l2": template.HTML(model.Conf.Language(172)),
-		"l3": model.Conf.Language(175),
-		"l4": model.Conf.Language(176),
-		"l5": model.Conf.Language(177),
+		"l0":               model.Conf.Language(173),
+		"l1":               model.Conf.Language(174),
+		"l2":               template.HTML(model.Conf.Language(172)),
+		"l3":               model.Conf.Language(175),
+		"l4":               model.Conf.Language(176),
+		"l5":               model.Conf.Language(177),
+		"appearanceMode":   model.Conf.Appearance.Mode,
+		"appearanceModeOS": model.Conf.Appearance.ModeOS,
 	}
 	buf := &bytes.Buffer{}
 	if err = tpl.Execute(buf, model); nil != err {

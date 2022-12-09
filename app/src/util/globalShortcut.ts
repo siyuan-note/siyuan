@@ -396,6 +396,13 @@ export const globalShortcut = () => {
                     const sideElement = currentLiElement.parentElement.previousElementSibling || currentLiElement.parentElement.nextElementSibling;
                     (sideElement.querySelector(`[data-index="${currentLiElement.getAttribute("data-index")}"]`) || sideElement.lastElementChild).classList.add("b3-list-item--focus");
                 }
+                const currentRect = switchDialog.element.querySelector(".b3-list-item--focus").getBoundingClientRect();
+                const currentParentRect = currentLiElement.parentElement.getBoundingClientRect();
+                if (currentRect.top < currentParentRect.top) {
+                    currentLiElement.scrollIntoView(true);
+                } else if (currentRect.bottom > currentParentRect.bottom) {
+                    currentLiElement.scrollIntoView(false);
+                }
             }
             return;
         }

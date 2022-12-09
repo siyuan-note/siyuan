@@ -597,6 +597,20 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             config.sort = 4;
             inputEvent(element, config, undefined, edit);
         }
+    }, {
+        label: window.siyuan.languages.sortByRankAsc,
+        current: config.sort === 6,
+        click() {
+            config.sort = 6;
+            inputEvent(element, config, undefined, edit);
+        }
+    }, {
+        label: window.siyuan.languages.sortByRankDesc,
+        current: config.sort === 7,
+        click() {
+            config.sort = 7;
+            inputEvent(element, config, undefined, edit);
+        }
     }];
     if (config.group === 1) {
         sortMenu.push({

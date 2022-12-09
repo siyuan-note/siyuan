@@ -1,4 +1,6 @@
 {
+  "sortByRankDesc": "DESC de pertinence",
+  "sortByRankAsc": "ASC de pertinence",
   "saveCriterion": "Enregistrer le critère nommé",
   "useCriterion": "Utiliser le critère nommé",
   "groupe": "Groupe",

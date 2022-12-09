@@ -53,7 +53,7 @@ interface Window {
 
 interface ISearchOption {
     name?: string
-    sort: number,  //  0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时）
+    sort: number,  //  0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
     group: number,  // 0：不分组，1：按文档分组
     layout: number  // 0：上下，1：左右
     hasReplace: boolean,

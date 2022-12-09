@@ -314,8 +314,8 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 
 // FullTextSearchBlock 搜索内容块。
 //
-// method：0：文本，1：查询语法，2：SQL，3：正则表达式
-// orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时）
+// method：0：关键字，1：查询语法，2：SQL，3：正则表达式
+// orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
 // groupBy：0：不分组，1：按文档分组
 func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = strings.TrimSpace(query)
@@ -335,7 +335,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
 		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexp(query, boxFilter, pathFilter, typeFilter, orderByClause, beforeLen)
-	default: // 文本
+	default: // 关键字
 		filter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
@@ -411,7 +411,9 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		case 4: // 按更新时间降序
 			sort.Slice(roots, func(i, j int) bool { return roots[i].Updated > roots[j].Updated })
 		case 5: // 按内容顺序（仅在按文档分组时）
-			// 都是文档，不需要再次排序
+		// 都是文档，不需要再次排序
+		case 6, 7: // 按相关度
+		// 已在 ORDER BY 中处理
 		default: // 按块类型（默认）
 			// 都是文档，不需要再次排序
 		}
@@ -467,6 +469,10 @@ func buildOrderBy(orderBy int) string {
 		return "ORDER BY updated ASC"
 	case 4:
 		return "ORDER BY updated DESC"
+	case 6:
+		return "ORDER BY rank DESC" // 默认是按相关度降序，所以按相关度升序要反过来使用 DESC
+	case 7:
+		return "ORDER BY rank" // 默认是按相关度降序
 	default:
 		return "ORDER BY sort ASC"
 	}

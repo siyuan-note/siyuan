@@ -1,4 +1,6 @@
 {
+  "sortByRankDesc": "Relevancia DESC",
+  "sortByRankAsc": "Relevancia ASC",
   "saveCriterion": "Guardar criterio nombrado",
   "useCriterion": "Usar criterio con nombre",
   "grupo": "Grupo",

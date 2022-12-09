@@ -1,4 +1,6 @@
 {
+  "sortByRankDesc": "按相關度降序",
+  "sortByRankAsc": "按相關度升序",
   "saveCriterion": "保存命名查詢",
   "useCriterion": "使用命名查詢",
   "group": "分組",

@@ -215,9 +215,13 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                     }
                 }
             } else {
+                let data = topElement.outerHTML;    // 不能 spin ，否则 li 会变为 list
+                if (topElement.classList.contains("render-node") || topElement.querySelector("div.render-node")) {
+                    data = protyle.lute.SpinBlockDOM(topElement.outerHTML);  // 防止图表撤销问题
+                }
                 inserts.push({
                     action: "insert",
-                    data: protyle.lute.SpinBlockDOM(topElement.outerHTML),  // 防止图标撤销问题
+                    data,
                     id,
                     previousID: topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "",
                     parentID: topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID

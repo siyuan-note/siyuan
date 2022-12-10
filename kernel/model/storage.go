@@ -38,6 +38,30 @@ type RecentDoc struct {
 
 var recentDocLock = sync.Mutex{}
 
+func RemoveRecentDoc(ids []string) {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+
+	recentDocs, err := getRecentDocs()
+	if nil != err {
+		return
+	}
+
+	ids = gulu.Str.RemoveDuplicatedElem(ids)
+	for i, doc := range recentDocs {
+		if gulu.Str.Contains(doc.RootID, ids) {
+			recentDocs = append(recentDocs[:i], recentDocs[i+1:]...)
+			break
+		}
+	}
+
+	err = setRecentDocs(recentDocs)
+	if nil != err {
+		return
+	}
+	return
+}
+
 func SetRecentDoc(doc *RecentDoc) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()

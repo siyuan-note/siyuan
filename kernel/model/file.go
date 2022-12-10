@@ -1247,6 +1247,7 @@ func removeDoc(box *Box, p string) (err error) {
 
 	treenode.RemoveBlockTreesByPathPrefix(childrenDir)
 	sql.RemoveTreePathQueue(box.ID, childrenDir)
+	RemoveRecentDoc(removeIDs)
 
 	if "/" != dir {
 		others, err := os.ReadDir(filepath.Join(util.DataDir, box.ID, dir))

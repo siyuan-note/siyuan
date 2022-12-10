@@ -80,7 +80,10 @@ func SetRecentDoc(doc *RecentDoc) (err error) {
 		}
 	}
 	if !update {
-		recentDocs = append(recentDocs, doc)
+		recentDocs = append([]*RecentDoc{doc}, recentDocs...)
+	}
+	if 32 < len(recentDocs) {
+		recentDocs = recentDocs[:64]
 	}
 
 	err = setRecentDocs(recentDocs)

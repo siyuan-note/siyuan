@@ -875,7 +875,14 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
         dialog.element.querySelector("input").focus();
         dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.recentDocs.custom)
         dialog.element.addEventListener("click", (event) => {
-            window.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter"}))
+            const liElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
+            if (liElement) {
+                dialog.element.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
+                liElement.classList.add("b3-list-item--focus");
+                window.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter"}))
+                event.stopPropagation();
+                event.preventDefault();
+            }
         });
     })
 }

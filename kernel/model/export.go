@@ -194,7 +194,7 @@ func Preview(id string) string {
 	return luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
 }
 
-func ExportDocx(id, savePath string, removeAssets bool) (err error) {
+func ExportDocx(id, savePath string, removeAssets, merge bool) (err error) {
 	if !util.IsValidPandocBin(Conf.Export.PandocBin) {
 		return errors.New(Conf.Language(115))
 	}
@@ -204,7 +204,7 @@ func ExportDocx(id, savePath string, removeAssets bool) (err error) {
 		return
 	}
 	defer os.Remove(tmpDir)
-	name, content := ExportMarkdownHTML(id, tmpDir, true)
+	name, content := ExportMarkdownHTML(id, tmpDir, true, merge)
 
 	tmpDocxPath := filepath.Join(tmpDir, name+".docx")
 	args := []string{ // pandoc -f html --resource-path=请从这里开始 请从这里开始\index.html -o test.docx
@@ -237,8 +237,17 @@ func ExportDocx(id, savePath string, removeAssets bool) (err error) {
 	return
 }
 
-func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
+func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string) {
 	tree, _ := loadTreeByBlockID(id)
+
+	if merge {
+		var mergeErr error
+		tree, mergeErr = mergeSubDocs(tree)
+		if nil != mergeErr {
+			logging.LogErrorf("merge sub docs failed: %s", mergeErr)
+			return
+		}
+	}
 
 	tree = exportTree(tree, true, true, false)
 	name = path.Base(tree.HPath)
@@ -329,7 +338,7 @@ func ExportMarkdownHTML(id, savePath string, docx bool) (name, dom string) {
 	return
 }
 
-func ExportHTML(id, savePath string, pdf, keepFold bool) (name, dom string) {
+func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom string) {
 	savePath = strings.TrimSpace(savePath)
 	tree, _ := loadTreeByBlockID(id)
 	var headings []*ast.Node
@@ -354,6 +363,14 @@ func ExportHTML(id, savePath string, pdf, keepFold bool) (name, dom string) {
 		}
 	}
 
+	if merge {
+		var mergeErr error
+		tree, mergeErr = mergeSubDocs(tree)
+		if nil != mergeErr {
+			logging.LogErrorf("merge sub docs failed: %s", mergeErr)
+			return
+		}
+	}
 	tree = exportTree(tree, true, true, keepFold)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614

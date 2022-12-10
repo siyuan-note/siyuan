@@ -350,7 +350,8 @@ func (box *Box) Unindex() {
 	sql.RemoveBoxHash(tx, box.ID)
 	sql.DeleteByBoxTx(tx, box.ID)
 	sql.CommitTx(tx)
-	treenode.RemoveBlockTreesByBoxID(box.ID)
+	ids := treenode.RemoveBlockTreesByBoxID(box.ID)
+	RemoveRecentDoc(ids)
 }
 
 func (box *Box) ListFiles(path string) (ret []*FileInfo) {

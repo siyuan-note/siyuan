@@ -175,11 +175,10 @@ func RemoveBlockTreesByPathPrefix(pathPrefix string) {
 	blockTreesChanged = true
 }
 
-func RemoveBlockTreesByBoxID(boxID string) {
+func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 	blockTreesLock.Lock()
 	defer blockTreesLock.Unlock()
 
-	var ids []string
 	for _, b := range blockTrees {
 		if b.BoxID == boxID {
 			ids = append(ids, b.ID)
@@ -189,6 +188,7 @@ func RemoveBlockTreesByBoxID(boxID string) {
 		delete(blockTrees, id)
 	}
 	blockTreesChanged = true
+	return
 }
 
 func RemoveBlockTree(id string) {

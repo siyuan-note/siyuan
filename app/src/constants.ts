@@ -191,7 +191,7 @@ export abstract class Constants {
                 memo: {default: "⌥⌘M", custom: "⌥⌘M"},
                 underline: {default: "⌘U", custom: "⌘U"},
                 italic: {default: "⌘I", custom: "⌘I"},
-                mark: {default: "⌘E", custom: "⌘E"},
+                mark: {default: "⌥D", custom: "⌥D"},
                 tag: {default: "⌘T", custom: "⌘T"},
                 strike: {default: "⇧⌘S", custom: "⇧⌘S"},
                 "inline-code": {default: "⌘G", custom: "⌘G"},

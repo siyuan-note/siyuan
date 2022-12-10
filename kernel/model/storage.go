@@ -29,12 +29,12 @@ import (
 )
 
 type RecentDoc struct {
-	RootID     string `json:"rootID"`
-	Icon       string `json:"icon"`
-	Title      string `json:"title"`
-	ScrollAttr string `json:"scrollAttr"`
-	Mode       string `json:"mode"`
-	Action     string `json:"action"`
+	RootID string `json:"rootID"`
+	ID     string `json:"id"`
+	Icon   string `json:"icon"`
+	Title  string `json:"title"`
+	Mode   string `json:"mode"`
+	Action string `json:"action"`
 }
 
 var recentDocLock = sync.Mutex{}
@@ -63,12 +63,12 @@ func RemoveRecentDoc(ids []string) {
 	return
 }
 
-func SetRecentDocByTree(tree *parse.Tree) {
+func SetRecentDocByTree(id string, tree *parse.Tree) {
 	recentDoc := &RecentDoc{
-		RootID:     tree.Root.ID,
-		Icon:       tree.Root.IALAttr("icon"),
-		Title:      tree.Root.IALAttr("title"),
-		ScrollAttr: tree.Root.IALAttr("scroll"),
+		RootID: tree.Root.ID,
+		ID:     id,
+		Icon:   tree.Root.IALAttr("icon"),
+		Title:  tree.Root.IALAttr("title"),
 	}
 
 	SetRecentDoc(recentDoc)

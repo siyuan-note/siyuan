@@ -397,6 +397,7 @@ export const about = {
                 window.siyuan.config.system.downloadInstallPkg = downloadInstallPkgElement.checked;
             });
         });
+        /// #if !BROWSER
         const autoLaunchElement = about.element.querySelector("#autoLaunch") as HTMLInputElement;
         autoLaunchElement.addEventListener("change", () => {
             fetchPost("/api/system/setAutoLaunch", {autoLaunch: autoLaunchElement.checked}, () => {
@@ -404,6 +405,7 @@ export const about = {
                 app.setLoginItemSettings({openAtLogin: autoLaunchElement.checked});
             });
         });
+        /// #endif
         about.element.querySelector("#aboutConfirm").addEventListener("click", () => {
             const scheme = (about.element.querySelector("#aboutScheme") as HTMLInputElement).value;
             const host = (about.element.querySelector("#aboutHost") as HTMLInputElement).value;

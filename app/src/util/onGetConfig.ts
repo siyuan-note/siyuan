@@ -27,9 +27,9 @@ import {openHistory} from "./history";
 import {initStatus} from "../layout/status";
 import {syncGuide} from "../sync/syncGuide";
 import {showMessage} from "../dialog/message";
-import {replaceLocalPath} from "../editor/rename";
 import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
+import {replaceLocalPath} from "../editor/rename";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -372,7 +372,6 @@ const initWindow = () => {
                 return;
             }
             const msgId = showMessage(window.siyuan.languages.exporting, -1);
-            const filePath = result.filePaths[0].endsWith(ipcData.rootTitle) ? result.filePaths[0] : path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle));
             localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {
                 removeAssets: ipcData.removeAssets,
                 keepFold: ipcData.keepFold
@@ -383,9 +382,9 @@ const initWindow = () => {
                         id: ipcData.rootId,
                         pdf: true,
                         removeAssets: ipcData.removeAssets,
-                        savePath: filePath
+                        savePath: result.filePaths[0]
                     }, () => {
-                        const pdfFilePath = path.join(filePath, path.basename(filePath) + ".pdf");
+                        const pdfFilePath = path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle) + ".pdf");
                         fs.writeFileSync(pdfFilePath, pdfData);
                         destroyPrintWindow();
                         fetchPost("/api/export/addPDFOutline", {
@@ -413,7 +412,7 @@ const initWindow = () => {
                                         });
                                     });
                                 };
-                                removePromise(path.join(filePath, "assets"));
+                                removePromise(path.join(result.filePaths[0], "assets"));
                             }
                         });
                     });

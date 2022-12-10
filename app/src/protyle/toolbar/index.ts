@@ -1272,7 +1272,7 @@ export class Toolbar {
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
             this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="min-width: 260px;max-width:${isMobile() ? "90" : "50"}vw">
+<div class="fn__flex-column" style="min-width: 260px;max-width:${isMobile() ? "100" : "50"}vw">
     <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>
@@ -1431,7 +1431,7 @@ export class Toolbar {
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
             this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="min-width: 260px;max-width:${isMobile() ? "90" : "50"}vw">
+<div class="fn__flex-column" style="min-width: 260px;max-width:${isMobile() ? "100" : "50"}vw">
     <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>

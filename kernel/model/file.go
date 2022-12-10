@@ -50,9 +50,9 @@ import (
 
 type File struct {
 	Path         string `json:"path"`
-	Name         string `json:"name"`
+	Name         string `json:"name"` // 标题，即 ial["title"]
 	Icon         string `json:"icon"`
-	Name1        string `json:"name1"`
+	Name1        string `json:"name1"` // 命名，即 ial["name"]
 	Alias        string `json:"alias"`
 	Memo         string `json:"memo"`
 	Bookmark     string `json:"bookmark"`

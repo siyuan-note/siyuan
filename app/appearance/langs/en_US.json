@@ -1,4 +1,5 @@
 {
+  "recentDocs": "Recently opened documents",
   "autoLaunch": "Automatic launch at boot",
   "autoLaunchTip": "After enabling, the application will be automatically launched after logging into the operating system",
   "sortByRankDesc": "Relevance DESC",

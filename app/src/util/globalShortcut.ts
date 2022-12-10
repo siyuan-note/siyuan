@@ -57,7 +57,6 @@ const getRightBlock = (element: HTMLElement, x: number, y: number) => {
 
 const switchDialogEvent = (event: MouseEvent, switchDialog: Dialog) => {
     event.preventDefault();
-    event.stopPropagation();
     let target = event.target as HTMLElement;
     while (!target.isSameNode(switchDialog.element)) {
         if (target.classList.contains("b3-list-item")) {
@@ -218,11 +217,9 @@ export const globalShortcut = () => {
 
     window.addEventListener("mouseup", (event) => {
         if (event.button === 3) {
-            event.stopPropagation();
             event.preventDefault();
             goBack();
         } else if (event.button === 4) {
-            event.stopPropagation();
             event.preventDefault();
             goForward();
         }
@@ -397,6 +394,16 @@ export const globalShortcut = () => {
                     (sideElement.querySelector(`[data-index="${currentLiElement.getAttribute("data-index")}"]`) || sideElement.lastElementChild).classList.add("b3-list-item--focus");
                 }
                 currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus")
+                const rootId = currentLiElement.getAttribute("data-node-id");
+                if (rootId) {
+                    fetchPost("/api/filetree/getFullHPathByID", {
+                        id: rootId
+                    }, (response) => {
+                        currentLiElement.parentElement.parentElement.nextElementSibling.innerHTML = escapeHtml(response.data);
+                    });
+                } else {
+                    currentLiElement.parentElement.parentElement.nextElementSibling.innerHTML = currentLiElement.querySelector(".b3-list-item__text").innerHTML;
+                }
                 const currentRect = currentLiElement.getBoundingClientRect();
                 const currentParentRect = currentLiElement.parentElement.getBoundingClientRect();
                 if (currentRect.top < currentParentRect.top) {
@@ -476,15 +483,24 @@ export const globalShortcut = () => {
             });
             return;
         }
+
+        if (matchHotKey(window.siyuan.config.keymap.general.recentDocs.custom, event)) {
+            event.preventDefault();
+            if (window.siyuan.dialogs.length > 0) {
+                hideElements(["dialog"]);
+                return;
+            }
+
+            return;
+        }
+
         if (matchHotKey(window.siyuan.config.keymap.general.syncNow.custom, event)) {
             event.preventDefault();
-            event.stopPropagation();
             syncGuide(document.querySelector("#barSync"));
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.editMode.custom, event)) {
             event.preventDefault();
-            event.stopPropagation();
             editor.setMode();
             return;
         }
@@ -495,19 +511,16 @@ export const globalShortcut = () => {
                 });
             });
             event.preventDefault();
-            event.stopPropagation();
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.dataHistory.custom, event)) {
             openHistory();
             event.preventDefault();
-            event.stopPropagation();
             return;
         }
         if (!window.siyuan.config.readonly && matchHotKey(window.siyuan.config.keymap.general.config.custom, event)) {
             openSetting();
             event.preventDefault();
-            event.stopPropagation();
             return;
         }
         const target = event.target as HTMLElement;
@@ -524,7 +537,6 @@ export const globalShortcut = () => {
                     target.blur();
                 }
                 event.preventDefault();
-                event.stopPropagation();
                 return true;
             }
         });
@@ -539,13 +551,11 @@ export const globalShortcut = () => {
                 target.blur();
             }
             event.preventDefault();
-            event.stopPropagation();
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
             newFile(undefined, undefined, true);
             event.preventDefault();
-            event.stopPropagation();
             return;
         }
 
@@ -623,14 +633,12 @@ export const globalShortcut = () => {
 
         if (matchHotKey(window.siyuan.config.keymap.general.goForward.custom, event)) {
             goForward();
-            event.stopPropagation();
             event.preventDefault();
             return;
         }
 
         if (matchHotKey(window.siyuan.config.keymap.general.goBack.custom, event)) {
             goBack();
-            event.stopPropagation();
             event.preventDefault();
             return;
         }
@@ -645,7 +653,6 @@ export const globalShortcut = () => {
         // close tab
         if (matchHotKey(window.siyuan.config.keymap.general.closeTab.custom, event) && !event.repeat) {
             event.preventDefault();
-            event.stopPropagation();
             let activeTabElement = document.querySelector(".layout__tab--active");
             if (activeTabElement && activeTabElement.getBoundingClientRect().width > 0) {
                 let type: TDockType;
@@ -683,7 +690,6 @@ export const globalShortcut = () => {
                 openGlobalSearch("", false);
             }
             event.preventDefault();
-            event.stopPropagation();
             return;
         }
 
@@ -717,14 +723,12 @@ export const globalShortcut = () => {
                 openSearch(searchKey);
             }
             event.preventDefault();
-            event.stopPropagation();
             return;
         }
 
         // https://github.com/siyuan-note/insider/issues/445
         if (matchHotKey("⌘S", event)) {
             event.preventDefault();
-            event.stopPropagation();
             return true;
         }
     });
@@ -753,7 +757,6 @@ export const globalShortcut = () => {
             writeText(copyElement.parentElement.nextElementSibling.textContent.trimEnd());
             showMessage(window.siyuan.languages.copied, 2000);
             event.preventDefault();
-            event.stopPropagation();
         }
 
         // 点击空白，pdf 搜索、更多消失
@@ -827,7 +830,6 @@ const editKeydown = (event: KeyboardEvent) => {
             openSearch(searchKey);
         }
         event.preventDefault();
-        event.stopPropagation();
         return true;
     }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
@@ -851,7 +853,6 @@ const editKeydown = (event: KeyboardEvent) => {
             });
         }
         event.preventDefault();
-        event.stopPropagation();
         return true;
     }
     const target = event.target as HTMLElement;
@@ -861,7 +862,6 @@ const editKeydown = (event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.preview.custom, event)) {
         setEditMode(protyle, "preview");
         event.preventDefault();
-        event.stopPropagation();
         return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.wysiwyg.custom, event) && !protyle.options.backlinkData) {
@@ -874,20 +874,17 @@ const editKeydown = (event: KeyboardEvent) => {
             onGet(getResponse, protyle);
         });
         event.preventDefault();
-        event.stopPropagation();
         return true;
     }
     // 没有光标时，无法撤销 https://ld246.com/article/1624021111567
     if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {
         protyle.undo.undo(protyle);
         event.preventDefault();
-        event.stopPropagation();
         return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.redo.custom, event)) {
         protyle.undo.redo(protyle);
         event.preventDefault();
-        event.stopPropagation();
         return true;
     }
     return false;
@@ -901,7 +898,6 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     const files = dockFile.data.file as Files;
     if (matchHotKey(window.siyuan.config.keymap.general.selectOpen1.custom, event)) {
         event.preventDefault();
-        event.stopPropagation();
         const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
             document.querySelector(".layout-tab-bar > .item--focus");
         if (element) {
@@ -945,7 +941,6 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             type: isFile ? "file" : "notebook",
         });
         event.preventDefault();
-        event.stopPropagation();
         return true;
     }
     if (matchHotKey("⌘/", event)) {
@@ -967,7 +962,6 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             moveToPath(pathes, toNotebook[0], toPath[0]);
         }, pathes);
         event.preventDefault();
-        event.stopPropagation();
         return true;
     }
     let searchKey = "";
@@ -984,7 +978,6 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             openSearch(searchKey, undefined, notebookId);
         }
         event.preventDefault();
-        event.stopPropagation();
         return true;
     }
     const target = event.target as HTMLElement;
@@ -992,7 +985,6 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         return false;
     }
     if (bindMenuKeydown(event)) {
-        event.stopPropagation();
         event.preventDefault();
         return true;
     }

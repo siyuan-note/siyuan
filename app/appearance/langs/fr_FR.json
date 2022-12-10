@@ -1,4 +1,5 @@
 {
+  "recentDocs": "Documents récemment ouverts",
   "autoLaunch": "Lancement automatique au démarrage",
   "autoLaunchTip": "Après l'activation, l'application sera automatiquement lancée après la connexion au système d'exploitation",
   "sortByRankDesc": "DESC de pertinence",

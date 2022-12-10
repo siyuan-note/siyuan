@@ -132,6 +132,7 @@ export abstract class Constants {
             dataHistory: {default: "⌥H", custom: "⌥H"},
             toggleWin: {default: "⌥M", custom: "⌥M"},
             lockScreen: {default: "⌥N", custom: "⌥N"},
+            recentDocs: {default: "⌘E", custom: "⌘E"},
             move: {default: "", custom: ""},
             selectOpen1: {default: "", custom: ""},
         },

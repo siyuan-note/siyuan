@@ -442,6 +442,7 @@ func moveTree(tree *parse.Tree) {
 
 func parseStdMd(markdown []byte) (ret *parse.Tree) {
 	luteEngine := lute.New()
+	luteEngine.SetProtyleWYSIWYG(true)
 	luteEngine.SetFootnotes(false)
 	luteEngine.SetToC(false)
 	luteEngine.SetIndentCodeBlock(false)

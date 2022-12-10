@@ -27,6 +27,90 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+type RecentDoc struct {
+	RootID     string `json:"rootID"`
+	Icon       string `json:"icon"`
+	Title      string `json:"title"`
+	ScrollAttr string `json:"scrollAttr"`
+	Mode       string `json:"mode"`
+	Action     string `json:"action"`
+}
+
+var recentDocLock = sync.Mutex{}
+
+func SetRecentDoc(doc *RecentDoc) (err error) {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+
+	recentDocs, err := getRecentDocs()
+	if nil != err {
+		return
+	}
+
+	update := false
+	for i, c := range recentDocs {
+		if c.RootID == doc.RootID {
+			recentDocs[i] = doc
+			update = true
+			break
+		}
+	}
+	if !update {
+		recentDocs = append(recentDocs, doc)
+	}
+
+	err = setRecentDocs(recentDocs)
+	return
+}
+
+func GetRecentDocs() (ret []*RecentDoc, err error) {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+	return getRecentDocs()
+}
+
+func setRecentDocs(recentDocs []*RecentDoc) (err error) {
+	dirPath := filepath.Join(util.DataDir, "storage")
+	if err = os.MkdirAll(dirPath, 0755); nil != err {
+		logging.LogErrorf("create storage [recent-doc] dir failed: %s", err)
+		return
+	}
+
+	data, err := gulu.JSON.MarshalIndentJSON(recentDocs, "", "  ")
+	if nil != err {
+		logging.LogErrorf("marshal storage [recent-doc] failed: %s", err)
+		return
+	}
+
+	lsPath := filepath.Join(dirPath, "recent-doc.json")
+	err = filelock.WriteFile(lsPath, data)
+	if nil != err {
+		logging.LogErrorf("write storage [recent-doc] failed: %s", err)
+		return
+	}
+	return
+}
+
+func getRecentDocs() (ret []*RecentDoc, err error) {
+	ret = []*RecentDoc{}
+	dataPath := filepath.Join(util.DataDir, "storage/recent-doc.json")
+	if !gulu.File.IsExist(dataPath) {
+		return
+	}
+
+	data, err := filelock.ReadFile(dataPath)
+	if nil != err {
+		logging.LogErrorf("read storage [recent-doc] failed: %s", err)
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("unmarshal storage [recent-doc] failed: %s", err)
+		return
+	}
+	return
+}
+
 type Criterion struct {
 	Name        string          `json:"name"`
 	Sort        int             `json:"sort"`       //  0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时）

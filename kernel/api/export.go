@@ -160,7 +160,11 @@ func exportDocx(c *gin.Context) {
 	id := arg["id"].(string)
 	savePath := arg["savePath"].(string)
 	removeAssets := arg["removeAssets"].(bool)
-	err := model.ExportDocx(id, savePath, removeAssets)
+	merge := false
+	if nil != arg["merge"] {
+		merge = arg["merge"].(bool)
+	}
+	err := model.ExportDocx(id, savePath, removeAssets, merge)
 	if nil != err {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -180,7 +184,7 @@ func exportMdHTML(c *gin.Context) {
 
 	id := arg["id"].(string)
 	savePath := arg["savePath"].(string)
-	name, content := model.ExportMarkdownHTML(id, savePath, false)
+	name, content := model.ExportMarkdownHTML(id, savePath, false, false)
 	ret.Data = map[string]interface{}{
 		"id":      id,
 		"name":    name,
@@ -229,10 +233,14 @@ func exportPreviewHTML(c *gin.Context) {
 
 	id := arg["id"].(string)
 	keepFold := false
-	if arg["keepFold"] != nil {
+	if nil != arg["keepFold"] {
 		keepFold = arg["keepFold"].(bool)
 	}
-	name, content := model.ExportHTML(id, "", true, keepFold)
+	merge := false
+	if nil != arg["merge"] {
+		merge = arg["merge"].(bool)
+	}
+	name, content := model.ExportHTML(id, "", true, keepFold, merge)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://"+util.LocalHost+":"+util.ServerPort+"/#", "#")
 
@@ -256,10 +264,14 @@ func exportHTML(c *gin.Context) {
 	pdf := arg["pdf"].(bool)
 	savePath := arg["savePath"].(string)
 	keepFold := false
-	if arg["keepFold"] != nil {
+	if nil != arg["keepFold"] {
 		keepFold = arg["keepFold"].(bool)
 	}
-	name, content := model.ExportHTML(id, savePath, pdf, keepFold)
+	merge := false
+	if nil != arg["merge"] {
+		merge = arg["merge"].(bool)
+	}
+	name, content := model.ExportHTML(id, savePath, pdf, keepFold, merge)
 	ret.Data = map[string]interface{}{
 		"id":      id,
 		"name":    name,

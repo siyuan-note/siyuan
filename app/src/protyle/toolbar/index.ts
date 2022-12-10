@@ -10,7 +10,7 @@ import {
     setFirstNodeRange,
     setLastNodeRange
 } from "../util/selection";
-import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {updateTransaction} from "../wysiwyg/transaction";
@@ -1272,8 +1272,14 @@ export class Toolbar {
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
             this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="min-width: 260px;max-width:${isMobile() ? "100" : "50"}vw">
-    <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
+<div class="fn__flex-column" style="min-width: 260px;${isMobile() ? "" : "max-width:50vw"}">
+    <div class="fn__flex" style="margin: 4px 8px 8px 8px">
+        <input class="b3-text-field fn__flex-1"/>
+        <span class="fn__space"></span>
+        <span data-type="previous" class="block__icon block__icon--show"><svg><use xlink:href="#iconLeft"></use></svg></span>
+        <span class="fn__space"></span>
+        <span data-type="next" class="block__icon block__icon--show"><svg><use xlink:href="#iconRight"></use></svg></span>
+    </div>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>
 <div style="width: 520px;${isMobile() ? "display:none" : ""};overflow: auto;"></div>
@@ -1333,18 +1339,33 @@ export class Toolbar {
                 if (target.classList.contains("b3-list--empty")) {
                     this.subElement.classList.add("fn__none");
                     focusByRange(this.range);
+                    event.stopPropagation();
                     return;
                 }
                 /// #if !BROWSER
                 const iconElement = hasClosestByClassName(target, "b3-list-item__action");
                 if (iconElement) {
                     openBy(iconElement.parentElement.getAttribute("data-value"), "folder");
+                    event.stopPropagation();
                     return;
                 }
                 /// #endif
+                const previousElement = hasClosestByAttribute(target, "data-type", "previous");
+                if (previousElement) {
+                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowUp"}));
+                    event.stopPropagation();
+                    return;
+                }
+                const nextElement = hasClosestByAttribute(target, "data-type", "next");
+                if (nextElement) {
+                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown"}));
+                    event.stopPropagation();
+                    return;
+                }
                 const listElement = hasClosestByClassName(target, "b3-list-item");
                 if (listElement) {
                     hintRenderTemplate(decodeURIComponent(listElement.getAttribute("data-value")), protyle, nodeElement);
+                    event.stopPropagation();
                 }
             });
             const rangePosition = getSelectionPosition(nodeElement, range);
@@ -1431,8 +1452,14 @@ export class Toolbar {
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
             this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="min-width: 260px;max-width:${isMobile() ? "100" : "50"}vw">
-    <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
+<div class="fn__flex-column" style="min-width: 260px;${isMobile() ? "" : "max-width:50vw"}">
+    <div class="fn__flex" style="margin: 4px 8px 8px 8px">
+        <input class="b3-text-field fn__flex-1"/>
+        <span class="fn__space"></span>
+        <span data-type="previous" class="block__icon block__icon--show"><svg><use xlink:href="#iconLeft"></use></svg></span>
+        <span class="fn__space"></span>
+        <span data-type="next" class="block__icon block__icon--show"><svg><use xlink:href="#iconRight"></use></svg></span>
+    </div>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>
 <div style="width: 260px;display: ${isMobile() ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
@@ -1491,16 +1518,29 @@ export class Toolbar {
             });
             this.subElement.lastElementChild.addEventListener("click", (event) => {
                 const target = event.target as HTMLElement;
+                const previousElement = hasClosestByAttribute(target, "data-type", "previous");
+                if (previousElement) {
+                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowUp"}));
+                    event.stopPropagation();
+                    return;
+                }
+                const nextElement = hasClosestByAttribute(target, "data-type", "next");
+                if (nextElement) {
+                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown"}));
+                    event.stopPropagation();
+                    return;
+                }
                 if (target.classList.contains("b3-list--empty")) {
                     this.subElement.classList.add("fn__none");
                     focusByRange(this.range);
+                    event.stopPropagation();
                     return;
                 }
                 const listItemElement = hasClosestByClassName(target, "b3-list-item");
-                if (!listItemElement) {
-                    return;
+                if (listItemElement) {
+                    event.stopPropagation();
+                    hintRenderAssets(listItemElement.getAttribute("data-value"), protyle);
                 }
-                hintRenderAssets(listItemElement.getAttribute("data-value"), protyle);
             });
             const rangePosition = getSelectionPosition(nodeElement, range);
             this.subElement.classList.remove("fn__none");

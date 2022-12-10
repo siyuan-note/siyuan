@@ -28,8 +28,10 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 		return
 	}
 
-	for i := 0; i < 1024; i++ {
-		if err = walkBlock(ret, rootBlock); nil != err {
+	insertPoint := rootTree.Root.LastChild
+	for {
+		i := 0
+		if err = walkBlock(insertPoint, rootBlock, i); nil != err {
 			return
 		}
 
@@ -40,34 +42,42 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 	return
 }
 
-func walkBlock(tree *parse.Tree, block *Block) (err error) {
+func walkBlock(insertPoint *ast.Node, block *Block, level int) (err error) {
+	level++
 	for _, c := range block.Children {
-		if err = walkBlock(tree, c); nil != err {
+		if err = walkBlock(insertPoint, c, level); nil != err {
 			return
 		}
 	}
 
-	for i := len(block.Children) - 1; -1 < i; i-- {
-		c := block.Children[i]
-		nodes, loadErr := loadTreeNodes(c.Box, c.Path)
+	for _, c := range block.Children {
+		nodes, loadErr := loadTreeNodes(c.Box, c.Path, level)
 		if nil != loadErr {
 			return
 		}
 
 		for j := len(nodes) - 1; -1 < j; j-- {
-			tree.Root.LastChild.InsertAfter(nodes[j])
+			insertPoint.InsertAfter(nodes[j])
 		}
 	}
 	block.Children = nil
 	return
 }
 
-func loadTreeNodes(box string, p string) (ret []*ast.Node, err error) {
+func loadTreeNodes(box string, p string, level int) (ret []*ast.Node, err error) {
 	tree, err := LoadTree(box, p)
 	if nil != err {
 		return
 	}
 
+	hLevel := level
+	if 6 < level {
+		hLevel = 6
+	}
+
+	heading := &ast.Node{Type: ast.NodeHeading, HeadingLevel: hLevel}
+	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(tree.Root.IALAttr("title"))})
+	tree.Root.PrependChild(heading)
 	for c := tree.Root.FirstChild; nil != c; c = c.Next {
 		ret = append(ret, c)
 	}

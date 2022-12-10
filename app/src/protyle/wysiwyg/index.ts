@@ -823,7 +823,7 @@ export class WYSIWYG {
                         }).element);
                         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                         window.siyuan.menus.menu.append(new MenuItem({
-                            label: window.siyuan.languages.remove,
+                            label: window.siyuan.languages.clear,
                             icon: "iconTrashcan",
                             click() {
                                 if (tableBlockElement) {

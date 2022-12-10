@@ -1272,7 +1272,7 @@ export class Toolbar {
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
             this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="min-width: 260px;max-width: 100vw">
+<div class="fn__flex-column" style="min-width: 260px;max-width:${isMobile() ? "80" : "50"}vw">
     <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>
@@ -1423,7 +1423,7 @@ export class Toolbar {
         }, (response) => {
             let html = "";
             response.data.forEach((item: { hName: string, path: string }, index: number) => {
-                html += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</div>`;
+                html += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${item.hName}</div></div>`;
             });
             if (html === "") {
                 html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
@@ -1431,7 +1431,7 @@ export class Toolbar {
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
             this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="min-width: 260px;max-width: 100vw">
+<div class="fn__flex-column" style="min-width: 260px;max-width:${isMobile() ? "80" : "50"}vw">
     <input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>

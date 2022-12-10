@@ -98,23 +98,23 @@ export const initFramework = () => {
     const editIconElement = editElement.querySelector("use");
     if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
         inputElement.readOnly = true;
-        editIconElement.setAttribute("xlink:href", "#iconEdit");
+        editIconElement.setAttribute("xlink:href", "#iconPreview");
     } else {
         inputElement.readOnly = false;
-        editIconElement.setAttribute("xlink:href", "#iconPreview");
+        editIconElement.setAttribute("xlink:href", "#iconEdit");
     }
     editElement.addEventListener(getEventName(), () => {
-        const isReadonly = editIconElement.getAttribute("xlink:href") === "#iconPreview";
+        const isReadonly = editIconElement.getAttribute("xlink:href") === "#iconEdit";
         window.siyuan.config.editor.readOnly = isReadonly;
         fetchPost("/api/setting/setEditor", window.siyuan.config.editor, () => {
             if (!isReadonly) {
                 enableProtyle(window.siyuan.mobileEditor.protyle);
                 inputElement.readOnly = false;
-                editIconElement.setAttribute("xlink:href", "#iconPreview");
+                editIconElement.setAttribute("xlink:href", "#iconEdit");
             } else {
                 disabledProtyle(window.siyuan.mobileEditor.protyle);
                 inputElement.readOnly = true;
-                editIconElement.setAttribute("xlink:href", "#iconEdit");
+                editIconElement.setAttribute("xlink:href", "#iconPreview");
             }
         });
     });

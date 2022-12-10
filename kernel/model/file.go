@@ -659,6 +659,8 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 
 	luteEngine.RenderOptions.NodeIndexStart = index
 	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions)
+
+	SetRecentDocByTree(tree)
 	return
 }
 

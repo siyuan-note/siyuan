@@ -17,6 +17,7 @@
 package model
 
 import (
+	"github.com/88250/lute/parse"
 	"os"
 	"path/filepath"
 	"sync"
@@ -60,6 +61,17 @@ func RemoveRecentDoc(ids []string) {
 		return
 	}
 	return
+}
+
+func SetRecentDocByTree(tree *parse.Tree) {
+	recentDoc := &RecentDoc{
+		RootID:     tree.Root.ID,
+		Icon:       tree.Root.IALAttr("icon"),
+		Title:      tree.Root.IALAttr("title"),
+		ScrollAttr: tree.Root.IALAttr("scroll"),
+	}
+
+	SetRecentDoc(recentDoc)
 }
 
 func SetRecentDoc(doc *RecentDoc) (err error) {

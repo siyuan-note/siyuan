@@ -30,6 +30,7 @@ import (
 
 type RecentDoc struct {
 	RootID     string `json:"rootID"`
+	ID         string `json:"id"`
 	Icon       string `json:"icon"`
 	Title      string `json:"title"`
 	ScrollAttr string `json:"scrollAttr"`
@@ -63,9 +64,10 @@ func RemoveRecentDoc(ids []string) {
 	return
 }
 
-func SetRecentDocByTree(tree *parse.Tree) {
+func SetRecentDocByTree(id string, tree *parse.Tree) {
 	recentDoc := &RecentDoc{
 		RootID:     tree.Root.ID,
+		ID:         id,
 		Icon:       tree.Root.IALAttr("icon"),
 		Title:      tree.Root.IALAttr("title"),
 		ScrollAttr: tree.Root.IALAttr("scroll"),

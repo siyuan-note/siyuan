@@ -33,7 +33,7 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
             if (!previousElement) {
                 const newId = Lute.NewNodeID();
                 sourceElements[0].parentElement.parentElement.previousElementSibling.lastElementChild.insertAdjacentHTML("beforebegin", `<div data-subtype="${sourceElements[0].getAttribute("data-subtype")}" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div id="moveTempLi"></div><div class="protyle-attr" contenteditable="false">&ZeroWidthSpace;</div></div>`);
-                previousElement = sourceElements[0].parentElement.parentElement.previousElementSibling.querySelector(".list")
+                previousElement = sourceElements[0].parentElement.parentElement.previousElementSibling.querySelector(".list");
             }
         } else {
             return;
@@ -48,7 +48,7 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
             if (!previousElement) {
                 const newId = Lute.NewNodeID();
                 sourceElements[0].parentElement.previousElementSibling.lastElementChild.insertAdjacentHTML("beforebegin", `<div data-subtype="${sourceElements[0].getAttribute("data-subtype")}" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div id="moveTempLi"></div><div class="protyle-attr" contenteditable="false">&ZeroWidthSpace;</div></div>`);
-                previousElement = sourceElements[0].parentElement.previousElementSibling.querySelector(".list")
+                previousElement = sourceElements[0].parentElement.previousElementSibling.querySelector(".list");
             }
         } else {
             return;
@@ -136,10 +136,10 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
             if (!nextElement) {
                 const newId = Lute.NewNodeID();
                 sourceElements[0].parentElement.parentElement.nextElementSibling.lastElementChild.insertAdjacentHTML("beforebegin", `<div data-subtype="${sourceElements[0].getAttribute("data-subtype")}" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div class="protyle-attr" contenteditable="false">&ZeroWidthSpace;</div></div>`);
-                nextElement = sourceElements[0].parentElement.parentElement.nextElementSibling.querySelector(".list > div")
+                nextElement = sourceElements[0].parentElement.parentElement.nextElementSibling.querySelector(".list > div");
             }
         } else {
-            return
+            return;
         }
     }
     if (type === "NodeList" && sourceElements[sourceElements.length - 1].nextElementSibling.classList.contains("protyle-attr") &&

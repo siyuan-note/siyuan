@@ -111,9 +111,9 @@ export const openSnippets = () => {
                 });
                 fetchPost("/api/snippet/setSnippet", {snippets}, () => {
                     removeIds.forEach(item => {
-                        const rmElement = document.querySelector(item)
+                        const rmElement = document.querySelector(item);
                         if (rmElement) {
-                            rmElement.remove()
+                            rmElement.remove();
                         }
                     });
                     renderSnippet();
@@ -138,8 +138,8 @@ export const openSnippets = () => {
             }
             const removeElement = hasClosestByClassName(target, "b3-tooltips");
             if (removeElement) {
-                const itemElement = removeElement.parentElement.parentElement
-                removeIds.push("#snippet" + (itemElement.getAttribute("data-type") === "css" ? "CSS" : "JS") + itemElement.getAttribute("data-id"))
+                const itemElement = removeElement.parentElement.parentElement;
+                removeIds.push("#snippet" + (itemElement.getAttribute("data-type") === "css" ? "CSS" : "JS") + itemElement.getAttribute("data-id"));
                 itemElement.nextElementSibling.remove();
                 itemElement.remove();
             }

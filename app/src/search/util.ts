@@ -731,7 +731,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                         }
                         return;
                     }
-                    const dialogElement = hasClosestByClassName(element, "b3-dialog--open")
+                    const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
                     if (dialogElement && dialogElement.getAttribute("data-key") === window.siyuan.config.keymap.general.search.custom) {
                         // https://github.com/siyuan-note/siyuan/issues/6828
                         item.hPath = config.hPath;

@@ -11,7 +11,7 @@ import {
 import {newFile} from "./newFile";
 import {Constants} from "../constants";
 import {openSetting} from "../config";
-import {exportLayout, getDockByType, getInstanceById, setPanelFocus} from "../layout/util";
+import {exportLayout, getDockByType, getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {Editor} from "../editor";
 import {setEditMode} from "../protyle/util/setEditMode";
@@ -453,7 +453,7 @@ export const globalShortcut = () => {
                 if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.recentDocs.custom) {
                     return true;
                 }
-            })
+            });
             if (openRecentDocsDialog) {
                 event.preventDefault();
                 dialogArrow(openRecentDocsDialog.element, event);
@@ -465,7 +465,7 @@ export const globalShortcut = () => {
                 if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.recentDocs.custom) {
                     return true;
                 }
-            })
+            });
             if (openRecentDocsDialog) {
                 hideElements(["dialog"]);
                 return;
@@ -793,20 +793,20 @@ const dialogArrow = (element: HTMLElement, event: KeyboardEvent) => {
             if (currentType) {
                 getDockByType(currentType).toggleModel(currentType, true);
             } else {
-                let actionString = currentLiElement.getAttribute("data-action")
+                let actionString = currentLiElement.getAttribute("data-action");
                 if (actionString.indexOf(Constants.CB_GET_SCROLL) === -1) {
-                    actionString = actionString ? (actionString + "," + Constants.CB_GET_SCROLL) : Constants.CB_GET_SCROLL
+                    actionString = actionString ? (actionString + "," + Constants.CB_GET_SCROLL) : Constants.CB_GET_SCROLL;
                 }
                 openFileById({
                     id: currentLiElement.getAttribute("data-block-id") || currentLiElement.getAttribute("data-node-id"),
                     mode: currentLiElement.getAttribute("data-mode") as TEditorMode,
                     action: actionString.split(",")
-                })
+                });
             }
-            hideElements(["dialog"])
+            hideElements(["dialog"]);
             return;
         }
-        currentLiElement = element.querySelector(".b3-list-item--focus")
+        currentLiElement = element.querySelector(".b3-list-item--focus");
         const rootId = currentLiElement.getAttribute("data-node-id");
         if (rootId) {
             fetchPost("/api/filetree/getFullHPathByID", {
@@ -825,15 +825,15 @@ const dialogArrow = (element: HTMLElement, event: KeyboardEvent) => {
             currentLiElement.scrollIntoView(false);
         }
     }
-}
+};
 
 const openRecentDocs = () => {
     fetchPost("/api/storage/getRecentDocs", {}, (response) => {
-        let range: Range
+        let range: Range;
         if (getSelection().rangeCount > 0) {
-            range = getSelection().getRangeAt(0)
+            range = getSelection().getRangeAt(0);
         }
-        let tabHtml = ""
+        let tabHtml = "";
         response.data.forEach((item: any, index: number) => {
             tabHtml += `<li data-index="${index}" data-action="${item.action}" data-node-id="${item.rootID}" data-block-id="${item.id || ""}" data-mode="${item.mode}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
 ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true)}
@@ -873,19 +873,19 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
             dialog.element.querySelector(".dialog__path").innerHTML = dialog.element.querySelector(".b3-list-item--focus").textContent;
         }
         dialog.element.querySelector("input").focus();
-        dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.recentDocs.custom)
+        dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.recentDocs.custom);
         dialog.element.addEventListener("click", (event) => {
             const liElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
             if (liElement) {
                 dialog.element.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                 liElement.classList.add("b3-list-item--focus");
-                window.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter"}))
+                window.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter"}));
                 event.stopPropagation();
                 event.preventDefault();
             }
         });
-    })
-}
+    });
+};
 
 const editKeydown = (event: KeyboardEvent) => {
     const activeTabElement = document.querySelector(".layout__wnd--active .item--focus");

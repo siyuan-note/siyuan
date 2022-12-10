@@ -27,7 +27,7 @@ import {blockRender} from "../markdown/blockRender";
 import {openBy} from "../../editor/util";
 /// #endif
 import {fetchPost} from "../../util/fetch";
-import {isArrayEqual, isBrowser, isMobile} from "../../util/functions";
+import {isArrayEqual, isMobile} from "../../util/functions";
 import * as dayjs from "dayjs";
 import {insertEmptyBlock} from "../../block/util";
 import {matchHotKey} from "../util/hotKey";

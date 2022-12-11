@@ -164,6 +164,7 @@ export abstract class Constants {
                 rename: {default: "F2", custom: "F2"},
                 newNameFile: {default: "F3", custom: "F3"},
                 newContentFile: {default: "F4", custom: "F4"},
+                newNameSettingFile: {default: "⌘F3", custom: "⌘F3"},
                 showInFolder: {default: "⌥A", custom: "⌥A"},
                 outline: {default: "⌥O", custom: "⌥O"},
                 backlinks: {default: "⌥B", custom: "⌥B"},

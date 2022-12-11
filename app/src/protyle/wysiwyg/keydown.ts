@@ -36,9 +36,9 @@ import {
 } from "./transaction";
 import {fontEvent} from "../toolbar/Font";
 import {listIndent, listOutdent} from "./list";
-import {newFileBySelect, newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
+import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
-import {isLocalPath} from "../../util/pathName";
+import {getDisplayName, isLocalPath, pathPosix} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
@@ -67,6 +67,9 @@ import {openMobileFileById} from "../../mobile/editor";
 import {moveToDown, moveToUp} from "./move";
 import {pasteAsPlainText} from "../util/paste";
 import {preventScroll} from "../scroll/preventScroll";
+import {getSavePath} from "../../util/newFile";
+import {escapeHtml} from "../../util/escape";
+import {insertHTML} from "../util/insertHTML";
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
@@ -690,7 +693,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
             if (range.toString() === "" && event.key === "Backspace" &&
                 range.startOffset === range.startContainer.textContent.length &&
-                range.startContainer.textContent.endsWith("\n"+Constants.ZWSP)) {
+                range.startContainer.textContent.endsWith("\n" + Constants.ZWSP)) {
                 range.setStart(range.startContainer, range.startOffset - 1);
                 range.collapse(true);
                 event.stopPropagation();
@@ -1044,7 +1047,41 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (!selectText.trim()) {
                     selectAll(protyle, nodeElement, range);
                 }
-                newFileBySelect(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML), protyle);
+                const newName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML)) || "Untitled";
+                const id = Lute.NewNodeID();
+                fetchPost("/api/filetree/createDoc", {
+                    notebook: protyle.notebookId,
+                    path: pathPosix().join(getDisplayName(protyle.path, false, true), id + ".sy"),
+                    title: newName,
+                    md: ""
+                }, () => {
+                    insertHTML(`<span data-type="block-ref" data-id="${id}" data-subtype="d">${escapeHtml(newName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`, protyle);
+                    hideElements(["toolbar"], protyle)
+                });
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.newNameSettingFile.custom, event)) {
+            if (!selectText.trim() && (nodeElement.querySelector("tr") || nodeElement.querySelector("span"))) {
+                // 没选中时，都是纯文本就创建子文档 https://ld246.com/article/1663073488381/comment/1664804353295#comments
+            } else {
+                if (!selectText.trim()) {
+                    selectAll(protyle, nodeElement, range);
+                }
+                const newFileName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML));
+                getSavePath(protyle.path, protyle.notebookId, (pathString) => {
+                    fetchPost("/api/filetree/createDocWithMd", {
+                        notebook: protyle.notebookId,
+                        path: pathPosix().join(pathString, newFileName),
+                        markdown: ""
+                    }, response => {
+                        insertHTML(`<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`, protyle);
+                        hideElements(["toolbar"], protyle)
+                    });
+                });
             }
             event.preventDefault();
             event.stopPropagation();

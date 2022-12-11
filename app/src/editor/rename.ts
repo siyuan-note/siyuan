@@ -3,11 +3,9 @@ import {Dialog} from "../dialog";
 import {focusByRange} from "../protyle/util/selection";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {removeEmbed} from "../protyle/wysiwyg/removeEmbed";
-import {insertHTML} from "../protyle/util/insertHTML";
 import {isMobile} from "../util/functions";
 import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
 import {fetchPost} from "../util/fetch";
-import {escapeHtml} from "../util/escape";
 import {Constants} from "../constants";
 import {showTooltip} from "../dialog/tooltip";
 
@@ -173,18 +171,5 @@ export const newFileContentBySelect = (protyle: IProtyle) => {
         path: pathPosix().join(getDisplayName(protyle.path, false, true), Lute.NewNodeID() + ".sy"),
         title: fileNameShort,
         md: protyle.lute.BlockDOM2StdMd(html)
-    });
-};
-
-export const newFileBySelect = (fileName: string, protyle: IProtyle) => {
-    const newName = replaceFileName(fileName) || "Untitled";
-    const id = Lute.NewNodeID();
-    fetchPost("/api/filetree/createDoc", {
-        notebook: protyle.notebookId,
-        path: pathPosix().join(getDisplayName(protyle.path, false, true), id + ".sy"),
-        title: newName,
-        md: ""
-    }, () => {
-        insertHTML(`<span data-type="block-ref" data-id="${id}" data-subtype="d">${escapeHtml(newName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`, protyle);
     });
 };

@@ -61,8 +61,8 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             paragraph: window.siyuan.config.search.paragraph,
         };
     }
-    let hPath = "";
-    const idPath: string[] = [];
+    let hPath = localData;
+    let idPath: string[] = [];
     if (notebookId) {
         hPath = escapeHtml(getNotebookName(notebookId));
         idPath.push(notebookId);
@@ -74,6 +74,9 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
             hPath = pathPosix().join(hPath, escapeHtml(response.data));
             idPath[0] = pathPosix().join(idPath[0], searchPath);
         }
+    } else if (window.siyuan.config.keymap.general.globalSearch.custom === hotkey) {
+        hPath = localData.hPath || "";
+        idPath = localData.idPath || [];
     }
 
     let range: Range;

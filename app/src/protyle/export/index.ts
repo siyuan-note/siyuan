@@ -505,7 +505,7 @@ const getExportPath = (option: { type: string, id: string }, removeAssets?: bool
                             hideMessage(msgId);
                             return;
                         }
-                        afterExport(savePath, msgId);
+                        afterExport(path.join(savePath, replaceLocalPath(response.data.rootTitle)) + ".docx", msgId);
                     } else {
                         onExport(exportResponse, savePath, option.type, removeAssets, msgId);
                     }

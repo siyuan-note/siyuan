@@ -36,7 +36,7 @@ export const replaceFileName = (name: string) => {
 };
 
 export const replaceLocalPath = (name: string) => {
-    return name.replace(/\\\\|\/|:|\*|\?|\\|'|<|>|\|/g, "");
+    return name.replace(/\\\\|\/|"|:|\*|\?|\\|'|<|>|\|/g, "");
 };
 
 export const rename = (options: {

@@ -24,7 +24,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
@@ -35,9 +34,6 @@ import (
 
 func createDocsByHPath(boxID, hPath, content string) (id string, existed bool, err error) {
 	hPath = strings.TrimSuffix(hPath, ".sy")
-	if existed = nil != treenode.GetBlockTreeRootByHPath(boxID, hPath); existed {
-		hPath += "-" + gulu.Rand.String(7)
-	}
 	pathBuilder := bytes.Buffer{}
 	pathBuilder.WriteString("/")
 	hPathBuilder := bytes.Buffer{}

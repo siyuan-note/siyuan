@@ -341,6 +341,16 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom string) {
 	savePath = strings.TrimSpace(savePath)
 	tree, _ := loadTreeByBlockID(id)
+
+	if merge {
+		var mergeErr error
+		tree, mergeErr = mergeSubDocs(tree)
+		if nil != mergeErr {
+			logging.LogErrorf("merge sub docs failed: %s", mergeErr)
+			return
+		}
+	}
+
 	var headings []*ast.Node
 	if pdf { // 导出 PDF 需要标记目录书签
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -363,14 +373,6 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom strin
 		}
 	}
 
-	if merge {
-		var mergeErr error
-		tree, mergeErr = mergeSubDocs(tree)
-		if nil != mergeErr {
-			logging.LogErrorf("merge sub docs failed: %s", mergeErr)
-			return
-		}
-	}
 	tree = exportTree(tree, true, true, keepFold)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
@@ -502,8 +504,12 @@ func AddPDFOutline(id, p string) (err error) {
 	footnotes := map[string]*pdfcpu.Bookmark{}
 	for _, link := range links {
 		linkID := link.URI[strings.LastIndex(link.URI, "/")+1:]
-
-		title := sql.GetBlock(linkID).Content
+		b := sql.GetBlock(linkID)
+		if nil == b {
+			logging.LogWarnf("pdf outline block [%s] not found", linkID)
+			continue
+		}
+		title := b.Content
 		title, _ = url.QueryUnescape(title)
 		bm := &pdfcpu.Bookmark{
 			Title:    title,

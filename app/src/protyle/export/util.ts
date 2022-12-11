@@ -15,7 +15,7 @@ import {openByMobile} from "../util/compatibility";
 
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
-    showMessage(`${window.siyuan.languages.exported}${escapeHtml(exportPath)}
+    showMessage(`${window.siyuan.languages.exported} ${escapeHtml(exportPath)}
 <div class="fn__space"></div>
 <button class="b3-button b3-button--white">${window.siyuan.languages.showInFolder}</button>`, 6000, "info", msgId);
     document.querySelector(`#message [data-id="${msgId}"] button`).addEventListener("click", () => {

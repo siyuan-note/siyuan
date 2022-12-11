@@ -37,6 +37,13 @@ export const saveExport = (option: { type: string, id: string }) => {
         <span class="fn__space"></span>
         <input id="removeAssets" class="b3-switch" type="checkbox" ${localData === "true" ? "checked" : ""}>
     </label>
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.exportPDF6}
+        </div>
+        <span class="fn__space"></span>
+        <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData === "true" ? "checked" : ""}>
+    </label>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -50,8 +57,9 @@ export const saveExport = (option: { type: string, id: string }) => {
         });
         btnsElement[1].addEventListener("click", () => {
             const removeAssets = (wordDialog.element.querySelector("#removeAssets") as HTMLInputElement).checked;
-            localStorage.setItem(Constants.LOCAL_EXPORTWORD, removeAssets.toString());
-            getExportPath(option, removeAssets);
+            const mergeSubdocs = (wordDialog.element.querySelector("#mergeSubdocs") as HTMLInputElement).checked;
+            localStorage.setItem(Constants.LOCAL_EXPORTWORD, JSON.stringify({removeAssets, mergeSubdocs}));
+            getExportPath(option, removeAssets, mergeSubdocs);
             wordDialog.destroy();
         });
     } else {
@@ -473,7 +481,7 @@ export const destroyPrintWindow = () => {
     window.siyuan.printWin.destroy();
 };
 
-const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean) => {
+const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean, mergeSubdocs?: boolean) => {
     fetchPost("/api/block/getBlockInfo", {
         id: option.id
     }, (response) => {
@@ -516,7 +524,8 @@ const getExportPath = (option: { type: string, id: string }, removeAssets?: bool
                 fetchPost(url, {
                     id: option.id,
                     pdf: option.type === "pdf",
-                    removeAssets,
+                    removeAssets: removeAssets,
+                    merge: mergeSubdocs,
                     savePath
                 }, exportResponse => {
                     if (option.type === "word") {

@@ -793,14 +793,9 @@ const dialogArrow = (element: HTMLElement, event: KeyboardEvent) => {
             if (currentType) {
                 getDockByType(currentType).toggleModel(currentType, true);
             } else {
-                let actionString = currentLiElement.getAttribute("data-action");
-                if (actionString.indexOf(Constants.CB_GET_SCROLL) === -1) {
-                    actionString = actionString ? (actionString + "," + Constants.CB_GET_SCROLL) : Constants.CB_GET_SCROLL;
-                }
                 openFileById({
-                    id: currentLiElement.getAttribute("data-block-id") || currentLiElement.getAttribute("data-node-id"),
-                    mode: currentLiElement.getAttribute("data-mode") as TEditorMode,
-                    action: actionString.split(",")
+                    id: currentLiElement.getAttribute("data-node-id"),
+                    action: [Constants.CB_GET_SCROLL]
                 });
             }
             hideElements(["dialog"]);
@@ -835,7 +830,7 @@ const openRecentDocs = () => {
         }
         let tabHtml = "";
         response.data.forEach((item: any, index: number) => {
-            tabHtml += `<li data-index="${index}" data-action="${item.action}" data-node-id="${item.rootID}" data-block-id="${item.id || ""}" data-mode="${item.mode}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
+            tabHtml += `<li data-index="${index}" data-node-id="${item.rootID}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
 ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
 </li>`;

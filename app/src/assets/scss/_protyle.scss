@@ -65,6 +65,11 @@
   top: -9px;
   opacity: 0;
   font-size: 12px;
+  font-weight: normal;
+
+  & > div.protyle-attr--bookmark {
+    flex: 1;
+  }
 
   & > div:not(.protyle-attr--refcount) {
     margin: 0 4px;

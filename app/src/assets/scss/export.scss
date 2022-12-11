@@ -39,8 +39,13 @@ svg {
   display: flex;
   opacity: 0;
   font-size: 12px;
+  font-weight: normal;
 
-  & > div {
+  & > div.protyle-attr--bookmark {
+    flex: 1;
+  }
+
+  & > div:not(.protyle-attr--refcount) {
     margin: 0 4px;
     display: flex;
     align-items: center;
@@ -54,8 +59,8 @@ svg {
     svg {
       height: 12px;
       width: 12px;
-      margin-right: 2px;
-      flex-shrink: 0;
+      margin: 2px 2px 0 0;
+      float: left;
     }
   }
 

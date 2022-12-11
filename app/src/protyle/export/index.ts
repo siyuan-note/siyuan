@@ -106,7 +106,7 @@ const renderPDF = (id: string) => {
         #action {
           width: 200px;
           background: var(--b3-theme-background-light);
-          padding: 16px;
+          padding: 12px;
           position: fixed;
           right: 0;
           top: 0;
@@ -132,6 +132,10 @@ const renderPDF = (id: string) => {
           max-width: none;
         }
         
+        .b3-switch {
+            margin-left: 14px;
+        }
+        
         .exporting::-webkit-scrollbar {
           width: 0;
           height: 0;
@@ -151,8 +155,8 @@ const renderPDF = (id: string) => {
           border-bottom: 1px solid var(--b3-theme-surface-lighter);
           display: block;
           color: var(--b3-theme-on-surface);
-          padding-bottom: 16px;
-          margin-bottom: 16px;
+          padding-bottom: 12px;
+          margin-bottom: 12px;
         }
         ${setInlineStyle(false)}
     </style>
@@ -432,6 +436,7 @@ const renderPDF = (id: string) => {
                 scale:  parseFloat(actionElement.querySelector("#scale").value),
                 pageSize: actionElement.querySelector("#pageSize").value,
               },
+              left: previewElement.style.paddingLeft,
               keepFold: keepFoldElement.checked,
               mergeSubdocs: mergeSubdocsElement.checked,
               removeAssets: actionElement.querySelector("#removeAssets").checked,
@@ -440,7 +445,7 @@ const renderPDF = (id: string) => {
             })
             actionElement.remove();
             previewElement.classList.add("exporting");
-            previewElement.style.paddingTop = "0";
+            previewElement.style.paddingTop = "6px";
             previewElement.style.paddingBottom = "0";
         });
         setPadding();
@@ -454,7 +459,7 @@ const renderPDF = (id: string) => {
         modal: true,
         show: true,
         width: 1032,
-        height: 618,
+        height: 638,
         resizable: false,
         frame: "darwin" === window.siyuan.config.system.os,
         icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),

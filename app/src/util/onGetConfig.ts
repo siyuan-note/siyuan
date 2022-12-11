@@ -378,6 +378,11 @@ const initWindow = () => {
                 mergeSubdocs: ipcData.mergeSubdocs,
             })));
             try {
+                ipcData.pdfOptions.displayHeaderFooter = true;
+                ipcData.pdfOptions.headerTemplate = "<span></span>";
+                ipcData.pdfOptions.footerTemplate = `<div style="font-size: 12px;padding-left:${ipcData.left}">
+    <a style="color:#5f6368;" href="https://b3log.org/siyuan">${window.siyuan.languages.exportBySiYuan}</a>
+</div>`
                 window.siyuan.printWin.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {
                     fetchPost("/api/export/exportHTML", {
                         id: ipcData.rootId,

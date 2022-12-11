@@ -391,6 +391,7 @@ const initWindow = () => {
                         destroyPrintWindow();
                         fetchPost("/api/export/addPDFOutline", {
                             id: ipcData.rootId,
+                            merge: ipcData.mergeSubdocs,
                             path: pdfFilePath
                         }, () => {
                             afterExport(pdfFilePath, msgId);

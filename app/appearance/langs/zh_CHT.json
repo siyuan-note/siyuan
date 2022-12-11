@@ -459,7 +459,7 @@
   "newNameFile": "新建文檔名為",
   "newContentFile": "新建文檔內容為",
   "exporting": "正在匯出，請稍等...",
-  "exported": "匯出完成：",
+  "exported": "匯出完成",
   "refExpired": "不存在符合條件的內容塊",
   "emptyContent": "暫無相關內容",
   "useBrowserView": "在瀏覽器中查看",

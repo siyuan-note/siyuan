@@ -459,7 +459,7 @@
   "newNameFile": "The name of the new document is",
   "newContentFile": "The content of the new document is",
   "exporting": "Exporting, please wait...",
-  "exported": "Export complete: ",
+  "exported": "Export complete",
   "refExpired": "Search content block does not exist",
   "emptyContent": "No related content",
   "useBrowserView": "View in the browser",

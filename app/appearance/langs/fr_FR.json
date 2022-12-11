@@ -459,7 +459,7 @@
   "newNameFile": "Le nom du nouveau document est",
   "newContentFile": "Le contenu du nouveau document est",
   "exporting": "En cours d'exportation, veuillez patienter...",
-  "exported": "Exportation terminée: ",
+  "exported": "Exportation terminée",
   "refExpired": "Le bloc de contenu de recherche n'existe pas",
   "emptyContent": "Aucun contenu pertinent pour le moment",
   "useBrowserView": "Afficher dans le navigateur",

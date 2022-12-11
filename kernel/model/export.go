@@ -504,8 +504,12 @@ func AddPDFOutline(id, p string) (err error) {
 	footnotes := map[string]*pdfcpu.Bookmark{}
 	for _, link := range links {
 		linkID := link.URI[strings.LastIndex(link.URI, "/")+1:]
-
-		title := sql.GetBlock(linkID).Content
+		b := sql.GetBlock(linkID)
+		if nil == b {
+			logging.LogWarnf("pdf outline block [%s] not found", linkID)
+			continue
+		}
+		title := b.Content
 		title, _ = url.QueryUnescape(title)
 		bm := &pdfcpu.Bookmark{
 			Title:    title,

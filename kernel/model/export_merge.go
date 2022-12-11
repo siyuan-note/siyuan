@@ -33,6 +33,13 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 		insertPoint = rootTree.Root
 	}
 
+	// 跳过空段落插入点，向上寻找非空段落
+	for ; nil != insertPoint && ast.NodeParagraph == insertPoint.Type; insertPoint = insertPoint.Previous {
+		if nil != insertPoint.FirstChild {
+			break
+		}
+	}
+
 	for {
 		i := 0
 		if err = walkBlock(insertPoint, rootBlock, i); nil != err {

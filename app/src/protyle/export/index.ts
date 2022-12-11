@@ -106,7 +106,7 @@ const renderPDF = (id: string) => {
         #action {
           width: 200px;
           background: var(--b3-theme-background-light);
-          padding: 12px;
+          padding: 16px;
           position: fixed;
           right: 0;
           top: 0;
@@ -459,7 +459,7 @@ const renderPDF = (id: string) => {
         modal: true,
         show: true,
         width: 1032,
-        height: 638,
+        height: 650,
         resizable: false,
         frame: "darwin" === window.siyuan.config.system.os,
         icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),

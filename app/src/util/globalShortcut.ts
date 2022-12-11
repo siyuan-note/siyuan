@@ -417,6 +417,7 @@ export const globalShortcut = () => {
                 range = getSelection().getRangeAt(0).cloneRange();
             }
             switchDialog = new Dialog({
+                title: window.siyuan.languages.switchTab,
                 content: `<div class="fn__flex-column b3-dialog--switch">
     <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
     <div class="fn__flex">
@@ -844,6 +845,7 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
 </li>`;
         });
         const dialog = new Dialog({
+            title: window.siyuan.languages.recentDocs,
             content: `<div class="fn__flex-column b3-dialog--switch">
     <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
     <div class="fn__flex">

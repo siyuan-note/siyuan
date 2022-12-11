@@ -1,4 +1,5 @@
 {
+  "switchTab": "Conmutador",
   "recentDocs": "Documentos abiertos recientemente",
   "autoLaunch": "Inicio automático al arrancar",
   "autoLaunchTip": "Después de habilitar, la aplicación se iniciará automáticamente después de iniciar sesión en el sistema operativo",

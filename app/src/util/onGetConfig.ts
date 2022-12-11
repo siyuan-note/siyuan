@@ -374,7 +374,8 @@ const initWindow = () => {
             const msgId = showMessage(window.siyuan.languages.exporting, -1);
             localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {
                 removeAssets: ipcData.removeAssets,
-                keepFold: ipcData.keepFold
+                keepFold: ipcData.keepFold,
+                mergeSubdocs: ipcData.mergeSubdocs,
             })));
             try {
                 window.siyuan.printWin.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {

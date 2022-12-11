@@ -37,6 +37,13 @@ export const saveExport = (option: { type: string, id: string }) => {
         <span class="fn__space"></span>
         <input id="removeAssets" class="b3-switch" type="checkbox" ${localData === "true" ? "checked" : ""}>
     </label>
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.exportPDF6}
+        </div>
+        <span class="fn__space"></span>
+        <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData === "true" ? "checked" : ""}>
+    </label>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -50,8 +57,9 @@ export const saveExport = (option: { type: string, id: string }) => {
         });
         btnsElement[1].addEventListener("click", () => {
             const removeAssets = (wordDialog.element.querySelector("#removeAssets") as HTMLInputElement).checked;
-            localStorage.setItem(Constants.LOCAL_EXPORTWORD, removeAssets.toString());
-            getExportPath(option, removeAssets);
+            const mergeSubdocs = (wordDialog.element.querySelector("#mergeSubdocs") as HTMLInputElement).checked;
+            localStorage.setItem(Constants.LOCAL_EXPORTWORD, JSON.stringify({removeAssets, mergeSubdocs}));
+            getExportPath(option, removeAssets, mergeSubdocs);
             wordDialog.destroy();
         });
     } else {
@@ -70,6 +78,7 @@ const renderPDF = (id: string) => {
         pageSize: "A4",
         removeAssets: true,
         keepFold: false,
+        mergeSubdocs: false,
     }));
     const servePath = window.location.protocol + "//" + window.location.host;
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
@@ -204,6 +213,13 @@ const renderPDF = (id: string) => {
         <span class="fn__hr"></span>
         <input id="keepFold" class="b3-switch" type="checkbox" ${localData.keepFold ? "checked" : ""}>
     </label>
+    <label class="b3-label">
+        <div>
+            ${window.siyuan.languages.exportPDF6}
+        </div>
+        <span class="fn__hr"></span>
+        <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData.mergeSubdocs ? "checked" : ""}>
+    </label>
     <div class="fn__flex">
       <div class="fn__flex-1"></div>
       <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
@@ -316,6 +332,7 @@ const renderPDF = (id: string) => {
     fetchPost("/api/export/exportPreviewHTML", {
         id: "${id}",
         keepFold: ${localData.keepFold},
+        merge: ${localData.mergeSubdocs},
     }, response => {
         if (response.code === 1) {
             alert(response.msg)
@@ -359,10 +376,19 @@ const renderPDF = (id: string) => {
         const actionElement = document.getElementById('action');
         const keepFoldElement = actionElement.querySelector('#keepFold');
         keepFoldElement.addEventListener('change', () => {
-            previewElement.innerHTML = '<div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>'
+            refreshPreview();
+        });
+        const mergeSubdocsElement = actionElement.querySelector('#mergeSubdocs');
+        mergeSubdocsElement.addEventListener('change', () => {
+            refreshPreview();
+        });
+        
+        const refreshPreview = () => {
+          previewElement.innerHTML = '<div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>'
             fetchPost("/api/export/exportPreviewHTML", {
                 id: "${id}",
                 keepFold: keepFoldElement.checked,
+                merge: mergeSubdocsElement.checked,
             }, response2 => {
                 if (response2.code === 1) {
                     alert(response2.msg)
@@ -371,7 +397,8 @@ const renderPDF = (id: string) => {
                 setPadding();
                 renderPreview(response2.data.content);
             })
-        })
+        };
+        
         actionElement.querySelector("#scale").addEventListener("input", () => {
             actionElement.querySelector("#scaleTip").innerText = actionElement.querySelector("#scale").value;
         })
@@ -406,6 +433,7 @@ const renderPDF = (id: string) => {
                 pageSize: actionElement.querySelector("#pageSize").value,
               },
               keepFold: keepFoldElement.checked,
+              mergeSubdocs: mergeSubdocsElement.checked,
               removeAssets: actionElement.querySelector("#removeAssets").checked,
               rootId: "${id}",
               rootTitle: response.data.name,
@@ -453,7 +481,7 @@ export const destroyPrintWindow = () => {
     window.siyuan.printWin.destroy();
 };
 
-const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean) => {
+const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean, mergeSubdocs?: boolean) => {
     fetchPost("/api/block/getBlockInfo", {
         id: option.id
     }, (response) => {
@@ -496,7 +524,8 @@ const getExportPath = (option: { type: string, id: string }, removeAssets?: bool
                 fetchPost(url, {
                     id: option.id,
                     pdf: option.type === "pdf",
-                    removeAssets,
+                    removeAssets: removeAssets,
+                    merge: mergeSubdocs,
                     savePath
                 }, exportResponse => {
                     if (option.type === "word") {

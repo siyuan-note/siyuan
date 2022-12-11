@@ -29,12 +29,15 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 	}
 
 	insertPoint := rootTree.Root.LastChild
+	if nil == insertPoint {
+		insertPoint = rootTree.Root
+	}
+
 	for {
 		i := 0
 		if err = walkBlock(insertPoint, rootBlock, i); nil != err {
 			return
 		}
-
 		if nil == rootBlock.Children {
 			break
 		}
@@ -44,13 +47,12 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 
 func walkBlock(insertPoint *ast.Node, block *Block, level int) (err error) {
 	level++
-	for _, c := range block.Children {
+	for i := len(block.Children) - 1; i >= 0; i-- {
+		c := block.Children[i]
 		if err = walkBlock(insertPoint, c, level); nil != err {
 			return
 		}
-	}
 
-	for _, c := range block.Children {
 		nodes, loadErr := loadTreeNodes(c.Box, c.Path, level)
 		if nil != loadErr {
 			return

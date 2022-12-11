@@ -84,7 +84,7 @@ func loadTreeNodes(box string, p string, level int) (ret []*ast.Node, err error)
 		hLevel = 6
 	}
 
-	heading := &ast.Node{Type: ast.NodeHeading, HeadingLevel: hLevel}
+	heading := &ast.Node{ID: tree.Root.ID, Type: ast.NodeHeading, HeadingLevel: hLevel}
 	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(tree.Root.IALAttr("title"))})
 	tree.Root.PrependChild(heading)
 	for c := tree.Root.FirstChild; nil != c; c = c.Next {

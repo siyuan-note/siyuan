@@ -290,7 +290,11 @@ func addPDFOutline(c *gin.Context) {
 
 	id := arg["id"].(string)
 	path := arg["path"].(string)
-	err := model.AddPDFOutline(id, path)
+	merge := false
+	if nil != arg["merge"] {
+		merge = arg["merge"].(bool)
+	}
+	err := model.AddPDFOutline(id, path, merge)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

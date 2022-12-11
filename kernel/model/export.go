@@ -489,7 +489,7 @@ func processIFrame(tree *parse.Tree) {
 	}
 }
 
-func AddPDFOutline(id, p string) (err error) {
+func AddPDFOutline(id, p string, merge bool) (err error) {
 	inFile := p
 	links, err := api.ListToCLinks(inFile)
 	if nil != err {
@@ -526,6 +526,14 @@ func AddPDFOutline(id, p string) (err error) {
 	tree, _ := loadTreeByBlockID(id)
 	if nil == tree {
 		return
+	}
+	if merge {
+		var mergeErr error
+		tree, mergeErr = mergeSubDocs(tree)
+		if nil != mergeErr {
+			logging.LogErrorf("merge sub docs failed: %s", mergeErr)
+			return
+		}
 	}
 
 	var headings []*ast.Node

@@ -383,6 +383,7 @@ const initWindow = () => {
                         id: ipcData.rootId,
                         pdf: true,
                         removeAssets: ipcData.removeAssets,
+                        merge: ipcData.mergeSubdocs,
                         savePath: result.filePaths[0]
                     }, () => {
                         const pdfFilePath = path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle) + ".pdf");

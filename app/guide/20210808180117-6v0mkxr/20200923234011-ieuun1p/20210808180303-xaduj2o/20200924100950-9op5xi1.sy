@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20221210173942"
+		"updated": "20221212223548"
 	},
 	"Children": [
 		{
@@ -2107,7 +2107,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-yozlufs",
-				"updated": "20221109143648"
+				"updated": "20221212223548"
 			},
 			"Children": [
 				{
@@ -2814,7 +2814,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Use the selection as the name of the new document"
+									"Data": "Use selection as name for new document and reference"
 								}
 							]
 						},
@@ -2840,6 +2840,69 @@
 						{
 							"Type": "NodeTableCell",
 							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use selection as name for new document and reference"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+F3"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘F3"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Follow the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ref create doc save location"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
 						}
 					]
 				},

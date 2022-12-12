@@ -472,7 +472,34 @@ const boot = () => {
         click: () => {
           mainWindow.webContents.send('siyuan-save-close', true)
         },
-      }]
+      }
+    ]
+
+    let changeWndTop = {}
+    if ('win32' === process.platform) {
+      // Windows 平台提供窗口置顶功能
+      changeWndTop = {
+        label: 'Set Window Top',
+        click: () => {
+          if (!mainWindow.isAlwaysOnTop()) {
+            mainWindow.setAlwaysOnTop(true)
+            changeWndTop.label = 'Cancel Window Top'
+            trayMenuTemplate.splice(trayMenuTemplate.length - 2, 1, changeWndTop)
+            const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
+            tray.setContextMenu(contextMenu)
+          } else {
+            mainWindow.setAlwaysOnTop(false)
+            changeWndTop.label = 'Set Window Top'
+            trayMenuTemplate.splice(trayMenuTemplate.length - 2, 1, changeWndTop)
+            const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
+            tray.setContextMenu(contextMenu)
+          }
+        },
+      };
+
+      trayMenuTemplate.splice(trayMenuTemplate.length - 1, 0, changeWndTop)
+    }
+
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
     tray.setContextMenu(contextMenu)
     tray.on('click', () => {

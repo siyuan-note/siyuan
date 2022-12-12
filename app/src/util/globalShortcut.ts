@@ -416,13 +416,14 @@ export const globalShortcut = () => {
             if (getSelection().rangeCount > 0) {
                 range = getSelection().getRangeAt(0).cloneRange();
             }
+            hideElements(["dialog"]);
             switchDialog = new Dialog({
                 title: window.siyuan.languages.switchTab,
                 content: `<div class="fn__flex-column b3-dialog--switch">
     <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
     <div class="fn__flex">
         <ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">${dockHtml}</ul>
-        <ul class="b3-list b3-list--background fn__flex-1" style="max-height: calc(70vh - 35px)">${tabHtml}</ul>
+        <ul class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
     </div>
     <div class="dialog__path"></div>
 </div>`,
@@ -850,7 +851,7 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
     <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
     <div class="fn__flex">
         <ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">${dockHtml}</ul>
-        <ul class="b3-list b3-list--background fn__flex-1" style="max-height: calc(70vh - 35px)">${tabHtml}</ul>
+        <ul class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
     </div>
     <div class="dialog__path"></div>
 </div>`,

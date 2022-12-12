@@ -88,9 +88,7 @@
 
     .b3-list:last-child {
       border-left: 1px solid var(--b3-theme-surface-lighter);
-      overflow: auto;
-      max-width: 360px;
-      min-width: 200px;
+      max-height: calc(70vh - 35px)
     }
 
     .dialog__path {

@@ -1,6 +1,5 @@
 # Binaries for programs and plugins
 *.exe
-cloc.exe
 *.dll
 *.so
 *.dylib

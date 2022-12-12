@@ -17,14 +17,15 @@
 package model
 
 import (
-	"github.com/88250/lute/parse"
 	"os"
 	"path/filepath"
 	"sync"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -79,17 +80,14 @@ func SetRecentDoc(doc *RecentDoc) (err error) {
 		return
 	}
 
-	update := false
 	for i, c := range recentDocs {
 		if c.RootID == doc.RootID {
-			recentDocs[i] = doc
-			update = true
+			recentDocs = append(recentDocs[:i], recentDocs[i+1:]...)
 			break
 		}
 	}
-	if !update {
-		recentDocs = append([]*RecentDoc{doc}, recentDocs...)
-	}
+
+	recentDocs = append([]*RecentDoc{doc}, recentDocs...)
 	if 32 < len(recentDocs) {
 		recentDocs = recentDocs[:32]
 	}
@@ -127,7 +125,7 @@ func setRecentDocs(recentDocs []*RecentDoc) (err error) {
 }
 
 func getRecentDocs() (ret []*RecentDoc, err error) {
-	ret = []*RecentDoc{}
+	tmp := []*RecentDoc{}
 	dataPath := filepath.Join(util.DataDir, "storage/recent-doc.json")
 	if !gulu.File.IsExist(dataPath) {
 		return
@@ -139,9 +137,21 @@ func getRecentDocs() (ret []*RecentDoc, err error) {
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &tmp); nil != err {
 		logging.LogErrorf("unmarshal storage [recent-doc] failed: %s", err)
 		return
+	}
+
+	var notExists []string
+	for _, doc := range tmp {
+		if nil != treenode.GetBlockTree(doc.RootID) {
+			ret = append(ret, doc)
+		} else {
+			notExists = append(notExists, doc.RootID)
+		}
+	}
+	if 0 < len(notExists) {
+		setRecentDocs(ret)
 	}
 	return
 }

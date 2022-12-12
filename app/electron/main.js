@@ -397,95 +397,85 @@ const boot = () => {
     await fetch(getServer() + '/api/system/uiproc?pid=' + process.pid,
       {method: 'POST'})
   })
+
+  // 系统托盘菜单
+  const trayMenuTemplate = [
+    {
+      label: 'Official Website',
+      click: () => {
+        shell.openExternal('https://b3log.org/siyuan/')
+      },
+    },
+    {
+      label: 'Open Source',
+      click: () => {
+        shell.openExternal('https://github.com/siyuan-note/siyuan')
+      },
+    },
+    {
+      label: '中文反馈',
+      click: () => {
+        shell.openExternal('https://ld246.com/article/1649901726096')
+      },
+    },
+    {
+      label: 'Reset Window on restart',
+      type: 'checkbox',
+      click: v => {
+        resetWindowStateOnRestart = v.checked
+      },
+    },
+    {
+      label: 'Quit',
+      click: () => {
+        mainWindow.webContents.send('siyuan-save-close', true)
+      },
+    }
+  ]
+
+  const showWndMenu = {
+    label: 'Hide Window',
+    click: () => {
+      showHideWnd()
+    },
+  }
+  const showHideWnd = () => {
+    if (!mainWindow.isVisible()) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore()
+      }
+      showWndMenu.label = "Hide Window"
+      trayMenuTemplate.splice(0, 1, showWndMenu)
+      const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
+      tray.setContextMenu(contextMenu)
+      mainWindow.show()
+    } else {
+      mainWindow.hide()
+      showWndMenu.label = "Show Window"
+      trayMenuTemplate.splice(0, 1, showWndMenu)
+      const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
+      tray.setContextMenu(contextMenu)
+    }
+  }
+
   ipcMain.on('siyuan-hotkey', (event, hotkey) => {
     globalShortcut.unregisterAll()
     if (!hotkey) {
       return
     }
     globalShortcut.register(hotkey, () => {
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore()
-        if (!mainWindow.isVisible()) {
-          mainWindow.show()
-        }
-      } else {
-        if (mainWindow.isVisible()) {
-          if (!mainWindow.isFocused()) {
-            mainWindow.show()
-          } else {
-            mainWindow.hide()
-          }
-        } else {
-          mainWindow.show()
-        }
-      }
+      showHideWnd()
     })
   })
 
   if ('win32' === process.platform || 'linux' === process.platform) {
     // 系统托盘
+
     tray = new Tray(path.join(appDir, 'stage', 'icon-large.png'))
     tray.setToolTip('SiYuan v' + appVer)
-    const trayMenuTemplate = [
-      {
-        label: 'Official Website',
-        click: () => {
-          shell.openExternal('https://b3log.org/siyuan/')
-        },
-      },
-      {
-        label: 'Open Source',
-        click: () => {
-          shell.openExternal('https://github.com/siyuan-note/siyuan')
-        },
-      },
-      {
-        label: '中文反馈',
-        click: () => {
-          shell.openExternal('https://ld246.com/article/1649901726096')
-        },
-      },
-      {
-        label: 'Reset Window on restart',
-        type: 'checkbox',
-        click: v => {
-          resetWindowStateOnRestart = v.checked
-        },
-      },
-      {
-        label: 'Quit',
-        click: () => {
-          mainWindow.webContents.send('siyuan-save-close', true)
-        },
-      }
-    ]
 
-    const showWndMenu = {
-      label: 'Hide Window',
-      click: () => {
-        showHideWnd()
-      },
-    }
+    // 插入显示/隐藏窗口菜单
     trayMenuTemplate.splice(0, 0, showWndMenu)
-
-    const showHideWnd = () => {
-      if (!mainWindow.isVisible()) {
-        if (mainWindow.isMinimized()) {
-          mainWindow.restore()
-        }
-        showWndMenu.label = "Hide Window"
-        trayMenuTemplate.splice(0, 1, showWndMenu)
-        const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
-        tray.setContextMenu(contextMenu)
-        mainWindow.show()
-      } else {
-        mainWindow.hide()
-        showWndMenu.label = "Show Window"
-        trayMenuTemplate.splice(0, 1, showWndMenu)
-        const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
-        tray.setContextMenu(contextMenu)
-      }
-    }
 
     let changeWndTop = {}
     if ('win32' === process.platform) {
@@ -496,20 +486,20 @@ const boot = () => {
           if (!mainWindow.isAlwaysOnTop()) {
             mainWindow.setAlwaysOnTop(true)
             changeWndTop.label = 'Cancel Window top'
-            trayMenuTemplate.splice(trayMenuTemplate.length - 2, 1, changeWndTop)
+            trayMenuTemplate.splice(1, 1, changeWndTop)
             const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
             tray.setContextMenu(contextMenu)
           } else {
             mainWindow.setAlwaysOnTop(false)
             changeWndTop.label = 'Set Window top'
-            trayMenuTemplate.splice(trayMenuTemplate.length - 2, 1, changeWndTop)
+            trayMenuTemplate.splice(1, 1, changeWndTop)
             const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
             tray.setContextMenu(contextMenu)
           }
         },
       };
 
-      trayMenuTemplate.splice(trayMenuTemplate.length - 1, 0, changeWndTop)
+      trayMenuTemplate.splice(1, 0, changeWndTop)
     }
 
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)

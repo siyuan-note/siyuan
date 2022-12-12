@@ -85,6 +85,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/filetree/listDocsByPath", model.CheckAuth, listDocsByPath)
 	ginServer.Handle("POST", "/api/filetree/getDoc", model.CheckAuth, getDoc)
 	ginServer.Handle("POST", "/api/filetree/getDocNameTemplate", model.CheckAuth, getDocNameTemplate)
+	ginServer.Handle("POST", "/api/filetree/getRefCreateSavePath", model.CheckAuth, getRefCreateSavePath)
 	ginServer.Handle("POST", "/api/filetree/changeSort", model.CheckAuth, changeSort)
 	ginServer.Handle("POST", "/api/filetree/lockFile", model.CheckAuth, lockFile)
 	ginServer.Handle("POST", "/api/filetree/createDocWithMd", model.CheckAuth, model.CheckReadonly, createDocWithMd)

@@ -557,7 +557,7 @@ func getDocNameTemplate(c *gin.Context) {
 		nameTemplate = model.Conf.FileTree.CreateDocNameTemplate
 	}
 
-	name, err := model.RenderCreateDocNameTemplate(nameTemplate)
+	name, err := model.RenderGoTemplate(nameTemplate)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -565,6 +565,36 @@ func getDocNameTemplate(c *gin.Context) {
 	}
 	ret.Data = map[string]interface{}{
 		"name": name,
+	}
+}
+
+func getRefCreateSavePath(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	notebook := arg["notebook"].(string)
+	box := model.Conf.Box(notebook)
+	refCreateSavePath := model.Conf.FileTree.RefCreateSavePath
+	if nil != box {
+		refCreateSavePath = box.GetConf().RefCreateSavePath
+	}
+	if "" == refCreateSavePath {
+		refCreateSavePath = model.Conf.FileTree.RefCreateSavePath
+	}
+
+	p, err := model.RenderGoTemplate(refCreateSavePath)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]interface{}{
+		"path": p,
 	}
 }
 

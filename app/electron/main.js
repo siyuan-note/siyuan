@@ -483,13 +483,13 @@ const boot = () => {
         click: () => {
           if (!mainWindow.isAlwaysOnTop()) {
             mainWindow.setAlwaysOnTop(true)
-            changeWndTop.label = 'Cancel Window Top'
+            changeWndTop.label = 'Cancel window top'
             trayMenuTemplate.splice(trayMenuTemplate.length - 2, 1, changeWndTop)
             const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
             tray.setContextMenu(contextMenu)
           } else {
             mainWindow.setAlwaysOnTop(false)
-            changeWndTop.label = 'Set Window Top'
+            changeWndTop.label = 'Set window top'
             trayMenuTemplate.splice(trayMenuTemplate.length - 2, 1, changeWndTop)
             const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
             tray.setContextMenu(contextMenu)

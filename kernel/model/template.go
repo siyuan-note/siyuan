@@ -41,8 +41,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 )
 
-func RenderCreateDocNameTemplate(nameTemplate string) (ret string, err error) {
-	tpl, err := template.New("").Funcs(sprig.TxtFuncMap()).Parse(nameTemplate)
+func RenderGoTemplate(templateContent string) (ret string, err error) {
+	tpl, err := template.New("").Funcs(sprig.TxtFuncMap()).Parse(templateContent)
 	if nil != err {
 		return "", errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
 	}

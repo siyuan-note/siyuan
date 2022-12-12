@@ -1335,7 +1335,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 
-	hPath, err := RenderCreateDocNameTemplate(boxConf.DailyNoteSavePath)
+	hPath, err := RenderGoTemplate(boxConf.DailyNoteSavePath)
 	if nil != err {
 		return
 	}

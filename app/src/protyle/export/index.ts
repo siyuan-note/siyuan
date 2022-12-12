@@ -122,7 +122,8 @@ const renderPDF = (id: string) => {
           left: 0;
         }
         
-        #preview > .code-block {
+        #preview > .code-block,
+        #preview > [data-type="NodeMathBlock"] {
            margin-left: auto;
            margin-right: auto;
         }
@@ -265,6 +266,10 @@ const renderPDF = (id: string) => {
             item.parentElement.style.width = width + "px";
             item.removeAttribute('data-render');
         })
+        previewElement.querySelectorAll('[data-type="NodeMathBlock"]').forEach((item) => {
+            item.style.width = width + "px";
+        })
+        Protyle.mathRender(previewElement, "${servePath}/stage/protyle", true);
         Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
     }
     const setPadding = () => {
@@ -320,7 +325,6 @@ const renderPDF = (id: string) => {
     }
     const renderPreview = (html) => {
         previewElement.innerHTML = html;
-        Protyle.mathRender(previewElement, "${servePath}/stage/protyle", true);
         Protyle.mermaidRender(previewElement, "${servePath}/stage/protyle");
         Protyle.flowchartRender(previewElement, "${servePath}/stage/protyle");
         Protyle.graphvizRender(previewElement, "${servePath}/stage/protyle");

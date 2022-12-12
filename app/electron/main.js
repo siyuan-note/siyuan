@@ -428,21 +428,6 @@ const boot = () => {
     tray.setToolTip('SiYuan v' + appVer)
     const trayMenuTemplate = [
       {
-        label: 'Show Window',
-        click: () => {
-          if (mainWindow.isMinimized()) {
-            mainWindow.restore()
-          }
-          mainWindow.show()
-        },
-      },
-      {
-        label: 'Hide Window',
-        click: () => {
-          mainWindow.hide()
-        },
-      },
-      {
         label: 'Official Website',
         click: () => {
           shell.openExternal('https://b3log.org/siyuan/')
@@ -475,21 +460,48 @@ const boot = () => {
       }
     ]
 
+    const showWndMenu = {
+      label: 'Hide Window',
+      click: () => {
+        showHideWnd()
+      },
+    }
+    trayMenuTemplate.splice(0, 0, showWndMenu)
+
+    const showHideWnd = () => {
+      if (!mainWindow.isVisible()) {
+        if (mainWindow.isMinimized()) {
+          mainWindow.restore()
+        }
+        showWndMenu.label = "Hide Window"
+        trayMenuTemplate.splice(0, 1, showWndMenu)
+        const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
+        tray.setContextMenu(contextMenu)
+        mainWindow.show()
+      } else {
+        mainWindow.hide()
+        showWndMenu.label = "Show Window"
+        trayMenuTemplate.splice(0, 1, showWndMenu)
+        const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
+        tray.setContextMenu(contextMenu)
+      }
+    }
+
     let changeWndTop = {}
     if ('win32' === process.platform) {
       // Windows 平台提供窗口置顶功能
       changeWndTop = {
-        label: 'Set Window Top',
+        label: 'Set Window top',
         click: () => {
           if (!mainWindow.isAlwaysOnTop()) {
             mainWindow.setAlwaysOnTop(true)
-            changeWndTop.label = 'Cancel window top'
+            changeWndTop.label = 'Cancel Window top'
             trayMenuTemplate.splice(trayMenuTemplate.length - 2, 1, changeWndTop)
             const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
             tray.setContextMenu(contextMenu)
           } else {
             mainWindow.setAlwaysOnTop(false)
-            changeWndTop.label = 'Set window top'
+            changeWndTop.label = 'Set Window top'
             trayMenuTemplate.splice(trayMenuTemplate.length - 2, 1, changeWndTop)
             const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
             tray.setContextMenu(contextMenu)
@@ -503,22 +515,7 @@ const boot = () => {
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
     tray.setContextMenu(contextMenu)
     tray.on('click', () => {
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore()
-        if (!mainWindow.isVisible()) {
-          mainWindow.show()
-        }
-      } else {
-        if (mainWindow.isVisible()) {
-          if (!mainWindow.isFocused()) {
-            mainWindow.show()
-          } else {
-            mainWindow.hide()
-          }
-        } else {
-          mainWindow.show()
-        }
-      }
+      showHideWnd()
     })
   }
 }

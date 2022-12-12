@@ -485,7 +485,7 @@ const boot = () => {
 
     let changeWndTop = {}
     if ('win32' === process.platform) {
-      // Windows 平台提供窗口置顶功能
+      // Windows 端支持窗口置顶 https://github.com/siyuan-note/siyuan/issues/6860
       changeWndTop = {
         label: 'Set Window top',
         click: () => {

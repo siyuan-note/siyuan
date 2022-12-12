@@ -1259,6 +1259,10 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
 
 const panelTreeKeydown = (event: KeyboardEvent) => {
     // 面板折叠展开操作
+    const target = event.target as HTMLElement;
+    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || hasClosestByAttribute(target, "contenteditable", null)) {
+        return false;
+    }
     if (!matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) &&
         !matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event) &&
         !event.key.startsWith("Arrow") && event.key !== "Enter") {
@@ -1316,6 +1320,9 @@ const panelTreeKeydown = (event: KeyboardEvent) => {
     let tree = (model as Backlink).tree;
     if (activeItemElement.parentElement.parentElement.classList.contains("backlinkMList")) {
         tree = (model as Backlink).mTree;
+    }
+    if (!tree) {
+        return false
     }
     if (event.key === "Enter") {
         tree.click(activeItemElement);

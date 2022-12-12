@@ -80,17 +80,14 @@ func SetRecentDoc(doc *RecentDoc) (err error) {
 		return
 	}
 
-	update := false
 	for i, c := range recentDocs {
 		if c.RootID == doc.RootID {
-			recentDocs[i] = doc
-			update = true
+			recentDocs = append(recentDocs[:i], recentDocs[i+1:]...)
 			break
 		}
 	}
-	if !update {
-		recentDocs = append([]*RecentDoc{doc}, recentDocs...)
-	}
+
+	recentDocs = append([]*RecentDoc{doc}, recentDocs...)
 	if 32 < len(recentDocs) {
 		recentDocs = recentDocs[:32]
 	}

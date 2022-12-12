@@ -79,22 +79,18 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
 };
 
 export const getSavePath = (pathString: string, notebookId: string, cb: (p: string) => void) => {
-    fetchPost("/api/notebook/getNotebookConf", {
+    fetchPost("/api/filetree/getRefCreateSavePath", {
         notebook: notebookId
     }, (data) => {
-        let savePath = data.data.conf.refCreateSavePath;
-        if (!savePath) {
-            savePath = window.siyuan.config.fileTree.refCreateSavePath;
-        }
-        if (savePath) {
-            if (savePath.startsWith("/")) {
-                cb(getDisplayName(savePath, false, true));
+        if (data.data.path) {
+            if (data.data.path.startsWith("/")) {
+                cb(getDisplayName(data.data.path, false, true));
             } else {
                 fetchPost("/api/filetree/getHPathByPath", {
                     notebook: notebookId,
                     path: pathString
                 }, (response) => {
-                    cb(getDisplayName(pathPosix().join(response.data, savePath), false, true));
+                    cb(getDisplayName(pathPosix().join(response.data, data.data.path), false, true));
                 });
             }
         } else {

@@ -104,8 +104,6 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         method: localData.method || 0,
         hPath,
         idPath,
-        list: localData.list || [],
-        replaceList: localData.replaceList || [],
         group: localData.group || 0,
         layout: localData.layout || 0,
         sort: localData.sort || 0,

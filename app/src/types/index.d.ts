@@ -62,8 +62,6 @@ interface ISearchOption {
     idPath: string[]
     k: string
     r: string
-    replaceList: string[]
-    list: string[]
     types: {
         mathBlock: boolean
         table: boolean

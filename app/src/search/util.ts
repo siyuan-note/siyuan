@@ -19,6 +19,18 @@ import {unicode2Emoji} from "../emoji";
 import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
+const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
+    const searchKeys = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
+    let list: string[] = searchKeys[type] || []
+    list.splice(0, 0, value);
+    list = Array.from(new Set(list));
+    if (list.length > window.siyuan.config.search.limit) {
+        list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
+    }
+    searchKeys[type] = list
+    localStorage.setItem(Constants.LOCAL_SEARCHEKEYS, JSON.stringify(searchKeys));
+};
+
 export const openGlobalSearch = (text: string, replace: boolean) => {
     text = text.trim();
     let wnd: Wnd;
@@ -65,8 +77,6 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
                     method: localData.method || 0,
                     hPath: "",
                     idPath: [],
-                    list: [],
-                    replaceList: [],
                     group: localData.group || 0,
                     layout: localData.layout || 0,
                     sort: localData.sort || 0,
@@ -205,7 +215,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 config.idPath = [];
                 config.hPath = "";
                 element.querySelector("#searchPathInput").innerHTML = config.hPath;
-                inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
+                inputTimeout = inputEvent(element, config, inputTimeout, edit);
                 const includeElement = element.querySelector("#searchInclude");
                 includeElement.classList.remove("b3-button--cancel");
                 includeElement.setAttribute("disabled", "disabled");
@@ -259,7 +269,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         } else {
                             includeElement.setAttribute("disabled", "disabled");
                         }
-                        inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
+                        inputTimeout = inputEvent(element, config, inputTimeout, edit);
                     });
                 }, [], undefined, window.siyuan.languages.specifyPath);
                 event.stopPropagation();
@@ -320,7 +330,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchRefresh") {
-                inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
+                inputTimeout = inputEvent(element, config, inputTimeout, edit);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -342,11 +352,12 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchHistoryBtn") {
-                if (!config.list || config.list.length === 0) {
+                const list = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS)||"{}")
+                if (!list.keys || list.keys.length === 0) {
                     return;
                 }
                 let html = "";
-                (config.list || []).forEach((s: string) => {
+                list.keys.forEach((s: string) => {
                     if (s !== searchInputElement.value) {
                         html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
                     }
@@ -361,11 +372,12 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 return;
             } else if (target.id === "replaceHistoryBtn") {
-                if (!config.replaceList || config.replaceList.length === 0) {
+                const list = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS)||"{}")
+                if (!list.replaceKeys || list.replaceKeys.length === 0) {
                     return;
                 }
                 let html = "";
-                (config.replaceList || []).forEach((s: string) => {
+                list.replaceKeys .forEach((s: string) => {
                     if (s !== replaceInputElement.value) {
                         html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
                     }
@@ -398,7 +410,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             } else if (target.classList.contains("b3-list-item")) {
                 if (target.parentElement.id === "searchHistoryList") {
                     searchInputElement.value = target.textContent;
-                    inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
+                    inputTimeout = inputEvent(element, config, inputTimeout, edit);
                 } else if (target.parentElement.id === "replaceHistoryList") {
                     replaceInputElement.value = target.textContent;
                     replaceHistoryElement.classList.add("fn__none");
@@ -459,23 +471,13 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     }, false);
 
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
-        inputTimeout = inputEvent(element, config, inputTimeout, edit, false, event);
+        inputTimeout = inputEvent(element, config, inputTimeout, edit, event);
     });
     searchInputElement.addEventListener("input", (event: InputEvent) => {
-        inputTimeout = inputEvent(element, config, inputTimeout, edit, false, event);
+        inputTimeout = inputEvent(element, config, inputTimeout, edit, event);
     });
     searchInputElement.addEventListener("blur", () => {
-        let searches: string[] = config.list || [];
-        searches.splice(0, 0, searchInputElement.value);
-        searches = Array.from(new Set(searches));
-        if (searches.length > window.siyuan.config.search.limit) {
-            searches.splice(window.siyuan.config.search.limit, searches.length - window.siyuan.config.search.limit);
-        }
-        config.list = searches;
-        config.k = searchInputElement.value;
-        if (!element.getAttribute("data-id")) {
-            localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-        }
+        saveKeyList("keys", searchInputElement.value)
     });
     searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
@@ -556,7 +558,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         replace(element, config, edit, false);
         event.preventDefault();
     });
-    inputTimeout = inputEvent(element, config, inputTimeout, edit, false);
+    inputTimeout = inputEvent(element, config, inputTimeout, edit);
     return edit;
 };
 
@@ -661,9 +663,6 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 element.querySelector(".search__layout").classList.remove("search__layout--row");
                 setPadding(edit.protyle);
                 config.layout = 0;
-                if (!element.getAttribute("data-id")) {
-                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-                }
             }
         }, {
             label: window.siyuan.languages.leftRightLayout,
@@ -672,9 +671,6 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 element.querySelector(".search__layout").classList.add("search__layout--row");
                 setPadding(edit.protyle);
                 config.layout = 1;
-                if (!element.getAttribute("data-id")) {
-                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-                }
             }
         }]
     }).element);
@@ -789,6 +785,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                     (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
                     Object.assign(config, item);
                     inputEvent(element, config, undefined, edit);
+                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
                     window.siyuan.menus.menu.remove();
                 });
             }
@@ -988,17 +985,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
     if (!loadElement.classList.contains("fn__none")) {
         return;
     }
-    let searches: string[] = config.replaceList || [];
-    searches.splice(0, 0, replaceInputElement.value);
-    searches = Array.from(new Set(searches));
-    if (searches.length > window.siyuan.config.search.limit) {
-        searches.splice(window.siyuan.config.search.limit, searches.length - window.siyuan.config.search.limit);
-    }
-    config.replaceList = searches;
-    config.r = replaceInputElement.value;
-    if (!element.getAttribute("data-id")) {
-        localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-    }
+    saveKeyList("replaceKeys", replaceInputElement.value)
     let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
     if (!currentList) {
         return;
@@ -1059,7 +1046,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
     });
 };
 
-const inputEvent = (element: Element, config: ISearchOption, inputTimeout: number, edit: Protyle, saveConfig = true, event?: InputEvent) => {
+const inputEvent = (element: Element, config: ISearchOption, inputTimeout: number, edit: Protyle, event?: InputEvent) => {
     if (event && event.isComposing) {
         return;
     }
@@ -1089,12 +1076,6 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 element.querySelector("#searchResult").innerHTML = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
                 loadingElement.classList.add("fn__none");
             });
-        }
-        if (saveConfig) {
-            config.k = inputValue;
-            if (!element.getAttribute("data-id")) {
-                localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-            }
         }
     }, Constants.TIMEOUT_SEARCH);
     return inputTimeout;

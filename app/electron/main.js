@@ -444,17 +444,23 @@ const boot = () => {
       if (mainWindow.isMinimized()) {
         mainWindow.restore()
       }
-      showWndMenu.label = "Hide Window"
-      trayMenuTemplate.splice(0, 1, showWndMenu)
-      const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
-      tray.setContextMenu(contextMenu)
       mainWindow.show()
+
+      if ('win32' === process.platform || 'linux' === process.platform) {
+        showWndMenu.label = "Hide Window"
+        trayMenuTemplate.splice(0, 1, showWndMenu)
+        const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
+        tray.setContextMenu(contextMenu)
+      }
     } else {
       mainWindow.hide()
-      showWndMenu.label = "Show Window"
-      trayMenuTemplate.splice(0, 1, showWndMenu)
-      const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
-      tray.setContextMenu(contextMenu)
+
+      if ('win32' === process.platform || 'linux' === process.platform) {
+        showWndMenu.label = "Show Window"
+        trayMenuTemplate.splice(0, 1, showWndMenu)
+        const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
+        tray.setContextMenu(contextMenu)
+      }
     }
   }
 

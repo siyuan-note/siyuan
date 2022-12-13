@@ -38,7 +38,7 @@ import {fontEvent} from "../toolbar/Font";
 import {listIndent, listOutdent} from "./list";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {insertEmptyBlock, jumpToParentNext} from "../../block/util";
-import {getDisplayName, isLocalPath, pathPosix} from "../../util/pathName";
+import {isLocalPath, pathPosix} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
@@ -1058,7 +1058,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         markdown: ""
                     }, response => {
                         insertHTML(`<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`, protyle);
-                        hideElements(["toolbar"], protyle)
+                        hideElements(["toolbar"], protyle);
                     });
                 });
             }
@@ -1082,7 +1082,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         markdown: ""
                     }, response => {
                         insertHTML(`<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`, protyle);
-                        hideElements(["toolbar"], protyle)
+                        hideElements(["toolbar"], protyle);
                     });
                 });
             }

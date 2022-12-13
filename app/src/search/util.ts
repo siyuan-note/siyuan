@@ -21,13 +21,13 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     const searchKeys = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
-    let list: string[] = searchKeys[type] || []
+    let list: string[] = searchKeys[type] || [];
     list.splice(0, 0, value);
     list = Array.from(new Set(list));
     if (list.length > window.siyuan.config.search.limit) {
         list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
     }
-    searchKeys[type] = list
+    searchKeys[type] = list;
     localStorage.setItem(Constants.LOCAL_SEARCHEKEYS, JSON.stringify(searchKeys));
 };
 
@@ -352,7 +352,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchHistoryBtn") {
-                const list = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS)||"{}")
+                const list = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS)||"{}");
                 if (!list.keys || list.keys.length === 0) {
                     return;
                 }
@@ -372,7 +372,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 return;
             } else if (target.id === "replaceHistoryBtn") {
-                const list = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS)||"{}")
+                const list = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS)||"{}");
                 if (!list.replaceKeys || list.replaceKeys.length === 0) {
                     return;
                 }
@@ -477,7 +477,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         inputTimeout = inputEvent(element, config, inputTimeout, edit, event);
     });
     searchInputElement.addEventListener("blur", () => {
-        saveKeyList("keys", searchInputElement.value)
+        saveKeyList("keys", searchInputElement.value);
     });
     searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
@@ -985,7 +985,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
     if (!loadElement.classList.contains("fn__none")) {
         return;
     }
-    saveKeyList("replaceKeys", replaceInputElement.value)
+    saveKeyList("replaceKeys", replaceInputElement.value);
     let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
     if (!currentList) {
         return;

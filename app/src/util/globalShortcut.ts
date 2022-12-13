@@ -1320,7 +1320,7 @@ const panelTreeKeydown = (event: KeyboardEvent) => {
         tree = (model as Backlink).mTree;
     }
     if (!tree) {
-        return false
+        return false;
     }
     if (event.key === "Enter") {
         tree.click(activeItemElement);

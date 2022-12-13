@@ -305,12 +305,7 @@ func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (da
 	repoURLHash = strings.TrimPrefix(repoURLHash, "https://github.com/")
 	u := util.BazaarOSSServer + "/package/" + repoURLHash
 	buf := &bytes.Buffer{}
-	resp, err := req.C().
-		SetUserAgent(util.UserAgent).
-		SetTimeout(30 * time.Second).
-		DisableInsecureSkipVerify().
-		R().SetRetryCount(1).
-		SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+	resp, err := httpclient.NewBrowserRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 		if pushProgress {
 			progress := float32(info.DownloadedSize) / float32(info.Response.ContentLength)
 			logging.LogDebugf("downloading bazaar package [%d]", progress)

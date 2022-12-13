@@ -1,3 +1,69 @@
+## v2.5.4 / 2022-12-13
+
+### 改进功能
+
+* [支持合并子文档导出 Word/PDF](https://github.com/siyuan-note/siyuan/issues/3219)
+* [支持列出和切换最近打开的文档](https://github.com/siyuan-note/siyuan/issues/3293)
+* [嵌入块复制为图片的范围不应局限于屏幕显示范围](https://github.com/siyuan-note/siyuan/issues/4503)
+* [`块引新建文档存放位置` 支持模板变量](https://github.com/siyuan-note/siyuan/issues/4693)
+* [代码块输入光标错误](https://github.com/siyuan-note/siyuan/issues/4710)
+* [Windows 端支持 Ctrl+Tab 不松开 Ctrl 后使用方向键选择切换](https://github.com/siyuan-note/siyuan/issues/5400)
+* [大纲、书签和标签面板支持键盘操作](https://github.com/siyuan-note/siyuan/issues/5549)
+* [`Ctrl+F3` 遵循笔记本设置中的 `块引新建文档存放位置`](https://github.com/siyuan-note/siyuan/issues/6420)
+* [字号设置过大时导出图片优化](https://github.com/siyuan-note/siyuan/issues/6795)
+* [改进行级代码位于软换行后的编辑](https://github.com/siyuan-note/siyuan/issues/6796)
+* [导出 PDF 和 Word 时不带文件夹](https://github.com/siyuan-note/siyuan/issues/6797)
+* [Ctrl+K 后如锚文本为空则将链接缩略后填入锚文本中](https://github.com/siyuan-note/siyuan/issues/6798)
+* [`优化排版` 支持行级元素加粗、斜体等](https://github.com/siyuan-note/siyuan/issues/6800)
+* [`Ctrl+Shift+↑/↓` 子项可移动到上下无子项的列表中](https://github.com/siyuan-note/siyuan/issues/6802)
+* [改进桌面端初始化时使用的外观语言](https://github.com/siyuan-note/siyuan/issues/6803)
+* [导出 Data 不带 data 父文件夹](https://github.com/siyuan-note/siyuan/issues/6805)
+* [统一块剪切粘贴逻辑为生成新块](https://github.com/siyuan-note/siyuan/issues/6807)
+* [浏览器端和移动端导出 Data 去掉 `data-` 前缀](https://github.com/siyuan-note/siyuan/issues/6808)
+* [导出 PDF 时根据所选页面大小对带行号的代码块宽度进行设定](https://github.com/siyuan-note/siyuan/issues/6809)
+* [自定义表情图片对齐](https://github.com/siyuan-note/siyuan/issues/6810)
+* [增加工作空间内核伺服锁](https://github.com/siyuan-note/siyuan/issues/6811)
+* [桌面端启动获取内核端口失败弹窗提示](https://github.com/siyuan-note/siyuan/issues/6812)
+* [改进标签重命名](https://github.com/siyuan-note/siyuan/issues/6816)
+* [开启 `始终定位打开的文档` 后再次选中文档页签时不再定位](https://github.com/siyuan-note/siyuan/pull/6820)
+* [访问授权页支持暗黑模式](https://github.com/siyuan-note/siyuan/issues/6821)
+* [访问授权页忘记授权码提示文案](https://github.com/siyuan-note/siyuan/issues/6822)
+* [`Ctrl+Tab` 切换到的页签标题显示在可视区域内](https://github.com/siyuan-note/siyuan/issues/6823)
+* [访问授权页支持多语言](https://github.com/siyuan-note/siyuan/issues/6824)
+* [Android Pad 端旋转屏幕后不重新载入](https://github.com/siyuan-note/siyuan/issues/6825)
+* [搜索支持按相关度排序](https://github.com/siyuan-note/siyuan/issues/6827)
+* [`Ctrl+F` 覆盖命名查询中的指定路径](https://github.com/siyuan-note/siyuan/issues/6828)
+* [Windows/macOS 桌面端支持开机启动](https://github.com/siyuan-note/siyuan/issues/6833)
+* [改进移动端只读模式图标](https://github.com/siyuan-note/siyuan/issues/6835)
+* [`/模版` 和 `/资源` 提供上一个下一个按钮](https://github.com/siyuan-note/siyuan/issues/6838)
+* [标记快捷键修改为 `Alt+E`](https://github.com/siyuan-note/siyuan/issues/6841)
+* [PDF 导出页脚处添加 `由思源笔记导出`](https://github.com/siyuan-note/siyuan/issues/6849)
+* [重复剪藏相同的页面后创建的文档不跟随机数](https://github.com/siyuan-note/siyuan/issues/6851)
+* [`F3` 划选文本不重复创建子文档引用](https://github.com/siyuan-note/siyuan/issues/6854)
+* [改进命名查询持久化](https://github.com/siyuan-note/siyuan/issues/6856)
+* [Windows 端支持窗口置顶](https://github.com/siyuan-note/siyuan/issues/6860)
+* [改进系统托盘单击交互](https://github.com/siyuan-note/siyuan/issues/6861)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/6793)
+* [重构 Android 端启动](https://github.com/siyuan-note/siyuan/issues/6815)
+* [移除旧的行级元素相关实现代码](https://github.com/siyuan-note/siyuan/issues/6819)
+
+### 修复缺陷
+
+* [带有字体样式的公式复制之后内容不正确](https://github.com/siyuan-note/siyuan/issues/6799)
+* [从左到右图标错误](https://github.com/siyuan-note/siyuan/issues/6806)
+* [切换主题导致页签空白](https://github.com/siyuan-note/siyuan/issues/6817)
+* [外观模式 `跟随系统` 时切换主题未刷新](https://github.com/siyuan-note/siyuan/issues/6818)
+* [启用的 CSS 片段删除后未从 `<head>` 中移除](https://github.com/siyuan-note/siyuan/issues/6826)
+* [列表项剪切撤销触发状态异常](https://github.com/siyuan-note/siyuan/issues/6829)
+* [导入空内容 Markdown 文件时报错](https://github.com/siyuan-note/siyuan/issues/6832)
+* [导入 Markdown 文件解析任务列表异常](https://github.com/siyuan-note/siyuan/issues/6842)
+* [导出 PDF 时表格中存在 SVG 图片出现滚动条](https://github.com/siyuan-note/siyuan/issues/6855)
+* [PDF 导出公式被截断](https://github.com/siyuan-note/siyuan/issues/6859)
+* [集市包下载进度没有展现](https://github.com/siyuan-note/siyuan/issues/6862)
+
 ## v2.5.3 / 2022-12-06
 
 ### 改进功能

@@ -427,9 +427,6 @@ export const globalShortcut = () => {
     </div>
     <div class="dialog__path"></div>
 </div>`,
-                disableClose: true,
-                disableAnimation: true,
-                transparent: true,
                 destroyCallback: () => {
                     if (range && range.getBoundingClientRect().height !== 0) {
                         focusByRange(range);

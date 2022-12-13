@@ -305,22 +305,21 @@ func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (da
 	repoURLHash = strings.TrimPrefix(repoURLHash, "https://github.com/")
 	u := util.BazaarOSSServer + "/package/" + repoURLHash
 	buf := &bytes.Buffer{}
-	resp, err := httpclient.NewBrowserRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+	resp, err := req.C().
+		SetUserAgent(util.UserAgent).
+		SetTimeout(30 * time.Second).
+		DisableInsecureSkipVerify().
+		R().SetRetryCount(1).
+		SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 		if pushProgress {
-			util.PushDownloadProgress(pushID, float32(info.DownloadedSize)/float32(info.Response.ContentLength))
+			progress := float32(info.DownloadedSize) / float32(info.Response.ContentLength)
+			logging.LogDebugf("downloading bazaar package [%d]", progress)
+			util.PushDownloadProgress(pushID, progress)
 		}
 	}).Get(u)
 	if nil != err {
-		u = util.BazaarOSSServer + "/package/" + repoURLHash
-		resp, err = httpclient.NewBrowserRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
-			if pushProgress {
-				util.PushDownloadProgress(pushID, float32(info.DownloadedSize)/float32(info.Response.ContentLength))
-			}
-		}).Get(u)
-		if nil != err {
-			logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
-			return nil, errors.New("get bazaar package failed")
-		}
+		logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
+		return nil, errors.New("get bazaar package failed")
 	}
 	if 200 != resp.StatusCode {
 		logging.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)

@@ -88,7 +88,11 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 		return
 	}
 
-	// 数据快照 - 本地快照显示文件类型 https://github.com/siyuan-note/siyuan/issues/6870
+	ret = buildSnapshots(logs)
+	return
+}
+
+func buildSnapshots(logs []*dejavu.Log) (ret []*Snapshot) {
 	for _, l := range logs {
 		typesCount := statTypesByPath(l.Files)
 		ret = append(ret, &Snapshot{
@@ -100,36 +104,34 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 }
 
 func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
-	m := map[string]int{}
-
 	for _, f := range files {
 		ext := path.Ext(f.Path)
-		m[ext]++
-	}
 
-	var stated []string
-	for ext, count := range m {
-		ret = append(ret, &TypeCount{
-			Type:  ext,
-			Count: count,
-		})
-		stated = append(stated, ext)
-		if 10 < len(ret) {
-			break
+		found := false
+		for _, tc := range ret {
+			if tc.Type == ext {
+				tc.Count++
+				found = true
+				break
+			}
+		}
+		if !found {
+			ret = append(ret, &TypeCount{Type: ext, Count: 1})
 		}
 	}
+
 	sort.Slice(ret, func(i, j int) bool { return ret[i].Count > ret[j].Count })
-	for _, s := range stated {
-		delete(m, s)
+	if 10 < len(ret) {
+		otherCount := 0
+		for _, tc := range ret[10:] {
+			tc.Count += otherCount
+		}
+		other := &TypeCount{
+			Type:  "Other",
+			Count: otherCount,
+		}
+		ret = append(ret[:10], other)
 	}
-	otherCount := 0
-	for _, count := range m {
-		otherCount += count
-	}
-	ret = append(ret, &TypeCount{
-		Type:  "Other",
-		Count: otherCount,
-	})
 	return
 }
 
@@ -388,6 +390,7 @@ func RemoveCloudRepoTag(tag string) (err error) {
 }
 
 func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
+	ret = []*dejavu.Log{}
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -398,14 +401,16 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 		return
 	}
 
-	ret, err = repo.GetCloudRepoTagLogs(map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
-	if 1 > len(ret) {
-		ret = []*dejavu.Log{}
+	logs, err := repo.GetCloudRepoTagLogs(map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
+	if nil != err {
+		return
 	}
+	ret = logs
 	return
 }
 
-func GetTagSnapshots() (ret []*dejavu.Log, err error) {
+func GetTagSnapshots() (ret []*Snapshot, err error) {
+	ret = []*Snapshot{}
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -416,10 +421,11 @@ func GetTagSnapshots() (ret []*dejavu.Log, err error) {
 		return
 	}
 
-	ret, err = repo.GetTagLogs()
-	if 1 > len(ret) {
-		ret = []*dejavu.Log{}
+	logs, err := repo.GetTagLogs()
+	if nil != err {
+		return
 	}
+	ret = buildSnapshots(logs)
 	return
 }
 
